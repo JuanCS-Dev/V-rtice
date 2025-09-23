@@ -1,0 +1,18 @@
+#backend/api_gateway/main.py
+from fastapi import FastAPI
+
+app = FastAPI(
+    title="Projeto VÉRTICE - API Gateway",
+    description="Ponto de entrada unificado para todos os microsserviços de inteligência.",
+    version="0.1.0",
+)
+
+@app.get("/", tags=["Root"])
+def read_root():
+    """
+    Endpoint raiz para verificação de status do serviço.
+    """
+    return {"status": "API Gateway is running!"}
+
+# Aqui registraremos as rotas para os outros serviços no futuro
+# Ex: app.include_router(tataca_router, prefix="/tataca")
