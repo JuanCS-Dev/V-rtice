@@ -12,7 +12,6 @@ from dotenv import load_dotenv
 from pathlib import Path
 from rich.syntax import Syntax
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
-from rich.table import Table
 
 from utils import (
     console, print_panel, thinking_stream, collect_files, exibir_banner,
@@ -157,7 +156,7 @@ def review(file_path: Path = typer.Argument(..., help="📝 O caminho para o arq
         raise typer.Exit()
     try:
         content = file_path.read_text(encoding='utf-8')
-        prompt = f"""
+        prompt = """
         Como um engenheiro de software sênior...
         (O resto do prompt do review continua aqui)
         """.strip()

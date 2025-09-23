@@ -2,7 +2,6 @@
 
 import time
 from pathlib import Path
-import pyfiglet
 import git
 from rich.console import Console
 from rich.panel import Panel
@@ -12,7 +11,6 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.syntax import Syntax
 from rich.table import Table
 from datetime import datetime
-import itertools
 import questionary
 
 # Inicializa o console do Rich para uma saída bonita
@@ -147,13 +145,14 @@ def create_status_table(items: dict) -> Table:
     return table
 
 def git_safe_execute(action_func, repo_path: Path, command_name: str):
-    """Executa uma função que modifica arquivos dentro de um protocolo de segurança Git."""
+    """
+    Executa uma função que modifica arquivos dentro de um protocolo de segurança Git.
+    """
     try:
-        repo = git.Repo(repo_path, search_parent_directories=True)
+        repo = git.Repo(str(repo_path.resolve()), search_parent_directories=True)
     except git.InvalidGitRepositoryError:
         print_warning("Este não é um repositório Git. O modo de segurança com rollback não pode ser ativado.")
-        print_info("Executando a ação sem a rede de segurança. Tenha cuidado.")
-        action_func()
+        action_func() # Executa a função sem segurança, como fallback
         return
 
     if repo.is_dirty(untracked_files=True):
@@ -170,13 +169,24 @@ def git_safe_execute(action_func, repo_path: Path, command_name: str):
     action_succeeded = action_func()
 
     if not action_succeeded:
-        print_warning(f"Ação '{command_name}' falhou ou foi cancelada. Revertendo para o ponto de restauração...")
+        print_warning(f"Ação '{command_name}' falhou ou foi cancelada. Revertendo...")
         repo.git.reset("--hard", restore_commit_sha)
         print_success("Rollback concluído. Seu código está seguro.")
         return
         
+    # --- LÓGICA DE DETECÇÃO DE MUDANÇAS CORRIGIDA ---
+    repo.git.add(A=True) # Força o Git a ver as mudanças feitas pela 'action_func'
+    
+    if not repo.is_dirty():
+        print_info("A ação foi executada mas não resultou em nenhuma alteração no código.")
+        print_warning("Revertendo o commit de 'ponto de restauração'...")
+        repo.git.reset("--hard", restore_commit_sha)
+        print_success("Rollback concluído. Seu código está seguro.")
+        return
+
     console.print("\n✨ [bold]Alterações aplicadas. Revise o que mudou:[/bold]")
     
+    # O diff agora será gerado corretamente
     diff_output = repo.git.diff("HEAD~1", "HEAD")
     console.print(Syntax(diff_output, "diff", theme="monokai", line_numbers=True))
 
@@ -184,7 +194,10 @@ def git_safe_execute(action_func, repo_path: Path, command_name: str):
 
     if manter:
         print_success("Alterações mantidas. O commit final foi mesclado.")
-        repo.index.commit(f"feat(VÉRTICE): Aplica alterações via '{command_name}'", amend=True)
+        # --- LÓGICA DE COMMIT CORRIGIDA ---
+        # Em vez de amend, vamos resetar e criar um novo commit limpo
+        repo.git.reset("--soft", "HEAD~1")
+        repo.index.commit(f"feat(VÉRTICE): Aplica alterações via '{command_name}'")
     else:
         print_warning("Revertendo alterações conforme solicitado...")
         repo.git.reset("--hard", restore_commit_sha)
