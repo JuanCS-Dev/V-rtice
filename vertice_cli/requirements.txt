@@ -6,3 +6,4 @@ questionary
 patch
 pyfiglet
 ruff
+GitPython
