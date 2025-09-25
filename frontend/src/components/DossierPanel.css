@@ -1,0 +1,79 @@
+/* src/components/DossierPanel.css */
+
+.dossier-panel {
+  padding: 15px;
+  background-color: #10121a;
+  height: 100%;
+  overflow-y: auto;
+  border-right: 1px solid #ff00ff;
+  color: #e0e0e0;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.section-title {
+  color: #ff00ff; /* Magenta */
+  font-weight: bold;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #555;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.id-section {
+  display: flex;
+  align-items: center;
+}
+
+.suspect-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #00f0ff; /* Cyan */
+  margin-right: 15px;
+  object-fit: cover;
+}
+
+.id-details h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.4em;
+}
+
+.id-details p {
+  margin: 5px 0;
+  color: #aaa;
+}
+
+.status-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: #1a1a1a;
+}
+
+.asset-item, .associate-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  background-color: #252834;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.asset-icon, .associate-icon {
+  margin-right: 10px;
+}
+
+.asset-plate {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+/* --- Lógica de Cores de Status --- */
+
+.status-critical { color: #ff4d4d !important; background-color: #ff4d4d30; } /* Vermelho */
+.status-warning { color: #ffa500 !important; background-color: #ffa50030; } /* Laranja */
+.status-info { color: #00aaff !important; background-color: #00aaff30; }   /* Azul */

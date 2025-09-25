@@ -1,0 +1,14 @@
+services:
+  api_gateway:
+    build: ./backend/api_gateway
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/api_gateway:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+  
+  sinesp_service:
+    build: ./backend/sinesp_service
+    volumes:
+      - ./backend/sinesp_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
