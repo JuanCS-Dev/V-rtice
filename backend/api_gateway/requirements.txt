@@ -1,2 +1,8 @@
-fastapi[all]
+fastapi
+uvicorn
 httpx
+redis
+slowapi
+# Novas ferramentas para o painel de instrumentos
+prometheus-client
+structlog

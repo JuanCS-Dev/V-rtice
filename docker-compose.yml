@@ -6,9 +6,19 @@ services:
     volumes:
       - ./backend/api_gateway:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    # Adicionamos uma dependência para garantir que o Redis inicie primeiro
+    depends_on:
+      - redis
 
   sinesp_service:
-    build: ./backend/sinesp_service
+    build: ./backend/services/sinesp_service
     volumes:
-      - ./backend/sinesp_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      - ./backend/services/sinesp_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+
+  # NOVO SERVIÇO: O nosso motor de cache
+  redis:
+    image: "redis:alpine"
+    ports:
+      # A porta 6379 é a padrão do Redis
+      - "6379:6379"
