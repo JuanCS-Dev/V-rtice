@@ -12,12 +12,19 @@ const Footer = ({ searchHistory = [], setCurrentView }) => {
           {searchHistory.length > 0 && (
             <span className="text-green-400">CONSULTAS: {searchHistory.length}</span>
           )}
-          {/* O BOTÃO SECRETO */}
+          {/* BOTÃO ADMIN */}
           <button 
             onClick={() => setCurrentView('admin')}
             className="text-gray-500 hover:text-yellow-400 transition-colors border border-gray-600 px-2 py-1 rounded"
           >
             ADMIN
+          </button>
+          {/* NOVO BOTÃO CYBER */}
+          <button 
+            onClick={() => setCurrentView('cyber')}
+            className="text-gray-500 hover:text-cyan-400 transition-colors border border-gray-600 px-2 py-1 rounded"
+          >
+            CYBER
           </button>
         </div>
         <div className="text-green-400/70">

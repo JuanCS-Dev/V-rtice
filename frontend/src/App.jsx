@@ -1,3 +1,5 @@
+// /home/juan/vertice-dev/frontend/src/App.jsx
+
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { consultarPlacaApi } from './api/sinesp';
@@ -8,7 +10,8 @@ import MapPanel from './components/MapPanel';
 import Footer from './components/Footer';
 import ModalOcorrencias from './components/ModalOcorrencias';
 import ModalRelatorio from './components/ModalRelatorio';
-import AdminDashboard from './components/AdminDashboard'; // 1. Importar o novo Dashboard
+import AdminDashboard from './components/AdminDashboard';
+import CyberDashboard from './components/CyberDashboard'; // NOVO IMPORT
 
 function App() {
   // ... (todos os outros estados permanecem iguais)
@@ -23,8 +26,8 @@ function App() {
   const [relatorioVisivel, setRelatorioVisivel] = useState(false);
   const [placasSuspeitas, setPlacasSuspeitas] = useState(new Set());
   
-  // 2. NOVO ESTADO: Controla qual vista está ativa
-  const [currentView, setCurrentView] = useState('operator'); // 'operator' ou 'admin'
+  // ESTADO ATUALIZADO: Agora inclui 'cyber'
+  const [currentView, setCurrentView] = useState('operator'); // 'operator', 'admin' ou 'cyber'
 
   // ... (todas as outras funções permanecem iguais)
   useEffect(() => { const timer = setInterval(() => setCurrentTime(new Date()), 1000); return () => clearInterval(timer); }, []);
@@ -35,10 +38,13 @@ function App() {
   const handleVerOcorrencias = () => { if (dossierData && dossierData.ocorrencias) { setOcorrenciasVisivel(true); }};
   const handleGerarRelatorio = () => { if (dossierData) { setRelatorioVisivel(true); }};
 
-
-  // 3. RENDERIZAÇÃO CONDICIONAL: Mostra uma vista ou outra
+  // RENDERIZAÇÃO CONDICIONAL ATUALIZADA: Inclui a nova view 'cyber'
   if (currentView === 'admin') {
     return <AdminDashboard setCurrentView={setCurrentView} />;
+  }
+
+  if (currentView === 'cyber') {
+    return <CyberDashboard setCurrentView={setCurrentView} />;
   }
 
   return (
@@ -65,7 +71,7 @@ function App() {
         </div>
       </main>
 
-      {/* Passar a função para mudar de vista para o Footer */}
+      {/* Footer atualizado com função para mudar de vista */}
       <Footer searchHistory={searchHistory} setCurrentView={setCurrentView} />
 
       {ocorrenciasVisivel && dossierData && ReactDOM.createPortal( <ModalOcorrencias ocorrencias={dossierData.ocorrencias} onClose={() => setOcorrenciasVisivel(false)} />, document.getElementById('modal-root'))}

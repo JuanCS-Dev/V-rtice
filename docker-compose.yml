@@ -1,3 +1,5 @@
+# /home/juan/vertice-dev/docker-compose.yml
+
 services:
   api_gateway:
     build: ./backend/api_gateway
@@ -6,9 +8,13 @@ services:
     volumes:
       - ./backend/api_gateway:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    # Adicionamos uma dependência para garantir que o Redis inicie primeiro
+    environment:
+      - SINESP_SERVICE_URL=http://sinesp_service:8001
+      - CYBER_SERVICE_URL=http://cyber_service:8002
     depends_on:
       - redis
+      - sinesp_service
+      - cyber_service
 
   sinesp_service:
     build: ./backend/services/sinesp_service
@@ -16,9 +22,18 @@ services:
       - ./backend/services/sinesp_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
-  # NOVO SERVIÇO: O nosso motor de cache
+  # NOVO SERVIÇO: Cyber Security Service
+  cyber_service:
+    build: ./backend/services/cyber_service
+    volumes:
+      - ./backend/services/cyber_service:/app
+      - /var/log:/var/log:ro  # Acesso read-only aos logs do sistema
+      - /etc:/etc:ro          # Acesso read-only às configurações
+    privileged: true          # Necessário para algumas verificações de segurança
+    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+
+  # Motor de cache (já existente)
   redis:
     image: "redis:alpine"
     ports:
-      # A porta 6379 é a padrão do Redis
       - "6379:6379"
