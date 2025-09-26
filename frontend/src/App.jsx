@@ -1,86 +1,83 @@
-// frontend/src/App.jsx
-
-import React from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import { consultarPlacaApi } from './api/sinesp';
+import Header from './components/Header';
+import SidePanel from './components/SidePanel';
 import DossierPanel from './components/DossierPanel';
-import MapComponent from './components/Map';
-
-// --- ATUALIZAMOS NOSSOS DADOS DE TESTE ---
-const mockSuspect = {
-  name: 'Marcos "O Fantasma" Oliveira',
-  cpf: '123.456.789-00',
-  status: 'Foragido',
-  photoUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-  // ADICIONAMOS A LOCALIZAÇÃO
-  lastKnownLocation: {
-    lat: -16.328,
-    lng: -48.953,
-  },
-  assets: {
-    vehicles: [
-      { plate: 'ABC-1234', model: 'Honda Civic', color: 'Preto', status: 'Regular' },
-      { plate: 'XYZ-9876', model: 'Fiat Strada', color: 'Vermelho', status: 'Roubado' }
-    ]
-  },
-  associates: [
-    { name: 'Juliana "A Dama" Costa', status: 'Em Observação' },
-    { name: 'Ricardo "O Ferramenta" Alves', status: 'Preso' }
-  ]
-};
-// ------------------------------------------
+import MapPanel from './components/MapPanel';
+import Footer from './components/Footer';
+import ModalOcorrencias from './components/ModalOcorrencias';
+import ModalRelatorio from './components/ModalRelatorio'; // 1. Importar o novo modal
 
 function App() {
-  const styles = {
-    app: {
-      backgroundColor: '#1a1a1a',
-      color: '#00f0ff',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      fontFamily: 'monospace',
-    },
-    header: {
-      borderBottom: '1px solid #ff00ff',
-      padding: '10px',
-      textAlign: 'center',
-    },
-    main: {
-      display: 'flex',
-      flex: 1,
-      overflow: 'hidden',
-    },
-    sidePanel: {
-      width: '30%',
-      minWidth: '350px',
-    },
-    mapArea: {
-      flex: 1,
-      borderLeft: '1px solid #555'
-    },
-    footer: {
-      borderTop: '1px solid #ff00ff',
-      padding: '10px',
-      textAlign: 'center',
+  const [placa, setPlaca] = useState('');
+  const [dossierData, setDossierData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [alerts, setAlerts] = useState([]);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [ocorrenciasVisivel, setOcorrenciasVisivel] = useState(false);
+  const [relatorioVisivel, setRelatorioVisivel] = useState(false); // 2. Adicionar estado do relatório
+
+  useEffect(() => { const timer = setInterval(() => setCurrentTime(new Date()), 1000); return () => clearInterval(timer); }, []);
+  useEffect(() => { const alertTimer = setInterval(() => { if (Math.random() > 0.85) { const alertTypes = [{ type: 'INFO', message: 'Sistema de monitoramento ativo' },{ type: 'WARNING', message: 'Atividade suspeita detectada' }]; const randomAlert = alertTypes[Math.floor(Math.random() * alertTypes.length)]; const newAlert = { id: Date.now(), ...randomAlert, timestamp: new Date().toLocaleTimeString() }; setAlerts(prev => [newAlert, ...prev.slice(0, 4)]); }}, 8000); return () => clearInterval(alertTimer); }, []);
+  
+  const [placasSuspeitas, setPlacasSuspeitas] = useState(new Set());
+  const handleMarcarSuspeito = (placaParaMarcar) => { setPlacasSuspeitas(prevSet => { const newSet = new Set(prevSet); newSet.add(placaParaMarcar); return newSet; }); };
+  const handleSearch = async () => { if (!placa.trim()) return; setLoading(true); setError(null); setDossierData(null); try { const data = await consultarPlacaApi(placa); if (data.error) { throw new Error(data.error); } const dataWithLocation = { ...data, lastKnownLocation: data.lastKnownLocation || { lat: -16.328, lng: -48.953 } }; setDossierData(dataWithLocation); setSearchHistory(prev => [placa.toUpperCase(), ...prev.filter(p => p !== placa.toUpperCase())].slice(0, 10)); } catch (err) { setError(err.message); } finally { setLoading(false); }};
+  const handleKeyPress = (e) => { if (e.key === 'Enter') { handleSearch(); }};
+  const handleVerOcorrencias = () => { if (dossierData && dossierData.ocorrencias) { setOcorrenciasVisivel(true); }};
+  
+  // 3. Adicionar a função para mostrar o relatório
+  const handleGerarRelatorio = () => {
+    if (dossierData) {
+      setRelatorioVisivel(true);
     }
   };
 
   return (
-    <div style={styles.app}>
-      <header style={styles.header}>
-        [ Barra de Comando Universal ]
-      </header>
-      <main style={styles.main}>
-        <aside style={styles.sidePanel}>
-          <DossierPanel suspect={mockSuspect} />
-        </aside>
-        <section style={styles.mapArea}>
-          {/* AGORA PASSAMOS A LOCALIZAÇÃO PARA O MAPA */}
-          <MapComponent location={[mockSuspect.lastKnownLocation.lat, mockSuspect.lastKnownLocation.lng]} />
-        </section>
+    <div className="h-screen w-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-green-400 font-mono overflow-hidden flex flex-col">
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-green-400 to-transparent animate-pulse z-20"></div>
+      
+      <Header
+        currentTime={currentTime} placa={placa} setPlaca={setPlaca}
+        loading={loading} handleSearch={handleSearch} handleKeyPress={handleKeyPress}
+        searchHistory={searchHistory}
+      />
+
+      <main className="flex-1 flex min-h-0">
+        <SidePanel alerts={alerts} />
+        <div className="flex-1 flex min-w-0">
+          <DossierPanel 
+            loading={loading} error={error} dossierData={dossierData} 
+            onVerOcorrencias={handleVerOcorrencias}
+            onMarcarSuspeito={handleMarcarSuspeito}
+            placasSuspeitas={placasSuspeitas}
+            onGerarRelatorio={handleGerarRelatorio} // 4. Passar a nova função
+          />
+          <MapPanel dossierData={dossierData} />
+        </div>
       </main>
-      <footer style={styles.footer}>
-        [ Linha do Tempo ]
-      </footer>
+
+      <Footer searchHistory={searchHistory} />
+
+      {ocorrenciasVisivel && dossierData && ReactDOM.createPortal(
+        <ModalOcorrencias 
+          ocorrencias={dossierData.ocorrencias} 
+          onClose={() => setOcorrenciasVisivel(false)}
+        />,
+        document.getElementById('modal-root')
+      )}
+      
+      {/* 5. Renderizar o modal de relatório usando o Portal */}
+      {relatorioVisivel && dossierData && ReactDOM.createPortal(
+        <ModalRelatorio 
+          dossierData={dossierData}
+          onClose={() => setRelatorioVisivel(false)}
+        />,
+        document.getElementById('modal-root')
+      )}
     </div>
   );
 }
