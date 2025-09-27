@@ -5,6 +5,7 @@ import CyberHeader from './cyber/CyberHeader';
 import DomainAnalyzer from './cyber/DomainAnalyzer';
 import IpIntelligence from './cyber/IpIntelligence';
 import NetworkMonitor from './cyber/NetworkMonitor';
+import NmapScanner from './cyber/NmapScanner';
 import ThreatMap from './cyber/ThreatMap';
 import CyberAlerts from './cyber/CyberAlerts';
 
@@ -55,6 +56,7 @@ const CyberDashboard = ({ setCurrentView }) => {
     domain: <DomainAnalyzer />,
     ip: <IpIntelligence />,
     network: <NetworkMonitor />,
+    nmap: <NmapScanner />,
     threats: <ThreatMap />
   };
 
@@ -132,7 +134,7 @@ const CyberOverview = ({ threatData }) => {
         {/* Status dos Módulos */}
         <div className="space-y-4">
           <h3 className="text-cyan-400 font-bold text-lg mb-4">STATUS DOS MÓDULOS</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
               <div className="flex justify-between items-center">
                 <span className="text-cyan-400/70">Domain Analyzer</span>
@@ -153,6 +155,13 @@ const CyberOverview = ({ threatData }) => {
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
               </div>
               <div className="text-xs text-cyan-400/50 mt-1">Tempo real ativo</div>
+            </div>
+            <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
+              <div className="flex justify-between items-center">
+                <span className="text-cyan-400/70">Nmap Scanner</span>
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              </div>
+              <div className="text-xs text-cyan-400/50 mt-1">Pronto para varreduras</div>
             </div>
             <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
               <div className="flex justify-between items-center">

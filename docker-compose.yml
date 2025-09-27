@@ -11,10 +11,18 @@ services:
     environment:
       - SINESP_SERVICE_URL=http://sinesp_service:8001
       - CYBER_SERVICE_URL=http://cyber_service:8002
+      - DOMAIN_SERVICE_URL=http://domain_service:8003
+      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:8004
+      - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:8005
+      - NMAP_SERVICE_URL=http://nmap_service:8006
     depends_on:
       - redis
       - sinesp_service
       - cyber_service
+      - domain_service
+      - ip_intelligence_service
+      - network_monitor_service
+      - nmap_service
 
   sinesp_service:
     build: ./backend/services/sinesp_service
@@ -22,7 +30,7 @@ services:
       - ./backend/services/sinesp_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
-  # NOVO SERVIÇO: Cyber Security Service
+  # Cyber Security Service
   cyber_service:
     build: ./backend/services/cyber_service
     volumes:
@@ -31,6 +39,40 @@ services:
       - /etc:/etc:ro          # Acesso read-only às configurações
     privileged: true          # Necessário para algumas verificações de segurança
     command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+
+  # Domain Analysis Service
+  domain_service:
+    build: ./backend/services/domain_service
+    volumes:
+      - ./backend/services/domain_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload
+
+  # IP Intelligence Service
+  ip_intelligence_service:
+    build: ./backend/services/ip_intelligence_service
+    volumes:
+      - ./backend/services/ip_intelligence_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8004 --reload
+
+  # Network Monitor Service
+  network_monitor_service:
+    build: ./backend/services/network_monitor_service
+    volumes:
+      - ./backend/services/network_monitor_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8005 --reload
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+  # Nmap Service
+  nmap_service:
+    build: ./backend/services/nmap_service
+    volumes:
+      - ./backend/services/nmap_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8006 --reload
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
 
   # Motor de cache (já existente)
   redis:
