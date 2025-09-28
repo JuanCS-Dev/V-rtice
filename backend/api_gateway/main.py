@@ -6,10 +6,11 @@ import os
 import json
 import time
 import structlog
-import websockets
-from typing import Optional
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from typing import List, Optional, Dict, Any
+from datetime import datetime
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -17,482 +18,204 @@ from prometheus_client import Counter, Histogram, generate_latest
 from starlette.responses import Response
 from pydantic import BaseModel
 
+# Configuração de logs estruturados
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.JSONRenderer()
+    ],
+    context_class=dict,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
 log = structlog.get_logger()
+
+# Métricas Prometheus
 REQUESTS_TOTAL = Counter("api_requests_total", "Total de pedidos recebidos", ["method", "path", "status_code"])
 RESPONSE_TIME = Histogram("api_response_time_seconds", "Tempo de resposta dos pedidos", ["method", "path"])
+
+# Rate limiting
 limiter = Limiter(key_func=get_remote_address)
 
-app = FastAPI( 
-    title="Projeto VÉRTICE - API Gateway", 
-    description="Ponto de entrada unificado com cache, rate limiting, observability e cyber security.", 
-    version="2.0.0"
+# FastAPI app
+app = FastAPI(
+    title="Projeto VÉRTICE - API Gateway",
+    description="Ponto de entrada unificado com cache, rate limiting, observability, cyber security e OSINT completo.",
+    version="3.2.2" # Version bump para correção da rota de predição
 )
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-origins = ["http://localhost:5173"]
-app.add_middleware( 
-    CORSMiddleware, 
-    allow_origins=origins, 
-    allow_credentials=True, 
-    allow_methods=["*"], 
+# CORS
+origins = ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:3000"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"]
 )
 
+# Middleware de monitoramento
 @app.middleware("http")
 async def monitor_requests(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
+    
     path_template = request.scope.get("route").path if request.scope.get("route") else request.url.path
     method = request.method
     status_code = response.status_code
+    
     REQUESTS_TOTAL.labels(method=method, path=path_template, status_code=status_code).inc()
     RESPONSE_TIME.labels(method=method, path=path_template).observe(process_time)
-    log.info( 
-        "request_processed", 
-        method=method, 
-        path=request.url.path, 
-        status_code=status_code, 
-        process_time=round(process_time, 4)
-    )
+    
+    log.info("request_processed",
+             method=method,
+             path=request.url.path,
+             status_code=status_code,
+             process_time=round(process_time, 4))
+    
     return response
 
-# URLs dos serviços
-SINESP_SERVICE_URL = os.getenv("SINESP_SERVICE_URL", "http://sinesp_service:8001")
-CYBER_SERVICE_URL = os.getenv("CYBER_SERVICE_URL", "http://cyber_service:8002")
-DOMAIN_SERVICE_URL = os.getenv("DOMAIN_SERVICE_URL", "http://domain_service:8003")
-IP_INTELLIGENCE_SERVICE_URL = os.getenv("IP_INTELLIGENCE_SERVICE_URL", "http://ip_intelligence_service:8004")
-NETWORK_MONITOR_SERVICE_URL = os.getenv("NETWORK_MONITOR_SERVICE_URL", "http://network_monitor_service:8005")
-NMAP_SERVICE_URL = os.getenv("NMAP_SERVICE_URL", "http://nmap_service:8006")
+# ============================
+# URLs DOS SERVIÇOS INTERNOS
+# ============================
+SINESP_SERVICE_URL = os.getenv("SINESP_SERVICE_URL", "http://sinesp_service:80")
+CYBER_SERVICE_URL = os.getenv("CYBER_SERVICE_URL", "http://cyber_service:80")
+DOMAIN_SERVICE_URL = os.getenv("DOMAIN_SERVICE_URL", "http://domain_service:80")
+IP_INTEL_SERVICE_URL = os.getenv("IP_INTEL_SERVICE_URL", "http://ip_intelligence_service:80")
+NETWORK_MONITOR_URL = os.getenv("NETWORK_MONITOR_URL", "http://network_monitor:80")
+NMAP_SERVICE_URL = os.getenv("NMAP_SERVICE_URL", "http://nmap_service:80")
+OSINT_SERVICE_URL = os.getenv("OSINT_SERVICE_URL", "http://osint-service:80")
+AURORA_PREDICT_URL = os.getenv("AURORA_PREDICT_URL", "http://aurora_predict:80")
 
+# Redis
 REDIS_URL = "redis://redis:6379"
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
-CACHE_EXPIRATION_SECONDS = 3600
 
-# Modelos para requests
-class NetworkScanRequest(BaseModel):
-    target: str
-    profile: str = "self-check"
+# ============================
+# MODELOS PYDANTIC
+# ============================
+class OccurrenceInput(BaseModel):
+    lat: float
+    lng: float
+    intensity: float
+    timestamp: datetime
+    tipo: str
 
-class DomainAnalysisRequest(BaseModel):
-    domain: str
+class PredictionInput(BaseModel):
+    occurrences: List[OccurrenceInput]
 
-class IPAnalysisRequest(BaseModel):
-    ip: str
+class ClusterOutput(BaseModel):
+    center_lat: float
+    center_lng: float
+    num_points: int
+    risk_level: str
 
-class NetworkMonitorConfigRequest(BaseModel):
-    window_seconds: int = 12
-    spike_threshold: int = 30
-    syn_recv_threshold: int = 60
-    portscan_ports_threshold: int = 15
-    persistent_scan_threshold: int = 3
-    debounce_seconds: int = 20
+class PredictionOutput(BaseModel):
+    hotspots: List[ClusterOutput]
 
-class NmapScanRequest(BaseModel):
-    target: str
-    profile: str = "quick"
-    custom_args: Optional[str] = None
+class AutomatedInvestigationRequest(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    name: Optional[str] = None
+    image_url: Optional[str] = None
+
+# ============================
+# FUNÇÃO AUXILIAR PARA PROXY
+# ============================
+async def proxy_request(request: Request, service_url: str, endpoint: str,
+                       service_name: str, timeout: float = 30.0) -> Dict[Any, Any]:
+    async with httpx.AsyncClient() as client:
+        try:
+            request_data = None
+            if request.method in ["POST", "PUT", "PATCH"]:
+                try: request_data = await request.json()
+                except json.JSONDecodeError: log.warning("proxy_request_empty_body"); request_data = {}
+            
+            response = await client.request(
+                method=request.method, url=f"{service_url}{endpoint}",
+                json=request_data, params=dict(request.query_params), timeout=timeout
+            )
+            response.raise_for_status()
+            return response.json()
+        except httpx.RequestError as exc:
+            log.error(f"{service_name}_proxy_error", error=str(exc))
+            raise HTTPException(status_code=503, detail=f"Erro de comunicação com {service_name}: {exc}")
+        except httpx.HTTPStatusError as exc:
+            log.error(f"{service_name}_http_error", status=exc.response.status_code, detail=exc.response.text)
+            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
+
+# ============================
+# ENDPOINTS CORE
+# ============================
+@app.get("/", tags=["Root"])
+async def read_root():
+    return {"status": "API Gateway is running!"}
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return {"status": "ok"}
 
 @app.get("/metrics", tags=["Monitoring"])
-def get_metrics(): 
+def get_metrics():
+    """Expõe as métricas do Prometheus para serem raspadas."""
     return Response(generate_latest(), media_type="text/plain")
 
-@app.get("/", tags=["Root"])
-async def read_root(): 
-    return {"status": "API Gateway is running with Cyber Security!"}
-
-# --- ENDPOINTS IP INTELLIGENCE ---
-
-@app.post("/ip/analyze", tags=["IP Intelligence"])
-@limiter.limit("5/minute")
-async def ip_analyze(request: Request, ip_request: IPAnalysisRequest):
-    """Proxy para análise completa de IP"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(
-                f"{IP_INTELLIGENCE_SERVICE_URL}/analyze",
-                json=ip_request.dict(),
-                timeout=60  # Timeout maior para análise completa
-            )
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(
-                status_code=503, 
-                detail=f"Erro de comunicação com o serviço de análise de IP: {exc}"
-            )
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(
-                status_code=exc.response.status_code, 
-                detail=exc.response.json().get("detail", exc.response.text)
-            )
-
-@app.get("/ip/health", tags=["IP Intelligence"])
-@limiter.limit("10/minute")
-async def ip_health(request: Request):
-    """Health check do IP Intelligence Service"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{IP_INTELLIGENCE_SERVICE_URL}/", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de IP: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-# --- ENDPOINTS DOMAIN ANALYSIS ---
-
-@app.post("/domain/analyze", tags=["Domain Analysis"])
-@limiter.limit("3/minute")
-async def domain_analyze(request: Request, domain_request: DomainAnalysisRequest):
-    """Proxy para análise completa de domínio"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(
-                f"{DOMAIN_SERVICE_URL}/analyze",
-                json=domain_request.dict(),
-                timeout=45
-            )
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(
-                status_code=503, 
-                detail=f"Erro de comunicação com o serviço de análise de domínio: {exc}"
-            )
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(
-                status_code=exc.response.status_code, 
-                detail=exc.response.json().get("detail", exc.response.text)
-            )
-
-@app.get("/domain/health", tags=["Domain Analysis"])
-@limiter.limit("10/minute")
-async def domain_health(request: Request):
-    """Health check do Domain Service"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{DOMAIN_SERVICE_URL}/", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de domínio: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-# --- ENDPOINTS NETWORK MONITOR ---
-
-@app.get("/network-monitor/health", tags=["Network Monitor"])
-@limiter.limit("10/minute")
-async def network_monitor_health(request: Request):
-    """Health check do Network Monitor Service"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{NETWORK_MONITOR_SERVICE_URL}/health", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de network monitor: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/network-monitor/stats", tags=["Network Monitor"])
-@limiter.limit("5/minute")
-async def network_monitor_stats(request: Request):
-    """Proxy para estatísticas do monitor de rede"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{NETWORK_MONITOR_SERVICE_URL}/stats", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de network monitor: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/network-monitor/config", tags=["Network Monitor"])
-@limiter.limit("5/minute")
-async def network_monitor_get_config(request: Request):
-    """Proxy para configuração do monitor"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{NETWORK_MONITOR_SERVICE_URL}/config", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de network monitor: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.put("/network-monitor/config", tags=["Network Monitor"])
+# ============================
+# ENDPOINT AI ORCHESTRATION
+# ============================
+@app.post("/api/investigate/auto", tags=["AI Orchestration"])
 @limiter.limit("2/minute")
-async def network_monitor_update_config(request: Request, config_request: NetworkMonitorConfigRequest):
-    """Proxy para atualizar configuração do monitor"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.put(
-                f"{NETWORK_MONITOR_SERVICE_URL}/config",
-                json=config_request.dict(),
-                timeout=10
-            )
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(
-                status_code=503, 
-                detail=f"Erro de comunicação com o serviço de network monitor: {exc}"
-            )
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(
-                status_code=exc.response.status_code, 
-                detail=exc.response.json().get("detail", exc.response.text)
-            )
+async def automated_investigation(request: Request, investigation_request: AutomatedInvestigationRequest):
+    if not any([investigation_request.username, investigation_request.email, investigation_request.phone, investigation_request.name, investigation_request.image_url]):
+        raise HTTPException(status_code=400, detail="Pelo menos um identificador deve ser fornecido.")
+    log.info("Proxying automated investigation request to OSINT service")
+    return await proxy_request(request=request, service_url=OSINT_SERVICE_URL, endpoint="/api/investigate/auto", service_name="osint-orchestrator", timeout=300.0)
 
-@app.post("/network-monitor/start", tags=["Network Monitor"])
-@limiter.limit("2/minute")
-async def network_monitor_start(request: Request):
-    """Proxy para iniciar monitoramento"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(f"{NETWORK_MONITOR_SERVICE_URL}/start", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de network monitor: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.post("/network-monitor/stop", tags=["Network Monitor"])
-@limiter.limit("2/minute")
-async def network_monitor_stop(request: Request):
-    """Proxy para parar monitoramento"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(f"{NETWORK_MONITOR_SERVICE_URL}/stop", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de network monitor: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.websocket("/network-monitor/ws/alerts")
-async def network_monitor_websocket_alerts(websocket: WebSocket):
-    """WebSocket proxy para alertas do Network Monitor em tempo real"""
-    await websocket.accept()
-    
+# ============================
+# ENDPOINTS DE PREDIÇÃO (RESTAURADO)
+# ============================
+@app.post("/predict/crime-hotspots", response_model=PredictionOutput, tags=["Prediction"])
+@limiter.limit("5/minute")
+async def predict_crime_hotspots_proxy(request: Request, data: PredictionInput):
+    """Proxy para o serviço de predição de hotspots Aurora."""
+    log.info("Proxying crime hotspot prediction request to Aurora service")
     try:
-        ws_url = NETWORK_MONITOR_SERVICE_URL.replace("http://", "ws://") + "/ws/alerts"
-        
-        async with websockets.connect(ws_url) as backend_ws:
-            async for message in backend_ws:
-                await websocket.send_text(message)
-                
-    except WebSocketDisconnect:
-        log.info("Cliente WebSocket desconectado")
-    except Exception as e:
-        log.error("Erro no WebSocket proxy", error=str(e))
-        await websocket.close(code=1011, reason=f"Erro interno: {str(e)}")
-
-# --- ENDPOINTS NMAP SERVICE ---
-
-@app.get("/nmap/health", tags=["Nmap Scanner"])
-@limiter.limit("10/minute")
-async def nmap_health(request: Request):
-    """Health check do Nmap Service"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{NMAP_SERVICE_URL}/", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de nmap: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/nmap/profiles", tags=["Nmap Scanner"])
-@limiter.limit("5/minute")
-async def nmap_profiles(request: Request):
-    """Proxy para perfis de scan disponíveis"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{NMAP_SERVICE_URL}/profiles", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de nmap: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.post("/nmap/scan", tags=["Nmap Scanner"])
-@limiter.limit("1/minute")  # Limite muito restrito para scans
-async def nmap_scan(request: Request, scan_request: NmapScanRequest):
-    """Proxy para execução de scan Nmap"""
-    async with httpx.AsyncClient() as client:
-        try:
+        payload = jsonable_encoder(data)
+        async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{NMAP_SERVICE_URL}/scan",
-                json=scan_request.dict(),
-                timeout=320  # Timeout maior para scans
+                f"{AURORA_PREDICT_URL}/predict/crime-hotspots",
+                json=payload,
+                timeout=90.0
             )
             response.raise_for_status()
             return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(
-                status_code=503, 
-                detail=f"Erro de comunicação com o serviço de nmap: {exc}"
-            )
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(
-                status_code=exc.response.status_code, 
-                detail=exc.response.json().get("detail", exc.response.text)
-            )
+    except httpx.RequestError as exc:
+        log.error("aurora_predict_proxy_error", error=str(exc))
+        raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de predição: {exc}")
+    except httpx.HTTPStatusError as exc:
+        log.error("aurora_predict_http_error", status=exc.response.status_code, detail=exc.response.text)
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
 
-# --- ENDPOINTS CYBER SECURITY ---
-
-@app.post("/cyber/network-scan", tags=["Cyber Security"])
-@limiter.limit("2/minute")  # Limite restrito para scans
-async def cyber_network_scan(request: Request, scan_request: NetworkScanRequest):
-    """Proxy para network scan do cyber service"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.post(
-                f"{CYBER_SERVICE_URL}/cyber/network-scan",
-                json=scan_request.dict(),
-                timeout=60  # Timeout maior para scans
-            )
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(
-                status_code=503, 
-                detail=f"Erro de comunicação com o serviço cyber: {exc}"
-            )
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(
-                status_code=exc.response.status_code, 
-                detail=exc.response.json().get("detail", exc.response.text)
-            )
-
-@app.get("/cyber/port-analysis", tags=["Cyber Security"])
-@limiter.limit("5/minute")
-async def cyber_port_analysis(request: Request):
-    """Proxy para análise de portas"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{CYBER_SERVICE_URL}/cyber/port-analysis", timeout=30)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço cyber: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/cyber/file-integrity", tags=["Cyber Security"])
-@limiter.limit("3/minute")
-async def cyber_file_integrity(request: Request):
-    """Proxy para verificação de integridade de arquivos"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{CYBER_SERVICE_URL}/cyber/file-integrity", timeout=45)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço cyber: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/cyber/process-analysis", tags=["Cyber Security"])
-@limiter.limit("5/minute")
-async def cyber_process_analysis(request: Request):
-    """Proxy para análise de processos"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{CYBER_SERVICE_URL}/cyber/process-analysis", timeout=30)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço cyber: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/cyber/certificate-check", tags=["Cyber Security"])
-@limiter.limit("3/minute")
-async def cyber_certificate_check(request: Request):
-    """Proxy para verificação de certificados"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{CYBER_SERVICE_URL}/cyber/certificate-check", timeout=30)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço cyber: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/cyber/security-config", tags=["Cyber Security"])
-@limiter.limit("5/minute")
-async def cyber_security_config(request: Request):
-    """Proxy para verificação de configurações de segurança"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{CYBER_SERVICE_URL}/cyber/security-config", timeout=20)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço cyber: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/cyber/security-logs", tags=["Cyber Security"])
-@limiter.limit("3/minute")
-async def cyber_security_logs(request: Request):
-    """Proxy para análise de logs de segurança"""
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{CYBER_SERVICE_URL}/cyber/security-logs", timeout=25)
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço cyber: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-# --- ENDPOINTS SINESP (EXISTENTES) ---
-
-@app.get("/ocorrencias/heatmap", tags=["Heatmap"])
-@limiter.limit("5/minute")
-async def get_heatmap_data_proxy(request: Request):
-    cache_key = "heatmap:data"
-    try:
-        cached_data = await redis_client.get(cache_key)
-        if cached_data:
-            log.info("heatmap_cache_hit")
-            return json.loads(cached_data)
-    except Exception as e:
-        log.error("redis_error_heatmap", error=str(e))
-
-    log.info("heatmap_cache_miss")
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(f"{SINESP_SERVICE_URL}/ocorrencias/heatmap")
-            response.raise_for_status()
-            heatmap_data = response.json()
-            try:
-                await redis_client.setex(cache_key, 3600, json.dumps(heatmap_data))
-            except Exception as e:
-                 log.error("redis_save_error_heatmap", error=str(e))
-            return heatmap_data
-        except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de ocorrências: {exc}")
-        except httpx.HTTPStatusError as exc:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
-
-@app.get("/veiculos/{placa}", tags=["Consultas"])
-@limiter.limit("10/minute")
-async def consultar_placa_com_cache(request: Request, placa: str):
+# ============================
+# ENDPOINTS SINESP
+# ============================
+@app.get("/veiculos/{placa}", tags=["SINESP"])
+@limiter.limit("30/minute")
+async def consultar_placa_proxy(request: Request, placa: str):
+    """Proxy para consulta de placas no SINESP Service com cache."""
     cache_key = f"placa:{placa.upper()}"
     try:
         cached_data = await redis_client.get(cache_key)
@@ -509,11 +232,29 @@ async def consultar_placa_com_cache(request: Request, placa: str):
             response.raise_for_status()
             vehicle_data = response.json()
             try:
-                await redis_client.setex(cache_key, CACHE_EXPIRATION_SECONDS, json.dumps(vehicle_data))
+                await redis_client.setex(cache_key, 3600, json.dumps(vehicle_data)) # Cache de 1 hora
             except Exception as e:
                  log.error("redis_save_error", error=str(e))
             return vehicle_data
         except httpx.RequestError as exc:
-            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço de consulta: {exc}")
+            raise HTTPException(status_code=503, detail=f"Erro de comunicação com o serviço SINESP: {exc}")
         except httpx.HTTPStatusError as exc:
             raise HTTPException(status_code=exc.response.status_code, detail=exc.response.json().get("detail", exc.response.text))
+
+@app.get("/ocorrencias/tipos", tags=["SINESP"])
+@limiter.limit("10/minute")
+async def get_ocorrencia_tipos_proxy(request: Request):
+    """Proxy para obter os tipos de ocorrências do SINESP Service."""
+    return await proxy_request(request=request, service_url=SINESP_SERVICE_URL, endpoint="/ocorrencias/tipos", service_name="sinesp-service")
+
+@app.get("/ocorrencias/heatmap", tags=["SINESP"])
+@limiter.limit("10/minute")
+async def get_heatmap_data_proxy(request: Request):
+    """Proxy para obter os dados do heatmap do SINESP Service."""
+    return await proxy_request(request=request, service_url=SINESP_SERVICE_URL, endpoint="/ocorrencias/heatmap", service_name="sinesp-service")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+

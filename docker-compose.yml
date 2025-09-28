@@ -1,20 +1,26 @@
 # /home/juan/vertice-dev/docker-compose.yml
 
 services:
+  # ============================
+  # API GATEWAY
+  # ============================
   api_gateway:
     build: ./backend/api_gateway
+    container_name: vertice-api-gateway
     ports:
       - "8000:8000"
     volumes:
       - ./backend/api_gateway:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
-      - SINESP_SERVICE_URL=http://sinesp_service:8001
-      - CYBER_SERVICE_URL=http://cyber_service:8002
-      - DOMAIN_SERVICE_URL=http://domain_service:8003
-      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:8004
-      - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:8005
-      - NMAP_SERVICE_URL=http://nmap_service:8006
+      - SINESP_SERVICE_URL=http://sinesp_service:80
+      - CYBER_SERVICE_URL=http://cyber_service:80
+      - DOMAIN_SERVICE_URL=http://domain_service:80
+      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:80
+      - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:80
+      - NMAP_SERVICE_URL=http://nmap_service:80
+      - OSINT_SERVICE_URL=http://osint-service:8007
+      - AURORA_PREDICT_URL=http://aurora_predict:80
     depends_on:
       - redis
       - sinesp_service
@@ -23,59 +29,224 @@ services:
       - ip_intelligence_service
       - network_monitor_service
       - nmap_service
+      - osint-service
+      - aurora_predict
+    networks:
+      - vertice-network
+    restart: unless-stopped
 
-  sinesp_service:
-    build: ./backend/services/sinesp_service
-    volumes:
-      - ./backend/services/sinesp_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
-
-  # Cyber Security Service
-  cyber_service:
-    build: ./backend/services/cyber_service
-    volumes:
-      - ./backend/services/cyber_service:/app
-      - /var/log:/var/log:ro  # Acesso read-only aos logs do sistema
-      - /etc:/etc:ro          # Acesso read-only às configurações
-    privileged: true          # Necessário para algumas verificações de segurança
-    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
-
-  # Domain Analysis Service
-  domain_service:
-    build: ./backend/services/domain_service
-    volumes:
-      - ./backend/services/domain_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8003 --reload
-
-  # IP Intelligence Service
-  ip_intelligence_service:
-    build: ./backend/services/ip_intelligence_service
-    volumes:
-      - ./backend/services/ip_intelligence_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8004 --reload
-
-  # Network Monitor Service
-  network_monitor_service:
-    build: ./backend/services/network_monitor_service
-    volumes:
-      - ./backend/services/network_monitor_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8005 --reload
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-
-  # Nmap Service
-  nmap_service:
-    build: ./backend/services/nmap_service
-    volumes:
-      - ./backend/services/nmap_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8006 --reload
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-
-  # Motor de cache (já existente)
+  # ============================
+  # REDIS CACHE
+  # ============================
   redis:
     image: "redis:alpine"
+    container_name: vertice-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # SINESP SERVICE
+  # ============================
+  sinesp_service:
+    build: ./backend/services/sinesp_service
+    container_name: vertice-sinesp
+    ports:
+      - "8001:80"
+    volumes:
+      - ./backend/services/sinesp_service:/code
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # CYBER SERVICE
+  # ============================
+  cyber_service:
+    build: ./backend/services/cyber_service
+    container_name: vertice-cyber
+    volumes:
+      - ./backend/services/cyber_service:/app
+      - /var/log:/var/log:ro
+      - /etc:/etc:ro
+    privileged: true
+    ports:
+      - "8002:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # DOMAIN SERVICE
+  # ============================
+  domain_service:
+    build: ./backend/services/domain_service
+    container_name: vertice-domain
+    volumes:
+      - ./backend/services/domain_service:/app
+    ports:
+      - "8003:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # IP INTELLIGENCE SERVICE
+  # ============================
+  ip_intelligence_service:
+    build: ./backend/services/ip_intelligence_service
+    container_name: vertice-ip-intel
+    volumes:
+      - ./backend/services/ip_intelligence_service:/app
+    ports:
+      - "8004:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # NETWORK MONITOR SERVICE
+  # ============================
+  network_monitor_service:
+    build: ./backend/services/network_monitor_service
+    container_name: vertice-network-monitor
+    volumes:
+      - ./backend/services/network_monitor_service:/app
+    ports:
+      - "8005:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # NMAP SERVICE
+  # ============================
+  nmap_service:
+    build: ./backend/services/nmap_service
+    container_name: vertice-nmap
+    volumes:
+      - ./backend/services/nmap_service:/app
+    ports:
+      - "8006:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # OSINT SERVICE (NOVO)
+  # ============================
+  osint-service:
+    build: ./backend/services/osint_service
+    container_name: vertice-osint
+    ports:
+      - "8007:8007"
+    environment:
+      - REDIS_HOST=redis
+      - AURORA_HOST=aurora_predict
+      - PYTHONUNBUFFERED=1
+      - CHROME_BIN=/usr/bin/chromium
+      - CHROMEDRIVER_PATH=/usr/bin/chromedriver
+    depends_on:
+      - redis
+      - aurora_predict
+    volumes:
+      - ./backend/services/osint_service:/app
+      - osint-data:/app/data
+    command: uvicorn main:app --host 0.0.0.0 --port 8007 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # AURORA PREDICT SERVICE
+  # ============================
+  aurora_predict:
+    build: ./backend/services/aurora_predict
+    container_name: vertice-aurora
+    volumes:
+      - ./backend/services/aurora_predict:/code
+      - aurora-models:/models
+    ports:
+      - "8008:80"
+    environment:
+      - MODEL_PATH=/models
+      - PYTHONUNBUFFERED=1
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # PROMETHEUS (OPCIONAL)
+  # ============================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: vertice-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # GRAFANA (OPCIONAL)
+  # ============================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: vertice-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=vertice2024
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+# ============================
+# NETWORKS
+# ============================
+networks:
+  vertice-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ============================
+# VOLUMES
+# ============================
+volumes:
+  redis-data:
+    driver: local
+  osint-data:
+    driver: local
+  aurora-models:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

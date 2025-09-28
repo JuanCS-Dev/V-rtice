@@ -8,6 +8,7 @@ const CyberHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
     { id: 'domain', name: 'DOMAIN INTEL', icon: '🌐' },
     { id: 'ip', name: 'IP ANALYSIS', icon: '🎯' },
     { id: 'network', name: 'NET MONITOR', icon: '📡' },
+    { id: 'nmap', name: 'NMAP SCAN', icon: '⚡' },
     { id: 'threats', name: 'THREAT MAP', icon: '🗺️' }
   ];
 

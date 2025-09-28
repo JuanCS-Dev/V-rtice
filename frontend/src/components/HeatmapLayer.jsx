@@ -7,45 +7,53 @@ import L from 'leaflet';
 import PropTypes from 'prop-types';
 
 /**
- * Uma camada de mapa de calor (heatmap) para o React-Leaflet.
- * Este componente é um wrapper para a biblioteca Leaflet.heat, 
- * garantindo a integração correta com o ciclo de vida do React.
+ * Camada de heatmap adaptada para receber um array de objetos.
  * @param {object} props
- * @param {Array<[number, number, number?]>} props.points - Array de pontos para o heatmap. 
- * Cada ponto é um array no formato [latitude, longitude, intensidade(opcional)].
+ * @param {Array<object>} props.points - Array de objetos, cada um com `lat`, `lng`, e `intensity`.
  */
 const HeatmapLayer = ({ points }) => {
   const map = useMap();
 
   useEffect(() => {
-    // Não faz nada se o mapa não estiver pronto ou se não houver pontos para renderizar.
     if (!map || !points || points.length === 0) {
       return;
     }
 
-    // Configurações para a camada de heatmap. Ajusta estes valores para otimizar a visualização.
+    // --- CORREÇÃO: Transforma os dados do formato de objeto para o formato de array que o L.heatLayer espera ---
+    const formattedPoints = points
+      .filter(p => typeof p.lat === 'number' && typeof p.lng === 'number') // Filtra pontos com dados inválidos
+      .map(p => [p.lat, p.lng, p.intensity || 0.5]); // Usa intensidade do objeto ou um padrão
+
+    // Se após a filtragem não sobrarem pontos, não adiciona a camada.
+    if (formattedPoints.length === 0) {
+      return;
+    }
+
     const heatLayerOptions = {
       radius: 25,
       blur: 15,
       maxZoom: 18,
-      gradient: { 0.4: '#1A237E', 0.65: '#F9A825', 1: '#B71C1C' } // Gradiente: Azul escuro -> Amarelo -> Vermelho
+      gradient: { 0.4: '#1A237E', 0.65: '#F9A825', 1: '#B71C1C' }
     };
 
-    const heatLayer = L.heatLayer(points, heatLayerOptions).addTo(map);
+    const heatLayer = L.heatLayer(formattedPoints, heatLayerOptions).addTo(map);
 
-    // Função de cleanup: essencial para evitar camadas duplicadas em re-renderizações.
-    // O React executa esta função quando o componente é desmontado ou quando as dependências do useEffect mudam.
     return () => {
       map.removeLayer(heatLayer);
     };
-  }, [map, points]); // O efeito é re-executado se a instância do mapa ou os dados dos pontos mudarem.
+  }, [map, points]);
 
-  return null; // Este componente não renderiza elementos no DOM, apenas manipula o mapa do Leaflet.
+  return null;
 };
 
+// --- CORREÇÃO: Atualiza os propTypes para o novo formato de dados ---
 HeatmapLayer.propTypes = {
   points: PropTypes.arrayOf(
-    PropTypes.arrayOf(PropTypes.number).isRequired
+    PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+      intensity: PropTypes.number // A intensidade pode ser opcional
+    }).isRequired
   ).isRequired
 };
 

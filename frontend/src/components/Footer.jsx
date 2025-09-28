@@ -1,34 +1,25 @@
 import React from 'react';
 
-// Recebe a função setCurrentView como prop
-const Footer = ({ searchHistory = [], setCurrentView }) => {
+const Footer = ({ searchHistory = [] }) => {
   return (
-    <footer className="border-t border-green-400/30 bg-black/50 backdrop-blur-sm p-2">
+    <footer className="border-t border-green-400/30 bg-black/50 backdrop-blur-sm p-3">
       <div className="flex justify-between items-center text-xs">
         <div className="flex space-x-6 items-center">
-          <span className="text-green-400">CONEXÃO: SEGURA</span>
-          <span className="text-green-400">SERVIDOR: ONLINE</span>
+          <span className="text-green-400 flex items-center">
+            <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+            CONEXÃO: SEGURA
+          </span>
+          <span className="text-green-400 flex items-center">
+            <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+            SERVIDOR: ONLINE
+          </span>
           <span className="text-green-400">USUÁRIO: OPERADOR_001</span>
           {searchHistory.length > 0 && (
-            <span className="text-green-400">CONSULTAS: {searchHistory.length}</span>
+            <span className="text-green-400">CONSULTAS REALIZADAS: {searchHistory.length}</span>
           )}
-          {/* BOTÃO ADMIN */}
-          <button 
-            onClick={() => setCurrentView('admin')}
-            className="text-gray-500 hover:text-yellow-400 transition-colors border border-gray-600 px-2 py-1 rounded"
-          >
-            ADMIN
-          </button>
-          {/* NOVO BOTÃO CYBER */}
-          <button 
-            onClick={() => setCurrentView('cyber')}
-            className="text-gray-500 hover:text-cyan-400 transition-colors border border-gray-600 px-2 py-1 rounded"
-          >
-            CYBER
-          </button>
         </div>
-        <div className="text-green-400/70">
-          PROJETO VÉRTICE v2.0 | SSP-GO | CLASSIFICAÇÃO: CONFIDENCIAL
+        <div className="text-green-400/70 font-mono">
+          PROJETO VÉRTICE v2.4.0 | SSP-GO | CLASSIFICAÇÃO: CONFIDENCIAL
         </div>
       </div>
     </footer>
