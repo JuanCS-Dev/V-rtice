@@ -339,6 +339,93 @@ async def analyze_ip(request: IPAnalysisRequest):
     
     return result
 
+@app.get("/my-ip", tags=["IP Intelligence"])
+async def get_my_ip():
+    """Detecta o IP público do operador/cliente"""
+    try:
+        # Usar múltiplas fontes para detectar IP público
+        sources = [
+            "https://httpbin.org/ip",
+            "https://api.ipify.org?format=json",
+            "https://ipinfo.io/ip"
+        ]
+
+        detected_ip = None
+        source_used = None
+
+        for source in sources:
+            try:
+                response = requests.get(source, timeout=5)
+                if response.status_code == 200:
+                    if "ipify" in source:
+                        data = response.json()
+                        detected_ip = data.get("ip")
+                    elif "httpbin" in source:
+                        data = response.json()
+                        detected_ip = data.get("origin", "").split(",")[0].strip()
+                    elif "ipinfo" in source:
+                        detected_ip = response.text.strip()
+
+                    if detected_ip and IPV4_RE.match(detected_ip):
+                        source_used = source
+                        break
+            except:
+                continue
+
+        if not detected_ip:
+            raise Exception("Não foi possível detectar o IP público")
+
+        # Retornar informações básicas sem análise completa
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "success": True,
+            "detected_ip": detected_ip,
+            "source": source_used,
+            "message": "IP público detectado com sucesso",
+            "next_action": f"Use o endpoint /analyze para análise completa do IP {detected_ip}"
+        }
+
+    except Exception as e:
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "success": False,
+            "error": f"Falha ao detectar IP público: {str(e)}",
+            "detected_ip": None
+        }
+
+@app.post("/analyze-my-ip", tags=["IP Intelligence"])
+async def analyze_my_ip():
+    """Detecta e analisa automaticamente o IP público do operador"""
+    try:
+        # Primeiro detecta o IP
+        ip_detection = await get_my_ip()
+
+        if not ip_detection["success"]:
+            return ip_detection
+
+        detected_ip = ip_detection["detected_ip"]
+
+        # Depois faz a análise completa
+        analysis_request = IPAnalysisRequest(ip=detected_ip)
+        analysis_result = await analyze_ip(analysis_request)
+
+        # Adiciona informações de detecção ao resultado
+        analysis_result["ip_detection"] = {
+            "detected_ip": detected_ip,
+            "source": ip_detection["source"],
+            "auto_detected": True
+        }
+
+        return analysis_result
+
+    except Exception as e:
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "success": False,
+            "error": f"Falha na análise automática: {str(e)}",
+            "ip_detection": None
+        }
+
 @app.get("/", tags=["Root"])
 async def health_check():
     """Health check endpoint"""
@@ -349,6 +436,8 @@ async def health_check():
         "version": "1.0.0",
         "endpoints": {
             "analyze": "POST /analyze",
+            "my_ip": "GET /my-ip",
+            "analyze_my_ip": "POST /analyze-my-ip",
             "health": "GET /"
         }
     }

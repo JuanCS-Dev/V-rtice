@@ -23,10 +23,17 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
       description: 'Investigação em Mídias Sociais',
       color: 'purple'
     },
-    { 
-      id: 'admin', 
-      label: 'ADMINISTRAÇÃO', 
-      icon: '⚙️', 
+    {
+      id: 'terminal',
+      label: 'TERMINAL CLI',
+      icon: '💻',
+      description: 'Console Avançado para Especialistas',
+      color: 'orange'
+    },
+    {
+      id: 'admin',
+      label: 'ADMINISTRAÇÃO',
+      icon: '⚙️',
       description: 'Monitoramento e Configurações',
       color: 'yellow'
     }
@@ -45,6 +52,10 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
       purple: {
         active: 'bg-purple-500 text-white border-purple-400',
         inactive: 'bg-purple-500/10 text-purple-400 border-purple-400/30 hover:bg-purple-500/20 hover:border-purple-400'
+      },
+      orange: {
+        active: 'bg-orange-500 text-white border-orange-400',
+        inactive: 'bg-orange-500/10 text-orange-400 border-orange-400/30 hover:bg-orange-500/20 hover:border-orange-400'
       },
       yellow: {
         active: 'bg-yellow-500 text-black border-yellow-400',

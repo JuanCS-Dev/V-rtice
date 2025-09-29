@@ -7,6 +7,7 @@ const IpIntelligence = () => {
   const [loading, setLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [searchHistory, setSearchHistory] = useState([]);
+  const [loadingMyIp, setLoadingMyIp] = useState(false);
 
   const handleAnalyzeIP = async () => {
     if (!ipAddress.trim()) return;
@@ -102,6 +103,41 @@ const IpIntelligence = () => {
     }
   };
 
+  const handleAnalyzeMyIP = async () => {
+    setLoadingMyIp(true);
+    setAnalysisResult(null);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/ip/analyze-my-ip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Define o IP detectado no campo de input
+        setIpAddress(data.ip_detection.detected_ip);
+
+        // Mostra o resultado da análise
+        setAnalysisResult(data.data);
+
+        // Adiciona ao histórico
+        setSearchHistory(prev => [data.ip_detection.detected_ip, ...prev.filter(ip => ip !== data.ip_detection.detected_ip)].slice(0, 10));
+      } else {
+        console.error('Erro na detecção do IP:', data.error);
+        alert(data.error || 'Erro ao detectar seu IP público');
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      alert('Erro de conexão com o serviço');
+    } finally {
+      setLoadingMyIp(false);
+    }
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleAnalyzeIP();
@@ -145,13 +181,24 @@ const IpIntelligence = () => {
             </div>
           </div>
           
-          <button
-            onClick={handleAnalyzeIP}
-            disabled={loading || !ipAddress.trim()}
-            className="bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-500 hover:to-cyan-600 disabled:from-gray-600 disabled:to-gray-700 text-black font-bold px-8 py-3 rounded-lg transition-all duration-300 disabled:cursor-not-allowed tracking-wider"
-          >
-            {loading ? 'ANALISANDO...' : 'EXECUTAR ANÁLISE'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleAnalyzeIP}
+              disabled={loading || loadingMyIp || !ipAddress.trim()}
+              className="flex-1 bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-500 hover:to-cyan-600 disabled:from-gray-600 disabled:to-gray-700 text-black font-bold px-8 py-3 rounded-lg transition-all duration-300 disabled:cursor-not-allowed tracking-wider"
+            >
+              {loading ? 'ANALISANDO...' : 'EXECUTAR ANÁLISE'}
+            </button>
+
+            <button
+              onClick={handleAnalyzeMyIP}
+              disabled={loading || loadingMyIp}
+              className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 disabled:cursor-not-allowed tracking-wider whitespace-nowrap"
+              title="Detectar e analisar automaticamente seu IP público"
+            >
+              {loadingMyIp ? '🔍 DETECTANDO...' : '🎯 MEU IP'}
+            </button>
+          </div>
         </div>
 
         {/* Histórico de Pesquisas */}

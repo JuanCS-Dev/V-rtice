@@ -23,6 +23,8 @@ services:
       - AURORA_PREDICT_URL=http://aurora_predict:80
       - ATLAS_SERVICE_URL=http://atlas_service:8000 # <-- ADICIONADO
       - AUTH_SERVICE_URL=http://auth_service:80
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
+      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:80
     depends_on:
       - redis
       - sinesp_service
@@ -35,6 +37,8 @@ services:
       - aurora_predict
       - auth_service
       - atlas_service # <-- ADICIONADO
+      - vuln_scanner_service
+      - social_eng_service
     networks:
       - vertice-network
     restart: unless-stopped
@@ -210,6 +214,39 @@ services:
       - ADMIN_EMAILS=${ADMIN_EMAILS:-}
     depends_on:
       - redis
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # VULNERABILITY SCANNER SERVICE
+  # ============================
+  vuln_scanner_service:
+    build: ./backend/services/vuln_scanner_service
+    container_name: vertice-vuln-scanner
+    volumes:
+      - ./backend/services/vuln_scanner_service:/app
+    ports:
+      - "8011:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # SOCIAL ENGINEERING SERVICE
+  # ============================
+  social_eng_service:
+    build: ./backend/services/social_eng_service
+    container_name: vertice-social-eng
+    volumes:
+      - ./backend/services/social_eng_service:/app
+    ports:
+      - "8012:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - vertice-network
     restart: unless-stopped

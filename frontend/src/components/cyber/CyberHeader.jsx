@@ -9,7 +9,9 @@ const CyberHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
     { id: 'ip', name: 'IP ANALYSIS', icon: '🎯' },
     { id: 'network', name: 'NET MONITOR', icon: '📡' },
     { id: 'nmap', name: 'NMAP SCAN', icon: '⚡' },
-    { id: 'threats', name: 'THREAT MAP', icon: '🗺️' }
+    { id: 'threats', name: 'THREAT MAP', icon: '🗺️' },
+    { id: 'vulnscan', name: 'VULN SCANNER', icon: '💥', isOffensive: true },
+    { id: 'socialeng', name: 'SOCIAL ENG', icon: '🎭', isOffensive: true }
   ];
 
   return (
@@ -55,12 +57,17 @@ const CyberHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
               onClick={() => setActiveModule(module.id)}
               className={`px-4 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 ${
                 activeModule === module.id
-                  ? 'bg-cyan-400/20 text-cyan-400 border border-cyan-400/50'
-                  : 'bg-black/30 text-cyan-400/70 border border-cyan-400/20 hover:bg-cyan-400/10 hover:text-cyan-400'
+                  ? module.isOffensive
+                    ? 'bg-red-400/20 text-red-400 border border-red-400/50'
+                    : 'bg-cyan-400/20 text-cyan-400 border border-cyan-400/50'
+                  : module.isOffensive
+                    ? 'bg-black/30 text-red-400/70 border border-red-400/20 hover:bg-red-400/10 hover:text-red-400'
+                    : 'bg-black/30 text-cyan-400/70 border border-cyan-400/20 hover:bg-cyan-400/10 hover:text-cyan-400'
               }`}
             >
               <span className="mr-2">{module.icon}</span>
               {module.name}
+              {module.isOffensive && <span className="ml-1 text-xs">⚠️</span>}
             </button>
           ))}
         </div>

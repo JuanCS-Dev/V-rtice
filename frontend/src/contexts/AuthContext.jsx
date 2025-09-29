@@ -139,9 +139,15 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user
   };
 
+  const getAuthToken = () => {
+    return token;
+  };
+
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{...value, getAuthToken}}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export { AuthContext };

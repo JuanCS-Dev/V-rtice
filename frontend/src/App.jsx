@@ -12,7 +12,8 @@ import ModalOcorrencias from './components/ModalOcorrencias';
 import ModalRelatorio from './components/ModalRelatorio';
 import AdminDashboard from './components/AdminDashboard';
 import CyberDashboard from './components/CyberDashboard';
-import OSINTDashboard from './components/OSINTDashboard'; // NOVO IMPORT
+import OSINTDashboard from './components/OSINTDashboard';
+import TerminalDashboard from './components/terminal/TerminalDashboard';
 
 function App() {
   // Estados existentes
@@ -27,8 +28,8 @@ function App() {
   const [relatorioVisivel, setRelatorioVisivel] = useState(false);
   const [placasSuspeitas, setPlacasSuspeitas] = useState(new Set());
   
-  // ESTADO ATUALIZADO: Agora inclui 'osint'
-  const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'cyber' ou 'osint'
+  // ESTADO ATUALIZADO: Agora inclui 'terminal'
+  const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'cyber', 'osint' ou 'terminal'
 
   // Effects existentes
   useEffect(() => { 
@@ -116,6 +117,10 @@ function App() {
 
   if (currentView === 'osint') {
     return <OSINTDashboard setCurrentView={setCurrentView} />;
+  }
+
+  if (currentView === 'terminal') {
+    return <TerminalDashboard setCurrentView={setCurrentView} />;
   }
 
   // Dashboard principal (operações gerais)

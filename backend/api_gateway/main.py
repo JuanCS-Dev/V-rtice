@@ -102,6 +102,8 @@ OSINT_SERVICE_URL = os.getenv("OSINT_SERVICE_URL", "http://osint-service:80")
 AURORA_PREDICT_URL = os.getenv("AURORA_PREDICT_URL", "http://aurora_predict:80")
 ATLAS_SERVICE_URL = os.getenv("ATLAS_SERVICE_URL", "http://atlas_service:8000")
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth_service:80")
+VULN_SCANNER_SERVICE_URL = os.getenv("VULN_SCANNER_SERVICE_URL", "http://vuln_scanner_service:80")
+SOCIAL_ENG_SERVICE_URL = os.getenv("SOCIAL_ENG_SERVICE_URL", "http://social_eng_service:80")
 
 # Authentication configuration
 JWT_SECRET = os.getenv("JWT_SECRET", "vertice-super-secret-key-2024")
@@ -385,6 +387,16 @@ async def domain_health_check_proxy(request: Request):
 async def ip_analyze_proxy(request: Request):
     return await proxy_request(request=request, service_url=IP_INTEL_SERVICE_URL, endpoint="/analyze", service_name="ip-intelligence-service", timeout=60.0)
 
+@app.get("/api/ip/my-ip", tags=["IP Intelligence"])
+@limiter.limit("10/minute")
+async def ip_my_ip_proxy(request: Request):
+    return await proxy_request(request=request, service_url=IP_INTEL_SERVICE_URL, endpoint="/my-ip", service_name="ip-intelligence-service", timeout=30.0)
+
+@app.post("/api/ip/analyze-my-ip", tags=["IP Intelligence"])
+@limiter.limit("10/minute")
+async def ip_analyze_my_ip_proxy(request: Request):
+    return await proxy_request(request=request, service_url=IP_INTEL_SERVICE_URL, endpoint="/analyze-my-ip", service_name="ip-intelligence-service", timeout=60.0)
+
 @app.get("/ip/health", tags=["IP Intelligence"])
 async def ip_health_check_proxy(request: Request):
     return await proxy_request(request=request, service_url=IP_INTEL_SERVICE_URL, endpoint="/", service_name="ip-intelligence-service")
@@ -548,6 +560,81 @@ async def offensive_tools_access(user: Dict[str, Any] = Depends(require_permissi
 async def analyst_access(user: Dict[str, Any] = Depends(require_permission("write"))):
     """Analyst access"""
     return {"message": "Analyst access granted", "user": user["email"]}
+
+# ============================
+# VULNERABILITY SCANNER ROUTES
+# ============================
+@app.post("/api/vuln-scanner/scan", tags=["Offensive Security"])
+async def vulnerability_scan(request: Request, user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """Perform vulnerability scan - requires offensive permission"""
+    return await proxy_request(request, VULN_SCANNER_SERVICE_URL, "/scan", "Vulnerability Scanner")
+
+@app.get("/api/vuln-scanner/scan/{scan_id}", tags=["Offensive Security"])
+async def get_scan_result(scan_id: str, user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """Get vulnerability scan results - requires offensive permission"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{VULN_SCANNER_SERVICE_URL}/scan/{scan_id}")
+        return response.json()
+
+@app.post("/api/vuln-scanner/exploit", tags=["Offensive Security"])
+async def exploit_vulnerability(request: Request, user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """Exploit vulnerability - requires offensive permission"""
+    return await proxy_request(request, VULN_SCANNER_SERVICE_URL, "/exploit", "Vulnerability Scanner")
+
+@app.get("/api/vuln-scanner/exploits", tags=["Offensive Security"])
+async def list_exploits(user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """List available exploits - requires offensive permission"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{VULN_SCANNER_SERVICE_URL}/exploits")
+        return response.json()
+
+@app.get("/vuln-scanner/health", tags=["Offensive Security"])
+async def vuln_scanner_health():
+    """Health check for vulnerability scanner service"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{VULN_SCANNER_SERVICE_URL}/health")
+        return response.json()
+
+# ============================
+# SOCIAL ENGINEERING ROUTES
+# ============================
+@app.post("/api/social-eng/campaign", tags=["Offensive Security"])
+async def create_phishing_campaign(request: Request, user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """Create phishing campaign - requires offensive permission"""
+    return await proxy_request(request, SOCIAL_ENG_SERVICE_URL, "/campaign", "Social Engineering")
+
+@app.get("/api/social-eng/campaign/{campaign_id}", tags=["Offensive Security"])
+async def get_campaign_status(campaign_id: str, user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """Get campaign status - requires offensive permission"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{SOCIAL_ENG_SERVICE_URL}/campaign/{campaign_id}")
+        return response.json()
+
+@app.post("/api/social-eng/awareness", tags=["Offensive Security"])
+async def create_awareness_training(request: Request, user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """Create awareness training - requires offensive permission"""
+    return await proxy_request(request, SOCIAL_ENG_SERVICE_URL, "/awareness", "Social Engineering")
+
+@app.get("/api/social-eng/templates", tags=["Offensive Security"])
+async def list_templates(user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """List phishing templates - requires offensive permission"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{SOCIAL_ENG_SERVICE_URL}/templates")
+        return response.json()
+
+@app.get("/api/social-eng/analytics/{campaign_id}", tags=["Offensive Security"])
+async def get_campaign_analytics(campaign_id: str, user: Dict[str, Any] = Depends(require_permission("offensive"))):
+    """Get campaign analytics - requires offensive permission"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{SOCIAL_ENG_SERVICE_URL}/analytics/{campaign_id}")
+        return response.json()
+
+@app.get("/social-eng/health", tags=["Offensive Security"])
+async def social_eng_health():
+    """Health check for social engineering service"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{SOCIAL_ENG_SERVICE_URL}/health")
+        return response.json()
 
 
 if __name__ == "__main__":

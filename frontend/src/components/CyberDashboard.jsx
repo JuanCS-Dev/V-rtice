@@ -8,6 +8,8 @@ import NetworkMonitor from './cyber/NetworkMonitor';
 import NmapScanner from './cyber/NmapScanner';
 import ThreatMap from './cyber/ThreatMap';
 import CyberAlerts from './cyber/CyberAlerts';
+import VulnerabilityScanner from './cyber/VulnerabilityScanner';
+import SocialEngineering from './cyber/SocialEngineering';
 
 const CyberDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -57,7 +59,9 @@ const CyberDashboard = ({ setCurrentView }) => {
     ip: <IpIntelligence />,
     network: <NetworkMonitor />,
     nmap: <NmapScanner />,
-    threats: <ThreatMap />
+    threats: <ThreatMap />,
+    vulnscan: <VulnerabilityScanner />,
+    socialeng: <SocialEngineering />
   };
 
   return (
@@ -169,6 +173,20 @@ const CyberOverview = ({ threatData }) => {
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
               </div>
               <div className="text-xs text-cyan-400/50 mt-1">Visualização global</div>
+            </div>
+            <div className="bg-black/30 border border-red-400/30 rounded p-4">
+              <div className="flex justify-between items-center">
+                <span className="text-red-400/70">Vulnerability Scanner ⚠️</span>
+                <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+              </div>
+              <div className="text-xs text-red-400/50 mt-1">Ferramenta ofensiva ativa</div>
+            </div>
+            <div className="bg-black/30 border border-red-400/30 rounded p-4">
+              <div className="flex justify-between items-center">
+                <span className="text-red-400/70">Social Engineering ⚠️</span>
+                <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+              </div>
+              <div className="text-xs text-red-400/50 mt-1">Campanhas disponíveis</div>
             </div>
           </div>
         </div>

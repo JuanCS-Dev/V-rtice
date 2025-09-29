@@ -1,9 +1,32 @@
-typer[all]
-python-dotenv
-google-generativeai
-rich
-questionary
-patch
-pyfiglet
-ruff
-GitPython
+# Vértice CLI Requirements - Production Ready Versions
+
+# CLI Framework and Terminal Interface
+typer[all]==0.9.0
+rich==13.7.0
+questionary==2.0.1
+
+# HTTP Requests and API Communication
+requests==2.31.0
+
+# Configuration and Environment
+python-dotenv==1.0.0
+
+# Google AI Integration (for existing functionality)
+google-generativeai==0.3.2
+
+# Code Analysis Tools
+ruff==0.1.6
+
+# Git Integration
+GitPython==3.1.40
+
+# Additional Security Tools
+pyjwt==2.8.0
+cryptography==41.0.8
+
+# JSON and Data Processing
+orjson==3.9.10
+
+# Development Dependencies
+pytest==7.4.3
+black==23.11.0
