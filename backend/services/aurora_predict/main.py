@@ -61,6 +61,7 @@ class OccurrenceInput(BaseModel):
     lng: float
     timestamp: Optional[datetime] = None
     tipo: Optional[str] = "unknown"
+    intensity: Optional[float] = 0.5
 
 class PredictionInput(BaseModel):
     occurrences: List[OccurrenceInput]
@@ -134,7 +135,7 @@ async def predict_crime_hotspots(data: PredictionInput):
             for _, occ in cluster_df.iterrows():
                 base_weight = SEVERITY_WEIGHTS.get(occ.get('tipo', 'unknown'), 5)
                 decay_weight = calculate_decay_weight(occ.get('timestamp'))
-                total_risk_score += base_weight * decay_weight
+                total_risk_score += base_weight * decay_weight * occ.get('intensity', 0.5)
 
             if total_risk_score >= 250: risk_level = "Crítico"
             elif total_risk_score >= 120: risk_level = "Alto"
