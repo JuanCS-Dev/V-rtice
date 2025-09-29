@@ -21,6 +21,8 @@ services:
       - NMAP_SERVICE_URL=http://nmap_service:80
       - OSINT_SERVICE_URL=http://osint-service:8007
       - AURORA_PREDICT_URL=http://aurora_predict:80
+      - ATLAS_SERVICE_URL=http://atlas_service:8000 # <-- ADICIONADO
+      - AUTH_SERVICE_URL=http://auth_service:80
     depends_on:
       - redis
       - sinesp_service
@@ -31,6 +33,8 @@ services:
       - nmap_service
       - osint-service
       - aurora_predict
+      - auth_service
+      - atlas_service # <-- ADICIONADO
     networks:
       - vertice-network
     restart: unless-stopped
@@ -49,9 +53,8 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # SINESP SERVICE
-  # ============================
+  # ... (todos os outros serviços permanecem iguais) ...
+  
   sinesp_service:
     build: ./backend/services/sinesp_service
     container_name: vertice-sinesp
@@ -64,9 +67,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # CYBER SERVICE
-  # ============================
   cyber_service:
     build: ./backend/services/cyber_service
     container_name: vertice-cyber
@@ -82,9 +82,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # DOMAIN SERVICE
-  # ============================
   domain_service:
     build: ./backend/services/domain_service
     container_name: vertice-domain
@@ -97,9 +94,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # IP INTELLIGENCE SERVICE
-  # ============================
   ip_intelligence_service:
     build: ./backend/services/ip_intelligence_service
     container_name: vertice-ip-intel
@@ -112,9 +106,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # NETWORK MONITOR SERVICE
-  # ============================
   network_monitor_service:
     build: ./backend/services/network_monitor_service
     container_name: vertice-network-monitor
@@ -130,9 +121,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # NMAP SERVICE
-  # ============================
   nmap_service:
     build: ./backend/services/nmap_service
     container_name: vertice-nmap
@@ -148,9 +136,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # OSINT SERVICE (NOVO)
-  # ============================
   osint-service:
     build: ./backend/services/osint_service
     container_name: vertice-osint
@@ -173,9 +158,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # AURORA PREDICT SERVICE
-  # ============================
   aurora_predict:
     build: ./backend/services/aurora_predict
     container_name: vertice-aurora
@@ -193,8 +175,47 @@ services:
     restart: unless-stopped
 
   # ============================
-  # PROMETHEUS (OPCIONAL)
+  # ATLAS SERVICE (NOVO)
   # ============================
+  atlas_service:
+    build: ./backend/services/atlas_service
+    container_name: vertice-atlas
+    volumes:
+      - ./backend/services/atlas_service:/app
+    ports:
+      - "8009:8000" # Expondo numa porta externa livre
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # AUTH SERVICE
+  # ============================
+  auth_service:
+    build: ./backend/services/auth_service
+    container_name: vertice-auth
+    volumes:
+      - ./backend/services/auth_service:/app
+    ports:
+      - "8010:80"
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    environment:
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-vertice-super-secret-key-2024}
+      - REDIS_URL=redis://redis:6379
+      - AUTHORIZED_DOMAINS=${AUTHORIZED_DOMAINS:-}
+      - AUTHORIZED_EMAILS=${AUTHORIZED_EMAILS:-}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-}
+    depends_on:
+      - redis
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ... (Prometheus e Grafana permanecem iguais) ...
+
   prometheus:
     image: prom/prometheus:latest
     container_name: vertice-prometheus
@@ -210,9 +231,6 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  # ============================
-  # GRAFANA (OPCIONAL)
-  # ============================
   grafana:
     image: grafana/grafana:latest
     container_name: vertice-grafana

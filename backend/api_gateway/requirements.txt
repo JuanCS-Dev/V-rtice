@@ -9,3 +9,6 @@ slowapi
 prometheus-client
 structlog
 websockets
+# Authentication
+PyJWT==2.8.0
+cryptography==41.0.7

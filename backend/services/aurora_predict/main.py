@@ -1,9 +1,9 @@
 # /home/juan/vertice-dev/backend/services/aurora_predict/main.py
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional, Union
-from datetime import datetime
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from datetime import datetime, timezone
 import pandas as pd
 from sklearn.cluster import DBSCAN
 import numpy as np
@@ -15,250 +15,156 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="AuroraPredict Service",
-    description="Motor de IA do Vértice - Análises preditivas e processamento inteligente de dados criminais.",
-    version="1.1.0",
+    description="Motor de IA do Vértice - Análises preditivas com lógica de risco híbrida.",
+    version="2.0.0", # Version bump para lógica de risco com Severidade e Decaimento Temporal
 )
+
+# === LÓGICA DE RISCO (VALIDADA NO SANDBOX) ===
+
+# Tabela de Severidade - Ajustada para Anápolis, Set/2025
+SEVERITY_WEIGHTS = {
+    "homicidio": 100, "latrocinio": 100, "tentativa_homicidio": 85,
+    "trafico_drogas": 90,
+    "roubo_carga": 60, "roubo_residencia": 55, "roubo_transeunte": 50,
+    "roubo_veiculo": 40,
+    "furto_residencia": 25, "furto_veiculo": 15,
+    "desordem": 10, "unknown": 5,
+}
+
+def calculate_decay_weight(timestamp_str: Optional[str], half_life_days: int = 7) -> float:
+    """
+    Calcula um peso de decaimento exponencial com base na idade de um evento.
+    """
+    if not timestamp_str:
+        return 0.1 # Retorna um peso baixo para dados sem data
+
+    try:
+        # Garante que o timestamp seja timezone-aware (UTC) para comparações corretas
+        event_time = datetime.fromisoformat(str(timestamp_str)).replace(tzinfo=timezone.utc if pd.isna(getattr(timestamp_str, 'tzinfo', None)) else None)
+        now = datetime.now(timezone.utc)
+        
+        age_in_days = (now - event_time).total_seconds() / (24 * 3600)
+        
+        if age_in_days < 0: return 1.0 # Evento no futuro, peso máximo
+        
+        decay_factor = 0.5 ** (age_in_days / half_life_days)
+        return decay_factor
+    except (ValueError, TypeError):
+        logger.warning(f"Timestamp inválido encontrado: {timestamp_str}. Usando peso de decaimento baixo.")
+        return 0.1
+
 
 # === MODELOS DE DADOS ===
 
 class OccurrenceInput(BaseModel):
-    """Modelo flexível para receber dados de ocorrências"""
-    lat: Union[float, int]
-    lng: Union[float, int]
-    intensity: Optional[Union[float, int]] = 1.0  # Valor padrão se não fornecido
-    timestamp: Optional[Union[datetime, str]] = None
+    lat: float
+    lng: float
+    timestamp: Optional[datetime] = None
     tipo: Optional[str] = "unknown"
 
 class PredictionInput(BaseModel):
-    """Input para análise preditiva"""
     occurrences: List[OccurrenceInput]
+    eps_km: Optional[float] = Field(2.5, gt=0, description="Raio de busca do cluster em quilómetros.")
+    min_samples: Optional[int] = Field(3, gt=0, description="Número mínimo de pontos para formar um cluster.")
 
 class HotspotOutput(BaseModel):
-    """Output de hotspot preditivo"""
-    lat: float
-    lng: float
-    center_lat: float  # Para compatibilidade com frontend
-    center_lng: float  # Para compatibilidade com frontend
+    center_lat: float
+    center_lng: float
     num_points: int
-    core_samples: int  # Novo campo
     risk_level: str
-    radius_km: float
+    risk_score: float = Field(..., description="Score de risco final do hotspot, com decaimento temporal.")
+    crime_types: List[str]
 
 class PredictionOutput(BaseModel):
-    """Output da análise preditiva"""
     hotspots: List[HotspotOutput]
     total_occurrences_analyzed: int
     clusters_found: int
     analysis_timestamp: datetime
+    parameters_used: dict
 
 # === ENDPOINTS ===
 
 @app.get("/", tags=["Health"])
 async def read_root():
-    """Health check do serviço"""
     return {
         "status": "AuroraPredict Service Online",
-        "version": "1.1.0",
-        "capabilities": ["crime_hotspots", "cluster_analysis", "predictive_modeling"],
-        "timestamp": datetime.now().isoformat()
-    }
-
-@app.get("/health", tags=["Health"])
-async def health_check():
-    """Health check detalhado"""
-    return {
-        "status": "healthy",
-        "service": "aurora_predict",
-        "version": "1.1.0",
-        "dependencies": {
-            "sklearn": "available",
-            "pandas": "available", 
-            "numpy": "available"
-        },
-        "timestamp": datetime.now().isoformat()
+        "version": "2.0.0",
+        "capabilities": ["crime_hotspots", "severity_weighted_risk", "temporal_decay_risk"],
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 @app.post("/predict/crime-hotspots", response_model=PredictionOutput, tags=["Prediction"])
 async def predict_crime_hotspots(data: PredictionInput):
     """
-    Análise preditiva de hotspots criminais usando DBSCAN.
-    
-    Recebe dados de ocorrências e identifica clusters geográficos
-    com alto potencial de atividade criminal.
+    Análise preditiva de hotspots criminais com lógica de risco baseada em
+    severidade de crime e decaimento temporal.
     """
-    logger.info(f"Iniciando análise preditiva com {len(data.occurrences)} ocorrências")
-    
+    start_time = datetime.now(timezone.utc)
+    logger.info(f"Iniciando análise com {len(data.occurrences)} ocorrências.")
+
+    if len(data.occurrences) < data.min_samples:
+        return PredictionOutput(hotspots=[], total_occurrences_analyzed=len(data.occurrences), clusters_found=0, analysis_timestamp=start_time, parameters_used={})
+
     try:
-        # Validação inicial
-        if len(data.occurrences) < 5:
-            logger.warning(f"Dados insuficientes: {len(data.occurrences)} ocorrências")
-            return PredictionOutput(
-                hotspots=[],
-                total_occurrences_analyzed=len(data.occurrences),
-                clusters_found=0,
-                analysis_timestamp=datetime.now()
-            )
-
-        # Processamento dos dados
-        processed_data = []
-        for i, occ in enumerate(data.occurrences):
-            try:
-                # Converter para float e validar coordenadas
-                lat = float(occ.lat)
-                lng = float(occ.lng)
-                intensity = float(occ.intensity) if occ.intensity else 1.0
-                
-                # Validar se as coordenadas estão dentro de limites razoáveis
-                if -90 <= lat <= 90 and -180 <= lng <= 180:
-                    processed_data.append({
-                        'lat': lat,
-                        'lng': lng, 
-                        'intensity': intensity,
-                        'tipo': occ.tipo or 'unknown'
-                    })
-                else:
-                    logger.warning(f"Coordenadas inválidas ignoradas: lat={lat}, lng={lng}")
-                    
-            except (ValueError, TypeError) as e:
-                logger.warning(f"Erro ao processar ocorrência {i}: {e}")
-                continue
-
-        if len(processed_data) < 5:
-            logger.warning(f"Após processamento: apenas {len(processed_data)} ocorrências válidas")
-            return PredictionOutput(
-                hotspots=[],
-                total_occurrences_analyzed=len(processed_data),
-                clusters_found=0,
-                analysis_timestamp=datetime.now()
-            )
-
-        # Converter para DataFrame
-        df = pd.DataFrame(processed_data)
-        logger.info(f"DataFrame criado com {len(df)} registros válidos")
-
-        # Preparar coordenadas para clustering
+        df = pd.DataFrame([occ.dict() for occ in data.occurrences])
         coords = df[['lat', 'lng']].values
-        
-        # Configurar DBSCAN - Parâmetros mais flexíveis
-        # Raio de 2.5km para capturar clusters maiores
-        kms_per_radian = 6371.0088
-        epsilon = 2.5 / kms_per_radian  # ~2.5km de raio (era 1.5km)
-        min_samples = 3  # Fixo em 3 (era adaptativo e alto)
-        
-        logger.info(f"Configuração DBSCAN: epsilon={epsilon:.6f}, min_samples={min_samples}")
 
-        # Executar clustering
+        kms_per_radian = 6371.0088
+        epsilon = data.eps_km / kms_per_radian
+        parameters_used = {"eps_km": data.eps_km, "min_samples": data.min_samples}
+
+        logger.info(f"Executando DBSCAN com parâmetros: {parameters_used}")
         coords_rad = np.radians(coords)
-        db = DBSCAN(
-            eps=epsilon, 
-            min_samples=min_samples, 
-            algorithm='ball_tree', 
-            metric='haversine'
-        ).fit(coords_rad)
+        db = DBSCAN(eps=epsilon, min_samples=data.min_samples, algorithm='ball_tree', metric='haversine').fit(coords_rad)
         
         cluster_labels = db.labels_
-        unique_clusters = set(cluster_labels)
-        
-        # Remover noise (-1)
-        valid_clusters = [c for c in unique_clusters if c != -1]
+        valid_clusters = [c for c in set(cluster_labels) if c != -1]
         logger.info(f"Clusters encontrados: {len(valid_clusters)}")
 
-        # Processar hotspots
         hotspots = []
         for cluster_id in valid_clusters:
-            try:
-                # Pontos do cluster
-                cluster_mask = cluster_labels == cluster_id
-                cluster_points = coords[cluster_mask]
-                cluster_intensities = df.loc[cluster_mask, 'intensity'].values
-                
-                # Calcular centro ponderado pela intensidade
-                weights = cluster_intensities / cluster_intensities.sum()
-                center_lat = np.average(cluster_points[:, 0], weights=weights)
-                center_lng = np.average(cluster_points[:, 1], weights=weights)
-                
-                # Calcular raio do cluster
-                distances = np.sqrt(np.sum((cluster_points - [center_lat, center_lng])**2, axis=1))
-                radius_km = np.max(distances) * 111.32  # Conversão graus para km aproximada
-                
-                # Métricas do cluster
-                num_points = len(cluster_points)
-                avg_intensity = np.mean(cluster_intensities)
-                core_samples = len(db.core_sample_indices_[cluster_labels[db.core_sample_indices_] == cluster_id])
-                
-                # Determinar nível de risco
-                risk_score = (num_points * 0.4) + (avg_intensity * 0.4) + (core_samples * 0.2)
-                
-                if risk_score >= 15:
-                    risk_level = "Crítico"
-                elif risk_score >= 10:
-                    risk_level = "Alto"
-                elif risk_score >= 5:
-                    risk_level = "Médio"
-                else:
-                    risk_level = "Baixo"
-                
-                hotspot = HotspotOutput(
-                    lat=center_lat,
-                    lng=center_lng,
-                    center_lat=center_lat,  # Compatibilidade
-                    center_lng=center_lng,  # Compatibilidade
-                    num_points=num_points,
-                    core_samples=core_samples,
-                    risk_level=risk_level,
-                    radius_km=round(radius_km, 2)
-                )
-                
-                hotspots.append(hotspot)
-                logger.info(f"Hotspot criado: {risk_level} - {num_points} ocorrências - R:{radius_km:.1f}km")
-                
-            except Exception as e:
-                logger.error(f"Erro ao processar cluster {cluster_id}: {e}")
-                continue
+            cluster_mask = cluster_labels == cluster_id
+            cluster_df = df[cluster_mask]
+            
+            num_points = len(cluster_df)
+            center_lat, center_lng = cluster_df[['lat', 'lng']].mean().values
 
-        # Ordenar por nível de risco
-        risk_order = {"Crítico": 4, "Alto": 3, "Médio": 2, "Baixo": 1}
-        hotspots.sort(key=lambda h: risk_order.get(h.risk_level, 0), reverse=True)
+            # --- CÁLCULO DE RISCO HÍBRIDO (SEVERIDADE + TEMPO) ---
+            total_risk_score = 0
+            for _, occ in cluster_df.iterrows():
+                base_weight = SEVERITY_WEIGHTS.get(occ.get('tipo', 'unknown'), 5)
+                decay_weight = calculate_decay_weight(occ.get('timestamp'))
+                total_risk_score += base_weight * decay_weight
+
+            if total_risk_score >= 250: risk_level = "Crítico"
+            elif total_risk_score >= 120: risk_level = "Alto"
+            elif total_risk_score >= 40: risk_level = "Médio"
+            else: risk_level = "Baixo"
+
+            hotspots.append(HotspotOutput(
+                center_lat=center_lat,
+                center_lng=center_lng,
+                num_points=num_points,
+                risk_level=risk_level,
+                risk_score=round(total_risk_score, 2),
+                crime_types=list(cluster_df['tipo'].unique())
+            ))
+        
+        # Ordenar hotspots pelo score de risco, do maior para o menor
+        hotspots.sort(key=lambda h: h.risk_score, reverse=True)
 
         result = PredictionOutput(
             hotspots=hotspots,
-            total_occurrences_analyzed=len(processed_data),
+            total_occurrences_analyzed=len(df),
             clusters_found=len(hotspots),
-            analysis_timestamp=datetime.now()
+            analysis_timestamp=datetime.now(timezone.utc),
+            parameters_used=parameters_used
         )
         
-        logger.info(f"Análise concluída: {len(hotspots)} hotspots identificados")
+        duration = (datetime.now(timezone.utc) - start_time).total_seconds()
+        logger.info(f"Análise concluída em {duration:.2f}s: {len(hotspots)} hotspots identificados.")
         return result
 
     except Exception as e:
-        logger.error(f"Erro na análise preditiva: {e}")
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Erro interno na análise preditiva: {str(e)}"
-        )
-
-@app.get("/stats", tags=["Analytics"])
-async def get_service_stats():
-    """Estatísticas do serviço"""
-    return {
-        "service": "aurora_predict",
-        "algorithms": {
-            "clustering": "DBSCAN",
-            "distance_metric": "haversine",
-            "optimization": "ball_tree"
-        },
-        "parameters": {
-            "default_radius_km": 1.5,
-            "min_samples_adaptive": True,
-            "risk_calculation": "weighted"
-        },
-        "performance": {
-            "typical_processing_time": "< 5 seconds",
-            "max_supported_points": 10000,
-            "memory_efficient": True
-        }
-    }
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=80)
+        logger.error(f"Erro fatal na análise preditiva: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erro interno no serviço de IA: {str(e)}")

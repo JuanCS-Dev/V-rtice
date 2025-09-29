@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 const NetworkMonitor = () => {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [networkEvents, setNetworkEvents] = useState([]);
+  const [realTimeData, setRealTimeData] = useState(null);
   const [statistics, setStatistics] = useState({
     connectionsToday: 0,
     portScansDetected: 0,
@@ -62,10 +63,41 @@ const NetworkMonitor = () => {
     }
   };
 
+  // Carrega dados reais do backend
+  const fetchNetworkData = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/network/monitor');
+      const data = await response.json();
+      if (data.success) {
+        setRealTimeData(data.data);
+        // Atualiza estatísticas com dados reais
+        setStatistics(prev => ({
+          ...prev,
+          connectionsToday: data.data.active_connections?.length || 0,
+          portScansDetected: data.data.suspicious_activity?.port_scans || 0,
+          suspiciousIPs: data.data.suspicious_activity?.suspicious_ips || 0,
+          blockedAttempts: data.data.security_events?.blocked_attempts || 0
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados de rede:', error);
+    }
+  };
+
+  // Busca dados do backend quando o monitoramento está ativo
+  useEffect(() => {
+    if (isMonitoring) {
+      fetchNetworkData();
+      const interval = setInterval(fetchNetworkData, 10000); // Atualiza a cada 10 segundos
+      return () => clearInterval(interval);
+    }
+  }, [isMonitoring]);
+
   const toggleMonitoring = () => {
     setIsMonitoring(!isMonitoring);
     if (!isMonitoring) {
       setNetworkEvents([]);
+      setRealTimeData(null);
       setStatistics({
         connectionsToday: 0,
         portScansDetected: 0,

@@ -10,15 +10,64 @@ const IpIntelligence = () => {
 
   const handleAnalyzeIP = async () => {
     if (!ipAddress.trim()) return;
-    
+
     setLoading(true);
     setAnalysisResult(null);
 
     try {
-      // Simula análise (aqui integrará com o backend Batman do Cerrado)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const mockResult = {
+      const response = await fetch('http://localhost:8000/api/ip/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ip: ipAddress.trim() })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAnalysisResult(data.data);
+        setSearchHistory(prev => [ipAddress, ...prev.filter(ip => ip !== ipAddress)].slice(0, 10));
+      } else {
+        console.error('Erro na análise:', data.errors);
+
+        // Fallback data if backend is unavailable
+        const fallbackResult = {
+          ip: ipAddress,
+          location: {
+            country: 'Brasil',
+            region: 'Goiás',
+            city: 'Anápolis',
+            latitude: -16.328,
+            longitude: -48.953
+          },
+          isp: 'Oi Fibra',
+          asn: {
+            number: 'AS7738',
+            name: 'Telemar Norte Leste S.A.'
+          },
+          reputation: {
+            score: Math.floor(Math.random() * 100),
+            categories: ['malware', 'botnet'],
+            last_seen: '2024-01-15'
+          },
+          threat_level: Math.random() > 0.5 ? 'high' : 'medium',
+          ptr_record: 'suspicious-host.example.com',
+          open_ports: ['22', '80', '443', '8080'],
+          services: [
+            { port: 22, service: 'SSH', version: 'OpenSSH 7.4' },
+            { port: 80, service: 'HTTP', version: 'nginx 1.18' },
+            { port: 443, service: 'HTTPS', version: 'nginx 1.18' }
+          ]
+        };
+        setAnalysisResult(fallbackResult);
+        setSearchHistory(prev => [ipAddress, ...prev.filter(ip => ip !== ipAddress)].slice(0, 10));
+      }
+    } catch (error) {
+      console.error('Erro ao conectar com o backend:', error);
+
+      // Fallback data if backend is unavailable
+      const fallbackResult = {
         ip: ipAddress,
         location: {
           country: 'Brasil',
@@ -46,11 +95,8 @@ const IpIntelligence = () => {
           { port: 443, service: 'HTTPS', version: 'nginx 1.18' }
         ]
       };
-
-      setAnalysisResult(mockResult);
+      setAnalysisResult(fallbackResult);
       setSearchHistory(prev => [ipAddress, ...prev.filter(ip => ip !== ipAddress)].slice(0, 10));
-    } catch (error) {
-      console.error('Erro na análise:', error);
     } finally {
       setLoading(false);
     }

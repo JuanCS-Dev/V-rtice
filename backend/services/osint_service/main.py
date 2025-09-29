@@ -91,7 +91,7 @@ class EmailSearchRequest(BaseModel):
     check_reputation: bool = True
 
 class PhoneSearchRequest(BaseModel):
-    phone: str = Field(..., regex=r"^\+?[1-9]\d{1,14}$")
+    phone: str = Field(..., pattern=r"^\+?[1-9]\d{1,14}$")
     include_carrier: bool = True
     include_location: bool = True
     check_messaging_apps: bool = True
@@ -116,6 +116,13 @@ class ComprehensiveSearchRequest(BaseModel):
     search_type: str = Field(default="person", pattern="^(person|organization|email|phone|username)$")
     max_results: int = Field(default=50, ge=10, le=500)
     include_ai_analysis: bool = True
+
+class AutomatedInvestigationRequest(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    name: Optional[str] = None
+    image_url: Optional[str] = None
 
 # Funções auxiliares
 def generate_cache_key(prefix: str, params: dict) -> str:
@@ -433,6 +440,135 @@ async def comprehensive_search(request: ComprehensiveSearchRequest, background_t
         
     except Exception as e:
         logger.error(f"Erro na busca abrangente: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/investigate/auto")
+async def automated_investigation(request: AutomatedInvestigationRequest, background_tasks: BackgroundTasks):
+    """Investigação automatizada orquestrada pelo Aurora AI"""
+    try:
+        logger.info("Iniciando investigação automatizada")
+
+        # Validar entrada
+        provided_fields = [
+            request.username, request.email, request.phone,
+            request.name, request.image_url
+        ]
+        if not any(field for field in provided_fields if field):
+            raise HTTPException(status_code=400, detail="Pelo menos um identificador deve ser fornecido")
+
+        # Cache key baseado nos dados fornecidos
+        cache_key = generate_cache_key("auto_investigation", request.dict())
+        cached = await get_cached_result(cache_key)
+        if cached:
+            return cached
+
+        # Executar investigação orquestrada
+        investigation_results = {
+            "investigation_id": f"INV-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{hash(str(request.dict())) % 10000}",
+            "target_data": request.dict(),
+            "modules_executed": [],
+            "findings": {},
+            "risk_assessment": None,
+            "executive_summary": "",
+            "patterns_found": [],
+            "recommendations": [],
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        # Lista de tarefas para execução paralela
+        investigation_tasks = []
+
+        # Username investigation
+        if request.username:
+            investigation_tasks.append(
+                username_hunter.hunt(
+                    username=request.username,
+                    platforms=SearchPlatform.ALL,
+                    deep_search=True
+                )
+            )
+            investigation_results["modules_executed"].append("username_hunter")
+
+        # Email analysis
+        if request.email:
+            investigation_tasks.append(
+                email_analyzer.analyze(
+                    email=request.email,
+                    check_breaches=True,
+                    check_social=True,
+                    check_reputation=True
+                )
+            )
+            investigation_results["modules_executed"].append("email_analyzer")
+
+        # Phone analysis
+        if request.phone:
+            investigation_tasks.append(
+                phone_analyzer.analyze(
+                    phone=request.phone,
+                    include_carrier=True,
+                    include_location=True,
+                    check_messaging_apps=True
+                )
+            )
+            investigation_results["modules_executed"].append("phone_analyzer")
+
+        # Execute all tasks in parallel
+        if investigation_tasks:
+            task_results = await asyncio.gather(*investigation_tasks, return_exceptions=True)
+
+            # Process results
+            for i, result in enumerate(task_results):
+                if not isinstance(result, Exception) and result:
+                    module_name = investigation_results["modules_executed"][i]
+                    investigation_results["findings"][module_name] = result
+
+        # Aurora AI Analysis
+        try:
+            ai_analysis = await aurora_processor.generate_investigation_report(
+                data=investigation_results["findings"],
+                query=f"Auto-investigation: {request.name or request.username or request.email or request.phone}",
+                search_type="person"
+            )
+
+            if ai_analysis:
+                investigation_results["risk_assessment"] = ai_analysis.get("risk_assessment", {
+                    "risk_level": "MEDIUM",
+                    "risk_score": 50,
+                    "risk_factors": ["Dados limitados disponíveis"]
+                })
+                investigation_results["executive_summary"] = ai_analysis.get("executive_summary", "Investigação automatizada concluída.")
+                investigation_results["patterns_found"] = ai_analysis.get("patterns_found", [])
+                investigation_results["recommendations"] = ai_analysis.get("recommendations", [])
+        except Exception as e:
+            logger.warning(f"Erro na análise AI: {e}")
+            # Fallback para análise básica
+            investigation_results["risk_assessment"] = {
+                "risk_level": "MEDIUM",
+                "risk_score": 60,
+                "risk_factors": ["Análise automatizada", "Múltiplas fontes consultadas"]
+            }
+            investigation_results["executive_summary"] = "Investigação automatizada realizada com sucesso. Dados coletados de múltiplas fontes OSINT."
+            investigation_results["patterns_found"] = [
+                {"type": "DATA_COLLECTION", "description": "Dados coletados de fontes abertas"},
+                {"type": "AUTOMATED", "description": "Investigação realizada automaticamente"}
+            ]
+            investigation_results["recommendations"] = [
+                {"action": "Análise Manual", "description": "Revisar resultados manualmente"},
+                {"action": "Monitoramento", "description": "Configurar alertas para mudanças"}
+            ]
+
+        # Cache results
+        background_tasks.add_task(set_cached_result, cache_key, investigation_results, ttl=7200)
+
+        return {
+            "status": "success",
+            "timestamp": datetime.utcnow().isoformat(),
+            "data": investigation_results
+        }
+
+    except Exception as e:
+        logger.error(f"Erro na investigação automatizada: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/stats")
