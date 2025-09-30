@@ -1,16 +1,17 @@
+
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
+# Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application
-COPY main.py .
+# Copy the entire application source code
+COPY . .
 
-# Expose port
-EXPOSE 80
+# Expose the port the application runs on
+EXPOSE 8000
 
 # Command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

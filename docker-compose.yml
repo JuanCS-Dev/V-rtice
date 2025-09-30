@@ -25,6 +25,11 @@ services:
       - AUTH_SERVICE_URL=http://auth_service:80
       - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
       - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:80
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:80
+      - AURORA_ORCHESTRATOR_URL=http://aurora_orchestrator_service:80
+      - AI_AGENT_SERVICE_URL=http://ai_agent_service:80
     depends_on:
       - redis
       - sinesp_service
@@ -39,6 +44,10 @@ services:
       - atlas_service # <-- ADICIONADO
       - vuln_scanner_service
       - social_eng_service
+      - threat_intel_service
+      - malware_analysis_service
+      - ssl_monitor_service
+      - aurora_orchestrator_service
     networks:
       - vertice-network
     restart: unless-stopped
@@ -105,7 +114,9 @@ services:
       - ./backend/services/ip_intelligence_service:/app
     ports:
       - "8004:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    environment:
+      - CACHE_TTL_SECONDS=86400
+    command: uvicorn main:app --host 0.0.0.0 --port 80
     networks:
       - vertice-network
     restart: unless-stopped
@@ -277,6 +288,119 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=vertice2024
     volumes:
       - grafana-data:/var/lib/grafana
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # NSA-GRADE AURORA AI SERVICES
+  # ============================
+
+  threat_intel_service:
+    build: ./backend/services/threat_intel_service
+    container_name: vertice-threat-intel
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./backend/services/threat_intel_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8013 --reload
+    environment:
+      - ABUSEIPDB_API_KEY=${ABUSEIPDB_API_KEY}
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+      - GREYNOISE_API_KEY=${GREYNOISE_API_KEY}
+      - OTX_API_KEY=${OTX_API_KEY}
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  malware_analysis_service:
+    build: ./backend/services/malware_analysis_service
+    container_name: vertice-malware-analysis
+    ports:
+      - "8014:8014"
+    volumes:
+      - ./backend/services/malware_analysis_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8014 --reload
+    environment:
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+      - HYBRID_ANALYSIS_API_KEY=${HYBRID_ANALYSIS_API_KEY}
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  ssl_monitor_service:
+    build: ./backend/services/ssl_monitor_service
+    container_name: vertice-ssl-monitor
+    ports:
+      - "8015:8015"
+    volumes:
+      - ./backend/services/ssl_monitor_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8015 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  aurora_orchestrator_service:
+    build: ./backend/services/aurora_orchestrator_service
+    container_name: vertice-aurora-orchestrator
+    ports:
+      - "8016:8016"
+    volumes:
+      - ./backend/services/aurora_orchestrator_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8016 --reload
+    environment:
+      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:80
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:80
+      - NMAP_SERVICE_URL=http://nmap_service:80
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
+      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:80
+      - DOMAIN_SERVICE_URL=http://domain_service:80
+    depends_on:
+      - threat_intel_service
+      - malware_analysis_service
+      - ssl_monitor_service
+      - ip_intelligence_service
+      - nmap_service
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # AI AGENT SERVICE - THE BRAIN 🧠
+  # ============================
+  ai_agent_service:
+    build: ./backend/services/ai_agent_service
+    container_name: vertice-ai-agent
+    ports:
+      - "8017:80"
+    volumes:
+      - ./backend/services/ai_agent_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:80
+      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:80
+      - NMAP_SERVICE_URL=http://nmap_service:80
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
+      - DOMAIN_SERVICE_URL=http://domain_service:80
+      - AURORA_PREDICT_URL=http://aurora_predict:80
+      - OSINT_SERVICE_URL=http://osint-service:8007
+    depends_on:
+      - threat_intel_service
+      - malware_analysis_service
+      - ssl_monitor_service
+      - ip_intelligence_service
+      - nmap_service
+      - vuln_scanner_service
+      - domain_service
+      - aurora_predict
+      - osint-service
     networks:
       - vertice-network
     restart: unless-stopped

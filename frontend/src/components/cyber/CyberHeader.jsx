@@ -5,6 +5,7 @@ import React from 'react';
 const CyberHeader = ({ currentTime, setCurrentView, activeModule, setActiveModule }) => {
   const modules = [
     { id: 'overview', name: 'OVERVIEW', icon: '🛡️' },
+    { id: 'aurora', name: 'AURORA AI HUB', icon: '🤖', isAI: true },
     { id: 'domain', name: 'DOMAIN INTEL', icon: '🌐' },
     { id: 'ip', name: 'IP ANALYSIS', icon: '🎯' },
     { id: 'network', name: 'NET MONITOR', icon: '📡' },
@@ -48,28 +49,52 @@ const CyberHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
         </div>
       </div>
 
-      {/* Navigation Modules */}
+      {/* Navigation Modules - AI FIRST */}
       <div className="p-4 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
-        <div className="flex space-x-2">
-          {modules.map((module) => (
+        <div className="flex flex-col space-y-3">
+          {/* AI MODULE - DESTAQUE ESPECIAL */}
+          <div className="flex justify-center">
             <button
-              key={module.id}
-              onClick={() => setActiveModule(module.id)}
-              className={`px-4 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 ${
-                activeModule === module.id
-                  ? module.isOffensive
-                    ? 'bg-red-400/20 text-red-400 border border-red-400/50'
-                    : 'bg-cyan-400/20 text-cyan-400 border border-cyan-400/50'
-                  : module.isOffensive
-                    ? 'bg-black/30 text-red-400/70 border border-red-400/20 hover:bg-red-400/10 hover:text-red-400'
-                    : 'bg-black/30 text-cyan-400/70 border border-cyan-400/20 hover:bg-cyan-400/10 hover:text-cyan-400'
+              onClick={() => setActiveModule('aurora')}
+              className={`px-8 py-4 rounded-xl font-bold text-base tracking-wider transition-all duration-300 transform hover:scale-105 ${
+                activeModule === 'aurora'
+                  ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white shadow-2xl shadow-purple-500/50 animate-pulse'
+                  : 'bg-gradient-to-r from-purple-900/40 via-pink-900/40 to-purple-900/40 text-purple-300 border-2 border-purple-500/50 hover:border-purple-400'
               }`}
             >
-              <span className="mr-2">{module.icon}</span>
-              {module.name}
-              {module.isOffensive && <span className="ml-1 text-xs">⚠️</span>}
+              <div className="flex items-center space-x-3">
+                <span className="text-3xl">🤖</span>
+                <div className="text-left">
+                  <div className="text-lg font-extrabold">AURORA AI HUB</div>
+                  <div className="text-xs opacity-90">Agente Autônomo • Tool Calling</div>
+                </div>
+                <span className="text-2xl animate-pulse">✨</span>
+              </div>
             </button>
-          ))}
+          </div>
+
+          {/* OUTROS MÓDULOS */}
+          <div className="flex flex-wrap gap-2 justify-center">
+            {modules.filter(m => !m.isAI).map((module) => (
+              <button
+                key={module.id}
+                onClick={() => setActiveModule(module.id)}
+                className={`px-3 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 ${
+                  activeModule === module.id
+                    ? module.isOffensive
+                      ? 'bg-red-400/20 text-red-400 border border-red-400/50'
+                      : 'bg-cyan-400/20 text-cyan-400 border border-cyan-400/50'
+                    : module.isOffensive
+                      ? 'bg-black/30 text-red-400/70 border border-red-400/20 hover:bg-red-400/10 hover:text-red-400'
+                      : 'bg-black/30 text-cyan-400/70 border border-cyan-400/20 hover:bg-cyan-400/10 hover:text-cyan-400'
+                }`}
+              >
+                <span className="mr-1">{module.icon}</span>
+                {module.name}
+                {module.isOffensive && <span className="ml-1 text-xs">⚠️</span>}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </header>

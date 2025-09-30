@@ -6,12 +6,13 @@ import UsernameModule from './osint/UsernameModule';
 import EmailModule from './osint/EmailModule';
 import PhoneModule from './osint/PhoneModule';
 import SocialModule from './osint/SocialModule';
+import GoogleModule from './osint/GoogleModule';
 import DarkWebModule from './osint/DarkWebModule';
 import ReportsModule from './osint/ReportsModule';
 
 const OSINTDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [activeModule, setActiveModule] = useState('overview');
+  const [activeModule, setActiveModule] = useState('aurora'); // AI-FIRST: Aurora como landing page
   const [osintAlerts, setOsintAlerts] = useState([]);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const [investigationResults, setInvestigationResults] = useState(null);
@@ -61,6 +62,7 @@ const OSINTDashboard = ({ setCurrentView }) => {
     email: <EmailModule />,
     phone: <PhoneModule />,
     social: <SocialModule />,
+    google: <GoogleModule />,
     darkweb: <DarkWebModule />,
     reports: <ReportsModule results={investigationResults} />
   };

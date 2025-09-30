@@ -1,26 +1,33 @@
-#!/usr/bin/env python3
-
-import os
-import json
+import uuid
 import random
 import string
-import uuid
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from typing import List, Dict, Optional
+
+from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-import asyncio
-import httpx
-import tempfile
-import base64
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+# Internal imports
+import models
+import schemas
+from database import engine, get_db, Base, AsyncSessionLocal
+from config import settings
 
 app = FastAPI(
     title="Social Engineering Toolkit",
     description="Ferramenta de engenharia social para testes de conscientização - Projeto Vértice",
-    version="1.0.0"
+    version="2.0.0"
 )
 
+# Middleware for CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,46 +35,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Models
-class PhishingCampaignRequest(BaseModel):
-    name: str
-    target_domain: str
-    email_template: str
-    sender_name: str = "IT Support"
-    sender_email: str = "noreply@company.com"
-    landing_page_template: str = "office365"
-    tracking_enabled: bool = True
+# Setup Jinja2 templates
+templates = Jinja2Templates(directory="templates")
 
-class EmailTemplate(BaseModel):
-    name: str
-    subject: str
-    body: str
-    template_type: str  # phishing, spear_phishing, awareness
-
-class LandingPageRequest(BaseModel):
-    template_name: str
-    company_name: str
-    logo_url: Optional[str] = None
-    redirect_url: Optional[str] = None
-
-class AwarenessTrainingRequest(BaseModel):
-    campaign_id: str
-    training_type: str  # interactive, video, quiz
-    difficulty: str = "medium"  # easy, medium, hard
-
-# Storage (in production, use database)
-campaigns = {}
-email_templates = {}
-landing_pages = {}
-training_sessions = {}
-campaign_stats = {}
-
-# Pre-built email templates
-DEFAULT_TEMPLATES = {
-    "office365_login": {
-        "name": "Office 365 Login Alert",
-        "subject": "🔔 Unusual sign-in activity detected",
-        "body": """
+@app.on_event("startup")
+async def startup():
+    """Create database tables and default email templates on startup."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    async with AsyncSessionLocal() as session:
+        # Check and add default email templates
+        default_templates_data = {
+            "office365_login": {
+                "name": "Office 365 Login Alert",
+                "subject": "🔔 Unusual sign-in activity detected",
+                "body": """
         Dear {target_name},
 
         We detected unusual sign-in activity on your Office 365 account.
@@ -84,12 +67,12 @@ DEFAULT_TEMPLATES = {
         Best regards,
         IT Security Team
         """,
-        "template_type": "phishing"
-    },
-    "payroll_update": {
-        "name": "Urgent Payroll Information Update",
-        "subject": "🚨 URGENT: Update Required for Payroll Processing",
-        "body": """
+                "template_type": "phishing"
+            },
+            "payroll_update": {
+                "name": "Urgent Payroll Information Update",
+                "subject": "🚨 URGENT: Update Required for Payroll Processing",
+                "body": """
         Dear {target_name},
 
         Our payroll system requires immediate verification of your information
@@ -105,12 +88,12 @@ DEFAULT_TEMPLATES = {
 
         HR Department
         """,
-        "template_type": "spear_phishing"
-    },
-    "security_awareness": {
-        "name": "Security Awareness Test",
-        "subject": "Security Training: How to Identify Phishing",
-        "body": """
+                "template_type": "spear_phishing"
+            },
+            "security_awareness": {
+                "name": "Security Awareness Test",
+                "subject": "Security Training: How to Identify Phishing",
+                "body": """
         Dear {target_name},
 
         This is a security awareness test. The email you received was a
@@ -125,148 +108,44 @@ DEFAULT_TEMPLATES = {
 
         Security Team
         """,
-        "template_type": "awareness"
-    }
-}
+                "template_type": "awareness"
+            }
+        }
 
-# Landing page templates
-LANDING_PAGE_TEMPLATES = {
-    "office365": {
-        "name": "Office 365 Login",
-        "html": """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Microsoft Office 365 - Sign In</title>
-            <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f3f2f1; }
-                .container { max-width: 440px; margin: 100px auto; background: white; padding: 60px 40px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-                .logo { text-align: center; margin-bottom: 20px; }
-                .title { font-size: 24px; font-weight: 600; color: #323130; margin-bottom: 8px; }
-                .subtitle { color: #605e5c; margin-bottom: 24px; }
-                input { width: 100%; padding: 11px; border: 1px solid #605e5c; margin-bottom: 16px; font-size: 15px; }
-                .btn { background: #0078d4; color: white; border: none; padding: 12px 24px; font-size: 15px; cursor: pointer; width: 100%; }
-                .warning { background: #fff4ce; border: 1px solid #d83b01; padding: 12px; margin-top: 20px; border-radius: 2px; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="logo">
-                    <img src="data:image/png;base64,{ms_logo}" alt="Microsoft" width="108" height="24">
-                </div>
-                <div class="title">Sign in</div>
-                <div class="subtitle">to continue to {company_name}</div>
-                <form id="loginForm" onsubmit="captureCredentials(event)">
-                    <input type="email" placeholder="Email, phone, or Skype" required>
-                    <input type="password" placeholder="Password" required>
-                    <button class="btn" type="submit">Sign in</button>
-                </form>
-                <div class="warning" style="display:none;" id="warning">
-                    <strong>⚠️ SECURITY AWARENESS TEST</strong><br>
-                    This was a simulated phishing attempt. Your credentials were NOT captured.
-                    <a href="{awareness_link}">Learn more about phishing protection</a>
-                </div>
-            </div>
-            <script>
-                function captureCredentials(event) {
-                    event.preventDefault();
+        for template_key, template_data in default_templates_data.items():
+            existing_template = await session.execute(
+                select(models.EmailTemplate).filter_by(name=template_data["name"])
+            )
+            if not existing_template.scalar_one_or_none():
+                new_template = models.EmailTemplate(
+                    name=template_data["name"],
+                    subject=template_data["subject"],
+                    body=template_data["body"],
+                    template_type=template_data["template_type"]
+                )
+                session.add(new_template)
+        await session.commit()
 
-                    // Show awareness message instead of capturing credentials
-                    document.getElementById('warning').style.display = 'block';
-                    document.getElementById('loginForm').style.display = 'none';
-
-                    // Track interaction for awareness metrics
-                    if ('{tracking_enabled}' === 'true') {
-                        fetch('/track-interaction', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                campaign_id: '{campaign_id}',
-                                action: 'credentials_submitted',
-                                timestamp: new Date().toISOString()
-                            })
-                        });
-                    }
-                }
-            </script>
-        </body>
-        </html>
-        """
-    },
-    "bank_login": {
-        "name": "Bank Login Portal",
-        "html": """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Secure Banking - Login</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-                .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); min-width: 350px; }
-                .logo { text-align: center; margin-bottom: 30px; font-size: 28px; color: #1a73e8; font-weight: bold; }
-                .form-group { margin-bottom: 20px; }
-                label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
-                input { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 5px; font-size: 16px; }
-                input:focus { border-color: #1a73e8; outline: none; }
-                .btn { background: #1a73e8; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
-                .security-note { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-                .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin-top: 20px; border-radius: 5px; display: none; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="logo">🏦 SecureBank</div>
-                <form id="bankForm" onsubmit="showAwareness(event)">
-                    <div class="form-group">
-                        <label>Account Number</label>
-                        <input type="text" placeholder="Enter account number" required>
-                    </div>
-                    <div class="form-group">
-                        <label>PIN</label>
-                        <input type="password" placeholder="Enter PIN" required>
-                    </div>
-                    <button class="btn" type="submit">🔐 Secure Login</button>
-                </form>
-                <div class="security-note">
-                    🔒 Your connection is secured with 256-bit encryption
-                </div>
-                <div class="warning" id="awareness">
-                    <strong>🎯 SECURITY TRAINING COMPLETE</strong><br>
-                    This was a simulated phishing site for awareness training.
-                    Never enter banking credentials on suspicious sites!
-                </div>
-            </div>
-            <script>
-                function showAwareness(event) {
-                    event.preventDefault();
-                    document.getElementById('awareness').style.display = 'block';
-                    document.getElementById('bankForm').style.display = 'none';
-                }
-            </script>
-        </body>
-        </html>
-        """
-    }
-}
+# --- Helper Functions ---
 
 def generate_campaign_id() -> str:
-    """Generate unique campaign ID"""
-    return f"camp_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:8]}"
+    """Generate a unique campaign ID."""
+    return f"camp_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}"
 
 def generate_tracking_id() -> str:
-    """Generate tracking ID for links"""
+    """Generate a unique tracking ID for links."""
     return ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
 def create_phishing_link(campaign_id: str, tracking_id: str) -> str:
-    """Create tracked phishing link"""
-    return f"http://localhost:8011/landing/{campaign_id}?t={tracking_id}"
+    """Create a tracked phishing link using the base URL from settings."""
+    return f"{settings.APP_BASE_URL}/landing/{campaign_id}?t={tracking_id}"
 
 def create_awareness_link(campaign_id: str) -> str:
-    """Create awareness training link"""
-    return f"http://localhost:8011/training/{campaign_id}"
+    """Create an awareness training link."""
+    return f"{settings.APP_BASE_URL}/training/{campaign_id}"
 
-def personalize_template(template: str, target_data: Dict) -> str:
-    """Personalize email template with target data"""
+def personalize_template(template_body: str, target_data: Dict) -> str:
+    """Personalize email template with target data."""
     replacements = {
         "{target_name}": target_data.get("name", "User"),
         "{company_name}": target_data.get("company", "Your Company"),
@@ -279,361 +158,307 @@ def personalize_template(template: str, target_data: Dict) -> str:
         "{awareness_link}": target_data.get("awareness_link", "#")
     }
 
-    result = template
+    result = template_body
     for placeholder, value in replacements.items():
         result = result.replace(placeholder, value)
     return result
 
-# API Routes
-@app.get("/health")
-async def health_check():
+async def send_email_via_smtp(
+    sender_email: str, recipient_email: str, subject: str, body: str
+):
+    """Sends an email using configured SMTP settings."""
+    if not settings.SMTP_HOST or not settings.SMTP_PORT:
+        raise ValueError("SMTP host and port must be configured in .env")
+
+    msg = MIMEText(body, "html", "utf-8")
+    msg["From"] = str(Header(f"{settings.SMTP_SENDER_EMAIL} <{sender_email}>", "utf-8"))
+    msg["To"] = recipient_email
+    msg["Subject"] = str(Header(subject, "utf-8"))
+
+    try:
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            server.starttls()
+            if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
+                server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        print(f"Email sent to {recipient_email}")
+    except Exception as e:
+        print(f"Failed to send email to {recipient_email}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
+
+# --- API Routes ---
+
+@app.get("/health", tags=["General"])
+async def health_check(db: AsyncSession = Depends(get_db)):
+    """Check the health of the service."""
+    campaign_count = (await db.execute(select(models.Campaign))).scalars().all()
+    template_count = (await db.execute(select(models.EmailTemplate))).scalars().all()
     return {
         "status": "healthy",
-        "active_campaigns": len(campaigns),
-        "email_templates": len(email_templates) + len(DEFAULT_TEMPLATES),
+        "database_status": "connected",
+        "active_campaigns": len(campaign_count),
+        "email_templates": len(template_count),
         "service": "social-engineering-toolkit"
     }
 
-@app.post("/campaigns/create")
-async def create_phishing_campaign(campaign_request: PhishingCampaignRequest, background_tasks: BackgroundTasks):
-    """Create new phishing awareness campaign"""
+@app.post("/campaigns", status_code=201, response_model=schemas.CampaignResponse, tags=["Campaigns"])
+async def create_campaign(
+    campaign_request: schemas.CampaignCreate, db: AsyncSession = Depends(get_db)
+):
+    """Create a new phishing awareness campaign."""
     campaign_id = generate_campaign_id()
-
-    campaign = {
-        "campaign_id": campaign_id,
-        "name": campaign_request.name,
-        "target_domain": campaign_request.target_domain,
-        "email_template": campaign_request.email_template,
-        "sender_name": campaign_request.sender_name,
-        "sender_email": campaign_request.sender_email,
-        "landing_page_template": campaign_request.landing_page_template,
-        "tracking_enabled": campaign_request.tracking_enabled,
-        "status": "active",
-        "created_at": datetime.utcnow().isoformat(),
-        "targets": [],
-        "interactions": [],
-        "stats": {
-            "emails_sent": 0,
-            "links_clicked": 0,
-            "credentials_submitted": 0,
-            "awareness_completed": 0
-        }
-    }
-
-    campaigns[campaign_id] = campaign
-
-    # Generate landing page
-    landing_page = generate_landing_page(campaign_id, campaign_request.landing_page_template, campaign_request.target_domain)
-    landing_pages[campaign_id] = landing_page
+    
+    new_campaign = models.Campaign(
+        id=campaign_id,
+        name=campaign_request.name,
+        target_domain=campaign_request.target_domain,
+        email_template_name=campaign_request.email_template_name,
+        landing_page_template=campaign_request.landing_page_template,
+        sender_name=campaign_request.sender_name,
+        sender_email=campaign_request.sender_email,
+        tracking_enabled=campaign_request.tracking_enabled,
+    )
+    db.add(new_campaign)
+    await db.commit()
+    await db.refresh(new_campaign)
 
     return {
-        "message": "Phishing awareness campaign created successfully",
-        "campaign_id": campaign_id,
-        "landing_page_url": f"http://localhost:8011/landing/{campaign_id}",
-        "awareness_url": f"http://localhost:8011/training/{campaign_id}",
-        "status": "ready"
+        "message": "Phishing awareness campaign created successfully.",
+        "campaign": new_campaign,
+        "landing_page_url": f"{settings.APP_BASE_URL}/landing/{campaign_id}",
+        "awareness_url": f"{settings.APP_BASE_URL}/training/{campaign_id}",
     }
 
-@app.post("/campaigns/{campaign_id}/send-email")
-async def send_campaign_email(campaign_id: str, targets: List[Dict[str, str]]):
-    """Send phishing awareness emails to targets"""
-    if campaign_id not in campaigns:
+@app.get("/campaigns", response_model=List[schemas.Campaign], tags=["Campaigns"])
+async def list_campaigns(db: AsyncSession = Depends(get_db)):
+    """List all campaigns."""
+    result = await db.execute(select(models.Campaign))
+    return result.scalars().all()
+
+@app.get("/campaigns/{campaign_id}", response_model=schemas.Campaign, tags=["Campaigns"])
+async def get_campaign(campaign_id: str, db: AsyncSession = Depends(get_db)):
+    """Get details for a specific campaign."""
+    campaign = await db.get(models.Campaign, campaign_id)
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    return campaign
+
+@app.delete("/campaigns/{campaign_id}", status_code=204, tags=["Campaigns"])
+async def delete_campaign(campaign_id: str, db: AsyncSession = Depends(get_db)):
+    """Delete a campaign and all its related data."""
+    campaign = await db.get(models.Campaign, campaign_id)
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    await db.delete(campaign)
+    await db.commit()
+    return None
+
+@app.post("/campaigns/{campaign_id}/send", tags=["Execution"])
+async def send_campaign_emails(
+    campaign_id: str, targets: List[schemas.TargetBase], db: AsyncSession = Depends(get_db)
+):
+    """Send phishing awareness emails to a list of targets."""
+    campaign = await db.get(models.Campaign, campaign_id)
+    if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
 
-    campaign = campaigns[campaign_id]
-    template_name = campaign["email_template"]
-
-    if template_name not in DEFAULT_TEMPLATES:
+    email_template = await db.execute(
+        select(models.EmailTemplate).filter_by(name=campaign.email_template_name)
+    )
+    email_template = email_template.scalar_one_or_none()
+    if not email_template:
         raise HTTPException(status_code=404, detail="Email template not found")
 
-    template = DEFAULT_TEMPLATES[template_name]
-    sent_emails = []
-
-    for target in targets:
+    sent_count = 0
+    for target_data in targets:
         tracking_id = generate_tracking_id()
         phishing_link = create_phishing_link(campaign_id, tracking_id)
         awareness_link = create_awareness_link(campaign_id)
 
-        target_data = {
-            **target,
-            "phishing_link": phishing_link,
-            "training_link": awareness_link,
-            "awareness_link": awareness_link
-        }
+        target_email = target_data.email
+        target_name = target_data.name
 
-        personalized_email = personalize_template(template["body"], target_data)
+        personalized_body = personalize_template(
+            email_template.body,
+            {
+                "name": target_name,
+                "email": target_email,
+                "phishing_link": phishing_link,
+                "training_link": awareness_link,
+                "awareness_link": awareness_link,
+                "company": campaign.target_domain # Pass target_domain as company
+            }
+        )
 
-        email_record = {
-            "target_email": target.get("email"),
-            "target_name": target.get("name", "User"),
-            "tracking_id": tracking_id,
-            "phishing_link": phishing_link,
-            "sent_at": datetime.utcnow().isoformat(),
-            "status": "sent"  # In production, integrate with email service
-        }
+        try:
+            await send_email_via_smtp(
+                sender_email=campaign.sender_email,
+                recipient_email=target_email,
+                subject=email_template.subject,
+                body=personalized_body,
+            )
+            status = "sent"
+        except HTTPException: # Catch the HTTPException raised by send_email_via_smtp
+            status = "failed"
 
-        campaign["targets"].append(email_record)
-        sent_emails.append(email_record)
-
-    campaign["stats"]["emails_sent"] += len(sent_emails)
-    campaigns[campaign_id] = campaign
+        new_target = models.Target(
+            campaign_id=campaign_id,
+            email=target_email,
+            name=target_name,
+            tracking_id=tracking_id,
+            phishing_link=phishing_link,
+            status=status
+        )
+        db.add(new_target)
+        sent_count += 1
+    
+    await db.commit()
 
     return {
-        "message": f"Simulated {len(sent_emails)} emails sent for awareness campaign",
+        "message": f"Attempted to send {sent_count} emails for awareness campaign.",
         "campaign_id": campaign_id,
-        "emails_sent": len(sent_emails),
-        "note": "⚠️ SIMULATION MODE: No real emails sent - this is for awareness testing only"
+        "emails_attempted": sent_count,
+        "note": "Check logs for individual email sending status."
     }
 
-@app.get("/landing/{campaign_id}")
-async def serve_landing_page(campaign_id: str, t: Optional[str] = None):
-    """Serve phishing landing page"""
-    if campaign_id not in campaigns:
+@app.get("/landing/{campaign_id}", response_class=HTMLResponse, tags=["Execution"])
+async def serve_landing_page(
+    request: Request, campaign_id: str, t: Optional[str] = None, db: AsyncSession = Depends(get_db)
+):
+    """Serve the phishing landing page and track the visit."""
+    campaign = await db.get(models.Campaign, campaign_id)
+    if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
 
-    if campaign_id not in landing_pages:
-        raise HTTPException(status_code=404, detail="Landing page not found")
+    # Track the page visit interaction
+    if t:
+        interaction = models.Interaction(
+            campaign_id=campaign_id,
+            tracking_id=t,
+            action="page_visited",
+            ip_address=request.client.host, # Capture real IP address
+        )
+        db.add(interaction)
+        await db.commit()
 
-    # Track page visit
-    if t:  # tracking ID provided
-        interaction = {
-            "tracking_id": t,
-            "action": "page_visited",
-            "timestamp": datetime.utcnow().isoformat(),
-            "ip_address": "simulated"  # In production, get real IP
-        }
-        campaigns[campaign_id]["interactions"].append(interaction)
-        campaigns[campaign_id]["stats"]["links_clicked"] += 1
+    template_name = campaign.landing_page_template
+    if template_name not in ["office365_login", "bank_login"]:
+        template_name = "office365_login.html" # Default
+    else:
+        template_name += ".html"
 
-    return landing_pages[campaign_id]
+    context = {
+        "request": request,
+        "campaign_id": campaign_id,
+        "company_name": campaign.target_domain,
+        "tracking_enabled": str(campaign.tracking_enabled).lower(),
+        "awareness_link": create_awareness_link(campaign_id),
+        "app_base_url": settings.APP_BASE_URL,
+    }
+    return templates.TemplateResponse(template_name, context)
 
-@app.post("/track-interaction")
-async def track_interaction(interaction_data: Dict):
-    """Track user interaction with phishing elements"""
-    campaign_id = interaction_data.get("campaign_id")
-    if not campaign_id or campaign_id not in campaigns:
-        return {"status": "campaign not found"}
+@app.get("/training/{campaign_id}", response_class=HTMLResponse, tags=["Execution"])
+async def serve_awareness_training(request: Request, campaign_id: str, db: AsyncSession = Depends(get_db)):
+    """Serve the awareness training page."""
+    campaign = await db.get(models.Campaign, campaign_id)
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
 
-    campaigns[campaign_id]["interactions"].append({
-        **interaction_data,
-        "timestamp": datetime.utcnow().isoformat()
-    })
+    context = {
+        "request": request,
+        "campaign_id": campaign_id,
+        "app_base_url": settings.APP_BASE_URL,
+    }
+    return templates.TemplateResponse("training.html", context)
 
-    # Update stats based on action
-    action = interaction_data.get("action")
-    if action == "credentials_submitted":
-        campaigns[campaign_id]["stats"]["credentials_submitted"] += 1
-    elif action == "awareness_completed":
-        campaigns[campaign_id]["stats"]["awareness_completed"] += 1
+@app.post("/track-interaction", status_code=202, tags=["Execution"])
+async def track_interaction(
+    interaction_data: schemas.InteractionCreate, db: AsyncSession = Depends(get_db)
+):
+    """Track a user interaction, like a credential submission or training completion."""
+    campaign = await db.get(models.Campaign, interaction_data.campaign_id)
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
 
+    new_interaction = models.Interaction(**interaction_data.dict())
+    db.add(new_interaction)
+    await db.commit()
+    
     return {"status": "tracked"}
 
-@app.get("/campaigns/{campaign_id}/stats")
-async def get_campaign_stats(campaign_id: str):
-    """Get campaign statistics and analytics"""
-    if campaign_id not in campaigns:
+@app.get("/campaigns/{campaign_id}/stats", response_model=schemas.CampaignStats, tags=["Stats"])
+async def get_campaign_stats(campaign_id: str, db: AsyncSession = Depends(get_db)):
+    """Get detailed statistics for a campaign."""
+    campaign = await db.get(models.Campaign, campaign_id)
+    if not campaign:
         raise HTTPException(status_code=404, detail="Campaign not found")
 
-    campaign = campaigns[campaign_id]
-    stats = campaign["stats"]
+    # Query for stats
+    total_sent = (await db.execute(
+        select(models.Target).filter_by(campaign_id=campaign_id)
+    )).scalars().all()
+    
+    links_clicked = (await db.execute(
+        select(models.Interaction).where(
+            models.Interaction.campaign_id == campaign_id,
+            models.Interaction.action == "page_visited"
+        )
+    )).scalars().all()
+    
+    credentials_submitted = (await db.execute(
+        select(models.Interaction).where(
+            models.Interaction.campaign_id == campaign_id,
+            models.Interaction.action == "credentials_submitted"
+        )
+    )).scalars().all()
 
-    # Calculate success rate
-    emails_sent = stats["emails_sent"]
-    links_clicked = stats["links_clicked"]
-    credentials_submitted = stats["credentials_submitted"]
+    awareness_completed = (await db.execute(
+        select(models.Interaction).where(
+            models.Interaction.campaign_id == campaign_id,
+            models.Interaction.action == "awareness_completed"
+        )
+    )).scalars().all()
 
-    click_rate = (links_clicked / emails_sent * 100) if emails_sent > 0 else 0
-    success_rate = (credentials_submitted / emails_sent * 100) if emails_sent > 0 else 0
+    click_rate = (len(links_clicked) / len(total_sent) * 100) if len(total_sent) > 0 else 0
+    submission_rate = (len(credentials_submitted) / len(total_sent) * 100) if len(total_sent) > 0 else 0
+
+    # Fetch recent interactions directly from the campaign relationship
+    # This assumes campaign.interactions is loaded, which it should be with relationship
+    recent_interactions = sorted(campaign.interactions, key=lambda x: x.timestamp, reverse=True)[:10]
 
     return {
-        "campaign_id": campaign_id,
-        "campaign_name": campaign["name"],
-        "status": campaign["status"],
-        "created_at": campaign["created_at"],
+        "campaign_id": campaign.id,
+        "campaign_name": campaign.name,
         "stats": {
-            "emails_sent": emails_sent,
-            "links_clicked": links_clicked,
-            "credentials_submitted": credentials_submitted,
-            "awareness_completed": stats["awareness_completed"],
+            "emails_sent": len(total_sent),
+            "links_clicked": len(links_clicked),
+            "credentials_submitted": len(credentials_submitted),
+            "awareness_completed": len(awareness_completed),
             "click_rate_percent": round(click_rate, 2),
-            "success_rate_percent": round(success_rate, 2)
+            "submission_rate_percent": round(submission_rate, 2),
         },
-        "recent_interactions": campaign["interactions"][-10:],  # Last 10 interactions
-        "recommendations": generate_campaign_recommendations(stats, emails_sent)
+        "recent_interactions": recent_interactions
     }
 
-def generate_landing_page(campaign_id: str, template_name: str, company_name: str) -> str:
-    """Generate personalized landing page"""
-    if template_name not in LANDING_PAGE_TEMPLATES:
-        template_name = "office365"  # Default template
+# --- Template Management ---
 
-    template = LANDING_PAGE_TEMPLATES[template_name]["html"]
+@app.post("/templates/email", status_code=201, response_model=schemas.EmailTemplate, tags=["Templates"])
+async def create_email_template(
+    template_data: schemas.EmailTemplateCreate, db: AsyncSession = Depends(get_db)
+):
+    """Create a new custom email template."""
+    new_template = models.EmailTemplate(**template_data.dict())
+    db.add(new_template)
+    await db.commit()
+    await db.refresh(new_template)
+    return new_template
 
-    # Replace placeholders
-    html = template.replace("{campaign_id}", campaign_id)
-    html = html.replace("{company_name}", company_name)
-    html = html.replace("{tracking_enabled}", "true")
-    html = html.replace("{awareness_link}", f"/training/{campaign_id}")
-
-    # Add Microsoft logo (base64 encoded placeholder)
-    ms_logo = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
-    html = html.replace("{ms_logo}", ms_logo)
-
-    return html
-
-def generate_campaign_recommendations(stats: Dict, total_sent: int) -> List[str]:
-    """Generate campaign recommendations"""
-    recommendations = []
-
-    if total_sent == 0:
-        return ["📧 Start by sending test emails to measure awareness levels"]
-
-    click_rate = (stats["links_clicked"] / total_sent * 100) if total_sent > 0 else 0
-    success_rate = (stats["credentials_submitted"] / total_sent * 100) if total_sent > 0 else 0
-
-    if success_rate > 20:
-        recommendations.append("🚨 HIGH RISK: >20% of users submitted credentials - immediate training needed")
-    elif success_rate > 10:
-        recommendations.append("⚠️ MEDIUM RISK: >10% susceptible - additional awareness training recommended")
-    elif success_rate > 5:
-        recommendations.append("✅ GOOD: <5% fell for phishing - maintain current training")
-    else:
-        recommendations.append("🏆 EXCELLENT: Very low susceptibility rate")
-
-    if click_rate > 30:
-        recommendations.append("📚 Focus on email security awareness training")
-    if stats["awareness_completed"] < stats["links_clicked"]:
-        recommendations.append("🎯 Encourage more users to complete awareness training")
-
-    recommendations.append("📊 Run quarterly campaigns to maintain awareness")
-
-    return recommendations
-
-@app.get("/templates/email")
-async def get_email_templates():
-    """Get available email templates"""
-    return {
-        "default_templates": DEFAULT_TEMPLATES,
-        "custom_templates": email_templates,
-        "total": len(DEFAULT_TEMPLATES) + len(email_templates)
-    }
-
-@app.post("/templates/email")
-async def create_email_template(template: EmailTemplate):
-    """Create custom email template"""
-    template_id = f"custom_{int(datetime.now().timestamp())}"
-    email_templates[template_id] = template.dict()
-
-    return {
-        "message": "Email template created successfully",
-        "template_id": template_id,
-        "template": template.dict()
-    }
-
-@app.get("/templates/landing-pages")
-async def get_landing_page_templates():
-    """Get available landing page templates"""
-    return {
-        "templates": {k: {"name": v["name"]} for k, v in LANDING_PAGE_TEMPLATES.items()},
-        "total": len(LANDING_PAGE_TEMPLATES)
-    }
-
-@app.get("/training/{campaign_id}")
-async def serve_awareness_training(campaign_id: str):
-    """Serve awareness training content"""
-    if campaign_id not in campaigns:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-
-    training_html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Security Awareness Training</title>
-        <style>
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8f9fa; }
-            .container { max-width: 800px; margin: 50px auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            .header { text-align: center; margin-bottom: 30px; }
-            .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px; color: #155724; }
-            .tips { background: #e7f3ff; border: 1px solid #bee5eb; padding: 20px; border-radius: 5px; margin: 20px 0; }
-            .tip-item { margin: 10px 0; padding-left: 20px; }
-            .btn { background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>🛡️ Security Awareness Training</h1>
-                <p>Learn how to identify and prevent phishing attacks</p>
-            </div>
-
-            <div class="success">
-                <strong>✅ Great job!</strong> You've completed this security awareness exercise.
-                This helps improve our organization's security posture.
-            </div>
-
-            <div class="tips">
-                <h3>🎯 How to Spot Phishing Emails:</h3>
-                <div class="tip-item">• Check the sender's email address carefully</div>
-                <div class="tip-item">• Look for urgent language or threats</div>
-                <div class="tip-item">• Hover over links to see the real destination</div>
-                <div class="tip-item">• Be suspicious of unexpected attachments</div>
-                <div class="tip-item">• Verify requests through other channels</div>
-            </div>
-
-            <div class="tips">
-                <h3>🔐 Best Security Practices:</h3>
-                <div class="tip-item">• Use strong, unique passwords</div>
-                <div class="tip-item">• Enable two-factor authentication</div>
-                <div class="tip-item">• Keep software updated</div>
-                <div class="tip-item">• Report suspicious emails to IT</div>
-                <div class="tip-item">• Never share credentials</div>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px;">
-                <a href="#" class="btn" onclick="completeTraining()">Mark Training Complete</a>
-            </div>
-        </div>
-
-        <script>
-            function completeTraining() {
-                fetch('/track-interaction', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        campaign_id: '""" + campaign_id + """',
-                        action: 'awareness_completed',
-                        timestamp: new Date().toISOString()
-                    })
-                }).then(() => {
-                    alert('Training completed! Thank you for improving our security.');
-                });
-            }
-        </script>
-    </body>
-    </html>
-    """
-
-    return training_html
-
-@app.get("/campaigns")
-async def list_campaigns():
-    """List all campaigns"""
-    return {
-        "campaigns": list(campaigns.values()),
-        "total": len(campaigns)
-    }
-
-@app.delete("/campaigns/{campaign_id}")
-async def delete_campaign(campaign_id: str):
-    """Delete a campaign"""
-    if campaign_id not in campaigns:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-
-    del campaigns[campaign_id]
-    if campaign_id in landing_pages:
-        del landing_pages[campaign_id]
-
-    return {"message": "Campaign deleted successfully"}
+@app.get("/templates/email", response_model=List[schemas.EmailTemplate], tags=["Templates"])
+async def list_email_templates(db: AsyncSession = Depends(get_db)):
+    """List all available email templates."""
+    result = await db.execute(select(models.EmailTemplate))
+    return result.scalars().all()
 
 if __name__ == "__main__":
     import uvicorn

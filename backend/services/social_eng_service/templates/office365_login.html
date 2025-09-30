@@ -1,0 +1,57 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Microsoft Office 365 - Sign In</title>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f3f2f1; }
+                .container { max-width: 440px; margin: 100px auto; background: white; padding: 60px 40px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+                .logo { text-align: center; margin-bottom: 20px; }
+                .title { font-size: 24px; font-weight: 600; color: #323130; margin-bottom: 8px; }
+                .subtitle { color: #605e5c; margin-bottom: 24px; }
+                input { width: 100%; padding: 11px; border: 1px solid #605e5c; margin-bottom: 16px; font-size: 15px; }
+                .btn { background: #0078d4; color: white; border: none; padding: 12px 24px; font-size: 15px; cursor: pointer; width: 100%; }
+                .warning { background: #fff4ce; border: 1px solid #d83b01; padding: 12px; margin-top: 20px; border-radius: 2px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="logo">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="Microsoft" width="108" height="24">
+                </div>
+                <div class="title">Sign in</div>
+                <div class="subtitle">to continue to {{ company_name }}</div>
+                <form id="loginForm" onsubmit="captureCredentials(event)">
+                    <input type="email" placeholder="Email, phone, or Skype" required>
+                    <input type="password" placeholder="Password" required>
+                    <button class="btn" type="submit">Sign in</button>
+                </form>
+                <div class="warning" style="display:none;" id="warning">
+                    <strong>⚠️ SECURITY AWARENESS TEST</strong><br>
+                    This was a simulated phishing attempt. Your credentials were NOT captured.
+                    <a href="{{ awareness_link }}">Learn more about phishing protection</a>
+                </div>
+            </div>
+            <script>
+                function captureCredentials(event) {
+                    event.preventDefault();
+
+                    document.getElementById('warning').style.display = 'block';
+                    document.getElementById('loginForm').style.display = 'none';
+
+                    if ('{{ tracking_enabled }}' === 'true') {
+                        fetch('{{ app_base_url }}/track-interaction', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                campaign_id: '{{ campaign_id }}',
+                                action: 'credentials_submitted',
+                                timestamp: new Date().toISOString()
+                            })
+                        });
+                    }
+                }
+            </script>
+        </body>
+        </html>
+        

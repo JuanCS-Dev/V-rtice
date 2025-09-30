@@ -10,10 +10,11 @@ import ThreatMap from './cyber/ThreatMap';
 import CyberAlerts from './cyber/CyberAlerts';
 import VulnerabilityScanner from './cyber/VulnerabilityScanner';
 import SocialEngineering from './cyber/SocialEngineering';
+import AuroraCyberHub from './cyber/AuroraCyberHub';
 
 const CyberDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [activeModule, setActiveModule] = useState('overview');
+  const [activeModule, setActiveModule] = useState('aurora'); // AI-FIRST: Aurora como landing page
   const [cyberAlerts, setCyberAlerts] = useState([]);
   const [threatData, setThreatData] = useState({
     totalThreats: 127,
@@ -55,6 +56,7 @@ const CyberDashboard = ({ setCurrentView }) => {
 
   const moduleComponents = {
     overview: <CyberOverview threatData={threatData} />,
+    aurora: <AuroraCyberHub />,
     domain: <DomainAnalyzer />,
     ip: <IpIntelligence />,
     network: <NetworkMonitor />,
@@ -78,13 +80,15 @@ const CyberDashboard = ({ setCurrentView }) => {
 
       <main className="flex-1 flex min-h-0">
         {/* Sidebar de Alertas */}
-        <aside className="w-80 border-r border-cyan-400/30 bg-black/30 backdrop-blur-sm">
+        <aside className="w-72 border-r border-cyan-400/30 bg-black/30 backdrop-blur-sm">
           <CyberAlerts alerts={cyberAlerts} threatData={threatData} />
         </aside>
 
         {/* Área Principal */}
-        <div className="flex-1 p-4 overflow-hidden">
-          {moduleComponents[activeModule]}
+        <div className="flex-1 p-4 overflow-hidden min-h-0">
+          <div className="h-full">
+            {moduleComponents[activeModule]}
+          </div>
         </div>
       </main>
 

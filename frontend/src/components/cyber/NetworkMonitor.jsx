@@ -68,17 +68,16 @@ const NetworkMonitor = () => {
     try {
       const response = await fetch('http://localhost:8000/api/network/monitor');
       const data = await response.json();
-      if (data.success) {
-        setRealTimeData(data.data);
-        // Atualiza estatísticas com dados reais
-        setStatistics(prev => ({
-          ...prev,
-          connectionsToday: data.data.active_connections?.length || 0,
-          portScansDetected: data.data.suspicious_activity?.port_scans || 0,
-          suspiciousIPs: data.data.suspicious_activity?.suspicious_ips || 0,
-          blockedAttempts: data.data.security_events?.blocked_attempts || 0
-        }));
-      }
+
+      setRealTimeData(data);
+      // Atualiza estatísticas com dados reais
+      setStatistics(prev => ({
+        ...prev,
+        connectionsToday: data.active_connections || 0,
+        portScansDetected: 0, // Será implementado quando o backend fornecer
+        suspiciousIPs: data.unique_ips || 0,
+        blockedAttempts: data.total_alerts || 0
+      }));
     } catch (error) {
       console.error('Erro ao carregar dados de rede:', error);
     }

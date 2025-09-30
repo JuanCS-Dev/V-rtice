@@ -1,0 +1,51 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Secure Banking - Login</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+                .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); min-width: 350px; }
+                .logo { text-align: center; margin-bottom: 30px; font-size: 28px; color: #1a73e8; font-weight: bold; }
+                .form-group { margin-bottom: 20px; }
+                label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+                input { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 5px; font-size: 16px; }
+                input:focus { border-color: #1a73e8; outline: none; }
+                .btn { background: #1a73e8; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
+                .security-note { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+                .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin-top: 20px; border-radius: 5px; display: none; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="logo">🏦 SecureBank</div>
+                <form id="bankForm" onsubmit="showAwareness(event)">
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" placeholder="Enter account number" required>
+                    </div>
+                    <div class="form-group">
+                        <label>PIN</label>
+                        <input type="password" placeholder="Enter PIN" required>
+                    </div>
+                    <button class="btn" type="submit">🔐 Secure Login</button>
+                </form>
+                <div class="security-note">
+                    🔒 Your connection is secured with 256-bit encryption
+                </div>
+                <div class="warning" id="awareness">
+                    <strong>🎯 SECURITY TRAINING COMPLETE</strong><br>
+                    This was a simulated phishing site for awareness training.
+                    Never enter banking credentials on suspicious sites!
+                </div>
+            </div>
+            <script>
+                function showAwareness(event) {
+                    event.preventDefault();
+                    document.getElementById('awareness').style.display = 'block';
+                    document.getElementById('bankForm').style.display = 'none';
+                }
+            </script>
+        </body>
+        </html>
+        

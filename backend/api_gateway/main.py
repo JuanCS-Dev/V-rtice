@@ -98,12 +98,21 @@ DOMAIN_SERVICE_URL = os.getenv("DOMAIN_SERVICE_URL", "http://domain_service:80")
 IP_INTEL_SERVICE_URL = os.getenv("IP_INTEL_SERVICE_URL", "http://ip_intelligence_service:80")
 NMAP_SERVICE_URL = os.getenv("NMAP_SERVICE_URL", "http://nmap_service:80")
 NETWORK_MONITOR_SERVICE_URL = os.getenv("NETWORK_MONITOR_SERVICE_URL", "http://network_monitor_service:80")
+VULN_SCANNER_SERVICE_URL = os.getenv("VULN_SCANNER_SERVICE_URL", "http://vuln_scanner_service:80")
+SOCIAL_ENG_SERVICE_URL = os.getenv("SOCIAL_ENG_SERVICE_URL", "http://social_eng_service:80")
+# New NSA-Grade Services
+THREAT_INTEL_SERVICE_URL = os.getenv("THREAT_INTEL_SERVICE_URL", "http://threat_intel_service:80")
+MALWARE_ANALYSIS_SERVICE_URL = os.getenv("MALWARE_ANALYSIS_SERVICE_URL", "http://malware_analysis_service:80")
+SSL_MONITOR_SERVICE_URL = os.getenv("SSL_MONITOR_SERVICE_URL", "http://ssl_monitor_service:80")
+AURORA_ORCHESTRATOR_URL = os.getenv("AURORA_ORCHESTRATOR_URL", "http://aurora_orchestrator_service:80")
 OSINT_SERVICE_URL = os.getenv("OSINT_SERVICE_URL", "http://osint-service:80")
+GOOGLE_OSINT_SERVICE_URL = os.getenv("GOOGLE_OSINT_SERVICE_URL", "http://localhost:8013")
 AURORA_PREDICT_URL = os.getenv("AURORA_PREDICT_URL", "http://aurora_predict:80")
 ATLAS_SERVICE_URL = os.getenv("ATLAS_SERVICE_URL", "http://atlas_service:8000")
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth_service:80")
 VULN_SCANNER_SERVICE_URL = os.getenv("VULN_SCANNER_SERVICE_URL", "http://vuln_scanner_service:80")
 SOCIAL_ENG_SERVICE_URL = os.getenv("SOCIAL_ENG_SERVICE_URL", "http://social_eng_service:80")
+AI_AGENT_SERVICE_URL = os.getenv("AI_AGENT_SERVICE_URL", "http://ai_agent_service:80")
 
 # Authentication configuration
 JWT_SECRET = os.getenv("JWT_SECRET", "vertice-super-secret-key-2024")
@@ -466,6 +475,48 @@ async def get_osint_stats_proxy(request: Request):
 async def osint_health_check_proxy(request: Request):
     return await proxy_request(request=request, service_url=OSINT_SERVICE_URL, endpoint=f"/health", service_name="osint-service")
 
+# ============================
+# GOOGLE OSINT ENDPOINTS
+# ============================
+@app.post("/api/google/search/basic", tags=["Google OSINT"])
+@limiter.limit("5/minute")
+async def google_basic_search_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/api/search/basic", service_name="google-osint-service", timeout=180.0)
+
+@app.post("/api/google/search/advanced", tags=["Google OSINT"])
+@limiter.limit("3/minute")
+async def google_advanced_search_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/api/search/advanced", service_name="google-osint-service", timeout=300.0)
+
+@app.post("/api/google/search/documents", tags=["Google OSINT"])
+@limiter.limit("5/minute")
+async def google_documents_search_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/api/search/documents", service_name="google-osint-service", timeout=240.0)
+
+@app.post("/api/google/search/images", tags=["Google OSINT"])
+@limiter.limit("5/minute")
+async def google_images_search_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/api/search/images", service_name="google-osint-service", timeout=180.0)
+
+@app.post("/api/google/search/social", tags=["Google OSINT"])
+@limiter.limit("5/minute")
+async def google_social_search_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/api/search/social", service_name="google-osint-service", timeout=180.0)
+
+@app.get("/api/google/dorks/patterns", tags=["Google OSINT"])
+@limiter.limit("30/minute")
+async def google_dork_patterns_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/api/dorks/patterns", service_name="google-osint-service")
+
+@app.get("/api/google/stats", tags=["Google OSINT"])
+@limiter.limit("30/minute")
+async def google_osint_stats_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/api/stats", service_name="google-osint-service")
+
+@app.get("/api/google/health", tags=["Google OSINT"])
+async def google_osint_health_proxy(request: Request):
+    return await proxy_request(request=request, service_url=GOOGLE_OSINT_SERVICE_URL, endpoint=f"/health", service_name="google-osint-service")
+
 @app.post("/predict/crime-hotspots", response_model=PredictionOutput, tags=["Prediction"])
 @limiter.limit("5/minute")
 async def predict_crime_hotspots_proxy(request: Request, data: PredictionInput):
@@ -636,6 +687,117 @@ async def social_eng_health():
         response = await client.get(f"{SOCIAL_ENG_SERVICE_URL}/health")
         return response.json()
 
+# ============================
+# NSA-GRADE SERVICES - AURORA AI
+# ============================
+
+@app.post("/api/threat-intel/check", tags=["Threat Intelligence"])
+@limiter.limit("30/minute")
+async def threat_intel_check(request: Request):
+    """Threat Intelligence Aggregator - checks multiple sources"""
+    return await proxy_request(request=request, service_url=THREAT_INTEL_SERVICE_URL, endpoint="/api/threat-intel/check", service_name="threat-intel-service", timeout=30.0)
+
+@app.get("/threat-intel/health", tags=["Threat Intelligence"])
+async def threat_intel_health():
+    """Health check for threat intelligence service"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{THREAT_INTEL_SERVICE_URL}/health")
+        return response.json()
+
+@app.post("/api/malware/analyze-file", tags=["Malware Analysis"])
+@limiter.limit("10/minute")
+async def malware_analyze_file(request: Request):
+    """Malware Analysis - analyze uploaded file"""
+    return await proxy_request(request=request, service_url=MALWARE_ANALYSIS_SERVICE_URL, endpoint="/api/malware/analyze-file", service_name="malware-analysis-service", timeout=60.0)
+
+@app.post("/api/malware/analyze-hash", tags=["Malware Analysis"])
+@limiter.limit("30/minute")
+async def malware_analyze_hash(request: Request):
+    """Malware Analysis - analyze hash"""
+    return await proxy_request(request=request, service_url=MALWARE_ANALYSIS_SERVICE_URL, endpoint="/api/malware/analyze-hash", service_name="malware-analysis-service", timeout=30.0)
+
+@app.post("/api/malware/analyze-url", tags=["Malware Analysis"])
+@limiter.limit("30/minute")
+async def malware_analyze_url(request: Request):
+    """Malware Analysis - analyze URL"""
+    return await proxy_request(request=request, service_url=MALWARE_ANALYSIS_SERVICE_URL, endpoint="/api/malware/analyze-url", service_name="malware-analysis-service", timeout=30.0)
+
+@app.get("/malware/health", tags=["Malware Analysis"])
+async def malware_health():
+    """Health check for malware analysis service"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{MALWARE_ANALYSIS_SERVICE_URL}/health")
+        return response.json()
+
+@app.post("/api/ssl/check", tags=["SSL/TLS Monitor"])
+@limiter.limit("30/minute")
+async def ssl_check(request: Request):
+    """SSL/TLS Monitor - comprehensive certificate analysis"""
+    return await proxy_request(request=request, service_url=SSL_MONITOR_SERVICE_URL, endpoint="/api/ssl/check", service_name="ssl-monitor-service", timeout=30.0)
+
+@app.get("/ssl/health", tags=["SSL/TLS Monitor"])
+async def ssl_health():
+    """Health check for SSL monitor service"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{SSL_MONITOR_SERVICE_URL}/health")
+        return response.json()
+
+@app.post("/api/aurora/investigate", tags=["Aurora Orchestrator"])
+@limiter.limit("10/minute")
+async def aurora_investigate(request: Request):
+    """Aurora Orchestrator - autonomous investigation"""
+    return await proxy_request(request=request, service_url=AURORA_ORCHESTRATOR_URL, endpoint="/api/aurora/investigate", service_name="aurora-orchestrator", timeout=300.0)
+
+@app.get("/api/aurora/investigation/{investigation_id}", tags=["Aurora Orchestrator"])
+@limiter.limit("60/minute")
+async def aurora_get_investigation(request: Request, investigation_id: str):
+    """Aurora Orchestrator - get investigation status"""
+    return await proxy_request(request=request, service_url=AURORA_ORCHESTRATOR_URL, endpoint=f"/api/aurora/investigation/{investigation_id}", service_name="aurora-orchestrator", timeout=10.0)
+
+@app.get("/api/aurora/services", tags=["Aurora Orchestrator"])
+@limiter.limit("30/minute")
+async def aurora_list_services(request: Request):
+    """Aurora Orchestrator - list all services"""
+    return await proxy_request(request=request, service_url=AURORA_ORCHESTRATOR_URL, endpoint="/api/aurora/services", service_name="aurora-orchestrator", timeout=10.0)
+
+@app.get("/aurora/health", tags=["Aurora Orchestrator"])
+async def aurora_health():
+    """Health check for Aurora orchestrator"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{AURORA_ORCHESTRATOR_URL}/health")
+        return response.json()
+
+# ========================================
+# AI AGENT ROUTES - THE BRAIN 🧠
+# ========================================
+
+@app.get("/api/ai/", tags=["AI Agent"])
+async def ai_agent_info():
+    """Get AI Agent service info"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{AI_AGENT_SERVICE_URL}/")
+        return response.json()
+
+@app.get("/api/ai/tools", tags=["AI Agent"])
+async def ai_agent_list_tools(request: Request):
+    """List all tools available to the AI"""
+    return await proxy_request(request=request, service_url=AI_AGENT_SERVICE_URL, endpoint="/tools", service_name="ai-agent", timeout=10.0)
+
+@app.post("/api/ai/chat", tags=["AI Agent"])
+@limiter.limit("10/minute")
+async def ai_agent_chat(request: Request):
+    """
+    Chat conversacional com AI Agent
+    A AI tem acesso maestro a TODOS os serviços via tool calling
+    """
+    return await proxy_request(request=request, service_url=AI_AGENT_SERVICE_URL, endpoint="/chat", service_name="ai-agent", timeout=120.0)
+
+@app.get("/ai/health", tags=["AI Agent"])
+async def ai_agent_health():
+    """Health check for AI Agent"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{AI_AGENT_SERVICE_URL}/health")
+        return response.json()
 
 if __name__ == "__main__":
     import uvicorn

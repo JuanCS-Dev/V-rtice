@@ -32,13 +32,24 @@ const UsernameModule = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success' && data.data) {
-          // Adaptar os dados para o formato esperado
+          // Adaptar os dados reais do backend para o formato esperado
+          const profilesFound = data.data.profiles_found || [];
+          const adaptedProfiles = profilesFound.map(profile => ({
+            platform: profile.platform,
+            url: profile.url,
+            status: profile.exists ? 'found' : 'not_found',
+            last_activity: profile.timestamp ? new Date(profile.timestamp).toLocaleDateString() : null
+          }));
+
           const adaptedResults = {
             username: username,
-            platforms_found: data.data.profiles_found || [],
-            total_found: data.data.profiles_found?.length || 0,
-            confidence_score: data.data.confidence_score || 85,
-            ai_analysis: data.data.ai_analysis
+            platforms_found: adaptedProfiles,
+            total_found: profilesFound.filter(p => p.exists).length,
+            confidence_score: data.data.ai_analysis?.confidence_score || 75,
+            ai_analysis: data.data.ai_analysis,
+            execution_time: data.data.execution_time,
+            total_platforms_checked: data.data.total_platforms_checked,
+            statistics: data.data.statistics
           };
           setResults(adaptedResults);
         } else {

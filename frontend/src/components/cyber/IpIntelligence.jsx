@@ -26,44 +26,34 @@ const IpIntelligence = () => {
 
       const data = await response.json();
 
-      if (data.success) {
-        setAnalysisResult(data.data);
-        setSearchHistory(prev => [ipAddress, ...prev.filter(ip => ip !== ipAddress)].slice(0, 10));
-      } else {
-        console.error('Erro na análise:', data.errors);
+      // Formatar o resultado para o formato esperado pela interface
+      const formattedResult = {
+        ip: data.ip,
+        location: {
+          country: data.geolocation?.country || 'N/A',
+          region: data.geolocation?.regionName || 'N/A',
+          city: data.geolocation?.city || 'N/A',
+          latitude: data.geolocation?.lat || 0,
+          longitude: data.geolocation?.lon || 0
+        },
+        isp: data.geolocation?.isp || 'N/A',
+        asn: {
+          number: data.geolocation?.as?.split(' ')[0] || 'N/A',
+          name: data.geolocation?.as?.split(' ').slice(1).join(' ') || 'N/A'
+        },
+        reputation: {
+          score: data.reputation?.score || 0,
+          categories: ['analysis'],
+          last_seen: data.reputation?.last_seen || new Date().toISOString().split('T')[0]
+        },
+        threat_level: data.reputation?.threat_level || 'low',
+        ptr_record: data.ptr_record || 'N/A',
+        open_ports: data.open_ports || [],
+        services: []
+      };
 
-        // Fallback data if backend is unavailable
-        const fallbackResult = {
-          ip: ipAddress,
-          location: {
-            country: 'Brasil',
-            region: 'Goiás',
-            city: 'Anápolis',
-            latitude: -16.328,
-            longitude: -48.953
-          },
-          isp: 'Oi Fibra',
-          asn: {
-            number: 'AS7738',
-            name: 'Telemar Norte Leste S.A.'
-          },
-          reputation: {
-            score: Math.floor(Math.random() * 100),
-            categories: ['malware', 'botnet'],
-            last_seen: '2024-01-15'
-          },
-          threat_level: Math.random() > 0.5 ? 'high' : 'medium',
-          ptr_record: 'suspicious-host.example.com',
-          open_ports: ['22', '80', '443', '8080'],
-          services: [
-            { port: 22, service: 'SSH', version: 'OpenSSH 7.4' },
-            { port: 80, service: 'HTTP', version: 'nginx 1.18' },
-            { port: 443, service: 'HTTPS', version: 'nginx 1.18' }
-          ]
-        };
-        setAnalysisResult(fallbackResult);
-        setSearchHistory(prev => [ipAddress, ...prev.filter(ip => ip !== ipAddress)].slice(0, 10));
-      }
+      setAnalysisResult(formattedResult);
+      setSearchHistory(prev => [ipAddress, ...prev.filter(ip => ip !== ipAddress)].slice(0, 10));
     } catch (error) {
       console.error('Erro ao conectar com o backend:', error);
 
@@ -108,31 +98,70 @@ const IpIntelligence = () => {
     setAnalysisResult(null);
 
     try {
-      const response = await fetch('http://localhost:8000/api/ip/analyze-my-ip', {
+      // Primeiro: Detectar o IP público
+      const myIpResponse = await fetch('http://localhost:8000/api/ip/my-ip', {
+        method: 'GET'
+      });
+
+      if (!myIpResponse.ok) {
+        throw new Error(`Erro ao detectar IP: ${myIpResponse.status}`);
+      }
+
+      const myIpData = await myIpResponse.json();
+      const detectedIP = myIpData.detected_ip;
+
+      // Define o IP detectado no campo de input
+      setIpAddress(detectedIP);
+
+      // Segundo: Analisar o IP detectado
+      const analyzeResponse = await fetch('http://localhost:8000/api/ip/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({ ip: detectedIP })
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Define o IP detectado no campo de input
-        setIpAddress(data.ip_detection.detected_ip);
-
-        // Mostra o resultado da análise
-        setAnalysisResult(data.data);
-
-        // Adiciona ao histórico
-        setSearchHistory(prev => [data.ip_detection.detected_ip, ...prev.filter(ip => ip !== data.ip_detection.detected_ip)].slice(0, 10));
-      } else {
-        console.error('Erro na detecção do IP:', data.error);
-        alert(data.error || 'Erro ao detectar seu IP público');
+      if (!analyzeResponse.ok) {
+        throw new Error(`Erro na análise: ${analyzeResponse.status}`);
       }
+
+      const analyzeData = await analyzeResponse.json();
+
+      // Formatar o resultado para o formato esperado pela interface
+      const formattedResult = {
+        ip: analyzeData.ip,
+        location: {
+          country: analyzeData.geolocation?.country || 'N/A',
+          region: analyzeData.geolocation?.regionName || 'N/A',
+          city: analyzeData.geolocation?.city || 'N/A',
+          latitude: analyzeData.geolocation?.lat || 0,
+          longitude: analyzeData.geolocation?.lon || 0
+        },
+        isp: analyzeData.geolocation?.isp || 'N/A',
+        asn: {
+          number: analyzeData.geolocation?.as?.split(' ')[0] || 'N/A',
+          name: analyzeData.geolocation?.as?.split(' ').slice(1).join(' ') || 'N/A'
+        },
+        reputation: {
+          score: analyzeData.reputation?.score || 0,
+          categories: ['analysis'],
+          last_seen: analyzeData.reputation?.last_seen || new Date().toISOString().split('T')[0]
+        },
+        threat_level: analyzeData.reputation?.threat_level || 'low',
+        ptr_record: analyzeData.ptr_record || 'N/A',
+        open_ports: analyzeData.open_ports || [],
+        services: []
+      };
+
+      setAnalysisResult(formattedResult);
+
+      // Adiciona ao histórico
+      setSearchHistory(prev => [detectedIP, ...prev.filter(ip => ip !== detectedIP)].slice(0, 10));
+
     } catch (error) {
       console.error('Erro na requisição:', error);
-      alert('Erro de conexão com o serviço');
+      alert(`Erro de conexão: ${error.message}`);
     } finally {
       setLoadingMyIp(false);
     }
@@ -155,15 +184,15 @@ const IpIntelligence = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 h-full overflow-y-auto pr-2">
       {/* Header do Módulo */}
-      <div className="border border-cyan-400/50 rounded-lg bg-cyan-400/5 p-6">
-        <h2 className="text-cyan-400 font-bold text-2xl mb-4 tracking-wider">
+      <div className="border border-cyan-400/50 rounded-lg bg-cyan-400/5 p-4">
+        <h2 className="text-cyan-400 font-bold text-xl mb-3 tracking-wider">
           IP INTELLIGENCE & GEOLOCATION
         </h2>
         
         {/* Barra de Pesquisa */}
-        <div className="flex items-center space-x-4 mb-6">
+        <div className="flex items-center space-x-4 mb-4">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -220,9 +249,9 @@ const IpIntelligence = () => {
 
       {/* Resultado da Análise */}
       {analysisResult && (
-        <div className="grid grid-cols-12 gap-6">
-          {/* Coluna 1: Informações de Localização (span-4) */}
-          <div className="col-span-4 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[600px] overflow-y-auto bg-black/10 rounded-lg p-4 border border-cyan-400/20">
+          {/* Coluna 1: Informações de Localização */}
+          <div className="space-y-4">
             <div className="border border-cyan-400/30 rounded-lg bg-black/20 p-4">
               <h3 className="text-cyan-400 font-bold text-lg mb-4">GEOLOCALIZAÇÃO</h3>
               
@@ -283,9 +312,9 @@ const IpIntelligence = () => {
             </div>
           </div>
 
-          {/* Coluna 2: Análise de Ameaças (span-4) */}
-          <div className="col-span-4">
-            <div className="border border-cyan-400/30 rounded-lg bg-black/20 p-4 h-full">
+          {/* Coluna 2: Análise de Ameaças */}
+          <div>
+            <div className="border border-cyan-400/30 rounded-lg bg-black/20 p-4">
               <h3 className="text-cyan-400 font-bold text-lg mb-4">ANÁLISE DE AMEAÇAS</h3>
               
               <div className="space-y-4">
@@ -330,9 +359,9 @@ const IpIntelligence = () => {
             </div>
           </div>
 
-          {/* Coluna 3: Serviços e Portas (span-4) */}
-          <div className="col-span-4">
-            <div className="border border-cyan-400/30 rounded-lg bg-black/20 p-4 h-full">
+          {/* Coluna 3: Serviços e Portas */}
+          <div>
+            <div className="border border-cyan-400/30 rounded-lg bg-black/20 p-4">
               <h3 className="text-cyan-400 font-bold text-lg mb-4">SERVIÇOS DETECTADOS</h3>
               
               <div className="space-y-4">

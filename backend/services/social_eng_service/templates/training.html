@@ -1,0 +1,68 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Security Awareness Training</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8f9fa; }
+            .container { max-width: 800px; margin: 50px auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .header { text-align: center; margin-bottom: 30px; }
+            .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px; color: #155724; }
+            .tips { background: #e7f3ff; border: 1px solid #bee5eb; padding: 20px; border-radius: 5px; margin: 20px 0; }
+            .tip-item { margin: 10px 0; padding-left: 20px; }
+            .btn { background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🛡️ Security Awareness Training</h1>
+                <p>Learn how to identify and prevent phishing attacks</p>
+            </div>
+
+            <div class="success">
+                <strong>✅ Great job!</strong> You've completed this security awareness exercise.
+                This helps improve our organization's security posture.
+            </div>
+
+            <div class="tips">
+                <h3>🎯 How to Spot Phishing Emails:</h3>
+                <div class="tip-item">• Check the sender's email address carefully</div>
+                <div class="tip-item">• Look for urgent language or threats</div>
+                <div class="tip-item">• Hover over links to see the real destination</div>
+                <div class="tip-item">• Be suspicious of unexpected attachments</div>
+                <div class="tip-item">• Verify requests through other channels</div>
+            </div>
+
+            <div class="tips">
+                <h3>🔐 Best Security Practices:</h3>
+                <div class="tip-item">• Use strong, unique passwords</div>
+                <div class="tip-item">• Enable two-factor authentication</div>
+                <div class="tip-item">• Keep software updated</div>
+                <div class="tip-item">• Report suspicious emails to IT</div>
+                <div class="tip-item">• Never share credentials</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="#" class="btn" onclick="completeTraining()">Mark Training Complete</a>
+            </div>
+        </div>
+
+        <script>
+            function completeTraining() {
+                fetch('{{ app_base_url }}/track-interaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        campaign_id: '{{ campaign_id }}',
+                        action: 'awareness_completed',
+                        timestamp: new Date().toISOString()
+                    })
+                }).then(() => {
+                    alert('Training completed! Thank you for improving our security.');
+                });
+            }
+        </script>
+    </body>
+    </html>
+    
