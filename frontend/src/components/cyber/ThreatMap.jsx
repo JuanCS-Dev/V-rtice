@@ -1,6 +1,3 @@
-/**
- * ThreatMap - Wrapper de compatibilidade
- */
+import ThreatMap from './ThreatMap/ThreatMap';
 
-export { ThreatMap as default } from './ThreatMap';
-export { ThreatMap } from './ThreatMap';
+export default ThreatMap;

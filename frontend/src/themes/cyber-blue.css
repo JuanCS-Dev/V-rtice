@@ -1,0 +1,39 @@
+/* Tema Cyber Blue - Azul Cibernético */
+:root[data-theme="cyber-blue"] {
+  /* Cores Primárias */
+  --primary-color: #00d4ff;
+  --primary-dark: #00a8cc;
+  --primary-light: #66e5ff;
+  --primary-glow: rgba(0, 212, 255, 0.3);
+
+  /* Cores de Fundo */
+  --bg-primary: #000511;
+  --bg-secondary: #0a0f1a;
+  --bg-tertiary: #0f1a2e;
+  --bg-overlay: rgba(0, 5, 17, 0.8);
+
+  /* Cores de Texto */
+  --text-primary: #00d4ff;
+  --text-secondary: #00a8cc;
+  --text-muted: rgba(0, 212, 255, 0.5);
+  --text-inverse: #000511;
+
+  /* Bordas */
+  --border-color: rgba(0, 212, 255, 0.3);
+  --border-hover: #00d4ff;
+
+  /* Estados */
+  --success: #00ffaa;
+  --warning: #ffaa00;
+  --error: #ff3366;
+  --info: #00d4ff;
+
+  /* Sombras */
+  --shadow-sm: 0 0 10px rgba(0, 212, 255, 0.2);
+  --shadow-md: 0 0 20px rgba(0, 212, 255, 0.3);
+  --shadow-lg: 0 0 30px rgba(0, 212, 255, 0.4);
+
+  /* Efeitos */
+  --backdrop-blur: blur(10px);
+  --transition-speed: 0.3s;
+}

@@ -7,6 +7,7 @@ import Header from './components/Header';
 import SidePanel from './components/SidePanel';
 import DossierPanel from './components/DossierPanel';
 import MapPanel from './components/MapPanel';
+import { SimpleMap } from './components/MapPanel/SimpleMap';
 import Footer from './components/Footer';
 import ModalOcorrencias from './components/ModalOcorrencias';
 import ModalRelatorio from './components/ModalRelatorio';
@@ -65,26 +66,41 @@ function App() {
     }); 
   };
 
-  const handleSearch = async () => { 
-    if (!placa.trim()) return; 
-    setLoading(true); 
-    setError(null); 
-    setDossierData(null); 
-    try { 
-      const data = await consultarPlacaApi(placa); 
-      if (data.error) { 
-        throw new Error(data.error); 
-      } 
-      const dataWithLocation = { 
-        ...data, 
-        lastKnownLocation: data.lastKnownLocation || { lat: -16.328, lng: -48.953 } 
-      }; 
-      setDossierData(dataWithLocation); 
-      setSearchHistory(prev => [placa.toUpperCase(), ...prev.filter(p => p !== placa.toUpperCase())].slice(0, 10)); 
-    } catch (err) { 
-      setError(err.message); 
-    } finally { 
-      setLoading(false); 
+  const handleSearch = async () => {
+    if (!placa.trim()) {
+      console.log('[SEARCH] Placa vazia, abortando');
+      return;
+    }
+
+    console.log('[SEARCH] Iniciando busca para placa:', placa);
+    setLoading(true);
+    setError(null);
+    setDossierData(null);
+
+    try {
+      console.log('[SEARCH] Chamando API...');
+      const data = await consultarPlacaApi(placa);
+      console.log('[SEARCH] Resposta da API:', data);
+
+      if (data.error) {
+        console.error('[SEARCH] Erro na resposta:', data.error);
+        throw new Error(data.error);
+      }
+
+      const dataWithLocation = {
+        ...data,
+        lastKnownLocation: data.lastKnownLocation || { lat: -16.328, lng: -48.953 }
+      };
+
+      console.log('[SEARCH] Dados processados:', dataWithLocation);
+      setDossierData(dataWithLocation);
+      setSearchHistory(prev => [placa.toUpperCase(), ...prev.filter(p => p !== placa.toUpperCase())].slice(0, 10));
+    } catch (err) {
+      console.error('[SEARCH] Erro capturado:', err);
+      setError(err.message);
+    } finally {
+      console.log('[SEARCH] Finalizando busca');
+      setLoading(false);
     }
   };
 
@@ -152,7 +168,7 @@ function App() {
             placasSuspeitas={placasSuspeitas}
             onGerarRelatorio={handleGerarRelatorio}
           />
-          <MapPanel dossierData={dossierData} />
+          <SimpleMap dossierData={dossierData} />
         </div>
       </main>
 

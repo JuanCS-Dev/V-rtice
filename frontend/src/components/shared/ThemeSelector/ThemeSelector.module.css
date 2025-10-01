@@ -10,6 +10,9 @@
 .compact {
   position: relative;
   display: inline-block;
+  z-index: 10000;
+  /* Prevent parent overflow from hiding dropdown */
+  overflow: visible !important;
 }
 
 .compactButton {
@@ -39,18 +42,18 @@
 }
 
 .dropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
+  position: fixed;
+  top: 60px;
+  right: 20px;
   min-width: 200px;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background: rgba(20, 25, 39, 0.95);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  border-radius: 8px;
   padding: 0.5rem;
-  box-shadow: var(--shadow-lg);
-  z-index: var(--z-dropdown);
-  backdrop-filter: blur(var(--glass-blur));
-  animation: fadeIn var(--transition-fast) ease-out;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 255, 65, 0.2);
+  z-index: 99999;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.2s ease-out;
 }
 
 [data-theme="cyberpunk"] .dropdown {

@@ -31,7 +31,7 @@ export const CyberHeader = ({
           <Button
             variant="success"
             size="sm"
-            onClick={() => setCurrentView('operator')}
+            onClick={() => setCurrentView('main')}
             icon="fas fa-arrow-left"
           >
             VOLTAR VÉRTICE

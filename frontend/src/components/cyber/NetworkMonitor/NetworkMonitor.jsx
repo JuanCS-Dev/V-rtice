@@ -10,11 +10,11 @@
  */
 
 import React from 'react';
-import { Card } from '../../../shared';
-import { NetworkMonitorHeader } from './components/NetworkMonitorHeader';
-import { NetworkStatistics } from './components/NetworkStatistics';
-import { NetworkEventStream } from './components/NetworkEventStream';
-import { NetworkAdvancedControls } from './components/NetworkAdvancedControls';
+import { Card } from '../../shared/Card';
+import NetworkMonitorHeader from './components/NetworkMonitorHeader';
+import NetworkStatistics from './components/NetworkStatistics';
+import NetworkEventStream from './components/NetworkEventStream';
+import NetworkAdvancedControls from './components/NetworkAdvancedControls';
 import { useNetworkMonitoring } from './hooks/useNetworkMonitoring';
 import styles from './NetworkMonitor.module.css';
 

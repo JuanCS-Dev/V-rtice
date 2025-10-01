@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './IpAnalysisResults.module.css';
-import { ThreatCategory } from './ThreatCategory';
-import { OpenPort } from './OpenPort';
-import { IdentifiedService } from './IdentifiedService';
+import ThreatCategory from './ThreatCategory';
+import OpenPort from './OpenPort';
+import IdentifiedService from './IdentifiedService';
 
 /**
  * Displays the detailed analysis results for an IP address.

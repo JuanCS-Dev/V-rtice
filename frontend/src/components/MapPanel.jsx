@@ -204,6 +204,46 @@ const PredictiveHotspots = React.memo(({ hotspots, visible }) => {
 });
 
 // Componente para centralizar mapa quando dossierData mudar
+// Componente para forçar invalidateSize e garantir tiles
+const MapInitializer = () => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map) {
+      console.log('[MAP] MapInitializer: map instance detected');
+
+      // Force invalidate size multiple times to ensure tiles load
+      const timeouts = [50, 100, 200, 500, 1000, 2000];
+      timeouts.forEach(delay => {
+        setTimeout(() => {
+          map.invalidateSize(true); // true = animate
+          console.log('[MAP] invalidateSize called at', delay, 'ms');
+        }, delay);
+      });
+
+      // Force refresh all tile layers
+      setTimeout(() => {
+        map.eachLayer((layer) => {
+          if (layer instanceof L.TileLayer) {
+            console.log('[MAP] Forcing tile layer redraw');
+            layer.redraw();
+          }
+        });
+      }, 500);
+
+      // Set view to force tile loading
+      setTimeout(() => {
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+        console.log('[MAP] Forcing view reset:', center, zoom);
+        map.setView(center, zoom, { animate: false });
+      }, 1000);
+    }
+  }, [map]);
+
+  return null;
+};
+
 const MapUpdater = ({ dossierData }) => {
   const map = useMap();
 
@@ -392,7 +432,7 @@ const MapPanel = ({ dossierData }) => {
       });
 
       try {
-        const response = await axios.get(`http://localhost:8000/ocorrencias/heatmap?${params.toString()}`);
+        const response = await axios.get(`/api/ocorrencias/heatmap?${params.toString()}`);
         const data = response.data || [];
         setOccurrenceData(data);
 
@@ -434,7 +474,7 @@ const MapPanel = ({ dossierData }) => {
         min_samples: minSamples
       };
 
-      const response = await axios.post('http://localhost:8000/predict/crime-hotspots', payload, {
+      const response = await axios.post('/api/predict/crime-hotspots', payload, {
         timeout: 90000,
         headers: {
           'Content-Type': 'application/json'
@@ -470,8 +510,8 @@ const MapPanel = ({ dossierData }) => {
   const initialZoom = 12;
 
   return (
-    <div className="flex-1 relative h-full w-full">
-      <div className="h-full w-full bg-black/20 overflow-hidden relative">
+    <div className="flex-1 relative h-full w-full" style={{ minHeight: '600px', height: '100%' }}>
+      <div className="h-full w-full bg-black/20 overflow-hidden relative" style={{ minHeight: '600px', height: '100%' }}>
 
         {/* Overlay de Carregamento */}
         {(isLoading || isPredicting) && (
@@ -493,12 +533,30 @@ const MapPanel = ({ dossierData }) => {
           zoom={initialZoom}
           scrollWheelZoom={true}
           className="h-full w-full"
+          style={{ minHeight: '600px', height: '100%', width: '100%', zIndex: 1 }}
           zoomControl={false}
+          key={`map-${initialCenter[0]}-${initialCenter[1]}`}
+          whenCreated={(map) => {
+            console.log('[MAP] Map created!', map);
+            map.on('load', () => console.log('[MAP] Map loaded!'));
+            map.on('tileload', () => console.log('[MAP] Tile loaded!'));
+            map.on('tileerror', (e) => console.error('[MAP] Tile error:', e));
+          }}
         >
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            maxZoom={19}
+            eventHandlers={{
+              load: () => console.log('[TILE] TileLayer loaded!'),
+              tileerror: (error) => console.error('[TILE] Tile error:', error),
+              tileloadstart: () => console.log('[TILE] Tile load started'),
+              tileload: () => console.log('[TILE] Individual tile loaded')
+            }}
           />
+
+          {/* Forçar inicialização do mapa */}
+          <MapInitializer />
 
           {heatmapVisible && <HeatmapLayer points={occurrenceData} />}
           {showOccurrenceMarkers && <ClusteredOccurrenceMarkers data={occurrenceData} />}

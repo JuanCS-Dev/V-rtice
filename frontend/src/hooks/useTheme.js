@@ -12,13 +12,63 @@ const MODE_KEY = 'vertice-theme-mode';
 
 const AVAILABLE_THEMES = [
   {
-    id: 'cyberpunk',
-    name: 'Cyberpunk',
-    description: 'Visual moderno com neon e high-tech',
+    id: 'default',
+    name: 'Matrix Green',
+    description: 'Tema clássico inspirado em Matrix',
     preview: {
-      primary: '#00d9ff',
-      secondary: '#ff00aa',
-      background: '#0a0e1a'
+      primary: '#00ff41',
+      secondary: '#00cc33',
+      background: '#000000'
+    }
+  },
+  {
+    id: 'cyber-blue',
+    name: 'Cyber Blue',
+    description: 'Azul cibernético futurista',
+    preview: {
+      primary: '#00d4ff',
+      secondary: '#00a8cc',
+      background: '#000511'
+    }
+  },
+  {
+    id: 'purple-haze',
+    name: 'Purple Haze',
+    description: 'Roxo neon vibrante',
+    preview: {
+      primary: '#c77dff',
+      secondary: '#9d4edd',
+      background: '#10002b'
+    }
+  },
+  {
+    id: 'amber-alert',
+    name: 'Amber Alert',
+    description: 'Âmbar de alerta operacional',
+    preview: {
+      primary: '#ffb703',
+      secondary: '#fb8500',
+      background: '#1a0f00'
+    }
+  },
+  {
+    id: 'red-alert',
+    name: 'Red Alert',
+    description: 'Vermelho de alerta crítico',
+    preview: {
+      primary: '#ff0a54',
+      secondary: '#cc0844',
+      background: '#1a0000'
+    }
+  },
+  {
+    id: 'stealth-mode',
+    name: 'Stealth Mode',
+    description: 'Modo furtivo discreto',
+    preview: {
+      primary: '#8b8b8b',
+      secondary: '#5a5a5a',
+      background: '#0a0a0a'
     }
   },
   {
@@ -36,8 +86,8 @@ const AVAILABLE_THEMES = [
 export const useTheme = () => {
   // Estado do tema atual
   const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return 'cyberpunk';
-    return localStorage.getItem(THEME_KEY) || 'cyberpunk';
+    if (typeof window === 'undefined') return 'default';
+    return localStorage.getItem(THEME_KEY) || 'default';
   });
 
   // Estado do modo (light/dark) - apenas para windows11
@@ -98,17 +148,12 @@ export const useTheme = () => {
   }, [theme, applyTheme]);
 
   /**
-   * Toggle entre light/dark (apenas windows11)
+   * Toggle entre light/dark (não usado nos novos temas)
    */
   const toggleMode = useCallback(() => {
-    if (theme !== 'windows11') {
-      console.warn('[Theme] Mode toggle only available for windows11 theme');
-      return;
-    }
-
     const newMode = mode === 'light' ? 'dark' : 'light';
     setMode(newMode);
-  }, [theme, mode, setMode]);
+  }, [mode, setMode]);
 
   /**
    * Cicla entre temas
@@ -140,7 +185,7 @@ export const useTheme = () => {
     cycleTheme,
     availableThemes: AVAILABLE_THEMES,
     currentThemeInfo: getCurrentThemeInfo(),
-    supportsMode: theme === 'windows11'
+    supportsMode: false // Removido suporte a modo claro/escuro
   };
 };
 

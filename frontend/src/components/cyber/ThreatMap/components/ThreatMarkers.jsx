@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
@@ -6,29 +6,70 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { getThreatColor, getThreatIcon } from '../utils/threatUtils';
 
+// OTIMIZADO: Cache de ícones para evitar recriação
+const iconCache = new Map();
+
 const createThreatIcon = (severity, type, pulse = false) => {
+  const cacheKey = `${severity}-${type}-${pulse}`;
+
+  if (iconCache.has(cacheKey)) {
+    return iconCache.get(cacheKey);
+  }
+
   const color = getThreatColor(severity);
   const icon = getThreatIcon(type);
   const pulseHtml = pulse ? `<div class="pulse-ring" style="border-color: ${color};"></div>` : '';
 
-  return L.divIcon({
+  const divIcon = L.divIcon({
     html: `
       <div class="cyber-threat-marker" style="opacity: 1;">
-        <div class="threat-icon" style="background-color: ${color}; border-color: ${color}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid;">
-          <span style="font-size: 12px;">${icon}</span>
+        <div class="threat-icon" style="background-color: ${color}; border-color: ${color}; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid;">
+          <span style="font-size: 10px;">${icon}</span>
         </div>
         ${pulseHtml}
       </div>
     `,
     className: 'custom-threat-marker',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12]
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10]
   });
+
+  iconCache.set(cacheKey, divIcon);
+  return divIcon;
 };
 
 const ThreatMarkers = ({ threats, onThreatClick }) => {
   const map = useMap();
+
+  // OTIMIZADO: Memoize cluster options
+  const clusterOptions = useMemo(() => ({
+    chunkedLoading: true,
+    chunkInterval: 100,
+    chunkDelay: 50,
+    spiderfyOnMaxZoom: false,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true,
+    maxClusterRadius: 60,
+    disableClusteringAtZoom: 14,
+    animate: false,
+    animateAddingMarkers: false,
+    iconCreateFunction: function(cluster) {
+      const count = cluster.getChildCount();
+      let size = count < 10 ? 'small' : count < 100 ? 'medium' : 'large';
+      let color = count < 10 ? '#00aaff' : count < 100 ? '#ffaa00' : '#ff4000';
+
+      return new L.DivIcon({
+        html: `
+          <div style="background: radial-gradient(circle, ${color}, transparent); width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+            <span style="color: white; font-weight: bold; font-family: monospace; font-size: 11px;">${count}</span>
+          </div>
+        `,
+        className: `marker-cluster marker-cluster-${size}`,
+        iconSize: new L.Point(35, 35)
+      });
+    }
+  }), []);
 
   useEffect(() => {
     if (!map || threats.length === 0) return;

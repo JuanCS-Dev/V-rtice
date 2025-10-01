@@ -10,10 +10,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { Card, Badge, LoadingSpinner, Alert } from '../../../shared';
-import { InvestigationForm } from './components/InvestigationForm';
+import { Card, Badge, LoadingSpinner, Alert } from '../../shared';
+import InvestigationForm from './components/InvestigationForm';
 import { useSocialMediaInvestigation } from './hooks/useSocialMediaInvestigation';
-import { getConfidenceBadge, formatExecutionTime } from '../../../../api/worldClassTools';
+import { getConfidenceBadge, formatExecutionTime } from '../../../api/worldClassTools';
 import styles from './SocialMediaWidget.module.css';
 
 export const SocialMediaWidget = () => {

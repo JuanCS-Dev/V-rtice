@@ -20,7 +20,32 @@
   flex-direction: column;
   gap: var(--space-2);
   overflow-y: auto;
+  overflow-x: hidden;
   min-height: 0;
+  max-height: calc(100vh - 330px); /* Adjusted for footer */
+  padding-bottom: var(--space-6);
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-cyber-primary) var(--bg-tertiary);
+}
+
+.controlPanel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.controlPanel::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.controlPanel::-webkit-scrollbar-thumb {
+  background: var(--color-cyber-primary);
+  border-radius: var(--radius-sm);
+}
+
+.controlPanel::-webkit-scrollbar-thumb:hover {
+  background: var(--color-cyber-secondary);
 }
 
 .timelinePanel {

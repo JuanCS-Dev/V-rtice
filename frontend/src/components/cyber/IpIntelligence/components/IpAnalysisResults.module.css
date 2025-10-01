@@ -7,8 +7,33 @@
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
-  max-height: 600px;
+  padding-bottom: var(--space-8); /* Extra padding for footer */
+  max-height: calc(100vh - 350px);
+  min-height: 350px;
   overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-cyber-primary) var(--bg-tertiary);
+}
+
+.resultsGrid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.resultsGrid::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.resultsGrid::-webkit-scrollbar-thumb {
+  background: var(--color-cyber-primary);
+  border-radius: var(--radius-sm);
+}
+
+.resultsGrid::-webkit-scrollbar-thumb:hover {
+  background: var(--color-cyber-secondary);
 }
 
 .sectionCard {

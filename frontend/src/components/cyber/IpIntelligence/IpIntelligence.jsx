@@ -9,9 +9,9 @@
  */
 
 import React from 'react';
-import { Card } from '../../../shared';
-import { IpSearchForm } from './components/IpSearchForm';
-import { IpAnalysisResults } from './components/IpAnalysisResults';
+import { Card } from '../../shared/Card';
+import IpSearchForm from './components/IpSearchForm';
+import IpAnalysisResults from './components/IpAnalysisResults';
 import { useIpIntelligence } from './hooks/useIpIntelligence';
 import styles from './IpIntelligence.module.css';
 

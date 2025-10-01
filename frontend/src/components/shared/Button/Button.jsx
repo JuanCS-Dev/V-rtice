@@ -34,11 +34,11 @@ export const Button = ({
     >
       {loading && <span className={styles.spinner} />}
       {!loading && icon && iconPosition === 'left' && (
-        <span className={styles.icon}>{icon}</span>
+        <i className={`${styles.icon} ${icon}`} />
       )}
       <span className={styles.content}>{children}</span>
       {!loading && icon && iconPosition === 'right' && (
-        <span className={styles.icon}>{icon}</span>
+        <i className={`${styles.icon} ${icon}`} />
       )}
     </button>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NetworkEvent } from './NetworkEvent'; // Import the new component
+import NetworkEvent from './NetworkEvent';
 import styles from './NetworkEventStream.module.css';
 
 /**

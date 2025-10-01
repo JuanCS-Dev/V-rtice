@@ -1,9 +1,3 @@
-/**
- * SocialMediaWidget - Wrapper de compatibilidade
- *
- * Este arquivo mantém a compatibilidade com imports existentes.
- * A implementação real está em ./SocialMediaWidget/SocialMediaWidget.jsx
- */
+import SocialMediaWidget from './SocialMediaWidget/SocialMediaWidget';
 
-export { SocialMediaWidget as default } from './SocialMediaWidget';
-export { SocialMediaWidget } from './SocialMediaWidget';
+export default SocialMediaWidget;

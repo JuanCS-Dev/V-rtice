@@ -1,6 +1,3 @@
-/**
- * BreachDataWidget - Wrapper de compatibilidade
- */
+import BreachDataWidget from './BreachDataWidget/BreachDataWidget';
 
-export { BreachDataWidget as default } from './BreachDataWidget';
-export { BreachDataWidget } from './BreachDataWidget';
+export default BreachDataWidget;

@@ -15,14 +15,16 @@
  * Antes: 621 linhas | Depois: ~150 linhas
  */
 
-import React, { useState } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import React, { useState, lazy, Suspense } from 'react';
 import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import { Card, Badge, LoadingSpinner } from '../../shared';
-import { ThreatMarkers } from './components/ThreatMarkers';
 import { ThreatFilters } from './components/ThreatFilters';
 import { useThreatData } from './hooks/useThreatData';
 import styles from './ThreatMap.module.css';
+
+// OTIMIZADO: Lazy load apenas dos componentes pesados
+const ThreatMarkers = lazy(() => import('./components/ThreatMarkers'));
 
 export const ThreatMap = () => {
   const { threats, loading, error, filters, setFilters, refresh } = useThreatData();
@@ -73,12 +75,19 @@ export const ThreatMap = () => {
             zoom={10}
             className={styles.map}
             zoomControl={true}
+            preferCanvas={true}
+            key="threat-map"
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              maxZoom={19}
+              subdomains="abcd"
+              errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
             />
-            <ThreatMarkers threats={threats} onThreatClick={handleThreatClick} />
+            <Suspense fallback={null}>
+              <ThreatMarkers threats={threats} onThreatClick={handleThreatClick} />
+            </Suspense>
           </MapContainer>
         </div>
 

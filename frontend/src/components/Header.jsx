@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeSelector } from './shared/ThemeSelector';
+import { ThemeSelector } from './shared/ThemeSelector/ThemeSelector';
 
 const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKeyPress, searchHistory, setCurrentView, currentView }) => {
   const navigationModules = [
@@ -134,7 +134,7 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
                 onChange={(e) => setPlaca(e.target.value.toUpperCase())}
                 onKeyPress={handleKeyPress}
                 placeholder=">>> INSERIR PLACA DO VEÍCULO"
-                className="w-full bg-black/70 border border-green-400/50 text-green-400 placeholder-green-400/50 p-3 rounded-lg focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/20 font-mono text-lg tracking-widest"
+                className="w-full bg-black/70 border border-green-400/50 text-green-400 placeholder-green-400/50 p-3 rounded-lg focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/50"
                 disabled={loading}
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -147,7 +147,7 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
             <button
               onClick={handleSearch}
               disabled={loading || !placa.trim()}
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 disabled:from-gray-600 disabled:to-gray-700 text-black font-bold px-8 py-3 rounded-lg transition-all duration-300 disabled:cursor-not-allowed tracking-widest"
+              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 disabled:from-gray-600 disabled:to-gray-700 text-black font-bold px-8 py-3 rounded-lg transition-all duration-200"
             >
               {loading ? 'PROCESSANDO...' : 'EXECUTAR CONSULTA'}
             </button>

@@ -37,7 +37,13 @@ export const ThemeSelector = ({ compact = false, showInHeader = false }) => {
           title="Mudar tema"
         >
           <span className={styles.themeIcon}>
-            {theme === 'cyberpunk' ? '⚡' : '🪟'}
+            {theme === 'default' && '🟢'}
+            {theme === 'cyber-blue' && '🔵'}
+            {theme === 'purple-haze' && '🟣'}
+            {theme === 'amber-alert' && '🟠'}
+            {theme === 'red-alert' && '🔴'}
+            {theme === 'stealth-mode' && '⚫'}
+            {theme === 'windows11' && '🪟'}
           </span>
         </button>
 

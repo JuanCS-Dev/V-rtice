@@ -57,12 +57,37 @@
 }
 
 .eventList {
-  max-height: 400px; /* Fixed height for scroll */
+  max-height: calc(100vh - 550px); /* Dynamic height considering footer */
+  min-height: 250px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-right: var(--space-2);
+  padding-bottom: var(--space-4); /* Extra bottom padding */
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-cyber-primary) var(--bg-tertiary);
+}
+
+.eventList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.eventList::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.eventList::-webkit-scrollbar-thumb {
+  background: var(--color-cyber-primary);
+  border-radius: var(--radius-sm);
+}
+
+.eventList::-webkit-scrollbar-thumb:hover {
+  background: var(--color-cyber-secondary);
 }
 
 .noEvents {

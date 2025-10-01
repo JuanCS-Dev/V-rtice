@@ -1,0 +1,39 @@
+/* Tema Red Alert - Alerta Vermelho */
+:root[data-theme="red-alert"] {
+  /* Cores Primárias */
+  --primary-color: #ff0a54;
+  --primary-dark: #cc0844;
+  --primary-light: #ff477e;
+  --primary-glow: rgba(255, 10, 84, 0.3);
+
+  /* Cores de Fundo */
+  --bg-primary: #1a0000;
+  --bg-secondary: #2d0a0a;
+  --bg-tertiary: #3d0f0f;
+  --bg-overlay: rgba(26, 0, 0, 0.8);
+
+  /* Cores de Texto */
+  --text-primary: #ff0a54;
+  --text-secondary: #cc0844;
+  --text-muted: rgba(255, 10, 84, 0.5);
+  --text-inverse: #1a0000;
+
+  /* Bordas */
+  --border-color: rgba(255, 10, 84, 0.3);
+  --border-hover: #ff0a54;
+
+  /* Estados */
+  --success: #00ff88;
+  --warning: #ffaa00;
+  --error: #ff0a54;
+  --info: #00d4ff;
+
+  /* Sombras */
+  --shadow-sm: 0 0 10px rgba(255, 10, 84, 0.2);
+  --shadow-md: 0 0 20px rgba(255, 10, 84, 0.3);
+  --shadow-lg: 0 0 30px rgba(255, 10, 84, 0.4);
+
+  /* Efeitos */
+  --backdrop-blur: blur(10px);
+  --transition-speed: 0.3s;
+}

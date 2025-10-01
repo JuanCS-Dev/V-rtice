@@ -10,10 +10,10 @@
  */
 
 import React from 'react';
-import { Card, Badge, LoadingSpinner, Alert } from '../../../shared';
+import { Card, Badge, LoadingSpinner, Alert } from '../../shared';
 import { BreachSearchForm } from './components/BreachSearchForm';
 import { useBreachDataSearch } from './hooks/useBreachDataSearch';
-import { getConfidenceBadge, formatExecutionTime, getSeverityColor } from '../../../../api/worldClassTools';
+import { getConfidenceBadge, formatExecutionTime, getSeverityColor } from '../../../api/worldClassTools';
 import styles from './BreachDataWidget.module.css';
 
 export const BreachDataWidget = () => {

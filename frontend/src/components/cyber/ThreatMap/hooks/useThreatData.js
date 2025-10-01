@@ -17,21 +17,20 @@ export const useThreatData = () => {
 
   /**
    * Gera lista de IPs suspeitos conhecidos para análise
-   * Em produção, isso viria de um feed de threat intelligence
+   * OTIMIZADO: Reduzido para apenas IPs relevantes
    */
   const getKnownThreatsIPs = useCallback(() => {
-    // IPs de threat feeds conhecidos (exemplo)
-    // Em produção: buscar de um feed real ou database
+    // Apenas IPs de threat feeds conhecidos (OTIMIZADO)
     return [
       '185.220.101.23', // Tor exit node
       '45.142.212.61',  // Known botnet
       '89.248.165.201', // Malware C2
       '185.234.218.27', // Phishing
       '104.244.76.61',  // Twitter phishing
-      '8.8.8.8',        // Google DNS (teste - clean)
-      '1.1.1.1',        // Cloudflare DNS (teste - clean)
-      // Adiciona IPs aleatórios para visualização
-      ...Array.from({ length: 20 }, () =>
+      '8.8.8.8',        // Google DNS (teste)
+      '1.1.1.1',        // Cloudflare DNS (teste)
+      // Reduzido de 20 para 5 IPs aleatórios
+      ...Array.from({ length: 5 }, () =>
         `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
       )
     ];
@@ -45,68 +44,76 @@ export const useThreatData = () => {
       const ipsToAnalyze = getKnownThreatsIPs();
       const threats = [];
 
-      // Analisa cada IP (em paralelo, limitado a 10 por vez para não sobrecarregar)
-      const batchSize = 10;
+      // OTIMIZADO: Reduzido batch size de 10 para 5 e com timeout
+      const batchSize = 5;
+      const timeout = 8000; // 8 segundos timeout por batch
+
       for (let i = 0; i < ipsToAnalyze.length; i += batchSize) {
         const batch = ipsToAnalyze.slice(i, i + batchSize);
 
-        const batchResults = await Promise.all(
-          batch.map(async (ip) => {
-            try {
-              // Busca dados de geolocalização
-              const ipData = await analyzeIP(ip);
+        const batchResults = await Promise.race([
+          Promise.all(
+            batch.map(async (ip) => {
+              try {
+                // OTIMIZADO: Apenas uma chamada (analyzeIP já retorna threat info)
+                const ipData = await analyzeIP(ip);
 
-              // Busca threat intelligence
-              const threatData = await checkThreatIntelligence(ip, 'ip');
+                // Se não tem geolocalização, pula
+                if (!ipData.success || !ipData.geolocation) {
+                  return null;
+                }
 
-              // Se não tem geolocalização, pula
-              if (!ipData.success || !ipData.geolocation) {
-                return null;
-              }
-
-              // Determina severidade baseada no threat score
-              let severity = 'low';
-              if (threatData.success) {
-                const score = threatData.threatScore;
+                // Determina severidade baseada no reputation score
+                const score = ipData.reputation?.score || 50;
+                let severity = 'low';
                 if (score >= 80) severity = 'critical';
                 else if (score >= 60) severity = 'high';
                 else if (score >= 40) severity = 'medium';
+
+                // Tipo baseado em heurística simples
+                const type = ipData.ptr_record?.includes('tor') ? 'tor' :
+                             score < 40 ? 'malicious' : 'unknown';
+
+                return {
+                  id: `threat_${ip}`,
+                  lat: ipData.geolocation.lat,
+                  lng: ipData.geolocation.lon,
+                  severity,
+                  type,
+                  timestamp: new Date().toISOString(),
+                  source: ip,
+                  description: ipData.reputation?.threat_level || 'Unknown threat',
+                  country: ipData.geolocation.country,
+                  city: ipData.geolocation.city,
+                  isp: ipData.geolocation.isp,
+                  asn: ipData.geolocation.asn,
+                  threatScore: score,
+                  isMalicious: score < 50,
+                  confidence: score > 70 ? 'high' : score > 40 ? 'medium' : 'low'
+                };
+              } catch (error) {
+                console.error(`Failed to analyze ${ip}:`, error);
+                return null;
               }
-
-              // Determina tipo baseado nas categorias
-              const categories = threatData.success ? threatData.categories : [];
-              const type = categories[0] || 'unknown';
-
-              return {
-                id: `threat_${ip}`,
-                lat: ipData.geolocation.lat,
-                lng: ipData.geolocation.lon,
-                severity,
-                type,
-                timestamp: new Date().toISOString(),
-                source: ip,
-                description: threatData.success ? threatData.reputation : 'Unknown threat',
-                country: ipData.geolocation.country,
-                city: ipData.geolocation.city,
-                isp: ipData.geolocation.isp,
-                asn: ipData.geolocation.asn,
-                threatScore: threatData.success ? threatData.threatScore : 0,
-                isMalicious: threatData.success ? threatData.isMalicious : false,
-                confidence: threatData.success ? threatData.confidence : 'low',
-                recommendations: threatData.success ? threatData.recommendations : []
-              };
-            } catch (error) {
-              console.error(`Failed to analyze ${ip}:`, error);
-              return null;
-            }
-          })
-        );
+            })
+          ),
+          // Timeout protection
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Batch timeout')), timeout)
+          )
+        ]).catch(err => {
+          console.warn('Batch failed:', err.message);
+          return [];
+        });
 
         // Filtra nulls e adiciona à lista
-        threats.push(...batchResults.filter(t => t !== null));
+        const validThreats = (batchResults || []).filter(t => t !== null);
+        threats.push(...validThreats);
 
         // Atualiza progressivamente para feedback visual
-        setThreats([...threats]);
+        if (validThreats.length > 0) {
+          setThreats([...threats]);
+        }
       }
 
       console.log(`Loaded ${threats.length} threats from real services`);

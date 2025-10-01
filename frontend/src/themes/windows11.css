@@ -1,0 +1,39 @@
+/* Tema Windows 11 - Clean, Sóbrio, Profissional */
+:root[data-theme="windows11"] {
+  /* Cores Primárias */
+  --primary-color: #0078d4;
+  --primary-dark: #005a9e;
+  --primary-light: #50a6e8;
+  --primary-glow: rgba(0, 120, 212, 0.2);
+
+  /* Cores de Fundo */
+  --bg-primary: #f3f3f3;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #ffffff;
+  --bg-overlay: rgba(255, 255, 255, 0.9);
+
+  /* Cores de Texto */
+  --text-primary: #1f1f1f;
+  --text-secondary: #616161;
+  --text-muted: rgba(31, 31, 31, 0.5);
+  --text-inverse: #ffffff;
+
+  /* Bordas */
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 120, 212, 0.3);
+
+  /* Estados */
+  --success: #107c10;
+  --warning: #ffb900;
+  --error: #d13438;
+  --info: #0078d4;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+
+  /* Efeitos */
+  --backdrop-blur: blur(30px);
+  --transition-speed: 0.2s;
+}
