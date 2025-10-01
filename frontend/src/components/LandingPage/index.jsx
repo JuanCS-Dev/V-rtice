@@ -36,45 +36,47 @@ export const LandingPage = ({ setCurrentView }) => {
 
   return (
     <div className="landing-page">
-      {/* Hero Section */}
-      <div className="hero-section">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span className="pulse-dot"></span>
-            <span>SISTEMA OPERACIONAL</span>
+      <div style={{width: '100%', maxWidth: '1800px', margin: '0 auto'}}>
+        {/* Hero Section */}
+        <div className="hero-section">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <span className="pulse-dot"></span>
+              <span>SISTEMA OPERACIONAL</span>
+            </div>
+  
+            <h1 className="hero-title">
+              PROJETO VÉRTICE
+              <span className="gradient-text">v2.4.0</span>
+            </h1>
+  
+            <p className="hero-subtitle">
+              Plataforma Unificada de Inteligência Criminal e Segurança Cibernética
+            </p>
+  
+            <div className="hero-tags">
+              <span className="tag">🛡️ Cyber Security</span>
+              <span className="tag">🕵️ OSINT</span>
+              <span className="tag">⚡ Real-Time Analysis</span>
+              <span className="tag">🤖 AI-Powered</span>
+            </div>
           </div>
-
-          <h1 className="hero-title">
-            PROJETO VÉRTICE
-            <span className="gradient-text">v2.4.0</span>
-          </h1>
-
-          <p className="hero-subtitle">
-            Plataforma Unificada de Inteligência Criminal e Segurança Cibernética
-          </p>
-
-          <div className="hero-tags">
-            <span className="tag">🛡️ Cyber Security</span>
-            <span className="tag">🕵️ OSINT</span>
-            <span className="tag">⚡ Real-Time Analysis</span>
-            <span className="tag">🤖 AI-Powered</span>
+  
+          {/* Mapa Global de Ameaças */}
+          <div className="threat-globe-container">
+            <ThreatGlobe />
           </div>
         </div>
-
-        {/* Mapa Global de Ameaças */}
-        <div className="threat-globe-container">
-          <ThreatGlobe />
-        </div>
+  
+        {/* Stats Grid */}
+        <StatsPanel stats={stats} />
+  
+        {/* Modules Grid */}
+        <ModuleGrid setCurrentView={setCurrentView} />
+  
+        {/* Live Activity Feed */}
+        <LiveFeed />
       </div>
-
-      {/* Stats Grid */}
-      <StatsPanel stats={stats} />
-
-      {/* Modules Grid */}
-      <ModuleGrid setCurrentView={setCurrentView} />
-
-      {/* Live Activity Feed */}
-      <LiveFeed />
 
       {/* Footer Info */}
       <div className="landing-footer">

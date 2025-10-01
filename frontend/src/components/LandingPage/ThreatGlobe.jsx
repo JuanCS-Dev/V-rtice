@@ -11,17 +11,32 @@ export const ThreatGlobe = () => {
   const mapInstanceRef = useRef(null);
   const [threats, setThreats] = useState([]);
 
-  // Gerar ameaças aleatórias
+  // Gerar ameaças aleatórias em locais mais realistas
   const generateThreat = () => {
     const types = ['DDoS', 'Malware', 'Phishing', 'Ransomware', 'Exploit'];
     const severities = ['critical', 'high', 'medium', 'low'];
+
+    const regions = [
+      { name: 'Brazil', latRange: [-34, 5], lngRange: [-74, -34] },
+      { name: 'USA', latRange: [25, 49], lngRange: [-122, -67] },
+      { name: 'Russia', latRange: [41, 78], lngRange: [20, 180] },
+      { name: 'Europe', latRange: [36, 70], lngRange: [-10, 40] },
+      { name: 'Australia', latRange: [-38, -18], lngRange: [120, 148] },
+      { name: 'Japan', latRange: [30, 46], lngRange: [129, 146] },
+      { name: 'China', latRange: [20, 54], lngRange: [73, 135] },
+    ];
+
+    const region = regions[Math.floor(Math.random() * regions.length)];
+    
+    const lat = Math.random() * (region.latRange[1] - region.latRange[0]) + region.latRange[0];
+    const lng = Math.random() * (region.lngRange[1] - region.lngRange[0]) + region.lngRange[0];
 
     return {
       id: Math.random(),
       type: types[Math.floor(Math.random() * types.length)],
       severity: severities[Math.floor(Math.random() * severities.length)],
-      lat: (Math.random() * 180) - 90,
-      lng: (Math.random() * 360) - 180,
+      lat: lat,
+      lng: lng,
     };
   };
 
@@ -41,7 +56,6 @@ export const ThreatGlobe = () => {
       preferCanvas: true,
     });
 
-    // Tiles escuros - CartoDB Dark Matter (versão alternativa)
     const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
       attribution: '',
       maxZoom: 5,
@@ -49,29 +63,31 @@ export const ThreatGlobe = () => {
       subdomains: 'abcd',
     });
 
-    tileLayer.on('tileerror', function(error, tile) {
-      console.error('Tile error:', error);
-    });
-
-    tileLayer.on('load', function() {
-      console.log('Tiles loaded successfully');
-    });
-
+    tileLayer.on('tileerror', (error, tile) => console.error('Tile error:', error));
+    tileLayer.on('load', () => console.log('Tiles loaded successfully'));
     tileLayer.addTo(map);
 
     mapInstanceRef.current = map;
 
-    // Force invalidate after mount
-    setTimeout(() => {
+    // --- ROBUST FIX --- 
+    // Observa o container do mapa e força a atualização do Leaflet quando o tamanho muda.
+    // Isso corrige o bug dos tiles desalinhados de forma confiável.
+    const resizeObserver = new ResizeObserver(() => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.invalidateSize();
       }
-    }, 100);
+    });
+
+    resizeObserver.observe(mapRef.current);
 
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
+      }
+      if (mapRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        resizeObserver.unobserve(mapRef.current);
       }
     };
   }, []);
