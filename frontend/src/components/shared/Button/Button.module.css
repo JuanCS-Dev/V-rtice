@@ -1,0 +1,210 @@
+
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-weight: var(--font-bold);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+  white-space: nowrap;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Content */
+.content {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Loading State */
+.loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+.spinner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Variants */
+.primary {
+  background: var(--gradient-cyber);
+  color: var(--bg-primary);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.primary:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.secondary {
+  background: transparent;
+  border: var(--border-2) solid var(--color-cyber-primary);
+  color: var(--color-cyber-primary);
+}
+
+.secondary:hover:not(:disabled) {
+  background: rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.outline {
+  background: transparent;
+  border: var(--border-1) solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.outline:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--text-primary);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.danger {
+  background: var(--gradient-danger);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.danger:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.success {
+  background: var(--gradient-success);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.success:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.osint {
+  background: var(--gradient-osint);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+.osint:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.analytics {
+  background: var(--gradient-analytics);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.analytics:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Sizes */
+.xs {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  gap: var(--space-1);
+}
+
+.xs .spinner {
+  width: 12px;
+  height: 12px;
+}
+
+.sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  gap: var(--space-1-5);
+}
+
+.sm .spinner {
+  width: 14px;
+  height: 14px;
+}
+
+.md {
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-base);
+}
+
+.lg {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-lg);
+}
+
+.lg .spinner {
+  width: 20px;
+  height: 20px;
+}
+
+.xl {
+  padding: var(--space-5) var(--space-8);
+  font-size: var(--text-xl);
+  gap: var(--space-3);
+}
+
+.xl .spinner {
+  width: 24px;
+  height: 24px;
+}
+
+/* Full Width */
+.fullWidth {
+  width: 100%;
+}

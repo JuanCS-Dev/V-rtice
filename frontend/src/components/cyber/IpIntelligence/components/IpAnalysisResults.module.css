@@ -1,0 +1,232 @@
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.sectionCard {
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sectionTitle {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+}
+
+.infoValue {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base);
+}
+
+.threatLevelBadge {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.threatLevelBadge.critical {
+  color: var(--color-critical);
+  border-color: var(--color-critical);
+  background: rgba(255, 0, 64, 0.1);
+}
+.threatLevelBadge.high {
+  color: var(--color-high);
+  border-color: var(--color-high);
+  background: rgba(255, 64, 0, 0.1);
+}
+.threatLevelBadge.medium {
+  color: var(--color-medium);
+  border-color: var(--color-medium);
+  background: rgba(255, 170, 0, 0.1);
+}
+.threatLevelBadge.low {
+  color: var(--color-low);
+  border-color: var(--color-low);
+  background: rgba(0, 170, 0, 0.1);
+}
+.threatLevelBadge.default {
+  color: var(--text-secondary);
+  border-color: var(--border-primary);
+  background: var(--bg-secondary);
+}
+
+.reputationScoreContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.reputationScoreValue {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+}
+
+.reputationScoreValue.low {
+  color: var(--color-critical);
+}
+.reputationScoreValue.medium {
+  color: var(--color-high);
+}
+.reputationScoreValue.high {
+  color: var(--color-low);
+}
+
+.progressBar {
+  flex: 1;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  height: var(--space-2);
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.progressBarFill.low {
+  background: var(--color-critical);
+}
+.progressBarFill.medium {
+  background: var(--color-high);
+}
+.progressBarFill.high {
+  background: var(--color-low);
+}
+
+.threatCategories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.threatCategoryItem {
+  background: rgba(255, 0, 64, 0.1);
+  border: 1px solid rgba(255, 0, 64, 0.3);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  color: var(--color-critical);
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+}
+
+.openPortsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.portPill {
+  background: rgba(255, 170, 0, 0.1);
+  color: var(--color-medium);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+}
+
+.servicesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.serviceCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.serviceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.servicePort {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.serviceName {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.serviceVersion {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
+}
+
+.initialState {
+  text-align: center;
+  padding: var(--space-8) var(--space-5);
+  color: var(--color-cyber-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+}
+
+.initialStateIcon {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-4);
+  display: block;
+}
+
+.initialStateTitle {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-2);
+}
+
+.initialStateDescription {
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+}

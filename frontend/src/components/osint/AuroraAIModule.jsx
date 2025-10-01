@@ -94,66 +94,66 @@ const AuroraAIModule = ({ setIsAIProcessing, setResults }) => {
 
   return (
     <div className="space-y-6">
-      <div className="border border-purple-400/50 rounded-lg bg-purple-400/5 p-6">
-        <h2 className="text-purple-400 font-bold text-2xl mb-4 tracking-wider">
-          🧠 AURORA AI - ORQUESTRADOR DE INVESTIGAÇÃO
+      <div className="border border-cyan-500/30 rounded-lg bg-black/40 p-6">
+        <h2 className="text-white font-semibold text-xl mb-2 tracking-wide">
+          AURORA AI
         </h2>
-        <p className="text-purple-400/70 text-sm mb-6">
-          Sistema de IA avançado para investigação OSINT automatizada com análise comportamental
+        <p className="text-gray-400 text-xs mb-6 font-mono">
+          Autonomous intelligence orchestrator for OSINT investigation
         </p>
 
         {/* Input Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="space-y-2">
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider">USERNAME / HANDLE</label>
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="space-y-1">
+            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Username</label>
             <input
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="john_doe_2024"
               value={targetData.username}
               onChange={(e) => setTargetData({...targetData, username: e.target.value})}
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider">EMAIL</label>
+          <div className="space-y-1">
+            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Email</label>
             <input
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="target@email.com"
               value={targetData.email}
               onChange={(e) => setTargetData({...targetData, email: e.target.value})}
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider">TELEFONE</label>
+          <div className="space-y-1">
+            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Phone</label>
             <input
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="+5562999999999"
               value={targetData.phone}
               onChange={(e) => setTargetData({...targetData, phone: e.target.value})}
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider">NOME COMPLETO</label>
+          <div className="space-y-1">
+            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Name</label>
             <input
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="João Silva"
               value={targetData.name}
               onChange={(e) => setTargetData({...targetData, name: e.target.value})}
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider">LOCALIZAÇÃO</label>
+          <div className="space-y-1">
+            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Location</label>
             <input
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="Goiânia, GO"
               value={targetData.location}
               onChange={(e) => setTargetData({...targetData, location: e.target.value})}
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider">CONTEXTO</label>
+          <div className="space-y-1">
+            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Context</label>
             <input
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono"
-              placeholder="Investigação de segurança"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+              placeholder="Security investigation"
               value={targetData.context}
               onChange={(e) => setTargetData({...targetData, context: e.target.value})}
             />
@@ -161,55 +161,55 @@ const AuroraAIModule = ({ setIsAIProcessing, setResults }) => {
         </div>
 
         {/* Buttons */}
-        <div className="flex space-x-4 mb-6">
+        <div className="flex gap-2 mb-4">
           <button
-            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider"
+            className="flex-1 bg-gradient-to-r from-black via-green-900/40 to-green-700/60 hover:from-green-900/50 hover:to-green-600/70 text-gray-200 font-medium py-2 px-4 rounded text-sm border border-green-700/30 transition-all duration-200"
             onClick={handleInvestigation}
           >
-            🚀 INICIAR INVESTIGAÇÃO AURORA AI
+            Initialize Investigation
           </button>
           <button
-            className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider"
+            className="bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-gray-300 font-medium py-2 px-4 rounded text-sm border border-gray-700 transition-all duration-200"
             onClick={clearForm}
           >
-            🗑️ LIMPAR
+            Clear
           </button>
         </div>
 
         {/* Progress */}
         {aiPhase && (
-          <div className="bg-black/50 border border-purple-400/30 rounded-lg p-4 mb-6">
-            <div className="text-purple-400 text-sm mb-2">{aiPhase}</div>
-            <div className="w-full bg-purple-400/20 rounded-full h-2 overflow-hidden">
+          <div className="bg-black/60 border border-gray-700 rounded p-3 mb-4">
+            <div className="text-gray-300 text-xs mb-2 font-mono">{aiPhase}</div>
+            <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-green-600 to-cyan-500 transition-all duration-500"
                 style={{ width: `${aiProgress}%` }}
               />
             </div>
-            <div className="text-purple-400/60 text-xs text-right mt-1">{aiProgress}%</div>
+            <div className="text-gray-500 text-[10px] text-right mt-1 font-mono">{aiProgress}%</div>
           </div>
         )}
 
         {/* Results */}
         {result && (
-          <div className="bg-black/50 border border-purple-400/30 rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-purple-400 font-bold text-lg">📋 RELATÓRIO DE INVESTIGAÇÃO</h3>
-              <span className="text-purple-400/60 text-sm">ID: {result.investigation_id}</span>
+          <div className="bg-black/60 border border-gray-700 rounded p-4">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-800">
+              <h3 className="text-white font-semibold text-sm">Investigation Report</h3>
+              <span className="text-gray-500 text-xs font-mono">{result.investigation_id}</span>
             </div>
 
             {/* Risk Assessment */}
             {result.risk_assessment && (
-              <div className="bg-red-400/10 border border-red-400/30 rounded-lg p-4 mb-4">
-                <h4 className="text-red-400 font-bold mb-3">AVALIAÇÃO DE RISCO</h4>
-                <div className="flex items-center space-x-6">
+              <div className="bg-red-950/30 border border-red-900/30 rounded p-3 mb-3">
+                <h4 className="text-red-400 font-medium text-xs mb-2 uppercase tracking-wider">Risk Assessment</h4>
+                <div className="flex items-center space-x-4">
                   <div className="text-center">
-                    <div className="text-red-400 text-4xl font-bold">{result.risk_assessment.risk_score}</div>
-                    <div className="text-red-400/70 text-sm">{result.risk_assessment.risk_level}</div>
+                    <div className="text-red-400 text-2xl font-bold">{result.risk_assessment.risk_score}</div>
+                    <div className="text-red-400/70 text-[10px]">{result.risk_assessment.risk_level}</div>
                   </div>
                   <div className="flex-1">
-                    <strong className="text-white/80">Fatores de Risco:</strong>
-                    <ul className="text-white/70 text-sm mt-2 space-y-1">
+                    <span className="text-gray-400 text-xs font-medium">Risk Factors:</span>
+                    <ul className="text-gray-500 text-xs mt-1 space-y-0.5">
                       {result.risk_assessment.risk_factors?.map((factor, idx) => (
                         <li key={idx}>• {factor}</li>
                       ))}
@@ -221,21 +221,21 @@ const AuroraAIModule = ({ setIsAIProcessing, setResults }) => {
 
             {/* Executive Summary */}
             {result.executive_summary && (
-              <div className="bg-purple-400/10 border border-purple-400/30 rounded-lg p-4 mb-4">
-                <h4 className="text-purple-400 font-bold mb-2">RESUMO EXECUTIVO</h4>
-                <p className="text-white/80 text-sm">{result.executive_summary}</p>
+              <div className="bg-blue-950/20 border border-blue-900/30 rounded p-3 mb-3">
+                <h4 className="text-cyan-400 font-medium text-xs mb-2 uppercase tracking-wider">Executive Summary</h4>
+                <p className="text-gray-400 text-xs leading-relaxed">{result.executive_summary}</p>
               </div>
             )}
 
             {/* Patterns Found */}
             {result.patterns_found && (
-              <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-4 mb-4">
-                <h4 className="text-yellow-400 font-bold mb-3">PADRÕES DETECTADOS</h4>
-                <div className="space-y-2">
+              <div className="bg-yellow-950/20 border border-yellow-900/30 rounded p-3 mb-3">
+                <h4 className="text-yellow-500 font-medium text-xs mb-2 uppercase tracking-wider">Patterns Detected</h4>
+                <div className="space-y-1.5">
                   {result.patterns_found.map((pattern, idx) => (
-                    <div key={idx} className="flex space-x-3 bg-black/30 p-2 rounded">
-                      <span className="text-yellow-400 font-bold text-sm">{pattern.type}</span>
-                      <span className="text-white/80 text-sm">{pattern.description}</span>
+                    <div key={idx} className="flex space-x-2 bg-black/30 px-2 py-1.5 rounded text-xs">
+                      <span className="text-yellow-500 font-medium">{pattern.type}</span>
+                      <span className="text-gray-400">{pattern.description}</span>
                     </div>
                   ))}
                 </div>
@@ -244,13 +244,13 @@ const AuroraAIModule = ({ setIsAIProcessing, setResults }) => {
 
             {/* Recommendations */}
             {result.recommendations && (
-              <div className="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4">
-                <h4 className="text-cyan-400 font-bold mb-3">RECOMENDAÇÕES DA IA</h4>
-                <div className="space-y-2">
+              <div className="bg-green-950/20 border border-green-900/30 rounded p-3">
+                <h4 className="text-green-400 font-medium text-xs mb-2 uppercase tracking-wider">AI Recommendations</h4>
+                <div className="space-y-1.5">
                   {result.recommendations.map((rec, idx) => (
-                    <div key={idx} className="bg-black/30 p-3 rounded">
-                      <strong className="text-cyan-400">{rec.action}:</strong>
-                      <span className="text-white/80 ml-2">{rec.description}</span>
+                    <div key={idx} className="bg-black/30 px-2 py-1.5 rounded text-xs">
+                      <span className="text-green-400 font-medium">{rec.action}:</span>
+                      <span className="text-gray-400 ml-2">{rec.description}</span>
                     </div>
                   ))}
                 </div>

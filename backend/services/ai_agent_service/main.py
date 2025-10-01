@@ -15,6 +15,37 @@ import json
 import os
 import asyncio
 
+# COGNITIVE CORE - The brain that makes Aurora think
+from reasoning_engine import ReasoningEngine, ThoughtChain
+
+# MEMORY SYSTEM - Aurora's memory (short-term, long-term, semantic)
+from memory_system import MemorySystem, ConversationContext
+
+# WORLD-CLASS TOOLS - NSA-grade arsenal
+from tools_world_class import (
+    WORLD_CLASS_TOOLS,
+    get_tool_catalog,
+    # Cyber Security
+    exploit_search,
+    dns_enumeration,
+    subdomain_discovery,
+    web_crawler,
+    javascript_analysis,
+    container_scan,
+    # OSINT
+    social_media_deep_dive,
+    breach_data_search,
+    # Analytics
+    pattern_recognition,
+    anomaly_detection,
+    time_series_analysis,
+    graph_analysis,
+    nlp_entity_extraction,
+)
+
+# TOOL ORCHESTRATOR - Parallel execution, caching, validation
+from tool_orchestrator import ToolOrchestrator, ToolExecution, ValidationLevel
+
 app = FastAPI(
     title="Vértice AI Agent - AI-FIRST Brain",
     description="Sistema de IA conversacional com acesso maestro a todos os serviços via tool calling",
@@ -45,6 +76,49 @@ OSINT_SERVICE_URL = os.getenv("OSINT_SERVICE_URL", "http://osint-service:8007")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "anthropic")  # anthropic, openai, local
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+# Initialize Reasoning Engine
+reasoning_engine = ReasoningEngine(
+    llm_provider=LLM_PROVIDER,
+    anthropic_api_key=ANTHROPIC_API_KEY,
+    openai_api_key=OPENAI_API_KEY
+)
+
+# Initialize Memory System
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+POSTGRES_URL = os.getenv("POSTGRES_URL", "postgresql://postgres:postgres@localhost:5432/aurora")
+ENABLE_SEMANTIC_MEMORY = os.getenv("ENABLE_SEMANTIC_MEMORY", "false").lower() == "true"
+
+memory_system = MemorySystem(
+    redis_url=REDIS_URL,
+    postgres_url=POSTGRES_URL,
+    enable_semantic=ENABLE_SEMANTIC_MEMORY
+)
+
+# Initialize Tool Orchestrator
+tool_orchestrator = ToolOrchestrator(
+    max_concurrent=5,
+    enable_cache=True,
+    cache_ttl=300,  # 5 minutes
+    default_timeout=30
+)
+
+# Lifecycle events
+@app.on_event("startup")
+async def startup_event():
+    """Inicializa sistemas na startup"""
+    try:
+        await memory_system.initialize()
+        print("✅ Memory System initialized")
+    except Exception as e:
+        print(f"⚠️  Memory System initialization failed: {e}")
+        print("   Aurora will run without persistent memory")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Desliga sistemas no shutdown"""
+    await memory_system.shutdown()
+    print("👋 Memory System shutdown")
 
 # ========================================
 # TOOL DEFINITIONS (Function Calling)
@@ -358,6 +432,7 @@ class ChatResponse(BaseModel):
     tools_used: List[ToolUse]
     conversation_id: Optional[str] = None
     timestamp: str
+    reasoning_trace: Optional[Dict[str, Any]] = None  # Chain-of-Thought transparency
 
 # ========================================
 # LLM INTEGRATION
@@ -483,16 +558,29 @@ async def call_openai_gpt(messages: List[Dict], tools: List[Dict]) -> Dict:
 async def root():
     return {
         "service": "Vértice AI Agent - AI-FIRST Brain",
-        "version": "1.0.0",
+        "version": "2.0.0",  # Aurora 2.0 - World-Class
         "status": "online",
         "llm_provider": LLM_PROVIDER,
         "llm_configured": bool(ANTHROPIC_API_KEY or OPENAI_API_KEY),
-        "available_tools": len(TOOLS),
+        "legacy_tools": len(TOOLS),
+        "world_class_tools": len(WORLD_CLASS_TOOLS),
+        "total_tools": len(TOOLS) + len(WORLD_CLASS_TOOLS),
         "capabilities": {
             "conversational_ai": True,
             "tool_calling": True,
             "autonomous_investigation": True,
-            "multi_service_orchestration": True
+            "multi_service_orchestration": True,
+            "chain_of_thought_reasoning": True,
+            "multi_layer_memory": True,
+            "parallel_tool_execution": True,
+            "result_caching": True,
+            "result_validation": True,
+            "nsa_grade": True
+        },
+        "cognitive_systems": {
+            "reasoning_engine": "online",
+            "memory_system": "online",
+            "tool_orchestrator": "online"
         }
     }
 
@@ -500,108 +588,519 @@ async def root():
 async def list_tools():
     """Lista todas as tools disponíveis para a AI"""
     return {
-        "total_tools": len(TOOLS),
-        "tools": TOOLS
+        "legacy_tools": len(TOOLS),
+        "world_class_tools": len(WORLD_CLASS_TOOLS),
+        "total_tools": len(TOOLS) + len(WORLD_CLASS_TOOLS),
+        "legacy": TOOLS,
+        "world_class": get_tool_catalog()
     }
+
+@app.get("/tools/world-class")
+async def list_world_class_tools():
+    """
+    Lista as World-Class Tools (NSA-grade).
+
+    17 tools de nível mundial organizadas por categoria:
+    - Cyber Security (6)
+    - OSINT (2)
+    - Analytics (5)
+    - Advanced Tools (4)
+    """
+    catalog = get_tool_catalog()
+
+    # Organize by category
+    by_category = {}
+    for name, info in catalog.items():
+        category = info.get("category", "other")
+        if category not in by_category:
+            by_category[category] = []
+        by_category[category].append({
+            "name": name,
+            "description": info.get("description"),
+            "complexity": info.get("complexity"),
+            "avg_execution_time": info.get("avg_execution_time")
+        })
+
+    return {
+        "total_tools": len(WORLD_CLASS_TOOLS),
+        "categories": list(by_category.keys()),
+        "tools_by_category": by_category,
+        "standards": {
+            "type_safety": "Pydantic models",
+            "self_validating": True,
+            "self_documenting": True,
+            "graceful_failures": True,
+            "performance_optimized": True,
+            "intelligence_first": True
+        },
+        "catalog": catalog
+    }
+
+@app.post("/tools/world-class/execute")
+async def execute_world_class_tool(
+    tool_name: str,
+    tool_input: Dict[str, Any]
+):
+    """
+    Executa uma World-Class Tool diretamente.
+
+    Args:
+        tool_name: Nome da tool (ex: 'exploit_search')
+        tool_input: Input parameters para a tool
+
+    Returns:
+        BaseToolResult com status, confidence, dados e metadata
+    """
+    if tool_name not in WORLD_CLASS_TOOLS:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Tool '{tool_name}' not found. Available tools: {list(WORLD_CLASS_TOOLS.keys())}"
+        )
+
+    try:
+        tool_func = WORLD_CLASS_TOOLS[tool_name]
+        result = await tool_func(**tool_input)
+
+        return {
+            "tool_name": tool_name,
+            "status": result.status,
+            "confidence": result.confidence,
+            "confidence_level": result.confidence_level,
+            "is_actionable": result.is_actionable,
+            "execution_time_ms": result.execution_time_ms,
+            "timestamp": result.timestamp,
+            "result": result.dict(),
+            "metadata": result.metadata,
+            "errors": result.errors,
+            "warnings": result.warnings
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Tool execution failed: {str(e)}"
+        )
+
+@app.post("/tools/world-class/execute-parallel")
+async def execute_parallel_tools(
+    executions: List[Dict[str, Any]],
+    fail_fast: bool = False
+):
+    """
+    Executa múltiplas World-Class Tools em paralelo.
+
+    Usa o ToolOrchestrator para:
+    - Execução paralela (max 5 concurrent)
+    - Caching automático (TTL 5 min)
+    - Retry inteligente
+    - Validação de resultados
+
+    Args:
+        executions: Lista de {tool_name, tool_input, priority?}
+        fail_fast: Se True, para tudo no primeiro erro
+
+    Returns:
+        Lista de resultados com status, timing, confidence
+    """
+    tool_executions = []
+
+    for exec_spec in executions:
+        tool_name = exec_spec.get("tool_name")
+        tool_input = exec_spec.get("tool_input", {})
+        priority = exec_spec.get("priority", 5)
+
+        if tool_name not in WORLD_CLASS_TOOLS:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Tool '{tool_name}' not found"
+            )
+
+        tool_func = WORLD_CLASS_TOOLS[tool_name]
+
+        tool_executions.append(ToolExecution(
+            tool_name=tool_name,
+            tool_input=tool_input,
+            executor=lambda inp, func=tool_func: func(**inp),
+            priority=priority
+        ))
+
+    # Execute in parallel
+    results = await tool_orchestrator.execute_parallel(
+        executions=tool_executions,
+        fail_fast=fail_fast
+    )
+
+    # Format results
+    formatted_results = []
+    for exec_result in results:
+        formatted_results.append({
+            "tool_name": exec_result.tool_name,
+            "status": exec_result.status,
+            "result": exec_result.result,
+            "error": exec_result.error,
+            "execution_time_ms": exec_result.execution_time_ms,
+            "retry_count": exec_result.retry_count,
+            "cached": exec_result.cached,
+            "start_time": exec_result.start_time,
+            "end_time": exec_result.end_time
+        })
+
+    # Get orchestrator stats
+    orchestrator_stats = tool_orchestrator.get_stats()
+
+    return {
+        "executions": formatted_results,
+        "summary": {
+            "total": len(results),
+            "successful": sum(1 for r in results if r.status == "success"),
+            "failed": sum(1 for r in results if r.status == "failed"),
+            "cached": sum(1 for r in results if r.cached),
+            "total_time_ms": sum(r.execution_time_ms or 0 for r in results)
+        },
+        "orchestrator_stats": orchestrator_stats
+    }
+
+@app.get("/tools/orchestrator/stats")
+async def get_orchestrator_stats():
+    """
+    Retorna estatísticas do Tool Orchestrator.
+
+    Mostra:
+    - Total de execuções
+    - Taxa de sucesso
+    - Cache hit rate
+    - Performance metrics
+    """
+    return tool_orchestrator.get_stats()
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
-    Endpoint conversacional principal. A AI pode:
-    - Responder perguntas
-    - Chamar tools para executar ações
-    - Fazer investigações autônomas
-    - Orquestrar múltiplos serviços
+    Endpoint conversacional principal com REASONING ENGINE + MEMORY.
+
+    Aurora agora:
+    - LEMBRA de conversas anteriores (working + episodic memory)
+    - PENSA explicitamente (chain-of-thought)
+    - APRENDE com investigações (semantic memory)
+    - CONTEXTUALIZA baseado em histórico
     """
 
-    # System prompt
-    system_prompt = """Você é o VÉRTICE AI, um agente de inteligência cibernética avançado.
+    # Generate session ID (or get from request metadata)
+    import uuid
+    session_id = str(uuid.uuid4())
+    user_id = request.conversation_id  # If provided
 
-Você tem acesso maestro a múltiplos serviços de segurança através de tools (function calling).
+    # Get last user message
+    user_query = request.messages[-1].content if request.messages else ""
 
-Suas capacidades:
-- Análise de threat intelligence (offline-first, sem depender de APIs externas)
-- Detecção de malware e análise de hashes
-- Verificação de certificados SSL/TLS
-- Intelligence de IPs (geolocalização, ASN, ISP)
-- Scanning de portas e vulnerabilidades
-- OSINT (Open Source Intelligence)
-- Predição de criminalidade com IA
-- Investigações completas automatizadas
+    # 🧠 REMEMBER: Try to recall conversation context
+    conversation_context = await memory_system.remember_conversation(session_id, user_id)
 
-Você é proativo, preciso, e sempre usa as tools disponíveis para fornecer informações REAIS e VERIFICADAS.
-Nunca invente dados - sempre use as tools para obter informações reais dos serviços.
+    if not conversation_context:
+        # Nova conversa - criar contexto
+        conversation_context = ConversationContext(
+            session_id=session_id,
+            user_id=user_id
+        )
+        await memory_system.episodic.store_conversation(session_id, user_id)
 
-Quando o usuário pedir para analisar algo, USE AS TOOLS automaticamente.
-Seja conciso mas completo. Priorize informações críticas primeiro."""
+    # Store user message in memory
+    await memory_system.episodic.store_message(
+        session_id=session_id,
+        role="user",
+        content=user_query
+    )
 
-    messages_with_system = [
-        {"role": "system", "content": system_prompt}
-    ] + [msg.dict() for msg in request.messages]
+    # Update working memory
+    await memory_system.working.update_context(
+        session_id=session_id,
+        new_message={"role": "user", "content": user_query}
+    )
 
+    # Build context with memory
+    context = {
+        "conversation_history": [msg.dict() for msg in request.messages[:-1]],
+        "episodic_memory": conversation_context.messages[-10:],  # Last 10 messages
+        "available_tools": TOOLS,
+        "tool_executor": execute_tool,
+        "system_capabilities": {
+            "threat_intelligence": True,
+            "malware_analysis": True,
+            "ssl_monitoring": True,
+            "ip_intelligence": True,
+            "port_scanning": True,
+            "vulnerability_scanning": True,
+            "osint": True,
+            "crime_prediction": True,
+            "comprehensive_investigation": True,
+            "memory_enabled": True
+        }
+    }
+
+    # 🧠 THINK: Cognitive processing with memory context
+    thought_chain = await reasoning_engine.think_step_by_step(
+        task=user_query,
+        context=context,
+        max_steps=10,
+        confidence_threshold=80.0
+    )
+
+    # Extract tools used from execution phase
     tools_used = []
-    max_iterations = 5  # Prevenir loops infinitos
+    for thought in thought_chain.thoughts:
+        if thought.type == "execution" and "tool_name" in thought.metadata:
+            tool_use = ToolUse(
+                tool_name=thought.metadata["tool_name"],
+                tool_input=thought.metadata.get("tool_input", {}),
+                result=thought.metadata.get("tool_result", {})
+            )
+            tools_used.append(tool_use)
 
-    for iteration in range(max_iterations):
-        # Chamar LLM
-        llm_response = await call_llm_with_tools(messages_with_system, TOOLS)
-
-        # Se não há tool calls, retornar resposta
-        if not llm_response.get("tool_calls"):
-            return ChatResponse(
-                response=llm_response["content"],
-                tools_used=tools_used,
-                timestamp=datetime.now().isoformat()
+            # Store tool execution in memory
+            execution_id = f"exec_{datetime.now().timestamp()}"
+            await memory_system.episodic.store_tool_execution(
+                execution_id=execution_id,
+                session_id=session_id,
+                tool_name=thought.metadata["tool_name"],
+                tool_input=thought.metadata.get("tool_input", {}),
+                tool_output=thought.metadata.get("tool_result", {}),
+                success=True
             )
 
-        # Executar tools
-        tool_results = []
-        for tool_call in llm_response["tool_calls"]:
-            tool_name = tool_call["name"]
-            tool_input = tool_call["input"]
+    # Store assistant response in memory
+    assistant_response = thought_chain.final_answer or "Processing complete."
+    await memory_system.episodic.store_message(
+        session_id=session_id,
+        role="assistant",
+        content=assistant_response
+    )
 
-            # Executar tool
-            result = await execute_tool(tool_name, tool_input)
+    # Update working memory with response
+    await memory_system.working.update_context(
+        session_id=session_id,
+        new_message={"role": "assistant", "content": assistant_response},
+        new_reasoning=thought_chain.__dict__
+    )
 
-            tools_used.append(ToolUse(
-                tool_name=tool_name,
-                tool_input=tool_input,
-                result=result
-            ))
-
-            tool_results.append({
-                "type": "tool_result",
-                "tool_use_id": tool_call["id"],
-                "content": json.dumps(result)
-            })
-
-        # Adicionar tool results à conversa
-        messages_with_system.append({
-            "role": "assistant",
-            "content": llm_response.get("content", "") or tool_results
-        })
-
-        messages_with_system.append({
-            "role": "user",
-            "content": tool_results
-        })
-
-        # Se o LLM disse que terminou, sair do loop
-        if llm_response.get("stop_reason") == "end_turn":
-            break
-
-    # Resposta final após executar tools
-    final_response = await call_llm_with_tools(messages_with_system, TOOLS)
+    # 🧠 LEARN: If this was an investigation, store it
+    if tools_used and thought_chain.overall_confidence > 70:
+        investigation_id = f"inv_{session_id}_{datetime.now().timestamp()}"
+        await memory_system.learn_from_investigation(
+            investigation_id=investigation_id,
+            session_id=session_id,
+            target=user_query[:200],  # First 200 chars as target
+            findings={"response": assistant_response},
+            tools_used=[t.dict() for t in tools_used],
+            reasoning_trace={
+                "confidence": thought_chain.overall_confidence,
+                "thoughts": len(thought_chain.thoughts)
+            }
+        )
 
     return ChatResponse(
-        response=final_response["content"],
+        response=assistant_response,
         tools_used=tools_used,
-        timestamp=datetime.now().isoformat()
+        conversation_id=session_id,
+        timestamp=datetime.now().isoformat(),
+        reasoning_trace={
+            "task": thought_chain.task,
+            "total_thoughts": len(thought_chain.thoughts),
+            "confidence": thought_chain.overall_confidence,
+            "status": thought_chain.status,
+            "duration": thought_chain.end_time,
+            "memory_context_used": len(conversation_context.messages) if conversation_context else 0,
+            "thought_summary": [
+                {
+                    "type": t.type,
+                    "content": t.content[:200] + "..." if len(t.content) > 200 else t.content,
+                    "confidence": t.confidence
+                }
+                for t in thought_chain.thoughts
+            ]
+        }
     )
+
+@app.post("/chat/reasoning")
+async def chat_with_full_reasoning(request: ChatRequest):
+    """
+    Endpoint que retorna o Chain-of-Thought COMPLETO.
+
+    Use este endpoint para debugging, auditoria, ou quando precisar
+    entender exatamente como Aurora chegou a uma conclusão.
+
+    Retorna:
+    - Todos os pensamentos (observations, analysis, planning, etc)
+    - Confidence score de cada etapa
+    - Metadados completos de execução
+    - Tools chamadas com timestamps
+    """
+
+    user_query = request.messages[-1].content if request.messages else ""
+
+    context = {
+        "conversation_history": [msg.dict() for msg in request.messages[:-1]],
+        "available_tools": TOOLS,
+        "tool_executor": execute_tool,
+        "system_capabilities": {
+            "threat_intelligence": True,
+            "malware_analysis": True,
+            "ssl_monitoring": True,
+            "ip_intelligence": True,
+            "port_scanning": True,
+            "vulnerability_scanning": True,
+            "osint": True,
+            "crime_prediction": True,
+            "comprehensive_investigation": True
+        }
+    }
+
+    # Get complete reasoning chain
+    thought_chain = await reasoning_engine.think_step_by_step(
+        task=user_query,
+        context=context,
+        max_steps=10,
+        confidence_threshold=80.0
+    )
+
+    # Export full trace
+    return {
+        "task": thought_chain.task,
+        "final_answer": thought_chain.final_answer,
+        "overall_confidence": thought_chain.overall_confidence,
+        "status": thought_chain.status,
+        "start_time": thought_chain.start_time,
+        "end_time": thought_chain.end_time,
+        "complete_thought_chain": [
+            {
+                "thought_id": t.thought_id,
+                "type": t.type,
+                "content": t.content,
+                "confidence": t.confidence,
+                "timestamp": t.timestamp,
+                "metadata": t.metadata,
+                "parent_thought_id": t.parent_thought_id
+            }
+            for t in thought_chain.thoughts
+        ],
+        "metrics": {
+            "total_thoughts": len(thought_chain.thoughts),
+            "thoughts_by_type": {
+                thought_type: sum(1 for t in thought_chain.thoughts if t.type == thought_type)
+                for thought_type in set(t.type for t in thought_chain.thoughts)
+            },
+            "avg_confidence": sum(t.confidence for t in thought_chain.thoughts) / len(thought_chain.thoughts) if thought_chain.thoughts else 0
+        }
+    }
+
+@app.get("/reasoning/capabilities")
+async def reasoning_capabilities():
+    """
+    Retorna as capacidades cognitivas da Aurora.
+    """
+    return {
+        "cognitive_engine": "Chain-of-Thought Reasoning Engine",
+        "version": "2.0",
+        "capabilities": {
+            "explicit_reasoning": True,
+            "self_reflection": True,
+            "multi_step_planning": True,
+            "dynamic_replanning": True,
+            "confidence_scoring": True,
+            "tool_orchestration": True,
+            "autonomous_investigation": True
+        },
+        "thought_types": [
+            "observation",
+            "analysis",
+            "hypothesis",
+            "planning",
+            "execution",
+            "validation",
+            "reflection",
+            "decision",
+            "correction"
+        ],
+        "max_reasoning_steps": 10,
+        "confidence_threshold": 80.0,
+        "nsa_grade": True
+    }
+
+@app.get("/memory/stats")
+async def memory_stats():
+    """
+    Retorna estatísticas do sistema de memória.
+
+    Mostra quantas conversas, mensagens, investigações
+    foram armazenadas.
+    """
+    stats = await memory_system.get_memory_stats()
+    return stats
+
+@app.get("/memory/conversation/{session_id}")
+async def get_conversation_memory(session_id: str):
+    """
+    Recupera memória de uma conversa específica.
+
+    Útil para revisar conversas passadas ou continuar
+    uma conversa anterior.
+    """
+    context = await memory_system.remember_conversation(session_id)
+
+    if not context:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    return {
+        "session_id": context.session_id,
+        "user_id": context.user_id,
+        "message_count": len(context.messages),
+        "messages": context.messages[-20:],  # Last 20 messages
+        "tools_used_count": len(context.tools_used),
+        "created_at": context.created_at,
+        "last_activity": context.last_activity
+    }
+
+@app.get("/memory/investigations/similar/{target}")
+async def get_similar_investigations(target: str, limit: int = 5):
+    """
+    Busca investigações similares ao target fornecido.
+
+    Aurora pode aprender com investigações passadas.
+    """
+    investigations = await memory_system.episodic.get_similar_investigations(
+        target=target,
+        limit=limit
+    )
+
+    return {
+        "target": target,
+        "similar_investigations_found": len(investigations),
+        "investigations": investigations
+    }
+
+@app.get("/memory/tool-stats/{tool_name}")
+async def get_tool_stats(tool_name: str, last_n_days: int = 30):
+    """
+    Retorna estatísticas de uso de uma tool.
+
+    Taxa de sucesso, tempo médio de execução, etc.
+    """
+    stats = await memory_system.episodic.get_tool_success_rate(
+        tool_name=tool_name,
+        last_n_days=last_n_days
+    )
+
+    return stats
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "llm_ready": bool(ANTHROPIC_API_KEY or OPENAI_API_KEY)}
+    memory_stats = await memory_system.get_memory_stats()
+
+    return {
+        "status": "healthy",
+        "llm_ready": bool(ANTHROPIC_API_KEY or OPENAI_API_KEY),
+        "reasoning_engine": "online",
+        "memory_system": memory_stats,
+        "cognitive_capabilities": "NSA-grade"
+    }
 
 if __name__ == "__main__":
     import uvicorn

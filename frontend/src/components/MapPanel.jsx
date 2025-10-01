@@ -203,6 +203,149 @@ const PredictiveHotspots = React.memo(({ hotspots, visible }) => {
   return null;
 });
 
+// Componente para centralizar mapa quando dossierData mudar
+const MapUpdater = ({ dossierData }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (dossierData && dossierData.lastKnownLocation) {
+      const { lat, lng } = dossierData.lastKnownLocation;
+      map.flyTo([lat, lng], 15, { duration: 1.5 });
+    }
+  }, [dossierData, map]);
+
+  return null;
+};
+
+// Componente para marcador do veículo
+const VehicleMarker = ({ dossierData }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || !dossierData || !dossierData.lastKnownLocation) return;
+
+    const { lat, lng } = dossierData.lastKnownLocation;
+    const riskColor = dossierData.riskLevel === 'HIGH' ? '#ff0040' :
+                     dossierData.riskLevel === 'MEDIUM' ? '#ffaa00' : '#00aa00';
+
+    const vehicleIcon = L.divIcon({
+      html: `
+        <div class="vehicle-marker" style="position: relative;">
+          <div class="pulse-ring" style="border-color: ${riskColor};"></div>
+          <div style="
+            width: 24px;
+            height: 24px;
+            background: ${riskColor};
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 20px ${riskColor};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+          ">🚗</div>
+        </div>
+      `,
+      className: 'custom-vehicle-marker',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -15]
+    });
+
+    const marker = L.marker([lat, lng], { icon: vehicleIcon });
+
+    marker.bindPopup(`
+      <div class="cyber-popup vehicle-popup">
+        <div class="popup-header" style="background: linear-gradient(90deg, ${riskColor}, #0066cc);">
+          <strong>🚗 VEÍCULO LOCALIZADO</strong>
+        </div>
+        <div class="popup-content">
+          <div class="coord-line">
+            <span class="label">PLACA:</span>
+            <span class="value" style="color: ${riskColor}; font-weight: bold;">${dossierData.placa}</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">VEÍCULO:</span>
+            <span class="value">${dossierData.marca} ${dossierData.modelo}</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">ANO:</span>
+            <span class="value">${dossierData.ano}</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">COR:</span>
+            <span class="value">${dossierData.cor}</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">SITUAÇÃO:</span>
+            <span class="value" style="color: ${riskColor};">${dossierData.situacao}</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">RISCO:</span>
+            <span class="value" style="color: ${riskColor};">${dossierData.riskLevel}</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">LOCALIZAÇÃO:</span>
+            <span class="value">${dossierData.municipio} - ${dossierData.uf}</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">LAT:</span>
+            <span class="value">${lat.toFixed(6)}°</span>
+          </div>
+          <div class="coord-line">
+            <span class="label">LNG:</span>
+            <span class="value">${lng.toFixed(6)}°</span>
+          </div>
+        </div>
+      </div>
+    `, { maxWidth: 300, className: 'cyber-popup-container' });
+
+    marker.addTo(map);
+
+    // Adicionar marcadores do histórico de localização se existir
+    if (dossierData.locationHistory && dossierData.locationHistory.length > 0) {
+      const historyGroup = L.layerGroup();
+
+      dossierData.locationHistory.forEach((location, index) => {
+        const historyIcon = createIcon('#ffaa00', false, 0.6, 12);
+        const historyMarker = L.marker([location.lat, location.lng], { icon: historyIcon });
+
+        historyMarker.bindPopup(`
+          <div class="cyber-popup history-popup">
+            <div class="popup-header" style="background: linear-gradient(90deg, #ffaa00, #0066cc);">
+              <strong>📍 HISTÓRICO DE LOCALIZAÇÃO #${index + 1}</strong>
+            </div>
+            <div class="popup-content">
+              <div class="coord-line">
+                <span class="label">DATA:</span>
+                <span class="value">${new Date(location.timestamp).toLocaleString('pt-BR')}</span>
+              </div>
+              <div class="coord-line">
+                <span class="label">LOCAL:</span>
+                <span class="value">${location.description}</span>
+              </div>
+              <div class="coord-line">
+                <span class="label">COORDENADAS:</span>
+                <span class="value">${location.lat.toFixed(6)}°, ${location.lng.toFixed(6)}°</span>
+              </div>
+            </div>
+          </div>
+        `, { maxWidth: 300, className: 'cyber-popup-container' });
+
+        historyGroup.addLayer(historyMarker);
+      });
+
+      historyGroup.addTo(map);
+    }
+
+    return () => {
+      map.removeLayer(marker);
+    };
+  }, [map, dossierData]);
+
+  return null;
+};
+
 // === Componente Principal: MapPanel ===
 const MapPanel = ({ dossierData }) => {
   // Estados de dados e filtros
@@ -360,6 +503,10 @@ const MapPanel = ({ dossierData }) => {
           {heatmapVisible && <HeatmapLayer points={occurrenceData} />}
           {showOccurrenceMarkers && <ClusteredOccurrenceMarkers data={occurrenceData} />}
           {showPredictiveHotspots && <PredictiveHotspots hotspots={predictedHotspots} visible={showPredictiveHotspots} />}
+
+          {/* Componentes para visualização do veículo pesquisado */}
+          <MapUpdater dossierData={dossierData} />
+          <VehicleMarker dossierData={dossierData} />
         </MapContainer>
 
         {/* Painel de Controle Compacto */}
@@ -866,6 +1013,39 @@ const MapPanel = ({ dossierData }) => {
         .risk-bar-fill {
           height: 100%;
           transition: width 1s ease;
+        }
+
+        /* Marcador do Veículo */
+        .vehicle-marker {
+          position: relative;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .pulse-ring {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 30px;
+          height: 30px;
+          border: 2px solid;
+          border-radius: 50%;
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: 0;
+          }
         }
 
         /* Responsividade */

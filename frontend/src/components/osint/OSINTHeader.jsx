@@ -4,6 +4,8 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
   const modules = [
     { id: 'overview', name: 'OVERVIEW', icon: '🛡️' },
     { id: 'aurora', name: 'AURORA AI', icon: '🧠', isAI: true },
+    { id: 'socialmedia', name: 'SOCIAL MEDIA', icon: '🔎', isWorldClass: true },
+    { id: 'breachdata', name: 'BREACH DATA', icon: '💾', isWorldClass: true },
     { id: 'username', name: 'USERNAME', icon: '👤' },
     { id: 'email', name: 'EMAIL', icon: '📧' },
     { id: 'phone', name: 'PHONE', icon: '📱' },
@@ -47,47 +49,32 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
         </div>
       </div>
 
-      {/* Navigation Modules - AI FIRST */}
-      <div className="p-4 bg-gradient-to-r from-purple-900/20 to-blue-900/20">
-        <div className="flex flex-col space-y-3">
-          {/* AI MODULE - DESTAQUE ESPECIAL */}
-          <div className="flex justify-center">
+      {/* Navigation Modules */}
+      <div className="px-4 py-2 bg-black/30">
+        <div className="flex flex-wrap gap-2 justify-center items-center">
+          {modules.map((module) => (
             <button
-              onClick={() => setActiveModule('aurora')}
-              className={`px-8 py-4 rounded-xl font-bold text-base tracking-wider transition-all duration-300 transform hover:scale-105 ${
-                activeModule === 'aurora'
-                  ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white shadow-2xl shadow-purple-500/50 animate-pulse'
-                  : 'bg-gradient-to-r from-purple-900/40 via-pink-900/40 to-purple-900/40 text-purple-300 border-2 border-purple-500/50 hover:border-purple-400'
+              key={module.id}
+              onClick={() => setActiveModule(module.id)}
+              className={`px-3 py-1.5 rounded font-medium text-xs transition-all ${
+                activeModule === module.id
+                  ? module.isAI
+                    ? 'bg-gradient-to-r from-black via-green-900/40 to-green-700/60 text-gray-200 border border-green-700/30'
+                    : module.isWorldClass
+                      ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 text-gray-200 border border-purple-400/50'
+                      : 'bg-blue-950/30 text-blue-400 border border-blue-900/50'
+                  : module.isAI
+                    ? 'bg-gray-800/50 text-gray-400 border border-gray-700 hover:border-green-700/30'
+                    : module.isWorldClass
+                      ? 'bg-black/30 text-purple-400/70 border border-gray-700 hover:border-purple-400/50'
+                      : 'bg-black/30 text-gray-400 border border-gray-700 hover:border-blue-900/30'
               }`}
             >
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">🧠</span>
-                <div className="text-left">
-                  <div className="text-lg font-extrabold">AURORA AI BRAIN</div>
-                  <div className="text-xs opacity-90">Investigação Autônoma • Deep Learning</div>
-                </div>
-                <span className="text-2xl animate-pulse">✨</span>
-              </div>
+              <span className="mr-1.5 text-[10px]">{module.icon}</span>
+              {module.name}
+              {module.isWorldClass && <span className="ml-1.5 text-[10px]">⭐</span>}
             </button>
-          </div>
-
-          {/* OUTROS MÓDULOS */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {modules.filter(m => !m.isAI).map((module) => (
-              <button
-                key={module.id}
-                onClick={() => setActiveModule(module.id)}
-                className={`px-3 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 ${
-                  activeModule === module.id
-                    ? 'bg-purple-400/20 text-purple-400 border border-purple-400/50'
-                    : 'bg-black/30 text-purple-400/70 border border-purple-400/20 hover:bg-purple-400/10 hover:text-purple-400'
-                }`}
-              >
-                <span className="mr-1">{module.icon}</span>
-                {module.name}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     </header>

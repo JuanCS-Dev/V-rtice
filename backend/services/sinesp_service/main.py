@@ -1,115 +1,110 @@
-# Path: backend/services/sinesp_service/main.py
-
+import asyncio
+from contextlib import asynccontextmanager
+from datetime import datetime
+import httpx
+import redis.asyncio as redis
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from typing import Optional, List
-import random
-from datetime import datetime, timedelta
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+
+from config import settings
+from intelligence_agent import IntelligenceAgent
+from llm_client import LLMClientFactory
+from models import SinespAnalysisReport, SinespQueryInput
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Handles startup and shutdown events for the application.
+    """
+    # Initialize Redis cache
+    redis_client = redis.from_url(settings.REDIS_URL, encoding="utf8", decode_responses=True)
+    FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
+
+    # Initialize the LLM Client Factory
+    LLMClientFactory()
+    yield
+    # Clean up resources if needed
 
 app = FastAPI(
-    title="SINESP Service (Simulator)",
-    description="Microsserviço que simula a consulta de placas e fornece dados para o heatmap.",
-    version="2.6.0", # Version bump para resposta de dados enriquecida
+    title="SINESP Intelligence Node",
+    description="Autonomous intelligence node for vehicle analysis and correlation.",
+    version="4.0.0",
+    lifespan=lifespan
 )
 
-# --- NOVO: Modelo Pydantic para Ocorrências ---
-# Define a estrutura de dados de forma explícita
-class Ocorrencia(BaseModel):
-    lat: float
-    lng: float
-    intensity: float
-    timestamp: datetime
-    tipo: str
+def mock_sinesp_api_call(plate: str) -> dict:
+    """Simulates a call to the SINESP API."""
+    return {
+        "plate": plate.upper(),
+        "status": "COM RESTRIÇÃO DE ROUBO/FURTO",
+        "details": {
+            "model": "FIAT TORO",
+            "color": "PRETA",
+            "year": 2022,
+            "city": "São Paulo",
+            "state": "SP"
+        }
+    }
 
-# --- Dados Simulados ---
-mock_database = { # ... (sem alterações) ...
-    "ABC1234": { "placa": "ABC1234", "modelo": "GOL 1.6", "marca": "VOLKSWAGEN", "cor": "BRANCO", "ano": "2018", "anoModelo": "2019", "chassi": "ABC123***********123", "situacao": "ROUBO/FURTO", "municipio": "GOIÂNIA", "uf": "GO", },
-    "XYZ9876": { "placa": "XYZ9876", "modelo": "ONIX 1.0T", "marca": "CHEVROLET", "cor": "PRATA", "ano": "2021", "anoModelo": "2021", "chassi": "XYZ987***********987", "situacao": "CIRCULAÇÃO", "municipio": "APARECIDA DE GOIÂNIA", "uf": "GO", }
-}
+@app.post("/analyze", response_model=SinespAnalysisReport)
+@cache(expire=3600)
+async def analyze_plate(query: SinespQueryInput) -> SinespAnalysisReport:
+    """
+    Analyzes a vehicle plate, correlates with criminal hotspots, and generates an intelligence report.
+    Caches the result for 1 hour.
+    """
+    # 1. Collect factual data
+    plate_details = mock_sinesp_api_call(query.plate)
+    location_analysis = None
 
-def generate_ocorrencias(placa, situacao): # ... (sem alterações) ...
-    ocorrencias = []
-    if situacao == "ROUBO/FURTO":
-        ocorrencias.append({ "id": f"BO-{random.randint(1000, 9999)}", "data": (datetime.utcnow() - timedelta(days=random.randint(5, 30))).isoformat(), "tipo": "Roubo de Veículo", "local": "Av. Brasil, Setor Central, Goiânia - GO", "status": "Em Investigação", "resumo": f"Veículo de placa {placa} foi subtraído mediante grave ameaça com arma de fogo."})
-    ocorrencias.append({ "id": f"AI-{random.randint(1000, 9999)}", "data": (datetime.utcnow() - timedelta(days=random.randint(60, 120))).isoformat(), "tipo": "Averiguação de Atitude Suspeita", "local": "Rua 10, Setor Sul, Anápolis - GO", "status": "Concluído", "resumo": f"Veículo foi avistado em área conhecida por desmanche. Nenhuma irregularidade constatada na abordagem."})
-    return ocorrencias
-def generate_history(base_lat, base_lng): # ... (sem alterações) ...
-    history = []
-    now = datetime.utcnow()
-    for i in range(1, 5):
-        history.append({ "lat": base_lat + (random.uniform(-0.05, 0.05) * i), "lng": base_lng + (random.uniform(-0.05, 0.05) * i), "timestamp": (now - timedelta(hours=i*2)).isoformat() + "Z", "description": f"Avistamento em área {random.choice(['comercial', 'residencial', 'industrial'])}"})
-    return history
+    if query.deep_analysis:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "http://aurora_predict_service:8009/api/predict/check-location",
+                    json={"latitude": -23.550520, "longitude": -46.633308}, # Mock location
+                    timeout=5.0
+                )
+                response.raise_for_status()
+                location_analysis = response.json()
+        except httpx.RequestError:
+            # If the service is down, we can proceed without this data
+            location_analysis = {"error": "Aurora Predict Service unavailable."}
 
-TIPOS_OCORRENCIA = ["roubo", "furto", "recuperacao", "atitude_suspeita", "trafico"]
+    facts = {
+        "plate_details": plate_details,
+        "location_analysis": location_analysis
+    }
 
-def _generate_mock_ocorrencias_database(total_points=500) -> List[Ocorrencia]:
-    """Gera uma lista de ocorrências com timestamps e tipos para simular um banco de dados."""
-    db = []
-    now = datetime.utcnow()
-    for _ in range(total_points):
-        db.append(
-            Ocorrencia(
-                lat = -16.328 + random.uniform(-0.2, 0.2),
-                lng = -48.953 + random.uniform(-0.2, 0.2),
-                intensity = random.uniform(0.2, 1.0),
-                timestamp = now - timedelta(days=random.randint(0, 90)),
-                tipo = random.choice(TIPOS_OCORRENCIA)
-            )
+    # 2. Select LLM model
+    model_name = 'gemini-1.5-pro-latest' if query.deep_analysis else 'gemini-1.5-flash-latest'
+    llm_client = LLMClientFactory().get_client(model_name)
+
+    # 3. Instantiate and run the intelligence agent
+    agent = IntelligenceAgent(llm_client)
+
+    try:
+        # 4. Get the AI-synthesized report
+        report = await agent.analyze(facts)
+        return report
+    except Exception as e:
+        # 5. Graceful Degradation
+        # If the LLM fails after all retries, return a partial report with factual data.
+        return SinespAnalysisReport(
+            plate_details=plate_details,
+            threat_score=0, # Default score
+            risk_level="INDETERMINADO",
+            summary="A análise de IA falhou. As informações apresentadas são apenas dados factuais.",
+            reasoning_chain=[
+                "Coleta de dados factuais bem-sucedida.",
+                f"Falha na síntese de IA após múltiplas tentativas. Erro: {str(e)}",
+                "Retornando relatório parcial como medida de degradação graciosa."
+            ],
+            correlated_events=[{"type": "SYSTEM_WARNING", "description": "AI synthesis failed."}],
+            recommended_actions=["Revisar dados brutos e proceder com cautela.", "Reportar falha do sistema de IA."],
+            confidence_score=0.4, # Low confidence due to failure
+            timestamp=datetime.now()
         )
-    return db
-
-MOCK_OCORRENCIAS_DB = _generate_mock_ocorrencias_database()
-
-# --- MODIFICADO: Endpoint agora retorna a lista de objetos Ocorrencia completos ---
-@app.get("/ocorrencias/heatmap", response_model=List[Ocorrencia], tags=["Heatmap"])
-async def get_heatmap_data(
-    periodo: Optional[str] = None, 
-    tipo: Optional[str] = None
-):
-    """
-    Retorna uma lista de objetos de ocorrência completos, permitindo a filtragem
-    por 'periodo' e 'tipo'.
-    """
-    now = datetime.utcnow()
-    
-    # 1. Filtro temporal
-    if not periodo or periodo == 'all':
-        temporally_filtered_points = MOCK_OCORRENCIAS_DB
-    else:
-        period_map = { "24h": timedelta(days=1), "7d": timedelta(days=7), "30d": timedelta(days=30), }
-        delta = period_map.get(periodo)
-        if not delta:
-            raise HTTPException(status_code=400, detail=f"Valor de 'periodo' inválido.")
-            
-        cutoff_date = now - delta
-        # A comparação agora é entre objetos datetime, o que é mais seguro
-        temporally_filtered_points = [ occ for occ in MOCK_OCORRENCIAS_DB if occ.timestamp >= cutoff_date ]
-
-    # 2. Filtro de tipo
-    if not tipo or tipo == 'todos':
-        final_points_to_return = temporally_filtered_points
-    else:
-        if tipo not in TIPOS_OCORRENCIA:
-             raise HTTPException(status_code=400, detail=f"Valor de 'tipo' inválido.")
-        final_points_to_return = [ occ for occ in temporally_filtered_points if occ.tipo == tipo ]
-
-    # Retorna a lista completa de objetos filtrados. O FastAPI irá serializá-los para JSON.
-    return final_points_to_return
-
-@app.get("/ocorrencias/tipos", tags=["Ocorrências"])
-async def get_ocorrencia_tipos() -> List[str]: # ... (sem alterações) ...
-    return TIPOS_OCORRENCIA
-
-@app.get("/veiculos/{placa}", tags=["Consultas"])
-async def consultar_placa_simulado(placa: str): # ... (sem alterações) ...
-    placa_upper = placa.upper()
-    if placa_upper == 'ERR-001': raise HTTPException(status_code=503, detail="Falha forçada de comunicação com a base de dados.")
-    if placa_upper == 'NOT-FND': raise HTTPException(status_code=404, detail="Placa não encontrada na base de dados.")
-    data = mock_database.get(placa_upper)
-    if not data: data = { "placa": placa_upper, "modelo": "STRADA RANCH", "marca": "FIAT", "cor": "CINZA", "ano": "2023", "anoModelo": "2023", "chassi": "RND123***********456", "situacao": "CIRCULAÇÃO", "municipio": "ANÁPOLIS", "uf": "GO" }
-    data["riskLevel"] = "HIGH" if data["situacao"] == "ROUBO/FURTO" else ("MEDIUM" if random.random() > 0.6 else "LOW")
-    base_location = {"lat": -16.328, "lng": -48.953}
-    data["lastKnownLocation"] = base_location
-    data["locationHistory"] = generate_history(base_location["lat"], base_location["lng"])
-    data["ocorrencias"] = generate_ocorrencias(placa_upper, data["situacao"])
-    return data

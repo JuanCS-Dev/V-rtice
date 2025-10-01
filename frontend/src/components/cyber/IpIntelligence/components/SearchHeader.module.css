@@ -1,0 +1,71 @@
+
+.container {
+  border: var(--border-1) solid rgba(0, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 255, 255, 0.05);
+  padding: var(--space-4);
+}
+
+.title {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--tracking-wider);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.input {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  min-width: max-content;
+}
+
+.history {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.historyLabel {
+  color: rgba(0, 255, 255, 0.5);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.historyItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.historyItem {
+  padding: var(--space-1) var(--space-2);
+  background: rgba(0, 255, 255, 0.1);
+  color: rgba(0, 255, 255, 0.7);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.historyItem:hover {
+  background: rgba(0, 255, 255, 0.2);
+  color: var(--color-cyber-primary);
+}

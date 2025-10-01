@@ -1,0 +1,62 @@
+
+.container {
+  padding: var(--space-4);
+  border-bottom: var(--border-1) solid rgba(0, 255, 255, 0.3);
+}
+
+.title {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--tracking-wide);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.metric {
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  border: var(--border-1) solid;
+  text-align: center;
+}
+
+.value {
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
+}
+
+.label {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+  margin-top: var(--space-1);
+}
+
+/* Variants */
+.critical {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: var(--color-critical);
+}
+
+.warning {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: var(--color-warning);
+}
+
+.high {
+  background: rgba(249, 115, 22, 0.2);
+  border-color: rgba(249, 115, 22, 0.5);
+  color: var(--color-high);
+}
+
+.cyber {
+  background: rgba(0, 255, 255, 0.2);
+  border-color: rgba(0, 255, 255, 0.5);
+  color: var(--color-cyber-primary);
+}

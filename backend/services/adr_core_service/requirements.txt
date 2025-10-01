@@ -1,0 +1,10 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Future ML dependencies (Fase 2)
+# scikit-learn==1.3.2
+# xgboost==2.0.2
+# pefile==2023.2.7
+# yara-python==4.5.0

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ThemeSelector } from './shared/ThemeSelector';
 
 const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKeyPress, searchHistory, setCurrentView, currentView }) => {
   const navigationModules = [
@@ -80,13 +81,19 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
             <p className="text-green-400/70 text-sm tracking-widest">SISTEMA DE INTELIGÊNCIA CRIMINAL</p>
           </div>
         </div>
-        
-        <div className="text-right">
-          <div className="text-green-400 font-bold text-lg">
-            {currentTime.toLocaleTimeString()}
-          </div>
-          <div className="text-green-400/70 text-sm">
-            {currentTime.toLocaleDateString('pt-BR')}
+
+        <div className="flex items-center gap-4">
+          {/* Theme Selector */}
+          <ThemeSelector compact={true} />
+
+          {/* Clock */}
+          <div className="text-right">
+            <div className="text-green-400 font-bold text-lg">
+              {currentTime.toLocaleTimeString()}
+            </div>
+            <div className="text-green-400/70 text-sm">
+              {currentTime.toLocaleDateString('pt-BR')}
+            </div>
           </div>
         </div>
       </div>

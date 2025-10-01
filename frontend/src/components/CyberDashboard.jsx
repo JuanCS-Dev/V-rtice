@@ -11,6 +11,7 @@ import CyberAlerts from './cyber/CyberAlerts';
 import VulnerabilityScanner from './cyber/VulnerabilityScanner';
 import SocialEngineering from './cyber/SocialEngineering';
 import AuroraCyberHub from './cyber/AuroraCyberHub';
+import ExploitSearchWidget from './cyber/ExploitSearchWidget';
 
 const CyberDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -63,7 +64,8 @@ const CyberDashboard = ({ setCurrentView }) => {
     nmap: <NmapScanner />,
     threats: <ThreatMap />,
     vulnscan: <VulnerabilityScanner />,
-    socialeng: <SocialEngineering />
+    socialeng: <SocialEngineering />,
+    exploits: <ExploitSearchWidget />
   };
 
   return (

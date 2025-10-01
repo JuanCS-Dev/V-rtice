@@ -1,9 +1,27 @@
+/* Import Theme System - must come before Tailwind directives */
+@import './styles/themes.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Removemos todas as regras de layout explícitas. 
+/* Removemos todas as regras de layout explícitas.
    O Tailwind e o Flexbox voltarão a controlar o layout. */
 body {
   overflow: hidden; /* Garante que não haja barras de rolagem indesejadas */
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* Hide scrollbar but keep functionality */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
 }

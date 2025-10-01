@@ -1,0 +1,48 @@
+
+.mapPanelContainer {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+.leafletContainer {
+    height: 100%;
+    width: 100%;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 14, 26, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.loadingContent {
+  text-align: center;
+  color: var(--color-cyber-primary);
+}
+
+.loadingSpinner {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-4);
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+}

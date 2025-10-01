@@ -13,4 +13,4 @@ COPY . .
 
 # Comando para rodar a aplicação com Uvicorn
 # A porta 8001 aqui corresponde ao que o docker-compose espera
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

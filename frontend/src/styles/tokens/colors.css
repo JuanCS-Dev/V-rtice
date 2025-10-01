@@ -1,0 +1,89 @@
+/**
+ * Design Tokens - Colors
+ * Projeto Vértice - Sistema de Cores Centralizado
+ */
+
+:root {
+  /* ==================== PRIMARY COLORS ==================== */
+  --color-cyber-primary: #00ffff;
+  --color-cyber-secondary: #0088ff;
+  --color-cyber-accent: #00aaff;
+
+  --color-osint-primary: #a855f7;
+  --color-osint-secondary: #ec4899;
+  --color-osint-accent: #d946ef;
+
+  --color-analytics-primary: #3b82f6;
+  --color-analytics-secondary: #06b6d4;
+  --color-analytics-accent: #8b5cf6;
+
+  /* ==================== SEMANTIC COLORS ==================== */
+  --color-success: #10b981;
+  --color-success-light: #34d399;
+  --color-success-dark: #059669;
+
+  --color-warning: #f59e0b;
+  --color-warning-light: #fbbf24;
+  --color-warning-dark: #d97706;
+
+  --color-error: #ef4444;
+  --color-error-light: #f87171;
+  --color-error-dark: #dc2626;
+
+  --color-info: #06b6d4;
+  --color-info-light: #22d3ee;
+  --color-info-dark: #0891b2;
+
+  /* ==================== SEVERITY COLORS ==================== */
+  --color-critical: #ff0040;
+  --color-high: #ff4000;
+  --color-medium: #ffaa00;
+  --color-low: #00aa00;
+  --color-info-severity: #00aaff;
+
+  /* ==================== CONFIDENCE COLORS ==================== */
+  --color-confidence-very-high: #00ff00;
+  --color-confidence-high: #00ffff;
+  --color-confidence-medium: #ffaa00;
+  --color-confidence-low: #ff4000;
+  --color-confidence-very-low: #ff0040;
+
+  /* ==================== BACKGROUND ==================== */
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #1a1a1a;
+  --bg-quaternary: #2a2a2a;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+  --bg-overlay-light: rgba(0, 0, 0, 0.6);
+  --bg-glass: rgba(0, 0, 0, 0.5);
+
+  /* ==================== TEXT ==================== */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --text-quaternary: rgba(255, 255, 255, 0.3);
+  --text-disabled: rgba(255, 255, 255, 0.2);
+
+  /* ==================== BORDERS ==================== */
+  --border-primary: rgba(255, 255, 255, 0.2);
+  --border-secondary: rgba(255, 255, 255, 0.1);
+  --border-tertiary: rgba(255, 255, 255, 0.05);
+  --border-focus: var(--color-cyber-primary);
+
+  /* ==================== GRADIENTS ==================== */
+  --gradient-cyber: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+  --gradient-osint: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  --gradient-analytics: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --gradient-dark: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+
+  /* ==================== SHADOWS ==================== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.5);
+  --shadow-cyber: 0 0 20px rgba(0, 255, 255, 0.3);
+  --shadow-osint: 0 0 20px rgba(168, 85, 247, 0.3);
+  --shadow-glow: 0 0 30px currentColor;
+}

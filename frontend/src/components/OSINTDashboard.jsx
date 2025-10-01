@@ -9,6 +9,8 @@ import SocialModule from './osint/SocialModule';
 import GoogleModule from './osint/GoogleModule';
 import DarkWebModule from './osint/DarkWebModule';
 import ReportsModule from './osint/ReportsModule';
+import SocialMediaWidget from './osint/SocialMediaWidget';
+import BreachDataWidget from './osint/BreachDataWidget';
 
 const OSINTDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -58,6 +60,8 @@ const OSINTDashboard = ({ setCurrentView }) => {
   const moduleComponents = {
     overview: <OverviewModule stats={systemStats} />,
     aurora: <AuroraAIModule setIsAIProcessing={setIsAIProcessing} setResults={setInvestigationResults} />,
+    socialmedia: <SocialMediaWidget />,
+    breachdata: <BreachDataWidget />,
     username: <UsernameModule />,
     email: <EmailModule />,
     phone: <PhoneModule />,
