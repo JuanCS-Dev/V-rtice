@@ -1,5 +1,5 @@
 /**
- * Backwards compatibility wrapper for AuroraCyberHub
- * @deprecated Use './AuroraCyberHub/AuroraCyberHub' instead
+ * Backwards compatibility wrapper for MaximusCyberHub
+ * @deprecated Use './MaximusCyberHub/MaximusCyberHub' instead
  */
-export { AuroraCyberHub, default } from './AuroraCyberHub/AuroraCyberHub';
+export { MaximusCyberHub, default } from './MaximusCyberHub/MaximusCyberHub';

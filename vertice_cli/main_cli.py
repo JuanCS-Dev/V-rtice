@@ -3,8 +3,10 @@
 import typer
 import questionary
 from rich.panel import Panel
+from rich.table import Table
 from modules import cyber, osint
-from utils import console, print_banner, AuthManager
+from utils import console, print_banner, AuthManager, print_info, print_error
+from utils.api_client import VerticeAPI
 
 app = typer.Typer(
     help="🚀 VÉRTICE CLI - Cyber Security Toolkit para especialistas",
@@ -107,28 +109,47 @@ def auth_menu(auth: AuthManager):
 
 @app.command()
 def status():
-    """📊 Status dos serviços do Vértice"""
-    console.print("[yellow]🔄 Verificando status dos serviços...[/yellow]")
+    """📊 Verifica o status dos microserviços do Vértice."""
+    print_info("🔄 Verificando status dos serviços do Vértice...")
+    api = VerticeAPI()
 
-    # TODO: Implementar verificação de status dos microserviços
-    services = [
-        ("API Gateway", "http://localhost:8000", "🟢 Online"),
-        ("OSINT Service", "http://localhost:8001", "🟢 Online"),
-        ("IP Intel Service", "http://localhost:8002", "🟢 Online"),
-        ("Vulnerability Scanner", "http://localhost:8011", "🟡 Protegido"),
-        ("Social Engineering", "http://localhost:8012", "🟡 Protegido")
-    ]
+    services_to_check = {
+        "API Gateway": {"url": "http://localhost:8000", "endpoint": "/health"},
+        "Auth Service": {"url": "http://localhost:8000", "endpoint": "/auth/health"}, # Assuming auth is part of API Gateway or has a health endpoint
+        "OSINT Service": {"url": "http://localhost:8001", "endpoint": "/health"},
+        "IP Intel Service": {"url": "http://localhost:8002", "endpoint": "/health"},
+        "Vulnerability Scanner": {"url": "http://localhost:8011", "endpoint": "/health"},
+        "Social Engineering": {"url": "http://localhost:8012", "endpoint": "/health"},
+        # Adicione outros serviços conforme necessário
+    }
 
-    from rich.table import Table
-    table = Table(title="Status dos Serviços Vértice")
-    table.add_column("Serviço", style="cyan")
-    table.add_column("URL", style="blue")
-    table.add_column("Status", style="white")
+    table = Table(title="Status dos Serviços Vértice", show_header=True, header_style="bold bright_cyan")
+    table.add_column("Serviço", style="cyan", justify="left")
+    table.add_column("URL Base", style="blue", justify="left")
+    table.add_column("Status", style="white", justify="center")
+    table.add_column("Detalhes", style="dim", justify="left")
 
-    for service, url, status in services:
-        table.add_row(service, url, status)
+    for service_name, service_data in services_to_check.items():
+        base_url = service_data["url"]
+        endpoint = service_data["endpoint"]
+        full_url = f"{base_url}{endpoint}"
+        
+        try:
+            response = api.check_service_health(base_url, endpoint)
+            if response and response.get("status") == "ok":
+                status_text = "[bold green]🟢 Online[/bold green]"
+                details = response.get("message", "N/A")
+            else:
+                status_text = "[bold red]🔴 Offline[/bold red]"
+                details = response.get("message", "Não respondeu ou status inválido")
+        except Exception as e:
+            status_text = "[bold red]🔴 Offline[/bold red]"
+            details = f"Erro de conexão: {e}"
+        
+        table.add_row(service_name, base_url, status_text, details)
 
     console.print(table)
+    print_info("Verificação de status concluída.")
 
 if __name__ == "__main__":
     app()

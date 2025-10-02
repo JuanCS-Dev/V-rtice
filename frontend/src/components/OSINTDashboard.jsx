@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import OSINTHeader from './osint/OSINTHeader';
 import OSINTAlerts from './osint/OSINTAlerts';
-import AuroraAIModule from './osint/AuroraAIModule';
+import MaximusAIModule from './osint/MaximusAIModule';
 import UsernameModule from './osint/UsernameModule';
 import EmailModule from './osint/EmailModule';
 import PhoneModule from './osint/PhoneModule';
@@ -14,7 +14,7 @@ import BreachDataWidget from './osint/BreachDataWidget';
 
 const OSINTDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [activeModule, setActiveModule] = useState('aurora'); // AI-FIRST: Aurora como landing page
+  const [activeModule, setActiveModule] = useState('aurora'); // AI-FIRST: Maximus como landing page
   const [osintAlerts, setOsintAlerts] = useState([]);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const [investigationResults, setInvestigationResults] = useState(null);
@@ -59,7 +59,7 @@ const OSINTDashboard = ({ setCurrentView }) => {
 
   const moduleComponents = {
     overview: <OverviewModule stats={systemStats} />,
-    aurora: <AuroraAIModule setIsAIProcessing={setIsAIProcessing} setResults={setInvestigationResults} />,
+    aurora: <MaximusAIModule setIsAIProcessing={setIsAIProcessing} setResults={setInvestigationResults} />,
     socialmedia: <SocialMediaWidget />,
     breachdata: <BreachDataWidget />,
     username: <UsernameModule />,

@@ -1,8 +1,51 @@
-
 .terminalContainer {
   width: 100%;
   height: 100%;
   padding: 1rem;
   background-color: #000000;
   overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.terminalContainer :global(.xterm) {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.terminalContainer :global(.xterm-viewport) {
+  overflow-y: auto !important;
+  background-color: transparent !important;
+  width: 100% !important;
+}
+
+.terminalContainer :global(.xterm-screen) {
+  width: 100% !important;
+}
+
+.terminalContainer :global(.xterm-helper-textarea) {
+  position: absolute !important;
+  opacity: 0 !important;
+  left: -9999em !important;
+  top: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  z-index: -10 !important;
+  pointer-events: none !important;
+}
+
+.terminalContainer :global(.xterm-rows) {
+  width: 100% !important;
+}
+
+/* Fix para o canvas do xterm */
+.terminalContainer :global(canvas) {
+  display: block !important;
+}
+
+/* Prevent text wrapping */
+.terminalContainer :global(.xterm-screen) {
+  white-space: nowrap !important;
 }

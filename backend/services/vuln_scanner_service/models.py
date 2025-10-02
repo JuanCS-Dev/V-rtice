@@ -11,7 +11,7 @@ class ScanStatus(enum.Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
-class Severity(enum.Enum):
+class Severity(str, enum.Enum):
     INFO = "info"
     LOW = "low"
     MEDIUM = "medium"
@@ -39,7 +39,7 @@ class Vulnerability(Base):
     port = Column(Integer)
     service = Column(String)
     cve_id = Column(String, nullable=True, index=True)
-    severity = Column(SQLAlchemyEnum(Severity), default=Severity.INFO)
+    severity = Column(String, default="info")  # Changed from Enum to String to avoid migration issues
     description = Column(Text)
     recommendation = Column(Text)
     exploit_available = Column(String, nullable=True)
@@ -52,5 +52,5 @@ class CommonExploit(Base):
     cve_id = Column(String, primary_key=True, index=True)
     name = Column(String)
     description = Column(Text)
-    severity = Column(SQLAlchemyEnum(Severity))
+    severity = Column(String)  # Changed from Enum to String
     metasploit_module = Column(String, nullable=True)

@@ -129,3 +129,39 @@ class VerticeAPI:
     def list_email_templates(self) -> Optional[Dict[str, Any]]:
         """Lista templates de email disponíveis"""
         return self._make_request("GET", "/api/social-eng/templates")
+
+    def analyze_geospatial(self, coords: str) -> Optional[Dict[str, Any]]:
+        """Analisa coordenadas geoespaciais"""
+        return self._make_request("POST", "/api/geospatial/analyze", {"coords": coords})
+
+    def check_service_health(self, base_url: str, endpoint: str) -> Optional[Dict[str, Any]]:
+        """Verifica a saúde de um serviço"""
+        url = f"{base_url}{endpoint}"
+        try:
+            response = requests.get(url, timeout=5) # Curto timeout para health checks
+            if response.ok:
+                return {"status": "ok", "message": response.json().get("status", "Online")} # Assumindo que o health endpoint retorna JSON com status
+            else:
+                return {"status": "error", "message": f"HTTP Status: {response.status_code}"}
+        except requests.exceptions.ConnectionError:
+            return {"status": "error", "message": "Erro de conexão"}
+        except requests.exceptions.Timeout:
+            return {"status": "error", "message": "Timeout"}
+        except Exception as e:
+            return {"status": "error", "message": f"Erro inesperado: {str(e)}"}
+
+    def check_service_health(self, base_url: str, endpoint: str) -> Optional[Dict[str, Any]]:
+        """Verifica a saúde de um serviço"""
+        url = f"{base_url}{endpoint}"
+        try:
+            response = requests.get(url, timeout=5) # Curto timeout para health checks
+            if response.ok:
+                return {"status": "ok", "message": response.json().get("status", "Online")} # Assumindo que o health endpoint retorna JSON com status
+            else:
+                return {"status": "error", "message": f"HTTP Status: {response.status_code}"}
+        except requests.exceptions.ConnectionError:
+            return {"status": "error", "message": "Erro de conexão"}
+        except requests.exceptions.Timeout:
+            return {"status": "error", "message": "Timeout"}
+        except Exception as e:
+            return {"status": "error", "message": f"Erro inesperado: {str(e)}"}

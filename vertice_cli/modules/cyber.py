@@ -67,8 +67,8 @@ def ip_intel(target: str = typer.Option(None, "--target", "-t", help="IP para an
     result = api.analyze_ip(target)
 
     if result:
-        print_success("Análise concluída!")
-        # TODO: Formatar e exibir resultados
+        print_success("Análise de IP concluída!")
+        format_ip_intel_result(result)
     else:
         print_error("Falha na análise do IP")
 
@@ -79,7 +79,14 @@ def domain_analysis(domain: str = typer.Option(None, "--domain", "-d", help="Dom
         domain = questionary.text("Digite o domínio para análise:").ask()
 
     print_info(f"Analisando domínio: {domain}")
-    # TODO: Implementar
+    api = VerticeAPI()
+    result = api.analyze_domain(domain)
+
+    if result:
+        print_success("Análise de domínio concluída!")
+        format_domain_analysis_result(result)
+    else:
+        print_error("Falha na análise do domínio")
 
 @app.command()
 def vuln_scanner():
@@ -97,6 +104,25 @@ def vuln_scanner():
 
     # TODO: Implementar vulnerability scanner
     print_info("Vulnerability Scanner - Em implementação")
+    target = questionary.text("Digite o alvo (IP ou Domínio): ").ask()
+    scan_type = questionary.select(
+        "Selecione o tipo de scan:",
+        choices=["quick", "full", "stealth", "aggressive"]
+    ).ask()
+
+    if not target or not scan_type:
+        print_warning("Alvo e tipo de scan são obrigatórios.")
+        return
+
+    api = VerticeAPI()
+    print_info(f"Iniciando scan de vulnerabilidades em {target} ({scan_type})...")
+    result = api.start_vulnerability_scan(target, scan_type)
+
+    if result:
+        print_success("Scan de vulnerabilidades iniciado com sucesso!")
+        format_vulnerability_result(result)
+    else:
+        print_error("Falha ao iniciar scan de vulnerabilidades.")
 
 @app.command()
 def social_eng():
@@ -112,8 +138,29 @@ def social_eng():
         print_warning("Operação cancelada pelo usuário")
         return
 
-    # TODO: Implementar social engineering toolkit
     print_info("Social Engineering Toolkit - Em implementação")
+    campaign_name = questionary.text("Digite o nome da campanha de phishing: ").ask()
+    target_email = questionary.text("Digite o email alvo (ou lista de emails separados por vírgula): ").ask()
+    template_id = questionary.text("Digite o ID do template de email (ex: 'phishing_template_1'): ").ask()
+
+    if not campaign_name or not target_email or not template_id:
+        print_warning("Nome da campanha, email alvo e ID do template são obrigatórios.")
+        return
+
+    campaign_data = {
+        "campaign_name": campaign_name,
+        "target_emails": [email.strip() for email in target_email.split(',')],
+        "template_id": template_id
+    }
+
+    api = VerticeAPI()
+    print_info(f"Criando campanha de phishing '{campaign_name}'...")
+    result = api.create_phishing_campaign(campaign_data)
+
+    if result:
+        print_success(f"Campanha de phishing '{campaign_name}' criada com sucesso! ID: {result.get('campaign_id')}")
+    else:
+        print_error("Falha ao criar campanha de phishing.")
 
 # Funções de Help Detalhadas
 

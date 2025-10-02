@@ -105,6 +105,74 @@
   transform: translateY(-2px);
 }
 
+/* === SERVICES STATUS === */
+.services-status {
+  margin-top: 2rem;
+  background: rgba(20, 25, 39, 0.4);
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #00d9ff;
+  letter-spacing: 1px;
+}
+
+.status-count {
+  color: #00ff88;
+  font-size: 1rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: rgba(10, 14, 26, 0.5);
+  font-size: 0.75rem;
+  transition: all 0.3s;
+}
+
+.status-item.online {
+  border-left: 3px solid #00ff88;
+}
+
+.status-item.offline {
+  border-left: 3px solid #ff0040;
+  opacity: 0.5;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b7280;
+}
+
+.status-item.online .status-dot {
+  background: #00ff88;
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+}
+
+.status-item.offline .status-dot {
+  background: #ff0040;
+}
+
 /* === THREAT GLOBE === */
 .threat-globe-container {
   position: relative;
@@ -183,6 +251,125 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 0.25rem;
+}
+
+.globe-status {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 217, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-pulse {
+  width: 6px;
+  height: 6px;
+  background: #00d9ff;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.status-text {
+  font-size: 0.7rem;
+  color: #00d9ff;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* === ONION TRACER STATUS === */
+.onion-status {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(10, 14, 26, 0.95);
+  border: 2px solid rgba(255, 0, 170, 0.5);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(255, 0, 170, 0.3);
+}
+
+.onion-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.onion-icon {
+  font-size: 1.2rem;
+}
+
+.onion-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ff00aa;
+  letter-spacing: 1.5px;
+}
+
+.onion-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 0, 170, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.onion-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff00aa, #00d9ff);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 0, 170, 0.8);
+}
+
+.onion-message {
+  font-size: 0.75rem;
+  color: #00d9ff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.onion-hop {
+  font-size: 0.7rem;
+  color: #a8b2c1;
+  font-family: 'Courier New', monospace;
+}
+
+.globe-legend {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  background: rgba(10, 14, 26, 0.9);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem;
+  backdrop-filter: blur(10px);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: #a8b2c1;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid #fff;
 }
 
 /* === STATS PANEL === */
@@ -469,10 +656,62 @@
   font-weight: 600;
 }
 
-.feed-time {
+.feed-detail {
+  font-family: 'Courier New', monospace;
+  color: #6b7280;
   font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.feed-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.feed-severity {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.severity-critical {
+  background: rgba(255, 0, 64, 0.2);
+  color: #ff0040;
+  border: 1px solid #ff0040;
+}
+
+.severity-high {
+  background: rgba(255, 102, 0, 0.2);
+  color: #ff6600;
+  border: 1px solid #ff6600;
+}
+
+.severity-medium {
+  background: rgba(255, 170, 0, 0.2);
+  color: #ffaa00;
+  border: 1px solid #ffaa00;
+}
+
+.severity-low {
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+  border: 1px solid #00ff88;
+}
+
+.feed-time {
+  font-size: 0.7rem;
   color: #6b7280;
   font-family: 'Courier New', monospace;
+}
+
+.feed-hint {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 
 /* === FOOTER === */

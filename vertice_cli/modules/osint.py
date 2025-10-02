@@ -73,7 +73,7 @@ def email_analysis(email: str = typer.Option(None, "--email", "-e", help="Email 
 
     if result:
         print_success("Análise de email concluída!")
-        # TODO: Exibir resultados formatados
+        format_osint_result(result, "email")
     else:
         print_error("Falha na análise do email")
 
@@ -85,9 +85,14 @@ def phone_investigation(phone: str = typer.Option(None, "--phone", "-p", help="T
 
     print_info(f"Investigando telefone: {phone}")
 
-    # TODO: Implementar
     api = VerticeAPI()
     result = api.analyze_phone(phone)
+
+    if result:
+        print_success("Investigação de telefone concluída!")
+        format_osint_result(result, "phone")
+    else:
+        print_error("Falha na investigação do telefone")
 
 @app.command()
 def username_investigation(username: str = typer.Option(None, "--username", "-u", help="Username para investigação")):
@@ -97,9 +102,16 @@ def username_investigation(username: str = typer.Option(None, "--username", "-u"
 
     print_info(f"Investigando username: {username}")
 
-    # TODO: Implementar
     api = VerticeAPI()
     result = api.investigate_username(username)
+
+    if result:
+        print_success("Investigação de username concluída!")
+        # For now, print the raw result as there isn't a specific formatter for it yet.
+        # A more sophisticated formatter can be added later if needed.
+        console.print(result)
+    else:
+        print_error("Falha na investigação do username")
 
 @app.command()
 def social_media_analysis():
@@ -113,15 +125,34 @@ def social_media_analysis():
 
     print_info(f"Analisando perfil {identifier} no {platform}")
 
-    # TODO: Implementar
     api = VerticeAPI()
     result = api.analyze_social_profile(platform.lower(), identifier)
+
+    if result:
+        print_success("Análise de perfil social concluída!")
+        format_osint_result(result, "social")
+    else:
+        print_error("Falha na análise do perfil social")
 
 @app.command()
 def geospatial_analysis():
     """🌍 Análise de inteligência geoespacial"""
     print_info("Geospatial Intelligence - Em implementação")
-    # TODO: Implementar análise geoespacial
+    # Placeholder for now. Will add API call after updating api_client.py
+    coords = questionary.text("Digite as coordenadas (latitude,longitude): ").ask()
+    if not coords:
+        print_warning("Coordenadas são obrigatórias.")
+        return
+
+    api = VerticeAPI()
+    print_info(f"Analisando coordenadas geoespaciais: {coords}")
+    result = api.analyze_geospatial(coords)
+
+    if result:
+        print_success("Análise geoespacial concluída!")
+        console.print(result) # Placeholder for formatting
+    else:
+        print_error("Falha na análise geoespacial.")
 
 # Funções de Help Detalhadas
 

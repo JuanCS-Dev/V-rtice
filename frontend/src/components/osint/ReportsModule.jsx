@@ -92,7 +92,7 @@ const ReportsModule = ({ results }) => {
             <div className="text-6xl mb-4">📋</div>
             <h3 className="text-yellow-400 font-bold text-xl mb-2">NENHUM DADO DISPONÍVEL</h3>
             <p className="text-yellow-400/80 mb-4">
-              Execute uma investigação no módulo Aurora AI para gerar relatórios
+              Execute uma investigação no módulo Maximus AI para gerar relatórios
             </p>
             <p className="text-yellow-400/60 text-sm">
               Os dados da investigação aparecerão aqui automaticamente

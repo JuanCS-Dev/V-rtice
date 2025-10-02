@@ -10,12 +10,12 @@ import ThreatMap from './cyber/ThreatMap';
 import CyberAlerts from './cyber/CyberAlerts';
 import VulnerabilityScanner from './cyber/VulnerabilityScanner';
 import SocialEngineering from './cyber/SocialEngineering';
-import AuroraCyberHub from './cyber/AuroraCyberHub';
+import MaximusCyberHub from './cyber/MaximusCyberHub';
 import ExploitSearchWidget from './cyber/ExploitSearchWidget';
 
 const CyberDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [activeModule, setActiveModule] = useState('aurora'); // AI-FIRST: Aurora como landing page
+  const [activeModule, setActiveModule] = useState('aurora'); // AI-FIRST: Maximus como landing page
   const [cyberAlerts, setCyberAlerts] = useState([]);
   const [threatData, setThreatData] = useState({
     totalThreats: 127,
@@ -57,7 +57,7 @@ const CyberDashboard = ({ setCurrentView }) => {
 
   const moduleComponents = {
     overview: <CyberOverview threatData={threatData} />,
-    aurora: <AuroraCyberHub />,
+    aurora: <MaximusCyberHub />,
     domain: <DomainAnalyzer />,
     ip: <IpIntelligence />,
     network: <NetworkMonitor />,

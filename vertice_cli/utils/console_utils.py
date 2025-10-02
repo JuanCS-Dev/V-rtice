@@ -137,10 +137,78 @@ def _format_phone_result(data: dict) -> None:
     """Formatar resultado de análise de telefone"""
     console.print(Panel.fit(f"📱 Análise de Telefone: [cyan]{data.get('phone', 'N/A')}[/cyan]"))
 
-    # TODO: Implementar formatação específica para telefone
+    table = Table(title="Detalhes do Telefone", show_header=False)
+    table.add_column("Campo", style="cyan")
+    table.add_column("Valor", style="white")
+
+    table.add_row("Número", data.get("phone", "N/A"))
+    table.add_row("País", data.get("country", "N/A"))
+    table.add_row("Operadora", data.get("carrier", "N/A"))
+    table.add_row("Tipo", data.get("line_type", "N/A"))
+    table.add_row("Vazamentos", ", ".join(data.get("breaches", ["N/A"])))
+
+    console.print(table)
 
 def _format_social_result(data: dict) -> None:
     """Formatar resultado de análise de redes sociais"""
     console.print(Panel.fit(f"🌐 Perfil Social: [cyan]{data.get('identifier', 'N/A')}[/cyan] - {data.get('platform', 'N/A')}"))
 
-    # TODO: Implementar formatação específica para redes sociais
+    table = Table(title="Detalhes do Perfil Social", show_header=False)
+    table.add_column("Campo", style="cyan")
+    table.add_column("Valor", style="white")
+
+    table.add_row("Plataforma", data.get("platform", "N/A"))
+    table.add_row("Identificador", data.get("identifier", "N/A"))
+    table.add_row("URL do Perfil", data.get("profile_url", "N/A"))
+    table.add_row("Nome", data.get("name", "N/A"))
+    table.add_row("Seguidores", str(data.get("followers", "N/A")))
+    table.add_row("Posts", str(data.get("posts", "N/A")))
+    table.add_row("Bio", data.get("bio", "N/A"))
+
+    console.print(table)
+
+def format_ip_intel_result(data: dict) -> None:
+    """Formata e exibe resultados de IP Intelligence"""
+    if not data:
+        print_error("Nenhum dado de IP Intelligence para exibir")
+        return
+
+    console.print(Panel.fit(f"🌐 Análise de IP: [cyan]{data.get('ip', 'N/A')}[/cyan]"))
+
+    table = Table(title="Detalhes do IP", show_header=False)
+    table.add_column("Campo", style="cyan")
+    table.add_column("Valor", style="white")
+
+    table.add_row("IP", data.get("ip", "N/A"))
+    table.add_row("País", data.get("country", "N/A"))
+    table.add_row("Cidade", data.get("city", "N/A"))
+    table.add_row("ISP", data.get("isp", "N/A"))
+    table.add_row("Organização", data.get("org", "N/A"))
+    table.add_row("ASN", data.get("asn", "N/A"))
+    table.add_row("Latitude", str(data.get("latitude", "N/A")))
+    table.add_row("Longitude", str(data.get("longitude", "N/A")))
+    table.add_row("Reputação", data.get("reputation", "N/A"))
+
+    console.print(table)
+
+def format_domain_analysis_result(data: dict) -> None:
+    """Formata e exibe resultados de Análise de Domínio"""
+    if not data:
+        print_error("Nenhum dado de Análise de Domínio para exibir")
+        return
+
+    console.print(Panel.fit(f"🔍 Análise de Domínio: [cyan]{data.get('domain', 'N/A')}[/cyan]"))
+
+    table = Table(title="Detalhes do Domínio", show_header=False)
+    table.add_column("Campo", style="cyan")
+    table.add_column("Valor", style="white")
+
+    table.add_row("Domínio", data.get("domain", "N/A"))
+    table.add_row("Registrante", data.get("registrant", "N/A"))
+    table.add_row("Data de Criação", data.get("creation_date", "N/A"))
+    table.add_row("Data de Expiração", data.get("expiration_date", "N/A"))
+    table.add_row("Servidores DNS", ", ".join(data.get("dns_servers", ["N/A"])))
+    table.add_row("Status SSL", data.get("ssl_status", "N/A"))
+    table.add_row("Reputação", data.get("reputation", "N/A"))
+
+    console.print(table)

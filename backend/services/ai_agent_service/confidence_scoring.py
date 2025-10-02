@@ -1,5 +1,5 @@
 """
-Aurora Confidence Scoring System - Trustworthy AI
+Maximus Confidence Scoring System - Trustworthy AI
 ==================================================
 
 Sistema de scoring de confiança para respostas de IA, resolvendo o problema

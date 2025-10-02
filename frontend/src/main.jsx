@@ -13,5 +13,7 @@ initializeTheme();
 // The only change is removing the <React.StrictMode> wrapper.
 // This is often necessary for compatibility with libraries like Mapbox GL.
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <App />
+  <AuthProvider>
+    <App />
+  </AuthProvider>
 )

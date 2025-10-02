@@ -1,7 +1,7 @@
 /**
  * World-Class Tools API Client
  *
- * Cliente para integração com as 17 NSA-grade tools do Aurora 2.0
+ * Cliente para integração com as 17 NSA-grade tools do Maximus 2.0
  * Backend: ai_agent_service (porta 8017)
  */
 

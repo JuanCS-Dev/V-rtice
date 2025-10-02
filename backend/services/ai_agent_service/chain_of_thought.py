@@ -1,5 +1,5 @@
 """
-Aurora Chain-of-Thought System - Explicit Reasoning
+Maximus Chain-of-Thought System - Explicit Reasoning
 ====================================================
 
 Implementa raciocínio explícito tipo Chain-of-Thought (CoT) para:
@@ -150,7 +150,7 @@ class CoTPromptBuilder:
         Format:
         Problem → Understand → Plan → Execute → Verify → Conclude
         """
-        prompt = f"""You are Aurora, an elite AI analyst. Use explicit step-by-step reasoning.
+        prompt = f"""You are Maximus, an elite AI analyst. Use explicit step-by-step reasoning.
 
 PROBLEM:
 {problem}
@@ -206,7 +206,7 @@ Begin your step-by-step reasoning:"""
 
         The AI critiques its own answer and improves it.
         """
-        prompt = f"""You are Aurora, an elite AI analyst. You just generated an answer, but now you need to critique it and improve it.
+        prompt = f"""You are Maximus, an elite AI analyst. You just generated an answer, but now you need to critique it and improve it.
 
 ORIGINAL PROBLEM:
 {problem}
@@ -254,7 +254,7 @@ Begin your self-critique:"""
         """
         Prompt para decompor problema complexo em sub-problemas.
         """
-        prompt = f"""You are Aurora, an elite AI analyst. You need to break down a complex problem into smaller, manageable sub-problems.
+        prompt = f"""You are Maximus, an elite AI analyst. You need to break down a complex problem into smaller, manageable sub-problems.
 
 COMPLEX PROBLEM:
 {problem}

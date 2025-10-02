@@ -1,0 +1,22 @@
+# Default configuration for Vertice CLI
+api:
+  base_url: "http://localhost:8000"
+  timeout: 30
+  retry_attempts: 3
+
+output:
+  format: "table"  # Options: table, json, yaml
+  color: true
+  verbose: false
+
+cache:
+  enabled: true
+  ttl: 3600  # seconds
+  directory: "~/.vertice/cache"
+
+services:
+  ip_intelligence: "http://localhost:8000"
+  threat_intel: "http://localhost:8013"
+  adr_core: "http://localhost:8014"
+  malware_analysis: "http://localhost:8011"
+  ai_agent: "http://localhost:8001"

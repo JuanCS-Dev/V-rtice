@@ -18,8 +18,26 @@ import asyncio
 # COGNITIVE CORE - The brain that makes Aurora think
 from reasoning_engine import ReasoningEngine, ThoughtChain
 
-# MEMORY SYSTEM - Aurora's memory (short-term, long-term, semantic)
+# MEMORY SYSTEM - Maximus's memory (short-term, long-term, semantic)
 from memory_system import MemorySystem, ConversationContext
+
+# MAXIMUS AI 2.0 INTEGRATED SYSTEM - Complete AI Brain
+from maximus_integrated import (
+    MaximusIntegratedSystem,
+    MaximusRequest,
+    MaximusResponse,
+    ResponseMode
+)
+
+# MAXIMUS AI 2.0 COGNITIVE SYSTEMS
+from rag_system import RAGSystem, Source, SourceType
+from chain_of_thought import ChainOfThoughtEngine, ReasoningType
+from confidence_scoring import ConfidenceScoringSystem
+from self_reflection import SelfReflectionEngine
+
+# GEMINI CLIENT
+from gemini_client import GeminiClient, GeminiConfig
+
 
 # WORLD-CLASS TOOLS - NSA-grade arsenal
 from tools_world_class import (
@@ -73,9 +91,23 @@ AURORA_PREDICT_URL = os.getenv("AURORA_PREDICT_URL", "http://aurora_predict:80")
 OSINT_SERVICE_URL = os.getenv("OSINT_SERVICE_URL", "http://osint-service:8007")
 
 # API Key para LLM (OpenAI, Anthropic, etc)
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "anthropic")  # anthropic, openai, local
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")  # anthropic, openai, local
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
+
+# Initialize Gemini Client
+gemini_client = None
+if GEMINI_API_KEY:
+    gemini_config = GeminiConfig(
+        api_key=GEMINI_API_KEY,
+        model="gemini-2.0-flash-exp",
+        temperature=0.7,
+        max_tokens=4096
+    )
+    gemini_client = GeminiClient(gemini_config)
+    print("✅ Gemini client initialized")
 
 # Initialize Reasoning Engine
 reasoning_engine = ReasoningEngine(
@@ -103,22 +135,49 @@ tool_orchestrator = ToolOrchestrator(
     default_timeout=30
 )
 
+
+# Initialize Maximus AI 2.0 Integrated System
+maximus_system = MaximusIntegratedSystem(
+    llm_client=gemini_client,
+    enable_rag=True,
+    enable_reasoning=True,
+    enable_memory=True,
+    enable_reflection=True
+)
+
 # Lifecycle events
 @app.on_event("startup")
 async def startup_event():
     """Inicializa sistemas na startup"""
+    # Memory System é opcional - app funciona sem ele
     try:
         await memory_system.initialize()
         print("✅ Memory System initialized")
     except Exception as e:
         print(f"⚠️  Memory System initialization failed: {e}")
-        print("   Aurora will run without persistent memory")
+        print("   Maximus will run without persistent memory")
+
+    # Maximus System também é opcional
+    # try:
+    #     await maximus_system.initialize()
+    #     print("✅ Maximus AI 2.0 Integrated System initialized")
+    # except Exception as e:
+    #     print(f"⚠️  Maximus AI 2.0 initialization failed: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Desliga sistemas no shutdown"""
-    await memory_system.shutdown()
-    print("👋 Memory System shutdown")
+    try:
+        await memory_system.shutdown()
+        print("👋 Memory System shutdown")
+    except:
+        pass
+
+    # try:
+    #     await maximus_system.shutdown()
+    #     print("👋 Maximus AI 2.0 shutdown")
+    # except:
+    #     pass
 
 # ========================================
 # TOOL DEFINITIONS (Function Calling)
@@ -440,9 +499,11 @@ class ChatResponse(BaseModel):
 
 async def call_llm_with_tools(messages: List[Dict], tools: List[Dict]) -> Dict:
     """
-    Chama o LLM (Anthropic Claude) com tool calling support
+    Chama o LLM com tool calling support (Gemini, Anthropic Claude, OpenAI GPT)
     """
-    if LLM_PROVIDER == "anthropic" and ANTHROPIC_API_KEY:
+    if LLM_PROVIDER == "gemini" and GEMINI_API_KEY:
+        return await call_google_gemini(messages, tools)
+    elif LLM_PROVIDER == "anthropic" and ANTHROPIC_API_KEY:
         return await call_anthropic_claude(messages, tools)
     elif LLM_PROVIDER == "openai" and OPENAI_API_KEY:
         return await call_openai_gpt(messages, tools)
@@ -451,6 +512,67 @@ async def call_llm_with_tools(messages: List[Dict], tools: List[Dict]) -> Dict:
         return {
             "role": "assistant",
             "content": "⚠️ LLM não configurado. Configure ANTHROPIC_API_KEY ou OPENAI_API_KEY para habilitar a IA conversacional completa.",
+            "tool_calls": []
+        }
+
+
+async def call_google_gemini(messages: List[Dict], tools: List[Dict]) -> Dict:
+    """Chama Google Gemini API com tool calling"""
+
+    if not GEMINI_API_KEY or not gemini_client:
+        return {
+            "role": "assistant",
+            "content": "Configure GEMINI_API_KEY para usar Gemini",
+            "tool_calls": []
+        }
+
+    try:
+        # Extrai system message
+        system_instruction = None
+        conversation_messages = []
+
+        for msg in messages:
+            if msg["role"] == "system":
+                system_instruction = msg["content"]
+            else:
+                conversation_messages.append({
+                    "role": msg["role"],
+                    "content": msg.get("content", "")
+                })
+
+        # Chama Gemini
+        if conversation_messages:
+            response = await gemini_client.generate_with_conversation(
+                messages=conversation_messages,
+                system_instruction=system_instruction,
+                tools=tools if tools else None
+            )
+        else:
+            response = await gemini_client.generate_text(
+                prompt=system_instruction or "Hello",
+                tools=tools if tools else None
+            )
+
+        # Converte resposta para formato unificado
+        tool_calls = []
+        for tc in response.get("tool_calls", []):
+            tool_calls.append({
+                "id": f"call_{tc['name']}",
+                "name": tc["name"],
+                "input": tc.get("arguments", {})
+            })
+
+        return {
+            "role": "assistant",
+            "content": response.get("text", ""),
+            "tool_calls": tool_calls,
+            "stop_reason": response.get("finish_reason", "stop")
+        }
+
+    except Exception as e:
+        return {
+            "role": "assistant",
+            "content": f"Erro ao chamar Gemini: {str(e)}",
             "tool_calls": []
         }
 
@@ -787,7 +909,7 @@ async def chat(request: ChatRequest):
     # Generate session ID (or get from request metadata)
     import uuid
     session_id = str(uuid.uuid4())
-    user_id = request.conversation_id  # If provided
+    user_id = getattr(request, 'conversation_id', 'anonymous')  # If provided
 
     # Get last user message
     user_query = request.messages[-1].content if request.messages else ""
@@ -1096,7 +1218,7 @@ async def health():
 
     return {
         "status": "healthy",
-        "llm_ready": bool(ANTHROPIC_API_KEY or OPENAI_API_KEY),
+        "llm_ready": bool(GEMINI_API_KEY or ANTHROPIC_API_KEY or OPENAI_API_KEY),
         "reasoning_engine": "online",
         "memory_system": memory_stats,
         "cognitive_capabilities": "NSA-grade"

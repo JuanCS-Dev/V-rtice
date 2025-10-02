@@ -4,7 +4,7 @@ import { useRef, useCallback } from 'react';
  * Manages user input, including special keys and history navigation.
  */
 export const useTerminalInput = (terminal, commandHistoryHook, commandProcessorHook, prompt) => {
-  const { getPreviousCommand, getNextCommand, resetHistoryIndex } = commandHistoryHook;
+  const { getPreviousCommand, getNextCommand, resetHistoryIndex, addCommandToHistory } = commandHistoryHook;
   const { processCommand } = commandProcessorHook;
   const currentCommand = useRef('');
 
@@ -14,6 +14,9 @@ export const useTerminalInput = (terminal, commandHistoryHook, commandProcessorH
 
     switch (data) {
       case '\r': // Enter
+        if (currentCommand.current.trim()) {
+          addCommandToHistory(currentCommand.current);
+        }
         processCommand(currentCommand.current, () => term.write(prompt));
         currentCommand.current = '';
         resetHistoryIndex();
@@ -58,7 +61,7 @@ export const useTerminalInput = (terminal, commandHistoryHook, commandProcessorH
         }
         break;
     }
-  }, [terminal, getPreviousCommand, getNextCommand, resetHistoryIndex, processCommand, prompt]);
+  }, [terminal, getPreviousCommand, getNextCommand, resetHistoryIndex, addCommandToHistory, processCommand, prompt]);
 
   return { handleTerminalInput };
 };

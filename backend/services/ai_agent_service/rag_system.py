@@ -1,5 +1,5 @@
 """
-Aurora RAG System - Retrieval-Augmented Generation
+Maximus RAG System - Retrieval-Augmented Generation
 ===================================================
 
 Sistema RAG (Retrieval-Augmented Generation) para reduzir alucinações
@@ -32,7 +32,7 @@ class SourceType(str, Enum):
     OSINT = "osint"  # Dados OSINT coletados
     MALWARE_DB = "malware_db"  # Base de malware
     DOCUMENTATION = "documentation"  # Docs técnicos
-    MEMORY = "memory"  # Memória da Aurora
+    MEMORY = "memory"  # Memória da Maximus
     WEB = "web"  # Busca web
     FILE = "file"  # Arquivos locais
 
@@ -355,7 +355,7 @@ class RAGSystem:
 
         # System prompt padrão
         if not system_prompt:
-            system_prompt = """You are Aurora, an elite AI cyber intelligence analyst.
+            system_prompt = """You are Maximus, an elite AI cyber intelligence analyst.
 
 CRITICAL INSTRUCTIONS:
 1. Base your answer ONLY on the provided sources

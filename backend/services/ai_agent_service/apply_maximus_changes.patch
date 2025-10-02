@@ -1,0 +1,30 @@
+--- main.py.orig	2025-10-01 19:00:00
++++ main.py	2025-10-01 19:00:00
+@@ -18,9 +18,26 @@
+ # COGNITIVE CORE - The brain that makes Aurora think
+ from reasoning_engine import ReasoningEngine, ThoughtChain
+ 
+-# MEMORY SYSTEM - Aurora's memory (short-term, long-term, semantic)
++# MEMORY SYSTEM - Maximus's memory (short-term, long-term, semantic)
+ from memory_system import MemorySystem, ConversationContext
+ 
++# MAXIMUS AI 2.0 INTEGRATED SYSTEM - Complete AI Brain
++from maximus_integrated import (
++    MaximusIntegratedSystem,
++    MaximusRequest,
++    MaximusResponse,
++    ResponseMode
++)
++
++# MAXIMUS AI 2.0 COGNITIVE SYSTEMS
++from rag_system import RAGSystem, Source, SourceType
++from chain_of_thought import ChainOfThoughtEngine, ReasoningType
++from confidence_scoring import ConfidenceScoringSystem
++from self_reflection import SelfReflectionEngine
++
++# GEMINI CLIENT
++from gemini_client import GeminiClient, GeminiConfig
++
+ # WORLD-CLASS TOOLS - NSA-grade arsenal
+ from tools_world_class import (
+     WORLD_CLASS_TOOLS,

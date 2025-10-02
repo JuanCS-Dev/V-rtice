@@ -11,7 +11,16 @@ import TerminalDisplay from './components/TerminalDisplay';
 import '@xterm/xterm/css/xterm.css';
 
 const ASCII_BANNER = `
-\x1b[38;2;0;255;255m  VÉRTICE CLI v2.0\x1b[0m
+\x1b[1;32m██╗   ██╗███████╗██████╗ ████████╗██╗ ██████╗███████╗\x1b[0m
+\x1b[1;32m██║   ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝\x1b[0m
+\x1b[1;36m██║   ██║█████╗  ██████╔╝   ██║   ██║██║     █████╗\x1b[0m
+\x1b[1;36m╚██╗ ██╔╝██╔══╝  ██╔══██╗   ██║   ██║██║     ██╔══╝\x1b[0m
+\x1b[1;34m ╚████╔╝ ███████╗██║  ██║   ██║   ██║╚██████╗███████╗\x1b[0m
+\x1b[1;34m  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝╚══════╝\x1b[0m
+
+\x1b[1;37m        ◈ PROJETO VÉRTICE - CLI v2.0 ◈\x1b[0m
+\x1b[0;36m🚀 IA-Powered Security & Intelligence Platform\x1b[0m
+\x1b[0;37mType \x1b[1;32m'menu'\x1b[0m to get started or \x1b[1;32m'help'\x1b[0m for all commands\x1b[0m
 `;
 
 const TerminalEmulator = ({ theme, isFullscreen }) => {
@@ -33,10 +42,14 @@ const TerminalEmulator = ({ theme, isFullscreen }) => {
   useEffect(() => {
     const term = new Terminal({
       cursorBlink: true,
-      fontFamily: '"Fira Code", monospace',
+      fontFamily: '"Courier New", "Consolas", monospace',
       fontSize: 14,
       theme: theme,
       allowTransparency: true,
+      rows: 30,
+      cols: 100,
+      scrollback: 1000,
+      letterSpacing: 0,
     });
 
     fitAddon.current = new FitAddon();
@@ -48,10 +61,15 @@ const TerminalEmulator = ({ theme, isFullscreen }) => {
 
     if (terminalRef.current) {
       term.open(terminalRef.current);
-      fitAddon.current.fit();
-      term.write(ASCII_BANNER);
-      commandProcessorHook.showMainMenu();
-      term.write(getPrompt());
+
+      // Aguardar o DOM estar pronto
+      setTimeout(() => {
+        fitAddon.current.fit();
+        term.clear();
+        term.write(ASCII_BANNER);
+        commandProcessorHook.showMainMenu();
+        term.write(getPrompt());
+      }, 100);
     }
 
     term.onData(handleTerminalInput);
