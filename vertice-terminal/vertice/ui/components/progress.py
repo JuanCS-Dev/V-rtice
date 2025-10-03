@@ -7,6 +7,8 @@ from textual.widgets import Static
 from textual.reactive import reactive
 from rich.text import Text
 from rich.progress import Progress as RichProgress, BarColumn, TextColumn, TimeRemainingColumn
+from datetime import datetime
+from typing import Optional
 
 from ..themes import THEME
 
@@ -43,6 +45,11 @@ class ProgressWidget(Static):
         self.total = total
         self.description = description
         self.is_indeterminate = indeterminate
+
+        # Tracking de velocidade para ETA
+        self._start_time: Optional[datetime] = None
+        self._last_update_time: Optional[datetime] = None
+        self._last_progress: float = 0.0
 
     def render(self) -> Text:
         """Renderiza barra de progresso com gradiente"""
@@ -101,19 +108,63 @@ class ProgressWidget(Static):
         return result
 
     def _estimate_time(self) -> str:
-        """Estima tempo restante"""
-        # Simplificado - apenas retorna um placeholder
-        remaining = self.total - self.progress
-        # TODO: calcular tempo real baseado em velocidade
-        return "~calculating..."
+        """Estima tempo restante baseado em velocidade real"""
+        if not self._start_time or not self._last_update_time:
+            return "~calculating..."
+
+        # Calcula tempo decorrido
+        elapsed = (datetime.now() - self._start_time).total_seconds()
+
+        # Evita divisão por zero
+        if elapsed < 0.1 or self.progress <= 0:
+            return "~calculating..."
+
+        # Calcula velocidade (unidades por segundo)
+        speed = self.progress / elapsed
+
+        # Calcula tempo restante
+        remaining_units = self.total - self.progress
+        remaining_seconds = remaining_units / speed if speed > 0 else 0
+
+        # Formata tempo
+        if remaining_seconds < 60:
+            return f"~{int(remaining_seconds)}s"
+        elif remaining_seconds < 3600:
+            minutes = int(remaining_seconds / 60)
+            return f"~{minutes}m"
+        else:
+            hours = int(remaining_seconds / 3600)
+            return f"~{hours}h"
 
     def update(self, progress: float) -> None:
-        """Atualiza progresso"""
+        """Atualiza progresso com tracking de velocidade"""
+        now = datetime.now()
+
+        # Inicializa tempos na primeira atualização
+        if self._start_time is None:
+            self._start_time = now
+
+        # Atualiza tracking
+        self._last_update_time = now
+        self._last_progress = self.progress
+
+        # Atualiza progresso
         self.progress = progress
         self.refresh()
 
     def advance(self, amount: float = 1.0) -> None:
-        """Avança progresso"""
+        """Avança progresso com tracking"""
+        now = datetime.now()
+
+        # Inicializa tempos na primeira atualização
+        if self._start_time is None:
+            self._start_time = now
+
+        # Atualiza tracking
+        self._last_update_time = now
+        self._last_progress = self.progress
+
+        # Avança progresso
         self.progress = min(self.total, self.progress + amount)
         self.refresh()
 
@@ -123,6 +174,9 @@ class ProgressWidget(Static):
         self.refresh()
 
     def reset(self) -> None:
-        """Reseta progresso"""
+        """Reseta progresso e tracking"""
         self.progress = 0.0
+        self._start_time = None
+        self._last_update_time = None
+        self._last_progress = 0.0
         self.refresh()
