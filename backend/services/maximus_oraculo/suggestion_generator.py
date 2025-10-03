@@ -162,8 +162,11 @@ class SuggestionGenerator:
             Lista de sugestões não filtradas
         """
         if not self.gemini_api_key:
-            logger.warning("⚠️ GEMINI_API_KEY não configurada, usando sugestões mock")
-            return self._generate_mock_suggestions()
+            logger.error("❌ GEMINI_API_KEY não configurada - Oráculo requer Gemini AI")
+            raise ValueError(
+                "GEMINI_API_KEY obrigatória. Configure a variável de ambiente GEMINI_API_KEY para usar o Oráculo. "
+                "Obtenha sua chave em: https://makersuite.google.com/app/apikey"
+            )
 
         try:
             import google.generativeai as genai
@@ -188,12 +191,14 @@ class SuggestionGenerator:
             logger.info(f"✅ LLM retornou {len(suggestions)} sugestões")
             return suggestions
 
-        except ImportError:
-            logger.error("❌ google-generativeai não instalado. Instale: pip install google-generativeai")
-            return self._generate_mock_suggestions()
+        except ImportError as e:
+            logger.error("❌ google-generativeai não instalado")
+            raise ImportError(
+                "google-generativeai é obrigatório. Instale com: pip install google-generativeai"
+            ) from e
         except Exception as e:
             logger.error(f"❌ Erro ao chamar Gemini: {e}")
-            return self._generate_mock_suggestions()
+            raise RuntimeError(f"Falha ao consultar Gemini AI: {e}") from e
 
     def _build_analysis_prompt(
         self,
@@ -344,54 +349,6 @@ Return ONLY valid JSON, no markdown formatting.
             )
 
         return sorted(suggestions, key=score, reverse=True)
-
-    def _generate_mock_suggestions(self) -> List[Suggestion]:
-        """Gera sugestões mock para testes sem API key"""
-        from uuid import uuid4
-
-        return [
-            Suggestion(
-                suggestion_id=f"sug_{uuid4().hex[:8]}",
-                timestamp=datetime.utcnow(),
-                category=SuggestionCategory.SECURITY,
-                priority=SuggestionPriority.HIGH,
-                title="Adicionar validação de input em endpoints críticos",
-                description="Endpoints de análise não validam tamanho/tipo de inputs, permitindo DoS via payloads gigantes",
-                affected_files=["maximus_core_service/main.py"],
-                confidence_score=0.85,
-                impact_score=0.90,
-                effort_estimate_hours=4,
-                implementation_steps=[
-                    "Adicionar Pydantic validators para file_size, string_length",
-                    "Implementar rate limiting por IP",
-                    "Adicionar timeout em operações de I/O"
-                ],
-                code_example="# Exemplo\nclass FileAnalysisRequest(BaseModel):\n    file_path: str = Field(..., max_length=512)\n    @validator('file_path')\n    def validate_size(cls, v):\n        if os.path.getsize(v) > 100_000_000:\n            raise ValueError('File too large')\n        return v",
-                references=["https://owasp.org/www-community/vulnerabilities/Denial_of_Service"],
-                reasoning="Protege contra ataques de DoS e garante estabilidade em produção"
-            ),
-            Suggestion(
-                suggestion_id=f"sug_{uuid4().hex[:8]}",
-                timestamp=datetime.utcnow(),
-                category=SuggestionCategory.PERFORMANCE,
-                priority=SuggestionPriority.MEDIUM,
-                title="Implementar cache Redis para resultados de IP intelligence",
-                description="Queries repetidas ao IP Intel Service causam latência. Cache reduziria 70% das chamadas.",
-                affected_files=["adr_core_service/connectors/ip_intelligence_connector.py"],
-                confidence_score=0.92,
-                impact_score=0.75,
-                effort_estimate_hours=6,
-                implementation_steps=[
-                    "Instalar redis-py",
-                    "Criar RedisCache wrapper class",
-                    "Adicionar cache lookup antes de HTTP request",
-                    "Configurar TTL de 1 hora para IP reputation"
-                ],
-                code_example="# Exemplo\nimport redis\n\nclass IPIntelConnector:\n    def __init__(self):\n        self.cache = redis.Redis(host='localhost', port=6379, db=0)\n    \n    async def get_ip_info(self, ip: str):\n        cached = self.cache.get(f'ip:{ip}')\n        if cached:\n            return json.loads(cached)\n        # ... fetch from API",
-                references=["https://redis.io/docs/manual/patterns/caching/"],
-                reasoning="Reduz latência de análise em 40-60% e custos de infraestrutura"
-            )
-        ]
 
     def get_suggestions_by_category(self, category: SuggestionCategory) -> List[Suggestion]:
         """Filtra sugestões por categoria"""

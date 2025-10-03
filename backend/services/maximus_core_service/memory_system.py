@@ -39,8 +39,15 @@ import redis.asyncio as redis
 import asyncpg
 
 # Qdrant para semantic memory (vector DB)
-# from qdrant_client import QdrantClient
-# from qdrant_client.models import Distance, VectorParams, PointStruct
+try:
+    from qdrant_client import QdrantClient
+    from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
+    QDRANT_AVAILABLE = True
+except ImportError:
+    QDRANT_AVAILABLE = False
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning("qdrant-client not available. Install with: pip install qdrant-client")
 
 
 class MemoryType(str, Enum):
@@ -478,7 +485,7 @@ class EpisodicMemory:
 
 class SemanticMemory:
     """
-    SEMANTIC MEMORY - Memória de conhecimento (Vector DB)
+    SEMANTIC MEMORY - Memória de conhecimento (Qdrant Vector DB)
 
     Armazena CONHECIMENTO SEMÂNTICO:
     - Ameaças conhecidas e seus padrões
@@ -489,16 +496,77 @@ class SemanticMemory:
     Permite busca semântica: "encontre investigações similares a X"
     """
 
-    def __init__(self, collection_name: str = "aurora_knowledge"):
+    def __init__(
+        self,
+        collection_name: str = "aurora_knowledge",
+        qdrant_url: str = "http://localhost:6333",
+        vector_size: int = 384  # all-MiniLM-L6-v2 default
+    ):
         self.collection_name = collection_name
+        self.vector_size = vector_size
         self.client = None
-        # TODO: Implementar quando tivermos Qdrant configurado
-        # self.client = QdrantClient(url="http://localhost:6333")
+        self.enabled = QDRANT_AVAILABLE
+
+        if QDRANT_AVAILABLE:
+            try:
+                self.client = QdrantClient(url=qdrant_url)
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"✅ Qdrant client initialized: {qdrant_url}")
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"⚠️ Qdrant connection failed: {e}")
+                self.enabled = False
+        else:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("⚠️ Qdrant client not available - semantic memory disabled")
 
     async def init_collection(self):
-        """Inicializa coleção no Qdrant"""
-        # TODO: Implementar com Qdrant
-        pass
+        """Inicializa coleção no Qdrant com schema para conhecimento"""
+        if not self.enabled or not self.client:
+            return False
+
+        try:
+            # Check if collection exists
+            collections = self.client.get_collections().collections
+            collection_exists = any(c.name == self.collection_name for c in collections)
+
+            if not collection_exists:
+                # Create collection with vector config
+                self.client.create_collection(
+                    collection_name=self.collection_name,
+                    vectors_config=VectorParams(
+                        size=self.vector_size,
+                        distance=Distance.COSINE  # Cosine similarity for semantic search
+                    )
+                )
+
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"✅ Created Qdrant collection: {self.collection_name}")
+
+            # Create payload indexes for faster filtering
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="pattern_type",
+                field_schema="keyword"
+            )
+
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="timestamp",
+                field_schema="datetime"
+            )
+
+            return True
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"❌ Failed to initialize Qdrant collection: {e}")
+            return False
 
     async def store_knowledge(
         self,
@@ -507,19 +575,109 @@ class SemanticMemory:
         embedding: List[float],
         metadata: Dict[str, Any]
     ):
-        """Armazena conhecimento com embedding"""
-        # TODO: Implementar com Qdrant
-        pass
+        """
+        Armazena conhecimento com embedding no Qdrant
+
+        Args:
+            knowledge_id: ID único do conhecimento
+            text: Texto original
+            embedding: Vetor de embedding
+            metadata: Metadados adicionais
+        """
+        if not self.enabled or not self.client:
+            return False
+
+        try:
+            # Prepare point
+            point = PointStruct(
+                id=hashlib.md5(knowledge_id.encode()).hexdigest(),  # Convert to numeric-like hash
+                vector=embedding,
+                payload={
+                    "knowledge_id": knowledge_id,
+                    "text": text,
+                    "timestamp": datetime.now().isoformat(),
+                    **metadata
+                }
+            )
+
+            # Upsert point
+            self.client.upsert(
+                collection_name=self.collection_name,
+                points=[point]
+            )
+
+            return True
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"❌ Failed to store knowledge in Qdrant: {e}")
+            return False
 
     async def search_similar(
         self,
         query_embedding: List[float],
         limit: int = 5,
-        score_threshold: float = 0.7
+        score_threshold: float = 0.7,
+        filter_conditions: Optional[Dict[str, Any]] = None
     ) -> List[Dict]:
-        """Busca conhecimento similar"""
-        # TODO: Implementar com Qdrant
-        return []
+        """
+        Busca conhecimento semanticamente similar
+
+        Args:
+            query_embedding: Vetor de busca
+            limit: Número máximo de resultados
+            score_threshold: Score mínimo de similaridade (0-1)
+            filter_conditions: Filtros adicionais (ex: {"pattern_type": "malware"})
+
+        Returns:
+            Lista de conhecimentos similares com scores
+        """
+        if not self.enabled or not self.client:
+            return []
+
+        try:
+            # Build filter if provided
+            query_filter = None
+            if filter_conditions:
+                must_conditions = [
+                    FieldCondition(
+                        key=key,
+                        match=MatchValue(value=value)
+                    )
+                    for key, value in filter_conditions.items()
+                ]
+                query_filter = Filter(must=must_conditions)
+
+            # Search
+            results = self.client.search(
+                collection_name=self.collection_name,
+                query_vector=query_embedding,
+                query_filter=query_filter,
+                limit=limit,
+                score_threshold=score_threshold
+            )
+
+            # Format results
+            similar_knowledge = []
+            for hit in results:
+                similar_knowledge.append({
+                    "knowledge_id": hit.payload.get("knowledge_id"),
+                    "text": hit.payload.get("text"),
+                    "score": hit.score,
+                    "metadata": {
+                        k: v for k, v in hit.payload.items()
+                        if k not in ["knowledge_id", "text"]
+                    }
+                })
+
+            return similar_knowledge
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"❌ Qdrant search failed: {e}")
+            return []
 
     async def store_threat_pattern(
         self,
@@ -527,11 +685,109 @@ class SemanticMemory:
         pattern_type: str,
         description: str,
         indicators: List[str],
-        metadata: Dict[str, Any]
+        metadata: Dict[str, Any],
+        embedding: Optional[List[float]] = None
     ):
-        """Armazena padrão de ameaça"""
-        # TODO: Implementar
-        pass
+        """
+        Armazena padrão de ameaça com embedding automático
+
+        Args:
+            pattern_id: ID único do padrão
+            pattern_type: Tipo (malware, exploit, phishing, etc)
+            description: Descrição textual
+            indicators: Lista de IoCs
+            metadata: Metadados adicionais
+            embedding: Embedding pré-computado (opcional)
+        """
+        if not self.enabled or not self.client:
+            return False
+
+        try:
+            # Generate embedding if not provided
+            if embedding is None:
+                embedding = await self._generate_embedding(description)
+
+            # Combine description with indicators for better semantic search
+            full_text = f"{description}\nIndicators: {', '.join(indicators[:10])}"
+
+            # Store with metadata
+            await self.store_knowledge(
+                knowledge_id=pattern_id,
+                text=full_text,
+                embedding=embedding,
+                metadata={
+                    "pattern_type": pattern_type,
+                    "description": description,
+                    "indicators": indicators,
+                    "indicator_count": len(indicators),
+                    **metadata
+                }
+            )
+
+            return True
+
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"❌ Failed to store threat pattern: {e}")
+            return False
+
+    async def _generate_embedding(self, text: str) -> List[float]:
+        """
+        Gera embedding usando modelo local (sentence-transformers)
+
+        Falls back to simple hash-based embedding if model not available
+        """
+        try:
+            from sentence_transformers import SentenceTransformer
+            model = SentenceTransformer('all-MiniLM-L6-v2')
+            embedding = model.encode(text).tolist()
+            return embedding
+
+        except ImportError:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("⚠️ sentence-transformers not available, using hash-based embedding")
+
+            # Fallback: simple hash-based embedding (not semantic, but functional)
+            hash_val = hashlib.sha256(text.encode()).hexdigest()
+            # Convert hex to normalized float vector
+            embedding = [
+                (int(hash_val[i:i+2], 16) - 128) / 128.0
+                for i in range(0, min(len(hash_val), self.vector_size * 2), 2)
+            ]
+
+            # Pad to vector_size if needed
+            while len(embedding) < self.vector_size:
+                embedding.append(0.0)
+
+            return embedding[:self.vector_size]
+
+    async def get_stats(self) -> Dict[str, Any]:
+        """Retorna estatísticas da semantic memory"""
+        if not self.enabled or not self.client:
+            return {
+                "enabled": False,
+                "reason": "Qdrant not available or not configured"
+            }
+
+        try:
+            collection_info = self.client.get_collection(self.collection_name)
+
+            return {
+                "enabled": True,
+                "collection_name": self.collection_name,
+                "total_vectors": collection_info.points_count,
+                "vector_size": self.vector_size,
+                "distance_metric": "cosine",
+                "status": collection_info.status
+            }
+
+        except Exception as e:
+            return {
+                "enabled": False,
+                "error": str(e)
+            }
 
 
 class MemorySystem:
