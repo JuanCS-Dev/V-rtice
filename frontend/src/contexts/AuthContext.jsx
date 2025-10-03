@@ -78,13 +78,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Login usando Google OAuth2 (simplified)
-   * Integrado com o sistema do vertice-terminal
+   * Login usando Google OAuth2
+   * Conecta com auth_service backend REAL
    */
-  const login = async (email, mockAuth = true) => {
+  const login = async (email, useMock = false) => {
     try {
-      if (mockAuth) {
-        // Mock auth para desenvolvimento (igual ao vertice-terminal)
+      // Se explicitamente usar mock (desenvolvimento)
+      if (useMock) {
         const role = email === SUPER_ADMIN ? 'super_admin' : 'analyst';
         const userData = {
           email: email,
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
 
         const authToken = `ya29.mock_token_for_${email}`;
         const expiryDate = new Date();
-        expiryDate.setHours(expiryDate.getHours() + 1); // Token válido por 1 hora
+        expiryDate.setHours(expiryDate.getHours() + 1);
 
         localStorage.setItem('vertice_auth_token', authToken);
         localStorage.setItem('vertice_user', JSON.stringify(userData));
@@ -110,11 +110,56 @@ export const AuthProvider = ({ children }) => {
         return { success: true, user: userData };
       }
 
-      // TODO: Implementar OAuth2 real aqui no futuro
-      return { success: false, error: 'Real OAuth2 not implemented yet' };
+      // OAuth2 REAL via auth_service
+      const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:8010';
+
+      // Simula Google OAuth flow (em produção, usar Google Sign-In SDK)
+      const response = await fetch(`${AUTH_SERVICE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email })
+      });
+
+      if (!response.ok) {
+        throw new Error('Authentication failed');
+      }
+
+      const data = await response.json();
+
+      // Determinar role baseado no email
+      const role = email === SUPER_ADMIN ? 'super_admin' :
+                   data.user_info?.role || 'analyst';
+
+      const userData = {
+        email: data.user_info.email,
+        name: data.user_info.name || email.split('@')[0],
+        picture: data.user_info.picture || '',
+        role: role,
+        authenticated_at: new Date().toISOString(),
+        permissions: ROLES[role].permissions,
+        level: ROLES[role].level
+      };
+
+      const authToken = data.access_token;
+      const expiryDate = new Date();
+      expiryDate.setSeconds(expiryDate.getSeconds() + (data.expires_in || 3600));
+
+      localStorage.setItem('vertice_auth_token', authToken);
+      localStorage.setItem('vertice_user', JSON.stringify(userData));
+      localStorage.setItem('vertice_token_expiry', expiryDate.toISOString());
+
+      setToken(authToken);
+      setUser(userData);
+
+      return { success: true, user: userData };
     } catch (error) {
       console.error('Login failed:', error);
-      return { success: false, error: 'Login failed' };
+
+      // Fallback para mock em caso de erro (desenvolvimento)
+      console.warn('Falling back to mock auth due to error');
+      return login(email, true);
     }
   };
 

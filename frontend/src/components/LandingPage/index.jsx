@@ -165,7 +165,13 @@ export const LandingPage = ({ setCurrentView }) => {
             </p>
 
             {/* Auth Section - Standalone */}
-            <div style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>
+            <div style={{
+              marginTop: '2rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
               {isAuthenticated ? (
                 <div
                   className="auth-status-badge"
