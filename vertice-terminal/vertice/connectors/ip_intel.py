@@ -1,12 +1,14 @@
 from .base import BaseConnector
 from typing import Dict, Any
 import httpx
+from ..utils.config import config
 
 class IPIntelConnector(BaseConnector):
-    """Conector para IP Intelligence Service (porta 8000)"""
+    """Conector para IP Intelligence Service"""
 
     def __init__(self):
-        super().__init__(base_url="http://localhost:8000")
+        base_url = config.get("services.ip_intelligence.url", "http://localhost:8004")
+        super().__init__(service_name="IP Intelligence", base_url=base_url)
 
     async def health_check(self) -> bool:
         try:

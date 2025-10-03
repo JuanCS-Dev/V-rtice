@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { ThreatGlobe } from './ThreatGlobe';
 // import { ThreatGlobeWithOnion } from './ThreatGlobeWithOnion';
 import { StatsPanel } from './StatsPanel';
@@ -20,6 +21,10 @@ import { checkServicesHealth, checkThreatIntelligence } from '../../api/cyberSer
 import './LandingPage.css';
 
 export const LandingPage = ({ setCurrentView }) => {
+  const { user, isAuthenticated, login, logout } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [email, setEmail] = useState('');
+
   const [stats, setStats] = useState({
     threatsDetected: 0,
     activeMonitoring: 127,
@@ -121,6 +126,23 @@ export const LandingPage = ({ setCurrentView }) => {
     return () => clearInterval(interval);
   }, []);
 
+  // Handle login
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const result = await login(email);
+    if (result.success) {
+      setShowLoginModal(false);
+      setEmail('');
+    } else {
+      alert(result.error);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <div className="landing-page">
       <div style={{width: '100%', maxWidth: '1800px', margin: '0 auto'}}>
@@ -132,6 +154,7 @@ export const LandingPage = ({ setCurrentView }) => {
               <span>SISTEMA OPERACIONAL</span>
             </div>
 
+            {/* Title */}
             <h1 className="hero-title">
               PROJETO VÉRTICE
               <span className="gradient-text">v2.4.0</span>
@@ -140,6 +163,106 @@ export const LandingPage = ({ setCurrentView }) => {
             <p className="hero-subtitle">
               Plataforma Unificada de Inteligência Criminal e Segurança Cibernética
             </p>
+
+            {/* Auth Section - Standalone */}
+            <div style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>
+              {isAuthenticated ? (
+                <div
+                  className="auth-status-badge"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                    background: 'rgba(0, 255, 136, 0.1)',
+                    border: '2px solid #00ff88',
+                    borderRadius: '12px',
+                    padding: '12px 20px',
+                    boxShadow: '0 4px 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    animation: 'fadeInScale 0.6s ease-out'
+                  }}
+                >
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{
+                      color: '#00ff88',
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                      marginBottom: '2px'
+                    }}>
+                      {user?.name || user?.email}
+                    </div>
+                    <div style={{
+                      color: '#00ff88',
+                      fontSize: '11px',
+                      opacity: 0.7,
+                      letterSpacing: '0.5px'
+                    }}>
+                      {user?.role?.toUpperCase() || 'USER'}
+                      {user?.role === 'super_admin' && ' 👑'}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid #ff0055',
+                      color: '#ff0055',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontFamily: 'monospace',
+                      fontWeight: 'bold',
+                      transition: 'all 0.3s',
+                      letterSpacing: '1px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = '#ff0055';
+                      e.target.style.color = '#000';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'transparent';
+                      e.target.style.color = '#ff0055';
+                    }}
+                  >
+                    LOGOUT
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="hero-login-button"
+                  style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none',
+                    color: '#fff',
+                    padding: '14px 32px',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontSize: '15px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 20px rgba(102, 126, 234, 0.5)',
+                    transition: 'all 0.3s',
+                    letterSpacing: '1px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '10px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-3px)';
+                    e.target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.7)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.5)';
+                  }}
+                >
+                  <span>🔐</span>
+                  <span>ACESSAR SISTEMA</span>
+                </button>
+              )}
+            </div>
 
             <div className="hero-tags">
               <span className="tag">🛡️ Cyber Security</span>
@@ -212,6 +335,204 @@ export const LandingPage = ({ setCurrentView }) => {
           <span>Classificação: CONFIDENCIAL</span>
         </div>
       </div>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div
+          className="login-modal-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            backdropFilter: 'blur(10px)',
+            animation: 'fadeIn 0.3s ease-out'
+          }}
+          onClick={(e) => {
+            if (e.target.className.includes('login-modal-overlay')) {
+              setShowLoginModal(false);
+              setEmail('');
+            }
+          }}
+        >
+          <div
+            className="login-modal-content"
+            style={{
+              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+              border: '2px solid #667eea',
+              borderRadius: '20px',
+              padding: '40px',
+              width: '90%',
+              maxWidth: '480px',
+              boxShadow: '0 20px 60px rgba(102, 126, 234, 0.4), 0 0 100px rgba(102, 126, 234, 0.2)',
+              animation: 'modalSlideIn 0.4s ease-out',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '30px'
+            }}>
+              <div style={{
+                fontSize: '48px',
+                marginBottom: '10px'
+              }}>🔐</div>
+              <h2 style={{
+                color: '#fff',
+                margin: 0,
+                fontSize: '24px',
+                fontWeight: 'bold',
+                marginBottom: '8px'
+              }}>
+                VÉRTICE Authentication
+              </h2>
+              <p style={{
+                color: '#a8b2d1',
+                margin: 0,
+                fontSize: '14px'
+              }}>
+                Sistema de Autenticação Unificado
+              </p>
+            </div>
+
+            <form onSubmit={handleLogin}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{
+                  display: 'block',
+                  color: '#a8b2d1',
+                  marginBottom: '8px',
+                  fontSize: '13px',
+                  fontWeight: '500'
+                }}>
+                  Email Google
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu.email@gmail.com"
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(168, 178, 209, 0.3)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '14px',
+                    fontFamily: 'monospace',
+                    outline: 'none',
+                    transition: 'all 0.3s'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.border = '1px solid #667eea';
+                    e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.border = '1px solid rgba(168, 178, 209, 0.3)';
+                    e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                  }}
+                />
+              </div>
+
+              <div style={{
+                padding: '12px',
+                background: 'rgba(255, 215, 0, 0.1)',
+                border: '1px solid rgba(255, 215, 0, 0.3)',
+                borderRadius: '8px',
+                marginBottom: '24px'
+              }}>
+                <div style={{
+                  color: '#ffd700',
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span>ℹ️</span>
+                  <div>
+                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                      Super Admin: juan.brainfarma@gmail.com
+                    </div>
+                    <div style={{ opacity: 0.8 }}>
+                      Outros emails terão permissões de Analyst
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '12px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    setEmail('');
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    background: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: '#a8b2d1',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'transparent';
+                  }}
+                >
+                  CANCELAR
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+                  }}
+                >
+                  AUTENTICAR
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

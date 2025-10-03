@@ -1,0 +1,124 @@
+# MAXIMUS AI SERVICES - Docker Compose
+# =====================================
+# Orquestra todos os serviços MAXIMUS (Oráculo, Eureka, Integration)
+#
+# Para adicionar ao docker-compose.yml principal, copie a seção "services" abaixo
+
+services:
+  # ============================
+  # MAXIMUS INTEGRATION SERVICE
+  # ============================
+  maximus_integration:
+    build:
+      context: ./backend/services/maximus_integration_service
+      dockerfile: Dockerfile
+    container_name: maximus-integration
+    ports:
+      - "8099:8099"
+    volumes:
+      - ./backend/services/maximus_integration_service:/app
+      - ./backend/services/maximus_oraculo:/app/maximus_oraculo
+      - ./backend/services/maximus_eureka:/app/maximus_eureka
+    command: uvicorn main:app --host 0.0.0.0 --port 8099 --reload
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MAXIMUS_CORE_URL=http://maximus_core:8001
+      - ADR_CORE_URL=http://adr_core:8050
+    depends_on:
+      - maximus_core
+      - adr_core
+    networks:
+      - maximus_network
+
+  # ============================
+  # MAXIMUS CORE SERVICE
+  # ============================
+  maximus_core:
+    build:
+      context: ./backend/services/maximus_core_service
+      dockerfile: Dockerfile
+    container_name: maximus-core
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/services/maximus_core_service:/app
+    command: python main.py
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - REASONING_MODEL=gemini-1.5-flash
+    networks:
+      - maximus_network
+
+  # ============================
+  # ADR CORE SERVICE
+  # ============================
+  adr_core:
+    build:
+      context: ./backend/services/adr_core_service
+      dockerfile: Dockerfile
+    container_name: adr-core
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./backend/services/adr_core_service:/app
+      - /tmp/maximus_playbooks:/app/playbooks  # Shared playbooks volume
+    command: uvicorn main:app --host 0.0.0.0 --port 8050 --reload
+    environment:
+      - IP_INTEL_URL=http://ip_intelligence_service:8000
+      - THREAT_INTEL_URL=http://threat_intel_service:8013
+      - MALWARE_URL=http://malware_analysis_service:8006
+    networks:
+      - maximus_network
+
+  # ============================
+  # IP INTELLIGENCE SERVICE
+  # ============================
+  ip_intelligence_service:
+    build:
+      context: ./backend/services/ip_intelligence_service
+      dockerfile: Dockerfile
+    container_name: ip-intelligence
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/services/ip_intelligence_service:/app
+    networks:
+      - maximus_network
+
+  # ============================
+  # THREAT INTELLIGENCE SERVICE
+  # ============================
+  threat_intel_service:
+    build:
+      context: ./backend/services/threat_intel_service
+      dockerfile: Dockerfile
+    container_name: threat-intel
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./backend/services/threat_intel_service:/app
+    networks:
+      - maximus_network
+
+  # ============================
+  # MALWARE ANALYSIS SERVICE
+  # ============================
+  malware_analysis_service:
+    build:
+      context: ./backend/services/malware_analysis_service
+      dockerfile: Dockerfile
+    container_name: malware-analysis
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./backend/services/malware_analysis_service:/app
+    networks:
+      - maximus_network
+
+networks:
+  maximus_network:
+    driver: bridge
+
+volumes:
+  maximus_playbooks:
+    driver: local

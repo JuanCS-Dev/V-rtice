@@ -26,7 +26,7 @@ Este documento rastreia o progresso do desenvolvimento da nova CLI, baseado no b
 - [x] `vertice threat` (check, lookup, scan)
 - [x] `vertice adr` (status, metrics, analyze)
 - [x] `vertice malware` (analyze, yara, hash)
-- [x] `vertice aurora` (ask, chat, investigate)
+- [x] `vertice maximus` (ask, chat, investigate)
 
 ### **Fase 4: Comandos Avançados**
 - [x] `vertice scan` (nmap, ports, vulns)

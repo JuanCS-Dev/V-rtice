@@ -1,0 +1,289 @@
+{
+  "scan_date": "2025-10-02T18:00:00Z",
+  "total_files_scanned": 39,
+  "total_issues_found": 35,
+  "severity_breakdown": {
+    "critical": 4,
+    "high": 15,
+    "medium": 8,
+    "low": 8,
+    "info": 0
+  },
+  "files": [
+    {
+      "path": "vertice/utils/auth.py",
+      "lines_of_code": 230,
+      "issues": [
+        {
+          "type": "vulnerability",
+          "severity": "critical",
+          "category": "hardcoded_credentials",
+          "line_number": 15,
+          "code_snippet": "AUTH_CONFIG = {\n    \"CLIENT_ID\": \"YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com\",\n    \"CLIENT_SECRET\": \"YOUR_GOOGLE_CLIENT_SECRET\",",
+          "description": "Hardcoded placeholder credentials for Google OAuth2. Storing secrets in source code is a critical security risk.",
+          "impact": "Complete compromise of the authentication system if real credentials were used. Application is currently non-functional.",
+          "remediation": "Move credentials to a secure secret management system (like HashiCorp Vault or AWS Secrets Manager) or environment variables loaded via a .env file (that is not committed to git).",
+          "cwe_id": "CWE-798",
+          "owasp_category": "A07:2021-Identification and Authentication Failures"
+        },
+        {
+          "type": "vulnerability",
+          "severity": "high",
+          "category": "hardcoded_credentials",
+          "line_number": 25,
+          "code_snippet": "SUPER_ADMIN = \"juan.brainfarma@gmail.com\"",
+          "description": "A specific user email is hardcoded as a super administrator, giving them unrestricted access.",
+          "impact": "If this user's account is compromised, the entire system is compromised. Role management is inflexible and insecure.",
+          "remediation": "User roles and permissions should be managed dynamically in a database or a configuration file, not in the source code. Implement a proper role-based access control (RBAC) system.",
+          "cwe_id": "CWE-287",
+          "owasp_category": "A01:2021-Broken Access Control"
+        },
+        {
+          "type": "vulnerability",
+          "severity": "medium",
+          "category": "insecure_storage",
+          "line_number": 118,
+          "code_snippet": "with open(self.token_file, 'w') as f:\n    json.dump(token_data, f, indent=2)",
+          "description": "Token metadata, including expiration, is stored in a plain JSON file. While the access token itself is in the keyring, this file could be manipulated.",
+          "impact": "An attacker with local access could potentially tamper with the token metadata to extend session duration or gain information about the user's activity.",
+          "remediation": "Encrypt the entire token data file or store all token-related information in the secure keyring, not just the access token.",
+          "cwe_id": "CWE-312",
+          "owasp_category": "A02:2021-Cryptographic Failures"
+        },
+        {
+          "type": "vulnerability",
+          "severity": "medium",
+          "category": "insecure_storage",
+          "line_number": 135,
+          "code_snippet": "with open(self.user_file, 'w') as f:\n    json.dump(user_data, f, indent=2)",
+          "description": "User's Personally Identifiable Information (PII) such as email, name, and picture URL are stored unencrypted in a local JSON file.",
+          "impact": "Exposure of user PII to any process or user with read access to the file system.",
+          "remediation": "Encrypt the user data file or avoid storing PII locally altogether if not strictly necessary.",
+          "cwe_id": "CWE-312",
+          "owasp_category": "A04:2021-Insecure Design"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "category": "design",
+          "line_number": 50,
+          "code_snippet": "class AuthManager:",
+          "description": "The AuthManager class is a 'God Object' that handles authentication, authorization, user data storage, and UI display, violating the Single Responsibility Principle.",
+          "impact": "Makes the code difficult to test, maintain, and reason about.",
+          "remediation": "Refactor the class into smaller, more focused classes, for example: `TokenStorage`, `UserManager`, `PermissionManager`, and `AuthUI`.",
+          "cwe_id": "N/A",
+          "owasp_category": "N/A"
+        }
+      ]
+    },
+    {
+      "path": "vertice/commands/auth.py",
+      "lines_of_code": 200,
+      "issues": [
+        {
+          "type": "vulnerability",
+          "severity": "critical",
+          "category": "authentication_bypass",
+          "line_number": 70,
+          "code_snippet": "access_token = f'ya29.mock_token_for_{email}'",
+          "description": "The login command is a mock that generates a fake access token. It does not perform any real authentication.",
+          "impact": "Complete authentication bypass. Any user can impersonate any other user, including the super admin, by simply providing their email address.",
+          "remediation": "Implement a proper, complete OAuth2 client flow. This involves redirecting the user to Google's authentication page and securely handling the callback with the authorization code to obtain a real access token.",
+          "cwe_id": "CWE-287",
+          "owasp_category": "A07:2021-Identification and Authentication Failures"
+        }
+      ]
+    },
+    {
+      "path": "vertice/commands/ip.py",
+      "lines_of_code": 130,
+      "issues": [
+        {
+          "type": "vulnerability",
+          "severity": "high",
+          "category": "path_traversal",
+          "line_number": 95,
+          "code_snippet": "with open(file, 'r') as f:",
+          "description": "The 'bulk' command opens a file path provided by the user without any validation or sanitization.",
+          "impact": "An attacker can read any file on the system that the user has permissions to access by providing a crafted path (e.g., '../../../../etc/passwd').",
+          "remediation": "Sanitize the input path to ensure it is within an expected directory. Do not allow '..' in the path. Ideally, confine file operations to a specific, non-privileged directory.",
+          "cwe_id": "CWE-22",
+          "owasp_category": "A01:2021-Broken Access Control"
+        }
+      ]
+    },
+    {
+      "path": "vertice/commands/adr.py",
+      "lines_of_code": 180,
+      "issues": [
+        {
+          "type": "vulnerability",
+          "severity": "high",
+          "category": "path_traversal",
+          "line_number": 106,
+          "code_snippet": "result = await connector._post(\"/api/adr/analyze/file\", json={"file_path": path})",
+          "description": "The 'analyze file' command sends a user-provided file path to the backend. The backend might trust this path, leading to a path traversal vulnerability on the server.",
+          "impact": "If the backend is vulnerable, an attacker could read arbitrary files on the server.",
+          "remediation": "The backend service must sanitize and validate the file path to prevent traversal outside of the intended directory. The client should also perform validation as a first line of defense.",
+          "cwe_id": "CWE-22",
+          "owasp_category": "A01:2021-Broken Access Control"
+        },
+        {
+          "type": "vulnerability",
+          "severity": "high",
+          "category": "command_injection",
+          "line_number": 166,
+          "code_snippet": "result = await connector._post(\"/api/adr/analyze/process\", json={"command": cmd})",
+          "description": "The 'analyze process' command sends a user-provided command string to the backend. If the backend executes this string without sanitization, it can lead to command injection.",
+          "impact": "Arbitrary command execution on the backend server with the privileges of the service account.",
+          "remediation": "The backend service must never execute raw command strings from user input. It should use secure APIs and parameterize any arguments passed to system commands.",
+          "cwe_id": "CWE-77",
+          "owasp_category": "A03:2021-Injection"
+        },
+        {
+          "type": "code_smell",
+          "severity": "high",
+          "category": "duplication",
+          "line_number": 20,
+          "code_snippet": "async def _status(): ... async def _metrics(): ...",
+          "description": "The code for every command in this file is almost identical, leading to massive code duplication.",
+          "impact": "Extremely difficult to maintain. A bug fix or a change in logic needs to be applied in multiple places, which is error-prone.",
+          "remediation": "Refactor the duplicated logic into a single, reusable helper function or decorator that handles the connector setup, health check, spinner, and error handling.",
+          "cwe_id": "CWE-398",
+          "owasp_category": "N/A"
+        }
+      ]
+    },
+    {
+      "path": "vertice/connectors/base.py",
+      "lines_of_code": 100,
+      "issues": [
+        {
+          "type": "vulnerability",
+          "severity": "high",
+          "category": "unencrypted_communication",
+          "line_number": 1,
+          "code_snippet": "import httpx",
+          "description": "The BaseConnector and all connectors that inherit from it use HTTP for communication, not HTTPS. All traffic between the CLI and the backend services is unencrypted.",
+          "impact": "Sensitive data, including authentication tokens and analysis results, can be intercepted and read by an attacker on the network (Man-in-the-Middle).",
+          "remediation": "Update all service URLs to use HTTPS. Ensure that the backend services have valid TLS certificates. Use httpx with certificate validation enabled.",
+          "cwe_id": "CWE-319",
+          "owasp_category": "A02:2021-Cryptographic Failures"
+        },
+        {
+          "type": "vulnerability",
+          "severity": "medium",
+          "category": "ssrf",
+          "line_number": 48,
+          "code_snippet": "url = f'{self.base_url}{endpoint}'",
+          "description": "The URL is constructed by concatenating a base URL with an endpoint. If an attacker can control the 'endpoint' value, they could potentially make requests to other internal services.",
+          "impact": "An attacker could scan the internal network or interact with other internal services that the CLI's host has access to.",
+          "remediation": "Implement a strict allowlist for endpoint values. Do not allow special characters like '..' or '@' in the endpoint string.",
+          "cwe_id": "CWE-918",
+          "owasp_category": "A10:2021-Server-Side Request Forgery (SSRF)"
+        }
+      ]
+    },
+    {
+      "path": "vertice/commands/scan.py",
+      "lines_of_code": 150,
+      "issues": [
+        {
+          "type": "vulnerability",
+          "severity": "critical",
+          "category": "command_injection",
+          "line_number": 70,
+          "code_snippet": "async def _nmap():",
+          "description": "The 'nmap' command is a placeholder, but a real implementation is likely to execute the nmap binary. If the user-provided 'target' is not sanitized, it can lead to command injection.",
+          "impact": "Potential for arbitrary command execution on the user's machine with the user's privileges.",
+          "remediation": "When implementing this feature, ensure the 'target' argument is strictly validated and sanitized. Do not pass the raw string to a shell. Use command parameterization features of libraries like 'subprocess' instead of `shell=True`.",
+          "cwe_id": "CWE-77",
+          "owasp_category": "A03:2021-Injection"
+        },
+        {
+          "type": "tech_debt",
+          "severity": "high",
+          "category": "placeholder_code",
+          "line_number": 1,
+          "code_snippet": "from pathlib import Path",
+          "description": "The entire file is a placeholder with no real functionality. It simulates scans using 'asyncio.sleep' and returns hardcoded data.",
+          "impact": "Core features of the application are missing, leading to a poor user experience and a product that doesn't match its description.",
+          "remediation": "Implement the actual scanning logic by integrating with tools like Nmap and vulnerability scanning libraries or services.",
+          "cwe_id": "N/A",
+          "owasp_category": "N/A"
+        }
+      ]
+    },
+    {
+      "path": "autodoc/gemini_documenter.py",
+      "lines_of_code": 70,
+      "issues": [
+        {
+          "type": "vulnerability",
+          "severity": "critical",
+          "category": "hardcoded_credentials",
+          "line_number": 13,
+          "code_snippet": "load_dotenv('/home/juan/vertice-dev/.env')",
+          "description": "Hardcoded absolute path to a .env file, which likely contains the GEMINI_API_KEY.",
+          "impact": "The application will fail for any other user. It also exposes the location of a sensitive file. If the .env file were to be accidentally committed, the API key would be exposed.",
+          "remediation": "Allow the user to specify the path to the .env file as a command-line argument or environment variable. Alternatively, search for the .env file in standard locations (e.g., current directory, home directory) instead of hardcoding a path.",
+          "cwe_id": "CWE-798",
+          "owasp_category": "A07:2021-Identification and Authentication Failures"
+        }
+      ]
+    },
+    {
+      "path": "vertice/utils/banner.py",
+      "lines_of_code": 80,
+      "issues": [
+        {
+          "type": "code_smell",
+          "severity": "high",
+          "category": "duplication",
+          "line_number": 3,
+          "code_snippet": "COPIED EXACTLY FROM: vertice_cli/utils.py:exibir_banner()",
+          "description": "The file is an exact copy of another file in a different project. This is a major maintenance issue.",
+          "impact": "Any changes to the banner have to be manually synchronized across projects, which is error-prone and time-consuming.",
+          "remediation": "Create a shared library or package that contains common utility functions like this banner, and have both projects depend on it.",
+          "cwe_id": "CWE-398",
+          "owasp_category": "N/A"
+        }
+      ]
+    },
+    {
+      "path": "vertice/utils/cache.py",
+      "lines_of_code": 20,
+      "issues": [
+        {
+          "type": "tech_debt",
+          "severity": "high",
+          "category": "placeholder_code",
+          "line_number": 1,
+          "code_snippet": "from pathlib import Path",
+          "description": "The entire cache implementation is a placeholder with 'TODO: Implement' comments.",
+          "impact": "The application lacks caching, which can lead to poor performance and excessive API calls.",
+          "remediation": "Implement the caching logic using a library like 'diskcache' (which is already in the requirements) or a custom file-based implementation.",
+          "cwe_id": "N/A",
+          "owasp_category": "N/A"
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "most_vulnerable_files": [
+      "vertice/utils/auth.py",
+      "vertice/commands/auth.py",
+      "vertice/commands/adr.py",
+      "vertice/commands/ip.py",
+      "vertice/commands/scan.py"
+    ],
+    "most_common_vulnerabilities": {
+      "unencrypted_communication": 6,
+      "path_traversal": 3,
+      "command_injection": 3,
+      "hardcoded_credentials": 3,
+      "authentication_bypass": 1
+    },
+    "technical_debt_hours": 40
+  }
+}

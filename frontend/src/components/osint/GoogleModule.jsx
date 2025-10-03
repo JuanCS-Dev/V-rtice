@@ -91,7 +91,8 @@ const GoogleModule = () => {
     if (!results || !results.results) return null;
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#a855f7 rgba(0,0,0,0.3)'}}>
+        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#a855f7;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#c084fc}`}</style>
         <div className="flex justify-between items-center">
           <h3 className="text-purple-400 font-bold text-lg">🔍 Resultados Google OSINT</h3>
           <div className="text-purple-400/60 text-sm">
@@ -99,7 +100,7 @@ const GoogleModule = () => {
           </div>
         </div>
 
-        <div className="space-y-3 max-h-96 overflow-y-auto">
+        <div className="space-y-3">
           {results.results.map((result, index) => (
             <div
               key={index}
@@ -140,7 +141,8 @@ const GoogleModule = () => {
     if (!results || !results.results_by_type) return null;
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#a855f7 rgba(0,0,0,0.3)'}}>
+        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#a855f7;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#c084fc}`}</style>
         <div className="flex justify-between items-center">
           <h3 className="text-purple-400 font-bold text-lg">🎯 Busca Avançada</h3>
           <div className="text-purple-400/60 text-sm">

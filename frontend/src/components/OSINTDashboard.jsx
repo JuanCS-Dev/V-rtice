@@ -40,7 +40,7 @@ const OSINTDashboard = ({ setCurrentView }) => {
           { type: 'LEAK', message: 'Novo vazamento detectado', severity: 'critical', source: 'Dark Web Monitor' },
           { type: 'SOCIAL', message: 'Atividade suspeita em rede social', severity: 'high', source: 'Social Scraper' },
           { type: 'BREACH', message: 'Email comprometido identificado', severity: 'critical', source: 'Breach Analyzer' },
-          { type: 'PATTERN', message: 'Padrão comportamental anômalo', severity: 'medium', source: 'Aurora AI' },
+          { type: 'PATTERN', message: 'Padrão comportamental anômalo', severity: 'medium', source: 'Maximus AI' },
           { type: 'IDENTITY', message: 'Nova identidade digital encontrada', severity: 'info', source: 'Username Hunter' }
         ];
 
@@ -162,7 +162,7 @@ const OverviewModule = ({ stats }) => {
           <h3 className="text-purple-400 font-bold text-lg mb-4">STATUS DOS MÓDULOS OSINT</h3>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { name: 'Aurora AI Engine', status: 'online', activity: 'Analisando padrões' },
+              { name: 'Maximus AI Engine', status: 'online', activity: 'Analisando padrões' },
               { name: 'Username Hunter', status: 'online', activity: 'Monitorando 2,847 perfis' },
               { name: 'Email Analyzer', status: 'online', activity: 'Verificando 1,293 emails' },
               { name: 'Phone Intelligence', status: 'online', activity: 'Rastreando 847 números' },

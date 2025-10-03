@@ -45,20 +45,19 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
   return (
     <div className={styles.form}>
       <form onSubmit={handleSubmit} className={styles.searchForm}>
-        <label htmlFor="target-input" className={styles.visuallyHidden}>Username ou Target</label>
-        <Input
-          id="target-input"
-          type="text"
-          placeholder="username ou target"
-          value={target}
-          onChange={(e) => setTarget(e.target.value)}
-          onKeyPress={handleKeyPress}
-          disabled={loading}
-          variant="osint"
-          size="lg"
-          icon={<i className="fas fa-user-secret"></i>}
-          error={error}
-        />
+        <div className={styles.inputWrapper}>
+          <label htmlFor="target-input" className={styles.visuallyHidden}>Username ou Target</label>
+          <input
+            id="target-input"
+            type="text"
+            placeholder="@ssimone"
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={loading}
+            className={styles.input}
+          />
+        </div>
 
         <Button
           type="submit"

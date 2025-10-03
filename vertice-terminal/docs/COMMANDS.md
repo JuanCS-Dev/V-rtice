@@ -14,8 +14,8 @@ ADR detection and response
 ### malware
 Malware analysis and detection
 
-### aurora
-Aurora AI-powered operations
+### maximus
+Maximus AI-powered operations
 
 ### scan
 Network and port scanning

@@ -75,7 +75,26 @@ const EmailModule = () => {
 
         {/* Results Display */}
         {result && (
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-4 max-h-[600px] overflow-y-auto" style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#a855f7 rgba(0,0,0,0.3)'
+          }}>
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                width: 8px;
+              }
+              div::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 4px;
+              }
+              div::-webkit-scrollbar-thumb {
+                background: #a855f7;
+                border-radius: 4px;
+              }
+              div::-webkit-scrollbar-thumb:hover {
+                background: #c084fc;
+              }
+            `}</style>
             <h3 className="text-purple-400 font-bold text-lg">📊 Resultados da Análise</h3>
 
             {/* Basic Info */}

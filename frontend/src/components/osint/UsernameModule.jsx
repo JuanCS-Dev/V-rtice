@@ -135,7 +135,26 @@ const UsernameModule = () => {
 
         {/* Results */}
         {results && (
-          <div className="bg-black/50 border border-purple-400/30 rounded-lg p-6">
+          <div className="bg-black/50 border border-purple-400/30 rounded-lg p-6 max-h-[600px] overflow-y-auto" style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#a855f7 rgba(0,0,0,0.3)'
+          }}>
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                width: 8px;
+              }
+              div::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 4px;
+              }
+              div::-webkit-scrollbar-thumb {
+                background: #a855f7;
+                border-radius: 4px;
+              }
+              div::-webkit-scrollbar-thumb:hover {
+                background: #c084fc;
+              }
+            `}</style>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-purple-400 font-bold text-lg">RESULTADOS DA BUSCA</h3>
               <div className="text-purple-400/60 text-sm">

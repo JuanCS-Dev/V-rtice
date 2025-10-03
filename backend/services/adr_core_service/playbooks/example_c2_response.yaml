@@ -1,0 +1,87 @@
+---
+playbook_id: "pb_c2_001"
+name: "C2 Communication Response"
+description: "Response playbook for Command & Control communication detection"
+version: "1.0"
+enabled: true
+
+# Trigger Configuration
+trigger_type: "threat_type"
+trigger_conditions:
+  threat_types:
+    - "c2_communication"
+    - "command_and_control"
+    - "botnet"
+  mitre_techniques:
+    - "T1071"  # Application Layer Protocol
+    - "T1095"  # Non-Application Layer Protocol
+    - "T1572"  # Protocol Tunneling
+
+# Execution Settings
+auto_execute: true
+require_approval: false
+approval_timeout_minutes: 0
+
+# Response Steps
+steps:
+  - step_id: "step_001"
+    name: "Block C2 IP"
+    action_type: "block_ip"
+    order: 1
+    parallel: false
+    critical: true
+    timeout_seconds: 30
+    retry_on_failure: true
+    max_retries: 3
+    parameters:
+      scope: "global"
+      duration: "24h"
+
+  - step_id: "step_002"
+    name: "Block C2 Domain"
+    action_type: "block_domain"
+    order: 1
+    parallel: false
+    critical: true
+    timeout_seconds: 30
+    retry_on_failure: true
+    max_retries: 3
+    parameters:
+      dns_sinkhole: true
+
+  - step_id: "step_003"
+    name: "Alert Security Team"
+    action_type: "alert"
+    order: 2
+    parallel: false
+    critical: false
+    timeout_seconds: 15
+    retry_on_failure: true
+    max_retries: 3
+    parameters:
+      severity: "high"
+      channels:
+        - "email"
+        - "slack"
+
+  - step_id: "step_004"
+    name: "Log C2 Communication"
+    action_type: "log"
+    order: 3
+    parallel: false
+    critical: false
+    timeout_seconds: 10
+    retry_on_failure: true
+    max_retries: 5
+    parameters:
+      log_level: "warning"
+      include_network_trace: true
+
+# Metadata
+author: "ADR Security Team"
+tags:
+  - "c2"
+  - "automated"
+  - "network"
+created_at: "2025-01-15T00:00:00Z"
+updated_at: "2025-01-15T00:00:00Z"

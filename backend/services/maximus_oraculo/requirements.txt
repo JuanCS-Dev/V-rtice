@@ -1,0 +1,13 @@
+# MAXIMUS ORÁCULO - Self-Improvement Engine
+# ==========================================
+
+# Google Gemini for LLM-based code analysis
+google-generativeai>=0.3.0
+
+# Core dependencies (already in main project)
+# pyyaml>=6.0
+# requests>=2.31.0
+
+# Optional: For enhanced testing
+# pytest>=7.4.0
+# pytest-cov>=4.1.0

@@ -1,26 +1,12 @@
 """
-ADR Core Service - Autonomous Detection & Response
-===================================================
+ADR Core Service - INTEGRATED & COMPLETE
+==========================================
 
-"Segurança de classe mundial não é privilégio. É direito."
+"Pela Arte. Pela Sociedade."
 
-Este serviço implementa capacidades ADR (Autonomous Detection and Response)
-de nível enterprise, democratizadas para toda a sociedade.
-
-Inspirado em:
-- SentinelOne Purple AI (Agentic AI)
-- Darktrace (Self-Learning Behavioral AI)
-- CrowdStrike Falcon (Threat Intelligence)
-- CISA/NSA Guidance (Best Practices)
-
-Construído com:
-- ❤️ Amor pela arte
-- 🎯 Missão de proteção social
-- 🔥 Paixão por excelência técnica
-- 🌍 Compromisso com a comunidade
-
-Autor: Juan (Arquiteto)
-Data: 2025-10-01
+Versão: 2.0.0-INTEGRATED
+Data: 2025-10-02
+Status: PRODUCTION READY
 """
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
@@ -30,21 +16,44 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 import asyncio
 import logging
+import uuid
+
+# Import our engines
+from engines import DetectionEngine, ResponseEngine, MLEngine
+from connectors import (
+    IPIntelligenceConnector,
+    ThreatIntelConnector,
+    MalwareAnalysisConnector
+)
+from playbooks import PlaybookLoader
+from models import (
+    ThreatDetection,
+    AnalysisRequest,
+    AnalysisResult,
+    ResponseAction,
+    PlaybookExecution,
+    ServiceMetrics,
+    APIResponse,
+    HealthStatus,
+    SeverityLevel,
+    ThreatType,
+    ActionType
+)
+from utils import setup_logger, MetricsCollector, generate_id
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+logger = setup_logger("adr_core", level="INFO")
+
+# ============================================================================
+# FASTAPI APP
+# ============================================================================
 
 app = FastAPI(
-    title="Aurora ADR Core Service",
-    description="Autonomous Detection & Response - Democratizing Enterprise Security",
-    version="1.0.0-alpha",
+    title="ADR Core Service - INTEGRATED",
+    description="Autonomous Detection & Response with Full Integration",
+    version="2.0.0-integrated",
 )
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -54,574 +63,522 @@ app.add_middleware(
 )
 
 # ============================================================================
-# MODELS
+# GLOBAL STATE & ENGINES
 # ============================================================================
 
-class ThreatDetection(BaseModel):
-    """Modelo de detecção de ameaça"""
-    threat_id: str
-    type: str  # malware, lotl, phishing, exfiltration, etc
-    severity: str  # critical, high, medium, low
-    source: str  # IP, hostname, process, file
-    indicators: List[str]
-    threat_score: int  # 0-100
-    confidence: str  # low, medium, high
-    timestamp: str
-    raw_data: Optional[Dict[str, Any]] = None
-
-
-class ResponseAction(BaseModel):
-    """Modelo de ação de resposta"""
-    action_id: str
-    threat_id: str
-    action_type: str  # isolate, terminate, quarantine, rotate, alert
-    target: str
-    status: str  # pending, in_progress, completed, failed
-    timestamp: str
-    response_time_ms: Optional[int] = None
-    details: Optional[Dict[str, Any]] = None
-
-
-class ADRMetrics(BaseModel):
-    """Métricas do ADR"""
-    total_threats_detected: int
-    threats_by_severity: Dict[str, int]
-    autonomous_responses: int
-    mean_time_to_respond_ms: float  # MTTR - métrica crítica
-    detection_accuracy: float  # % de detecções corretas
-    false_positive_rate: float
-    uptime: str
-
-
-# ============================================================================
-# STATE
-# ============================================================================
-
-class ADRState:
-    """Estado global do ADR"""
+class ADRCore:
+    """Centralized ADR Core State"""
 
     def __init__(self):
-        self.threats_detected: List[ThreatDetection] = []
-        self.responses_executed: List[ResponseAction] = []
-        self.is_armed: bool = True  # ADR está armado para resposta autônoma
-        self.risk_threshold: int = 70  # Score mínimo para resposta autônoma
+        # Engines
+        self.detection_engine: Optional[DetectionEngine] = None
+        self.response_engine: Optional[ResponseEngine] = None
+        self.ml_engine: Optional[MLEngine] = None
 
-    def add_threat(self, threat: ThreatDetection):
-        self.threats_detected.append(threat)
-        logger.info(f"🚨 Threat detected: {threat.type} | Severity: {threat.severity} | Score: {threat.threat_score}")
+        # Connectors
+        self.ip_intel_connector: Optional[IPIntelligenceConnector] = None
+        self.threat_intel_connector: Optional[ThreatIntelConnector] = None
+        self.malware_connector: Optional[MalwareAnalysisConnector] = None
 
-    def add_response(self, response: ResponseAction):
-        self.responses_executed.append(response)
-        logger.info(f"⚡ Response executed: {response.action_type} | Target: {response.target}")
+        # Playbooks
+        self.playbook_loader: Optional[PlaybookLoader] = None
 
-    def calculate_mttr(self) -> float:
-        """Calcula Mean Time to Respond (MTTR)"""
-        if not self.responses_executed:
-            return 0.0
+        # Metrics
+        self.metrics = MetricsCollector()
 
-        response_times = [r.response_time_ms for r in self.responses_executed if r.response_time_ms]
-        if not response_times:
-            return 0.0
-
-        return sum(response_times) / len(response_times)
-
-
-# Global state
-adr_state = ADRState()
-
-
-# ============================================================================
-# DETECTION ENGINE (Fase 1 - Estrutura Base)
-# ============================================================================
-
-class DetectionEngine:
-    """
-    Motor de detecção de ameaças
-
-    Fase 1: Estrutura base + integração com serviços existentes
-    Fase 2: ML models + behavioral analysis
-    """
-
-    def __init__(self):
-        self.threat_signatures = self.load_threat_signatures()
-        self.behavioral_baselines = {}
-
-    def load_threat_signatures(self) -> Dict[str, Any]:
-        """Carrega assinaturas de ameaças conhecidas"""
-        # TODO: Integrar com threat intel service
-        return {
-            'malware_hashes': [],
-            'malicious_ips': [],
-            'suspicious_patterns': []
+        # Config
+        self.config = {
+            'enable_auto_response': False,
+            'enable_enrichment': True,
+            'auto_response_threshold': 70,
+            'enable_ml': True,
         }
 
-    async def analyze_file(self, file_path: str) -> ThreatDetection:
-        """
-        Analisa arquivo em busca de malware
+        self.start_time = datetime.utcnow()
 
-        Fase 1: Hash-based detection
-        Fase 2: ML-based behavioral detection
-        """
-        import hashlib
-        import os
-        from uuid import uuid4
+    async def initialize(self):
+        """Initialize all components"""
+        logger.info("🚀 Initializing ADR Core Service...")
 
-        # Calcula hash do arquivo
-        try:
-            with open(file_path, 'rb') as f:
-                file_hash = hashlib.sha256(f.read()).hexdigest()
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+        # Initialize engines
+        logger.info("⚙️ Initializing engines...")
+        self.detection_engine = DetectionEngine(config={
+            'enabled': True,
+            'workers': 4,
+            'log_level': 'INFO'
+        })
 
-        # Verifica contra assinaturas conhecidas
-        is_malicious = file_hash in self.threat_signatures.get('malware_hashes', [])
+        self.response_engine = ResponseEngine(config={
+            'enabled': True,
+            'enable_auto_response': self.config['enable_auto_response'],
+            'log_level': 'INFO'
+        })
 
-        # TODO: Integrar ML model para análise comportamental
-        threat_score = 95 if is_malicious else 10
+        self.ml_engine = MLEngine(config={
+            'enabled': self.config['enable_ml'],
+            'log_level': 'INFO'
+        })
 
-        return ThreatDetection(
-            threat_id=str(uuid4()),
-            type='malware' if is_malicious else 'unknown',
-            severity='critical' if threat_score >= 80 else 'low',
-            source=file_path,
-            indicators=[f"SHA256: {file_hash}"],
-            threat_score=threat_score,
-            confidence='high' if is_malicious else 'low',
-            timestamp=datetime.utcnow().isoformat(),
-            raw_data={'file_hash': file_hash}
-        )
+        # Initialize connectors
+        logger.info("🔌 Initializing connectors...")
+        self.ip_intel_connector = IPIntelligenceConnector("http://localhost:8000")
+        self.threat_intel_connector = ThreatIntelConnector("http://localhost:8013")
+        self.malware_connector = MalwareAnalysisConnector("http://localhost:8006")
 
-    async def analyze_network_traffic(self, traffic_data: Dict[str, Any]) -> Optional[ThreatDetection]:
-        """
-        Analisa tráfego de rede em busca de anomalias
+        # Connect connectors
+        await self.ip_intel_connector.connect()
+        await self.threat_intel_connector.connect()
+        await self.malware_connector.connect()
 
-        Fase 1: IP blacklist checking
-        Fase 2: ML-based anomaly detection
-        """
-        from uuid import uuid4
+        # Load playbooks
+        logger.info("📋 Loading playbooks...")
+        self.playbook_loader = PlaybookLoader()
+        playbooks = self.playbook_loader.load_all_playbooks()
 
-        dest_ip = traffic_data.get('destination_ip')
+        # Register playbooks in response engine
+        for playbook in playbooks:
+            self.response_engine.load_playbook(playbook)
 
-        # Verifica contra IPs maliciosos conhecidos
-        is_malicious = dest_ip in self.threat_signatures.get('malicious_ips', [])
+        logger.info(f"✅ Loaded {len(playbooks)} playbooks")
 
-        if not is_malicious:
-            return None
+        logger.info("✅ ADR Core Service READY")
 
-        return ThreatDetection(
-            threat_id=str(uuid4()),
-            type='exfiltration',
-            severity='high',
-            source=traffic_data.get('source_ip', 'unknown'),
-            indicators=[f"Destination: {dest_ip}"],
-            threat_score=85,
-            confidence='high',
-            timestamp=datetime.utcnow().isoformat(),
-            raw_data=traffic_data
-        )
+    async def shutdown(self):
+        """Cleanup on shutdown"""
+        logger.info("🛑 Shutting down ADR Core Service...")
 
-    async def analyze_process_behavior(self, process_data: Dict[str, Any]) -> Optional[ThreatDetection]:
-        """
-        Analisa comportamento de processo (LOTL detection)
+        if self.ip_intel_connector:
+            await self.ip_intel_connector.close()
+        if self.threat_intel_connector:
+            await self.threat_intel_connector.close()
+        if self.malware_connector:
+            await self.malware_connector.disconnect()
 
-        Fase 1: Signature-based (PowerShell suspicious commands)
-        Fase 2: ML behavioral analysis
-        """
-        from uuid import uuid4
+        logger.info("✅ ADR Core Service stopped")
 
-        command = process_data.get('command_line', '')
-        process_name = process_data.get('process_name', '')
-
-        # Patterns suspeitos (LOTL)
-        suspicious_patterns = [
-            'powershell.*-encodedcommand',
-            'powershell.*invoke-expression',
-            'wmic.*process.*call.*create',
-            'certutil.*-decode',
-            'bitsadmin.*transfer'
-        ]
-
-        import re
-        is_suspicious = any(re.search(pattern, command.lower()) for pattern in suspicious_patterns)
-
-        if not is_suspicious:
-            return None
-
-        return ThreatDetection(
-            threat_id=str(uuid4()),
-            type='lotl',
-            severity='high',
-            source=process_name,
-            indicators=[f"Command: {command[:100]}..."],
-            threat_score=80,
-            confidence='medium',
-            timestamp=datetime.utcnow().isoformat(),
-            raw_data=process_data
-        )
-
+# Global ADR Core instance
+adr_core = ADRCore()
 
 # ============================================================================
-# RESPONSE ENGINE (Fase 1 - Estrutura Base)
+# STARTUP & SHUTDOWN
 # ============================================================================
 
-class ResponseEngine:
+@app.on_event("startup")
+async def startup_event():
+    """Startup initialization"""
+    await adr_core.initialize()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Shutdown cleanup"""
+    await adr_core.shutdown()
+
+# ============================================================================
+# REQUEST/RESPONSE MODELS
+# ============================================================================
+
+class FileAnalysisRequest(BaseModel):
+    file_path: str
+    enrich: bool = True
+
+class NetworkAnalysisRequest(BaseModel):
+    source_ip: str
+    destination_ip: str
+    port: int
+    protocol: str = "TCP"
+    enrich: bool = True
+
+class ProcessAnalysisRequest(BaseModel):
+    process_name: str
+    command_line: str
+    pid: Optional[int] = None
+    enrich: bool = True
+
+class ConfigUpdate(BaseModel):
+    enable_auto_response: Optional[bool] = None
+    enable_enrichment: Optional[bool] = None
+    auto_response_threshold: Optional[int] = None
+
+# ============================================================================
+# ENRICHMENT FUNCTIONS
+# ============================================================================
+
+async def enrich_detection(
+    detection: ThreatDetection,
+    enable_enrichment: bool = True
+) -> ThreatDetection:
     """
-    Motor de resposta autônoma a ameaças
+    Enrich detection with external intelligence
 
-    Fase 1: Playbooks básicos (alert, log)
-    Fase 2: Autonomous actions (isolate, quarantine, terminate)
+    Returns enriched detection with:
+    - IP Intelligence context
+    - Threat Intelligence data
+    - Malware analysis (if applicable)
+    - Adjusted threat score
     """
+    if not enable_enrichment or not adr_core.config['enable_enrichment']:
+        return detection
 
-    def __init__(self):
-        self.playbooks = self.load_playbooks()
+    enriched = detection
+    enrichment_sources = []
 
-    def load_playbooks(self) -> Dict[str, Any]:
-        """Carrega playbooks de resposta"""
-        return {
-            'malware': ['alert', 'quarantine', 'forensics'],
-            'lotl': ['alert', 'log_powershell', 'monitor'],
-            'exfiltration': ['alert', 'isolate_network', 'forensics'],
-            'phishing': ['alert', 'block_sender', 'user_training']
-        }
+    try:
+        # Convert to dict for connector enrichment
+        detection_dict = detection.dict()
 
-    async def respond_to_threat(
-        self,
-        threat: ThreatDetection,
-        autonomous: bool = True
-    ) -> ResponseAction:
-        """
-        Responde a uma ameaça detectada
+        # IP Intelligence enrichment
+        if adr_core.ip_intel_connector and adr_core.ip_intel_connector.connected:
+            try:
+                detection_dict = await adr_core.ip_intel_connector.enrich_threat_with_ip_context(
+                    detection_dict
+                )
+                enrichment_sources.append('ip_intelligence')
+            except Exception as e:
+                logger.error(f"IP Intel enrichment failed: {e}")
 
-        Args:
-            threat: Ameaça detectada
-            autonomous: Se True, executa ação automaticamente sem confirmação humana
-                       (apenas se threat_score >= threshold)
-        """
-        from uuid import uuid4
-        import time
+        # Threat Intelligence enrichment
+        if adr_core.threat_intel_connector and adr_core.threat_intel_connector.connected:
+            try:
+                detection_dict = await adr_core.threat_intel_connector.enrich_threat_with_intel(
+                    detection_dict
+                )
+                enrichment_sources.append('threat_intelligence')
+            except Exception as e:
+                logger.error(f"Threat Intel enrichment failed: {e}")
 
-        start_time = time.time()
+        # Malware Analysis enrichment (if file-based)
+        if detection.threat_type in [ThreatType.MALWARE, ThreatType.RANSOMWARE]:
+            if adr_core.malware_connector and adr_core.malware_connector.connected:
+                try:
+                    detection_dict = await adr_core.malware_connector.enrich(detection_dict)
+                    enrichment_sources.append('malware_analysis')
+                except Exception as e:
+                    logger.error(f"Malware enrichment failed: {e}")
 
-        # Determina se deve agir autonomamente
-        should_auto_respond = (
-            autonomous and
-            adr_state.is_armed and
-            threat.threat_score >= adr_state.risk_threshold
+        # Reconstruct enriched detection
+        # Update score and severity from enriched data
+        if 'threat_score' in detection_dict:
+            enriched.score = detection_dict['threat_score']
+        if 'severity' in detection_dict:
+            enriched.severity = SeverityLevel(detection_dict['severity'])
+
+        # Store enriched context in evidence
+        if 'enriched_context' in detection_dict:
+            enriched.evidence['enriched_context'] = detection_dict['enriched_context']
+            enriched.evidence['enrichment_sources'] = enrichment_sources
+
+        # Add recommendations if available
+        if 'recommendations' in detection_dict:
+            enriched.evidence['recommendations'] = detection_dict['recommendations']
+
+        logger.info(
+            f"✅ Detection enriched: {len(enrichment_sources)} sources | "
+            f"Score: {detection.score} → {enriched.score}"
         )
 
-        if should_auto_respond:
-            # RESPOSTA AUTÔNOMA
-            actions_taken = await self.execute_autonomous_response(threat)
-            status = 'completed'
-        else:
-            # APENAS ALERTA (requer confirmação humana)
-            actions_taken = ['alert_generated']
-            status = 'pending_approval'
+    except Exception as e:
+        logger.error(f"Enrichment error: {e}")
 
-        response_time = (time.time() - start_time) * 1000  # ms
-
-        response = ResponseAction(
-            action_id=str(uuid4()),
-            threat_id=threat.threat_id,
-            action_type='autonomous' if should_auto_respond else 'alert',
-            target=threat.source,
-            status=status,
-            timestamp=datetime.utcnow().isoformat(),
-            response_time_ms=int(response_time),
-            details={
-                'actions_taken': actions_taken,
-                'autonomous': should_auto_respond,
-                'playbook_used': self.playbooks.get(threat.type, ['alert'])
-            }
-        )
-
-        adr_state.add_response(response)
-
-        return response
-
-    async def execute_autonomous_response(self, threat: ThreatDetection) -> List[str]:
-        """
-        Executa resposta autônoma baseada no tipo de ameaça
-
-        Fase 1: Logging + alerting
-        Fase 2: Network isolation, process termination, quarantine
-        """
-        actions = []
-
-        # Ações baseadas no playbook
-        playbook = self.playbooks.get(threat.type, ['alert'])
-
-        for action in playbook:
-            if action == 'alert':
-                await self.send_alert(threat)
-                actions.append('alert_sent')
-
-            elif action == 'quarantine':
-                # TODO: Implementar quarantine real
-                logger.info(f"🔒 Quarantine: {threat.source}")
-                actions.append('quarantine_simulated')
-
-            elif action == 'isolate_network':
-                # TODO: Implementar isolamento de rede real
-                logger.info(f"🚫 Network isolation: {threat.source}")
-                actions.append('network_isolation_simulated')
-
-            elif action == 'forensics':
-                # TODO: Coletar evidências forenses
-                logger.info(f"🔍 Forensics collection: {threat.source}")
-                actions.append('forensics_collected')
-
-        return actions
-
-    async def send_alert(self, threat: ThreatDetection):
-        """Envia alerta sobre ameaça detectada"""
-        # TODO: Integrar com sistema de notificação (email, Slack, etc)
-        logger.warning(f"⚠️ ALERT: {threat.type} detected | Severity: {threat.severity} | Score: {threat.threat_score}")
-
-
-# Import connectors
-from connectors import IPIntelligenceConnector, ThreatIntelConnector
-
-# Global engines
-detection_engine = DetectionEngine()
-response_engine = ResponseEngine()
-
-# Global connectors (integração com serviços reais)
-ip_intel_connector = IPIntelligenceConnector()
-threat_intel_connector = ThreatIntelConnector()
-
+    return enriched
 
 # ============================================================================
 # API ENDPOINTS
 # ============================================================================
 
-@app.get("/")
-async def root():
-    """Health check e informações do serviço"""
-    return {
-        "service": "Aurora ADR Core",
-        "version": "1.0.0-alpha",
-        "status": "operational",
-        "mission": "Democratizing Enterprise Security",
-        "philosophy": "Segurança de classe mundial não é privilégio. É direito.",
-        "armed": adr_state.is_armed,
-        "risk_threshold": adr_state.risk_threshold
+@app.get("/health", response_model=HealthStatus)
+async def health_check():
+    """Health check endpoint"""
+    components = {
+        'detection_engine': 'healthy' if adr_core.detection_engine else 'unhealthy',
+        'response_engine': 'healthy' if adr_core.response_engine else 'unhealthy',
+        'ml_engine': 'healthy' if adr_core.ml_engine and adr_core.ml_engine.enabled else 'disabled',
+        'ip_intel_connector': 'connected' if adr_core.ip_intel_connector and adr_core.ip_intel_connector.connected else 'disconnected',
+        'threat_intel_connector': 'connected' if adr_core.threat_intel_connector and adr_core.threat_intel_connector.connected else 'disconnected',
+        'malware_connector': 'connected' if adr_core.malware_connector and adr_core.malware_connector.connected else 'disconnected',
     }
 
+    all_healthy = all(
+        status in ['healthy', 'connected', 'disabled']
+        for status in components.values()
+    )
+
+    return HealthStatus(
+        status='healthy' if all_healthy else 'degraded',
+        version='2.0.0-integrated',
+        uptime_seconds=int((datetime.utcnow() - adr_core.start_time).total_seconds()),
+        components=components
+    )
 
 @app.post("/api/adr/analyze/file")
-async def analyze_file(file_path: str, background_tasks: BackgroundTasks, enrich: bool = True):
+async def analyze_file(request: FileAnalysisRequest, background_tasks: BackgroundTasks):
     """
-    Analisa arquivo em busca de malware
+    Analyze file for malware
 
-    Args:
-        file_path: Caminho do arquivo
-        enrich: Se True, enriquece com threat intelligence (default: True)
-
-    Se ameaça for detectada e score >= threshold, resposta autônoma é executada
+    With enrichment enabled:
+    - Hash-based detection
+    - ML classification
+    - Malware analysis service integration
+    - Auto-adjusted threat score
     """
     try:
-        # FASE 1: Detecção local
-        threat = await detection_engine.analyze_file(file_path)
-        threat_dict = threat.dict()
+        # Create analysis request
+        analysis_req = AnalysisRequest(
+            request_id=generate_id("req_"),
+            analysis_type="file",
+            target=request.file_path,
+            options={"enrich": request.enrich}
+        )
 
-        # FASE 2: Enriquecimento com serviços reais (se habilitado)
-        if enrich:
-            logger.info("🔍 Enriching threat with real intelligence services...")
+        # Analyze with detection engine
+        result = await adr_core.detection_engine.analyze(analysis_req)
 
-            # Enriquece com Threat Intelligence
-            threat_dict = await threat_intel_connector.enrich_threat_with_intel(threat_dict)
-
-            logger.info(f"✨ Threat enriched with {len(threat_dict.get('enriched_context', {}))} sources")
-
-        # Adiciona ao estado
-        adr_state.add_threat(ThreatDetection(**threat_dict))
-
-        # FASE 3: Resposta autônoma (se score >= threshold)
-        will_respond = threat_dict['threat_score'] >= adr_state.risk_threshold
-
-        if will_respond:
-            background_tasks.add_task(
-                response_engine.respond_to_threat,
-                ThreatDetection(**threat_dict)
+        if not result.detections:
+            return APIResponse(
+                status="success",
+                message="No threats detected",
+                data={'result': result.dict()}
             )
 
-        return {
-            "success": True,
-            "threat": threat_dict,
-            "will_auto_respond": will_respond,
-            "enriched": enrich,
-            "enrichment_sources": list(threat_dict.get('enriched_context', {}).keys()) if enrich else []
-        }
+        # Get primary detection
+        primary_detection = result.detections[0]
+
+        # Enrich detection
+        if request.enrich:
+            primary_detection = await enrich_detection(primary_detection, request.enrich)
+
+        # Check if auto-response should trigger
+        will_auto_respond = (
+            adr_core.config['enable_auto_response'] and
+            primary_detection.score >= adr_core.config['auto_response_threshold']
+        )
+
+        # Trigger auto-response in background
+        if will_auto_respond:
+            background_tasks.add_task(
+                adr_core.response_engine.respond_to_threat,
+                primary_detection,
+                auto_approve=True
+            )
+
+        return APIResponse(
+            status="success",
+            message=f"Threat detected: {primary_detection.threat_type.value}",
+            data={
+                'threat': primary_detection.dict(),
+                'will_auto_respond': will_auto_respond,
+                'enriched': request.enrich,
+                'enrichment_sources': primary_detection.evidence.get('enrichment_sources', [])
+            }
+        )
 
     except Exception as e:
-        logger.error(f"Error analyzing file: {str(e)}")
+        logger.error(f"File analysis error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.post("/api/adr/analyze/network")
-async def analyze_network(traffic_data: Dict[str, Any], background_tasks: BackgroundTasks, enrich: bool = True):
+async def analyze_network(request: NetworkAnalysisRequest, background_tasks: BackgroundTasks):
     """
-    Analisa tráfego de rede
+    Analyze network traffic
 
-    Args:
-        traffic_data: Dados do tráfego (source_ip, destination_ip, etc)
-        enrich: Se True, enriquece com IP intelligence e threat intel
+    With enrichment:
+    - IP Intelligence (geo, ISP, reputation)
+    - Threat Intelligence (malicious IPs, C2)
+    - Auto-adjusted threat score
     """
-    threat = await detection_engine.analyze_network_traffic(traffic_data)
+    try:
+        analysis_req = AnalysisRequest(
+            request_id=generate_id("req_"),
+            analysis_type="network",
+            target=f"{request.source_ip}:{request.destination_ip}:{request.port}",
+            options={
+                "source_ip": request.source_ip,
+                "destination_ip": request.destination_ip,
+                "port": request.port,
+                "protocol": request.protocol,
+                "enrich": request.enrich
+            }
+        )
 
-    if threat:
-        threat_dict = threat.dict()
+        result = await adr_core.detection_engine.analyze(analysis_req)
 
-        # Enriquecimento com serviços reais
-        if enrich:
-            logger.info("🔍 Enriching network threat...")
-
-            # IP Intelligence (geolocalização, ISP, ASN)
-            threat_dict = await ip_intel_connector.enrich_threat_with_ip_context(threat_dict)
-
-            # Threat Intelligence
-            threat_dict = await threat_intel_connector.enrich_threat_with_intel(threat_dict)
-
-            logger.info("✨ Network threat fully enriched")
-
-        adr_state.add_threat(ThreatDetection(**threat_dict))
-
-        will_respond = threat_dict['threat_score'] >= adr_state.risk_threshold
-
-        if will_respond:
-            background_tasks.add_task(
-                response_engine.respond_to_threat,
-                ThreatDetection(**threat_dict)
+        if not result.detections:
+            return APIResponse(
+                status="success",
+                message="No threats detected",
+                data={'result': result.dict()}
             )
 
-        return {
-            "success": True,
-            "threat": threat_dict,
-            "will_auto_respond": will_respond,
-            "enriched": enrich,
-            "enrichment_sources": list(threat_dict.get('enriched_context', {}).keys()) if enrich else []
-        }
+        primary_detection = result.detections[0]
 
-    return {
-        "success": True,
-        "threat": None,
-        "message": "No threats detected"
-    }
+        if request.enrich:
+            primary_detection = await enrich_detection(primary_detection, request.enrich)
 
+        will_auto_respond = (
+            adr_core.config['enable_auto_response'] and
+            primary_detection.score >= adr_core.config['auto_response_threshold']
+        )
+
+        if will_auto_respond:
+            background_tasks.add_task(
+                adr_core.response_engine.respond_to_threat,
+                primary_detection,
+                auto_approve=True
+            )
+
+        return APIResponse(
+            status="success",
+            message=f"Threat detected: {primary_detection.threat_type.value}",
+            data={
+                'threat': primary_detection.dict(),
+                'will_auto_respond': will_auto_respond,
+                'enriched': request.enrich,
+                'enrichment_sources': primary_detection.evidence.get('enrichment_sources', [])
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Network analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/adr/analyze/process")
-async def analyze_process(process_data: Dict[str, Any], background_tasks: BackgroundTasks, enrich: bool = True):
+async def analyze_process(request: ProcessAnalysisRequest, background_tasks: BackgroundTasks):
     """
-    Analisa comportamento de processo (LOTL detection)
+    Analyze process behavior (LOTL detection)
 
-    Args:
-        process_data: Dados do processo (command_line, process_name, etc)
-        enrich: Se True, enriquece com threat intelligence
+    With enrichment:
+    - Threat Intelligence correlation
+    - MITRE ATT&CK mapping
+    - Malware family identification
     """
-    threat = await detection_engine.analyze_process_behavior(process_data)
+    try:
+        analysis_req = AnalysisRequest(
+            request_id=generate_id("req_"),
+            analysis_type="process",
+            target=request.process_name,
+            options={
+                "process_name": request.process_name,
+                "command_line": request.command_line,
+                "pid": request.pid,
+                "enrich": request.enrich
+            }
+        )
 
-    if threat:
-        threat_dict = threat.dict()
+        result = await adr_core.detection_engine.analyze(analysis_req)
 
-        # Enriquecimento (LOTL patterns já são conhecidos, mas podemos verificar IOCs)
-        if enrich:
-            logger.info("🔍 Enriching LOTL threat...")
-
-            # Threat Intelligence (pode correlacionar command patterns com malware families)
-            threat_dict = await threat_intel_connector.enrich_threat_with_intel(threat_dict)
-
-        adr_state.add_threat(ThreatDetection(**threat_dict))
-
-        will_respond = threat_dict['threat_score'] >= adr_state.risk_threshold
-
-        if will_respond:
-            background_tasks.add_task(
-                response_engine.respond_to_threat,
-                ThreatDetection(**threat_dict)
+        if not result.detections:
+            return APIResponse(
+                status="success",
+                message="No threats detected",
+                data={'result': result.dict()}
             )
 
-        return {
-            "success": True,
-            "threat": threat_dict,
-            "will_auto_respond": will_respond,
-            "enriched": enrich,
-            "enrichment_sources": list(threat_dict.get('enriched_context', {}).keys()) if enrich else []
-        }
+        primary_detection = result.detections[0]
 
-    return {
-        "success": True,
-        "threat": None,
-        "message": "No suspicious behavior detected"
-    }
+        if request.enrich:
+            primary_detection = await enrich_detection(primary_detection, request.enrich)
 
+        will_auto_respond = (
+            adr_core.config['enable_auto_response'] and
+            primary_detection.score >= adr_core.config['auto_response_threshold']
+        )
+
+        if will_auto_respond:
+            background_tasks.add_task(
+                adr_core.response_engine.respond_to_threat,
+                primary_detection,
+                auto_approve=True
+            )
+
+        return APIResponse(
+            status="success",
+            message=f"Threat detected: {primary_detection.threat_type.value}",
+            data={
+                'threat': primary_detection.dict(),
+                'will_auto_respond': will_auto_respond,
+                'enriched': request.enrich,
+                'enrichment_sources': primary_detection.evidence.get('enrichment_sources', [])
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Process analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/adr/metrics")
 async def get_metrics():
-    """Retorna métricas do ADR (MTTR, detection rate, etc)"""
+    """Get ADR metrics"""
+    detection_stats = adr_core.detection_engine.get_stats() if adr_core.detection_engine else {}
+    response_stats = adr_core.response_engine.get_stats() if adr_core.response_engine else {}
 
-    threats_by_severity = {
-        'critical': len([t for t in adr_state.threats_detected if t.severity == 'critical']),
-        'high': len([t for t in adr_state.threats_detected if t.severity == 'high']),
-        'medium': len([t for t in adr_state.threats_detected if t.severity == 'medium']),
-        'low': len([t for t in adr_state.threats_detected if t.severity == 'low'])
-    }
+    return APIResponse(
+        status="success",
+        data={
+            'detection': detection_stats,
+            'response': response_stats,
+            'system': adr_core.metrics.get_summary()
+        }
+    )
 
-    return ADRMetrics(
-        total_threats_detected=len(adr_state.threats_detected),
-        threats_by_severity=threats_by_severity,
-        autonomous_responses=len([r for r in adr_state.responses_executed if r.action_type == 'autonomous']),
-        mean_time_to_respond_ms=adr_state.calculate_mttr(),
-        detection_accuracy=0.95,  # TODO: Calcular baseado em feedback
-        false_positive_rate=0.05,  # TODO: Calcular baseado em feedback
-        uptime="99.9%"  # TODO: Calcular real uptime
-    ).dict()
+@app.get("/api/adr/playbooks")
+async def list_playbooks():
+    """List loaded playbooks"""
+    if not adr_core.playbook_loader:
+        raise HTTPException(status_code=503, detail="Playbook loader not initialized")
 
+    playbooks = adr_core.playbook_loader.list_playbooks()
 
-@app.get("/api/adr/threats")
-async def get_threats(limit: int = 100):
-    """Lista ameaças detectadas"""
-    return {
-        "total": len(adr_state.threats_detected),
-        "threats": [t.dict() for t in adr_state.threats_detected[-limit:]]
-    }
+    return APIResponse(
+        status="success",
+        data={'playbooks': playbooks, 'count': len(playbooks)}
+    )
 
+@app.post("/api/adr/playbooks/reload")
+async def reload_playbooks():
+    """Reload playbooks from disk"""
+    if not adr_core.playbook_loader:
+        raise HTTPException(status_code=503, detail="Playbook loader not initialized")
 
-@app.get("/api/adr/responses")
-async def get_responses(limit: int = 100):
-    """Lista respostas executadas"""
-    return {
-        "total": len(adr_state.responses_executed),
-        "responses": [r.dict() for r in adr_state.responses_executed[-limit:]]
-    }
+    count = adr_core.playbook_loader.reload_playbooks()
 
+    # Re-register in response engine
+    for playbook in adr_core.playbook_loader.loaded_playbooks.values():
+        adr_core.response_engine.load_playbook(playbook)
 
-@app.post("/api/adr/configure")
-async def configure_adr(armed: Optional[bool] = None, risk_threshold: Optional[int] = None):
-    """Configura parâmetros do ADR"""
-    if armed is not None:
-        adr_state.is_armed = armed
-        logger.info(f"🛡️ ADR armed: {armed}")
+    return APIResponse(
+        status="success",
+        message=f"Reloaded {count} playbooks"
+    )
 
-    if risk_threshold is not None:
-        if not 0 <= risk_threshold <= 100:
-            raise HTTPException(status_code=400, detail="Risk threshold must be between 0 and 100")
-        adr_state.risk_threshold = risk_threshold
-        logger.info(f"⚙️ Risk threshold set to: {risk_threshold}")
+@app.post("/api/adr/config")
+async def update_config(config: ConfigUpdate):
+    """Update ADR configuration"""
+    if config.enable_auto_response is not None:
+        adr_core.config['enable_auto_response'] = config.enable_auto_response
 
-    return {
-        "success": True,
-        "armed": adr_state.is_armed,
-        "risk_threshold": adr_state.risk_threshold
-    }
+    if config.enable_enrichment is not None:
+        adr_core.config['enable_enrichment'] = config.enable_enrichment
 
+    if config.auto_response_threshold is not None:
+        adr_core.config['auto_response_threshold'] = config.auto_response_threshold
+
+    return APIResponse(
+        status="success",
+        message="Configuration updated",
+        data={'config': adr_core.config}
+    )
+
+@app.get("/api/adr/config")
+async def get_config():
+    """Get current ADR configuration"""
+    return APIResponse(
+        status="success",
+        data={'config': adr_core.config}
+    )
+
+# ============================================================================
+# MAIN
+# ============================================================================
 
 if __name__ == "__main__":
     import uvicorn
-
-    logger.info("🚀 Starting Aurora ADR Core Service...")
-    logger.info("🎨 'Segurança de classe mundial não é privilégio. É direito.'")
-    logger.info(f"🛡️ ADR Armed: {adr_state.is_armed}")
-    logger.info(f"⚙️ Risk Threshold: {adr_state.risk_threshold}")
-
-    uvicorn.run(app, host="0.0.0.0", port=8014)
+    uvicorn.run(app, host="0.0.0.0", port=8050)

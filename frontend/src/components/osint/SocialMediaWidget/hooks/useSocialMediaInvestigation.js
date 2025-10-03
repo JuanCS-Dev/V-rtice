@@ -32,9 +32,15 @@ export const useSocialMediaInvestigation = () => {
         platforms,
         deepAnalysis: true
       });
-      setResult(response.result);
+
+      if (response && response.result) {
+        setResult(response.result);
+      } else {
+        throw new Error('Resposta inválida do servidor');
+      }
     } catch (err) {
-      setError(err.message || 'Erro ao investigar target');
+      console.error('Social Media Investigation Error:', err);
+      setError(err.message || 'Erro ao investigar target. Verifique se o serviço está ativo.');
     } finally {
       setLoading(false);
     }

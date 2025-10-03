@@ -7,9 +7,10 @@ import AdminDashboard from './components/AdminDashboard';
 import CyberDashboard from './components/CyberDashboard';
 import OSINTDashboard from './components/OSINTDashboard';
 import TerminalDashboard from './components/terminal/TerminalDashboard';
+import MaximusDashboard from './components/maximus/MaximusDashboard';
 
 function App() {
-  const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'cyber', 'osint', 'terminal'
+  const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'cyber', 'osint', 'terminal', 'maximus'
 
   if (currentView === 'admin') {
     return (
@@ -39,6 +40,14 @@ function App() {
     return (
       <ErrorBoundary>
         <TerminalDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    );
+  }
+
+  if (currentView === 'maximus') {
+    return (
+      <ErrorBoundary>
+        <MaximusDashboard setCurrentView={setCurrentView} />
       </ErrorBoundary>
     );
   }

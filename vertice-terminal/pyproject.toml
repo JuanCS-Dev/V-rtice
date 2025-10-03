@@ -1,0 +1,30 @@
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
+warnings_as_errors = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+source = ["vertice"]
+
+[tool.coverage.report]
+fail_under = 80
+
+[tool.bandit]
+excludes = ["/tests"]
+
+[tool.radon]
+# Set complexity thresholds
+complexity = 10

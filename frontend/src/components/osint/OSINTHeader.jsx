@@ -3,7 +3,7 @@ import React from 'react';
 const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModule }) => {
   const modules = [
     { id: 'overview', name: 'OVERVIEW', icon: '🛡️' },
-    { id: 'aurora', name: 'AURORA AI', icon: '🧠', isAI: true },
+    { id: 'aurora', name: 'MAXIMUS AI', icon: '🧠', isAI: true },
     { id: 'socialmedia', name: 'SOCIAL MEDIA', icon: '🔎', isWorldClass: true },
     { id: 'breachdata', name: 'BREACH DATA', icon: '💾', isWorldClass: true },
     { id: 'username', name: 'USERNAME', icon: '👤' },
@@ -26,7 +26,7 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
             <h1 className="text-2xl font-bold text-purple-400 tracking-wider">
               OSINT INTELLIGENCE
             </h1>
-            <p className="text-purple-400/70 text-sm tracking-widest">AURORA AI POWERED • ADVANCED THREAT HUNTING</p>
+            <p className="text-purple-400/70 text-sm tracking-widest">MAXIMUS AI POWERED • ADVANCED THREAT HUNTING</p>
           </div>
         </div>
 

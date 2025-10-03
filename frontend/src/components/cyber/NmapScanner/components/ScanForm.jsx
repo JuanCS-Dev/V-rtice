@@ -30,10 +30,10 @@ export const ScanForm = ({
         <Input
           label="Target (IP/CIDR/Hostname)"
           variant="cyber"
-          size="lg"
+          size="md"
           value={target}
           onChange={(e) => setTarget(e.target.value)}
-          placeholder=">>> 192.168.1.0/24 ou exemplo.com"
+          placeholder="8.8.8.8"
           disabled={loading}
           fullWidth
         />
@@ -57,6 +57,7 @@ export const ScanForm = ({
         <Input
           label="Argumentos Customizados (opcional)"
           variant="cyber"
+          size="sm"
           value={customArgs}
           onChange={(e) => setCustomArgs(e.target.value)}
           placeholder="-p 1-1000 --script vuln"
@@ -66,7 +67,7 @@ export const ScanForm = ({
 
         <Button
           variant="cyber"
-          size="lg"
+          size="md"
           onClick={onScan}
           disabled={loading || !target.trim()}
           loading={loading}

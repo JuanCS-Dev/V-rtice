@@ -3,7 +3,7 @@ from .base import BaseConnector
 
 class AIAgentConnector(BaseConnector):
     """
-    Conector para o Aurora AI Agent Service.
+    Conector para o Maximus AI Agent Service.
     Lida com a comunicação com o serviço de IA para queries e análises.
     """
 
@@ -11,12 +11,12 @@ class AIAgentConnector(BaseConnector):
         """
         Inicializa o AIAgentConnector com o nome e a URL base para o serviço AI Agent.
         """
-        # CORREÇÃO: Adicionamos o 'service_name' obrigatório na chamada do super().
-        super().__init__(service_name="Aurora AI Agent", base_url="http://localhost:8001")
+        # CORREÇÃO: Porta correta é 8017 (ai_agent_service)
+        super().__init__(service_name="Maximus AI Agent", base_url="http://localhost:8017")
 
     async def health_check(self) -> bool:
         """
-        Verifica a saúde do serviço Aurora AI Agent.
+        Verifica a saúde do serviço Maximus AI Agent.
         """
         try:
             # O endpoint /health é mais comum que /, vamos usar ele.
@@ -28,21 +28,34 @@ class AIAgentConnector(BaseConnector):
 
     async def query(self, prompt: str) -> Optional[Dict[str, Any]]:
         """
-        Envia uma pergunta para a Aurora AI e retorna sua resposta.
+        Envia uma pergunta para a Maximus AI e retorna sua resposta.
         """
-        # O endpoint do blueprint é /chat. O corpo da requisição espera um JSON com a chave 'message'.
-        return await self._post("/chat", json={"message": prompt})
+        # Schema real: messages array com role + content
+        # Using /test-gemini for now (bypasses reasoning engine)
+        return await self._post("/test-gemini", data={
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        })
 
     async def analyze(self, context: str) -> Optional[Dict[str, Any]]:
         """
-        Envia um contexto para análise à Aurora AI.
+        Envia um contexto para análise à Maximus AI.
         """
-        # Supondo um endpoint /analyze que espera um JSON com a chave 'context'.
-        return await self._post("/analyze", json={"context": context})
+        # Usa /chat com prompt de análise
+        return await self._post("/chat", data={
+            "messages": [
+                {"role": "user", "content": f"Analise o seguinte contexto:\n\n{context}"}
+            ]
+        })
 
     async def investigate(self, incident: str) -> Optional[Dict[str, Any]]:
         """
-        Envia um incidente para investigação à Aurora AI.
+        Envia um incidente para investigação à Maximus AI.
         """
-        # Supondo um endpoint /investigate que espera um JSON com a chave 'incident'.
-        return await self._post("/investigate", json={"incident": incident})
+        # Usa /chat com prompt de investigação
+        return await self._post("/chat", data={
+            "messages": [
+                {"role": "user", "content": f"Investigue este incidente de segurança:\n\n{incident}"}
+            ]
+        })

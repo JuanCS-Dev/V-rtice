@@ -1,0 +1,29 @@
+
+sequenceDiagram
+    participant User
+    participant CLI_Typer as Vértice CLI (Typer)
+    participant Cmd_IP as ip.py Command
+    participant Auth as auth.py
+    participant Connector as IPIntelConnector
+    participant Service as IP Intel Service
+
+    User->>+CLI_Typer: vcli ip analyze 8.8.8.8
+    CLI_Typer->>+Cmd_IP: analyze("8.8.8.8")
+
+    Cmd_IP->>+Auth: require_auth()
+    Auth-->>-Cmd_IP: OK (Authenticated)
+
+    Cmd_IP->>+Connector: __init__()
+    Cmd_IP->>+Connector: health_check()
+    Connector->>+Service: GET /health
+    Service-->>-Connector: {"status": "operational"}
+    Connector-->>-Cmd_IP: True
+
+    Cmd_IP->>+Connector: analyze_ip("8.8.8.8")
+    Connector->>+Service: POST /api/ip/analyze
+    Note right of Service: Processa o IP, busca em BDs, etc.
+    Service-->>-Connector: {ip: "...", geo: "...", ...}
+    Connector-->>-Cmd_IP: {ip: "...", geo: "...", ...}
+
+    Cmd_IP->>CLI_Typer: Formata a saída (rich.Table)
+    CLI_Typer-->>-User: (Exibe a tabela com os resultados)

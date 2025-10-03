@@ -9,7 +9,7 @@
  * @author Gemini
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Card, Badge, LoadingSpinner, Alert } from '../../shared';
 import { BreachSearchForm } from './components/BreachSearchForm';
 import { useBreachDataSearch } from './hooks/useBreachDataSearch';

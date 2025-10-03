@@ -7,6 +7,14 @@ import React from 'react';
 export const ModuleGrid = ({ setCurrentView }) => {
   const modules = [
     {
+      id: 'maximus',
+      name: 'MAXIMUS AI',
+      description: 'Autonomous Intelligence Platform',
+      icon: '🧠',
+      color: 'gradient-ai',
+      features: ['Self-Improvement', 'Malware Analysis', 'AI Insights']
+    },
+    {
       id: 'cyber',
       name: 'Cyber Security',
       description: 'Análise de Redes e Ameaças Digitais',

@@ -10,37 +10,56 @@ export const useAuth = () => {
   return context;
 };
 
+/**
+ * AuthProvider - Sistema de autenticação integrado com vertice-terminal
+ * Usa o sistema de roles do CLI (super_admin, admin, analyst, viewer)
+ */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('auth_token'));
+  const [token, setToken] = useState(localStorage.getItem('vertice_auth_token'));
+
+  // Super Admin do sistema
+  const SUPER_ADMIN = 'juan.brainfarma@gmail.com';
+
+  // Roles e permissões (sincronizado com vertice-terminal)
+  const ROLES = {
+    super_admin: {
+      email: SUPER_ADMIN,
+      permissions: ['*'], // Todas as permissões
+      level: 100
+    },
+    admin: {
+      permissions: ['read', 'write', 'execute', 'manage_users', 'offensive'],
+      level: 80
+    },
+    analyst: {
+      permissions: ['read', 'write', 'execute'],
+      level: 50
+    },
+    viewer: {
+      permissions: ['read'],
+      level: 10
+    }
+  };
 
   // Check if user is authenticated on app start
   useEffect(() => {
-    const checkAuth = async () => {
-      const storedToken = localStorage.getItem('auth_token');
+    const checkAuth = () => {
+      const storedUser = localStorage.getItem('vertice_user');
+      const storedToken = localStorage.getItem('vertice_auth_token');
+      const tokenExpiry = localStorage.getItem('vertice_token_expiry');
 
-      if (storedToken) {
-        try {
-          const response = await fetch('http://localhost:8000/auth/me', {
-            headers: {
-              'Authorization': `Bearer ${storedToken}`
-            }
-          });
+      if (storedToken && storedUser && tokenExpiry) {
+        const expiryDate = new Date(tokenExpiry);
 
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData.user);
-            setToken(storedToken);
-          } else {
-            // Token is invalid, clear it
-            localStorage.removeItem('auth_token');
-            setToken(null);
-          }
-        } catch (error) {
-          console.error('Auth check failed:', error);
-          localStorage.removeItem('auth_token');
-          setToken(null);
+        if (new Date() < expiryDate) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setToken(storedToken);
+        } else {
+          // Token expirado, limpar
+          clearAuthData();
         }
       }
 
@@ -50,81 +69,105 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (googleToken) => {
+  const clearAuthData = () => {
+    localStorage.removeItem('vertice_auth_token');
+    localStorage.removeItem('vertice_user');
+    localStorage.removeItem('vertice_token_expiry');
+    setToken(null);
+    setUser(null);
+  };
+
+  /**
+   * Login usando Google OAuth2 (simplified)
+   * Integrado com o sistema do vertice-terminal
+   */
+  const login = async (email, mockAuth = true) => {
     try {
-      const response = await fetch('http://localhost:8000/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: googleToken })
-      });
+      if (mockAuth) {
+        // Mock auth para desenvolvimento (igual ao vertice-terminal)
+        const role = email === SUPER_ADMIN ? 'super_admin' : 'analyst';
+        const userData = {
+          email: email,
+          name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
+          picture: '',
+          role: role,
+          authenticated_at: new Date().toISOString(),
+          permissions: ROLES[role].permissions,
+          level: ROLES[role].level
+        };
 
-      if (response.ok) {
-        const authData = await response.json();
+        const authToken = `ya29.mock_token_for_${email}`;
+        const expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + 1); // Token válido por 1 hora
 
-        localStorage.setItem('auth_token', authData.access_token);
-        setToken(authData.access_token);
-        setUser(authData.user_info);
+        localStorage.setItem('vertice_auth_token', authToken);
+        localStorage.setItem('vertice_user', JSON.stringify(userData));
+        localStorage.setItem('vertice_token_expiry', expiryDate.toISOString());
 
-        return { success: true, user: authData.user_info };
-      } else {
-        const error = await response.json();
-        return { success: false, error: error.detail };
+        setToken(authToken);
+        setUser(userData);
+
+        return { success: true, user: userData };
       }
+
+      // TODO: Implementar OAuth2 real aqui no futuro
+      return { success: false, error: 'Real OAuth2 not implemented yet' };
     } catch (error) {
       console.error('Login failed:', error);
       return { success: false, error: 'Login failed' };
     }
   };
 
+  /**
+   * Logout - limpa tokens e dados
+   */
   const logout = async () => {
-    try {
-      if (token) {
-        await fetch('http://localhost:8000/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Logout request failed:', error);
-    } finally {
-      localStorage.removeItem('auth_token');
-      setToken(null);
-      setUser(null);
-    }
+    clearAuthData();
+    return { success: true };
   };
 
-  const getUserPermissions = async () => {
-    if (!token) return [];
+  /**
+   * Get user role
+   */
+  const getUserRole = () => {
+    return user?.role || 'viewer';
+  };
 
-    try {
-      const response = await fetch('http://localhost:8000/auth/verify-token', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+  /**
+   * Check if user has specific permission
+   */
+  const hasPermission = (permission) => {
+    if (!user) return false;
 
-      if (response.ok) {
-        const data = await response.json();
-        return data.permissions || [];
-      }
-    } catch (error) {
-      console.error('Failed to get permissions:', error);
+    const userPermissions = user.permissions || [];
+
+    // Super admin tem tudo
+    if (userPermissions.includes('*')) {
+      return true;
     }
 
-    return [];
+    return userPermissions.includes(permission);
   };
 
-  const hasPermission = async (permission) => {
-    const permissions = await getUserPermissions();
-    return permissions.includes(permission);
+  /**
+   * Check offensive permission
+   */
+  const canAccessOffensive = () => {
+    return hasPermission('offensive') || user?.email === SUPER_ADMIN;
   };
 
-  const canAccessOffensive = async () => {
-    return await hasPermission('offensive');
+  /**
+   * Get auth token
+   */
+  const getAuthToken = () => {
+    return token;
+  };
+
+  /**
+   * Get user permissions list
+   */
+  const getUserPermissions = () => {
+    return user?.permissions || [];
   };
 
   const value = {
@@ -133,18 +176,18 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
+    getUserRole,
     getUserPermissions,
     hasPermission,
     canAccessOffensive,
-    isAuthenticated: !!user
-  };
-
-  const getAuthToken = () => {
-    return token;
+    getAuthToken,
+    isAuthenticated: !!user,
+    SUPER_ADMIN,
+    ROLES
   };
 
   return (
-    <AuthContext.Provider value={{...value, getAuthToken}}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

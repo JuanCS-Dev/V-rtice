@@ -8,7 +8,40 @@
 .searchForm {
   display: flex;
   gap: var(--space-3);
-  align-items: flex-start; /* Align items to the top */
+  align-items: flex-start;
+}
+
+.inputWrapper {
+  flex: 1;
+}
+
+.input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  transition: all var(--duration-base) var(--ease-out);
+  outline: none;
+}
+
+.input::placeholder {
+  color: rgba(168, 85, 247, 0.5);
+  font-family: var(--font-mono);
+}
+
+.input:focus {
+  border-color: var(--color-osint-primary);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .platformSelection {

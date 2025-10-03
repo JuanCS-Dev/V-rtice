@@ -8,18 +8,20 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'click>=8.1.0',
+        'typer>=0.12.3',
         'rich>=13.0.0',
         'httpx>=0.25.0',
         'pyyaml>=6.0',
         'python-dotenv>=1.0.0',
         'questionary>=2.0.0',
-        'tabulate>=0.9.0',
-        'typer>=0.12.3',
+        'diskcache>=5.6.0',
+        'typing-extensions>=4.0.0',
+        'prompt-toolkit>=3.0.0',
     ],
     entry_points={
         'console_scripts': [
-            'vcli=vertice.cli:app',  # <-- CORREÇÃO CRÍTICA: 'vcli' agora chama o objeto 'app'
+            'vcli=vertice.cli:app',  # Standard CLI with subcommands
+            'vertice=vertice.interactive_shell:main',  # Direct to interactive shell
         ],
     },
     python_requires='>=3.8',

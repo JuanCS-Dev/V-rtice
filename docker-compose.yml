@@ -20,7 +20,7 @@ services:
       - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:80
       - NMAP_SERVICE_URL=http://nmap_service:80
       - OSINT_SERVICE_URL=http://osint-service:8007
-      - AURORA_PREDICT_URL=http://aurora_predict:80
+      - MAXIMUS_PREDICT_URL=http://maximus_predict:80
       - ATLAS_SERVICE_URL=http://atlas_service:8000 # <-- ADICIONADO
       - AUTH_SERVICE_URL=http://auth_service:80
       - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
@@ -28,8 +28,8 @@ services:
       - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
       - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
       - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:80
-      - AURORA_ORCHESTRATOR_URL=http://aurora_orchestrator_service:80
-      - AI_AGENT_SERVICE_URL=http://ai_agent_service:80
+      - MAXIMUS_ORCHESTRATOR_URL=http://maximus_orchestrator_service:80
+      - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8001
     depends_on:
       - redis
       - sinesp_service
@@ -39,7 +39,7 @@ services:
       - network_monitor_service
       - nmap_service
       - osint-service
-      - aurora_predict
+      - maximus_predict
       - auth_service
       - atlas_service # <-- ADICIONADO
       - vuln_scanner_service
@@ -47,7 +47,7 @@ services:
       - threat_intel_service
       - malware_analysis_service
       - ssl_monitor_service
-      - aurora_orchestrator_service
+      - maximus_orchestrator_service
     networks:
       - vertice-network
     restart: unless-stopped
@@ -62,6 +62,24 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # POSTGRESQL DATABASE
+  # ============================
+  postgres:
+    image: "postgres:15-alpine"
+    container_name: vertice-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=aurora
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - vertice-network
     restart: unless-stopped
@@ -158,13 +176,13 @@ services:
       - "8007:8007"
     environment:
       - REDIS_HOST=redis
-      - AURORA_HOST=aurora_predict
+      - MAXIMUS_HOST=maximus_predict
       - PYTHONUNBUFFERED=1
       - CHROME_BIN=/usr/bin/chromium
       - CHROMEDRIVER_PATH=/usr/bin/chromedriver
     depends_on:
       - redis
-      - aurora_predict
+      - maximus_predict
     volumes:
       - ./backend/services/osint_service:/app
       - osint-data:/app/data
@@ -173,12 +191,12 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  aurora_predict:
-    build: ./backend/services/aurora_predict
-    container_name: vertice-aurora
+  maximus_predict:
+    build: ./backend/services/maximus_predict
+    container_name: maximus-predict
     volumes:
-      - ./backend/services/aurora_predict:/code
-      - aurora-models:/models
+      - ./backend/services/maximus_predict:/code
+      - maximus-models:/models
     ports:
       - "8008:80"
     environment:
@@ -340,13 +358,38 @@ services:
       - vertice-network
     restart: unless-stopped
 
-  aurora_orchestrator_service:
-    build: ./backend/services/aurora_orchestrator_service
-    container_name: vertice-aurora-orchestrator
+  # ============================
+  # MAXIMUS INTEGRATION SERVICE - API GATEWAY FOR AI
+  # ============================
+  maximus_integration_service:
+    build: ./backend/services/maximus_integration_service
+    container_name: maximus-integration
+    ports:
+      - "8099:8099"
+    volumes:
+      - ./backend/services/maximus_integration_service:/app
+      - ./backend/services/maximus_oraculo:/app/maximus_oraculo
+      - ./backend/services/maximus_eureka:/app/maximus_eureka
+    command: uvicorn main:app --host 0.0.0.0 --port 8099 --reload
+    environment:
+      - ORACULO_TARGET_PATH=/app/maximus_oraculo
+      - EUREKA_SCAN_PATH=/tmp/malware_samples
+      - ADR_CORE_URL=http://adr_core_service:8011
+      - MAXIMUS_CORE_URL=http://maximus_core_service:8001
+    depends_on:
+      - adr_core_service
+      - maximus_core_service
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  maximus_orchestrator_service:
+    build: ./backend/services/maximus_orchestrator_service
+    container_name: maximus-orchestrator
     ports:
       - "8016:8016"
     volumes:
-      - ./backend/services/aurora_orchestrator_service:/app
+      - ./backend/services/maximus_orchestrator_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8016 --reload
     environment:
       - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:80
@@ -368,21 +411,23 @@ services:
     restart: unless-stopped
 
   # ============================
-  # AI AGENT SERVICE - THE BRAIN 🧠
+  # MAXIMUS CORE SERVICE - THE BRAIN 🧠
   # ============================
-  ai_agent_service:
-    build: ./backend/services/ai_agent_service
-    container_name: vertice-ai-agent
+  maximus_core_service:
+    build: ./backend/services/maximus_core_service
+    container_name: maximus-core
     ports:
-      - "8017:80"
+      - "8001:8001"
     volumes:
-      - ./backend/services/ai_agent_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+      - ./backend/services/maximus_core_service:/app
+    command: python main.py
     environment:
       - LLM_PROVIDER=${LLM_PROVIDER:-gemini}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/aurora
       - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
       - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
       - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:80
@@ -390,9 +435,11 @@ services:
       - NMAP_SERVICE_URL=http://nmap_service:80
       - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
       - DOMAIN_SERVICE_URL=http://domain_service:80
-      - AURORA_PREDICT_URL=http://aurora_predict:80
+      - MAXIMUS_PREDICT_URL=http://maximus_predict:80
       - OSINT_SERVICE_URL=http://osint-service:8007
     depends_on:
+      - redis
+      - postgres
       - threat_intel_service
       - malware_analysis_service
       - ssl_monitor_service
@@ -400,7 +447,7 @@ services:
       - nmap_service
       - vuln_scanner_service
       - domain_service
-      - aurora_predict
+      - maximus_predict
       - osint-service
     networks:
       - vertice-network
@@ -422,9 +469,11 @@ networks:
 volumes:
   redis-data:
     driver: local
+  postgres-data:
+    driver: local
   osint-data:
     driver: local
-  aurora-models:
+  maximus-models:
     driver: local
   prometheus-data:
     driver: local

@@ -8,3 +8,4 @@ python-multipart==0.0.6
 # xgboost==2.0.2
 # pefile==2023.2.7
 # yara-python==4.5.0
+pyyaml>=6.0

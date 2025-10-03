@@ -1,22 +1,99 @@
-# Default configuration for Vertice CLI
+# Vertice CLI Terminal - Unified Configuration
+# All service endpoints and settings in one place
+
+# API Global Settings
 api:
-  base_url: "http://localhost:8000"
   timeout: 30
   retry_attempts: 3
 
+# Output Settings
 output:
-  format: "table"  # Options: table, json, yaml
+  format: "rich"  # Options: rich, json, quiet
   color: true
   verbose: false
 
+# Cache Settings
 cache:
   enabled: true
-  ttl: 3600  # seconds
+  ttl: 3600  # seconds (1 hour)
   directory: "~/.vertice/cache"
 
+# Logging Settings
+logging:
+  enabled: true
+  level: "INFO"
+  path: "~/.vertice/logs"
+
+# Service Endpoints (from blueprint - services.yaml)
 services:
-  ip_intelligence: "http://localhost:8000"
-  threat_intel: "http://localhost:8013"
-  adr_core: "http://localhost:8014"
-  malware_analysis: "http://localhost:8011"
-  ai_agent: "http://localhost:8001"
+  api_gateway:
+    url: "http://localhost:8000"
+    port: 8000
+
+  sinesp:
+    url: "http://localhost:8001"
+    port: 8001
+
+  cyber:
+    url: "http://localhost:8002"
+    port: 8002
+
+  domain:
+    url: "http://localhost:8003"
+    port: 8003
+
+  ip_intelligence:
+    url: "http://localhost:8004"
+    port: 8004
+
+  network_monitor:
+    url: "http://localhost:8005"
+    port: 8005
+
+  nmap:
+    url: "http://localhost:8006"
+    port: 8006
+
+  osint:
+    url: "http://localhost:8007"
+    port: 8007
+
+  maximus_predict:
+    url: "http://localhost:8008"
+    port: 8008
+
+  atlas:
+    url: "http://localhost:8009"
+    port: 8009
+
+  auth:
+    url: "http://localhost:8010"
+    port: 8010
+
+  malware_analysis:
+    url: "http://localhost:8011"
+    port: 8011
+
+  social_eng:
+    url: "http://localhost:8012"
+    port: 8012
+
+  threat_intel:
+    url: "http://localhost:8013"
+    port: 8013
+
+  adr_core:
+    url: "http://localhost:8014"
+    port: 8014
+
+  ssl_monitor:
+    url: "http://localhost:8015"
+    port: 8015
+
+  maximus_orchestrator:
+    url: "http://localhost:8016"
+    port: 8016
+
+  ai_agent:
+    url: "http://localhost:8017"
+    port: 8017

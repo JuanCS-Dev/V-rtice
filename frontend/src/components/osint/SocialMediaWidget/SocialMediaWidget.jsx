@@ -51,6 +51,12 @@ export const SocialMediaWidget = () => {
           error={error}
         />
 
+        {error && !loading && (
+          <Alert variant="critical">
+            <strong>Erro:</strong> {error}
+          </Alert>
+        )}
+
         {loading && (
           <LoadingSpinner
             variant="osint"

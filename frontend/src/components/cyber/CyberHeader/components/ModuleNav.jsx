@@ -3,7 +3,7 @@ import styles from './ModuleNav.module.css';
 
 const MODULES = [
   { id: 'overview', name: 'OVERVIEW', icon: '🛡️' },
-  { id: 'aurora', name: 'AURORA AI HUB', icon: '🤖', isAI: true },
+  { id: 'aurora', name: 'MAXIMUS AI HUB', icon: '🤖', isAI: true },
   { id: 'exploits', name: 'CVE EXPLOITS', icon: '🐛', isWorldClass: true },
   { id: 'domain', name: 'DOMAIN INTEL', icon: '🌐' },
   { id: 'ip', name: 'IP ANALYSIS', icon: '🎯' },

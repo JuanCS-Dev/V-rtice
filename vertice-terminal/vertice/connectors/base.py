@@ -8,14 +8,16 @@ class BaseConnector(ABC):
     Provides asynchronous HTTP request methods and enforces a health check.
     """
 
-    def __init__(self, base_url: str, timeout: int = 10):
+    def __init__(self, service_name: str, base_url: str, timeout: int = 10):
         """
-        Initializes the BaseConnector with a base URL and a timeout for requests.
+        Initializes the BaseConnector with a service name, base URL and timeout.
 
         Args:
+            service_name (str): The name of the service (for error messages).
             base_url (str): The base URL of the microservice.
             timeout (int): The default timeout for HTTP requests in seconds.
         """
+        self.service_name = service_name
         self.base_url = base_url
         # Using AsyncClient for asynchronous operations as per blueprint
         self.client = httpx.AsyncClient(timeout=timeout)

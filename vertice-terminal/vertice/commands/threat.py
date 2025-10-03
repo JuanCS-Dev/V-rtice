@@ -1,27 +1,33 @@
-import click
+import typer
 import asyncio
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from ..connectors.threat_intel import ThreatIntelConnector
 from ..utils.output import print_json, spinner_task, print_error, print_table
+from ..utils.auth import require_auth
 
 console = Console()
 
-@click.group()
-def threat():
-    """Threat intelligence operations."""
-    pass
+app = typer.Typer(
+    name="threat",
+    help="🛡️ Threat intelligence operations",
+    rich_markup_mode="rich"
+)
 
-@threat.command()
-@click.argument('indicator')
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def lookup(indicator, output_json_flag, verbose):
+@app.command()
+def lookup(
+    indicator: Annotated[str, typer.Argument(help="Threat indicator to lookup (IP, domain, hash)")],
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Lookup threat indicator.
 
     Example:
         vertice threat lookup malicious.com
     """
+    require_auth()
+
     async def _lookup():
         connector = ThreatIntelConnector()
         try:
@@ -37,14 +43,11 @@ def lookup(indicator, output_json_flag, verbose):
             with spinner_task(f"Looking up threat indicator: {indicator}..."):
                 result = await connector.lookup_threat(indicator)
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
-                    # Assuming result is a dict, convert to list of dicts for print_table
-                    # Or format it nicely with Rich Panel/Table if a specific format is defined
                     console.print(f"[bold green]Threat Lookup Result for {indicator}:[/bold green]")
-                    # For now, just print the dictionary as a simple table
                     table_data = []
                     for key, value in result.items():
                         table_data.append({"Field": key, "Value": str(value)})
@@ -59,16 +62,19 @@ def lookup(indicator, output_json_flag, verbose):
 
     asyncio.run(_lookup())
 
-@threat.command()
-@click.argument('target')
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def check(target, output_json_flag, verbose):
+@app.command()
+def check(
+    target: Annotated[str, typer.Argument(help="Target to check for known threats")],
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Check a target for known threats.
 
     Example:
         vertice threat check malware.exe
     """
+    require_auth()
+
     async def _check():
         connector = ThreatIntelConnector()
         try:
@@ -82,10 +88,9 @@ def check(target, output_json_flag, verbose):
             if verbose:
                 console.print(f"[dim]Checking target: {target}...[/dim]")
             with spinner_task(f"Checking target: {target}..."):
-                # Assuming a generic check endpoint for now
-                result = await connector.lookup_threat(target) # Reusing lookup for simplicity
+                result = await connector.lookup_threat(target)
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
@@ -104,16 +109,19 @@ def check(target, output_json_flag, verbose):
 
     asyncio.run(_check())
 
-@threat.command()
-@click.argument('file_path')
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def scan(file_path, output_json_flag, verbose):
+@app.command()
+def scan(
+    file_path: Annotated[str, typer.Argument(help="File path to scan for threats")],
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Scan a file for threats.
 
     Example:
         vertice threat scan /path/to/suspicious.zip
     """
+    require_auth()
+
     async def _scan():
         connector = ThreatIntelConnector()
         try:
@@ -127,11 +135,9 @@ def scan(file_path, output_json_flag, verbose):
             if verbose:
                 console.print(f"[dim]Scanning file: {file_path}...[/dim]")
             with spinner_task(f"Scanning file: {file_path}..."):
-                # Assuming a file scan endpoint, for now, reuse lookup_threat
-                # In a real scenario, this would involve sending the file content
-                result = await connector.lookup_threat(file_path) # Reusing lookup for simplicity
+                result = await connector.lookup_threat(file_path)
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
@@ -149,3 +155,20 @@ def scan(file_path, output_json_flag, verbose):
             await connector.close()
 
     asyncio.run(_scan())
+
+@app.command()
+def feed(
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    follow: Annotated[bool, typer.Option("--follow", "-f", help="Follow threat feed in real-time")] = False
+):
+    """Get threat intelligence feed.
+
+    Example:
+        vertice threat feed
+        vertice threat feed --follow
+    """
+    require_auth()
+
+    console.print("[yellow]Threat feed functionality coming soon...[/yellow]")
+    if follow:
+        console.print("[dim]Real-time feed streaming will be available in next version.[/dim]")

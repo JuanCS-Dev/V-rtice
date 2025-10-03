@@ -32,7 +32,7 @@ services:
     url: "http://localhost:8007"
     port: 8007
 
-  aurora_predict:
+  maximus_predict:
     url: "http://localhost:8008"
     port: 8008
 
@@ -64,7 +64,7 @@ services:
     url: "http://localhost:8015"
     port: 8015
 
-  aurora_orchestrator:
+  maximus_orchestrator:
     url: "http://localhost:8016"
     port: 8016
 

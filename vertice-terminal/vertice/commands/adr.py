@@ -1,26 +1,31 @@
-import click
+import typer
 import asyncio
 from rich.console import Console
-from rich.table import Table
+from typing_extensions import Annotated
 from ..connectors.adr_core import ADRCoreConnector
 from ..utils.output import print_json, spinner_task, print_error, print_table
+from ..utils.auth import require_auth
 
 console = Console()
 
-@click.group()
-def adr():
-    """ADR detection and response."""
-    pass
+app = typer.Typer(
+    name="adr",
+    help="⚔️ ADR (Ameaça Digital em Redes) detection and response",
+    rich_markup_mode="rich"
+)
 
-@adr.command()
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def status(output_json_flag, verbose):
+@app.command()
+def status(
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Check ADR system status.
 
     Example:
         vertice adr status
     """
+    require_auth()
+
     async def _status():
         connector = ADRCoreConnector()
         try:
@@ -36,7 +41,7 @@ def status(output_json_flag, verbose):
             with spinner_task("Getting ADR system status..."):
                 result = await connector.get_status()
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
@@ -55,15 +60,18 @@ def status(output_json_flag, verbose):
 
     asyncio.run(_status())
 
-@adr.command()
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def metrics(output_json_flag, verbose):
+@app.command()
+def metrics(
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Get ADR metrics (MTTR, detection rate).
 
     Example:
         vertice adr metrics
     """
+    require_auth()
+
     async def _metrics():
         connector = ADRCoreConnector()
         try:
@@ -77,10 +85,9 @@ def metrics(output_json_flag, verbose):
             if verbose:
                 console.print("[dim]Getting ADR metrics...[/dim]")
             with spinner_task("Getting ADR metrics..."):
-                # Assuming an endpoint for metrics
-                result = await connector._get("/api/adr/metrics") # Using _get directly for now
+                result = await connector._get("/api/adr/metrics")
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
@@ -99,28 +106,39 @@ def metrics(output_json_flag, verbose):
 
     asyncio.run(_metrics())
 
-@adr.group()
-def analyze():
-    """Manual analysis operations for ADR.
+# Subcommand group for analyze
+analyze_app = typer.Typer(
+    name="analyze",
+    help="Manual analysis operations for ADR",
+    rich_markup_mode="rich"
+)
+app.add_typer(analyze_app, name="analyze")
 
-    Example:
-        vertice adr analyze file /path/to/suspicious.log
-    """
-    pass
+from ..utils.file_validator import sanitize_file_path, ValidationError
 
-@analyze.command()
-@click.argument('path', type=click.Path(exists=True))
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def file(path, output_json_flag, verbose):
+@analyze_app.command(name="file")
+def analyze_file(
+    path: Annotated[str, typer.Argument(help="File path to analyze")],
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Analyze a file for ADR.
 
     Example:
         vertice adr analyze file /path/to/suspicious.log
     """
+    require_auth()
+
     async def _file_analyze():
         connector = ADRCoreConnector()
         try:
+            try:
+                safe_path = sanitize_file_path(path)
+                filename = safe_path.name
+            except ValidationError as e:
+                print_error(f"Invalid file path: {e}")
+                return
+
             if verbose:
                 console.print("[dim]Checking ADR Core service status...[/dim]")
             with spinner_task("Checking ADR Core service status..."):
@@ -129,12 +147,11 @@ def file(path, output_json_flag, verbose):
                     return
 
             if verbose:
-                console.print(f"[dim]Analyzing file: {path}...[/dim]")
-            with spinner_task(f"Analyzing file: {path}..."):
-                # Assuming an endpoint for file analysis
-                result = await connector._post("/api/adr/analyze/file", json={"file_path": path}) # Using _post directly for now
+                console.print(f"[dim]Analyzing file: {filename}...[/dim]")
+            with spinner_task(f"Analyzing file: {filename}..."):
+                result = await connector._post("/api/adr/analyze/file", json={"filename": filename})
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
@@ -153,16 +170,19 @@ def file(path, output_json_flag, verbose):
 
     asyncio.run(_file_analyze())
 
-@analyze.command()
-@click.argument('ip')
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def network(ip, output_json_flag, verbose):
+@analyze_app.command(name="network")
+def analyze_network(
+    ip: Annotated[str, typer.Argument(help="IP address to analyze network traffic")],
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Analyze network traffic for an IP for ADR.
 
     Example:
         vertice adr analyze network 192.168.1.1
     """
+    require_auth()
+
     async def _network_analyze():
         connector = ADRCoreConnector()
         try:
@@ -176,10 +196,9 @@ def network(ip, output_json_flag, verbose):
             if verbose:
                 console.print(f"[dim]Analyzing network traffic for IP: {ip}...[/dim]")
             with spinner_task(f"Analyzing network traffic for IP: {ip}..."):
-                # Assuming an endpoint for network analysis
-                result = await connector._post("/api/adr/analyze/network", json={"ip_address": ip}) # Using _post directly for now
+                result = await connector._post("/api/adr/analyze/network", json={"ip_address": ip})
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
@@ -198,19 +217,53 @@ def network(ip, output_json_flag, verbose):
 
     asyncio.run(_network_analyze())
 
-@analyze.command()
-@click.argument('cmd')
-@click.option('--json', 'output_json_flag', is_flag=True, help='Output as JSON')
-@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
-def process(cmd, output_json_flag, verbose):
+
+ALLOWED_COMMANDS = {
+    'ps': ['ps', 'aux'],
+    'netstat': ['netstat', '-an'],
+    'top': ['top', '-b', '-n', '1'],
+    'df': ['df', '-h'],
+    'free': ['free', '-m']
+}
+
+def sanitize_process_command(cmd: str) -> list:
+    """
+    Converte comando string em lista segura.
+    Apenas comandos whitelisted são permitidos.
+    """
+    cmd = cmd.strip()
+    
+    # Verifica se está na whitelist
+    if cmd not in ALLOWED_COMMANDS:
+        raise ValueError(f"Command not allowed: {cmd}")
+    
+    return ALLOWED_COMMANDS[cmd]
+
+@analyze_app.command(name="process")
+def analyze_process(
+    cmd: Annotated[str, typer.Argument(help="Command/process to analyze")],
+    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False
+):
     """Analyze a process for ADR.
 
     Example:
-        vertice adr analyze process "ls -la"
+        vertice adr analyze process "ps"
     """
+    require_auth()
+
     async def _process_analyze():
         connector = ADRCoreConnector()
         try:
+            try:
+                safe_cmd_list = sanitize_process_command(cmd)
+            except ValueError as e:
+                print_error(str(e))
+                console.print("\n[yellow]Allowed commands:[/yellow]")
+                for cmd_name in ALLOWED_COMMANDS:
+                    console.print(f"  - {cmd_name}")
+                return
+
             if verbose:
                 console.print("[dim]Checking ADR Core service status...[/dim]")
             with spinner_task("Checking ADR Core service status..."):
@@ -219,12 +272,11 @@ def process(cmd, output_json_flag, verbose):
                     return
 
             if verbose:
-                console.print(f"[dim]Analyzing process: {cmd}...[/dim]")
-            with spinner_task(f"Analyzing process: {cmd}..."):
-                # Assuming an endpoint for process analysis
-                result = await connector._post("/api/adr/analyze/process", json={"command": cmd}) # Using _post directly for now
+                console.print(f"[dim]Analyzing process: {safe_cmd_list}...[/dim]")
+            with spinner_task(f"Analyzing process: {safe_cmd_list}..."):
+                result = await connector._post("/api/adr/analyze/process", json={"command": safe_cmd_list})
 
-            if output_json_flag:
+            if json_output:
                 print_json(result)
             else:
                 if result:
