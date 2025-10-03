@@ -1,0 +1,333 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rte-system
+  labels:
+    name: rte-system
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rte-patterns
+  namespace: rte-system
+data:
+  threat_patterns.json: |
+    [
+      {
+        "id": 1,
+        "pattern": "malware.*\\.exe",
+        "flags": ["CASELESS"],
+        "metadata": {
+          "severity": "critical",
+          "category": "malware",
+          "description": "Malware executable detection"
+        }
+      },
+      {
+        "id": 2,
+        "pattern": "SELECT.*FROM.*WHERE",
+        "flags": ["CASELESS"],
+        "metadata": {
+          "severity": "high",
+          "category": "sqli",
+          "description": "SQL injection attempt"
+        }
+      },
+      {
+        "id": 3,
+        "pattern": "<script[^>]*>.*</script>",
+        "flags": ["CASELESS", "DOTALL"],
+        "metadata": {
+          "severity": "high",
+          "category": "xss",
+          "description": "XSS attempt"
+        }
+      },
+      {
+        "id": 4,
+        "pattern": "cmd\\.exe|powershell\\.exe|/bin/bash|/bin/sh",
+        "flags": ["CASELESS"],
+        "metadata": {
+          "severity": "critical",
+          "category": "rce",
+          "description": "Remote code execution attempt"
+        }
+      },
+      {
+        "id": 5,
+        "pattern": "\\.\\./|\\.\\.\\\\",
+        "flags": [],
+        "metadata": {
+          "severity": "medium",
+          "category": "path_traversal",
+          "description": "Path traversal attempt"
+        }
+      },
+      {
+        "id": 6,
+        "pattern": "(?i)(union|select|insert|update|delete|drop|create|alter).*(?i)(from|into|table|database)",
+        "flags": ["CASELESS"],
+        "metadata": {
+          "severity": "high",
+          "category": "sqli",
+          "description": "SQL injection keywords"
+        }
+      },
+      {
+        "id": 7,
+        "pattern": "eval\\s*\\(|exec\\s*\\(|system\\s*\\(",
+        "flags": ["CASELESS"],
+        "metadata": {
+          "severity": "critical",
+          "category": "code_injection",
+          "description": "Code injection attempt"
+        }
+      },
+      {
+        "id": 8,
+        "pattern": "(?i)(\\.ssh/id_rsa|\\.aws/credentials|\\.kube/config)",
+        "flags": ["CASELESS"],
+        "metadata": {
+          "severity": "critical",
+          "category": "credential_access",
+          "description": "Credential file access"
+        }
+      }
+    ]
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rte-agent
+  namespace: rte-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rte-agent
+rules:
+  # NetworkPolicy management
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Pod management (for isolation)
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+
+  # Events (for logging actions)
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rte-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rte-agent
+subjects:
+  - kind: ServiceAccount
+    name: rte-agent
+    namespace: rte-system
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: rte-agent
+  namespace: rte-system
+  labels:
+    app: rte-agent
+    component: security
+spec:
+  selector:
+    matchLabels:
+      app: rte-agent
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+  template:
+    metadata:
+      labels:
+        app: rte-agent
+        component: security
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8005"
+        prometheus.io/path: "/metrics"
+
+    spec:
+      serviceAccountName: rte-agent
+      hostNetwork: true  # Access to host network for iptables
+      hostPID: true      # Access to host processes
+
+      # Security context
+      securityContext:
+        runAsNonRoot: false  # Need root for iptables
+
+      # Node selector (optional - deploy only on specific nodes)
+      # nodeSelector:
+      #   security: "enabled"
+
+      # Tolerations for all nodes (including master)
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+
+      containers:
+        - name: rte-agent
+          image: rte-service:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 8005
+              protocol: TCP
+
+          env:
+            - name: RTE_HOST
+              value: "0.0.0.0"
+            - name: RTE_PORT
+              value: "8005"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+          # Resource limits
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+
+          # Liveness probe
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # Readiness probe
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # Volume mounts
+          volumeMounts:
+            # Pattern configuration
+            - name: patterns
+              mountPath: /app/patterns
+              readOnly: true
+
+            # Persistent model storage
+            - name: models
+              mountPath: /app/models
+
+            # Quarantine directory
+            - name: quarantine
+              mountPath: /var/quarantine
+
+            # Host filesystem access (for process monitoring)
+            - name: host-proc
+              mountPath: /host/proc
+              readOnly: true
+
+          # Security context (privileged for iptables)
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN  # For iptables
+                - SYS_ADMIN  # For process management
+
+      volumes:
+        # Pattern ConfigMap
+        - name: patterns
+          configMap:
+            name: rte-patterns
+
+        # Host path for model persistence
+        - name: models
+          hostPath:
+            path: /var/lib/rte/models
+            type: DirectoryOrCreate
+
+        # Host path for quarantine
+        - name: quarantine
+          hostPath:
+            path: /var/quarantine
+            type: DirectoryOrCreate
+
+        # Host /proc
+        - name: host-proc
+          hostPath:
+            path: /proc
+            type: Directory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rte-service
+  namespace: rte-system
+  labels:
+    app: rte-agent
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service
+  selector:
+    app: rte-agent
+  ports:
+    - name: http
+      port: 8005
+      targetPort: 8005
+      protocol: TCP
+
+---
+# ServiceMonitor for Prometheus (optional)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rte-agent
+  namespace: rte-system
+  labels:
+    app: rte-agent
+spec:
+  selector:
+    matchLabels:
+      app: rte-agent
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

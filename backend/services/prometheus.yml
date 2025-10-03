@@ -1,0 +1,80 @@
+# Prometheus Configuration for HCL Services
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'hcl-local'
+    environment: 'development'
+
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Scrape configurations
+scrape_configs:
+  # HCL Monitor Service
+  - job_name: 'hcl-monitor'
+    static_configs:
+      - targets: ['hcl-monitor:8001']
+        labels:
+          service: 'hcl-monitor'
+          component: 'monitor'
+
+  # HCL Analyzer Service
+  - job_name: 'hcl-analyzer'
+    static_configs:
+      - targets: ['hcl-analyzer:8002']
+        labels:
+          service: 'hcl-analyzer'
+          component: 'analyzer'
+
+  # HCL Planner Service
+  - job_name: 'hcl-planner'
+    static_configs:
+      - targets: ['hcl-planner:8003']
+        labels:
+          service: 'hcl-planner'
+          component: 'planner'
+
+  # HCL Executor Service
+  - job_name: 'hcl-executor'
+    static_configs:
+      - targets: ['hcl-executor:8004']
+        labels:
+          service: 'hcl-executor'
+          component: 'executor'
+
+  # HCL Knowledge Base Service
+  - job_name: 'hcl-kb'
+    static_configs:
+      - targets: ['hcl-kb-service:8000']
+        labels:
+          service: 'hcl-kb'
+          component: 'knowledge-base'
+
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          component: 'monitoring'
+
+  # Kafka (if metrics endpoint available)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9092']
+        labels:
+          service: 'kafka'
+          component: 'messaging'
+
+  # PostgreSQL (if postgres_exporter is added)
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+  #       labels:
+  #         service: 'postgres'
+  #         component: 'database'

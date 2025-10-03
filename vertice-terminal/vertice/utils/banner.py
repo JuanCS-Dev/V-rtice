@@ -2,6 +2,7 @@
 Banner display utilities for Vertice CLI Terminal.
 COPIED EXACTLY FROM: vertice_cli/utils.py:exibir_banner()
 """
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -10,6 +11,7 @@ from rich.table import Table
 from datetime import datetime
 
 console = Console()
+
 
 def create_gradient_text(text: str, colors: list) -> Text:
     """Cria um texto com gradiente de cores."""
@@ -24,6 +26,7 @@ def create_gradient_text(text: str, colors: list) -> Text:
         gradient_text.append(char, style=colors[color_index])
 
     return gradient_text
+
 
 def exibir_banner():
     """
@@ -63,20 +66,18 @@ def exibir_banner():
         title="[bold bright_green]◈ PROJETO VÉRTICE CLI ◈[/bold bright_green]",
         subtitle="[dim bright_cyan]Developed by Juan for Cybersecurity Professionals[/dim bright_cyan]",
         border_style="bright_green",
-        padding=(1, 2)
+        padding=(1, 2),
     )
 
     info_panel = Panel(
-        Align.center(subtitle_text),
-        border_style="bright_cyan",
-        padding=(1, 2)
+        Align.center(subtitle_text), border_style="bright_cyan", padding=(1, 2)
     )
 
     features_panel = Panel(
         Align.center(info_table),
         title="[bold cyan]🛠️  Available Features[/bold cyan]",
         border_style="cyan",
-        padding=(1, 2)
+        padding=(1, 2),
     )
 
     console.print()

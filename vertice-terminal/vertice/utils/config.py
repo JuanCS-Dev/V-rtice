@@ -2,6 +2,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+
 class Config:
     """Configuration manager for the Vertice CLI.
 
@@ -12,7 +13,9 @@ class Config:
         self.config_dir = Path.home() / ".vertice"
         self.config_file = self.config_dir / "config.yaml"
         # Path to the default config file within the package
-        self.default_config_path = Path(__file__).parent.parent / "config" / "default.yaml"
+        self.default_config_path = (
+            Path(__file__).parent.parent / "config" / "default.yaml"
+        )
         self.config = self._load()
 
     def _load(self) -> Dict[str, Any]:
@@ -23,20 +26,24 @@ class Config:
             Dict[str, Any]: The merged configuration dictionary.
         """
         # Load default configuration
-        with open(self.default_config_path, 'r') as f:
+        with open(self.default_config_path, "r") as f:
             config = yaml.safe_load(f)
 
         # Override with user configuration if it exists
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file, "r") as f:
                     user_config = yaml.safe_load(f)
                     if user_config:
                         self._deep_merge(config, user_config)
             except yaml.YAMLError as e:
-                print(f"Warning: Could not parse user config file {self.config_file}: {e}")
+                print(
+                    f"Warning: Could not parse user config file {self.config_file}: {e}"
+                )
             except Exception as e:
-                print(f"Warning: Unexpected error loading user config file {self.config_file}: {e}")
+                print(
+                    f"Warning: Unexpected error loading user config file {self.config_file}: {e}"
+                )
 
         return config
 
@@ -45,7 +52,11 @@ class Config:
         Recursively merges user_dict into default_dict.
         """
         for key, value in user_dict.items():
-            if key in default_dict and isinstance(default_dict[key], dict) and isinstance(value, dict):
+            if (
+                key in default_dict
+                and isinstance(default_dict[key], dict)
+                and isinstance(value, dict)
+            ):
                 self._deep_merge(default_dict[key], value)
             else:
                 default_dict[key] = value
@@ -61,18 +72,19 @@ class Config:
         Returns:
             Any: The configuration value, or the default if not found.
         """
-        keys = key.split('.')
+        keys = key.split(".")
         value = self.config
 
         for k in keys:
             if isinstance(value, dict):
                 value = value.get(k)
             else:
-                return default # Key path diverged from dictionary structure
+                return default  # Key path diverged from dictionary structure
             if value is None:
                 return default
 
         return value
+
 
 # Global instance of the Config manager for easy access throughout the CLI
 config = Config()

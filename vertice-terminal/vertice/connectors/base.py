@@ -2,6 +2,7 @@ import httpx
 from typing import Dict, Any, Optional
 from abc import ABC, abstractmethod
 
+
 class BaseConnector(ABC):
     """
     Base class for all service connectors in the Vertice CLI.
@@ -55,14 +56,18 @@ class BaseConnector(ABC):
             return None
         except httpx.HTTPStatusError as exc:
             # Error handling for bad HTTP responses
-            print(f"Erro da API em {url} - Status {exc.response.status_code}: {exc.response.text}")
+            print(
+                f"Erro da API em {url} - Status {exc.response.status_code}: {exc.response.text}"
+            )
             return None
         except Exception as exc:
             # Generic error handling
             print(f"Erro inesperado ao fazer GET para {url}: {exc}")
             return None
 
-    async def _post(self, endpoint: str, data: Optional[Dict] = None, **kwargs) -> Optional[Dict[str, Any]]:
+    async def _post(
+        self, endpoint: str, data: Optional[Dict] = None, **kwargs
+    ) -> Optional[Dict[str, Any]]:
         """
         Performs an asynchronous POST request to the specified endpoint.
 
@@ -83,7 +88,9 @@ class BaseConnector(ABC):
             print(f"Erro de rede ao acessar {url}: {exc}")
             return None
         except httpx.HTTPStatusError as exc:
-            print(f"Erro da API em {url} - Status {exc.response.status_code}: {exc.response.text}")
+            print(
+                f"Erro da API em {url} - Status {exc.response.status_code}: {exc.response.text}"
+            )
             return None
         except Exception as exc:
             print(f"Erro inesperado ao fazer POST para {url}: {exc}")

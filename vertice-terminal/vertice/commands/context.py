@@ -9,7 +9,7 @@ from rich.table import Table
 from rich.panel import Panel
 from rich import box
 
-from vertice.config.context_manager import get_context_manager, ContextError
+from vertice.config.context_manager import get_context_manager, Context, ContextError
 from vertice.utils.output import print_error, print_success, print_info, print_warning
 
 app = typer.Typer(help="🎯 Gerenciamento de contextos de engajamento")
@@ -36,11 +36,21 @@ def format_warning(msg: str) -> str:
 @app.command("create")
 def create_context(
     name: str = typer.Argument(..., help="Nome do contexto (ex: pentest-acme)"),
-    target: str = typer.Option(..., "--target", "-t", help="Alvo do engagement (IP, range, domain)"),
-    output_dir: Optional[str] = typer.Option(None, "--output-dir", "-o", help="Diretório de output personalizado"),
-    proxy: Optional[str] = typer.Option(None, "--proxy", "-p", help="Proxy HTTP (ex: http://127.0.0.1:8080)"),
-    notes: Optional[str] = typer.Option(None, "--notes", "-n", help="Notas sobre o engagement"),
-    no_auto_use: bool = typer.Option(False, "--no-auto-use", help="Não ativar automaticamente após criar")
+    target: str = typer.Option(
+        ..., "--target", "-t", help="Alvo do engagement (IP, range, domain)"
+    ),
+    output_dir: Optional[str] = typer.Option(
+        None, "--output-dir", "-o", help="Diretório de output personalizado"
+    ),
+    proxy: Optional[str] = typer.Option(
+        None, "--proxy", "-p", help="Proxy HTTP (ex: http://127.0.0.1:8080)"
+    ),
+    notes: Optional[str] = typer.Option(
+        None, "--notes", "-n", help="Notas sobre o engagement"
+    ),
+    no_auto_use: bool = typer.Option(
+        False, "--no-auto-use", help="Não ativar automaticamente após criar"
+    ),
 ):
     """
     Cria um novo contexto de engajamento
@@ -56,7 +66,7 @@ def create_context(
             output_dir=output_dir,
             proxy=proxy,
             notes=notes,
-            auto_use=not no_auto_use
+            auto_use=not no_auto_use,
         )
 
         console.print(format_success(f"✓ Contexto '{name}' criado com sucesso!"))
@@ -112,7 +122,11 @@ def list_contexts():
 
         if not contexts:
             console.print(format_warning("⚠ Nenhum contexto criado ainda"))
-            console.print(format_info("💡 Crie um: vertice context create <name> --target <target>"))
+            console.print(
+                format_info(
+                    "💡 Crie um: vertice context create <name> --target <target>"
+                )
+            )
             return
 
         table = Table(title="🎯 Contextos de Engajamento", box=box.ROUNDED)
@@ -134,7 +148,7 @@ def list_contexts():
                 ctx.target,
                 ctx.output_dir,
                 ctx.proxy or "-",
-                ctx.created_at.split('T')[0]
+                ctx.created_at.split("T")[0],
             )
 
         console.print(table)
@@ -152,9 +166,7 @@ def list_contexts():
 
 
 @app.command("use")
-def use_context(
-    name: str = typer.Argument(..., help="Nome do contexto para ativar")
-):
+def use_context(name: str = typer.Argument(..., help="Nome do contexto para ativar")):
     """
     Ativa um contexto existente
 
@@ -166,6 +178,13 @@ def use_context(
         ctx_manager.use(name)
 
         context = ctx_manager.get(name)
+        if context is None:
+            console.print(
+                format_error(
+                    f"✗ Contexto '{name}' não encontrado após tentativa de ativação."
+                )
+            )
+            raise typer.Exit(1)
 
         console.print(format_success(f"✓ Contexto '{name}' ativado!"))
         console.print()
@@ -201,8 +220,14 @@ def show_current():
 
         if current is None:
             console.print(format_warning("⚠ Nenhum contexto ativo"))
-            console.print(format_info("💡 Crie um: vertice context create <name> --target <target>"))
-            console.print(format_info("💡 Ou ative um existente: vertice context use <name>"))
+            console.print(
+                format_info(
+                    "💡 Crie um: vertice context create <name> --target <target>"
+                )
+            )
+            console.print(
+                format_info("💡 Ou ative um existente: vertice context use <name>")
+            )
             return
 
         # Panel com informações do contexto
@@ -218,16 +243,18 @@ def show_current():
         if current.notes:
             info_lines.append(f"[white bold]Notes:[/white bold] {current.notes}")
 
-        info_lines.extend([
-            f"[green bold]Created:[/green bold] {current.created_at}",
-            f"[green bold]Updated:[/green bold] {current.updated_at}",
-        ])
+        info_lines.extend(
+            [
+                f"[green bold]Created:[/green bold] {current.created_at}",
+                f"[green bold]Updated:[/green bold] {current.updated_at}",
+            ]
+        )
 
         panel = Panel(
             "\n".join(info_lines),
             title=f"🎯 Contexto Ativo: {current.name}",
             border_style="green",
-            box=box.ROUNDED
+            box=box.ROUNDED,
         )
 
         console.print(panel)
@@ -240,8 +267,10 @@ def show_current():
 @app.command("delete")
 def delete_context(
     name: str = typer.Argument(..., help="Nome do contexto para deletar"),
-    delete_files: bool = typer.Option(False, "--delete-files", "-f", help="Deletar também os arquivos do output_dir"),
-    yes: bool = typer.Option(False, "--yes", "-y", help="Confirmar sem perguntar")
+    delete_files: bool = typer.Option(
+        False, "--delete-files", "-f", help="Deletar também os arquivos do output_dir"
+    ),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Confirmar sem perguntar"),
 ):
     """
     Deleta um contexto
@@ -260,9 +289,15 @@ def delete_context(
 
         # Confirmação
         if not yes:
-            console.print(format_warning(f"⚠ Você está prestes a deletar o contexto '{name}'"))
+            console.print(
+                format_warning(f"⚠ Você está prestes a deletar o contexto '{name}'")
+            )
             if delete_files:
-                console.print(format_error(f"⚠ ATENÇÃO: Os arquivos em {context.output_dir} serão PERMANENTEMENTE deletados!"))
+                console.print(
+                    format_error(
+                        f"⚠ ATENÇÃO: Os arquivos em {context.output_dir} serão PERMANENTEMENTE deletados!"
+                    )
+                )
 
             confirm = typer.confirm("Tem certeza?")
             if not confirm:
@@ -286,7 +321,7 @@ def update_context(
     name: str = typer.Argument(..., help="Nome do contexto para atualizar"),
     target: Optional[str] = typer.Option(None, "--target", "-t", help="Novo target"),
     proxy: Optional[str] = typer.Option(None, "--proxy", "-p", help="Novo proxy"),
-    notes: Optional[str] = typer.Option(None, "--notes", "-n", help="Novas notas")
+    notes: Optional[str] = typer.Option(None, "--notes", "-n", help="Novas notas"),
 ):
     """
     Atualiza informações de um contexto
@@ -302,17 +337,18 @@ def update_context(
             raise typer.Exit(1)
 
         ctx_manager = get_context_manager()
-        ctx_manager.update(
-            name=name,
-            target=target,
-            proxy=proxy,
-            notes=notes
-        )
+        ctx_manager.update(name=name, target=target, proxy=proxy, notes=notes)
 
         console.print(format_success(f"✓ Contexto '{name}' atualizado com sucesso"))
 
         # Mostrar contexto atualizado
         context = ctx_manager.get(name)
+        if context is None:
+            console.print(
+                format_error(f"✗ Contexto '{name}' não encontrado após atualização.")
+            )
+            raise typer.Exit(1)
+
         table = Table(box=box.SIMPLE, show_header=False, padding=(0, 2))
         table.add_column("Campo", style="cyan")
         table.add_column("Valor", style="white")
@@ -333,7 +369,9 @@ def update_context(
 
 @app.command("info")
 def context_info(
-    name: Optional[str] = typer.Argument(None, help="Nome do contexto (usa o atual se não fornecido)")
+    name: Optional[str] = typer.Argument(
+        None, help="Nome do contexto (usa o atual se não fornecido)"
+    )
 ):
     """
     Mostra informações detalhadas de um contexto
@@ -349,7 +387,11 @@ def context_info(
             context = ctx_manager.get_current()
             if context is None:
                 console.print(format_warning("⚠ Nenhum contexto ativo"))
-                console.print(format_info("💡 Especifique um contexto: vertice context info <name>"))
+                console.print(
+                    format_info(
+                        "💡 Especifique um contexto: vertice context info <name>"
+                    )
+                )
                 raise typer.Exit(1)
         else:
             context = ctx_manager.get(name)
@@ -370,11 +412,13 @@ def context_info(
         if context.notes:
             info_lines.append(f"[white bold]Notes:[/white bold] {context.notes}")
 
-        info_lines.extend([
-            "",
-            f"[green bold]Created:[/green bold] {context.created_at}",
-            f"[green bold]Updated:[/green bold] {context.updated_at}",
-        ])
+        info_lines.extend(
+            [
+                "",
+                f"[green bold]Created:[/green bold] {context.created_at}",
+                f"[green bold]Updated:[/green bold] {context.updated_at}",
+            ]
+        )
 
         if context.metadata:
             info_lines.append("")
@@ -386,7 +430,7 @@ def context_info(
             "\n".join(info_lines),
             title=f"📋 Informações do Contexto: {context.name}",
             border_style="blue",
-            box=box.ROUNDED
+            box=box.ROUNDED,
         )
 
         console.print(panel)

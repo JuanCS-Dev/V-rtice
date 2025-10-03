@@ -1,6 +1,7 @@
 """
 Vertice Terminal Connectors - Production Ready.
 """
+
 from .base import BaseConnector
 from .ip_intel import IPIntelConnector
 from .threat_intel import ThreatIntelConnector
@@ -20,5 +21,5 @@ __all__ = [
     "ADRCoreConnector",
     "NmapConnector",
     "VulnScannerConnector",
-    "NetworkMonitorConnector"
+    "NetworkMonitorConnector",
 ]

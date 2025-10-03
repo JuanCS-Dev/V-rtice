@@ -1,0 +1,207 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hpc-system
+  labels:
+    name: hpc-system
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hpc-config
+  namespace: hpc-system
+data:
+  NUM_FEATURES: "30"
+  HIERARCHY_LEVELS: "4"
+  LEARNING_RATE: "0.1"
+  EXPLORATION_BUDGET: "100.0"
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hpc-service
+  namespace: hpc-system
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hpc-service
+  namespace: hpc-system
+  labels:
+    app: hpc-service
+    component: prediction
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hpc-service
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  template:
+    metadata:
+      labels:
+        app: hpc-service
+        component: prediction
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8006"
+        prometheus.io/path: "/metrics"
+
+    spec:
+      serviceAccountName: hpc-service
+
+      containers:
+        - name: hpc-service
+          image: hpc-service:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 8006
+              protocol: TCP
+
+          env:
+            - name: HPC_HOST
+              value: "0.0.0.0"
+            - name: HPC_PORT
+              value: "8006"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+          envFrom:
+            - configMapRef:
+                name: hpc-config
+
+          # Resource limits
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 2Gi
+            limits:
+              cpu: 4000m
+              memory: 8Gi
+
+          # Liveness probe
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8006
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # Readiness probe
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8006
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # Volume mounts
+          volumeMounts:
+            # Persistent model storage
+            - name: models
+              mountPath: /app/models
+
+      volumes:
+        # Persistent volume for models
+        - name: models
+          persistentVolumeClaim:
+            claimName: hpc-models-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hpc-models-pvc
+  namespace: hpc-system
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hpc-service
+  namespace: hpc-system
+  labels:
+    app: hpc-service
+spec:
+  type: ClusterIP
+  selector:
+    app: hpc-service
+  ports:
+    - name: http
+      port: 8006
+      targetPort: 8006
+      protocol: TCP
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpc-service
+  namespace: hpc-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hpc-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+# ServiceMonitor for Prometheus (optional)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hpc-service
+  namespace: hpc-system
+  labels:
+    app: hpc-service
+spec:
+  selector:
+    matchLabels:
+      app: hpc-service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

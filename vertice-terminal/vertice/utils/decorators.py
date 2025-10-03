@@ -1,8 +1,8 @@
-
 """
 Command decorators for Vertice CLI.
 Eliminates code duplication across all command modules.
 """
+
 import asyncio
 import functools
 from typing import Type, Callable, Any
@@ -21,7 +21,7 @@ def with_connector(connector_class: Type, require_authentication: bool = True):
     - Health check
     - Error handling
     - Cleanup (close)
-    
+
     Uso:
         @with_connector(IPIntelConnector)
         async def analyze(target: str, json_output: bool = False, **kwargs):
@@ -29,16 +29,17 @@ def with_connector(connector_class: Type, require_authentication: bool = True):
             result = await kwargs['connector'].analyze_ip(target)
             return result
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # Autenticação
             if require_authentication:
                 require_auth()
-            
+
             # Cria connector
             connector = connector_class()
-            
+
             async def async_wrapper():
                 try:
                     # Health check
@@ -46,25 +47,26 @@ def with_connector(connector_class: Type, require_authentication: bool = True):
                         if not await connector.health_check():
                             print_error(f"{connector.service_name} is not available")
                             return None
-                    
+
                     # Injeta connector nos kwargs
-                    kwargs['connector'] = connector
-                    
+                    kwargs["connector"] = connector
+
                     # Executa função original
                     result = await func(*args, **kwargs)
-                    
+
                     return result
-                    
+
                 except Exception as e:
                     print_error(f"Error: {str(e)}")
                     return None
-                    
+
                 finally:
                     # Cleanup
                     await connector.close()
-            
+
             # Executa async
             return asyncio.run(async_wrapper())
-        
+
         return wrapper
+
     return decorator

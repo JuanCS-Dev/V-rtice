@@ -1,5 +1,6 @@
 
 import pytest
+import httpx
 from vertice.connectors.base import BaseConnector
 
 # A concrete implementation of the abstract BaseConnector for testing
@@ -42,7 +43,9 @@ async def test_get_http_error(httpx_mock, capsys):
 @pytest.mark.asyncio
 async def test_get_network_error(httpx_mock, capsys):
     """Test a GET request that results in a network error."""
-    # httpx_mock raises RequestError for any request that is not explicitly mocked
+    # Explicitly mock the URL to raise a network error
+    httpx_mock.add_exception(httpx.RequestError("Network error"), url="http://test-service.com/api/unmocked")
+
     connector = ConcreteConnector()
     response = await connector._get("/api/unmocked")
 

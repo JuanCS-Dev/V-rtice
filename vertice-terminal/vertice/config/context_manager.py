@@ -17,6 +17,7 @@ from dataclasses import dataclass, asdict
 @dataclass
 class Context:
     """Representa um contexto de engajamento"""
+
     name: str
     target: str
     output_dir: str
@@ -35,6 +36,7 @@ class Context:
 
 class ContextError(Exception):
     """Exceção para erros de contexto"""
+
     pass
 
 
@@ -59,7 +61,7 @@ class ContextManager:
 
     def _init_contexts_file(self):
         """Inicializa arquivo de contextos vazio"""
-        with open(self.contexts_file, 'wb') as f:
+        with open(self.contexts_file, "wb") as f:
             tomli_w.dump({"contexts": {}}, f)
 
     def _load_contexts(self) -> Dict[str, Dict[str, Any]]:
@@ -67,13 +69,13 @@ class ContextManager:
         if not self.contexts_file.exists():
             return {}
 
-        with open(self.contexts_file, 'rb') as f:
+        with open(self.contexts_file, "rb") as f:
             data = tomli.load(f)
             return data.get("contexts", {})
 
     def _save_contexts(self, contexts: Dict[str, Dict[str, Any]]):
         """Salva contextos no arquivo TOML"""
-        with open(self.contexts_file, 'wb') as f:
+        with open(self.contexts_file, "wb") as f:
             tomli_w.dump({"contexts": contexts}, f)
 
     def create(
@@ -84,7 +86,7 @@ class ContextManager:
         proxy: Optional[str] = None,
         notes: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        auto_use: bool = True
+        auto_use: bool = True,
     ) -> Context:
         """
         Cria um novo contexto
@@ -110,7 +112,7 @@ class ContextManager:
             raise ContextError(f"Contexto '{name}' já existe")
 
         # Validar nome
-        if not name or not name.replace('-', '').replace('_', '').isalnum():
+        if not name or not name.replace("-", "").replace("_", "").isalnum():
             raise ContextError(
                 f"Nome de contexto inválido: '{name}'. "
                 "Use apenas letras, números, hífens e underscores"
@@ -141,7 +143,7 @@ class ContextManager:
             updated_at=now,
             proxy=proxy,
             notes=notes,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         contexts[name] = context.to_dict()
@@ -186,7 +188,7 @@ class ContextManager:
             )
 
         # Salvar contexto atual
-        with open(self.current_file, 'w') as f:
+        with open(self.current_file, "w") as f:
             f.write(name)
 
     def get_current(self) -> Optional[Context]:
@@ -194,7 +196,7 @@ class ContextManager:
         if not self.current_file.exists():
             return None
 
-        with open(self.current_file, 'r') as f:
+        with open(self.current_file, "r") as f:
             current_name = f.read().strip()
 
         if not current_name:
@@ -236,6 +238,7 @@ class ContextManager:
             output_dir = Path(contexts[name]["output_dir"])
             if output_dir.exists():
                 import shutil
+
                 shutil.rmtree(output_dir)
 
         # Remover do arquivo
@@ -248,7 +251,7 @@ class ContextManager:
         target: Optional[str] = None,
         proxy: Optional[str] = None,
         notes: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         """
         Atualiza um contexto existente

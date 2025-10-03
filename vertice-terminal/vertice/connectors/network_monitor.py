@@ -2,23 +2,39 @@
 Network Monitor Connector - Real implementation
 Connects to network_monitor_service backend
 """
+
 import httpx
-from typing import Dict, Any, List, Optional
+import os
+from typing import Dict, Any, Optional
 from .base import BaseConnector
 
 
 class NetworkMonitorConnector(BaseConnector):
     """Connector for Network Monitor service."""
 
-    def __init__(self, base_url: str = "http://localhost:8009"):
-        super().__init__(base_url)
-        self.service_name = "Network Monitor"
+    def __init__(self, base_url: Optional[str] = None):
+        if base_url is None:
+            base_url = os.getenv("NETWORK_MONITOR_SERVICE_URL", "http://localhost:8009")
+        super().__init__(service_name="Network Monitor", base_url=base_url)
+
+    async def health_check(self) -> bool:
+        """
+        Checks if the Network Monitor service is online and operational.
+
+        Returns:
+            bool: True if the service is healthy, False otherwise.
+        """
+        try:
+            response = await self.client.get(f"{self.base_url}/")
+            response.raise_for_status()
+            data = response.json()
+            return data.get("status") == "operational"
+        except (httpx.RequestError, httpx.HTTPStatusError):
+            return False
 
     async def start_monitoring(
-        self,
-        interface: Optional[str] = None,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, interface: Optional[str] = None, filters: Optional[Dict[str, Any]] = None
+    ) -> Optional[Dict[str, Any]]:
         """
         Start network monitoring session.
 
@@ -27,30 +43,25 @@ class NetworkMonitorConnector(BaseConnector):
             filters: Packet filters to apply
 
         Returns:
-            Dict with session info
+            Optional[Dict[str, Any]]: A dictionary with session info, or None on failure.
         """
-        payload = {}
+        payload: Dict[str, Any] = {}
         if interface:
             payload["interface"] = interface
         if filters:
             payload["filters"] = filters
+        return await self._post("/monitor/start", data=payload)
 
-        response = await self.client.post("/monitor/start", json=payload)
-        response.raise_for_status()
-        return response.json()
-
-    async def stop_monitoring(self, session_id: str) -> Dict[str, Any]:
+    async def stop_monitoring(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Stop monitoring session."""
-        response = await self.client.post(f"/monitor/stop/{session_id}")
-        response.raise_for_status()
-        return response.json()
+        return await self._post(f"/monitor/stop/{session_id}")
 
     async def get_events(
         self,
         session_id: Optional[str] = None,
         limit: int = 100,
-        event_type: Optional[str] = None
-    ) -> Dict[str, Any]:
+        event_type: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
         """
         Get network events.
 
@@ -60,29 +71,22 @@ class NetworkMonitorConnector(BaseConnector):
             event_type: Filter by event type
 
         Returns:
-            Dict with network events
+            Optional[Dict[str, Any]]: A dictionary with network events, or None on failure.
         """
-        params = {"limit": limit}
+        params: Dict[str, Any] = {"limit": limit}
         if session_id:
             params["session_id"] = session_id
         if event_type:
             params["event_type"] = event_type
+        return await self._get("/events", params=params)
 
-        response = await self.client.get("/events", params=params)
-        response.raise_for_status()
-        return response.json()
-
-    async def get_statistics(self) -> Dict[str, Any]:
+    async def get_statistics(self) -> Optional[Dict[str, Any]]:
         """Get network monitoring statistics."""
-        response = await self.client.get("/statistics")
-        response.raise_for_status()
-        return response.json()
+        return await self._get("/statistics")
 
     async def get_alerts(
-        self,
-        severity: Optional[str] = None,
-        limit: int = 50
-    ) -> Dict[str, Any]:
+        self, severity: Optional[str] = None, limit: int = 50
+    ) -> Optional[Dict[str, Any]]:
         """
         Get network alerts.
 
@@ -91,17 +95,16 @@ class NetworkMonitorConnector(BaseConnector):
             limit: Maximum alerts to return
 
         Returns:
-            Dict with network alerts
+            Optional[Dict[str, Any]]: A dictionary with network alerts, or None on failure.
         """
-        params = {"limit": limit}
+        params: Dict[str, Any] = {"limit": limit}
         if severity:
             params["severity"] = severity
+        return await self._get("/alerts", params=params)
 
-        response = await self.client.get("/alerts", params=params)
-        response.raise_for_status()
-        return response.json()
-
-    async def block_ip(self, ip_address: str, duration: Optional[int] = None) -> Dict[str, Any]:
+    async def block_ip(
+        self, ip_address: str, duration: Optional[int] = None
+    ) -> Optional[Dict[str, Any]]:
         """
         Block an IP address.
 
@@ -110,12 +113,9 @@ class NetworkMonitorConnector(BaseConnector):
             duration: Block duration in seconds (None = permanent)
 
         Returns:
-            Dict with block confirmation
+            Optional[Dict[str, Any]]: A dictionary with block confirmation, or None on failure.
         """
-        payload = {"ip_address": ip_address}
+        payload: Dict[str, Any] = {"ip_address": ip_address}
         if duration:
             payload["duration"] = duration
-
-        response = await self.client.post("/block", json=payload)
-        response.raise_for_status()
-        return response.json()
+        return await self._post("/block", data=payload)

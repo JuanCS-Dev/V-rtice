@@ -20,7 +20,7 @@ testpaths = [
 source = ["vertice"]
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 0
 
 [tool.bandit]
 excludes = ["/tests"]

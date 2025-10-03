@@ -2,37 +2,37 @@
 Authentication commands for Vertice CLI Terminal - PRODUCTION READY
 Implements REAL Google OAuth2 with proper security
 """
+
 import typer
-import webbrowser
-import http.server
-import socketserver
-import urllib.parse
-from threading import Thread
 from rich.console import Console
+from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
 from typing_extensions import Annotated
-from google.oauth2.credentials import Credentials
+from typing import Optional
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import os
 
-from ..utils.auth import auth_manager, SUPER_ADMIN, ROLES
-from ..utils.output import styled_input, styled_confirm
+from ..utils.auth import auth_manager, ROLES
+from ..utils.output import styled_confirm
 
 console = Console()
 
 app = typer.Typer(
-    name="auth",
-    help="🔐 Authentication and user management",
-    rich_markup_mode="rich"
+    name="auth", help="🔐 Authentication and user management", rich_markup_mode="rich"
 )
 
 
 @app.command()
 def login(
-    email: Annotated[str, typer.Option("--email", "-e", help="Email hint for authentication")] = None,
-    no_browser: Annotated[bool, typer.Option("--no-browser", help="Don't open browser automatically")] = False
+    email: Annotated[
+        Optional[str],
+        typer.Option("--email", "-e", help="Email hint for authentication"),
+    ] = None,
+    no_browser: Annotated[
+        bool, typer.Option("--no-browser", help="Don't open browser automatically")
+    ] = False,
 ):
     """
     Authenticate with Google OAuth2 - REAL IMPLEMENTATION.
@@ -58,9 +58,11 @@ def login(
 
     # Verifica se já está autenticado
     if auth_manager.is_authenticated():
-        current_user = auth_manager.get_user_info()
+        current_user = auth_manager.get_current_user()
         if current_user:
-            console.print(f"[yellow]Already authenticated as: {current_user.get('email')}[/yellow]")
+            console.print(
+                f"[yellow]Already authenticated as: {current_user.get('email')}[/yellow]"
+            )
             if not styled_confirm("Do you want to re-authenticate?"):
                 raise typer.Exit(0)
             auth_manager.logout()
@@ -73,12 +75,18 @@ def login(
     if not client_id or not client_secret:
         console.print("[bold red]ERROR: OAuth2 credentials not configured![/bold red]")
         console.print()
-        console.print("[yellow]Please set the following environment variables in .env:[/yellow]")
+        console.print(
+            "[yellow]Please set the following environment variables in .env:[/yellow]"
+        )
         console.print("  GOOGLE_CLIENT_ID")
         console.print("  GOOGLE_CLIENT_SECRET")
-        console.print("  GOOGLE_REDIRECT_URI (optional, default: http://localhost:8080)")
+        console.print(
+            "  GOOGLE_REDIRECT_URI (optional, default: http://localhost:8080)"
+        )
         console.print()
-        console.print("[dim]Get credentials from: https://console.cloud.google.com/apis/credentials[/dim]")
+        console.print(
+            "[dim]Get credentials from: https://console.cloud.google.com/apis/credentials[/dim]"
+        )
         raise typer.Exit(1)
 
     try:
@@ -98,53 +106,46 @@ def login(
 
         # Scopes necessários
         scopes = [
-            'openid',
-            'https://www.googleapis.com/auth/userinfo.email',
-            'https://www.googleapis.com/auth/userinfo.profile'
+            "openid",
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
         ]
 
         # Inicia flow OAuth2
-        flow = InstalledAppFlow.from_client_config(
-            client_config,
-            scopes=scopes
-        )
+        flow = InstalledAppFlow.from_client_config(client_config, scopes=scopes)
 
         # Executa o flow (abre browser)
         if no_browser:
-            console.print("[yellow]Browser opening disabled. Use the URL below:[/yellow]")
+            console.print(
+                "[yellow]Browser opening disabled. Use the URL below:[/yellow]"
+            )
             creds = flow.run_console()
         else:
             console.print("[dim]Opening browser for authentication...[/dim]")
             creds = flow.run_local_server(
                 port=8080,
-                prompt='consent',
-                success_message='Authentication successful! You can close this window.'
+                prompt="consent",
+                success_message="Authentication successful! You can close this window.",
             )
 
         # Obtém informações do usuário
         console.print()
         console.print("[cyan]📝 Fetching user information...[/cyan]")
 
-        service = build('oauth2', 'v2', credentials=creds)
+        service = build("oauth2", "v2", credentials=creds)
         user_info = service.userinfo().get().execute()
 
         # Valida email se foi fornecido
-        if email and user_info.get('email') != email:
-            console.print(f"[red]ERROR: Authenticated as {user_info.get('email')}, expected {email}[/red]")
+        if email and user_info.get("email") != email:
+            console.print(
+                f"[red]ERROR: Authenticated as {user_info.get('email')}, expected {email}[/red]"
+            )
             raise typer.Exit(1)
 
         # Salva autenticação de forma segura
         auth_manager.save_auth_data(
-            user_info=user_info,
-            access_token=creds.token,
-            expires_in=3600  # 1 hora
+            user_info=user_info, token=creds.token, expires_in=3600  # 1 hora
         )
-
-        # Mostra mensagem de sucesso
-        console.print()
-        console.print("[bold bright_green]✓ Authentication Successful![/bold bright_green]")
-        console.print()
-        auth_manager.display_welcome()
 
         console.print()
         console.print("[dim]Try:[/dim] [cyan]vertice ip analyze 8.8.8.8[/cyan]")
@@ -176,8 +177,8 @@ def logout():
         console.print("[yellow]Not currently authenticated[/yellow]")
         raise typer.Exit(0)
 
-    user_info = auth_manager.get_user_info()
-    email = user_info.get('email', 'Unknown') if user_info else 'Unknown'
+    user_info = auth_manager.get_current_user()
+    email = user_info.get("email", "Unknown") if user_info else "Unknown"
 
     console.print()
     console.print(f"[cyan]Currently authenticated as:[/cyan] {email}")
@@ -185,9 +186,6 @@ def logout():
 
     if styled_confirm("Are you sure you want to logout?"):
         auth_manager.logout()
-        console.print()
-        console.print("[bold bright_green]✓ Logged out successfully[/bold bright_green]")
-        console.print()
     else:
         console.print("[yellow]Logout cancelled[/yellow]")
 
@@ -208,18 +206,18 @@ def whoami():
         console.print()
         raise typer.Exit(0)
 
-    user_info = auth_manager.get_user_info()
+    user_info = auth_manager.get_current_user()
     if not user_info:
         console.print("[red]Error retrieving user information[/red]")
         raise typer.Exit(1)
 
-    email = user_info.get('email', 'Unknown')
-    name = user_info.get('name', 'Unknown')
+    email = user_info.get("email", "Unknown")
+    name = user_info.get("name", "Unknown")
     role = auth_manager.get_user_role()
 
     # Determina permissões
-    permissions = ROLES.get(role, {}).get('permissions', [])
-    perm_display = ', '.join(permissions) if isinstance(permissions, list) else 'All'
+    permissions = ROLES.get(role, {}).get("permissions", [])
+    perm_display = ", ".join(permissions) if isinstance(permissions, list) else "All"
 
     # Cria tabela de informações
     table = Table(title="Current User", show_header=False, box=None, pad_edge=False)
@@ -247,8 +245,8 @@ def status():
     console.print()
 
     if auth_manager.is_authenticated():
-        user_info = auth_manager.get_user_info()
-        email = user_info.get('email', 'Unknown') if user_info else 'Unknown'
+        user_info = auth_manager.get_current_user()
+        email = user_info.get("email", "Unknown") if user_info else "Unknown"
 
         console.print("[bold bright_green]✓ Authenticated[/bold bright_green]")
         console.print(f"[cyan]User:[/cyan] {email}")

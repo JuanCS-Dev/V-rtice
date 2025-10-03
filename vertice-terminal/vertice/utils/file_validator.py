@@ -1,7 +1,9 @@
 from pathlib import Path
 
+
 class ValidationError(Exception):
     pass
+
 
 def sanitize_file_path(path: str) -> Path:
     """

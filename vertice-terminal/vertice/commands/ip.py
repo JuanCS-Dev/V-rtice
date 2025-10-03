@@ -12,19 +12,24 @@ console = Console()
 app = typer.Typer(
     name="ip",
     help="🔍 IP Intelligence and analysis operations",
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
 
 from ..utils.decorators import with_connector
+
 
 @app.command()
 @with_connector(IPIntelConnector)
 async def analyze(
     ip_address: Annotated[str, typer.Argument(help="IP address to analyze")],
-    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
+    json_output: Annotated[
+        bool, typer.Option("--json", "-j", help="Output as JSON")
+    ] = False,
     quiet: Annotated[bool, typer.Option("--quiet", "-q", help="Quiet mode")] = False,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False,
-    connector=None
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Verbose output")
+    ] = False,
+    connector=None,
 ):
     """Analyze an IP address
 
@@ -46,7 +51,7 @@ async def analyze(
         print_json(result)
     elif quiet:
         # Apenas threat status
-        threat_level = result.get('reputation', {}).get('threat_level', 'unknown')
+        threat_level = result.get("reputation", {}).get("threat_level", "unknown")
         print(threat_level.upper())
     else:
         # Rich table formatado
@@ -56,8 +61,10 @@ async def analyze(
 @app.command()
 @with_connector(IPIntelConnector)
 async def my_ip(
-    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
-    connector=None
+    json_output: Annotated[
+        bool, typer.Option("--json", "-j", help="Output as JSON")
+    ] = False,
+    connector=None,
 ):
     """Detect your public IP
 
@@ -66,7 +73,7 @@ async def my_ip(
     """
     with spinner_task("Detecting public IP..."):
         ip = await connector.get_my_ip()
-    
+
     if ip:
         if json_output:
             print_json({"ip": ip})
@@ -77,10 +84,16 @@ async def my_ip(
 @app.command()
 @with_connector(IPIntelConnector)
 async def bulk(
-    file: Annotated[str, typer.Argument(help="File containing IP addresses (one per line)")],
-    json_output: Annotated[bool, typer.Option("--json", "-j", help="Output as JSON")] = False,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Verbose output")] = False,
-    connector=None
+    file: Annotated[
+        str, typer.Argument(help="File containing IP addresses (one per line)")
+    ],
+    json_output: Annotated[
+        bool, typer.Option("--json", "-j", help="Output as JSON")
+    ] = False,
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Verbose output")
+    ] = False,
+    connector=None,
 ):
     """Perform bulk IP analysis from a file.
 
@@ -91,7 +104,7 @@ async def bulk(
     """
     results = []
     try:
-        with open(file, 'r') as f:
+        with open(file, "r") as f:
             ips = [line.strip() for line in f if line.strip()]
 
         if not ips:
@@ -109,13 +122,16 @@ async def bulk(
                     results.append(result)
 
         if json_output:
-            print_json(results)
+            # Convert to dict for json output
+            results_dict = {"results": results, "count": len(results)}
+            print_json(results_dict)
         else:
             # For bulk, a simple table or summary might be better, or iterate and print each
             console.print("[bold green]Bulk IP Analysis Results:[/bold green]")
             for result in results:
-                format_ip_analysis(result, console)
-                console.print("\n" + "-"*80 + "\n") # Separator
+                if isinstance(result, dict):
+                    format_ip_analysis(result, console)
+                    console.print("\n" + "-" * 80 + "\n")  # Separator
 
     except Exception as e:
         print_error(f"An error occurred during bulk analysis: {e}")

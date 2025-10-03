@@ -1,0 +1,15 @@
+# HCL Executor Service - Dependencies
+
+# Web framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+
+# Kubernetes client
+kubernetes==28.1.0
+
+# Kafka
+aiokafka==0.10.0
+
+# HTTP client
+httpx==0.26.0

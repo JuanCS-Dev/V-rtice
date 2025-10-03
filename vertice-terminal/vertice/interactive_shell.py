@@ -2,6 +2,7 @@
 VÉRTICE Interactive Shell
 Modern, self-contained CLI with slash commands and autocomplete.
 """
+
 import asyncio
 import os
 import sys
@@ -27,32 +28,32 @@ COMMANDS = {
             "login": "Login to VÉRTICE platform",
             "logout": "Logout from VÉRTICE",
             "status": "Check authentication status",
-            "whoami": "Display current user info"
-        }
+            "whoami": "Display current user info",
+        },
     },
     "ip": {
         "description": "IP Intelligence and analysis operations",
         "subcommands": {
             "analyze": "Analyze an IP address",
             "my-ip": "Detect your public IP",
-            "bulk": "Bulk IP analysis from file"
-        }
+            "bulk": "Bulk IP analysis from file",
+        },
     },
     "threat": {
         "description": "Threat intelligence operations",
         "subcommands": {
             "lookup": "Lookup threat information",
             "check": "Check for threats",
-            "feed": "Access threat feeds"
-        }
+            "feed": "Access threat feeds",
+        },
     },
     "adr": {
         "description": "ADR (Automated Detection & Response)",
         "subcommands": {
             "status": "Check ADR status",
             "metrics": "View ADR metrics",
-            "alerts": "List active alerts"
-        }
+            "alerts": "List active alerts",
+        },
     },
     "malware": {
         "description": "Malware analysis and detection",
@@ -60,8 +61,8 @@ COMMANDS = {
             "analyze": "Analyze a file for malware",
             "yara": "Run YARA scan",
             "hash": "Hash lookup",
-            "submit": "Submit file for analysis"
-        }
+            "submit": "Submit file for analysis",
+        },
     },
     "maximus": {
         "description": "Maximus AI - Central intelligence",
@@ -70,8 +71,8 @@ COMMANDS = {
             "analyze": "AI-powered analysis",
             "investigate": "Incident investigation",
             "oraculo": "Self-improvement mode",
-            "eureka": "Code analysis mode"
-        }
+            "eureka": "Code analysis mode",
+        },
     },
     "scan": {
         "description": "Network and port scanning",
@@ -79,16 +80,16 @@ COMMANDS = {
             "ports": "Port scanning",
             "nmap": "Nmap scan",
             "vulns": "Vulnerability scanning",
-            "network": "Network discovery"
-        }
+            "network": "Network discovery",
+        },
     },
     "monitor": {
         "description": "Real-time monitoring",
         "subcommands": {
             "threats": "Monitor threats",
             "network": "Network monitoring",
-            "logs": "Log monitoring"
-        }
+            "logs": "Log monitoring",
+        },
     },
     "hunt": {
         "description": "Threat hunting operations",
@@ -96,27 +97,16 @@ COMMANDS = {
             "search": "IOC search",
             "timeline": "Incident timeline",
             "pivot": "Pivot analysis",
-            "correlate": "IOC correlation"
-        }
+            "correlate": "IOC correlation",
+        },
     },
     "menu": {
         "description": "Interactive menu",
-        "subcommands": {
-            "interactive": "Launch interactive menu"
-        }
+        "subcommands": {"interactive": "Launch interactive menu"},
     },
-    "help": {
-        "description": "Show help information",
-        "subcommands": {}
-    },
-    "exit": {
-        "description": "Exit VÉRTICE shell",
-        "subcommands": {}
-    },
-    "clear": {
-        "description": "Clear screen",
-        "subcommands": {}
-    }
+    "help": {"description": "Show help information", "subcommands": {}},
+    "exit": {"description": "Exit VÉRTICE shell", "subcommands": {}},
+    "clear": {"description": "Clear screen", "subcommands": {}},
 }
 
 
@@ -127,7 +117,7 @@ class SlashCommandCompleter(Completer):
         text = document.text_before_cursor
 
         # Only complete if starts with /
-        if not text.startswith('/'):
+        if not text.startswith("/"):
             return
 
         # Remove the leading slash
@@ -143,12 +133,12 @@ class SlashCommandCompleter(Completer):
             word = parts[0]
             for cmd in COMMANDS.keys():
                 if cmd.startswith(word):
-                    remaining = cmd[len(word):]
+                    remaining = cmd[len(word) :]
                     yield Completion(
                         remaining,
                         start_position=0,
                         display=f"/{cmd}",
-                        display_meta=COMMANDS[cmd]["description"]
+                        display_meta=COMMANDS[cmd]["description"],
                     )
         elif len(parts) == 2:
             # Complete subcommand
@@ -157,12 +147,12 @@ class SlashCommandCompleter(Completer):
             if cmd in COMMANDS and COMMANDS[cmd]["subcommands"]:
                 for subcmd, desc in COMMANDS[cmd]["subcommands"].items():
                     if subcmd.startswith(subword):
-                        remaining = subcmd[len(subword):]
+                        remaining = subcmd[len(subword) :]
                         yield Completion(
                             remaining,
                             start_position=0,
                             display=subcmd,
-                            display_meta=desc
+                            display_meta=desc,
                         )
 
 
@@ -185,15 +175,23 @@ def display_banner():
     console.print(banner, style="bold cyan")
     console.print()
     console.print("  [bold green]Welcome to VÉRTICE Interactive Shell[/bold green]")
-    console.print("  [dim]Type /help for available commands or start typing / for autocomplete[/dim]")
+    console.print(
+        "  [dim]Type /help for available commands or start typing / for autocomplete[/dim]"
+    )
     console.print()
 
 
 def display_help():
     """Display help information."""
-    console.print("\n[bold cyan]╔══════════════════════════════════════════╗[/bold cyan]")
-    console.print("[bold cyan]║[/bold cyan]  [bold green]VÉRTICE Available Commands[/bold green]          [bold cyan]║[/bold cyan]")
-    console.print("[bold cyan]╚══════════════════════════════════════════╝[/bold cyan]\n")
+    console.print(
+        "\n[bold cyan]╔══════════════════════════════════════════╗[/bold cyan]"
+    )
+    console.print(
+        "[bold cyan]║[/bold cyan]  [bold green]VÉRTICE Available Commands[/bold green]          [bold cyan]║[/bold cyan]"
+    )
+    console.print(
+        "[bold cyan]╚══════════════════════════════════════════╝[/bold cyan]\n"
+    )
 
     for cmd, info in COMMANDS.items():
         console.print(f"  [bold green]/{cmd}[/bold green]")
@@ -208,21 +206,23 @@ def display_help():
 def get_bottom_toolbar():
     """Bottom toolbar with tips."""
     return HTML(
-        '<b>[VÉRTICE]</b> '
-        'Press <b>Ctrl+C</b> to cancel | '
-        '<b>Ctrl+D</b> to exit | '
-        'Type <b>/help</b> for commands'
+        "<b>[VÉRTICE]</b> "
+        "Press <b>Ctrl+C</b> to cancel | "
+        "<b>Ctrl+D</b> to exit | "
+        "Type <b>/help</b> for commands"
     )
 
 
 def create_prompt_style():
     """Create custom style for the prompt."""
-    return Style.from_dict({
-        'prompt': '#00ff00 bold',
-        'bracket': '#00ffff',
-        'path': '#ffff00',
-        'bottom-toolbar': 'bg:#333333 #ffffff',
-    })
+    return Style.from_dict(
+        {
+            "prompt": "#00ff00 bold",
+            "bracket": "#00ffff",
+            "path": "#ffff00",
+            "bottom-toolbar": "bg:#333333 #ffffff",
+        }
+    )
 
 
 async def execute_command(command: str) -> bool:
@@ -236,7 +236,7 @@ async def execute_command(command: str) -> bool:
         return True
 
     # Handle slash commands
-    if command.startswith('/'):
+    if command.startswith("/"):
         parts = command[1:].split()
         if not parts:
             return True
@@ -263,15 +263,18 @@ async def execute_command(command: str) -> bool:
 
             try:
                 import subprocess
+
                 result = subprocess.run(
                     vcli_cmd,
                     cwd="/home/juan/vertice-dev/vertice-terminal",
                     capture_output=False,
-                    text=True
+                    text=True,
                 )
 
                 if result.returncode != 0:
-                    console.print(f"[red]Command failed with exit code {result.returncode}[/red]")
+                    console.print(
+                        f"[red]Command failed with exit code {result.returncode}[/red]"
+                    )
             except Exception as e:
                 console.print(f"[red]Error executing command: {e}[/red]")
         else:
@@ -307,12 +310,12 @@ async def run_interactive_shell():
         try:
             # Create prompt
             prompt_text = [
-                ('class:bracket', '╭─['),
-                ('class:prompt', 'VÉRTICE'),
-                ('class:bracket', ']'),
-                ('', '\n'),
-                ('class:bracket', '╰─'),
-                ('class:prompt', '> '),
+                ("class:bracket", "╭─["),
+                ("class:prompt", "VÉRTICE"),
+                ("class:bracket", "]"),
+                ("", "\n"),
+                ("class:bracket", "╰─"),
+                ("class:prompt", "> "),
             ]
 
             # Get input
@@ -322,7 +325,9 @@ async def run_interactive_shell():
             should_continue = await execute_command(command)
 
             if not should_continue:
-                console.print("\n[bold green]👋 Exiting VÉRTICE. Stay secure![/bold green]\n")
+                console.print(
+                    "\n[bold green]👋 Exiting VÉRTICE. Stay secure![/bold green]\n"
+                )
                 break
 
         except KeyboardInterrupt:
@@ -331,7 +336,9 @@ async def run_interactive_shell():
             continue
         except EOFError:
             # Ctrl+D - exit
-            console.print("\n[bold green]👋 Exiting VÉRTICE. Stay secure![/bold green]\n")
+            console.print(
+                "\n[bold green]👋 Exiting VÉRTICE. Stay secure![/bold green]\n"
+            )
             break
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
