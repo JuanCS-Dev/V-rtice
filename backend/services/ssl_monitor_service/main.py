@@ -17,7 +17,9 @@ import asyncio
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+from cryptography.x509 import ocsp
 import httpx
+import base64
 
 app = FastAPI(title="SSL/TLS Monitor Service")
 
@@ -494,6 +496,227 @@ def generate_recommendations(cert: CertificateInfo, vulnerabilities: List[dict],
 
     return recommendations[:10]  # Top 10 recommendations
 
+async def check_ocsp_status(cert, issuer_cert=None) -> Optional[dict]:
+    """
+    Verifica status OCSP (Online Certificate Status Protocol)
+
+    Retorna status de revogação em tempo real:
+    - good: certificado válido
+    - revoked: certificado revogado
+    - unknown: status desconhecido
+    """
+    try:
+        # Extract OCSP URL from certificate
+        try:
+            aia = cert.extensions.get_extension_for_oid(
+                x509.oid.ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+            )
+            ocsp_url = None
+            for desc in aia.value:
+                if desc.access_method == x509.oid.AuthorityInformationAccessOID.OCSP:
+                    ocsp_url = desc.access_location.value
+                    break
+
+            if not ocsp_url:
+                return {
+                    "status": "unavailable",
+                    "message": "No OCSP URL found in certificate"
+                }
+        except Exception as e:
+            return {
+                "status": "unavailable",
+                "message": f"Failed to extract OCSP URL: {str(e)}"
+            }
+
+        # If no issuer cert provided, can't build OCSP request
+        if not issuer_cert:
+            return {
+                "status": "unavailable",
+                "message": "Issuer certificate required for OCSP check",
+                "ocsp_url": ocsp_url
+            }
+
+        # Build OCSP request
+        builder = ocsp.OCSPRequestBuilder()
+        builder = builder.add_certificate(cert, issuer_cert, hashes.SHA256())
+        ocsp_request = builder.build()
+
+        # Encode request
+        ocsp_request_data = ocsp_request.public_bytes(x509.Encoding.DER)
+
+        # Send OCSP request
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                ocsp_url,
+                content=ocsp_request_data,
+                headers={"Content-Type": "application/ocsp-request"}
+            )
+
+            if response.status_code != 200:
+                return {
+                    "status": "error",
+                    "message": f"OCSP server returned {response.status_code}",
+                    "ocsp_url": ocsp_url
+                }
+
+            # Parse OCSP response
+            ocsp_response = ocsp.load_der_ocsp_response(response.content)
+
+            # Check response status
+            if ocsp_response.response_status != ocsp.OCSPResponseStatus.SUCCESSFUL:
+                return {
+                    "status": "error",
+                    "message": f"OCSP response status: {ocsp_response.response_status.name}",
+                    "ocsp_url": ocsp_url
+                }
+
+            # Get certificate status
+            cert_status = ocsp_response.certificate_status
+
+            if cert_status == ocsp.OCSPCertStatus.GOOD:
+                status_str = "good"
+                message = "Certificate is valid and not revoked"
+            elif cert_status == ocsp.OCSPCertStatus.REVOKED:
+                status_str = "revoked"
+                revocation_time = ocsp_response.revocation_time
+                revocation_reason = ocsp_response.revocation_reason
+                message = f"Certificate revoked at {revocation_time}"
+                if revocation_reason:
+                    message += f" (Reason: {revocation_reason.name})"
+            else:
+                status_str = "unknown"
+                message = "Certificate status unknown"
+
+            # Get OCSP responder info
+            produced_at = ocsp_response.produced_at
+            this_update = ocsp_response.this_update
+            next_update = ocsp_response.next_update
+
+            return {
+                "status": status_str,
+                "message": message,
+                "ocsp_url": ocsp_url,
+                "produced_at": produced_at.isoformat() if produced_at else None,
+                "this_update": this_update.isoformat() if this_update else None,
+                "next_update": next_update.isoformat() if next_update else None,
+                "responder": str(ocsp_response.responder_name) if hasattr(ocsp_response, 'responder_name') else "Unknown"
+            }
+
+    except httpx.TimeoutException:
+        return {
+            "status": "timeout",
+            "message": "OCSP server timeout",
+            "ocsp_url": ocsp_url if 'ocsp_url' in locals() else None
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"OCSP check failed: {str(e)}",
+            "ocsp_url": ocsp_url if 'ocsp_url' in locals() else None
+        }
+
+async def check_ct_logs(cert) -> Optional[dict]:
+    """
+    Verifica Certificate Transparency (CT) Logs
+
+    CT logs são registros públicos de todos os certificados SSL emitidos.
+    Permite detectar certificados emitidos de forma não autorizada.
+    """
+    try:
+        # Extract SCT (Signed Certificate Timestamp) from certificate
+        scts = []
+        try:
+            sct_ext = cert.extensions.get_extension_for_oid(
+                x509.oid.ExtensionOID.PRECERT_SIGNED_CERTIFICATE_TIMESTAMPS
+            )
+            # SCT extension found - certificate was submitted to CT logs
+            scts_count = len(list(sct_ext.value))
+
+            return {
+                "status": "logged",
+                "message": f"Certificate found in {scts_count} CT log(s)",
+                "sct_count": scts_count,
+                "compliance": "compliant",
+                "logs": []  # Detailed log info would require parsing SCT
+            }
+        except x509.ExtensionNotFound:
+            # No SCT extension - check via crt.sh API
+            pass
+
+        # Fallback: Query crt.sh (Certificate Transparency search)
+        cert_sha256 = cert.fingerprint(hashes.SHA256()).hex()
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Query crt.sh by SHA256 fingerprint
+            response = await client.get(
+                f"https://crt.sh/?sha256={cert_sha256}&output=json",
+                follow_redirects=True
+            )
+
+            if response.status_code == 200:
+                try:
+                    ct_data = response.json()
+
+                    if isinstance(ct_data, list) and len(ct_data) > 0:
+                        # Certificate found in CT logs
+                        logs = []
+                        unique_log_names = set()
+
+                        for entry in ct_data[:10]:  # Limit to 10 entries
+                            log_name = entry.get('issuer_name', 'Unknown')
+                            entry_timestamp = entry.get('entry_timestamp', '')
+                            cert_id = entry.get('id')
+
+                            unique_log_names.add(log_name)
+
+                            logs.append({
+                                "cert_id": cert_id,
+                                "issuer": log_name,
+                                "logged_at": entry_timestamp,
+                                "not_before": entry.get('not_before'),
+                                "not_after": entry.get('not_after')
+                            })
+
+                        return {
+                            "status": "logged",
+                            "message": f"Certificate found in CT logs ({len(ct_data)} entries)",
+                            "total_entries": len(ct_data),
+                            "unique_logs": len(unique_log_names),
+                            "compliance": "compliant",
+                            "logs": logs,
+                            "crt_sh_url": f"https://crt.sh/?sha256={cert_sha256}"
+                        }
+                    else:
+                        # Not found in CT logs - SUSPICIOUS
+                        return {
+                            "status": "not_found",
+                            "message": "⚠️ Certificate NOT found in public CT logs - potentially suspicious",
+                            "compliance": "non_compliant",
+                            "severity": "high",
+                            "crt_sh_url": f"https://crt.sh/?sha256={cert_sha256}"
+                        }
+                except (ValueError, KeyError) as e:
+                    return {
+                        "status": "error",
+                        "message": f"Failed to parse CT log data: {str(e)}"
+                    }
+            else:
+                return {
+                    "status": "unavailable",
+                    "message": f"CT log query failed (HTTP {response.status_code})"
+                }
+
+    except httpx.TimeoutException:
+        return {
+            "status": "timeout",
+            "message": "CT log query timeout"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"CT log check failed: {str(e)}"
+        }
+
 @app.get("/")
 async def root():
     return {
@@ -546,6 +769,31 @@ async def check_ssl(request: SSLCheckRequest):
         # Generate recommendations
         recommendations = generate_recommendations(cert_info, vulnerabilities, protocol, compliance)
 
+        # Check OCSP status (if requested and chain available)
+        ocsp_status = None
+        if request.check_ocsp:
+            issuer_cert_obj = chain_certs[0] if chain_certs else None
+            ocsp_status = await check_ocsp_status(cert, issuer_cert_obj)
+
+            # Add warning if certificate is revoked
+            if ocsp_status and ocsp_status.get("status") == "revoked":
+                vulnerabilities.append({
+                    "id": "CERT_REVOKED",
+                    "severity": "critical",
+                    "title": "Certificate Revoked",
+                    "description": ocsp_status.get("message", "Certificate has been revoked"),
+                    "cve": None
+                })
+
+        # Check Certificate Transparency logs (if requested)
+        ct_logs = None
+        if request.check_ct_logs:
+            ct_logs = await check_ct_logs(cert)
+
+            # Add warning if not found in CT logs
+            if ct_logs and ct_logs.get("status") == "not_found":
+                threat_indicators.append("⚠️ Certificate not found in public CT logs")
+
         # Generate warnings
         warnings = []
         if cert_info.days_until_expiry < 30:
@@ -554,6 +802,10 @@ async def check_ssl(request: SSLCheckRequest):
             warnings.append("Self-signed certificate detected")
         if threat_indicators:
             warnings.append(f"{len(threat_indicators)} threat indicators detected")
+        if ocsp_status and ocsp_status.get("status") == "revoked":
+            warnings.append("⚠️ CRITICAL: Certificate has been REVOKED")
+        if ct_logs and ct_logs.get("status") == "not_found":
+            warnings.append("⚠️ Certificate not logged in CT - potentially suspicious")
 
         # Cipher info
         cipher_name = cipher[0] if cipher else "Unknown"
@@ -562,7 +814,8 @@ async def check_ssl(request: SSLCheckRequest):
         is_valid = (
             not cert_info.is_expired and
             security_score >= 70 and
-            len([v for v in vulnerabilities if v['severity'] in ['critical', 'high']]) == 0
+            len([v for v in vulnerabilities if v['severity'] in ['critical', 'high']]) == 0 and
+            (not ocsp_status or ocsp_status.get("status") != "revoked")
         )
 
         return SSLAnalysisResponse(
@@ -581,8 +834,8 @@ async def check_ssl(request: SSLCheckRequest):
             compliance=compliance,
             recommendations=recommendations,
             threat_indicators=threat_indicators,
-            ocsp_status=None,  # TODO: Implement OCSP checking
-            ct_logs=None,  # TODO: Implement CT logs checking
+            ocsp_status=ocsp_status,
+            ct_logs=ct_logs,
             timestamp=datetime.now().isoformat()
         )
 

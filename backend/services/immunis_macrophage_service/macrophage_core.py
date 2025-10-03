@@ -462,22 +462,209 @@ class MacrophageCore:
 
     async def _sandbox_analysis(self, sample_path: Path) -> Dict:
         """
-        Dynamic analysis in sandbox.
+        Dynamic analysis in Cuckoo Sandbox.
 
-        For production: integrate with Cuckoo Sandbox
-        For now: simulated analysis
+        Cuckoo Sandbox API integration for behavioral malware analysis.
+        Executes sample in isolated VM and monitors:
+        - Process creation/injection
+        - File system modifications
+        - Registry changes
+        - Network activity
+        - API calls
         """
-        # TODO: Real Cuckoo Sandbox integration
-        logger.info("Sandbox analysis (simulated)")
+        import httpx
+        import asyncio
+
+        cuckoo_url = os.getenv("CUCKOO_API_URL", "http://localhost:8090")
+        cuckoo_api_key = os.getenv("CUCKOO_API_KEY")
+
+        try:
+            async with httpx.AsyncClient(timeout=self.sandbox_timeout) as client:
+                # Prepare headers
+                headers = {}
+                if cuckoo_api_key:
+                    headers["Authorization"] = f"Bearer {cuckoo_api_key}"
+
+                # Submit file to Cuckoo
+                logger.info(f"Submitting {sample_path.name} to Cuckoo Sandbox...")
+
+                with open(sample_path, "rb") as f:
+                    files = {"file": (sample_path.name, f, "application/octet-stream")}
+
+                    submit_response = await client.post(
+                        f"{cuckoo_url}/tasks/create/file",
+                        files=files,
+                        headers=headers
+                    )
+
+                if submit_response.status_code != 200:
+                    logger.error(f"Cuckoo submission failed: HTTP {submit_response.status_code}")
+                    return self._fallback_sandbox_analysis()
+
+                submit_data = submit_response.json()
+                task_id = submit_data.get("task_id")
+
+                if not task_id:
+                    logger.error("No task_id returned from Cuckoo")
+                    return self._fallback_sandbox_analysis()
+
+                logger.info(f"Cuckoo task created: {task_id}")
+
+                # Poll for completion (with timeout)
+                max_polls = self.sandbox_timeout // 5  # Poll every 5 seconds
+                for attempt in range(max_polls):
+                    await asyncio.sleep(5)
+
+                    status_response = await client.get(
+                        f"{cuckoo_url}/tasks/view/{task_id}",
+                        headers=headers
+                    )
+
+                    if status_response.status_code == 200:
+                        status_data = status_response.json()
+                        task_status = status_data.get("task", {}).get("status")
+
+                        if task_status == "reported":
+                            logger.info(f"Cuckoo analysis complete for task {task_id}")
+                            break
+                    else:
+                        logger.warning(f"Status check failed: {status_response.status_code}")
+
+                # Get report
+                report_response = await client.get(
+                    f"{cuckoo_url}/tasks/report/{task_id}",
+                    headers=headers
+                )
+
+                if report_response.status_code != 200:
+                    logger.error(f"Failed to retrieve Cuckoo report: {report_response.status_code}")
+                    return self._fallback_sandbox_analysis()
+
+                report = report_response.json()
+
+                # Extract behavioral features from Cuckoo report
+                behavior = report.get("behavior", {})
+                network = report.get("network", {})
+
+                # Process created
+                processes = behavior.get("processes", [])
+                process_created = [
+                    {
+                        "process_name": p.get("process_name"),
+                        "pid": p.get("pid"),
+                        "parent_pid": p.get("parent_id"),
+                        "command_line": p.get("command_line")
+                    }
+                    for p in processes[:20]  # Limit to 20
+                ]
+
+                # Files created/deleted
+                summary = behavior.get("summary", {})
+                files_created = summary.get("files", [])[:50]
+                files_deleted = summary.get("file_deleted", [])[:50]
+
+                # Registry modifications
+                registry_modified = [
+                    {
+                        "key": reg.get("key"),
+                        "value": reg.get("value"),
+                        "data": reg.get("data")
+                    }
+                    for reg in summary.get("keys", [])[:50]
+                ]
+
+                # Network connections
+                connections = []
+                for conn in network.get("tcp", [])[:30]:
+                    connections.append({
+                        "protocol": "tcp",
+                        "src": conn.get("src"),
+                        "dst": conn.get("dst"),
+                        "sport": conn.get("sport"),
+                        "dport": conn.get("dport")
+                    })
+
+                for conn in network.get("udp", [])[:30]:
+                    connections.append({
+                        "protocol": "udp",
+                        "src": conn.get("src"),
+                        "dst": conn.get("dst"),
+                        "sport": conn.get("sport"),
+                        "dport": conn.get("dport")
+                    })
+
+                # DNS queries
+                dns_queries = [
+                    {
+                        "request": dns.get("request"),
+                        "type": dns.get("type"),
+                        "answers": dns.get("answers", [])
+                    }
+                    for dns in network.get("dns", [])[:50]
+                ]
+
+                # HTTP requests
+                http_requests = [
+                    {
+                        "method": http.get("method"),
+                        "host": http.get("host"),
+                        "uri": http.get("uri"),
+                        "user_agent": http.get("user_agent")
+                    }
+                    for http in network.get("http", [])[:50]
+                ]
+
+                logger.info(f"Cuckoo analysis extracted: {len(process_created)} processes, "
+                           f"{len(connections)} network connections")
+
+                return {
+                    "task_id": task_id,
+                    "cuckoo_score": report.get("info", {}).get("score", 0),
+                    "process_created": process_created,
+                    "files_created": files_created,
+                    "files_deleted": files_deleted,
+                    "registry_modified": registry_modified,
+                    "network_connections": connections,
+                    "dns_queries": dns_queries,
+                    "http_requests": http_requests,
+                    "signatures": [
+                        {
+                            "name": sig.get("name"),
+                            "severity": sig.get("severity"),
+                            "description": sig.get("description")
+                        }
+                        for sig in report.get("signatures", [])[:20]
+                    ],
+                    "analysis_duration": report.get("info", {}).get("duration")
+                }
+
+        except httpx.ConnectError:
+            logger.error(f"Cannot connect to Cuckoo Sandbox at {cuckoo_url}")
+            return self._fallback_sandbox_analysis()
+        except httpx.TimeoutException:
+            logger.error(f"Cuckoo Sandbox timeout after {self.sandbox_timeout}s")
+            return self._fallback_sandbox_analysis()
+        except Exception as e:
+            logger.error(f"Cuckoo Sandbox error: {e}")
+            return self._fallback_sandbox_analysis()
+
+    def _fallback_sandbox_analysis(self) -> Dict:
+        """
+        Fallback when Cuckoo is unavailable.
+        Returns empty behavioral data with warning.
+        """
+        logger.warning("⚠️ Cuckoo Sandbox unavailable - using fallback (limited analysis)")
 
         return {
+            "sandbox_available": False,
             "process_created": [],
             "files_created": [],
             "files_deleted": [],
             "registry_modified": [],
             "network_connections": [],
             "dns_queries": [],
-            "http_requests": []
+            "http_requests": [],
+            "warning": "Dynamic analysis unavailable - Cuckoo Sandbox not reachable"
         }
 
     def _classify(
