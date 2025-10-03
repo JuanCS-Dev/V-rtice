@@ -53,6 +53,41 @@ register_commands()
 
 
 @app.command()
+def tui():
+    """
+    🎨 Launch PRIMOROSO Text UI Dashboard (BETA).
+
+    Enter a beautiful full-screen TUI with:
+    - Gradiente Verde → Azul primoroso
+    - Dashboard minimalista que supera Gemini CLI
+    - Quick actions (1-4) para operações rápidas
+    - Command Palette (Ctrl+P) para acesso completo
+    - Real-time status e metrics
+
+    Bindings:
+        Ctrl+P  → Command Palette
+        Ctrl+Q  → Quit
+        1-4     → Quick Actions
+
+    Example:
+        vcli tui
+    """
+    try:
+        from .ui import run_tui
+
+        run_tui()
+    except ImportError as e:
+        console.print(f"[red]Error: Could not load TUI: {e}[/red]")
+        console.print(
+            "[yellow]Install required dependencies: pip install textual textual-dev[/yellow]"
+        )
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Unexpected error: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@app.command()
 def shell():
     """
     🚀 Launch interactive VÉRTICE shell with slash commands.
