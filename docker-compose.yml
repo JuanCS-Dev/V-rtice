@@ -84,6 +84,36 @@ services:
       - vertice-network
     restart: unless-stopped
 
+  # ============================
+  # QDRANT VECTOR DB
+  # ============================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: vertice-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
+  # CUCKOO SANDBOX (optional)
+  # ============================
+  # cuckoo:
+  #   image: blacktop/cuckoo:latest
+  #   container_name: vertice-cuckoo
+  #   ports:
+  #     - "8090:8090"
+  #   volumes:
+  #     - cuckoo-data:/cuckoo
+  #   networks:
+  #     - vertice-network
+  #   restart: unless-stopped
+  #   privileged: true
+
   # ... (todos os outros serviços permanecem iguais) ...
   
   sinesp_service:
@@ -829,3 +859,9 @@ volumes:
     driver: local
   oraculo_sessions:
     driver: local
+  # Vector DB
+  qdrant-data:
+    driver: local
+  # Sandbox (optional)
+  # cuckoo-data:
+  #   driver: local
