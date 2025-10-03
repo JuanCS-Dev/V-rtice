@@ -150,6 +150,7 @@ class VerticeDashboard(Screen):
     BINDINGS = [
         Binding("ctrl+p", "command_palette", "Command Palette", show=True),
         Binding("ctrl+w", "widgets_demo", "Widgets Demo", show=True),
+        Binding("ctrl+t", "theme_switcher", "Themes", show=True),
         Binding("ctrl+q", "quit", "Quit", show=True),
         Binding("1", "action_ip", "IP Analysis", show=False),
         Binding("2", "action_hunt", "Threat Hunt", show=False),
@@ -203,6 +204,11 @@ class VerticeDashboard(Screen):
         """Abre widgets demo (Ctrl+W)"""
         from .widgets_demo import WidgetsDemoScreen
         self.app.push_screen(WidgetsDemoScreen())
+
+    def action_theme_switcher(self) -> None:
+        """Abre theme switcher (Ctrl+T)"""
+        from .theme_switcher import ThemeSwitcherScreen
+        self.app.push_screen(ThemeSwitcherScreen())
 
     def action_quit(self) -> None:
         """Sai da aplicação"""
