@@ -86,19 +86,19 @@ class NmapParser(ToolParser):
     def _parse_scan_info(self, root: ET.Element) -> Dict[str, Any]:
         """Extract scan metadata."""
         runstats = root.find("runstats")
-        finished = runstats.find("finished") if runstats else None
+        finished = runstats.find("finished") if runstats is not None else None
 
         # Get command
         command = root.get("args", "")
 
         # Get timestamps
         start_time = int(root.get("start", 0))
-        end_time = int(finished.get("time", 0)) if finished else 0
+        end_time = int(finished.get("time", 0)) if finished is not None else 0
 
         # Get host stats
-        hosts_elem = runstats.find("hosts") if runstats else None
-        total_hosts = int(hosts_elem.get("total", 0)) if hosts_elem else 0
-        up_hosts = int(hosts_elem.get("up", 0)) if hosts_elem else 0
+        hosts_elem = runstats.find("hosts") if runstats is not None else None
+        total_hosts = int(hosts_elem.get("total", 0)) if hosts_elem is not None else 0
+        up_hosts = int(hosts_elem.get("up", 0)) if hosts_elem is not None else 0
 
         return {
             "command": command,
@@ -112,15 +112,19 @@ class NmapParser(ToolParser):
         """Parse single host element."""
         # Host status
         status = host_elem.find("status")
-        if not status or status.get("state") != "up":
+        # Note: ElementTree elements are falsy if empty, so use "is None"
+        if status is None or status.get("state") != "up":
             return None  # Skip down hosts
 
-        # IP address
-        address_elem = host_elem.find("address[@addrtype='ipv4']")
-        if not address_elem:
-            address_elem = host_elem.find("address[@addrtype='ipv6']")
+        # IP address - ElementTree doesn't support XPath predicates, so we filter manually
+        address_elem = None
+        for addr in host_elem.findall("address"):
+            if addr.get("addrtype") in ("ipv4", "ipv6"):
+                address_elem = addr
+                break
 
-        if not address_elem:
+        # ElementTree elements are falsy if empty, so use "is None"
+        if address_elem is None:
             logger.warning("Host without IP address, skipping")
             return None
 
@@ -129,9 +133,9 @@ class NmapParser(ToolParser):
         # Hostname
         hostname = None
         hostnames = host_elem.find("hostnames")
-        if hostnames:
+        if hostnames is not None:
             hostname_elem = hostnames.find("hostname")
-            if hostname_elem:
+            if hostname_elem is not None:
                 hostname = hostname_elem.get("name")
 
         # OS detection
@@ -158,12 +162,12 @@ class NmapParser(ToolParser):
     def _parse_os(self, host_elem: ET.Element) -> tuple[Optional[str], Optional[str]]:
         """Extract OS information."""
         os_elem = host_elem.find("os")
-        if not os_elem:
+        if os_elem is None:
             return None, None
 
         # Try osmatch (OS detection results)
         osmatch = os_elem.find("osmatch")
-        if osmatch:
+        if osmatch is not None:
             os_name = osmatch.get("name", "")
 
             # Try to extract family and version
@@ -198,7 +202,7 @@ class NmapParser(ToolParser):
 
         # Port state
         state_elem = port_elem.find("state")
-        if not state_elem:
+        if state_elem is None:
             return None
 
         state = state_elem.get("state")
@@ -210,14 +214,14 @@ class NmapParser(ToolParser):
         version = None
         banner = None
 
-        if service_elem:
+        if service_elem is not None:
             service = service_elem.get("name")
             product = service_elem.get("product")
             version_str = service_elem.get("version")
             extra_info = service_elem.get("extrainfo")
 
             # Build version string
-            if product:
+            if product is not None:
                 version = product
                 if version_str:
                     version += f" {version_str}"
