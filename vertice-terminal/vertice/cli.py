@@ -43,6 +43,7 @@ COMMAND_MODULES = [
     "hcl",  # Human-Centric Language
     "memory",  # Memory System Management
     "menu",
+    "project",  # Workspace & State Management
 ]
 
 console = Console()
