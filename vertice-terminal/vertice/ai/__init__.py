@@ -9,6 +9,7 @@ Componentes:
 - SafetyGuard: Valida e protege comandos perigosos
 - AutopilotEngine: Execução autônoma de workflows multi-fase
 - ExecutionPlanner: Geração de planos de execução
+- MaximusAssistant: NL queries, CVE correlation, suggestions, reports
 """
 
 from .interpreter import AIInterpreter
@@ -17,6 +18,13 @@ from .tools import ToolCaller, ToolRegistry
 from .safety import SafetyGuard
 from .autopilot import AutopilotEngine
 from .planner import ExecutionPlanner
+from .assistant import (
+    MaximusAssistant,
+    NaturalLanguageQueryParser,
+    CVECorrelator,
+    SuggestionEngine,
+    ReportGenerator
+)
 from .models import (
     ExecutionPlan,
     ExecutionPhase,
@@ -37,6 +45,11 @@ __all__ = [
     "SafetyGuard",
     "AutopilotEngine",
     "ExecutionPlanner",
+    "MaximusAssistant",
+    "NaturalLanguageQueryParser",
+    "CVECorrelator",
+    "SuggestionEngine",
+    "ReportGenerator",
     "ExecutionPlan",
     "ExecutionPhase",
     "ExecutionStep",
