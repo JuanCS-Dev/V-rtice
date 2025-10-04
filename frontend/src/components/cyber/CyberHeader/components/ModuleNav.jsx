@@ -3,7 +3,7 @@ import styles from './ModuleNav.module.css';
 
 const MODULES = [
   { id: 'overview', name: 'OVERVIEW', icon: '🛡️' },
-  { id: 'aurora', name: 'MAXIMUS AI HUB', icon: '🤖', isAI: true },
+  { id: 'maximus', name: 'MAXIMUS AI CORE', icon: '🤖', isAI: true },
   { id: 'exploits', name: 'CVE EXPLOITS', icon: '🐛', isWorldClass: true },
   { id: 'domain', name: 'DOMAIN INTEL', icon: '🌐' },
   { id: 'ip', name: 'IP ANALYSIS', icon: '🎯' },
@@ -11,7 +11,14 @@ const MODULES = [
   { id: 'nmap', name: 'NMAP SCAN', icon: '⚡' },
   { id: 'threats', name: 'THREAT MAP', icon: '🗺️' },
   { id: 'vulnscan', name: 'VULN SCANNER', icon: '💥', isOffensive: true },
-  { id: 'socialeng', name: 'SOCIAL ENG', icon: '🎭', isOffensive: true }
+  { id: 'socialeng', name: 'SOCIAL ENG', icon: '🎭', isOffensive: true },
+  // OFFENSIVE SECURITY ARSENAL
+  { id: 'netrecon', name: 'NET RECON', icon: '🔍', isOffensive: true },
+  { id: 'vulnintel', name: 'VULN INTEL', icon: '🔐', isOffensive: true },
+  { id: 'webattack', name: 'WEB ATTACK', icon: '🌐', isOffensive: true },
+  { id: 'c2', name: 'C2 ORCHESTRATION', icon: '👾', isOffensive: true },
+  { id: 'bas', name: 'BAS', icon: '🎯', isOffensive: true },
+  { id: 'gateway', name: 'GATEWAY', icon: '⚡', isOffensive: true }
 ];
 
 export const ModuleNav = ({ activeModule, onModuleChange }) => {

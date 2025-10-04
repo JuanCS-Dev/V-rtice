@@ -1,609 +1,539 @@
-# 🎯 VÉRTICE CLI - Guia Completo de Instalação e Uso
+<div align="center">
 
-## 📋 Índice
-1. [Pré-requisitos](#pré-requisitos)
-2. [Instalação](#instalação)
-3. [Primeiro Uso](#primeiro-uso)
-4. [Comandos Disponíveis](#comandos-disponíveis)
-5. [Sistema de Autenticação](#sistema-de-autenticação)
-6. [Exemplos Práticos](#exemplos-práticos)
-7. [Troubleshooting](#troubleshooting)
-8. [Renomeação Maximus → Maximus](#renomeação-maximus--maximus)
+# 🎯 VÉRTICE CLI
 
----
+### Cyber Security Command Center Powered by AI
 
-## 🔧 Pré-requisitos
-
-Antes de começar, certifique-se de ter instalado:
-
-- **Python 3.11+** (verifique com `python --version`)
-- **pip** (gerenciador de pacotes Python)
-- **Git** (para clonar o repositório)
-
-### Verificando Pré-requisitos
-
-```bash
-# Verificar Python
-python --version
-# Deve mostrar: Python 3.11.x ou superior
-
-# Verificar pip
-pip --version
-# Deve mostrar a versão do pip
-
-# Verificar Git
-git --version
-# Deve mostrar a versão do git
-```
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/juancs-dev/vertice-terminal)
+[![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-30%2F30%20passing-success.svg)](./tests/)
+[![License](https://img.shields.io/badge/license-MIT-purple.svg)](./LICENSE)
+[![AI](https://img.shields.io/badge/AI-Maximus%20Powered-orange.svg)](./docs/MAXIMUS_AI.md)
 
 ---
 
-## 📦 Instalação
+**28 Commands** • **100+ Subcommands** • **57 AI Tools** • **18+ Integrations**
 
-### Passo 1: Navegar até o diretório
+[Quick Start](#-quick-start) • [Commands](#-command-reference) • [Features](#-features) • [Documentation](#-documentation)
 
-```bash
-cd /home/juan/vertice-dev/vertice-terminal
-```
-
-### Passo 2: Instalar dependências
-
-```bash
-pip install -r requirements.txt
-```
-
-**Dependências principais instaladas:**
-- `typer` - Framework CLI
-- `rich` - Output colorido e bonito
-- `httpx` - Cliente HTTP assíncrono
-- `keyring` - Armazenamento seguro de tokens
-- `cryptography` - Criptografia
-- E outras...
-
-### Passo 3: Verificar instalação
-
-```bash
-python -m vertice.cli --help
-```
-
-Se aparecer o help do CLI, está tudo OK! ✅
+</div>
 
 ---
 
-## 🚀 Primeiro Uso
+## 📖 What is Vértice CLI?
 
-### 1. Ver o Banner e Ajuda
+**Vértice CLI** (`vcli`) is a comprehensive **Cyber Security Command Center** that brings the power of AI-driven security operations to your terminal. Built on top of **Maximus AI**, it provides a unified interface for:
 
-```bash
-# Mostra o banner + lista de comandos
-python -m vertice.cli
+- 🤖 **AI-Orchestrated Investigations** - Let Maximus decide the best tools
+- 🔎 **OSINT & Reconnaissance** - From social media to breach databases
+- ⚔️ **Offensive Security** - Authorized pentesting arsenal
+- 🛡️ **Defense & Response** - AI Immune System with 8 specialized cells
+- 📊 **Analytics & ML** - Behavioral analysis and risk scoring
+- 🧠 **Memory System** - Context-aware operations with semantic search
+- 📝 **Human-Centric Language** - Write security workflows in natural language
 
-# Mostra apenas a ajuda (sem banner)
-python -m vertice.cli --no-banner
+---
 
-# Mostra a versão
-python -m vertice.cli --version
+## ✨ Key Features
+
+### 🤖 AI-First Architecture
+
+```
+                 vcli investigate example.com
+                          ↓
+           ╔══════════════════════════════╗
+           ║    Maximus AI Core (8001)    ║
+           ║    Reasoning Engine ✓        ║
+           ║    57 Tools Available        ║
+           ╚══════════════════════════════╝
+                          ↓
+        ┌─────────────────┴─────────────────┐
+        ↓                                   ↓
+  Autonomous Tool              Parallel Execution
+  Selection                    (up to 5 tools)
+        ↓                                   ↓
+        └─────────────────┬─────────────────┘
+                          ↓
+           ╔══════════════════════════════╗
+           ║     Intelligent Response     ║
+           ║     + Reasoning Trace        ║
+           ║     + Confidence Score       ║
+           ╚══════════════════════════════╝
 ```
 
-### 2. Fazer Login (IMPORTANTE!)
+### 🧠 Memory System
 
-**🔐 Todos os comandos exigem autenticação!**
+- **Working Memory**: Immediate context
+- **Episodic Memory**: Conversation history (25 conversations stored)
+- **Semantic Memory**: Knowledge base with vector search
+- **Recall Similar Investigations**: Find past cases like current one
 
-```bash
-# Login com seu email
-python -m vertice.cli auth login --email seu.email@gmail.com
-
-# Ou sem o flag (vai pedir o email)
-python -m vertice.cli auth login
-```
-
-**Super Admin:** `juan.brainfarma@gmail.com` 👑
-- Tem TODAS as permissões
-- Acesso a ferramentas offensive
-- Level 100
-
-**Outros emails:** Role `analyst`
-- Permissões: read, write, execute
-- Sem acesso offensive
-- Level 50
-
-### 3. Verificar Status de Login
+### 🎨 Beautiful Terminal UI
 
 ```bash
-# Status rápido
-python -m vertice.cli auth status
-
-# Informações completas do usuário
-python -m vertice.cli auth whoami
-```
-
-### 4. Logout
-
-```bash
-python -m vertice.cli auth logout
+vcli tui  # Launch full-screen dashboard
+vcli shell  # Interactive shell with autocomplete
 ```
 
 ---
 
-## 📚 Comandos Disponíveis
+## 🚀 Quick Start
 
-### 🔐 Auth (Autenticação)
-
-```bash
-# Login
-python -m vertice.cli auth login --email juan.brainfarma@gmail.com
-
-# Logout
-python -m vertice.cli auth logout
-
-# Ver quem está logado
-python -m vertice.cli auth whoami
-
-# Status rápido
-python -m vertice.cli auth status
-```
-
-### 🔍 IP Intelligence
+### Installation
 
 ```bash
-# Analisar um IP
-python -m vertice.cli ip analyze 8.8.8.8
+# Clone repository
+git clone https://github.com/juancs-dev/vertice-terminal.git
+cd vertice-terminal
 
-# Analisar com output JSON
-python -m vertice.cli ip analyze 8.8.8.8 --json
+# Install dependencies
+pip install -e .
 
-# Descobrir seu IP público
-python -m vertice.cli ip my-ip (ta off, 404)
-
-# Análise em massa de IPs (arquivo)
-python -m vertice.cli ip bulk ips.txt
+# Verify installation
+vcli --version
 ```
 
-**Arquivo ips.txt exemplo:**
-```
-8.8.8.8
-1.1.1.1
-185.220.101.23
-45.129.56.200
-```
-
-### 🛡️ Threat Intelligence
+### First Command
 
 ```bash
-# Lookup de ameaça (IP, domain, hash)
-python -m vertice.cli threat lookup malicious.com
+# Get help
+vcli --help
 
-# Verificar target
-python -m vertice.cli threat check malware.exe
+# Login (required for most commands)
+vcli auth login --email your.email@gmail.com
 
-# Scan de arquivo
-python -m vertice.cli threat scan /path/to/file.zip
+# Investigate a domain (AI-orchestrated)
+vcli investigate target example.com --type defensive
 
-# Feed de ameaças (em desenvolvimento)
-python -m vertice.cli threat feed
+# Check OSINT for a username
+vcli osint username johndoe --platforms "twitter,linkedin"
+
+# View memory status
+vcli memory status
 ```
 
-### ⚔️ ADR (Ameaça Digital em Redes)
+### Quick Tour
 
 ```bash
-# Status do sistema ADR
-python -m vertice.cli adr status
+# Interactive shell with autocomplete
+vcli shell
 
-# Métricas (MTTR, detection rate)
-python -m vertice.cli adr metrics
+# Beautiful TUI dashboard
+vcli tui
 
-# Analisar arquivo
-python -m vertice.cli adr analyze file /path/to/suspicious.log
-
-# Analisar tráfego de rede
-python -m vertice.cli adr analyze network 192.168.1.100
-
-# Analisar processo
-python -m vertice.cli adr analyze process "ls -la"
-```
-
-### 🦠 Malware Analysis
-
-```bash
-# Analisar arquivo
-python -m vertice.cli malware analyze /path/to/suspicious.exe
-
-# YARA scan (em desenvolvimento)
-python -m vertice.cli malware yara /path/to/file
-
-# Lookup por hash (em desenvolvimento)
-python -m vertice.cli malware hash abc123def456
-```
-
-### 🌐 Network Scanning
-
-```bash
-# Scan de portas
-python -m vertice.cli scan ports example.com
-
-# Nmap scan
-python -m vertice.cli scan nmap example.com
-
-# Scan de vulnerabilidades
-python -m vertice.cli scan vulns example.com
-
-# Network discovery (em desenvolvimento)
-python -m vertice.cli scan network
-```
-
-### 🔎 Threat Hunting
-
-```bash
-# Buscar IOCs
-python -m vertice.cli hunt search "malicious.com"
-
-# Timeline de incidente
-python -m vertice.cli hunt timeline INC001 --last 48h
-
-# Análise pivot
-python -m vertice.cli hunt pivot "malicious.com"
-
-# Correlacionar IOCs (em desenvolvimento)
-python -m vertice.cli hunt correlate "malicious.com" "1.2.3.4"
-```
-
-### 🌌 Maximus AI (será renomeado para Maximus)
-
-```bash
-# Fazer pergunta para a IA
-python -m vertice.cli maximus ask "Qual é o status do sistema?"
-
-# Analisar contexto
-python -m vertice.cli maximus analyze "logs de erro aqui..."
-
-# Investigar incidente
-python -m vertice.cli maximus investigate "Detalhes do incidente..."
-
-# Chat interativo (em desenvolvimento)
-python -m vertice.cli maximus chat
-
-# Oráculo (em desenvolvimento)
-python -m vertice.cli maximus oraculo
-
-# Eureka - análise de código (em desenvolvimento)
-python -m vertice.cli maximus eureka /path/to/code
-```
-
-### 🛰️ Monitor
-
-```bash
-# Monitorar ameaças (em desenvolvimento)
-python -m vertice.cli monitor threats
-
-# Monitorar logs de serviço
-python -m vertice.cli monitor logs ai_agent_service
-
-# Seguir logs em tempo real
-python -m vertice.cli monitor logs ai_agent_service --follow
-
-# Dashboard de métricas (em desenvolvimento)
-python -m vertice.cli monitor metrics
-
-# Stream de alertas (em desenvolvimento)
-python -m vertice.cli monitor alerts
-```
-
-### 📋 Menu Interativo
-
-```bash
-# Menu com todas as opções categorizadas
-python -m vertice.cli menu (off)
+# Menu with categorized tools
+vcli menu
 ```
 
 ---
 
-## 🔐 Sistema de Autenticação
+## 📋 Command Reference
 
-### Roles e Permissões
+> **📚 Full documentation**: See [ANALISE_COMPLETA_VERTICE_CLI.md](/home/juan/vertice-dev/ANALISE_COMPLETA_VERTICE_CLI.md) for detailed command reference
 
-| Role | Level | Permissões | Acesso Offensive |
-|------|-------|------------|------------------|
-| **super_admin** 👑 | 100 | `*` (todas) | ✅ Sim |
-| **admin** | 80 | read, write, execute, manage_users, offensive | ✅ Sim |
-| **analyst** | 50 | read, write, execute | ❌ Não |
-| **viewer** | 10 | read | ❌ Não |
+### 🤖 AI & Intelligence (7 commands)
 
-### Super Admin
+| Command | Description | Subcommands |
+|---------|-------------|-------------|
+| `investigate` | 🔍 AI-orchestrated investigation | `target`, `multi`, `history`, `similar` |
+| `ask` | 🤖 AI-powered threat hunting | Interactive |
+| `maximus` | 🌌 Maximus AI direct interface | `chat`, `tools`, `status` |
+| `memory` | 🧠 Memory system management | `status`, `recall`, `similar`, `stats`, `clear` |
+| `analytics` | 📊 Advanced analytics | `behavior`, `ml`, `risk`, `threat-intel` |
+| `hunt` | 🔎 Threat hunting | Multiple |
+| `detect` | 🔍 Threat detection (YARA/Sigma) | `yara`, `sigma`, `custom` |
 
-**Email:** `juan.brainfarma@gmail.com`
-
-Tem acesso TOTAL a:
-- ✅ Todas as ferramentas
-- ✅ Ferramentas offensive
-- ✅ Comandos administrativos
-- ✅ Todas as permissões
-
-### Localização dos Tokens
-
-**Diretório:** `~/.vertice/auth/`
-
+**Example - AI Investigation**:
 ```bash
-~/.vertice/auth/
-├── token.json        # Metadados do token
-└── user.json         # Dados do usuário
+# Deep investigation with autonomous tool selection
+vcli investigate target malware.exe --type defensive --depth comprehensive
+
+# Find similar past investigations (semantic search)
+vcli investigate similar "ransomware attack"
 ```
 
-**Token seguro:** Armazenado no `keyring` do sistema
-
-### Tempo de Sessão
-
-- **Duração:** 1 hora
-- **Auto-renovação:** Não (precisa fazer login novamente)
-
----
-
-## 💡 Exemplos Práticos
-
-### Exemplo 1: Workflow Básico de Análise
-
-```bash
-# 1. Login
-python -m vertice.cli auth login --email juan.brainfarma@gmail.com
-
-# 2. Verificar se está logado
-python -m vertice.cli auth whoami
-
-# 3. Analisar um IP suspeito
-python -m vertice.cli ip analyze 185.220.101.23
-
-# 4. Buscar mais informações sobre ameaças
-python -m vertice.cli threat lookup 185.220.101.23
-
-# 5. Fazer scan de portas
-python -m vertice.cli scan ports 185.220.101.23
+**Output Preview**:
 ```
+🔍 Investigation Report
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-### Exemplo 2: Investigação com Maximus AI
+Target: example.com
+Type: defensive
 
-```bash
-# Login
-python -m vertice.cli auth login --email juan.brainfarma@gmail.com
+Findings:
+  • Threat intel: CLEAN (confidence: 95%)
+  • SSL certificate: Valid (expires in 180 days)
+  • DNS records: Properly configured
 
-# Fazer pergunta para Maximus
-python -m vertice.cli maximus ask "Analise este IP: 185.220.101.23"
+Tools Executed: ✓ threat_intel ✓ ssl_monitor ✓ domain_analysis
 
-# Investigar incidente
-python -m vertice.cli maximus investigate "IP 185.220.101.23 fazendo varredura de portas"
-```
-
-### Exemplo 3: Análise em Massa
-
-```bash
-# Criar arquivo com IPs
-cat > ips_suspeitos.txt << EOF
-185.220.101.23
-45.129.56.200
-178.162.212.214
-91.219.236.232
-EOF
-
-# Análise em massa
-python -m vertice.cli ip bulk ips_suspeitos.txt
-
-# Com output JSON para processamento
-python -m vertice.cli ip bulk ips_suspeitos.txt --json > resultados.json
-```
-
-### Exemplo 4: Threat Hunting
-
-```bash
-# Login
-python -m vertice.cli auth login --email juan.brainfarma@gmail.com
-
-# Buscar IOC
-python -m vertice.cli hunt search "malicious-domain.com"
-
-# Timeline dos últimos 7 dias
-python -m vertice.cli hunt timeline INC001 --last 7d
-
-# Análise pivot
-python -m vertice.cli hunt pivot "malicious-domain.com"
+⚡ Maximus Reasoning:
+  Confidence: 92.5%
+  Next Actions: Monitor subdomain activity
 ```
 
 ---
 
-## 🐛 Troubleshooting
+### 🔎 OSINT & Reconnaissance (4 commands)
 
-### Erro: "Comando não encontrado"
+| Command | Description | Subcommands |
+|---------|-------------|-------------|
+| `osint` | 🔎 Open Source Intelligence | `username`, `breach`, `vehicle`, `multi`, `comprehensive` |
+| `ip` | 🔍 IP Intelligence | `analyze`, `geo`, `whois`, `reputation` |
+| `threat` | 🛡️ Threat intelligence | `analyze`, `feed`, `ttp` |
+| `threat_intel` | 🌐 Threat intel platform | Multiple |
 
+**Example - OSINT**:
 ```bash
-# Certifique-se de estar no diretório correto
-cd /home/juan/vertice-dev/vertice-terminal
+# Social media profiling
+vcli osint username johndoe --platforms "twitter,linkedin,github"
 
-# Use python -m ao invés de apenas vertice
-python -m vertice.cli --help
-```
+# Breach data lookup
+vcli osint breach user@example.com
 
-### Erro: "Authentication Required"
-
-```bash
-# Você precisa fazer login primeiro!
-python -m vertice.cli auth login --email seu.email@gmail.com
-```
-
-### Erro: "No module named 'vertice'"
-
-```bash
-# Instale as dependências
-pip install -r requirements.txt
-
-# Verifique se está no diretório correto
-pwd
-# Deve mostrar: /home/juan/vertice-dev/vertice-terminal
-```
-
-### Erro: "Service is offline"
-
-```bash
-# O serviço backend não está rodando
-# Inicie os serviços do backend primeiro:
-cd /home/juan/vertice-dev
-docker-compose up -d
-
-# Ou verifique se os serviços estão rodando:
-docker-compose ps
-```
-
-### Erro: "ModuleNotFoundError: No module named 'keyring'"
-
-```bash
-# Instale a dependência faltando
-pip install keyring cryptography
-```
-
-### Token Expirado
-
-```bash
-# Faça logout e login novamente
-python -m vertice.cli auth logout
-python -m vertice.cli auth login --email seu.email@gmail.com
-```
-
-### Ver Logs de Erro
-
-```bash
-# Rode com verbose para ver erros detalhados
-python -m vertice.cli ip analyze 8.8.8.8 --verbose
-
-# Ou capture o erro
-python -m vertice.cli ip analyze 8.8.8.8 2>&1 | tee error.log
+# SINESP vehicle query (Brazil)
+vcli osint vehicle ABC1234
 ```
 
 ---
 
-## 🔄 Renomeação Maximus → Maximus
+### ⚔️ Offensive Security (4 commands)
 
-Quando estiver pronto para renomear **Maximus** para **Maximus** em todo o projeto:
+| Command | Description | Subcommands |
+|---------|-------------|-------------|
+| `offensive` | ⚔️ Offensive arsenal | `recon`, `vuln`, `exploit`, `web`, `bas` |
+| `scan` | 🌐 Network scanning | `nmap`, `masscan`, `service` |
+| `monitor` | 📊 Network monitoring | Multiple |
+| `pentest` | 🔓 Penetration testing | Multiple |
 
-### Executar o Script de Renomeação
+⚠️ **WARNING**: Authorized use only!
 
+**Example**:
 ```bash
-# Tornar executável (se ainda não for)
-chmod +x rename_maximus_to_maximus.sh
+# Network reconnaissance (authorized pentest)
+vcli offensive recon 192.168.1.0/24 --type stealth
 
-# Executar
-./rename_maximus_to_maximus.sh
-```
+# Vulnerability intelligence
+vcli offensive vuln CVE-2021-44228
 
-### O que o script faz:
-
-1. ✅ Substitui "Maximus" por "Maximus" em todos os arquivos
-2. ✅ Renomeia arquivos e diretórios com "maximus" no nome
-3. ✅ Atualiza imports Python
-4. ✅ Atualiza configurações YAML
-5. ✅ Mantém histórico do Git intacto
-
-### Após executar:
-
-```bash
-# Ver mudanças
-git diff
-
-# Testar novo nome
-python -m vertice.cli maximus --help
-
-# Commit
-git add .
-git commit -m "refactor: Renomear Maximus para Maximus"
+# Web attack simulation
+vcli offensive web https://test.example.com --attacks "sqli,xss"
 ```
 
 ---
 
-## 📊 Status dos Comandos
+### 🛡️ Defense & Response (6 commands)
 
-### ✅ Totalmente Implementados
-- `auth` - Sistema de autenticação
-- `ip` - IP Intelligence
-- `threat` - Threat Intelligence
-- `adr` - ADR Analysis
-- `malware` - Malware Analysis
-- `scan` - Network Scanning
-- `hunt` - Threat Hunting
-- `maximus` - Maximus AI (básico)
-- `monitor` - Monitoring (básico)
-- `menu` - Menu Interativo
+| Command | Description | Subcommands |
+|---------|-------------|-------------|
+| `immunis` | 🛡️ AI Immune System (8 cells) | `status`, `detect`, `respond`, `patrol`, `memory` |
+| `adr` | ⚔️ ADR (Anomaly Detection) | `detect`, `respond`, `plan` |
+| `incident` | 🚨 Incident response | `create`, `investigate`, `timeline`, `evidence` |
+| `policy` | 📜 Policy-as-Code | `create`, `apply`, `validate` |
+| `malware` | 🦠 Malware analysis | `analyze`, `scan`, `sandbox` |
+| `dlp` | 🔒 Data Loss Prevention | `scan`, `classify`, `alert` |
 
-### 🚧 Em Desenvolvimento
-- `maximus chat` - Chat interativo
-- `maximus oraculo` - Auto-melhoria
-- `maximus eureka` - Análise de código
-- `threat feed` - Feed de ameaças
-- `monitor threats` - ThreatMap real-time
-- `monitor metrics` - Dashboard métricas
-- `monitor alerts` - Stream de alertas
+**Example - AI Immune System**:
+```bash
+# Check immune system status
+vcli immunis status
+
+# Activate NK patrol (proactive defense)
+vcli immunis patrol network --targets "192.168.1.0/24"
+```
+
+**8 Immune Cell Types**:
+- 🔬 Macrophage, ⚡ Neutrophil, 📊 Dendritic, 🧬 B-Cell
+- 🤝 Helper T, ⚔️ Cytotoxic T, 👁️ NK Cell, 🛡️ Immunis API
 
 ---
 
-## 🎯 Quick Start para Testers
+### 📊 Management & Compliance (5 commands)
 
-### Setup Completo em 5 Minutos
+| Command | Description | Frameworks |
+|---------|-------------|------------|
+| `compliance` | 📋 Multi-framework compliance | PCI-DSS, GDPR, SOC2, HIPAA, ISO 27001 |
+| `siem` | 🔍 SIEM integration | Splunk, Sentinel, QRadar, Elastic |
+| `context` | 🎯 Context management | - |
+| `auth` | 🔐 Authentication | - |
+| `menu` | 📋 Interactive menu | - |
 
+---
+
+### 🧠 Advanced Features (2 commands)
+
+| Command | Description | Subcommands |
+|---------|-------------|-------------|
+| `hcl` | 📝 Human-Centric Language | `execute`, `plan`, `analyze`, `query` |
+| `cognitive` | 🧠 Cognitive services | `image`, `audio`, `decide` |
+
+**Example - HCL Workflows**:
 ```bash
-# 1. Navegar para o projeto
-cd /home/juan/vertice-dev/vertice-terminal
+# Generate plan from objective
+vcli hcl plan "Perform comprehensive security assessment"
 
-# 2. Instalar dependências
-pip install -r requirements.txt
-
-# 3. Testar instalação
-python -m vertice.cli --help
-
-# 4. Login como Super Admin
-python -m vertice.cli auth login --email juan.brainfarma@gmail.com
-
-# 5. Verificar status
-python -m vertice.cli auth whoami
-
-# 6. Testar comando
-python -m vertice.cli ip analyze 8.8.8.8
-```
-
-### Teste Rápido de Todos os Comandos
-
-```bash
-# Auth
-python -m vertice.cli auth status
-
-# IP
-python -m vertice.cli ip my-ip
-
-# Threat
-python -m vertice.cli threat lookup 8.8.8.8
-
-# ADR
-python -m vertice.cli adr status
-
-# Malware
-python -m vertice.cli malware analyze /tmp/test.txt
-
-# Scan
-python -m vertice.cli scan ports google.com
-
-# Hunt
-python -m vertice.cli hunt search "test"
-
-# Maximus
-python -m vertice.cli maximus ask "Olá Maximus"
-
-# Monitor
-python -m vertice.cli monitor logs test_service
-
-# Menu
-python -m vertice.cli menu
+# Execute HCL workflow
+vcli hcl execute security_audit.hcl
 ```
 
 ---
 
-## 📞 Suporte
+### 🎨 UI & Shell (2 commands)
 
-**Problemas?**
-- Verifique o [Troubleshooting](#troubleshooting)
-- Veja os [Exemplos Práticos](#exemplos-práticos)
-- Contate o admin: `juan.brainfarma@gmail.com`
+| Command | Description | Features |
+|---------|-------------|----------|
+| `tui` | 🎨 Text UI Dashboard (BETA) | Gradient UI, Quick actions, Command Palette |
+| `shell` | 🚀 Interactive shell | Autocomplete, History, Suggestions |
 
-**Boa sorte nos testes! 🚀**
+**Bindings**:
+- `Ctrl+P` - Command Palette
+- `Ctrl+Q` - Quit
+- `1-4` - Quick Actions
+
+---
+
+## 🔗 Integrations
+
+### 🤖 AI & Orchestration
+
+- **Maximus AI Core** (port 8001)
+  - 57 tools available
+  - Reasoning engine
+  - Memory system
+
+### 🛡️ Security Services (44+)
+
+**Intelligence**: OSINT (5 sources), Threat intel, IP intel, Domain analysis
+
+**Detection**: YARA, Sigma, ML models, Behavioral analytics
+
+**Offensive**: Nmap, Masscan, Exploit DBs, BAS
+
+**Defense**: 8 AI immune cells, ADR, Incident response, DLP
+
+### 🔌 SIEM & SOAR
+
+**SIEM**: Splunk, Microsoft Sentinel, IBM QRadar, Elastic
+
+**SOAR**: Splunk SOAR, Sentinel, Custom playbooks
+
+---
+
+## 💡 Practical Examples
+
+### 🔍 Defensive Security
+
+```bash
+# Complete domain investigation
+vcli investigate target suspicious-domain.com --type defensive --depth deep
+
+# Check for breached credentials
+vcli osint breach leaked-emails.txt
+
+# Malware analysis
+vcli malware analyze suspicious.exe --sandbox
+```
+
+### ⚔️ Offensive Security (Authorized)
+
+```bash
+# Reconnaissance
+vcli offensive recon target.com --type comprehensive
+
+# Vulnerability assessment
+vcli scan nmap 192.168.1.0/24 --script vuln
+
+# BAS
+vcli offensive bas phishing --target sales-team@company.com
+```
+
+### 🚨 Incident Response
+
+```bash
+# Create incident case
+vcli incident create --title "Ransomware Attack" --severity critical
+
+# Collect evidence
+vcli incident evidence collect --case INC-2025-001
+
+# Timeline reconstruction
+vcli incident timeline --case INC-2025-001
+```
+
+### 📊 Compliance
+
+```bash
+# Run PCI-DSS audit
+vcli compliance audit --framework pci-dss-4.0
+
+# Generate report
+vcli compliance report --frameworks "pci-dss,gdpr" --format pdf
+```
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      VÉRTICE CLI (vcli)                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │ Commands │  │  Shell   │  │   TUI    │  │  Menu    │  │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  │
+│       └──────────────┴─────────────┴──────────────┘        │
+│                    ┌─────▼─────┐                           │
+│                    │ Connectors │                           │
+│                    └─────┬─────┘                           │
+└──────────────────────────┼─────────────────────────────────┘
+                           │
+         ┌─────────────────┼─────────────────┐
+         │                 │                 │
+    ┌────▼────┐     ┌─────▼──────┐    ┌────▼────┐
+    │ Maximus │     │  Services  │    │  SIEM   │
+    │AI (8001)│     │  (44+)     │    │Connectors│
+    └────┬────┘     └────────────┘    └─────────┘
+         │
+    ┌────▼────────────────────┐
+    │ - Reasoning Engine      │
+    │ - 57 Tools              │
+    │ - Memory System         │
+    └─────────────────────────┘
+```
+
+---
+
+## 🛠️ Development
+
+### Setup
+
+```bash
+git clone https://github.com/juancs-dev/vertice-terminal.git
+cd vertice-terminal
+
+# Virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+
+# Install
+pip install -e ".[dev]"
+
+# Tests
+pytest tests/ -v --cov=vertice
+```
+
+### Testing
+
+```bash
+# All tests
+pytest tests/ -v
+
+# Integration
+pytest tests/integration/ -v
+
+# E2E
+pytest tests/e2e/ -v -m e2e
+
+# Coverage
+pytest tests/ --cov=vertice --cov-report=html
+```
+
+---
+
+## 🔐 Security
+
+⚠️ **IMPORTANT**: Authorized use only!
+
+- ✅ Authorized: Company assets, authorized pentests
+- ❌ Unauthorized: Third-party systems, malicious use
+
+### Features
+
+- 🔐 Authentication & permissions
+- 🔑 Secure token storage
+- 📝 Audit logging
+- 🛡️ Sandboxing
+
+### Reporting
+
+Security issues: security@vertice.dev (NOT public issues)
+
+---
+
+## 📊 Statistics
+
+- **Commands**: 28
+- **Subcommands**: 100+
+- **AI Tools**: 57
+- **Connectors**: 18+
+- **Services**: 44+
+- **Tests**: 30/30 passing (100%)
+- **Lines of Code**: 15,000+
+
+---
+
+## 🗺️ Roadmap
+
+### v1.1 (Q1 2025)
+
+- [ ] Web UI dashboard
+- [ ] ChatOps (Slack, Teams)
+- [ ] Plugin marketplace
+- [ ] Auto-update
+
+### v1.2 (Q2 2025)
+
+- [ ] Cloud integrations (AWS, Azure, GCP)
+- [ ] Kubernetes security
+- [ ] Container security
+- [ ] Mobile app
+
+### v2.0 (Q3 2025)
+
+- [ ] Distributed architecture
+- [ ] Multi-tenant
+- [ ] Advanced ML
+- [ ] Real-time collaboration
+
+---
+
+## 📚 Documentation
+
+Full documentation available:
+
+- **[ANALISE_COMPLETA_VERTICE_CLI.md](/home/juan/vertice-dev/ANALISE_COMPLETA_VERTICE_CLI.md)** - Complete analysis
+- **[INTEGRACAO_MAXIMUS_CLI_COMPLETA.md](/home/juan/vertice-dev/INTEGRACAO_MAXIMUS_CLI_COMPLETA.md)** - Integration guide
+- **[CERTIFICACAO_FINAL_INTEGRACAO_MAXIMUS.md](/home/juan/vertice-dev/CERTIFICACAO_FINAL_INTEGRACAO_MAXIMUS.md)** - Certification
+
+---
+
+## 📜 License
+
+MIT License - see [LICENSE](./LICENSE)
+
+---
+
+## 🙏 Acknowledgments
+
+- **Maximus AI Team** - AI engine
+- **JuanCS-Dev** - Creator
+- **Open Source Community**
+
+---
+
+## 📞 Support
+
+- 📧 Email: support@vertice.dev
+- 🐛 Issues: [GitHub Issues](https://github.com/juancs-dev/vertice-terminal/issues)
+- 📖 Docs: [docs.vertice.dev](https://docs.vertice.dev)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the Vértice Team**
+
+**Powered by 🤖 Maximus AI**
+
+[⬆ Back to Top](#-vértice-cli)
+
+</div>

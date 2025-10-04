@@ -5,6 +5,12 @@
   gap: var(--space-6);
 }
 
+.aiButtonContainer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 var(--space-4);
+}
+
 .results {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

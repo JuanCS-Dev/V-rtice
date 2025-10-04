@@ -39,6 +39,22 @@ services:
       - HCL_KB_URL=http://hcl_kb_service:8022
       - HCL_MONITOR_URL=http://hcl_monitor_service:8023
       - HCL_PLANNER_URL=http://hcl_planner_service:8024
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_URL=http://vestibular_service:8010
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
+      - NETWORK_RECON_URL=http://network_recon_service:8032
+      - VULN_INTEL_URL=http://vuln_intel_service:8033
+      - WEB_ATTACK_URL=http://web_attack_service:8034
+      - C2_ORCHESTRATION_URL=http://c2_orchestration_service:8035
+      - BAS_URL=http://bas_service:8036
+      - OFFENSIVE_GATEWAY_URL=http://offensive_gateway:8037
     depends_on:
       - redis
       - sinesp_service
@@ -398,6 +414,21 @@ services:
     restart: unless-stopped
 
   # ============================
+  # ADR CORE SERVICE
+  # ============================
+  adr_core_service:
+    build: ./backend/services/adr_core_service
+    container_name: vertice-adr-core
+    ports:
+      - "8030:8030"
+    volumes:
+      - ./backend/services/adr_core_service:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8030 --reload
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  # ============================
   # MAXIMUS INTEGRATION SERVICE - API GATEWAY FOR AI
   # ============================
   maximus_integration_service:
@@ -413,7 +444,7 @@ services:
     environment:
       - ORACULO_TARGET_PATH=/app/maximus_oraculo
       - EUREKA_SCAN_PATH=/tmp/malware_samples
-      - ADR_CORE_URL=http://adr_core_service:8011
+      - ADR_CORE_URL=http://adr_core_service:8030
       - MAXIMUS_CORE_URL=http://maximus_core_service:8001
     depends_on:
       - adr_core_service
@@ -823,30 +854,14 @@ services:
   # OSINT DASHBOARD - MISSING SERVICES
   # ============================
 
-  osint_service:
-    build: ./backend/services/osint_service
-    container_name: vertice-osint
-    ports:
-      - "8007:8007"
-    volumes:
-      - ./backend/services/osint_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8007 --reload
-    environment:
-      - REDIS_URL=redis://redis:6379/2
-    depends_on:
-      - redis
-    networks:
-      - vertice-network
-    restart: unless-stopped
-
   google_osint_service:
     build: ./backend/services/google_osint_service
     container_name: vertice-google-osint
     ports:
-      - "8008:8008"
+      - "8031:8031"
     volumes:
       - ./backend/services/google_osint_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8008 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8031 --reload
     environment:
       - REDIS_URL=redis://redis:6379/3
     depends_on:
@@ -857,20 +872,6 @@ services:
 
   # ============================
   # CYBER DASHBOARD - MISSING SERVICES
-  # ============================
-
-  ssl_monitor_service:
-    build: ./backend/services/ssl_monitor_service
-    container_name: vertice-ssl-monitor
-    ports:
-      - "8015:8015"
-    volumes:
-      - ./backend/services/ssl_monitor_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8015 --reload
-    networks:
-      - vertice-network
-    restart: unless-stopped
-
   # ============================
   # IMMUNIS SYSTEM (8 SERVICES)
   # ============================
@@ -1068,17 +1069,183 @@ services:
     restart: unless-stopped
 
   # ============================
-  # NEURAL ARCHITECTURE - MISSING
+  # AUTONOMIC SAFETY ARCHITECTURE (Maximus AI 3.0)
+  # Sensory Layer (5) + Executive Control (5)
   # ============================
 
   auditory_cortex_service:
     build: ./backend/services/auditory_cortex_service
     container_name: vertice-auditory-cortex
     ports:
-      - "8025:8025"
+      - "8007:8007"
     volumes:
       - ./backend/services/auditory_cortex_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8025 --reload
+    command: uvicorn api:app --host 0.0.0.0 --port 8007
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  visual_cortex_service:
+    build: ./backend/services/visual_cortex_service
+    container_name: vertice-visual-cortex
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./backend/services/visual_cortex_service:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8006
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  somatosensory_service:
+    build: ./backend/services/somatosensory_service
+    container_name: vertice-somatosensory
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./backend/services/somatosensory_service:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8008
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  chemical_sensing_service:
+    build: ./backend/services/chemical_sensing_service
+    container_name: vertice-chemical-sensing
+    ports:
+      - "8009:8009"
+    volumes:
+      - ./backend/services/chemical_sensing_service:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8009
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  vestibular_service:
+    build: ./backend/services/vestibular_service
+    container_name: vertice-vestibular
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./backend/services/vestibular_service:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8010
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  prefrontal_cortex_service:
+    build: ./backend/services/prefrontal_cortex_service
+    container_name: vertice-prefrontal-cortex
+    ports:
+      - "8011:8011"
+    volumes:
+      - ./backend/services/prefrontal_cortex_service:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8011
+    environment:
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_URL=http://vestibular_service:8010
+    depends_on:
+      - visual_cortex_service
+      - auditory_cortex_service
+      - somatosensory_service
+      - chemical_sensing_service
+      - vestibular_service
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  digital_thalamus_service:
+    build: ./backend/services/digital_thalamus_service
+    container_name: vertice-digital-thalamus
+    ports:
+      - "8012:8012"
+    volumes:
+      - ./backend/services/digital_thalamus_service:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8012
+    environment:
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_URL=http://vestibular_service:8010
+    depends_on:
+      - visual_cortex_service
+      - auditory_cortex_service
+      - somatosensory_service
+      - chemical_sensing_service
+      - vestibular_service
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  narrative_manipulation_filter:
+    build: ./backend/services/narrative_manipulation_filter
+    container_name: vertice-narrative-filter
+    ports:
+      - "8013:8013"
+    volumes:
+      - ./backend/services/narrative_manipulation_filter:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8013
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  ai_immune_system:
+    build: ./backend/services/ai_immune_system
+    container_name: vertice-ai-immune
+    ports:
+      - "8014:8014"
+    volumes:
+      - ./backend/services/ai_immune_system:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8014
+    environment:
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_URL=http://vestibular_service:8010
+    depends_on:
+      - prefrontal_cortex_service
+      - digital_thalamus_service
+      - narrative_manipulation_filter
+    networks:
+      - vertice-network
+    restart: unless-stopped
+
+  homeostatic_regulation:
+    build: ./backend/services/homeostatic_regulation
+    container_name: vertice-homeostatic-regulation
+    ports:
+      - "8015:8015"
+    volumes:
+      - ./backend/services/homeostatic_regulation:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8015
+    environment:
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_URL=http://vestibular_service:8010
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+    depends_on:
+      - visual_cortex_service
+      - auditory_cortex_service
+      - somatosensory_service
+      - chemical_sensing_service
+      - vestibular_service
+      - prefrontal_cortex_service
+      - digital_thalamus_service
+      - narrative_manipulation_filter
+      - ai_immune_system
     networks:
       - vertice-network
     restart: unless-stopped
@@ -1150,6 +1317,337 @@ services:
       - vertice-network
     restart: unless-stopped
 
+  # ============================
+  # OFFENSIVE SECURITY ARSENAL (Maximus AI 3.0)
+  # Strategic Implementation: The 2025 Offensive Security Roadmap
+  # ============================
+
+  network_recon_service:
+    build: ./backend/services/network_recon_service
+    container_name: vertice-network-recon
+    ports:
+      - "8032:8032"  # Service API
+      - "9032:9032"  # Prometheus metrics
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./backend/services/network_recon_service:/app
+      - network_recon_logs:/var/log/network_recon
+      - network_recon_data:/app/data
+    command: uvicorn api:app --host 0.0.0.0 --port 8032 --reload
+    environment:
+      - SERVICE_NAME=network_reconnaissance
+      - SERVICE_PORT=8032
+      - LOG_LEVEL=INFO
+      - DEFAULT_MASSCAN_RATE=10000
+      - DEFAULT_NMAP_TIMING=3
+      - MAX_SCAN_RATE=100000
+      - DEFAULT_DEEP_SCAN_THRESHOLD=100
+      - ENABLE_ASA_INTEGRATION=true
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_URL=http://vestibular_service:8010
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
+      - ASA_REQUEST_TIMEOUT=10.0
+      - SCAN_TIMEOUT=3600
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9032
+    depends_on:
+      - visual_cortex_service
+      - digital_thalamus_service
+      - homeostatic_regulation
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8032/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  vuln_intel_service:
+    build: ./backend/services/vuln_intel_service
+    container_name: vertice-vuln-intel
+    ports:
+      - "8033:8033"  # Service API
+      - "9033:9033"  # Prometheus metrics
+    volumes:
+      - ./backend/services/vuln_intel_service:/app
+      - nuclei_templates:/app/nuclei-templates
+      - vuln_intel_logs:/var/log/vuln_intel
+      - vuln_intel_data:/app/data
+    command: uvicorn api:app --host 0.0.0.0 --port 8033 --reload
+    environment:
+      - SERVICE_NAME=vulnerability_intelligence
+      - SERVICE_PORT=8033
+      - LOG_LEVEL=INFO
+      - NUCLEI_BINARY=/usr/bin/nuclei
+      - NUCLEI_TEMPLATES_DIR=/app/nuclei-templates
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - AUTO_SYNC_TEMPLATES=true
+      - TEMPLATE_SYNC_INTERVAL=3600
+      - DEFAULT_NUCLEI_CONCURRENCY=25
+      - DEFAULT_NUCLEI_RATE_LIMIT=150
+      - NVD_API_BASE=https://services.nvd.nist.gov/rest/json/cves/2.0
+      - EPSS_API_BASE=https://api.first.org/data/v1/epss
+      - CVE_CACHE_TTL=3600
+      - ENABLE_ASA_INTEGRATION=true
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9033
+    depends_on:
+      - chemical_sensing_service
+      - ai_immune_system
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8033/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  web_attack_service:
+    build: ./backend/services/web_attack_service
+    container_name: vertice-web-attack
+    ports:
+      - "8034:8034"  # Service API
+      - "9034:9034"  # Prometheus metrics
+    volumes:
+      - ./backend/services/web_attack_service:/app
+      - web_attack_logs:/var/log/web_attack
+    command: uvicorn api:app --host 0.0.0.0 --port 8034 --reload
+    environment:
+      - SERVICE_NAME=web_application_attack
+      - SERVICE_PORT=8034
+      - LOG_LEVEL=INFO
+      # AI Configuration (Hybrid Gemini/Anthropic)
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - AI_PROVIDER=auto
+      - AI_TEMPERATURE=0.7
+      - AI_MAX_TOKENS=2000
+      # Burp Suite
+      - BURP_API_URL=http://localhost:1337
+      - BURP_API_KEY=${BURP_API_KEY}
+      # OWASP ZAP
+      - ZAP_API_URL=http://localhost:8080
+      - ZAP_API_KEY=${ZAP_API_KEY}
+      # ASA Integration
+      - ENABLE_ASA_INTEGRATION=true
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9034
+    depends_on:
+      - prefrontal_cortex_service
+      - auditory_cortex_service
+      - somatosensory_service
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8034/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # C2 Orchestration Service (Port 8035)
+  c2_orchestration_service:
+    build:
+      context: ./backend/services/c2_orchestration_service
+      dockerfile: Dockerfile
+    container_name: c2_orchestration_service
+    ports:
+      - "8035:8035"  # API
+      - "9035:9035"  # Prometheus metrics
+    volumes:
+      - ./backend/services/c2_orchestration_service:/app
+      - c2_orchestration_logs:/var/log/c2_orchestration
+      - c2_payloads:/tmp/c2_payloads
+    environment:
+      - SERVICE_NAME=c2_orchestration
+      - SERVICE_PORT=8035
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Cobalt Strike Team Server
+      - COBALT_STRIKE_HOST=${COBALT_STRIKE_HOST:-localhost}
+      - COBALT_STRIKE_PORT=${COBALT_STRIKE_PORT:-50050}
+      - COBALT_STRIKE_PASSWORD=${COBALT_STRIKE_PASSWORD}
+      - COBALT_STRIKE_USER=${COBALT_STRIKE_USER:-maximus_ai}
+      - COBALT_STRIKE_SSL_VERIFY=false
+      # Metasploit RPC
+      - METASPLOIT_HOST=${METASPLOIT_HOST:-localhost}
+      - METASPLOIT_PORT=${METASPLOIT_PORT:-55553}
+      - METASPLOIT_USER=${METASPLOIT_USER:-msf}
+      - METASPLOIT_PASSWORD=${METASPLOIT_PASSWORD}
+      - METASPLOIT_SSL=true
+      # ASA Integration
+      - ENABLE_ASA_INTEGRATION=true
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      # Operational
+      - MAX_CONCURRENT_BEACONS=100
+      - MAX_CONCURRENT_SESSIONS=50
+      # Metrics
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9035
+    depends_on:
+      - auditory_cortex_service
+      - somatosensory_service
+      - prefrontal_cortex_service
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8035/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Breach & Attack Simulation Service (Port 8036)
+  bas_service:
+    build:
+      context: ./backend/services/bas_service
+      dockerfile: Dockerfile
+    container_name: bas_service
+    ports:
+      - "8036:8036"  # API
+      - "9036:9036"  # Prometheus metrics
+    volumes:
+      - ./backend/services/bas_service:/app
+      - bas_logs:/var/log/bas
+      - bas_reports:/app/data/reports
+      - atomic_red_team:/app/data/atomic-red-team
+    environment:
+      - SERVICE_NAME=breach_attack_simulation
+      - SERVICE_PORT=8036
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Atomic Red Team
+      - ATOMIC_RED_TEAM_PATH=/app/data/atomic-red-team
+      - ATOMIC_AUTO_UPDATE=true
+      # Execution
+      - DEFAULT_TIMEOUT_SECONDS=300
+      - MAX_CONCURRENT_SIMULATIONS=10
+      - ENABLE_CLEANUP=true
+      # Purple Team
+      - ENABLE_DETECTION_VALIDATION=true
+      - DETECTION_TIMEOUT_SECONDS=60
+      # SIEM Integration (opcional - configurar via .env)
+      - SPLUNK_URL=${SPLUNK_URL:-}
+      - SPLUNK_TOKEN=${SPLUNK_TOKEN:-}
+      - ELASTIC_URL=${ELASTIC_URL:-}
+      - ELASTIC_API_KEY=${ELASTIC_API_KEY:-}
+      # ASA Integration
+      - ENABLE_ASA_INTEGRATION=true
+      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+      # Remote Execution
+      - ENABLE_REMOTE_EXECUTION=true
+      - SSH_DEFAULT_USER=${BAS_SSH_USER:-bas_runner}
+      - ENABLE_WINRM=true
+      - WINRM_DEFAULT_USER=${BAS_WINRM_USER:-bas_runner}
+      # Safety
+      - MAX_IMPACT_TECHNIQUES_PER_CAMPAIGN=5
+      - REQUIRE_APPROVAL_FOR_IMPACT=true
+      # Metrics
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9036
+    depends_on:
+      - somatosensory_service
+      - prefrontal_cortex_service
+      - ai_immune_system
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8036/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Offensive Security Gateway (Port 8037)
+  offensive_gateway:
+    build:
+      context: ./backend/services/offensive_gateway
+      dockerfile: Dockerfile
+    container_name: offensive_gateway
+    ports:
+      - "8037:8037"  # API
+      - "9037:9037"  # Prometheus metrics
+    volumes:
+      - ./backend/services/offensive_gateway:/app
+      - gateway_logs:/var/log/offensive_gateway
+    environment:
+      - SERVICE_NAME=offensive_gateway
+      - SERVICE_PORT=8037
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Backend Services
+      - NETWORK_RECON_URL=http://network_recon_service:8032
+      - VULN_INTEL_URL=http://vuln_intel_service:8033
+      - WEB_ATTACK_URL=http://web_attack_service:8034
+      - C2_ORCHESTRATION_URL=http://c2_orchestration_service:8035
+      - BAS_URL=http://bas_service:8036
+      # Workflows
+      - MAX_CONCURRENT_WORKFLOWS=20
+      - WORKFLOW_TIMEOUT_SECONDS=3600
+      - ENABLE_WORKFLOW_PERSISTENCE=true
+      # Attack Chains
+      - MAX_CONCURRENT_CHAINS=5
+      - CHAIN_TIMEOUT_SECONDS=7200
+      - AUTO_CLEANUP_CHAINS=true
+      # RBAC
+      - ENABLE_RBAC=true
+      - REQUIRE_API_KEY=true
+      - API_KEY_HEADER=X-API-Key
+      # Rate Limiting
+      - ENABLE_RATE_LIMITING=true
+      - DEFAULT_RATE_LIMIT=60
+      # Safety
+      - ENABLE_SAFETY_CHECKS=true
+      - REQUIRE_APPROVAL_HIGH_IMPACT=true
+      - MAX_SIMULTANEOUS_EXPLOITS=10
+      # Audit
+      - ENABLE_AUDIT_LOG=true
+      # Metrics
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9037
+      # ASA
+      - ENABLE_ASA_INTEGRATION=true
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+    depends_on:
+      - network_recon_service
+      - vuln_intel_service
+      - web_attack_service
+      - c2_orchestration_service
+      - bas_service
+      - prefrontal_cortex_service
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8037/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
 # ============================
 # NETWORKS
 # ============================
@@ -1201,6 +1699,31 @@ volumes:
     driver: local
   # Vector DB
   qdrant-data:
+    driver: local
+  # Offensive Security Arsenal
+  network_recon_logs:
+    driver: local
+  network_recon_data:
+    driver: local
+  nuclei_templates:
+    driver: local
+  vuln_intel_logs:
+    driver: local
+  vuln_intel_data:
+    driver: local
+  web_attack_logs:
+    driver: local
+  c2_orchestration_logs:
+    driver: local
+  c2_payloads:
+    driver: local
+  bas_logs:
+    driver: local
+  bas_reports:
+    driver: local
+  atomic_red_team:
+    driver: local
+  gateway_logs:
     driver: local
   # Sandbox (optional)
   # cuckoo-data:

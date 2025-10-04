@@ -1,5 +1,9 @@
-"""
-ADR Core Service - Data Models
+"""ADR Core Service - Data Models Package.
+
+This package defines the data structures for the ADR Core Service, including
+Pydantic schemas for API validation and enumerations for categorical data.
+
+It exports all necessary models and enums for use throughout the application.
 """
 
 from .enums import (

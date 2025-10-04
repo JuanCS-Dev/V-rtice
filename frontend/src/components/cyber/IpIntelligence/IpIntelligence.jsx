@@ -13,6 +13,7 @@ import { Card } from '../../shared/Card';
 import IpSearchForm from './components/IpSearchForm';
 import IpAnalysisResults from './components/IpAnalysisResults';
 import { useIpIntelligence } from './hooks/useIpIntelligence';
+import { AskMaximusButton } from '../../shared/AskMaximusButton';
 import styles from './IpIntelligence.module.css';
 
 export const IpIntelligence = () => {
@@ -32,6 +33,21 @@ export const IpIntelligence = () => {
       title="IP INTELLIGENCE & GEOLOCATION"
       badge="CYBER"
       variant="cyber"
+      headerAction={
+        analysisResult && (
+          <AskMaximusButton
+            context={{
+              type: 'ip_intelligence',
+              ip: ipAddress,
+              analysis: analysisResult
+            }}
+            prompt="Analyze this IP intelligence data and assess threat level"
+            size="small"
+            variant="secondary"
+            buttonText="🤖 Ask AI"
+          />
+        )
+      }
     >
       <div className={styles.widgetBody}>
         <IpSearchForm

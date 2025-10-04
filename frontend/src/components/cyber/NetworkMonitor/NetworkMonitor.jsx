@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { Card } from '../../shared/Card';
+import AskMaximusButton from '../../shared/AskMaximusButton';
 import NetworkMonitorHeader from './components/NetworkMonitorHeader';
 import NetworkStatistics from './components/NetworkStatistics';
 import NetworkEventStream from './components/NetworkEventStream';
@@ -34,6 +35,20 @@ export const NetworkMonitor = () => {
       variant="cyber"
     >
       <div className={styles.widgetBody}>
+        <div style={{ marginBottom: '1rem' }}>
+          <AskMaximusButton
+            context={{
+              type: 'network_monitor',
+              data: { networkEvents, statistics },
+              isMonitoring,
+              eventsCount: networkEvents.length
+            }}
+            prompt="Analyze this network traffic and identify anomalies, suspicious patterns, or security concerns"
+            size="medium"
+            variant="secondary"
+          />
+        </div>
+
         <NetworkMonitorHeader
           isMonitoring={isMonitoring}
           onToggleMonitoring={toggleMonitoring}

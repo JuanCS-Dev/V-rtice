@@ -1,11 +1,17 @@
+#!/usr/bin/env python3
 # vertice/cli.py
 import typer
 from rich.console import Console
 import importlib
 import sys
+import os
+
+# Adiciona a raiz do projeto (vertice-terminal) ao Python path
+# para permitir que o script seja executado diretamente.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Importa a função do banner
-from .utils.banner import exibir_banner
+from vertice.utils.banner import exibir_banner
 
 # Lista dos nossos módulos de comando
 COMMAND_MODULES = [
@@ -19,6 +25,23 @@ COMMAND_MODULES = [
     "scan",
     "monitor",
     "hunt",
+    "ask",  # AI Conversational Engine
+    "policy",  # Policy-as-Code Engine
+    "detect",  # Detection Engine (YARA/Sigma)
+    "analytics",  # Advanced Analytics & ML
+    "incident",  # Incident Response & Orchestration
+    "compliance",  # Multi-framework Compliance & Reporting
+    "threat_intel",  # Threat Intelligence Platform
+    "dlp",  # Data Loss Prevention
+    "siem",  # SIEM Integration & Log Management
+    # AI-First Commands (Maximus Integration)
+    "investigate",  # AI-Orchestrated Investigation
+    "osint",  # OSINT Operations
+    "cognitive",  # Cognitive Services
+    "offensive",  # Offensive Security Arsenal
+    "immunis",  # AI Immune System
+    "hcl",  # Human-Centric Language
+    "memory",  # Memory System Management
     "menu",
 ]
 
@@ -38,7 +61,7 @@ def register_commands():
     for module_name in COMMAND_MODULES:
         try:
             module = importlib.import_module(
-                f".commands.{module_name}", package="vertice"
+                f"vertice.commands.{module_name}"
             )
             app.add_typer(module.app, name=module_name)
         except (ImportError, AttributeError):
@@ -73,7 +96,7 @@ def tui():
         vcli tui
     """
     try:
-        from .ui import run_tui
+        from vertice.ui import run_tui
 
         run_tui()
     except ImportError as e:
@@ -102,7 +125,7 @@ def shell():
         vcli shell
     """
     try:
-        from .interactive_shell import main as shell_main
+        from vertice.interactive_shell import main as shell_main
 
         shell_main()
     except ImportError as e:
@@ -120,7 +143,7 @@ def shell():
 def main(
     ctx: typer.Context,
     version: bool = typer.Option(
-        None, "--version", "-v", help="Exibe a versão do vCli."
+        False, "--version", "-v", help="Exibe a versão do vCli."
     ),
     no_banner: bool = typer.Option(
         False, "--no-banner", help="Não exibir o banner de inicialização."

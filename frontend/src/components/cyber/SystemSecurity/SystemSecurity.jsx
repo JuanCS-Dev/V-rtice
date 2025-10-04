@@ -1,4 +1,5 @@
 import React from 'react';
+import AskMaximusButton from '../../shared/AskMaximusButton';
 import { useSystemSecurity } from './hooks/useSystemSecurity';
 import { SecurityHeader } from './components/SecurityHeader';
 import { AnalysisPanel } from './components/AnalysisPanel';
@@ -14,6 +15,19 @@ export const SystemSecurity = () => {
   return (
     <div className={styles.container}>
       <SecurityHeader lastUpdate={lastUpdate} onRefresh={refresh} />
+
+      <div style={{ margin: '1rem 0' }}>
+        <AskMaximusButton
+          context={{
+            type: 'system_security',
+            data: securityData,
+            lastUpdate
+          }}
+          prompt="Analyze this system security status and identify vulnerabilities, misconfigurations, or security risks"
+          size="medium"
+          variant="secondary"
+        />
+      </div>
 
       <div className={styles.panels}>
         <AnalysisPanel

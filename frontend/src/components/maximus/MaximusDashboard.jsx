@@ -15,11 +15,15 @@ import React, { useState, useEffect } from 'react';
 import { OraculoPanel } from './OraculoPanel';
 import { EurekaPanel } from './EurekaPanel';
 import { AIInsightsPanel } from './AIInsightsPanel';
+import { MaximusAI3Panel } from './MaximusAI3Panel';
+import { MaximusCore } from './MaximusCore';
+import { WorkflowsPanel } from './WorkflowsPanel';
+import TerminalEmulator from '../terminal/TerminalEmulator';
 import { BackgroundEffect, EffectSelector } from './BackgroundEffects';
 import './MaximusDashboard.css';
 
 export const MaximusDashboard = ({ setCurrentView }) => {
-  const [activePanel, setActivePanel] = useState('insights'); // 'insights', 'oraculo', 'eureka'
+  const [activePanel, setActivePanel] = useState('core'); // 'core', 'insights', 'ai3', 'oraculo', 'eureka', 'workflows', 'terminal'
   const [backgroundEffect, setBackgroundEffect] = useState('matrix'); // 'scanline', 'matrix', 'particles', 'none'
   const [aiStatus, setAiStatus] = useState({
     oraculo: { status: 'idle', lastRun: null, suggestions: 0 },
@@ -95,7 +99,11 @@ export const MaximusDashboard = ({ setCurrentView }) => {
   }, []);
 
   const panels = [
+    { id: 'core', name: 'AI CORE', icon: '🤖', description: 'Chat & Orchestration' },
+    { id: 'workflows', name: 'WORKFLOWS', icon: '🔄', description: 'AI-Driven Automation' },
+    { id: 'terminal', name: 'TERMINAL', icon: '⚡', description: 'Vertice CLI Interface' },
     { id: 'insights', name: 'AI INSIGHTS', icon: '🧠', description: 'Unified Intelligence View' },
+    { id: 'ai3', name: 'MAXIMUS AI 3.0', icon: '🧬', description: 'Neural Architecture' },
     { id: 'oraculo', name: 'ORÁCULO', icon: '🔮', description: 'Self-Improvement Engine' },
     { id: 'eureka', name: 'EUREKA', icon: '🔬', description: 'Deep Malware Analysis' }
   ];
@@ -113,12 +121,26 @@ export const MaximusDashboard = ({ setCurrentView }) => {
 
   const renderActivePanel = () => {
     switch (activePanel) {
+      case 'core':
+        return <MaximusCore aiStatus={aiStatus} setAiStatus={setAiStatus} />;
+      case 'workflows':
+        return <WorkflowsPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
+      case 'terminal':
+        return (
+          <div style={{ height: '100%', padding: '1rem' }}>
+            <TerminalEmulator isFullscreen={false} />
+          </div>
+        );
+      case 'ai3':
+        return <MaximusAI3Panel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'oraculo':
         return <OraculoPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'eureka':
         return <EurekaPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
-      default:
+      case 'insights':
         return <AIInsightsPanel aiStatus={aiStatus} brainActivity={brainActivity} />;
+      default:
+        return <MaximusCore aiStatus={aiStatus} setAiStatus={setAiStatus} />;
     }
   };
 

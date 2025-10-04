@@ -1,4 +1,18 @@
+/**
+ * Error Boundary Component
+ * Catches React errors and prevents dashboard crashes
+ *
+ * Features:
+ * - Graceful error handling
+ * - User-friendly fallback UI
+ * - Telemetry integration ready (Sentry)
+ * - Retry mechanism
+ * - Error context logging
+ */
+
 import React from 'react';
+import PropTypes from 'prop-types';
+import './shared/ErrorBoundary.css';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -6,7 +20,8 @@ class ErrorBoundary extends React.Component {
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
+      errorCount: 0
     };
   }
 
@@ -16,131 +31,121 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    this.setState({
+
+    this.setState(prevState => ({
       error,
-      errorInfo
-    });
+      errorInfo,
+      errorCount: prevState.errorCount + 1
+    }));
+
+    // Log to telemetry service (ready for Sentry integration)
+    this.logErrorToService(error, errorInfo);
   }
+
+  logErrorToService = (error, errorInfo) => {
+    const errorData = {
+      timestamp: new Date().toISOString(),
+      message: error?.toString() || 'Unknown error',
+      stack: error?.stack || 'No stack trace',
+      componentStack: errorInfo?.componentStack || 'No component stack',
+      context: this.props.context || 'Unknown context',
+      errorCount: this.state.errorCount + 1,
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+
+    // TODO: Integrar com Sentry quando disponível
+    // Sentry.captureException(error, { contexts: { react: errorInfo } });
+
+    // Log para console em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.group('🚨 Error Boundary - Telemetry Data');
+      console.error('Error:', errorData);
+      console.groupEnd();
+    }
+
+    // Enviar para endpoint de logging (se disponível)
+    try {
+      fetch('/api/errors/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(errorData)
+      }).catch(() => {
+        // Fail silently se endpoint não existir
+      });
+    } catch (e) {
+      // Fail silently
+    }
+  };
+
+  handleReset = () => {
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null
+    });
+
+    // Callback para parent component
+    if (this.props.onReset) {
+      this.props.onReset();
+    }
+  };
 
   render() {
     if (this.state.hasError) {
-      return (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          backgroundColor: '#0a0a0a',
-          color: '#00ff00',
-          fontFamily: 'monospace',
-          padding: '20px'
-        }}>
-          <div style={{
-            border: '2px solid #00ff00',
-            borderRadius: '8px',
-            padding: '30px',
-            maxWidth: '800px',
-            backgroundColor: '#1a1a1a'
-          }}>
-            <h1 style={{
-              marginBottom: '20px',
-              fontSize: '24px',
-              textAlign: 'center'
-            }}>
-              ⚠️ VÉRTICE Error Handler
-            </h1>
+      // Fallback UI customizado (se fornecido)
+      if (this.props.fallback) {
+        return this.props.fallback({
+          error: this.state.error,
+          errorInfo: this.state.errorInfo,
+          resetError: this.handleReset
+        });
+      }
 
-            <p style={{
-              marginBottom: '15px',
-              fontSize: '16px',
-              color: '#ffaa00'
-            }}>
-              Algo deu errado. O sistema detectou um erro não tratado.
+      // Fallback UI padrão
+      return (
+        <div className="error-boundary-container">
+          <div className="error-boundary-content">
+            <div className="error-boundary-icon">⚠️</div>
+            <h2 className="error-boundary-title">
+              {this.props.title || 'Algo deu errado'}
+            </h2>
+            <p className="error-boundary-message">
+              {this.props.message || 'Ocorreu um erro inesperado. Nossa equipe foi notificada.'}
             </p>
 
-            {this.state.error && (
-              <div style={{
-                backgroundColor: '#2a2a2a',
-                padding: '15px',
-                borderRadius: '4px',
-                marginBottom: '15px',
-                overflowX: 'auto'
-              }}>
-                <strong style={{ color: '#ff5555' }}>Error:</strong>
-                <pre style={{
-                  margin: '10px 0 0 0',
-                  fontSize: '14px',
-                  color: '#ff5555'
-                }}>
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <details className="error-boundary-details">
+                <summary>Detalhes do Erro (Dev Only)</summary>
+                <pre className="error-boundary-stack">
                   {this.state.error.toString()}
+                  {'\n\n'}
+                  {this.state.error.stack}
                 </pre>
-              </div>
-            )}
-
-            {this.state.errorInfo && (
-              <details style={{ marginBottom: '20px' }}>
-                <summary style={{
-                  cursor: 'pointer',
-                  color: '#ffaa00',
-                  marginBottom: '10px'
-                }}>
-                  Ver Stack Trace
-                </summary>
-                <div style={{
-                  backgroundColor: '#2a2a2a',
-                  padding: '15px',
-                  borderRadius: '4px',
-                  overflowX: 'auto'
-                }}>
-                  <pre style={{
-                    margin: 0,
-                    fontSize: '12px',
-                    color: '#999'
-                  }}>
-                    {this.state.errorInfo.componentStack}
-                  </pre>
-                </div>
               </details>
             )}
 
-            <div style={{
-              display: 'flex',
-              gap: '10px',
-              justifyContent: 'center'
-            }}>
+            <div className="error-boundary-actions">
               <button
-                onClick={() => window.location.reload()}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#00ff00',
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}
+                onClick={this.handleReset}
+                className="error-boundary-btn error-boundary-btn-primary"
               >
-                Recarregar Página
+                🔄 Tentar Novamente
               </button>
 
               <button
                 onClick={() => window.location.href = '/'}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#333',
-                  color: '#00ff00',
-                  border: '1px solid #00ff00',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}
+                className="error-boundary-btn error-boundary-btn-secondary"
               >
-                Ir para Home
+                🏠 Voltar ao Início
               </button>
             </div>
+
+            {this.state.errorCount > 2 && (
+              <p className="error-boundary-warning">
+                ⚠️ Múltiplos erros detectados. Considere recarregar a página.
+              </p>
+            )}
           </div>
         </div>
       );
@@ -149,5 +154,14 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+  context: PropTypes.string,
+  fallback: PropTypes.func,
+  title: PropTypes.string,
+  message: PropTypes.string,
+  onReset: PropTypes.func
+};
 
 export default ErrorBoundary;

@@ -19,6 +19,7 @@ import React, { useState, lazy, Suspense } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { Card, Badge, LoadingSpinner } from '../../shared';
+import AskMaximusButton from '../../shared/AskMaximusButton';
 import { ThreatFilters } from './components/ThreatFilters';
 import { useThreatData } from './hooks/useThreatData';
 import styles from './ThreatMap.module.css';
@@ -41,14 +42,27 @@ export const ThreatMap = () => {
       variant="cyber"
       className={styles.widget}
       headerActions={
-        <button
-          className={styles.refreshButton}
-          onClick={refresh}
-          disabled={loading}
-          title="Atualizar"
-        >
-          <i className={`fas fa-sync ${loading ? 'fa-spin' : ''}`}></i>
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <AskMaximusButton
+            context={{
+              type: 'threat_map',
+              data: threats,
+              count: threats.length,
+              filters
+            }}
+            prompt="Analyze these global cyber threats and identify patterns, high-risk regions, and threat trends"
+            size="small"
+            variant="secondary"
+          />
+          <button
+            className={styles.refreshButton}
+            onClick={refresh}
+            disabled={loading}
+            title="Atualizar"
+          >
+            <i className={`fas fa-sync ${loading ? 'fa-spin' : ''}`}></i>
+          </button>
+        </div>
       }
     >
       <div className={styles.container}>

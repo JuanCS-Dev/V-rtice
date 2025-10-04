@@ -1,11 +1,14 @@
-"""
-Enumerations for ADR Core Service
+"""Enumerations for the ADR Core Service.
+
+This module defines a comprehensive set of enumerations used throughout the
+service to ensure consistency and type safety for categorical data such as
+severity levels, threat types, and action statuses.
 """
 from enum import Enum
 
 
 class SeverityLevel(str, Enum):
-    """Threat severity levels"""
+    """Defines the severity levels for threats and alerts."""
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -14,7 +17,7 @@ class SeverityLevel(str, Enum):
 
 
 class ThreatType(str, Enum):
-    """Types of threats detected"""
+    """Defines the types of threats that can be detected."""
     MALWARE = "malware"
     RANSOMWARE = "ransomware"
     TROJAN = "trojan"
@@ -45,7 +48,7 @@ class ThreatType(str, Enum):
 
 
 class ActionType(str, Enum):
-    """Response action types"""
+    """Defines the types of response actions that can be executed."""
     BLOCK_IP = "block_ip"
     BLOCK_DOMAIN = "block_domain"
     BLOCK_HASH = "block_hash"
@@ -64,7 +67,7 @@ class ActionType(str, Enum):
 
 
 class ActionStatus(str, Enum):
-    """Status of response actions"""
+    """Defines the lifecycle status of a response action."""
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -74,7 +77,7 @@ class ActionStatus(str, Enum):
 
 
 class DetectionSource(str, Enum):
-    """Source of detection"""
+    """Defines the source or method of a threat detection."""
     FILE_ANALYSIS = "file_analysis"
     NETWORK_ANALYSIS = "network_analysis"
     PROCESS_ANALYSIS = "process_analysis"
@@ -89,7 +92,7 @@ class DetectionSource(str, Enum):
 
 
 class PlaybookTrigger(str, Enum):
-    """Playbook trigger conditions"""
+    """Defines the conditions that can trigger a response playbook."""
     THREAT_TYPE = "threat_type"
     SEVERITY_LEVEL = "severity_level"
     MITRE_TECHNIQUE = "mitre_technique"
@@ -98,7 +101,7 @@ class PlaybookTrigger(str, Enum):
 
 
 class AlertStatus(str, Enum):
-    """Alert lifecycle status"""
+    """Defines the lifecycle status of a security alert."""
     NEW = "new"
     ACKNOWLEDGED = "acknowledged"
     INVESTIGATING = "investigating"
@@ -109,7 +112,7 @@ class AlertStatus(str, Enum):
 
 
 class ConnectorType(str, Enum):
-    """Connector integration types"""
+    """Defines the types of external connectors for integration."""
     IP_INTELLIGENCE = "ip_intelligence"
     THREAT_INTEL = "threat_intel"
     MALWARE_ANALYSIS = "malware_analysis"
@@ -123,7 +126,7 @@ class ConnectorType(str, Enum):
 
 
 class EngineType(str, Enum):
-    """Analysis engine types"""
+    """Defines the types of internal analysis engines."""
     DETECTION = "detection"
     RESPONSE = "response"
     CORRELATION = "correlation"

@@ -1,5 +1,8 @@
-"""
-Base Connector - Abstract base for all ADR connectors
+"""Base Connector module for the ADR Core Service.
+
+This module defines the abstract base class `BaseConnector` that all specific
+connectors must inherit from. It provides a common interface for connecting
+to external services, handling configuration, and making HTTP requests.
 """
 
 from abc import ABC, abstractmethod
@@ -11,25 +14,30 @@ logger = logging.getLogger(__name__)
 
 
 class BaseConnector(ABC):
-    """
-    Abstract base class for ADR connectors
+    """Abstract base class for all external service connectors.
 
-    All connectors must implement:
-    - connect(): Establish connection to external service
-    - disconnect(): Clean up resources
-    - health_check(): Verify service is reachable
+    This class provides a standardized structure for connectors that integrate
+    with external APIs. It includes methods for connection management, health
+    checks, and a generic HTTP request handler.
+
+    Subclasses must implement the `health_check` and `enrich` methods.
+
+    Attributes:
+        config (Dict[str, Any]): The configuration dictionary for the connector.
+        endpoint (str): The base URL of the external service.
+        timeout (float): The timeout for HTTP requests in seconds.
+        api_key (Optional[str]): The API key for authentication, if required.
+        enabled (bool): A flag to enable or disable the connector.
+        client (Optional[httpx.AsyncClient]): The HTTP client for making requests.
+        connected (bool): The current connection status.
     """
 
     def __init__(self, config: Dict[str, Any]):
-        """
-        Initialize connector with configuration
+        """Initializes the BaseConnector with its configuration.
 
         Args:
-            config: Configuration dict containing:
-                - endpoint: Service endpoint URL
-                - timeout: Request timeout in seconds
-                - api_key: Optional API key
-                - enabled: Whether connector is enabled
+            config (Dict[str, Any]): A dictionary containing configuration such as
+                `endpoint`, `timeout`, `api_key`, and `enabled`.
         """
         self.config = config
         self.endpoint = config.get('endpoint')
@@ -40,12 +48,16 @@ class BaseConnector(ABC):
         self.client: Optional[httpx.AsyncClient] = None
         self.connected = False
 
-        logger.info(f"Initialized {self.__class__.__name__} for {self.endpoint}")
+        logger.info(f"Initialized {self.__class__.__name__} for endpoint: {self.endpoint}")
 
     async def connect(self):
-        """Establish connection to external service"""
+        """Establishes and verifies the connection to the external service.
+
+        If the connector is enabled, it creates an `httpx.AsyncClient` and performs
+        an initial health check to verify connectivity.
+        """
         if not self.enabled:
-            logger.warning(f"{self.__class__.__name__} is disabled")
+            logger.warning(f"{self.__class__.__name__} is disabled and will not connect.")
             return
 
         try:
@@ -58,43 +70,53 @@ class BaseConnector(ABC):
                 headers=headers
             )
 
-            # Verify connection
+            # Perform an initial health check to confirm connectivity.
             await self.health_check()
             self.connected = True
 
-            logger.info(f"✅ Connected to {self.__class__.__name__}")
+            logger.info(f"Successfully connected to {self.__class__.__name__}.")
         except Exception as e:
-            logger.error(f"❌ Failed to connect {self.__class__.__name__}: {e}")
+            logger.error(f"Failed to connect to {self.__class__.__name__}: {e}")
             self.connected = False
+            if self.client:
+                await self.client.aclose()
+                self.client = None
 
     async def disconnect(self):
-        """Clean up resources and close connections"""
+        """Closes the connection and cleans up resources.
+
+        This method gracefully closes the `httpx.AsyncClient` if it exists.
+        """
         if self.client:
             await self.client.aclose()
             self.client = None
         self.connected = False
-        logger.info(f"Disconnected from {self.__class__.__name__}")
+        logger.info(f"Disconnected from {self.__class__.__name__}.")
 
     @abstractmethod
     async def health_check(self) -> bool:
-        """
-        Check if external service is reachable
+        """Performs a health check of the external service.
+
+        This method must be implemented by subclasses to verify that the
+        external service is reachable and operational.
 
         Returns:
-            True if service is healthy, False otherwise
+            bool: True if the service is healthy, False otherwise.
         """
         pass
 
     @abstractmethod
     async def enrich(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Enrich detection/threat data with external intelligence
+        """Enriches detection data with information from the external service.
+
+        This is the primary method for data enrichment and must be implemented
+        by all concrete connector subclasses.
 
         Args:
-            data: Raw detection/threat data
+            data (Dict[str, Any]): The raw detection or threat data to be enriched.
 
         Returns:
-            Enriched data with additional context
+            Dict[str, Any]: The enriched data with additional context.
         """
         pass
 
@@ -105,54 +127,50 @@ class BaseConnector(ABC):
         data: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, Any]] = None
     ) -> Optional[Dict[str, Any]]:
-        """
-        Make HTTP request to external service
+        """Makes a generic HTTP request to the external service.
+
+        This helper method handles GET, POST, PUT, and DELETE requests, including
+        error handling and response parsing.
 
         Args:
-            method: HTTP method (GET, POST, etc.)
-            endpoint: API endpoint path
-            data: Request body data
-            params: Query parameters
+            method (str): The HTTP method to use (e.g., 'GET', 'POST').
+            endpoint (str): The API endpoint path to append to the base URL.
+            data (Optional[Dict[str, Any]], optional): The request body for POST/PUT.
+                Defaults to None.
+            params (Optional[Dict[str, Any]], optional): URL query parameters.
+                Defaults to None.
 
         Returns:
-            Response data or None if failed
+            Optional[Dict[str, Any]]: The JSON response as a dictionary, or None
+                if the request fails or returns a non-2xx status code.
         """
-        if not self.client:
-            logger.error(f"{self.__class__.__name__} not connected")
+        if not self.client or not self.connected:
+            logger.error(f"{self.__class__.__name__} is not connected. Cannot make request.")
             return None
 
         try:
             url = f"{self.endpoint}{endpoint}"
 
-            if method.upper() == 'GET':
-                response = await self.client.get(url, params=params)
-            elif method.upper() == 'POST':
-                response = await self.client.post(url, json=data, params=params)
-            elif method.upper() == 'PUT':
-                response = await self.client.put(url, json=data, params=params)
-            elif method.upper() == 'DELETE':
-                response = await self.client.delete(url, params=params)
-            else:
-                logger.error(f"Unsupported HTTP method: {method}")
-                return None
+            response = await self.client.request(method.upper(), url, json=data, params=params)
 
-            if response.status_code in [200, 201]:
-                return response.json()
-            else:
-                logger.warning(
-                    f"{self.__class__.__name__} request failed: "
-                    f"{response.status_code} {response.text}"
-                )
-                return None
+            response.raise_for_status()  # Raises HTTPStatusError for 4xx/5xx responses
+            return response.json()
 
+        except httpx.HTTPStatusError as e:
+            logger.warning(
+                f"{self.__class__.__name__} request failed with status {e.response.status_code}: "
+                f"{e.response.text}"
+            )
+            return None
         except httpx.RequestError as e:
             logger.error(f"{self.__class__.__name__} request error: {e}")
             return None
         except Exception as e:
-            logger.error(f"{self.__class__.__name__} unexpected error: {e}")
+            logger.error(f"{self.__class__.__name__} encountered an unexpected error: {e}")
             return None
 
     def __repr__(self):
+        """Provides a string representation of the connector's state."""
         return (
             f"<{self.__class__.__name__} "
             f"endpoint={self.endpoint} "

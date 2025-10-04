@@ -30,43 +30,208 @@ class GradientHeader(Static):
         return gradient_header
 
 
-class StatusPanel(Static):
-    """Painel de status com informações em tempo real"""
+class BackendStatusPanel(Static):
+    """Painel de status com dados REAIS do API Gateway"""
 
     DEFAULT_CSS = """
-    StatusPanel {
-        height: 7;
+    BackendStatusPanel {
+        height: auto;
+        min-height: 10;
         border: solid $primary;
         padding: 1;
         background: $panel;
     }
     """
 
-    def compose(self) -> ComposeResult:
-        yield Static(self.render_status())
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._connector = None
+        self._last_status = None
+        self._is_loading = True
+        self._interval_timer = None
 
-    def render_status(self) -> Text:
-        """Renderiza status do sistema"""
+    def on_mount(self) -> None:
+        """Quando montado, inicia polling do backend"""
+        self._interval_timer = self.set_interval(5.0, self._refresh_status)
+        self._refresh_status()
+
+    async def _refresh_status(self) -> None:
+        """Atualiza status do backend a cada 5 segundos"""
+        from ...connectors.api_gateway import APIGatewayConnector
+
+        if self._connector is None:
+            self._connector = APIGatewayConnector()
+
+        try:
+            # Verifica health do gateway
+            is_healthy = await self._connector.health_check()
+
+            if is_healthy:
+                # Obtém status de todos os serviços
+                self._last_status = await self._connector.get_services_status()
+                self._is_loading = False
+            else:
+                self._last_status = None
+                self._is_loading = False
+        except Exception as e:
+            self._last_status = None
+            self._is_loading = False
+
+        self.refresh()
+
+    def render(self) -> Text:
+        """Renderiza status do backend"""
         from ...utils.banner import create_gradient_text
 
         now = datetime.now().strftime("%H:%M:%S")
         status = Text()
 
         # Título com gradiente
-        title = create_gradient_text("📊 System Status", [THEME.colors.VERDE_NEON, THEME.colors.CIANO_BRILHO])
+        title = create_gradient_text("📊 Backend Services", [THEME.colors.VERDE_NEON, THEME.colors.CIANO_BRILHO])
         status.append(title)
         status.append("\n\n")
 
-        # Status items
-        status.append(f"{THEME.symbols.SUCCESS} ", style=THEME.colors.SUCCESS)
-        status.append(f"Connected  ", style=THEME.colors.CINZA_TEXTO)
-        status.append(f"  {THEME.symbols.CIRCLE} ", style=THEME.colors.CIANO_BRILHO)
-        status.append(f"Online\n", style=THEME.colors.BRANCO)
+        if self._is_loading:
+            # Estado de carregamento
+            status.append(f"{THEME.symbols.INFO} ", style=THEME.colors.INFO)
+            status.append("Loading backend status...\n", style=THEME.colors.CINZA_TEXTO)
+        elif self._last_status is None:
+            # Gateway offline
+            status.append(f"{THEME.symbols.ERROR} ", style=THEME.colors.ERROR)
+            status.append("API Gateway ", style=THEME.colors.CINZA_TEXTO)
+            status.append("OFFLINE", style=THEME.colors.ERROR)
+            status.append(f"\n{THEME.symbols.INFO} ", style=THEME.colors.CINZA_TEXTO)
+            status.append(f"Last check: {now}", style=THEME.colors.CINZA_TEXTO)
+        else:
+            # Gateway online - mostra status
+            services = self._last_status.get("services", {})
+            total_services = len(services)
+            online_services = sum(1 for s in services.values() if s.get("status") == "healthy")
 
-        status.append(f"{THEME.symbols.INFO} ", style=THEME.colors.INFO)
-        status.append(f"Time: {now}", style=THEME.colors.CINZA_TEXTO)
+            # Status summary
+            status.append(f"{THEME.symbols.SUCCESS} ", style=THEME.colors.SUCCESS)
+            status.append(f"API Gateway ", style=THEME.colors.CINZA_TEXTO)
+            status.append("ONLINE", style=THEME.colors.SUCCESS)
+            status.append(f"\n{THEME.symbols.CIRCLE} ", style=THEME.colors.CIANO_BRILHO)
+            status.append(f"Services: ", style=THEME.colors.CINZA_TEXTO)
+            status.append(f"{online_services}/{total_services}", style=THEME.colors.VERDE_NEON)
+            status.append(f"\n{THEME.symbols.INFO} ", style=THEME.colors.CINZA_TEXTO)
+            status.append(f"Updated: {now}", style=THEME.colors.CINZA_TEXTO)
 
         return status
+
+    async def on_unmount(self) -> None:
+        """Fecha conexão quando desmontado"""
+        if self._connector:
+            await self._connector.close()
+
+
+class LiveMetricsPanel(Static):
+    """Painel de métricas ao vivo (CPU, Mem, Network)"""
+
+    DEFAULT_CSS = """
+    LiveMetricsPanel {
+        height: auto;
+        min-height: 10;
+        border: solid $accent;
+        padding: 1;
+        background: $panel;
+    }
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._connector = None
+        self._last_metrics = None
+        self._is_loading = True
+        self._interval_timer = None
+
+    def on_mount(self) -> None:
+        """Quando montado, inicia polling de métricas"""
+        self._interval_timer = self.set_interval(2.0, self._refresh_metrics)
+        self._refresh_metrics()
+
+    async def _refresh_metrics(self) -> None:
+        """Atualiza métricas a cada 2 segundos"""
+        from ...connectors.api_gateway import APIGatewayConnector
+
+        if self._connector is None:
+            self._connector = APIGatewayConnector()
+
+        try:
+            self._last_metrics = await self._connector.get_metrics()
+            self._is_loading = False
+        except Exception:
+            self._last_metrics = None
+            self._is_loading = False
+
+        self.refresh()
+
+    def render(self) -> Text:
+        """Renderiza métricas ao vivo"""
+        from ...utils.banner import create_gradient_text
+
+        metrics = Text()
+
+        # Título com gradiente
+        title = create_gradient_text("📈 Live Metrics", [THEME.colors.CIANO_BRILHO, THEME.colors.AZUL_PROFUNDO])
+        metrics.append(title)
+        metrics.append("\n\n")
+
+        if self._is_loading:
+            metrics.append(f"{THEME.symbols.INFO} ", style=THEME.colors.INFO)
+            metrics.append("Loading metrics...\n", style=THEME.colors.CINZA_TEXTO)
+        elif self._last_metrics is None:
+            metrics.append(f"{THEME.symbols.WARNING} ", style=THEME.colors.WARNING)
+            metrics.append("Metrics unavailable\n", style=THEME.colors.CINZA_TEXTO)
+        else:
+            # CPU
+            cpu = self._last_metrics.get("cpu", {})
+            cpu_percent = cpu.get("percent", 0)
+            cpu_color = self._get_metric_color(cpu_percent)
+            metrics.append("CPU:  ", style=THEME.colors.CINZA_TEXTO)
+            metrics.append(f"{cpu_percent:.1f}%", style=cpu_color)
+            metrics.append(self._get_bar(cpu_percent), style=cpu_color)
+            metrics.append("\n")
+
+            # Memory
+            mem = self._last_metrics.get("memory", {})
+            mem_percent = mem.get("percent", 0)
+            mem_color = self._get_metric_color(mem_percent)
+            metrics.append("MEM:  ", style=THEME.colors.CINZA_TEXTO)
+            metrics.append(f"{mem_percent:.1f}%", style=mem_color)
+            metrics.append(self._get_bar(mem_percent), style=mem_color)
+            metrics.append("\n")
+
+            # Network
+            net = self._last_metrics.get("network", {})
+            net_sent = net.get("sent_mb", 0)
+            net_recv = net.get("recv_mb", 0)
+            metrics.append("NET:  ", style=THEME.colors.CINZA_TEXTO)
+            metrics.append(f"↑{net_sent:.1f}MB ", style=THEME.colors.VERDE_NEON)
+            metrics.append(f"↓{net_recv:.1f}MB", style=THEME.colors.CIANO_BRILHO)
+
+        return metrics
+
+    def _get_metric_color(self, percent: float) -> str:
+        """Retorna cor baseada na porcentagem"""
+        if percent < 50:
+            return THEME.colors.SUCCESS
+        elif percent < 80:
+            return THEME.colors.WARNING
+        else:
+            return THEME.colors.ERROR
+
+    def _get_bar(self, percent: float, width: int = 10) -> str:
+        """Gera barra visual de progresso"""
+        filled = int((percent / 100) * width)
+        empty = width - filled
+        return f" [{THEME.symbols.PROGRESS_FULL * filled}{THEME.symbols.PROGRESS_EMPTY * empty}]"
+
+    async def on_unmount(self) -> None:
+        """Fecha conexão quando desmontado"""
+        if self._connector:
+            await self._connector.close()
 
 
 class QuickActionsPanel(Static):
@@ -175,6 +340,10 @@ class VerticeDashboard(Screen):
         width: 1fr;
     }
 
+    .center-panel {
+        width: 1fr;
+    }
+
     .right-panel {
         width: 1fr;
     }
@@ -189,7 +358,10 @@ class VerticeDashboard(Screen):
 
             with Horizontal(classes="panels"):
                 with Vertical(classes="left-panel"):
-                    yield StatusPanel()
+                    yield BackendStatusPanel()
+
+                with Vertical(classes="center-panel"):
+                    yield LiveMetricsPanel()
 
                 with Vertical(classes="right-panel"):
                     yield QuickActionsPanel()

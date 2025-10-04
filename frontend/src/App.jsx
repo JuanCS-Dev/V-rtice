@@ -1,61 +1,90 @@
 // /home/juan/vertice-dev/frontend/src/App.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
-import AdminDashboard from './components/AdminDashboard';
-import CyberDashboard from './components/CyberDashboard';
-import OSINTDashboard from './components/OSINTDashboard';
-import TerminalDashboard from './components/terminal/TerminalDashboard';
-import MaximusDashboard from './components/maximus/MaximusDashboard';
+
+// Lazy load dashboards for code splitting
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const DefensiveDashboard = lazy(() => import('./components/dashboards/DefensiveDashboard/DefensiveDashboard'));
+const OffensiveDashboard = lazy(() => import('./components/dashboards/OffensiveDashboard/OffensiveDashboard'));
+const PurpleTeamDashboard = lazy(() => import('./components/dashboards/PurpleTeamDashboard/PurpleTeamDashboard'));
+const OSINTDashboard = lazy(() => import('./components/OSINTDashboard'));
+const MaximusDashboard = lazy(() => import('./components/maximus/MaximusDashboard'));
+
+// Loading component
+const DashboardLoader = () => (
+  <div style={{
+    height: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #0a1929 0%, #001e3c 100%)',
+    color: '#00f0ff',
+    fontFamily: 'Courier New, monospace',
+    fontSize: '1.5rem'
+  }}>
+    <div>
+      <div className="loading-spinner" style={{
+        border: '4px solid rgba(0, 240, 255, 0.1)',
+        borderTop: '4px solid #00f0ff',
+        borderRadius: '50%',
+        width: '3rem',
+        height: '3rem',
+        animation: 'spin 1s linear infinite',
+        margin: '0 auto 1rem'
+      }}></div>
+      LOADING DASHBOARD...
+    </div>
+  </div>
+);
 
 function App() {
-  const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'cyber', 'osint', 'terminal', 'maximus'
+  // 'main', 'admin', 'defensive', 'offensive', 'purple', 'osint', 'maximus'
+  const [currentView, setCurrentView] = useState('main');
 
-  if (currentView === 'admin') {
-    return (
-      <ErrorBoundary>
+  const views = {
+    admin: (
+      <ErrorBoundary context="admin-dashboard" title="Admin Dashboard Error">
         <AdminDashboard setCurrentView={setCurrentView} />
       </ErrorBoundary>
-    );
-  }
-
-  if (currentView === 'cyber') {
-    return (
-      <ErrorBoundary>
-        <CyberDashboard setCurrentView={setCurrentView} />
+    ),
+    defensive: (
+      <ErrorBoundary context="defensive-dashboard" title="Defensive Dashboard Error">
+        <DefensiveDashboard setCurrentView={setCurrentView} />
       </ErrorBoundary>
-    );
-  }
-
-  if (currentView === 'osint') {
-    return (
-      <ErrorBoundary>
+    ),
+    offensive: (
+      <ErrorBoundary context="offensive-dashboard" title="Offensive Dashboard Error">
+        <OffensiveDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    purple: (
+      <ErrorBoundary context="purple-team-dashboard" title="Purple Team Dashboard Error">
+        <PurpleTeamDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    osint: (
+      <ErrorBoundary context="osint-dashboard" title="OSINT Dashboard Error">
         <OSINTDashboard setCurrentView={setCurrentView} />
       </ErrorBoundary>
-    );
-  }
-
-  if (currentView === 'terminal') {
-    return (
-      <ErrorBoundary>
-        <TerminalDashboard setCurrentView={setCurrentView} />
-      </ErrorBoundary>
-    );
-  }
-
-  if (currentView === 'maximus') {
-    return (
-      <ErrorBoundary>
+    ),
+    maximus: (
+      <ErrorBoundary context="maximus-dashboard" title="MAXIMUS AI Dashboard Error">
         <MaximusDashboard setCurrentView={setCurrentView} />
       </ErrorBoundary>
-    );
-  }
+    ),
+  };
 
-  // Landing Page principal
   return (
-    <ErrorBoundary>
-      <LandingPage setCurrentView={setCurrentView} />
+    <ErrorBoundary context="app-root" title="Application Error">
+      {currentView === 'main' ? (
+        <LandingPage setCurrentView={setCurrentView} />
+      ) : (
+        <Suspense fallback={<DashboardLoader />}>
+          {views[currentView]}
+        </Suspense>
+      )}
     </ErrorBoundary>
   );
 }

@@ -12,36 +12,44 @@ export const ModuleGrid = ({ setCurrentView }) => {
       description: 'Autonomous Intelligence Platform',
       icon: '🧠',
       color: 'gradient-ai',
-      features: ['Self-Improvement', 'Malware Analysis', 'AI Insights']
+      features: ['AI Chat & Orchestration', 'Self-Improvement', 'Workflows', 'Terminal CLI']
     },
     {
-      id: 'cyber',
-      name: 'Cyber Security',
-      description: 'Análise de Redes e Ameaças Digitais',
+      id: 'defensive',
+      name: 'DEFENSIVE OPS',
+      description: 'Blue Team Security Operations',
       icon: '🛡️',
       color: 'cyan',
-      features: ['Threat Map', 'Vulnerability Scanner', 'Network Monitor']
+      features: ['Threat Detection', 'Network Monitor', 'Malware Analysis', 'SIEM']
+    },
+    {
+      id: 'offensive',
+      name: 'OFFENSIVE OPS',
+      description: 'Red Team Attack Operations',
+      icon: '⚔️',
+      color: 'red',
+      features: ['Network Recon', 'Vuln Intel', 'Web Attack', 'C2 Control', 'BAS']
+    },
+    {
+      id: 'purple',
+      name: 'PURPLE TEAM',
+      description: 'Unified Red & Blue Coordination',
+      icon: '🟣',
+      color: 'purple',
+      features: ['Attack-Defense Correlation', 'Gap Analysis', 'Coverage Metrics']
     },
     {
       id: 'osint',
       name: 'OSINT Intelligence',
-      description: 'Investigação em Mídias Sociais',
+      description: 'Open Source Investigation',
       icon: '🕵️',
-      color: 'purple',
+      color: 'blue',
       features: ['Social Media', 'Breach Data', 'Dark Web Monitoring']
     },
     {
-      id: 'terminal',
-      name: 'Terminal CLI',
-      description: 'Console Avançado para Especialistas',
-      icon: '💻',
-      color: 'orange',
-      features: ['Command Line', 'Script Automation', 'Custom Tools']
-    },
-    {
       id: 'admin',
-      name: 'Administração',
-      description: 'Monitoramento e Configurações',
+      name: 'ADMIN PANEL',
+      description: 'System Administration',
       icon: '⚙️',
       color: 'yellow',
       features: ['System Logs', 'User Management', 'API Configuration']

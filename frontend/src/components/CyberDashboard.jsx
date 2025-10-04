@@ -12,10 +12,17 @@ import VulnerabilityScanner from './cyber/VulnerabilityScanner';
 import SocialEngineering from './cyber/SocialEngineering';
 import MaximusCyberHub from './cyber/MaximusCyberHub';
 import ExploitSearchWidget from './cyber/ExploitSearchWidget';
+// OFFENSIVE SECURITY ARSENAL
+import NetworkRecon from './cyber/NetworkRecon';
+import VulnIntel from './cyber/VulnIntel';
+import WebAttack from './cyber/WebAttack';
+import C2Orchestration from './cyber/C2Orchestration';
+import BAS from './cyber/BAS';
+import OffensiveGateway from './cyber/OffensiveGateway';
 
 const CyberDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [activeModule, setActiveModule] = useState('aurora'); // AI-FIRST: Maximus como landing page
+  const [activeModule, setActiveModule] = useState('maximus'); // AI-FIRST: Maximus AI Core como landing page
   const [cyberAlerts, setCyberAlerts] = useState([]);
   const [threatData, setThreatData] = useState({
     totalThreats: 127,
@@ -57,7 +64,7 @@ const CyberDashboard = ({ setCurrentView }) => {
 
   const moduleComponents = {
     overview: <CyberOverview threatData={threatData} />,
-    aurora: <MaximusCyberHub />,
+    maximus: <MaximusCyberHub />,
     domain: <DomainAnalyzer />,
     ip: <IpIntelligence />,
     network: <NetworkMonitor />,
@@ -65,7 +72,14 @@ const CyberDashboard = ({ setCurrentView }) => {
     threats: <ThreatMap />,
     vulnscan: <VulnerabilityScanner />,
     socialeng: <SocialEngineering />,
-    exploits: <ExploitSearchWidget />
+    exploits: <ExploitSearchWidget />,
+    // OFFENSIVE SECURITY ARSENAL
+    netrecon: <NetworkRecon />,
+    vulnintel: <VulnIntel />,
+    webattack: <WebAttack />,
+    c2: <C2Orchestration />,
+    bas: <BAS />,
+    gateway: <OffensiveGateway />
   };
 
   return (

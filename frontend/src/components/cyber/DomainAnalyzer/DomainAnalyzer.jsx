@@ -5,6 +5,7 @@ import { BasicInfoPanel } from './components/BasicInfoPanel';
 import { InfrastructurePanel } from './components/InfrastructurePanel';
 import { ThreatAnalysisPanel } from './components/ThreatAnalysisPanel';
 import { EmptyState } from './components/EmptyState';
+import { AskMaximusButton } from '../../shared/AskMaximusButton';
 import styles from './DomainAnalyzer.module.css';
 
 /**
@@ -34,11 +35,26 @@ export const DomainAnalyzer = () => {
       />
 
       {analysisResult && (
-        <div className={styles.results}>
-          <BasicInfoPanel data={analysisResult} />
-          <InfrastructurePanel data={analysisResult} />
-          <ThreatAnalysisPanel data={analysisResult} />
-        </div>
+        <>
+          <div className={styles.aiButtonContainer}>
+            <AskMaximusButton
+              context={{
+                type: 'domain_analysis',
+                domain: domain,
+                analysis: analysisResult
+              }}
+              prompt="Analyze this domain for security threats and provide recommendations"
+              size="medium"
+              variant="secondary"
+            />
+          </div>
+
+          <div className={styles.results}>
+            <BasicInfoPanel data={analysisResult} />
+            <InfrastructurePanel data={analysisResult} />
+            <ThreatAnalysisPanel data={analysisResult} />
+          </div>
+        </>
       )}
 
       {!analysisResult && !loading && <EmptyState />}

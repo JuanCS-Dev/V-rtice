@@ -12,9 +12,9 @@ class AIAgentConnector(BaseConnector):
         """
         Inicializa o AIAgentConnector com o nome e a URL base para o serviço AI Agent.
         """
-        # CORREÇÃO: Porta correta é 8017 (ai_agent_service)
+        # Porta correta: 8001 (maximus_core_service)
         super().__init__(
-            service_name="Maximus AI Agent", base_url="http://localhost:8017"
+            service_name="Maximus AI Core", base_url="http://localhost:8001"
         )
 
     async def health_check(self) -> bool:

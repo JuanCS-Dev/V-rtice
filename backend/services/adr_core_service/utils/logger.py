@@ -1,5 +1,13 @@
-"""
-Logging utilities for ADR Core Service
+"""Logging utilities for the ADR Core Service.
+
+This module provides standardized logger configuration for other parts of
+the service, ensuring consistent log formatting and output.
+
+Typical usage example:
+
+  from .logger import setup_logger
+  logger = setup_logger("my_module")
+  logger.info("This is an informational message.")
 """
 
 import logging
@@ -13,16 +21,22 @@ def setup_logger(
     level: str = "INFO",
     log_file: Optional[str] = None
 ) -> logging.Logger:
-    """
-    Configure and return logger
+    """Configures and retrieves a logger instance.
+
+    Sets up a logger with a specified name and level, adding handlers for
+    console output and optionally for a log file. It ensures a consistent
+    format for all log messages. If the logger already has handlers, they
+    are cleared to avoid duplication.
 
     Args:
-        name: Logger name
-        level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        log_file: Optional log file path
+        name (str, optional): The name of the logger. Defaults to "adr_core".
+        level (str, optional): The minimum log level to capture (e.g., "INFO",
+            "DEBUG"). Defaults to "INFO".
+        log_file (Optional[str], optional): If provided, logs will also be
+            written to this file path. Defaults to None.
 
     Returns:
-        Configured logger instance
+        logging.Logger: The configured logger instance.
     """
     logger = logging.getLogger(name)
     logger.setLevel(getattr(logging, level.upper()))
@@ -56,5 +70,16 @@ def setup_logger(
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Get logger by name"""
+    """Retrieves a logger by name.
+
+    This is a convenience function to get a logger instance that is expected
+    to have been previously configured by `setup_logger`. It simply wraps
+    `logging.getLogger`.
+
+    Args:
+        name (str): The name of the logger to retrieve.
+
+    Returns:
+        logging.Logger: The logger instance.
+    """
     return logging.getLogger(name)

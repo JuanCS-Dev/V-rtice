@@ -1,9 +1,0 @@
-typer[all]
-python-dotenv
-google-generativeai
-rich
-questionary
-patch
-pyfiglet
-ruff
-GitPython

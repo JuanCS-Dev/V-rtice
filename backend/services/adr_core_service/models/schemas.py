@@ -1,5 +1,8 @@
-"""
-Pydantic schemas for ADR Core Service
+"""Pydantic schemas for the ADR Core Service.
+
+This module defines the data structures used for API requests, responses,
+and internal data handling. It uses Pydantic for data validation and
+serialization, ensuring data integrity throughout the service.
 """
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -20,7 +23,14 @@ from .enums import (
 # ========== Detection Schemas ==========
 
 class MITRETechnique(BaseModel):
-    """MITRE ATT&CK technique information"""
+    """Represents a MITRE ATT&CK technique.
+
+    Attributes:
+        technique_id (str): The unique MITRE technique ID (e.g., T1059).
+        technique_name (str): The official name of the technique.
+        tactic (str): The associated MITRE ATT&CK tactic.
+        subtechnique (Optional[str]): The sub-technique ID, if applicable.
+    """
     technique_id: str = Field(..., description="MITRE technique ID (e.g., T1059)")
     technique_name: str = Field(..., description="Technique name")
     tactic: str = Field(..., description="Associated tactic")
@@ -28,7 +38,20 @@ class MITRETechnique(BaseModel):
 
 
 class ThreatIndicator(BaseModel):
-    """Threat indicator from detection"""
+    """Represents a single, observable indicator of a threat.
+
+    Indicators are atomic pieces of evidence like a file hash, IP address,
+    or domain name.
+
+    Attributes:
+        type (str): The type of indicator (e.g., 'hash', 'ip', 'domain').
+        value (str): The value of the indicator.
+        confidence (float): The confidence score (0-1) in this indicator.
+        source (DetectionSource): The source that identified this indicator.
+        first_seen (datetime): Timestamp of the first observation.
+        last_seen (datetime): Timestamp of the most recent observation.
+        metadata (Dict[str, Any]): Additional metadata about the indicator.
+    """
     type: str = Field(..., description="Indicator type (hash, ip, domain, etc.)")
     value: str = Field(..., description="Indicator value")
     confidence: float = Field(..., ge=0, le=1, description="Confidence score 0-1")
@@ -39,7 +62,30 @@ class ThreatIndicator(BaseModel):
 
 
 class ThreatDetection(BaseModel):
-    """Complete threat detection result"""
+    """Represents a complete, aggregated threat detection event.
+
+    This is a core model that encapsulates all information about a detected
+    threat, from its severity and type to the evidence and affected assets.
+
+    Attributes:
+        detection_id (str): A unique identifier for this detection event.
+        timestamp (datetime): The time the detection was made.
+        severity (SeverityLevel): The assessed severity of the threat.
+        threat_type (ThreatType): The classification of the threat.
+        confidence (float): The overall confidence in the detection's accuracy.
+        score (int): A numerical score (0-100) representing the threat level.
+        source (DetectionSource): The primary engine or method that made the detection.
+        source_details (Dict[str, Any]): Specific details from the detection source.
+        title (str): A concise, human-readable title for the detection.
+        description (str): A detailed description of the threat.
+        indicators (List[ThreatIndicator]): A list of observable indicators.
+        mitre_techniques (List[MITRETechnique]): Associated MITRE ATT&CK techniques.
+        affected_assets (List[str]): A list of assets (e.g., IPs, hosts) affected.
+        evidence (Dict[str, Any]): A collection of supporting evidence.
+        metadata (Dict[str, Any]): Additional arbitrary metadata.
+        kill_chain_phase (Optional[str]): The phase in the cyber kill chain.
+        false_positive_likelihood (float): Estimated likelihood of being a false positive.
+    """
     detection_id: str = Field(..., description="Unique detection ID")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     severity: SeverityLevel = Field(..., description="Threat severity")
@@ -68,7 +114,7 @@ class ThreatDetection(BaseModel):
 
     @validator('score')
     def validate_score(cls, v, values):
-        """Ensure score aligns with severity"""
+        """Validates that the score is consistent with the severity level."""
         severity = values.get('severity')
         if severity == SeverityLevel.CRITICAL and v < 80:
             raise ValueError("Critical severity must have score >= 80")
@@ -78,7 +124,28 @@ class ThreatDetection(BaseModel):
 
 
 class DetectionRule(BaseModel):
-    """Custom detection rule definition"""
+    """Defines a custom rule for the detection engine.
+
+    This model allows for the creation of user-defined detection rules, such as
+    those based on Sigma or YARA.
+
+    Attributes:
+        rule_id (str): A unique identifier for the rule.
+        name (str): The name of the rule.
+        description (str): A description of what the rule detects.
+        enabled (bool): Whether the rule is currently active.
+        rule_type (str): The type of rule (e.g., 'sigma', 'yara').
+        rule_content (str): The actual content of the rule.
+        severity (SeverityLevel): The severity to assign to detections from this rule.
+        threat_types (List[ThreatType]): Threat types associated with this rule.
+        mitre_techniques (List[str]): MITRE ATT&CK technique IDs.
+        author (Optional[str]): The author of the rule.
+        created_at (datetime): Timestamp of rule creation.
+        updated_at (datetime): Timestamp of the last update.
+        version (str): The version of the rule.
+        tags (List[str]): Tags for categorizing the rule.
+        metadata (Dict[str, Any]): Additional metadata.
+    """
     rule_id: str = Field(..., description="Unique rule ID")
     name: str = Field(..., description="Rule name")
     description: str = Field(..., description="Rule description")
@@ -103,7 +170,16 @@ class DetectionRule(BaseModel):
 
 
 class AnalysisRequest(BaseModel):
-    """Request for threat analysis"""
+    """Represents a request to perform a threat analysis.
+
+    Attributes:
+        request_id (str): A unique ID for tracking the request.
+        analysis_type (str): The type of analysis to perform (e.g., 'file', 'network').
+        target (str): The target of the analysis (e.g., a file path or IP address).
+        options (Dict[str, Any]): Analysis-specific options.
+        priority (int): The priority of the request (1-10).
+        context (Dict[str, Any]): Additional context for the analysis.
+    """
     request_id: str = Field(..., description="Unique request ID")
     analysis_type: str = Field(..., description="file, network, process, memory")
     target: str = Field(..., description="Target to analyze")
@@ -113,7 +189,18 @@ class AnalysisRequest(BaseModel):
 
 
 class AnalysisResult(BaseModel):
-    """Analysis result with detections"""
+    """Contains the results of a threat analysis.
+
+    Attributes:
+        request_id (str): The ID of the original `AnalysisRequest`.
+        timestamp (datetime): The time the analysis was completed.
+        analysis_type (str): The type of analysis that was performed.
+        status (str): The final status of the analysis ('completed', 'failed').
+        detections (List[ThreatDetection]): A list of threats found.
+        summary (Dict[str, Any]): A summary of the analysis results.
+        execution_time_ms (int): The total time taken for the analysis in ms.
+        errors (List[str]): A list of any errors that occurred.
+    """
     request_id: str = Field(..., description="Original request ID")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     analysis_type: str
@@ -128,7 +215,25 @@ class AnalysisResult(BaseModel):
 # ========== Response Schemas ==========
 
 class ResponseAction(BaseModel):
-    """Individual response action"""
+    """Represents a single, executable response action.
+
+    Attributes:
+        action_id (str): A unique ID for this specific action instance.
+        action_type (ActionType): The type of action to perform.
+        status (ActionStatus): The current status of the action.
+        target (str): The target of the action (e.g., an IP or file path).
+        parameters (Dict[str, Any]): Parameters for the action.
+        priority (int): The execution priority (1-10).
+        timeout_seconds (int): How long to wait before timing out.
+        retry_count (int): The number of times this action has been retried.
+        max_retries (int): The maximum number of retry attempts.
+        result (Optional[Dict[str, Any]]): The result of the action if successful.
+        error (Optional[str]): The error message if the action failed.
+        started_at (Optional[datetime]): Timestamp when the action started.
+        completed_at (Optional[datetime]): Timestamp when the action completed.
+        rollback_action (Optional[Dict[str, Any]]): Defines the action to undo this one.
+        can_rollback (bool): Whether this action can be rolled back.
+    """
     action_id: str = Field(..., description="Unique action ID")
     action_type: ActionType = Field(..., description="Type of action")
     status: ActionStatus = Field(default=ActionStatus.PENDING)
@@ -155,7 +260,21 @@ class ResponseAction(BaseModel):
 
 
 class PlaybookStep(BaseModel):
-    """Single step in a playbook"""
+    """Defines a single step within an automated response playbook.
+
+    Attributes:
+        step_id (str): A unique identifier for the step within the playbook.
+        name (str): A human-readable name for the step.
+        action_type (ActionType): The type of action to execute.
+        parameters (Dict[str, Any]): Parameters for the action.
+        conditions (List[Dict[str, Any]]): Conditions that must be met to run.
+        order (int): The execution order of the step.
+        parallel (bool): Whether this step can run in parallel with others of the same order.
+        critical (bool): If true, the playbook will fail if this step fails.
+        timeout_seconds (int): A specific timeout for this step.
+        retry_on_failure (bool): Whether to retry this step if it fails.
+        max_retries (int): The maximum number of retries for this step.
+    """
     step_id: str = Field(..., description="Step identifier")
     name: str = Field(..., description="Step name")
     action_type: ActionType = Field(..., description="Action to execute")
@@ -173,7 +292,29 @@ class PlaybookStep(BaseModel):
 
 
 class Playbook(BaseModel):
-    """Automated response playbook"""
+    """Defines an automated response playbook.
+
+    Playbooks are a series of steps (actions) that are automatically executed
+    in response to a specific type of threat detection.
+
+    Attributes:
+        playbook_id (str): A unique identifier for the playbook.
+        name (str): The name of the playbook.
+        description (str): A description of the playbook's purpose.
+        enabled (bool): Whether the playbook is active.
+        trigger_type (PlaybookTrigger): The primary condition that triggers the playbook.
+        trigger_conditions (Dict[str, Any]): The specific conditions for the trigger.
+        steps (List[PlaybookStep]): The ordered list of steps to execute.
+        auto_execute (bool): Whether the playbook can execute without manual approval.
+        require_approval (bool): Whether manual approval is required.
+        approval_timeout_minutes (int): Time to wait for approval before cancelling.
+        severity_threshold (SeverityLevel): The minimum severity to trigger this playbook.
+        author (Optional[str]): The author of the playbook.
+        created_at (datetime): Timestamp of playbook creation.
+        updated_at (datetime): Timestamp of the last update.
+        version (str): The version of the playbook.
+        tags (List[str]): Tags for categorizing the playbook.
+    """
     playbook_id: str = Field(..., description="Unique playbook ID")
     name: str = Field(..., description="Playbook name")
     description: str = Field(..., description="Playbook description")
@@ -201,7 +342,26 @@ class Playbook(BaseModel):
 
 
 class PlaybookExecution(BaseModel):
-    """Playbook execution instance"""
+    """Represents a single run of a playbook.
+
+    This model tracks the state and results of a playbook execution from
+    trigger to completion.
+
+    Attributes:
+        execution_id (str): A unique ID for this specific execution.
+        playbook_id (str): The ID of the playbook that is being executed.
+        triggered_by (str): The ID of the detection or manual trigger.
+        triggered_at (datetime): The time the execution was triggered.
+        status (str): The current status of the execution.
+        current_step (Optional[int]): The index of the current step being executed.
+        actions (List[ResponseAction]): A list of all actions for this execution.
+        actions_completed (int): The number of completed actions.
+        actions_failed (int): The number of failed actions.
+        started_at (Optional[datetime]): The time the execution started.
+        completed_at (Optional[datetime]): The time the execution finished.
+        errors (List[str]): A list of any errors that occurred during execution.
+        metadata (Dict[str, Any]): Additional metadata about the execution.
+    """
     execution_id: str = Field(..., description="Unique execution ID")
     playbook_id: str = Field(..., description="Playbook being executed")
 
@@ -226,7 +386,15 @@ class PlaybookExecution(BaseModel):
 
 
 class ResponseRequest(BaseModel):
-    """Manual response request"""
+    """Represents a request to manually trigger a response.
+
+    Attributes:
+        detection_id (str): The ID of the detection to respond to.
+        actions (List[ActionType]): A list of actions to execute.
+        parameters (Dict[str, Any]): Parameters for the actions.
+        approval_token (Optional[str]): An approval token, if required.
+        auto_approve (bool): If true, bypasses the approval workflow.
+    """
     detection_id: str = Field(..., description="Detection to respond to")
     actions: List[ActionType] = Field(..., description="Actions to execute")
     parameters: Dict[str, Any] = Field(default_factory=dict)
@@ -237,7 +405,28 @@ class ResponseRequest(BaseModel):
 # ========== Alert Schemas ==========
 
 class Alert(BaseModel):
-    """Security alert"""
+    """Represents a security alert for analyst review.
+
+    Alerts are generated from high-confidence detections and serve as the
+    primary unit of work for security analysts.
+
+    Attributes:
+        alert_id (str): A unique ID for the alert.
+        detection_id (str): The ID of the associated detection.
+        severity (SeverityLevel): The severity of the alert.
+        title (str): The title of the alert.
+        description (str): A description of the alert.
+        status (AlertStatus): The current status in the alert lifecycle.
+        assigned_to (Optional[str]): The analyst assigned to this alert.
+        created_at (datetime): The time the alert was created.
+        acknowledged_at (Optional[datetime]): The time the alert was acknowledged.
+        resolved_at (Optional[datetime]): The time the alert was resolved.
+        playbook_executions (List[str]): IDs of any playbooks executed for this alert.
+        manual_actions (List[str]): IDs of any manual actions taken.
+        notes (List[Dict[str, Any]]): Analyst notes.
+        tags (List[str]): Tags for categorizing the alert.
+        metadata (Dict[str, Any]): Additional metadata.
+    """
     alert_id: str = Field(..., description="Unique alert ID")
     detection_id: str = Field(..., description="Associated detection")
 
@@ -266,7 +455,14 @@ class Alert(BaseModel):
 
 
 class AlertUpdate(BaseModel):
-    """Alert status update"""
+    """Represents a request to update an existing alert.
+
+    Attributes:
+        status (Optional[AlertStatus]): The new status of the alert.
+        assigned_to (Optional[str]): The new assignee for the alert.
+        note (Optional[str]): A new note to add to the alert.
+        tags (Optional[List[str]]): A new list of tags to set.
+    """
     status: Optional[AlertStatus] = None
     assigned_to: Optional[str] = None
     note: Optional[str] = None
@@ -276,7 +472,16 @@ class AlertUpdate(BaseModel):
 # ========== Configuration Schemas ==========
 
 class EngineConfig(BaseModel):
-    """Engine configuration"""
+    """Represents the configuration for an internal engine.
+
+    Attributes:
+        enabled (bool): Whether the engine is enabled.
+        log_level (str): The logging level for the engine.
+        workers (int): The number of worker processes/threads.
+        queue_size (int): The size of the input queue.
+        timeout_seconds (int): The default timeout for operations.
+        settings (Dict[str, Any]): Engine-specific settings.
+    """
     enabled: bool = Field(default=True)
     log_level: str = Field(default="INFO")
     workers: int = Field(default=4, ge=1, le=32)
@@ -286,7 +491,19 @@ class EngineConfig(BaseModel):
 
 
 class ConnectorConfig(BaseModel):
-    """External connector configuration"""
+    """Represents the configuration for an external connector.
+
+    Attributes:
+        connector_id (str): A unique ID for the connector instance.
+        connector_type (ConnectorType): The type of the connector.
+        enabled (bool): Whether the connector is enabled.
+        endpoint (str): The API endpoint of the external service.
+        credentials (Dict[str, Any]): Credentials for authentication.
+        timeout_seconds (int): The request timeout.
+        retry_attempts (int): The number of retry attempts on failure.
+        settings (Dict[str, Any]): Connector-specific settings.
+        metadata (Dict[str, Any]): Additional metadata.
+    """
     connector_id: str = Field(..., description="Unique connector ID")
     connector_type: ConnectorType = Field(..., description="Connector type")
     enabled: bool = Field(default=True)
@@ -302,7 +519,23 @@ class ConnectorConfig(BaseModel):
 
 
 class ADRConfig(BaseModel):
-    """Complete ADR service configuration"""
+    """Represents the complete configuration for the ADR service.
+
+    Attributes:
+        service_name (str): The name of the service.
+        version (str): The service version.
+        detection_engine (EngineConfig): Configuration for the detection engine.
+        response_engine (EngineConfig): Configuration for the response engine.
+        connectors (List[ConnectorConfig]): A list of external connector configurations.
+        auto_response_threshold (SeverityLevel): The minimum severity for auto-response.
+        alert_threshold (SeverityLevel): The minimum severity to generate an alert.
+        enable_ml (bool): Whether to enable ML-based features.
+        enable_auto_response (bool): Whether to enable autonomous response.
+        enable_playbooks (bool): Whether to enable playbooks.
+        max_concurrent_analyses (int): Max concurrent analysis tasks.
+        max_concurrent_responses (int): Max concurrent response tasks.
+        metadata (Dict[str, Any]): Additional service-wide metadata.
+    """
     service_name: str = Field(default="adr_core_service")
     version: str = Field(default="2.0.0")
 
@@ -332,7 +565,25 @@ class ADRConfig(BaseModel):
 # ========== Metrics Schemas ==========
 
 class ServiceMetrics(BaseModel):
-    """Service performance metrics"""
+    """Represents a snapshot of service performance metrics.
+
+    Attributes:
+        timestamp (datetime): The time the metrics were generated.
+        uptime_seconds (int): The service uptime in seconds.
+        total_detections (int): The total number of detections.
+        detections_by_severity (Dict[str, int]): Detections broken down by severity.
+        detections_by_type (Dict[str, int]): Detections broken down by type.
+        total_responses (int): The total number of responses.
+        responses_completed (int): The number of completed responses.
+        responses_failed (int): The number of failed responses.
+        total_alerts (int): The total number of alerts.
+        alerts_by_status (Dict[str, int]): Alerts broken down by status.
+        avg_detection_time_ms (float): Average time to detect a threat.
+        avg_response_time_ms (float): Average time to respond to a threat.
+        active_analyses (int): The number of currently active analyses.
+        active_responses (int): The number of currently active responses.
+        queue_depth (int): The current depth of the processing queue.
+    """
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     uptime_seconds: int
 
@@ -363,7 +614,14 @@ class ServiceMetrics(BaseModel):
 # ========== API Response Schemas ==========
 
 class APIResponse(BaseModel):
-    """Standard API response wrapper"""
+    """Represents a standard API response wrapper.
+
+    Attributes:
+        status (str): The status of the response ('success' or 'error').
+        message (Optional[str]): An optional message.
+        data (Optional[Any]): The response payload.
+        timestamp (datetime): The timestamp of the response.
+    """
     status: str = Field(..., description="success or error")
     message: Optional[str] = None
     data: Optional[Any] = None
@@ -371,7 +629,15 @@ class APIResponse(BaseModel):
 
 
 class HealthStatus(BaseModel):
-    """Service health status"""
+    """Represents the health status of the service.
+
+    Attributes:
+        status (str): The overall health status ('healthy', 'degraded', 'unhealthy').
+        version (str): The service version.
+        uptime_seconds (int): The service uptime in seconds.
+        components (Dict[str, str]): The health status of individual components.
+        timestamp (datetime): The timestamp of the health check.
+    """
     status: str = Field(..., description="healthy, degraded, unhealthy")
     version: str
     uptime_seconds: int

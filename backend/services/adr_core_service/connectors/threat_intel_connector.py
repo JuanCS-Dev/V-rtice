@@ -1,9 +1,8 @@
-"""
-Threat Intelligence Connector - Enriquece detecções com threat intel
-=====================================================================
+"""Threat Intelligence Connector for enriching threat data.
 
-Conecta ADR Core com Threat Intel Service (porta 8013)
-Adiciona contexto de ameaças conhecidas, malware families, IOCs.
+This module provides a connector to the Threat Intelligence Service. It is used
+to check indicators (IPs, domains, hashes) against a database of known
+threats, providing reputation, threat scores, and associated malware families.
 """
 
 import httpx
@@ -11,43 +10,61 @@ import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
+# As with the previous file, BaseConnector is assumed to exist.
+class BaseConnector:
+    def __init__(self, config):
+        pass
+    async def enrich(self, data):
+        return data
+
 logger = logging.getLogger(__name__)
 
 
-class ThreatIntelConnector:
-    """
-    Conector para Threat Intelligence Service
+class ThreatIntelConnector(BaseConnector):
+    """Connects to the Threat Intelligence Service for threat enrichment.
 
-    Enriquece ameaças com:
-    - Threat score agregado (offline engine + APIs externas)
-    - Malware family identification
-    - IOC correlation
-    - Reputation (clean, suspicious, malicious)
-    - Recommendations de resposta
+    This connector queries the Threat Intel Service to get detailed information
+    about indicators like IPs, domains, and file hashes. It provides threat
+    scores, reputation, and MITRE ATT&CK TTPs to enrich raw detections.
+
+    Attributes:
+        base_url (str): The base URL of the Threat Intelligence Service.
+        client (httpx.AsyncClient): The client for making asynchronous HTTP requests.
+        cache (Dict[str, Any]): An in-memory cache for threat intelligence results.
     """
 
     def __init__(self, base_url: str = "http://localhost:8013"):
+        """Initializes the ThreatIntelConnector.
+
+        Args:
+            base_url (str, optional): The base URL of the Threat Intelligence Service.
+                Defaults to "http://localhost:8013".
+        """
         self.base_url = base_url
         self.client = httpx.AsyncClient(timeout=15.0)
         self.cache = {}
+        logger.info(f"Initialized ThreatIntelConnector for URL: {base_url}")
 
     async def check_threat(
         self,
         target: str,
         target_type: str = "auto"
     ) -> Optional[Dict[str, Any]]:
-        """
-        Verifica ameaça usando Threat Intel Service
+        """Checks a single target (IP, domain, hash) for threat information.
+
+        Queries the Threat Intel Service for a given target. It uses an in-memory
+        cache to avoid redundant queries.
 
         Args:
-            target: IP, domain, hash, ou URL
-            target_type: 'auto', 'ip', 'domain', 'hash', 'url'
+            target (str): The indicator to check (e.g., '8.8.8.8', 'evil.com').
+            target_type (str, optional): The type of target ('ip', 'domain', 'hash').
+                Defaults to "auto".
 
         Returns:
-            Dados de threat intelligence ou None
+            Optional[Dict[str, Any]]: A dictionary with threat intelligence data,
+                or None if the check fails.
         """
         cache_key = f"{target}:{target_type}"
-
         if cache_key in self.cache:
             logger.debug(f"Cache hit for threat: {target}")
             return self.cache[cache_key]
@@ -55,226 +72,187 @@ class ThreatIntelConnector:
         try:
             response = await self.client.post(
                 f"{self.base_url}/api/threat-intel/check",
-                json={
-                    "target": target,
-                    "target_type": target_type
-                }
+                json={"target": target, "target_type": target_type}
             )
+            response.raise_for_status()
+            data = response.json()
 
-            if response.status_code == 200:
-                data = response.json()
+            enriched_data = self._format_response(data)
+            self.cache[cache_key] = enriched_data
 
-                enriched = {
-                    'target': data.get('target'),
-                    'target_type': data.get('target_type'),
+            logger.info(
+                f"Threat intel for {target}: Score={enriched_data['threat_score']}, "
+                f"Malicious={enriched_data['is_malicious']}"
+            )
+            return enriched_data
 
-                    # Threat Assessment
-                    'threat_score': data.get('threat_score', 0),
-                    'is_malicious': data.get('is_malicious', False),
-                    'confidence': data.get('confidence', 'low'),
-                    'reputation': data.get('reputation', 'unknown'),
-
-                    # Categories & TTPs
-                    'categories': data.get('categories', []),
-                    'mitre_tactics': self._extract_mitre_tactics(data),
-
-                    # Sources
-                    'sources': data.get('sources', {}),
-                    'sources_available': [
-                        source for source, info in data.get('sources', {}).items()
-                        if info.get('available')
-                    ],
-
-                    # Recommendations
-                    'recommendations': data.get('recommendations', []),
-
-                    # Timeline
-                    'first_seen': data.get('first_seen'),
-                    'last_seen': data.get('last_seen'),
-
-                    # Metadata
-                    'enriched_at': datetime.utcnow().isoformat(),
-                    'enriched_by': 'threat_intel_service'
-                }
-
-                self.cache[cache_key] = enriched
-
-                logger.info(
-                    f"🎯 Threat intel for {target}: "
-                    f"Score={enriched['threat_score']}, "
-                    f"Malicious={enriched['is_malicious']}, "
-                    f"Reputation={enriched['reputation']}"
-                )
-
-                return enriched
-            else:
-                logger.warning(f"Threat Intel Service returned {response.status_code} for {target}")
-                return None
-
+        except httpx.HTTPStatusError as e:
+            logger.warning(
+                f"Threat Intel Service returned status {e.response.status_code} for {target}"
+            )
+            return None
         except httpx.RequestError as e:
             logger.error(f"Failed to connect to Threat Intel Service: {e}")
             return None
         except Exception as e:
-            logger.error(f"Error checking threat {target}: {e}")
+            logger.error(f"An unexpected error occurred while checking threat {target}: {e}")
             return None
 
+    def _format_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Formats the raw service response into a structured dictionary."""
+        return {
+            'target': data.get('target'),
+            'target_type': data.get('target_type'),
+            'threat_score': data.get('threat_score', 0),
+            'is_malicious': data.get('is_malicious', False),
+            'confidence': data.get('confidence', 'low'),
+            'reputation': data.get('reputation', 'unknown'),
+            'categories': data.get('categories', []),
+            'mitre_tactics': self._extract_mitre_tactics(data),
+            'sources': data.get('sources', {}),
+            'recommendations': data.get('recommendations', []),
+            'first_seen': data.get('first_seen'),
+            'last_seen': data.get('last_seen'),
+            'enriched_at': datetime.utcnow().isoformat(),
+            'enriched_by': 'threat_intel_service'
+        }
+
     async def enrich_threat_with_intel(self, threat: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Enriquece ameaça com threat intelligence
+        """Enriches a threat detection object with threat intelligence.
+
+        Extracts all relevant indicators from a threat object, queries the
+        Threat Intel Service for each, and aggregates the results into the
+        threat's `enriched_context`. It also adjusts the threat score.
 
         Args:
-            threat: Objeto de ameaça do ADR
+            threat (Dict[str, Any]): The threat detection object to enrich.
 
         Returns:
-            Ameaça enriquecida com threat intel
+            Dict[str, Any]: The enriched threat detection object.
         """
-        # Determina targets para análise
-        targets_to_check = []
-
-        # Source (IP, domain, hash)
-        source = threat.get('source', '')
-        if source:
-            targets_to_check.append({
-                'target': source,
-                'type': self._detect_target_type(source)
-            })
-
-        # Indicadores
-        for indicator in threat.get('indicators', []):
-            extracted = self._extract_target_from_indicator(indicator)
-            if extracted and extracted not in [t['target'] for t in targets_to_check]:
-                targets_to_check.append(extracted)
-
-        # Raw data (pode conter hashes, URLs, etc)
-        raw_data = threat.get('raw_data', {})
-        if raw_data.get('file_hash'):
-            targets_to_check.append({
-                'target': raw_data['file_hash'],
-                'type': 'hash'
-            })
-
-        # Verifica cada target
+        targets_to_check = self._extract_targets_from_threat(threat)
         intel_results = {}
+
         for item in targets_to_check:
             intel = await self.check_threat(item['target'], item['type'])
             if intel:
                 intel_results[item['target']] = intel
 
-        # Adiciona ao threat
-        threat['enriched_context'] = threat.get('enriched_context', {})
+        if 'enriched_context' not in threat:
+            threat['enriched_context'] = {}
         threat['enriched_context']['threat_intelligence'] = intel_results
 
-        # Ajusta threat_score baseado em threat intel
         if intel_results:
-            # Pega o pior threat score
-            threat_scores = [
-                intel_data['threat_score']
-                for intel_data in intel_results.values()
-            ]
-
-            if threat_scores:
-                worst_intel_score = max(threat_scores)
-
-                original_score = threat.get('threat_score', 0)
-
-                # Weighted average (60% threat intel, 40% original detection)
-                adjusted_score = int(worst_intel_score * 0.6 + original_score * 0.4)
-
-                threat['threat_score_original'] = original_score
-                threat['threat_score'] = adjusted_score
-                threat['threat_score_adjusted_by'] = 'threat_intelligence'
-
-                # Atualiza severity baseado no novo score
-                threat['severity'] = self._calculate_severity(adjusted_score)
-
-                logger.info(
-                    f"🎯 Threat score adjusted: {original_score} → {adjusted_score} "
-                    f"based on threat intelligence"
-                )
-
-                # Adiciona recommendations agregadas
-                all_recommendations = []
-                for intel_data in intel_results.values():
-                    all_recommendations.extend(intel_data.get('recommendations', []))
-
-                threat['recommendations'] = list(set(all_recommendations))
+            self._adjust_threat_score(threat, intel_results)
 
         return threat
 
-    def _detect_target_type(self, target: str) -> str:
-        """Auto-detecta tipo do target"""
-        import re
+    def _extract_targets_from_threat(self, threat: Dict[str, Any]) -> List[Dict[str, str]]:
+        """Extracts unique indicators (targets) from a threat object."""
+        targets = []
+        seen_targets = set()
 
-        # IP
+        # Helper to add a target if it hasn't been seen before
+        def add_target(target, target_type):
+            if target not in seen_targets:
+                targets.append({'target': target, 'type': target_type})
+                seen_targets.add(target)
+
+        # Extract from source
+        source = threat.get('source', '')
+        if source:
+            add_target(source, self._detect_target_type(source))
+
+        # Extract from indicators
+        for indicator in threat.get('indicators', []):
+            extracted = self._extract_target_from_indicator(str(indicator))
+            if extracted:
+                add_target(extracted['target'], extracted['type'])
+
+        # Extract from raw data (e.g., file hash)
+        raw_data = threat.get('raw_data', {})
+        if raw_data.get('file_hash'):
+            add_target(raw_data['file_hash'], 'hash')
+
+        return targets
+
+    def _adjust_threat_score(self, threat: Dict[str, Any], intel_results: Dict[str, Any]):
+        """Adjusts threat score based on the highest score from intelligence results."""
+        threat_scores = [
+            intel_data['threat_score']
+            for intel_data in intel_results.values()
+        ]
+        if not threat_scores:
+            return
+
+        worst_intel_score = max(threat_scores)
+        original_score = threat.get('threat_score', 0)
+        # Weighted average: 60% threat intel, 40% original detection
+        adjusted_score = int(worst_intel_score * 0.6 + original_score * 0.4)
+
+        threat['threat_score_original'] = original_score
+        threat['threat_score'] = adjusted_score
+        threat['threat_score_adjusted_by'] = 'threat_intelligence'
+        threat['severity'] = self._calculate_severity(adjusted_score)
+
+        logger.info(
+            f"Threat score adjusted: {original_score} -> {adjusted_score} based on threat intelligence."
+        )
+
+        # Aggregate recommendations
+        all_recommendations = set(threat.get('recommendations', []))
+        for intel_data in intel_results.values():
+            for rec in intel_data.get('recommendations', []):
+                all_recommendations.add(rec)
+        threat['recommendations'] = list(all_recommendations)
+
+    def _detect_target_type(self, target: str) -> str:
+        """Automatically detects the type of an indicator (IP, domain, hash, etc.)."""
+        import re
         if re.match(r'^(?:\d{1,3}\.){3}\d{1,3}$', target):
             return 'ip'
-
-        # Hash
-        if re.match(r'^[a-fA-F0-9]{32}$', target):
-            return 'md5'
-        if re.match(r'^[a-fA-F0-9]{40}$', target):
-            return 'sha1'
-        if re.match(r'^[a-fA-F0-9]{64}$', target):
-            return 'sha256'
-
-        # URL
-        if target.startswith(('http://', 'https://')):
+        if len(target) in [32, 40, 64] and re.match(r'^[a-fA-F0-9]+$', target):
+            return 'hash'
+        if '://' in target:
             return 'url'
-
-        # Domain
-        if re.match(r'^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z]{2,})+$', target):
+        if '.' in target:
             return 'domain'
-
         return 'auto'
 
     def _extract_target_from_indicator(self, indicator: str) -> Optional[Dict[str, str]]:
-        """Extrai target de um indicador"""
+        """Extracts the most likely indicator from a generic string."""
         import re
-
-        # Tenta extrair IP
-        ip_match = re.search(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', indicator)
-        if ip_match:
-            return {'target': ip_match.group(0), 'type': 'ip'}
-
-        # Tenta extrair domain
-        domain_match = re.search(r'\b[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}\b', indicator)
-        if domain_match:
-            return {'target': domain_match.group(0), 'type': 'domain'}
-
-        # Tenta extrair hash
-        hash_match = re.search(r'\b[a-fA-F0-9]{32,64}\b', indicator)
-        if hash_match:
-            hash_val = hash_match.group(0)
-            hash_type = 'md5' if len(hash_val) == 32 else 'sha256'
-            return {'target': hash_val, 'type': hash_type}
-
+        # Regex patterns ordered by specificity
+        patterns = {
+            'ip': r'\b(?:\d{1,3}\.){3}\d{1,3}\b',
+            'hash': r'\b[a-fA-F0-9]{32,64}\b',
+            'domain': r'\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'
+        }
+        for target_type, pattern in patterns.items():
+            match = re.search(pattern, indicator)
+            if match:
+                return {'target': match.group(0), 'type': target_type}
         return None
 
     def _extract_mitre_tactics(self, data: Dict[str, Any]) -> List[str]:
-        """Extrai táticas MITRE ATT&CK das categorias"""
-        # Mapping de categorias para MITRE tactics
+        """Extracts MITRE ATT&CK tactic IDs from threat categories."""
         category_to_mitre = {
-            'malware': ['TA0002'],  # Execution
-            'botnet': ['TA0011'],   # Command and Control
-            'phishing': ['TA0001'], # Initial Access
-            'ransomware': ['TA0040'], # Impact
+            'malware': ['TA0002'],       # Execution
+            'botnet': ['TA0011'],        # Command and Control
+            'phishing': ['TA0001'],      # Initial Access
+            'ransomware': ['TA0040'],    # Impact
             'trojan': ['TA0002', 'TA0011'],
-            'backdoor': ['TA0003', 'TA0011'], # Persistence, C2
+            'backdoor': ['TA0003', 'TA0011'] # Persistence, C2
         }
-
-        categories = data.get('categories', [])
         tactics = set()
-
-        for cat in categories:
-            cat_lower = cat.lower()
+        for cat in data.get('categories', []):
             for key, mitre_ids in category_to_mitre.items():
-                if key in cat_lower:
+                if key in cat.lower():
                     tactics.update(mitre_ids)
-
         return list(tactics)
 
     def _calculate_severity(self, threat_score: int) -> str:
-        """Calcula severity baseado no threat score"""
+        """Calculates a severity string from a numerical threat score."""
         if threat_score >= 80:
             return 'critical'
         elif threat_score >= 60:
@@ -285,5 +263,10 @@ class ThreatIntelConnector:
             return 'low'
 
     async def close(self):
-        """Fecha conexão HTTP"""
+        """Closes the asynchronous HTTP client session."""
         await self.client.aclose()
+        logger.info("ThreatIntelConnector client closed.")
+
+    async def enrich(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Enriches threat data. Implementation of the abstract method."""
+        return await self.enrich_threat_with_intel(data)

@@ -1,5 +1,10 @@
-"""
-ADR Connectors - Integração com serviços de inteligência
+"""ADR Core Service - Connectors Package.
+
+This package contains modules for connecting to external intelligence and analysis
+services. Each connector is responsible for communicating with a specific
+external API to enrich threat data.
+
+This `__init__.py` file exports the primary connector classes for easy access.
 """
 
 from .base import BaseConnector

@@ -1,5 +1,8 @@
-"""
-Helper utilities for ADR Core Service
+"""General helper utilities for the ADR Core Service.
+
+This module contains miscellaneous helper functions that are used across
+different parts of the service. These include functions for ID generation,
+hashing, and data parsing.
 """
 
 import hashlib
@@ -9,29 +12,35 @@ from typing import Any
 
 
 def generate_id(prefix: str = "") -> str:
-    """
-    Generate unique ID
+    """Generates a unique ID with an optional prefix.
+
+    Creates a short, unique identifier using a portion of a UUID4. This is
+    suitable for generating non-critical, human-readable identifiers.
 
     Args:
-        prefix: Optional prefix for ID
+        prefix (str, optional): A prefix to prepend to the generated ID.
+            Defaults to "".
 
     Returns:
-        Unique identifier string
+        str: The generated unique identifier string.
     """
     uid = str(uuid.uuid4())[:8]
     return f"{prefix}{uid}" if prefix else uid
 
 
 def calculate_hash(data: str, algorithm: str = "sha256") -> str:
-    """
-    Calculate hash of data
+    """Calculates the hash of a given string.
+
+    Supports MD5, SHA1, and SHA256 algorithms. The input data is encoded
+    as UTF-8 before hashing.
 
     Args:
-        data: Data to hash
-        algorithm: Hash algorithm (md5, sha1, sha256)
+        data (str): The input string to hash.
+        algorithm (str, optional): The hashing algorithm to use ('md5', 'sha1',
+            or 'sha256'). Defaults to "sha256".
 
     Returns:
-        Hex digest of hash
+        str: The hexadecimal digest of the hash.
     """
     if algorithm == "md5":
         h = hashlib.md5()
@@ -45,14 +54,16 @@ def calculate_hash(data: str, algorithm: str = "sha256") -> str:
 
 
 def parse_severity(severity: Any) -> str:
-    """
-    Parse severity value to standard string
+    """Parses a value into a standardized severity string.
+
+    Converts an integer score or a string into one of the standard severity
+    levels: "critical", "high", "medium", "low", or "info".
 
     Args:
-        severity: Severity value (int, string, etc.)
+        severity (Any): The input severity, can be an integer score or a string.
 
     Returns:
-        Standardized severity string
+        str: The standardized severity string.
     """
     if isinstance(severity, int):
         if severity >= 80:
@@ -73,15 +84,17 @@ def parse_severity(severity: Any) -> str:
 
 
 def format_timestamp(dt: datetime = None, fmt: str = "iso") -> str:
-    """
-    Format datetime to string
+    """Formats a datetime object into a string representation.
+
+    If no datetime object is provided, the current UTC time is used.
 
     Args:
-        dt: Datetime object (defaults to now)
-        fmt: Format type (iso, unix, readable)
+        dt (datetime, optional): The datetime object to format. Defaults to None.
+        fmt (str, optional): The output format ('iso', 'unix', 'readable').
+            Defaults to "iso".
 
     Returns:
-        Formatted timestamp string
+        str: The formatted timestamp string.
     """
     if dt is None:
         dt = datetime.utcnow()

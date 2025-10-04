@@ -14,6 +14,9 @@ class VerticeApp(App):
     UI Primorosa com gradiente Verde → Azul
     """
 
+    # Performance optimizations
+    ENABLE_COMMAND_PALETTE = False  # Lazy load apenas quando necessário
+
     CSS = f"""
     /* Cores globais baseadas no Design System */
     App {{

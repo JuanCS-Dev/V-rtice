@@ -37,7 +37,812 @@ CONSCIOUS LAYER (System 2) - 5% do processamento
 
 ---
 
-## 📐 ARQUITETURA NEURO-IMUNE UNIFICADA
+## 📐 ARQUITETURA NEURO-IMUNE-SENSORIAL UNIFICADA
+
+### CAMADA 0: SENSORY LAYER (O Sistema Perceptivo)
+**Inspiração Biológica:** Sistema Sensorial Humano (Visão, Audição, Tato, Olfato/Paladar, Equilíbrio)
+**Paradigma:** "Sentient Security" - De reativo a PERCEPTIVO
+**Status Atual:** ⚠️ NÃO EXISTE - **FUNDAÇÃO DA CONSCIÊNCIA SITUACIONAL**
+
+**Função:** Transformar dados brutos em percepções estruturadas através de processamento biomimético multi-modal
+
+**Princípio Fundamental:**
+```
+❌ ANTIGO: Data Lake → Correlation → Alerts (PASSIVO)
+✅ NOVO: Unified Perceptual Field → Predictive Coding → Threat Percepts (ATIVO)
+```
+
+Sistemas sensoriais biológicos NÃO transmitem dados brutos ao cérebro. Eles fazem:
+1. **Pre-processing** (retina detecta edges, córtex auditivo faz FFT)
+2. **Predictive Coding** (cérebro prediz input, só propaga PREDICTION ERROR)
+3. **Adaptive Filtering** (foveal vs peripheral, cocktail party effect)
+
+**Arquitetura dos 5 Sentidos:**
+
+#### 0.1. Visual Cortex Analogue - "Seeing Threats in Data"
+**Inspiração:** Retina → V1 → V2-V4 → IT Cortex (hierarchical feature extraction)
+**Status:** ⚠️ NÃO EXISTE - **IMPLEMENTAR PRIMEIRO**
+
+**Componentes:**
+
+##### 0.1.1. Malware Binary Visualization Engine
+```python
+# Tradução: Binary → Image → CNN Classification
+class MalwareVisionSystem:
+    def visualize_binary(self, executable_bytes):
+        """
+        Convert binary to grayscale image.
+        Malware families = visual textures (shared code = recurring patterns)
+        """
+        # Reshape bytes to 2D matrix
+        width = int(np.sqrt(len(executable_bytes)))
+        image = np.frombuffer(executable_bytes, dtype=np.uint8)
+        image = image[:width*width].reshape(width, width)
+        return image
+
+    def classify_malware_family(self, binary_image):
+        """
+        CNN trained on malware image dataset.
+        Recognizes texture fingerprints without semantic analysis.
+        """
+        # ResNet-50 or EfficientNet architecture (V1-V4 analogue)
+        features = self.cnn_encoder(binary_image)  # [10k → 1024 → 256 → 64]
+        family_probs = self.classifier_head(features)  # [64 → num_families]
+        return family_probs
+```
+
+**Datasets:**
+- Malware images: VirusShare, MalImg, EMBER
+- Target: >95% accuracy em classificar família sem signature
+
+##### 0.1.2. Network Flow Cartography (Dorsal Stream)
+```python
+# Tradução: Network traffic → Dynamic visualization → Pattern recognition
+class NetworkVisionSystem:
+    def create_flow_heatmap(self, netflow_data, time_window=60):
+        """
+        (src_ip, dst_ip, volume, time) → 2D heatmap/video
+        """
+        # Create adjacency matrix: [num_hosts x num_hosts]
+        heatmap = np.zeros((256, 256))  # simplified /24 network
+
+        for flow in netflow_data:
+            src_idx = self.ip_to_index(flow.src_ip)
+            dst_idx = self.ip_to_index(flow.dst_ip)
+            heatmap[src_idx, dst_idx] += flow.byte_count
+
+        return heatmap
+
+    def detect_visual_patterns(self, heatmap_sequence):
+        """
+        Motion detection (dorsal stream analogue):
+        - DDoS = sudden brightening of target pixels
+        - Network scan = sweeping line pattern
+        - Lateral movement = hopping between internal hosts
+        """
+        optical_flow = self.calculate_motion(heatmap_sequence)
+        patterns = {
+            'ddos': self.detect_brightening(optical_flow),
+            'scan': self.detect_sweep_pattern(optical_flow),
+            'lateral': self.detect_hopping_pattern(optical_flow)
+        }
+        return patterns
+```
+
+##### 0.1.3. Foveal/Peripheral Attention System
+```python
+# Inspiração: Fovea (alta resolução) vs Peripheral (detecção mudança)
+class AttentionSystem:
+    def __init__(self):
+        self.peripheral = PeripheralMonitor()  # lightweight, broad
+        self.foveal = FovealAnalyzer()  # deep, expensive
+
+    async def monitor(self):
+        """Two-tier resource allocation"""
+        while True:
+            # Peripheral: continuous, low-cost scanning
+            anomalies = await self.peripheral.scan_all()
+
+            for anomaly in anomalies:
+                if anomaly.salience > threshold:
+                    # Saccade: direct foveal attention to anomaly
+                    await self.foveal.deep_analyze(anomaly.target)
+
+class PeripheralMonitor:
+    """Lightweight algorithms for broad monitoring"""
+    def scan_all(self):
+        # Statistical sampling, entropy analysis, volume checks
+        return detect_significant_changes()
+
+class FovealAnalyzer:
+    """Full analytical power"""
+    def deep_analyze(self, target):
+        # Deep packet inspection, full sandbox, CNN analysis
+        return comprehensive_threat_assessment()
+```
+
+##### 0.1.4. Event-Driven Vision (DVS-Inspired)
+```python
+# Inspiração: Dynamic Vision Sensors (neuromorphic)
+# Só processa MUDANÇAS, não frames completos
+class EventDrivenVisionSensor:
+    def __init__(self):
+        self.state_cache = {}  # current state of all entities
+
+    async def process_event_stream(self):
+        """Asynchronous, sparse event processing"""
+        async for event in self.event_source:
+            # Only process if state CHANGED
+            entity_id = event.entity_id
+            previous_state = self.state_cache.get(entity_id)
+
+            if self.is_significant_change(previous_state, event.new_state):
+                # Generate sparse event
+                await self.propagate_event({
+                    'type': 'STATE_CHANGE',
+                    'entity': entity_id,
+                    'delta': event.new_state - previous_state,
+                    'timestamp': event.timestamp
+                })
+
+                self.state_cache[entity_id] = event.new_state
+
+# Event types:
+# - NEW_TCP_CONNECTION
+# - FILE_HASH_CHANGED
+# - USER_LOGIN_NEW_SYSTEM
+# - TRAFFIC_VOLUME_SPIKE
+```
+
+**Performance Targets:**
+- Malware classification: <500ms per binary
+- Network visualization: 30 FPS real-time heatmap
+- Foveal saccade latency: <100ms
+- Event-driven processing: <100ms desde mudança até alerta
+
+---
+
+#### 0.2. Auditory Cortex Analogue - "Listening for Malice"
+**Inspiração:** Cochlea (FFT) → Binaural processing → Auditory Scene Analysis
+**Status:** ⚠️ NÃO EXISTE
+
+**Componentes:**
+
+##### 0.2.1. C2 Beacon Detection via Frequency Analysis
+```python
+# Inspiração: Cochlea = biological spectrum analyzer
+class AuditoryCortexSystem:
+    def detect_c2_heartbeat(self, traffic_time_series):
+        """
+        Convert time-series → frequency domain (FFT)
+        C2 beacon (periodic) = sharp spike at specific frequency
+        Normal traffic (aperiodic) = broadband noise
+        """
+        # Apply FFT (cochlear processing analogue)
+        frequencies = np.fft.fft(traffic_time_series)
+        power_spectrum = np.abs(frequencies)**2
+
+        # Detect narrow-band signals (pure tones)
+        peaks = self.find_spectral_peaks(power_spectrum)
+
+        for peak in peaks:
+            frequency_hz = peak.frequency
+            period_seconds = 1 / frequency_hz
+
+            if self.is_suspicious_period(period_seconds):
+                # Beacon every 60s = 0.0167 Hz spike
+                return {
+                    'type': 'C2_BEACON',
+                    'period': period_seconds,
+                    'confidence': peak.snr
+                }
+```
+
+##### 0.2.2. Multi-Source Alert Correlation (Binaural Processing)
+```python
+# Inspiração: ITD/ILD para sound localization
+class BinauralCorrelationEngine:
+    def localize_attack_origin(self, alert_stream_1, alert_stream_2):
+        """
+        Treat different sensors as "two ears"
+        Trace attack path via timing differences
+        """
+        correlated_alerts = []
+
+        for alert_1 in alert_stream_1:
+            # Find temporally close alerts in stream 2
+            matches = self.find_temporal_matches(alert_1, alert_stream_2)
+
+            for alert_2 in matches:
+                # Calculate "Inter-Alert Time Difference" (ITD)
+                itd = alert_2.timestamp - alert_1.timestamp
+
+                # Calculate "Inter-Alert Intensity Difference" (ILD)
+                ild = alert_2.severity - alert_1.severity
+
+                # Compute attack trajectory
+                trajectory = self.triangulate_path(itd, ild)
+                correlated_alerts.append({
+                    'origin': trajectory.source,
+                    'path': trajectory.hops,
+                    'confidence': self.correlation_score(itd, ild)
+                })
+
+        return correlated_alerts
+```
+
+##### 0.2.3. Cocktail Party Effect for Alert Triage (ASA)
+```python
+# Inspiração: Auditory Scene Analysis - segregate sound streams
+class CocktailPartyTriageEngine:
+    def segment_alert_streams(self, raw_alerts):
+        """
+        Group alerts into coherent incident "streams"
+        Analyst focuses on 1 critical stream, suppresses noise
+        """
+        # ASA grouping based on:
+        # - Same source IP (pitch)
+        # - Same user account (timbre)
+        # - Temporal proximity (onset time)
+
+        streams = []
+        for alert in raw_alerts:
+            # Find existing stream or create new
+            matched_stream = self.find_matching_stream(alert, streams)
+
+            if matched_stream:
+                matched_stream.add_alert(alert)
+            else:
+                streams.append(IncidentStream(alert))
+
+        # Apply attentional focus
+        critical_stream = max(streams, key=lambda s: s.severity_score)
+
+        return {
+            'focused_stream': critical_stream,
+            'suppressed_streams': [s for s in streams if s != critical_stream],
+            'noise_reduction': len(raw_alerts) / len(streams)
+        }
+
+class IncidentStream:
+    """Coherent sequence of related alerts"""
+    def __init__(self, initial_alert):
+        self.alerts = [initial_alert]
+        self.signature = self.extract_signature(initial_alert)
+
+    def matches(self, new_alert):
+        # Check if alert belongs to this stream
+        return (
+            new_alert.src_ip == self.signature.src_ip or
+            new_alert.user == self.signature.user or
+            self.temporal_proximity(new_alert)
+        )
+```
+
+##### 0.2.4. Threat Actor TTP Signature Recognition
+```python
+# Inspiração: Voice recognition (pitch, timbre, cadence)
+class TTPSignatureLibrary:
+    def learn_actor_signature(self, incident_history):
+        """
+        APT groups have unique temporal "acoustic" signatures
+        Sequence + timing of TTPs = fingerprint
+        """
+        for incident in incident_history:
+            # Extract TTP sequence
+            ttp_sequence = incident.mitre_techniques  # [T1059, T1021, T1003, ...]
+
+            # Extract temporal cadence
+            cadence = self.calculate_inter_ttp_timing(incident.events)
+
+            # Create signature
+            signature = {
+                'actor': incident.attributed_actor,
+                'ttp_pattern': ttp_sequence,
+                'timing_pattern': cadence,
+                'pitch': self.calculate_average_frequency(cadence),
+                'timbre': self.calculate_ttp_distribution(ttp_sequence)
+            }
+
+            self.signature_db.store(signature)
+
+    def identify_actor(self, new_incident):
+        """Match new activity to known TTP signatures"""
+        new_signature = self.extract_signature(new_incident)
+
+        best_match = None
+        best_score = 0
+
+        for known_signature in self.signature_db.all():
+            similarity = self.compare_signatures(new_signature, known_signature)
+
+            if similarity > best_score:
+                best_score = similarity
+                best_match = known_signature.actor
+
+        return {
+            'attributed_actor': best_match,
+            'confidence': best_score
+        }
+```
+
+**Performance Targets:**
+- C2 detection: >90% TPR for periodic beacons
+- Alert reduction: 80-90% via ASA grouping
+- Actor attribution: >70% accuracy
+- Processing latency: <1s for FFT analysis
+
+---
+
+#### 0.3. Somatosensory System - "Feeling Infrastructure Health"
+**Inspiração:** Mechanoreceptors, Thermoreceptors, Nociceptors (pain)
+**Status:** ⚠️ NÃO EXISTE
+
+**Componentes:**
+
+##### 0.3.1. Infrastructure "Touch" Receptors
+```python
+# Diferentes tipos de receptores tácteis
+class SomatosensorySystem:
+    def __init__(self):
+        self.mechanoreceptors = MechanoreceptorLayer()  # pressure, vibration
+        self.thermoreceptors = ThermoreceptorLayer()     # temperature
+        self.nociceptors = NociceptorLayer()             # pain
+
+class MechanoreceptorLayer:
+    """Detect pressure/load on infrastructure"""
+    def sense_pressure(self, metrics):
+        return {
+            'cpu_pressure': metrics.cpu_load / metrics.cpu_capacity,
+            'memory_pressure': metrics.mem_used / metrics.mem_total,
+            'disk_io_pressure': metrics.iowait_percent,
+            'network_pressure': metrics.bandwidth_used / metrics.bandwidth_total
+        }
+
+    def detect_ddos_pressure(self, network_metrics):
+        """DDoS = sudden intense pressure on network stack"""
+        syn_queue_fullness = metrics.syn_backlog / metrics.syn_max
+
+        if syn_queue_fullness > 0.9:
+            return {
+                'type': 'PRESSURE_OVERLOAD',
+                'receptor': 'network_mechanoreceptor',
+                'intensity': syn_queue_fullness
+            }
+
+class ThermoreceptorLayer:
+    """Thermal monitoring"""
+    def sense_temperature(self, hardware_metrics):
+        return {
+            'cpu_temp': hardware_metrics.cpu_celsius,
+            'gpu_temp': hardware_metrics.gpu_celsius,
+            'thermal_throttling': hardware_metrics.cpu_freq < hardware_metrics.cpu_max_freq
+        }
+
+class NociceptorLayer:
+    """Pain signals = critical damage events"""
+    def detect_pain(self, system_events):
+        """
+        Ransomware = ACUTE PAIN (mass file encryption)
+        Trigger immediate immune response
+        """
+        pain_signals = []
+
+        # File integrity pain
+        if system_events.files_modified_per_second > 1000:
+            pain_signals.append({
+                'type': 'ACUTE_PAIN',
+                'source': 'FILE_INTEGRITY_NOCICEPTOR',
+                'cause': 'MASS_FILE_MODIFICATION',
+                'intensity': 10.0,
+                'action': 'IMMEDIATE_HOST_ISOLATION'
+            })
+
+        # Shadow copy deletion pain
+        if 'vssadmin delete shadows' in system_events.commands:
+            pain_signals.append({
+                'type': 'ACUTE_PAIN',
+                'source': 'BACKUP_NOCICEPTOR',
+                'cause': 'SHADOW_COPY_DELETION',
+                'intensity': 9.5,
+                'action': 'KILL_PROCESS_AND_ISOLATE'
+            })
+
+        return pain_signals
+```
+
+##### 0.3.2. Weber-Fechner Law for Adaptive Sensitivity
+```python
+# Lei psicofísica: ΔI/I = constant (detectar % change, não absoluto)
+class AdaptiveReceptorSensitivity:
+    def calculate_just_noticeable_difference(self, baseline, current):
+        """
+        Humans detect relative change, not absolute
+        Apply same principle to infrastructure sensing
+        """
+        weber_fraction = 0.05  # 5% change threshold
+
+        relative_change = abs(current - baseline) / baseline
+
+        if relative_change > weber_fraction:
+            return {
+                'detectable': True,
+                'magnitude': relative_change / weber_fraction
+            }
+        else:
+            return {'detectable': False}
+```
+
+##### 0.3.3. Endogenous Analgesia (False Positive Suppression)
+```python
+# Inspiração: Sistema opioide endógeno (supressão de dor)
+class EndogenousAnalgesiaSystem:
+    def suppress_benign_pain(self, pain_signal, context):
+        """
+        High-confidence benign activity → release "opioid"
+        Suppress low-level pain from harmless events
+        """
+        if self.is_known_benign(context):
+            # Release endogenous opioid
+            opioid_level = self.calculate_confidence(context)
+
+            # Suppress pain proportionally
+            suppressed_intensity = pain_signal.intensity * (1 - opioid_level)
+
+            return {
+                'original_intensity': pain_signal.intensity,
+                'suppressed_intensity': suppressed_intensity,
+                'suppression_factor': opioid_level,
+                'reason': 'KNOWN_BENIGN_ACTIVITY'
+            }
+```
+
+**Performance Targets:**
+- DDoS detection: <5s via pressure receptors
+- Ransomware pain signal: <1s trigger to isolation
+- False positive reduction: >50% via analgesia
+
+---
+
+#### 0.4. Chemical Sensing (Olfactory/Gustatory System)
+**Inspiração:** Combinatorial receptor coding (350 receptors → thousands of odors)
+**Status:** ⚠️ NÃO EXISTE
+
+**Componentes:**
+
+##### 0.4.1. Malware "Odor" Detection
+```python
+# Inspiração: 350 olfactory receptors detect patterns
+class OlfactoryMalwareSystem:
+    def __init__(self):
+        # 350 "chemical receptors" = feature extractors
+        self.receptors = self.create_receptor_array(num_receptors=350)
+
+    def create_receptor_array(self, num_receptors):
+        """Each receptor sensitive to specific malware features"""
+        return [
+            APICallFrequencyReceptor(api_name)
+            for api_name in common_apis
+        ] + [
+            PESectionEntropyReceptor(section)
+            for section in pe_sections
+        ] + [
+            OpcodeDistributionReceptor(opcode_pattern)
+            for opcode_pattern in common_patterns
+        ] + [
+            StringPatternReceptor(regex)
+            for regex in suspicious_strings
+        ]
+
+    def detect_malware_odor(self, binary_file):
+        """
+        Combinatorial activation pattern = odor fingerprint
+        Novel malware variant = familiar "odor family"
+        """
+        activation_pattern = []
+
+        for receptor in self.receptors:
+            activation = receptor.respond_to(binary_file)
+            activation_pattern.append(activation)
+
+        # activation_pattern = [0.2, 0.0, 0.8, 0.3, ...] (350 values)
+
+        # Compare to known malware families
+        family = self.classify_odor_family(activation_pattern)
+
+        return {
+            'malware_family': family,
+            'activation_pattern': activation_pattern,
+            'confidence': self.pattern_similarity(activation_pattern, family.prototype)
+        }
+
+    def classify_odor_family(self, activation_pattern):
+        """
+        Zero-day detection: NO signature needed
+        Just structural similarity to known families
+        """
+        best_match = None
+        best_similarity = 0
+
+        for known_family in self.odor_library:
+            similarity = cosine_similarity(
+                activation_pattern,
+                known_family.prototype_pattern
+            )
+
+            if similarity > best_similarity:
+                best_similarity = similarity
+                best_match = known_family
+
+        return best_match if best_similarity > 0.7 else 'NOVEL_FAMILY'
+```
+
+##### 0.4.2. Network Traffic "Taste" Classification
+```python
+# Inspiração: 5 basic tastes (sweet, salty, sour, bitter, umami)
+class GustatoryNetworkSystem:
+    def classify_traffic_taste(self, packet):
+        """
+        5 taste receptors for rapid categorization
+        """
+        tastes = {
+            'sweet': self.is_normal_user_traffic(packet),      # benign
+            'salty': self.is_high_entropy_encrypted(packet),   # encrypted
+            'sour': self.is_malformed_packet(packet),          # protocol violation
+            'bitter': self.is_blacklisted_destination(packet), # known bad
+            'umami': self.is_newly_registered_domain(packet)   # suspicious new
+        }
+
+        # Dominant taste = primary classification
+        dominant_taste = max(tastes.items(), key=lambda x: x[1])
+
+        return {
+            'taste': dominant_taste[0],
+            'intensity': dominant_taste[1],
+            'taste_profile': tastes
+        }
+```
+
+##### 0.4.3. Vomeronasal System for Social Engineering
+```python
+# Inspiração: Vomeronasal organ detects pheromones
+class VomeronasalPhishingDetector:
+    def detect_social_pheromones(self, email):
+        """
+        Detect social manipulation "pheromones"
+        """
+        pheromones = {
+            'urgency': self.detect_urgency_language(email.body),
+            'authority': self.detect_authority_mimicry(email.sender),
+            'fear': self.detect_fear_induction(email.subject),
+            'trust': self.detect_trust_exploitation(email.links)
+        }
+
+        if sum(pheromones.values()) > threshold:
+            return {
+                'verdict': 'SOCIAL_ENGINEERING',
+                'pheromone_profile': pheromones,
+                'manipulation_score': sum(pheromones.values())
+            }
+
+    def detect_urgency_language(self, text):
+        urgency_keywords = ['URGENT', 'IMMEDIATELY', 'ACT NOW', 'EXPIRES TODAY']
+        return len([kw for kw in urgency_keywords if kw in text.upper()])
+
+    def detect_authority_mimicry(self, sender):
+        # CEO name spoofing, executive impersonation
+        return self.levenshtein_distance(sender, known_executives) < 2
+```
+
+**Performance Targets:**
+- Zero-day malware classification: >70% accuracy without signature
+- Phishing detection: >85% TPR via pheromone analysis
+- Odor classification: <200ms per sample
+
+---
+
+#### 0.5. Vestibular System - "Balance and Orientation"
+**Inspiração:** Semicircular canals (rotation) + Otolith organs (linear acceleration)
+**Status:** ⚠️ NÃO EXISTE
+
+**Componentes:**
+
+##### 0.5.1. Security Posture Monitoring
+```python
+# Inspiração: Vestibular system maintains body orientation
+class VestibularPostureSystem:
+    def monitor_security_posture(self, organization_state):
+        """
+        Security posture = orientation in 3D threat space
+        """
+        posture = {
+            'x_axis': self.calculate_patch_level(organization_state),
+            'y_axis': self.calculate_config_compliance(organization_state),
+            'z_axis': self.calculate_user_behavior_risk(organization_state)
+        }
+
+        # Detect tilt/drift from secure baseline
+        baseline_posture = {'x': 0.95, 'y': 0.90, 'z': 0.85}
+
+        drift_vector = {
+            'x': posture['x_axis'] - baseline_posture['x'],
+            'y': posture['y_axis'] - baseline_posture['y'],
+            'z': posture['z_axis'] - baseline_posture['z']
+        }
+
+        drift_magnitude = np.linalg.norm(list(drift_vector.values()))
+
+        if drift_magnitude > threshold:
+            return {
+                'status': 'POSTURE_DRIFT',
+                'drift_vector': drift_vector,
+                'magnitude': drift_magnitude,
+                'corrective_action': self.calculate_correction(drift_vector)
+            }
+```
+
+##### 0.5.2. Attack Campaign Acceleration Detection
+```python
+# Inspiração: Otolith organs detect linear acceleration
+class AccelerationDetectionSystem:
+    def detect_attack_acceleration(self, incident_timeline):
+        """
+        Velocity = rate of attack progression
+        Acceleration = rate of change of velocity
+
+        APT = slow, constant velocity (low acceleration)
+        Ransomware = rapid acceleration
+        """
+        # Calculate velocity at each timepoint
+        velocities = []
+        for i in range(1, len(incident_timeline)):
+            dt = incident_timeline[i].time - incident_timeline[i-1].time
+            d_progress = incident_timeline[i].stage - incident_timeline[i-1].stage
+            velocity = d_progress / dt
+            velocities.append(velocity)
+
+        # Calculate acceleration
+        accelerations = []
+        for i in range(1, len(velocities)):
+            dt = incident_timeline[i].time - incident_timeline[i-1].time
+            dv = velocities[i] - velocities[i-1]
+            acceleration = dv / dt
+            accelerations.append(acceleration)
+
+        avg_acceleration = np.mean(accelerations)
+
+        if avg_acceleration > high_threshold:
+            return {
+                'attack_type': 'RANSOMWARE',
+                'acceleration': avg_acceleration,
+                'urgency': 'CRITICAL'
+            }
+        elif avg_acceleration < low_threshold:
+            return {
+                'attack_type': 'APT',
+                'acceleration': avg_acceleration,
+                'urgency': 'MONITOR'
+            }
+```
+
+##### 0.5.3. Vestibulo-Ocular Reflex (VOR) for Focus Stability
+```python
+# Inspiração: VOR stabilizes vision during head movement
+class VestibularOcularReflex:
+    def stabilize_analyst_focus(self, alert_storm, critical_incident):
+        """
+        During "spinning" (alert storm):
+        VOR compensates to keep focus on critical incident
+        """
+        # Alert storm = vestibular perturbation
+        perturbation_vector = self.calculate_alert_velocity(alert_storm)
+
+        # Generate compensatory eye movement (attentional shift)
+        compensatory_focus = -perturbation_vector  # opposite direction
+
+        # Apply to analyst's view
+        stabilized_view = {
+            'suppressed_alerts': self.filter_by_vector(
+                alert_storm,
+                compensatory_focus
+            ),
+            'focused_incident': critical_incident,
+            'stability_score': self.calculate_stability(perturbation_vector)
+        }
+
+        return stabilized_view
+```
+
+**Performance Targets:**
+- Posture drift detection: <30min to detect configuration deviation
+- Attack classification: APT vs ransomware in <5min
+- Focus stabilization: maintain analyst attention on critical incident
+
+---
+
+#### 0.6. Unified Perceptual Field (Multi-Modal Fusion)
+**Função:** Integrar todos os 5 sentidos em representação unificada
+
+```python
+class UnifiedPerceptualField:
+    """
+    Fuse all sensory modalities into coherent threat percepts
+    """
+    def __init__(self):
+        self.visual = VisualCortexAnalogue()
+        self.auditory = AuditoryCortexAnalogue()
+        self.somatosensory = SomatosensorySystem()
+        self.chemical = ChemicalSensingSystem()
+        self.vestibular = VestibularSystem()
+
+    async def perceive(self, environment_state):
+        """
+        Multi-modal parallel sensing → fusion → percepts
+        """
+        # Parallel sensory processing
+        visual_percept, auditory_percept, tactile_percept, \
+        chemical_percept, vestibular_percept = await asyncio.gather(
+            self.visual.process(environment_state.network_traffic),
+            self.auditory.process(environment_state.time_series_data),
+            self.somatosensory.process(environment_state.infrastructure_metrics),
+            self.chemical.process(environment_state.binary_files),
+            self.vestibular.process(environment_state.security_posture)
+        )
+
+        # Cross-modal fusion
+        fused_percept = self.fuse_modalities({
+            'visual': visual_percept,
+            'auditory': auditory_percept,
+            'tactile': tactile_percept,
+            'chemical': chemical_percept,
+            'vestibular': vestibular_percept
+        })
+
+        # Generate high-confidence threat objects
+        threat_objects = self.extract_threat_objects(fused_percept)
+
+        return threat_objects
+
+    def fuse_modalities(self, percepts):
+        """
+        Example: Malware detection
+        - Visual: binary looks like ransomware family
+        - Chemical: odor matches cryptolocker variant
+        - Auditory: C2 beacon detected
+        - Tactile: HIGH pain from mass file modification
+        - Vestibular: security posture degrading rapidly
+
+        Fusion → High-confidence ransomware percept
+        """
+        confidence_scores = {}
+
+        for modality, percept in percepts.items():
+            if percept.threat_detected:
+                confidence_scores[modality] = percept.confidence
+
+        # Bayesian fusion or weighted voting
+        fused_confidence = self.bayesian_fusion(confidence_scores)
+
+        return {
+            'threat_type': self.majority_vote(percepts),
+            'confidence': fused_confidence,
+            'supporting_modalities': confidence_scores.keys(),
+            'percept_object': self.construct_percept_object(percepts)
+        }
+```
+
+**Integration with Existing Layers:**
+```
+SENSORY LAYER (Perception)
+    ↓ structured percepts
+NEUROLOGICAL LAYER (Predictive Coding hPC)
+    ↓ prediction errors
+NEUROMODULATION (Meta-learning)
+    ↓ adjusted hyperparameters
+IMMUNOLOGICAL LAYER (Response)
+```
+
+---
 
 ### CAMADA 1: UNCONSCIOUS FOUNDATION (A Infraestrutura Invisível)
 

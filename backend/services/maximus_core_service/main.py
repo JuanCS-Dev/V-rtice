@@ -64,6 +64,12 @@ from tools_world_class import (
 # TOOL ORCHESTRATOR - Parallel execution, caching, validation
 from tool_orchestrator import ToolOrchestrator, ToolExecution, ValidationLevel
 
+# OFFENSIVE ARSENAL TOOLS - Complete integration
+from offensive_arsenal_tools import OFFENSIVE_ARSENAL_TOOLS
+
+# ALL SERVICES TOOLS - 45+ integrated services
+from all_services_tools import ALL_SERVICES_TOOLS
+
 app = FastAPI(
     title="Vértice AI Agent - AI-FIRST Brain",
     description="Sistema de IA conversacional com acesso maestro a todos os serviços via tool calling",
@@ -102,7 +108,7 @@ gemini_client = None
 if GEMINI_API_KEY:
     gemini_config = GeminiConfig(
         api_key=GEMINI_API_KEY,
-        model="gemini-2.0-flash-exp",
+        model="gemini-2.0-flash-exp",  # Fastest & most capable experimental model
         temperature=0.7,
         max_tokens=4096
     )
@@ -1245,6 +1251,226 @@ async def get_tool_stats(tool_name: str, last_n_days: int = 30):
 
     return stats
 
+@app.get("/api/tools/complete")
+async def get_complete_tool_catalog():
+    """
+    Get complete tool catalog with ALL integrated services.
+    Returns: World-class tools + Offensive Arsenal + All Services (45+ tools total)
+    """
+    complete_catalog = {
+        "world_class_tools": {
+            "count": len(WORLD_CLASS_TOOLS),
+            "tools": list(WORLD_CLASS_TOOLS.keys()),
+            "catalog": get_tool_catalog()
+        },
+        "offensive_arsenal": {
+            "count": len(OFFENSIVE_ARSENAL_TOOLS),
+            "tools": list(OFFENSIVE_ARSENAL_TOOLS.keys()),
+            "catalog": {name: tool.get("description", "") for name, tool in OFFENSIVE_ARSENAL_TOOLS.items()}
+        },
+        "all_services": {
+            "count": len(ALL_SERVICES_TOOLS),
+            "tools": list(ALL_SERVICES_TOOLS.keys()),
+            "categories": {
+                "osint": [k for k, v in ALL_SERVICES_TOOLS.items() if v.get("category") == "osint"],
+                "cyber": [k for k, v in ALL_SERVICES_TOOLS.items() if v.get("category") == "cyber"],
+                "asa": [k for k, v in ALL_SERVICES_TOOLS.items() if v.get("category") == "asa"],
+                "immunis": [k for k, v in ALL_SERVICES_TOOLS.items() if v.get("category") == "immunis"],
+                "cognitive": [k for k, v in ALL_SERVICES_TOOLS.items() if v.get("category") == "cognitive"],
+                "hcl": [k for k, v in ALL_SERVICES_TOOLS.items() if v.get("category") == "hcl"],
+                "maximus": [k for k, v in ALL_SERVICES_TOOLS.items() if v.get("category") == "maximus"]
+            }
+        },
+        "total_tools": len(WORLD_CLASS_TOOLS) + len(OFFENSIVE_ARSENAL_TOOLS) + len(ALL_SERVICES_TOOLS),
+        "integration_status": "complete"
+    }
+    return complete_catalog
+
+
+@app.post("/api/tool-call")
+async def execute_tool_call(tool_name: str, params: Dict[str, Any] = None, context: Dict[str, Any] = None):
+    """
+    Universal tool calling endpoint - executes ANY tool from any category.
+    """
+    params = params or {}
+    context = context or {}
+
+    # Try WORLD_CLASS_TOOLS first
+    if tool_name in WORLD_CLASS_TOOLS:
+        tool_func = WORLD_CLASS_TOOLS[tool_name]
+        result = await tool_func(**params)
+        return {"success": True, "tool": tool_name, "category": "world_class", "result": result}
+
+    # Try OFFENSIVE_ARSENAL_TOOLS
+    elif tool_name in OFFENSIVE_ARSENAL_TOOLS:
+        tool_info = OFFENSIVE_ARSENAL_TOOLS[tool_name]
+        tool_func = tool_info["function"]
+        result = await tool_func(**params)
+        return {"success": True, "tool": tool_name, "category": "offensive", "result": result}
+
+    # Try ALL_SERVICES_TOOLS
+    elif tool_name in ALL_SERVICES_TOOLS:
+        tool_info = ALL_SERVICES_TOOLS[tool_name]
+        tool_func = tool_info["function"]
+        result = await tool_func(**params)
+        category = tool_info.get("category", "unknown")
+        return {"success": True, "tool": tool_name, "category": category, "result": result}
+
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Tool '{tool_name}' not found. Use /api/tools/complete to see all available tools."
+        )
+
+
+@app.post("/api/chat/simple")
+async def api_chat_simple(request: ChatRequest):
+    """
+    Endpoint de chat SIMPLES - chama Gemini diretamente sem reasoning engine
+    Para testes e respostas rápidas
+    """
+    try:
+        if not gemini_client:
+            raise HTTPException(status_code=503, detail="Gemini client not initialized")
+
+        # Extrai última mensagem do usuário
+        user_message = request.messages[-1].content if request.messages else ""
+
+        # Chama Gemini diretamente
+        response = await gemini_client.generate_text(
+            prompt=user_message,
+            system_instruction="Você é Maximus, um assistente AI de cibersegurança elite.",
+            max_tokens=request.max_tokens or 2000
+        )
+
+        return {
+            "response": response.get("text", ""),
+            "finish_reason": response.get("finish_reason", ""),
+            "reasoning": None,
+            "tools_used": []
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.post("/api/chat")
+async def api_chat(request: ChatRequest):
+    """
+    Endpoint de chat compatível com frontend - OTIMIZADO
+    Usa Gemini diretamente para respostas rápidas
+    """
+    try:
+        if not gemini_client:
+            raise HTTPException(status_code=503, detail="Gemini client not initialized")
+
+        # Extrai última mensagem do usuário
+        user_message = request.messages[-1].content if request.messages else ""
+
+        # Converte histórico para formato Gemini
+        history = []
+        if len(request.messages) > 1:
+            for msg in request.messages[:-1]:
+                history.append({
+                    "role": "model" if msg.role == "assistant" else "user",
+                    "content": msg.content
+                })
+
+        # System instruction personalizada
+        system_instruction = """Você é Maximus, um assistente AI elite de cibersegurança e inteligência.
+
+Características:
+- Preciso, direto e técnico
+- Especializado em cybersecurity, OSINT, threat intelligence, malware analysis
+- Capaz de executar ferramentas e análises complexas
+- Sempre fornece informações acionáveis
+
+Responda de forma profissional e técnica."""
+
+        # Chama Gemini com histórico
+        if history:
+            response = await gemini_client.generate_with_conversation(
+                messages=history + [{"role": "user", "content": user_message}],
+                system_instruction=system_instruction
+            )
+        else:
+            response = await gemini_client.generate_text(
+                prompt=user_message,
+                system_instruction=system_instruction,
+                max_tokens=request.max_tokens or 4000
+            )
+
+        return {
+            "response": response.get("text", ""),
+            "finish_reason": response.get("finish_reason", "STOP"),
+            "reasoning": None,
+            "tools_used": [],
+            "status": "success"
+        }
+    except Exception as e:
+        import traceback
+        error_detail = f"{str(e)}\n{traceback.format_exc()}"
+        raise HTTPException(status_code=500, detail=error_detail)
+
+
+@app.post("/api/analyze")
+async def api_analyze(data: Dict[str, Any]):
+    """
+    Análise de dados com AI - OTIMIZADO com Gemini direto
+    """
+    try:
+        if not gemini_client:
+            return {
+                "success": False,
+                "error": "Gemini client not initialized",
+                "analysis": None
+            }
+
+        # Extrai informações do request
+        analyzed_data = data.get("data", {})
+        context = data.get("context", {})
+        mode = data.get("mode", "quick_scan")
+
+        # Cria mensagem para o LLM baseada no modo
+        if mode == "deep_analysis":
+            message = f"""Analise profundamente os seguintes dados:
+
+{json.dumps(analyzed_data, indent=2)}
+
+Contexto adicional: {json.dumps(context, indent=2)}
+
+Forneça uma análise detalhada incluindo:
+1. Resumo dos dados
+2. Insights principais
+3. Possíveis anomalias ou pontos de atenção
+4. Recomendações"""
+        elif mode == "quick_scan":
+            message = f"Faça uma análise rápida e objetiva: {json.dumps(analyzed_data, indent=2)}"
+        else:
+            message = f"Analise: {json.dumps(analyzed_data, indent=2)}"
+
+        # Chama Gemini diretamente
+        response = await gemini_client.generate_text(
+            prompt=message,
+            system_instruction="Você é Maximus, um analista AI especializado em cibersegurança. Seja preciso e técnico.",
+            max_tokens=2000
+        )
+
+        return {
+            "success": True,
+            "analysis": response.get("text", ""),
+            "mode": mode,
+            "reasoning": None,
+            "context": context
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "analysis": None
+        }
+
+
 @app.get("/health")
 async def health():
     memory_stats = await memory_system.get_memory_stats()
@@ -1254,9 +1480,10 @@ async def health():
         "llm_ready": bool(GEMINI_API_KEY or ANTHROPIC_API_KEY or OPENAI_API_KEY),
         "reasoning_engine": "online",
         "memory_system": memory_stats,
-        "cognitive_capabilities": "NSA-grade"
+        "cognitive_capabilities": "NSA-grade",
+        "total_integrated_tools": len(WORLD_CLASS_TOOLS) + len(OFFENSIVE_ARSENAL_TOOLS) + len(ALL_SERVICES_TOOLS)
     }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8017)
+    uvicorn.run(app, host="0.0.0.0", port=8001)  # Port 8001 for Maximus Core

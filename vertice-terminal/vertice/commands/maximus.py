@@ -10,6 +10,7 @@ from typing_extensions import Annotated
 from ..connectors.ai_agent import AIAgentConnector
 from ..utils.output import output_json, print_error, print_success
 from ..utils.auth import require_auth
+from vertice.utils import primoroso
 
 # Cria a aplicação Typer para este módulo de comando
 app = typer.Typer(
