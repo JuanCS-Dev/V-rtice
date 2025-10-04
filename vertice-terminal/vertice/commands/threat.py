@@ -5,6 +5,7 @@ from typing_extensions import Annotated
 from ..connectors.threat_intel import ThreatIntelConnector
 from ..utils.output import print_json, spinner_task, print_error, print_table
 from ..utils.decorators import with_connector
+from vertice.utils import primoroso
 
 console = Console()
 
@@ -43,7 +44,7 @@ async def lookup(
     if json_output:
         print_json(result)
     else:
-        console.print(f"[bold green]Threat Lookup Result for {indicator}:[/bold green]")
+        primoroso.success(f"Threat Lookup Result for {indicator}:")
         table_data = []
         for key, value in result.items():
             table_data.append({"Field": key, "Value": str(value)})
@@ -78,7 +79,7 @@ async def check(
     if json_output:
         print_json(result)
     else:
-        console.print(f"[bold green]Threat Check Result for {target}:[/bold green]")
+        primoroso.success(f"Threat Check Result for {target}:")
         table_data = []
         for key, value in result.items():
             table_data.append({"Field": key, "Value": str(value)})
@@ -113,7 +114,7 @@ async def scan(
     if json_output:
         print_json(result)
     else:
-        console.print(f"[bold green]Threat Scan Result for {file_path}:[/bold green]")
+        primoroso.success(f"Threat Scan Result for {file_path}:")
         table_data = []
         for key, value in result.items():
             table_data.append({"Field": key, "Value": str(value)})
@@ -136,7 +137,7 @@ def feed(
         vertice threat feed --follow
     """
     # This command does not use a connector, so it is not refactored.
-    console.print("[yellow]Threat feed functionality coming soon...[/yellow]")
+    primoroso.warning("Threat feed functionality coming soon...")
     if follow:
         console.print(
             "[dim]Real-time feed streaming will be available in next version.[/dim]"

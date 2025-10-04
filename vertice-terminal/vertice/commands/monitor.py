@@ -14,6 +14,7 @@ import time
 from ..utils.output import print_json, spinner_task, print_error
 from ..connectors.network_monitor import NetworkMonitorConnector
 from ..utils.decorators import with_connector
+from vertice.utils import primoroso
 
 console = Console()
 
@@ -59,7 +60,7 @@ async def start(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Network Monitoring Started[/bold green]\n")
+        primoroso.error("\n[bold green]✓ Network Monitoring Started[/bold green]\n")
         console.print(f"[cyan]Session ID:[/cyan] {result.get('session_id', 'N/A')}")
         console.print(f"[cyan]Interface:[/cyan] {result.get('interface', 'auto')}")
         console.print(f"[cyan]Status:[/cyan] {result.get('status', 'active')}\n")
@@ -94,8 +95,8 @@ async def stop(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Monitoring Session Stopped[/bold green]\n")
-        console.print(f"[cyan]Session ID:[/cyan] {session_id}")
+        primoroso.error("\n[bold green]✓ Monitoring Session Stopped[/bold green]\n")
+        primoroso.info(f"Session ID:[/cyan] {session_id}")
         console.print(f"[cyan]Status:[/cyan] {result.get('status', 'stopped')}")
 
 
@@ -156,7 +157,7 @@ async def events(
                 time.sleep(2)  # Poll every 2 seconds
 
         except KeyboardInterrupt:
-            console.print("\n[dim]Stopped following events.[/dim]")
+            primoroso.error("\n[dim]Stopped following events.[/dim]")
             return
 
     else:
@@ -171,7 +172,7 @@ async def events(
         if json_output:
             print_json(result)
         else:
-            console.print(f"\n[bold green]✓ Network Events Retrieved[/bold green]\n")
+            primoroso.error("\n[bold green]✓ Network Events Retrieved[/bold green]\n")
 
             if "events" in result and result["events"]:
                 table = Table(
@@ -197,7 +198,7 @@ async def events(
                 console.print(table)
                 console.print(f"\n[bold]Total events:[/bold] {len(result['events'])}")
             else:
-                console.print("[yellow]No network events found.[/yellow]")
+                primoroso.warning("No network events found.")
 
 
 @app.command()
@@ -224,7 +225,7 @@ async def stats(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Network Statistics[/bold green]\n")
+        primoroso.error("\n[bold green]✓ Network Statistics[/bold green]\n")
 
         if "statistics" in result:
             stats = result["statistics"]
@@ -293,7 +294,7 @@ async def alerts(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Network Alerts Retrieved[/bold green]\n")
+        primoroso.error("\n[bold green]✓ Network Alerts Retrieved[/bold green]\n")
 
         if "alerts" in result and result["alerts"]:
             table = Table(title="Network Security Alerts", show_header=True)
@@ -323,7 +324,7 @@ async def alerts(
             console.print(table)
             console.print(f"\n[bold]Total alerts:[/bold] {len(result['alerts'])}")
         else:
-            console.print("[green]✓ No alerts found. System is clean.[/green]")
+            primoroso.success("✓ No alerts found. System is clean.")
 
 
 @app.command()
@@ -361,11 +362,11 @@ async def block(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ IP Address Blocked[/bold green]\n")
-        console.print(f"[cyan]IP Address:[/cyan] {ip_address}")
+        primoroso.error("\n[bold green]✓ IP Address Blocked[/bold green]\n")
+        primoroso.info(f"IP Address:[/cyan] {ip_address}")
         console.print(
             f"[cyan]Duration:[/cyan] {'Permanent' if not duration else f'{duration} seconds'}"
         )
         console.print(f"[cyan]Status:[/cyan] {result.get('status', 'blocked')}")
         if reason:
-            console.print(f"[cyan]Reason:[/cyan] {reason}")
+            primoroso.info(f"Reason:[/cyan] {reason}")

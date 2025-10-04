@@ -83,6 +83,7 @@ def save_scan_result(result: dict, scan_type: str, target: str):
 
 
 from ..utils.decorators import with_connector
+from vertice.utils import primoroso
 
 
 @app.command()
@@ -91,10 +92,10 @@ def ports(
     target: Annotated[str, typer.Argument(help="Target IP or hostname to scan")],
     ports_range: Annotated[
         Optional[str],
-        typer.Option("--ports", "-p", help="Port range (e.g., 1-1000, 22,80,443)"),
+        typer.Option("--ports", help="Port range (e.g., 1-1000, 22,80,443)"),
     ] = None,
     scan_type: Annotated[
-        str, typer.Option("--type", "-t", help="Scan type: quick, full, stealth")
+        str, typer.Option("--type", help="Scan type: quick, full, stealth")
     ] = "quick",
     json_output: Annotated[
         bool, typer.Option("--json", "-j", help="Output as JSON")
@@ -128,7 +129,7 @@ def ports(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Port Scan Complete[/bold green]\n")
+        primoroso.error("\n[bold green]✓ Port Scan Complete[/bold green]\n")
         console.print(f"[cyan]Target:[/cyan] {result.get('target', target)}")
         console.print(f"[cyan]Status:[/cyan] {result.get('status', 'completed')}\n")
 
@@ -154,7 +155,7 @@ def ports(
 
             console.print(table)
         else:
-            console.print("[yellow]No open ports found.[/yellow]")
+            primoroso.warning("No open ports found.")
 
 
 @app.command()
@@ -162,7 +163,7 @@ def ports(
 def nmap(
     target: Annotated[str, typer.Argument(help="Target for nmap scan")],
     arguments: Annotated[
-        Optional[str], typer.Option("--args", "-a", help="Custom nmap arguments")
+        Optional[str], typer.Option("--args", help="Custom nmap arguments")
     ] = None,
     json_output: Annotated[
         bool, typer.Option("--json", "-j", help="Output as JSON")
@@ -191,7 +192,7 @@ def nmap(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Nmap Scan Complete[/bold green]\n")
+        primoroso.error("\n[bold green]✓ Nmap Scan Complete[/bold green]\n")
         if "output" in result:
             console.print(result["output"])
         else:
@@ -204,7 +205,7 @@ def nmap(
 def vulns(
     target: Annotated[str, typer.Argument(help="Target to scan for vulnerabilities")],
     scan_type: Annotated[
-        str, typer.Option("--type", "-t", help="Scan type: quick, full, intensive")
+        str, typer.Option("--type", help="Scan type: quick, full, intensive")
     ] = "full",
     json_output: Annotated[
         bool, typer.Option("--json", "-j", help="Output as JSON")
@@ -238,7 +239,7 @@ def vulns(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Vulnerability Scan Complete[/bold green]\n")
+        primoroso.error("\n[bold green]✓ Vulnerability Scan Complete[/bold green]\n")
         console.print(f"[cyan]Target:[/cyan] {result.get('target', target)}")
         console.print(f"[cyan]Status:[/cyan] {result.get('status', 'completed')}\n")
 
@@ -272,15 +273,13 @@ def vulns(
                 f"\n[bold]Total vulnerabilities found:[/bold] {len(result['vulnerabilities'])}"
             )
         else:
-            console.print("[green]✓ No vulnerabilities found.[/green]")
+            primoroso.success("✓ No vulnerabilities found.")
 
 
 @app.command()
 @with_connector(NmapConnector)
 async def network(
-    network: Annotated[
-        str, typer.Option("--network", "-n", help="Network CIDR to scan")
-    ] = "192.168.1.0/24",
+    network: str = typer.Argument("192.168.1.0/24", help="Network CIDR to scan"),
     json_output: Annotated[
         bool, typer.Option("--json", "-j", help="Output as JSON")
     ] = False,
@@ -306,7 +305,7 @@ async def network(
     if json_output:
         print_json(result)
     else:
-        console.print(f"\n[bold green]✓ Network Discovery Complete[/bold green]\n")
+        primoroso.error("\n[bold green]✓ Network Discovery Complete[/bold green]\n")
         console.print(f"[cyan]Network:[/cyan] {result.get('network', network)}\n")
 
         if "hosts" in result and result["hosts"]:
@@ -329,4 +328,4 @@ async def network(
             console.print(table)
             console.print(f"\n[bold]Total hosts found:[/bold] {len(result['hosts'])}")
         else:
-            console.print("[yellow]No hosts discovered.[/yellow]")
+            primoroso.warning("No hosts discovered.")

@@ -11,6 +11,7 @@ from rich import box
 
 from vertice.config.context_manager import get_context_manager, Context, ContextError
 from vertice.utils.output import print_error, print_success, print_info, print_warning
+from vertice.utils import primoroso
 
 app = typer.Typer(help="🎯 Gerenciamento de contextos de engajamento")
 console = Console()
@@ -37,16 +38,16 @@ def format_warning(msg: str) -> str:
 def create_context(
     name: str = typer.Argument(..., help="Nome do contexto (ex: pentest-acme)"),
     target: str = typer.Option(
-        ..., "--target", "-t", help="Alvo do engagement (IP, range, domain)"
+        ..., "--target", help="Alvo do engagement (IP, range, domain)"
     ),
     output_dir: Optional[str] = typer.Option(
-        None, "--output-dir", "-o", help="Diretório de output personalizado"
+        None, "--output-dir", help="Diretório de output personalizado"
     ),
     proxy: Optional[str] = typer.Option(
-        None, "--proxy", "-p", help="Proxy HTTP (ex: http://127.0.0.1:8080)"
+        None, "--proxy", help="Proxy HTTP (ex: http://127.0.0.1:8080)"
     ),
     notes: Optional[str] = typer.Option(
-        None, "--notes", "-n", help="Notas sobre o engagement"
+        None, "--notes", help="Notas sobre o engagement"
     ),
     no_auto_use: bool = typer.Option(
         False, "--no-auto-use", help="Não ativar automaticamente após criar"
@@ -95,12 +96,12 @@ def create_context(
 
         console.print()
         console.print(format_info("📂 Estrutura criada:"))
-        console.print(f"  {context.output_dir}/")
-        console.print("    ├── scans/")
-        console.print("    ├── recon/")
-        console.print("    ├── exploits/")
-        console.print("    ├── loot/")
-        console.print("    └── reports/")
+        primoroso.error(f"{context.output_dir}/")
+        primoroso.error("├── scans/")
+        primoroso.error("├── recon/")
+        primoroso.error("├── exploits/")
+        primoroso.error("├── loot/")
+        primoroso.error("└── reports/")
 
     except ContextError as e:
         console.print(format_error(f"✗ Erro: {e}"))
@@ -319,9 +320,9 @@ def delete_context(
 @app.command("update")
 def update_context(
     name: str = typer.Argument(..., help="Nome do contexto para atualizar"),
-    target: Optional[str] = typer.Option(None, "--target", "-t", help="Novo target"),
-    proxy: Optional[str] = typer.Option(None, "--proxy", "-p", help="Novo proxy"),
-    notes: Optional[str] = typer.Option(None, "--notes", "-n", help="Novas notas"),
+    target: Optional[str] = typer.Option(None, "--target", help="Novo target"),
+    proxy: Optional[str] = typer.Option(None, "--proxy", help="Novo proxy"),
+    notes: Optional[str] = typer.Option(None, "--notes", help="Novas notas"),
 ):
     """
     Atualiza informações de um contexto

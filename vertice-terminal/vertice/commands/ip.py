@@ -16,6 +16,7 @@ app = typer.Typer(
 )
 
 from ..utils.decorators import with_connector
+from vertice.utils import primoroso
 
 
 @app.command()
@@ -78,7 +79,7 @@ async def my_ip(
         if json_output:
             print_json({"ip": ip})
         else:
-            console.print(f"[green]Your IP:[/green] {ip}")
+            primoroso.success(f"Your IP:[/green] {ip}")
 
 
 @app.command()
@@ -108,7 +109,7 @@ async def bulk(
             ips = [line.strip() for line in f if line.strip()]
 
         if not ips:
-            console.print("[yellow]No IP addresses found in the file.[/yellow]")
+            primoroso.warning("No IP addresses found in the file.")
             return
 
         console.print(f"[dim]Analyzing {len(ips)} IP addresses from {file}...[/dim]")
@@ -127,7 +128,7 @@ async def bulk(
             print_json(results_dict)
         else:
             # For bulk, a simple table or summary might be better, or iterate and print each
-            console.print("[bold green]Bulk IP Analysis Results:[/bold green]")
+            primoroso.success("Bulk IP Analysis Results:")
             for result in results:
                 if isinstance(result, dict):
                     format_ip_analysis(result, console)
