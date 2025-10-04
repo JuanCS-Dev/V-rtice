@@ -44,6 +44,7 @@ COMMAND_MODULES = [
     "memory",  # Memory System Management
     "menu",
     "project",  # Workspace & State Management
+    "plugin",  # Plugin Management & Extension System
 ]
 
 console = Console()
