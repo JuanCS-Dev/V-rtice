@@ -500,118 +500,406 @@ def connectors_list():
     console.print(table)
 
 
-@connectors_app.command("send")
-def connectors_send(
-    siem: str = typer.Option(..., "--siem", help="SIEM name (splunk, elastic)"),
-    events_file: str = typer.Option(..., "--events", help="Events JSON file"),
-    index: Optional[str] = typer.Option(None, "--index", help="Target index"),
+@connectors_app.command("test")
+def connectors_test(
+    siem_type: str = typer.Argument(..., help="SIEM type: splunk, elasticsearch"),
+    host: str = typer.Option(..., "--host", help="SIEM server hostname"),
+    port: int = typer.Option(None, "--port", help="SIEM server port"),
+    token: Optional[str] = typer.Option(None, "--token", help="Authentication token (Splunk HEC)"),
+    username: Optional[str] = typer.Option(None, "--username", help="Username (Elasticsearch)"),
+    password: Optional[str] = typer.Option(None, "--password", help="Password (Elasticsearch)"),
+    api_key: Optional[str] = typer.Option(None, "--api-key", help="API key (Elasticsearch)"),
+    ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Use SSL/TLS"),
+    verify_ssl: bool = typer.Option(False, "--verify-ssl/--no-verify-ssl", help="Verify SSL certificates"),
 ):
     """
-    📤 Send events to SIEM
+    🧪 Test SIEM connectivity
 
-    Example:
-        vcli siem connectors send --siem splunk --events events.json
+    Examples:
+        vcli siem connectors test splunk --host splunk.example.com --token YOUR-HEC-TOKEN
+        vcli siem connectors test elasticsearch --host elastic.example.com --username elastic --password changeme
     """
-    connector = get_siem_connector(siem)
+    from vertice.siem_integration import SplunkConnector, ElasticsearchConnector
 
-    if not connector:
-        primoroso.error(
-            f"SIEM connector not found: {siem}",
-            suggestion="Available connectors: splunk, elastic"
-        )
-        raise typer.Exit(1)
-
-    # Load events
-    events_path = Path(events_file)
-
-    if not events_path.exists():
-        primoroso.error(f"Events file not found: {events_file}")
-        raise typer.Exit(1)
+    primoroso.info(f"Testing connection to {siem_type} at {host}...")
+    primoroso.newline()
 
     try:
-        with open(events_path, 'r') as f:
-            events = json.load(f)
+        # Create connector
+        if siem_type.lower() == "splunk":
+            if not port:
+                port = 8088
+            if not token:
+                primoroso.error("Splunk requires --token parameter")
+                raise typer.Exit(1)
 
-        if not isinstance(events, list):
-            events = [events]
+            connector = SplunkConnector(
+                host=host,
+                port=port,
+                token=token,
+                ssl=ssl,
+                verify_ssl=verify_ssl
+            )
+
+        elif siem_type.lower() == "elasticsearch":
+            if not port:
+                port = 9200
+
+            connector = ElasticsearchConnector(
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                api_key=api_key,
+                ssl=ssl,
+                verify_ssl=verify_ssl
+            )
+
+        else:
+            primoroso.error(
+                f"Unsupported SIEM type: {siem_type}",
+                suggestion="Supported types: splunk, elasticsearch"
+            )
+            raise typer.Exit(1)
+
+        # Test connection
+        with primoroso.spinner(f"Testing connection to {siem_type}..."):
+            success = connector.test_connection()
+
+        if success:
+            primoroso.success(
+                f"Successfully connected to {siem_type}",
+                details={
+                    "Host": host,
+                    "Port": port,
+                    "SSL": "Enabled" if ssl else "Disabled"
+                }
+            )
+        else:
+            primoroso.error(f"Connection test failed for {siem_type}")
+            raise typer.Exit(1)
 
     except Exception as e:
-        primoroso.error(f"Failed to load events: {e}")
-        raise typer.Exit(1)
-
-    primoroso.info(f"Sending {len(events)} events to {siem}...")
-    primoroso.newline()
-
-    # Send batch
-    with primoroso.spinner(f"Sending to {siem}...") as s:
-        response = connector.send_batch(events, index=index)
-
-    if response.success:
-        primoroso.success(
-            f"Successfully sent {len(events)} events to {siem}",
-            details={
-                "Latency": f"{response.latency_ms}ms",
-                "Status Code": response.status_code
-            }
-        )
-    else:
-        primoroso.error(
-            "Failed to send events",
-            details={"Error": response.error}
-        )
+        primoroso.error(f"Connection failed: {e}")
         raise typer.Exit(1)
 
 
-@connectors_app.command("query")
-def connectors_query(
-    siem: str = typer.Option(..., "--siem", help="SIEM name (splunk, elastic)"),
-    query: str = typer.Option(..., "--query", help="Query string"),
-    limit: int = typer.Option(10, "--limit", help="Max results"),
+@connectors_app.command("send")
+def connectors_send(
+    siem_type: str = typer.Argument(..., help="SIEM type: splunk, elasticsearch"),
+    host: str = typer.Option(..., "--host", help="SIEM server hostname"),
+    port: int = typer.Option(None, "--port", help="SIEM server port"),
+    event_type: str = typer.Option("security_event", "--event-type", help="Event type"),
+    severity: str = typer.Option("info", "--severity", help="Severity: critical, high, medium, low, info"),
+    description: str = typer.Option(..., "--description", help="Event description"),
+    source_ip: Optional[str] = typer.Option(None, "--source-ip", help="Source IP address"),
+    destination_ip: Optional[str] = typer.Option(None, "--dest-ip", help="Destination IP address"),
+    token: Optional[str] = typer.Option(None, "--token", help="Authentication token (Splunk)"),
+    username: Optional[str] = typer.Option(None, "--username", help="Username (Elasticsearch)"),
+    password: Optional[str] = typer.Option(None, "--password", help="Password (Elasticsearch)"),
+    api_key: Optional[str] = typer.Option(None, "--api-key", help="API key (Elasticsearch)"),
+    ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Use SSL/TLS"),
 ):
     """
-    🔍 Query SIEM
+    📤 Send single event to SIEM
 
-    Example:
-        vcli siem connectors query --siem splunk --query "error"
-        vcli siem connectors query --siem elastic --query "status:500"
+    Examples:
+        vcli siem connectors send splunk --host splunk.example.com --token TOKEN \\
+            --description "SQL Injection detected" --severity high --source-ip 10.10.1.5
+
+        vcli siem connectors send elasticsearch --host elastic.example.com \\
+            --username elastic --password changeme --description "Port scan detected"
     """
-    connector = get_siem_connector(siem)
+    from vertice.siem_integration import SplunkConnector, ElasticsearchConnector
+    from datetime import datetime
 
-    if not connector:
-        primoroso.error(f"SIEM connector not found: {siem}")
-        raise typer.Exit(1)
+    # Build event
+    event = {
+        "event_type": event_type,
+        "severity": severity,
+        "description": description,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
-    primoroso.info(f"Querying {siem}: '{query}'")
+    if source_ip:
+        event["source_ip"] = source_ip
+    if destination_ip:
+        event["destination_ip"] = destination_ip
+
+    primoroso.info(f"Sending event to {siem_type}...")
     primoroso.newline()
 
-    with primoroso.spinner(f"Querying {siem}...") as s:
-        response = connector.query(query, limit=limit)
+    try:
+        # Create connector
+        if siem_type.lower() == "splunk":
+            if not port:
+                port = 8088
+            if not token:
+                primoroso.error("Splunk requires --token parameter")
+                raise typer.Exit(1)
 
-    if response.success:
-        results = response.data.get("results", [])
+            connector = SplunkConnector(
+                host=host,
+                port=port,
+                token=token,
+                ssl=ssl,
+                verify_ssl=False
+            )
+
+        elif siem_type.lower() == "elasticsearch":
+            if not port:
+                port = 9200
+
+            connector = ElasticsearchConnector(
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                api_key=api_key,
+                ssl=ssl,
+                verify_ssl=False
+            )
+
+        else:
+            primoroso.error(f"Unsupported SIEM type: {siem_type}")
+            raise typer.Exit(1)
+
+        # Send event
+        with primoroso.spinner(f"Sending to {siem_type}..."):
+            success = connector.send_event(event)
+
+        if success:
+            primoroso.success(
+                f"Event sent to {siem_type}",
+                details={
+                    "Event Type": event_type,
+                    "Severity": severity,
+                    "Description": description
+                }
+            )
+        else:
+            primoroso.error("Failed to send event")
+            raise typer.Exit(1)
+
+    except Exception as e:
+        primoroso.error(f"Send failed: {e}")
+        raise typer.Exit(1)
+
+
+@connectors_app.command("sync")
+def connectors_sync(
+    siem_type: str = typer.Argument(..., help="SIEM type: splunk, elasticsearch"),
+    host: str = typer.Option(..., "--host", help="SIEM server hostname"),
+    port: int = typer.Option(None, "--port", help="SIEM server port"),
+    workspace: Optional[str] = typer.Option(None, "--workspace", "-w", help="Workspace name"),
+    severity_filter: Optional[str] = typer.Option(None, "--severity", help="Filter by severity"),
+    limit: int = typer.Option(100, "--limit", help="Max events to sync"),
+    token: Optional[str] = typer.Option(None, "--token", help="Authentication token (Splunk)"),
+    username: Optional[str] = typer.Option(None, "--username", help="Username (Elasticsearch)"),
+    password: Optional[str] = typer.Option(None, "--password", help="Password (Elasticsearch)"),
+    api_key: Optional[str] = typer.Option(None, "--api-key", help="API key (Elasticsearch)"),
+    ssl: bool = typer.Option(True, "--ssl/--no-ssl", help="Use SSL/TLS"),
+):
+    """
+    🔄 Sync workspace findings to SIEM
+
+    Examples:
+        vcli siem connectors sync splunk --host splunk.example.com --token TOKEN --workspace web-pentest
+        vcli siem connectors sync elasticsearch --host elastic.example.com --username elastic --password changeme
+    """
+    from vertice.siem_integration import SplunkConnector, ElasticsearchConnector
+    from vertice.workspace import WorkspaceManager
+    from datetime import datetime
+
+    # Get workspace
+    ws_manager = WorkspaceManager()
+
+    if workspace:
+        ws = ws_manager.get_workspace(workspace)
+        if not ws:
+            primoroso.error(f"Workspace not found: {workspace}")
+            raise typer.Exit(1)
+    else:
+        ws = ws_manager.get_active_workspace()
+        if not ws:
+            primoroso.error("No active workspace. Use --workspace to specify one.")
+            raise typer.Exit(1)
+
+    primoroso.info(f"Syncing workspace '{ws.name}' to {siem_type}...")
+    primoroso.newline()
+
+    try:
+        # Create connector
+        if siem_type.lower() == "splunk":
+            if not port:
+                port = 8088
+            if not token:
+                primoroso.error("Splunk requires --token parameter")
+                raise typer.Exit(1)
+
+            connector = SplunkConnector(
+                host=host,
+                port=port,
+                token=token,
+                ssl=ssl,
+                verify_ssl=False
+            )
+
+        elif siem_type.lower() == "elasticsearch":
+            if not port:
+                port = 9200
+
+            connector = ElasticsearchConnector(
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                api_key=api_key,
+                ssl=ssl,
+                verify_ssl=False
+            )
+
+        else:
+            primoroso.error(f"Unsupported SIEM type: {siem_type}")
+            raise typer.Exit(1)
+
+        # Get findings from workspace
+        findings = ws.get_vulnerabilities(limit=limit)
+
+        if severity_filter:
+            findings = [f for f in findings if f.severity.lower() == severity_filter.lower()]
+
+        if not findings:
+            primoroso.warning("No findings to sync")
+            return
+
+        # Convert findings to events
+        events = []
+        for finding in findings:
+            event = {
+                "event_type": "vulnerability",
+                "severity": finding.severity,
+                "description": finding.description,
+                "host": finding.host,
+                "port": finding.port,
+                "cve_id": finding.cve_id if hasattr(finding, 'cve_id') else None,
+                "timestamp": datetime.utcnow().isoformat(),
+                "workspace": ws.name
+            }
+            events.append(event)
+
+        # Send batch
+        with primoroso.spinner(f"Syncing {len(events)} findings to {siem_type}..."):
+            stats = connector.send_batch(events)
 
         primoroso.success(
-            f"Query completed",
+            f"Sync complete",
             details={
-                "Results Found": len(results),
-                "Latency": f"{response.latency_ms}ms"
+                "Workspace": ws.name,
+                "Sent": stats["sent"],
+                "Failed": stats["failed"],
+                "Success Rate": f"{(stats['sent']/len(events)*100):.1f}%"
             }
         )
 
-        # Show results
-        if results:
-            console.print("\n[bold]Results:[/bold]")
+    except Exception as e:
+        primoroso.error(f"Sync failed: {e}")
+        raise typer.Exit(1)
 
-            for i, result in enumerate(results[:10], 1):
-                console.print(f"\n[cyan]{i}.[/cyan]")
-                syntax = Syntax(json.dumps(result, indent=2), "json", theme="monokai")
-                console.print(syntax)
 
-    else:
-        primoroso.error(
-            "Query failed",
-            details={"Error": response.error}
-        )
+@connectors_app.command("format")
+def connectors_format(
+    format_type: str = typer.Argument(..., help="Format type: cef, leef, json"),
+    event_type: str = typer.Option("vulnerability", "--event-type", help="Event type"),
+    severity: str = typer.Option("high", "--severity", help="Severity level"),
+    description: str = typer.Option("SQL Injection vulnerability found", "--description", help="Event description"),
+    source_ip: Optional[str] = typer.Option("10.10.1.5", "--source-ip", help="Source IP address"),
+    destination_ip: Optional[str] = typer.Option("192.168.1.10", "--dest-ip", help="Destination IP address"),
+    source_port: Optional[int] = typer.Option(3306, "--source-port", help="Source port"),
+):
+    """
+    🎨 Show event formatting examples
+
+    Examples:
+        vcli siem connectors format cef
+        vcli siem connectors format leef --severity critical
+        vcli siem connectors format json --event-type threat_detected
+    """
+    from vertice.siem_integration import CEFFormatter, LEEFFormatter, JSONFormatter
+    from datetime import datetime
+
+    # Build sample event
+    event = {
+        "event_type": event_type,
+        "severity": severity,
+        "description": description,
+        "source_ip": source_ip,
+        "destination_ip": destination_ip,
+        "source_port": source_port,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+    primoroso.info(f"Event Format: {format_type.upper()}")
+    primoroso.newline()
+
+    try:
+        # Format event
+        if format_type.lower() == "cef":
+            formatter = CEFFormatter()
+            formatted = formatter.format(event)
+
+            console.print(Panel(
+                formatted,
+                title="[bold cyan]CEF Format[/bold cyan]",
+                subtitle="Common Event Format (ArcSight, Splunk)",
+                border_style="cyan"
+            ))
+
+            console.print("\n[bold]CEF Format Structure:[/bold]")
+            console.print("CEF:Version|Vendor|Product|Version|SignatureID|Name|Severity|Extension")
+            console.print("\n[bold]Extension Fields:[/bold]")
+            console.print("  src    = Source IP address")
+            console.print("  dst    = Destination IP address")
+            console.print("  spt    = Source port")
+            console.print("  dpt    = Destination port")
+            console.print("  msg    = Message")
+            console.print("  rt     = Receipt time")
+
+        elif format_type.lower() == "leef":
+            formatter = LEEFFormatter()
+            formatted = formatter.format(event)
+
+            console.print(Panel(
+                formatted,
+                title="[bold magenta]LEEF Format[/bold magenta]",
+                subtitle="Log Event Extended Format (QRadar)",
+                border_style="magenta"
+            ))
+
+            console.print("\n[bold]LEEF Format Structure:[/bold]")
+            console.print("LEEF:Version|Vendor|Product|Version|EventID|<TAB>Key1=Value1<TAB>Key2=Value2")
+
+        elif format_type.lower() == "json":
+            formatter = JSONFormatter()
+            formatted = formatter.format(event)
+
+            syntax = Syntax(formatted, "json", theme="monokai", line_numbers=False)
+            console.print(Panel(
+                syntax,
+                title="[bold green]JSON Format[/bold green]",
+                subtitle="Splunk HEC, Elasticsearch",
+                border_style="green"
+            ))
+
+        else:
+            primoroso.error(
+                f"Unsupported format: {format_type}",
+                suggestion="Supported formats: cef, leef, json"
+            )
+            raise typer.Exit(1)
+
+    except Exception as e:
+        primoroso.error(f"Formatting failed: {e}")
         raise typer.Exit(1)
 
 
