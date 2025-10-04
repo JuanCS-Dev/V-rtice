@@ -10,6 +10,13 @@ Componentes:
 - AutopilotEngine: Execução autônoma de workflows multi-fase
 - ExecutionPlanner: Geração de planos de execução
 - MaximusAssistant: NL queries, CVE correlation, suggestions, reports
+
+Advanced AI Features (Phase 2.2):
+- CoTReasoner: Chain-of-Thought reasoning with backtracking
+- SelfReflector: Self-reflection and continuous improvement
+- MultiAgentOrchestrator: Multi-agent collaboration and orchestration
+- ToolLearner: Tool performance tracking and adaptive selection
+- ExplainableAI: Decision explainability and transparency
 """
 
 from .interpreter import AIInterpreter
@@ -36,7 +43,42 @@ from .models import (
     PlanResult
 )
 
+# Advanced AI Features
+from .reasoning import CoTReasoner, ReasoningStrategy, ReasoningResult, ReasoningStep, StepType
+from .self_reflection import (
+    SelfReflector,
+    ActionRecord,
+    Reflection,
+    LearningInsight,
+    OutcomeType,
+    ReflectionType
+)
+from .multi_agent import (
+    MultiAgentOrchestrator,
+    Agent,
+    Task,
+    CollaborationResult,
+    AgentRole,
+    TaskPriority,
+    TaskStatus
+)
+from .tool_learning import (
+    ToolLearner,
+    ToolUsage,
+    ToolRecommendation,
+    ToolPerformanceProfile,
+    ToolCategory
+)
+from .explainability import (
+    ExplainableAI,
+    DecisionExplanation,
+    ConfidenceFactor,
+    ExplanationType,
+    DecisionType
+)
+
 __all__ = [
+    # Core AI
     "AIInterpreter",
     "ConversationEngine",
     "Investigation",
@@ -58,4 +100,33 @@ __all__ = [
     "PhaseStatus",
     "StepStatus",
     "PlanResult",
+    # Advanced AI Features
+    "CoTReasoner",
+    "ReasoningStrategy",
+    "ReasoningResult",
+    "ReasoningStep",
+    "StepType",
+    "SelfReflector",
+    "ActionRecord",
+    "Reflection",
+    "LearningInsight",
+    "OutcomeType",
+    "ReflectionType",
+    "MultiAgentOrchestrator",
+    "Agent",
+    "Task",
+    "CollaborationResult",
+    "AgentRole",
+    "TaskPriority",
+    "TaskStatus",
+    "ToolLearner",
+    "ToolUsage",
+    "ToolRecommendation",
+    "ToolPerformanceProfile",
+    "ToolCategory",
+    "ExplainableAI",
+    "DecisionExplanation",
+    "ConfidenceFactor",
+    "ExplanationType",
+    "DecisionType",
 ]
