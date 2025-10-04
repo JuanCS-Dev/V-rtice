@@ -12,8 +12,8 @@ Componentes:
 
 from .behavioral import BehavioralAnalytics, Baseline, Anomaly, AnomalyType
 from .threat_intel import ThreatIntelFeed, IOCType, IOC, ThreatActor
-from .ml_detector import MLDetector, MLModel, Prediction
-from .risk_scorer import RiskScorer, RiskScore, RiskFactor
+from .ml_detector import MLDetector, MLModel, MLModelType, Prediction
+from .risk_scorer import RiskScorer, RiskScore, RiskFactor, RiskLevel
 
 __all__ = [
     "BehavioralAnalytics",
@@ -26,8 +26,10 @@ __all__ = [
     "ThreatActor",
     "MLDetector",
     "MLModel",
+    "MLModelType",
     "Prediction",
     "RiskScorer",
     "RiskScore",
     "RiskFactor",
+    "RiskLevel",
 ]

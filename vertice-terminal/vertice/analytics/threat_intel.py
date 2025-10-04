@@ -82,9 +82,7 @@ class ThreatActor:
     aliases: List[str] = field(default_factory=list)
 
     # Classification
-    type: str = "unknown"  # apt, cybercrime, hacktiv
-
-ist, nation_state
+    type: str = "unknown"  # apt, cybercrime, hacktivist, nation_state
     motivation: str = "unknown"  # financial, espionage, destruction
 
     # Attribution
