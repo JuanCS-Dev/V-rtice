@@ -27,7 +27,9 @@ from vertice.core import (
     NmapExecutor,
     NmapParser,
     NucleiExecutor,
-    NucleiParser
+    NucleiParser,
+    NiktoExecutor,
+    NiktoParser
 )
 
 
@@ -903,3 +905,322 @@ class TestNucleiWorkspaceIntegration:
         # Check that template info is in description
         log4j_vuln = next(v for v in vulns if "Log4j" in v.title)
         assert "CVE-2021-44228" in log4j_vuln.description or "Template:" in log4j_vuln.description or log4j_vuln.cve_id == "CVE-2021-44228"
+
+
+# ===== NIKTO TESTS =====
+
+@pytest.fixture
+def sample_nikto_output():
+    """Sample Nikto text output for testing."""
+    return """- Nikto v2.5.0
+---------------------------------------------------------------------------
++ Target IP:          10.10.1.5
++ Target Hostname:    example.com
++ Target Port:        80
++ Start Time:         2024-01-10 15:30:00 (GMT0)
+---------------------------------------------------------------------------
++ Server: Apache/2.4.41 (Ubuntu)
++ The anti-clickjacking X-Frame-Options header is not present.
++ The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type.
++ OSVDB-3268: /icons/: Directory indexing found.
++ Apache/2.4.41 appears to be outdated (current is at least Apache/2.4.54). Apache 2.2.34 is the EOL for the 2.x branch.
++ /login.php: Admin login page/section found.
++ /config.php: PHP Config file may contain database IDs and passwords.
++ 8065 requests: 0 error(s) and 6 item(s) reported on remote host
++ End Time:           2024-01-10 15:35:00 (GMT0) (300 seconds)
+---------------------------------------------------------------------------
++ 1 host(s) tested"""
+
+
+@pytest.fixture
+def sample_nikto_output_empty():
+    """Empty Nikto output (no findings)."""
+    return """- Nikto v2.5.0
+---------------------------------------------------------------------------
++ Target IP:          10.10.1.5
++ Target Hostname:    example.com
++ Target Port:        443
+---------------------------------------------------------------------------
++ Server: nginx/1.18.0
++ 500 requests: 0 error(s) and 0 item(s) reported on remote host
+---------------------------------------------------------------------------
++ 1 host(s) tested"""
+
+
+class TestNiktoExecutor:
+    """Tests for NiktoExecutor."""
+
+    @patch('shutil.which')
+    def test_command_build_quick_scan(self, mock_which):
+        """Test building command for quick scan."""
+        mock_which.return_value = "/usr/bin/nikto"
+        executor = NiktoExecutor()
+        cmd = executor.build_command(target="https://example.com", scan_type="quick")
+
+        assert "nikto" in cmd
+        assert "-h" in cmd
+        assert "https://example.com" in cmd
+        assert "-Format" in cmd
+        assert "txt" in cmd
+        assert "-nointeractive" in cmd
+
+        # Quick scan should have tuning "123b"
+        if "-Tuning" in cmd:
+            tuning_idx = cmd.index("-Tuning")
+            assert cmd[tuning_idx + 1] == "123b"
+
+    @patch('shutil.which')
+    def test_command_build_full_scan(self, mock_which):
+        """Test building command for full scan."""
+        mock_which.return_value = "/usr/bin/nikto"
+        executor = NiktoExecutor()
+        cmd = executor.build_command(target="https://example.com", scan_type="full")
+
+        assert "nikto" in cmd
+        assert "-h" in cmd
+        # Full scan should NOT have tuning (all tests)
+        assert "-Tuning" not in cmd or cmd[cmd.index("-Tuning") + 1] is None
+
+    @patch('shutil.which')
+    def test_command_build_ssl_scan(self, mock_which):
+        """Test building command for SSL scan."""
+        mock_which.return_value = "/usr/bin/nikto"
+        executor = NiktoExecutor()
+        cmd = executor.build_command(target="https://example.com", scan_type="ssl")
+
+        assert "nikto" in cmd
+        assert "-ssl" in cmd
+
+    @patch('shutil.which')
+    def test_command_build_custom_tuning(self, mock_which):
+        """Test building command with custom tuning."""
+        mock_which.return_value = "/usr/bin/nikto"
+        executor = NiktoExecutor()
+        cmd = executor.build_command(
+            target="https://example.com",
+            scan_type="quick",
+            tuning="x6"  # Exclude DoS tests
+        )
+
+        assert "-Tuning" in cmd
+        tuning_idx = cmd.index("-Tuning")
+        assert cmd[tuning_idx + 1] == "x6"
+
+    @patch('shutil.which')
+    def test_command_build_plugins(self, mock_which):
+        """Test building command with plugins."""
+        mock_which.return_value = "/usr/bin/nikto"
+        executor = NiktoExecutor()
+        cmd = executor.build_command(
+            target="https://example.com",
+            plugins="@@ALL"
+        )
+
+        assert "-Plugins" in cmd
+        plugins_idx = cmd.index("-Plugins")
+        assert cmd[plugins_idx + 1] == "@@ALL"
+
+    @patch('shutil.which')
+    def test_tool_name(self, mock_which):
+        """Test tool name is set correctly."""
+        mock_which.return_value = "/usr/bin/nikto"
+        executor = NiktoExecutor()
+        assert executor.tool_name == "nikto"
+
+    @patch('shutil.which')
+    def test_default_timeout(self, mock_which):
+        """Test default timeout is appropriate for Nikto."""
+        mock_which.return_value = "/usr/bin/nikto"
+        executor = NiktoExecutor()
+        assert executor.default_timeout == 600  # 10 minutes
+
+
+class TestNiktoParser:
+    """Tests for NiktoParser."""
+
+    def test_parse_valid_output(self, sample_nikto_output):
+        """Test parsing valid Nikto output."""
+        parser = NiktoParser()
+        result = parser.parse(sample_nikto_output)
+
+        assert "scan_info" in result
+        assert "findings" in result
+        assert len(result["findings"]) == 6
+
+        scan_info = result["scan_info"]
+        assert scan_info["target_ip"] == "10.10.1.5"
+        assert scan_info["target_hostname"] == "example.com"
+        assert scan_info["target_port"] == 80
+        assert scan_info["server"] == "Apache/2.4.41 (Ubuntu)"
+        assert scan_info["total_requests"] == 8065
+        assert scan_info["total_findings"] == 6
+
+    def test_parse_empty_output(self, sample_nikto_output_empty):
+        """Test parsing Nikto output with no findings."""
+        parser = NiktoParser()
+        result = parser.parse(sample_nikto_output_empty)
+
+        assert result["findings"] == []
+        assert result["scan_info"]["total_findings"] == 0
+        assert result["scan_info"]["target_port"] == 443
+
+    def test_parse_osvdb_extraction(self, sample_nikto_output):
+        """Test OSVDB ID extraction."""
+        parser = NiktoParser()
+        result = parser.parse(sample_nikto_output)
+
+        # Find the directory indexing finding
+        osvdb_finding = next(
+            (f for f in result["findings"] if f.get("osvdb_id") == "3268"),
+            None
+        )
+        assert osvdb_finding is not None
+        assert osvdb_finding["uri"] == "/icons/"
+        assert "Directory indexing" in osvdb_finding["description"]
+
+    def test_parse_uri_extraction(self, sample_nikto_output):
+        """Test URI extraction from findings."""
+        parser = NiktoParser()
+        result = parser.parse(sample_nikto_output)
+
+        # Check login.php finding
+        login_finding = next(
+            (f for f in result["findings"] if f.get("uri") == "/login.php"),
+            None
+        )
+        assert login_finding is not None
+        assert "Admin login" in login_finding["description"]
+
+    def test_parse_severity_classification(self, sample_nikto_output):
+        """Test severity classification."""
+        parser = NiktoParser()
+        result = parser.parse(sample_nikto_output)
+
+        findings = result["findings"]
+
+        # Check severity levels
+        severities = [f["severity"] for f in findings]
+        assert "medium" in severities or "low" in severities
+
+        # Outdated software should be medium
+        outdated_finding = next(
+            (f for f in findings if "outdated" in f["description"].lower()),
+            None
+        )
+        if outdated_finding:
+            assert outdated_finding["severity"] in ["medium", "low"]
+
+    def test_parse_category_classification(self, sample_nikto_output):
+        """Test category classification."""
+        parser = NiktoParser()
+        result = parser.parse(sample_nikto_output)
+
+        # Check categories
+        categories = [f["category"] for f in result["findings"]]
+        assert "information_disclosure" in categories or "security_headers" in categories
+
+    def test_parse_no_server_as_finding(self, sample_nikto_output):
+        """Test that Server metadata line is not treated as finding."""
+        parser = NiktoParser()
+        result = parser.parse(sample_nikto_output)
+
+        # Ensure Server metadata is in scan_info, not findings
+        assert result["scan_info"]["server"] == "Apache/2.4.41 (Ubuntu)"
+
+        # Ensure no finding has the exact server string as description
+        # (findings about outdated Apache are OK, but the metadata line itself should not be a finding)
+        for finding in result["findings"]:
+            assert finding["description"] != "Apache/2.4.41 (Ubuntu)"
+
+
+class TestNiktoWorkspaceIntegration:
+    """Tests for Nikto workspace integration."""
+
+    @pytest.fixture
+    def temp_workspace(self):
+        """Create temporary workspace."""
+        import tempfile
+        import shutil
+        from vertice.workspace import WorkspaceManager
+
+        temp_dir = Path(tempfile.mkdtemp())
+        ws = WorkspaceManager(workspace_root=temp_dir)
+        ws.create_project("test-nikto-integration")
+
+        yield ws
+
+        # Cleanup
+        shutil.rmtree(temp_dir)
+
+    def test_populate_basic(self, temp_workspace, sample_nikto_output):
+        """Test basic Nikto workspace population."""
+        from vertice.core.workspace_integration import populate_from_nikto
+
+        parser = NiktoParser()
+        parsed = parser.parse(sample_nikto_output)
+
+        stats = populate_from_nikto(temp_workspace, parsed)
+
+        assert stats["hosts_added"] == 1
+        assert stats["vulns_added"] > 0  # Should add non-info findings
+
+        # Verify host was added
+        hosts = temp_workspace.query_hosts()
+        assert len(hosts) == 1
+        assert hosts[0].ip_address == "10.10.1.5"
+        assert hosts[0].hostname == "example.com"
+
+    def test_populate_port_detection(self, temp_workspace, sample_nikto_output):
+        """Test that port is added from scan."""
+        from vertice.core.workspace_integration import populate_from_nikto
+
+        parser = NiktoParser()
+        parsed = parser.parse(sample_nikto_output)
+
+        populate_from_nikto(temp_workspace, parsed)
+
+        # Verify port was added
+        from vertice.workspace.models import Port
+        ports = temp_workspace._session.query(Port).all()
+        assert len(ports) >= 1
+
+        # Port 80 should be added
+        port_80 = next((p for p in ports if p.port == 80), None)
+        assert port_80 is not None
+        assert port_80.service == "http"
+
+    def test_populate_updates_existing_host(self, temp_workspace, sample_nikto_output):
+        """Test that existing hosts are updated, not duplicated."""
+        from vertice.core.workspace_integration import populate_from_nikto
+
+        # Pre-add the host
+        temp_workspace.add_host("10.10.1.5", hostname="existing")
+
+        parser = NiktoParser()
+        parsed = parser.parse(sample_nikto_output)
+
+        stats = populate_from_nikto(temp_workspace, parsed)
+
+        # Should update existing host, not add new
+        assert stats["hosts_updated"] == 1
+        assert stats["hosts_added"] == 0
+
+        # Should still have only 1 host
+        hosts = temp_workspace.query_hosts()
+        assert len(hosts) == 1
+
+    def test_populate_discovered_by(self, temp_workspace, sample_nikto_output):
+        """Test that Nikto scanner is recorded in discovered_by field."""
+        from vertice.core.workspace_integration import populate_from_nikto
+
+        parser = NiktoParser()
+        parsed = parser.parse(sample_nikto_output)
+
+        populate_from_nikto(temp_workspace, parsed)
+
+        from vertice.workspace.models import Vulnerability
+        vulns = temp_workspace._session.query(Vulnerability).all()
+
+        # Check that all vulnerabilities have discovered_by set to nikto
+        for vuln in vulns:
+            assert vuln.discovered_by == "nikto"

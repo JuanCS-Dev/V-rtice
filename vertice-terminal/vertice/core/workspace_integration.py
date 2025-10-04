@@ -234,13 +234,107 @@ def populate_from_nikto(workspace: WorkspaceManager, nikto_data: Dict[str, Any])
     """
     Populate workspace from parsed Nikto data.
 
-    TODO: Implement when NiktoParser is ready
-
     Args:
         workspace: Active WorkspaceManager instance
-        nikto_data: Parsed Nikto data
+        nikto_data: Parsed Nikto data (from NiktoParser)
 
     Returns:
-        Statistics dict
+        Statistics dict:
+        {
+            "hosts_added": 1,
+            "hosts_updated": 0,
+            "vulns_added": 12
+        }
+
+    Raises:
+        WorkspaceError: If no active project
     """
-    raise NotImplementedError("Nikto integration coming in Phase 1.1 completion")
+    stats = {
+        "hosts_added": 0,
+        "hosts_updated": 0,
+        "vulns_added": 0
+    }
+
+    scan_info = nikto_data.get("scan_info", {})
+    findings = nikto_data.get("findings", [])
+
+    # Get target from scan_info
+    target_ip = scan_info.get("target_ip")
+    target_hostname = scan_info.get("target_hostname")
+    target_port = scan_info.get("target_port")
+    server = scan_info.get("server")
+
+    if not target_ip and not target_hostname:
+        logger.warning("No target IP or hostname in Nikto data")
+        return stats
+
+    # Use IP if available, otherwise hostname
+    host_addr = target_ip or target_hostname
+
+    # Get or create host
+    existing_hosts = workspace.query_hosts({"ip_address": host_addr})
+
+    if existing_hosts:
+        host = existing_hosts[0]
+        stats["hosts_updated"] += 1
+        logger.debug(f"Found existing host: {host_addr}")
+    else:
+        host = workspace.add_host(
+            host_addr,
+            hostname=target_hostname,
+            state="up"
+        )
+        stats["hosts_added"] += 1
+        logger.info(f"Added host from Nikto: {host_addr}")
+
+    # Add port if detected
+    if target_port:
+        # Check if HTTP or HTTPS based on port
+        service = "https" if target_port == 443 else "http"
+        try:
+            workspace.add_port(
+                host.id,
+                target_port,
+                protocol="tcp",
+                service=service,
+                version=server,
+                state="open"
+            )
+        except Exception as e:
+            logger.debug(f"Port already exists or error: {e}")
+
+    # Add findings as vulnerabilities
+    for finding in findings:
+        # Skip info-level findings
+        if finding.get("severity") == "info":
+            continue
+
+        # Build description with URI
+        description = finding.get("description", "")
+        if finding.get("uri"):
+            description = f"URI: {finding['uri']}\n\n{description}"
+        if finding.get("osvdb_id"):
+            description += f"\n\nOSVDB-{finding['osvdb_id']}"
+
+        # Add vulnerability
+        workspace.add_vulnerability(
+            host.id,
+            title=f"Nikto: {finding.get('category', 'general').replace('_', ' ').title()}",
+            severity=finding.get("severity", "low"),
+            description=description,
+            discovered_by="nikto"
+        )
+
+        stats["vulns_added"] += 1
+        logger.info(
+            f"Added Nikto finding: {finding.get('category')} "
+            f"({finding.get('severity')}) on {host_addr}"
+        )
+
+    logger.info(
+        f"Nikto workspace population complete: "
+        f"{stats['hosts_added']} hosts added, {stats['hosts_updated']} updated, "
+        f"{stats['vulns_added']} vulnerabilities added"
+    )
+
+    return stats

@@ -505,6 +505,183 @@ def nuclei(
 
 
 @app.command()
+def nikto(
+    target: Annotated[str, typer.Argument(help="Target URL for Nikto scan")],
+    scan_type: Annotated[
+        str, typer.Option("--type", help="Scan type: quick, full, ssl, headers, custom")
+    ] = "quick",
+    tuning: Annotated[
+        Optional[str], typer.Option("--tuning", "-t", help="Tuning options (e.g., '1234', 'x6')")
+    ] = None,
+    plugins: Annotated[
+        Optional[str], typer.Option("--plugins", help="Specific plugins (e.g., '@@ALL', 'apache')")
+    ] = None,
+    ssl: Annotated[
+        bool, typer.Option("--ssl", help="Force SSL mode")
+    ] = False,
+    workspace: Annotated[
+        bool, typer.Option("--workspace", "-w", help="Auto-populate active workspace")
+    ] = False,
+    json_output: Annotated[
+        bool, typer.Option("--json", "-j", help="Output as JSON")
+    ] = False,
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Verbose output")
+    ] = False,
+):
+    """
+    Execute Nikto web vulnerability scan using orchestration engine.
+
+    🎯 Zero Context Switch - executes Nikto, parses results, optionally populates workspace.
+
+    Scan Types:
+      quick   - Fast scan (common files, misconfig, info disclosure)
+      full    - Comprehensive scan (all tests)
+      ssl     - SSL/TLS security analysis
+      headers - HTTP security headers analysis
+      custom  - Custom tuning/plugins
+
+    Tuning Options:
+      1 = Interesting files    5 = Remote file retrieval (web root)
+      2 = Misconfiguration     6 = Denial of service
+      3 = Info disclosure      7 = Remote file retrieval (server-wide)
+      4 = Injection            8 = Command execution
+      9 = SQL injection        a = Authentication bypass
+      b = Software ID          c = Remote source inclusion
+      x = Reverse (exclude)
+
+    Examples:
+        vcli scan nikto https://example.com
+        vcli scan nikto http://10.10.1.5:8080 --type full --workspace
+        vcli scan nikto https://target.com --ssl
+        vcli scan nikto https://example.com --tuning "123b" -j
+    """
+    from ..core import NiktoExecutor, NiktoParser, ToolNotFoundError, ToolExecutionError
+    from ..core.workspace_integration import populate_from_nikto
+    from ..workspace import WorkspaceManager, WorkspaceError
+
+    try:
+        # Execute Nikto
+        if verbose:
+            console.print(f"[dim]Executing Nikto {scan_type} scan on: {target}...[/dim]")
+
+        executor = NiktoExecutor()
+
+        with spinner_task(f"Running Nikto {scan_type} scan on {target}..."):
+            result = executor.execute(
+                target=target,
+                scan_type=scan_type,
+                tuning=tuning,
+                plugins=plugins,
+                ssl=ssl
+            )
+
+        if not result.success:
+            primoroso.error(f"Nikto scan failed: {result.stderr[:200]}")
+            return
+
+        # Parse output
+        parser = NiktoParser()
+        try:
+            parsed = parser.parse(result.stdout)
+        except ValueError as e:
+            primoroso.error(f"Failed to parse Nikto output: {e}")
+            if verbose:
+                console.print(f"[dim]Raw output:\n{result.stdout[:500]}[/dim]")
+            return
+
+        # Auto-populate workspace if requested
+        if workspace:
+            try:
+                ws = WorkspaceManager()
+                current_project = ws.get_current_project()
+
+                if not current_project:
+                    primoroso.warning(
+                        "No active workspace project. "
+                        "Use 'vcli project create <name>' or 'vcli project switch <name>'"
+                    )
+                else:
+                    with spinner_task("Populating workspace..."):
+                        stats = populate_from_nikto(ws, parsed)
+
+                    primoroso.success(
+                        f"Workspace updated: {stats['hosts_added']} hosts, "
+                        f"{stats['vulns_added']} vulnerabilities added to project '{current_project.name}'"
+                    )
+
+            except WorkspaceError as e:
+                primoroso.warning(f"Workspace update failed: {e}")
+
+        # Display results
+        if json_output:
+            print_json({
+                "execution": {
+                    "command": " ".join(result.command),
+                    "duration": result.duration,
+                    "success": result.success
+                },
+                "scan": parsed
+            })
+        else:
+            primoroso.success("\n✓ Nikto Scan Complete\n")
+            console.print(f"[cyan]Target:[/cyan] {target}")
+            console.print(f"[cyan]Type:[/cyan] {scan_type}")
+            console.print(f"[cyan]Duration:[/cyan] {result.duration:.2f}s\n")
+
+            scan_info = parsed.get("scan_info", {})
+            console.print(
+                f"[dim]Server: {scan_info.get('server', 'Unknown')} | "
+                f"Port: {scan_info.get('target_port', 'N/A')} | "
+                f"Requests: {scan_info.get('total_requests', 0)} | "
+                f"Findings: {scan_info.get('total_findings', 0)}[/dim]\n"
+            )
+
+            if parsed.get("findings"):
+                table = Table(show_header=True, header_style="bold red")
+                table.add_column("Severity", style="red", justify="center", width=10)
+                table.add_column("Category", style="yellow", width=20)
+                table.add_column("Description", style="white", width=60)
+                table.add_column("URI", style="cyan", width=25)
+
+                for finding in parsed["findings"]:
+                    severity_val = finding.get("severity", "low").upper()
+                    severity_color = {
+                        "CRITICAL": "bold red",
+                        "HIGH": "red",
+                        "MEDIUM": "yellow",
+                        "LOW": "green",
+                        "INFO": "blue"
+                    }.get(severity_val, "white")
+
+                    category = finding.get("category", "general").replace("_", " ").title()
+                    description = finding.get("description", "")[:60]
+                    uri = finding.get("uri", "N/A") or "N/A"
+
+                    table.add_row(
+                        f"[{severity_color}]{severity_val}[/{severity_color}]",
+                        category,
+                        description,
+                        uri if len(uri) < 25 else uri[:22] + "..."
+                    )
+
+                console.print(table)
+            else:
+                primoroso.success("✓ No vulnerabilities found")
+
+    except ToolNotFoundError as e:
+        primoroso.error(str(e))
+        console.print("\n[dim]Install Nikto: sudo apt install nikto[/dim]")
+    except ToolExecutionError as e:
+        primoroso.error(f"Execution error: {e}")
+    except Exception as e:
+        primoroso.error(f"Unexpected error: {e}")
+        if verbose:
+            import traceback
+            console.print(f"[dim]{traceback.format_exc()}[/dim]")
+
+
+@app.command()
 @with_connector(VulnScannerConnector)
 def vulns(
     target: Annotated[str, typer.Argument(help="Target to scan for vulnerabilities")],
