@@ -1,110 +1,36 @@
 // /home/juan/vertice-dev/frontend/src/components/AdminDashboard.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SystemSelfCheck from './admin/SystemSelfCheck';
-
-// --- Funções de Parsing de Métricas ---
-const parseMetrics = (text) => {
-  let totalRequests = 0;
-  let errorRequests = 0;
-  let totalLatencySum = 0;
-  let totalLatencyCount = 0;
-
-  const lines = text.split('\n');
-  const requestRegex = /api_requests_total{.*status_code="(\d{3})".*} (\d+\.?\d*)/;
-
-  lines.forEach(line => {
-    if (line.startsWith('#') || line.trim() === '') return;
-
-    const requestMatch = line.match(requestRegex);
-    if (requestMatch) {
-      const statusCode = parseInt(requestMatch[1], 10);
-      const value = parseFloat(requestMatch[2]);
-
-      totalRequests += value;
-      if (statusCode < 200 || statusCode >= 300) {
-        errorRequests += value;
-      }
-    } else if (line.startsWith('api_response_time_seconds_sum')) {
-      totalLatencySum += parseFloat(line.split(' ')[1]);
-    } else if (line.startsWith('api_response_time_seconds_count')) {
-      totalLatencyCount += parseFloat(line.split(' ')[1]);
-    }
-  });
-  
-  const averageLatency = totalLatencyCount > 0 ? (totalLatencySum / totalLatencyCount) * 1000 : 0;
-  const errorRate = totalRequests > 0 ? (errorRequests / totalRequests) * 100 : 0;
-
-  return {
-    totalRequests,
-    averageLatency: Math.round(averageLatency),
-    errorRate: errorRate.toFixed(2)
-  };
-};
+import SkipLink from './shared/SkipLink';
+import useKeyboardNavigation from '../hooks/useKeyboardNavigation';
+import { useClock } from '../hooks/useClock';
+import { useAdminMetrics } from '../hooks/useAdminMetrics';
+import { useSystemAlerts } from '../hooks/useSystemAlerts';
 
 const AdminDashboard = ({ setCurrentView }) => {
-  const [metrics, setMetrics] = useState({ totalRequests: 0, averageLatency: 0, errorRate: 0 });
-  const [loading, setLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const { t } = useTranslation();
   const [activeModule, setActiveModule] = useState('overview');
-  const [systemAlerts, setSystemAlerts] = useState([]);
 
-  // Atualiza relógio
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Busca métricas
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/metrics');
-        if (!response.ok) { throw new Error(`Erro de rede: ${response.statusText}`); }
-        const text = await response.text();
-        const parsedData = parseMetrics(text);
-        setMetrics(parsedData);
-      } catch (error) {
-        console.error("Falha ao buscar métricas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchMetrics();
-    const interval = setInterval(fetchMetrics, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Simula alertas do sistema
-  useEffect(() => {
-    const alertTimer = setInterval(() => {
-      if (Math.random() > 0.9) {
-        const alertTypes = [
-          { type: 'INFO', message: 'Backup automático concluído', severity: 'info' },
-          { type: 'WARNING', message: 'Uso de CPU elevado detectado', severity: 'medium' },
-          { type: 'ERROR', message: 'Falha na conexão com API externa', severity: 'high' },
-          { type: 'SECURITY', message: 'Tentativa de acesso não autorizado', severity: 'critical' }
-        ];
-        
-        const randomAlert = alertTypes[Math.floor(Math.random() * alertTypes.length)];
-        const newAlert = {
-          id: Date.now(),
-          ...randomAlert,
-          timestamp: new Date().toLocaleTimeString()
-        };
-        setSystemAlerts(prev => [newAlert, ...prev.slice(0, 9)]);
-      }
-    }, 15000);
-    return () => clearInterval(alertTimer);
-  }, []);
+  // Custom hooks
+  const currentTime = useClock();
+  const { metrics, loading } = useAdminMetrics();
+  const systemAlerts = useSystemAlerts(t);
 
   const modules = [
-    { id: 'overview', name: 'OVERVIEW', icon: '📊' },
-    { id: 'metrics', name: 'MÉTRICAS', icon: '📈' },
-    { id: 'security', name: 'SELF-CHECK', icon: '🛡️' },
-    { id: 'logs', name: 'LOGS', icon: '📋' }
+    { id: 'overview', name: t('dashboard.admin.modules.overview'), icon: '📊' },
+    { id: 'metrics', name: t('dashboard.admin.modules.metrics'), icon: '📈' },
+    { id: 'security', name: t('dashboard.admin.modules.security'), icon: '🛡️' },
+    { id: 'logs', name: t('dashboard.admin.modules.logs'), icon: '📋' }
   ];
+
+  const { getItemProps } = useKeyboardNavigation({
+    itemCount: modules.length,
+    onSelect: (index) => setActiveModule(modules[index].id),
+    orientation: 'horizontal',
+    loop: true
+  });
 
   const renderModuleContent = () => {
     switch (activeModule) {
@@ -121,9 +47,11 @@ const AdminDashboard = ({ setCurrentView }) => {
 
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-yellow-400 font-mono overflow-hidden flex flex-col">
+      <SkipLink href="#main-content">{t('accessibility.skipToMain')}</SkipLink>
+
       {/* Scan Line */}
       <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent animate-pulse z-20"></div>
-      
+
       {/* Header */}
       <header className="relative border-b border-yellow-400/30 bg-black/50 backdrop-blur-sm">
         <div className="flex items-center justify-between p-4">
@@ -133,9 +61,9 @@ const AdminDashboard = ({ setCurrentView }) => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-yellow-400 tracking-wider">
-                ADMIN DASHBOARD
+                {t('dashboard.admin.title')}
               </h1>
-              <p className="text-yellow-400/70 text-sm tracking-widest">CENTRO DE CONTROLE DO SISTEMA</p>
+              <p className="text-yellow-400/70 text-sm tracking-widest">{t('dashboard.admin.subtitle')}</p>
             </div>
           </div>
           
@@ -143,8 +71,9 @@ const AdminDashboard = ({ setCurrentView }) => {
             <button
               onClick={() => setCurrentView('operator')}
               className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-black font-bold px-6 py-2 rounded-lg transition-all duration-300 tracking-wider"
+              aria-label={t('navigation.back_to_hub')}
             >
-              ← VOLTAR VÉRTICE
+              ← {t('common.back').toUpperCase()}
             </button>
             
             <div className="text-right">
@@ -161,15 +90,17 @@ const AdminDashboard = ({ setCurrentView }) => {
         {/* Navigation Modules */}
         <div className="p-4 bg-gradient-to-r from-yellow-900/20 to-orange-900/20">
           <div className="flex space-x-2">
-            {modules.map((module) => (
+            {modules.map((module, index) => (
               <button
                 key={module.id}
-                onClick={() => setActiveModule(module.id)}
-                className={`px-4 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 ${
-                  activeModule === module.id
-                    ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/50'
-                    : 'bg-black/30 text-yellow-400/70 border border-yellow-400/20 hover:bg-yellow-400/10 hover:text-yellow-400'
-                }`}
+                {...getItemProps(index, {
+                  onClick: () => setActiveModule(module.id),
+                  className: `px-4 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 ${
+                    activeModule === module.id
+                      ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/50'
+                      : 'bg-black/30 text-yellow-400/70 border border-yellow-400/20 hover:bg-yellow-400/10 hover:text-yellow-400'
+                  }`
+                })}
               >
                 <span className="mr-2">{module.icon}</span>
                 {module.name}
@@ -180,7 +111,7 @@ const AdminDashboard = ({ setCurrentView }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-hidden">
+      <main id="main-content" className="flex-1 p-6 overflow-hidden">
         {renderModuleContent()}
       </main>
 
@@ -188,13 +119,13 @@ const AdminDashboard = ({ setCurrentView }) => {
       <footer className="border-t border-yellow-400/30 bg-black/50 backdrop-blur-sm p-2">
         <div className="flex justify-between items-center text-xs">
           <div className="flex space-x-6">
-            <span className="text-yellow-400">SISTEMA: VÉRTICE v2.0</span>
-            <span className="text-yellow-400">UPTIME: 99.8%</span>
-            <span className="text-yellow-400">USUÁRIO: ADMIN_001</span>
-            <span className="text-yellow-400">ALERTAS: {systemAlerts.length}</span>
+            <span className="text-yellow-400">{t('dashboard.admin.footer.system')}: VÉRTICE v2.0</span>
+            <span className="text-yellow-400">{t('dashboard.admin.footer.uptime')}: 99.8%</span>
+            <span className="text-yellow-400">{t('dashboard.admin.footer.user')}: ADMIN_001</span>
+            <span className="text-yellow-400">{t('dashboard.admin.footer.alerts')}: {systemAlerts.length}</span>
           </div>
           <div className="text-yellow-400/70">
-            PAINEL ADMINISTRATIVO | SSP-GO | ACESSO RESTRITO
+            {t('dashboard.admin.footer.notice')}
           </div>
         </div>
       </footer>
