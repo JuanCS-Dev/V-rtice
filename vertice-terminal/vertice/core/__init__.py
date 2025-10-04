@@ -47,7 +47,8 @@ from .base import (
     ToolTimeoutError
 )
 from .nmap_executor import NmapExecutor
-from .parsers import NmapParser
+from .nuclei_executor import NucleiExecutor
+from .parsers import NmapParser, NucleiParser
 
 __all__ = [
     "ExecutionResult",
@@ -58,5 +59,7 @@ __all__ = [
     "ToolExecutionError",
     "ToolTimeoutError",
     "NmapExecutor",
-    "NmapParser"
+    "NucleiExecutor",
+    "NmapParser",
+    "NucleiParser"
 ]

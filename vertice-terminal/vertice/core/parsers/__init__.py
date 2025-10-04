@@ -6,10 +6,11 @@ Parsers convert tool-specific output formats into unified data structures.
 
 Available Parsers:
 - NmapParser: XML → structured host/port data
-- NucleiParser: JSON → vulnerability data (TODO)
+- NucleiParser: JSONL → vulnerability data
 - NiktoParser: Text → web vulnerability data (TODO)
 """
 
 from .nmap_parser import NmapParser
+from .nuclei_parser import NucleiParser
 
-__all__ = ["NmapParser"]
+__all__ = ["NmapParser", "NucleiParser"]

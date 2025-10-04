@@ -129,16 +129,105 @@ def populate_from_nuclei(workspace: WorkspaceManager, nuclei_data: Dict[str, Any
     """
     Populate workspace from parsed Nuclei data.
 
-    TODO: Implement when NucleiParser is ready
-
     Args:
         workspace: Active WorkspaceManager instance
-        nuclei_data: Parsed Nuclei data
+        nuclei_data: Parsed Nuclei data (from NucleiParser)
 
     Returns:
-        Statistics dict
+        Statistics dict:
+        {
+            "hosts_added": 2,
+            "hosts_updated": 1,
+            "vulns_added": 8,
+            "vulns_updated": 0
+        }
+
+    Raises:
+        WorkspaceError: If no active project
     """
-    raise NotImplementedError("Nuclei integration coming in Phase 1.1 completion")
+    from urllib.parse import urlparse
+
+    stats = {
+        "hosts_added": 0,
+        "hosts_updated": 0,
+        "vulns_added": 0,
+        "vulns_updated": 0
+    }
+
+    # Track hosts we've seen (to avoid duplicate adds)
+    seen_hosts = {}
+
+    for vuln_data in nuclei_data.get("vulnerabilities", []):
+        # Extract host from URL (e.g., "http://10.10.1.5:8080" -> "10.10.1.5")
+        host_url = vuln_data.get("host", "")
+        if not host_url:
+            logger.warning(f"Vulnerability missing host: {vuln_data.get('template_id')}")
+            continue
+
+        # Parse URL to extract IP/hostname
+        try:
+            parsed = urlparse(host_url)
+            # Remove port from netloc (e.g., "10.10.1.5:8080" -> "10.10.1.5")
+            host_addr = parsed.hostname or parsed.netloc.split(":")[0]
+        except Exception as e:
+            logger.warning(f"Failed to parse host URL '{host_url}': {e}")
+            continue
+
+        # Get or create host
+        if host_addr not in seen_hosts:
+            existing_hosts = workspace.query_hosts({"ip_address": host_addr})
+
+            if existing_hosts:
+                host = existing_hosts[0]
+                stats["hosts_updated"] += 1
+                logger.debug(f"Found existing host: {host_addr}")
+            else:
+                host = workspace.add_host(
+                    host_addr,
+                    state="up"
+                )
+                stats["hosts_added"] += 1
+                logger.info(f"Added host from Nuclei: {host_addr}")
+
+            seen_hosts[host_addr] = host
+        else:
+            host = seen_hosts[host_addr]
+
+        # Extract port from URL or vuln data
+        port_num = vuln_data.get("port")
+        if not port_num and parsed.port:
+            port_num = parsed.port
+
+        # Add vulnerability
+        # Note: Nuclei-specific metadata (template_id, matched_at, tags) is stored in description
+        description = vuln_data.get("description", "")
+        if vuln_data.get("matched_at"):
+            description += f"\n\nMatched at: {vuln_data.get('matched_at')}"
+        if vuln_data.get("template_id"):
+            description += f"\nTemplate: {vuln_data.get('template_id')}"
+
+        vuln = workspace.add_vulnerability(
+            host.id,
+            title=vuln_data.get("name", "Unknown"),
+            severity=vuln_data.get("severity", "info"),
+            cve_id=vuln_data.get("cve_id"),
+            description=description,
+            discovered_by="nuclei"
+        )
+
+        stats["vulns_added"] += 1
+        logger.info(
+            f"Added vulnerability: {vuln_data.get('name')} "
+            f"({vuln_data.get('severity')}) on {host_addr}"
+        )
+
+    logger.info(
+        f"Nuclei workspace population complete: "
+        f"{stats['hosts_added']} hosts added, {stats['hosts_updated']} updated, "
+        f"{stats['vulns_added']} vulnerabilities added"
+    )
+
+    return stats
 
 
 def populate_from_nikto(workspace: WorkspaceManager, nikto_data: Dict[str, Any]) -> Dict[str, int]:
