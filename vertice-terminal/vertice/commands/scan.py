@@ -159,45 +159,172 @@ def ports(
 
 
 @app.command()
-@with_connector(NmapConnector)
 def nmap(
     target: Annotated[str, typer.Argument(help="Target for nmap scan")],
-    arguments: Annotated[
-        Optional[str], typer.Option("--args", help="Custom nmap arguments")
+    scan_type: Annotated[
+        str, typer.Option("--type", help="Scan type: quick, full, vuln, service, os")
+    ] = "quick",
+    ports: Annotated[
+        Optional[str], typer.Option("--ports", "-p", help="Port specification (e.g., '22,80,443' or '1-1000')")
     ] = None,
+    timing: Annotated[
+        Optional[str], typer.Option("--timing", "-T", help="Timing template (T0-T5)")
+    ] = None,
+    os_detection: Annotated[
+        bool, typer.Option("--os", help="Enable OS detection")
+    ] = False,
+    workspace: Annotated[
+        bool, typer.Option("--workspace", "-w", help="Auto-populate active workspace")
+    ] = False,
     json_output: Annotated[
         bool, typer.Option("--json", "-j", help="Output as JSON")
     ] = False,
     verbose: Annotated[
         bool, typer.Option("--verbose", "-v", help="Verbose output")
     ] = False,
-    connector=None,
 ):
-    """Perform custom Nmap scan with arguments.
+    """
+    Execute Nmap scan using orchestration engine.
+
+    🎯 Zero Context Switch - executes Nmap, parses results, optionally populates workspace.
+
+    Scan Types:
+      quick   - Fast scan (top 100 ports)
+      full    - Comprehensive (all ports + version detection)
+      vuln    - Vulnerability scan (NSE vuln scripts)
+      service - Service/version detection only
+      os      - OS detection
 
     Examples:
-        vertice scan nmap example.com
-        vertice scan nmap 192.168.1.1 --args "-sV -sC"
-        vertice scan nmap scanme.nmap.org --args "-O -T4" -j
+        vcli scan nmap 10.10.1.5
+        vcli scan nmap 192.168.1.0/24 --type full
+        vcli scan nmap target.com --type vuln --workspace
+        vcli scan nmap scanme.nmap.org --ports "22,80,443" --os
+        vcli scan nmap example.com --timing T4 -j
     """
-    if verbose:
-        console.print(f"[dim]Performing Nmap scan on: {target}...[/dim]")
+    from ..core import NmapExecutor, NmapParser, ToolNotFoundError, ToolExecutionError
+    from ..core.workspace_integration import populate_from_nmap
+    from ..workspace import WorkspaceManager, WorkspaceError
 
-    with spinner_task(f"Running Nmap scan on {target}..."):
-        result = connector.scan_nmap(target, arguments=arguments)
+    try:
+        # Execute Nmap
+        if verbose:
+            console.print(f"[dim]Executing Nmap {scan_type} scan on: {target}...[/dim]")
 
-    if not result:
-        return
+        executor = NmapExecutor()
 
-    if json_output:
-        print_json(result)
-    else:
-        primoroso.error("\n[bold green]✓ Nmap Scan Complete[/bold green]\n")
-        if "output" in result:
-            console.print(result["output"])
+        with spinner_task(f"Running Nmap {scan_type} scan on {target}..."):
+            result = executor.execute(
+                target=target,
+                scan_type=scan_type,
+                ports=ports,
+                os_detection=os_detection,
+                timing=timing
+            )
+
+        if not result.success:
+            primoroso.error(f"Nmap scan failed: {result.stderr[:200]}")
+            return
+
+        # Parse output
+        parser = NmapParser()
+        try:
+            parsed = parser.parse(result.stdout)
+        except ValueError as e:
+            primoroso.error(f"Failed to parse Nmap output: {e}")
+            if verbose:
+                console.print(f"[dim]Raw output:\n{result.stdout[:500]}[/dim]")
+            return
+
+        # Auto-populate workspace if requested
+        if workspace:
+            try:
+                ws = WorkspaceManager()
+                current_project = ws.get_current_project()
+
+                if not current_project:
+                    primoroso.warning(
+                        "No active workspace project. "
+                        "Use 'vcli project create <name>' or 'vcli project switch <name>'"
+                    )
+                else:
+                    with spinner_task("Populating workspace..."):
+                        stats = populate_from_nmap(ws, parsed)
+
+                    primoroso.success(
+                        f"Workspace updated: {stats['hosts_added']} hosts, "
+                        f"{stats['ports_added']} ports added to project '{current_project.name}'"
+                    )
+
+            except WorkspaceError as e:
+                primoroso.warning(f"Workspace update failed: {e}")
+
+        # Display results
+        if json_output:
+            print_json({
+                "execution": {
+                    "command": " ".join(result.command),
+                    "duration": result.duration,
+                    "success": result.success
+                },
+                "scan": parsed
+            })
         else:
-            console.print(f"[cyan]Target:[/cyan] {result.get('target', target)}")
-            console.print(f"[cyan]Status:[/cyan] {result.get('status', 'completed')}")
+            primoroso.success("\n✓ Nmap Scan Complete\n")
+            console.print(f"[cyan]Target:[/cyan] {target}")
+            console.print(f"[cyan]Type:[/cyan] {scan_type}")
+            console.print(f"[cyan]Duration:[/cyan] {result.duration:.2f}s\n")
+
+            scan_info = parsed.get("scan_info", {})
+            console.print(f"[dim]Hosts scanned: {scan_info.get('total_hosts', 0)} "
+                         f"(up: {scan_info.get('up_hosts', 0)})[/dim]\n")
+
+            if parsed.get("hosts"):
+                for host_data in parsed["hosts"]:
+                    console.print(f"[bold green]Host:[/bold green] {host_data['ip']}")
+
+                    if host_data.get("hostname"):
+                        console.print(f"  [cyan]Hostname:[/cyan] {host_data['hostname']}")
+
+                    if host_data.get("os_family"):
+                        console.print(f"  [cyan]OS:[/cyan] {host_data.get('os_family')}")
+                        if host_data.get("os_version"):
+                            console.print(f"      {host_data.get('os_version')}")
+
+                    if host_data.get("ports"):
+                        table = Table(show_header=True, header_style="bold magenta")
+                        table.add_column("Port", style="cyan", justify="right")
+                        table.add_column("State", style="green")
+                        table.add_column("Service", style="yellow")
+                        table.add_column("Version", style="dim")
+
+                        for port in host_data["ports"]:
+                            table.add_row(
+                                f"{port['port']}/{port.get('protocol', 'tcp')}",
+                                port.get("state", "unknown"),
+                                port.get("service", "unknown"),
+                                port.get("version", "")[:50]
+                            )
+
+                        console.print(table)
+                    else:
+                        primoroso.info("  No open ports detected")
+
+                    console.print()  # Blank line between hosts
+
+            else:
+                primoroso.warning("No hosts found or all hosts are down")
+
+    except ToolNotFoundError as e:
+        primoroso.error(str(e))
+        console.print("\n[dim]Install Nmap: sudo apt install nmap[/dim]")
+    except ToolExecutionError as e:
+        primoroso.error(f"Execution error: {e}")
+    except Exception as e:
+        primoroso.error(f"Unexpected error: {e}")
+        if verbose:
+            import traceback
+            console.print(f"[dim]{traceback.format_exc()}[/dim]")
 
 
 @app.command()
