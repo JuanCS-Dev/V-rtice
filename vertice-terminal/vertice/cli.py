@@ -45,6 +45,7 @@ COMMAND_MODULES = [
     "menu",
     "project",  # Workspace & State Management
     "plugin",  # Plugin Management & Extension System
+    "script",  # VScript Workflow Automation (Phase 2.4)
 ]
 
 console = Console()
