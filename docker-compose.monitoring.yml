@@ -1,0 +1,201 @@
+version: '3.8'
+
+services:
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: maximus-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=monitoring"
+      - "com.maximus.component=prometheus"
+
+  # Grafana - Visualization
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: maximus-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=maximus_ai_3_0
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - maximus-network
+    depends_on:
+      - prometheus
+    labels:
+      - "com.maximus.service=monitoring"
+      - "com.maximus.component=grafana"
+
+  # Node Exporter - System Metrics
+  node_exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: maximus-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=monitoring"
+      - "com.maximus.component=node-exporter"
+
+  # Neuromodulation Service
+  neuromodulation_service:
+    build:
+      context: ./backend/services/neuromodulation_service
+      dockerfile: Dockerfile
+    container_name: maximus-neuromodulation
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=neural_architecture"
+      - "com.maximus.component=neuromodulation"
+      - "com.maximus.layer=unconscious"
+
+  # Memory Consolidation Service
+  memory_consolidation_service:
+    build:
+      context: ./backend/services/memory_consolidation_service
+      dockerfile: Dockerfile
+    container_name: maximus-memory-consolidation
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=neural_architecture"
+      - "com.maximus.component=memory_consolidation"
+      - "com.maximus.layer=offline"
+
+  # HSAS Service
+  hsas_service:
+    build:
+      context: ./backend/services/hsas_service
+      dockerfile: Dockerfile
+    container_name: maximus-hsas
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=neural_architecture"
+      - "com.maximus.component=hsas"
+      - "com.maximus.layer=offline"
+
+  # Strategic Planning Service
+  strategic_planning_service:
+    build:
+      context: ./backend/services/strategic_planning_service
+      dockerfile: Dockerfile
+    container_name: maximus-strategic-planning
+    restart: unless-stopped
+    ports:
+      - "8004:8004"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=neural_architecture"
+      - "com.maximus.component=strategic_planning"
+      - "com.maximus.layer=conscious"
+
+  # Immunis API Service
+  immunis_api_service:
+    build:
+      context: ./backend/services/immunis_api_service
+      dockerfile: Dockerfile
+    container_name: maximus-immunis
+    restart: unless-stopped
+    ports:
+      - "8005:8005"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=neural_architecture"
+      - "com.maximus.component=immunis"
+      - "com.maximus.layer=unconscious"
+
+  # Visual Cortex Service - SENSORY LAYER (Vision)
+  visual_cortex_service:
+    build:
+      context: ./backend/services/visual_cortex_service
+      dockerfile: Dockerfile
+    container_name: maximus-visual-cortex
+    restart: unless-stopped
+    ports:
+      - "8006:8006"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+      - MALWARE_IMAGE_SIZE=256
+      - NETWORK_GRID_SIZE=256
+      - DVS_CHANGE_THRESHOLD=0.05
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=sensory_layer"
+      - "com.maximus.component=visual_cortex"
+      - "com.maximus.layer=sensory"
+
+networks:
+  maximus-network:
+    driver: bridge
+    name: maximus-ai-network
+
+volumes:
+  prometheus_data:
+    name: maximus-prometheus-data
+  grafana_data:
+    name: maximus-grafana-data
