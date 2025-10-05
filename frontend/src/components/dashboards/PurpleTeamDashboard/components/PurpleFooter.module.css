@@ -1,0 +1,67 @@
+/**
+ * PurpleFooter Styles
+ */
+
+.footer {
+  background: linear-gradient(135deg, rgba(75, 0, 130, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%);
+  border-top: 2px solid rgba(179, 102, 255, 0.3);
+  padding: 0.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.leftSection,
+.centerSection,
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.label {
+  color: rgba(179, 102, 255, 0.6);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.value {
+  color: #b366ff;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.statusEnabled {
+  color: #00ff7f;
+  text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);
+}
+
+.footerBrand {
+  font-size: 0.75rem;
+  color: rgba(179, 102, 255, 0.5);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .footer {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .leftSection,
+  .centerSection,
+  .rightSection {
+    width: 100%;
+    justify-content: center;
+  }
+}

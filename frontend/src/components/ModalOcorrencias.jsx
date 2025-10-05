@@ -1,23 +1,40 @@
 import React from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const ModalOcorrencias = ({ ocorrencias, onClose }) => {
+  const modalRef = useFocusTrap({
+    active: true,
+    autoFocus: true,
+    returnFocus: true,
+    onEscape: onClose,
+    allowOutsideClick: false
+  });
+
   return (
     // Overlay de fundo
-    <div 
+    <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
       onClick={onClose}
+      role="presentation"
     >
       {/* Container do Modal */}
-      <div 
+      <div
+        ref={modalRef}
         className="bg-gray-900 border border-green-400/50 w-full max-w-4xl h-[80vh] rounded-lg shadow-lg flex flex-col animate-slide-up"
         onClick={e => e.stopPropagation()} // Impede que o clique dentro do modal o feche
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-occurrences-title"
       >
         {/* Cabeçalho do Modal */}
         <header className="flex items-center justify-between p-4 border-b border-green-400/30 flex-shrink-0">
-          <h2 className="text-xl font-bold text-green-400 tracking-wider">HISTÓRICO DE OCORRÊNCIAS</h2>
-          <button 
+          <h2 id="modal-occurrences-title" className="text-xl font-bold text-green-400 tracking-wider">
+            HISTÓRICO DE OCORRÊNCIAS
+          </h2>
+          <button
             onClick={onClose}
             className="text-green-400 hover:text-white transition-colors text-2xl leading-none"
+            aria-label="Fechar histórico de ocorrências"
           >
             &times;
           </button>

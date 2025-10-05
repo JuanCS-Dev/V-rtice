@@ -1,8 +1,15 @@
 // /home/juan/vertice-dev/frontend/src/App.jsx
 
 import React, { useState, lazy, Suspense } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { useTranslation } from 'react-i18next';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
+import { queryClient } from './config/queryClient';
+import { LanguageSwitcher } from './components/shared/LanguageSwitcher';
+import { SkipLink } from './components/shared/SkipLink';
+import './i18n/config'; // Initialize i18n
 
 // Lazy load dashboards for code splitting
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
@@ -13,31 +20,34 @@ const OSINTDashboard = lazy(() => import('./components/OSINTDashboard'));
 const MaximusDashboard = lazy(() => import('./components/maximus/MaximusDashboard'));
 
 // Loading component
-const DashboardLoader = () => (
-  <div style={{
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, #0a1929 0%, #001e3c 100%)',
-    color: '#00f0ff',
-    fontFamily: 'Courier New, monospace',
-    fontSize: '1.5rem'
-  }}>
-    <div>
-      <div className="loading-spinner" style={{
-        border: '4px solid rgba(0, 240, 255, 0.1)',
-        borderTop: '4px solid #00f0ff',
-        borderRadius: '50%',
-        width: '3rem',
-        height: '3rem',
-        animation: 'spin 1s linear infinite',
-        margin: '0 auto 1rem'
-      }}></div>
-      LOADING DASHBOARD...
+const DashboardLoader = () => {
+  const { t } = useTranslation();
+  return (
+    <div style={{
+      height: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0a1929 0%, #001e3c 100%)',
+      color: '#00f0ff',
+      fontFamily: 'Courier New, monospace',
+      fontSize: '1.5rem'
+    }}>
+      <div>
+        <div className="loading-spinner" style={{
+          border: '4px solid rgba(0, 240, 255, 0.1)',
+          borderTop: '4px solid #00f0ff',
+          borderRadius: '50%',
+          width: '3rem',
+          height: '3rem',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto 1rem'
+        }}></div>
+        {t('common.loading').toUpperCase()}...
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function App() {
   // 'main', 'admin', 'defensive', 'offensive', 'purple', 'osint', 'maximus'
@@ -77,15 +87,22 @@ function App() {
   };
 
   return (
-    <ErrorBoundary context="app-root" title="Application Error">
-      {currentView === 'main' ? (
-        <LandingPage setCurrentView={setCurrentView} />
-      ) : (
-        <Suspense fallback={<DashboardLoader />}>
-          {views[currentView]}
-        </Suspense>
-      )}
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary context="app-root" title="Application Error">
+        <SkipLink href="#main-content" />
+        <LanguageSwitcher position="top-right" />
+        <main id="main-content" role="main">
+          {currentView === 'main' ? (
+            <LandingPage setCurrentView={setCurrentView} />
+          ) : (
+            <Suspense fallback={<DashboardLoader />}>
+              {views[currentView]}
+            </Suspense>
+          )}
+        </main>
+      </ErrorBoundary>
+      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   );
 }
 

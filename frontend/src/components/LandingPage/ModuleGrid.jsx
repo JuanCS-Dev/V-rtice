@@ -3,56 +3,59 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const ModuleGrid = ({ setCurrentView }) => {
+  const { t } = useTranslation();
+
   const modules = [
     {
       id: 'maximus',
-      name: 'MAXIMUS AI',
-      description: 'Autonomous Intelligence Platform',
+      name: t('modules.maximus.name'),
+      description: t('modules.maximus.description'),
       icon: '🧠',
       color: 'gradient-ai',
-      features: ['AI Chat & Orchestration', 'Self-Improvement', 'Workflows', 'Terminal CLI']
+      features: t('modules.maximus.features', { returnObjects: true })
     },
     {
       id: 'defensive',
-      name: 'DEFENSIVE OPS',
-      description: 'Blue Team Security Operations',
+      name: t('modules.defensive.name'),
+      description: t('modules.defensive.description'),
       icon: '🛡️',
       color: 'cyan',
-      features: ['Threat Detection', 'Network Monitor', 'Malware Analysis', 'SIEM']
+      features: t('modules.defensive.features', { returnObjects: true })
     },
     {
       id: 'offensive',
-      name: 'OFFENSIVE OPS',
-      description: 'Red Team Attack Operations',
+      name: t('modules.offensive.name'),
+      description: t('modules.offensive.description'),
       icon: '⚔️',
       color: 'red',
-      features: ['Network Recon', 'Vuln Intel', 'Web Attack', 'C2 Control', 'BAS']
+      features: t('modules.offensive.features', { returnObjects: true })
     },
     {
       id: 'purple',
-      name: 'PURPLE TEAM',
-      description: 'Unified Red & Blue Coordination',
+      name: t('modules.purple.name'),
+      description: t('modules.purple.description'),
       icon: '🟣',
       color: 'purple',
-      features: ['Attack-Defense Correlation', 'Gap Analysis', 'Coverage Metrics']
+      features: t('modules.purple.features', { returnObjects: true })
     },
     {
       id: 'osint',
-      name: 'OSINT Intelligence',
-      description: 'Open Source Investigation',
+      name: t('modules.osint.name'),
+      description: t('modules.osint.description'),
       icon: '🕵️',
       color: 'blue',
-      features: ['Social Media', 'Breach Data', 'Dark Web Monitoring']
+      features: t('modules.osint.features', { returnObjects: true })
     },
     {
       id: 'admin',
-      name: 'ADMIN PANEL',
-      description: 'System Administration',
+      name: t('modules.admin.name'),
+      description: t('modules.admin.description'),
       icon: '⚙️',
       color: 'yellow',
-      features: ['System Logs', 'User Management', 'API Configuration']
+      features: t('modules.admin.features', { returnObjects: true })
     }
   ];
 
@@ -60,7 +63,7 @@ export const ModuleGrid = ({ setCurrentView }) => {
     <div className="module-section">
       <h2 className="section-title">
         <span className="title-icon">⚡</span>
-        Módulos Disponíveis
+        {t('navigation.available_modules')}
       </h2>
 
       <div className="module-grid">
@@ -86,7 +89,7 @@ export const ModuleGrid = ({ setCurrentView }) => {
             </div>
 
             <div className="module-action">
-              <span>ACESSAR MÓDULO</span>
+              <span>{t('navigation.access_module').toUpperCase()}</span>
               <i className="fas fa-arrow-right"></i>
             </div>
           </div>

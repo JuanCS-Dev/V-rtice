@@ -1,0 +1,73 @@
+/**
+ * OffensiveFooter Styles
+ */
+
+.footer {
+  background: linear-gradient(135deg, rgba(139, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%);
+  border-top: 2px solid rgba(255, 68, 68, 0.3);
+  padding: 0.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 -4px 20px rgba(255, 0, 0, 0.1);
+}
+
+.leftSection,
+.centerSection,
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.label {
+  color: rgba(255, 68, 68, 0.6);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.value {
+  color: #ff4444;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.statusOnline {
+  color: #00ff00;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.statusEnabled {
+  color: #00ff00;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.footerBrand {
+  font-size: 0.75rem;
+  color: rgba(255, 68, 68, 0.5);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .footer {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .leftSection,
+  .centerSection,
+  .rightSection {
+    width: 100%;
+    justify-content: center;
+  }
+}

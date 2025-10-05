@@ -1,0 +1,40 @@
+/**
+ * PurpleTeamDashboard Styles - Purple Team Theme
+ */
+
+.purpleDashboard {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1a001a 0%, #000000 50%, #00001a 100%);
+  color: var(--purple-text-primary, #b366ff);
+  font-family: 'Fira Code', 'Courier New', monospace;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(179, 102, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(179, 102, 255, 0.5);
+  }
+}

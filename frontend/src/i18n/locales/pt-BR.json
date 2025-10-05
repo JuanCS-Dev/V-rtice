@@ -1,0 +1,336 @@
+{
+  "app": {
+    "name": "PROJETO VÉRTICE",
+    "subtitle": "Plataforma de Inteligência Híbrida para Segurança Cibernética"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "download": "Baixar",
+    "upload": "Enviar",
+    "retry": "Tentar Novamente",
+    "refresh": "Atualizar",
+    "clear": "Limpar",
+    "reset": "Resetar",
+    "submit": "Enviar",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "navigation": {
+    "home": "Início",
+    "dashboard": "Dashboard",
+    "back_to_hub": "Voltar ao Hub",
+    "back_to_home": "Voltar ao Início",
+    "access_module": "Acessar Módulo",
+    "access_view": "Acessar Visão",
+    "available_modules": "Módulos Disponíveis"
+  },
+  "accessibility": {
+    "skipToMain": "Pular para o conteúdo principal",
+    "skipToNav": "Pular para a navegação",
+    "alertsSidebar": "Barra Lateral de Alertas",
+    "executionsSidebar": "Barra Lateral de Execuções ao Vivo",
+    "dashboardFooter": "Rodapé do Dashboard"
+  },
+  "dashboard": {
+    "defensive": {
+      "title": "OPERAÇÕES DEFENSIVAS",
+      "subtitle": "Blue Team - Detecção e Monitoramento de Ameaças",
+      "metrics": {
+        "threats": "AMEAÇAS DETECTADAS",
+        "suspiciousIPs": "IPs SUSPEITOS",
+        "domains": "DOMÍNIOS SINALIZADOS",
+        "monitored": "ATIVOS MONITORADOS"
+      },
+      "modules": {
+        "threatMap": "Mapa de Ameaças",
+        "networkMonitor": "Monitor de Rede",
+        "nmapScanner": "Scanner Nmap",
+        "malwareAnalysis": "Análise de Malware",
+        "systemSecurity": "Segurança do Sistema",
+        "domainAnalyzer": "Analisador de Domínios",
+        "ipIntelligence": "Inteligência de IP",
+        "exploitSearch": "Busca de Exploits"
+      }
+    },
+    "offensive": {
+      "title": "CENTRO DE OPERAÇÕES OFENSIVAS",
+      "subtitle": "Red Team | Testes de Penetração | Simulação de Ataques",
+      "metrics": {
+        "activeScans": "SCANS ATIVOS",
+        "exploitsFound": "EXPLOITS ENCONTRADOS",
+        "targets": "ALVOS",
+        "sessions": "SESSÕES"
+      },
+      "modules": {
+        "networkRecon": "Reconhecimento de Rede",
+        "vulnIntel": "Inteligência de Vulnerabilidades",
+        "webAttack": "Ataque Web",
+        "c2Control": "Controle C2",
+        "bas": "BAS",
+        "gateway": "Gateway"
+      }
+    },
+    "purple": {
+      "title": "CENTRO DE OPERAÇÕES PURPLE TEAM",
+      "subtitle": "Coordenação Unificada Red & Blue Team | Correlação Ataque-Defesa",
+      "metrics": {
+        "activeAttacks": "ATAQUES ATIVOS",
+        "detections": "DETECÇÕES",
+        "coverage": "COBERTURA",
+        "correlations": "CORRELAÇÕES"
+      },
+      "views": {
+        "split": "VISÃO DIVIDIDA",
+        "timeline": "LINHA DO TEMPO",
+        "analysis": "ANÁLISE DE GAPS"
+      }
+    },
+    "maximus": {
+      "title": "MAXIMUS AI",
+      "subtitle": "Plataforma de Inteligência Autônoma",
+      "panels": {
+        "core": "NÚCLEO IA",
+        "workflows": "WORKFLOWS",
+        "terminal": "TERMINAL",
+        "insights": "INSIGHTS IA",
+        "ai3": "MAXIMUS AI 3.0",
+        "oracle": "ORÁCULO",
+        "eureka": "EUREKA"
+      },
+      "panelDescriptions": {
+        "core": "Chat & Orquestração",
+        "workflows": "Automação Guiada por IA",
+        "terminal": "Interface CLI Vértice",
+        "insights": "Visão Unificada de Inteligência",
+        "ai3": "Arquitetura Neural",
+        "oracle": "Motor de Auto-Aprimoramento",
+        "eureka": "Análise Profunda de Malware"
+      },
+      "status": {
+        "core": "NÚCLEO",
+        "oracle": "ORÁCULO",
+        "eureka": "EUREKA",
+        "online": "ONLINE",
+        "offline": "OFFLINE",
+        "idle": "INATIVO",
+        "running": "EXECUTANDO",
+        "degraded": "DEGRADADO"
+      },
+      "footer": {
+        "brainActivity": "ATIVIDADE CEREBRAL IA",
+        "eventsRegistered": "eventos registrados",
+        "waitingActivity": "Aguardando atividade da IA..."
+      },
+      "classification": {
+        "level": "CLASSIFICAÇÃO: RESTRITO",
+        "platform": "PLATAFORMA MAXIMUS AI",
+        "project": "PROJETO VÉRTICE"
+      }
+    },
+    "osint": {
+      "title": "INTELIGÊNCIA OSINT",
+      "subtitle": "MOVIDO POR MAXIMUS AI • CAÇA AVANÇADA DE AMEAÇAS",
+      "modules": {
+        "overview": "VISÃO GERAL",
+        "aurora": "MAXIMUS AI",
+        "socialmedia": "REDES SOCIAIS",
+        "breachdata": "DADOS VAZADOS",
+        "username": "USUÁRIO",
+        "email": "EMAIL",
+        "phone": "TELEFONE",
+        "social": "SOCIAL",
+        "google": "GOOGLE OSINT",
+        "darkweb": "DARK WEB",
+        "reports": "RELATÓRIOS"
+      },
+      "alerts": {
+        "leak": "Novo vazamento detectado",
+        "social": "Atividade suspeita em rede social",
+        "breach": "Email comprometido identificado",
+        "pattern": "Padrão comportamental anômalo",
+        "identity": "Nova identidade digital encontrada"
+      },
+      "processing": "AURORA AI PROCESSANDO...",
+      "stats": {
+        "totalInvestigations": "Total de Investigações",
+        "activeTargets": "Alvos Ativos",
+        "threatsDetected": "Ameaças Detectadas",
+        "dataPoints": "Pontos de Dados",
+        "aiAccuracy": "Precisão IA"
+      }
+    },
+    "admin": {
+      "title": "PAINEL ADMINISTRATIVO",
+      "subtitle": "CENTRO DE CONTROLE DO SISTEMA",
+      "modules": {
+        "overview": "VISÃO GERAL",
+        "metrics": "MÉTRICAS",
+        "security": "AUTO-VERIFICAÇÃO",
+        "logs": "LOGS"
+      },
+      "alerts": {
+        "backup": "Backup automático concluído",
+        "cpu": "Uso de CPU elevado detectado",
+        "apiError": "Falha na conexão com API externa",
+        "security": "Tentativa de acesso não autorizado"
+      },
+      "footer": {
+        "system": "SISTEMA",
+        "uptime": "TEMPO ATIVO",
+        "user": "USUÁRIO",
+        "alerts": "ALERTAS",
+        "notice": "PAINEL ADMINISTRATIVO | SSP-GO | ACESSO RESTRITO"
+      }
+    }
+  },
+  "modules": {
+    "maximus": {
+      "name": "MAXIMUS AI",
+      "description": "Inteligência Artificial e Orquestração",
+      "features": [
+        "Chat & Orquestração IA",
+        "Auto-Aprimoramento",
+        "Workflows",
+        "Terminal CLI"
+      ]
+    },
+    "defensive": {
+      "name": "OPS DEFENSIVAS",
+      "description": "Operações de Defesa Blue Team",
+      "features": [
+        "Detecção de Ameaças",
+        "Monitor de Rede",
+        "Análise de Malware",
+        "SIEM"
+      ]
+    },
+    "offensive": {
+      "name": "OPS OFENSIVAS",
+      "description": "Operações de Ataque Red Team",
+      "features": [
+        "Reconhecimento de Rede",
+        "Intel de Vulnerabilidades",
+        "Ataque Web",
+        "Controle C2",
+        "BAS"
+      ]
+    },
+    "purple": {
+      "name": "PURPLE TEAM",
+      "description": "Coordenação Ataque-Defesa",
+      "features": [
+        "Correlação Ataque-Defesa",
+        "Análise de Gaps",
+        "Métricas de Cobertura"
+      ]
+    },
+    "osint": {
+      "name": "OSINT",
+      "description": "Inteligência de Fontes Abertas",
+      "features": [
+        "Investigação de Domínios",
+        "Análise de Redes Sociais",
+        "Busca Dark Web",
+        "Correlação de Dados"
+      ]
+    },
+    "admin": {
+      "name": "ADMINISTRAÇÃO",
+      "description": "Gerenciamento do Sistema",
+      "features": [
+        "Configurações",
+        "Usuários",
+        "Logs",
+        "Auditoria"
+      ]
+    }
+  },
+  "error": {
+    "boundary": {
+      "title": "Algo deu errado",
+      "message": "Ocorreu um erro inesperado. Nossa equipe foi notificada.",
+      "retry": "Tentar Novamente",
+      "backHome": "Voltar ao Início",
+      "multipleErrors": "Múltiplos erros detectados. Considere recarregar a página."
+    },
+    "network": {
+      "title": "Erro de Rede",
+      "message": "Não foi possível conectar ao servidor. Verifique sua conexão.",
+      "offline": "Você está offline"
+    },
+    "notFound": {
+      "title": "Não Encontrado",
+      "message": "A página que você procura não existe."
+    },
+    "unauthorized": {
+      "title": "Não Autorizado",
+      "message": "Você não tem permissão para acessar este recurso."
+    },
+    "rateLimit": {
+      "title": "Limite Excedido",
+      "message": "Você atingiu o limite de requisições. Tente novamente em {{seconds}} segundos."
+    },
+    "api": {
+      "title": "Erro de API",
+      "network": "Erro de conexão de rede. Verifique sua conexão com a internet.",
+      "timeout": "Tempo limite excedido. O servidor está demorando muito para responder.",
+      "rateLimit": "Muitas requisições. Aguarde um momento antes de tentar novamente.",
+      "unauthorized": "Autenticação necessária. Por favor, faça login novamente.",
+      "forbidden": "Acesso negado. Você não tem permissão para acessar este recurso.",
+      "notFound": "Recurso não encontrado. Os dados solicitados não estão disponíveis.",
+      "server": "Erro no servidor. Nossa equipe foi notificada e está trabalhando nisso.",
+      "query": "Erro ao buscar dados. Não foi possível carregar as informações solicitadas.",
+      "unknown": "Ocorreu um erro inesperado. Por favor, tente novamente.",
+      "retry": "Tentar Novamente",
+      "reload": "Recarregar Página"
+    },
+    "technical": {
+      "details": "Detalhes Técnicos"
+    }
+  },
+  "security": {
+    "rateLimit": {
+      "exceeded": "Limite de requisições excedido",
+      "tryAgainIn": "Tente novamente em {{seconds}}s",
+      "remaining": "{{count}} requisições restantes"
+    },
+    "validation": {
+      "invalidEmail": "Email inválido",
+      "invalidURL": "URL inválida",
+      "invalidIP": "Endereço IP inválido",
+      "invalidDomain": "Domínio inválido",
+      "invalidCVE": "ID CVE inválido",
+      "tooShort": "Muito curto (mínimo: {{min}} caracteres)",
+      "tooLong": "Muito longo (máximo: {{max}} caracteres)"
+    }
+  },
+  "time": {
+    "justNow": "Agora mesmo",
+    "minutesAgo": "{{count}} minuto atrás",
+    "minutesAgo_plural": "{{count}} minutos atrás",
+    "hoursAgo": "{{count}} hora atrás",
+    "hoursAgo_plural": "{{count}} horas atrás",
+    "daysAgo": "{{count}} dia atrás",
+    "daysAgo_plural": "{{count}} dias atrás"
+  },
+  "language": {
+    "selector": "Selecionar Idioma",
+    "current": "Idioma Atual",
+    "change": "Alterar Idioma"
+  }
+}
