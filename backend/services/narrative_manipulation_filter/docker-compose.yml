@@ -1,0 +1,65 @@
+# ============================================================================
+# NARRATIVE MANIPULATION FILTER - Docker Compose Configuration
+# Multi-layer detection and protection against narrative manipulation
+# ============================================================================
+
+version: '3.8'
+
+services:
+  narrative_filter:
+    build: .
+    container_name: narrative_manipulation_filter
+    ports:
+      - "8013:8013"  # Service API
+      - "9013:9013"  # Prometheus metrics
+    environment:
+      - SERVICE_NAME=narrative_manipulation_filter
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8013
+      - LOG_LEVEL=INFO
+
+      # Analysis Thresholds
+      - INFO_THRESHOLD=0.3
+      - WARNING_THRESHOLD=0.6
+      - CRITICAL_THRESHOLD=0.8
+
+      # Detection Thresholds
+      - EMOTIONAL_INTENSITY_THRESHOLD=0.5
+      - FALLACY_SEVERITY_THRESHOLD=0.5
+      - DISTORTION_SEVERITY_THRESHOLD=0.5
+
+      # Alert Configuration
+      - ENABLE_BLOCKING=true
+      - ENABLE_ALTERNATIVES=true
+      - ENABLE_EDUCATIONAL_CONTENT=true
+      - MAX_EVIDENCE_ITEMS=10
+      - MAX_ALTERNATIVE_SOURCES=3
+
+      # Metrics
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9013
+
+      # Integration URLs
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+
+    volumes:
+      - ./logs:/var/log/narrative_filter
+      - ./data:/app/data
+
+    networks:
+      - maximus_network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8013/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  maximus_network:
+    external: true
+    name: maximus_network
