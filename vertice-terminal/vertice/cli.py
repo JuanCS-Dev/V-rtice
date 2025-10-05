@@ -37,9 +37,10 @@ COMMAND_MODULES = [
     # AI-First Commands (Maximus Integration)
     "investigate",  # AI-Orchestrated Investigation
     "osint",  # OSINT Operations
-    "cognitive",  # Cognitive Services
+    "cognitive",  # Cognitive Services (FASE 1 + FASE 8)
     "offensive",  # Offensive Security Arsenal
-    "immunis",  # AI Immune System
+    "immunis",  # AI Immune System (FASE 4 + FASE 9)
+    "distributed",  # Distributed Organism (FASE 10)
     "hcl",  # Human-Centric Language
     "memory",  # Memory System Management
     "menu",
