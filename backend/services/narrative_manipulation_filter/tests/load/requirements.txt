@@ -1,0 +1,24 @@
+# ============================================================================
+# Load Testing Dependencies
+# ============================================================================
+
+# Locust - Python-based load testing
+locust==2.20.0
+
+# Additional utilities for Locust
+locust-plugins==4.0.0  # Extra reporters and helpers
+gevent==23.9.1  # Async support
+greenlet==3.0.3
+
+# For data generation
+faker==22.0.0
+
+# For HTTP requests (used by Locust under the hood)
+requests==2.31.0
+
+# For metrics and reporting
+numpy==1.26.2
+pandas==2.1.4
+
+# k6 doesn't need Python dependencies (installed separately)
+# https://k6.io/docs/getting-started/installation/

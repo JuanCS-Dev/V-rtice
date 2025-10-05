@@ -1,0 +1,152 @@
+# ============================================================================
+# INGRESS - Cognitive Defense System
+# HTTP/HTTPS routing with TLS termination
+# ============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: narrative-filter-ingress
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: ingress
+  annotations:
+    # Ingress class (nginx, traefik, etc.)
+    kubernetes.io/ingress.class: "nginx"
+
+    # TLS configuration
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/acme-challenge-type: "http01"
+
+    # SSL/TLS settings
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+
+    # CORS configuration
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://vertice.dev"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/cors-max-age: "86400"
+
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-rpm: "5000"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+
+    # Request size limits
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+
+    # Backend protocol
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+
+    # Connection settings
+    nginx.ingress.kubernetes.io/upstream-keepalive-connections: "100"
+    nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "60"
+
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Permissions-Policy: geolocation=(), microphone=(), camera=()";
+
+spec:
+  # TLS configuration
+  tls:
+    - hosts:
+        - api.cognitive-defense.vertice.dev
+      secretName: narrative-filter-tls-cert
+
+  # Routing rules
+  rules:
+    - host: api.cognitive-defense.vertice.dev
+      http:
+        paths:
+          # API endpoints
+          - path: /api/v2
+            pathType: Prefix
+            backend:
+              service:
+                name: narrative-filter
+                port:
+                  number: 8013
+
+          # Health checks (public)
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: narrative-filter
+                port:
+                  number: 8013
+
+          # Metrics (protected - use separate ingress or service mesh)
+          # - path: /metrics
+          #   pathType: Exact
+          #   backend:
+          #     service:
+          #       name: narrative-filter
+          #       port:
+          #         number: 9013
+
+---
+# ============================================================================
+# INGRESS for Prometheus Metrics (Internal Only)
+# ============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: narrative-filter-metrics-ingress
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: metrics-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+
+    # IP whitelist for internal monitoring
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+
+    # Basic auth for additional security
+    nginx.ingress.kubernetes.io/auth-type: "basic"
+    nginx.ingress.kubernetes.io/auth-secret: "metrics-basic-auth"
+    nginx.ingress.kubernetes.io/auth-realm: "Metrics Access"
+
+spec:
+  rules:
+    - host: metrics.cognitive-defense.internal
+      http:
+        paths:
+          - path: /metrics
+            pathType: Exact
+            backend:
+              service:
+                name: narrative-filter
+                port:
+                  number: 9013
+
+---
+# ============================================================================
+# Basic Auth Secret for Metrics (Template)
+# ============================================================================
+# Create with: htpasswd -c auth prometheus
+# Then: kubectl create secret generic metrics-basic-auth --from-file=auth -n cognitive-defense
+#
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: metrics-basic-auth
+#   namespace: cognitive-defense
+# type: Opaque
+# data:
+#   auth: <base64-encoded-htpasswd-file>
+# ============================================================================

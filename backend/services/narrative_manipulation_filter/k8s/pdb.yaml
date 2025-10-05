@@ -1,0 +1,42 @@
+# ============================================================================
+# POD DISRUPTION BUDGET - Cognitive Defense System
+# Ensures minimum availability during voluntary disruptions
+# ============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: narrative-filter-pdb
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: availability
+spec:
+  minAvailable: 2  # At least 2 pods must be available at all times
+  # Alternative: maxUnavailable: 1  # Max 1 pod can be unavailable
+
+  selector:
+    matchLabels:
+      app: narrative-filter
+      component: api
+
+  # Unhealthy pod eviction policy
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+
+---
+# ============================================================================
+# NOTES:
+# ============================================================================
+# This PDB ensures that during:
+# - Cluster upgrades
+# - Node drains
+# - Pod evictions
+# - Rolling updates
+#
+# At least 2 pods remain available, preventing total service outage.
+#
+# minAvailable: 2 means:
+# - With 3 replicas: Max 1 pod can be disrupted
+# - With 4+ replicas: Max (total - 2) pods can be disrupted
+#
+# This allows safe maintenance operations while maintaining service availability.
+# ============================================================================

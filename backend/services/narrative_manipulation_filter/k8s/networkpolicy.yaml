@@ -1,0 +1,177 @@
+# ============================================================================
+# NETWORK POLICIES - Cognitive Defense System
+# Restrict network traffic for security (Zero-Trust model)
+# ============================================================================
+
+# Policy 1: Allow ingress from Ingress Controller only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: narrative-filter-ingress
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: network-security
+spec:
+  podSelector:
+    matchLabels:
+      app: narrative-filter
+      component: api
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    # Allow from Ingress Controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8013
+
+    # Allow from Prometheus (for metrics scraping)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9013
+
+    # Allow from same namespace (inter-pod communication)
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8013
+
+---
+# Policy 2: Allow egress to required services only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: narrative-filter-egress
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: network-security
+spec:
+  podSelector:
+    matchLabels:
+      app: narrative-filter
+      component: api
+
+  policyTypes:
+    - Egress
+
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # Allow to PostgreSQL
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow to Redis
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow to Kafka
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # Allow to Seriema Graph (Neo4j)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: seriema-graph
+      ports:
+        - protocol: TCP
+          port: 7474
+        - protocol: TCP
+          port: 7687
+
+    # Allow to external APIs (HTTPS)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+
+---
+# Policy 3: Default deny all (enable for maximum security)
+# WARNING: This will block all traffic not explicitly allowed above
+# Only enable after verifying all required traffic is whitelisted
+#
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: default-deny-all
+#   namespace: cognitive-defense
+# spec:
+#   podSelector: {}
+#   policyTypes:
+#     - Ingress
+#     - Egress
+
+---
+# ============================================================================
+# NOTES:
+# ============================================================================
+# These policies implement a Zero-Trust security model:
+#
+# 1. Ingress policy:
+#    - Only allows traffic from Ingress Controller
+#    - Allows Prometheus scraping for monitoring
+#    - Allows inter-pod communication within namespace
+#
+# 2. Egress policy:
+#    - Allows DNS resolution
+#    - Allows connections to required databases (PostgreSQL, Redis, Kafka)
+#    - Allows HTTPS to external APIs
+#    - Blocks all other outbound traffic
+#
+# 3. Default deny policy (commented):
+#    - When enabled, blocks ALL traffic not explicitly allowed
+#    - Use only after thorough testing
+#
+# Prerequisites:
+# - NetworkPolicy support in cluster (Calico, Cilium, Weave, etc.)
+# - Properly labeled namespaces and pods
+# ============================================================================

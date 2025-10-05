@@ -1,0 +1,127 @@
+# ============================================================================
+# HORIZONTAL POD AUTOSCALER - Cognitive Defense System
+# Auto-scaling based on CPU, memory, and custom metrics
+# ============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: narrative-filter-hpa
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: narrative-filter
+
+  # Scaling bounds
+  minReplicas: 3
+  maxReplicas: 20
+
+  # Scaling behavior
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      policies:
+        - type: Percent
+          value: 50  # Scale down max 50% of pods at a time
+          periodSeconds: 60
+        - type: Pods
+          value: 2  # Scale down max 2 pods at a time
+          periodSeconds: 60
+      selectPolicy: Min  # Use minimum of the two policies
+
+    scaleUp:
+      stabilizationWindowSeconds: 60  # Wait 1 minute before scaling up
+      policies:
+        - type: Percent
+          value: 100  # Scale up max 100% of pods at a time
+          periodSeconds: 60
+        - type: Pods
+          value: 4  # Scale up max 4 pods at a time
+          periodSeconds: 60
+      selectPolicy: Max  # Use maximum of the two policies
+
+  # Metrics for scaling decisions
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70  # Target 70% CPU utilization
+
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80  # Target 80% memory utilization
+
+    # Custom metrics (requires metrics-server and custom metrics API)
+    # Uncomment when Prometheus adapter is configured
+
+    # Request rate (requests per second)
+    # - type: Pods
+    #   pods:
+    #     metric:
+    #       name: http_requests_per_second
+    #     target:
+    #       type: AverageValue
+    #       averageValue: "100"  # Scale when avg RPS > 100
+
+    # Request latency (milliseconds)
+    # - type: Pods
+    #   pods:
+    #     metric:
+    #       name: http_request_duration_p95
+    #     target:
+    #       type: AverageValue
+    #       averageValue: "1000"  # Scale when p95 latency > 1s
+
+    # Queue depth (if using message queues)
+    # - type: External
+    #   external:
+    #     metric:
+    #       name: kafka_consumer_lag
+    #       selector:
+    #         matchLabels:
+    #           topic: claims_to_verify
+    #     target:
+    #       type: AverageValue
+    #       averageValue: "1000"  # Scale when lag > 1000 messages
+
+---
+# ============================================================================
+# VERTICAL POD AUTOSCALER (VPA) - Optional
+# Automatically adjusts CPU and memory requests/limits
+# Requires VPA controller to be installed in cluster
+# ============================================================================
+# apiVersion: autoscaling.k8s.io/v1
+# kind: VerticalPodAutoscaler
+# metadata:
+#   name: narrative-filter-vpa
+#   namespace: cognitive-defense
+# spec:
+#   targetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: narrative-filter
+#   updatePolicy:
+#     updateMode: "Auto"  # Automatically apply recommendations
+#   resourcePolicy:
+#     containerPolicies:
+#       - containerName: narrative-filter
+#         minAllowed:
+#           cpu: 200m
+#           memory: 512Mi
+#         maxAllowed:
+#           cpu: 4000m
+#           memory: 8Gi
+#         controlledResources:
+#           - cpu
+#           - memory

@@ -1,0 +1,19 @@
+# ============================================================================
+# Security Scanning Tools - Python Dependencies
+# ============================================================================
+
+# Dependency vulnerability scanning
+pip-audit==2.6.3
+safety==3.0.1
+
+# Code security analysis
+bandit[toml]==1.7.6
+
+# Secret detection
+detect-secrets==1.4.0
+
+# Code quality with security rules
+ruff==0.1.15
+
+# Additional security tools
+# (trivy, kubesec, kube-score are installed separately - see README)

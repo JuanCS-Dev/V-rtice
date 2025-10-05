@@ -1,0 +1,125 @@
+# ============================================================================
+# CONFIGMAP - Cognitive Defense System Configuration
+# Non-sensitive configuration values
+# ============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: narrative-filter-config
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: configuration
+data:
+  # Service configuration
+  SERVICE_NAME: "narrative_manipulation_filter"
+  SERVICE_HOST: "0.0.0.0"
+  SERVICE_PORT: "8013"
+  PROMETHEUS_PORT: "9013"
+  LOG_LEVEL: "INFO"
+  WORKERS: "2"
+
+  # API endpoints
+  API_VERSION: "v2"
+  API_PREFIX: "/api/v2"
+
+  # Database configuration (non-sensitive)
+  DB_HOST: "postgresql.cognitive-defense.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "cognitive_defense"
+  DB_POOL_SIZE: "20"
+  DB_MAX_OVERFLOW: "10"
+  DB_POOL_TIMEOUT: "30"
+
+  # Redis configuration
+  REDIS_HOST: "redis.cognitive-defense.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  REDIS_TTL: "3600"
+  REDIS_MAX_CONNECTIONS: "50"
+
+  # Kafka configuration
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.cognitive-defense.svc.cluster.local:9092"
+  KAFKA_CONSUMER_GROUP: "cognitive-defense-workers"
+  KAFKA_AUTO_OFFSET_RESET: "earliest"
+  KAFKA_ENABLE_AUTO_COMMIT: "true"
+
+  # Seriema Graph configuration
+  SERIEMA_HOST: "seriema-graph.cognitive-defense.svc.cluster.local"
+  SERIEMA_PORT: "7474"
+  SERIEMA_BOLT_PORT: "7687"
+
+  # External APIs (non-sensitive endpoints)
+  NEWSGUARD_API_URL: "https://api.newsguardtech.com"
+  CLAIMBUSTER_API_URL: "https://idir.uta.edu/claimbuster/api/v2"
+  GOOGLE_FACTCHECK_API_URL: "https://factchecktools.googleapis.com/v1alpha1"
+  DBPEDIA_SPOTLIGHT_URL: "https://api.dbpedia-spotlight.org/en/annotate"
+  WIKIDATA_SPARQL_ENDPOINT: "https://query.wikidata.org/sparql"
+  DBPEDIA_SPARQL_ENDPOINT: "https://dbpedia.org/sparql"
+
+  # Cache configuration
+  CACHE_ENABLED: "true"
+  CACHE_TTL_SECONDS: "3600"
+  CACHE_MAX_SIZE: "10000"
+  CACHE_HIT_RATE_TARGET: "0.70"
+
+  # Model configuration
+  MODEL_CACHE_DIR: "/app/models/cache"
+  SPACY_MODEL: "pt_core_news_lg"
+  SENTENCE_TRANSFORMER_MODEL: "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+
+  # Performance tuning
+  BATCH_SIZE: "32"
+  BATCH_WAIT_TIME_MS: "100"
+  MAX_WORKERS: "4"
+  REQUEST_TIMEOUT: "30"
+
+  # Processing modes
+  DEFAULT_PROCESSING_MODE: "STANDARD"
+  FAST_TRACK_THRESHOLD_MS: "500"
+  STANDARD_THRESHOLD_MS: "2000"
+  DEEP_ANALYSIS_THRESHOLD_MS: "5000"
+
+  # Threat assessment thresholds
+  CREDIBILITY_WEIGHT: "0.25"
+  EMOTIONAL_WEIGHT: "0.25"
+  LOGICAL_WEIGHT: "0.20"
+  REALITY_WEIGHT: "0.30"
+
+  # Alert configuration
+  ALERT_ERROR_RATE_THRESHOLD: "0.05"
+  ALERT_LATENCY_THRESHOLD_SECONDS: "2.0"
+  ALERT_CACHE_HIT_RATE_THRESHOLD: "0.50"
+  ALERT_COOLDOWN_HOURS: "1"
+
+  # Retraining configuration
+  RETRAINING_MIN_SAMPLES: "1000"
+  RETRAINING_IMPROVEMENT_THRESHOLD: "0.02"
+  RETRAINING_AB_TEST_DURATION_HOURS: "24"
+
+  # Security
+  CORS_ORIGINS: '["http://localhost:3000", "https://vertice.dev"]'
+  RATE_LIMIT_REQUESTS: "100"
+  RATE_LIMIT_WINDOW_SECONDS: "60"
+
+  # Monitoring
+  METRICS_ENABLED: "true"
+  METRICS_PATH: "/metrics"
+  HEALTH_CHECK_PATH: "/health"
+  READINESS_CHECK_PATH: "/ready"
+  LIVENESS_CHECK_PATH: "/live"
+
+  # Feature flags
+  ENABLE_TIER2_VERIFICATION: "true"
+  ENABLE_ADVERSARIAL_DETECTION: "true"
+  ENABLE_BATCH_INFERENCE: "true"
+  ENABLE_MODEL_QUANTIZATION: "true"
+
+  # Logging
+  LOG_FORMAT: "json"
+  LOG_OUTPUT: "stdout"
+  ACCESS_LOG_ENABLED: "true"
+
+  # Python configuration
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"

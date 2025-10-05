@@ -1,0 +1,86 @@
+# ============================================================================
+# SERVICE - Cognitive Defense System
+# ClusterIP service for internal communication + LoadBalancer for external
+# ============================================================================
+
+# Internal service (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: narrative-filter
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: api
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9013"
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  selector:
+    app: narrative-filter
+    component: api
+  ports:
+    - name: http
+      port: 8013
+      targetPort: http
+      protocol: TCP
+    - name: metrics
+      port: 9013
+      targetPort: metrics
+      protocol: TCP
+
+---
+# External LoadBalancer service (optional - for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: narrative-filter-external
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: api-external
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # For AWS
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+spec:
+  type: LoadBalancer
+  sessionAffinity: ClientIP  # Sticky sessions
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+  selector:
+    app: narrative-filter
+    component: api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: http
+      protocol: TCP
+
+---
+# Headless service for StatefulSet (if needed for worker pods)
+apiVersion: v1
+kind: Service
+metadata:
+  name: narrative-filter-headless
+  namespace: cognitive-defense
+  labels:
+    app: narrative-filter
+    component: headless
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless
+  selector:
+    app: narrative-filter
+    component: api
+  ports:
+    - name: http
+      port: 8013
+      targetPort: http
+      protocol: TCP
