@@ -144,11 +144,12 @@ class APTSimulation:
         return metrics
 
     async def _simulate_reconnaissance(self) -> bool:
-        """Simulate port scanning reconnaissance."""
-        # Send port scan events to RTE
+        """Simulate port scanning reconnaissance with REAL HTTP calls."""
         try:
             async with aiohttp.ClientSession() as session:
-                # Simulate rapid port scan
+                detection_count = 0
+
+                # Send REAL port scan events to RTE
                 for port in [22, 80, 443, 3389, 8080]:
                     event = {
                         'type': 'network_connection',
@@ -160,75 +161,236 @@ class APTSimulation:
                         'timestamp': datetime.now().isoformat()
                     }
 
-                    # This should trigger RTE reflex (< 5ms)
+                    # REAL HTTP POST to RTE service
+                    try:
+                        url = f"{self.framework.services['rte']}/scan"
+                        async with session.post(
+                            url,
+                            json=event,
+                            timeout=aiohttp.ClientTimeout(total=1)
+                        ) as response:
+                            if response.status == 200:
+                                result = await response.json()
+                                if result.get('threat_detected'):
+                                    detection_count += 1
+                    except Exception as e:
+                        logger.debug(f"RTE call failed for port {port}: {e}")
+
                     await asyncio.sleep(0.01)  # 10ms between scans
 
-            # Check if RTE detected it
-            return True  # Assume detection for now (would check RTE logs in production)
+                # Verification: Check RTE recent detections
+                try:
+                    url = f"{self.framework.services['rte']}/recent_detections"
+                    async with session.get(
+                        url,
+                        params={'limit': 10, 'type': 'port_scan'},
+                        timeout=aiohttp.ClientTimeout(total=2)
+                    ) as response:
+                        if response.status == 200:
+                            detections = await response.json()
+                            return len(detections) > 0 or detection_count > 2
+                except Exception as e:
+                    logger.debug(f"RTE verification failed: {e}")
+                    # Fallback: if we got 3+ detections during scan, consider success
+                    return detection_count >= 3
+
+            return detection_count >= 3
 
         except Exception as e:
             logger.error(f"Reconnaissance simulation failed: {e}")
             return False
 
     async def _simulate_initial_compromise(self) -> bool:
-        """Simulate phishing email with malware."""
-        # Simulate malware execution event
-        event = {
-            'type': 'process_execution',
-            'process_name': 'invoice.exe',
-            'parent_process': 'outlook.exe',
-            'user': 'john.doe',
-            'suspicious_indicators': [
-                'unsigned_binary',
-                'network_connection_on_startup',
-                'registry_modification'
-            ],
-            'timestamp': datetime.now().isoformat()
-        }
+        """Simulate phishing email with malware - REAL HTTP calls."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                event = {
+                    'type': 'process_execution',
+                    'process_name': 'invoice.exe',
+                    'parent_process': 'outlook.exe',
+                    'user': 'john.doe',
+                    'suspicious_indicators': [
+                        'unsigned_binary',
+                        'network_connection_on_startup',
+                        'registry_modification'
+                    ],
+                    'timestamp': datetime.now().isoformat()
+                }
 
-        # Should trigger NK Cell detection (unknown process)
-        return True
+                # REAL HTTP POST to NK Cell service
+                try:
+                    url = f"{self.framework.services['immunis_nk']}/detect"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=2)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('detected', False)
+                except aiohttp.ClientError:
+                    # Service may not be available, check RTE fallback
+                    pass
+
+                # Fallback: Try RTE detection
+                try:
+                    url = f"{self.framework.services['rte']}/scan"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=1)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('threat_detected', False)
+                except Exception as e:
+                    logger.debug(f"RTE fallback failed: {e}")
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Initial compromise simulation failed: {e}")
+            return False
 
     async def _simulate_lateral_movement(self) -> bool:
-        """Simulate credential theft and lateral movement."""
-        event = {
-            'type': 'credential_access',
-            'technique': 'lsass_memory_dump',
-            'tool': 'mimikatz',
-            'user': 'SYSTEM',
-            'timestamp': datetime.now().isoformat()
-        }
+        """Simulate credential theft and lateral movement - REAL HTTP calls."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                event = {
+                    'type': 'credential_access',
+                    'technique': 'lsass_memory_dump',
+                    'tool': 'mimikatz',
+                    'user': 'SYSTEM',
+                    'timestamp': datetime.now().isoformat()
+                }
 
-        # Should trigger Dendritic Cell (behavior analysis)
-        return True
+                # REAL HTTP POST to Dendritic Cell service
+                try:
+                    url = f"{self.framework.services['immunis_dendritic']}/present_antigen"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=2)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('antigen_presented', False)
+                except aiohttp.ClientError:
+                    pass
+
+                # Fallback: RTE behavioral detection
+                try:
+                    url = f"{self.framework.services['rte']}/scan"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=1)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('threat_detected', False)
+                except Exception:
+                    pass
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Lateral movement simulation failed: {e}")
+            return False
 
     async def _simulate_persistence(self) -> bool:
-        """Simulate backdoor persistence."""
-        event = {
-            'type': 'persistence',
-            'method': 'registry_run_key',
-            'path': 'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
-            'value': 'C:\\Windows\\Temp\\svchost.exe',
-            'timestamp': datetime.now().isoformat()
-        }
+        """Simulate backdoor persistence - REAL HTTP calls."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                event = {
+                    'type': 'persistence',
+                    'method': 'registry_run_key',
+                    'path': 'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+                    'value': 'C:\\Windows\\Temp\\svchost.exe',
+                    'timestamp': datetime.now().isoformat()
+                }
 
-        # Should trigger Helper T Cell coordination
-        return True
+                # REAL HTTP POST to Helper T Cell service
+                try:
+                    url = f"{self.framework.services['immunis_helper_t']}/coordinate"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=2)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('coordination_triggered', False)
+                except aiohttp.ClientError:
+                    pass
+
+                # Fallback: RTE detection
+                try:
+                    url = f"{self.framework.services['rte']}/scan"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=1)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('threat_detected', False)
+                except Exception:
+                    pass
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Persistence simulation failed: {e}")
+            return False
 
     async def _simulate_data_exfiltration(self) -> bool:
-        """Simulate data exfiltration."""
-        event = {
-            'type': 'network_traffic',
-            'direction': 'outbound',
-            'dst_ip': '185.220.101.1',  # Suspicious external IP
-            'protocol': 'https',
-            'bytes_transferred': 524288000,  # 500MB
-            'duration_sec': 120,
-            'timestamp': datetime.now().isoformat()
-        }
+        """Simulate data exfiltration - REAL HTTP calls."""
+        try:
+            async with aiohttp.ClientSession() as session:
+                event = {
+                    'type': 'network_traffic',
+                    'direction': 'outbound',
+                    'dst_ip': '185.220.101.1',  # Suspicious external IP
+                    'protocol': 'https',
+                    'bytes_transferred': 524288000,  # 500MB
+                    'duration_sec': 120,
+                    'timestamp': datetime.now().isoformat()
+                }
 
-        # Should trigger Cytotoxic T Cell (kill connection)
-        return True
+                # REAL HTTP POST to Cytotoxic T Cell service
+                try:
+                    url = f"{self.framework.services['immunis_cytotoxic_t']}/eliminate"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=2)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('eliminated', False)
+                except aiohttp.ClientError:
+                    pass
+
+                # Fallback: RTE network detection
+                try:
+                    url = f"{self.framework.services['rte']}/scan"
+                    async with session.post(
+                        url,
+                        json=event,
+                        timeout=aiohttp.ClientTimeout(total=1)
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            return result.get('threat_detected', False)
+                except Exception:
+                    pass
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Data exfiltration simulation failed: {e}")
+            return False
 
     async def _trigger_immune_response(self, threat_type: str) -> Dict[str, Any]:
         """Trigger immune system response.

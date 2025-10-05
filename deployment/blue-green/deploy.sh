@@ -107,8 +107,7 @@ SOAK_TIME=60  # seconds
 for traffic in "${TRAFFIC_STEPS[@]}"; do
     echo -e "  Shifting ${traffic}% traffic to ${TARGET_COLOR}..."
 
-    # Update load balancer (HAProxy/Nginx/Traefik)
-    # This is a placeholder - actual implementation depends on load balancer
+    # Update load balancer (Nginx with real upstream weight manipulation)
     ./update_traffic_split.sh $CURRENT_COLOR $TARGET_COLOR $traffic
 
     echo -e "  Soaking for ${SOAK_TIME}s..."
