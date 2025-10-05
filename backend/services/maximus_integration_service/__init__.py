@@ -1,20 +1,13 @@
+"""Maximus Integration Service - Package Initialization.
+
+This package provides the core functionality for the Maximus AI's Integration
+Service. It is responsible for facilitating seamless communication and data
+exchange between various Maximus AI services and external systems.
+
+Key components within this package are responsible for:
+- Managing API connections and authentication for external services.
+- Translating data formats and protocols between different systems.
+- Orchestrating workflows that span multiple services.
+- Providing a unified interface for Maximus AI to interact with the broader
+  digital ecosystem.
 """
-MAXIMUS INTEGRATION SERVICE - Unified Gateway
-==============================================
-
-"Pela Arte. Pela Sociedade."
-
-Serviço central que integra todos os componentes do MAXIMUS:
-- MAXIMUS Core (Reasoning Engine)
-- ORÁCULO (Self-Improvement)
-- EUREKA (Deep Malware Analysis)
-- ADR Core (Detection & Response)
-- Supply Chain Guardian (Oráculo + Eureka)
-
-Versão: 1.0.0
-Status: INTEGRATION LAYER
-"""
-
-__version__ = "1.0.0"
-__author__ = "Juan + Claude"
-__status__ = "Production Ready"

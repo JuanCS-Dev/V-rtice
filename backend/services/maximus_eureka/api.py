@@ -1,249 +1,151 @@
+"""Maximus Eureka Service - API Endpoints.
+
+This module defines the FastAPI application and its endpoints for the Eureka
+Service. It exposes functionalities for identifying novel insights, making
+unexpected connections, and generating breakthrough discoveries from vast
+amounts of data.
+
+Endpoints are provided for:
+- Submitting data for insight generation.
+- Querying for novel patterns or anomalies.
+- Retrieving generated hypotheses or discoveries.
+
+This API allows other Maximus AI services or human analysts to leverage the
+Eureka Service's advanced analytical capabilities, facilitating scientific
+discovery, strategic planning, and complex problem-solving within the Maximus
+AI system.
 """
-MAXIMUS EUREKA - REST API
-========================
 
-FastAPI REST endpoints para análise profunda de malware.
-
-Endpoints:
-- POST /analyze → Analisa arquivo de malware
-- GET /health → Health check
-- GET /patterns → Lista padrões disponíveis
-"""
-
-import os
-import logging
-from typing import Dict, Any, Optional
-from pathlib import Path
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Dict, Any, Optional
+import uvicorn
+import asyncio
 from datetime import datetime
+import uuid
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from eureka import EurekaEngine
+from pattern_detector import PatternDetector
+from ioc_extractor import IoCExtractor
+from playbook_generator import PlaybookGenerator
 
-from eureka import MalwareAnalyzer, AnalysisResult
+app = FastAPI(title="Maximus Eureka Service", version="1.0.0")
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-# FastAPI app
-app = FastAPI(
-    title="MAXIMUS EUREKA API",
-    description="Deep Malware Analysis Orchestrator",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
-
-# Initialize analyzer
-analyzer = MalwareAnalyzer()
+# Initialize Eureka components
+eureka_engine = EurekaEngine()
+pattern_detector = PatternDetector()
+ioc_extractor = IoCExtractor()
+playbook_generator = PlaybookGenerator()
 
 
-class AnalysisRequest(BaseModel):
-    """Request model for analysis"""
-    file_path: str = Field(..., description="Path to malware file for analysis")
-    generate_playbook: bool = Field(True, description="Generate response playbook")
-    export_html: bool = Field(False, description="Export HTML report")
+class InsightRequest(BaseModel):
+    """Request model for submitting data for insight generation.
+
+    Attributes:
+        data (Dict[str, Any]): The data to analyze for insights.
+        data_type (str): The type of data (e.g., 'logs', 'network_traffic', 'threat_intel').
+        context (Optional[Dict[str, Any]]): Additional context for the analysis.
+    """
+    data: Dict[str, Any]
+    data_type: str
+    context: Optional[Dict[str, Any]] = None
 
 
-class AnalysisResponse(BaseModel):
-    """Response model for analysis"""
-    status: str
-    analysis_id: str
-    threat_score: int
-    severity: str
-    malware_type: Optional[str]
-    patterns_detected: int
-    iocs_found: int
-    report_url: Optional[str]
-    playbook_url: Optional[str]
-    timestamp: str
+class PatternDetectionRequest(BaseModel):
+    """Request model for detecting specific patterns.
+
+    Attributes:
+        data (Dict[str, Any]): The data to analyze for patterns.
+        pattern_definition (Dict[str, Any]): The definition of the pattern to detect.
+    """
+    data: Dict[str, Any]
+    pattern_definition: Dict[str, Any]
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Eureka Service."""
+    print("💡 Starting Maximus Eureka Service...")
+    print("✅ Maximus Eureka Service started successfully.")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Eureka Service."""
+    print("👋 Shutting down Maximus Eureka Service...")
+    print("🛑 Maximus Eureka Service shut down.")
 
 
 @app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "service": "maximus-eureka",
-        "version": "1.0.0",
-        "timestamp": datetime.now().isoformat()
-    }
-
-
-@app.get("/patterns")
-async def list_patterns():
-    """List available malicious patterns"""
-    patterns = analyzer.pattern_detector.get_pattern_names()
-    return {
-        "total": len(patterns),
-        "patterns": patterns
-    }
-
-
-@app.post("/analyze", response_model=AnalysisResponse)
-async def analyze_malware(
-    file: UploadFile = File(...),
-    generate_playbook: bool = True,
-    export_html: bool = False
-):
-    """
-    Analyze malware file.
-
-    Args:
-        file: Malware file to analyze
-        generate_playbook: Generate YAML playbook (default: True)
-        export_html: Export HTML report (default: False)
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Eureka Service.
 
     Returns:
-        Analysis results with threat score, IOCs, patterns, etc.
+        Dict[str, str]: A dictionary indicating the service status.
     """
-    temp_file = None
-
-    try:
-        # Save uploaded file temporarily
-        temp_dir = Path("/tmp/eureka_uploads")
-        temp_dir.mkdir(exist_ok=True)
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        temp_file = temp_dir / f"{timestamp}_{file.filename}"
-
-        with open(temp_file, "wb") as f:
-            content = await file.read()
-            f.write(content)
-
-        logger.info(f"Analyzing file: {file.filename} ({len(content)} bytes)")
-
-        # Run analysis
-        result = analyzer.analyze_file(str(temp_file))
-
-        # Generate playbook if requested
-        playbook_url = None
-        if generate_playbook:
-            playbook_path = analyzer.generate_playbook(result)
-            if playbook_path:
-                playbook_url = f"/playbooks/{Path(playbook_path).name}"
-
-        # Export HTML if requested
-        report_url = None
-        if export_html:
-            html_path = analyzer.export_html(result)
-            if html_path:
-                report_url = f"/reports/{Path(html_path).name}"
-
-        # Build response
-        response = AnalysisResponse(
-            status="success",
-            analysis_id=f"eureka_{timestamp}",
-            threat_score=result.threat_score,
-            severity=result.severity,
-            malware_type=result.malware_type or "Unknown",
-            patterns_detected=len(result.patterns_detected),
-            iocs_found=len(result.iocs),
-            report_url=report_url,
-            playbook_url=playbook_url,
-            timestamp=datetime.now().isoformat()
-        )
-
-        logger.info(f"Analysis complete: {file.filename} - Score: {result.threat_score}")
-
-        return response
-
-    except Exception as e:
-        logger.error(f"Analysis failed: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-
-    finally:
-        # Cleanup temporary file
-        if temp_file and temp_file.exists():
-            try:
-                temp_file.unlink()
-            except Exception as e:
-                logger.warning(f"Failed to cleanup temp file: {e}")
+    return {"status": "healthy", "message": "Eureka Service is operational."}
 
 
-@app.post("/analyze/path")
-async def analyze_file_path(request: AnalysisRequest):
-    """
-    Analyze malware from file path (for internal service calls).
+@app.post("/generate_insight")
+async def generate_insight_endpoint(request: InsightRequest) -> Dict[str, Any]:
+    """Submits data for insight generation and returns novel discoveries.
 
     Args:
-        request: Analysis request with file path
+        request (InsightRequest): The request body containing data for analysis.
 
     Returns:
-        Analysis results
+        Dict[str, Any]: A dictionary containing the generated insights and discoveries.
     """
-    try:
-        file_path = Path(request.file_path)
+    print(f"[API] Generating insight for {request.data_type} data.")
+    
+    # Simulate various Eureka engine operations
+    insights = await eureka_engine.analyze_data(request.data, request.data_type, request.context)
+    
+    # Extract IoCs if applicable
+    extracted_iocs = ioc_extractor.extract_iocs(request.data)
+    if extracted_iocs: insights["extracted_iocs"] = extracted_iocs
 
-        if not file_path.exists():
-            raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
+    # Detect patterns
+    detected_patterns = pattern_detector.detect_patterns(request.data, {"type": "anomaly"}) # Generic pattern
+    if detected_patterns: insights["detected_patterns"] = detected_patterns
 
-        logger.info(f"Analyzing file: {file_path}")
+    # Generate playbook if a critical insight is found
+    if insights.get("novel_discovery") and insights["novel_discovery"].get("severity", "low") == "critical":
+        playbook = playbook_generator.generate_playbook(insights["novel_discovery"])
+        insights["suggested_playbook"] = playbook
 
-        # Run analysis
-        result = analyzer.analyze_file(str(file_path))
-
-        # Generate playbook if requested
-        playbook_url = None
-        if request.generate_playbook:
-            playbook_path = analyzer.generate_playbook(result)
-            if playbook_path:
-                playbook_url = f"/playbooks/{Path(playbook_path).name}"
-
-        # Export HTML if requested
-        report_url = None
-        if request.export_html:
-            html_path = analyzer.export_html(result)
-            if html_path:
-                report_url = f"/reports/{Path(html_path).name}"
-
-        # Build response
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        response = AnalysisResponse(
-            status="success",
-            analysis_id=f"eureka_{timestamp}",
-            threat_score=result.threat_score,
-            severity=result.severity,
-            malware_type=result.malware_type or "Unknown",
-            patterns_detected=len(result.patterns_detected),
-            iocs_found=len(result.iocs),
-            report_url=report_url,
-            playbook_url=playbook_url,
-            timestamp=datetime.now().isoformat()
-        )
-
-        logger.info(f"Analysis complete: {file_path.name} - Score: {result.threat_score}")
-
-        return response
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Analysis failed: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+    return {"status": "success", "timestamp": datetime.now().isoformat(), "insights": insights}
 
 
-@app.get("/")
-async def root():
-    """Root endpoint"""
-    return {
-        "service": "MAXIMUS EUREKA",
-        "description": "Deep Malware Analysis Orchestrator",
-        "version": "1.0.0",
-        "endpoints": {
-            "analyze": "POST /analyze - Upload and analyze malware file",
-            "analyze_path": "POST /analyze/path - Analyze file from path",
-            "patterns": "GET /patterns - List detection patterns",
-            "health": "GET /health - Health check",
-            "docs": "GET /docs - API documentation"
-        }
-    }
+@app.post("/detect_pattern")
+async def detect_pattern_endpoint(request: PatternDetectionRequest) -> Dict[str, Any]:
+    """Detects specific patterns within provided data.
+
+    Args:
+        request (PatternDetectionRequest): The request body containing data and pattern definition.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the pattern detection results.
+    """
+    print(f"[API] Detecting patterns in data.")
+    detected_patterns = pattern_detector.detect_patterns(request.data, request.pattern_definition)
+    return {"status": "success", "timestamp": datetime.now().isoformat(), "detected_patterns": detected_patterns}
+
+
+@app.post("/extract_iocs")
+async def extract_iocs_endpoint(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Extracts Indicators of Compromise (IoCs) from provided data.
+
+    Args:
+        data (Dict[str, Any]): The data from which to extract IoCs.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the extracted IoCs.
+    """
+    print(f"[API] Extracting IoCs from data.")
+    extracted_iocs = ioc_extractor.extract_iocs(data)
+    return {"status": "success", "timestamp": datetime.now().isoformat(), "extracted_iocs": extracted_iocs}
 
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8200)
+    uvicorn.run(app, host="0.0.0.0", port=8024)

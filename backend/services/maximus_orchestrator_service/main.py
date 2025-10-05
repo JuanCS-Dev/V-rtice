@@ -1,602 +1,276 @@
-"""
-Aurora Orchestrator Service - NSA Grade AI Brain
-Orquestra investigações autônomas com IA decision-making
-Coordena todos os microserviços de cyber security e OSINT
+"""Maximus Orchestrator Service - Main Application Entry Point.
+
+This module serves as the main entry point for the Maximus Orchestrator Service.
+It initializes and configures the FastAPI application, sets up event handlers
+for startup and shutdown, and defines the API endpoints for managing and
+coordinating the activities of all other Maximus AI services.
+
+It acts as the central command and control hub, receiving high-level directives,
+breaking them down into multi-service workflows, distributing tasks, and
+monitoring their execution. This service is crucial for ensuring efficient,
+coherent, and goal-oriented behavior across the entire Maximus AI ecosystem,
+providing a unified interface for controlling and observing its operations.
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import httpx
+from typing import Dict, Any, List, Optional
+import uvicorn
 import asyncio
-import os
 from datetime import datetime
-from typing import Optional, List, Dict, Any
-from enum import Enum
-import json
-import re
+import httpx
+import os
+import uuid
 
-app = FastAPI(title="Aurora Orchestrator Service")
+app = FastAPI(title="Maximus Orchestrator Service", version="1.0.0")
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configuration for Maximus sub-services (mock URLs)
+MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8000")
+MAXIMUS_ATLAS_SERVICE_URL = os.getenv("MAXIMUS_ATLAS_SERVICE_URL", "http://localhost:8007")
+MAXIMUS_ORACULO_SERVICE_URL = os.getenv("MAXIMUS_ORACULO_SERVICE_URL", "http://localhost:8026")
+MAXIMUS_IMMUNIS_API_SERVICE_URL = os.getenv("MAXIMUS_IMMUNIS_API_SERVICE_URL", "http://localhost:8021")
+MAXIMUS_ADR_CORE_SERVICE_URL = os.getenv("MAXIMUS_ADR_CORE_SERVICE_URL", "http://localhost:8005")
 
-# Service Registry
-SERVICES = {
-    "ip_intelligence": {"url": "http://localhost:8002", "name": "IP Intelligence"},
-    "threat_intel": {"url": "http://localhost:8013", "name": "Threat Intelligence"},
-    "malware_analysis": {"url": "http://localhost:8014", "name": "Malware Analysis"},
-    "ssl_monitor": {"url": "http://localhost:8015", "name": "SSL/TLS Monitor"},
-    "nmap_scanner": {"url": "http://localhost:8010", "name": "Nmap Scanner"},
-    "vuln_scanner": {"url": "http://localhost:8011", "name": "Vulnerability Scanner"},
-    "social_eng": {"url": "http://localhost:8012", "name": "Social Engineering"},
-    "domain_analyzer": {"url": "http://localhost:8003", "name": "Domain Analyzer"},
-}
 
-# Models
-class InvestigationType(str, Enum):
-    AUTO = "auto"
-    DEFENSIVE = "defensive"
-    OFFENSIVE = "offensive"
-    FULL = "full"
-    STEALTH = "stealth"
+class OrchestrationRequest(BaseModel):
+    """Request model for initiating a complex orchestration workflow.
 
-class TargetType(str, Enum):
-    IP = "ip"
-    DOMAIN = "domain"
-    URL = "url"
-    HASH = "hash"
-    EMAIL = "email"
-    PHONE = "phone"
-    USERNAME = "username"
-    UNKNOWN = "unknown"
-
-class InvestigationRequest(BaseModel):
-    target: str
-    investigation_type: InvestigationType = InvestigationType.AUTO
-    priority: int = 5  # 1-10
-    stealth_mode: bool = False
-    deep_analysis: bool = False
-    max_time: int = 300  # seconds
-    callbacks: Optional[List[str]] = None
-
-class StepResult(BaseModel):
-    service: str
-    action: str
-    status: str  # running, completed, failed, skipped
-    data: Optional[Dict[str, Any]]
-    error: Optional[str]
-    duration: float
-    timestamp: str
-
-class InvestigationResponse(BaseModel):
-    investigation_id: str
-    target: str
-    target_type: TargetType
-    investigation_type: InvestigationType
-    status: str  # running, completed, failed
-    progress: int  # 0-100
-    steps: List[StepResult]
-    threat_assessment: Optional[Dict[str, Any]]
-    recommendations: List[str]
-    start_time: str
-    end_time: Optional[str]
-    duration: Optional[float]
-
-# In-memory storage (em produção usar Redis/DB)
-investigations_db = {}
-
-# Aurora Decision Engine
-class AuroraDecisionEngine:
+    Attributes:
+        workflow_name (str): The name of the workflow to execute (e.g., 'threat_hunting', 'system_optimization').
+        parameters (Optional[Dict[str, Any]]): Parameters for the workflow.
+        priority (int): The priority of the workflow (1-10, 10 being highest).
     """
-    O cérebro da Aurora - decide estratégias baseado em contexto
+    workflow_name: str
+    parameters: Optional[Dict[str, Any]] = None
+    priority: int = 5
+
+
+class WorkflowStatus(BaseModel):
+    """Response model for workflow status.
+
+    Attributes:
+        workflow_id (str): Unique identifier for the workflow.
+        status (str): Current status of the workflow (e.g., 'running', 'completed', 'failed').
+        current_step (Optional[str]): The current step being executed.
+        progress (float): Progress percentage (0.0 to 1.0).
+        results (Optional[Dict[str, Any]]): Final results if completed.
+        error (Optional[str]): Error message if failed.
     """
+    workflow_id: str
+    status: str
+    current_step: Optional[str] = None
+    progress: float = 0.0
+    results: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
 
-    @staticmethod
-    def detect_target_type(target: str) -> TargetType:
-        """Detecta automaticamente o tipo de target"""
-        # IP Address
-        if re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', target):
-            return TargetType.IP
 
-        # Hash (MD5, SHA1, SHA256)
-        if re.match(r'^[a-fA-F0-9]{32}$', target):
-            return TargetType.HASH
-        if re.match(r'^[a-fA-F0-9]{40}$', target):
-            return TargetType.HASH
-        if re.match(r'^[a-fA-F0-9]{64}$', target):
-            return TargetType.HASH
+# In-memory storage for active workflows (for demonstration)
+active_workflows: Dict[str, WorkflowStatus] = {}
 
-        # Email
-        if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', target):
-            return TargetType.EMAIL
 
-        # Phone
-        if re.match(r'^\+?[\d\s\-\(\)]{10,}$', target):
-            return TargetType.PHONE
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Orchestrator Service."""
+    print(" orchestrator Starting Maximus Orchestrator Service...")
+    print("✅ Maximus Orchestrator Service started successfully.")
 
-        # URL
-        if target.startswith('http://') or target.startswith('https://'):
-            return TargetType.URL
 
-        # Domain
-        if re.match(r'^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z]{2,})+$', target):
-            return TargetType.DOMAIN
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Orchestrator Service."""
+    print("👋 Shutting down Maximus Orchestrator Service...")
+    print("🛑 Maximus Orchestrator Service shut down.")
 
-        return TargetType.UNKNOWN
-
-    @staticmethod
-    def plan_investigation(target: str, target_type: TargetType,
-                          investigation_type: InvestigationType,
-                          stealth_mode: bool, deep_analysis: bool) -> List[Dict[str, Any]]:
-        """
-        Aurora decide o workflow baseado em múltiplos fatores
-        Retorna lista de steps a serem executados
-        """
-        workflow = []
-
-        # FASE 1: RECONNAISSANCE (sempre executar)
-        if target_type == TargetType.IP:
-            workflow.append({
-                "service": "threat_intel",
-                "action": "check",
-                "endpoint": "/api/threat-intel/check",
-                "params": {"target": target, "target_type": "ip"},
-                "priority": 10,
-                "phase": "reconnaissance"
-            })
-
-            workflow.append({
-                "service": "ip_intelligence",
-                "action": "analyze",
-                "endpoint": "/api/ip/analyze",
-                "params": {"ip": target},
-                "priority": 9,
-                "phase": "reconnaissance"
-            })
-
-            if not stealth_mode:
-                workflow.append({
-                    "service": "nmap_scanner",
-                    "action": "quick_scan",
-                    "endpoint": "/api/nmap/scan",
-                    "params": {"target": target, "scan_type": "quick"},
-                    "priority": 7,
-                    "phase": "enumeration"
-                })
-
-        elif target_type == TargetType.DOMAIN:
-            workflow.append({
-                "service": "threat_intel",
-                "action": "check_domain",
-                "endpoint": "/api/threat-intel/check",
-                "params": {"target": target, "target_type": "domain"},
-                "priority": 10,
-                "phase": "reconnaissance"
-            })
-
-            workflow.append({
-                "service": "ssl_monitor",
-                "action": "check_certificate",
-                "endpoint": "/api/ssl/check",
-                "params": {"target": target, "port": 443},
-                "priority": 8,
-                "phase": "reconnaissance"
-            })
-
-            if not stealth_mode:
-                workflow.append({
-                    "service": "nmap_scanner",
-                    "action": "service_scan",
-                    "endpoint": "/api/nmap/scan",
-                    "params": {"target": target, "scan_type": "service"},
-                    "priority": 7,
-                    "phase": "enumeration"
-                })
-
-        elif target_type == TargetType.HASH:
-            workflow.append({
-                "service": "malware_analysis",
-                "action": "check_hash",
-                "endpoint": "/api/malware/analyze-hash",
-                "params": {"hash_value": target, "hash_type": "auto"},
-                "priority": 10,
-                "phase": "analysis"
-            })
-
-        elif target_type == TargetType.URL:
-            workflow.append({
-                "service": "malware_analysis",
-                "action": "check_url",
-                "endpoint": "/api/malware/analyze-url",
-                "params": {"url": target},
-                "priority": 10,
-                "phase": "analysis"
-            })
-
-            # Extract domain from URL
-            domain = re.findall(r'https?://([^/]+)', target)
-            if domain:
-                workflow.append({
-                    "service": "ssl_monitor",
-                    "action": "check_certificate",
-                    "endpoint": "/api/ssl/check",
-                    "params": {"target": domain[0], "port": 443},
-                    "priority": 8,
-                    "phase": "reconnaissance"
-                })
-
-        # FASE 2: OFFENSIVE (apenas se autorizado)
-        if investigation_type in [InvestigationType.OFFENSIVE, InvestigationType.FULL]:
-            if target_type in [TargetType.IP, TargetType.DOMAIN, TargetType.URL]:
-                workflow.append({
-                    "service": "vuln_scanner",
-                    "action": "scan",
-                    "endpoint": "/api/vuln-scanner/scan",
-                    "params": {"target": target, "scan_type": "passive" if stealth_mode else "active"},
-                    "priority": 6,
-                    "phase": "exploitation",
-                    "requires_auth": True
-                })
-
-        # FASE 3: DEEP ANALYSIS (se solicitado)
-        if deep_analysis:
-            if target_type == TargetType.IP:
-                workflow.append({
-                    "service": "nmap_scanner",
-                    "action": "full_scan",
-                    "endpoint": "/api/nmap/scan",
-                    "params": {"target": target, "scan_type": "comprehensive"},
-                    "priority": 5,
-                    "phase": "deep_analysis"
-                })
-
-        # Ordenar por prioridade
-        workflow.sort(key=lambda x: x['priority'], reverse=True)
-
-        return workflow
-
-    @staticmethod
-    def assess_threat(results: List[StepResult]) -> Dict[str, Any]:
-        """
-        Aurora avalia todos os resultados e gera threat assessment
-        """
-        threat_scores = []
-        malicious_indicators = []
-        suspicious_indicators = []
-        clean_indicators = []
-
-        for result in results:
-            if result.status == "completed" and result.data:
-                data = result.data
-
-                # Extract threat score
-                if "threat_score" in data:
-                    threat_scores.append(data["threat_score"])
-
-                if "is_malicious" in data and data["is_malicious"]:
-                    malicious_indicators.append(result.service)
-
-                # SSL Analysis
-                if result.service == "ssl_monitor":
-                    if data.get("security_score", 0) < 70:
-                        suspicious_indicators.append(f"SSL Score: {data.get('security_score')}")
-                    if data.get("vulnerabilities"):
-                        malicious_indicators.extend([
-                            f"SSL: {v['title']}" for v in data["vulnerabilities"]
-                            if v['severity'] in ['critical', 'high']
-                        ])
-
-                # Malware Analysis
-                if result.service == "malware_analysis":
-                    if data.get("is_malicious"):
-                        malicious_indicators.append("Malware detected")
-
-                # Threat Intel
-                if result.service == "threat_intel":
-                    if data.get("is_malicious"):
-                        malicious_indicators.append(f"Threat Intel: {data.get('reputation')}")
-
-        # Calculate aggregated threat score
-        if threat_scores:
-            avg_threat_score = sum(threat_scores) / len(threat_scores)
-        else:
-            avg_threat_score = 0
-
-        # Determine threat level
-        if avg_threat_score >= 80 or len(malicious_indicators) >= 2:
-            threat_level = "CRITICAL"
-            threat_color = "red"
-        elif avg_threat_score >= 60 or len(malicious_indicators) >= 1:
-            threat_level = "HIGH"
-            threat_color = "orange"
-        elif avg_threat_score >= 40 or len(suspicious_indicators) >= 2:
-            threat_level = "MEDIUM"
-            threat_color = "yellow"
-        elif avg_threat_score >= 20:
-            threat_level = "LOW"
-            threat_color = "blue"
-        else:
-            threat_level = "CLEAN"
-            threat_color = "green"
-
-        return {
-            "threat_level": threat_level,
-            "threat_color": threat_color,
-            "threat_score": int(avg_threat_score),
-            "malicious_indicators": malicious_indicators[:10],
-            "suspicious_indicators": suspicious_indicators[:10],
-            "confidence": "high" if len(results) >= 3 else "medium" if len(results) >= 2 else "low"
-        }
-
-    @staticmethod
-    def generate_recommendations(threat_assessment: Dict[str, Any],
-                                results: List[StepResult]) -> List[str]:
-        """
-        Aurora gera recomendações baseadas em toda a investigação
-        """
-        recommendations = []
-
-        threat_level = threat_assessment["threat_level"]
-
-        if threat_level == "CRITICAL":
-            recommendations.append("🚨 IMMEDIATE ACTION: Block target at firewall level")
-            recommendations.append("🔥 ISOLATE: Quarantine affected systems immediately")
-            recommendations.append("📞 ESCALATE: Notify security team and management")
-            recommendations.append("📋 DOCUMENT: Create incident report")
-            recommendations.append("🔍 INVESTIGATE: Check for lateral movement")
-
-        elif threat_level == "HIGH":
-            recommendations.append("⚠️ BLOCK: Add target to blocklist")
-            recommendations.append("🔍 MONITOR: Enhanced logging and monitoring")
-            recommendations.append("📊 ANALYZE: Review related traffic and connections")
-            recommendations.append("🛡️ HARDEN: Review and update security policies")
-
-        elif threat_level == "MEDIUM":
-            recommendations.append("👁️ WATCH: Add to watch list")
-            recommendations.append("📊 LOG: Increase logging verbosity")
-            recommendations.append("🔍 PERIODIC: Schedule follow-up scans")
-
-        elif threat_level == "LOW":
-            recommendations.append("✅ MONITOR: Standard monitoring sufficient")
-            recommendations.append("📊 BASELINE: Document for baseline comparison")
-
-        else:  # CLEAN
-            recommendations.append("✅ CLEAN: No immediate action required")
-            recommendations.append("📊 BASELINE: Add to clean baselines")
-
-        # Service-specific recommendations
-        for result in results:
-            if result.data and result.data.get("recommendations"):
-                recommendations.extend(result.data["recommendations"][:2])
-
-        return recommendations[:10]  # Top 10
-
-# Service Executor
-async def execute_service_call(step: Dict[str, Any]) -> StepResult:
-    """
-    Executa chamada para um microserviço
-    """
-    service_name = step["service"]
-    service_info = SERVICES.get(service_name)
-
-    if not service_info:
-        return StepResult(
-            service=service_name,
-            action=step["action"],
-            status="failed",
-            data=None,
-            error="Service not found",
-            duration=0.0,
-            timestamp=datetime.now().isoformat()
-        )
-
-    start_time = datetime.now()
-
-    try:
-        url = f"{service_info['url']}{step['endpoint']}"
-        params = step["params"]
-
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(url, json=params)
-
-            duration = (datetime.now() - start_time).total_seconds()
-
-            if response.status_code == 200:
-                return StepResult(
-                    service=service_name,
-                    action=step["action"],
-                    status="completed",
-                    data=response.json(),
-                    error=None,
-                    duration=duration,
-                    timestamp=datetime.now().isoformat()
-                )
-            else:
-                return StepResult(
-                    service=service_name,
-                    action=step["action"],
-                    status="failed",
-                    data=None,
-                    error=f"HTTP {response.status_code}: {response.text}",
-                    duration=duration,
-                    timestamp=datetime.now().isoformat()
-                )
-
-    except Exception as e:
-        duration = (datetime.now() - start_time).total_seconds()
-        return StepResult(
-            service=service_name,
-            action=step["action"],
-            status="failed",
-            data=None,
-            error=str(e),
-            duration=duration,
-            timestamp=datetime.now().isoformat()
-        )
-
-# Background Investigation Runner
-async def run_investigation(investigation_id: str, target: str, target_type: TargetType,
-                           investigation_type: InvestigationType, stealth_mode: bool,
-                           deep_analysis: bool):
-    """
-    Executa investigação em background
-    """
-    investigation = investigations_db[investigation_id]
-
-    # Aurora decide o workflow
-    engine = AuroraDecisionEngine()
-    workflow = engine.plan_investigation(
-        target, target_type, investigation_type,
-        stealth_mode, deep_analysis
-    )
-
-    investigation["status"] = "running"
-    investigation["total_steps"] = len(workflow)
-
-    # Execute workflow sequencialmente (em produção, pode ser paralelizado)
-    for idx, step in enumerate(workflow):
-        # Update progress
-        progress = int((idx / len(workflow)) * 90)  # 0-90%, deixa 10% para análise final
-        investigation["progress"] = progress
-
-        # Execute step
-        result = await execute_service_call(step)
-        investigation["steps"].append(result)
-
-        # Se falhou crítico, pode parar
-        if result.status == "failed" and step.get("critical", False):
-            break
-
-    # Fase final: Aurora analisa tudo
-    investigation["progress"] = 95
-
-    threat_assessment = engine.assess_threat(investigation["steps"])
-    investigation["threat_assessment"] = threat_assessment
-
-    recommendations = engine.generate_recommendations(threat_assessment, investigation["steps"])
-    investigation["recommendations"] = recommendations
-
-    # Finalizar
-    investigation["status"] = "completed"
-    investigation["progress"] = 100
-    investigation["end_time"] = datetime.now().isoformat()
-
-    start = datetime.fromisoformat(investigation["start_time"])
-    end = datetime.fromisoformat(investigation["end_time"])
-    investigation["duration"] = (end - start).total_seconds()
-
-@app.get("/")
-async def root():
-    return {
-        "service": "Aurora Orchestrator",
-        "status": "online",
-        "version": "1.0.0",
-        "classification": "TOP-SECRET // NSA-GRADE",
-        "ai_engine": "Aurora Decision Engine v2.0",
-        "registered_services": len(SERVICES),
-        "capabilities": {
-            "autonomous_investigation": True,
-            "ai_decision_making": True,
-            "multi_service_orchestration": True,
-            "threat_assessment": True,
-            "real_time_adaptation": True
-        }
-    }
-
-@app.post("/api/aurora/investigate", response_model=InvestigationResponse)
-async def start_investigation(request: InvestigationRequest, background_tasks: BackgroundTasks):
-    """
-    Inicia investigação orquestrada pela Aurora
-    """
-    # Detect target type
-    engine = AuroraDecisionEngine()
-    target_type = engine.detect_target_type(request.target)
-
-    if target_type == TargetType.UNKNOWN:
-        raise HTTPException(status_code=400, detail="Target type not recognized")
-
-    # Create investigation
-    investigation_id = f"AURORA-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-
-    investigation = {
-        "investigation_id": investigation_id,
-        "target": request.target,
-        "target_type": target_type,
-        "investigation_type": request.investigation_type,
-        "status": "initializing",
-        "progress": 0,
-        "steps": [],
-        "threat_assessment": None,
-        "recommendations": [],
-        "start_time": datetime.now().isoformat(),
-        "end_time": None,
-        "duration": None,
-        "total_steps": 0
-    }
-
-    investigations_db[investigation_id] = investigation
-
-    # Start background investigation
-    background_tasks.add_task(
-        run_investigation,
-        investigation_id,
-        request.target,
-        target_type,
-        request.investigation_type,
-        request.stealth_mode,
-        request.deep_analysis
-    )
-
-    return InvestigationResponse(**investigation)
-
-@app.get("/api/aurora/investigation/{investigation_id}", response_model=InvestigationResponse)
-async def get_investigation(investigation_id: str):
-    """
-    Obtém status de uma investigação
-    """
-    if investigation_id not in investigations_db:
-        raise HTTPException(status_code=404, detail="Investigation not found")
-
-    return InvestigationResponse(**investigations_db[investigation_id])
-
-@app.get("/api/aurora/services")
-async def list_services():
-    """
-    Lista todos os serviços disponíveis
-    """
-    services_status = {}
-
-    async with httpx.AsyncClient(timeout=5.0) as client:
-        for service_id, service_info in SERVICES.items():
-            try:
-                response = await client.get(f"{service_info['url']}/")
-                services_status[service_id] = {
-                    "name": service_info["name"],
-                    "url": service_info["url"],
-                    "status": "online" if response.status_code == 200 else "error",
-                    "response_time": response.elapsed.total_seconds()
-                }
-            except:
-                services_status[service_id] = {
-                    "name": service_info["name"],
-                    "url": service_info["url"],
-                    "status": "offline",
-                    "response_time": None
-                }
-
-    return services_status
 
 @app.get("/health")
-async def health():
-    return {"status": "healthy", "ai_engine": "operational"}
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Orchestrator Service.
+
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
+    """
+    return {"status": "healthy", "message": "Orchestrator Service is operational."}
+
+
+@app.post("/orchestrate", response_model=WorkflowStatus)
+async def orchestrate_workflow(request: OrchestrationRequest) -> WorkflowStatus:
+    """Initiates a complex workflow across multiple Maximus services.
+
+    Args:
+        request (OrchestrationRequest): The request body containing workflow details.
+
+    Returns:
+        WorkflowStatus: The initial status of the initiated workflow.
+    """
+    workflow_id = str(uuid.uuid4())
+    print(f"[API] Initiating workflow '{request.workflow_name}' (ID: {workflow_id})")
+
+    initial_status = WorkflowStatus(
+        workflow_id=workflow_id,
+        status="running",
+        current_step="Initializing",
+        progress=0.0
+    )
+    active_workflows[workflow_id] = initial_status
+
+    # Start the workflow in a background task
+    asyncio.create_task(run_workflow(workflow_id, request.workflow_name, request.parameters))
+
+    return initial_status
+
+
+@app.get("/workflow/{workflow_id}/status", response_model=WorkflowStatus)
+async def get_workflow_status(workflow_id: str) -> WorkflowStatus:
+    """Retrieves the current status of a specific workflow.
+
+    Args:
+        workflow_id (str): The ID of the workflow.
+
+    Returns:
+        WorkflowStatus: The current status and details of the workflow.
+
+    Raises:
+        HTTPException: If the workflow ID is not found.
+    """
+    workflow = active_workflows.get(workflow_id)
+    if not workflow:
+        raise HTTPException(status_code=404, detail="Workflow not found.")
+    return workflow
+
+
+async def run_workflow(workflow_id: str, workflow_name: str, parameters: Optional[Dict[str, Any]]):
+    """Simulates the execution of a multi-step workflow.
+
+    Args:
+        workflow_id (str): The ID of the workflow.
+        workflow_name (str): The name of the workflow.
+        parameters (Optional[Dict[str, Any]]): Parameters for the workflow.
+    """
+    workflow_status = active_workflows[workflow_id]
+    async with httpx.AsyncClient() as client:
+        try:
+            if workflow_name == "threat_hunting":
+                await _threat_hunting_workflow(client, workflow_status, parameters)
+            elif workflow_name == "system_optimization":
+                await _system_optimization_workflow(client, workflow_status, parameters)
+            else:
+                raise ValueError(f"Unknown workflow: {workflow_name}")
+
+            workflow_status.status = "completed"
+            workflow_status.progress = 1.0
+            workflow_status.current_step = "Finished"
+            workflow_status.results = {"message": f"Workflow {workflow_name} completed successfully."}
+
+        except Exception as e:
+            workflow_status.status = "failed"
+            workflow_status.error = str(e)
+            workflow_status.current_step = "Error"
+            print(f"[Orchestrator] Workflow {workflow_id} failed: {e}")
+
+
+async def _threat_hunting_workflow(client: httpx.AsyncClient, status: WorkflowStatus, parameters: Optional[Dict[str, Any]]):
+    """Simulates a threat hunting workflow.
+
+    Args:
+        client (httpx.AsyncClient): HTTP client for inter-service communication.
+        status (WorkflowStatus): The status object for the current workflow.
+        parameters (Optional[Dict[str, Any]]): Parameters for the workflow.
+    """
+    status.current_step = "Starting Threat Hunting"
+    status.progress = 0.1
+    print(f"[Orchestrator] Workflow {status.workflow_id}: Starting Threat Hunting.")
+    await asyncio.sleep(1)
+
+    # Step 1: Query Atlas for environmental context
+    status.current_step = "Querying Atlas Service"
+    status.progress = 0.2
+    atlas_response = await client.post(f"{MAXIMUS_ATLAS_SERVICE_URL}/query_environment", json={
+        "query": "identify suspicious network segments",
+        "context": parameters
+    })
+    atlas_response.raise_for_status()
+    print(f"[Orchestrator] Atlas response: {atlas_response.json()}")
+    await asyncio.sleep(1)
+
+    # Step 2: Use Oraculo for threat prediction
+    status.current_step = "Consulting Oraculo for Prediction"
+    status.progress = 0.5
+    oraculo_response = await client.post(f"{MAXIMUS_ORACULO_SERVICE_URL}/predict", json={
+        "data": atlas_response.json(),
+        "prediction_type": "threat_level",
+        "time_horizon": "24h"
+    })
+    oraculo_response.raise_for_status()
+    print(f"[Orchestrator] Oraculo prediction: {oraculo_response.json()}")
+    await asyncio.sleep(1)
+
+    # Step 3: Trigger Immunis response if threat predicted
+    status.current_step = "Triggering Immunis Response"
+    status.progress = 0.8
+    if oraculo_response.json()["prediction"]["risk_assessment"] == "high":
+        immunis_response = await client.post(f"{MAXIMUS_IMMUNIS_API_SERVICE_URL}/threat_alert", json={
+            "threat_id": f"predicted_threat_{status.workflow_id}",
+            "threat_type": "predicted_attack",
+            "severity": "high",
+            "details": oraculo_response.json(),
+            "source": "MaximusOrchestrator"
+        })
+        immunis_response.raise_for_status()
+        print(f"[Orchestrator] Immunis response: {immunis_response.json()}")
+    else:
+        print("[Orchestrator] No high threat predicted, no Immunis response triggered.")
+    await asyncio.sleep(1)
+
+
+async def _system_optimization_workflow(client: httpx.AsyncClient, status: WorkflowStatus, parameters: Optional[Dict[str, Any]]):
+    """Simulates a system optimization workflow.
+
+    Args:
+        client (httpx.AsyncClient): HTTP client for inter-service communication.
+        status (WorkflowStatus): The status object for the current workflow.
+        parameters (Optional[Dict[str, Any]]): Parameters for the workflow.
+    """
+    status.current_step = "Starting System Optimization"
+    status.progress = 0.1
+    print(f"[Orchestrator] Workflow {status.workflow_id}: Starting System Optimization.")
+    await asyncio.sleep(1)
+
+    # Step 1: Get current system metrics from Maximus Core
+    status.current_step = "Getting System Metrics"
+    status.progress = 0.3
+    core_metrics_response = await client.get(f"{MAXIMUS_CORE_SERVICE_URL}/health") # Using health as a proxy for metrics
+    core_metrics_response.raise_for_status()
+    print(f"[Orchestrator] Core metrics: {core_metrics_response.json()}")
+    await asyncio.sleep(1)
+
+    # Step 2: Consult Oraculo for optimization suggestions
+    status.current_step = "Consulting Oraculo for Optimization"
+    status.progress = 0.6
+    oraculo_optimization_response = await client.post(f"{MAXIMUS_ORACULO_SERVICE_URL}/predict", json={
+        "data": core_metrics_response.json(),
+        "prediction_type": "resource_optimization",
+        "time_horizon": "1h"
+    })
+    oraculo_optimization_response.raise_for_status()
+    print(f"[Orchestrator] Oraculo optimization suggestions: {oraculo_optimization_response.json()}")
+    await asyncio.sleep(1)
+
+    # Step 3: Apply suggestions via ADR Core Service (simulated)
+    status.current_step = "Applying Optimization Actions"
+    status.progress = 0.9
+    suggestions = oraculo_optimization_response.json()["prediction"]["suggestions"]
+    if suggestions:
+        for suggestion in suggestions:
+            if suggestion["type"] == "scale_up":
+                print(f"[Orchestrator] Simulating scale up: {suggestion}")
+                # In a real scenario, call HCL Executor or similar
+                # adr_response = await client.post(f"{MAXIMUS_ADR_CORE_SERVICE_URL}/respond", json={...})
+            elif suggestion["type"] == "optimize_database":
+                print(f"[Orchestrator] Simulating database optimization: {suggestion}")
+            await asyncio.sleep(0.5)
+    print("[Orchestrator] Optimization actions simulated.")
+    await asyncio.sleep(1)
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8016)
+    uvicorn.run(app, host="0.0.0.0", port=8027)

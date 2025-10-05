@@ -1,40 +1,25 @@
-"""
-Autonomic Core - System 1 (Unconscious Processing)
-====================================================
+"""Maximus Core Service - Autonomic Core Package.
 
-O substrato inconsciente que sustenta toda a operação do Maximus AI.
-Inspirado no cérebro humano, onde 95% do processamento é inconsciente.
+This package contains the core components responsible for the self-managing
+(autonomic) capabilities of the Maximus AI system. It implements the Homeostatic
+Control Loop (HCL) which continuously monitors, analyzes, plans, and executes
+resource adjustments to maintain optimal performance and stability.
 
-Components:
------------
-1. Homeostatic Control Loop (HCL) - Auto-regulation
-2. Predictive Coding Network - Anticipation
-3. Attention System - Filtering & Focusing
-4. Skill Learning - Automated behaviors
-5. Neuromodulation - Meta-learning
-
-Key Principles:
----------------
-- FAST: <100ms response time
-- PARALLEL: Multiple processes simultaneously
-- AUTOMATIC: No conscious intervention needed
-- PREDICTIVE: Always anticipating next state
-- ADAPTIVE: Continuously learning and optimizing
-
-This layer runs continuously in background, freeing System 2
-(Reasoning Engine) to focus on novel, complex problems only.
+Modules within this package include:
+- `hcl_orchestrator`: The main HCL orchestrator.
+- `monitor`: Collects real-time system metrics (Prometheus, Kafka).
+- `analyze`: Analyzes metrics for anomalies, failures, degradation (SARIMA, XGBoost, PELT).
+- `plan`: Generates resource allocation plans (Fuzzy Logic, RL).
+- `execute`: Executes planned resource adjustments (K8s, Docker, DB, Cache, LB).
+- `knowledge_base`: Stores decisions for learning (PostgreSQL + TimescaleDB).
 """
 
-from .homeostatic_control import HomeostaticControlLoop
-from .system_monitor import SystemMonitor
-from .resource_analyzer import ResourceAnalyzer
-from .resource_planner import ResourcePlanner
-from .resource_executor import ResourceExecutor
+from .hcl_orchestrator import (
+    HomeostaticControlLoop,
+    run_homeostatic_control_loop
+)
 
 __all__ = [
     'HomeostaticControlLoop',
-    'SystemMonitor',
-    'ResourceAnalyzer',
-    'ResourcePlanner',
-    'ResourceExecutor'
+    'run_homeostatic_control_loop'
 ]

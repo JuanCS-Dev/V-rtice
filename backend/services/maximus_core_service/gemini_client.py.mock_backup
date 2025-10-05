@@ -1,0 +1,159 @@
+"""Maximus Core Service - Gemini Client.
+
+This module provides a client for interacting with the Google Gemini API.
+It encapsulates the logic for making requests to the Gemini model, handling
+authentication, formatting prompts, and parsing responses. This client is
+essential for Maximus AI's ability to leverage advanced large language model
+capabilities for reasoning, generation, and understanding.
+
+It supports various Gemini functionalities, including text generation,
+multi-modal inputs, and tool use, enabling Maximus to perform complex cognitive
+tasks and interact with the world through external tools.
+"""
+
+import asyncio
+from typing import Any, Dict, List, Optional
+import os
+
+# Mocking the google.generativeai library for demonstration purposes
+# In a real application, you would import google.generativeai as genai
+class MockGenerativeModel:
+    """Um mock para a classe GenerativeModel do Gemini.
+
+    Simula o comportamento de um modelo generativo para fins de teste e desenvolvimento,
+    sem a necessidade de uma conexão real com a API do Gemini.
+    """
+    def __init__(self, model_name: str):
+        """Inicializa o MockGenerativeModel.
+
+        Args:
+            model_name (str): O nome do modelo Gemini que está sendo mockado.
+        """
+        self.model_name = model_name
+
+    async def generate_content(self, prompt: Any, tools: Optional[List[Any]] = None, tool_config: Optional[Dict[str, Any]] = None) -> Any:
+        """Simula a geração de conteúdo pelo modelo Gemini.
+
+        Args:
+            prompt (Any): O prompt de entrada para o modelo.
+            tools (Optional[List[Any]]): Uma lista de definições de ferramentas que o modelo pode usar.
+            tool_config (Optional[Dict[str, Any]]): Configuração para o uso de ferramentas.
+
+        Returns:
+            Any: Um objeto MockResponse simulando a resposta do Gemini.
+        """
+        print(f"[GeminiClient] Mocking generate_content for model {self.model_name}")
+        await asyncio.sleep(0.1) # Simulate API call
+        
+        # Simple mock response logic
+        if tools and "tool_code" in prompt:
+            # Simulate tool call request from Gemini
+            return MockResponse(text="", tool_calls=[{"function": {"name": "example_tool", "args": {"param": "value"}}}] )
+        
+        return MockResponse(text=f"Mock response from {self.model_name} for: {prompt}")
+
+class MockResponse:
+    """Um mock para o objeto de resposta retornado pela API do Gemini.
+
+    Simula a estrutura de uma resposta do Gemini, incluindo texto e chamadas de ferramentas.
+    """
+    def __init__(self, text: str, tool_calls: Optional[List[Dict[str, Any]]] = None):
+        """Inicializa o MockResponse.
+
+        Args:
+            text (str): O conteúdo de texto da resposta.
+            tool_calls (Optional[List[Dict[str, Any]]]): Uma lista de chamadas de ferramentas simuladas.
+        """
+        self._text = text
+        self.tool_calls = tool_calls if tool_calls is not None else []
+
+    @property
+    def text(self):
+        """Retorna o conteúdo de texto da resposta mockada."""
+        return self._text
+
+class MockGenAI:
+    """Um mock para o módulo google.generativeai.
+
+    Simula as funções de configuração e inicialização do modelo generativo.
+    """
+    def configure(self, api_key: str):
+        """Simula a configuração da chave de API para o Gemini.
+
+        Args:
+            api_key (str): A chave de API a ser configurada (mockada).
+        """
+        print("[GeminiClient] Mocking genai.configure with API Key.")
+
+    def GenerativeModel(self, model_name: str):
+        """Simula a criação de uma instância de MockGenerativeModel.
+
+        Args:
+            model_name (str): O nome do modelo a ser instanciado.
+
+        Returns:
+            MockGenerativeModel: Uma instância mock do modelo generativo.
+        """
+        return MockGenerativeModel(model_name)
+
+genai = MockGenAI()
+
+
+class GeminiClient:
+    """Client for interacting with the Google Gemini API.
+
+    Encapsulates logic for making requests to the Gemini model, handling authentication,
+    formatting prompts, and parsing responses.
+    """
+
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-pro"):
+        """Initializes the GeminiClient.
+
+        Args:
+            api_key (Optional[str]): Your Google Gemini API key. If None, it tries to read from environment variable.
+            model_name (str): The name of the Gemini model to use (e.g., 'gemini-pro').
+        """
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        if not self.api_key:
+            raise ValueError("Gemini API Key not provided and not found in environment variables.")
+        
+        genai.configure(api_key=self.api_key)
+        self.model = genai.GenerativeModel(model_name)
+        print(f"[GeminiClient] Initialized with model: {model_name}")
+
+    async def generate_content(self, prompt: Any, tools: Optional[List[Any]] = None, tool_config: Optional[Dict[str, Any]] = None) -> Any:
+        """Generates content using the configured Gemini model.
+
+        Args:
+            prompt (Any): The input prompt for the Gemini model. Can be a string or a list of parts.
+            tools (Optional[List[Any]]): A list of tool definitions that the model can use.
+            tool_config (Optional[Dict[str, Any]]): Configuration for tool usage.
+
+        Returns:
+            Any: The response object from the Gemini API.
+        """
+        try:
+            response = await self.model.generate_content(prompt, tools=tools, tool_config=tool_config)
+            return response
+        except Exception as e:
+            print(f"[GeminiClient] Error generating content: {e}")
+            raise
+
+    async def chat(self, history: List[Dict[str, Any]], message: str, tools: Optional[List[Any]] = None, tool_config: Optional[Dict[str, Any]] = None) -> Any:
+        """Engages in a multi-turn chat with the Gemini model.
+
+        Args:
+            history (List[Dict[str, Any]]): A list of previous chat messages.
+            message (str): The current message from the user.
+            tools (Optional[List[Any]]): A list of tool definitions that the model can use.
+            tool_config (Optional[Dict[str, Any]]): Configuration for tool usage.
+
+        Returns:
+            Any: The response object from the Gemini API.
+        """
+        # This is a simplified mock. Real chat functionality would involve
+        # managing a chat session object from the Gemini API.
+        print(f"[GeminiClient] Mocking chat for message: {message}")
+        full_prompt = history + [{"role": "user", "parts": [message]}]
+        response = await self.generate_content(full_prompt, tools=tools, tool_config=tool_config)
+        return response

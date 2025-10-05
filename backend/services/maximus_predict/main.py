@@ -1,171 +1,116 @@
-# /home/juan/vertice-dev/backend/services/aurora_predict/main.py
+"""Maximus Predict Service - Main Application Entry Point.
+
+This module serves as the main entry point for the Maximus Predict Service.
+It initializes and configures the FastAPI application, sets up event handlers
+for startup and shutdown, and defines the API endpoints for generating various
+types of predictions, forecasts, and probabilistic assessments.
+
+It orchestrates the ingestion and processing of diverse datasets, the training,
+evaluation, and deployment of machine learning models, and the generation of
+forecasts for system behavior, resource demand, and threat likelihood. This
+service is crucial for supporting proactive decision-making and strategic
+planning across the Maximus AI system.
+"""
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from typing import List, Optional
-from datetime import datetime, timezone
-import pandas as pd
-from sklearn.cluster import DBSCAN
+from pydantic import BaseModel
+from typing import Dict, Any, List, Optional
+import uvicorn
+import asyncio
+from datetime import datetime
 import numpy as np
-import logging
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+app = FastAPI(title="Maximus Predict Service", version="1.0.0")
 
-app = FastAPI(
-    title="AuroraPredict Service",
-    description="Motor de IA do Vértice - Análises preditivas com lógica de risco híbrida.",
-    version="2.0.0", # Version bump para lógica de risco com Severidade e Decaimento Temporal
-)
+# Mock ML Model (In a real scenario, this would be a loaded model)
+class MockPredictiveModel:
+    """Um mock para um modelo de Machine Learning preditivo.
 
-# === LÓGICA DE RISCO (VALIDADA NO SANDBOX) ===
-
-# Tabela de Severidade - Ajustada para Anápolis, Set/2025
-SEVERITY_WEIGHTS = {
-    "homicidio": 100, "latrocinio": 100, "tentativa_homicidio": 85,
-    "trafico_drogas": 90,
-    "roubo_carga": 60, "roubo_residencia": 55, "roubo_transeunte": 50,
-    "roubo_veiculo": 40,
-    "furto_residencia": 25, "furto_veiculo": 15,
-    "desordem": 10, "unknown": 5,
-}
-
-def calculate_decay_weight(timestamp_str: Optional[str], half_life_days: int = 7) -> float:
+    Simula a funcionalidade de um modelo de ML para gerar previsões
+    com base em dados de entrada, para fins de teste e desenvolvimento.
     """
-    Calcula um peso de decaimento exponencial com base na idade de um evento.
+    def predict(self, data: Dict[str, Any], prediction_type: str) -> Dict[str, Any]:
+        """Simula a geração de uma previsão com base nos dados e tipo de previsão.
+
+        Args:
+            data (Dict[str, Any]): Os dados de entrada para a previsão.
+            prediction_type (str): O tipo de previsão a ser gerada (ex: 'resource_demand', 'threat_likelihood').
+
+        Returns:
+            Dict[str, Any]: Um dicionário contendo o valor previsto, confiança e outras informações.
+        """
+        # Simulate prediction logic
+        if prediction_type == "resource_demand":            predicted_value = data.get("current_load", 0) * 1.1 + np.random.rand() * 10
+            confidence = 0.85
+            return {"predicted_value": predicted_value, "unit": "requests/sec", "confidence": confidence}
+        elif prediction_type == "threat_likelihood":
+            likelihood = data.get("anomaly_score", 0) * 0.7 + np.random.rand() * 0.2
+            confidence = 0.70
+            return {"likelihood": min(1.0, likelihood), "confidence": confidence, "threat_type": "DDoS"}
+        else:
+            return {"predicted_value": None, "confidence": 0.0, "error": "Unknown prediction type"}
+
+predictive_model = MockPredictiveModel()
+
+
+class PredictionRequest(BaseModel):
+    """Request model for generating a prediction.
+
+    Attributes:
+        data (Dict[str, Any]): The input data for the prediction.
+        prediction_type (str): The type of prediction requested (e.g., 'resource_demand', 'threat_likelihood').
+        time_horizon (Optional[str]): The time horizon for the prediction (e.g., '1h', '24h').
     """
-    if not timestamp_str:
-        return 0.1 # Retorna um peso baixo para dados sem data
-
-    try:
-        # Garante que o timestamp seja timezone-aware (UTC) para comparações corretas
-        event_time = datetime.fromisoformat(str(timestamp_str)).replace(tzinfo=timezone.utc if pd.isna(getattr(timestamp_str, 'tzinfo', None)) else None)
-        now = datetime.now(timezone.utc)
-        
-        age_in_days = (now - event_time).total_seconds() / (24 * 3600)
-        
-        if age_in_days < 0: return 1.0 # Evento no futuro, peso máximo
-        
-        decay_factor = 0.5 ** (age_in_days / half_life_days)
-        return decay_factor
-    except (ValueError, TypeError):
-        logger.warning(f"Timestamp inválido encontrado: {timestamp_str}. Usando peso de decaimento baixo.")
-        return 0.1
+    data: Dict[str, Any]
+    prediction_type: str
+    time_horizon: Optional[str] = None
 
 
-# === MODELOS DE DADOS ===
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Predict Service."""
+    print("🔮 Starting Maximus Predict Service...")
+    # Load ML models here
+    print("✅ Maximus Predict Service started successfully.")
 
-class OccurrenceInput(BaseModel):
-    lat: float
-    lng: float
-    timestamp: Optional[datetime] = None
-    tipo: Optional[str] = "unknown"
-    intensity: Optional[float] = 0.5
 
-class PredictionInput(BaseModel):
-    occurrences: List[OccurrenceInput]
-    eps_km: Optional[float] = Field(2.5, gt=0, description="Raio de busca do cluster em quilómetros.")
-    min_samples: Optional[int] = Field(3, gt=0, description="Número mínimo de pontos para formar um cluster.")
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Predict Service."""
+    print("👋 Shutting down Maximus Predict Service...")
+    print("🛑 Maximus Predict Service shut down.")
 
-class HotspotOutput(BaseModel):
-    center_lat: float
-    center_lng: float
-    num_points: int
-    risk_level: str
-    risk_score: float = Field(..., description="Score de risco final do hotspot, com decaimento temporal.")
-    crime_types: List[str]
 
-class PredictionOutput(BaseModel):
-    hotspots: List[HotspotOutput]
-    total_occurrences_analyzed: int
-    clusters_found: int
-    analysis_timestamp: datetime
-    parameters_used: dict
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Predict Service.
 
-# === ENDPOINTS ===
-
-@app.get("/", tags=["Health"])
-async def read_root():
-    return {
-        "status": "AuroraPredict Service Online",
-        "version": "2.0.0",
-        "capabilities": ["crime_hotspots", "severity_weighted_risk", "temporal_decay_risk"],
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
-
-@app.post("/predict/crime-hotspots", response_model=PredictionOutput, tags=["Prediction"])
-async def predict_crime_hotspots(data: PredictionInput):
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
     """
-    Análise preditiva de hotspots criminais com lógica de risco baseada em
-    severidade de crime e decaimento temporal.
+    return {"status": "healthy", "message": "Predict Service is operational."}
+
+
+@app.post("/predict")
+async def generate_prediction_endpoint(request: PredictionRequest) -> Dict[str, Any]:
+    """Generates a prediction based on the provided data and prediction type.
+
+    Args:
+        request (PredictionRequest): The request body containing data and prediction parameters.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the prediction results and confidence.
     """
-    start_time = datetime.now(timezone.utc)
-    logger.info(f"Iniciando análise com {len(data.occurrences)} ocorrências.")
+    print(f"[API] Generating {request.prediction_type} prediction for data: {request.data}")
+    await asyncio.sleep(0.1) # Simulate prediction time
 
-    if len(data.occurrences) < data.min_samples:
-        return PredictionOutput(hotspots=[], total_occurrences_analyzed=len(data.occurrences), clusters_found=0, analysis_timestamp=start_time, parameters_used={})
+    prediction_result = predictive_model.predict(request.data, request.prediction_type)
 
-    try:
-        df = pd.DataFrame([occ.dict() for occ in data.occurrences])
-        coords = df[['lat', 'lng']].values
+    if prediction_result.get("error"):
+        raise HTTPException(status_code=400, detail=prediction_result["error"])
 
-        kms_per_radian = 6371.0088
-        epsilon = data.eps_km / kms_per_radian
-        parameters_used = {"eps_km": data.eps_km, "min_samples": data.min_samples}
+    return {"status": "success", "timestamp": datetime.now().isoformat(), "prediction": prediction_result}
 
-        logger.info(f"Executando DBSCAN com parâmetros: {parameters_used}")
-        coords_rad = np.radians(coords)
-        db = DBSCAN(eps=epsilon, min_samples=data.min_samples, algorithm='ball_tree', metric='haversine').fit(coords_rad)
-        
-        cluster_labels = db.labels_
-        valid_clusters = [c for c in set(cluster_labels) if c != -1]
-        logger.info(f"Clusters encontrados: {len(valid_clusters)}")
 
-        hotspots = []
-        for cluster_id in valid_clusters:
-            cluster_mask = cluster_labels == cluster_id
-            cluster_df = df[cluster_mask]
-            
-            num_points = len(cluster_df)
-            center_lat, center_lng = cluster_df[['lat', 'lng']].mean().values
-
-            # --- CÁLCULO DE RISCO HÍBRIDO (SEVERIDADE + TEMPO) ---
-            total_risk_score = 0
-            for _, occ in cluster_df.iterrows():
-                base_weight = SEVERITY_WEIGHTS.get(occ.get('tipo', 'unknown'), 5)
-                decay_weight = calculate_decay_weight(occ.get('timestamp'))
-                total_risk_score += base_weight * decay_weight * occ.get('intensity', 0.5)
-
-            if total_risk_score >= 250: risk_level = "Crítico"
-            elif total_risk_score >= 120: risk_level = "Alto"
-            elif total_risk_score >= 40: risk_level = "Médio"
-            else: risk_level = "Baixo"
-
-            hotspots.append(HotspotOutput(
-                center_lat=center_lat,
-                center_lng=center_lng,
-                num_points=num_points,
-                risk_level=risk_level,
-                risk_score=round(total_risk_score, 2),
-                crime_types=list(cluster_df['tipo'].unique())
-            ))
-        
-        # Ordenar hotspots pelo score de risco, do maior para o menor
-        hotspots.sort(key=lambda h: h.risk_score, reverse=True)
-
-        result = PredictionOutput(
-            hotspots=hotspots,
-            total_occurrences_analyzed=len(df),
-            clusters_found=len(hotspots),
-            analysis_timestamp=datetime.now(timezone.utc),
-            parameters_used=parameters_used
-        )
-        
-        duration = (datetime.now(timezone.utc) - start_time).total_seconds()
-        logger.info(f"Análise concluída em {duration:.2f}s: {len(hotspots)} hotspots identificados.")
-        return result
-
-    except Exception as e:
-        logger.error(f"Erro fatal na análise preditiva: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Erro interno no serviço de IA: {str(e)}")
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8028)

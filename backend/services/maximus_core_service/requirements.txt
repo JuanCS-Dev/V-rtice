@@ -23,6 +23,24 @@ statsmodels>=0.14.0  # ARIMA time series prediction
 # Machine Learning (REAL)
 torch>=2.0.0  # PyTorch for Predictive Coding Network
 transformers>=4.30.0  # Hugging Face for Attention System
+scikit-learn>=1.3.0  # Isolation Forest, preprocessing
+xgboost>=2.0.0  # Gradient boosting for failure prediction
+ruptures>=1.1.8  # Change point detection (PELT)
+stable-baselines3>=2.1.0  # RL algorithms (SAC)
+
+# Optional dependencies for advanced features
+scikit-fuzzy>=0.4.2  # Fuzzy logic controller (optional, has fallback)
+
+# Monitoring and Metrics
+prometheus-client>=0.18.0  # Prometheus metrics
+kafka-python>=2.0.2  # Kafka streaming
+
+# Database
+asyncpg>=0.29.0  # PostgreSQL async driver
+psycopg2-binary>=2.9.9  # PostgreSQL sync driver (for VACUUM)
+
+# Async Redis
+redis[hiredis]>=5.0.0  # Redis with hiredis for better performance
 
 # Google Gemini
 google-generativeai>=0.3.0
