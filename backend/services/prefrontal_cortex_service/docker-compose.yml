@@ -1,0 +1,78 @@
+# ============================================================================
+# PREFRONTAL CORTEX SERVICE - Docker Compose Configuration
+# Rational Control and Emotional Regulation for Maximus AI 3.0
+# ============================================================================
+
+version: '3.8'
+
+services:
+  prefrontal_cortex:
+    build: .
+    container_name: prefrontal_cortex_service
+    ports:
+      - "8011:8011"  # Service API
+      - "9011:9011"  # Prometheus metrics
+    environment:
+      - SERVICE_NAME=prefrontal_cortex_service
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8011
+      - LOG_LEVEL=INFO
+
+      # Sensory Service Endpoints
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_CORTEX_URL=http://somatosensory_cortex_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_SYSTEM_URL=http://vestibular_service:8010
+
+      # Emotional Monitoring
+      - EMOTIONAL_MONITORING_INTERVAL=5.0
+      - AROUSAL_THRESHOLD_ALERT=0.4
+      - AROUSAL_THRESHOLD_STRESSED=0.6
+      - AROUSAL_THRESHOLD_PANIC=0.8
+      - AROUSAL_THRESHOLD_OVERWHELMED=0.9
+
+      # Rational Validation
+      - EVIDENCE_QUALITY_THRESHOLD=0.6
+      - MIN_CONFIDENCE_CRITICAL=0.9
+      - MAX_FALSE_POSITIVE_RATE=0.15
+      - COST_BENEFIT_APPROVE_THRESHOLD=0.3
+      - COST_BENEFIT_REJECT_THRESHOLD=-0.2
+
+      # Impulse Inhibition
+      - PAIN_CRITICAL_THRESHOLD=9.0
+      - PAIN_CRITICAL_DELAY=5.0
+      - C2_BEACON_DELAY=10.0
+      - BITTER_PAYLOAD_DELAY=3.0
+
+      # Metrics
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9011
+
+    volumes:
+      - ./logs:/var/log/prefrontal_cortex
+      - ./data:/app/data  # For persistent learning data
+
+    networks:
+      - maximus_network
+
+    depends_on:
+      - visual_cortex_service
+      - auditory_cortex_service
+      - somatosensory_cortex_service
+      - chemical_sensing_service
+      - vestibular_service
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  maximus_network:
+    external: true
+    name: maximus_network

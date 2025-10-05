@@ -1,0 +1,72 @@
+# ============================================================================
+# AI IMMUNE SYSTEM - Docker Compose Configuration
+# 3-Tier defense against false positives and cascade failures
+# ============================================================================
+
+version: '3.8'
+
+services:
+  ai_immune_system:
+    build: .
+    container_name: ai_immune_system
+    ports:
+      - "8014:8014"  # Service API
+      - "9014:9014"  # Prometheus metrics
+    environment:
+      - SERVICE_NAME=ai_immune_system
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8014
+      - LOG_LEVEL=INFO
+
+      # Tier 1: Circuit Breaker
+      - DEFAULT_FAILURE_THRESHOLD=5
+      - DEFAULT_TIMEOUT_SECONDS=60.0
+      - DEFAULT_HALF_OPEN_MAX_CALLS=1
+      - DEFAULT_SUCCESS_THRESHOLD=2
+
+      # Tier 2: Consensus Validation
+      - CONSENSUS_THRESHOLD=0.6
+      - MIN_VALIDATORS=3
+      - MAX_VALIDATORS=5
+      - VALIDATOR_TIMEOUT=5.0
+
+      # Tier 3: Adaptive Learning
+      - LEARNING_RATE=0.1
+      - MIN_INCIDENTS_FOR_RULE=3
+      - RULE_CONFIDENCE_THRESHOLD=0.7
+      - MAX_SUPPRESSION_RULES=100
+
+      # Metrics
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9014
+
+      # Integration URLs
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+      - SOMATOSENSORY_CORTEX_URL=http://somatosensory_cortex_service:8008
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+      - VESTIBULAR_SYSTEM_URL=http://vestibular_service:8010
+
+    volumes:
+      - ./logs:/var/log/ai_immune_system
+      - ./data:/app/data
+
+    networks:
+      - maximus_network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8014/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  maximus_network:
+    external: true
+    name: maximus_network

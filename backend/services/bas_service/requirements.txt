@@ -1,0 +1,28 @@
+# Breach & Attack Simulation Service - Python Dependencies
+# Quality-First: Production-ready dependencies
+
+# FastAPI framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Async HTTP client
+aiohttp==3.9.3
+
+# Atomic Red Team / YAML parsing
+PyYAML==6.0.1
+GitPython==3.1.41
+
+# Remote execution
+paramiko==3.4.0
+pypsrp==0.8.1
+
+# Prometheus metrics
+prometheus-client==0.19.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Logging
+python-json-logger==2.0.7

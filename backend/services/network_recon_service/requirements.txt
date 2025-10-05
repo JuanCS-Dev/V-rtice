@@ -1,0 +1,43 @@
+# ============================================================================
+# NETWORK RECONNAISSANCE SERVICE - Python Dependencies
+# Two-Stage Reconnaissance: Masscan → Nmap with ASA Integration
+# ============================================================================
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# HTTP Client for ASA integration
+httpx==0.26.0
+
+# Async Support
+asyncio==3.4.3
+aiofiles==23.2.1
+
+# Monitoring & Metrics
+prometheus-client==0.19.0
+
+# Logging
+python-json-logger==2.0.7
+
+# Environment Configuration
+python-dotenv==1.0.0
+
+# Type Hints
+typing-extensions==4.9.0
+
+# Date/Time
+python-dateutil==2.8.2
+
+# IP Address validation
+ipaddress==1.0.23
+
+# Testing (optional, for development)
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+
+# Note: masscan and nmap must be installed at OS level
+# apt-get install masscan nmap

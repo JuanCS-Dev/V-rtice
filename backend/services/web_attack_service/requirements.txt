@@ -1,0 +1,41 @@
+# ============================================================================
+# WEB APPLICATION ATTACK SERVICE - Python Dependencies
+# AI-Powered Web Security Testing
+# ============================================================================
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# HTTP Client
+httpx==0.26.0
+
+# AI Providers
+google-generativeai==0.3.2  # Gemini
+anthropic==0.18.1           # Claude
+
+# OWASP ZAP
+python-owasp-zap-v2.4==0.0.22
+
+# Async
+asyncio==3.4.3
+
+# Prometheus
+prometheus-client==0.19.0
+
+# Logging
+python-json-logger==2.0.7
+
+# Environment
+python-dotenv==1.0.0
+
+# Type Hints
+typing-extensions==4.9.0
+
+# Testing
+pytest==7.4.4
+pytest-asyncio==0.23.3
+
+# Note: Burp Suite Pro and OWASP ZAP must be running separately

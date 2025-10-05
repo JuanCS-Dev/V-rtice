@@ -1,0 +1,40 @@
+# ============================================================================
+# AI IMMUNE SYSTEM - Python Dependencies
+# 3-Tier defense against false positives and cascade failures
+# ============================================================================
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Numerical Computing
+numpy==1.26.2
+
+# Logging
+python-json-logger==2.0.7
+
+# Metrics & Monitoring
+prometheus-client==0.19.0
+
+# Database (optional)
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+
+# Redis (optional)
+redis==5.0.1
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.25.2
+
+# Development
+black==23.12.0
+ruff==0.1.8
+mypy==1.7.1
+
+# Security
+python-dotenv==1.0.0
