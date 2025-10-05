@@ -1052,7 +1052,258 @@ docker inspect -f '{{.NetworkSettings.Networks.vertice-network.IPAddress}}' vert
 docker exec vertice-ai-agent ping vertice-threat-intel
 ```
 
-### 5.7. Checklist Docker Debug
+### 5.7. Volume Mounts vs Image Code (CRÍTICO)
+
+**⚠️ ARMADILHA COMUM**: Volume mounts SOBRESCREVEM código da imagem Docker, mesmo após rebuild!
+
+#### Problema
+
+```yaml
+# docker-compose.yml
+services:
+  my_service:
+    build: ./backend/services/my_service
+    volumes:
+      - ./backend/services/my_service:/app  # ⚠️ SOBRESCREVE a imagem!
+```
+
+**Cenário**:
+1. Você corrige um bug no código HOST (`my_service/main.py`)
+2. Faz rebuild: `docker compose build my_service`
+3. Container AINDA falha com o erro antigo! 😱
+
+**Causa**: O volume mount `-v ./backend/services/my_service:/app` monta o diretório HOST sobre `/app` no container, **ignorando** os arquivos da imagem.
+
+#### Diagnóstico
+
+```bash
+# 1. Verifique se tem volume mount
+docker inspect my_service | grep -A 10 '"Mounts"'
+
+# 2. Compare checksums (HOST vs Container)
+md5sum /home/juan/vertice-dev/backend/services/my_service/main.py
+docker exec my_service md5sum /app/main.py
+# Se diferentes = problema!
+
+# 3. Verifique timestamps
+ls -l backend/services/my_service/main.py  # Modificado HOJE
+docker exec my_service ls -l /app/main.py   # Modificado SEMANA PASSADA
+```
+
+#### Soluções
+
+**Opção 1: Remover volume mount (Produção)**
+```yaml
+# docker-compose.yml
+services:
+  my_service:
+    build: ./backend/services/my_service
+    # volumes:  # ❌ REMOVER em produção
+    #   - ./backend/services/my_service:/app
+```
+
+**Opção 2: Rebuild SEM cache**
+```bash
+docker compose build --no-cache my_service
+docker compose up -d my_service
+```
+
+**Opção 3: Docker cp (Quick fix para builds demorados)**
+```bash
+# Útil quando Dockerfile demora >5min (ex: compila Hyperscan)
+docker cp ./backend/services/my_service/main.py my_service:/app/
+docker cp ./backend/services/my_service/utils.py my_service:/app/
+docker restart my_service
+```
+
+**Opção 4: Limpar cache Python**
+```bash
+# Bytecode cache pode persistir com código antigo
+docker exec my_service find /app -type d -name __pycache__ -exec rm -rf {} +
+docker exec my_service find /app -type f -name "*.pyc" -delete
+docker restart my_service
+```
+
+#### Caso Real: RTE Service
+
+**Problema**: Container rodava código de 3 dias atrás (com Hyperscan real), HOST tinha código novo (MockHyperscan).
+
+```bash
+# Diagnóstico
+$ docker exec rte-service head -20 /app/hyperscan_matcher.py | grep "import hyperscan"
+import hyperscan  # ⚠️ Código ANTIGO!
+
+$ head -20 ./backend/services/rte_service/hyperscan_matcher.py | grep "class Mock"
+class MockHyperscan:  # ✅ Código NOVO!
+
+# Solução: docker cp (rebuild demoraria 10+ min compilando Hyperscan)
+$ docker cp ./backend/services/rte_service/hyperscan_matcher.py rte-service:/app/
+$ docker cp ./backend/services/rte_service/main.py rte-service:/app/
+$ docker restart rte-service
+# ✅ Funcionou!
+```
+
+### 5.8. Build Cache Mascarando Correções
+
+**Sintoma**: Você corrige o código, faz `docker compose build`, mas erro persiste.
+
+**Causa**: Docker reutiliza layers em cache que têm código antigo.
+
+**Debug**:
+```bash
+# Veja se build usou cache
+docker compose build my_service 2>&1 | grep CACHED
+
+# Output:
+#5 CACHED
+#6 CACHED
+#7 [5/5] COPY . .
+#7 CACHED  # ⚠️ Copiou arquivos antigos do cache!
+```
+
+**Solução**:
+```bash
+# Force rebuild completo
+docker compose build --no-cache my_service
+
+# Ou para todos os serviços
+docker compose build --no-cache
+
+# Ou rebuild + recreate container
+docker compose up --build --force-recreate my_service
+```
+
+### 5.9. Imports Opcionais para Dependências Pesadas
+
+**Problema**: Biblioteca está no `requirements.txt` mas instalação falhou silenciosamente, causando `ImportError` em runtime.
+
+**Solução: Try/Except Imports**
+
+```python
+# ❌ ANTES: Import direto
+from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
+from kafka import KafkaProducer
+from sklearn.metrics import r2_score
+
+# ✅ DEPOIS: Import opcional com fallback
+try:
+    from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
+    PROMETHEUS_AVAILABLE = True
+except ImportError:
+    PROMETHEUS_AVAILABLE = False
+    CollectorRegistry = None
+    Gauge = None
+    push_to_gateway = None
+
+try:
+    from kafka import KafkaProducer
+    from kafka.errors import KafkaError
+    KAFKA_AVAILABLE = True
+except ImportError:
+    KAFKA_AVAILABLE = False
+    KafkaProducer = None
+    KafkaError = Exception
+
+# Use nos métodos
+def setup_prometheus(self):
+    if not PROMETHEUS_AVAILABLE:
+        logger.warning("Prometheus client not available, metrics disabled")
+        return
+
+    self.registry = CollectorRegistry()
+    # ... resto do código
+```
+
+**Vantagens**:
+- Container inicia mesmo sem dependência opcional
+- Logs claros sobre features desabilitadas
+- Facilita desenvolvimento incremental
+- Produção continua funcionando (degraded mode)
+
+### 5.10. Containers Duplicados (Naming Conflicts)
+
+**Problema**: `docker ps` mostra containers com nomes diferentes para o mesmo serviço.
+
+```bash
+$ docker ps --format "{{.Names}}"
+hcl-executor           # ❌ Duplicado
+vertice-hcl-executor   # ✅ Oficial
+rte-service            # ❌ Duplicado
+vertice-rte            # ✅ Oficial
+```
+
+**Causa**: Múltiplas definições no `docker-compose.yml` ou múltiplos docker-compose files.
+
+**Debug**:
+```bash
+# Encontre definições duplicadas
+grep -n "hcl.*executor:" docker-compose.yml
+# 542:  hcl-executor:
+# 892:  hcl_executor_service:
+
+# Veja quais estão rodando
+docker ps --filter "name=hcl" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+```
+
+**Solução**:
+```bash
+# Pare duplicados problemáticos
+docker stop hcl-executor rte-service
+
+# Mantenha apenas os oficiais (vertice-*)
+docker ps | grep vertice-hcl-executor  # ✅ Este está OK
+
+# Remova containers órfãos
+docker compose down --remove-orphans
+```
+
+### 5.11. Debugging Workflow Completo
+
+```bash
+# ========================================
+# CONTAINER RESTARTING - WORKFLOW DEBUG
+# ========================================
+
+# 1. Identifique o container problemático
+docker ps -a | grep -i restart
+# OUTPUT: my_service  Restarting (1) 5 seconds ago
+
+# 2. Veja os logs (últimas linhas mostram o erro)
+docker logs my_service 2>&1 | tail -50
+# OUTPUT: ImportError: cannot import name 'get_mode_policy'
+
+# 3. Verifique se código no container difere do HOST
+docker exec my_service cat /app/file.py | head -20
+cat ./backend/services/my_service/file.py | head -20
+# Compare visualmente ou com diff
+
+# 4. Verifique volume mounts
+docker inspect my_service | grep -A 10 '"Mounts"'
+# Se tem volume mount: código HOST é usado
+# Se NÃO tem: código da imagem é usado
+
+# 5A. Se TEM volume mount: corrija no HOST
+vim ./backend/services/my_service/file.py
+docker restart my_service
+
+# 5B. Se NÃO TEM volume mount: rebuild imagem
+docker compose build --no-cache my_service
+docker compose up -d my_service
+
+# 5C. Se build demora muito: docker cp como workaround
+docker cp ./backend/services/my_service/file.py my_service:/app/
+docker restart my_service
+
+# 6. Valide a correção
+docker logs my_service 2>&1 | tail -20
+# Deve mostrar: "INFO: Started server process"
+
+# 7. Test health endpoint
+curl http://localhost:PORT/health
+# OUTPUT: {"status":"healthy"}
+```
+
+### 5.12. Checklist Docker Debug
 
 ```markdown
 ✅ Docker Debug Checklist:
@@ -1069,6 +1320,15 @@ docker exec vertice-ai-agent ping vertice-threat-intel
 □ Services comunicando entre si (curl interno)
 □ Health checks passando
 □ Resources suficientes (RAM, disk)
+
+🆕 VERIFICAÇÕES AVANÇADAS (Aprendizados 2025-10-04):
+□ Volume mounts NÃO sobrescrevendo código corrigido
+□ Código no container IGUAL ao código no HOST (md5sum)
+□ Build SEM usar cache para arquivos modificados
+□ Imports opcionais implementados para deps pesadas
+□ Sem containers duplicados (naming conflicts)
+□ Python __pycache__ limpo após mudanças
+□ Dockerfile COPY atualizado (se sem volume mount)
 ```
 
 ---
@@ -1664,9 +1924,18 @@ Este guia cobre os cenários mais comuns de debugging. Para problemas específic
 
 ---
 
-**Última atualização**: 2025-10-01
-**Versão**: 1.0.0
+**Última atualização**: 2025-10-04
+**Versão**: 1.1.0
 **Mantido por**: JuanCS-Dev
+
+**Changelog v1.1.0 (2025-10-04)**:
+- ✅ Adicionadas seções 5.7-5.12: Debugging avançado de containers
+- ✅ Volume mounts vs Image code (armadilha crítica)
+- ✅ Build cache mascarando correções
+- ✅ Imports opcionais para dependências pesadas
+- ✅ Containers duplicados (naming conflicts)
+- ✅ Workflow completo de debugging de containers
+- ✅ Caso real documentado: RTE Service (docker cp solution)
 
 **Links Úteis**:
 - Repositório: `/home/juan/vertice-dev`
