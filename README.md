@@ -1392,6 +1392,13 @@ Uso não autorizado é estritamente proibido.
 
 ---
 
+## 👨‍💻 Autor
+
+**Juan Carlos**
+Arquiteto e Desenvolvedor Principal do Projeto VÉRTICE
+
+---
+
 ## 🙏 Agradecimentos
 
 - **Natureza** - 3.8 bilhões de anos de P&D em sistemas adaptativos
