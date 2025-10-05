@@ -92,7 +92,7 @@ class DistributedOrganismTools:
                     else:
                         error_text = await response.text()
                         logger.error(f"Multi-edge scan failed: {error_text}")
-                        return {"error": f"HTTP {response.status": {error_text}"}
+                        return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in coordinate_multi_edge_scan: {e}")
