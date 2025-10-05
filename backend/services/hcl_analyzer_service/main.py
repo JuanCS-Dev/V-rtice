@@ -1,160 +1,139 @@
-"""HCL Analyzer Service - Predictive Analysis Engine.
+"""Maximus HCL Analyzer Service - Main Application Entry Point.
 
-This service acts as a predictive analysis engine for the HCL (Hardware
-Compatibility List) ecosystem. It consumes system telemetry from a Kafka topic,
-runs machine learning models to forecast resource usage and predict failures,
-and publishes the resulting predictions back to Kafka.
+This module serves as the main entry point for the Maximus Homeostatic Control
+Loop (HCL) Analyzer Service. It initializes and configures the FastAPI
+application, sets up event handlers for startup and shutdown, and defines the
+API endpoints for ingesting system metrics and performing in-depth analysis.
+
+It orchestrates the application of statistical methods and machine learning
+models to identify anomalies, predict trends, and assess the overall health
+and performance of the Maximus AI system. This service is crucial for providing
+actionable insights to the HCL Planner Service, enabling adaptive self-management.
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Dict, Any, Optional
+import uvicorn
 import asyncio
-import json
-import logging
-import os
 from datetime import datetime
-from typing import Dict
-import pandas as pd
+import numpy as np
 
-from .models import SARIMAForecaster, IsolationForestDetector, XGBoostFailurePredictor
+from models import SystemMetrics, AnalysisResult, Anomaly, AnomalyType
 
-# Conditional Kafka import
-try:
-    from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
-    KAFKA_AVAILABLE = True
-except ImportError:
-    KAFKA_AVAILABLE = False
+app = FastAPI(title="Maximus HCL Analyzer Service", version="1.0.0")
 
-# ============================================================================
-# Configuration and Initialization
-# ============================================================================
+# In a real scenario, this would be a more sophisticated analysis engine
+# with ML models, historical data storage, etc.
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Mock historical data for analysis
+historical_metrics: List[SystemMetrics] = []
 
-KAFKA_BROKERS = os.getenv("KAFKA_BROKERS", "localhost:9092")
-MODEL_DIR = "/app/models"
 
-class ModelRegistry:
-    """A simple registry to manage all machine learning models."""
-    def __init__(self):
-        self.sarima_cpu = SARIMAForecaster("cpu_usage")
-        self.isolation_forest = IsolationForestDetector()
-        self.xgboost_failure = XGBoostFailurePredictor()
-        self.models_loaded = {"sarima_cpu": False, "isolation_forest": False, "xgboost_failure": False}
+class AnalyzeMetricsRequest(BaseModel):
+    """Request model for submitting system metrics for analysis.
 
-    def load_all(self, model_dir: str):
-        """Loads all registered models from the specified directory."""
-        for name, model in [("sarima_cpu", self.sarima_cpu), ("isolation_forest", self.isolation_forest)]:
-            path = f"{model_dir}/{name}.pkl"
-            if os.path.exists(path):
-                model.load(path)
-                self.models_loaded[name] = True
+    Attributes:
+        current_metrics (SystemMetrics): The current snapshot of system metrics.
+    """
+    current_metrics: SystemMetrics
 
-registry = ModelRegistry()
 
-# ============================================================================
-# Kafka Consumer and Producer Logic
-# ============================================================================
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the HCL Analyzer Service."""
+    print("📊 Starting Maximus HCL Analyzer Service...")
+    print("✅ Maximus HCL Analyzer Service started successfully.")
 
-async def kafka_consumer_loop(consumer, producer):
-    """The main loop for consuming metrics and producing predictions."""
-    logger.info("Starting Kafka consumer loop...")
-    async for msg in consumer:
-        try:
-            metric = msg.value
-            # In a real implementation, this would trigger analysis
-            # For now, we just log it.
-            logger.debug(f"Received metric: {metric}")
-        except Exception as e:
-            logger.error(f"Error processing Kafka message: {e}")
 
-# ============================================================================
-# FastAPI Lifespan and Application Setup
-# ============================================================================
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the HCL Analyzer Service."""
+    print("👋 Shutting down Maximus HCL Analyzer Service...")
+    print("🛑 Maximus HCL Analyzer Service shut down.")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Manages application startup and shutdown events."""
-    logger.info("Starting HCL Analyzer Service...")
-    registry.load_all(MODEL_DIR)
-    
-    consumer_task = None
-    if KAFKA_AVAILABLE:
-        consumer = AIOKafkaConsumer('system.telemetry.raw', bootstrap_servers=KAFKA_BROKERS, value_deserializer=lambda m: json.loads(m.decode('utf-8')))
-        producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BROKERS, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-        await consumer.start()
-        await producer.start()
-        consumer_task = asyncio.create_task(kafka_consumer_loop(consumer, producer))
-    
-    yield
-    
-    logger.info("Shutting down HCL Analyzer Service...")
-    if consumer_task: consumer_task.cancel()
-    if KAFKA_AVAILABLE:
-        await consumer.stop()
-        await producer.stop()
-
-app = FastAPI(
-    title="HCL Analyzer Service",
-    description="Predictive analysis engine for HCL metrics.",
-    version="1.0.0",
-    lifespan=lifespan
-)
-
-# ============================================================================
-# API Endpoints
-# ============================================================================
 
 @app.get("/health")
-async def health_check():
-    """Provides a health check of the service, including model status."""
-    return {
-        "status": "healthy",
-        "models_loaded": registry.models_loaded,
-        "kafka_available": KAFKA_AVAILABLE
-    }
-
-@app.post("/train/sarima/{metric_name}", status_code=202)
-async def train_sarima(metric_name: str, background_tasks: BackgroundTasks):
-    """Triggers a background task to train a SARIMA forecasting model.
-
-    Args:
-        metric_name (str): The name of the metric to train (e.g., 'cpu_usage').
-        background_tasks (BackgroundTasks): FastAPI background task manager.
-    """
-    def train_task():
-        # Placeholder for fetching data and training
-        df = pd.DataFrame({
-            'timestamp': pd.to_datetime(pd.date_range(end=datetime.utcnow(), periods=100, freq='H')),
-            'metric_value': np.random.rand(100) * 100
-        })
-        if metric_name == "cpu_usage":
-            registry.sarima_cpu.train(df)
-            registry.sarima_cpu.save(f"{MODEL_DIR}/sarima_cpu.pkl")
-            registry.models_loaded["sarima_cpu"] = True
-
-    background_tasks.add_task(train_task)
-    return {"message": f"SARIMA training started for {metric_name}."}
-
-@app.get("/predict/sarima/{metric_name}")
-async def predict_sarima(metric_name: str, hours: int = 24):
-    """Generates a forecast using a trained SARIMA model.
-
-    Args:
-        metric_name (str): The metric to forecast (e.g., 'cpu_usage').
-        hours (int): The number of hours into the future to forecast.
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the HCL Analyzer Service.
 
     Returns:
-        Dict: The forecast, including predictions and confidence intervals.
+        Dict[str, str]: A dictionary indicating the service status.
     """
-    if not registry.models_loaded.get(f"sarima_{metric_name}"):
-        raise HTTPException(status_code=503, detail=f"SARIMA model for {metric_name} is not trained.")
-    
-    model = registry.sarima_cpu # Simplified for example
-    prediction = model.predict(steps=hours)
-    return {"metric": metric_name, "forecast": prediction}
+    return {"status": "healthy", "message": "HCL Analyzer Service is operational."}
+
+
+@app.post("/analyze_metrics", response_model=AnalysisResult)
+async def analyze_system_metrics(request: AnalyzeMetricsRequest) -> AnalysisResult:
+    """Analyzes incoming system metrics to detect anomalies and assess health.
+
+    Args:
+        request (AnalyzeMetricsRequest): The request body containing current system metrics.
+
+    Returns:
+        AnalysisResult: The comprehensive analysis result.
+    """
+    print(f"[API] Analyzing metrics from {request.current_metrics.timestamp}")
+    historical_metrics.append(request.current_metrics)
+    if len(historical_metrics) > 100: # Keep a rolling window of 100 metrics
+        historical_metrics.pop(0)
+
+    await asyncio.sleep(0.1) # Simulate analysis time
+
+    anomalies: List[Anomaly] = []
+    recommendations: List[str] = []
+    requires_intervention: bool = False
+    overall_health_score: float = 1.0
+
+    # Simplified anomaly detection logic
+    cpu_usages = [m.cpu_usage for m in historical_metrics]
+    if len(cpu_usages) > 5:
+        mean_cpu = np.mean(cpu_usages[:-1])
+        std_cpu = np.std(cpu_usages[:-1])
+        if request.current_metrics.cpu_usage > mean_cpu + 2 * std_cpu:
+            anomalies.append(Anomaly(type=AnomalyType.SPIKE, metric_name="cpu_usage", current_value=request.current_metrics.cpu_usage, severity=0.8, description="Sudden spike in CPU usage."))
+            recommendations.append("Investigate high CPU processes.")
+            requires_intervention = True
+            overall_health_score -= 0.2
+
+    if request.current_metrics.memory_usage > 90:
+        anomalies.append(Anomaly(type=AnomalyType.OUTLIER, metric_name="memory_usage", current_value=request.current_metrics.memory_usage, severity=0.9, description="Memory usage critically high."))
+        recommendations.append("Optimize memory consumption or scale up memory resources.")
+        requires_intervention = True
+        overall_health_score -= 0.3
+
+    if request.current_metrics.error_rate > 0.05:
+        anomalies.append(Anomaly(type=AnomalyType.TREND, metric_name="error_rate", current_value=request.current_metrics.error_rate, severity=0.7, description="Elevated error rate detected."))
+        recommendations.append("Review recent logs for service errors.")
+        requires_intervention = True
+        overall_health_score -= 0.15
+
+    return AnalysisResult(
+        timestamp=datetime.now().isoformat(),
+        overall_health_score=max(0.0, overall_health_score),
+        anomalies=anomalies,
+        trends={
+            "cpu_trend": "stable" if not requires_intervention else "unstable",
+            "memory_trend": "stable" if not requires_intervention else "unstable"
+        }, # Simplified
+        recommendations=recommendations,
+        requires_intervention=requires_intervention
+    )
+
+
+@app.get("/analysis_history", response_model=List[AnalysisResult])
+async def get_analysis_history(limit: int = 10) -> List[AnalysisResult]:
+    """Retrieves a history of past analysis results.
+
+    Args:
+        limit (int): The maximum number of historical results to retrieve.
+
+    Returns:
+        List[AnalysisResult]: A list of past analysis results.
+    """
+    # In a real system, this would query a persistent storage
+    return [] # Mocking empty history for now
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    uvicorn.run(app, host="0.0.0.0", port=8015)

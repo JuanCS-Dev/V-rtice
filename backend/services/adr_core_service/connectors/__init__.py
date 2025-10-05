@@ -1,20 +1,16 @@
-"""ADR Core Service - Connectors Package.
+"""Maximus ADR Core Service - Connectors Package.
 
-This package contains modules for connecting to external intelligence and analysis
-services. Each connector is responsible for communicating with a specific
-external API to enrich threat data.
+This package contains modules for connecting the Automated Detection and
+Response (ADR) service to various external systems and data sources.
+These connectors enable Maximus AI to ingest threat intelligence, query IP
+reputation, and interact with other security tools.
 
-This `__init__.py` file exports the primary connector classes for easy access.
+Modules within this package include:
+- `base`: Provides a base class or interface for all connectors.
+- `threat_intel_connector`: Integrates with external threat intelligence platforms.
+- `ip_intelligence_connector`: Queries IP address reputation and contextual data.
+- `malware_analysis`: Connects to malware analysis sandboxes or services.
+
+These connectors are crucial for enriching security event data, providing
+context for detections, and enabling comprehensive response actions.
 """
-
-from .base import BaseConnector
-from .ip_intelligence_connector import IPIntelligenceConnector
-from .threat_intel_connector import ThreatIntelConnector
-from .malware_analysis import MalwareAnalysisConnector
-
-__all__ = [
-    'BaseConnector',
-    'IPIntelligenceConnector',
-    'ThreatIntelConnector',
-    'MalwareAnalysisConnector'
-]

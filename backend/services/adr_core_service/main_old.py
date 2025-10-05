@@ -1,184 +1,180 @@
-"""ADR Core Service - Autonomous Detection & Response (Legacy Version).
+"""Maximus ADR Core Service - Old Main Application Entry Point.
 
-This module represents a previous, monolithic version of the ADR Core Service.
-It contains the initial structures for detection and response, which have since
-been refactored into more modular engines and connectors in the current version.
+This module represents an older or deprecated main entry point for the Maximus
+ADR Core Service. It likely contains previous versions of initialization logic,
+API endpoints, or service orchestration that have since been refactored or
+replaced by `main.py`.
 
-This file is retained for historical and reference purposes.
-
-Author: Juan (Arquiteto)
-Date: 2025-10-01
+This file is retained for historical reference or potential rollback purposes,
+but it is not intended for active deployment or development.
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
-from datetime import datetime
+from typing import List, Dict, Any, Optional
+import uvicorn
 import asyncio
-import logging
-from uuid import uuid4
-import hashlib
-import os
-import re
-import time
+from datetime import datetime
 
-# Setup basic logging for the legacy application
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Assuming these modules exist and are correctly structured within ADR
+from engines.detection_engine import DetectionEngine
+from engines.response_engine import ResponseEngine
+from engines.ml_engine import MLEngine
+from connectors.threat_intel_connector import ThreatIntelConnector
+from connectors.ip_intelligence_connector import IpIntelligenceConnector
+from models.schemas import Incident, DetectionResult, ResponseAction, ThreatIntelData, IpIntelligenceData
+from models.enums import IncidentSeverity, DetectionType, ResponseActionType
+from playbooks.loader import PlaybookLoader
+from utils.logger import setup_logger
 
-app = FastAPI(
-    title="Aurora ADR Core Service (Legacy)",
-    description="Autonomous Detection & Response - Democratizing Enterprise Security",
-    version="1.0.0-alpha",
-)
+# Setup logger
+logger = setup_logger(__name__)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = FastAPI(title="Maximus ADR Core Service (Old)", version="0.9.0")
 
-# ============================================================================
-# Legacy Models
-# ============================================================================
-
-class ThreatDetection(BaseModel):
-    """Represents a threat detection in the legacy system."""
-    threat_id: str
-    type: str
-    severity: str
-    source: str
-    indicators: List[str]
-    threat_score: int
-    confidence: str
-    timestamp: str
-    raw_data: Optional[Dict[str, Any]] = None
-
-class ResponseAction(BaseModel):
-    """Represents a response action in the legacy system."""
-    action_id: str
-    threat_id: str
-    action_type: str
-    target: str
-    status: str
-    timestamp: str
-    response_time_ms: Optional[int] = None
-    details: Optional[Dict[str, Any]] = None
-
-# ============================================================================
-# Legacy State Management
-# ============================================================================
-
-class ADRState:
-    """Manages the global state of the legacy ADR service."""
-    def __init__(self):
-        """Initializes the ADRState."""
-        self.threats_detected: List[ThreatDetection] = []
-        self.responses_executed: List[ResponseAction] = []
-        self.is_armed: bool = True
-        self.risk_threshold: int = 70
-
-    def add_threat(self, threat: ThreatDetection):
-        """Adds a detected threat to the state."""
-        self.threats_detected.append(threat)
-        logger.info(f"Threat detected: {threat.type} | Score: {threat.threat_score}")
-
-# Global state instance for the legacy app
-adr_state = ADRState()
-
-# ============================================================================
-# Legacy Connectors (Dummy Implementations)
-# ============================================================================
-
-class IPIntelligenceConnector:
-    """Dummy connector for IP intelligence in the legacy system."""
-    async def enrich_threat_with_ip_context(self, threat_dict: dict) -> dict:
-        threat_dict['enriched_context'] = {'ip_intel': 'dummy_data'}
-        return threat_dict
-
-class ThreatIntelConnector:
-    """Dummy connector for threat intelligence in the legacy system."""
-    async def enrich_threat_with_intel(self, threat_dict: dict) -> dict:
-        threat_dict['enriched_context'] = {'threat_intel': 'dummy_data'}
-        return threat_dict
-
-# ============================================================================
-# Legacy Engines (Simplified Implementations)
-# ============================================================================
-
-class DetectionEngine:
-    """A simplified detection engine from the legacy system."""
-    async def analyze_file(self, file_path: str) -> ThreatDetection:
-        """Analyzes a file based on a dummy hash check."""
-        try:
-            with open(file_path, 'rb') as f:
-                file_hash = hashlib.sha256(f.read()).hexdigest()
-        except FileNotFoundError:
-            raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
-        
-        # Dummy check
-        is_malicious = 'bad' in file_path
-        threat_score = 95 if is_malicious else 10
-
-        return ThreatDetection(
-            threat_id=str(uuid4()),
-            type='malware' if is_malicious else 'unknown',
-            severity='critical' if is_malicious else 'low',
-            source=file_path,
-            indicators=[f"SHA256: {file_hash}"],
-            threat_score=threat_score,
-            confidence='high' if is_malicious else 'low',
-            timestamp=datetime.utcnow().isoformat(),
-            raw_data={'file_hash': file_hash}
-        )
-
-# Instantiate legacy components
+# Initialize engines and connectors
 detection_engine = DetectionEngine()
-ip_intel_connector = IPIntelligenceConnector()
+response_engine = ResponseEngine()
+ml_engine = MLEngine()
 threat_intel_connector = ThreatIntelConnector()
+ip_intelligence_connector = IpIntelligenceConnector()
+playbook_loader = PlaybookLoader()
 
-# ============================================================================
-# Legacy API Endpoints
-# ============================================================================
 
-@app.get("/")
-async def root():
-    """Provides basic information about the legacy service."""
-    return {
-        "service": "Aurora ADR Core (Legacy)",
-        "version": "1.0.0-alpha",
-        "status": "operational_legacy",
-    }
+class DetectRequest(BaseModel):
+    """Request model for triggering a detection.
 
-@app.post("/api/adr/analyze/file")
-async def analyze_file(file_path: str, enrich: bool = True):
-    """Analyzes a file for threats using the legacy detection engine."""
+    Attributes:
+        event_data (Dict[str, Any]): The raw event data to be analyzed.
+        source (str): The source of the event (e.g., 'siem', 'endpoint').
+    """
+    event_data: Dict[str, Any]
+    source: str
+
+
+class RespondRequest(BaseModel):
+    """Request model for triggering a response action.
+
+    Attributes:
+        incident_id (str): The ID of the incident to respond to.
+        action_type (ResponseActionType): The type of response action to take.
+        parameters (Optional[Dict[str, Any]]): Parameters for the response action.
+    """
+    incident_id: str
+    action_type: ResponseActionType
+    parameters: Optional[Dict[str, Any]] = None
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the ADR Core Service."""
+    logger.info("🚀 Starting Maximus ADR Core Service (Old)...")
+    await playbook_loader.load_playbooks("adr_core_service/playbooks") # Load playbooks from a directory
+    logger.info(f"Loaded {len(playbook_loader.get_all_playbooks())} playbooks.")
+    logger.info("✅ Maximus ADR Core Service (Old) started successfully.")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the ADR Core Service."""
+    logger.info("👋 Shutting down Maximus ADR Core Service (Old)...")
+    logger.info("🛑 Maximus ADR Core Service (Old) shut down.")
+
+
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the ADR Core Service.
+
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
+    """
+    return {"status": "healthy", "message": "ADR Core Service (Old) is operational."}
+
+
+@app.post("/detect", response_model=List[DetectionResult])
+async def detect_threat(request: DetectRequest) -> List[DetectionResult]:
+    """Analyzes incoming event data for potential threats.
+
+    Args:
+        request (DetectRequest): The request body containing event data and source.
+
+    Returns:
+        List[DetectionResult]: A list of detected threats.
+    """
+    logger.info(f"Received detection request from {request.source}")
     try:
-        threat = await detection_engine.analyze_file(file_path)
-        threat_dict = threat.dict()
-
-        if enrich:
-            threat_dict = await threat_intel_connector.enrich_threat_with_intel(threat_dict)
-
-        adr_state.add_threat(ThreatDetection(**threat_dict))
-
-        return {
-            "success": True,
-            "threat": threat_dict,
-            "will_auto_respond": threat.threat_score >= adr_state.risk_threshold,
-        }
-    except HTTPException as e:
-        raise e
+        detections = await detection_engine.analyze_event(request.event_data, request.source)
+        # Simulate ML analysis for additional context
+        for det in detections:
+            ml_score = await ml_engine.predict_threat_score(det.event_id, det.event_data)
+            det.ml_score = ml_score
+        return detections
     except Exception as e:
-        logger.error(f"Error in legacy file analysis: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error.")
+        logger.error(f"Error during threat detection: {e}")
+        raise HTTPException(status_code=500, detail=f"Threat detection failed: {str(e)}")
+
+
+@app.post("/respond", response_model=ResponseAction)
+async def respond_to_incident(request: RespondRequest) -> ResponseAction:
+    """Triggers a response action for a given incident.
+
+    Args:
+        request (RespondRequest): The request body containing incident ID, action type, and parameters.
+
+    Returns:
+        ResponseAction: The details of the executed response action.
+    """
+    logger.info(f"Received response request for incident {request.incident_id} with action {request.action_type}")
+    try:
+        # Load relevant playbook
+        playbook = playbook_loader.get_playbook_for_incident(request.incident_id) # Simplified
+        if not playbook:
+            raise HTTPException(status_code=404, detail=f"No playbook found for incident {request.incident_id}")
+
+        action_result = await response_engine.execute_action(request.incident_id, request.action_type, request.parameters)
+        return action_result
+    except Exception as e:
+        logger.error(f"Error during incident response: {e}")
+        raise HTTPException(status_code=500, detail=f"Incident response failed: {str(e)}")
+
+
+@app.get("/threat_intel/{indicator}", response_model=ThreatIntelData)
+async def get_threat_intelligence(indicator: str) -> ThreatIntelData:
+    """Retrieves threat intelligence data for a given indicator.
+
+    Args:
+        indicator (str): The threat indicator (e.g., IP address, hash).
+
+    Returns:
+        ThreatIntelData: Threat intelligence information.
+    """
+    logger.info(f"Retrieving threat intelligence for indicator: {indicator}")
+    try:
+        data = await threat_intel_connector.get_intelligence(indicator)
+        return data
+    except Exception as e:
+        logger.error(f"Error retrieving threat intelligence: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve threat intelligence: {str(e)}")
+
+
+@app.get("/ip_intel/{ip_address}", response_model=IpIntelligenceData)
+async def get_ip_intelligence(ip_address: str) -> IpIntelligenceData:
+    """Retrieves IP intelligence data for a given IP address.
+
+    Args:
+        ip_address (str): The IP address to query.
+
+    Returns:
+        IpIntelligenceData: IP intelligence information.
+    """
+    logger.info(f"Retrieving IP intelligence for IP: {ip_address}")
+    try:
+        data = await ip_intelligence_connector.get_ip_info(ip_address)
+        return data
+    except Exception as e:
+        logger.error(f"Error retrieving IP intelligence: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve IP intelligence: {str(e)}")
+
 
 if __name__ == "__main__":
-    logger.info("Starting Legacy Aurora ADR Core Service for debugging.")
-    uvicorn.run(app, host="0.0.0.0", port=8014)
+    uvicorn.run(app, host="0.0.0.0", port=8005)

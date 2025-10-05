@@ -1,0 +1,61 @@
+[
+  {
+    "id": 1,
+    "pattern": "malware.*\\.exe",
+    "flags": [
+      "CASELESS"
+    ],
+    "metadata": {
+      "severity": "critical",
+      "category": "malware",
+      "description": "Malware executable detection"
+    }
+  },
+  {
+    "id": 2,
+    "pattern": "SELECT.*FROM.*WHERE",
+    "flags": [
+      "CASELESS"
+    ],
+    "metadata": {
+      "severity": "high",
+      "category": "sqli",
+      "description": "SQL injection attempt"
+    }
+  },
+  {
+    "id": 3,
+    "pattern": "<script[^>]*>.*</script>",
+    "flags": [
+      "CASELESS",
+      "DOTALL"
+    ],
+    "metadata": {
+      "severity": "high",
+      "category": "xss",
+      "description": "XSS attempt"
+    }
+  },
+  {
+    "id": 4,
+    "pattern": "cmd\\.exe|powershell\\.exe|/bin/bash",
+    "flags": [
+      "CASELESS"
+    ],
+    "metadata": {
+      "severity": "critical",
+      "category": "rce",
+      "description": "Remote code execution attempt"
+    }
+  },
+  {
+    "id": 5,
+    "pattern": "\\.\\./|\\.\\.\\\\",
+    "flags": [],
+    "metadata": {
+      "severity": "medium",
+      "category": "path_traversal",
+      "description": "Path traversal attempt"
+    }
+  }
+]

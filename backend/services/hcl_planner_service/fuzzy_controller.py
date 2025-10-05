@@ -1,82 +1,169 @@
-"""HCL Planner Service - Fuzzy Logic Controller.
+"""Maximus HCL Planner Service - Fuzzy Logic Controller.
 
-This module implements a Fuzzy Logic Controller for selecting the HCL's
-operational mode. It uses the `skfuzzy` library to map crisp input values
-(like CPU usage and latency) to a fuzzy output (the operational mode score),
-which is then translated into one of three modes: ENERGY_EFFICIENT, BALANCED,
-or HIGH_PERFORMANCE.
+This module implements a Fuzzy Logic Controller for the Homeostatic Control
+Loop (HCL) Planner Service. Fuzzy logic allows Maximus AI to reason with
+uncertainty and imprecision, mimicking human-like decision-making processes
+for resource management.
+
+By defining linguistic variables (e.g., 'CPU usage is high', 'performance is low')
+and fuzzy rules, this controller can generate adaptive resource alignment actions
+without requiring a precise mathematical model of the system. This module is
+crucial for providing robust and flexible planning capabilities in complex and
+dynamic operational environments.
 """
 
-import numpy as np
-import skfuzzy as fuzz
-from skfuzzy import control as ctrl
-import logging
-from typing import Dict, Tuple
-
-logger = logging.getLogger(__name__)
+import asyncio
+from typing import Dict, Any, List, Optional
+from datetime import datetime
 
 
-class FuzzyOperationalController:
-    """A Fuzzy Logic Controller for determining the HCL operational mode.
+class FuzzyController:
+    """Implements a Fuzzy Logic Controller for the HCL Planner Service.
 
-    This controller uses a set of human-readable rules to decide the most
-    appropriate operational mode based on the current state of the system.
-
-    Attributes:
-        control_system (ctrl.ControlSystem): The fuzzy control system instance.
-        controller (ctrl.ControlSystemSimulation): The simulation object for computation.
+    Fuzzy logic allows Maximus AI to reason with uncertainty and imprecision,
+    mimicking human-like decision-making processes for resource management.
     """
 
     def __init__(self):
-        """Initializes the fuzzy controller, its variables, and rules."""
-        # Define fuzzy antecedents (inputs)
-        self.cpu_usage = ctrl.Antecedent(np.arange(0, 101, 1), 'cpu_usage')
-        self.latency = ctrl.Antecedent(np.arange(0, 1001, 1), 'latency')
-        
-        # Define fuzzy consequent (output)
-        self.mode_score = ctrl.Consequent(np.arange(0, 101, 1), 'mode_score')
+        """Initializes the FuzzyController, defining fuzzy sets and rules."""
+        self.fuzzy_sets = self._define_fuzzy_sets()
+        self.fuzzy_rules = self._define_fuzzy_rules()
+        self.last_decision_time: Optional[datetime] = None
+        print("[FuzzyController] Initialized Fuzzy Logic Controller.")
 
-        # Define membership functions for inputs
-        self.cpu_usage.automf(3, 'poor', 'average', 'good') # Renamed for clarity
-        self.latency['low'] = fuzz.trimf(self.latency.universe, [0, 0, 200])
-        self.latency['high'] = fuzz.trimf(self.latency.universe, [500, 1000, 1000])
-
-        # Define membership functions for output
-        self.mode_score['energy_efficient'] = fuzz.trimf(self.mode_score.universe, [0, 0, 33])
-        self.mode_score['balanced'] = fuzz.trimf(self.mode_score.universe, [33, 50, 67])
-        self.mode_score['high_performance'] = fuzz.trimf(self.mode_score.universe, [67, 100, 100])
-
-        # Define fuzzy rules
-        rule1 = ctrl.Rule(self.cpu_usage['poor'] & self.latency['low'], self.mode_score['energy_efficient'])
-        rule2 = ctrl.Rule(self.cpu_usage['average'], self.mode_score['balanced'])
-        rule3 = ctrl.Rule(self.cpu_usage['good'] | self.latency['high'], self.mode_score['high_performance'])
-
-        self.control_system = ctrl.ControlSystem([rule1, rule2, rule3])
-        self.controller = ctrl.ControlSystemSimulation(self.control_system)
-
-    def decide(self, cpu: float, latency: float) -> Tuple[str, float, Dict[str, float]]:
-        """Makes an operational mode decision based on crisp input values.
-
-        Args:
-            cpu (float): The current CPU usage percentage (0-100).
-            latency (float): The current p99 network latency in ms (0-1000).
+    def _define_fuzzy_sets(self) -> Dict[str, Dict[str, Any]]:
+        """Defines linguistic terms and their membership functions for input/output variables.
 
         Returns:
-            Tuple[str, float, Dict[str, float]]: A tuple containing:
-                - The decided operational mode (str).
-                - The confidence in the decision (float).
-                - A dictionary of details, including the final fuzzy score.
+            Dict[str, Dict[str, Any]]: A dictionary defining fuzzy sets.
         """
-        self.controller.input['cpu_usage'] = np.clip(cpu, 0, 100)
-        self.controller.input['latency'] = np.clip(latency, 0, 1000)
-        self.controller.compute()
-        
-        score = self.controller.output['mode_score']
-        if score < 33: mode = "ENERGY_EFFICIENT"
-        elif score < 67: mode = "BALANCED"
-        else: mode = "HIGH_PERFORMANCE"
+        # Example fuzzy sets for CPU Usage (Input)
+        return {
+            "cpu_usage": {
+                "low": lambda x: max(0, min(1, (50 - x) / 50)),
+                "medium": lambda x: max(0, min(1, (x - 25) / 50, (75 - x) / 50)),
+                "high": lambda x: max(0, min(1, (x - 50) / 50))
+            },
+            "health_score": {
+                "poor": lambda x: max(0, min(1, (0.5 - x) / 0.5)),
+                "fair": lambda x: max(0, min(1, (x - 0.25) / 0.5, (0.75 - x) / 0.5)),
+                "good": lambda x: max(0, min(1, (x - 0.5) / 0.5))
+            },
+            "performance_priority": {
+                "low": lambda x: max(0, min(1, (0.5 - x) / 0.5)),
+                "medium": lambda x: max(0, min(1, (x - 0.25) / 0.5, (0.75 - x) / 0.5)),
+                "high": lambda x: max(0, min(1, (x - 0.5) / 0.5))
+            }
+        }
 
-        # Confidence is a simplified metric for this example
-        confidence = 1.0 - (abs(score - 50) / 50) if mode == "BALANCED" else abs(score - 50) / 50
+    def _define_fuzzy_rules(self) -> List[Dict[str, Any]]:
+        """Defines fuzzy rules that map input conditions to output actions.
 
-        return mode, np.clip(confidence, 0, 1), {"fuzzy_score": score}
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries, each representing a fuzzy rule.
+        """
+        # Example fuzzy rules
+        return [
+            {"IF": {"cpu_usage": "high", "health_score": "poor"}, "THEN": {"action": "scale_up", "intensity": "high"}},
+            {"IF": {"cpu_usage": "medium", "health_score": "fair"}, "THEN": {"action": "optimize_memory", "intensity": "medium"}},
+            {"IF": {"cpu_usage": "low", "health_score": "good"}, "THEN": {"action": "no_action", "intensity": "low"}},
+            {"IF": {"performance_priority": "high", "cpu_usage": "medium"}, "THEN": {"action": "scale_up", "intensity": "medium"}}
+        ]
+
+    def _fuzzify(self, variable_name: str, value: float) -> Dict[str, float]:
+        """Converts a crisp input value into fuzzy membership values for a given variable.
+
+        Args:
+            variable_name (str): The name of the linguistic variable.
+            value (float): The crisp input value.
+
+        Returns:
+            Dict[str, float]: A dictionary of membership values for each linguistic term.
+        """
+        memberships = {}
+        if variable_name in self.fuzzy_sets:
+            for term, func in self.fuzzy_sets[variable_name].items():
+                memberships[term] = func(value)
+        return memberships
+
+    def _infer(self, fuzzified_inputs: Dict[str, Dict[str, float]]) -> Dict[str, float]:
+        """Applies fuzzy rules to fuzzified inputs to infer output actions.
+
+        Args:
+            fuzzified_inputs (Dict[str, Dict[str, float]]): Fuzzified input variables.
+
+        Returns:
+            Dict[str, float]: A dictionary of inferred output actions and their strengths.
+        """
+        inferred_actions = defaultdict(float)
+        for rule in self.fuzzy_rules:
+            antecedent_strength = 1.0
+            for var, term in rule["IF"].items():
+                antecedent_strength = min(antecedent_strength, fuzzified_inputs.get(var, {}).get(term, 0.0))
+            
+            for action, intensity_term in rule["THEN"].items():
+                # For simplicity, we'll just take the max strength for each action
+                inferred_actions[action] = max(inferred_actions[action], antecedent_strength)
+        return inferred_actions
+
+    def _defuzzify(self, inferred_actions: Dict[str, float]) -> List[Dict[str, Any]]:
+        """Converts inferred fuzzy actions into crisp, actionable commands.
+
+        Args:
+            inferred_actions (Dict[str, float]): Inferred output actions and their strengths.
+
+        Returns:
+            List[Dict[str, Any]]: A list of crisp, actionable commands.
+        """
+        crisp_actions = []
+        for action_type, strength in inferred_actions.items():
+            if strength > 0.3: # Only consider actions with sufficient strength
+                # Simple defuzzification: higher strength means more aggressive action
+                if action_type == "scale_up":
+                    replicas = 1 if strength < 0.6 else 2
+                    crisp_actions.append({"type": "scale_deployment", "parameters": {"deployment_name": "maximus-core", "replicas": replicas}})
+                elif action_type == "optimize_memory":
+                    memory_limit = "1Gi" if strength < 0.6 else "512Mi"
+                    crisp_actions.append({"type": "update_resource_limits", "parameters": {"deployment_name": "maximus-core", "memory_limit": memory_limit}})
+                elif action_type == "no_action":
+                    if not crisp_actions: # Only add if no other actions are suggested
+                        crisp_actions.append({"type": "log_status", "parameters": {"message": "System stable, no action needed."}})
+        return crisp_actions
+
+    def generate_actions(self, health_score: float, cpu_usage: float, performance_priority: float) -> List[Dict[str, Any]]:
+        """Generates a list of actionable commands based on fuzzy logic.
+
+        Args:
+            health_score (float): The overall system health score (0.0 to 1.0).
+            cpu_usage (float): Current CPU utilization (0-100%).
+            performance_priority (float): Priority for performance (0.0 to 1.0).
+
+        Returns:
+            List[Dict[str, Any]]: A list of crisp, actionable commands.
+        """
+        print("[FuzzyController] Generating actions using fuzzy logic.")
+        self.last_decision_time = datetime.now()
+
+        fuzzified_inputs = {
+            "cpu_usage": self._fuzzify("cpu_usage", cpu_usage),
+            "health_score": self._fuzzify("health_score", health_score),
+            "performance_priority": self._fuzzify("performance_priority", performance_priority)
+        }
+
+        inferred_actions = self._infer(fuzzified_inputs)
+        crisp_actions = self._defuzzify(inferred_actions)
+
+        return crisp_actions
+
+    async def get_status(self) -> Dict[str, Any]:
+        """Retrieves the current operational status of the fuzzy controller.
+
+        Returns:
+            Dict[str, Any]: A dictionary with the current status and last decision time.
+        """
+        return {
+            "status": "active",
+            "last_decision": self.last_decision_time.isoformat() if self.last_decision_time else "N/A",
+            "fuzzy_sets_count": len(self.fuzzy_sets),
+            "fuzzy_rules_count": len(self.fuzzy_rules)
+        }

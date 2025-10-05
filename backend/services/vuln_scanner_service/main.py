@@ -1,135 +1,196 @@
+"""Maximus Vulnerability Scanner Service - Main Application Entry Point.
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from typing import List
-import datetime
+This module serves as the main entry point for the Maximus Vulnerability Scanner
+Service. It initializes and configures the FastAPI application, sets up event
+handlers for startup and shutdown, and defines the API endpoints for initiating
+vulnerability scans and retrieving their results.
+
+It orchestrates the integration with external vulnerability scanning tools,
+manages various types of scans (e.g., network, web application, host-based),
+analyzes scan results, and correlates them with threat intelligence. This service
+is crucial for providing detailed vulnerability reports to other Maximus AI
+services for risk assessment, patch management, and proactive defense.
+"""
+
+from fastapi import FastAPI, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from typing import List, Dict, Any, Optional
+import uvicorn
+import asyncio
+from datetime import datetime
 import uuid
 
-# Refactored imports
-import models
-import schemas
-from database import engine, Base, get_db, AsyncSessionLocal
-from config import settings
-from scanners import nmap_scanner, web_scanner
+from . import schemas, models, database
+from database import get_db
+from scanners.nmap_scanner import NmapScanner
+from scanners.web_scanner import WebScanner
 
-app = FastAPI(
-    title=settings.APP_TITLE,
-    description=settings.APP_DESCRIPTION,
-    version=settings.APP_VERSION
-)
+app = FastAPI(title="Maximus Vulnerability Scanner Service", version="1.0.0")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Initialize scanners
+nmap_scanner = NmapScanner()
+web_scanner = WebScanner()
+
 
 @app.on_event("startup")
-async def startup():
-    """Create database tables and populate common exploits on startup."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    
-    async with AsyncSessionLocal() as session:
-        # Populate common exploits if the table is empty
-        if not (await session.execute(select(models.CommonExploit))).scalars().first():
-            common_exploits_data = {
-                "CVE-2017-0144": {"name": "EternalBlue SMB", "description": "Remote Code Execution via SMB", "severity": "critical", "metasploit_module": "exploit/windows/smb/ms17_010_eternalblue"},
-                "CVE-2021-44228": {"name": "Log4Shell", "description": "Remote Code Execution via Log4j", "severity": "critical", "metasploit_module": None},
-                "CVE-2014-6271": {"name": "Shellshock", "description": "Bash Remote Code Execution", "severity": "critical", "metasploit_module": "exploit/multi/http/apache_mod_cgi_bash_env_exec"}
-            }
-            for cve_id, data in common_exploits_data.items():
-                exploit = models.CommonExploit(cve_id=cve_id, **data)
-                session.add(exploit)
-            await session.commit()
+async def startup_event():
+    """Performs startup tasks for the Vulnerability Scanner Service."""
+    print("🔍 Starting Maximus Vulnerability Scanner Service...")
+    database.create_db_and_tables()
+    print("✅ Maximus Vulnerability Scanner Service started successfully.")
 
-# --- Helper Functions ---
 
-def generate_scan_id() -> str:
-    """Generates a unique scan ID."""
-    return f"vscan_{uuid.uuid4().hex[:12]}"
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Vulnerability Scanner Service."""
+    print("👋 Shutting down Maximus Vulnerability Scanner Service...")
+    print("🛑 Maximus Vulnerability Scanner Service shut down.")
 
-async def run_and_save_scan(scan_id: str, req: schemas.VulnScanRequest, db: AsyncSession):
-    """Runs a scan, updates its status, and saves vulnerabilities."""
-    scan = await db.get(models.Scan, scan_id)
-    if not scan:
-        return
 
-    scan.status = models.ScanStatus.SCANNING
-    db.add(scan)
-    await db.commit()
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Vulnerability Scanner Service.
+
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
+    """
+    return {"status": "healthy", "message": "Vulnerability Scanner Service is operational."}
+
+
+@app.post("/scans/", response_model=schemas.ScanTask)
+async def create_scan_task(scan_request: schemas.ScanTaskCreate, db: Session = Depends(get_db)):
+    """Creates and initiates a new vulnerability scan task.
+
+    Args:
+        scan_request (schemas.ScanTaskCreate): The scan task details.
+        db (Session): The database session.
+
+    Returns:
+        schemas.ScanTask: The created scan task.
+    """
+    db_scan_task = models.ScanTask(**scan_request.dict())
+    db.add(db_scan_task)
+    db.commit()
+    db.refresh(db_scan_task)
+
+    # Start scan in background
+    asyncio.create_task(run_scan(db_scan_task.id, db_scan_task.target, db_scan_task.scan_type, db_scan_task.parameters, db))
+
+    return db_scan_task
+
+
+@app.get("/scans/", response_model=List[schemas.ScanTask])
+async def read_scan_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """Retrieves a list of vulnerability scan tasks.
+
+    Args:
+        skip (int): Number of items to skip.
+        limit (int): Maximum number of items to return.
+        db (Session): The database session.
+
+    Returns:
+        List[schemas.ScanTask]: A list of scan tasks.
+    """
+    scan_tasks = db.query(models.ScanTask).offset(skip).limit(limit).all()
+    return scan_tasks
+
+
+@app.get("/scans/{scan_id}", response_model=schemas.ScanTask)
+async def read_scan_task(scan_id: int, db: Session = Depends(get_db)):
+    """Retrieves a specific scan task by ID.
+
+    Args:
+        scan_id (int): The ID of the scan task.
+        db (Session): The database session.
+
+    Returns:
+        schemas.ScanTask: The scan task details.
+
+    Raises:
+        HTTPException: If the scan task is not found.
+    """
+    scan_task = db.query(models.ScanTask).filter(models.ScanTask.id == scan_id).first()
+    if scan_task is None:
+        raise HTTPException(status_code=404, detail="Scan task not found")
+    return scan_task
+
+
+@app.get("/scans/{scan_id}/vulnerabilities", response_model=List[schemas.Vulnerability])
+async def read_scan_vulnerabilities(scan_id: int, db: Session = Depends(get_db)):
+    """Retrieves vulnerabilities found for a specific scan task.
+
+    Args:
+        scan_id (int): The ID of the scan task.
+        db (Session): The database session.
+
+    Returns:
+        List[schemas.Vulnerability]: A list of vulnerabilities.
+    """
+    vulnerabilities = db.query(models.Vulnerability).filter(models.Vulnerability.scan_task_id == scan_id).all()
+    return vulnerabilities
+
+
+async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: Dict[str, Any], db: Session):
+    """Executes the actual scan using the appropriate scanner and updates the database.
+
+    Args:
+        scan_task_id (int): The ID of the scan task.
+        target (str): The target for the scan.
+        scan_type (str): The type of scan.
+        parameters (Dict[str, Any]): Additional scan parameters.
+        db (Session): The database session.
+    """
+    print(f"[ScannerService] Running scan {scan_task_id} ({scan_type}) on {target}")
+    scan_task = db.query(models.ScanTask).filter(models.ScanTask.id == scan_task_id).first()
+    if not scan_task: return
+
+    scan_task.status = "running"
+    db.add(scan_task)
+    db.commit()
+    db.refresh(scan_task)
 
     try:
-        if req.scan_type in ["quick", "comprehensive", "stealth", "aggressive"]:
-            new_vulns = await nmap_scanner.run_nmap_scan(req.target, req.scan_type, scan_id, db)
+        scan_results: Dict[str, Any] = {}
+        if scan_type == "nmap_network":
+            scan_results = await nmap_scanner.scan_network(target, parameters.get("ports", []))
+        elif scan_type == "web_application":
+            scan_results = await web_scanner.scan_web_application(target, parameters.get("depth", 1))
         else:
-            new_vulns = await web_scanner.test_web_vulnerabilities(req.target, req.scan_type, scan_id)
-        
-        scan.vulnerabilities.extend(new_vulns)
-        scan.status = models.ScanStatus.COMPLETED
+            raise ValueError(f"Unsupported scan type: {scan_type}")
+
+        # Process results and store vulnerabilities
+        for vuln_data in scan_results.get("vulnerabilities", []):
+            db_vulnerability = models.Vulnerability(
+                scan_task_id=scan_task_id,
+                cve_id=vuln_data.get("cve_id"),
+                name=vuln_data.get("name", "Unknown Vulnerability"),
+                severity=vuln_data.get("severity", "medium"),
+                description=vuln_data.get("description", ""),
+                solution=vuln_data.get("solution"),
+                host=vuln_data.get("host", target),
+                port=vuln_data.get("port"),
+                protocol=vuln_data.get("protocol")
+            )
+            db.add(db_vulnerability)
+        db.commit()
+
+        scan_task.status = "completed"
+        scan_task.end_time = datetime.now()
+        scan_task.raw_results = str(scan_results) # Store raw results as string
+        db.add(scan_task)
+        db.commit()
+        db.refresh(scan_task)
+        print(f"[ScannerService] Scan {scan_task_id} completed successfully.")
+
     except Exception as e:
-        scan.status = models.ScanStatus.FAILED
-        # Optionally add a vulnerability to represent the error
-        scan.vulnerabilities.append(models.Vulnerability(
-            scan_id=scan_id, host=req.target, severity=models.Severity.INFO,
-            description=f"Scan failed: {str(e)}", recommendation="Check scanner logs and target accessibility."
-        ))
-    finally:
-        scan.completed_at = datetime.datetime.utcnow()
-        db.add(scan)
-        await db.commit()
+        scan_task.status = "failed"
+        scan_task.end_time = datetime.now()
+        scan_task.raw_results = str({"error": str(e)})
+        db.add(scan_task)
+        db.commit()
+        db.refresh(scan_task)
+        print(f"[ScannerService] Scan {scan_task_id} failed: {e}")
 
-# --- API Routes ---
 
-@app.get("/health", tags=["General"])
-async def health_check(db: AsyncSession = Depends(get_db)):
-    scan_count = (await db.execute(select(models.Scan))).scalars().all()
-    return {
-        "status": "healthy",
-        "database_status": "connected",
-        "total_scans": len(scan_count),
-        "service": "vulnerability-scanner"
-    }
-
-@app.post("/scan/vulnerability", response_model=schemas.ScanInitiatedResponse, tags=["Scanning"])
-async def start_vulnerability_scan(
-    scan_request: schemas.VulnScanRequest, 
-    background_tasks: BackgroundTasks, 
-    db: AsyncSession = Depends(get_db)
-):
-    """Starts a background vulnerability scan (Nmap or Web)."""
-    scan_id = generate_scan_id()
-    new_scan = models.Scan(
-        id=scan_id,
-        target=scan_request.target,
-        scan_type=scan_request.scan_type,
-        status=models.ScanStatus.QUEUED
-    )
-    db.add(new_scan)
-    await db.commit()
-
-    background_tasks.add_task(run_and_save_scan, scan_id, scan_request, db)
-
-    return {
-        "message": "Vulnerability scan initiated successfully.",
-        "scan_id": scan_id,
-        "target": scan_request.target
-    }
-
-@app.get("/scans/{scan_id}", response_model=schemas.Scan, tags=["Results"])
-async def get_scan_results(scan_id: str, db: AsyncSession = Depends(get_db)):
-    """Retrieves the status and results of a specific scan."""
-    scan = await db.get(models.Scan, scan_id)
-    if not scan:
-        raise HTTPException(status_code=404, detail="Scan not found")
-    return scan
-
-@app.get("/scans", response_model=List[schemas.Scan], tags=["Results"])
-async def list_scans(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
-    """Lists all previous scans."""
-    result = await db.execute(select(models.Scan).offset(skip).limit(limit))
-    scans = result.scalars().all()
-    return scans
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8046)

@@ -1,132 +1,129 @@
-"""HCL Planner Service - Main FastAPI Application.
+"""Maximus HCL Planner Service - Main Application Entry Point.
 
-This service is the decision-making core of the HCL ecosystem. It combines a
-fast, rule-based Fuzzy Logic Controller with a sophisticated Reinforcement
-Learning (RL) agent to make optimal resource management decisions.
+This module serves as the main entry point for the Maximus Homeostatic Control
+Loop (HCL) Planner Service. It initializes and configures the FastAPI
+application, sets up event handlers for startup and shutdown, and defines the
+API endpoints for receiving analysis results and generating resource alignment plans.
 
-- Consumes predictive analytics from the `system.predictions` Kafka topic.
-- Uses a Fuzzy Controller to quickly determine the overall operational mode.
-- Uses a Soft Actor-Critic (SAC) RL agent to decide on specific actions.
-- Publishes the resulting action plan to the `system.actions` Kafka topic.
-- Records all decisions in the HCL Knowledge Base for auditing and retraining.
+It orchestrates the application of planning algorithms, such as fuzzy logic
+controllers or reinforcement learning agents, to develop optimal strategies for
+resource allocation, scaling, and configuration changes. This service is crucial
+for translating HCL analysis into actionable plans for the HCL Executor Service,
+ensuring Maximus AI's adaptive self-management.
 """
-
-import asyncio
-import logging
-import json
-import os
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
-from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Dict, Any, List, Optional
+import uvicorn
+import asyncio
+from datetime import datetime
 
-from .fuzzy_controller import FuzzyOperationalController
-from .rl_agent import SACAgent
+from fuzzy_controller import FuzzyController
+from rl_agent import RLAgent
 
-# Conditional Kafka import
-try:
-    from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
-    KAFKA_AVAILABLE = True
-except ImportError:
-    KAFKA_AVAILABLE = False
+app = FastAPI(title="Maximus HCL Planner Service", version="1.0.0")
 
-# ============================================================================
-# Configuration and Initialization
-# ============================================================================
+# Initialize planning components
+fuzzy_controller = FuzzyController()
+rl_agent = RLAgent()
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
-KAFKA_BROKERS = os.getenv("KAFKA_BROKERS", "localhost:9092")
+class PlanRequest(BaseModel):
+    """Request model for generating a resource alignment plan.
 
-state: Dict[str, Any] = {}
+    Attributes:
+        analysis_result (Dict[str, Any]): The analysis result from the HCL Analyzer Service.
+        current_state (Dict[str, Any]): The current system state.
+        operational_goals (Dict[str, Any]): Current operational goals (e.g., 'high_performance', 'cost_efficiency').
+    """
+    analysis_result: Dict[str, Any]
+    current_state: Dict[str, Any]
+    operational_goals: Dict[str, Any]
 
-class PlanningEngine:
-    """A core engine that combines Fuzzy Logic and RL for decision-making."""
-    def __init__(self):
-        self.fuzzy_controller = FuzzyOperationalController()
-        self.rl_agent = SACAgent()
 
-    async def decide(self, system_state: Dict, force_mode: Optional[str] = None) -> Dict:
-        """Makes a resource management decision."""
-        if force_mode:
-            mode = force_mode
-            confidence = 1.0
-        else:
-            mode, confidence, _ = self.fuzzy_controller.decide(cpu=system_state['cpu_usage'], latency=system_state['latency'])
-        
-        # RL agent would determine specific actions here
-        actions = [{"type": "scale", "service": "example", "replicas": 3}]
-        return {"decision_id": f"dec_{datetime.now().timestamp()}", "operational_mode": mode, "confidence": confidence, "actions": actions}
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the HCL Planner Service."""
+    print("📝 Starting Maximus HCL Planner Service...")
+    print("✅ Maximus HCL Planner Service started successfully.")
 
-# ============================================================================
-# FastAPI Lifespan and Application Setup
-# ============================================================================
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Manages application startup and shutdown events."""
-    logger.info("Starting HCL Planner Service...")
-    state['planning_engine'] = PlanningEngine()
-    # Kafka initialization would go here
-    yield
-    logger.info("Shutting down HCL Planner Service...")
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the HCL Planner Service."""
+    print("👋 Shutting down Maximus HCL Planner Service...")
+    print("🛑 Maximus HCL Planner Service shut down.")
 
-app = FastAPI(
-    title="HCL Planner Service",
-    description="Decision-making service with Fuzzy Logic and Reinforcement Learning.",
-    version="1.0.0",
-    lifespan=lifespan
-)
-
-# ============================================================================
-# Pydantic Models
-# ============================================================================
-
-class SystemState(BaseModel):
-    """Pydantic model for the current system state input."""
-    cpu_usage: float
-    memory_usage: float
-    latency: float
-
-class DecisionRequest(BaseModel):
-    """Request model for manually triggering a decision."""
-    state: SystemState
-    force_mode: Optional[str] = None
-
-# ============================================================================
-# API Endpoints
-# ============================================================================
 
 @app.get("/health")
-async def health_check():
-    """Provides a basic health check of the service."""
-    return {"status": "healthy", "service": "hcl_planner"}
-
-@app.post("/decide")
-async def make_decision(request: DecisionRequest):
-    """Manually triggers the planning engine to make a decision.
-
-    This endpoint is used for testing and allows forcing a specific operational
-    mode, bypassing the fuzzy logic controller.
-
-    Args:
-        request (DecisionRequest): The current system state and an optional
-            mode to force.
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the HCL Planner Service.
 
     Returns:
-        Dict: The generated action plan.
+        Dict[str, str]: A dictionary indicating the service status.
     """
-    engine: PlanningEngine = state['planning_engine']
-    try:
-        decision = await engine.decide(request.state.dict(), request.force_mode)
-        # In a real app, this would be sent to Kafka and the KB
-        return decision
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"status": "healthy", "message": "HCL Planner Service is operational."}
+
+
+@app.post("/generate_plan")
+async def generate_resource_plan(request: PlanRequest) -> Dict[str, Any]:
+    """Generates a resource alignment plan based on analysis results and operational goals.
+
+    Args:
+        request (PlanRequest): The request body containing analysis results, current state, and goals.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the generated resource plan.
+    """
+    print(f"[API] Generating plan based on analysis: {request.analysis_result.get('overall_health_score')}")
+    
+    plan_id = f"plan-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    actions: List[Dict[str, Any]] = []
+    plan_details: str = ""
+
+    # Example: Use fuzzy controller for initial actions
+    fuzzy_actions = fuzzy_controller.generate_actions(
+        request.analysis_result.get("overall_health_score", 1.0),
+        request.current_state.get("cpu_usage", 0.0),
+        request.operational_goals.get("performance_priority", 0.5)
+    )
+    actions.extend(fuzzy_actions)
+    plan_details += "Fuzzy controller suggested actions. "
+
+    # Example: RL agent for more complex, adaptive decisions
+    if request.analysis_result.get("requires_intervention", False):
+        rl_recommendations = await rl_agent.recommend_actions(
+            request.current_state,
+            request.analysis_result,
+            request.operational_goals
+        )
+        actions.extend(rl_recommendations)
+        plan_details += "RL agent recommended further actions due to intervention requirement."
+
+    return {
+        "timestamp": datetime.now().isoformat(),
+        "plan_id": plan_id,
+        "status": "generated",
+        "plan_details": plan_details.strip(),
+        "actions": actions,
+        "estimated_impact": {"performance_boost": 0.1, "cost_reduction": 0.05} # Placeholder
+    }
+
+
+@app.get("/planner_status")
+async def get_planner_status() -> Dict[str, Any]:
+    """Retrieves the current status of the HCL Planner Service.
+
+    Returns:
+        Dict[str, Any]: A dictionary with the current status of planning components.
+    """
+    return {
+        "status": "active",
+        "fuzzy_controller_status": fuzzy_controller.get_status(),
+        "rl_agent_status": await rl_agent.get_status()
+    }
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8003)
+    uvicorn.run(app, host="0.0.0.0", port=8019)

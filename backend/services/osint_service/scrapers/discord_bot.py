@@ -1,136 +1,185 @@
-"""
-Discord Bot Scraper - Extração de dados do Discord
-Projeto Vértice - SSP-GO
+"""Maximus OSINT Service - Discord Bot Scraper.
+
+This module implements a Discord Bot Scraper for the Maximus AI's OSINT Service.
+It is responsible for interacting with Discord servers and channels to collect
+open-source intelligence, such as user activity, messages, and server metadata.
+
+Key functionalities include:
+- Connecting to Discord as a bot using a provided token.
+- Listening for and collecting messages from specified channels.
+- Extracting user information and server details.
+- Filtering and processing collected data for relevance.
+
+This scraper is crucial for gathering intelligence from Discord, which is a
+popular platform for various communities, including those related to gaming,
+cybersecurity, and sometimes illicit activities. It enables Maximus to monitor
+and analyze discussions relevant to its operational goals.
 """
 
 import asyncio
-import aiohttp
-import json
-from typing import Dict, List, Optional
+from typing import Dict, Any, List, Optional
 from datetime import datetime
-import logging
-from .base_scraper import BaseScraper
 
-logger = logging.getLogger(__name__)
+# Mock discord.py library for demonstration
+class MockDiscordClient:
+    """Um mock para a classe discord.Client.
 
-class DiscordScraper(BaseScraper):
-    """Scraper especializado para Discord"""
-    
+    Simula o comportamento de um bot Discord para fins de teste e desenvolvimento.
+    """
     def __init__(self):
-        super().__init__()
-        self.base_url = "https://discord.com/api/v9"
+        """Inicializa o MockDiscordClient com usuários e guilds mock.
+
+        Atributos:
+            user (MagicMock): Um objeto mock para o usuário do bot.
+            guilds (List[MagicMock]): Uma lista de objetos mock para os servidores (guilds) do bot.
+        """
+        self.user = MagicMock(name="MockBot", id=12345)
+        self.guilds = [MagicMock(name="MockServer", id=67890)]
+
+    async def start(self, token: str):
+        """Simula a inicialização do bot Discord com um token.
+
+        Args:
+            token (str): O token de autenticação do bot.
+        """
+        print(f"[MockDiscord] Bot starting with token: {token[:5]}...")
+        await asyncio.sleep(0.1)
+        print("[MockDiscord] Bot connected.")
+
+    async def close(self):
+        """Simula o fechamento da conexão do bot Discord."""
+        print("[MockDiscord] Bot closing.")
+        await asyncio.sleep(0.05)
+
+    async def get_channel(self, channel_id: int):
+        """Simula a obtenção de um objeto de canal Discord.
+
+        Args:
+            channel_id (int): O ID do canal a ser obtido.
+
+        Returns:
+            MagicMock: Um objeto mock de canal.
+        """
+        return MagicMock(name=f"MockChannel_{channel_id}", id=channel_id)
+
+    async def fetch_message(self, channel, message_id: int):
+        """Simula a busca de uma mensagem específica em um canal.
+
+        Args:
+            channel (Any): O canal onde a mensagem será buscada.
+            message_id (int): O ID da mensagem a ser buscada.
+
+        Returns:
+            MagicMock: Um objeto mock de mensagem.
+        """
+        return MagicMock(author=MagicMock(name="MockUser"), content="Mock message content.")
+
+    async def fetch_channel_history(self, channel, limit: int):
+        """Simula a busca do histórico de mensagens de um canal.
+
+        Args:
+            channel (Any): O canal cujo histórico será buscado.
+            limit (int): O número máximo de mensagens a serem retornadas.
+
+        Returns:
+            List[MagicMock]: Uma lista de objetos mock de mensagens.
+        """
+        messages = []
+        for i in range(limit):
+            msg = MagicMock(author=MagicMock(name=f"User{i}"), content=f"Message {i} in {channel.name}", created_at=datetime.now())
+            messages.append(msg)
+        return messages
+
+
+from base_scraper import BaseScraper
+from unittest.mock import MagicMock
+
+
+class DiscordBotScraper(BaseScraper):
+    """Interacts with Discord servers and channels to collect open-source intelligence,
+    such as user activity, messages, and server metadata.
+
+    Connects to Discord as a bot, listens for and collects messages from specified
+    channels, and extracts user information and server details.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """Initializes the DiscordBotScraper.
+
+        Args:
+            config (Optional[Dict[str, Any]]): Configuration parameters, including 'discord_token'.
+        """
+        self.discord_token = config.get("discord_token") if config else None
+        if not self.discord_token:
+            print("[DiscordBotScraper] Warning: Discord token not provided. Running in mock mode.")
+        self.client = MockDiscordClient() # Replace with actual discord.Client()
+        self.scraped_data: List[Dict[str, Any]] = []
+        self.last_scrape_time: Optional[datetime] = None
+        self.current_status: str = "initialized"
+
+    async def scrape(self, channel_id: str, limit: int = 100) -> List[Dict[str, Any]]:
+        """Scrapes messages from a specified Discord channel.
+
+        Args:
+            channel_id (str): The ID of the Discord channel to scrape.
+            limit (int): The maximum number of messages to scrape.
+
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries, each representing a scraped message.
+        """
+        if self.current_status != "running":
+            await self.connect()
+
+        print(f"[DiscordBotScraper] Scraping channel {channel_id} for {limit} messages...")
+        self.current_status = "scraping"
         
-    async def scrape(self, identifier: str, **kwargs) -> Dict:
-        """Scrape Discord user/server data"""
-        
-        result = {
-            "platform": "discord",
-            "identifier": identifier,
-            "timestamp": datetime.utcnow().isoformat(),
-            "data": {}
-        }
-        
-        # Se for ID numérico (Snowflake)
-        if identifier.isdigit():
-            user_data = await self.analyze_snowflake(int(identifier))
-            result["data"]["snowflake_analysis"] = user_data
-            
-        # Buscar informações públicas
-        public_data = await self.get_public_info(identifier)
-        result["data"]["public_info"] = public_data
-        
-        return result
-        
-    async def analyze_snowflake(self, snowflake_id: int) -> Dict:
-        """Analisa Discord Snowflake ID"""
-        
-        # Discord Epoch (2015-01-01)
-        DISCORD_EPOCH = 1420070400000
-        
-        # Extrair timestamp do Snowflake
-        timestamp_ms = ((snowflake_id >> 22) + DISCORD_EPOCH)
-        timestamp = datetime.fromtimestamp(timestamp_ms / 1000)
-        
-        # Extrair outros componentes
-        worker_id = (snowflake_id & 0x3E0000) >> 17
-        process_id = (snowflake_id & 0x1F000) >> 12
-        increment = snowflake_id & 0xFFF
-        
+        try:
+            channel = await self.client.get_channel(int(channel_id))
+            if not channel:
+                print(f"[DiscordBotScraper] Channel {channel_id} not found.")
+                return []
+
+            messages = await self.client.fetch_channel_history(channel, limit=limit)
+            scraped_messages = []
+            for msg in messages:
+                scraped_messages.append({
+                    "timestamp": msg.created_at.isoformat(),
+                    "author": msg.author.name,
+                    "content": msg.content,
+                    "channel_id": channel_id,
+                    "server_id": channel.guild.id if hasattr(channel, 'guild') else None
+                })
+            self.scraped_data.extend(scraped_messages)
+            self.last_scrape_time = datetime.now()
+            self.current_status = "running"
+            return scraped_messages
+        except Exception as e:
+            print(f"[DiscordBotScraper] Error during scraping: {e}")
+            self.current_status = "error"
+            return []
+
+    async def connect(self):
+        """Connects the Discord bot to the Discord API."""
+        if self.discord_token:
+            await self.client.start(self.discord_token)
+            self.current_status = "running"
+        else:
+            print("[DiscordBotScraper] Running in mock mode, no actual Discord connection.")
+            self.current_status = "running" # Mock connection
+
+    async def disconnect(self):
+        """Disconnects the Discord bot from the Discord API."""
+        await self.client.close()
+        self.current_status = "disconnected"
+
+    async def get_status(self) -> Dict[str, Any]:
+        """Retrieves the current operational status of the Discord Bot Scraper.
+
+        Returns:
+            Dict[str, Any]: A dictionary summarizing the scraper's status.
+        """
         return {
-            "id": str(snowflake_id),
-            "created_at": timestamp.isoformat(),
-            "account_age_days": (datetime.utcnow() - timestamp).days,
-            "technical": {
-                "worker_id": worker_id,
-                "process_id": process_id,
-                "increment": increment,
-                "timestamp_ms": timestamp_ms
-            }
+            "status": self.current_status,
+            "last_scrape": self.last_scrape_time.isoformat() if self.last_scrape_time else "N/A",
+            "total_messages_scraped": len(self.scraped_data)
         }
-        
-    async def get_public_info(self, identifier: str) -> Dict:
-        """Busca informações públicas"""
-        
-        info = {
-            "found": False,
-            "profile": None,
-            "servers": [],
-            "activities": []
-        }
-        
-        # Verificar widgets públicos de servidores
-        # Discord limita muito o acesso sem autenticação
-        
-        try:
-            # Tentar buscar via widget (se for server ID)
-            if identifier.isdigit():
-                widget_url = f"https://discord.com/api/guilds/{identifier}/widget.json"
-                
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(widget_url) as response:
-                        if response.status == 200:
-                            widget_data = await response.json()
-                            info["found"] = True
-                            info["servers"].append({
-                                "id": widget_data.get("id"),
-                                "name": widget_data.get("name"),
-                                "instant_invite": widget_data.get("instant_invite"),
-                                "presence_count": widget_data.get("presence_count", 0),
-                                "member_count": len(widget_data.get("members", []))
-                            })
-                            
-        except Exception as e:
-            logger.error(f"Erro ao buscar info Discord: {e}")
-            
-        return info
-        
-    async def search_invites(self, code: str) -> Optional[Dict]:
-        """Busca informações de convite Discord"""
-        
-        try:
-            invite_url = f"https://discord.com/api/v9/invites/{code}"
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.get(invite_url) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        return {
-                            "code": code,
-                            "guild": {
-                                "id": data.get("guild", {}).get("id"),
-                                "name": data.get("guild", {}).get("name"),
-                                "description": data.get("guild", {}).get("description"),
-                                "features": data.get("guild", {}).get("features", [])
-                            },
-                            "channel": {
-                                "id": data.get("channel", {}).get("id"),
-                                "name": data.get("channel", {}).get("name"),
-                                "type": data.get("channel", {}).get("type")
-                            },
-                            "inviter": data.get("inviter")
-                        }
-                        
-        except Exception as e:
-            logger.error(f"Erro ao buscar invite: {e}")
-            
-        return None

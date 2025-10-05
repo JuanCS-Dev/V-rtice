@@ -1,18 +1,15 @@
-"""ADR Core Service - Engines Package.
+"""Maximus ADR Core Service - Engines Package.
 
-This package contains the core processing engines for the ADR service,
-including the DetectionEngine, ResponseEngine, and MLEngine.
+This package contains the core processing engines for the Automated Detection
+and Response (ADR) service. These engines are responsible for various stages
+of the ADR pipeline, including threat detection, machine learning analysis,
+and automated response orchestration.
 
-These engines encapsulate the main logic for threat detection, automated
-response, and machine learning-based analysis.
+Modules within this package include:
+- `detection_engine`: Identifies potential threats from ingested security events.
+- `ml_engine`: Applies machine learning models for advanced threat scoring and anomaly detection.
+- `response_engine`: Executes automated response actions based on detected incidents.
+
+These engines work in concert to provide a robust and intelligent automated
+cybersecurity defense capability for Maximus AI.
 """
-
-from .detection_engine import DetectionEngine
-from .response_engine import ResponseEngine
-from .ml_engine import MLEngine
-
-__all__ = [
-    'DetectionEngine',
-    'ResponseEngine',
-    'MLEngine'
-]

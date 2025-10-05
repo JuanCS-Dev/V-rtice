@@ -1,123 +1,105 @@
-"""
-Security Utils - Utilitários de segurança
-Projeto Vértice - SSP-GO
+"""Maximus OSINT Service - Security Utilities.
+
+This module provides security-related utility functions for the Maximus AI's
+OSINT Service. It is responsible for ensuring the secure handling of sensitive
+data, protecting against common web vulnerabilities, and promoting ethical
+OSINT practices.
+
+Key functionalities include:
+- Sanitizing user inputs to prevent injection attacks (e.g., XSS, SQLi).
+- Hashing or encrypting sensitive information before storage or transmission.
+- Implementing secure coding practices and data validation routines.
+- Providing helper functions for anonymization or pseudonymization of data.
+
+These utilities are crucial for maintaining the integrity, confidentiality,
+and availability of OSINT data, protecting both the Maximus AI system and the
+privacy of individuals whose data is collected.
 """
 
-import re
 import hashlib
-import hmac
-from typing import Optional, List
-import logging
+import re
+from typing import Dict, Any, Optional
 
-logger = logging.getLogger(__name__)
 
 class SecurityUtils:
-    """Utilitários de segurança para OSINT"""
-    
-    @staticmethod
-    def sanitize_input(text: str) -> str:
-        """Sanitiza entrada do usuário"""
-        if not text:
-            return ""
-            
-        # Remove caracteres de controle
-        text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+    """Provides security-related utility functions for the OSINT Service.
+
+    Ensures the secure handling of sensitive data, protects against common web
+    vulnerabilities, and promotes ethical OSINT practices.
+    """
+
+    def __init__(self):
+        """Initializes the SecurityUtils."""
+        pass
+
+    def sanitize_input(self, input_string: str) -> str:
+        """Sanitizes an input string to prevent common injection attacks.
+
+        Args:
+            input_string (str): The input string to sanitize.
+
+        Returns:
+            str: The sanitized string.
+        """
+        # Remove HTML tags
+        sanitized = re.sub(r'<.*?>', '', input_string)
+        # Escape special characters for SQL/shell (simplified)
+        sanitized = sanitized.replace("'", "''").replace("--", "")
+        return sanitized
+
+    def hash_data(self, data: str, algorithm: str = "sha256") -> str:
+        """Hashes a string using the specified algorithm.
+
+        Args:
+            data (str): The string data to hash.
+            algorithm (str): The hashing algorithm to use (e.g., 'sha256', 'md5').
+
+        Returns:
+            str: The hexadecimal representation of the hash.
         
-        # Remove tags HTML/JavaScript
-        text = re.sub(r'<[^>]*>', '', text)
-        
-        # Escape caracteres especiais
-        dangerous_chars = {
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#x27;',
-            '&': '&amp;',
-            '/': '&#x2F;'
-        }
-        
-        for char, escape in dangerous_chars.items():
-            text = text.replace(char, escape)
-            
-        return text.strip()
-        
-    @staticmethod
-    def validate_email(email: str) -> bool:
-        """Valida formato de email"""
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return bool(re.match(pattern, email))
-        
-    @staticmethod
-    def validate_phone(phone: str) -> bool:
-        """Valida formato de telefone"""
-        # Remove caracteres não numéricos
-        digits = re.sub(r'\D', '', phone)
-        
-        # Verifica comprimento (mínimo 10, máximo 15)
-        if len(digits) < 10 or len(digits) > 15:
-            return False
-            
-        return True
-        
-    @staticmethod
-    def hash_password(password: str, salt: Optional[str] = None) -> str:
-        """Hash seguro de senha"""
-        if not salt:
-            import secrets
-            salt = secrets.token_hex(32)
-            
-        key = hashlib.pbkdf2_hmac(
-            'sha256',
-            password.encode('utf-8'),
-            salt.encode('utf-8'),
-            100000  # iterations
-        )
-        
-        return f"{salt}:{key.hex()}"
-        
-    @staticmethod
-    def verify_password(password: str, password_hash: str) -> bool:
-        """Verifica senha contra hash"""
-        try:
-            salt, key = password_hash.split(':')
-            new_hash = SecurityUtils.hash_password(password, salt)
-            return new_hash == password_hash
-        except:
-            return False
-            
-    @staticmethod
-    def detect_sql_injection(text: str) -> bool:
-        """Detecta tentativas de SQL injection"""
-        sql_patterns = [
-            r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE)\b)",
-            r"(--|#|\/\*|\*\/)",
-            r"(\bOR\b\s*\d+\s*=\s*\d+)",
-            r"(\bAND\b\s*\d+\s*=\s*\d+)",
-            r"('|\"|;|\\x00|\\n|\\r|\\x1a)"
-        ]
-        
-        for pattern in sql_patterns:
-            if re.search(pattern, text, re.IGNORECASE):
-                logger.warning(f"Possível SQL injection detectado: {text[:50]}")
-                return True
-                
-        return False
-        
-    @staticmethod
-    def anonymize_data(data: dict, fields: List[str]) -> dict:
-        """Anonimiza campos sensíveis"""
-        anonymized = data.copy()
-        
-        for field in fields:
-            if field in anonymized:
-                value = str(anonymized[field])
-                
-                if '@' in value:  # Email
-                    parts = value.split('@')
-                    anonymized[field] = f"{parts[0][:3]}***@{parts[1]}"
-                elif value.isdigit() and len(value) > 6:  # Telefone
-                    anonymized[field] = f"{value[:3]}***{value[-2:]}"
-                else:  # Outros
-                    anonymized[field] = f"{value[:2]}***"
-                    
-        return anonymized
+        Raises:
+            ValueError: If an unsupported hashing algorithm is provided.
+        """
+        if algorithm == "sha256":
+            return hashlib.sha256(data.encode('utf-8')).hexdigest()
+        elif algorithm == "md5":
+            return hashlib.md5(data.encode('utf-8')).hexdigest()
+        else:
+            raise ValueError(f"Unsupported hashing algorithm: {algorithm}")
+
+    def anonymize_ip_address(self, ip_address: str) -> str:
+        """Anonymizes an IP address by masking the last octet (IPv4) or last 64 bits (IPv6).
+
+        Args:
+            ip_address (str): The IP address to anonymize.
+
+        Returns:
+            str: The anonymized IP address.
+        """
+        if "." in ip_address: # IPv4
+            parts = ip_address.split('.')
+            if len(parts) == 4:
+                return '.'.join(parts[:3]) + '.0'
+        elif ":" in ip_address: # IPv6 (simplified to mask last half)
+            parts = ip_address.split(':')
+            if len(parts) > 4:
+                return ':'.join(parts[:4]) + ':0:0:0:0'
+        return ip_address # Return as is if not recognized
+
+    def validate_url(self, url: str) -> bool:
+        """Validação básica para o formato de uma URL.
+
+        Args:
+            url (str): A URL a ser validada.
+
+        Returns:
+            bool: True se o formato da URL for válido, False caso contrário.
+        """
+        # Simple regex for URL validation
+        url_regex = re.compile(
+            r'^(?:http|ftp)s?://' # http:// or https://
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' # domain...
+            r'localhost|' # localhost...
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(\d+)?' # ...or ip
+            r'(?:/?|[/?]\S+)$/i', re.IGNORECASE)
+        return re.match(url_regex, url) is not None

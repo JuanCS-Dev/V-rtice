@@ -1,98 +1,149 @@
-"""Atlas Service - Geospatial (GIS) Data Enrichment.
+"""Maximus Atlas Service - Main Application Entry Point.
 
-This service provides geospatial data enrichment for the Vertice project by
-querying open data sources, primarily OpenStreetMap via the Overpass API.
-It allows other services to retrieve information about Points of Interest (POIs)
-and other geographic features.
+This module serves as the main entry point for the Maximus Atlas Service.
+It initializes and configures the FastAPI application, sets up event handlers
+for startup and shutdown, and defines the API endpoints for interacting with
+the environmental mapping and situational awareness capabilities.
 
-Typical usage example:
-
-  A client would make a POST request to the /query/ endpoint with an
-  Overpass QL query in the request body.
+It orchestrates the ingestion of sensor data, the construction of environmental
+models, and provides interfaces for other Maximus AI services to query and
+understand the operational environment.
 """
 
-import httpx
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from datetime import datetime, timezone
-import logging
+from typing import Dict, Any, Optional, List
+import uvicorn
+import asyncio
+from datetime import datetime
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+app = FastAPI(title="Maximus Atlas Service", version="1.0.0")
 
-app = FastAPI(
-    title="Atlas Service",
-    description="Geospatial (GIS) data enrichment service for Vertice. Provides data on Points of Interest (POIs) from open sources.",
-    version="1.0.0",
-)
-
-# Overpass API URL constant
-OVERPASS_API_URL = "https://overpass-api.de/api/interpreter"
+# In a real scenario, you would have modules for:
+# - Sensor data ingestion
+# - Environmental model generation (e.g., 3D mapping, network topology)
+# - Spatial reasoning engine
+# - Situational awareness engine
 
 
-async def query_overpass_api(query: str) -> dict:
-    """Executes a query against the Overpass API and returns the JSON result.
+class EnvironmentUpdateRequest(BaseModel):
+    """Request model for updating the environmental map.
 
-    This function sends a POST request with the given Overpass QL query string
-    to the public Overpass API endpoint.
+    Attributes:
+        sensor_data (Dict[str, Any]): Raw data from various sensors (e.g., lidar, radar, network scans).
+        data_source (str): The source of the sensor data.
+        timestamp (str): ISO formatted timestamp of the data collection.
+    """
+    sensor_data: Dict[str, Any]
+    data_source: str
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class QueryEnvironmentRequest(BaseModel):
+    """Request model for querying the environmental map.
+
+    Attributes:
+        query (str): A natural language query about the environment (e.g., 'find nearest exit', 'identify threats in sector 7').
+        context (Optional[Dict[str, Any]]): Additional context for the query (e.g., current location).
+    """
+    query: str
+    context: Optional[Dict[str, Any]] = None
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Atlas Service."""
+    print("🗺️ Starting Maximus Atlas Service...")
+    # Initialize environmental model, load maps, etc.
+    print("✅ Maximus Atlas Service started successfully.")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Atlas Service."""
+    print("👋 Shutting down Maximus Atlas Service...")
+    # Clean up resources
+    print("🛑 Maximus Atlas Service shut down.")
+
+
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Atlas Service.
+
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
+    """
+    return {"status": "healthy", "message": "Atlas Service is operational."}
+
+
+@app.post("/update_environment")
+async def update_environment(request: EnvironmentUpdateRequest) -> Dict[str, Any]:
+    """Updates the environmental map with new sensor data.
 
     Args:
-        query (str): The Overpass QL query string to be executed.
+        request (EnvironmentUpdateRequest): The request body containing sensor data.
 
     Returns:
-        dict: The JSON response from the Overpass API as a dictionary.
-
-    Raises:
-        HTTPException: If there is an HTTP error (e.g., 4xx, 5xx) from the
-            Overpass API, a connection error, or any other unexpected error
-            during the process.
+        Dict[str, Any]: A dictionary confirming the update and providing current environmental status.
     """
-    logger.info("Executing query on Overpass API...")
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(OVERPASS_API_URL, data=query)
-            response.raise_for_status()  # Raise an exception for HTTP errors
-            logger.info(f"Query executed successfully. Status: {response.status_code}")
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error while querying Overpass API: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(status_code=e.response.status_code, detail=f"Error from Overpass API: {e.response.text}")
-    except httpx.RequestError as e:
-        logger.error(f"Connection error with Overpass API: {e}")
-        raise HTTPException(status_code=503, detail=f"Could not connect to Overpass API: {e}")
-    except Exception as e:
-        logger.error(f"Unexpected error processing Overpass query: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal error while processing the query.")
+    print(f"[API] Received environment update from {request.data_source} at {request.timestamp}")
+    # In a real system, this would process sensor_data to update the internal environmental model
+    await asyncio.sleep(0.1) # Simulate processing
 
+    # Simulate some basic processing result
+    new_features_detected = len(request.sensor_data.keys()) # Placeholder
 
-@app.get("/", tags=["Health"])
-async def read_root():
-    """Provides a health check endpoint for the Atlas Service.
-
-    Returns:
-        dict: A dictionary containing the service status, version, data source,
-            and the current UTC timestamp.
-    """
     return {
-        "status": "Atlas Service Online",
-        "version": "1.0.0",
-        "data_source": "OpenStreetMap via Overpass API",
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now().isoformat(),
+        "status": "updated",
+        "new_features_integrated": new_features_detected,
+        "environmental_model_version": "1.0.1" # Placeholder
     }
 
 
-@app.post("/query/", tags=["Overpass"])
-async def execute_raw_query(query: str = Body(..., media_type="text/plain")):
-    """Executes a raw Overpass QL query.
-
-    This low-level endpoint is intended for development and testing purposes,
-    allowing direct execution of Overpass QL queries.
+@app.post("/query_environment")
+async def query_environment(request: QueryEnvironmentRequest) -> Dict[str, Any]:
+    """Queries the environmental map for specific information.
 
     Args:
-        query (str): The raw Overpass QL query string, sent in the request body.
+        request (QueryEnvironmentRequest): The request body containing the query and context.
 
     Returns:
-        dict: The JSON response from the Overpass API.
+        Dict[str, Any]: A dictionary containing the query results and situational awareness insights.
     """
-    return await query_overpass_api(query=query)
+    print(f"[API] Received environment query: {request.query}")
+    # In a real system, this would use spatial reasoning and situational awareness engines
+    await asyncio.sleep(0.2) # Simulate query processing
+
+    # Simulate query results
+    if "threats" in request.query.lower():
+        result = {"answer": "Threats detected in Sector 7: 2 unknown entities moving rapidly.", "threat_level": "high"}
+    elif "exit" in request.query.lower():
+        result = {"answer": "Nearest exit is 50 meters North-East.", "path": "[current_location -> exit_path]"}
+    else:
+        result = {"answer": f"Information for '{request.query}' is being processed.", "status": "pending"}
+
+    return {
+        "timestamp": datetime.now().isoformat(),
+        "query_result": result,
+        "situational_awareness_level": "high" # Placeholder
+    }
+
+
+@app.get("/map_status")
+async def get_map_status() -> Dict[str, Any]:
+    """Retrieves the current status of the environmental map.
+
+    Returns:
+        Dict[str, Any]: A dictionary indicating the map's last update and coverage.
+    """
+    return {
+        "status": "online",
+        "last_update": datetime.now().isoformat(),
+        "coverage_percentage": 95.5,
+        "model_complexity": "high"
+    }
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8007)

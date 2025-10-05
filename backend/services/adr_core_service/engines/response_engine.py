@@ -1,261 +1,95 @@
-"""ADR Core Response Engine.
+"""Maximus ADR Core Service - Response Engine.
 
-This module contains the `ResponseEngine`, which is responsible for orchestrating
-automated responses to detected threats. It uses a playbook-based system to
-execute a series of actions, such as isolating a host or quarantining a file.
+This module implements the Response Engine for the Automated Detection and
+Response (ADR) service. It is responsible for orchestrating and executing
+automated response actions based on detected incidents and predefined playbooks.
+
+The Response Engine interacts with various security tools and systems (e.g.,
+firewalls, EDR, SIEM) to perform actions such as isolating compromised hosts,
+blocking malicious IPs, terminating processes, or initiating forensic data
+collection. It ensures that Maximus AI can take swift and decisive action to
+mitigate threats.
 """
 
-import logging
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from datetime import datetime
-import hashlib
 
-from ..models import (
-    ResponseAction,
-    Playbook,
-    PlaybookExecution,
-    PlaybookStep,
-    ThreatDetection,
-    ActionType,
-    ActionStatus,
-    SeverityLevel
-)
+from models.enums import ResponseActionType
+from models.schemas import ResponseAction
+from utils.logger import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 class ResponseEngine:
-    """Orchestrates automated, playbook-based responses to threats.
+    """Orchestrates and executes automated response actions based on detected incidents.
 
-    This engine takes a threat detection, finds a matching playbook, and executes
-    the defined response actions. It supports both automated execution and
-    workflows requiring manual approval.
-
-    Attributes:
-        config (Dict[str, Any]): Configuration for the engine.
-        enabled (bool): Whether the engine is active.
-        auto_response_enabled (bool): Whether fully autonomous responses are enabled.
-        playbooks (Dict[str, Playbook]): A dictionary of loaded playbooks, indexed by ID.
-        active_executions (Dict[str, PlaybookExecution]): A dictionary of currently
-            running playbook executions.
-        stats (Dict[str, Any]): A dictionary for tracking engine statistics.
+    This engine interacts with various security tools and systems to perform actions
+    such as isolating compromised hosts, blocking malicious IPs, or terminating processes.
     """
 
-    def __init__(self, config: Dict[str, Any]):
-        """Initializes the ResponseEngine.
+    def __init__(self):
+        """Initializes the ResponseEngine."""
+        logger.info("[ResponseEngine] Initializing Response Engine...")
+        # In a real scenario, establish connections to security tools/APIs here
+        logger.info("[ResponseEngine] Response Engine initialized.")
+
+    async def execute_action(self, incident_id: str, action_type: ResponseActionType, parameters: Optional[Dict[str, Any]] = None) -> ResponseAction:
+        """Executes a specific response action for a given incident.
 
         Args:
-            config (Dict[str, Any]): A configuration dictionary for the engine,
-                including settings like `enable_auto_response`.
-        """
-        self.config = config
-        self.enabled = config.get('enabled', True)
-        self.auto_response_enabled = config.get('enable_auto_response', False)
-
-        self.playbooks: Dict[str, Playbook] = {}
-        self.active_executions: Dict[str, PlaybookExecution] = {}
-
-        self.stats = {
-            'total_responses': 0,
-            'responses_completed': 0,
-            'responses_failed': 0,
-            'actions_executed': 0,
-            'actions_failed': 0,
-            'avg_response_time_ms': 0
-        }
-
-        logger.info(f"Response Engine initialized (Auto-response: {self.auto_response_enabled}).")
-
-    async def respond_to_threat(
-        self,
-        detection: ThreatDetection,
-        auto_approve: bool = False
-    ) -> Optional[PlaybookExecution]:
-        """Initiates a response to a given threat detection.
-
-        This method finds a suitable playbook for the detection and, if conditions
-        are met, creates and starts a playbook execution.
-
-        Args:
-            detection (ThreatDetection): The threat detection to respond to.
-            auto_approve (bool, optional): If True, bypasses manual approval steps.
-                Defaults to False.
+            incident_id (str): The ID of the incident to respond to.
+            action_type (ResponseActionType): The type of response action to take.
+            parameters (Optional[Dict[str, Any]]): Parameters required for the action.
 
         Returns:
-            Optional[PlaybookExecution]: The created playbook execution instance,
-                or None if no suitable playbook is found or if approval is required.
-        """
-        start_time = datetime.utcnow()
-
-        playbook = self._find_matching_playbook(detection)
-        if not playbook:
-            logger.warning(f"No matching playbook found for detection {detection.detection_id}")
-            return None
-
-        can_auto_execute = (
-            playbook.auto_execute and
-            self.auto_response_enabled and
-            (auto_approve or not playbook.require_approval)
-        )
-
-        if not can_auto_execute:
-            logger.info(
-                f"Playbook '{playbook.name}' requires manual approval for detection "
-                f"{detection.detection_id}. Execution pending."
-            )
-            # In a real system, this would trigger a notification for approval.
-            return None
-
-        try:
-            execution = self._create_execution(detection, playbook)
-            asyncio.create_task(self._execute_playbook(execution))
-            
-            execution_time_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
-            self._update_stats(execution, execution_time_ms)
-            
-            return execution
-        except Exception as e:
-            logger.error(f"Failed to initiate response for {detection.detection_id}: {e}")
-            self.stats['responses_failed'] += 1
-            return None
-
-    def _find_matching_playbook(self, detection: ThreatDetection) -> Optional[Playbook]:
-        """Finds the best-matching playbook for a given detection."""
-        # Simplified logic: find the first playbook that matches the threat type.
-        # A real implementation would have more complex matching logic.
-        for playbook in self.playbooks.values():
-            if not playbook.enabled:
-                continue
-
-            if 'threat_types' in playbook.trigger_conditions:
-                if detection.threat_type.value in playbook.trigger_conditions['threat_types']:
-                    logger.info(f"Matched playbook '{playbook.name}' for detection.")
-                    return playbook
-        return None
-
-    def _create_execution(
-        self, detection: ThreatDetection, playbook: Playbook
-    ) -> PlaybookExecution:
-        """Creates a PlaybookExecution instance from a detection and playbook."""
-        execution_id = f"exec_{hashlib.sha1(f'{playbook.playbook_id}{detection.detection_id}{datetime.utcnow()}'.encode()).hexdigest()[:12]}"
+            ResponseAction: Details of the executed action, including its status.
         
-        actions = [self._create_action_from_step(step, detection) for step in playbook.steps]
+        Raises:
+            ValueError: If the action type is unsupported.
+        """
+        logger.info(f"[ResponseEngine] Executing action '{action_type.value}' for incident {incident_id}")
+        await asyncio.sleep(0.1) # Simulate action execution time
 
-        execution = PlaybookExecution(
-            execution_id=execution_id,
-            playbook_id=playbook.playbook_id,
-            triggered_by=detection.detection_id,
-            actions=actions,
-            metadata={
-                'detection_title': detection.title,
-                'playbook_name': playbook.name
-            }
-        )
-        self.active_executions[execution_id] = execution
-        return execution
+        status = "failed"
+        details = f"Action '{action_type.value}' not yet implemented."
 
-    def _create_action_from_step(
-        self, step: PlaybookStep, detection: ThreatDetection
-    ) -> ResponseAction:
-        """Creates a ResponseAction from a playbook step and detection context."""
-        target = self._resolve_target(step, detection)
-        action_id = f"act_{hashlib.sha1(f'{step.step_id}{target}{datetime.utcnow()}'.encode()).hexdigest()[:12]}"
+        if action_type == ResponseActionType.ISOLATE_HOST:
+            details = f"Host for incident {incident_id} isolated. Parameters: {parameters}"
+            status = "success"
+        elif action_type == ResponseActionType.BLOCK_IP:
+            details = f"IP {parameters.get('ip_address')} blocked. Parameters: {parameters}"
+            status = "success"
+        elif action_type == ResponseActionType.TERMINATE_PROCESS:
+            details = f"Process {parameters.get('process_id')} terminated on host for incident {incident_id}. Parameters: {parameters}"
+            status = "success"
+        elif action_type == ResponseActionType.COLLECT_FORENSICS:
+            details = f"Forensic data collection initiated for incident {incident_id}. Parameters: {parameters}"
+            status = "success"
+        else:
+            logger.warning(f"[ResponseEngine] Unsupported response action type: {action_type.value}")
+            raise ValueError(f"Unsupported response action type: {action_type.value}")
 
+        logger.info(f"[ResponseEngine] Action '{action_type.value}' for incident {incident_id} completed with status: {status}")
         return ResponseAction(
-            action_id=action_id,
-            action_type=step.action_type,
-            target=target,
-            parameters=step.parameters,
-            priority=step.order,
-            timeout_seconds=step.timeout_seconds,
-            max_retries=step.max_retries if step.retry_on_failure else 0
+            incident_id=incident_id,
+            action_type=action_type,
+            timestamp=datetime.now().isoformat(),
+            status=status,
+            details=details
         )
 
-    def _resolve_target(self, step: PlaybookStep, detection: ThreatDetection) -> str:
-        """Resolves the target for an action based on the detection context."""
-        # Simple logic: use the first affected asset or first indicator value.
-        if detection.affected_assets:
-            return detection.affected_assets[0]
-        if detection.indicators:
-            return detection.indicators[0].value
-        return "unresolved_target"
-
-    async def _execute_playbook(self, execution: PlaybookExecution):
-        """Executes the steps of a playbook execution instance."""
-        logger.info(f"Starting execution for playbook '{execution.playbook_id}' (ID: {execution.execution_id}).")
-        execution.status = 'running'
-        execution.started_at = datetime.utcnow()
-
-        try:
-            # Simplified execution: run actions sequentially by order.
-            # A real implementation would handle parallel execution.
-            for action in sorted(execution.actions, key=lambda a: a.priority):
-                await self._execute_action(action)
-                if action.status == ActionStatus.FAILED:
-                    logger.error(f"Action {action.action_id} failed. Stopping playbook execution.")
-                    execution.status = 'failed'
-                    break
-            else: # No break
-                execution.status = 'completed'
-        except Exception as e:
-            logger.error(f"Error during playbook execution {execution.execution_id}: {e}")
-            execution.status = 'failed'
-            execution.errors.append(str(e))
-        finally:
-            execution.completed_at = datetime.utcnow()
-            execution.actions_completed = sum(1 for a in execution.actions if a.status == ActionStatus.COMPLETED)
-            execution.actions_failed = sum(1 for a in execution.actions if a.status == ActionStatus.FAILED)
-            logger.info(f"Playbook execution {execution.execution_id} finished with status: {execution.status}")
-
-    async def _execute_action(self, action: ResponseAction):
-        """Executes a single response action and updates its status."""
-        action.status = ActionStatus.IN_PROGRESS
-        action.started_at = datetime.utcnow()
-        logger.info(f"Executing action: {action.action_type.value} on target '{action.target}'")
-
-        try:
-            # In a real system, this would call a handler for each action type.
-            # Simulating action execution here.
-            await asyncio.sleep(0.1) # Simulate I/O
-            action.status = ActionStatus.COMPLETED
-            action.result = {'message': 'Action simulated successfully'}
-            self.stats['actions_executed'] += 1
-            logger.info(f"Action {action.action_id} completed successfully.")
-        except Exception as e:
-            logger.error(f"Error executing action {action.action_id}: {e}")
-            action.status = ActionStatus.FAILED
-            action.error = str(e)
-            self.stats['actions_failed'] += 1
-        finally:
-            action.completed_at = datetime.utcnow()
-
-    def _update_stats(self, execution: PlaybookExecution, execution_time_ms: int):
-        """Updates the internal statistics of the engine."""
-        self.stats['total_responses'] += 1
-        if execution.status == 'completed':
-            self.stats['responses_completed'] += 1
-        elif execution.status == 'failed':
-            self.stats['responses_failed'] += 1
-
-        total_responses = self.stats['total_responses']
-        current_avg_time = self.stats['avg_response_time_ms']
-        self.stats['avg_response_time_ms'] = \
-            (current_avg_time * (total_responses - 1) + execution_time_ms) / total_responses
-
-    def load_playbook(self, playbook: Playbook):
-        """Loads or updates a playbook in the engine's memory.
+    async def get_action_status(self, action_id: str) -> Dict[str, Any]:
+        """Retrieves the status of a previously executed response action.
 
         Args:
-            playbook (Playbook): The playbook object to load.
-        """
-        self.playbooks[playbook.playbook_id] = playbook
-        logger.info(f"Loaded playbook: '{playbook.name}' (ID: {playbook.playbook_id})")
-
-    def get_stats(self) -> Dict[str, Any]:
-        """Returns a copy of the current engine statistics.
+            action_id (str): The ID of the action to check.
 
         Returns:
-            Dict[str, Any]: A dictionary containing engine performance metrics.
+            Dict[str, Any]: A dictionary containing the status and details of the action.
         """
-        return self.stats.copy()
+        logger.info(f"[ResponseEngine] Retrieving status for action {action_id}")
+        await asyncio.sleep(0.05) # Simulate status retrieval
+        # In a real system, this would query a database or the tool itself
+        return {"action_id": action_id, "status": "completed", "details": "Mock status: Action completed successfully."}

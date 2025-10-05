@@ -43,8 +43,8 @@ FROM python:3.11-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
-    libboost-system1.74.0 \
-    libboost-filesystem1.74.0 \
+    libboost-system-dev \
+    libboost-filesystem-dev \
     libpcap0.8 \
     iptables \
     iproute2 \

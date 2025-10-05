@@ -1,167 +1,84 @@
-"""HCL Analyzer Service - Predictive Models.
+"""Maximus HCL Analyzer Service - Data Models.
 
-This module defines the machine learning models used for predictive analysis in the
-HCL (Hardware Compatibility List) Analyzer service. It includes models for
-time-series forecasting, anomaly detection, and failure prediction.
+This module defines the Pydantic data models (schemas) used for data validation
+and serialization within the Homeostatic Control Loop (HCL) Analyzer service.
+These schemas ensure data consistency and provide a clear structure for
+representing various entities like system metrics, analysis results, and anomaly
+details.
 
-Models:
-    - SARIMAForecaster: For time-series forecasting of metrics like CPU/GPU usage.
-    - IsolationForestDetector: For detecting anomalies in system metrics.
-    - XGBoostFailurePredictor: For predicting potential system failures.
+By using Pydantic, Maximus AI benefits from automatic data validation, clear
+documentation of data structures, and seamless integration with FastAPI for
+API request and response modeling.
 """
 
-import numpy as np
-import pandas as pd
+from pydantic import BaseModel, Field
+from typing import Dict, Any, List, Optional
 from datetime import datetime
-from typing import Dict, List, Tuple
-import logging
-import pickle
-from pathlib import Path
-
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-from sklearn.ensemble import IsolationForest
-from sklearn.preprocessing import StandardScaler
-import xgboost as xgb
-
-logger = logging.getLogger(__name__)
+from enum import Enum
 
 
-class SARIMAForecaster:
-    """A time-series forecaster using the SARIMA (Seasonal AutoRegressive
-    Integrated Moving Average) model.
+class AnomalyType(str, Enum):
+    """Enumeration for different types of anomalies detected."""
+    SPIKE = "spike"
+    DROP = "drop"
+    TREND = "trend"
+    OUTLIER = "outlier"
 
-    This class is used to forecast future values of metrics like CPU, memory, and
-    GPU usage based on their historical data.
+
+class Anomaly(BaseModel):
+    """Represents a detected anomaly in system metrics.
 
     Attributes:
-        metric_name (str): The name of the metric this model forecasts.
-        model: The trained SARIMAX model object from statsmodels.
-        last_trained (Optional[datetime]): Timestamp of when the model was last trained.
+        type (AnomalyType): The type of anomaly.
+        metric_name (str): The name of the metric where the anomaly was detected.
+        current_value (float): The current value of the metric.
+        severity (float): The severity of the anomaly (0.0 to 1.0).
+        description (str): A human-readable description of the anomaly.
     """
-
-    def __init__(self, metric_name: str, order=(1, 1, 1), seasonal_order=(1, 1, 1, 24)):
-        """Initializes the SARIMAForecaster.
-
-        Args:
-            metric_name (str): The name of the metric to forecast (e.g., 'cpu_usage').
-            order (tuple): The (p,d,q) order of the non-seasonal component of the model.
-            seasonal_order (tuple): The (P,D,Q,s) order of the seasonal component.
-        """
-        self.metric_name = metric_name
-        self.order = order
-        self.seasonal_order = seasonal_order
-        self.model = None
-        self.last_trained: Optional[datetime] = None
-
-    def train(self, df: pd.DataFrame) -> Dict[str, float]:
-        """Trains the SARIMA model on historical data.
-
-        Args:
-            df (pd.DataFrame): A DataFrame with 'timestamp' and 'metric_value' columns.
-
-        Returns:
-            Dict[str, float]: A dictionary of training metrics, such as MAE and RMSE.
-        """
-        logger.info(f"Training SARIMA for {self.metric_name}...")
-        series = df.set_index('timestamp')['metric_value'].resample('H').mean().interpolate()
-        self.model = SARIMAX(series, order=self.order, seasonal_order=self.seasonal_order).fit(disp=False)
-        self.last_trained = datetime.utcnow()
-        # Simplified metrics for demonstration
-        return {"aic": float(self.model.aic)}
-
-    def predict(self, steps: int = 24) -> Dict[str, List]:
-        """Forecasts future values for a given number of steps.
-
-        Args:
-            steps (int): The number of future steps (hours) to forecast.
-
-        Returns:
-            Dict[str, List]: A dictionary containing the predicted values and confidence intervals.
-        """
-        if not self.model: raise ValueError("Model is not trained.")
-        forecast = self.model.get_forecast(steps=steps)
-        return {
-            "predictions": forecast.predicted_mean.tolist(),
-            "lower_bound": forecast.conf_int().iloc[:, 0].tolist(),
-            "upper_bound": forecast.conf_int().iloc[:, 1].tolist(),
-        }
-
-    def save(self, path: str):
-        """Saves the trained model to a file using pickle."""
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        with open(path, 'wb') as f: pickle.dump(self.model, f)
-
-    def load(self, path: str):
-        """Loads a trained model from a file."""
-        with open(path, 'rb') as f: self.model = pickle.load(f)
+    type: AnomalyType
+    metric_name: str
+    current_value: float
+    severity: float
+    description: str
 
 
-class IsolationForestDetector:
-    """An anomaly detector using the Isolation Forest algorithm.
+class AnalysisResult(BaseModel):
+    """Represents the comprehensive analysis of system resources and health.
 
-    This model is effective for identifying unusual patterns and outliers in
-    multidimensional system metrics.
+    Attributes:
+        timestamp (str): ISO formatted timestamp of the analysis.
+        overall_health_score (float): An aggregated score representing system health (0.0 to 1.0).
+        anomalies (List[Anomaly]): A list of detected anomalies.
+        trends (Dict[str, Any]): Identified trends in system metrics.
+        recommendations (List[str]): Suggested actions based on the analysis.
+        requires_intervention (bool): True if the analysis indicates a need for intervention.
     """
-
-    def __init__(self, contamination: float = 0.01):
-        """Initializes the IsolationForestDetector.
-
-        Args:
-            contamination (float): The expected proportion of anomalies in the data.
-        """
-        self.model = IsolationForest(contamination=contamination, random_state=42)
-        self.scaler = StandardScaler()
-        self.last_trained: Optional[datetime] = None
-
-    def train(self, df: pd.DataFrame) -> Dict[str, float]:
-        """Trains the Isolation Forest model on normal data."""
-        logger.info("Training Isolation Forest...")
-        X = self.scaler.fit_transform(df.drop(columns=['timestamp']))
-        self.model.fit(X)
-        self.last_trained = datetime.utcnow()
-        return {"n_features": X.shape[1]}
-
-    def predict(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """Predicts which data points are anomalies."""
-        X = self.scaler.transform(df.drop(columns=['timestamp']))
-        predictions = self.model.predict(X)
-        is_anomaly = predictions == -1
-        return {"is_anomaly": is_anomaly.tolist(), "n_anomalies": int(np.sum(is_anomaly))}
-
-    def save(self, path: str): ...
-    def load(self, path: str): ...
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+    overall_health_score: float
+    anomalies: List[Anomaly]
+    trends: Dict[str, Any]
+    recommendations: List[str]
+    requires_intervention: bool
 
 
-class XGBoostFailurePredictor:
-    """A failure predictor using the XGBoost classification model.
+class SystemMetrics(BaseModel):
+    """Represents a snapshot of system metrics collected by the HCL Monitor.
 
-    This model is trained on historical data to predict the likelihood of a
-    system failure based on recent metric trends.
+    Attributes:
+        timestamp (str): ISO formatted timestamp of when the metrics were collected.
+        cpu_usage (float): Current CPU utilization (0-100%).
+        memory_usage (float): Current memory utilization (0-100%).
+        disk_io_rate (float): Disk I/O rate (bytes/sec).
+        network_io_rate (float): Network I/O rate (bytes/sec).
+        avg_latency_ms (float): Average system latency in milliseconds.
+        error_rate (float): Rate of errors in the system.
+        service_status (Dict[str, str]): Status of various sub-services.
     """
-
-    def __init__(self):
-        """Initializes the XGBoostFailurePredictor."""
-        self.model = xgb.XGBClassifier(random_state=42)
-        self.scaler = StandardScaler()
-        self.last_trained: Optional[datetime] = None
-
-    def train(self, df: pd.DataFrame) -> Dict[str, float]:
-        """Trains the XGBoost model on labeled historical data."""
-        logger.info("Training XGBoost Failure Predictor...")
-        # Simplified training logic
-        X = df.drop(columns=['timestamp', 'failure'])
-        y = df['failure']
-        X_scaled = self.scaler.fit_transform(X)
-        self.model.fit(X_scaled, y)
-        self.last_trained = datetime.utcnow()
-        return {"n_features": X.shape[1]}
-
-    def predict(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """Predicts the probability of failure for new data."""
-        X = df.drop(columns=['timestamp'])
-        X_scaled = self.scaler.transform(X)
-        probs = self.model.predict_proba(X_scaled)[:, 1]
-        return {"failure_probability": probs.tolist()}
-
-    def save(self, path: str): ...
-    def load(self, path: str): ...
+    timestamp: str
+    cpu_usage: float
+    memory_usage: float
+    disk_io_rate: float
+    network_io_rate: float
+    avg_latency_ms: float
+    error_rate: float
+    service_status: Dict[str, str]

@@ -1,85 +1,14 @@
-"""ADR Core Service - Data Models Package.
+"""Maximus ADR Core Service - Models Package.
 
-This package defines the data structures for the ADR Core Service, including
-Pydantic schemas for API validation and enumerations for categorical data.
+This package defines the data models and schemas used throughout the Automated
+Detection and Response (ADR) service. These models ensure data consistency,
+facilitate validation, and provide a clear structure for representing security
+events, detection results, incidents, response actions, and threat intelligence.
 
-It exports all necessary models and enums for use throughout the application.
+Modules within this package include:
+- `enums`: Defines enumerations for various types (e.g., IncidentSeverity, DetectionType).
+- `schemas`: Defines Pydantic models for data validation and serialization.
+
+These models are crucial for maintaining data integrity and enabling seamless
+communication between different components of the ADR service and external systems.
 """
-
-from .enums import (
-    SeverityLevel,
-    ThreatType,
-    ActionType,
-    ActionStatus,
-    DetectionSource,
-    PlaybookTrigger,
-    AlertStatus,
-    ConnectorType,
-    EngineType,
-)
-
-from .schemas import (
-    # Detection
-    MITRETechnique,
-    ThreatIndicator,
-    ThreatDetection,
-    DetectionRule,
-    AnalysisRequest,
-    AnalysisResult,
-    # Response
-    ResponseAction,
-    PlaybookStep,
-    Playbook,
-    PlaybookExecution,
-    ResponseRequest,
-    # Alerts
-    Alert,
-    AlertUpdate,
-    # Configuration
-    EngineConfig,
-    ConnectorConfig,
-    ADRConfig,
-    # Metrics
-    ServiceMetrics,
-    # API
-    APIResponse,
-    HealthStatus,
-)
-
-__all__ = [
-    # Enums
-    "SeverityLevel",
-    "ThreatType",
-    "ActionType",
-    "ActionStatus",
-    "DetectionSource",
-    "PlaybookTrigger",
-    "AlertStatus",
-    "ConnectorType",
-    "EngineType",
-    # Detection
-    "MITRETechnique",
-    "ThreatIndicator",
-    "ThreatDetection",
-    "DetectionRule",
-    "AnalysisRequest",
-    "AnalysisResult",
-    # Response
-    "ResponseAction",
-    "PlaybookStep",
-    "Playbook",
-    "PlaybookExecution",
-    "ResponseRequest",
-    # Alerts
-    "Alert",
-    "AlertUpdate",
-    # Configuration
-    "EngineConfig",
-    "ConnectorConfig",
-    "ADRConfig",
-    # Metrics
-    "ServiceMetrics",
-    # API
-    "APIResponse",
-    "HealthStatus",
-]

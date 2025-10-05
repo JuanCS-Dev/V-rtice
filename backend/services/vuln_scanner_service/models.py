@@ -1,56 +1,92 @@
+"""Maximus Vulnerability Scanner Service - Data Models.
 
-import datetime
-from sqlalchemy import (Column, String, Integer, DateTime, Text, JSON, ForeignKey, Enum as SQLAlchemyEnum)
-from sqlalchemy.orm import relationship
-from database import Base
-import enum
+This module defines the Pydantic data models (schemas) used for data validation
+and serialization within the Vulnerability Scanner Service. These schemas ensure
+data consistency and provide a clear structure for representing scan tasks,
+vulnerability findings, and scan results.
 
-class ScanStatus(enum.Enum):
-    QUEUED = "queued"
-    SCANNING = "scanning"
-    COMPLETED = "completed"
-    FAILED = "failed"
+By using Pydantic, Maximus AI benefits from automatic data validation, clear
+documentation of data structures, and seamless integration with FastAPI for
+API request and response modeling. This is crucial for maintaining data integrity
+and enabling efficient data exchange within the vulnerability scanning ecosystem.
+"""
 
-class Severity(str, enum.Enum):
-    INFO = "info"
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+from pydantic import BaseModel, Field
+from typing import Dict, Any, List, Optional
+from datetime import datetime
 
-class Scan(Base):
-    __tablename__ = "scans"
 
-    id = Column(String, primary_key=True, index=True)
-    target = Column(String, index=True)
-    scan_type = Column(String)
-    status = Column(SQLAlchemyEnum(ScanStatus), default=ScanStatus.QUEUED)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    completed_at = Column(DateTime, nullable=True)
+class ScanTaskBase(BaseModel):
+    """Base model for a vulnerability scan task."""
+    target: str
+    scan_type: str
+    parameters: Dict[str, Any]
 
-    vulnerabilities = relationship("Vulnerability", back_populates="scan", cascade="all, delete-orphan")
 
-class Vulnerability(Base):
-    __tablename__ = "vulnerabilities"
+class ScanTaskCreate(ScanTaskBase):
+    """Model for creating a new vulnerability scan task."""
+    pass
 
-    id = Column(Integer, primary_key=True, index=True)
-    scan_id = Column(String, ForeignKey("scans.id"))
-    host = Column(String)
-    port = Column(Integer)
-    service = Column(String)
-    cve_id = Column(String, nullable=True, index=True)
-    severity = Column(String, default="info")  # Changed from Enum to String to avoid migration issues
-    description = Column(Text)
-    recommendation = Column(Text)
-    exploit_available = Column(String, nullable=True)
 
-    scan = relationship("Scan", back_populates="vulnerabilities")
+class ScanTask(ScanTaskBase):
+    """Model for a vulnerability scan task, including database-generated fields.
 
-class CommonExploit(Base):
-    __tablename__ = "common_exploits"
+    Attributes:
+        id (int): Unique identifier for the scan task.
+        status (str): Current status of the scan (e.g., 'pending', 'running').
+        start_time (datetime): Timestamp of when the scan started.
+        end_time (Optional[datetime]): Timestamp of when the scan ended.
+        report_path (Optional[str]): Path to the generated report.
+        raw_results (Optional[str]): Raw results from the scanner.
 
-    cve_id = Column(String, primary_key=True, index=True)
-    name = Column(String)
-    description = Column(Text)
-    severity = Column(String)  # Changed from Enum to String
-    metasploit_module = Column(String, nullable=True)
+    Config:
+        orm_mode = True
+    """
+    id: int
+    status: str
+    start_time: datetime
+    end_time: Optional[datetime]
+    report_path: Optional[str]
+    class Config:
+        """Configuração para habilitar o modo ORM."""
+        orm_mode = True
+
+
+class VulnerabilityBase(BaseModel):
+    """Base model for a detected vulnerability finding."""
+    scan_task_id: int
+    cve_id: Optional[str]
+    name: str
+    severity: str
+    description: str
+    solution: Optional[str]
+    host: str
+    port: Optional[int]
+    protocol: Optional[str]
+
+
+class VulnerabilityCreate(VulnerabilityBase):
+    """Model for creating a new vulnerability finding."""
+    pass
+
+
+class Vulnerability(VulnerabilityBase):
+    """Model for a detected vulnerability finding, including database-generated fields.
+
+    Attributes:
+        id (int): Unique identifier for the vulnerability.
+        discovered_at (datetime): Timestamp of when the vulnerability was discovered.
+        is_false_positive (bool): True if the vulnerability is a false positive.
+        remediated_at (Optional[datetime]): Timestamp of when the vulnerability was remediated.
+
+    Config:
+        orm_mode = True
+    """
+    id: int
+    discovered_at: datetime
+    is_false_positive: bool
+    remediated_at: Optional[datetime]
+
+    class Config:
+        """Configuração para habilitar o modo ORM."""
+        orm_mode = True

@@ -1,89 +1,106 @@
-"""
-Proxy Manager - Gerenciamento de proxies para scraping
-Projeto Vértice - SSP-GO
+"""Maximus OSINT Service - Proxy Manager.
+
+This module implements a Proxy Manager for the Maximus AI's OSINT Service.
+It is responsible for managing a pool of proxy servers, rotating them to avoid
+IP blocking, and ensuring anonymous and reliable access to open-source data
+sources.
+
+Key functionalities include:
+- Loading and validating a list of proxy servers.
+- Implementing proxy rotation strategies (e.g., round-robin, least-used).
+- Handling proxy failures and blacklisting unreliable proxies.
+- Providing a simple interface for scrapers to obtain and use proxies.
+
+This manager is crucial for maintaining the effectiveness of OSINT scraping
+operations, especially when dealing with websites that employ anti-scraping
+measures, ensuring continuous data collection and operational resilience.
 """
 
+import asyncio
 import random
-from typing import List, Optional, Dict
-import aiohttp
-import logging
+from typing import Dict, Any, List, Optional
+from datetime import datetime, timedelta
 
-logger = logging.getLogger(__name__)
 
 class ProxyManager:
-    """Gerencia pool de proxies para rotação"""
-    
-    def __init__(self):
-        self.proxies: List[Dict] = []
-        self.current_index = 0
-        self.failed_proxies: set = set()
-        
-    def add_proxy(self, proxy: str, proxy_type: str = "http"):
-        """Adiciona proxy ao pool"""
-        proxy_dict = {
-            "url": proxy,
-            "type": proxy_type,
-            "failures": 0,
-            "last_used": None
-        }
-        self.proxies.append(proxy_dict)
-        
+    """Manages a pool of proxy servers, rotating them to avoid IP blocking,
+    and ensuring anonymous and reliable access to open-source data sources.
+
+    Loads and validates a list of proxy servers, implements proxy rotation
+    strategies, and handles proxy failures.
+    """
+
+    def __init__(self, proxy_list: Optional[List[str]] = None, rotation_interval_seconds: int = 60):
+        """Initializes the ProxyManager.
+
+        Args:
+            proxy_list (Optional[List[str]]): A list of proxy URLs (e.g., 'http://user:pass@ip:port').
+            rotation_interval_seconds (int): How often to rotate proxies.
+        """
+        self.proxies = [{"url": p, "last_used": None, "failures": 0} for p in (proxy_list or [])]
+        self.rotation_interval = timedelta(seconds=rotation_interval_seconds)
+        self.current_proxy_index = 0
+        self.last_rotation_time = datetime.now()
+        self.current_status: str = "active"
+
     def get_proxy(self) -> Optional[str]:
-        """Retorna próximo proxy disponível"""
-        if not self.proxies:
-            return None
-            
-        # Filtrar proxies que não falharam muito
-        available = [p for p in self.proxies 
-                    if p["url"] not in self.failed_proxies]
-        
-        if not available:
-            # Reset failed proxies se não houver mais disponíveis
-            self.failed_proxies.clear()
-            available = self.proxies
-            
-        # Rotação round-robin
-        proxy = available[self.current_index % len(available)]
-        self.current_index += 1
-        
-        return proxy["url"]
-        
-    def mark_failed(self, proxy_url: str):
-        """Marca proxy como falho"""
-        self.failed_proxies.add(proxy_url)
-        
+        """Retrieves the current active proxy, rotating if necessary.
+
+        Returns:
+            Optional[str]: The URL of the active proxy, or None if no proxies are available.
+        """
+        if not self.proxies: return None
+
+        if (datetime.now() - self.last_rotation_time) > self.rotation_interval:
+            self._rotate_proxy()
+
+        active_proxy = self.proxies[self.current_proxy_index]
+        active_proxy["last_used"] = datetime.now()
+        print(f"[ProxyManager] Using proxy: {active_proxy['url']}")
+        return active_proxy["url"]
+
+    def _rotate_proxy(self):
+        """Rotates to the next available proxy in the list."""
+        self.current_proxy_index = (self.current_proxy_index + 1) % len(self.proxies)
+        self.last_rotation_time = datetime.now()
+        print(f"[ProxyManager] Rotating proxy to index {self.current_proxy_index}")
+
+    def mark_proxy_failed(self, proxy_url: str):
+        """Marks a proxy as failed, increasing its failure count.
+
+        Args:
+            proxy_url (str): The URL of the proxy that failed.
+        """
         for proxy in self.proxies:
             if proxy["url"] == proxy_url:
                 proxy["failures"] += 1
-                if proxy["failures"] > 3:
-                    logger.warning(f"Proxy {proxy_url} falhou múltiplas vezes")
-                    
-    async def test_proxy(self, proxy_url: str) -> bool:
-        """Testa se proxy está funcionando"""
-        test_url = "http://httpbin.org/ip"
-        
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    test_url,
-                    proxy=proxy_url,
-                    timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        logger.info(f"Proxy {proxy_url} funcionando: {data.get('origin')}")
-                        return True
-                        
-        except Exception as e:
-            logger.error(f"Proxy {proxy_url} falhou: {e}")
-            
-        return False
-        
-    async def validate_all_proxies(self):
-        """Valida todos os proxies do pool"""
-        for proxy in self.proxies:
-            is_working = await self.test_proxy(proxy["url"])
-            if not is_working:
-                self.failed_proxies.add(proxy["url"])
-                
-        logger.info(f"Proxies válidos: {len(self.proxies) - len(self.failed_proxies)}/{len(self.proxies)}")
+                print(f"[ProxyManager] Proxy {proxy_url} marked as failed. Total failures: {proxy['failures']}")
+                # Optionally, remove proxy if failures exceed a threshold
+                break
+
+    def add_proxy(self, proxy_url: str):
+        """Adds a new proxy to the pool.
+
+        Args:
+            proxy_url (str): The URL of the new proxy.
+        """
+        self.proxies.append({"url": proxy_url, "last_used": None, "failures": 0})
+        print(f"[ProxyManager] Added new proxy: {proxy_url}")
+
+    async def get_status(self) -> Dict[str, Any]:
+        """Retrieves the current operational status of the Proxy Manager.
+
+        Returns:
+            Dict[str, Any]: A dictionary summarizing the manager's status.
+        """
+        return {
+            "status": self.current_status,
+            "total_proxies": len(self.proxies),
+            "current_proxy_index": self.current_proxy_index,
+            "last_rotation": self.last_rotation_time.isoformat(),
+            "proxy_details": [{
+                "url": p["url"],
+                "last_used": p["last_used"].isoformat() if p["last_used"] else "N/A",
+                "failures": p["failures"]
+            } for p in self.proxies]
+        }

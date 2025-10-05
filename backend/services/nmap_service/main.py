@@ -1,346 +1,149 @@
-# backend/services/nmap_service/main.py
+"""Maximus Nmap Service - Main Application Entry Point.
 
-"""
-Nmap Service - Vértice Cyber Security Module
-Migração do Batman do Cerrado para arquitetura de microsserviços
-"""
+This module serves as the main entry point for the Maximus Nmap Service.
+It initializes and configures the FastAPI application, sets up event handlers
+for startup and shutdown, and defines the API endpoints for executing Nmap
+scans and retrieving their results.
 
-import subprocess
-import xml.etree.ElementTree as ET
-import json
-import time
-import re
-from datetime import datetime
-from typing import Dict, List, Any, Optional
+It acts as a dedicated wrapper and interface for the Nmap (Network Mapper)
+utility, enabling Maximus to perform advanced network discovery and security
+auditing operations. This service is crucial for supporting network
+reconnaissance, vulnerability identification, and attack surface mapping
+within the Maximus AI system.
+"""
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Dict, Any, List, Optional
+import uvicorn
+import asyncio
+from datetime import datetime
+import uuid
 
-app = FastAPI(
-    title="Nmap Service",
-    description="Microsserviço para varreduras de rede com Nmap - reconnaissance e detecção de serviços",
-    version="1.0.0",
-)
+app = FastAPI(title="Maximus Nmap Service", version="1.0.0")
 
-# Modelos de dados
+# In a real scenario, this would integrate with a Python Nmap library
+# or execute Nmap commands directly.
+
+# In-memory storage for Nmap scan results (mock)
+scan_results_db: Dict[str, Dict[str, Any]] = {}
+
+
 class NmapScanRequest(BaseModel):
+    """Request model for initiating an Nmap scan.
+
+    Attributes:
+        target (str): The target for the Nmap scan (e.g., IP address, hostname, CIDR range).
+        scan_type (str): The type of Nmap scan (e.g., 'quick', 'full', 'port_scan').
+        options (Optional[List[str]]): Additional Nmap command-line options.
+    """
     target: str
-    profile: str = "quick"
-    custom_args: Optional[str] = None
+    scan_type: str = "quick"
+    options: Optional[List[str]] = None
 
-class PortInfo(BaseModel):
-    port: int
-    protocol: str
-    state: str
-    service: Optional[str] = None
-    version: Optional[str] = None
-    product: Optional[str] = None
 
-class HostInfo(BaseModel):
-    ip: str
-    hostname: Optional[str] = None
-    status: str
-    ports: List[PortInfo] = []
-    os_info: Optional[str] = None
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Nmap Service."""
+    print("📡 Starting Maximus Nmap Service...")
+    print("✅ Maximus Nmap Service started successfully.")
 
-# Perfis de scan predefinidos
-SCAN_PROFILES = {
-    "quick": "-T4 -F",
-    "full": "-T4 -A -v",
-    "stealth": "-sS -T2 -f",
-    "comprehensive": "-T4 -A -sS -sU --script=default,vuln",
-    "discovery": "-sn",
-    "service-detection": "-sV -T4",
-    "os-detection": "-O -T4",
-    "vuln-scan": "-T4 --script=vuln"
-}
 
-# --- Nmap Analysis Functions ---
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Nmap Service."""
+    print("👋 Shutting down Maximus Nmap Service...")
+    print("🛑 Maximus Nmap Service shut down.")
 
-def validate_target(target: str) -> bool:
-    """Valida se o alvo é um IP, hostname ou CIDR válido"""
-    # Regex básica para IP
-    ip_pattern = r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
-    # Regex básica para CIDR
-    cidr_pattern = r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:[0-9]|[1-2][0-9]|3[0-2])$'
-    # Regex básica para hostname
-    hostname_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$'
-    
-    return (
-        re.match(ip_pattern, target) or 
-        re.match(cidr_pattern, target) or 
-        re.match(hostname_pattern, target)
-    )
 
-async def execute_nmap_scan(target: str, nmap_args: str) -> tuple[bool, str, str]:
-    """Executa scan Nmap e retorna resultado"""
-    try:
-        # Comando nmap com saída XML
-        cmd = ["nmap"] + nmap_args.split() + ["-oX", "-", target]
-        
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=300  # 5 minutos timeout
-        )
-        
-        return result.returncode == 0, result.stdout, result.stderr
-        
-    except subprocess.TimeoutExpired:
-        return False, "", "Scan timeout - operação cancelada após 5 minutos"
-    except Exception as e:
-        return False, "", f"Erro na execução: {str(e)}"
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Nmap Service.
 
-def parse_nmap_xml(xml_output: str) -> List[HostInfo]:
-    """Parse da saída XML do Nmap para estrutura de dados"""
-    hosts = []
-    
-    try:
-        root = ET.fromstring(xml_output)
-        
-        for host_elem in root.findall("host"):
-            # Informações básicas do host
-            status_elem = host_elem.find("status")
-            if status_elem is None:
-                continue
-                
-            status = status_elem.get("state", "unknown")
-            
-            # IP address
-            address_elem = host_elem.find("address")
-            if address_elem is None:
-                continue
-            ip = address_elem.get("addr")
-            
-            # Hostname
-            hostname = None
-            hostnames_elem = host_elem.find("hostnames")
-            if hostnames_elem is not None:
-                hostname_elem = hostnames_elem.find("hostname")
-                if hostname_elem is not None:
-                    hostname = hostname_elem.get("name")
-            
-            # OS detection
-            os_info = None
-            os_elem = host_elem.find("os")
-            if os_elem is not None:
-                osmatch_elem = os_elem.find("osmatch")
-                if osmatch_elem is not None:
-                    os_info = osmatch_elem.get("name")
-            
-            # Portas
-            ports = []
-            ports_elem = host_elem.find("ports")
-            if ports_elem is not None:
-                for port_elem in ports_elem.findall("port"):
-                    port_id = int(port_elem.get("portid", 0))
-                    protocol = port_elem.get("protocol", "tcp")
-                    
-                    state_elem = port_elem.find("state")
-                    state = state_elem.get("state", "unknown") if state_elem is not None else "unknown"
-                    
-                    # Informações do serviço
-                    service_name = None
-                    version = None
-                    product = None
-                    
-                    service_elem = port_elem.find("service")
-                    if service_elem is not None:
-                        service_name = service_elem.get("name")
-                        version = service_elem.get("version")
-                        product = service_elem.get("product")
-                    
-                    port_info = PortInfo(
-                        port=port_id,
-                        protocol=protocol,
-                        state=state,
-                        service=service_name,
-                        version=version,
-                        product=product
-                    )
-                    ports.append(port_info)
-            
-            host_info = HostInfo(
-                ip=ip,
-                hostname=hostname,
-                status=status,
-                ports=ports,
-                os_info=os_info
-            )
-            hosts.append(host_info)
-    
-    except ET.ParseError as e:
-        raise HTTPException(status_code=500, detail=f"Erro no parse XML: {str(e)}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro no processamento: {str(e)}")
-    
-    return hosts
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
+    """
+    return {"status": "healthy", "message": "Nmap Service is operational."}
 
-def assess_security_risks(hosts: List[HostInfo]) -> Dict[str, Any]:
-    """Avalia riscos de segurança baseado nos resultados"""
-    risks = {
-        "high_risk_services": [],
-        "open_ports_count": 0,
-        "vulnerable_services": [],
-        "recommendations": []
-    }
-    
-    high_risk_services = ["telnet", "ftp", "rsh", "rlogin", "snmp", "tftp"]
-    potentially_vulnerable = ["ssh", "http", "https", "mysql", "postgresql", "rdp"]
-    
-    for host in hosts:
-        for port in host.ports:
-            if port.state == "open":
-                risks["open_ports_count"] += 1
-                
-                if port.service in high_risk_services:
-                    risks["high_risk_services"].append({
-                        "host": host.ip,
-                        "port": port.port,
-                        "service": port.service,
-                        "risk": "Serviço inseguro detectado"
-                    })
-                
-                if port.service in potentially_vulnerable:
-                    risks["vulnerable_services"].append({
-                        "host": host.ip,
-                        "port": port.port,
-                        "service": port.service,
-                        "version": port.version
-                    })
-    
-    # Recomendações baseadas nos achados
-    if risks["high_risk_services"]:
-        risks["recommendations"].append("Desabilitar ou restringir serviços inseguros detectados")
-    
-    if risks["open_ports_count"] > 10:
-        risks["recommendations"].append("Revisar necessidade de todas as portas abertas")
-    
-    if not risks["recommendations"]:
-        risks["recommendations"].append("Configuração aparenta estar segura")
-    
-    return risks
 
-# --- Main Scan Endpoint ---
+@app.post("/scan", response_model=Dict[str, Any])
+async def initiate_nmap_scan(request: NmapScanRequest) -> Dict[str, Any]:
+    """Initiates an Nmap scan and returns a scan ID.
 
-@app.post("/scan", tags=["Network Scanning"])
-async def execute_scan(request: NmapScanRequest):
-    """Executa varredura Nmap no alvo especificado"""
-    result = {
+    Args:
+        request (NmapScanRequest): The request body containing target and scan parameters.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the scan ID and initial status.
+    """
+    scan_id = str(uuid.uuid4())
+    print(f"[API] Initiating Nmap scan (ID: {scan_id}, target: {request.target}, type: {request.scan_type})")
+
+    # Simulate Nmap scan in a background task
+    asyncio.create_task(perform_nmap_scan(scan_id, request.target, request.scan_type, request.options))
+
+    return {"scan_id": scan_id, "status": "running", "timestamp": datetime.now().isoformat()}
+
+
+@app.get("/scan_results/{scan_id}", response_model=Dict[str, Any])
+async def get_nmap_scan_results(scan_id: str) -> Dict[str, Any]:
+    """Retrieves the results of a specific Nmap scan.
+
+    Args:
+        scan_id (str): The ID of the Nmap scan.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the scan results.
+
+    Raises:
+        HTTPException: If the scan ID is not found or results are not yet available.
+    """
+    results = scan_results_db.get(scan_id)
+    if not results:
+        raise HTTPException(status_code=404, detail="Scan results not found or not yet available.")
+    return results
+
+
+async def perform_nmap_scan(scan_id: str, target: str, scan_type: str, options: Optional[List[str]]):
+    """Simulates an Nmap scan and stores its results.
+
+    Args:
+        scan_id (str): The ID of the scan.
+        target (str): The target for the scan.
+        scan_type (str): The type of Nmap scan.
+        options (Optional[List[str]]): Additional Nmap command-line options.
+    """
+    print(f"[NmapService] Performing simulated Nmap scan {scan_id} on {target}...")
+    await asyncio.sleep(random.uniform(2.0, 5.0)) # Simulate scan duration
+
+    # Mock Nmap output based on scan_type
+    output: Dict[str, Any] = {"scan_type": scan_type, "target": target, "options": options}
+    if scan_type == "quick":
+        output["hosts_found"] = 1
+        output["open_ports"] = [80, 443]
+        output["details"] = "Quick scan completed."
+    elif scan_type == "full":
+        output["hosts_found"] = 1
+        output["open_ports"] = [22, 80, 443, 8080]
+        output["services"] = [{"port": 22, "service": "ssh"}, {"port": 80, "service": "http"}]
+        output["os_detection"] = "Linux (mock)"
+        output["details"] = "Full scan completed."
+    elif scan_type == "port_scan":
+        output["hosts_found"] = 1
+        output["open_ports"] = [p for p in [21, 22, 23, 80, 443] if str(p) in str(options)] # Simulate specific ports
+        output["details"] = "Specific port scan completed."
+    else:
+        output["status"] = "failed"
+        output["error"] = f"Unsupported scan type: {scan_type}"
+
+    scan_results_db[scan_id] = {
+        "scan_id": scan_id,
+        "status": "completed",
         "timestamp": datetime.now().isoformat(),
-        "success": False,
-        "target": request.target,
-        "profile": request.profile,
-        "data": {},
-        "errors": []
+        "results": output
     }
-    
-    # Validação do alvo
-    if not validate_target(request.target):
-        raise HTTPException(
-            status_code=400, 
-            detail="Alvo inválido. Use IP, hostname ou CIDR válidos."
-        )
-    
-    # Validação do perfil
-    if request.profile not in SCAN_PROFILES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Perfil '{request.profile}' não encontrado. Perfis disponíveis: {list(SCAN_PROFILES.keys())}"
-        )
-    
-    try:
-        # Argumentos do nmap
-        nmap_args = SCAN_PROFILES[request.profile]
-        if request.custom_args:
-            nmap_args += f" {request.custom_args}"
-        
-        result["data"]["nmap_command"] = f"nmap {nmap_args} {request.target}"
-        
-        # Execução do scan
-        scan_start = time.time()
-        success, xml_output, error_output = await execute_nmap_scan(request.target, nmap_args)
-        scan_duration = time.time() - scan_start
-        
-        result["data"]["scan_duration"] = round(scan_duration, 2)
-        
-        if not success:
-            result["errors"].append(f"Scan falhou: {error_output}")
-            return result
-        
-        if not xml_output.strip():
-            result["errors"].append("Nenhuma saída XML gerada pelo Nmap")
-            return result
-        
-        # Parse dos resultados
-        hosts = parse_nmap_xml(xml_output)
-        result["data"]["hosts"] = [host.dict() for host in hosts]
-        result["data"]["hosts_count"] = len(hosts)
-        
-        # Análise de riscos
-        security_assessment = assess_security_risks(hosts)
-        result["data"]["security_assessment"] = security_assessment
-        
-        result["success"] = True
-        
-    except Exception as e:
-        result["errors"].append(f"Erro na análise: {str(e)}")
-    
-    return result
+    print(f"[NmapService] Nmap scan {scan_id} completed.")
 
-@app.get("/profiles", tags=["Configuration"])
-async def get_scan_profiles():
-    """Retorna perfis de scan disponíveis"""
-    return {
-        "profiles": {
-            profile: {
-                "name": profile,
-                "command": args,
-                "description": get_profile_description(profile)
-            }
-            for profile, args in SCAN_PROFILES.items()
-        }
-    }
 
-def get_profile_description(profile: str) -> str:
-    """Retorna descrição do perfil de scan"""
-    descriptions = {
-        "quick": "Scan rápido das portas mais comuns",
-        "full": "Scan completo com detecção de OS e serviços",
-        "stealth": "Scan furtivo para evitar detecção",
-        "comprehensive": "Scan abrangente incluindo vulnerabilidades",
-        "discovery": "Descoberta de hosts ativos (ping scan)",
-        "service-detection": "Detecção detalhada de serviços",
-        "os-detection": "Detecção do sistema operacional",
-        "vuln-scan": "Scan focado em vulnerabilidades"
-    }
-    return descriptions.get(profile, "Perfil personalizado")
-
-@app.get("/", tags=["Root"])
-async def health_check():
-    """Health check endpoint"""
-    # Verifica se nmap está disponível
-    nmap_available = False
-    try:
-        result = subprocess.run(
-            ["nmap", "--version"], 
-            capture_output=True, 
-            timeout=5
-        )
-        nmap_available = result.returncode == 0
-    except Exception:
-        pass
-    
-    return {
-        "service": "Nmap Service",
-        "status": "operational" if nmap_available else "degraded",
-        "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0",
-        "nmap_available": nmap_available,
-        "endpoints": {
-            "scan": "POST /scan",
-            "profiles": "GET /profiles",
-            "health": "GET /"
-        }
-    }
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8034)

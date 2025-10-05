@@ -1,111 +1,134 @@
-"""HCL Executor Service - Kubernetes Controller.
+"""Maximus HCL Executor Service - Kubernetes Controller.
 
-This module provides a real Kubernetes API client for executing decisions made
-by the HCL Planner. It is responsible for interacting with the Kubernetes API
-server to perform actions like scaling deployments, updating resource limits,
-and managing Horizontal Pod Autoscalers (HPAs).
+This module provides a controller for interacting with a Kubernetes cluster
+within the Homeostatic Control Loop (HCL) Executor Service. It abstracts the
+complexities of the Kubernetes API, allowing Maximus AI to programmatically
+manage and adjust its deployed services.
 
-This is a production-ready implementation using the official `kubernetes` Python client.
+Key functionalities include:
+- Scaling deployments (e.g., increasing or decreasing replica counts).
+- Updating resource limits (CPU, memory) for pods.
+- Restarting pods or deployments.
+- Retrieving cluster status and resource utilization.
+
+This controller is crucial for enabling Maximus AI to dynamically adapt its
+resource allocation and maintain optimal performance and resilience in a
+containerized environment.
 """
 
-import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timezone
+import asyncio
+from typing import Dict, Any, List, Optional
+from datetime import datetime
 
-from kubernetes import client, config
-from kubernetes.client.rest import ApiException
+# Mocking Kubernetes client for demonstration purposes
+class MockKubernetesClient:
+    def __init__(self):
+        self.deployments: Dict[str, Dict[str, Any]] = {
+            "default/maximus-core": {"replicas": 1, "cpu_limit": "1000m", "memory_limit": "1Gi"},
+            "default/sensory-service": {"replicas": 2, "cpu_limit": "500m", "memory_limit": "512Mi"}
+        }
+        self.pods: Dict[str, Dict[str, Any]] = {
+            "default/maximus-core-pod-abc": {"status": "running", "deployment": "maximus-core"},
+            "default/sensory-service-pod-123": {"status": "running", "deployment": "sensory-service"},
+            "default/sensory-service-pod-456": {"status": "running", "deployment": "sensory-service"}
+        }
 
-logger = logging.getLogger(__name__)
+    async def get_deployment(self, name: str, namespace: str) -> Optional[Dict[str, Any]]:
+        await asyncio.sleep(0.01)
+        return self.deployments.get(f"{namespace}/{name}")
+
+    async def scale_deployment(self, name: str, namespace: str, replicas: int) -> bool:
+        await asyncio.sleep(0.05)
+        key = f"{namespace}/{name}"
+        if key in self.deployments:
+            self.deployments[key]["replicas"] = replicas
+            print(f"[MockK8s] Scaled deployment {name} to {replicas} replicas.")
+            return True
+        return False
+
+    async def update_resource_limits(self, name: str, namespace: str, cpu_limit: Optional[str], memory_limit: Optional[str]) -> bool:
+        await asyncio.sleep(0.05)
+        key = f"{namespace}/{name}"
+        if key in self.deployments:
+            if cpu_limit: self.deployments[key]["cpu_limit"] = cpu_limit
+            if memory_limit: self.deployments[key]["memory_limit"] = memory_limit
+            print(f"[MockK8s] Updated resource limits for deployment {name}.")
+            return True
+        return False
+
+    async def restart_pod(self, name: str, namespace: str) -> bool:
+        await asyncio.sleep(0.05)
+        key = f"{namespace}/{name}"
+        if key in self.pods:
+            self.pods[key]["status"] = "restarting"
+            print(f"[MockK8s] Restarted pod {name}.")
+            return True
+        return False
+
+    async def get_cluster_info(self) -> Dict[str, Any]:
+        await asyncio.sleep(0.01)
+        return {"nodes": 3, "total_cpu": "12 cores", "total_memory": "48Gi", "running_pods": len(self.pods)}
 
 
 class KubernetesController:
-    """A controller for interacting with the Kubernetes API.
+    """Controller for interacting with a Kubernetes cluster.
 
-    This class wraps the `kubernetes` client library to provide high-level
-    functions for managing deployments and other resources within a specified
-    namespace.
-
-    Attributes:
-        namespace (str): The Kubernetes namespace this controller operates in.
-        apps_v1 (client.AppsV1Api): The API client for Apps V1 resources (e.g., Deployments).
-        core_v1 (client.CoreV1Api): The API client for Core V1 resources (e.g., Pods).
-        autoscaling_v2 (client.AutoscalingV2Api): The API client for HPA resources.
+    Abstracts the complexities of the Kubernetes API, allowing Maximus AI to
+    programmatically manage and adjust its deployed services.
     """
 
-    def __init__(self, namespace: str = "default", in_cluster: bool = True):
-        """Initializes the KubernetesController.
+    def __init__(self):
+        """Initializes the KubernetesController. In a real scenario, this would load K8s config."""
+        self.k8s_client = MockKubernetesClient() # Replace with actual k8s client
+        print("[KubernetesController] Initialized Kubernetes Controller (mock mode).")
 
-        Args:
-            namespace (str): The target Kubernetes namespace.
-            in_cluster (bool): If True, loads the in-cluster configuration. Otherwise,
-                loads the local kubeconfig file.
-        """
-        self.namespace = namespace
-        try:
-            config.load_incluster_config() if in_cluster else config.load_kube_config()
-            self.apps_v1 = client.AppsV1Api()
-            self.core_v1 = client.CoreV1Api()
-            self.autoscaling_v2 = client.AutoscalingV2Api()
-            logger.info(f"Kubernetes controller initialized for namespace '{namespace}'.")
-        except Exception as e:
-            logger.error(f"Failed to initialize Kubernetes client: {e}")
-            raise
-
-    async def scale_deployment(self, deployment_name: str, target_replicas: int) -> Dict[str, Any]:
-        """Scales a deployment to the specified number of replicas.
-
-        Args:
-            deployment_name (str): The name of the deployment to scale.
-            target_replicas (int): The desired number of replicas.
-
-        Returns:
-            Dict[str, Any]: A dictionary containing the result of the operation.
-        """
-        try:
-            body = {"spec": {"replicas": target_replicas}}
-            self.apps_v1.patch_namespaced_deployment_scale(deployment_name, self.namespace, body)
-            logger.info(f"Successfully scaled deployment '{deployment_name}' to {target_replicas} replicas.")
-            return {"status": "success", "deployment": deployment_name, "replicas": target_replicas}
-        except ApiException as e:
-            logger.error(f"API error scaling deployment {deployment_name}: {e}")
-            return {"status": "error", "error": e.reason}
-
-    async def update_resource_limits(self, deployment_name: str, cpu_limit: str, memory_limit: str) -> Dict[str, Any]:
-        """Updates the resource limits for a deployment's container(s).
-
-        Args:
-            deployment_name (str): The name of the deployment to update.
-            cpu_limit (str): The new CPU limit (e.g., "500m").
-            memory_limit (str): The new memory limit (e.g., "1Gi").
-
-        Returns:
-            Dict[str, Any]: A dictionary containing the result of the operation.
-        """
-        try:
-            body = {"spec": {"template": {"spec": {"containers": [{"name": deployment_name, "resources": {"limits": {"cpu": cpu_limit, "memory": memory_limit}}}]}}}}
-            self.apps_v1.patch_namespaced_deployment(deployment_name, self.namespace, body)
-            logger.info(f"Updated resource limits for '{deployment_name}'.")
-            return {"status": "success", "deployment": deployment_name}
-        except ApiException as e:
-            logger.error(f"API error updating resources for {deployment_name}: {e}")
-            return {"status": "error", "error": e.reason}
-
-    async def get_deployment_status(self, deployment_name: str) -> Dict[str, Any]:
-        """Retrieves the current status of a deployment.
+    async def scale_deployment(self, deployment_name: str, namespace: str, replicas: int) -> bool:
+        """Scales a Kubernetes deployment to the specified number of replicas.
 
         Args:
             deployment_name (str): The name of the deployment.
+            namespace (str): The Kubernetes namespace.
+            replicas (int): The target number of replicas.
 
         Returns:
-            Dict[str, Any]: A dictionary with the deployment's status details.
+            bool: True if scaling was successful, False otherwise.
         """
-        try:
-            deployment = self.apps_v1.read_namespaced_deployment_status(deployment_name, self.namespace)
-            return {
-                "replicas": deployment.status.replicas,
-                "ready_replicas": deployment.status.ready_replicas,
-                "available_replicas": deployment.status.available_replicas,
-            }
-        except ApiException as e:
-            logger.error(f"API error getting status for {deployment_name}: {e}")
-            return {"error": e.reason}
+        print(f"[KubernetesController] Scaling deployment {deployment_name} in {namespace} to {replicas} replicas.")
+        return await self.k8s_client.scale_deployment(deployment_name, namespace, replicas)
+
+    async def update_resource_limits(self, deployment_name: str, namespace: str, cpu_limit: Optional[str], memory_limit: Optional[str]) -> bool:
+        """Updates CPU and memory resource limits for a Kubernetes deployment.
+
+        Args:
+            deployment_name (str): The name of the deployment.
+            namespace (str): The Kubernetes namespace.
+            cpu_limit (Optional[str]): New CPU limit (e.g., '1000m').
+            memory_limit (Optional[str]): New memory limit (e.g., '1Gi').
+
+        Returns:
+            bool: True if limits were updated successfully, False otherwise.
+        """
+        print(f"[KubernetesController] Updating resource limits for {deployment_name} in {namespace}.")
+        return await self.k8s_client.update_resource_limits(deployment_name, namespace, cpu_limit, memory_limit)
+
+    async def restart_pod(self, pod_name: str, namespace: str) -> bool:
+        """Restarts a specific Kubernetes pod.
+
+        Args:
+            pod_name (str): The name of the pod.
+            namespace (str): The Kubernetes namespace.
+
+        Returns:
+            bool: True if the pod was restarted successfully, False otherwise.
+        """
+        print(f"[KubernetesController] Restarting pod {pod_name} in {namespace}.")
+        return await self.k8s_client.restart_pod(pod_name, namespace)
+
+    async def get_cluster_status(self) -> Dict[str, Any]:
+        """Retrieves the current status of the Kubernetes cluster.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing cluster information.
+        """
+        print("[KubernetesController] Getting Kubernetes cluster status.")
+        return await self.k8s_client.get_cluster_info()

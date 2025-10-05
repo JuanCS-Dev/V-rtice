@@ -1,122 +1,79 @@
-"""Metrics collection and aggregation for the ADR Core Service.
+"""Maximus ADR Core Service - Metrics Utilities.
 
-This module provides a `MetricsCollector` class to handle the tracking of
-various service metrics like counters, timers, and gauges. It is used to
-monitor the performance and behavior of the application in a centralized way.
+This module provides utilities for collecting, tracking, and reporting
+operational metrics within the Automated Detection and Response (ADR) service.
+It enables Maximus AI to monitor its own performance, efficiency, and effectiveness
+in detecting and responding to security incidents.
 
-Typical usage example:
+Metrics collected can include:
+- Number of detections, incidents, and response actions.
+- Latency of detection and response processes.
+- Accuracy of ML models.
 
-  metrics = MetricsCollector()
-  metrics.increment("requests.total")
-  
-  start_time = time.time()
-  # ... some operation ...
-  duration = (time.time() - start_time) * 1000
-  metrics.record_time("operation.duration_ms", duration)
-  
-  summary = metrics.get_summary()
+This module is crucial for performance monitoring, capacity planning, and
+continuous improvement of the ADR system.
 """
 
-import time
-from typing import Dict, Any
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
+from typing import Dict, Any
 
 
 class MetricsCollector:
-    """Collects and aggregates service metrics in memory.
+    """Collects, tracks, and reports operational metrics for the ADR service.
 
-    This class provides a simple, in-memory solution for tracking application
-    metrics. It is not thread-safe by default and is intended for use in a
-    single-threaded or async context where access is controlled.
-
-    Attributes:
-        start_time (float): The timestamp when the collector was instantiated.
-        counters (defaultdict): A dictionary to store counter metrics.
-        timers (defaultdict): A dictionary to store lists of timing metrics.
-        gauges (dict): A dictionary to store gauge metrics.
+    Enables Maximus AI to monitor its own performance, efficiency, and effectiveness
+    in detecting and responding to security incidents.
     """
 
     def __init__(self):
-        """Initializes the MetricsCollector and sets the start time."""
-        self.start_time = time.time()
-        self.counters = defaultdict(int)
-        self.timers = defaultdict(list)
-        self.gauges = {}
+        """Initializes the MetricsCollector."""
+        self.metrics: Dict[str, Any] = defaultdict(lambda: {"count": 0, "total_time": 0.0, "last_update": None})
+        self.start_time = datetime.now()
 
-    def increment(self, metric: str, value: int = 1):
-        """Increments a counter metric by a given value.
-
-        If the metric does not exist, it is created with the given value.
+    def record_metric(self, metric_name: str, value: Optional[float] = None):
+        """Records a single metric event.
 
         Args:
-            metric (str): The name of the counter metric.
-            value (int, optional): The value to increment by. Defaults to 1.
+            metric_name (str): The name of the metric.
+            value (Optional[float]): An optional numerical value associated with the metric (e.g., latency).
         """
-        self.counters[metric] += value
+        self.metrics[metric_name]["count"] += 1
+        if value is not None:
+            self.metrics[metric_name]["total_time"] += value
+        self.metrics[metric_name]["last_update"] = datetime.now().isoformat()
 
-    def record_time(self, metric: str, duration_ms: float):
-        """Records a timing measurement for a metric.
-
-        Appends the duration to a list of measurements for the specified metric.
+    def get_metric(self, metric_name: str) -> Dict[str, Any]:
+        """Retrieves the current data for a specific metric.
 
         Args:
-            metric (str): The name of the timer metric.
-            duration_ms (float): The duration in milliseconds to record.
-        """
-        self.timers[metric].append(duration_ms)
-
-    def set_gauge(self, metric: str, value: Any):
-        """Sets the value of a gauge metric.
-
-        Gauges represent a value that can go up or down, like the number of
-        active connections.
-
-        Args:
-            metric (str): The name of the gauge metric.
-            value (Any): The value to set.
-        """
-        self.gauges[metric] = value
-
-    def get_uptime(self) -> int:
-        """Calculates the service uptime in seconds.
+            metric_name (str): The name of the metric to retrieve.
 
         Returns:
-            int: The number of seconds since the collector was initialized.
+            Dict[str, Any]: A dictionary containing the metric's count, total time, and last update.
         """
-        return int(time.time() - self.start_time)
+        metric_data = self.metrics[metric_name]
+        if metric_data["count"] > 0 and metric_data["total_time"] > 0:
+            metric_data["average_time"] = metric_data["total_time"] / metric_data["count"]
+        else:
+            metric_data["average_time"] = 0.0
+        return dict(metric_data)
 
-    def get_summary(self) -> Dict[str, Any]:
-        """Generates a summary of all collected metrics.
-
-        This method compiles all counters, gauges, and timer statistics (count,
-        average, min, max) into a single dictionary.
+    def get_all_metrics(self) -> Dict[str, Any]:
+        """Retrieves all recorded metrics.
 
         Returns:
-            Dict[str, Any]: A dictionary containing the metrics summary.
+            Dict[str, Any]: A dictionary containing all metrics and their data.
         """
-        summary = {
-            'timestamp': datetime.utcnow().isoformat(),
-            'uptime_seconds': self.get_uptime(),
-            'counters': dict(self.counters),
-            'gauges': dict(self.gauges),
-            'timers': {}
-        }
+        all_metrics = {}
+        for name in self.metrics:
+            all_metrics[name] = self.get_metric(name)
+        return all_metrics
 
-        # Calculate timer statistics
-        for metric, times in self.timers.items():
-            if times:
-                summary['timers'][metric] = {
-                    'count': len(times),
-                    'avg_ms': sum(times) / len(times),
-                    'min_ms': min(times),
-                    'max_ms': max(times)
-                }
+    def get_uptime(self) -> float:
+        """Returns the uptime of the metrics collector in seconds.
 
-        return summary
-
-    def reset(self):
-        """Resets all collected metrics to their initial state."""
-        self.counters.clear()
-        self.timers.clear()
-        self.gauges.clear()
+        Returns:
+            float: The uptime in seconds.
+        """
+        return (datetime.now() - self.start_time).total_seconds()

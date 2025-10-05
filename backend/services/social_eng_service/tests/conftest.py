@@ -1,76 +1,62 @@
+"""Maximus Social Engineering Service - Test Configuration.
+
+This module provides pytest fixtures and configurations for testing the Maximus
+AI's Social Engineering Service. It sets up a clean testing environment, including
+an in-memory SQLite database, to ensure that tests are isolated and repeatable.
+
+Key functionalities include:
+- Creating a test database engine and session.
+- Overriding FastAPI's dependency injection for database access.
+- Providing a test client for making API requests.
+- Ensuring that database tables are created and dropped for each test run.
+
+This configuration is crucial for enabling robust and reliable testing of the
+Social Engineering Service's API endpoints and business logic.
+"""
+
 import pytest
-import asyncio
-from typing import Generator, AsyncGenerator
-from unittest.mock import patch
-
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from fastapi.testclient import TestClient
 
-from social_eng_service.main import app
-from social_eng_service.database import Base, get_db
-from social_eng_service.config import settings
+from main import app
+from database import Base, get_db
 
-# Use an in-memory SQLite database for tests
-TEST_DATABASE_URL = "sqlite+aiosqlite:///file::memory:?cache=shared"
+# Use an in-memory SQLite database for testing
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
-@pytest.fixture(scope="session")
-def event_loop(request) -> Generator:
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-@pytest.fixture(scope="function")
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Fixture for a test database session."""
-    # Create a test engine
-    engine = create_async_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-    
-    # Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
-    # Create a sessionmaker for the test database
-    TestAsyncSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=engine, class_=AsyncSession
-    )
+@pytest.fixture(name="db_session")
+def db_session_fixture():
+    """Provides a test database session for each test.
 
-    async with TestAsyncSessionLocal() as session:
-        yield session
+    Ensures that tables are created before each test and dropped after.
+    """
+    Base.metadata.create_all(bind=engine) # Create tables
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+        Base.metadata.drop_all(bind=engine) # Drop tables after test
 
-    # Drop tables after test
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
 
-@pytest.fixture(scope="function")
-async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
-    """Fixture for an asynchronous test client."""
+@pytest.fixture(name="client")
+def client_fixture(db_session: Session): # Use the db_session fixture
+    """Provides a TestClient for making API requests.
+
+    Overrides the get_db dependency to use the test database session.
+    """
     def override_get_db():
+        """Substitui a dependência get_db para usar a sessão de banco de dados de teste."""
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
-
-    # Mock SMTP sending
-    with patch('social_eng_service.main.smtplib.SMTP') as mock_smtp:
-        mock_smtp_instance = mock_smtp.return_value
-        mock_smtp_instance.sendmail.return_value = {}
-        mock_smtp_instance.starttls.return_value = None
-        mock_smtp_instance.login.return_value = None
-
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            yield ac
-
-    app.dependency_overrides.clear()
-
-@pytest.fixture(autouse=True)
-def mock_settings():
-    """Fixture to mock settings for tests."""
-    with patch('social_eng_service.config.settings') as mock_settings_obj:
-        mock_settings_obj.APP_BASE_URL = "http://test-app"
-        mock_settings_obj.DATABASE_URL = TEST_DATABASE_URL
-        mock_settings_obj.SMTP_HOST = "smtp.test.com"
-        mock_settings_obj.SMTP_PORT = 587
-        mock_settings_obj.SMTP_USERNAME = "testuser"
-        mock_settings_obj.SMTP_PASSWORD = "testpass"
-        mock_settings_obj.SMTP_SENDER_EMAIL = "test@test.com"
-        yield mock_settings_obj
+    with TestClient(app) as client:
+        yield client
+    app.dependency_overrides.clear() # Clean up overrides

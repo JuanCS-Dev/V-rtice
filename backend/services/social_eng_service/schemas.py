@@ -1,93 +1,112 @@
-from pydantic import BaseModel, EmailStr
+"""Maximus Social Engineering Service - Pydantic Schemas.
+
+This module defines the Pydantic schemas for data validation and serialization
+within the Social Engineering Service. These schemas are used for API request
+and response models, ensuring data consistency and clear documentation of
+data structures.
+
+It mirrors the SQLAlchemy models defined in `database.py` but is specifically
+designed for data validation and serialization, providing a clean separation
+between database models and API models.
+"""
+
+from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
-# --- Base Schemas ---
-
-class TargetBase(BaseModel):
-    email: EmailStr
-    name: str = "User"
-
-class InteractionCreate(BaseModel):
-    campaign_id: str
-    action: str
-    tracking_id: Optional[str] = None
-    details: Optional[dict] = None
-
-class EmailTemplateBase(BaseModel):
-    name: str
-    subject: str
-    body: str
-    template_type: str
-
-class EmailTemplateCreate(EmailTemplateBase):
-    pass
 
 class CampaignBase(BaseModel):
+    """Base Pydantic model for a social engineering campaign."""
     name: str
-    target_domain: str
-    email_template_name: str
-    landing_page_template: str
-    sender_name: str = "IT Support"
-    sender_email: EmailStr = "noreply@company.com"
-    tracking_enabled: bool = True
+    description: str
+    scenario: str
+    target_group: str
+
 
 class CampaignCreate(CampaignBase):
+    """Pydantic model for creating a new social engineering campaign."""
     pass
 
-# --- ORM Mode Schemas (for responses) ---
-
-class Interaction(InteractionCreate):
-    id: int
-    timestamp: datetime
-    ip_address: Optional[str] = None
-
-    class Config:
-        orm_mode = True
-
-class Target(TargetBase):
-    id: int
-    campaign_id: str
-    tracking_id: str
-    sent_at: datetime
-
-    class Config:
-        orm_mode = True
-
-class EmailTemplate(EmailTemplateBase):
-    id: int
-
-    class Config:
-        orm_mode = True
 
 class Campaign(CampaignBase):
-    id: str
+    """Pydantic model for a social engineering campaign, including database-generated fields.
+
+    Attributes:
+        id (int): Unique identifier for the campaign.
+        start_time (datetime): Timestamp of when the campaign started.
+        end_time (Optional[datetime]): Timestamp of when the campaign ended.
+        status (str): Current status of the campaign (e.g., 'created', 'running').
+
+    Config:
+        orm_mode = True
+    """
+    id: int
+    start_time: datetime
+    end_time: Optional[datetime]
     status: str
-    created_at: datetime
-    targets: List[Target] = []
-    interactions: List[Interaction] = []
 
     class Config:
+        """Configuração para habilitar o modo ORM."""
         orm_mode = True
 
-# --- Complex Response Schemas ---
 
-class CampaignResponse(BaseModel):
-    message: str
-    campaign: Campaign
-    landing_page_url: str
-    awareness_url: str
+class TargetBase(BaseModel):
+    """Base Pydantic model for a simulated human target."""
+    name: str
+    email: str
+    vulnerabilities: str # JSON string of vulnerabilities
+    phishing_susceptibility: int
 
-class CampaignStatsDetail(BaseModel):
-    emails_sent: int
-    links_clicked: int
-    credentials_submitted: int
-    awareness_completed: int
-    click_rate_percent: float
-    submission_rate_percent: float
 
-class CampaignStats(BaseModel):
-    campaign_id: str
-    campaign_name: str
-    stats: CampaignStatsDetail
-    recent_interactions: List[Interaction]
+class TargetCreate(TargetBase):
+    """Pydantic model for creating a new simulated human target."""
+    pass
+
+
+class Target(TargetBase):
+    """Pydantic model for a simulated human target, including database-generated fields.
+
+    Attributes:
+        id (int): Unique identifier for the target.
+
+    Config:
+        orm_mode = True
+    """
+    id: int
+
+    class Config:
+        """Configuração para habilitar o modo ORM."""
+        orm_mode = True
+
+
+class InteractionBase(BaseModel):
+    """Base Pydantic model for a simulated interaction with a target."""
+    target_id: int
+    action: str
+    details: str # JSON string of interaction details
+    successful: bool
+
+
+class InteractionCreate(InteractionBase):
+    """Pydantic model for creating a new interaction record."""
+    pass
+
+
+class Interaction(InteractionBase):
+    """Pydantic model for a simulated interaction, including database-generated fields.
+
+    Attributes:
+        id (int): Unique identifier for the interaction.
+        campaign_id (int): The ID of the campaign this interaction belongs to.
+        timestamp (datetime): Timestamp of the interaction.
+
+    Config:
+        orm_mode = True
+    """
+    id: int
+    campaign_id: int
+    timestamp: datetime
+
+    class Config:
+        """Configuração para habilitar o modo ORM."""
+        orm_mode = True

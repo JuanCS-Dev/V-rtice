@@ -1,85 +1,43 @@
-"""Logging utilities for the ADR Core Service.
+"""Maximus ADR Core Service - Logging Utilities.
 
-This module provides standardized logger configuration for other parts of
-the service, ensuring consistent log formatting and output.
+This module provides a standardized logging configuration for the Automated
+Detection and Response (ADR) service. It ensures consistent log formatting,
+output destinations, and log levels across all components of the ADR system.
 
-Typical usage example:
-
-  from .logger import setup_logger
-  logger = setup_logger("my_module")
-  logger.info("This is an informational message.")
+By centralizing logging configuration, Maximus AI can effectively capture
+operational events, debug information, warnings, and errors, which is crucial
+for monitoring the system's health, troubleshooting issues, and auditing
+security-related activities.
 """
 
 import logging
 import sys
-from typing import Optional
-from pathlib import Path
 
-
-def setup_logger(
-    name: str = "adr_core",
-    level: str = "INFO",
-    log_file: Optional[str] = None
-) -> logging.Logger:
-    """Configures and retrieves a logger instance.
-
-    Sets up a logger with a specified name and level, adding handlers for
-    console output and optionally for a log file. It ensures a consistent
-    format for all log messages. If the logger already has handlers, they
-    are cleared to avoid duplication.
+def setup_logger(name: str) -> logging.Logger:
+    """Sets up a standardized logger for ADR Core Service modules.
 
     Args:
-        name (str, optional): The name of the logger. Defaults to "adr_core".
-        level (str, optional): The minimum log level to capture (e.g., "INFO",
-            "DEBUG"). Defaults to "INFO".
-        log_file (Optional[str], optional): If provided, logs will also be
-            written to this file path. Defaults to None.
+        name (str): The name of the logger, typically __name__ of the module.
 
     Returns:
-        logging.Logger: The configured logger instance.
+        logging.Logger: A configured logger instance.
     """
     logger = logging.getLogger(name)
-    logger.setLevel(getattr(logging, level.upper()))
+    logger.setLevel(logging.INFO) # Default logging level
 
-    # Clear existing handlers
-    logger.handlers.clear()
+    # Prevent adding multiple handlers if the logger is already configured
+    if not logger.handlers:
+        # Console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
 
-    # Console handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.DEBUG)
-
-    # Format
-    formatter = logging.Formatter(
-        '%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-    # File handler (optional)
-    if log_file:
-        log_path = Path(log_file)
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        # Optional: File handler for persistent logs
+        # file_handler = logging.FileHandler('adr_service.log')
+        # file_handler.setLevel(logging.DEBUG)
+        # file_handler.setFormatter(formatter)
+        # logger.addHandler(file_handler)
 
     return logger
-
-
-def get_logger(name: str) -> logging.Logger:
-    """Retrieves a logger by name.
-
-    This is a convenience function to get a logger instance that is expected
-    to have been previously configured by `setup_logger`. It simply wraps
-    `logging.getLogger`.
-
-    Args:
-        name (str): The name of the logger to retrieve.
-
-    Returns:
-        logging.Logger: The logger instance.
-    """
-    return logging.getLogger(name)

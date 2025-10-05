@@ -1,140 +1,80 @@
-"""HCL Monitor Service - Main FastAPI Application.
+"""Maximus HCL Monitor Service - Main Application Entry Point.
 
-This service is the "Interoception" of the Maximus AI's Unconscious Layer. It is
-responsible for continuously collecting system and service metrics in real-time
-and publishing them to the HCL Knowledge Base (via REST) and a Kafka topic for
-consumption by other services like the HCL Analyzer.
+This module serves as the main entry point for the Maximus Homeostatic Control
+Loop (HCL) Monitor Service. It initializes and configures the FastAPI
+application, sets up event handlers for startup and shutdown, and defines the
+API endpoints for collecting and exposing system metrics.
+
+It orchestrates the continuous collection of real-time operational data from
+various Maximus AI services and the underlying infrastructure. This service is
+crucial for providing accurate and up-to-date monitoring information to the
+HCL Analyzer Service, enabling effective self-management and adaptive behavior.
 """
 
-from fastapi import FastAPI, BackgroundTasks
-from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Dict, Any, List, Optional
+import uvicorn
 import asyncio
-import aiohttp
-import logging
-import os
-import json
-from typing import List
+from datetime import datetime
 
-from .collectors import CollectorManager, Metric
+from collectors import SystemMetricsCollector
 
-# ============================================================================
-# Configuration and Initialization
-# ============================================================================
+app = FastAPI(title="Maximus HCL Monitor Service", version="1.0.0")
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Initialize metrics collector
+system_metrics_collector = SystemMetricsCollector()
 
-COLLECTION_INTERVAL = int(os.getenv("COLLECTION_INTERVAL", "15"))
-KB_API_URL = os.getenv("KB_API_URL", "http://localhost:8000")
-KAFKA_BROKERS = os.getenv("KAFKA_BROKERS", "localhost:9092")
-ENABLE_KAFKA = os.getenv("ENABLE_KAFKA", "false").lower() == "true"
 
-# Global state dictionary
-state = {}
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the HCL Monitor Service."""
+    print("📈 Starting Maximus HCL Monitor Service...")
+    # Start background task for continuous metric collection
+    asyncio.create_task(system_metrics_collector.start_collection())
+    print("✅ Maximus HCL Monitor Service started successfully.")
 
-# Conditional Kafka import
-if ENABLE_KAFKA:
-    try:
-        from aiokafka import AIOKafkaProducer
-        state['kafka_available'] = True
-    except ImportError:
-        logger.warning("aiokafka not found, Kafka is disabled.")
-        state['kafka_available'] = False
-else:
-    state['kafka_available'] = False
 
-# ============================================================================
-# Kafka and KB Integration
-# ============================================================================
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the HCL Monitor Service."""
+    print("👋 Shutting down Maximus HCL Monitor Service...")
+    await system_metrics_collector.stop_collection()
+    print("🛑 Maximus HCL Monitor Service shut down.")
 
-async def send_to_kafka(metrics: List[Metric]):
-    """Sends a list of metrics to the configured Kafka topic."""
-    if not state.get('kafka_producer'): return
-    try:
-        for metric in metrics:
-            await state['kafka_producer'].send('system.telemetry.raw', value=metric.to_dict())
-        await state['kafka_producer'].flush()
-    except Exception as e:
-        logger.error(f"Failed to send metrics to Kafka: {e}")
-
-async def send_to_kb(metrics: List[Metric]):
-    """Sends a batch of metrics to the HCL Knowledge Base service."""
-    if not state.get('kb_session'): return
-    try:
-        payload = [m.to_dict() for m in metrics]
-        async with state['kb_session'].post('/metrics/batch', json=payload) as response:
-            if response.status != 201:
-                logger.error(f"KB service returned error {response.status}: {await response.text()}")
-    except Exception as e:
-        logger.error(f"Failed to send metrics to Knowledge Base: {e}")
-
-# ============================================================================
-# Main Collection Loop
-# ============================================================================
-
-async def collection_loop():
-    """The main background task that periodically collects and sends metrics."""
-    logger.info(f"Starting collection loop with {COLLECTION_INTERVAL}s interval.")
-    while True:
-        try:
-            metrics = await state['collector_manager'].collect_all()
-            if metrics:
-                await asyncio.gather(send_to_kb(metrics), send_to_kafka(metrics))
-        except Exception as e:
-            logger.error(f"Error in collection loop: {e}")
-        await asyncio.sleep(COLLECTION_INTERVAL)
-
-# ============================================================================
-# FastAPI Lifespan and Application Setup
-# ============================================================================
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Manages application startup and shutdown events."""
-    logger.info("Starting HCL Monitor Service...")
-    state['collector_manager'] = CollectorManager()
-    state['kb_session'] = aiohttp.ClientSession(base_url=KB_API_URL)
-    
-    if state.get('kafka_available'):
-        state['kafka_producer'] = AIOKafkaProducer(bootstrap_servers=KAFKA_BROKERS, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-        await state['kafka_producer'].start()
-    
-    state['collection_task'] = asyncio.create_task(collection_loop())
-    
-    yield
-    
-    logger.info("Shutting down HCL Monitor Service...")
-    state['collection_task'].cancel()
-    if state.get('kb_session'): await state['kb_session'].close()
-    if state.get('kafka_producer'): await state['kafka_producer'].stop()
-
-app = FastAPI(
-    title="HCL Monitor Service",
-    description="Collects and distributes system metrics for the HCL ecosystem.",
-    version="1.0.0",
-    lifespan=lifespan
-)
-
-# ============================================================================
-# API Endpoints
-# ============================================================================
 
 @app.get("/health")
-async def health_check():
-    """Provides a basic health check of the service."""
-    return {
-        "status": "healthy",
-        "service": "hcl_monitor",
-        "kafka_enabled": state.get('kafka_available', False),
-        "collection_interval_seconds": COLLECTION_INTERVAL
-    }
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the HCL Monitor Service.
 
-@app.get("/metrics/latest")
-async def get_latest_metrics():
-    """Returns the most recently collected batch of metrics for debugging."""
-    metrics = await state['collector_manager'].collect_all()
-    return {"count": len(metrics), "metrics": [m.to_dict() for m in metrics]}
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
+    """
+    return {"status": "healthy", "message": "HCL Monitor Service is operational."}
+
+
+@app.get("/metrics")
+async def get_current_metrics() -> Dict[str, Any]:
+    """Retrieves the latest collected system metrics.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the current system metrics.
+    """
+    return system_metrics_collector.get_latest_metrics()
+
+
+@app.get("/metrics/history", response_model=List[Dict[str, Any]])
+async def get_metrics_history(limit: int = 10) -> List[Dict[str, Any]]:
+    """Retrieves a history of collected system metrics.
+
+    Args:
+        limit (int): The maximum number of historical metrics to retrieve.
+
+    Returns:
+        List[Dict[str, Any]]: A list of historical system metrics.
+    """
+    return system_metrics_collector.get_metrics_history(limit)
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8018)

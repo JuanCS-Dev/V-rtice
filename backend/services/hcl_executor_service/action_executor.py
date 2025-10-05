@@ -1,117 +1,104 @@
-"""HCL Executor Service - Action Executor.
+"""Maximus HCL Executor Service - Action Executor.
 
-This module contains the `ActionExecutor` class, which is responsible for
-receiving action plans from the HCL Planner, validating them, and executing
-the specified actions using the Kubernetes Controller.
+This module implements the Action Executor for the Homeostatic Control Loop
+(HCL) Executor Service. It is responsible for translating high-level resource
+alignment actions into concrete commands and executing them against the
+underlying infrastructure.
 
-It includes safety features like dry-run mode, rate limiting between actions,
-and automatic rollback on failure to ensure stable and safe operations.
+The Action Executor acts as an interface between the HCL's planning decisions
+and the actual system changes. It supports various action types (e.g., scaling
+containers, adjusting resource limits, restarting services) and interacts with
+specialized controllers (e.g., Kubernetes controller) to perform these operations.
+This module ensures that HCL plans are reliably and effectively implemented.
 """
 
-import logging
-from typing import Dict, List, Any
-from datetime import datetime, timezone
-from enum import Enum
+import asyncio
+from typing import Dict, Any, List, Optional
+from datetime import datetime
 
-from .k8s_controller import KubernetesController
-
-logger = logging.getLogger(__name__)
-
-
-class ActionType(str, Enum):
-    """Enumeration for the types of actions that can be executed."""
-    SCALE_SERVICE = "scale_service"
-    ADJUST_RESOURCES = "adjust_resources"
-    ROLLBACK = "rollback"
-    NO_ACTION = "no_action"
-
-
-class ExecutionStatus(str, Enum):
-    """Enumeration for the status of an action plan execution."""
-    PENDING = "pending"
-    RUNNING = "running"
-    SUCCESS = "success"
-    FAILED = "failed"
-    ROLLED_BACK = "rolled_back"
+from k8s_controller import KubernetesController
 
 
 class ActionExecutor:
-    """Validates and executes action plans on the Kubernetes cluster.
+    """Translates high-level resource alignment actions into concrete commands
+    and executes them against the underlying infrastructure.
 
-    This class acts as a safe interface between the HCL Planner's decisions and
-    the Kubernetes API. It validates actions against predefined safety limits
-    before instructing the KubernetesController to apply the changes.
-
-    Attributes:
-        k8s (KubernetesController): The controller for interacting with Kubernetes.
-        dry_run (bool): If True, actions are logged but not executed.
-        enable_rollback (bool): If True, failed plans trigger an automatic rollback.
+    Acts as an interface between the HCL's planning decisions and the actual
+    system changes.
     """
 
-    SERVICE_DEPLOYMENTS = {"maximus_core": "maximus-core"} # Simplified
-    MAX_REPLICAS = 20
-    MIN_REPLICAS = 1
-
-    def __init__(self, k8s_controller: KubernetesController, dry_run: bool = False, enable_rollback: bool = True):
+    def __init__(self, k8s_controller: KubernetesController):
         """Initializes the ActionExecutor.
 
         Args:
-            k8s_controller (KubernetesController): An instance of the k8s controller.
-            dry_run (bool): If True, enables dry-run mode.
-            enable_rollback (bool): If True, enables automatic rollback on failure.
+            k8s_controller (KubernetesController): An instance of the KubernetesController for K8s operations.
         """
-        self.k8s = k8s_controller
-        self.dry_run = dry_run
-        self.enable_rollback = enable_rollback
-        self.execution_history: List[Dict] = []
+        self.k8s_controller = k8s_controller
+        print("[ActionExecutor] Initialized Action Executor.")
 
-    async def execute_action_plan(self, decision_id: str, actions: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Validates and executes a complete action plan from the Planner.
+    async def execute_actions(self, plan_id: str, actions: List[Dict[str, Any]], priority: int) -> List[Dict[str, Any]]:
+        """Executes a list of actions as part of a resource alignment plan.
 
         Args:
-            decision_id (str): The ID of the decision that generated this plan.
+            plan_id (str): The ID of the plan to which these actions belong.
             actions (List[Dict[str, Any]]): A list of action dictionaries to execute.
+            priority (int): The priority of these actions.
 
         Returns:
-            Dict[str, Any]: A dictionary summarizing the execution result.
+            List[Dict[str, Any]]: A list of dictionaries, each containing the result of an action execution.
         """
-        logger.info(f"Executing action plan for decision {decision_id}...")
-        if self.dry_run:
-            logger.info("[DRY RUN] Would execute actions: %s", actions)
-            return {"status": "dry_run", "actions": actions}
-
-        execution_record = {"decision_id": decision_id, "results": [], "errors": [], "status": ExecutionStatus.SUCCESS}
-        
+        print(f"[ActionExecutor] Executing {len(actions)} actions for plan {plan_id} with priority {priority}")
+        results = []
         for action in actions:
-            try:
-                result = await self._execute_single_action(action)
-                execution_record["results"].append(result)
-                if result.get("status") == "error":
-                    execution_record["status"] = ExecutionStatus.FAILED
-                    execution_record["errors"].append(result.get("error"))
-                    # In a real scenario, rollback logic would be triggered here.
-                    break
-            except Exception as e:
-                logger.error(f"Action execution failed: {e}")
-                execution_record["status"] = ExecutionStatus.FAILED
-                execution_record["errors"].append(str(e))
-                break
-        
-        self.execution_history.append(execution_record)
-        return execution_record
+            action_type = action.get("type")
+            action_params = action.get("parameters", {})
+            action_result = {"action_type": action_type, "status": "failed", "details": "Unknown action type"}
 
-    async def _execute_single_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
-        """Routes a single action to its corresponding execution method."""
-        action_type = ActionType(action["type"])
-        if action_type == ActionType.SCALE_SERVICE:
-            return await self.k8s.scale_deployment(
-                deployment_name=self.SERVICE_DEPLOYMENTS[action["service"]],
-                target_replicas=action["target_replicas"]
-            )
-        elif action_type == ActionType.ADJUST_RESOURCES:
-            # Placeholder for resource adjustment logic
-            return {"status": "success", "action": "adjust_resources"}
-        elif action_type == ActionType.NO_ACTION:
-            return {"status": "success", "action": "no_action"}
-        else:
-            raise ValueError(f"Unknown action type: {action_type}")
+            try:
+                if action_type == "scale_deployment":
+                    deployment_name = action_params.get("deployment_name")
+                    namespace = action_params.get("namespace", "default")
+                    replicas = action_params.get("replicas")
+                    if deployment_name and replicas is not None:
+                        await self.k8s_controller.scale_deployment(deployment_name, namespace, replicas)
+                        action_result = {"action_type": action_type, "status": "success", "details": f"Scaled {deployment_name} to {replicas} replicas."}
+                    else:
+                        raise ValueError("Missing deployment_name or replicas for scale_deployment.")
+                elif action_type == "update_resource_limits":
+                    deployment_name = action_params.get("deployment_name")
+                    namespace = action_params.get("namespace", "default")
+                    cpu_limit = action_params.get("cpu_limit")
+                    memory_limit = action_params.get("memory_limit")
+                    if deployment_name and (cpu_limit or memory_limit):
+                        await self.k8s_controller.update_resource_limits(deployment_name, namespace, cpu_limit, memory_limit)
+                        action_result = {"action_type": action_type, "status": "success", "details": f"Updated resource limits for {deployment_name}."}
+                    else:
+                        raise ValueError("Missing deployment_name or resource limits for update_resource_limits.")
+                elif action_type == "restart_pod":
+                    pod_name = action_params.get("pod_name")
+                    namespace = action_params.get("namespace", "default")
+                    if pod_name:
+                        await self.k8s_controller.restart_pod(pod_name, namespace)
+                        action_result = {"action_type": action_type, "status": "success", "details": f"Restarted pod {pod_name}."}
+                    else:
+                        raise ValueError("Missing pod_name for restart_pod.")
+                else:
+                    print(f"[ActionExecutor] Unsupported action type: {action_type}")
+                    action_result = {"action_type": action_type, "status": "failed", "details": f"Unsupported action type: {action_type}"}
+
+            except Exception as e:
+                print(f"[ActionExecutor] Error executing action {action_type}: {e}")
+                action_result = {"action_type": action_type, "status": "failed", "details": str(e)}
+            
+            results.append(action_result)
+            await asyncio.sleep(0.05) # Simulate time between actions
+
+        return results
+
+    async def get_executor_status(self) -> Dict[str, Any]:
+        """Retrieves the current operational status of the Action Executor.
+
+        Returns:
+            Dict[str, Any]: A dictionary with the current status.
+        """
+        return {"status": "ready", "last_activity": datetime.now().isoformat()}

@@ -1,112 +1,54 @@
-"""
-Base Scraper - Classe base para todos os scrapers
-Projeto Vértice - SSP-GO
+"""Maximus OSINT Service - Base Scraper Module.
+
+This module defines the abstract base class or interface for all scrapers
+within the Maximus AI's OSINT Service. It establishes a standard contract
+that all concrete scraper implementations must adhere to, ensuring consistency
+and interoperability.
+
+By providing a common interface, this module facilitates the integration of
+diverse data collection methods from various open-source platforms. It promotes
+modularity, making it easier to add new scrapers or swap existing ones without
+affecting the core OSINT orchestration logic.
 """
 
-import asyncio
-import aiohttp
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
-from fake_useragent import UserAgent
-import logging
+from typing import Dict, Any, List, Optional
 
-logger = logging.getLogger(__name__)
 
 class BaseScraper(ABC):
-    """Classe base abstrata para scrapers"""
-    
-    def __init__(self):
-        self.ua = UserAgent()
-        self.session: Optional[aiohttp.ClientSession] = None
-        self.timeout = aiohttp.ClientTimeout(total=30)
-        self.headers = self._get_default_headers()
-        
-    def _get_default_headers(self) -> dict:
-        """Headers padrão para requisições"""
-        return {
-            'User-Agent': self.ua.random,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1'
-        }
-        
-    async def __aenter__(self):
-        """Entrada do context manager"""
-        self.session = aiohttp.ClientSession(
-            timeout=self.timeout,
-            headers=self.headers
-        )
-        return self
-        
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Saída do context manager"""
-        if self.session:
-            await self.session.close()
-            
-    async def create_session(self):
-        """Cria sessão se não existir"""
-        if not self.session:
-            self.session = aiohttp.ClientSession(
-                timeout=self.timeout,
-                headers=self.headers
-            )
-            
-    async def close_session(self):
-        """Fecha sessão se existir"""
-        if self.session:
-            await self.session.close()
-            self.session = None
-            
+    """Abstract base class for all scrapers in the OSINT service.
+
+    Establishes a standard contract that all concrete scraper implementations
+    must adhere to, ensuring consistency and interoperability.
+    """
+
     @abstractmethod
-    async def scrape(self, *args, **kwargs) -> Dict[str, Any]:
-        """Método abstrato para scraping - deve ser implementado"""
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """Initializes the scraper with optional configuration.
+
+        Args:
+            config (Optional[Dict[str, Any]]): Configuration parameters for the scraper.
+        """
         pass
-        
-    async def fetch(self, url: str, method: str = "GET", **kwargs) -> Optional[str]:
-        """Método genérico para fazer requisições"""
-        try:
-            await self.create_session()
-            
-            async with self.session.request(method, url, **kwargs) as response:
-                if response.status == 200:
-                    return await response.text()
-                else:
-                    logger.warning(f"Status {response.status} para {url}")
-                    return None
-                    
-        except asyncio.TimeoutError:
-            logger.error(f"Timeout ao acessar {url}")
-            return None
-        except Exception as e:
-            logger.error(f"Erro ao acessar {url}: {e}")
-            return None
-            
-    def sanitize_input(self, text: str) -> str:
-        """Sanitiza entrada do usuário"""
-        if not text:
-            return ""
-        # Remove caracteres perigosos
-        dangerous_chars = ['<', '>', '"', "'", '&', '\x00']
-        for char in dangerous_chars:
-            text = text.replace(char, '')
-        return text.strip()
-        
-    def validate_url(self, url: str) -> bool:
-        """Valida se URL é válida e segura"""
-        if not url:
-            return False
-        
-        # Verificar protocolo
-        if not url.startswith(('http://', 'https://')):
-            return False
-            
-        # Verificar caracteres suspeitos
-        suspicious = ['javascript:', 'data:', 'vbscript:', 'file:']
-        for pattern in suspicious:
-            if pattern in url.lower():
-                return False
-                
-        return True
+
+    @abstractmethod
+    async def scrape(self, query: str, depth: int = 1) -> List[Dict[str, Any]]:
+        """Performs a scraping operation based on a query.
+
+        Args:
+            query (str): The query string for the scraping operation.
+            depth (int): The depth of the scraping (e.g., number of pages, levels of links).
+
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries, each representing a scraped data entry.
+        """
+        pass
+
+    @abstractmethod
+    async def get_status(self) -> Dict[str, Any]:
+        """Retrieves the current operational status of the scraper.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the status and relevant information.
+        """
+        pass

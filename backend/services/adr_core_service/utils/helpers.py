@@ -1,109 +1,84 @@
-"""General helper utilities for the ADR Core Service.
+"""Maximus ADR Core Service - Helper Utilities.
 
-This module contains miscellaneous helper functions that are used across
-different parts of the service. These include functions for ID generation,
-hashing, and data parsing.
+This module provides a collection of general-purpose helper functions and
+utilities used across the Automated Detection and Response (ADR) service.
+These functions encapsulate common logic, data transformations, or other
+reusable operations that do not fit into specific engine or connector modules.
+
+Examples include data validation, string manipulation, time conversions,
+or other small, stateless functions that support the overall ADR workflow.
 """
 
-import hashlib
-import uuid
-from datetime import datetime
-from typing import Any
+from typing import Any, Dict, List
+from datetime import datetime, timedelta
 
 
-def generate_id(prefix: str = "") -> str:
+def generate_unique_id(prefix: str = "id") -> str:
     """Generates a unique ID with an optional prefix.
 
-    Creates a short, unique identifier using a portion of a UUID4. This is
-    suitable for generating non-critical, human-readable identifiers.
-
     Args:
-        prefix (str, optional): A prefix to prepend to the generated ID.
-            Defaults to "".
+        prefix (str): A prefix for the generated ID.
 
     Returns:
-        str: The generated unique identifier string.
+        str: A unique identifier string.
     """
-    uid = str(uuid.uuid4())[:8]
-    return f"{prefix}{uid}" if prefix else uid
+    return f"{prefix}-{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
 
 
-def calculate_hash(data: str, algorithm: str = "sha256") -> str:
-    """Calculates the hash of a given string.
-
-    Supports MD5, SHA1, and SHA256 algorithms. The input data is encoded
-    as UTF-8 before hashing.
+def is_valid_ip(ip_address: str) -> bool:
+    """Checks if a given string is a valid IPv4 or IPv6 address.
 
     Args:
-        data (str): The input string to hash.
-        algorithm (str, optional): The hashing algorithm to use ('md5', 'sha1',
-            or 'sha256'). Defaults to "sha256".
+        ip_address (str): The string to validate as an IP address.
 
     Returns:
-        str: The hexadecimal digest of the hash.
+        bool: True if the string is a valid IP address, False otherwise.
     """
-    if algorithm == "md5":
-        h = hashlib.md5()
-    elif algorithm == "sha1":
-        h = hashlib.sha1()
-    else:
-        h = hashlib.sha256()
-
-    h.update(data.encode('utf-8'))
-    return h.hexdigest()
+    import ipaddress
+    try:
+        ipaddress.ip_address(ip_address)
+        return True
+    except ValueError:
+        return False
 
 
-def parse_severity(severity: Any) -> str:
-    """Parses a value into a standardized severity string.
-
-    Converts an integer score or a string into one of the standard severity
-    levels: "critical", "high", "medium", "low", or "info".
+def calculate_time_difference(start_time_iso: str, end_time_iso: str) -> float:
+    """Calculates the time difference in seconds between two ISO formatted time strings.
 
     Args:
-        severity (Any): The input severity, can be an integer score or a string.
+        start_time_iso (str): The start time in ISO format.
+        end_time_iso (str): The end time in ISO format.
 
     Returns:
-        str: The standardized severity string.
+        float: The time difference in seconds.
+    
+    Raises:
+        ValueError: If the time strings are not in valid ISO format.
+        """
+    try:
+        start = datetime.fromisoformat(start_time_iso)
+        end = datetime.fromisoformat(end_time_iso)
+        return (end - start).total_seconds()
+    except ValueError as e:
+        raise ValueError(f"Invalid ISO time format: {e}")
+
+
+def flatten_dict(d: Dict[str, Any], parent_key: str = '', sep: str = '_') -> Dict[str, Any]:
+    """Flattens a nested dictionary into a single-level dictionary.
+
+    Args:
+        d (Dict[str, Any]): The dictionary to flatten.
+        parent_key (str): The base key for the current level of recursion.
+        sep (str): The separator to use for concatenating keys.
+
+    Returns:
+        Dict[str, Any]: The flattened dictionary.
     """
-    if isinstance(severity, int):
-        if severity >= 80:
-            return "critical"
-        elif severity >= 60:
-            return "high"
-        elif severity >= 40:
-            return "medium"
-        elif severity >= 20:
-            return "low"
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
         else:
-            return "info"
-
-    severity_str = str(severity).lower()
-    valid = ["critical", "high", "medium", "low", "info"]
-
-    return severity_str if severity_str in valid else "medium"
-
-
-def format_timestamp(dt: datetime = None, fmt: str = "iso") -> str:
-    """Formats a datetime object into a string representation.
-
-    If no datetime object is provided, the current UTC time is used.
-
-    Args:
-        dt (datetime, optional): The datetime object to format. Defaults to None.
-        fmt (str, optional): The output format ('iso', 'unix', 'readable').
-            Defaults to "iso".
-
-    Returns:
-        str: The formatted timestamp string.
-    """
-    if dt is None:
-        dt = datetime.utcnow()
-
-    if fmt == "iso":
-        return dt.isoformat()
-    elif fmt == "unix":
-        return str(int(dt.timestamp()))
-    elif fmt == "readable":
-        return dt.strftime("%Y-%m-%d %H:%M:%S")
-    else:
-        return dt.isoformat()
+            items.append((new_key, v))
+    return dict(items)

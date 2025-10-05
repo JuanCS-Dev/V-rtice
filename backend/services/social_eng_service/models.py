@@ -1,59 +1,112 @@
-import datetime
-from sqlalchemy import (Column, String, Integer, DateTime, Boolean, 
-                        ForeignKey, Text, JSON)
-from sqlalchemy.orm import relationship
-from database import Base
+"""Maximus Social Engineering Service - Data Models.
 
-class Campaign(Base):
-    __tablename__ = "campaigns"
+This module defines the Pydantic data models (schemas) used for data validation
+and serialization within the Social Engineering Service. These schemas ensure
+data consistency and provide a clear structure for representing social engineering
+campaigns, simulated human targets, and interaction logs.
 
-    id = Column(String, primary_key=True, index=True)
-    name = Column(String, index=True)
-    target_domain = Column(String)
-    email_template_name = Column(String)
-    landing_page_template = Column(String)
-    sender_name = Column(String)
-    sender_email = Column(String)
-    tracking_enabled = Column(Boolean, default=True)
-    status = Column(String, default="active")
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+By using Pydantic, Maximus AI benefits from automatic data validation, clear
+documentation of data structures, and seamless integration with FastAPI for
+API request and response modeling. This is crucial for maintaining data integrity
+and enabling efficient data exchange within the social engineering simulation
+ecosystem.
+"""
 
-    # Relationships
-    targets = relationship("Target", back_populates="campaign", lazy="selectin")
-    interactions = relationship("Interaction", back_populates="campaign", lazy="selectin")
+from pydantic import BaseModel, Field
+from typing import Dict, Any, List, Optional
+from datetime import datetime
 
-class EmailTemplate(Base):
-    __tablename__ = "email_templates"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    subject = Column(String)
-    body = Column(Text)
-    template_type = Column(String, default="custom")
+class CampaignBase(BaseModel):
+    """Base model for a social engineering campaign."""
+    name: str
+    description: str
+    scenario: str
+    target_group: str
 
-class Target(Base):
-    __tablename__ = "targets"
 
-    id = Column(Integer, primary_key=True, index=True)
-    campaign_id = Column(String, ForeignKey("campaigns.id"))
-    email = Column(String, index=True)
-    name = Column(String)
-    tracking_id = Column(String, unique=True)
-    phishing_link = Column(String)
-    sent_at = Column(DateTime, default=datetime.datetime.utcnow)
-    status = Column(String, default="sent")
+class CampaignCreate(CampaignBase):
+    """Model for creating a new social engineering campaign."""
+    pass
 
-    campaign = relationship("Campaign", back_populates="targets")
 
-class Interaction(Base):
-    __tablename__ = "interactions"
+class Campaign(CampaignBase):
+    """Model for a social engineering campaign with ID and status.
 
-    id = Column(Integer, primary_key=True, index=True)
-    campaign_id = Column(String, ForeignKey("campaigns.id"))
-    tracking_id = Column(String, nullable=True)
-    action = Column(String) # e.g., page_visited, credentials_submitted
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
-    ip_address = Column(String, nullable=True)
-    details = Column(JSON, nullable=True) # For extra data
+    Attributes:
+        id (int): Unique identifier for the campaign.
+        start_time (str): ISO formatted timestamp of when the campaign started.
+        end_time (Optional[str]): ISO formatted timestamp of when the campaign ended.
+        status (str): Current status of the campaign (e.g., 'created', 'running').
 
-    campaign = relationship("Campaign", back_populates="interactions")
+    Config:
+        orm_mode = True
+    """
+    id: int
+    start_time: str
+    end_time: Optional[str]
+    status: str
+
+    class Config:
+        """Configuração para habilitar o modo ORM."""
+        orm_mode = True
+
+
+class TargetBase(BaseModel):
+    """Base model for a simulated human target."""
+    name: str
+    email: str
+    vulnerabilities: str # JSON string of vulnerabilities
+    phishing_susceptibility: int
+
+
+class TargetCreate(TargetBase):
+    """Model for creating a new simulated human target."""
+    pass
+
+
+class Target(TargetBase):
+    """Model for a simulated human target with ID.
+
+    Attributes:
+        id (int): Unique identifier for the target.
+
+    Config:
+        orm_mode = True
+    """
+    class Config:
+        """Configuração para habilitar o modo ORM."""
+        orm_mode = True
+
+
+class InteractionBase(BaseModel):
+    """Base model for a simulated interaction with a target."""
+    target_id: int
+    action: str
+    details: str # JSON string of interaction details
+    successful: bool
+
+
+class InteractionCreate(InteractionBase):
+    """Model for creating a new interaction record."""
+    pass
+
+
+class Interaction(InteractionBase):
+    """Model for a simulated interaction with ID and timestamp.
+
+    Attributes:
+        id (int): Unique identifier for the interaction.
+        campaign_id (int): The ID of the campaign this interaction belongs to.
+        timestamp (str): ISO formatted timestamp of the interaction.
+
+    Config:
+        orm_mode = True
+    """
+    id: int
+    campaign_id: int
+    timestamp: str
+
+    class Config:
+        """Configuração para habilitar o modo ORM."""
+        orm_mode = True

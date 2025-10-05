@@ -1,16 +1,15 @@
+"""Maximus OSINT Service - Utilities Package.
+
+This package contains utility modules that provide common functionalities
+and helper functions for the Maximus AI's OSINT Service. These utilities
+support various aspects of OSINT operations, including proxy management,
+rate limiting, and security-related helpers.
+
+Modules within this package include:
+- `proxy_manager`: Manages proxy rotations and configurations for scraping.
+- `rate_limiter`: Enforces rate limits for external API calls or website access.
+- `security`: Provides security-related helper functions (e.g., data sanitization).
+
+These utilities aim to promote code reusability, maintainability, and ensure
+responsible and ethical OSINT practices throughout the service.
 """
-Utils Module - OSINT Service
-Projeto Vértice - SSP-GO
-"""
-
-from .proxy_manager import ProxyManager
-from .rate_limiter import RateLimiter
-from .security import SecurityUtils
-
-__all__ = [
-    'ProxyManager',
-    'RateLimiter',
-    'SecurityUtils'
-]
-
-__version__ = '1.0.0'

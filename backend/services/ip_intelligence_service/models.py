@@ -1,25 +1,50 @@
-"""IP Intelligence Service - Database Models.
+"""Maximus IP Intelligence Service - Data Models.
 
-This module defines the SQLAlchemy ORM model for the IP analysis cache.
+This module defines the Pydantic data models (schemas) used for data validation
+and serialization within the IP Intelligence Service. These schemas ensure data
+consistency and provide a clear structure for representing IP addresses, their
+associated intelligence, and query requests.
+
+By using Pydantic, Maximus AI benefits from automatic data validation, clear
+documentation of data structures, and seamless integration with FastAPI for
+API request and response modeling. This is crucial for maintaining data integrity
+and enabling efficient data exchange within the IP intelligence ecosystem.
 """
 
-import datetime
-from sqlalchemy import (Column, String, DateTime, JSON)
-from .database import Base
+from pydantic import BaseModel, Field
+from typing import Dict, Any, List, Optional
+from datetime import datetime
 
-class IPAnalysisCache(Base):
-    """SQLAlchemy model for the IP analysis cache table.
 
-    This table stores the JSON results of IP intelligence analyses to reduce
-    redundant queries to external APIs.
+class IPInfo(BaseModel):
+    """Represents detailed intelligence information about an IP address.
 
     Attributes:
-        ip (str): The IP address, serving as the primary key.
-        analysis_data (JSON): The complete JSON data from the analysis.
-        timestamp (DateTime): The timestamp of the last update.
+        ip_address (str): The IP address.
+        country (str): Geographic country of the IP address.
+        city (str): Geographic city of the IP address.
+        isp (str): Internet Service Provider associated with the IP address.
+        reputation (str): Reputation of the IP (e.g., 'Clean', 'Malicious', 'Suspicious').
+        threat_score (float): A numerical threat score for the IP (0.0 to 1.0).
+        last_checked (str): ISO formatted timestamp of when the IP was last checked.
+        tags (List[str]): Optional tags associated with the IP (e.g., 'VPN', 'TOR', 'Botnet').
+        asn (Optional[str]): Autonomous System Number.
     """
-    __tablename__ = "ip_analysis_cache"
+    ip_address: str
+    country: str
+    city: str
+    isp: str
+    reputation: str
+    threat_score: float
+    last_checked: str
+    tags: List[str] = []
+    asn: Optional[str] = None
 
-    ip = Column(String, primary_key=True, index=True)
-    analysis_data = Column(JSON)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+class IPQuery(BaseModel):
+    """Request model for querying IP intelligence.
+
+    Attributes:
+        ip_address (str): The IP address to query.
+    """
+    ip_address: str

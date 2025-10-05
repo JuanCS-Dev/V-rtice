@@ -12,14 +12,14 @@ endpoints for the core functionalities of the Bayesian network:
 
 import logging
 from contextlib import asynccontextmanager
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import numpy as np
 
-from .bayesian_core import BayesianCore, Observation
-from .active_inference import ActiveInferenceEngine
+from bayesian_core import BayesianCore, Observation
+from active_inference import ActiveInferenceEngine
 
 # ============================================================================
 # Configuration and Initialization

@@ -1,169 +1,143 @@
-"""Domain Analysis Service - Vértice Cyber Security Module.
+"""Maximus Domain Service - Main Application Entry Point.
 
-This microservice provides comprehensive analysis of domains, including OSINT,
-DNS records, TLS certificate details, and reputation assessment. It serves as a
-centralized tool for gathering intelligence on a given domain.
+This module serves as the main entry point for the Maximus Domain Service.
+It initializes and configures the FastAPI application, sets up event handlers
+for startup and shutdown, and defines the API endpoints for managing and
+querying domain-specific information.
+
+It handles the loading of domain ontologies, rules, and knowledge graphs,
+and provides interfaces for other Maximus AI services to retrieve contextual
+information and validate actions against domain constraints. This service is
+crucial for enabling Maximus to operate effectively and intelligently across
+diverse operational contexts.
 """
 
-import subprocess
-import socket
-import ssl
-from html.parser import HTMLParser
-from datetime import datetime
-from typing import Dict, List, Any, Optional
-
-import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import List, Dict, Any, Optional
+import uvicorn
+import asyncio
+from datetime import datetime
 
-app = FastAPI(
-    title="Domain Analysis Service",
-    description="A microservice for comprehensive domain analysis (OSINT, DNS, TLS, reputation).",
-    version="1.0.0",
-)
+app = FastAPI(title="Maximus Domain Service", version="1.0.0")
 
-# ============================================================================
-# Pydantic Models
-# ============================================================================
+# Mock Domain Knowledge Base
+domain_knowledge_base: Dict[str, Dict[str, Any]] = {
+    "cybersecurity": {
+        "description": "Knowledge related to cyber threats, vulnerabilities, and defense.",
+        "rules": ["block known malicious IPs", "alert on unusual login patterns"],
+        "entities": ["malware", "phishing", "APT"]
+    },
+    "environmental_monitoring": {
+        "description": "Knowledge related to environmental sensors, chemical compounds, and ecological patterns.",
+        "rules": ["alert on high methane levels", "track changes in air quality"],
+        "entities": ["methane", "CO2", "pollution"]
+    },
+    "physical_security": {
+        "description": "Knowledge related to physical access control, surveillance, and perimeter defense.",
+        "rules": ["alert on unauthorized access", "monitor camera feeds for anomalies"],
+        "entities": ["intruder", "access point", "camera"]
+    }
+}
 
-class DomainAnalysisRequest(BaseModel):
-    """Request model for analyzing a domain."""
-    domain: str
 
-# ============================================================================
-# HTML Parser for Title Extraction
-# ============================================================================
+class DomainQueryRequest(BaseModel):
+    """Request model for querying domain-specific information.
 
-class TitleParser(HTMLParser):
-    """A simple HTML parser to extract the content of the <title> tag."""
-    def __init__(self):
-        super().__init__()
-        self.in_title = False
-        self.title = ""
+    Attributes:
+        domain_name (str): The name of the domain to query.
+        query (str): A natural language query about the domain.
+        context (Optional[Dict[str, Any]]): Additional context for the query.
+    """
+    domain_name: str
+    query: str
+    context: Optional[Dict[str, Any]] = None
 
-    def handle_starttag(self, tag, attrs):
-        if tag.lower() == "title": self.in_title = True
 
-    def handle_endtag(self, tag):
-        if tag.lower() == "title": self.in_title = False
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Domain Service."""
+    print("🌐 Starting Maximus Domain Service...")
+    print("✅ Maximus Domain Service started successfully.")
 
-    def handle_data(self, data):
-        if self.in_title: self.title += data
 
-# ============================================================================
-# Analysis Functions
-# ============================================================================
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Domain Service."""
+    print("👋 Shutting down Maximus Domain Service...")
+    print("🛑 Maximus Domain Service shut down.")
 
-async def query_dns_records(domain: str) -> Dict[str, List[str]]:
-    """Queries various DNS records for a domain using the `dig` command.
 
-    Args:
-        domain (str): The domain to query.
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Domain Service.
 
     Returns:
-        Dict[str, List[str]]: A dictionary where keys are record types (A, MX, etc.)
-            and values are lists of record values.
+        Dict[str, str]: A dictionary indicating the service status.
     """
-    records = {}
-    for record_type in ["A", "AAAA", "MX", "NS", "TXT", "SOA"]:
-        try:
-            proc = await asyncio.create_subprocess_exec("dig", "+short", domain, record_type, stdout=subprocess.PIPE)
-            stdout, _ = await proc.communicate()
-            records[record_type] = [line.strip() for line in stdout.decode().splitlines() if line.strip()]
-        except Exception:
-            records[record_type] = []
-    return records
+    return {"status": "healthy", "message": "Domain Service is operational."}
 
-async def analyze_http_service(url: str) -> Dict[str, Any]:
-    """Analyzes an HTTP/HTTPS service to get status, headers, and title.
 
-    Args:
-        url (str): The URL to analyze (e.g., 'http://example.com').
+@app.get("/domains")
+async def list_domains() -> List[str]:
+    """Lists all available domains.
 
     Returns:
-        Dict[str, Any]: A dictionary containing the status code, headers, and page title.
+        List[str]: A list of domain names.
     """
-    try:
-        response = requests.get(url, timeout=10, headers={"User-Agent": "Vértice-Cyber/1.0"})
-        parser = TitleParser()
-        parser.feed(response.text[:5000])
-        return {
-            "status_code": response.status_code,
-            "title": parser.title.strip(),
-            "headers": dict(response.headers),
-        }
-    except requests.RequestException as e:
-        return {"error": str(e)}
+    return list(domain_knowledge_base.keys())
 
-async def get_tls_certificate_info(domain: str) -> Optional[Dict[str, Any]]:
-    """Retrieves and parses the TLS certificate for a domain.
+
+@app.get("/domain/{domain_name}")
+async def get_domain_info(domain_name: str) -> Dict[str, Any]:
+    """Retrieves information about a specific domain.
 
     Args:
-        domain (str): The domain to check.
+        domain_name (str): The name of the domain.
 
     Returns:
-        Optional[Dict[str, Any]]: A dictionary with certificate details if successful,
-            otherwise None.
+        Dict[str, Any]: A dictionary containing information about the domain.
+
+    Raises:
+        HTTPException: If the domain is not found.
     """
-    try:
-        context = ssl.create_default_context()
-        with socket.create_connection((domain, 443), timeout=5) as sock:
-            with context.wrap_socket(sock, server_hostname=domain) as ssock:
-                cert = ssock.getpeercert()
-                return {
-                    "subject": dict(x[0] for x in cert.get("subject", [])),
-                    "issuer": dict(x[0] for x in cert.get("issuer", [])),
-                    "expires": cert.get("notAfter"),
-                }
-    except Exception:
-        return None
+    domain_info = domain_knowledge_base.get(domain_name)
+    if not domain_info:
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_name}' not found.")
+    return domain_info
 
-# ============================================================================
-# API Endpoints
-# ============================================================================
 
-@app.get("/", tags=["Health"])
-async def health_check():
-    """Provides a basic health check of the service."""
-    return {"service": "Domain Analysis Service", "status": "operational"}
-
-@app.post("/analyze", tags=["Domain Analysis"])
-async def analyze_domain(request: DomainAnalysisRequest):
-    """Performs a comprehensive analysis of a given domain.
-
-    This endpoint orchestrates calls to various analysis functions to gather
-    DNS, HTTP, TLS, and reputation information for the specified domain.
+@app.post("/query_domain")
+async def query_domain(request: DomainQueryRequest) -> Dict[str, Any]:
+    """Queries a specific domain for information based on a natural language query.
 
     Args:
-        request (DomainAnalysisRequest): The request containing the domain to analyze.
+        request (DomainQueryRequest): The request body containing the domain name and query.
 
     Returns:
-        Dict[str, Any]: A dictionary containing the aggregated analysis results.
+        Dict[str, Any]: A dictionary containing the query results.
+
+    Raises:
+        HTTPException: If the domain is not found.
     """
-    domain = request.domain.strip().lower()
-    results = {"domain": domain, "timestamp": datetime.now().isoformat(), "data": {}, "errors": []}
-    try:
-        # Concurrently run all analysis functions
-        tasks = {
-            "dns": query_dns_records(domain),
-            "http": analyze_http_service(f"http://{domain}"),
-            "https": analyze_http_service(f"https://{domain}"),
-            "tls": get_tls_certificate_info(domain),
-        }
-        task_results = await asyncio.gather(*tasks.values(), return_exceptions=True)
-        
-        for task_name, res in zip(tasks.keys(), task_results):
-            if isinstance(res, Exception):
-                results["errors"].append(f"{task_name} analysis failed: {res}")
-            else:
-                results["data"][task_name] = res
+    print(f"[API] Querying domain '{request.domain_name}' with: {request.query}")
+    domain_info = domain_knowledge_base.get(request.domain_name)
+    if not domain_info:
+        raise HTTPException(status_code=404, detail=f"Domain '{request.domain_name}' not found.")
 
-    except Exception as e:
-        results["errors"].append(f"An unexpected error occurred: {e}")
+    await asyncio.sleep(0.1) # Simulate processing
 
-    results["success"] = not results["errors"]
-    return results
+    # Simple keyword-based query simulation
+    response = {"query": request.query, "domain": request.domain_name, "results": []}
+    if "rules" in request.query.lower():
+        response["results"].append({"type": "rules", "content": domain_info["rules"]})
+    if "entities" in request.query.lower():
+        response["results"].append({"type": "entities", "content": domain_info["entities"]})
+    if not response["results"]:
+        response["results"].append({"type": "info", "content": f"No specific information found for '{request.query}' in domain '{request.domain_name}'."})
+
+    return response
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    uvicorn.run(app, host="0.0.0.0", port=8013)

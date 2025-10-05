@@ -1,222 +1,261 @@
-"""Centralized Authentication Service for the Vertice project.
+"""Maximus Authentication Service - Main Application Entry Point.
 
-This service handles user authentication via Google OAuth, creates and verifies
-JWT tokens for session management, and manages user permissions based on predefined
-rules. It uses Redis for session storage to allow for stateless API services.
+This module serves as the main entry point for the Maximus Authentication
+Service. It initializes and configures the FastAPI application, sets up event
+handlers for startup and shutdown, and defines the API endpoints for user
+authentication, authorization, and token management.
 
-- Authenticates users with a Google OAuth token.
-- Creates a JWT containing user info and permissions.
-- Verifies JWTs for other services.
-- Provides permission-based access control dependencies.
-- Manages sessions via Redis.
+It handles user registration, login, token issuance and validation, and ensures
+secure access to all Maximus AI services. This service is critical for maintaining
+the security and integrity of the entire Maximus AI ecosystem.
 """
 
-import os
-import jwt
-import json
-import httpx
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Dict, Any, List
-from fastapi import FastAPI, HTTPException, Depends, Body
-from fastapi.security import HTTPBearer
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
-import redis
+from typing import Dict, Any, Optional
+import uvicorn
+import asyncio
+from datetime import datetime, timedelta
+import jwt # PyJWT
+import bcrypt # bcrypt
 
-# ============================================================================
-# Configuration and Initialization
-# ============================================================================
+# Configuration for JWT
+SECRET_KEY = "your-super-secret-key" # In production, use a strong, environment-variable-based key
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-app = FastAPI(
-    title="Authentication Service",
-    description="Centralized authentication service with Google OAuth for Vertice.",
-    version="1.0.0",
-)
+app = FastAPI(title="Maximus Authentication Service", version="1.0.0")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# --- Configuration from Environment Variables ---
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
-JWT_SECRET = os.getenv("JWT_SECRET", "default-secret-key")
-JWT_ALGORITHM = "HS256"
-TOKEN_EXPIRE_HOURS = 24
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
-AUTHORIZED_DOMAINS = os.getenv("AUTHORIZED_DOMAINS", "").split(",")
-AUTHORIZED_EMAILS = os.getenv("AUTHORIZED_EMAILS", "").split(",")
-ADMIN_EMAILS = os.getenv("ADMIN_EMAILS", "").split(",")
-SUPER_ADMIN_EMAIL = "juan.brainfarma@gmail.com"
-
-# --- Redis Connection ---
-try:
-    redis_client = redis.from_url(REDIS_URL, decode_responses=True)
-    redis_client.ping()
-except redis.exceptions.ConnectionError:
-    redis_client = None
-
-# --- Security Scheme ---
-security = HTTPBearer()
-
-# --- Permission Levels ---
-PERMISSION_LEVELS = {
-    "admin": ["read", "write", "delete", "offensive", "admin"],
-    "analyst": ["read", "write", "offensive"],
-    "viewer": ["read"],
+# Mock User Database (In a real app, this would be a proper database)
+users_db = {
+    "maximus_admin": {
+        "username": "maximus_admin",
+        "hashed_password": bcrypt.hashpw("adminpass".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+        "roles": ["admin", "user"]
+    },
+    "maximus_user": {
+        "username": "maximus_user",
+        "hashed_password": bcrypt.hashpw("userpass".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+        "roles": ["user"]
+    }
 }
 
-# ============================================================================
-# Pydantic Models
-# ============================================================================
 
-class GoogleTokenRequest(BaseModel):
-    """Request model for authenticating with a Google OAuth token."""
-    token: str
+class Token(BaseModel):
+    """Response model for JWT token.
 
-class UserInfo(BaseModel):
-    """Pydantic model representing public user information."""
-    id: str
-    email: str
-    name: str
-    picture: str
+    Attributes:
+        access_token (str): The JWT access token.
+        token_type (str): The type of token (e.g., 'bearer').
+    """
+    access_token: str
+    token_type: str
 
-class AuthStatus(BaseModel):
-    """Response model for the /auth/me endpoint."""
-    authenticated: bool
-    user: Optional[UserInfo] = None
-    permissions: List[str] = []
 
-# ============================================================================
-# Core Authentication Logic
-# ============================================================================
+class User(BaseModel):
+    """User model for registration and profile.
 
-async def verify_google_token(token: str) -> Dict[str, Any]:
-    """Verifies a Google OAuth token and retrieves user information.
+    Attributes:
+        username (str): The username of the user.
+        roles (List[str]): List of roles assigned to the user.
+    """
+    username: str
+    roles: List[str]
+
+
+class UserInDB(User):
+    """User model including hashed password for database storage.
+
+    Attributes:
+        hashed_password (str): The hashed password of the user.
+    """
+    hashed_password: str
+
+
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None):
+    """Creates a JWT access token.
 
     Args:
-        token (str): The Google OAuth access token.
+        data (Dict[str, Any]): The data to encode into the token.
+        expires_delta (Optional[timedelta]): Optional timedelta for token expiration.
 
     Returns:
-        Dict[str, Any]: The user information dictionary from Google.
+        str: The encoded JWT token.
+    """
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+async def get_user(username: str) -> Optional[UserInDB]:
+    """Retrieves a user from the mock database by username.
+
+    Args:
+        username (str): The username to retrieve.
+
+    Returns:
+        Optional[UserInDB]: The UserInDB object if found, None otherwise.
+    """
+    user_data = users_db.get(username)
+    if user_data:
+        return UserInDB(**user_data)
+    return None
+
+
+async def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
+    """Authenticates a user against the mock database.
+
+    Args:
+        username (str): The username.
+        password (str): The plain-text password.
+
+    Returns:
+        Optional[UserInDB]: The authenticated UserInDB object if successful, None otherwise.
+    """
+    user = await get_user(username)
+    if not user:
+        return None
+    if not bcrypt.checkpw(password.encode('utf-8'), user.hashed_password.encode('utf-8')):
+        return None
+    return user
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """Retrieves the current authenticated user from the JWT token.
+
+    Args:
+        token (str): The JWT token from the request header.
+
+    Returns:
+        User: The authenticated User object.
 
     Raises:
-        HTTPException: If the token is invalid or the user is not authorized.
+        HTTPException: If the token is invalid or expired.
     """
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"https://www.googleapis.com/oauth2/v1/userinfo?access_token={token}")
-            response.raise_for_status()
-            user_info = response.json()
-            if not is_authorized_user(user_info):
-                raise HTTPException(status_code=403, detail="User not authorized.")
-            return user_info
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid Google token: {e.response.text}")
-    except httpx.RequestError:
-        raise HTTPException(status_code=503, detail="Failed to connect to Google services.")
-
-def is_authorized_user(user_info: Dict[str, Any]) -> bool:
-    """Checks if a user is authorized to access the system based on their email."""
-    email = user_info.get("email", "").lower()
-    domain = email.split("@")[-1] if "@" in email else ""
-    if email == SUPER_ADMIN_EMAIL.lower(): return True
-    if email in [e.lower() for e in AUTHORIZED_EMAILS if e]: return True
-    if domain in [d.lower() for d in AUTHORIZED_DOMAINS if d]: return True
-    return False
-
-def get_user_permissions(user_info: Dict[str, Any]) -> List[str]:
-    """Determines a user's permission level based on their email."""
-    email = user_info.get("email", "").lower()
-    if email == SUPER_ADMIN_EMAIL.lower() or email in [e.lower() for e in ADMIN_EMAILS if e]:
-        return PERMISSION_LEVELS["admin"]
-    return PERMISSION_LEVELS["analyst"] # Default for other authorized users
-
-def create_jwt_token(user_info: Dict[str, Any]) -> str:
-    """Creates a JWT for an authenticated user and stores it in Redis."""
-    permissions = get_user_permissions(user_info)
-    payload = {
-        "sub": user_info["id"],
-        "email": user_info["email"],
-        "name": user_info["name"],
-        "picture": user_info["picture"],
-        "permissions": permissions,
-        "exp": datetime.now(timezone.utc) + timedelta(hours=TOKEN_EXPIRE_HOURS),
-        "iat": datetime.now(timezone.utc)
-    }
-    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-    if redis_client:
-        redis_client.setex(f"session:{user_info['id']}", TOKEN_EXPIRE_HOURS * 3600, json.dumps(payload, default=str))
-    return token
-
-def verify_jwt_token(token: str) -> Dict[str, Any]:
-    """Verifies a JWT and checks for a valid session in Redis."""
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        if redis_client and not redis_client.get(f"session:{payload['sub']}"):
-            raise HTTPException(status_code=401, detail="Session not found or expired.")
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired.")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token.")
-
-# ============================================================================
-# FastAPI Dependencies
-# ============================================================================
-
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
-    """A dependency to get the current authenticated user from a JWT."""
-    return verify_jwt_token(credentials.credentials)
-
-def require_permission(permission: str):
-    """A dependency factory to protect endpoints based on user permissions."""
-    def dependency(user: Dict[str, Any] = Depends(get_current_user)):
-        if permission not in user.get("permissions", []):
-            raise HTTPException(status_code=403, detail=f"Permission '{permission}' required.")
-        return user
-    return dependency
-
-# ============================================================================
-# API Endpoints
-# ============================================================================
-
-@app.get("/health", tags=["Management"])
-async def health_check():
-    """Provides a health check of the service and its dependencies."""
-    return {"status": "healthy", "redis_connected": redis_client is not None}
-
-@app.post("/auth/google", tags=["Authentication"])
-async def authenticate_with_google(request: GoogleTokenRequest):
-    """Authenticates a user via a Google OAuth token and returns a JWT."""
-    user_info = await verify_google_token(request.token)
-    jwt_token = create_jwt_token(user_info)
-    return {"access_token": jwt_token, "token_type": "Bearer"}
-
-@app.get("/auth/me", response_model=AuthStatus, tags=["Authentication"])
-async def get_current_user_info(user: Dict[str, Any] = Depends(get_current_user)):
-    """Returns information and permissions for the currently authenticated user."""
-    return AuthStatus(
-        authenticated=True,
-        user=UserInfo(**user),
-        permissions=user.get("permissions", [])
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        user = await get_user(username)
+        if user is None:
+            raise credentials_exception
+        return User(username=user.username, roles=user.roles)
+    except jwt.PyJWTError:
+        raise credentials_exception
 
-@app.post("/auth/logout", tags=["Authentication"])
-async def logout(user: Dict[str, Any] = Depends(get_current_user)):
-    """Logs out the user by deleting their session from Redis."""
-    if redis_client:
-        redis_client.delete(f"session:{user['sub']}")
-    return {"message": "Successfully logged out."}
 
-@app.get("/protected/admin", tags=["Protected"])
-async def admin_only_endpoint(user: Dict[str, Any] = Depends(require_permission("admin"))):
-    """An example endpoint protected by the 'admin' permission."""
-    return {"message": f"Welcome, admin {user['email']}!"}
+async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    """Retrieves the current active authenticated user.
+
+    Args:
+        current_user (User): The authenticated user object.
+
+    Returns:
+        User: The active User object.
+
+    Raises:
+        HTTPException: If the user is inactive (not applicable in this mock).
+    """
+    # In a real app, you might check if the user is active/enabled
+    return current_user
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Authentication Service."""
+    print("🔑 Starting Maximus Authentication Service...")
+    print("✅ Maximus Authentication Service started successfully.")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Authentication Service."""
+    print("👋 Shutting down Maximus Authentication Service...")
+    print("🛑 Maximus Authentication Service shut down.")
+
+
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Authentication Service.
+
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
+    """
+    return {"status": "healthy", "message": "Authentication Service is operational."}
+
+
+@app.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Authenticates a user and returns an access token.
+
+    Args:
+        form_data (OAuth2PasswordRequestForm): Form data containing username and password.
+
+    Returns:
+        Token: The JWT access token.
+
+    Raises:
+        HTTPException: If authentication fails.
+    """
+    user = await authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username, "roles": user.roles},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/users/me", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    """Retrieves the current authenticated user's information.
+
+    Args:
+        current_user (User): The authenticated user object.
+
+    Returns:
+        User: The current user's information.
+    """
+    return current_user
+
+
+@app.get("/admin_resource")
+async def read_admin_resource(current_user: User = Depends(get_current_active_user)):
+    """Accesses a resource that requires 'admin' role.
+
+    Args:
+        current_user (User): The authenticated user object.
+
+    Returns:
+        Dict[str, str]: A message indicating successful access.
+
+    Raises:
+        HTTPException: If the user does not have the 'admin' role.
+    """
+    if "admin" not in current_user.roles:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    return {"message": "Welcome, admin! This is a highly sensitive resource."}
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8008)

@@ -1,30 +1,39 @@
-"""IP Intelligence Service - Configuration.
+"""Maximus IP Intelligence Service - Configuration Module.
 
-This module defines the configuration model for the IP Intelligence service,
-loading settings from environment variables using Pydantic's BaseSettings.
+This module handles the configuration settings for the IP Intelligence Service.
+It provides a centralized place to define and manage parameters such as API keys
+for external IP intelligence providers, caching settings, logging levels, and
+other operational settings.
+
+By externalizing configuration, this module allows for flexible deployment and
+management of the IP Intelligence Service without requiring code changes.
+It supports loading configurations from environment variables, files, or other
+sources, ensuring adaptability across different environments.
 """
 
+import os
 from pydantic_settings import BaseSettings
 
+
 class Settings(BaseSettings):
-    """Manages application configuration using Pydantic.
+    """Configuration settings for the Maximus IP Intelligence Service.
 
-    Attributes:
-        DATABASE_URL (str): The connection string for the SQLite database.
-        CACHE_TTL_SECONDS (int): The time-to-live for cached IP analysis results.
-        IP_API_URL (str): The URL template for the ip-api.com GeoIP service.
-        IPINFO_URL (str): The URL template for the ipinfo.io GeoIP service.
+    Settings are loaded from environment variables or a .env file.
     """
-    DATABASE_URL: str = "sqlite+aiosqlite:///./ip_intel.db"
-    CACHE_TTL_SECONDS: int = 86400  # 24 hours
-
-    # External API URLs
-    IP_API_URL: str = "http://ip-api.com/json/{ip}?fields=status,country,countryCode,regionName,city,lat,lon,timezone,isp,org,as,query"
-    IPINFO_URL: str = "https://ipinfo.io/{ip}/json"
+    app_name: str = "Maximus IP Intelligence Service"
+    external_ip_api_key: str = os.getenv("EXTERNAL_IP_API_KEY", "your_external_ip_api_key")
+    cache_ttl_seconds: int = os.getenv("CACHE_TTL_SECONDS", 3600)
+    log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     class Config:
-        """Pydantic configuration settings."""
         env_file = ".env"
-        extra = "ignore"
+        env_file_encoding = 'utf-8'
 
-settings = Settings()
+
+def get_settings() -> Settings:
+    """Returns a singleton instance of the Settings.
+
+    Returns:
+        Settings: The configuration settings for the IP Intelligence service.
+    """
+    return Settings()

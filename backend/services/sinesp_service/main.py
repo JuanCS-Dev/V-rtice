@@ -1,110 +1,96 @@
-import asyncio
-from contextlib import asynccontextmanager
-from datetime import datetime
-import httpx
-import redis.asyncio as redis
+"""Maximus Sinesp Service - Main Application Entry Point.
+
+This module serves as the main entry point for the Maximus Sinesp Service.
+It initializes and configures the FastAPI application, sets up event handlers
+for startup and shutdown, and defines the API endpoints for querying Sinesp
+data and performing AI-driven analysis.
+
+It orchestrates the integration with the Sinesp Cidadão API, processes the
+retrieved public security data, and leverages a Large Language Model (LLM)
+to extract relevant intelligence and provide contextual insights. This service
+is crucial for supporting investigations, situational awareness, and law
+enforcement support within the Maximus AI system.
+"""
+
 from fastapi import FastAPI, HTTPException
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.decorator import cache
+from pydantic import BaseModel
+from typing import Dict, Any, List, Optional
+import uvicorn
+import asyncio
+from datetime import datetime
 
-from config import settings
 from intelligence_agent import IntelligenceAgent
-from llm_client import LLMClientFactory
-from models import SinespAnalysisReport, SinespQueryInput
+from llm_client import LLMClient
+from models import SinespQuery, VehicleInfo
+
+app = FastAPI(title="Maximus Sinesp Service", version="1.0.0")
+
+# Initialize LLM client and Intelligence Agent
+llm_client = LLMClient()
+intelligence_agent = IntelligenceAgent(llm_client)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+@app.on_event("startup")
+async def startup_event():
+    """Performs startup tasks for the Sinesp Service."""
+    print("🇧🇷 Starting Maximus Sinesp Service...")
+    print("✅ Maximus Sinesp Service started successfully.")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Performs shutdown tasks for the Sinesp Service."""
+    print("👋 Shutting down Maximus Sinesp Service...")
+    print("🛑 Maximus Sinesp Service shut down.")
+
+
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Performs a health check of the Sinesp Service.
+
+    Returns:
+        Dict[str, str]: A dictionary indicating the service status.
     """
-    Handles startup and shutdown events for the application.
+    return {"status": "healthy", "message": "Sinesp Service is operational."}
+
+
+@app.post("/query_vehicle", response_model=VehicleInfo)
+async def query_vehicle_info(query: SinespQuery) -> VehicleInfo:
+    """Queries the Sinesp Cidadão API for vehicle information.
+
+    Args:
+        query (SinespQuery): The query object containing the identifier and type.
+
+    Returns:
+        VehicleInfo: Detailed information about the vehicle.
+
+    Raises:
+        HTTPException: If the Sinesp API returns an error or the vehicle is not found.
     """
-    # Initialize Redis cache
-    redis_client = redis.from_url(settings.REDIS_URL, encoding="utf8", decode_responses=True)
-    FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
-
-    # Initialize the LLM Client Factory
-    LLMClientFactory()
-    yield
-    # Clean up resources if needed
-
-app = FastAPI(
-    title="SINESP Intelligence Node",
-    description="Autonomous intelligence node for vehicle analysis and correlation.",
-    version="4.0.0",
-    lifespan=lifespan
-)
-
-def mock_sinesp_api_call(plate: str) -> dict:
-    """Simulates a call to the SINESP API."""
-    return {
-        "plate": plate.upper(),
-        "status": "COM RESTRIÇÃO DE ROUBO/FURTO",
-        "details": {
-            "model": "FIAT TORO",
-            "color": "PRETA",
-            "year": 2022,
-            "city": "São Paulo",
-            "state": "SP"
-        }
-    }
-
-@app.post("/analyze", response_model=SinespAnalysisReport)
-@cache(expire=3600)
-async def analyze_plate(query: SinespQueryInput) -> SinespAnalysisReport:
-    """
-    Analyzes a vehicle plate, correlates with criminal hotspots, and generates an intelligence report.
-    Caches the result for 1 hour.
-    """
-    # 1. Collect factual data
-    plate_details = mock_sinesp_api_call(query.plate)
-    location_analysis = None
-
-    if query.deep_analysis:
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "http://aurora_predict_service:8009/api/predict/check-location",
-                    json={"latitude": -23.550520, "longitude": -46.633308}, # Mock location
-                    timeout=5.0
-                )
-                response.raise_for_status()
-                location_analysis = response.json()
-        except httpx.RequestError:
-            # If the service is down, we can proceed without this data
-            location_analysis = {"error": "Aurora Predict Service unavailable."}
-
-    facts = {
-        "plate_details": plate_details,
-        "location_analysis": location_analysis
-    }
-
-    # 2. Select LLM model
-    model_name = 'gemini-1.5-pro-latest' if query.deep_analysis else 'gemini-1.5-flash-latest'
-    llm_client = LLMClientFactory().get_client(model_name)
-
-    # 3. Instantiate and run the intelligence agent
-    agent = IntelligenceAgent(llm_client)
-
+    print(f"[API] Received Sinesp query for {query.query_type}: {query.identifier}")
     try:
-        # 4. Get the AI-synthesized report
-        report = await agent.analyze(facts)
-        return report
+        vehicle_info = await intelligence_agent.query_sinesp(query)
+        return vehicle_info
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        # 5. Graceful Degradation
-        # If the LLM fails after all retries, return a partial report with factual data.
-        return SinespAnalysisReport(
-            plate_details=plate_details,
-            threat_score=0, # Default score
-            risk_level="INDETERMINADO",
-            summary="A análise de IA falhou. As informações apresentadas são apenas dados factuais.",
-            reasoning_chain=[
-                "Coleta de dados factuais bem-sucedida.",
-                f"Falha na síntese de IA após múltiplas tentativas. Erro: {str(e)}",
-                "Retornando relatório parcial como medida de degradação graciosa."
-            ],
-            correlated_events=[{"type": "SYSTEM_WARNING", "description": "AI synthesis failed."}],
-            recommended_actions=["Revisar dados brutos e proceder com cautela.", "Reportar falha do sistema de IA."],
-            confidence_score=0.4, # Low confidence due to failure
-            timestamp=datetime.now()
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to query Sinesp API: {str(e)}")
+
+
+@app.post("/analyze_vehicle", response_model=Dict[str, Any])
+async def analyze_vehicle_details(vehicle_info: VehicleInfo) -> Dict[str, Any]:
+    """Analyzes vehicle information using AI to extract insights and recommendations.
+
+    Args:
+        vehicle_info (VehicleInfo): The vehicle information to analyze.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing AI-generated insights and recommendations.
+    """
+    print(f"[API] Analyzing vehicle details for plate: {vehicle_info.plate}")
+    insights = await intelligence_agent.analyze_vehicle_info(vehicle_info)
+    return {"status": "success", "timestamp": datetime.now().isoformat(), "insights": insights}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8039)
