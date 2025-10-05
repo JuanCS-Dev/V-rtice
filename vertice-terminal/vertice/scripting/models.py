@@ -126,6 +126,17 @@ class MethodCall(Expression):
 
 
 @dataclass
+class IndexAccess(Expression):
+    """Index access (obj[index])."""
+
+    object: Expression
+    index: Expression
+
+    def __repr__(self) -> str:
+        return f"IndexAccess({self.object}[{self.index}])"
+
+
+@dataclass
 class ListLiteral(Expression):
     """List literal [1, 2, 3]."""
 

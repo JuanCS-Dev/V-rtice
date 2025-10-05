@@ -1,0 +1,40 @@
+name: Detect Lateral Movement
+description: |
+  Detects lateral movement attempts using common techniques:
+  - SMB/RDP connections from workstations
+  - Pass-the-hash attacks
+  - WMI/PSExec remote execution
+
+enabled: true
+
+trigger:
+  - event: smb_connection
+  - event: rdp_connection
+  - event: wmi_remote_execution
+  - event: psexec_detected
+
+conditions:
+  - network.remote_ip NOT IN ["127.0.0.1", "::1"]
+  - process.name IN ['psexec.exe', 'wmic.exe', 'powershell.exe']
+
+actions:
+  - create_incident:
+      severity: high
+      title: Lateral Movement Detected
+      playbook: lateral_movement_investigation
+  - send_alert:
+      message: "Potential lateral movement from {source_ip} to {dest_ip}"
+      channel: soc_team
+
+tags:
+  - lateral_movement
+  - apt
+  - investigation
+
+metadata:
+  author: Threat Intel Team
+  version: "1.0"
+  mitre_attack:
+    - T1021  # Remote Services
+    - T1047  # Windows Management Instrumentation
+    - T1550  # Use Alternate Authentication Material

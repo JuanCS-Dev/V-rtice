@@ -320,15 +320,25 @@ class VScriptParser:
         statements = []
         self.skip_newlines()
 
-        # Simple indentation handling (just check for at least one space/tab)
-        # In production, would track indentation levels properly
-        while self.current_token().type not in ("EOF", "KEYWORD"):
-            # Stop if we hit a dedent (keyword at start of line)
+        # Get the indentation level of the first statement in the block
+        # (we expect it to be indented relative to the parent)
+        if self.current_token().type == "EOF":
+            return statements
+
+        base_indent = self.current_token().column
+
+        # Parse statements at this indentation level or deeper
+        while self.current_token().type != "EOF":
+            # Skip blank lines
             if self.current_token().type == "NEWLINE":
                 self.advance()
-                if self.current_token().type in ("EOF", "KEYWORD"):
-                    break
                 continue
+
+            # Check if we've dedented (statement at lower indentation level)
+            current_indent = self.current_token().column
+            if current_indent < base_indent:
+                # Dedent detected - end of block
+                break
 
             stmt = self.parse_statement()
             if stmt:
@@ -446,10 +456,12 @@ class VScriptParser:
                 attr_name = self.expect("IDENTIFIER").value
                 expr = AttributeAccess(object=expr, attribute=attr_name)
 
-            # List indexing (simplified)
+            # List/dict indexing
             elif self.current_token().type == "LBRACKET":
-                # TODO: Implement indexing
-                break
+                self.advance()  # [
+                index = self.parse_expression()
+                self.expect("RBRACKET")
+                expr = IndexAccess(object=expr, index=index)
 
             else:
                 break

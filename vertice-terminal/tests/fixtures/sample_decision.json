@@ -1,0 +1,36 @@
+{
+  "situation": "Suspicious network activity detected from internal host",
+  "options": [
+    {
+      "action": "block_immediately",
+      "risk": "low",
+      "impact": "high",
+      "cost": 100
+    },
+    {
+      "action": "monitor_and_alert",
+      "risk": "medium",
+      "impact": "low",
+      "cost": 10
+    },
+    {
+      "action": "investigate_further",
+      "risk": "high",
+      "impact": "low",
+      "cost": 50
+    }
+  ],
+  "constraints": {
+    "time_critical": true,
+    "max_cost": 100,
+    "compliance_required": [
+      "PCI-DSS",
+      "GDPR"
+    ]
+  },
+  "objectives": [
+    "minimize_security_risk",
+    "maintain_operations",
+    "comply_with_regulations"
+  ]
+}

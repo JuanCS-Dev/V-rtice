@@ -1,0 +1,32 @@
+# PowerShell Execution Artifact
+# Detects suspicious PowerShell executions
+
+name: Suspicious PowerShell Execution
+description: Find PowerShell processes with suspicious parent processes or command lines
+author: Vértice Security Team
+version: 1.0.0
+tags:
+  - execution
+  - powershell
+  - malware
+severity: critical
+
+query: |
+  SELECT process.name, process.pid, process.parent, process.cmdline
+  FROM endpoints
+  WHERE process.name = "powershell.exe"
+    AND process.parent NOT IN ("explorer.exe", "cmd.exe")
+  LIMIT 500
+
+output_fields:
+  - process.name
+  - process.pid
+  - process.parent
+  - process.cmdline
+
+remediation:
+  - Review PowerShell command line for malicious activity
+  - Check if parent process is legitimate
+  - Kill process if confirmed malicious
+  - Scan system for malware
+  - Check for encoded commands (base64)

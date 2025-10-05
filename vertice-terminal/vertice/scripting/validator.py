@@ -209,6 +209,10 @@ class VScriptValidator:
                 if isinstance(part, Expression):
                     self._validate_expression(part)
 
+        elif isinstance(expr, IndexAccess):
+            self._validate_expression(expr.object)
+            self._validate_expression(expr.index)
+
     def _validate_function_call(self, expr: FunctionCall) -> None:
         """Validate function call for security issues."""
         # Check dangerous functions

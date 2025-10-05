@@ -72,7 +72,7 @@ class TestAnalyticsWorkspaceIntegration:
         )
 
         # Get vulnerabilities from workspace
-        vulns = workspace.get_vulnerabilities(host_id=host.id)
+        vulns = host.vulnerabilities
 
         # Convert to risk factors
         risk_factors = []
@@ -162,6 +162,7 @@ class TestAnalyticsWorkspaceIntegration:
             workspace.add_vulnerability(
                 host_id=host.id,
                 cve_id="CVE-2021-44228",
+                title="Log4Shell",
                 severity="critical",
                 cvss_score=10.0,
             )
@@ -170,7 +171,7 @@ class TestAnalyticsWorkspaceIntegration:
         risk_scores = {}
 
         for host in hosts:
-            vulns = workspace.get_vulnerabilities(host_id=host.id)
+            vulns = host.vulnerabilities
 
             risk_factors = [
                 RiskFactor(
@@ -239,12 +240,13 @@ class TestAnalyticsWorkspaceIntegration:
                 workspace.add_vulnerability(
                     host_id=host.id,
                     cve_id=vuln_data["cve"],
+                    title=vuln_data["cve"],
                     severity=vuln_data["severity"],
                     cvss_score=vuln_data["cvss"],
                 )
 
             # Calculate risk
-            vulns = workspace.get_vulnerabilities(host_id=host.id)
+            vulns = host.vulnerabilities
             risk_factors = [
                 RiskFactor(
                     name=v.cve_id,

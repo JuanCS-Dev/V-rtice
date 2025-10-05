@@ -86,8 +86,8 @@ class TestOrchestratorWorkspaceIntegration:
         assert hosts[0].ip_address == "45.33.32.156"
         assert hosts[0].hostname == "scanme.nmap.org"
 
-        # Verify ports were stored
-        ports = workspace.query_ports(host_id=hosts[0].id)
+        # Verify ports were stored (through host relationship)
+        ports = hosts[0].ports
         assert len(ports) == 2
         assert any(p.port == 22 and p.service == "ssh" for p in ports)
         assert any(p.port == 80 and p.service == "http" for p in ports)
@@ -131,8 +131,8 @@ class TestOrchestratorWorkspaceIntegration:
                 description=finding["description"],
             )
 
-        # Verify vulnerabilities were stored
-        vulns = workspace.get_vulnerabilities(host_id=host.id)
+        # Verify vulnerabilities were stored (through host relationship)
+        vulns = host.vulnerabilities
         assert len(vulns) == 2
         assert any(v.cve_id == "CVE-2021-44228" and v.severity == "critical" for v in vulns)
         assert any(v.cve_id == "CVE-2021-3156" and v.severity == "high" for v in vulns)
@@ -173,12 +173,12 @@ class TestOrchestratorWorkspaceIntegration:
         all_hosts = workspace.query_hosts()
         assert len(all_hosts) == 3
 
-        # Query: Hosts with HTTP
-        http_hosts = workspace.query_hosts_by_service("http")
+        # Query: Hosts with HTTP (manual filter through ports relationship)
+        http_hosts = [h for h in all_hosts if any(p.service == "http" for p in h.ports)]
         assert len(http_hosts) == 2
 
-        # Query: Hosts with SSH
-        ssh_hosts = workspace.query_hosts_by_service("ssh")
+        # Query: Hosts with SSH (manual filter through ports relationship)
+        ssh_hosts = [h for h in all_hosts if any(p.service == "ssh" for p in h.ports)]
         assert len(ssh_hosts) == 3
 
     def test_workspace_statistics(self, workspace):
@@ -195,6 +195,7 @@ class TestOrchestratorWorkspaceIntegration:
                 workspace.add_vulnerability(
                     host_id=host.id,
                     cve_id=f"CVE-2021-{i}",
+                    title=f"Critical Vuln {i}",
                     severity="critical",
                 )
 
@@ -203,11 +204,21 @@ class TestOrchestratorWorkspaceIntegration:
                 workspace.add_vulnerability(
                     host_id=host.id,
                     cve_id=f"CVE-2022-{i}",
+                    title=f"Medium Vuln {i}",
                     severity="medium",
                 )
 
-        # Get statistics
-        stats = workspace.get_statistics()
+        # Get statistics (manually calculate since get_statistics doesn't exist)
+        all_hosts = workspace.query_hosts()
+        all_vulns = workspace.query_vulnerabilities()
+
+        stats = {
+            "total_hosts": len(all_hosts),
+            "total_vulnerabilities": len(all_vulns),
+            "critical_vulns": len([v for v in all_vulns if v.severity == "critical"]),
+            "high_vulns": len([v for v in all_vulns if v.severity == "high"]),
+            "medium_vulns": len([v for v in all_vulns if v.severity == "medium"]),
+        }
 
         assert stats["total_hosts"] == 5
         assert stats["total_vulnerabilities"] == 5

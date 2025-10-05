@@ -15,6 +15,9 @@ import logging
 from .models import *
 from .stdlib import VScriptStdlib
 
+# Import IndexAccess explicitly for type checking
+from .models import IndexAccess
+
 logger = logging.getLogger(__name__)
 
 
@@ -93,6 +96,10 @@ class VScriptRuntime:
         self.stdlib = stdlib or VScriptStdlib()
         self.global_context = ExecutionContext(stdlib=self.stdlib)
 
+        # Inject global objects
+        self.global_context.set("console", self.stdlib.console)
+        self.global_context.set("workspace", self.stdlib.workspace)
+
     def execute(self, program: Program) -> Any:
         """
         Execute program.
@@ -161,25 +168,23 @@ class VScriptRuntime:
         condition = self.evaluate_expression(stmt.condition, context)
 
         if self.is_truthy(condition):
-            child_context = context.create_child()
+            # Use same context - Python-like scoping
             for s in stmt.body:
-                self.execute_statement(s, child_context)
+                self.execute_statement(s, context)
             return None
 
         # Check elif branches
         for elif_cond, elif_body in stmt.elif_branches:
             elif_value = self.evaluate_expression(elif_cond, context)
             if self.is_truthy(elif_value):
-                child_context = context.create_child()
                 for s in elif_body:
-                    self.execute_statement(s, child_context)
+                    self.execute_statement(s, context)
                 return None
 
         # Else branch
         if stmt.else_body:
-            child_context = context.create_child()
             for s in stmt.else_body:
-                self.execute_statement(s, child_context)
+                self.execute_statement(s, context)
 
         return None
 
@@ -191,15 +196,14 @@ class VScriptRuntime:
         if not isinstance(iterable, (list, tuple, range, str)):
             raise TypeError(f"Cannot iterate over {type(iterable)}")
 
-        child_context = context.create_child()
-
         try:
             for item in iterable:
-                child_context.set(stmt.variable, item)
+                # Use same context - Python-like scoping
+                context.set(stmt.variable, item)
 
                 try:
                     for s in stmt.body:
-                        self.execute_statement(s, child_context)
+                        self.execute_statement(s, context)
                 except ContinueException:
                     continue
 
@@ -210,8 +214,6 @@ class VScriptRuntime:
 
     def execute_while(self, stmt: WhileLoop, context: ExecutionContext) -> Any:
         """Execute while loop."""
-        child_context = context.create_child()
-
         try:
             while True:
                 condition = self.evaluate_expression(stmt.condition, context)
@@ -220,7 +222,7 @@ class VScriptRuntime:
 
                 try:
                     for s in stmt.body:
-                        self.execute_statement(s, child_context)
+                        self.execute_statement(s, context)
                 except ContinueException:
                     continue
 
@@ -263,6 +265,9 @@ class VScriptRuntime:
 
         elif isinstance(expr, FString):
             return self.evaluate_fstring(expr, context)
+
+        elif isinstance(expr, IndexAccess):
+            return self.evaluate_index_access(expr, context)
 
         else:
             raise RuntimeError(f"Unknown expression type: {type(expr)}")
@@ -381,6 +386,30 @@ class VScriptRuntime:
                 result += str(value)
 
         return result
+
+    def evaluate_index_access(self, expr: IndexAccess, context: ExecutionContext) -> Any:
+        """Evaluate index access (obj[index])."""
+        obj = self.evaluate_expression(expr.object, context)
+        index = self.evaluate_expression(expr.index, context)
+
+        # List/tuple indexing
+        if isinstance(obj, (list, tuple)):
+            if not isinstance(index, int):
+                raise TypeError(f"List indices must be integers, not {type(index).__name__}")
+            return obj[index]
+
+        # Dict indexing
+        elif isinstance(obj, dict):
+            return obj[index]
+
+        # String indexing
+        elif isinstance(obj, str):
+            if not isinstance(index, int):
+                raise TypeError(f"String indices must be integers, not {type(index).__name__}")
+            return obj[index]
+
+        else:
+            raise TypeError(f"'{type(obj).__name__}' object is not subscriptable")
 
     @staticmethod
     def is_truthy(value: Any) -> bool:

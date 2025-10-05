@@ -1,0 +1,21 @@
+{
+  "source": "test_network_monitor",
+  "data": {
+    "packets": [
+      {
+        "src": "192.168.1.100",
+        "dst": "192.168.1.1",
+        "port": 443
+      },
+      {
+        "src": "192.168.1.100",
+        "dst": "malicious.example.com",
+        "port": 4444
+      }
+    ]
+  },
+  "context": {
+    "interface": "eth0",
+    "timestamp": "2025-10-04T00:00:00Z"
+  }
+}

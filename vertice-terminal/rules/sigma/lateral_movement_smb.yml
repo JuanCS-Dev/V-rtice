@@ -1,0 +1,32 @@
+title: Lateral Movement via SMB Admin Shares
+id: 8f0b1fb1-9c62-4c18-bd37-2d663d01f9a3
+status: stable
+description: Detects lateral movement attempts using SMB admin shares (C$, ADMIN$)
+author: Vertice Security Team
+date: 2025/10/03
+references:
+    - https://attack.mitre.org/techniques/T1021/002/
+tags:
+    - attack.lateral_movement
+    - attack.t1021
+    - attack.t1021.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_share:
+        EventID: 5140
+        ShareName|endswith:
+            - '\ADMIN$'
+            - '\C$'
+            - '\IPC$'
+    selection_logon:
+        EventID: 4624
+        LogonType: 3
+    time_proximity: 10s
+    condition: selection_share and selection_logon
+falsepositives:
+    - System administration activities
+    - Backup software
+    - Monitoring solutions
+level: high

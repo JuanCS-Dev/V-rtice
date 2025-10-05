@@ -1,0 +1,38 @@
+title: Suspicious PowerShell Download and Execute
+id: 1f49f2ab-26bc-48b3-96cc-dcffbc93eadf
+status: stable
+description: Detects suspicious PowerShell commands that download and execute code
+author: Vertice Security Team
+date: 2025/10/03
+modified: 2025/10/03
+references:
+    - https://attack.mitre.org/techniques/T1059/001/
+tags:
+    - attack.execution
+    - attack.t1059.001
+    - attack.defense_evasion
+    - attack.t1027
+logsource:
+    product: windows
+    service: powershell
+    definition: 'Script Block Logging must be enabled'
+detection:
+    selection_download:
+        EventID: 4104
+        ScriptBlockText|contains:
+            - 'System.Net.WebClient'
+            - 'Invoke-WebRequest'
+            - 'wget'
+            - 'curl'
+            - 'DownloadFile'
+            - 'DownloadString'
+    selection_execute:
+        ScriptBlockText|contains:
+            - 'IEX'
+            - 'Invoke-Expression'
+            - 'Invoke-Command'
+    condition: selection_download and selection_execute
+falsepositives:
+    - Legitimate administration scripts
+    - Software deployment tools
+level: high

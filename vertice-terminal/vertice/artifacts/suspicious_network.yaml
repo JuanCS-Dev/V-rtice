@@ -1,0 +1,34 @@
+# Suspicious Network Connections Artifact
+# Detects network connections to potentially malicious IPs
+
+name: Suspicious Network Connections
+description: Find processes making network connections to suspicious IPs (not private ranges)
+author: Vértice Security Team
+version: 1.0.0
+tags:
+  - network
+  - lateral-movement
+  - c2
+severity: high
+
+query: |
+  SELECT process.name, process.pid, network.remote_ip, network.port
+  FROM endpoints
+  WHERE network.remote_ip NOT IN ("127.0.0.1", "0.0.0.0", "::1")
+    AND process.name != "chrome.exe"
+    AND process.name != "firefox.exe"
+  LIMIT 1000
+
+# Expected output fields
+output_fields:
+  - process.name
+  - process.pid
+  - network.remote_ip
+  - network.port
+
+# Remediation steps
+remediation:
+  - Isolate affected endpoint
+  - Block suspicious IP at firewall
+  - Capture memory dump for analysis
+  - Check for persistence mechanisms

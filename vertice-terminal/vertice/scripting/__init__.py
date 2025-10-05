@@ -38,6 +38,7 @@ from .models import (
     Variable,
     Literal,
     BinaryOp,
+    IndexAccess,
     VScriptType,
 )
 
@@ -60,5 +61,6 @@ __all__ = [
     "Variable",
     "Literal",
     "BinaryOp",
+    "IndexAccess",
     "VScriptType",
 ]

@@ -1,0 +1,48 @@
+name: Auto-Block Ransomware
+description: |
+  Automatically detects and blocks ransomware activity by monitoring
+  file encryption events and shadow copy deletion.
+
+  Triggers on:
+  - Mass file encryption detected
+  - Shadow copy deletion (vssadmin, wmic)
+  - Suspicious file extensions (.encrypted, .locked, .crypted)
+
+enabled: true
+
+trigger:
+  - event: file_encryption_detected
+  - event: shadow_copy_deletion
+  - event: mass_file_modification
+
+conditions:
+  - process.name IN ['vssadmin.exe', 'wmic.exe', 'bcdedit.exe']
+  - file.extension IN ['.encrypted', '.locked', '.crypted', '.crypt']
+
+actions:
+  - isolate_endpoint
+  - kill_process:
+      process_name: suspect_process
+  - block_ip:
+      ip_address: command_and_control_ip
+  - create_incident:
+      severity: critical
+      title: Ransomware Activity Detected
+      playbook: ransomware_response
+  - send_alert:
+      message: "CRITICAL: Ransomware activity detected and blocked"
+      channel: security_ops
+
+tags:
+  - ransomware
+  - malware
+  - automated
+  - critical
+
+metadata:
+  author: Security Team
+  version: "1.0"
+  created: 2025-10-03
+  mitre_attack:
+    - T1486  # Data Encrypted for Impact
+    - T1490  # Inhibit System Recovery

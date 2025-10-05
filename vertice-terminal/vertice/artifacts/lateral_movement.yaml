@@ -1,0 +1,32 @@
+# Lateral Movement Artifact
+# Detects potential lateral movement activity
+
+name: Lateral Movement Detection
+description: Find suspicious remote execution and credential access patterns
+author: Vértice Security Team
+version: 1.0.0
+tags:
+  - lateral-movement
+  - credential-access
+  - privilege-escalation
+severity: critical
+
+query: |
+  SELECT process.name, process.pid, network.remote_ip, network.port
+  FROM endpoints
+  WHERE process.name IN ("psexec.exe", "wmic.exe", "sc.exe", "net.exe")
+    AND network.port IN (135, 445, 3389, 5985, 5986)
+  LIMIT 200
+
+output_fields:
+  - process.name
+  - process.pid
+  - network.remote_ip
+  - network.port
+
+remediation:
+  - Immediately isolate source endpoint
+  - Check destination endpoint for compromise
+  - Reset credentials of affected accounts
+  - Review authentication logs
+  - Block lateral movement ports if not required

@@ -67,9 +67,9 @@ class TestSIEMFindingsIntegration:
         event = {
             "name": vuln.title,
             "severity": vuln.severity,
-            "src": host.ip_address,
+            "source_ip": host.ip_address,
             "message": vuln.description,
-            "cve": vuln.cve_id,
+            "cve_id": vuln.cve_id,
             "cvss": vuln.cvss_score,
         }
 
@@ -101,7 +101,8 @@ class TestSIEMFindingsIntegration:
         event = {
             "name": vuln.title,
             "severity": vuln.severity,
-            "src": host.ip_address,
+            "source_ip": host.ip_address,
+            "cve_id": vuln.cve_id,
             "message": f"Vulnerability {vuln.cve_id} detected",
         }
 
@@ -150,6 +151,8 @@ class TestSIEMFindingsIntegration:
     def test_siem_event_enrichment(self, workspace):
         """Test enriching SIEM events with workspace context."""
         project = workspace.create_project("siem-enrichment-test")
+        # Get project name immediately before any other operations
+        project_name = project.name
         workspace.switch_project("siem-enrichment-test")
 
         # Add host with multiple findings
@@ -192,7 +195,7 @@ class TestSIEMFindingsIntegration:
             "appVersion": port.version,
             "os": host.os_family,
             # Metadata
-            "project": project.name,
+            "project": project_name,
             "discovered_at": vuln.discovered_at.isoformat() if vuln.discovered_at else None,
         }
 
@@ -219,6 +222,7 @@ class TestSIEMFindingsIntegration:
             workspace.add_vulnerability(
                 host_id=host.id,
                 cve_id=f"CVE-2021-{i}",
+                title=f"Test Vulnerability {i}",
                 severity=severity,
             )
 
