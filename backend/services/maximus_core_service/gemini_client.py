@@ -23,7 +23,7 @@ from dataclasses import dataclass
 class GeminiConfig:
     """Configuração do Gemini"""
     api_key: str
-    model: str = "gemini-2.0-flash-exp"  # Fastest & most capable experimental model
+    model: str = "gemini-1.5-flash"  # Modelo sem quota limite
     temperature: float = 0.7
     max_tokens: int = 4096
     timeout: int = 60
