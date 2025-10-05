@@ -48,3 +48,12 @@ virtualenv/
 Thumbs.db
 EOF
 oraculo_ideias_*.md
+
+# Backups
+*.backup
+*.backup-*
+LEGADO/
+
+# Temporary files
+docker-compose.yml.backup*
+README.md.backup
