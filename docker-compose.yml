@@ -13,48 +13,52 @@ services:
       - ./backend/api_gateway:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
-      - SINESP_SERVICE_URL=http://sinesp_service:80
-      - CYBER_SERVICE_URL=http://cyber_service:80
-      - DOMAIN_SERVICE_URL=http://domain_service:80
-      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:80
-      - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:80
-      - NMAP_SERVICE_URL=http://nmap_service:80
+      - SINESP_SERVICE_URL=http://sinesp_service:8102
+      - CYBER_SERVICE_URL=http://cyber_service:8103
+      - DOMAIN_SERVICE_URL=http://domain_service:8104
+      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:8105
+      - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:8120
+      - NMAP_SERVICE_URL=http://nmap_service:8106
       - OSINT_SERVICE_URL=http://osint_service:8007
-      - GOOGLE_OSINT_SERVICE_URL=http://google_osint_service:8008
-      - MAXIMUS_PREDICT_URL=http://maximus_predict:80
-      - ATLAS_SERVICE_URL=http://atlas_service:8000
-      - AUTH_SERVICE_URL=http://auth_service:80
-      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
-      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:80
-      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
-      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
-      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8015
-      - MAXIMUS_ORCHESTRATOR_URL=http://maximus_orchestrator_service:80
-      - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8001
+      - GOOGLE_OSINT_SERVICE_URL=http://google_osint_service:8101
+      - MAXIMUS_PREDICT_URL=http://maximus_predict:8126
+      - ATLAS_SERVICE_URL=http://atlas_service:8109
+      - AUTH_SERVICE_URL=http://auth_service:8110
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:8111
+      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:8112
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8113
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8114
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8115
+      - MAXIMUS_ORCHESTRATOR_URL=http://maximus_orchestrator_service:8125
+      - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8150
       - MAXIMUS_EUREKA_URL=http://maximus_eureka:8200
       - MAXIMUS_ORACULO_URL=http://maximus_oraculo:8201
-      - IMMUNIS_API_URL=http://immunis_api_service:8005
-      - HCL_ANALYZER_URL=http://hcl_analyzer_service:8020
-      - HCL_EXECUTOR_URL=http://hcl_executor_service:8021
-      - HCL_KB_URL=http://hcl_kb_service:8022
-      - HCL_MONITOR_URL=http://hcl_monitor_service:8023
-      - HCL_PLANNER_URL=http://hcl_planner_service:8024
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_URL=http://vestibular_service:8010
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
-      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
-      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
-      - NETWORK_RECON_URL=http://network_recon_service:8032
-      - VULN_INTEL_URL=http://vuln_intel_service:8033
-      - WEB_ATTACK_URL=http://web_attack_service:8034
-      - C2_ORCHESTRATION_URL=http://c2_orchestration_service:8035
-      - BAS_URL=http://bas_service:8036
-      - OFFENSIVE_GATEWAY_URL=http://offensive_gateway:8037
+      - IMMUNIS_API_URL=http://immunis_api_service:8300
+      - HCL_ANALYZER_URL=http://hcl_analyzer_service:8426
+      - HCL_EXECUTOR_URL=http://hcl_executor_service:8432
+      - HCL_KB_URL=http://hcl_kb_service:8420
+      - HCL_MONITOR_URL=http://hcl_monitor_service:8423
+      - HCL_PLANNER_URL=http://hcl_planner_service:8429
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
+      - VESTIBULAR_URL=http://vestibular_service:8210
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8212
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8213
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8214
+      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8215
+      - NETWORK_RECON_URL=http://network_recon_service:8532
+      - VULN_INTEL_URL=http://vuln_intel_service:8533
+      - WEB_ATTACK_URL=http://web_attack_service:8534
+      - C2_ORCHESTRATION_URL=http://c2_orchestration_service:8535
+      - BAS_URL=http://bas_service:8536
+      - OFFENSIVE_GATEWAY_URL=http://offensive_gateway:8537
+      # FASE 8: Enhanced Cognition
+      - NARRATIVE_ANALYSIS_URL=http://narrative_analysis_service:8015
+      - PREDICTIVE_THREAT_HUNTING_URL=http://predictive_threat_hunting_service:8016
+      - AUTONOMOUS_INVESTIGATION_URL=http://autonomous_investigation_service:8017
     depends_on:
       - redis
       - sinesp_service
@@ -145,7 +149,7 @@ services:
     build: ./backend/services/sinesp_service
     container_name: vertice-sinesp
     ports:
-      - "8001:80"
+      - "8102:80"
     volumes:
       - ./backend/services/sinesp_service:/code
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
@@ -162,7 +166,7 @@ services:
       - /etc:/etc:ro
     privileged: true
     ports:
-      - "8002:80"
+      - "8103:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - vertice-network
@@ -174,7 +178,7 @@ services:
     volumes:
       - ./backend/services/domain_service:/app
     ports:
-      - "8003:80"
+      - "8104:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - vertice-network
@@ -186,7 +190,7 @@ services:
     volumes:
       - ./backend/services/ip_intelligence_service:/app
     ports:
-      - "8004:80"
+      - "8105:80"
     environment:
       - CACHE_TTL_SECONDS=86400
     command: uvicorn main:app --host 0.0.0.0 --port 80
@@ -200,7 +204,7 @@ services:
     volumes:
       - ./backend/services/network_monitor_service:/app
     ports:
-      - "8005:80"
+      - "8120:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     cap_add:
       - NET_ADMIN
@@ -215,7 +219,7 @@ services:
     volumes:
       - ./backend/services/nmap_service:/app
     ports:
-      - "8006:80"
+      - "8106:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     cap_add:
       - NET_ADMIN
@@ -228,7 +232,7 @@ services:
     build: ./backend/services/osint_service
     container_name: vertice-osint
     ports:
-      - "8007:8007"
+      - "8100:8007"
     environment:
       - REDIS_HOST=redis
       - MAXIMUS_HOST=maximus_predict
@@ -253,7 +257,7 @@ services:
       - ./backend/services/maximus_predict:/code
       - maximus-models:/models
     ports:
-      - "8008:80"
+      - "8126:80"
     environment:
       - MODEL_PATH=/models
       - PYTHONUNBUFFERED=1
@@ -271,7 +275,7 @@ services:
     volumes:
       - ./backend/services/atlas_service:/app
     ports:
-      - "8009:8000" # Expondo numa porta externa livre
+      - "8109:8000" # Expondo numa porta externa livre
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - vertice-network
@@ -286,7 +290,7 @@ services:
     volumes:
       - ./backend/services/auth_service:/app
     ports:
-      - "8010:80"
+      - "8110:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     environment:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
@@ -311,7 +315,7 @@ services:
     volumes:
       - ./backend/services/vuln_scanner_service:/app
     ports:
-      - "8011:80"
+      - "8111:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     cap_add:
       - NET_ADMIN
@@ -329,7 +333,7 @@ services:
     volumes:
       - ./backend/services/social_eng_service:/app
     ports:
-      - "8012:80"
+      - "8112:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - vertice-network
@@ -373,7 +377,7 @@ services:
     build: ./backend/services/threat_intel_service
     container_name: vertice-threat-intel
     ports:
-      - "8013:8013"
+      - "8113:8013"
     volumes:
       - ./backend/services/threat_intel_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8013 --reload
@@ -390,7 +394,7 @@ services:
     build: ./backend/services/malware_analysis_service
     container_name: vertice-malware-analysis
     ports:
-      - "8014:8014"
+      - "8114:8014"
     volumes:
       - ./backend/services/malware_analysis_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8014 --reload
@@ -405,7 +409,7 @@ services:
     build: ./backend/services/ssl_monitor_service
     container_name: vertice-ssl-monitor
     ports:
-      - "8015:8015"
+      - "8115:8015"
     volumes:
       - ./backend/services/ssl_monitor_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8015 --reload
@@ -420,7 +424,7 @@ services:
     build: ./backend/services/adr_core_service
     container_name: vertice-adr-core
     ports:
-      - "8030:8030"
+      - "8130:8030"
     volumes:
       - ./backend/services/adr_core_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8030 --reload
@@ -435,7 +439,7 @@ services:
     build: ./backend/services/maximus_integration_service
     container_name: maximus-integration
     ports:
-      - "8099:8099"
+      - "8127:8099"
     volumes:
       - ./backend/services/maximus_integration_service:/app
       - ./backend/services/maximus_oraculo:/app/maximus_oraculo
@@ -444,8 +448,8 @@ services:
     environment:
       - ORACULO_TARGET_PATH=/app/maximus_oraculo
       - EUREKA_SCAN_PATH=/tmp/malware_samples
-      - ADR_CORE_URL=http://adr_core_service:8030
-      - MAXIMUS_CORE_URL=http://maximus_core_service:8001
+      - ADR_CORE_URL=http://adr_core_service:8130
+      - MAXIMUS_CORE_URL=http://maximus_core_service:8150
     depends_on:
       - adr_core_service
       - maximus_core_service
@@ -457,19 +461,19 @@ services:
     build: ./backend/services/maximus_orchestrator_service
     container_name: maximus-orchestrator
     ports:
-      - "8016:8016"
+      - "8125:8016"
     volumes:
       - ./backend/services/maximus_orchestrator_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8016 --reload
     environment:
-      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:80
-      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
-      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
-      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:80
-      - NMAP_SERVICE_URL=http://nmap_service:80
-      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
-      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:80
-      - DOMAIN_SERVICE_URL=http://domain_service:80
+      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8105
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8113
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8114
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8115
+      - NMAP_SERVICE_URL=http://nmap_service:8106
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:8111
+      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:8112
+      - DOMAIN_SERVICE_URL=http://domain_service:8104
     depends_on:
       - threat_intel_service
       - malware_analysis_service
@@ -487,7 +491,7 @@ services:
     build: ./backend/services/maximus_core_service
     container_name: maximus-core
     ports:
-      - "8001:8001"
+      - "8150:8001"
     volumes:
       - ./backend/services/maximus_core_service:/app
     command: python main.py
@@ -498,15 +502,15 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - REDIS_URL=redis://redis:6379
       - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/aurora
-      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:80
-      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:80
-      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:80
-      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:80
-      - NMAP_SERVICE_URL=http://nmap_service:80
-      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
-      - DOMAIN_SERVICE_URL=http://domain_service:80
-      - MAXIMUS_PREDICT_URL=http://maximus_predict:80
-      - OSINT_SERVICE_URL=http://osint-service:8007
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8113
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8114
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8115
+      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8105
+      - NMAP_SERVICE_URL=http://nmap_service:8106
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:8111
+      - DOMAIN_SERVICE_URL=http://domain_service:8104
+      - MAXIMUS_PREDICT_URL=http://maximus_predict:8126
+      - OSINT_SERVICE_URL=http://osint-service:8100
     depends_on:
       - redis
       - postgres
@@ -588,7 +592,7 @@ services:
       dockerfile: Dockerfile
     container_name: hcl-kb-service
     ports:
-      - "8100:8000"
+      - "8421:8000"
     environment:
       SERVICE_NAME: hcl_kb
       DATABASE_URL: postgresql+asyncpg://hcl_user:hcl_password@hcl-postgres/hcl_knowledge
@@ -613,7 +617,7 @@ services:
       dockerfile: Dockerfile
     container_name: hcl-monitor
     ports:
-      - "8101:8001"
+      - "8424:8001"
     environment:
       SERVICE_NAME: hcl_monitor
       KB_API_URL: http://hcl-kb-service:8000
@@ -646,7 +650,7 @@ services:
       dockerfile: Dockerfile
     container_name: hcl-analyzer
     ports:
-      - "8102:8002"
+      - "8427:8002"
     environment:
       SERVICE_NAME: hcl_analyzer
       KB_API_URL: http://hcl-kb-service:8000
@@ -677,7 +681,7 @@ services:
       dockerfile: Dockerfile
     container_name: hcl-planner
     ports:
-      - "8103:8003"
+      - "8430:8003"
     environment:
       SERVICE_NAME: hcl_planner
       KB_API_URL: http://hcl-kb-service:8000
@@ -710,7 +714,7 @@ services:
       dockerfile: Dockerfile
     container_name: hcl-executor
     ports:
-      - "8104:8004"
+      - "8433:8004"
     environment:
       SERVICE_NAME: hcl_executor
       KB_API_URL: http://hcl-kb-service:8000
@@ -750,7 +754,7 @@ services:
       dockerfile: Dockerfile
     container_name: rte-service
     ports:
-      - "8105:8005"
+      - "8606:8005"
     environment:
       RTE_HOST: 0.0.0.0
       RTE_PORT: 8005
@@ -775,7 +779,7 @@ services:
       dockerfile: Dockerfile
     container_name: hpc-service
     ports:
-      - "8106:8006"
+      - "8441:8006"
     environment:
       HPC_HOST: 0.0.0.0
       HPC_PORT: 8006
@@ -807,7 +811,7 @@ services:
       dockerfile: Dockerfile
     container_name: maximus-eureka
     ports:
-      - "8200:8200"
+      - "8151:8200"
     environment:
       SERVICE_NAME: maximus_eureka
       LOG_LEVEL: INFO
@@ -831,7 +835,7 @@ services:
       dockerfile: Dockerfile
     container_name: maximus-oraculo
     ports:
-      - "8201:8201"
+      - "8152:8201"
     environment:
       SERVICE_NAME: maximus_oraculo
       GEMINI_API_KEY: ${GEMINI_API_KEY}
@@ -858,7 +862,7 @@ services:
     build: ./backend/services/google_osint_service
     container_name: vertice-google-osint
     ports:
-      - "8031:8031"
+      - "8101:8031"
     volumes:
       - ./backend/services/google_osint_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8031 --reload
@@ -880,15 +884,15 @@ services:
     build: ./backend/services/immunis_api_service
     container_name: vertice-immunis-api
     ports:
-      - "8005:8005"
+      - "8300:8005"
     volumes:
       - ./backend/services/immunis_api_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8005 --reload
     environment:
-      - MACROPHAGE_URL=http://immunis_macrophage_service:8012
-      - NEUTROPHIL_URL=http://immunis_neutrophil_service:8013
-      - DENDRITIC_URL=http://immunis_dendritic_service:8014
-      - BCELL_URL=http://immunis_bcell_service:8016
+      - MACROPHAGE_URL=http://immunis_macrophage_service:8312
+      - NEUTROPHIL_URL=http://immunis_neutrophil_service:8313
+      - DENDRITIC_URL=http://immunis_dendritic_service:8314
+      - BCELL_URL=http://immunis_bcell_service:8316
     depends_on:
       - immunis_macrophage_service
       - immunis_neutrophil_service
@@ -902,7 +906,7 @@ services:
     build: ./backend/services/immunis_macrophage_service
     container_name: vertice-immunis-macrophage
     ports:
-      - "8012:8012"
+      - "8312:8012"
     volumes:
       - ./backend/services/immunis_macrophage_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8012 --reload
@@ -917,7 +921,7 @@ services:
     build: ./backend/services/immunis_neutrophil_service
     container_name: vertice-immunis-neutrophil
     ports:
-      - "8013:8013"
+      - "8313:8013"
     volumes:
       - ./backend/services/immunis_neutrophil_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8013 --reload
@@ -929,7 +933,7 @@ services:
     build: ./backend/services/immunis_dendritic_service
     container_name: vertice-immunis-dendritic
     ports:
-      - "8014:8014"
+      - "8314:8014"
     volumes:
       - ./backend/services/immunis_dendritic_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8014 --reload
@@ -941,7 +945,7 @@ services:
     build: ./backend/services/immunis_bcell_service
     container_name: vertice-immunis-bcell
     ports:
-      - "8016:8016"
+      - "8316:8016"
     volumes:
       - ./backend/services/immunis_bcell_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8016 --reload
@@ -953,7 +957,7 @@ services:
     build: ./backend/services/immunis_helper_t_service
     container_name: vertice-immunis-helper-t
     ports:
-      - "8017:8017"
+      - "8317:8017"
     volumes:
       - ./backend/services/immunis_helper_t_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8017 --reload
@@ -965,7 +969,7 @@ services:
     build: ./backend/services/immunis_cytotoxic_t_service
     container_name: vertice-immunis-cytotoxic-t
     ports:
-      - "8018:8018"
+      - "8318:8018"
     volumes:
       - ./backend/services/immunis_cytotoxic_t_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8018 --reload
@@ -977,7 +981,7 @@ services:
     build: ./backend/services/immunis_nk_cell_service
     container_name: vertice-immunis-nk-cell
     ports:
-      - "8019:8019"
+      - "8319:8019"
     volumes:
       - ./backend/services/immunis_nk_cell_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8019 --reload
@@ -993,7 +997,7 @@ services:
     build: ./backend/services/hcl_analyzer_service
     container_name: vertice-hcl-analyzer
     ports:
-      - "8020:8020"
+      - "8426:8020"
     volumes:
       - ./backend/services/hcl_analyzer_service:/app
       - hcl_analyzer_models:/models
@@ -1010,7 +1014,7 @@ services:
     build: ./backend/services/hcl_executor_service
     container_name: vertice-hcl-executor
     ports:
-      - "8021:8021"
+      - "8432:8021"
     volumes:
       - ./backend/services/hcl_executor_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8021 --reload
@@ -1025,7 +1029,7 @@ services:
     build: ./backend/services/hcl_kb_service
     container_name: vertice-hcl-kb
     ports:
-      - "8022:8022"
+      - "8420:8022"
     volumes:
       - ./backend/services/hcl_kb_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8022 --reload
@@ -1043,7 +1047,7 @@ services:
     build: ./backend/services/hcl_monitor_service
     container_name: vertice-hcl-monitor
     ports:
-      - "8023:8023"
+      - "8423:8023"
     volumes:
       - ./backend/services/hcl_monitor_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8023 --reload
@@ -1057,7 +1061,7 @@ services:
     build: ./backend/services/hcl_planner_service
     container_name: vertice-hcl-planner
     ports:
-      - "8024:8024"
+      - "8429:8024"
     volumes:
       - ./backend/services/hcl_planner_service:/app
       - hcl_planner_models:/models
@@ -1077,7 +1081,7 @@ services:
     build: ./backend/services/auditory_cortex_service
     container_name: vertice-auditory-cortex
     ports:
-      - "8007:8007"
+      - "8207:8007"
     volumes:
       - ./backend/services/auditory_cortex_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8007
@@ -1089,7 +1093,7 @@ services:
     build: ./backend/services/visual_cortex_service
     container_name: vertice-visual-cortex
     ports:
-      - "8006:8006"
+      - "8206:8006"
     volumes:
       - ./backend/services/visual_cortex_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8006
@@ -1101,7 +1105,7 @@ services:
     build: ./backend/services/somatosensory_service
     container_name: vertice-somatosensory
     ports:
-      - "8008:8008"
+      - "8208:8008"
     volumes:
       - ./backend/services/somatosensory_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8008
@@ -1113,7 +1117,7 @@ services:
     build: ./backend/services/chemical_sensing_service
     container_name: vertice-chemical-sensing
     ports:
-      - "8009:8009"
+      - "8209:8009"
     volumes:
       - ./backend/services/chemical_sensing_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8009
@@ -1125,7 +1129,7 @@ services:
     build: ./backend/services/vestibular_service
     container_name: vertice-vestibular
     ports:
-      - "8010:8010"
+      - "8210:8010"
     volumes:
       - ./backend/services/vestibular_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8010
@@ -1137,16 +1141,16 @@ services:
     build: ./backend/services/prefrontal_cortex_service
     container_name: vertice-prefrontal-cortex
     ports:
-      - "8011:8011"
+      - "8211:8011"
     volumes:
       - ./backend/services/prefrontal_cortex_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8011
     environment:
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_URL=http://vestibular_service:8010
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
+      - VESTIBULAR_URL=http://vestibular_service:8210
     depends_on:
       - visual_cortex_service
       - auditory_cortex_service
@@ -1161,16 +1165,16 @@ services:
     build: ./backend/services/digital_thalamus_service
     container_name: vertice-digital-thalamus
     ports:
-      - "8012:8012"
+      - "8212:8012"
     volumes:
       - ./backend/services/digital_thalamus_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8012
     environment:
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_URL=http://vestibular_service:8010
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
+      - VESTIBULAR_URL=http://vestibular_service:8210
     depends_on:
       - visual_cortex_service
       - auditory_cortex_service
@@ -1185,7 +1189,7 @@ services:
     build: ./backend/services/narrative_manipulation_filter
     container_name: vertice-narrative-filter
     ports:
-      - "8013:8013"
+      - "8213:8013"
     volumes:
       - ./backend/services/narrative_manipulation_filter:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8013
@@ -1197,19 +1201,19 @@ services:
     build: ./backend/services/ai_immune_system
     container_name: vertice-ai-immune
     ports:
-      - "8014:8014"
+      - "8214:8014"
     volumes:
       - ./backend/services/ai_immune_system:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8014
     environment:
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_URL=http://vestibular_service:8010
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8212
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8213
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
+      - VESTIBULAR_URL=http://vestibular_service:8210
     depends_on:
       - prefrontal_cortex_service
       - digital_thalamus_service
@@ -1222,20 +1226,20 @@ services:
     build: ./backend/services/homeostatic_regulation
     container_name: vertice-homeostatic-regulation
     ports:
-      - "8015:8015"
+      - "8215:8015"
     volumes:
       - ./backend/services/homeostatic_regulation:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8015
     environment:
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_URL=http://vestibular_service:8010
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
-      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
+      - VESTIBULAR_URL=http://vestibular_service:8210
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8212
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8213
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8214
     depends_on:
       - visual_cortex_service
       - auditory_cortex_service
@@ -1258,7 +1262,7 @@ services:
     build: ./backend/services/rte_service
     container_name: vertice-rte
     ports:
-      - "8026:8026"
+      - "8605:8026"
     volumes:
       - ./backend/services/rte_service:/app
       - rte_models:/models
@@ -1272,7 +1276,7 @@ services:
     build: ./backend/services/hpc_service
     container_name: vertice-hpc
     ports:
-      - "8027:8027"
+      - "8440:8027"
     volumes:
       - ./backend/services/hpc_service:/app
       - hpc_models:/models
@@ -1289,7 +1293,7 @@ services:
     build: ./backend/services/tataca_ingestion
     container_name: vertice-tataca-ingestion
     ports:
-      - "8028:8028"
+      - "8610:8028"
     volumes:
       - ./backend/services/tataca_ingestion:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8028 --reload
@@ -1305,7 +1309,7 @@ services:
     build: ./backend/services/seriema_graph
     container_name: vertice-seriema-graph
     ports:
-      - "8029:8029"
+      - "8611:8029"
     volumes:
       - ./backend/services/seriema_graph:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8029 --reload
@@ -1326,7 +1330,7 @@ services:
     build: ./backend/services/network_recon_service
     container_name: vertice-network-recon
     ports:
-      - "8032:8032"  # Service API
+      - "8532:8032"  # Service API
       - "9032:9032"  # Prometheus metrics
     cap_add:
       - NET_ADMIN
@@ -1345,16 +1349,16 @@ services:
       - MAX_SCAN_RATE=100000
       - DEFAULT_DEEP_SCAN_THRESHOLD=100
       - ENABLE_ASA_INTEGRATION=true
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_URL=http://vestibular_service:8010
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
-      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
-      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
+      - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
+      - VESTIBULAR_URL=http://vestibular_service:8210
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
+      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8212
+      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8213
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8214
+      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8215
       - ASA_REQUEST_TIMEOUT=10.0
       - SCAN_TIMEOUT=3600
       - METRICS_ENABLED=true
@@ -1377,7 +1381,7 @@ services:
     build: ./backend/services/vuln_intel_service
     container_name: vertice-vuln-intel
     ports:
-      - "8033:8033"  # Service API
+      - "8533:8033"  # Service API
       - "9033:9033"  # Prometheus metrics
     volumes:
       - ./backend/services/vuln_intel_service:/app
@@ -1400,9 +1404,9 @@ services:
       - EPSS_API_BASE=https://api.first.org/data/v1/epss
       - CVE_CACHE_TTL=3600
       - ENABLE_ASA_INTEGRATION=true
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
-      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
+      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8214
+      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8215
       - METRICS_ENABLED=true
       - METRICS_PORT=9033
     depends_on:
@@ -1422,7 +1426,7 @@ services:
     build: ./backend/services/web_attack_service
     container_name: vertice-web-attack
     ports:
-      - "8034:8034"  # Service API
+      - "8534:8034"  # Service API
       - "9034:9034"  # Prometheus metrics
     volumes:
       - ./backend/services/web_attack_service:/app
@@ -1446,9 +1450,9 @@ services:
       - ZAP_API_KEY=${ZAP_API_KEY}
       # ASA Integration
       - ENABLE_ASA_INTEGRATION=true
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
       - METRICS_ENABLED=true
       - METRICS_PORT=9034
     depends_on:
@@ -1472,7 +1476,7 @@ services:
       dockerfile: Dockerfile
     container_name: c2_orchestration_service
     ports:
-      - "8035:8035"  # API
+      - "8535:8035"  # API
       - "9035:9035"  # Prometheus metrics
     volumes:
       - ./backend/services/c2_orchestration_service:/app
@@ -1496,9 +1500,9 @@ services:
       - METASPLOIT_SSL=true
       # ASA Integration
       - ENABLE_ASA_INTEGRATION=true
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
       # Operational
       - MAX_CONCURRENT_BEACONS=100
       - MAX_CONCURRENT_SESSIONS=50
@@ -1526,7 +1530,7 @@ services:
       dockerfile: Dockerfile
     container_name: bas_service
     ports:
-      - "8036:8036"  # API
+      - "8536:8036"  # API
       - "9036:9036"  # Prometheus metrics
     volumes:
       - ./backend/services/bas_service:/app
@@ -1554,9 +1558,9 @@ services:
       - ELASTIC_API_KEY=${ELASTIC_API_KEY:-}
       # ASA Integration
       - ENABLE_ASA_INTEGRATION=true
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+      - SOMATOSENSORY_URL=http://somatosensory_service:8208
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
+      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8214
       # Remote Execution
       - ENABLE_REMOTE_EXECUTION=true
       - SSH_DEFAULT_USER=${BAS_SSH_USER:-bas_runner}
@@ -1589,7 +1593,7 @@ services:
       dockerfile: Dockerfile
     container_name: offensive_gateway
     ports:
-      - "8037:8037"  # API
+      - "8537:8037"  # API
       - "9037:9037"  # Prometheus metrics
     volumes:
       - ./backend/services/offensive_gateway:/app
@@ -1599,11 +1603,11 @@ services:
       - SERVICE_PORT=8037
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       # Backend Services
-      - NETWORK_RECON_URL=http://network_recon_service:8032
-      - VULN_INTEL_URL=http://vuln_intel_service:8033
-      - WEB_ATTACK_URL=http://web_attack_service:8034
-      - C2_ORCHESTRATION_URL=http://c2_orchestration_service:8035
-      - BAS_URL=http://bas_service:8036
+      - NETWORK_RECON_URL=http://network_recon_service:8532
+      - VULN_INTEL_URL=http://vuln_intel_service:8533
+      - WEB_ATTACK_URL=http://web_attack_service:8534
+      - C2_ORCHESTRATION_URL=http://c2_orchestration_service:8535
+      - BAS_URL=http://bas_service:8536
       # Workflows
       - MAX_CONCURRENT_WORKFLOWS=20
       - WORKFLOW_TIMEOUT_SECONDS=3600
@@ -1630,7 +1634,7 @@ services:
       - METRICS_PORT=9037
       # ASA
       - ENABLE_ASA_INTEGRATION=true
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
     depends_on:
       - network_recon_service
       - vuln_intel_service
@@ -1647,6 +1651,112 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # ============================================================================
+  # FASE 8: ENHANCED COGNITION (Q1-Q2 2026)
+  # Advanced narrative analysis, predictive threat hunting, autonomous investigation
+  # ============================================================================
+
+  # Narrative Analysis Service
+  narrative_analysis_service:
+    build:
+      context: ./backend/services/narrative_analysis_service
+      dockerfile: Dockerfile
+    container_name: narrative-analysis-service
+    ports:
+      - "8015:8015"
+    environment:
+      - SERVICE_NAME=narrative_analysis
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Analytics config
+      - ENABLE_SOCIAL_GRAPH_ANALYSIS=true
+      - ENABLE_BOT_DETECTION=true
+      - ENABLE_PROPAGANDA_ATTRIBUTION=true
+      - ENABLE_MEME_TRACKING=true
+      # Performance tuning
+      - MAX_GRAPH_NODES=100000
+      - COMMUNITY_DETECTION_RESOLUTION=1.0
+      - BOT_DETECTION_THRESHOLD=0.6
+      - ATTRIBUTION_MIN_CONFIDENCE=0.7
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8015/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Predictive Threat Hunting Service
+  predictive_threat_hunting_service:
+    build:
+      context: ./backend/services/predictive_threat_hunting_service
+      dockerfile: Dockerfile
+    container_name: predictive-threat-hunting-service
+    ports:
+      - "8016:8016"
+    environment:
+      - SERVICE_NAME=predictive_threat_hunting
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Prediction config
+      - DEFAULT_TIME_HORIZON_HOURS=24
+      - MIN_PREDICTION_CONFIDENCE=0.6
+      - ENABLE_ATTACK_PREDICTION=true
+      - ENABLE_VULNERABILITY_FORECASTING=true
+      - ENABLE_PROACTIVE_HUNTING=true
+      # Forecasting parameters
+      - VULNERABILITY_FORECAST_WINDOW_DAYS=30
+      - MIN_EXPLOIT_PROBABILITY=0.5
+      # Pattern detection
+      - MIN_PATTERN_HISTORY=5
+      - PERIODICITY_DETECTION_THRESHOLD=0.7
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8016/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Autonomous Investigation Service
+  autonomous_investigation_service:
+    build:
+      context: ./backend/services/autonomous_investigation_service
+      dockerfile: Dockerfile
+    container_name: autonomous-investigation-service
+    ports:
+      - "8017:8017"
+    environment:
+      - SERVICE_NAME=autonomous_investigation
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Investigation config
+      - DEFAULT_PLAYBOOK=standard
+      - ENABLE_ACTOR_PROFILING=true
+      - ENABLE_CAMPAIGN_CORRELATION=true
+      - ENABLE_AUTO_INVESTIGATION=true
+      # Attribution settings
+      - ATTRIBUTION_MIN_CONFIDENCE=0.6
+      - TTP_SIMILARITY_WEIGHT=0.7
+      - INFRASTRUCTURE_SIMILARITY_WEIGHT=0.3
+      # Campaign correlation
+      - CAMPAIGN_TIME_WINDOW_DAYS=30
+      - MIN_CAMPAIGN_SIZE=2
+      - CORRELATION_THRESHOLD=0.6
+      # Evidence collection
+      - ENABLE_EVIDENCE_CHAIN=true
+      - ENABLE_AUTO_RECOMMENDATIONS=true
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8017/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 # ============================
 # NETWORKS
