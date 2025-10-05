@@ -1,0 +1,231 @@
+{
+  "dashboard": {
+    "title": "VÉRTICE - Bio-Inspired Overview",
+    "description": "Main dashboard showing reflex, immune, and conscious layers",
+    "tags": ["vertice", "bio-inspired", "overview"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Architecture - 3 Layers",
+        "type": "text",
+        "gridPos": {"x": 0, "y": 0, "w": 24, "h": 3},
+        "options": {
+          "mode": "markdown",
+          "content": "# VÉRTICE - O Primeiro Sistema Imunológico Digital\n\n**Camada 1: Reflexos (RTE)** < 5ms | **Camada 2: Sistema Imunológico (Immunis)** < 100ms | **Camada 3: Córtex (MAXIMUS)** ~30s"
+        }
+      },
+      {
+        "id": 2,
+        "title": "RTE Latency (p50, p95, p99)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 3, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(rte_scan_latency_bucket[1m]))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(rte_scan_latency_bucket[1m]))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(rte_scan_latency_bucket[1m]))",
+            "legendFormat": "p99"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Latency"},
+          {"show": false}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [50], "type": "gt"},
+              "query": {"params": ["C", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "name": "RTE p99 > 50ms"
+        }
+      },
+      {
+        "id": 3,
+        "title": "RTE Throughput (events/s)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 3, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(rte_events_processed_total[1m])",
+            "legendFormat": "RTE Throughput"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Events/s"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Immune Cell Activity",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 11, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immunis_neutrophil_activations_total[1m])",
+            "legendFormat": "Neutrophils"
+          },
+          {
+            "expr": "rate(immunis_dendritic_antigen_presentations_total[1m])",
+            "legendFormat": "Dendritic Cells"
+          },
+          {
+            "expr": "rate(immunis_helper_t_coordinations_total[1m])",
+            "legendFormat": "Helper T Cells"
+          },
+          {
+            "expr": "rate(immunis_cytotoxic_t_eliminations_total[1m])",
+            "legendFormat": "Cytotoxic T Cells"
+          },
+          {
+            "expr": "rate(immunis_nk_detections_total[1m])",
+            "legendFormat": "NK Cells"
+          },
+          {
+            "expr": "rate(immunis_bcell_memory_formations_total[1m])",
+            "legendFormat": "B Cells"
+          },
+          {
+            "expr": "rate(immunis_macrophage_phagocytosis_total[1m])",
+            "legendFormat": "Macrophages"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Activations/s"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "MAXIMUS Inference Latency",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 19, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(maximus_inference_latency_seconds_bucket[5m]))",
+            "legendFormat": "p95"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "HPC Prediction Error (Zero-Day Indicator)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 19, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "hpc_prediction_error",
+            "legendFormat": "Prediction Error"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Error"},
+          {"show": false}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [2.0], "type": "gt"},
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "name": "HPC Prediction Error Spike"
+        }
+      },
+      {
+        "id": 7,
+        "title": "Neuromodulation State",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 27, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "neuromod_dopamine_rpe",
+            "legendFormat": "Dopamine (RPE)"
+          },
+          {
+            "expr": "neuromod_serotonin_epsilon",
+            "legendFormat": "Serotonin (Epsilon)"
+          },
+          {
+            "expr": "neuromod_acetylcholine_gain",
+            "legendFormat": "Acetylcholine (Attention)"
+          },
+          {
+            "expr": "neuromod_norepinephrine_urgency",
+            "legendFormat": "Norepinephrine (Urgency)"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Value"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "HSAS Skill Execution",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 35, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(hsas_skill_execution_total[1m])",
+            "legendFormat": "Total Executions"
+          },
+          {
+            "expr": "rate(hsas_skill_execution_failures_total[1m])",
+            "legendFormat": "Failures"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Executions/s"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Threat Detection Pipeline",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 35, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(threats_detected_total[1m])",
+            "legendFormat": "Detected"
+          },
+          {
+            "expr": "rate(false_positives_total[1m])",
+            "legendFormat": "False Positives"
+          },
+          {
+            "expr": "rate(threats_mitigated_total[1m])",
+            "legendFormat": "Mitigated"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Threats/s"},
+          {"show": false}
+        ]
+      }
+    ],
+    "time": {"from": "now-1h", "to": "now"},
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m"]
+    }
+  }
+}

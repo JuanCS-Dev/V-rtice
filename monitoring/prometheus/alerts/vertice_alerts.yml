@@ -1,0 +1,246 @@
+# FASE 7: Prometheus Alert Rules
+# Bio-inspired alerting for VÉRTICE
+
+groups:
+  # === REFLEX LAYER ALERTS (CRITICAL) ===
+  - name: reflex_layer
+    interval: 10s
+    rules:
+      # RTE latency exceeded (reflex too slow)
+      - alert: RTELatencyHigh
+        expr: histogram_quantile(0.99, rte_scan_latency_bucket) > 50
+        for: 1m
+        labels:
+          severity: critical
+          layer: reflex
+        annotations:
+          summary: "RTE p99 latency exceeded 50ms"
+          description: "Reflex response time is {{ $value }}ms (target: <50ms). Reflexes are degraded."
+
+      # RTE throughput too low
+      - alert: RTEThroughputLow
+        expr: rate(rte_events_processed_total[1m]) < 1000
+        for: 2m
+        labels:
+          severity: warning
+          layer: reflex
+        annotations:
+          summary: "RTE throughput below 1000 events/s"
+          description: "Processing {{ $value }} events/s. May indicate bottleneck."
+
+      # RTE error rate high
+      - alert: RTEErrorRateHigh
+        expr: rate(rte_errors_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+          layer: reflex
+        annotations:
+          summary: "RTE error rate elevated"
+          description: "{{ $value }} errors/s in reflex layer. CRITICAL."
+
+  # === IMMUNE LAYER ALERTS ===
+  - name: immune_layer
+    interval: 30s
+    rules:
+      # Neutrophil response time high
+      - alert: NeutrophilLatencyHigh
+        expr: histogram_quantile(0.95, immunis_neutrophil_response_latency_bucket) > 100
+        for: 2m
+        labels:
+          severity: warning
+          layer: immune
+          cell_type: neutrophil
+        annotations:
+          summary: "Neutrophil response > 100ms"
+          description: "First-line immune response degraded ({{ $value }}ms)."
+
+      # Dendritic cell antigen presentation backlog
+      - alert: DendriticBacklog
+        expr: immunis_dendritic_antigen_queue_size > 1000
+        for: 5m
+        labels:
+          severity: warning
+          layer: immune
+          cell_type: dendritic
+        annotations:
+          summary: "Dendritic cell antigen backlog"
+          description: "{{ $value }} antigens queued for presentation."
+
+      # Helper T cell coordination failure
+      - alert: HelperTCoordFailed
+        expr: rate(immunis_helper_t_coordination_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          layer: immune
+          cell_type: helper_t
+        annotations:
+          summary: "Helper T cell coordination failures"
+          description: "Immune coordination failing at {{ $value }} failures/s."
+
+      # Cytokine storm (too many messages)
+      - alert: CytokineStorm
+        expr: rate(kafka_messages_in_per_sec{topic=~"cytokine.*"}[1m]) > 10000
+        for: 1m
+        labels:
+          severity: warning
+          layer: immune
+        annotations:
+          summary: "Cytokine storm detected"
+          description: "Excessive immune signaling: {{ $value }} messages/s."
+
+  # === CONSCIOUS LAYER ALERTS ===
+  - name: conscious_layer
+    interval: 60s
+    rules:
+      # MAXIMUS inference latency high
+      - alert: MaximusLatencyHigh
+        expr: histogram_quantile(0.95, maximus_inference_latency_seconds_bucket) > 30
+        for: 5m
+        labels:
+          severity: warning
+          layer: conscious
+        annotations:
+          summary: "MAXIMUS inference > 30s"
+          description: "Conscious analysis taking {{ $value }}s (target: <30s)."
+
+      # HSAS skill execution failure rate
+      - alert: HSASSkillFailureRateHigh
+        expr: rate(hsas_skill_execution_failures_total[10m]) / rate(hsas_skill_execution_total[10m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          layer: conscious
+        annotations:
+          summary: "HSAS skill failure rate > 10%"
+          description: "{{ $value | humanizePercentage }} of skill executions failing."
+
+      # HPC prediction error spike (zero-day indicator)
+      - alert: HPCPredictionErrorSpike
+        expr: (hpc_prediction_error - hpc_prediction_error offset 5m) / hpc_prediction_error offset 5m > 2.0
+        for: 1m
+        labels:
+          severity: warning
+          layer: conscious
+        annotations:
+          summary: "HPC prediction error spike (possible zero-day)"
+          description: "Prediction error increased {{ $value | humanizePercentage }}. Novel threat?"
+
+  # === NEUROMODULATION ALERTS ===
+  - name: neuromodulation
+    interval: 60s
+    rules:
+      # Dopamine RPE extreme
+      - alert: DopamineRPEExtreme
+        expr: abs(neuromod_dopamine_rpe) > 10
+        for: 2m
+        labels:
+          severity: warning
+          layer: neuromodulation
+        annotations:
+          summary: "Dopamine RPE extreme ({{ $value }})"
+          description: "Reward prediction error out of normal range."
+
+      # Serotonin epsilon stuck high (perpetual exploration)
+      - alert: SerotoninEpsilonStuckHigh
+        expr: neuromod_serotonin_epsilon > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          layer: neuromodulation
+        annotations:
+          summary: "Serotonin epsilon stuck high ({{ $value }})"
+          description: "System stuck in exploration mode. May indicate learning failure."
+
+      # Norepinephrine urgency high (sustained stress)
+      - alert: NorepinephrineUrgencyHigh
+        expr: neuromod_norepinephrine_urgency > 0.9
+        for: 10m
+        labels:
+          severity: critical
+          layer: neuromodulation
+        annotations:
+          summary: "Sustained high urgency ({{ $value }})"
+          description: "System under sustained stress for 10+ minutes."
+
+  # === INFRASTRUCTURE ALERTS ===
+  - name: infrastructure
+    interval: 30s
+    rules:
+      # Service down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} has been down for 1+ minute."
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.job }}"
+          description: "CPU usage at {{ $value | humanizePercentage }}."
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / process_virtual_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.job }}"
+          description: "Memory usage at {{ $value | humanizePercentage }}."
+
+      # Disk space low
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space low on {{ $labels.instance }}"
+          description: "Only {{ $value | humanizePercentage }} space remaining."
+
+  # === SLO ALERTS ===
+  - name: slos
+    interval: 60s
+    rules:
+      # SLO: 99.9% uptime violated
+      - alert: SLOUptimeViolation
+        expr: (1 - (sum(up == 0) / count(up))) < 0.999
+        for: 5m
+        labels:
+          severity: critical
+          slo: uptime
+        annotations:
+          summary: "SLO violation: Uptime < 99.9%"
+          description: "Current uptime: {{ $value | humanizePercentage }}."
+
+      # SLO: Detection rate < 95%
+      - alert: SLODetectionRateViolation
+        expr: rate(threats_detected_total[1h]) / rate(threats_total[1h]) < 0.95
+        for: 10m
+        labels:
+          severity: critical
+          slo: detection_rate
+        annotations:
+          summary: "SLO violation: Detection rate < 95%"
+          description: "Current detection rate: {{ $value | humanizePercentage }}."
+
+      # SLO: False positive rate > 0.1%
+      - alert: SLOFalsePositiveRateViolation
+        expr: rate(false_positives_total[1h]) / rate(alerts_total[1h]) > 0.001
+        for: 10m
+        labels:
+          severity: warning
+          slo: false_positive_rate
+        annotations:
+          summary: "SLO violation: False positive rate > 0.1%"
+          description: "Current FP rate: {{ $value | humanizePercentage }}."

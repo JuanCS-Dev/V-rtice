@@ -1,0 +1,190 @@
+# Prometheus Alert Rules for Maximus AI 3.0
+
+groups:
+  - name: neuromodulation_alerts
+    interval: 30s
+    rules:
+      - alert: DopamineLearningRateCritical
+        expr: neuromodulation_dopamine_learning_rate > 0.008 or neuromodulation_dopamine_learning_rate < 0.0002
+        for: 2m
+        labels:
+          severity: warning
+          component: dopamine
+        annotations:
+          summary: "Dopamine learning rate out of normal range"
+          description: "Learning rate is {{ $value }}, outside safe operating range [0.0002, 0.008]"
+
+      - alert: SystemStateAlert
+        expr: neuromodulation_system_state >= 3
+        for: 1m
+        labels:
+          severity: critical
+          component: neuromodulation
+        annotations:
+          summary: "Neuromodulation system in ALERT or CRITICAL state"
+          description: "System state is {{ $value }} (3=ALERT, 4=CRITICAL)"
+
+      - alert: NeuromodulationServiceDown
+        expr: up{job="neuromodulation"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: neuromodulation
+        annotations:
+          summary: "Neuromodulation service is down"
+          description: "Service has been down for more than 1 minute"
+
+  - name: memory_consolidation_alerts
+    interval: 30s
+    rules:
+      - alert: BufferUtilizationHigh
+        expr: memory_consolidation_buffer_utilization_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: memory_consolidation
+        annotations:
+          summary: "Experience replay buffer utilization is high"
+          description: "Buffer is {{ $value }}% full, may need to increase capacity"
+
+      - alert: BufferUtilizationCritical
+        expr: memory_consolidation_buffer_utilization_percent > 98
+        for: 2m
+        labels:
+          severity: critical
+          component: memory_consolidation
+        annotations:
+          summary: "Experience replay buffer almost full"
+          description: "Buffer is {{ $value }}% full, experiences may be dropped"
+
+      - alert: MemoryConsolidationServiceDown
+        expr: up{job="memory_consolidation"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: memory_consolidation
+        annotations:
+          summary: "Memory Consolidation service is down"
+          description: "Service has been down for more than 1 minute"
+
+  - name: hsas_alerts
+    interval: 30s
+    rules:
+      - alert: LowSuccessRate
+        expr: hsas_success_rate < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: hsas
+        annotations:
+          summary: "HSAS success rate is low"
+          description: "Success rate is {{ $value }}, below 50% threshold"
+
+      - alert: HSASServiceDown
+        expr: up{job="hsas"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: hsas
+        annotations:
+          summary: "HSAS service is down"
+          description: "Service has been down for more than 1 minute"
+
+  - name: strategic_planning_alerts
+    interval: 30s
+    rules:
+      - alert: HighCriticalRisks
+        expr: strategic_planning_risks_by_level{level="critical"} > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: strategic_planning
+        annotations:
+          summary: "High number of critical risks detected"
+          description: "{{ $value }} critical risks identified"
+
+      - alert: PendingApprovalsBacklog
+        expr: strategic_planning_pending_approvals > 50
+        for: 15m
+        labels:
+          severity: warning
+          component: strategic_planning
+        annotations:
+          summary: "Approval backlog is growing"
+          description: "{{ $value }} approvals pending for more than 15 minutes"
+
+      - alert: StrategicPlanningServiceDown
+        expr: up{job="strategic_planning"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: strategic_planning
+        annotations:
+          summary: "Strategic Planning service is down"
+          description: "Service has been down for more than 1 minute"
+
+  - name: immunis_alerts
+    interval: 30s
+    rules:
+      - alert: HighInflammationLevel
+        expr: immunis_inflammation_level > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: immunis
+        annotations:
+          summary: "High inflammation level detected"
+          description: "Inflammation level is {{ $value }}, indicating high system stress"
+
+      - alert: LowThreatEliminationRate
+        expr: rate(immunis_threats_eliminated_total[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: immunis
+        annotations:
+          summary: "Low threat elimination rate"
+          description: "Elimination rate is {{ $value }} threats/sec"
+
+      - alert: ImmunisServiceDown
+        expr: up{job="immunis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: immunis
+        annotations:
+          summary: "Immunis service is down"
+          description: "Service has been down for more than 1 minute"
+
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Low disk space"
+          description: "Only {{ $value }}% disk space available on {{ $labels.instance }}"

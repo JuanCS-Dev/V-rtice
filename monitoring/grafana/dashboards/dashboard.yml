@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'Maximus AI Dashboards'
+    orgId: 1
+    folder: 'Maximus AI 3.0'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: true

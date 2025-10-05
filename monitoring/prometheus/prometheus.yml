@@ -1,0 +1,148 @@
+# FASE 7: Prometheus Configuration
+# Production-ready monitoring for VÉRTICE
+
+global:
+  scrape_interval: 15s  # Scrape targets every 15 seconds
+  evaluation_interval: 15s  # Evaluate rules every 15 seconds
+  external_labels:
+    cluster: 'vertice-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Load rules
+rule_files:
+  - 'alerts/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # MAXIMUS Core Service
+  - job_name: 'maximus_core'
+    static_configs:
+      - targets: ['maximus_core_service:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 5s  # More frequent for critical service
+
+  # HSAS Service (Hybrid Skill Acquisition)
+  - job_name: 'hsas'
+    static_configs:
+      - targets: ['hsas_service:8051']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Neuromodulation Service
+  - job_name: 'neuromodulation'
+    static_configs:
+      - targets: ['neuromodulation_service:8052']
+    metrics_path: '/metrics'
+    scrape_interval: 30s  # Less frequent (meta-learning is slower)
+
+  # RTE (Reflex Triage Engine) - CRITICAL
+  - job_name: 'rte'
+    static_configs:
+      - targets: ['rte_service:8010']
+    metrics_path: '/metrics'
+    scrape_interval: 5s  # High frequency for reflex monitoring
+    metric_relabel_configs:
+      # Track latency histogram
+      - source_labels: [__name__]
+        regex: 'rte_scan_latency_.*'
+        action: keep
+
+  # HPC (Hierarchical Predictive Coding)
+  - job_name: 'hpc'
+    static_configs:
+      - targets: ['hpc_service:8011']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Immunis Services (7 cell types)
+  - job_name: 'immunis_neutrophil'
+    static_configs:
+      - targets: ['immunis_neutrophil_service:8047']
+    metrics_path: '/metrics'
+
+  - job_name: 'immunis_dendritic'
+    static_configs:
+      - targets: ['immunis_dendritic_service:8045']
+    metrics_path: '/metrics'
+
+  - job_name: 'immunis_helper_t'
+    static_configs:
+      - targets: ['immunis_helper_t_service:8042']
+    metrics_path: '/metrics'
+
+  - job_name: 'immunis_cytotoxic_t'
+    static_configs:
+      - targets: ['immunis_cytotoxic_t_service:8043']
+    metrics_path: '/metrics'
+
+  - job_name: 'immunis_nk'
+    static_configs:
+      - targets: ['immunis_nk_cell_service:8044']
+    metrics_path: '/metrics'
+
+  - job_name: 'immunis_bcell'
+    static_configs:
+      - targets: ['immunis_bcell_service:8041']
+    metrics_path: '/metrics'
+
+  - job_name: 'immunis_macrophage'
+    static_configs:
+      - targets: ['immunis_macrophage_service:8046']
+    metrics_path: '/metrics'
+
+  # API Services
+  - job_name: 'domain_service'
+    static_configs:
+      - targets: ['domain_service:8002']
+    metrics_path: '/metrics'
+
+  - job_name: 'ip_service'
+    static_configs:
+      - targets: ['ip_service:8003']
+    metrics_path: '/metrics'
+
+  - job_name: 'malware_analysis'
+    static_configs:
+      - targets: ['malware_analysis_service:8004']
+    metrics_path: '/metrics'
+
+  # Offensive Arsenal (if deployed)
+  - job_name: 'offensive_gateway'
+    static_configs:
+      - targets: ['offensive_gateway:9000']
+    metrics_path: '/metrics'
+
+  # Node Exporter (system metrics)
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100']
+
+  # cAdvisor (container metrics)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: '/metrics'
+
+  # Kafka (Cytokine messaging)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+    metrics_path: '/metrics'
+
+  # PostgreSQL (if used)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    metrics_path: '/metrics'
