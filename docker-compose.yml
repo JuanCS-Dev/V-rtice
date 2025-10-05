@@ -59,6 +59,10 @@ services:
       - NARRATIVE_ANALYSIS_URL=http://narrative_analysis_service:8015
       - PREDICTIVE_THREAT_HUNTING_URL=http://predictive_threat_hunting_service:8016
       - AUTONOMOUS_INVESTIGATION_URL=http://autonomous_investigation_service:8017
+      # FASE 9: Immune Enhancement
+      - IMMUNIS_TREG_URL=http://immunis_treg_service:8018
+      - MEMORY_CONSOLIDATION_URL=http://memory_consolidation_service:8019
+      - ADAPTIVE_IMMUNITY_URL=http://adaptive_immunity_service:8020
     depends_on:
       - redis
       - sinesp_service
@@ -1753,6 +1757,119 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8017/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ============================================================================
+  # FASE 9: IMMUNE ENHANCEMENT (Q3-Q4 2026)
+  # Regulatory T-Cells, Memory Consolidation, Adaptive Immunity
+  # Bio-inspired adaptive learning and false positive suppression
+  # ============================================================================
+
+  # Regulatory T-Cells Service (Treg)
+  immunis_treg_service:
+    build:
+      context: ./backend/services/immunis_treg_service
+      dockerfile: Dockerfile
+    container_name: immunis-treg-service
+    ports:
+      - "8018:8018"
+    environment:
+      - SERVICE_NAME=regulatory_t_cells
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Tolerance learning
+      - DEFAULT_TOLERANCE_THRESHOLD=0.7
+      - MIN_OBSERVATIONS_FOR_TOLERANCE=10
+      - BEHAVIORAL_FINGERPRINT_WINDOW=100
+      # False positive suppression
+      - FP_SUPPRESSION_THRESHOLD=0.6
+      - ANOMALY_SCORE_THRESHOLD=3.0
+      - ENABLE_ADAPTIVE_LEARNING=true
+      # Performance
+      - MAX_ENTITY_PROFILES=10000
+      - PROFILE_CLEANUP_INTERVAL_HOURS=24
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8018/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Memory Consolidation Service
+  memory_consolidation_service:
+    build:
+      context: ./backend/services/memory_consolidation_service
+      dockerfile: Dockerfile
+    container_name: memory-consolidation-service
+    ports:
+      - "8019:8019"
+    environment:
+      - SERVICE_NAME=memory_consolidation
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Consolidation parameters
+      - CONSOLIDATION_THRESHOLD=0.6
+      - CIRCADIAN_INTERVAL_HOURS=6
+      - ENABLE_CIRCADIAN_RHYTHM=true
+      # Memory management
+      - MAX_STM_SIZE=10000
+      - MAX_LTM_SIZE=100000
+      - MEMORY_DECAY_RATE=0.05
+      # Pattern extraction
+      - MIN_PATTERN_SIZE=3
+      - TEMPORAL_WINDOW_MINUTES=60
+      - ENABLE_ATTACK_CHAIN_DETECTION=true
+      # Performance
+      - ENABLE_AUTO_CONSOLIDATION=true
+      - CONSOLIDATION_BATCH_SIZE=1000
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8019/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Adaptive Immunity Service
+  adaptive_immunity_service:
+    build:
+      context: ./backend/services/adaptive_immunity_service
+      dockerfile: Dockerfile
+    container_name: adaptive-immunity-service
+    ports:
+      - "8020:8020"
+    environment:
+      - SERVICE_NAME=adaptive_immunity
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Antibody generation
+      - INITIAL_REPERTOIRE_SIZE=100
+      - ENABLE_VDJ_RECOMBINATION=true
+      - DIVERSIFICATION_ENABLED=true
+      # Affinity maturation
+      - MUTATION_RATE=0.1
+      - MUTATIONS_PER_CYCLE=5
+      - ENABLE_SOMATIC_HYPERMUTATION=true
+      # Clonal selection
+      - EXPANSION_THRESHOLD=0.8
+      - MAX_CLONES_PER_ANTIBODY=10
+      - ENABLE_CLONAL_EXPANSION=true
+      # Learning
+      - ENABLE_FEEDBACK_LEARNING=true
+      - MIN_FEEDBACK_FOR_MATURATION=5
+      # Performance
+      - MAX_ANTIBODY_POOL_SIZE=1000
+      - MATURATION_CYCLE_INTERVAL_HOURS=12
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8020/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
