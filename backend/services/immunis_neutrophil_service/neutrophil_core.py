@@ -1,145 +1,289 @@
-"""Immunis System - Neutrophil Core Logic.
+"""Immunis Neutrophil Service - Production-Ready First Responder
 
-This module simulates the function of a Neutrophil, a type of phagocytic cell
-that acts as a first responder in the innate immune system. Neutrophils are
-characterized by their rapid response to threats and their short lifespan.
+Bio-inspired rapid response service (ephemeral, TTL 24h):
+- Lightweight container (minimal resources)
+- Auto-scaling based on threat load (HPA integration)
+- Ephemeral lifecycle (24h TTL, then self-destruct)
+- Integration with RTE for immediate threat response
 
-Biological Analogy:
--   **Rapid Response**: The first cells to arrive at an infection site.
--   **Phagocytosis**: Engulfing and destroying pathogens.
--   **NETosis**: Releasing Neutrophil Extracellular Traps (NETs) to trap and
-    kill pathogens at a distance.
--   **Apoptosis**: Programmed cell death after a short period of activity.
-
-Computational Implementation:
--   A lightweight, ephemeral service designed for fast, automated responses.
--   Handles common, pattern-based threats like port scans and brute-force attacks.
--   Deploys "NETs" in the form of rate limits or temporary blocks.
+Like biological neutrophils: First to arrive, short-lived, disposable.
+NO MOCKS - Production-ready implementation.
 """
 
-import logging
-import time
 import asyncio
-from typing import Dict, List, Optional
-from dataclasses import dataclass
-from enum import Enum
+import logging
+from typing import Dict, Any, List, Optional
+from datetime import datetime, timedelta
+import time
 
 logger = logging.getLogger(__name__)
 
 
-class NeutrophilState(str, Enum):
-    """Enumeration for the lifecycle states of a Neutrophil."""
-    CIRCULATING = "circulating"
-    ACTIVATED = "activated"
-    PHAGOCYTOSING = "phagocytosing"
-    APOPTOSIS = "apoptosis"
-
-
-class ThreatType(str, Enum):
-    """Enumeration for threat types that a Neutrophil can respond to."""
-    PORT_SCAN = "port_scan"
-    BRUTE_FORCE = "brute_force"
-    C2_COMMUNICATION = "c2_communication"
-
-
-@dataclass
-class ThreatEvent:
-    """Represents a detected threat event that requires a response.
-
-    Attributes:
-        event_id (str): A unique identifier for the threat event.
-        threat_type (ThreatType): The category of the threat.
-        source_ip (str): The source IP address of the threat.
-        severity (float): The severity of the threat (0.0 to 1.0).
-    """
-    event_id: str
-    threat_type: ThreatType
-    source_ip: str
-    severity: float
-
-
-@dataclass
-class NeutrophilAction:
-    """Represents a defensive action taken by a Neutrophil.
-
-    Attributes:
-        action_type (str): The type of action taken (e.g., 'block_ip').
-        target (str): The target of the action (e.g., an IP address).
-        success (bool): Whether the action was successfully executed.
-    """
-    action_type: str
-    target: str
-    success: bool
-
-
 class NeutrophilCore:
-    """Simulates a Neutrophil, the fast-response unit of the innate immune system.
+    """Production-ready Neutrophil service for rapid threat response.
 
-    This class is designed to be lightweight and ephemeral. It responds quickly to
-    common, pattern-based threats by executing predefined defensive actions, such
-    as blocking an IP address.
+    Characteristics:
+    - Lightweight and fast deployment
+    - Auto-scales with threat load
+    - Self-destructs after 24h (ephemeral)
+    - Integrates with RTE for immediate action
     """
 
-    def __init__(self, neutrophil_id: str, ttl_seconds: int = 86400):
-        """Initializes the NeutrophilCore.
+    def __init__(
+        self,
+        neutrophil_id: str,
+        ttl_hours: int = 24,
+        rte_endpoint: str = "http://reflex-triage-engine:8003"
+    ):
+        """Initialize Neutrophil.
 
         Args:
-            neutrophil_id (str): A unique identifier for this Neutrophil instance.
-            ttl_seconds (int): The time-to-live in seconds before the Neutrophil
-                undergoes apoptosis (programmed death).
+            neutrophil_id: Unique neutrophil instance ID
+            ttl_hours: Time to live in hours (default 24)
+            rte_endpoint: RTE service endpoint
         """
         self.neutrophil_id = neutrophil_id
-        self.ttl_seconds = ttl_seconds
-        self.birth_time = time.time()
-        self.state = NeutrophilState.CIRCULATING
-        self.stats = {"threats_neutralized": 0, "actions_taken": 0}
+        self.birth_time = datetime.now()
+        self.death_time = self.birth_time + timedelta(hours=ttl_hours)
+        self.rte_endpoint = rte_endpoint
 
-    async def respond(self, threat: ThreatEvent) -> List[NeutrophilAction]:
-        """Responds to a detected threat by executing a predefined action.
+        self.threats_engaged = []
+        self.actions_taken = []
+        self.status = "active"
 
-        The response is determined by the type of threat. This simulates the
-        Neutrophil's rapid, non-specific response.
+        logger.info(f"Neutrophil {neutrophil_id} born (TTL: {ttl_hours}h, death at {self.death_time})")
 
-        Args:
-            threat (ThreatEvent): The threat event to respond to.
-
-        Returns:
-            List[NeutrophilAction]: A list of actions taken in response.
-        """
-        logger.info(f"Neutrophil {self.neutrophil_id} responding to {threat.threat_type.value}")
-        self.state = NeutrophilState.ACTIVATED
-        
-        actions = []
-        if threat.threat_type in [ThreatType.PORT_SCAN, ThreatType.BRUTE_FORCE, ThreatType.C2_COMMUNICATION]:
-            action = await self._execute_action("block_ip", threat.source_ip)
-            actions.append(action)
-
-        self.stats["threats_neutralized"] += 1
-        self.stats["actions_taken"] += len(actions)
-        self.state = NeutrophilState.CIRCULATING
-        return actions
-
-    async def _execute_action(self, action_type: str, target: str) -> NeutrophilAction:
-        """Simulates the execution of a defensive action.
-
-        In a real system, this would integrate with a firewall, EDR, or other
-        enforcement point.
+    async def initiate_rapid_response(
+        self,
+        threat_id: str,
+        threat_type: str,
+        severity: str,
+        details: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Initiate rapid first-responder action against threat.
 
         Args:
-            action_type (str): The type of action to execute.
-            target (str): The target of the action.
+            threat_id: Unique threat identifier
+            threat_type: Type of threat
+            severity: Threat severity
+            details: Threat details
 
         Returns:
-            NeutrophilAction: A record of the action performed.
+            Response outcome dictionary
         """
-        logger.info(f"Executing action: {action_type} on target {target}")
-        await asyncio.sleep(0.01) # Simulate fast execution
-        return NeutrophilAction(action_type=action_type, target=target, success=True)
+        if not self.is_alive():
+            logger.warning(f"Neutrophil {self.neutrophil_id} expired - cannot respond")
+            return {'status': 'expired', 'neutrophil_id': self.neutrophil_id}
 
-    def should_apoptose(self) -> bool:
-        """Checks if the Neutrophil has reached the end of its lifespan."""
-        return (time.time() - self.birth_time) >= self.ttl_seconds
+        logger.info(f"Neutrophil {self.neutrophil_id} responding to threat {threat_id}")
 
-    def get_stats(self) -> Dict[str, Any]:
-        """Returns a dictionary of performance statistics."""
-        return self.stats
+        start_time = time.time()
+
+        # Determine response action
+        action = self._determine_action(threat_type, severity, details)
+
+        # Execute via RTE autonomous response
+        result = await self._execute_via_rte(action, threat_id, details)
+
+        # Record engagement
+        engagement = {
+            'timestamp': datetime.now().isoformat(),
+            'threat_id': threat_id,
+            'threat_type': threat_type,
+            'severity': severity,
+            'action_taken': action,
+            'result': result,
+            'response_time_ms': (time.time() - start_time) * 1000
+        }
+
+        self.threats_engaged.append(engagement)
+        self.actions_taken.append(action['type'])
+
+        logger.info(
+            f"Neutrophil {self.neutrophil_id} responded in "
+            f"{engagement['response_time_ms']:.1f}ms (action: {action['type']})"
+        )
+
+        return engagement
+
+    def _determine_action(
+        self,
+        threat_type: str,
+        severity: str,
+        details: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Determine appropriate rapid response action.
+
+        Args:
+            threat_type: Type of threat
+            severity: Severity level
+            details: Threat details
+
+        Returns:
+            Action dictionary
+        """
+        if severity == "critical" or threat_type == "malware":
+            return {
+                'type': 'isolate_and_quarantine',
+                'target': details.get('host_id', 'unknown'),
+                'level': 'full'
+            }
+        elif severity == "high" or threat_type == "intrusion":
+            return {
+                'type': 'block_network',
+                'target': details.get('ip_address', 'unknown'),
+                'duration': '1h'
+            }
+        elif threat_type == "process_anomaly":
+            return {
+                'type': 'kill_process',
+                'target': details.get('process_id', 'unknown')
+            }
+        else:
+            return {
+                'type': 'monitor_intensively',
+                'target': details.get('target', 'unknown'),
+                'duration': '30m'
+            }
+
+    async def _execute_via_rte(
+        self,
+        action: Dict[str, Any],
+        threat_id: str,
+        details: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Execute action via RTE autonomous response.
+
+        Args:
+            action: Action to execute
+            threat_id: Threat ID
+            details: Threat details
+
+        Returns:
+            Execution result
+        """
+        try:
+            import httpx
+
+            # Prepare RTE request
+            rte_request = {
+                'event_data': details.get('data', '').encode().hex() if isinstance(details.get('data'), str) else '',
+                'event_metadata': {
+                    'threat_id': threat_id,
+                    'ip': details.get('ip_address'),
+                    'process_id': details.get('process_id'),
+                    **details
+                },
+                'auto_respond': True
+            }
+
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.rte_endpoint}/rte/scan",
+                    json=rte_request,
+                    timeout=5.0
+                )
+
+                if response.status_code == 200:
+                    rte_result = response.json()
+                    return {
+                        'success': True,
+                        'rte_decision': rte_result.get('decision'),
+                        'rte_action': rte_result.get('action_taken'),
+                        'latency_ms': rte_result.get('latency_ms')
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'error': f'RTE returned {response.status_code}'
+                    }
+
+        except Exception as e:
+            logger.error(f"RTE execution failed: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def is_alive(self) -> bool:
+        """Check if neutrophil is alive (within TTL).
+
+        Returns:
+            True if alive, False if expired
+        """
+        return datetime.now() < self.death_time
+
+    def remaining_lifetime_seconds(self) -> float:
+        """Get remaining lifetime in seconds.
+
+        Returns:
+            Seconds until self-destruction
+        """
+        if not self.is_alive():
+            return 0.0
+
+        return (self.death_time - datetime.now()).total_seconds()
+
+    async def self_destruct(self) -> Dict[str, Any]:
+        """Self-destruct when TTL expires.
+
+        Returns:
+            Destruction summary
+        """
+        logger.info(f"Neutrophil {self.neutrophil_id} self-destructing (TTL expired)")
+
+        self.status = "destroyed"
+
+        summary = {
+            'neutrophil_id': self.neutrophil_id,
+            'birth_time': self.birth_time.isoformat(),
+            'death_time': datetime.now().isoformat(),
+            'lifetime_hours': (datetime.now() - self.birth_time).total_seconds() / 3600,
+            'threats_engaged': len(self.threats_engaged),
+            'actions_taken': len(self.actions_taken),
+            'action_breakdown': {
+                action: self.actions_taken.count(action)
+                for action in set(self.actions_taken)
+            }
+        }
+
+        # Clear memory
+        self.threats_engaged.clear()
+        self.actions_taken.clear()
+
+        logger.info(
+            f"Neutrophil {self.neutrophil_id} destroyed: "
+            f"{summary['threats_engaged']} threats engaged in "
+            f"{summary['lifetime_hours']:.1f}h"
+        )
+
+        return summary
+
+    async def get_response_status(self, threat_id: str) -> Optional[Dict[str, Any]]:
+        """Get status of response to specific threat.
+
+        Args:
+            threat_id: Threat ID to query
+
+        Returns:
+            Response status or None
+        """
+        for engagement in self.threats_engaged:
+            if engagement.get('threat_id') == threat_id:
+                return engagement
+        return None
+
+    async def get_status(self) -> Dict[str, Any]:
+        """Get neutrophil status.
+
+        Returns:
+            Status dictionary
+        """
+        return {
+            'neutrophil_id': self.neutrophil_id,
+            'status': self.status,
+            'is_alive': self.is_alive(),
+            'birth_time': self.birth_time.isoformat(),
+            'death_time': self.death_time.isoformat(),
+            'remaining_lifetime_seconds': self.remaining_lifetime_seconds(),
+            'threats_engaged': len(self.threats_engaged),
+            'actions_taken': len(self.actions_taken),
+            'rte_endpoint': self.rte_endpoint
+        }
