@@ -1,0 +1,53 @@
+# ============================================================================
+# NAMESPACE - Cognitive Defense System
+# Isolated namespace for the narrative manipulation filter service
+# ============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cognitive-defense
+  labels:
+    name: cognitive-defense
+    environment: production
+    team: ai-security
+    project: vertice-platform
+  annotations:
+    description: "AI-powered narrative manipulation detection system"
+    version: "2.0.0"
+---
+# Resource quotas for the namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: cognitive-defense-quota
+  namespace: cognitive-defense
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: "16Gi"
+    limits.cpu: "16"
+    limits.memory: "32Gi"
+    persistentvolumeclaims: "5"
+    services.loadbalancers: "2"
+---
+# Limit ranges for default resource constraints
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cognitive-defense-limits
+  namespace: cognitive-defense
+spec:
+  limits:
+    - max:
+        cpu: "4"
+        memory: "8Gi"
+      min:
+        cpu: "100m"
+        memory: "128Mi"
+      default:
+        cpu: "500m"
+        memory: "1Gi"
+      defaultRequest:
+        cpu: "200m"
+        memory: "512Mi"
+      type: Container
