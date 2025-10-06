@@ -10,6 +10,8 @@ Testes:
 - Ethical evaluation
 - Statistics tracking
 - Error handling
+- Privacy budget enforcement (Phase 4.1)
+- Federated learning checks (Phase 4.2)
 
 Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
@@ -47,6 +49,8 @@ def ethical_guardian(governance_config):
         enable_governance=True,
         enable_ethics=True,
         enable_xai=True,
+        enable_privacy=True,  # Phase 4.1: Differential Privacy
+        enable_fl=False,  # Phase 4.2: FL (disabled by default for tests)
         enable_compliance=True,
     )
     # Disable audit logger for tests (requires PostgreSQL)
@@ -337,6 +341,179 @@ async def test_multiple_policy_validation(ethical_guardian):
 
 
 # ============================================================================
+# TEST 8: PRIVACY BUDGET ENFORCEMENT (PHASE 4.1)
+# ============================================================================
+
+@pytest.mark.asyncio
+async def test_privacy_budget_enforcement(ethical_guardian):
+    """Test Phase 4.1: Differential Privacy budget enforcement."""
+    print("\n" + "=" * 80)
+    print("TEST 8: Privacy Budget Enforcement (Phase 4.1)")
+    print("=" * 80)
+
+    # First, test action with PII when budget is available
+    result1 = await ethical_guardian.validate_action(
+        action="process_user_data",
+        context={
+            "authorized": True,
+            "logged": True,
+            "processes_personal_data": True,
+            "has_pii": True,
+        },
+        actor="data_analyst",
+    )
+
+    # Assertions for available budget
+    assert result1.privacy is not None, "Should have privacy check result"
+    assert result1.privacy.privacy_budget_ok, "Budget should be available"
+    assert result1.privacy.privacy_level == "very_high", "Should have very_high privacy level"
+    assert result1.privacy.total_epsilon == 3.0, "Should have total epsilon of 3.0"
+    assert result1.privacy.total_delta == 1e-5, "Should have total delta of 1e-5"
+
+    print(f"✅ Privacy check passed:")
+    print(f"   Privacy level: {result1.privacy.privacy_level}")
+    print(f"   Budget: ε={result1.privacy.total_epsilon}, δ={result1.privacy.total_delta}")
+    print(f"   Used: ε={result1.privacy.used_epsilon:.2f}/{result1.privacy.total_epsilon}")
+    print(f"   Remaining: ε={result1.privacy.remaining_epsilon:.2f}")
+    print(f"   Queries executed: {result1.privacy.queries_executed}")
+    print(f"   Duration: {result1.privacy.duration_ms:.1f}ms")
+
+    # Test 2: Exhaust budget and verify rejection
+    # First, manually exhaust the budget by using all epsilon
+    ethical_guardian.privacy_budget.used_epsilon = ethical_guardian.privacy_budget.total_epsilon
+
+    result2 = await ethical_guardian.validate_action(
+        action="process_more_user_data",
+        context={
+            "authorized": True,
+            "logged": True,
+            "processes_personal_data": True,
+            "has_pii": True,
+        },
+        actor="data_analyst",
+    )
+
+    # Assertions for exhausted budget
+    assert result2.privacy is not None, "Should have privacy check result"
+    assert result2.privacy.budget_exhausted, "Budget should be exhausted"
+    assert not result2.is_approved, "Action should be rejected"
+    assert result2.decision_type == EthicalDecisionType.REJECTED_BY_PRIVACY, "Should be rejected by privacy"
+    assert len(result2.rejection_reasons) > 0, "Should have rejection reason"
+    assert any("budget exhausted" in reason.lower() for reason in result2.rejection_reasons), "Should mention budget exhausted"
+
+    print(f"\n✅ Privacy budget exhaustion correctly blocked action:")
+    print(f"   Decision: {result2.decision_type.value}")
+    print(f"   Rejection reasons: {result2.rejection_reasons}")
+
+    # Reset budget for other tests
+    ethical_guardian.privacy_budget.used_epsilon = 0.0
+    ethical_guardian.privacy_budget.used_delta = 0.0
+
+    print(f"\n✅ Test passed: Phase 4.1 Differential Privacy working correctly")
+
+
+# ============================================================================
+# TEST 9: FEDERATED LEARNING CHECK (PHASE 4.2)
+# ============================================================================
+
+@pytest.mark.asyncio
+async def test_federated_learning_check(governance_config):
+    """Test Phase 4.2: Federated Learning readiness check."""
+    print("\n" + "=" * 80)
+    print("TEST 9: Federated Learning Check (Phase 4.2)")
+    print("=" * 80)
+
+    # Create guardian with FL enabled
+    guardian_with_fl = EthicalGuardian(
+        governance_config=governance_config,
+        enable_governance=True,
+        enable_ethics=True,
+        enable_xai=True,
+        enable_privacy=True,
+        enable_fl=True,  # Enable FL for this test
+        enable_compliance=True,
+    )
+    guardian_with_fl.audit_logger = None
+
+    # Test 1: Model training action (should trigger FL check)
+    result1 = await guardian_with_fl.validate_action(
+        action="train_threat_model",
+        context={
+            "authorized": True,
+            "logged": True,
+        },
+        actor="ml_engineer",
+    )
+
+    # Assertions for FL-ready action
+    assert result1.fl is not None, "Should have FL check result"
+    assert result1.fl.fl_ready, "Should be FL ready for training action"
+    # Valid FL statuses: initializing, waiting_for_clients, training, aggregating, completed
+    valid_fl_statuses = ["initializing", "waiting_for_clients", "training", "aggregating", "completed"]
+    assert result1.fl.fl_status in valid_fl_statuses, f"Should have valid FL status (got {result1.fl.fl_status})"
+    assert result1.fl.model_type is not None, "Should have model type"
+    assert result1.fl.aggregation_strategy is not None, "Should have aggregation strategy"
+
+    print(f"✅ FL check for training action:")
+    print(f"   FL ready: {result1.fl.fl_ready}")
+    print(f"   FL status: {result1.fl.fl_status}")
+    print(f"   Model type: {result1.fl.model_type}")
+    print(f"   Aggregation strategy: {result1.fl.aggregation_strategy}")
+    print(f"   Requires DP: {result1.fl.requires_dp}")
+    if result1.fl.requires_dp:
+        print(f"   DP parameters: ε={result1.fl.dp_epsilon}, δ={result1.fl.dp_delta}")
+    print(f"   Duration: {result1.fl.duration_ms:.1f}ms")
+
+    # Test 2: Non-training action (should not be FL ready)
+    result2 = await guardian_with_fl.validate_action(
+        action="list_users",
+        context={
+            "authorized": True,
+            "logged": True,
+        },
+        actor="analyst",
+    )
+
+    # Assertions for non-FL action
+    assert result2.fl is not None, "Should have FL check result"
+    assert not result2.fl.fl_ready, "Should NOT be FL ready for non-training action"
+    assert result2.fl.fl_status == "not_applicable", "Should be not_applicable"
+
+    print(f"\n✅ FL check for non-training action:")
+    print(f"   FL ready: {result2.fl.fl_ready}")
+    print(f"   FL status: {result2.fl.fl_status}")
+
+    # Test 3: FL disabled (default guardian)
+    guardian_no_fl = EthicalGuardian(
+        governance_config=governance_config,
+        enable_governance=True,
+        enable_ethics=True,
+        enable_xai=True,
+        enable_privacy=True,
+        enable_fl=False,  # FL disabled
+        enable_compliance=True,
+    )
+    guardian_no_fl.audit_logger = None
+
+    result3 = await guardian_no_fl.validate_action(
+        action="train_threat_model",
+        context={
+            "authorized": True,
+            "logged": True,
+        },
+        actor="ml_engineer",
+    )
+
+    # Assertions for FL disabled
+    assert result3.fl is None, "Should have no FL check when disabled"
+
+    print(f"\n✅ FL disabled correctly:")
+    print(f"   FL check result: {result3.fl}")
+
+    print(f"\n✅ Test passed: Phase 4.2 Federated Learning working correctly")
+
+
+# ============================================================================
 # MAIN TEST RUNNER
 # ============================================================================
 
@@ -346,6 +523,7 @@ if __name__ == "__main__":
     print("=" * 80)
     print("\nRunning comprehensive integration tests...")
     print("Testing: EthicalGuardian, EthicalToolWrapper, Tool Orchestration")
+    print("Phases Tested: Governance, Ethics, XAI, Privacy (DP), FL, Compliance")
     print("\n" + "=" * 80)
 
     pytest.main([__file__, "-v", "--tb=short", "-s"])

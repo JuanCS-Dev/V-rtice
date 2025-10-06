@@ -88,6 +88,8 @@ class MaximusIntegrated:
             enable_governance=True,
             enable_ethics=True,
             enable_xai=True,
+            enable_privacy=True,  # Phase 4.1: Differential Privacy
+            enable_fl=False,  # Phase 4.2: FL (disabled by default - optional)
             enable_compliance=True,
         )
         self.ethical_wrapper = EthicalToolWrapper(

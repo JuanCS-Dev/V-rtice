@@ -37,6 +37,23 @@ from ethics import ActionContext, EthicalIntegrationEngine, EthicalVerdict
 # Phase 2: XAI
 from xai import DetailLevel, ExplanationEngine, ExplanationType
 
+# Phase 4.1: Differential Privacy
+from privacy import (
+    PrivacyAccountant,
+    PrivacyBudget,
+    PrivacyLevel,
+    DPAggregator,
+    CompositionType,
+)
+
+# Phase 4.2: Federated Learning
+from federated_learning import (
+    FLConfig,
+    FLStatus,
+    AggregationStrategy,
+    ModelType,
+)
+
 # Phase 6: Compliance
 from compliance import ComplianceEngine, ComplianceConfig, RegulationType
 
@@ -48,6 +65,7 @@ class EthicalDecisionType(str, Enum):
     APPROVED_WITH_CONDITIONS = "approved_with_conditions"
     REJECTED_BY_GOVERNANCE = "rejected_by_governance"
     REJECTED_BY_ETHICS = "rejected_by_ethics"
+    REJECTED_BY_PRIVACY = "rejected_by_privacy"
     REJECTED_BY_COMPLIANCE = "rejected_by_compliance"
     ERROR = "error"
 
@@ -94,6 +112,38 @@ class ComplianceCheckResult:
 
 
 @dataclass
+class PrivacyCheckResult:
+    """Resultado do check de privacidade diferencial (Phase 4.1)."""
+
+    privacy_budget_ok: bool
+    privacy_level: str  # PrivacyLevel.value
+    total_epsilon: float
+    used_epsilon: float
+    remaining_epsilon: float
+    total_delta: float
+    used_delta: float
+    remaining_delta: float
+    budget_exhausted: bool
+    queries_executed: int
+    duration_ms: float = 0.0
+
+
+@dataclass
+class FLCheckResult:
+    """Resultado do check de federated learning (Phase 4.2)."""
+
+    fl_ready: bool
+    fl_status: str  # FLStatus.value
+    model_type: Optional[str] = None  # ModelType.value
+    aggregation_strategy: Optional[str] = None  # AggregationStrategy.value
+    requires_dp: bool = False
+    dp_epsilon: Optional[float] = None
+    dp_delta: Optional[float] = None
+    notes: List[str] = field(default_factory=list)
+    duration_ms: float = 0.0
+
+
+@dataclass
 class EthicalDecisionResult:
     """Resultado completo da decisão ética."""
 
@@ -107,6 +157,8 @@ class EthicalDecisionResult:
     governance: Optional[GovernanceCheckResult] = None
     ethics: Optional[EthicsCheckResult] = None
     xai: Optional[XAICheckResult] = None
+    privacy: Optional[PrivacyCheckResult] = None  # Phase 4.1
+    fl: Optional[FLCheckResult] = None  # Phase 4.2
     compliance: Optional[ComplianceCheckResult] = None
 
     # Summary
@@ -173,9 +225,12 @@ class EthicalGuardian:
     def __init__(
         self,
         governance_config: Optional[GovernanceConfig] = None,
+        privacy_budget: Optional[PrivacyBudget] = None,
         enable_governance: bool = True,
         enable_ethics: bool = True,
         enable_xai: bool = True,
+        enable_privacy: bool = True,
+        enable_fl: bool = False,  # FL is optional
         enable_compliance: bool = True,
     ):
         """
@@ -183,15 +238,20 @@ class EthicalGuardian:
 
         Args:
             governance_config: Configuração do governance (usa default se None)
+            privacy_budget: Privacy budget para DP (usa default se None)
             enable_governance: Habilita checks de governance
             enable_ethics: Habilita avaliação ética
             enable_xai: Habilita explicações XAI
+            enable_privacy: Habilita checks de privacy (Phase 4.1)
+            enable_fl: Habilita checks de federated learning (Phase 4.2)
             enable_compliance: Habilita checks de compliance
         """
         self.governance_config = governance_config or GovernanceConfig()
         self.enable_governance = enable_governance
         self.enable_ethics = enable_ethics
         self.enable_xai = enable_xai
+        self.enable_privacy = enable_privacy
+        self.enable_fl = enable_fl
         self.enable_compliance = enable_compliance
 
         # Initialize Phase 0: Governance
@@ -234,6 +294,37 @@ class EthicalGuardian:
             )
         else:
             self.xai_engine = None
+
+        # Initialize Phase 4.1: Differential Privacy
+        if self.enable_privacy:
+            # Create privacy budget if not provided (default: moderate privacy)
+            self.privacy_budget = privacy_budget or PrivacyBudget(
+                total_epsilon=3.0,  # Medium privacy level
+                total_delta=1e-5,
+            )
+            # Create privacy accountant for tracking budget usage
+            self.privacy_accountant = PrivacyAccountant(
+                total_epsilon=self.privacy_budget.total_epsilon,
+                total_delta=self.privacy_budget.total_delta,
+                composition_type=CompositionType.ADVANCED_SEQUENTIAL,
+            )
+        else:
+            self.privacy_budget = None
+            self.privacy_accountant = None
+
+        # Initialize Phase 4.2: Federated Learning
+        if self.enable_fl:
+            # Default FL config for threat intelligence sharing
+            self.fl_config = FLConfig(
+                model_type=ModelType.THREAT_CLASSIFIER,
+                aggregation_strategy=AggregationStrategy.DP_FEDAVG,
+                min_clients=3,
+                use_differential_privacy=True,
+                dp_epsilon=8.0,
+                dp_delta=1e-5,
+            )
+        else:
+            self.fl_config = None
 
         # Initialize Phase 6: Compliance
         if self.enable_compliance:
@@ -334,9 +425,11 @@ class EthicalGuardian:
                     return result
 
             # ================================================================
-            # PARALLEL: PHASE 2 (XAI) + PHASE 6 (Compliance)
+            # PARALLEL: PHASE 2 (XAI) + PHASE 4 (Privacy & FL) + PHASE 6 (Compliance)
             # ================================================================
-            # XAI and Compliance are optional - failures won't block approval
+            # These phases are optional - failures won't block approval
+
+            # Phase 2: XAI
             if self.enable_xai and result.ethics:
                 try:
                     result.xai = await self._generate_explanation(
@@ -346,6 +439,36 @@ class EthicalGuardian:
                     # XAI failure is not critical - log and continue
                     result.xai = None
 
+            # Phase 4.1: Differential Privacy
+            if self.enable_privacy:
+                try:
+                    result.privacy = await self._privacy_check(action, context)
+                    # Reject if privacy budget exhausted and action processes PII
+                    if not result.privacy.privacy_budget_ok and (
+                        context.get("processes_personal_data")
+                        or context.get("has_pii")
+                    ):
+                        result.decision_type = EthicalDecisionType.REJECTED_BY_PRIVACY
+                        result.is_approved = False
+                        result.rejection_reasons.append(
+                            f"Privacy budget exhausted (ε={result.privacy.used_epsilon:.2f}/{result.privacy.total_epsilon:.2f})"
+                        )
+                        result.total_duration_ms = (time.time() - start_time) * 1000
+                        await self._log_decision(result)
+                        return result
+                except Exception as e:
+                    # Privacy check failure is not critical if not processing PII
+                    result.privacy = None
+
+            # Phase 4.2: Federated Learning
+            if self.enable_fl:
+                try:
+                    result.fl = await self._fl_check(action, context)
+                except Exception as e:
+                    # FL check failure is not critical
+                    result.fl = None
+
+            # Phase 6: Compliance
             if self.enable_compliance:
                 try:
                     result.compliance = await self._compliance_check(action, context)
@@ -605,6 +728,106 @@ class EthicalGuardian:
             regulations_checked=regulations_to_check,
             compliance_results=compliance_results,
             overall_compliant=overall_compliant,
+            duration_ms=duration_ms,
+        )
+
+    async def _privacy_check(
+        self, action: str, context: Dict[str, Any]
+    ) -> PrivacyCheckResult:
+        """
+        Phase 4.1: Check differential privacy budget and constraints.
+
+        Verifica se a ação respeita o privacy budget e princípios de DP.
+
+        Target: <50ms
+        """
+        start_time = time.time()
+
+        # Get current budget status
+        budget = self.privacy_budget
+        budget_ok = not budget.budget_exhausted
+
+        # Check if action processes personal data
+        processes_pii = context.get("processes_personal_data", False) or context.get(
+            "has_pii", False
+        )
+
+        # If action processes PII, check budget
+        if processes_pii and budget.budget_exhausted:
+            budget_ok = False
+
+        duration_ms = (time.time() - start_time) * 1000
+
+        return PrivacyCheckResult(
+            privacy_budget_ok=budget_ok,
+            privacy_level=budget.privacy_level.value,
+            total_epsilon=budget.total_epsilon,
+            used_epsilon=budget.used_epsilon,
+            remaining_epsilon=budget.remaining_epsilon,
+            total_delta=budget.total_delta,
+            used_delta=budget.used_delta,
+            remaining_delta=budget.remaining_delta,
+            budget_exhausted=budget.budget_exhausted,
+            queries_executed=len(budget.queries_executed),
+            duration_ms=duration_ms,
+        )
+
+    async def _fl_check(
+        self, action: str, context: Dict[str, Any]
+    ) -> FLCheckResult:
+        """
+        Phase 4.2: Check federated learning readiness and constraints.
+
+        Verifica se a ação é compatível com FL e se requer DP.
+
+        Target: <30ms
+        """
+        start_time = time.time()
+
+        # Check if action involves model training/aggregation
+        is_model_training = any(
+            keyword in action.lower()
+            for keyword in ["train", "model", "learn", "aggregate", "federated"]
+        )
+
+        # FL is ready if config exists and action involves training
+        fl_ready = is_model_training and self.fl_config is not None
+
+        # Determine FL status
+        if fl_ready:
+            fl_status = FLStatus.INITIALIZING.value
+            model_type = self.fl_config.model_type.value if self.fl_config else None
+            aggregation_strategy = (
+                self.fl_config.aggregation_strategy.value if self.fl_config else None
+            )
+            requires_dp = self.fl_config.use_differential_privacy if self.fl_config else False
+            dp_epsilon = self.fl_config.dp_epsilon if self.fl_config else None
+            dp_delta = self.fl_config.dp_delta if self.fl_config else None
+            notes = ["FL ready for model training"] if fl_ready else []
+        else:
+            fl_status = FLStatus.FAILED.value if is_model_training else "not_applicable"
+            model_type = None
+            aggregation_strategy = None
+            requires_dp = False
+            dp_epsilon = None
+            dp_delta = None
+            notes = (
+                ["FL not configured"]
+                if is_model_training
+                else ["Action does not require FL"]
+            )
+
+        duration_ms = (time.time() - start_time) * 1000
+
+        return FLCheckResult(
+            fl_ready=fl_ready,
+            fl_status=fl_status,
+            model_type=model_type,
+            aggregation_strategy=aggregation_strategy,
+            requires_dp=requires_dp,
+            dp_epsilon=dp_epsilon,
+            dp_delta=dp_delta,
+            notes=notes,
             duration_ms=duration_ms,
         )
 
