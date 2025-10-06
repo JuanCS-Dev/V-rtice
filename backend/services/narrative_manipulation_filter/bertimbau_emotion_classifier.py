@@ -16,10 +16,10 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from sentence_transformers import SentenceTransformer
 
-from .models import EmotionProfile, EmotionCategory
-from .cache_manager import cache_manager, CacheCategory
-from .utils import hash_text
-from .config import get_settings
+from models import EmotionProfile, EmotionCategory
+from cache_manager import cache_manager, CacheCategory
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

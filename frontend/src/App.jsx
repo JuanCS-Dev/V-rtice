@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
 import { queryClient } from './config/queryClient';
-import { LanguageSwitcher } from './components/shared/LanguageSwitcher';
 import { SkipLink } from './components/shared/SkipLink';
 import './i18n/config'; // Initialize i18n
 
@@ -90,7 +89,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary context="app-root" title="Application Error">
         <SkipLink href="#main-content" />
-        <LanguageSwitcher position="top-right" />
         <main id="main-content" role="main">
           {currentView === 'main' ? (
             <LandingPage setCurrentView={setCurrentView} />

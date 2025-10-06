@@ -16,16 +16,16 @@ import time
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .config import get_settings
-from .models import (
+from config import get_settings
+from models import (
     AnalysisRequest,
     AnalysisResponse,
     CognitiveDefenseReport,
     HealthCheckResponse
 )
-from .database import db_manager, get_db_session
-from .cache_manager import cache_manager
-from .kafka_client import kafka_client
+from database import db_manager, get_db_session
+from cache_manager import cache_manager
+from kafka_client import kafka_client
 
 # Configure logging
 logging.basicConfig(
@@ -94,7 +94,7 @@ async def lifespan(app: FastAPI):
     else:
         logger.info("✅ All systems initialized successfully")
 
-    logger.info(f"🎯 Cognitive Defense System v{settings.VERSION} ready on port {settings.PORT}")
+    logger.info(f"🎯 Cognitive Defense System v{settings.SERVICE_VERSION} ready on port {settings.SERVICE_PORT}")
 
     yield
 
@@ -131,7 +131,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Cognitive Defense System",
     description="Advanced narrative manipulation detection inspired by prefrontal cortex architecture",
-    version=settings.VERSION,
+    version=settings.SERVICE_VERSION,
     lifespan=lifespan,
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
@@ -218,7 +218,7 @@ async def health_check() -> HealthCheckResponse:
 
     return HealthCheckResponse(
         status=overall_status,
-        version=settings.VERSION,
+        version=settings.SERVICE_VERSION,
         timestamp=datetime.utcnow(),
         services=services,
         models_loaded=[]  # TODO Phase 2+: populate with loaded models
@@ -271,7 +271,7 @@ async def analyze_content(
         # STUB RESPONSE (Phase 1)
         logger.warning("⚠️  Using stub analysis - full implementation in Phase 2+")
 
-        from .models import (
+        from models import (
             CognitiveDefenseReport,
             SourceCredibilityResult,
             EmotionalManipulationResult,
@@ -328,7 +328,7 @@ async def analyze_content(
         stub_report = CognitiveDefenseReport(
             analysis_id=str(uuid4()),
             timestamp=datetime.utcnow(),
-            version=settings.VERSION,
+            version=settings.SERVICE_VERSION,
             text=request.text,
             source_url=request.source_url,
             credibility_result=credibility_result,
@@ -408,7 +408,7 @@ async def cache_stats() -> Dict[str, Any]:
 @app.get("/stats/database")
 async def database_stats() -> Dict[str, Any]:
     """Get database statistics."""
-    from .database import get_table_count
+    from database import get_table_count
 
     try:
         tables = [
@@ -441,7 +441,7 @@ async def service_info() -> Dict[str, Any]:
     """Get service configuration info."""
     return {
         "service": "Cognitive Defense System",
-        "version": settings.VERSION,
+        "version": settings.SERVICE_VERSION,
         "environment": "development" if settings.DEBUG else "production",
         "config": settings.get_info()
     }
@@ -457,7 +457,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "api:app",
         host="0.0.0.0",
-        port=settings.PORT,
+        port=settings.SERVICE_PORT,
         workers=settings.WORKERS,
         log_level="debug" if settings.DEBUG else "info",
         reload=settings.DEBUG

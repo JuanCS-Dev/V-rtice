@@ -19,8 +19,8 @@ from sqlalchemy.pool import NullPool, QueuePool
 from sqlalchemy import text, event
 from sqlalchemy.exc import SQLAlchemyError
 
-from .config import get_settings
-from .db_models import Base
+from config import get_settings
+from db_models import Base
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +48,11 @@ class DatabaseManager:
             # Create async engine with connection pooling
             self.engine = create_async_engine(
                 self.settings.DATABASE_URL,
-                echo=self.settings.DEBUG,
+                echo=self.settings.DB_ECHO,
                 future=True,
-                pool_size=self.settings.POSTGRES_POOL_SIZE,
-                max_overflow=self.settings.POSTGRES_MAX_OVERFLOW,
-                pool_timeout=30.0,
+                pool_size=self.settings.DB_POOL_SIZE,
+                max_overflow=self.settings.DB_MAX_OVERFLOW,
+                pool_timeout=self.settings.DB_POOL_TIMEOUT,
                 pool_recycle=3600,  # Recycle connections after 1 hour
                 pool_pre_ping=True,  # Verify connections before using
                 poolclass=QueuePool,

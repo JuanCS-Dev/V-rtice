@@ -26,10 +26,10 @@ USER maximus
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD python -c "import httpx; httpx.get('http://localhost:8001/health')" || exit 1
+  CMD python -c "import httpx; httpx.get('http://localhost:8033/health')" || exit 1
 
 # Expose port
-EXPOSE 8001
+EXPOSE 8033
 
 # Run service
-CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8001", "--log-level", "info"]
+CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8033", "--log-level", "info"]

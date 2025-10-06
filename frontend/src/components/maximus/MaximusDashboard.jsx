@@ -19,8 +19,8 @@ import { AIInsightsPanel } from './AIInsightsPanel';
 import { MaximusAI3Panel } from './MaximusAI3Panel';
 import { MaximusCore } from './MaximusCore';
 import { WorkflowsPanel } from './WorkflowsPanel';
-import TerminalEmulator from '../terminal/TerminalEmulator';
-import { BackgroundEffect, EffectSelector } from './BackgroundEffects';
+import MaximusTerminal from './MaximusTerminal';
+import { BackgroundEffect } from './BackgroundEffects';
 import SkipLink from '../shared/SkipLink';
 import useKeyboardNavigation from '../../hooks/useKeyboardNavigation';
 import { useClock } from '../../hooks/useClock';
@@ -79,11 +79,7 @@ export const MaximusDashboard = ({ setCurrentView }) => {
       case 'workflows':
         return <WorkflowsPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'terminal':
-        return (
-          <div style={{ height: '100%', padding: '1rem' }}>
-            <TerminalEmulator isFullscreen={false} />
-          </div>
-        );
+        return <MaximusTerminal />;
       case 'ai3':
         return <MaximusAI3Panel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'oraculo':
@@ -107,12 +103,6 @@ export const MaximusDashboard = ({ setCurrentView }) => {
       {/* Background Effect (Scanline/Matrix/Particles) */}
       <BackgroundEffect effectId={backgroundEffect} />
 
-      {/* Effect Selector */}
-      <EffectSelector
-        currentEffect={backgroundEffect}
-        onEffectChange={setBackgroundEffect}
-      />
-
       {/* HEADER - Mission Control */}
       <MaximusHeader
         aiStatus={aiStatus}
@@ -123,6 +113,8 @@ export const MaximusDashboard = ({ setCurrentView }) => {
         setCurrentView={setCurrentView}
         getItemProps={getItemProps}
         getStatusColor={getStatusColor}
+        backgroundEffect={backgroundEffect}
+        onEffectChange={setBackgroundEffect}
       />
 
       {/* MAIN CONTENT - Active Panel */}

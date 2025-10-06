@@ -16,7 +16,7 @@ import redis.asyncio as aioredis
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
 
-from .config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

@@ -11,9 +11,9 @@ from datetime import datetime, timedelta
 import aiohttp
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from .config import get_settings
-from .cache_manager import cache_manager, CacheCategory
-from .models import CredibilityRating
+from config import get_settings
+from cache_manager import cache_manager, CacheCategory
+from models import CredibilityRating
 
 logger = logging.getLogger(__name__)
 

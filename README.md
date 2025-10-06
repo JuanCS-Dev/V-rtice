@@ -1087,10 +1087,35 @@ nano .env
 # ABUSEIPDB_API_KEY=your_abuse_key         # Immunis IP reputation
 ```
 
-### **3. Iniciar Organismo (Docker Compose)**
+### **3. Iniciar Organismo (Com Validação Inteligente de Portas)**
 
 ```bash
-# Iniciar TODOS os serviços (30+ microsserviços)
+# 🌟 RECOMENDADO: Usar o starter inteligente (resolve conflitos automaticamente)
+./scripts/vertice-start.sh
+
+# O script automaticamente:
+# ✓ Valida todas as 30+ portas críticas
+# ✓ Libera portas em conflito (com confirmação)
+# ✓ Inicia serviços com health checks
+# ✓ Mostra status final de todos os containers
+
+# Opções avançadas:
+./scripts/vertice-start.sh --force   # Força reinicialização completa
+./scripts/vertice-start.sh --check   # Apenas verifica portas (não inicia)
+
+# Gerenciamento manual de portas (se necessário):
+./scripts/port-manager.sh            # Menu interativo
+./scripts/port-manager.sh check      # Verificar conflitos
+./scripts/port-manager.sh report     # Gerar relatório detalhado
+```
+
+**Por que usar os scripts?**
+- ❌ **ANTES**: `Error: port 8001 already allocated` → Frustração, debugar manualmente...
+- ✅ **DEPOIS**: Script detecta, libera e inicia tudo automaticamente!
+
+**Método tradicional (não recomendado):**
+```bash
+# Apenas se você realmente souber o que está fazendo:
 docker-compose up -d
 
 # Verificar saúde do organismo
@@ -1104,6 +1129,8 @@ curl http://localhost:8000/health     # API Gateway
 curl http://localhost:8001/health     # MAXIMUS AI
 curl http://localhost:8041/health     # Immunis B-Cells
 ```
+
+📚 **Documentação completa**: [`scripts/README.md`](scripts/README.md)
 
 ### **4. Frontend (Interface Neural)**
 

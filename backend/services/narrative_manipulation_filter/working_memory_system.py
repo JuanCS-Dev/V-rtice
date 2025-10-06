@@ -23,12 +23,12 @@ import asyncio
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db_session
-from .db_models import SourceProfile, AnalysisRecord, VerifiedClaim
-from .cache_manager import cache_manager, CacheCategory
-from .seriema_graph_client import seriema_graph_client
-from .utils import hash_text
-from .config import get_settings
+from database import get_db_session
+from db_models import SourceProfile, AnalysisRecord, VerifiedClaim
+from cache_manager import cache_manager, CacheCategory
+from seriema_graph_client import seriema_graph_client
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

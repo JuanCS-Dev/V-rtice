@@ -13,18 +13,18 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import asyncio
 
-from .argument_miner import argument_miner
-from .fallacy_classifier import fallacy_classifier
-from .argumentation_framework import ArgumentationFramework, build_framework_from_arguments
-from .seriema_graph_client import seriema_graph_client
-from .models import (
+from argument_miner import argument_miner
+from fallacy_classifier import fallacy_classifier
+from argumentation_framework import ArgumentationFramework, build_framework_from_arguments
+from seriema_graph_client import seriema_graph_client
+from models import (
     LogicalFallacyResult,
     Argument,
     Fallacy,
     ArgumentStructureAnalysis
 )
-from .utils import hash_text
-from .config import get_settings
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

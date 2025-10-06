@@ -210,34 +210,127 @@ export const AIInsightsPanel = ({ aiStatus, brainActivity }) => {
           Workflows Integrados
         </h2>
 
-        <div className="workflows-grid">
+        <div className="workflows-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+          gap: '1.5rem'
+        }}>
           {workflows.map(workflow => (
             <div
               key={workflow.id}
               className={`workflow-card ${selectedWorkflow === workflow.id ? 'workflow-selected' : ''}`}
               onClick={() => setSelectedWorkflow(workflow.id)}
+              style={{
+                background: 'rgba(30, 27, 75, 0.8)',
+                border: selectedWorkflow === workflow.id ? '2px solid #06B6D4' : '1px solid rgba(6, 182, 212, 0.3)',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                boxShadow: selectedWorkflow === workflow.id ? '0 8px 25px rgba(6, 182, 212, 0.3)' : 'none'
+              }}
             >
-              <div className="workflow-header">
-                <span className="workflow-icon">{workflow.icon}</span>
-                <div className="workflow-info">
-                  <h3 className="workflow-name">{workflow.name}</h3>
-                  <p className="workflow-description">{workflow.description}</p>
+              {/* Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '1rem'
+              }}>
+                <span style={{
+                  fontSize: '2.5rem',
+                  filter: 'drop-shadow(0 0 8px currentColor)'
+                }}>{workflow.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold',
+                    color: '#E2E8F0',
+                    marginBottom: '0.5rem'
+                  }}>{workflow.name}</h3>
+                  <p style={{
+                    margin: 0,
+                    fontSize: '0.875rem',
+                    color: '#94A3B8',
+                    lineHeight: '1.5'
+                  }}>{workflow.description}</p>
                 </div>
               </div>
 
-              <div className="workflow-steps">
+              {/* Steps */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
                 {workflow.steps.map((step, index) => (
-                  <div key={index} className="workflow-step">
-                    <span className="step-icon">{step.icon}</span>
-                    <span className="step-name">{step.name}</span>
-                    <span className={`step-status step-status-${step.status}`}>
+                  <div
+                    key={index}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'auto 1fr auto',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem',
+                      background: 'rgba(15, 23, 42, 0.6)',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(139, 92, 246, 0.2)'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.25rem' }}>{step.icon}</span>
+                    <span style={{
+                      fontSize: '0.875rem',
+                      color: '#CBD5E1'
+                    }}>{step.name}</span>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      color: step.status === 'ready' ? '#10B981' : '#94A3B8',
+                      textTransform: 'uppercase',
+                      fontWeight: '600',
+                      padding: '0.25rem 0.75rem',
+                      background: step.status === 'ready' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                      borderRadius: '4px',
+                      fontFamily: 'monospace'
+                    }}>
                       {step.status}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <button className="workflow-execute-btn">
+              {/* Execute Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log(`Executing workflow: ${workflow.id}`);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  background: 'linear-gradient(135deg, #06B6D4 0%, #8B5CF6 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(6, 182, 212, 0.3)',
+                  fontFamily: 'monospace',
+                  letterSpacing: '1px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(6, 182, 212, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 15px rgba(6, 182, 212, 0.3)';
+                }}
+              >
                 🚀 Executar Workflow
               </button>
             </div>

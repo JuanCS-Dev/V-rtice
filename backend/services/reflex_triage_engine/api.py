@@ -16,10 +16,10 @@ from pydantic import BaseModel
 from typing import Dict, List, Optional
 import uvicorn
 
-from .hyperscan_engine import HyperscanEngine
-from .fast_anomaly_detector import FastAnomalyDetector
-from .reflex_fusion import ReflexFusionEngine, ThreatDecision
-from .autonomous_response import AutonomousResponseEngine, PlaybookAction
+from hyperscan_engine import HyperscanEngine
+from fast_anomaly_detector import FastAnomalyDetector
+from reflex_fusion import ReflexFusionEngine, ThreatDecision
+from autonomous_response import AutonomousResponseEngine, PlaybookAction
 
 # Configure logging
 logging.basicConfig(

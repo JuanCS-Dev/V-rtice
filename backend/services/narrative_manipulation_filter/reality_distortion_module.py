@@ -14,15 +14,15 @@ from datetime import datetime
 from enum import Enum
 import asyncio
 
-from .fact_check_aggregator import fact_check_aggregator
-from .entity_linker import entity_linker
-from .sparql_generator import sparql_generator
-from .kg_verifier import kg_verifier
-from .fact_check_queue import fact_check_queue
-from .models import VerificationStatus
-from .cache_manager import cache_manager, CacheCategory
-from .utils import hash_text
-from .config import get_settings
+from fact_check_aggregator import fact_check_aggregator
+from entity_linker import entity_linker
+from sparql_generator import sparql_generator
+from kg_verifier import kg_verifier
+from fact_check_queue import fact_check_queue
+from models import VerificationStatus
+from cache_manager import cache_manager, CacheCategory
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

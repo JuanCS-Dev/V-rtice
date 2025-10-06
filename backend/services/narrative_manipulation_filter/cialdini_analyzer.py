@@ -15,8 +15,8 @@ import re
 from typing import List, Dict, Optional, Tuple
 from collections import Counter
 
-from .models import CialdiniPrinciple
-from .config import get_settings
+from models import CialdiniPrinciple
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

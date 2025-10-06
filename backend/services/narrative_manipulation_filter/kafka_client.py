@@ -16,7 +16,7 @@ from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
 from aiokafka.errors import KafkaError
 from aiokafka.structs import TopicPartition
 
-from .config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +49,6 @@ class KafkaClient:
                 key_serializer=lambda k: k.encode('utf-8') if k else None,
                 compression_type='gzip',
                 acks='all',  # Wait for all replicas
-                retries=3,
-                max_in_flight_requests_per_connection=5,
                 enable_idempotence=True,  # Exactly-once semantics
                 request_timeout_ms=30000,
             )

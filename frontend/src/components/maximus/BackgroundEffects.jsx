@@ -78,8 +78,8 @@ export const MatrixRainEffect = () => {
 
     // Função de desenho
     const draw = () => {
-      // Fade effect - deixa rastro MUITO sutil
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.15)'; // Fade mais forte = efeito mais sutil
+      // Fade effect - deixa rastro visível mas sutil
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.08)'; // Fade leve = efeito mais persistente
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Desenhar caracteres
@@ -90,11 +90,11 @@ export const MatrixRainEffect = () => {
         // Calcular posição Y
         const y = drops[i] * fontSize;
 
-        // Gradiente azul → roxo MUITO SUTIL (quase invisível)
+        // Gradiente azul → roxo VISÍVEL (cyberpunk aesthetic)
         const gradient = ctx.createLinearGradient(0, y - 150, 0, y);
-        gradient.addColorStop(0, 'rgba(139, 92, 246, 0.15)'); // Roxo no topo (bem sutil)
-        gradient.addColorStop(0.3, 'rgba(6, 182, 212, 0.08)'); // Cyan (quase invisível)
-        gradient.addColorStop(0.7, 'rgba(139, 92, 246, 0.03)'); // Roxo esmaecendo (quase imperceptível)
+        gradient.addColorStop(0, 'rgba(139, 92, 246, 0.5)'); // Roxo no topo (visível)
+        gradient.addColorStop(0.3, 'rgba(6, 182, 212, 0.3)'); // Cyan (visível)
+        gradient.addColorStop(0.7, 'rgba(139, 92, 246, 0.15)'); // Roxo esmaecendo
         gradient.addColorStop(1, 'rgba(139, 92, 246, 0)'); // Invisível no final
 
         ctx.fillStyle = gradient;
@@ -140,7 +140,7 @@ export const MatrixRainEffect = () => {
         height: '100%',
         zIndex: 1,
         pointerEvents: 'none',
-        opacity: 0.25 // BEM SUTIL - quase imperceptível, só um toque de atmosfera
+        opacity: 0.6 // Visível - estética cyberpunk com efeito Matrix perceptível
       }}
     />
   );
@@ -287,13 +287,13 @@ export const EffectSelector = ({ currentEffect, onEffectChange }) => {
   return (
     <div style={{
       position: 'fixed',
-      bottom: '5.5rem',
+      bottom: '7rem',
       right: '2rem',
       zIndex: 9999,
       background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 27, 75, 0.98))',
       border: '1px solid rgba(139, 92, 246, 0.4)',
       borderRadius: '12px',
-      padding: '1rem',
+      padding: '0.75rem',
       backdropFilter: 'blur(15px)',
       boxShadow: '0 8px 32px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(139, 92, 246, 0.1)',
       transition: 'all 0.3s ease'
@@ -301,21 +301,21 @@ export const EffectSelector = ({ currentEffect, onEffectChange }) => {
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '0.75rem',
-        marginBottom: '0.75rem'
+        gap: '0.6rem',
+        marginBottom: '0.6rem'
       }}>
         <div style={{
           width: '3px',
-          height: '20px',
+          height: '16px',
           background: 'linear-gradient(180deg, #8B5CF6, #06B6D4)',
           borderRadius: '2px'
         }}></div>
         <div style={{
           color: '#E2E8F0',
-          fontSize: '0.7rem',
+          fontSize: '0.65rem',
           fontWeight: '600',
           textTransform: 'uppercase',
-          letterSpacing: '1.5px',
+          letterSpacing: '1.2px',
           fontFamily: 'monospace'
         }}>
           🎨 Visual Effect
@@ -324,7 +324,7 @@ export const EffectSelector = ({ currentEffect, onEffectChange }) => {
 
       <div style={{
         display: 'flex',
-        gap: '0.5rem',
+        gap: '0.4rem',
         flexWrap: 'wrap'
       }}>
         {AVAILABLE_EFFECTS.map(effect => (
@@ -333,8 +333,8 @@ export const EffectSelector = ({ currentEffect, onEffectChange }) => {
             onClick={() => onEffectChange(effect.id)}
             title={effect.description}
             style={{
-              width: '42px',
-              height: '42px',
+              width: '34px',
+              height: '34px',
               background: currentEffect === effect.id
                 ? 'linear-gradient(135deg, #8B5CF6, #06B6D4)'
                 : 'rgba(15, 23, 42, 0.6)',
@@ -343,7 +343,7 @@ export const EffectSelector = ({ currentEffect, onEffectChange }) => {
                 : '1px solid rgba(139, 92, 246, 0.2)',
               borderRadius: '8px',
               color: currentEffect === effect.id ? '#FFFFFF' : '#94A3B8',
-              fontSize: '1.1rem',
+              fontSize: '1rem',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
@@ -426,7 +426,6 @@ export const BackgroundEffect = ({ effectId }) => {
 // ═══════════════════════════════════════════════════════════════════════════
 export default {
   BackgroundEffect,
-  EffectSelector,
   AVAILABLE_EFFECTS,
   // Individual effects
   ScanlineEffect,

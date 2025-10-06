@@ -5,6 +5,7 @@ from rich.console import Console
 import importlib
 import sys
 import os
+import click
 
 # Adiciona a raiz do projeto (vertice-terminal) ao Python path
 # para permitir que o script seja executado diretamente.
@@ -12,6 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 # Importa a função do banner
 from vertice.utils.banner import exibir_banner
+from vertice.utils.suggestions import suggest_with_correction
 
 # Lista dos nossos módulos de comando
 COMMAND_MODULES = [
@@ -47,16 +49,39 @@ COMMAND_MODULES = [
     "project",  # Workspace & State Management
     "plugin",  # Plugin Management & Extension System
     "script",  # VScript Workflow Automation (Phase 2.4)
+    "help_cmd",  # Enhanced Help System (Issue #8)
 ]
 
 console = Console()
 
-# Cria a aplicação principal com Typer (o objeto 'app')
-app = typer.Typer(
+
+# Custom Typer class with command suggestion support
+class VCLITyper(typer.Typer):
+    """Custom Typer with intelligent command suggestions."""
+
+    def main(self, *args, standalone_mode=True, **kwargs):
+        try:
+            return super().main(*args, standalone_mode=standalone_mode, **kwargs)
+        except click.exceptions.UsageError as e:
+            # Check if it's a "No such command" error
+            error_msg = str(e)
+            if "No such command" in error_msg:
+                # Extract the bad command from error message
+                import re
+                match = re.search(r"'([^']+)'", error_msg)
+                if match:
+                    typo = match.group(1)
+                    suggestion = suggest_with_correction(typo)
+                    console.print(f"\n{suggestion}\n", style="yellow")
+            raise
+
+
+# Cria a aplicação principal com Typer customizado
+app = VCLITyper(
     name="vcli",
     help="🎯 VÉRTICE CLI - Cyber Security Command Center",
     rich_markup_mode="rich",
-    add_completion=False,
+    add_completion=True,  # ✅ Habilita bash/zsh completion
 )
 
 
@@ -67,7 +92,11 @@ def register_commands():
             module = importlib.import_module(
                 f"vertice.commands.{module_name}"
             )
-            app.add_typer(module.app, name=module_name)
+            # Special case: help_cmd module should be registered as 'help'
+            if module_name == "help_cmd":
+                app.add_typer(module.app, name="help")
+            else:
+                app.add_typer(module.app, name=module_name)
         except (ImportError, AttributeError):
             # Captura tanto a falha de import quanto a ausência de 'app' no módulo
             console.print(

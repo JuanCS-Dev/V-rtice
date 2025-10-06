@@ -15,11 +15,11 @@ import asyncio
 import spacy
 from spacy.language import Language
 
-from .dbpedia_client import dbpedia_client
-from .wikidata_client import wikidata_client
-from .cache_manager import cache_manager, CacheCategory
-from .utils import hash_text
-from .config import get_settings
+from dbpedia_client import dbpedia_client
+from wikidata_client import wikidata_client
+from cache_manager import cache_manager, CacheCategory
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

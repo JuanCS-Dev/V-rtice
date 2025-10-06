@@ -19,6 +19,12 @@
   overflow-y: auto !important;
   background-color: transparent !important;
   width: 100% !important;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+.terminalContainer :global(.xterm-viewport)::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari/Opera */
 }
 
 .terminalContainer :global(.xterm-screen) {

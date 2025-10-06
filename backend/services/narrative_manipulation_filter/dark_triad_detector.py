@@ -12,8 +12,8 @@ import re
 from typing import Dict, List, Tuple, Optional
 from collections import defaultdict
 
-from .models import DarkTriadMarkers
-from .config import get_settings
+from models import DarkTriadMarkers
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

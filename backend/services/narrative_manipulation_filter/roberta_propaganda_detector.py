@@ -13,10 +13,10 @@ import asyncio
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 
-from .models import PropagandaSpan, PropagandaTechnique
-from .cache_manager import cache_manager, CacheCategory
-from .utils import hash_text
-from .config import get_settings
+from models import PropagandaSpan, PropagandaTechnique
+from cache_manager import cache_manager, CacheCategory
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

@@ -18,7 +18,7 @@ from dataclasses import dataclass
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-from .config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

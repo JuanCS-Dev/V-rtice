@@ -11,7 +11,7 @@ from typing import List, Set, Dict, Any, Tuple, Optional
 from datasketch import MinHash, MinHashLSH
 import hashlib
 
-from .utils import minhash_jaccard_estimate
+from utils import minhash_jaccard_estimate
 
 logger = logging.getLogger(__name__)
 

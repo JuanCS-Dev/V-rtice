@@ -21,8 +21,8 @@ RUN useradd -m -u 1000 maximus && chown -R maximus:maximus /app
 USER maximus
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD python -c "import httpx; httpx.get('http://localhost:8004/health')" || exit 1
+  CMD python -c "import httpx; httpx.get('http://localhost:8042/health')" || exit 1
 
-EXPOSE 8004
+EXPOSE 8042
 
-CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8004", "--log-level", "info"]
+CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8042", "--log-level", "info"]

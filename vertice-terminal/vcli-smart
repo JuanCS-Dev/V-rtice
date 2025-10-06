@@ -1,0 +1,44 @@
+#!/bin/bash
+# vcli-smart - Intelligent wrapper for vCLI with command suggestions
+#
+# Usage:
+#   ./vcli-smart <command> [args...]
+#
+# Installation:
+#   chmod +x vcli-smart
+#   sudo ln -s $(pwd)/vcli-smart /usr/local/bin/vcli-smart
+#   # OR add alias to ~/.bashrc:
+#   alias vcli='$(pwd)/vcli-smart'
+
+COMMAND="$1"
+
+# If no arguments, just run vcli
+if [ -z "$COMMAND" ]; then
+    vcli
+    exit $?
+fi
+
+# Special commands that should pass through directly
+case "$COMMAND" in
+    --help|--version|-v|--no-banner|--interactive|-i|--install-completion|--show-completion)
+        vcli "$@"
+        exit $?
+        ;;
+esac
+
+shift  # Remove first argument (command)
+
+# Check if command exists in vcli
+if ! vcli --help 2>&1 | grep -q "│ $COMMAND "; then
+    # Command not found - show suggestion
+    python3 -c "
+import sys
+sys.path.insert(0, '$(dirname $0)')
+from vertice.utils.suggestions import suggest_with_correction
+print(suggest_with_correction('$COMMAND'))
+" >&2
+    exit 1
+fi
+
+# Command exists - execute it
+vcli "$COMMAND" "$@"

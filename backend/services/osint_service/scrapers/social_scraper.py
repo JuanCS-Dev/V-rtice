@@ -20,7 +20,7 @@ import asyncio
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from base_scraper import BaseScraper
+from scrapers.base_scraper import BaseScraper
 
 
 class SocialMediaScraper(BaseScraper):

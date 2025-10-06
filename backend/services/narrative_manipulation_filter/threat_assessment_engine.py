@@ -15,8 +15,8 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 from dataclasses import dataclass
 
-from .models import VerificationStatus
-from .config import get_settings
+from models import VerificationStatus
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

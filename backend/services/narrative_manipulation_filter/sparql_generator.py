@@ -16,8 +16,8 @@ import re
 import spacy
 from spacy.tokens import Token
 
-from .entity_linker import entity_linker, Entity
-from .config import get_settings
+from entity_linker import entity_linker, Entity
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

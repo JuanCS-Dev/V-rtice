@@ -16,10 +16,10 @@ import asyncio
 import aiohttp
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-from .models import Entity, EntityType, KnowledgeGraphFact
-from .cache_manager import cache_manager, CacheCategory
-from .utils import hash_text
-from .config import get_settings
+from models import Entity, EntityType, KnowledgeGraphFact
+from cache_manager import cache_manager, CacheCategory
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

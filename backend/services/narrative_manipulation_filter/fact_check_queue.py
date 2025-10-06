@@ -14,13 +14,13 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 from contextlib import asynccontextmanager
 
-from .kafka_client import kafka_client
-from .entity_linker import entity_linker
-from .sparql_generator import sparql_generator
-from .kg_verifier import kg_verifier
-from .cache_manager import cache_manager, CacheCategory
-from .utils import hash_text
-from .config import get_settings
+from kafka_client import kafka_client
+from entity_linker import entity_linker
+from sparql_generator import sparql_generator
+from kg_verifier import kg_verifier
+from cache_manager import cache_manager, CacheCategory
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

@@ -11,13 +11,13 @@ from typing import Tuple, Dict, Any, List
 from datetime import datetime, timedelta
 from scipy.stats import beta as beta_dist
 
-from .utils import (
+from utils import (
     exponential_decay_weight,
     bayesian_update,
     beta_distribution_credibility,
     wilson_score_interval
 )
-from .models import CredibilityRating
+from models import CredibilityRating
 
 logger = logging.getLogger(__name__)
 

@@ -18,11 +18,11 @@ import asyncio
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db_session
-from .db_models import AnalysisRecord
-from .adversarial_training import AdversarialTrainer, adversarial_generator
-from .model_quantization import model_quantizer
-from .config import get_settings
+from database import get_db_session
+from db_models import AnalysisRecord
+from adversarial_training import AdversarialTrainer, adversarial_generator
+from model_quantization import model_quantizer
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

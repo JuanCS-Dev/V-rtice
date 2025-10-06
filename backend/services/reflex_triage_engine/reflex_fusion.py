@@ -14,8 +14,8 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-from .hyperscan_engine import HyperscanEngine, SignatureMatch
-from .fast_anomaly_detector import FastAnomalyDetector, AnomalyResult
+from hyperscan_engine import HyperscanEngine, SignatureMatch
+from fast_anomaly_detector import FastAnomalyDetector, AnomalyResult
 
 logger = logging.getLogger(__name__)
 

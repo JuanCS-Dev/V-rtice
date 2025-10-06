@@ -14,11 +14,11 @@ from typing import List, Dict, Any, Tuple, Optional
 from datetime import datetime
 import asyncio
 
-from .bertimbau_emotion_classifier import bertimbau_classifier
-from .roberta_propaganda_detector import roberta_detector
-from .cialdini_analyzer import cialdini_analyzer
-from .dark_triad_detector import dark_triad_detector
-from .models import (
+from bertimbau_emotion_classifier import bertimbau_classifier
+from roberta_propaganda_detector import roberta_detector
+from cialdini_analyzer import cialdini_analyzer
+from dark_triad_detector import dark_triad_detector
+from models import (
     EmotionalManipulationResult,
     EmotionProfile,
     PropagandaSpan,
@@ -26,7 +26,7 @@ from .models import (
     DarkTriadMarkers,
     EmotionCategory
 )
-from .config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

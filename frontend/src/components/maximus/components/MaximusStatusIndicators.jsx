@@ -17,7 +17,14 @@ export const MaximusStatusIndicators = ({ aiStatus, getStatusColor }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="status-indicators">
+    <div
+      className="status-indicators"
+      style={{
+        display: 'flex',
+        gap: '1.5rem',
+        maxWidth: '600px'
+      }}
+    >
       <StatusIndicator
         label={t('dashboard.maximus.status.core')}
         status={aiStatus.core.status}

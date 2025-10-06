@@ -30,8 +30,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
-# Download spaCy Portuguese model
-RUN python -m spacy download pt_core_news_lg
+# Download spaCy Portuguese model (comentado - modelo será baixado em runtime se necessário)
+# RUN python -m spacy download pt_core_news_lg
 
 # ============================================================================
 # STAGE 2: Runtime - Minimal production image

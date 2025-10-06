@@ -12,7 +12,7 @@
 
 ---
 
-**28 Commands** • **100+ Subcommands** • **57 AI Tools** • **18+ Integrations**
+**34 Commands** • **100+ Subcommands** • **57 AI Tools** • **18+ Integrations**
 
 [Quick Start](#-quick-start) • [Commands](#-command-reference) • [Features](#-features) • [Documentation](#-documentation)
 
@@ -278,14 +278,23 @@ vcli hcl execute security_audit.hcl
 
 ---
 
-### 🎨 UI & Shell (2 commands)
+### 🎨 UI & Shell (3 commands)
 
 | Command | Description | Features |
 |---------|-------------|----------|
+| `help` | 📚 Enhanced help system | Examples, Search, Categories, Quick reference |
 | `tui` | 🎨 Text UI Dashboard (BETA) | Gradient UI, Quick actions, Command Palette |
 | `shell` | 🚀 Interactive shell | Autocomplete, History, Suggestions |
 
-**Bindings**:
+**Help Commands**:
+```bash
+vcli help list           # List all commands by category
+vcli help show <cmd>     # Detailed help with examples
+vcli help search <word>  # Search across all commands
+vcli help quick          # Quick reference card
+```
+
+**TUI Bindings**:
 - `Ctrl+P` - Command Palette
 - `Ctrl+Q` - Quit
 - `1-4` - Quick Actions
@@ -461,7 +470,7 @@ Security issues: security@vertice.dev (NOT public issues)
 
 ## 📊 Statistics
 
-- **Commands**: 28
+- **Commands**: 34
 - **Subcommands**: 100+
 - **AI Tools**: 57
 - **Connectors**: 18+
@@ -498,11 +507,26 @@ Security issues: security@vertice.dev (NOT public issues)
 
 ## 📚 Documentation
 
-Full documentation available:
+### 🚀 Getting Started
+
+- **[QUICKSTART.md](QUICKSTART.md)** - ⚡ Get started in 5 minutes!
+- **[CHEATSHEET.md](CHEATSHEET.md)** - 📋 Quick reference for all commands
+- **[Completion Guide](completions/README.md)** - 🎯 Shell autocompletion (Bash/Zsh)
+
+### 📖 In-Depth Guides
 
 - **[ANALISE_COMPLETA_VERTICE_CLI.md](/home/juan/vertice-dev/ANALISE_COMPLETA_VERTICE_CLI.md)** - Complete analysis
 - **[INTEGRACAO_MAXIMUS_CLI_COMPLETA.md](/home/juan/vertice-dev/INTEGRACAO_MAXIMUS_CLI_COMPLETA.md)** - Integration guide
 - **[CERTIFICACAO_FINAL_INTEGRACAO_MAXIMUS.md](/home/juan/vertice-dev/CERTIFICACAO_FINAL_INTEGRACAO_MAXIMUS.md)** - Certification
+- **[ROADMAP_2025_2027.md](ROADMAP_2025_2027.md)** - Future roadmap
+
+### 💡 Pro Tips
+
+New to vCLI? Start here:
+1. Read **[QUICKSTART.md](QUICKSTART.md)** (5 min read)
+2. Install shell completion: `vcli --install-completion`
+3. Keep **[CHEATSHEET.md](CHEATSHEET.md)** handy for reference
+4. Try `vcli tui` for a visual dashboard
 
 ---
 

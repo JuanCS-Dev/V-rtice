@@ -176,18 +176,20 @@
   flex: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .status-indicators {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
+  max-width: 600px;
 }
 
 .status-indicator {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.5rem 1rem;
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 8px;
@@ -250,7 +252,7 @@
 }
 
 .status-label {
-  font-size: 0.625rem;
+  font-size: 0.6rem;
   color: #94A3B8;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -668,3 +670,27 @@
 .text-yellow-400 { color: #F59E0B; }
 .text-red-400 { color: #EF4444; }
 .text-gray-400 { color: #94A3B8; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR - CYBERPUNK THEME
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.maximus-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.maximus-main::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 4px;
+}
+
+.maximus-main::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8B5CF6, #06B6D4);
+  border-radius: 4px;
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.4);
+}
+
+.maximus-main::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #A78BFA, #22D3EE);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}

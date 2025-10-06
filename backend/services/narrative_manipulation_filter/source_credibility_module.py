@@ -14,14 +14,14 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .newsguard_client import newsguard_client
-from .credibility_scorer import BayesianCredibilityScorer, CredibilityAggregator
-from .domain_fingerprinter import domain_fingerprinter
-from .fact_check_aggregator import fact_check_aggregator
+from newsguard_client import newsguard_client
+from credibility_scorer import BayesianCredibilityScorer, CredibilityAggregator
+from domain_fingerprinter import domain_fingerprinter
+from fact_check_aggregator import fact_check_aggregator
 from .repositories.source_repository import SourceReputationRepository
-from .models import SourceCredibilityResult, CredibilityRating
-from .utils import extract_domain, hash_text
-from .config import get_settings
+from models import SourceCredibilityResult, CredibilityRating
+from utils import extract_domain, hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -185,7 +185,7 @@ class SourceCredibilityModule:
                 logger.info(f"Tier 2 verification triggered for {domain}")
 
                 # Extract checkable claims
-                from .utils import extract_sentences
+                from utils import extract_sentences
                 sentences = extract_sentences(text)[:5]  # Top 5 sentences
 
                 # Verify claims

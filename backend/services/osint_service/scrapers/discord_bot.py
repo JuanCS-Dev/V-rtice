@@ -91,7 +91,7 @@ class MockDiscordClient:
         return messages
 
 
-from base_scraper import BaseScraper
+from scrapers.base_scraper import BaseScraper
 from unittest.mock import MagicMock
 
 

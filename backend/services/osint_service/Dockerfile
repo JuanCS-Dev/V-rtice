@@ -36,4 +36,4 @@ ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 EXPOSE 8007
 
 # Comando de inicialização
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8007", "--reload"]
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8007"]

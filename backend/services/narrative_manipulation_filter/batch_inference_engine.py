@@ -22,7 +22,7 @@ import torch
 import numpy as np
 from transformers import AutoTokenizer
 
-from .config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

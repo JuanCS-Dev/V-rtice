@@ -11,10 +11,10 @@ COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # Copiar o ficheiro principal da aplicação
-COPY ./main.py /code/main.py
+COPY ./api.py /code/api.py
 
 # Expor a porta que a aplicação vai usar
-EXPOSE 80
+EXPOSE 8080
 
-# Comando para iniciar a aplicação (caminho ajustado para 'main:app')
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# Comando para iniciar a aplicação (caminho ajustado para 'api:app')
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8080"]

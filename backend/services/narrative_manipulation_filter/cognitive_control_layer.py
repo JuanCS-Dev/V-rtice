@@ -16,9 +16,9 @@ from datetime import datetime, timedelta
 from enum import Enum
 import numpy as np
 
-from .fact_check_aggregator import fact_check_aggregator
-from .cache_manager import cache_manager, CacheCategory
-from .config import get_settings
+from fact_check_aggregator import fact_check_aggregator
+from cache_manager import cache_manager, CacheCategory
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

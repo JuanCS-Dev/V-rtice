@@ -30,8 +30,8 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class NorepinephrineCore:
-    """Production-ready Norepinephrine module for urgency and temperature control.
+class NoradrenalineCore:
+    """Production-ready Noradrenaline module for urgency and temperature control.
 
     Modulates policy temperature based on urgency:
     - High urgency → Low temperature (focused, decisive)
@@ -45,7 +45,7 @@ class NorepinephrineCore:
         max_temperature: float = 2.0,
         urgency_window_size: int = 50
     ):
-        """Initialize Norepinephrine Core.
+        """Initialize Noradrenaline Core.
 
         Args:
             base_temperature: Base softmax temperature
@@ -65,7 +65,7 @@ class NorepinephrineCore:
         self.modulation_count = 0
 
         logger.info(
-            f"NorepinephrineCore initialized (base_temp={base_temperature}, "
+            f"NoradrenalineCore initialized (base_temp={base_temperature}, "
             f"range=[{min_temperature}, {max_temperature}])"
         )
 

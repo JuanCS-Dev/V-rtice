@@ -9,14 +9,14 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
 
-from .sparql_generator import SPARQLQuery, TriplePattern
-from .wikidata_client import wikidata_client
-from .dbpedia_client import dbpedia_client
-from .entity_linker import Entity
-from .models import VerificationStatus
-from .cache_manager import cache_manager, CacheCategory
-from .utils import hash_text
-from .config import get_settings
+from sparql_generator import SPARQLQuery, TriplePattern
+from wikidata_client import wikidata_client
+from dbpedia_client import dbpedia_client
+from entity_linker import Entity
+from models import VerificationStatus
+from cache_manager import cache_manager, CacheCategory
+from utils import hash_text
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 

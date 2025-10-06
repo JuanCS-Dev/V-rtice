@@ -4,6 +4,9 @@
 # Google Gemini for LLM-based code analysis
 google-generativeai>=0.3.0
 
+# Numerical computing
+numpy>=1.24.0
+
 # Core dependencies (already in main project)
 # pyyaml>=6.0
 # requests>=2.31.0
