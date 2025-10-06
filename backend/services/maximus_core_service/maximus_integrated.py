@@ -18,6 +18,7 @@ from typing import Any, Dict, Optional
 
 from agent_templates import AgentTemplates
 from all_services_tools import AllServicesTools
+from attention_system.attention_core import AttentionSystem
 from autonomic_core.homeostatic_control import HomeostaticControlLoop
 from autonomic_core.resource_analyzer import ResourceAnalyzer
 from autonomic_core.resource_executor import ResourceExecutor
@@ -30,6 +31,7 @@ from ethical_tool_wrapper import EthicalToolWrapper
 from gemini_client import GeminiClient, GeminiConfig
 from governance import GovernanceConfig
 from memory_system import MemorySystem
+from neuromodulation import NeuromodulationController
 from rag_system import RAGSystem
 from reasoning_engine import ReasoningEngine
 from self_reflection import SelfReflection
@@ -58,6 +60,10 @@ class MaximusIntegrated:
         self.gemini_client = GeminiClient(gemini_config)
         self.vector_db_client = VectorDBClient()
 
+        # Initialize Neuromodulation System (FASE 5)
+        # Must be initialized BEFORE other components that depend on it
+        self.neuromodulation = NeuromodulationController()
+
         # Initialize Autonomic Core components
         self.system_monitor = SystemMonitor()
         self.resource_analyzer = ResourceAnalyzer()
@@ -68,6 +74,14 @@ class MaximusIntegrated:
             analyzer=self.resource_analyzer,
             planner=self.resource_planner,
             executor=self.resource_executor,
+        )
+
+        # Initialize Attention System (FASE 0)
+        # Modulated by Acetylcholine (salience threshold) and Norepinephrine (arousal)
+        base_foveal_threshold = 0.6
+        self.attention_system = AttentionSystem(
+            foveal_threshold=base_foveal_threshold,
+            scan_interval=1.0
         )
 
         # Initialize other core components
@@ -192,6 +206,12 @@ class MaximusIntegrated:
         ethical_stats = self.ethical_guardian.get_statistics()
         wrapper_stats = self.ethical_wrapper.get_statistics()
 
+        # Get neuromodulation state
+        neuromod_state = self.get_neuromodulation_state()
+
+        # Get attention system performance
+        attention_stats = self.attention_system.get_performance_stats()
+
         return {
             "status": "online",
             "autonomic_core_status": hcl_status,
@@ -204,6 +224,15 @@ class MaximusIntegrated:
                 "total_validations": ethical_stats.get("total_validations", 0),
                 "approval_rate": ethical_stats.get("approval_rate", 0.0),
             },
+            "neuromodulation_status": {
+                "global_state": neuromod_state["global_state"],
+                "modulated_parameters": neuromod_state["modulated_parameters"],
+            },
+            "attention_system_status": {
+                "peripheral_detections": attention_stats["peripheral"]["detections_total"],
+                "foveal_analyses": attention_stats["foveal"]["analyses_total"],
+                "avg_analysis_time_ms": attention_stats["foveal"]["avg_analysis_time_ms"],
+            },
             "last_update": datetime.now().isoformat(),
         }
 
@@ -212,5 +241,136 @@ class MaximusIntegrated:
         return {
             "guardian": self.ethical_guardian.get_statistics(),
             "wrapper": self.ethical_wrapper.get_statistics(),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    # ============================================================================
+    # NEUROMODULATION INTEGRATION (FASE 5)
+    # ============================================================================
+
+    def get_neuromodulated_parameters(self) -> Dict[str, Any]:
+        """Get all neuromodulated parameters for adaptive behavior.
+
+        Returns modulation values for:
+        - Learning rate (Dopamine): for HCL/RL agent
+        - Attention threshold (Acetylcholine): for AttentionSystem salience
+        - Arousal gain (Norepinephrine): for threat response amplification
+        - Exploration temperature (Serotonin): for ReasoningEngine
+        """
+        # Base parameters
+        base_learning_rate = 0.01
+        base_foveal_threshold = 0.6
+        base_temperature = 0.7
+
+        # Get modulated values
+        modulated_lr = self.neuromodulation.get_modulated_learning_rate(base_learning_rate)
+        exploration_rate = self.neuromodulation.serotonin.get_exploration_rate()
+        attention_gain = self.neuromodulation.norepinephrine.get_attention_gain()
+        salience_threshold = self.neuromodulation.acetylcholine.get_salience_threshold()
+
+        # Convert exploration rate to temperature (inverse relationship)
+        # High exploration → high temperature (more randomness)
+        # Serotonin exploration_rate is in [0.05, 0.3]
+        # Map to temperature [0.3, 1.0]
+        modulated_temperature = 0.3 + (exploration_rate / 0.3) * 0.7
+
+        # Adjust attention threshold based on ACh salience threshold
+        # High ACh → lower threshold (attend to more)
+        # salience_threshold is typically [0.3, 0.7]
+        # Map to foveal_threshold [0.4, 0.8] (inverted)
+        modulated_attention_threshold = 0.8 - (salience_threshold - 0.3) * (0.4 / 0.4)
+
+        return {
+            "learning_rate": modulated_lr,
+            "attention_threshold": modulated_attention_threshold,
+            "arousal_gain": attention_gain,
+            "temperature": modulated_temperature,
+            "raw_neuromodulation": {
+                "dopamine_level": self.neuromodulation.dopamine.level,
+                "serotonin_level": self.neuromodulation.serotonin.level,
+                "norepinephrine_level": self.neuromodulation.norepinephrine.level,
+                "acetylcholine_level": self.neuromodulation.acetylcholine.level,
+                "exploration_rate": exploration_rate,
+                "salience_threshold": salience_threshold,
+            },
+        }
+
+    async def process_outcome(
+        self, expected_reward: float, actual_reward: float, success: bool
+    ) -> Dict[str, Any]:
+        """Process task outcome through neuromodulation system.
+
+        Updates dopamine (RPE) and serotonin (mood) based on results.
+
+        Args:
+            expected_reward: Expected reward/quality (0-1)
+            actual_reward: Actual reward/quality (0-1)
+            success: Whether the task succeeded
+
+        Returns:
+            Dict with RPE, motivation, and updated neuromodulation state
+        """
+        result = self.neuromodulation.process_reward(
+            expected_reward=expected_reward,
+            actual_reward=actual_reward,
+            success=success,
+        )
+
+        # Get updated parameters after processing outcome
+        updated_params = self.get_neuromodulated_parameters()
+        result["updated_parameters"] = updated_params
+
+        return result
+
+    async def respond_to_threat(
+        self, threat_severity: float, threat_type: str = "unknown"
+    ) -> Dict[str, Any]:
+        """Respond to detected threats through neuromodulation.
+
+        Activates norepinephrine system to increase arousal and attention.
+
+        Args:
+            threat_severity: Severity of threat (0-1)
+            threat_type: Type of threat (e.g., 'intrusion', 'anomaly')
+
+        Returns:
+            Dict with arousal level and attention gain
+        """
+        # Activate norepinephrine response
+        self.neuromodulation.respond_to_threat(threat_severity)
+
+        # Get updated arousal and attention
+        arousal_level = self.neuromodulation.norepinephrine.get_arousal_level()
+        attention_gain = self.neuromodulation.norepinephrine.get_attention_gain()
+
+        # Update attention system threshold based on arousal
+        updated_params = self.get_neuromodulated_parameters()
+        self.attention_system.salience_scorer.foveal_threshold = updated_params[
+            "attention_threshold"
+        ]
+
+        return {
+            "threat_severity": threat_severity,
+            "threat_type": threat_type,
+            "arousal_level": arousal_level,
+            "attention_gain": attention_gain,
+            "updated_attention_threshold": updated_params["attention_threshold"],
+        }
+
+    def get_neuromodulation_state(self) -> Dict[str, Any]:
+        """Get current neuromodulation state and global modulation parameters."""
+        global_state = self.neuromodulation.get_global_state()
+        modulated_params = self.get_neuromodulated_parameters()
+
+        return {
+            "global_state": {
+                "dopamine": global_state.dopamine,
+                "serotonin": global_state.serotonin,
+                "norepinephrine": global_state.norepinephrine,
+                "acetylcholine": global_state.acetylcholine,
+                "overall_mood": global_state.overall_mood,
+                "cognitive_load": global_state.cognitive_load,
+            },
+            "modulated_parameters": modulated_params,
             "timestamp": datetime.now().isoformat(),
         }
