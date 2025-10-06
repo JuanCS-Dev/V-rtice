@@ -13,8 +13,8 @@ and supporting adaptive security and operational strategies.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
 
@@ -40,8 +40,10 @@ class PlaybookGenerator:
         Returns:
             Dict[str, Any]: A dictionary representing the generated playbook.
         """
-        print(f"[PlaybookGenerator] Generating playbook for insight: {insight.get('id', 'N/A')}")
-        
+        print(
+            f"[PlaybookGenerator] Generating playbook for insight: {insight.get('id', 'N/A')}"
+        )
+
         playbook_id = f"PB-{uuid.uuid4()}"
         playbook_name = f"Response to {insight.get('type', 'Novel Insight')}"
         description = f"Automated playbook generated in response to a novel discovery: {insight.get('description', 'N/A')}"
@@ -53,8 +55,8 @@ class PlaybookGenerator:
             "name": playbook_name,
             "description": description,
             "created_at": datetime.now().isoformat(),
-            "trigger_insight_id": insight.get('id'),
-            "steps": steps
+            "trigger_insight_id": insight.get("id"),
+            "steps": steps,
         }
         self.generated_playbooks.append(generated_playbook)
         self.last_generation_time = datetime.now()
@@ -72,14 +74,58 @@ class PlaybookGenerator:
         """
         steps = []
         if insight.get("severity") == "critical":
-            steps.append({"order": 1, "action": "isolate_affected_systems", "parameters": {"target": insight.get('related_data', {}).get('host')}})
-            steps.append({"order": 2, "action": "collect_forensics", "parameters": {"target": insight.get('related_data', {}).get('host')}})
-            steps.append({"order": 3, "action": "notify_security_team", "parameters": {"message": f"Critical insight: {insight.get('description')}"}})
+            steps.append(
+                {
+                    "order": 1,
+                    "action": "isolate_affected_systems",
+                    "parameters": {
+                        "target": insight.get("related_data", {}).get("host")
+                    },
+                }
+            )
+            steps.append(
+                {
+                    "order": 2,
+                    "action": "collect_forensics",
+                    "parameters": {
+                        "target": insight.get("related_data", {}).get("host")
+                    },
+                }
+            )
+            steps.append(
+                {
+                    "order": 3,
+                    "action": "notify_security_team",
+                    "parameters": {
+                        "message": f"Critical insight: {insight.get('description')}"
+                    },
+                }
+            )
         elif insight.get("type") == "zero_day_exploit_potential":
-            steps.append({"order": 1, "action": "deploy_patch_if_available", "parameters": {"vulnerability": insight.get('id')}})
-            steps.append({"order": 2, "action": "monitor_for_exploitation", "parameters": {"pattern": insight.get('related_data', {}).get('pattern')}})
+            steps.append(
+                {
+                    "order": 1,
+                    "action": "deploy_patch_if_available",
+                    "parameters": {"vulnerability": insight.get("id")},
+                }
+            )
+            steps.append(
+                {
+                    "order": 2,
+                    "action": "monitor_for_exploitation",
+                    "parameters": {
+                        "pattern": insight.get("related_data", {}).get("pattern")
+                    },
+                }
+            )
         else:
-            steps.append({"order": 1, "action": "investigate_further", "parameters": {"details": insight.get('description')}})
+            steps.append(
+                {
+                    "order": 1,
+                    "action": "investigate_further",
+                    "parameters": {"details": insight.get("description")},
+                }
+            )
 
         return steps
 
@@ -92,5 +138,9 @@ class PlaybookGenerator:
         return {
             "status": self.current_status,
             "total_playbooks_generated": len(self.generated_playbooks),
-            "last_generation": self.last_generation_time.isoformat() if self.last_generation_time else "N/A"
+            "last_generation": (
+                self.last_generation_time.isoformat()
+                if self.last_generation_time
+                else "N/A"
+            ),
         }

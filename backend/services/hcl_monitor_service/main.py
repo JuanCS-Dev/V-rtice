@@ -11,14 +11,14 @@ crucial for providing accurate and up-to-date monitoring information to the
 HCL Analyzer Service, enabling effective self-management and adaptive behavior.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from collectors import SystemMetricsCollector
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus HCL Monitor Service", version="1.0.0")
 

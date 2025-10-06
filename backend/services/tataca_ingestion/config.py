@@ -4,9 +4,10 @@ Configuration management for the ETL pipeline that ingests data from multiple
 sources into the Vertice platform.
 """
 
-from pydantic_settings import BaseSettings
-from pydantic import Field
 from typing import Optional
+
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -35,28 +36,34 @@ class Settings(BaseSettings):
 
     # Neo4j configuration (via Seriema Graph service)
     SERIEMA_GRAPH_URL: str = Field(
-        default="http://seriema_graph:8029",
-        env="SERIEMA_GRAPH_URL"
+        default="http://seriema_graph:8029", env="SERIEMA_GRAPH_URL"
     )
 
     # SINESP API configuration
     SINESP_SERVICE_URL: str = Field(
-        default="http://sinesp_service:8018",
-        env="SINESP_SERVICE_URL"
+        default="http://sinesp_service:8018", env="SINESP_SERVICE_URL"
     )
 
     # Data sources configuration
     ENABLE_SINESP_CONNECTOR: bool = Field(default=True, env="ENABLE_SINESP_CONNECTOR")
-    ENABLE_PRISIONAL_CONNECTOR: bool = Field(default=False, env="ENABLE_PRISIONAL_CONNECTOR")
-    ENABLE_ANTECEDENTES_CONNECTOR: bool = Field(default=False, env="ENABLE_ANTECEDENTES_CONNECTOR")
+    ENABLE_PRISIONAL_CONNECTOR: bool = Field(
+        default=False, env="ENABLE_PRISIONAL_CONNECTOR"
+    )
+    ENABLE_ANTECEDENTES_CONNECTOR: bool = Field(
+        default=False, env="ENABLE_ANTECEDENTES_CONNECTOR"
+    )
 
     # External API keys (optional - for future integrations)
     PRISIONAL_API_KEY: Optional[str] = Field(default=None, env="PRISIONAL_API_KEY")
-    ANTECEDENTES_API_KEY: Optional[str] = Field(default=None, env="ANTECEDENTES_API_KEY")
+    ANTECEDENTES_API_KEY: Optional[str] = Field(
+        default=None, env="ANTECEDENTES_API_KEY"
+    )
 
     # Scheduler configuration
     ENABLE_SCHEDULER: bool = Field(default=True, env="ENABLE_SCHEDULER")
-    SCHEDULER_INTERVAL_MINUTES: int = Field(default=60, env="SCHEDULER_INTERVAL_MINUTES")
+    SCHEDULER_INTERVAL_MINUTES: int = Field(
+        default=60, env="SCHEDULER_INTERVAL_MINUTES"
+    )
 
     # Job configuration
     MAX_CONCURRENT_JOBS: int = Field(default=3, env="MAX_CONCURRENT_JOBS")
@@ -66,7 +73,9 @@ class Settings(BaseSettings):
 
     # Batch processing
     BATCH_SIZE: int = Field(default=100, env="BATCH_SIZE")
-    ENABLE_PARALLEL_PROCESSING: bool = Field(default=True, env="ENABLE_PARALLEL_PROCESSING")
+    ENABLE_PARALLEL_PROCESSING: bool = Field(
+        default=True, env="ENABLE_PARALLEL_PROCESSING"
+    )
 
     # Monitoring
     PROMETHEUS_PORT: int = Field(default=8029, env="PROMETHEUS_PORT")

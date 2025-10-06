@@ -18,8 +18,8 @@ high-stakes situations.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from fast_ml import FastML
 from hyperscan_matcher import HyperscanMatcher
@@ -45,7 +45,9 @@ class RealTimePlaybookExecutor:
         self.last_execution_time: Optional[datetime] = None
         self.current_status: str = "ready_for_playbooks"
 
-    async def execute_command(self, command_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_command(
+        self, command_name: str, parameters: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Executes a real-time command by triggering a predefined playbook.
 
         Args:
@@ -54,18 +56,18 @@ class RealTimePlaybookExecutor:
 
         Returns:
             Dict[str, Any]: A dictionary containing the execution results.
-        
+
         Raises:
             ValueError: If an unsupported command name is provided.
         """
         print(f"[RealTimePlaybookExecutor] Executing real-time command: {command_name}")
-        await asyncio.sleep(0.02) # Simulate very fast initial processing
+        await asyncio.sleep(0.02)  # Simulate very fast initial processing
 
         execution_result = {
             "timestamp": datetime.now().isoformat(),
             "command_name": command_name,
             "status": "failed",
-            "details": "Unsupported command."
+            "details": "Unsupported command.",
         }
 
         if command_name == "block_ip":
@@ -91,11 +93,15 @@ class RealTimePlaybookExecutor:
 
             if ml_prediction.get("prediction_value", 0) > 0.8:
                 execution_result["status"] = "success"
-                execution_result["details"] = "Critical threat confirmed by ML, initiating full containment."
+                execution_result["details"] = (
+                    "Critical threat confirmed by ML, initiating full containment."
+                )
                 # Further actions like blocking IPs, terminating processes would be here
             else:
                 execution_result["status"] = "failed"
-                execution_result["details"] = "ML prediction not critical enough for full response."
+                execution_result["details"] = (
+                    "ML prediction not critical enough for full response."
+                )
         else:
             raise ValueError(f"Unsupported real-time command: {command_name}")
 
@@ -113,5 +119,9 @@ class RealTimePlaybookExecutor:
         return {
             "status": self.current_status,
             "total_playbooks_executed": len(self.playbook_history),
-            "last_execution": self.last_execution_time.isoformat() if self.last_execution_time else "N/A"
+            "last_execution": (
+                self.last_execution_time.isoformat()
+                if self.last_execution_time
+                else "N/A"
+            ),
         }

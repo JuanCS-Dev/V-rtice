@@ -31,16 +31,16 @@ Like biological motor skill learning: Combines habits and planning for optimal p
 NO MOCKS - Production-ready implementation.
 """
 
-import logging
 from datetime import datetime
-from typing import Dict, Any, Optional, Tuple, List
-import numpy as np
+import logging
+from typing import Any, Dict, List, Optional, Tuple
 
 # Import HSAS components
 from actor_critic_core import ActorCriticCore
-from world_model_core import WorldModelCore
 from arbitrator_core import ArbitratorCore, ControlMode, DynaIntegration
+import numpy as np
 from skill_primitives import SkillPrimitivesLibrary
+from world_model_core import WorldModelCore
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class HSASCore:
         action_dim: int = 20,  # 20 skill primitives
         hidden_dim: int = 256,
         gamma: float = 0.99,
-        dry_run: bool = True
+        dry_run: bool = True,
     ):
         """Initialize HSAS Core.
 
@@ -83,26 +83,18 @@ class HSASCore:
             state_dim=state_dim,
             action_dim=action_dim,
             hidden_dim=hidden_dim,
-            gamma=gamma
+            gamma=gamma,
         )
 
         self.world_model = WorldModelCore(
-            state_dim=state_dim,
-            action_dim=action_dim,
-            hidden_dim=hidden_dim
+            state_dim=state_dim, action_dim=action_dim, hidden_dim=hidden_dim
         )
 
-        self.arbitrator = ArbitratorCore(
-            uncertainty_threshold=0.3
-        )
+        self.arbitrator = ArbitratorCore(uncertainty_threshold=0.3)
 
-        self.skill_primitives = SkillPrimitivesLibrary(
-            dry_run=dry_run
-        )
+        self.skill_primitives = SkillPrimitivesLibrary(dry_run=dry_run)
 
-        self.dyna_integration = DynaIntegration(
-            real_ratio=0.5
-        )
+        self.dyna_integration = DynaIntegration(real_ratio=0.5)
 
         # Neuromodulation state (will be set by external modules)
         self.dopamine_lr: float = 0.001
@@ -140,9 +132,7 @@ class HSASCore:
         return state
 
     async def select_action(
-        self,
-        state: np.ndarray,
-        mode: ControlMode = ControlMode.HYBRID
+        self, state: np.ndarray, mode: ControlMode = ControlMode.HYBRID
     ) -> Tuple[int, Dict[str, Any]]:
         """Select action using hybrid controller.
 
@@ -158,16 +148,14 @@ class HSASCore:
 
         # Arbitrate between model-free and model-based
         selected_mode = self.arbitrator.arbitrate(
-            uncertainty=uncertainty,
-            urgency=self.urgency,
-            mode=mode
+            uncertainty=uncertainty, urgency=self.urgency, mode=mode
         )
 
         metadata = {
-            'mode': selected_mode.value,
-            'uncertainty': uncertainty,
-            'urgency': self.urgency,
-            'timestamp': datetime.now().isoformat()
+            "mode": selected_mode.value,
+            "uncertainty": uncertainty,
+            "urgency": self.urgency,
+            "timestamp": datetime.now().isoformat(),
         }
 
         if selected_mode == ControlMode.MODEL_FREE:
@@ -176,16 +164,16 @@ class HSASCore:
                 state=state,
                 temperature=self.norepinephrine_temperature,
                 epsilon=self.serotonin_epsilon,
-                deterministic=False
+                deterministic=False,
             )
-            metadata['value'] = value
-            metadata['method'] = 'actor_critic'
+            metadata["value"] = value
+            metadata["method"] = "actor_critic"
 
         elif selected_mode == ControlMode.MODEL_BASED:
             # Deliberative planning (World Model)
             action, expected_return = self.world_model.plan_with_mpc(state)
-            metadata['expected_return'] = expected_return
-            metadata['method'] = 'world_model_mpc'
+            metadata["expected_return"] = expected_return
+            metadata["method"] = "world_model_mpc"
 
         else:
             raise ValueError(f"Unknown mode: {selected_mode}")
@@ -200,9 +188,7 @@ class HSASCore:
         return action, metadata
 
     async def execute_skill(
-        self,
-        action_index: int,
-        parameters: Dict[str, Any]
+        self, action_index: int, parameters: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Execute skill primitive.
 
@@ -218,16 +204,15 @@ class HSASCore:
 
         if action_index >= len(primitive_names):
             return {
-                'status': 'error',
-                'message': f'Invalid action index: {action_index}'
+                "status": "error",
+                "message": f"Invalid action index: {action_index}",
             }
 
         primitive_name = primitive_names[action_index]
 
         # Execute primitive
         result = await self.skill_primitives.execute_primitive(
-            primitive_name,
-            **parameters
+            primitive_name, **parameters
         )
 
         logger.info(f"Skill executed: {primitive_name} -> {result['status']}")
@@ -235,9 +220,7 @@ class HSASCore:
         return result
 
     async def step(
-        self,
-        observation: Dict[str, Any],
-        mode: ControlMode = ControlMode.HYBRID
+        self, observation: Dict[str, Any], mode: ControlMode = ControlMode.HYBRID
     ) -> Dict[str, Any]:
         """Perform one HSAS step (observe → select → execute).
 
@@ -256,19 +239,18 @@ class HSASCore:
 
         # 3. Execute skill (if parameters provided)
         execution_result = None
-        if 'action_parameters' in observation:
+        if "action_parameters" in observation:
             execution_result = await self.execute_skill(
-                action,
-                observation['action_parameters']
+                action, observation["action_parameters"]
             )
 
         return {
-            'state': state.tolist(),
-            'action': action,
-            'mode': metadata['mode'],
-            'uncertainty': metadata['uncertainty'],
-            'execution_result': execution_result,
-            'timestamp': datetime.now().isoformat()
+            "state": state.tolist(),
+            "action": action,
+            "mode": metadata["mode"],
+            "uncertainty": metadata["uncertainty"],
+            "execution_result": execution_result,
+            "timestamp": datetime.now().isoformat(),
         }
 
     async def train_step(
@@ -277,7 +259,7 @@ class HSASCore:
         action: int,
         reward: float,
         next_state: np.ndarray,
-        done: bool
+        done: bool,
     ):
         """Perform training step with experience.
 
@@ -289,9 +271,7 @@ class HSASCore:
             done: Episode termination flag
         """
         # 1. Compute TD-error (for dopamine)
-        td_error = self.actor_critic.compute_td_error(
-            state, reward, next_state, done
-        )
+        td_error = self.actor_critic.compute_td_error(state, reward, next_state, done)
 
         # 2. Store in actor-critic experience buffer
         self.actor_critic.store_experience(state, action, reward, next_state, done)
@@ -332,9 +312,7 @@ class HSASCore:
         if self.episode_count % 10 == 0:
             self.arbitrator.adapt_threshold()
 
-        logger.debug(
-            f"Training step: td_error={td_error:.4f}, reward={reward:.4f}"
-        )
+        logger.debug(f"Training step: td_error={td_error:.4f}, reward={reward:.4f}")
 
     def set_neuromodulation_state(
         self,
@@ -342,7 +320,7 @@ class HSASCore:
         serotonin_epsilon: Optional[float] = None,
         acetylcholine_attention_gain: Optional[float] = None,
         norepinephrine_temperature: Optional[float] = None,
-        urgency: Optional[float] = None
+        urgency: Optional[float] = None,
     ):
         """Set neuromodulation state from external modules.
 
@@ -374,10 +352,7 @@ class HSASCore:
             f"epsilon={self.serotonin_epsilon:.4f}, temp={self.norepinephrine_temperature:.3f}"
         )
 
-    async def compose_playbook(
-        self,
-        incident_type: str
-    ) -> List[Dict[str, Any]]:
+    async def compose_playbook(self, incident_type: str) -> List[Dict[str, Any]]:
         """Compose complex playbook from primitives.
 
         Args:
@@ -390,24 +365,24 @@ class HSASCore:
         # In production, use learned skill composition
 
         playbooks = {
-            'ransomware': [
-                {'primitive': 'isolate_host', 'params': {}},
-                {'primitive': 'kill_process', 'params': {}},
-                {'primitive': 'snapshot_vm', 'params': {}},
-                {'primitive': 'quarantine_file', 'params': {}},
-                {'primitive': 'extract_iocs', 'params': {}}
+            "ransomware": [
+                {"primitive": "isolate_host", "params": {}},
+                {"primitive": "kill_process", "params": {}},
+                {"primitive": "snapshot_vm", "params": {}},
+                {"primitive": "quarantine_file", "params": {}},
+                {"primitive": "extract_iocs", "params": {}},
             ],
-            'ddos': [
-                {'primitive': 'rate_limit_ip', 'params': {'rate_limit': 10}},
-                {'primitive': 'redirect_to_honeypot', 'params': {}},
-                {'primitive': 'block_ip', 'params': {'duration_minutes': 120}}
+            "ddos": [
+                {"primitive": "rate_limit_ip", "params": {"rate_limit": 10}},
+                {"primitive": "redirect_to_honeypot", "params": {}},
+                {"primitive": "block_ip", "params": {"duration_minutes": 120}},
             ],
-            'phishing': [
-                {'primitive': 'revoke_session', 'params': {}},
-                {'primitive': 'disable_account', 'params': {}},
-                {'primitive': 'enforce_mfa', 'params': {}},
-                {'primitive': 'block_domain', 'params': {}}
-            ]
+            "phishing": [
+                {"primitive": "revoke_session", "params": {}},
+                {"primitive": "disable_account", "params": {}},
+                {"primitive": "enforce_mfa", "params": {}},
+                {"primitive": "block_domain", "params": {}},
+            ],
         }
 
         playbook = playbooks.get(incident_type, [])
@@ -429,25 +404,27 @@ class HSASCore:
         dyna_status = await self.dyna_integration.get_status()
 
         return {
-            'status': 'operational',
-            'dry_run': self.dry_run,
-            'state_dim': self.state_dim,
-            'action_dim': self.action_dim,
-            'episode_count': self.episode_count,
-            'total_reward': self.total_reward,
-            'last_action': self.last_action_time.isoformat() if self.last_action_time else 'N/A',
-            'neuromodulation': {
-                'dopamine_lr': self.dopamine_lr,
-                'serotonin_epsilon': self.serotonin_epsilon,
-                'acetylcholine_attention_gain': self.acetylcholine_attention_gain,
-                'norepinephrine_temperature': self.norepinephrine_temperature,
-                'urgency': self.urgency
+            "status": "operational",
+            "dry_run": self.dry_run,
+            "state_dim": self.state_dim,
+            "action_dim": self.action_dim,
+            "episode_count": self.episode_count,
+            "total_reward": self.total_reward,
+            "last_action": (
+                self.last_action_time.isoformat() if self.last_action_time else "N/A"
+            ),
+            "neuromodulation": {
+                "dopamine_lr": self.dopamine_lr,
+                "serotonin_epsilon": self.serotonin_epsilon,
+                "acetylcholine_attention_gain": self.acetylcholine_attention_gain,
+                "norepinephrine_temperature": self.norepinephrine_temperature,
+                "urgency": self.urgency,
             },
-            'actor_critic': actor_critic_status,
-            'world_model': world_model_status,
-            'arbitrator': arbitrator_status,
-            'skill_primitives': primitives_status,
-            'dyna_integration': dyna_status
+            "actor_critic": actor_critic_status,
+            "world_model": world_model_status,
+            "arbitrator": arbitrator_status,
+            "skill_primitives": primitives_status,
+            "dyna_integration": dyna_status,
         }
 
 
@@ -475,7 +452,7 @@ class ImitationLearning:
         initial_state: np.ndarray,
         actions: List[int],
         outcome: str,
-        analyst_notes: str = ""
+        analyst_notes: str = "",
     ):
         """Record analyst demonstration.
 
@@ -487,12 +464,12 @@ class ImitationLearning:
             analyst_notes: Optional notes from analyst
         """
         demonstration = {
-            'incident_id': incident_id,
-            'initial_state': initial_state,
-            'actions': actions,
-            'outcome': outcome,
-            'analyst_notes': analyst_notes,
-            'timestamp': datetime.now().isoformat()
+            "incident_id": incident_id,
+            "initial_state": initial_state,
+            "actions": actions,
+            "outcome": outcome,
+            "analyst_notes": analyst_notes,
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.demonstration_buffer.append(demonstration)
@@ -514,13 +491,16 @@ class ImitationLearning:
 
         # Sample batch of demonstrations
         import random
-        batch = random.sample(self.demonstration_buffer, min(batch_size, len(self.demonstration_buffer)))
+
+        batch = random.sample(
+            self.demonstration_buffer, min(batch_size, len(self.demonstration_buffer))
+        )
 
         # Create state-action pairs
         training_data = []
         for demo in batch:
-            state = demo['initial_state']
-            for action in demo['actions']:
+            state = demo["initial_state"]
+            for action in demo["actions"]:
                 training_data.append((state, action))
                 # Simulate state transition (simplified)
                 state = state + np.random.randn(len(state)) * 0.1
@@ -540,7 +520,7 @@ class ImitationLearning:
             Status dictionary
         """
         return {
-            'status': 'operational',
-            'demonstration_buffer_size': len(self.demonstration_buffer),
-            'training_count': self.training_count
+            "status": "operational",
+            "demonstration_buffer_size": len(self.demonstration_buffer),
+            "training_count": self.training_count,
         }

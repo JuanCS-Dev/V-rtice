@@ -19,8 +19,8 @@ dynamic environments where information is often incomplete, noisy, or conflictin
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class FusionEngine:
@@ -48,12 +48,12 @@ class FusionEngine:
             Dict[str, Any]: A dictionary containing the fused and correlated data.
         """
         print(f"[FusionEngine] Fusing data from {len(data_sources)} sources...")
-        await asyncio.sleep(0.08) # Simulate fusion process
+        await asyncio.sleep(0.08)  # Simulate fusion process
 
         fused_result = {
             "timestamp": datetime.now().isoformat(),
             "fused_data": {},
-            "correlation_insights": []
+            "correlation_insights": [],
         }
 
         # Simple data fusion logic: merge and identify overlaps
@@ -63,13 +63,18 @@ class FusionEngine:
 
         for source_data in data_sources:
             for key, value in source_data.items():
-                if key == "ip_address": all_ips.add(value)
-                if key == "username": all_users.add(value)
-                if key == "event": all_events.append(value)
-            fused_result["fused_data"].update(source_data) # Simple merge
+                if key == "ip_address":
+                    all_ips.add(value)
+                if key == "username":
+                    all_users.add(value)
+                if key == "event":
+                    all_events.append(value)
+            fused_result["fused_data"].update(source_data)  # Simple merge
 
         if len(all_ips) > 1 and len(all_users) > 1 and len(all_events) > 0:
-            fused_result["correlation_insights"].append("Multiple IPs and users involved in recent events.")
+            fused_result["correlation_insights"].append(
+                "Multiple IPs and users involved in recent events."
+            )
 
         self.fused_data_store.append(fused_result)
         self.last_fusion_time = datetime.now()
@@ -84,6 +89,8 @@ class FusionEngine:
         """
         return {
             "status": self.current_status,
-            "last_fusion": self.last_fusion_time.isoformat() if self.last_fusion_time else "N/A",
-            "fused_data_records": len(self.fused_data_store)
+            "last_fusion": (
+                self.last_fusion_time.isoformat() if self.last_fusion_time else "N/A"
+            ),
+            "fused_data_records": len(self.fused_data_store),
         }

@@ -16,7 +16,8 @@ data, enhancing its ability to provide intelligent support for investigations.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 
 # Mocking a generic LLM client for demonstration purposes
 class MockLLMClient:
@@ -24,6 +25,7 @@ class MockLLMClient:
 
     Simula a geração de texto por um LLM para fins de teste e desenvolvimento.
     """
+
     def __init__(self, model_name: str = "mock-llm-model"):
         """Inicializa o MockLLMClient.
 
@@ -42,9 +44,11 @@ class MockLLMClient:
         Returns:
             str: Uma resposta de texto simulada do LLM.
         """
-        print(f"[MockLLMClient] Generating text with {self.model_name} for prompt: {prompt[:50]}...")
-        await asyncio.sleep(0.1) # Simulate API call
-        
+        print(
+            f"[MockLLMClient] Generating text with {self.model_name} for prompt: {prompt[:50]}..."
+        )
+        await asyncio.sleep(0.1)  # Simulate API call
+
         # Simple mock response logic
         if "stolen" in prompt.lower():
             return "Based on the information, the vehicle appears to be reported as stolen. Further investigation is highly recommended."
@@ -66,7 +70,9 @@ class LLMClient:
         Args:
             model_name (str): The name of the LLM model to use.
         """
-        self.client = MockLLMClient(model_name) # Replace with actual LLM client (e.g., OpenAI, Gemini)
+        self.client = MockLLMClient(
+            model_name
+        )  # Replace with actual LLM client (e.g., OpenAI, Gemini)
         print(f"[LLMClient] Initialized with model: {model_name}")
 
     async def generate_text(self, prompt: str, max_tokens: int = 200) -> str:
@@ -92,4 +98,8 @@ class LLMClient:
         Returns:
             Dict[str, Any]: A dictionary summarizing the client's status.
         """
-        return {"status": "active", "model_name": self.client.model_name, "last_activity": datetime.now().isoformat()}
+        return {
+            "status": "active",
+            "model_name": self.client.model_name,
+            "last_activity": datetime.now().isoformat(),
+        }

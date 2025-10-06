@@ -12,8 +12,8 @@ contribute to generating novel insights and supporting proactive threat intellig
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class PatternDetector:
@@ -27,13 +27,23 @@ class PatternDetector:
     def __init__(self):
         """Initializes the PatternDetector with predefined patterns (mock)."""
         self.predefined_patterns: Dict[str, Any] = {
-            "anomaly_spike": {"type": "statistical", "threshold": 3.0, "metric": "cpu_usage"},
-            "sequential_login_failure": {"type": "behavioral", "sequence": ["login_fail", "login_fail", "login_fail"], "time_window": 60}
+            "anomaly_spike": {
+                "type": "statistical",
+                "threshold": 3.0,
+                "metric": "cpu_usage",
+            },
+            "sequential_login_failure": {
+                "type": "behavioral",
+                "sequence": ["login_fail", "login_fail", "login_fail"],
+                "time_window": 60,
+            },
         }
         self.last_detection_time: Optional[datetime] = None
         self.detected_patterns_count: int = 0
 
-    def detect_patterns(self, data: Dict[str, Any], pattern_definition: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def detect_patterns(
+        self, data: Dict[str, Any], pattern_definition: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Detects specific patterns within the provided data.
 
         Args:
@@ -43,18 +53,41 @@ class PatternDetector:
         Returns:
             List[Dict[str, Any]]: A list of detected patterns.
         """
-        print(f"[PatternDetector] Detecting patterns in data (type: {pattern_definition.get('type')})...")
+        print(
+            f"[PatternDetector] Detecting patterns in data (type: {pattern_definition.get('type')})..."
+        )
         detected_results = []
 
         # Simulate pattern detection based on definition
-        if pattern_definition.get("type") == "statistical" and pattern_definition.get("metric") == "cpu_usage":
+        if (
+            pattern_definition.get("type") == "statistical"
+            and pattern_definition.get("metric") == "cpu_usage"
+        ):
             cpu_usage = data.get("cpu_usage", 0)
-            if cpu_usage > 90: # Simple threshold for demonstration
-                detected_results.append({"pattern_id": "high_cpu_anomaly", "description": "CPU usage exceeded threshold.", "value": cpu_usage})
+            if cpu_usage > 90:  # Simple threshold for demonstration
+                detected_results.append(
+                    {
+                        "pattern_id": "high_cpu_anomaly",
+                        "description": "CPU usage exceeded threshold.",
+                        "value": cpu_usage,
+                    }
+                )
                 self.detected_patterns_count += 1
-        elif pattern_definition.get("type") == "behavioral" and "login_fail" in str(data).lower():
-            if data.get("login_attempts", 0) > 5 and data.get("time_since_last_fail", 0) < 60:
-                detected_results.append({"pattern_id": "brute_force_attempt", "description": "Multiple login failures in short period.", "details": data})
+        elif (
+            pattern_definition.get("type") == "behavioral"
+            and "login_fail" in str(data).lower()
+        ):
+            if (
+                data.get("login_attempts", 0) > 5
+                and data.get("time_since_last_fail", 0) < 60
+            ):
+                detected_results.append(
+                    {
+                        "pattern_id": "brute_force_attempt",
+                        "description": "Multiple login failures in short period.",
+                        "details": data,
+                    }
+                )
                 self.detected_patterns_count += 1
 
         self.last_detection_time = datetime.now()
@@ -68,7 +101,11 @@ class PatternDetector:
         """
         return {
             "status": "active",
-            "last_detection": self.last_detection_time.isoformat() if self.last_detection_time else "N/A",
+            "last_detection": (
+                self.last_detection_time.isoformat()
+                if self.last_detection_time
+                else "N/A"
+            ),
             "total_patterns_detected": self.detected_patterns_count,
-            "predefined_patterns_count": len(self.predefined_patterns)
+            "predefined_patterns_count": len(self.predefined_patterns),
         }

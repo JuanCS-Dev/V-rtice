@@ -7,30 +7,28 @@ Coordinates data extraction, transformation, and loading into both PostgreSQL
 (Aurora) and Neo4j (Seriema Graph) for structured storage and graph analysis.
 """
 
-import logging
 from contextlib import asynccontextmanager
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional
 
+from config import get_settings
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
 from models import (
+    DataSource,
+    EntityType,
     IngestJobRequest,
     IngestJobResponse,
     IngestJobStatus,
     JobStatus,
-    DataSource,
-    EntityType
 )
+from pydantic import BaseModel
 from scheduler import JobScheduler
-from config import get_settings
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -69,7 +67,7 @@ app = FastAPI(
     title="Tatacá Ingestion Service",
     description="ETL pipeline for criminal investigation data ingestion",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -85,8 +83,10 @@ app.add_middleware(
 
 # API Models
 
+
 class HealthResponse(BaseModel):
     """Health check response."""
+
     status: str
     service: str
     version: str
@@ -97,12 +97,14 @@ class HealthResponse(BaseModel):
 
 class TriggerIngestRequest(BaseModel):
     """Quick ingestion trigger request."""
+
     source: DataSource
     entity_type: Optional[EntityType] = None
     filters: Dict[str, Any] = {}
 
 
 # API Endpoints
+
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
@@ -133,7 +135,7 @@ async def health_check():
         version="1.0.0",
         postgres_healthy=postgres_healthy,
         neo4j_healthy=neo4j_healthy,
-        active_jobs=active_jobs
+        active_jobs=active_jobs,
     )
 
 
@@ -196,7 +198,9 @@ async def get_job_status(job_id: str):
 @app.get("/jobs", response_model=List[IngestJobStatus])
 async def list_jobs(
     status: Optional[JobStatus] = Query(None, description="Filter by job status"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of jobs to return")
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of jobs to return"
+    ),
 ):
     """
     List ingestion jobs.
@@ -239,7 +243,7 @@ async def trigger_ingestion(request: TriggerIngestRequest):
         filters=request.filters,
         load_to_postgres=True,
         load_to_neo4j=True,
-        metadata={"triggered_via": "quick_trigger"}
+        metadata={"triggered_via": "quick_trigger"},
     )
 
     response = await scheduler.create_job(job_request)
@@ -261,26 +265,26 @@ async def list_data_sources():
             "enabled": settings.ENABLE_SINESP_CONNECTOR,
             "description": "Sistema Nacional de Informações de Segurança Pública",
             "entities": ["veiculo", "ocorrencia"],
-            "url": settings.SINESP_SERVICE_URL
+            "url": settings.SINESP_SERVICE_URL,
         },
         "prisional": {
             "enabled": settings.ENABLE_PRISIONAL_CONNECTOR,
             "description": "Sistema Prisional",
             "entities": ["pessoa"],
-            "status": "not_implemented"
+            "status": "not_implemented",
         },
         "antecedentes": {
             "enabled": settings.ENABLE_ANTECEDENTES_CONNECTOR,
             "description": "Antecedentes Criminais",
             "entities": ["pessoa", "ocorrencia"],
-            "status": "not_implemented"
-        }
+            "status": "not_implemented",
+        },
     }
 
     return {
         "sources": sources,
         "total": len(sources),
-        "enabled": sum(1 for s in sources.values() if s.get("enabled"))
+        "enabled": sum(1 for s in sources.values() if s.get("enabled")),
     }
 
 
@@ -297,34 +301,55 @@ async def list_entity_types():
     entities = {
         "pessoa": {
             "description": "Pessoa (individual)",
-            "fields": ["cpf", "nome", "data_nascimento", "mae", "pai", "rg", "telefone"],
+            "fields": [
+                "cpf",
+                "nome",
+                "data_nascimento",
+                "mae",
+                "pai",
+                "rg",
+                "telefone",
+            ],
             "primary_key": "cpf",
-            "relationships": ["possui", "reside_em", "envolvido_em"]
+            "relationships": ["possui", "reside_em", "envolvido_em"],
         },
         "veiculo": {
             "description": "Veículo (vehicle)",
-            "fields": ["placa", "renavam", "chassi", "marca", "modelo", "ano", "cor", "situacao"],
+            "fields": [
+                "placa",
+                "renavam",
+                "chassi",
+                "marca",
+                "modelo",
+                "ano",
+                "cor",
+                "situacao",
+            ],
             "primary_key": "placa",
-            "relationships": ["possui", "envolvido_em", "registrado_em"]
+            "relationships": ["possui", "envolvido_em", "registrado_em"],
         },
         "endereco": {
             "description": "Endereço (address)",
             "fields": ["cep", "logradouro", "numero", "bairro", "cidade", "estado"],
             "primary_key": "composite",
-            "relationships": ["reside_em", "ocorreu_em", "registrado_em"]
+            "relationships": ["reside_em", "ocorreu_em", "registrado_em"],
         },
         "ocorrencia": {
             "description": "Ocorrência criminal (criminal occurrence)",
-            "fields": ["numero_bo", "tipo", "data_hora", "descricao", "local", "status"],
+            "fields": [
+                "numero_bo",
+                "tipo",
+                "data_hora",
+                "descricao",
+                "local",
+                "status",
+            ],
             "primary_key": "numero_bo",
-            "relationships": ["envolvido_em", "ocorreu_em"]
-        }
+            "relationships": ["envolvido_em", "ocorreu_em"],
+        },
     }
 
-    return {
-        "entities": entities,
-        "total": len(entities)
-    }
+    return {"entities": entities, "total": len(entities)}
 
 
 @app.get("/stats", response_model=Dict[str, Any])
@@ -351,7 +376,7 @@ async def get_statistics():
         "by_source": {},
         "records_processed": sum(j.records_processed for j in all_jobs),
         "records_failed": sum(j.records_failed for j in all_jobs),
-        "active_jobs": len(scheduler.running_jobs)
+        "active_jobs": len(scheduler.running_jobs),
     }
 
     # Count by source
@@ -386,10 +411,13 @@ async def cancel_job(job_id: str):
     if not job_status:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
 
-    if job_status.status in [JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED]:
+    if job_status.status in [
+        JobStatus.COMPLETED,
+        JobStatus.FAILED,
+        JobStatus.CANCELLED,
+    ]:
         raise HTTPException(
-            status_code=400,
-            detail=f"Cannot cancel job in {job_status.status} status"
+            status_code=400, detail=f"Cannot cancel job in {job_status.status} status"
         )
 
     # Mark as cancelled
@@ -399,7 +427,7 @@ async def cancel_job(job_id: str):
     return {
         "job_id": job_id,
         "status": "cancelled",
-        "message": "Job cancelled successfully"
+        "message": "Job cancelled successfully",
     }
 
 
@@ -411,5 +439,5 @@ if __name__ == "__main__":
         host=settings.HOST,
         port=settings.PORT,
         reload=True,
-        log_level=settings.LOG_LEVEL.lower()
+        log_level=settings.LOG_LEVEL.lower(),
     )

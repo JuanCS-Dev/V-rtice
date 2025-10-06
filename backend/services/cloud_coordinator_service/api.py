@@ -6,29 +6,25 @@ Coordinates multiple edge agents in multi-tenant environment.
 NO MOCKS - Production-ready cloud coordination API.
 """
 
+from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional
+
+from coordinator_core import AgentHealth, CloudCoordinatorController
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import uvicorn
-import logging
-
-from coordinator_core import (
-    CloudCoordinatorController,
-    AgentHealth
-)
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Cloud Coordinator Service",
     description="FASE 10: Centralized coordination for distributed edge agents",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Initialize controller
@@ -39,21 +35,27 @@ coordinator = CloudCoordinatorController(heartbeat_timeout=60.0)
 # Request/Response Models
 # ========================
 
+
 class AgentRegistrationRequest(BaseModel):
     """Register new edge agent."""
+
     agent_id: str = Field(..., description="Unique agent identifier")
     tenant_id: str = Field(..., description="Tenant identifier")
     host: str = Field(..., description="Agent host address")
-    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
+    metadata: Optional[Dict[str, Any]] = Field(
+        default=None, description="Additional metadata"
+    )
 
 
 class HeartbeatRequest(BaseModel):
     """Agent heartbeat."""
+
     agent_id: str = Field(..., description="Agent identifier")
 
 
 class EventsIngestionRequest(BaseModel):
     """Ingest events from edge agent."""
+
     agent_id: str = Field(..., description="Agent identifier")
     events: List[Dict[str, Any]] = Field(..., description="Events to ingest")
 
@@ -61,6 +63,7 @@ class EventsIngestionRequest(BaseModel):
 # ===================
 # API Endpoints
 # ===================
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -85,7 +88,7 @@ async def health_check() -> Dict[str, str]:
     return {
         "status": "healthy",
         "service": "cloud_coordinator",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -104,7 +107,7 @@ async def register_agent(request: AgentRegistrationRequest) -> Dict[str, Any]:
             agent_id=request.agent_id,
             tenant_id=request.tenant_id,
             host=request.host,
-            metadata=request.metadata or {}
+            metadata=request.metadata or {},
         )
 
         return {
@@ -112,13 +115,13 @@ async def register_agent(request: AgentRegistrationRequest) -> Dict[str, Any]:
             "agent_id": agent.agent_id,
             "tenant_id": agent.tenant_id,
             "registered_at": agent.registered_at.isoformat(),
-            "health": agent.health.value
+            "health": agent.health.value,
         }
     except Exception as e:
         logger.error(f"Agent registration failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Registration failed: {str(e)}"
+            detail=f"Registration failed: {str(e)}",
         )
 
 
@@ -137,13 +140,13 @@ async def agent_heartbeat(request: HeartbeatRequest) -> Dict[str, Any]:
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Agent {request.agent_id} not found"
+            detail=f"Agent {request.agent_id} not found",
         )
 
     return {
         "status": "acknowledged",
         "agent_id": request.agent_id,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -164,13 +167,13 @@ async def ingest_events(request: EventsIngestionRequest) -> Dict[str, Any]:
             "status": "ingested",
             "agent_id": request.agent_id,
             "events_count": len(request.events),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         logger.error(f"Event ingestion failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ingestion failed: {str(e)}"
+            detail=f"Ingestion failed: {str(e)}",
         )
 
 
@@ -186,21 +189,23 @@ async def get_agents_status() -> Dict[str, Any]:
 
     agents_list = []
     for agent_id, agent in coordinator.agents.items():
-        agents_list.append({
-            "agent_id": agent.agent_id,
-            "tenant_id": agent.tenant_id,
-            "host": agent.host,
-            "health": agent.health.value,
-            "events_received": agent.events_received,
-            "events_processed": agent.events_processed,
-            "last_heartbeat": agent.last_heartbeat.isoformat(),
-            "is_alive": agent.is_alive()
-        })
+        agents_list.append(
+            {
+                "agent_id": agent.agent_id,
+                "tenant_id": agent.tenant_id,
+                "host": agent.host,
+                "health": agent.health.value,
+                "events_received": agent.events_received,
+                "events_processed": agent.events_processed,
+                "last_heartbeat": agent.last_heartbeat.isoformat(),
+                "is_alive": agent.is_alive(),
+            }
+        )
 
     return {
         "total_agents": len(coordinator.agents),
         "agents": agents_list,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -226,8 +231,7 @@ async def get_agent_details(agent_id: str) -> Dict[str, Any]:
     """
     if agent_id not in coordinator.agents:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Agent {agent_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Agent {agent_id} not found"
         )
 
     agent = coordinator.agents[agent_id]
@@ -243,7 +247,7 @@ async def get_agent_details(agent_id: str) -> Dict[str, Any]:
         "events_processed": agent.events_processed,
         "avg_latency_ms": agent.avg_latency_ms,
         "metadata": agent.metadata,
-        "is_alive": agent.is_alive()
+        "is_alive": agent.is_alive(),
     }
 
 

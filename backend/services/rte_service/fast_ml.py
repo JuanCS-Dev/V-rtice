@@ -17,8 +17,9 @@ effectiveness in real-time scenarios.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
 
@@ -38,7 +39,9 @@ class FastML:
         self.model_loaded = True
         print("[FastML] Fast ML Engine initialized and models loaded.")
 
-    async def predict(self, input_data: Dict[str, Any], prediction_type: str) -> Dict[str, Any]:
+    async def predict(
+        self, input_data: Dict[str, Any], prediction_type: str
+    ) -> Dict[str, Any]:
         """Performs a rapid ML prediction based on input data.
 
         Args:
@@ -47,7 +50,7 @@ class FastML:
 
         Returns:
             Dict[str, Any]: A dictionary containing the prediction result and confidence.
-        
+
         Raises:
             RuntimeError: If ML models are not loaded.
             ValueError: If an unsupported prediction type is provided.
@@ -55,20 +58,27 @@ class FastML:
         if not self.model_loaded:
             raise RuntimeError("Fast ML models not loaded.")
 
-        print(f"[FastML] Performing {prediction_type} prediction on data: {input_data.get('id', 'N/A')}")
-        await asyncio.sleep(0.01) # Simulate very low latency inference
+        print(
+            f"[FastML] Performing {prediction_type} prediction on data: {input_data.get('id', 'N/A')}"
+        )
+        await asyncio.sleep(0.01)  # Simulate very low latency inference
 
         prediction_value = 0.0
         confidence = 0.0
         details = ""
 
         if prediction_type == "threat_score":
-            score = input_data.get("features", {}).get("malicious_indicators", 0) * 0.8 + np.random.rand() * 0.1
+            score = (
+                input_data.get("features", {}).get("malicious_indicators", 0) * 0.8
+                + np.random.rand() * 0.1
+            )
             prediction_value = min(1.0, score)
             confidence = 0.9
             details = "Threat score based on real-time indicators."
         elif prediction_type == "anomaly_detection":
-            is_anomaly = input_data.get("features", {}).get("deviation_from_baseline", 0) > 0.5
+            is_anomaly = (
+                input_data.get("features", {}).get("deviation_from_baseline", 0) > 0.5
+            )
             prediction_value = 1.0 if is_anomaly else 0.0
             confidence = 0.8
             details = "Anomaly detected based on behavioral patterns."
@@ -80,7 +90,7 @@ class FastML:
             "prediction_type": prediction_type,
             "prediction_value": prediction_value,
             "confidence": confidence,
-            "details": details
+            "details": details,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -92,5 +102,5 @@ class FastML:
         return {
             "status": "active" if self.model_loaded else "initializing",
             "last_prediction": datetime.now().isoformat(),
-            "model_count": 1 # Mock
+            "model_count": 1,  # Mock
         }

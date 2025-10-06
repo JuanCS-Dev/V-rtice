@@ -20,11 +20,12 @@ Like biological Basal Ganglia: Habitual, fast, model-free reinforcement learning
 NO MOCKS - Production-ready implementation.
 """
 
+from collections import deque
+from datetime import datetime
 import logging
 import math
-from datetime import datetime
-from typing import Dict, Any, Optional, Tuple, List
-from collections import deque
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,9 @@ class ActorNetwork:
         self.w3 = self._xavier_init((hidden_dim, action_dim))
         self.b3 = np.zeros(action_dim)
 
-        logger.info(f"ActorNetwork initialized (state={state_dim}, action={action_dim}, hidden={hidden_dim})")
+        logger.info(
+            f"ActorNetwork initialized (state={state_dim}, action={action_dim}, hidden={hidden_dim})"
+        )
 
     def _xavier_init(self, shape: Tuple[int, int]) -> np.ndarray:
         """Xavier weight initialization.
@@ -114,10 +117,7 @@ class ActorNetwork:
         return action_probs
 
     def select_action(
-        self,
-        state: np.ndarray,
-        temperature: float = 1.0,
-        deterministic: bool = False
+        self, state: np.ndarray, temperature: float = 1.0, deterministic: bool = False
     ) -> int:
         """Select action from policy.
 
@@ -174,7 +174,9 @@ class CriticNetwork:
         self.w3 = self._xavier_init((hidden_dim, 1))
         self.b3 = np.zeros(1)
 
-        logger.info(f"CriticNetwork initialized (state={state_dim}, hidden={hidden_dim})")
+        logger.info(
+            f"CriticNetwork initialized (state={state_dim}, hidden={hidden_dim})"
+        )
 
     def _xavier_init(self, shape: Tuple[int, int]) -> np.ndarray:
         """Xavier weight initialization."""
@@ -226,7 +228,7 @@ class ActorCriticCore:
         hidden_dim: int = 256,
         gamma: float = 0.99,
         base_lr_actor: float = 0.001,
-        base_lr_critic: float = 0.005
+        base_lr_critic: float = 0.005,
     ):
         """Initialize Actor-Critic Core.
 
@@ -271,7 +273,7 @@ class ActorCriticCore:
         state: np.ndarray,
         temperature: float = 1.0,
         epsilon: float = 0.0,
-        deterministic: bool = False
+        deterministic: bool = False,
     ) -> Tuple[int, float]:
         """Select action using actor policy.
 
@@ -298,11 +300,7 @@ class ActorCriticCore:
         return action, value
 
     def compute_td_error(
-        self,
-        state: np.ndarray,
-        reward: float,
-        next_state: np.ndarray,
-        done: bool
+        self, state: np.ndarray, reward: float, next_state: np.ndarray, done: bool
     ) -> float:
         """Compute TD-error (Reward Prediction Error for dopamine).
 
@@ -354,7 +352,7 @@ class ActorCriticCore:
         action: int,
         reward: float,
         next_state: np.ndarray,
-        done: bool
+        done: bool,
     ):
         """Store experience in replay buffer.
 
@@ -366,12 +364,12 @@ class ActorCriticCore:
             done: Episode termination flag
         """
         experience = {
-            'state': state,
-            'action': action,
-            'reward': reward,
-            'next_state': next_state,
-            'done': done,
-            'timestamp': datetime.now().isoformat()
+            "state": state,
+            "action": action,
+            "reward": reward,
+            "next_state": next_state,
+            "done": done,
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.experience_buffer.append(experience)
@@ -382,7 +380,7 @@ class ActorCriticCore:
         action: int,
         reward: float,
         next_state: np.ndarray,
-        done: bool
+        done: bool,
     ) -> float:
         """Compute advantage A(s,a) = Q(s,a) - V(s).
 
@@ -411,10 +409,12 @@ class ActorCriticCore:
             Training statistics
         """
         if len(self.experience_buffer) < batch_size:
-            return {'error': 'insufficient_data'}
+            return {"error": "insufficient_data"}
 
         # Sample batch from experience buffer
-        indices = np.random.choice(len(self.experience_buffer), batch_size, replace=False)
+        indices = np.random.choice(
+            len(self.experience_buffer), batch_size, replace=False
+        )
         batch = [self.experience_buffer[i] for i in indices]
 
         # Compute losses
@@ -422,11 +422,11 @@ class ActorCriticCore:
         critic_loss = 0.0
 
         for exp in batch:
-            state = exp['state']
-            action = exp['action']
-            reward = exp['reward']
-            next_state = exp['next_state']
-            done = exp['done']
+            state = exp["state"]
+            action = exp["action"]
+            reward = exp["reward"]
+            next_state = exp["next_state"]
+            done = exp["done"]
 
             # Compute advantage (TD-error)
             advantage = self.compute_advantage(state, action, reward, next_state, done)
@@ -437,7 +437,7 @@ class ActorCriticCore:
             actor_loss -= log_prob * advantage
 
             # Critic loss: (TD-error)^2
-            critic_loss += advantage ** 2
+            critic_loss += advantage**2
 
         actor_loss /= batch_size
         critic_loss /= batch_size
@@ -456,10 +456,10 @@ class ActorCriticCore:
         )
 
         return {
-            'actor_loss': actor_loss,
-            'critic_loss': critic_loss,
-            'batch_size': batch_size,
-            'update_count': self.update_count
+            "actor_loss": actor_loss,
+            "critic_loss": critic_loss,
+            "batch_size": batch_size,
+            "update_count": self.update_count,
         }
 
     def _update_actor_weights(self, batch: List[Dict], loss: float):
@@ -482,9 +482,9 @@ class ActorCriticCore:
         grad_b3 = np.zeros_like(self.actor.b3)
 
         for experience in batch:
-            state = experience['state']
-            action = experience['action']
-            advantage = experience.get('advantage', experience['reward'])  # A(s,a)
+            state = experience["state"]
+            action = experience["action"]
+            advantage = experience.get("advantage", experience["reward"])  # A(s,a)
 
             # Forward pass (save activations)
             h1 = self.actor._relu(np.dot(state, self.actor.w1) + self.actor.b1)
@@ -551,8 +551,8 @@ class ActorCriticCore:
         grad_b3 = np.zeros_like(self.critic.b3)
 
         for experience in batch:
-            state = experience['state']
-            target = experience.get('target', experience['reward'])  # TD target
+            state = experience["state"]
+            target = experience.get("target", experience["reward"])  # TD target
 
             # Forward pass (save activations)
             h1 = self.critic._relu(np.dot(state, self.critic.w1) + self.critic.b1)
@@ -607,7 +607,7 @@ class ActorCriticCore:
             TD-error statistics
         """
         if not self.td_error_history:
-            return {'count': 0}
+            return {"count": 0}
 
         recent = list(self.td_error_history)[-window:]
 
@@ -615,11 +615,11 @@ class ActorCriticCore:
         abs_mean_td = sum(abs(x) for x in recent) / len(recent)
 
         return {
-            'count': len(recent),
-            'mean_td_error': mean_td,
-            'abs_mean_td_error': abs_mean_td,
-            'min_td_error': min(recent),
-            'max_td_error': max(recent)
+            "count": len(recent),
+            "mean_td_error": mean_td,
+            "abs_mean_td_error": abs_mean_td,
+            "min_td_error": min(recent),
+            "max_td_error": max(recent),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -631,15 +631,14 @@ class ActorCriticCore:
         td_stats = self.get_td_error_statistics()
 
         return {
-            'status': 'operational',
-            'state_dim': self.state_dim,
-            'action_dim': self.action_dim,
-            'learning_rates': {
-                'actor': self.lr_actor,
-                'critic': self.lr_critic
-            },
-            'experience_buffer_size': len(self.experience_buffer),
-            'update_count': self.update_count,
-            'last_update': self.last_update_time.isoformat() if self.last_update_time else 'N/A',
-            'td_error_statistics': td_stats
+            "status": "operational",
+            "state_dim": self.state_dim,
+            "action_dim": self.action_dim,
+            "learning_rates": {"actor": self.lr_actor, "critic": self.lr_critic},
+            "experience_buffer_size": len(self.experience_buffer),
+            "update_count": self.update_count,
+            "last_update": (
+                self.last_update_time.isoformat() if self.last_update_time else "N/A"
+            ),
+            "td_error_statistics": td_stats,
         }

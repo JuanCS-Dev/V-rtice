@@ -13,8 +13,8 @@ dynamic operational environments.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class FuzzyController:
@@ -42,18 +42,18 @@ class FuzzyController:
             "cpu_usage": {
                 "low": lambda x: max(0, min(1, (50 - x) / 50)),
                 "medium": lambda x: max(0, min(1, (x - 25) / 50, (75 - x) / 50)),
-                "high": lambda x: max(0, min(1, (x - 50) / 50))
+                "high": lambda x: max(0, min(1, (x - 50) / 50)),
             },
             "health_score": {
                 "poor": lambda x: max(0, min(1, (0.5 - x) / 0.5)),
                 "fair": lambda x: max(0, min(1, (x - 0.25) / 0.5, (0.75 - x) / 0.5)),
-                "good": lambda x: max(0, min(1, (x - 0.5) / 0.5))
+                "good": lambda x: max(0, min(1, (x - 0.5) / 0.5)),
             },
             "performance_priority": {
                 "low": lambda x: max(0, min(1, (0.5 - x) / 0.5)),
                 "medium": lambda x: max(0, min(1, (x - 0.25) / 0.5, (0.75 - x) / 0.5)),
-                "high": lambda x: max(0, min(1, (x - 0.5) / 0.5))
-            }
+                "high": lambda x: max(0, min(1, (x - 0.5) / 0.5)),
+            },
         }
 
     def _define_fuzzy_rules(self) -> List[Dict[str, Any]]:
@@ -64,10 +64,22 @@ class FuzzyController:
         """
         # Example fuzzy rules
         return [
-            {"IF": {"cpu_usage": "high", "health_score": "poor"}, "THEN": {"action": "scale_up", "intensity": "high"}},
-            {"IF": {"cpu_usage": "medium", "health_score": "fair"}, "THEN": {"action": "optimize_memory", "intensity": "medium"}},
-            {"IF": {"cpu_usage": "low", "health_score": "good"}, "THEN": {"action": "no_action", "intensity": "low"}},
-            {"IF": {"performance_priority": "high", "cpu_usage": "medium"}, "THEN": {"action": "scale_up", "intensity": "medium"}}
+            {
+                "IF": {"cpu_usage": "high", "health_score": "poor"},
+                "THEN": {"action": "scale_up", "intensity": "high"},
+            },
+            {
+                "IF": {"cpu_usage": "medium", "health_score": "fair"},
+                "THEN": {"action": "optimize_memory", "intensity": "medium"},
+            },
+            {
+                "IF": {"cpu_usage": "low", "health_score": "good"},
+                "THEN": {"action": "no_action", "intensity": "low"},
+            },
+            {
+                "IF": {"performance_priority": "high", "cpu_usage": "medium"},
+                "THEN": {"action": "scale_up", "intensity": "medium"},
+            },
         ]
 
     def _fuzzify(self, variable_name: str, value: float) -> Dict[str, float]:
@@ -99,11 +111,15 @@ class FuzzyController:
         for rule in self.fuzzy_rules:
             antecedent_strength = 1.0
             for var, term in rule["IF"].items():
-                antecedent_strength = min(antecedent_strength, fuzzified_inputs.get(var, {}).get(term, 0.0))
-            
+                antecedent_strength = min(
+                    antecedent_strength, fuzzified_inputs.get(var, {}).get(term, 0.0)
+                )
+
             for action, intensity_term in rule["THEN"].items():
                 # For simplicity, we'll just take the max strength for each action
-                inferred_actions[action] = max(inferred_actions[action], antecedent_strength)
+                inferred_actions[action] = max(
+                    inferred_actions[action], antecedent_strength
+                )
         return inferred_actions
 
     def _defuzzify(self, inferred_actions: Dict[str, float]) -> List[Dict[str, Any]]:
@@ -117,20 +133,45 @@ class FuzzyController:
         """
         crisp_actions = []
         for action_type, strength in inferred_actions.items():
-            if strength > 0.3: # Only consider actions with sufficient strength
+            if strength > 0.3:  # Only consider actions with sufficient strength
                 # Simple defuzzification: higher strength means more aggressive action
                 if action_type == "scale_up":
                     replicas = 1 if strength < 0.6 else 2
-                    crisp_actions.append({"type": "scale_deployment", "parameters": {"deployment_name": "maximus-core", "replicas": replicas}})
+                    crisp_actions.append(
+                        {
+                            "type": "scale_deployment",
+                            "parameters": {
+                                "deployment_name": "maximus-core",
+                                "replicas": replicas,
+                            },
+                        }
+                    )
                 elif action_type == "optimize_memory":
                     memory_limit = "1Gi" if strength < 0.6 else "512Mi"
-                    crisp_actions.append({"type": "update_resource_limits", "parameters": {"deployment_name": "maximus-core", "memory_limit": memory_limit}})
+                    crisp_actions.append(
+                        {
+                            "type": "update_resource_limits",
+                            "parameters": {
+                                "deployment_name": "maximus-core",
+                                "memory_limit": memory_limit,
+                            },
+                        }
+                    )
                 elif action_type == "no_action":
-                    if not crisp_actions: # Only add if no other actions are suggested
-                        crisp_actions.append({"type": "log_status", "parameters": {"message": "System stable, no action needed."}})
+                    if not crisp_actions:  # Only add if no other actions are suggested
+                        crisp_actions.append(
+                            {
+                                "type": "log_status",
+                                "parameters": {
+                                    "message": "System stable, no action needed."
+                                },
+                            }
+                        )
         return crisp_actions
 
-    def generate_actions(self, health_score: float, cpu_usage: float, performance_priority: float) -> List[Dict[str, Any]]:
+    def generate_actions(
+        self, health_score: float, cpu_usage: float, performance_priority: float
+    ) -> List[Dict[str, Any]]:
         """Generates a list of actionable commands based on fuzzy logic.
 
         Args:
@@ -147,7 +188,9 @@ class FuzzyController:
         fuzzified_inputs = {
             "cpu_usage": self._fuzzify("cpu_usage", cpu_usage),
             "health_score": self._fuzzify("health_score", health_score),
-            "performance_priority": self._fuzzify("performance_priority", performance_priority)
+            "performance_priority": self._fuzzify(
+                "performance_priority", performance_priority
+            ),
         }
 
         inferred_actions = self._infer(fuzzified_inputs)
@@ -163,7 +206,11 @@ class FuzzyController:
         """
         return {
             "status": "active",
-            "last_decision": self.last_decision_time.isoformat() if self.last_decision_time else "N/A",
+            "last_decision": (
+                self.last_decision_time.isoformat()
+                if self.last_decision_time
+                else "N/A"
+            ),
             "fuzzy_sets_count": len(self.fuzzy_sets),
-            "fuzzy_rules_count": len(self.fuzzy_rules)
+            "fuzzy_rules_count": len(self.fuzzy_rules),
         }

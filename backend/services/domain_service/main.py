@@ -12,12 +12,13 @@ crucial for enabling Maximus to operate effectively and intelligently across
 diverse operational contexts.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus Domain Service", version="1.0.0")
 
@@ -26,18 +27,18 @@ domain_knowledge_base: Dict[str, Dict[str, Any]] = {
     "cybersecurity": {
         "description": "Knowledge related to cyber threats, vulnerabilities, and defense.",
         "rules": ["block known malicious IPs", "alert on unusual login patterns"],
-        "entities": ["malware", "phishing", "APT"]
+        "entities": ["malware", "phishing", "APT"],
     },
     "environmental_monitoring": {
         "description": "Knowledge related to environmental sensors, chemical compounds, and ecological patterns.",
         "rules": ["alert on high methane levels", "track changes in air quality"],
-        "entities": ["methane", "CO2", "pollution"]
+        "entities": ["methane", "CO2", "pollution"],
     },
     "physical_security": {
         "description": "Knowledge related to physical access control, surveillance, and perimeter defense.",
         "rules": ["alert on unauthorized access", "monitor camera feeds for anomalies"],
-        "entities": ["intruder", "access point", "camera"]
-    }
+        "entities": ["intruder", "access point", "camera"],
+    },
 }
 
 
@@ -49,6 +50,7 @@ class DomainQueryRequest(BaseModel):
         query (str): A natural language query about the domain.
         context (Optional[Dict[str, Any]]): Additional context for the query.
     """
+
     domain_name: str
     query: str
     context: Optional[Dict[str, Any]] = None
@@ -103,7 +105,9 @@ async def get_domain_info(domain_name: str) -> Dict[str, Any]:
     """
     domain_info = domain_knowledge_base.get(domain_name)
     if not domain_info:
-        raise HTTPException(status_code=404, detail=f"Domain '{domain_name}' not found.")
+        raise HTTPException(
+            status_code=404, detail=f"Domain '{domain_name}' not found."
+        )
     return domain_info
 
 
@@ -123,18 +127,27 @@ async def query_domain(request: DomainQueryRequest) -> Dict[str, Any]:
     print(f"[API] Querying domain '{request.domain_name}' with: {request.query}")
     domain_info = domain_knowledge_base.get(request.domain_name)
     if not domain_info:
-        raise HTTPException(status_code=404, detail=f"Domain '{request.domain_name}' not found.")
+        raise HTTPException(
+            status_code=404, detail=f"Domain '{request.domain_name}' not found."
+        )
 
-    await asyncio.sleep(0.1) # Simulate processing
+    await asyncio.sleep(0.1)  # Simulate processing
 
     # Simple keyword-based query simulation
     response = {"query": request.query, "domain": request.domain_name, "results": []}
     if "rules" in request.query.lower():
         response["results"].append({"type": "rules", "content": domain_info["rules"]})
     if "entities" in request.query.lower():
-        response["results"].append({"type": "entities", "content": domain_info["entities"]})
+        response["results"].append(
+            {"type": "entities", "content": domain_info["entities"]}
+        )
     if not response["results"]:
-        response["results"].append({"type": "info", "content": f"No specific information found for '{request.query}' in domain '{request.domain_name}'."})
+        response["results"].append(
+            {
+                "type": "info",
+                "content": f"No specific information found for '{request.query}' in domain '{request.domain_name}'.",
+            }
+        )
 
     return response
 

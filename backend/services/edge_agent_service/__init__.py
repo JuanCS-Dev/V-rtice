@@ -10,16 +10,16 @@ __version__ = "1.0.0"
 __author__ = "VÉRTICE Team"
 
 from .edge_agent_core import (
-    EventType,
+    BatchingStrategy,
+    EdgeAgentController,
     EdgeAgentStatus,
     Event,
     EventBatch,
-    LocalBuffer,
-    BatchingStrategy,
+    EventType,
     HeartbeatManager,
-    RetryLogic,
+    LocalBuffer,
     LocalMetrics,
-    EdgeAgentController,
+    RetryLogic,
 )
 
 __all__ = [

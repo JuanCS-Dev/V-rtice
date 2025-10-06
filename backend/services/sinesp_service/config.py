@@ -12,7 +12,8 @@ ensuring adaptability across different environments.
 """
 
 import os
-from pydantic import BaseSettings
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -20,6 +21,7 @@ class Settings(BaseSettings):
 
     Settings are loaded from environment variables or a .env file.
     """
+
     app_name: str = "Maximus Sinesp Service"
     sinesp_api_key: str = os.getenv("SINESP_API_KEY", "your_sinesp_api_key")
     sinesp_api_url: str = os.getenv("SINESP_API_URL", "https://api.sinespcidadao.com")
@@ -28,8 +30,9 @@ class Settings(BaseSettings):
 
     class Config:
         """Configuração para carregar variáveis de ambiente de um arquivo .env."""
+
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
 
 def get_settings() -> Settings:

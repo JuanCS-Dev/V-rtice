@@ -16,8 +16,9 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
 
@@ -34,7 +35,9 @@ class OraculoEngine:
         self.last_prediction_time: Optional[datetime] = None
         self.current_status: str = "ready_for_predictions"
 
-    async def generate_prediction(self, data: Dict[str, Any], prediction_type: str, time_horizon: str) -> Dict[str, Any]:
+    async def generate_prediction(
+        self, data: Dict[str, Any], prediction_type: str, time_horizon: str
+    ) -> Dict[str, Any]:
         """Generates a predictive insight based on the provided data.
 
         Args:
@@ -45,8 +48,10 @@ class OraculoEngine:
         Returns:
             Dict[str, Any]: A dictionary containing the prediction results and confidence.
         """
-        print(f"[OraculoEngine] Generating {prediction_type} prediction for {time_horizon}...")
-        await asyncio.sleep(0.5) # Simulate complex predictive modeling
+        print(
+            f"[OraculoEngine] Generating {prediction_type} prediction for {time_horizon}..."
+        )
+        await asyncio.sleep(0.5)  # Simulate complex predictive modeling
 
         predicted_event = "N/A"
         confidence = 0.0
@@ -71,7 +76,7 @@ class OraculoEngine:
                 predicted_event = "Stable resource demand."
                 confidence = 0.90
                 risk_assessment = "low"
-        
+
         prediction_result = {
             "timestamp": datetime.now().isoformat(),
             "prediction_type": prediction_type,
@@ -79,7 +84,7 @@ class OraculoEngine:
             "predicted_event": predicted_event,
             "confidence": confidence,
             "risk_assessment": risk_assessment,
-            "details": "Prediction generated based on historical data and current trends."
+            "details": "Prediction generated based on historical data and current trends.",
         }
         self.prediction_history.append(prediction_result)
         self.last_prediction_time = datetime.now()
@@ -95,5 +100,9 @@ class OraculoEngine:
         return {
             "status": self.current_status,
             "total_predictions_generated": len(self.prediction_history),
-            "last_prediction": self.last_prediction_time.isoformat() if self.last_prediction_time else "N/A"
+            "last_prediction": (
+                self.last_prediction_time.isoformat()
+                if self.last_prediction_time
+                else "N/A"
+            ),
         }

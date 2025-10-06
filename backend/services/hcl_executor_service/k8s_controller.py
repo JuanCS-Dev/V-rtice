@@ -17,23 +17,43 @@ containerized environment.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 # Mocking Kubernetes client for demonstration purposes
 class MockKubernetesClient:
     def __init__(self):
         self.deployments: Dict[str, Dict[str, Any]] = {
-            "default/maximus-core": {"replicas": 1, "cpu_limit": "1000m", "memory_limit": "1Gi"},
-            "default/sensory-service": {"replicas": 2, "cpu_limit": "500m", "memory_limit": "512Mi"}
+            "default/maximus-core": {
+                "replicas": 1,
+                "cpu_limit": "1000m",
+                "memory_limit": "1Gi",
+            },
+            "default/sensory-service": {
+                "replicas": 2,
+                "cpu_limit": "500m",
+                "memory_limit": "512Mi",
+            },
         }
         self.pods: Dict[str, Dict[str, Any]] = {
-            "default/maximus-core-pod-abc": {"status": "running", "deployment": "maximus-core"},
-            "default/sensory-service-pod-123": {"status": "running", "deployment": "sensory-service"},
-            "default/sensory-service-pod-456": {"status": "running", "deployment": "sensory-service"}
+            "default/maximus-core-pod-abc": {
+                "status": "running",
+                "deployment": "maximus-core",
+            },
+            "default/sensory-service-pod-123": {
+                "status": "running",
+                "deployment": "sensory-service",
+            },
+            "default/sensory-service-pod-456": {
+                "status": "running",
+                "deployment": "sensory-service",
+            },
         }
 
-    async def get_deployment(self, name: str, namespace: str) -> Optional[Dict[str, Any]]:
+    async def get_deployment(
+        self, name: str, namespace: str
+    ) -> Optional[Dict[str, Any]]:
         await asyncio.sleep(0.01)
         return self.deployments.get(f"{namespace}/{name}")
 
@@ -46,12 +66,20 @@ class MockKubernetesClient:
             return True
         return False
 
-    async def update_resource_limits(self, name: str, namespace: str, cpu_limit: Optional[str], memory_limit: Optional[str]) -> bool:
+    async def update_resource_limits(
+        self,
+        name: str,
+        namespace: str,
+        cpu_limit: Optional[str],
+        memory_limit: Optional[str],
+    ) -> bool:
         await asyncio.sleep(0.05)
         key = f"{namespace}/{name}"
         if key in self.deployments:
-            if cpu_limit: self.deployments[key]["cpu_limit"] = cpu_limit
-            if memory_limit: self.deployments[key]["memory_limit"] = memory_limit
+            if cpu_limit:
+                self.deployments[key]["cpu_limit"] = cpu_limit
+            if memory_limit:
+                self.deployments[key]["memory_limit"] = memory_limit
             print(f"[MockK8s] Updated resource limits for deployment {name}.")
             return True
         return False
@@ -67,7 +95,12 @@ class MockKubernetesClient:
 
     async def get_cluster_info(self) -> Dict[str, Any]:
         await asyncio.sleep(0.01)
-        return {"nodes": 3, "total_cpu": "12 cores", "total_memory": "48Gi", "running_pods": len(self.pods)}
+        return {
+            "nodes": 3,
+            "total_cpu": "12 cores",
+            "total_memory": "48Gi",
+            "running_pods": len(self.pods),
+        }
 
 
 class KubernetesController:
@@ -79,10 +112,12 @@ class KubernetesController:
 
     def __init__(self):
         """Initializes the KubernetesController. In a real scenario, this would load K8s config."""
-        self.k8s_client = MockKubernetesClient() # Replace with actual k8s client
+        self.k8s_client = MockKubernetesClient()  # Replace with actual k8s client
         print("[KubernetesController] Initialized Kubernetes Controller (mock mode).")
 
-    async def scale_deployment(self, deployment_name: str, namespace: str, replicas: int) -> bool:
+    async def scale_deployment(
+        self, deployment_name: str, namespace: str, replicas: int
+    ) -> bool:
         """Scales a Kubernetes deployment to the specified number of replicas.
 
         Args:
@@ -93,10 +128,20 @@ class KubernetesController:
         Returns:
             bool: True if scaling was successful, False otherwise.
         """
-        print(f"[KubernetesController] Scaling deployment {deployment_name} in {namespace} to {replicas} replicas.")
-        return await self.k8s_client.scale_deployment(deployment_name, namespace, replicas)
+        print(
+            f"[KubernetesController] Scaling deployment {deployment_name} in {namespace} to {replicas} replicas."
+        )
+        return await self.k8s_client.scale_deployment(
+            deployment_name, namespace, replicas
+        )
 
-    async def update_resource_limits(self, deployment_name: str, namespace: str, cpu_limit: Optional[str], memory_limit: Optional[str]) -> bool:
+    async def update_resource_limits(
+        self,
+        deployment_name: str,
+        namespace: str,
+        cpu_limit: Optional[str],
+        memory_limit: Optional[str],
+    ) -> bool:
         """Updates CPU and memory resource limits for a Kubernetes deployment.
 
         Args:
@@ -108,8 +153,12 @@ class KubernetesController:
         Returns:
             bool: True if limits were updated successfully, False otherwise.
         """
-        print(f"[KubernetesController] Updating resource limits for {deployment_name} in {namespace}.")
-        return await self.k8s_client.update_resource_limits(deployment_name, namespace, cpu_limit, memory_limit)
+        print(
+            f"[KubernetesController] Updating resource limits for {deployment_name} in {namespace}."
+        )
+        return await self.k8s_client.update_resource_limits(
+            deployment_name, namespace, cpu_limit, memory_limit
+        )
 
     async def restart_pod(self, pod_name: str, namespace: str) -> bool:
         """Restarts a specific Kubernetes pod.

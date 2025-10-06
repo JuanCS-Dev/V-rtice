@@ -15,8 +15,8 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
 
@@ -34,7 +34,12 @@ class EurekaEngine:
         self.last_discovery_time: Optional[datetime] = None
         self.current_status: str = "seeking_insights"
 
-    async def analyze_data(self, data: Dict[str, Any], data_type: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def analyze_data(
+        self,
+        data: Dict[str, Any],
+        data_type: str,
+        context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Analyzes incoming data to identify novel insights and potential discoveries.
 
         Args:
@@ -46,13 +51,16 @@ class EurekaEngine:
             Dict[str, Any]: A dictionary containing the analysis results and any novel discoveries.
         """
         print(f"[EurekaEngine] Analyzing {data_type} data for insights...")
-        await asyncio.sleep(0.3) # Simulate complex analysis
+        await asyncio.sleep(0.3)  # Simulate complex analysis
 
         novel_discovery = None
         analysis_notes = "No significant novel insights found in this batch."
 
         # Simulate discovery based on data content
-        if "unusual_pattern" in str(data).lower() or "zero_day_exploit" in str(data).lower():
+        if (
+            "unusual_pattern" in str(data).lower()
+            or "zero_day_exploit" in str(data).lower()
+        ):
             discovery_id = str(uuid.uuid4())
             novel_discovery = {
                 "id": discovery_id,
@@ -60,7 +68,7 @@ class EurekaEngine:
                 "severity": "critical",
                 "description": "Identified a novel, potentially zero-day exploit pattern in network traffic.",
                 "timestamp": datetime.now().isoformat(),
-                "related_data": data
+                "related_data": data,
             }
             analysis_notes = "Critical novel discovery made!"
             self.discovery_history.append(novel_discovery)
@@ -69,7 +77,7 @@ class EurekaEngine:
         return {
             "status": "completed",
             "analysis_notes": analysis_notes,
-            "novel_discovery": novel_discovery
+            "novel_discovery": novel_discovery,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -81,5 +89,9 @@ class EurekaEngine:
         return {
             "status": self.current_status,
             "total_discoveries": len(self.discovery_history),
-            "last_discovery": self.last_discovery_time.isoformat() if self.last_discovery_time else "N/A"
+            "last_discovery": (
+                self.last_discovery_time.isoformat()
+                if self.last_discovery_time
+                else "N/A"
+            ),
         }

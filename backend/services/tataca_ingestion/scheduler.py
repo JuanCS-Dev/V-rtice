@@ -4,25 +4,25 @@ Manages ingestion jobs with scheduling, retry logic, and concurrent execution
 control.
 """
 
-import logging
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
+import logging
+from typing import Any, Dict, List, Optional
 import uuid
 
+from config import get_settings
+from connectors import SinespConnector
+from loaders import Neo4jLoader, PostgresLoader
 from models import (
+    DataSource,
+    EntityType,
     IngestJobRequest,
     IngestJobResponse,
     IngestJobStatus,
     JobStatus,
-    DataSource,
-    EntityType
 )
-from connectors import SinespConnector
 from transformers import EntityTransformer, RelationshipExtractor
-from loaders import PostgresLoader, Neo4jLoader
-from config import get_settings
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -118,12 +118,14 @@ class JobScheduler:
                 source=request.source,
                 created_at=datetime.utcnow(),
                 metadata={
-                    "entity_type": request.entity_type.value if request.entity_type else "all",
+                    "entity_type": (
+                        request.entity_type.value if request.entity_type else "all"
+                    ),
                     "filters": request.filters,
                     "load_to_postgres": request.load_to_postgres,
                     "load_to_neo4j": request.load_to_neo4j,
-                    **request.metadata
-                }
+                    **request.metadata,
+                },
             )
 
             # Store job
@@ -139,7 +141,7 @@ class JobScheduler:
                 status=JobStatus.PENDING,
                 source=request.source,
                 created_at=job_status.created_at,
-                message="Job created and queued for processing"
+                message="Job created and queued for processing",
             )
 
         except Exception as e:
@@ -159,9 +161,7 @@ class JobScheduler:
         return self.jobs.get(job_id)
 
     async def list_jobs(
-        self,
-        status_filter: Optional[JobStatus] = None,
-        limit: int = 100
+        self, status_filter: Optional[JobStatus] = None, limit: int = 100
     ) -> List[IngestJobStatus]:
         """
         List jobs with optional filtering.
@@ -274,8 +274,7 @@ class JobScheduler:
                         try:
                             # Transform
                             transform_result = self.transformer.transform_veiculo(
-                                veiculo.model_dump(),
-                                DataSource.SINESP
+                                veiculo.model_dump(), DataSource.SINESP
                             )
 
                             if not transform_result.success:
@@ -285,15 +284,13 @@ class JobScheduler:
                             # Load to PostgreSQL
                             if request.load_to_postgres and self.postgres_loader:
                                 await self.postgres_loader.load_entity(
-                                    EntityType.VEICULO,
-                                    transform_result.entity_data
+                                    EntityType.VEICULO, transform_result.entity_data
                                 )
 
                             # Load to Neo4j
                             if request.load_to_neo4j and self.neo4j_loader:
                                 await self.neo4j_loader.load_entity(
-                                    EntityType.VEICULO,
-                                    transform_result.entity_data
+                                    EntityType.VEICULO, transform_result.entity_data
                                 )
 
                             job_status.records_processed += 1
@@ -310,8 +307,7 @@ class JobScheduler:
                     try:
                         # Transform
                         transform_result = self.transformer.transform_ocorrencia(
-                            ocorrencia.model_dump(),
-                            DataSource.SINESP
+                            ocorrencia.model_dump(), DataSource.SINESP
                         )
 
                         if not transform_result.success:
@@ -321,15 +317,13 @@ class JobScheduler:
                         # Load to PostgreSQL
                         if request.load_to_postgres and self.postgres_loader:
                             await self.postgres_loader.load_entity(
-                                EntityType.OCORRENCIA,
-                                transform_result.entity_data
+                                EntityType.OCORRENCIA, transform_result.entity_data
                             )
 
                         # Load to Neo4j
                         if request.load_to_neo4j and self.neo4j_loader:
                             await self.neo4j_loader.load_entity(
-                                EntityType.OCORRENCIA,
-                                transform_result.entity_data
+                                EntityType.OCORRENCIA, transform_result.entity_data
                             )
 
                         job_status.records_processed += 1

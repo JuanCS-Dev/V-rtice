@@ -10,8 +10,10 @@ of new predictive capabilities, ensuring their accuracy, robustness, and
 performance without affecting the stability of the production system.
 """
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 
 # Assuming aurora_logic is a module or class that needs testing
 # For demonstration, we'll create a mock aurora_logic
@@ -21,6 +23,7 @@ class MockAuroraLogic:
     Utilizado para testar a integração e o comportamento esperado da lógica Aurora
     em um ambiente isolado.
     """
+
     def __init__(self):
         """Inicializa o MockAuroraLogic.
 

@@ -7,13 +7,13 @@ Implements formal argumentation analysis:
 - Coherence calculation
 """
 
-import logging
-from typing import List, Dict, Set, Tuple, Optional
 from collections import defaultdict
 import json
+import logging
+from typing import Dict, List, Optional, Set, Tuple
 
-from models import Argument, Fallacy, ArgumentRole
 from config import get_settings
+from models import Argument, ArgumentRole, Fallacy
 
 logger = logging.getLogger(__name__)
 
@@ -59,10 +59,7 @@ class ArgumentationFramework:
         else:
             logger.warning(f"Cannot add attack: argument IDs not found")
 
-    def infer_attacks_from_fallacies(
-        self,
-        fallacies: List[Fallacy]
-    ) -> None:
+    def infer_attacks_from_fallacies(self, fallacies: List[Fallacy]) -> None:
         """
         Infer attack relations from detected fallacies.
 
@@ -101,8 +98,7 @@ class ArgumentationFramework:
                     continue
 
                 # Claims attack opposing claims
-                if (arg1.role == ArgumentRole.CLAIM and
-                    arg2.role == ArgumentRole.CLAIM):
+                if arg1.role == ArgumentRole.CLAIM and arg2.role == ArgumentRole.CLAIM:
 
                     # Simple opposition detection (production should use semantics)
                     if self._are_opposing(arg1.text, arg2.text):
@@ -153,8 +149,7 @@ class ArgumentationFramework:
             Set of attacker IDs
         """
         return {
-            attacker for attacker, attacked in self.attacks
-            if attacked == argument_id
+            attacker for attacker, attacked in self.attacks if attacked == argument_id
         }
 
     def get_attacked(self, argument_id: str) -> Set[str]:
@@ -168,8 +163,7 @@ class ArgumentationFramework:
             Set of attacked IDs
         """
         return {
-            attacked for attacker, attacked in self.attacks
-            if attacker == argument_id
+            attacked for attacker, attacked in self.attacks if attacker == argument_id
         }
 
     def is_defended(self, argument_id: str, extension: Set[str]) -> bool:
@@ -311,7 +305,11 @@ class ArgumentationFramework:
 
         # Factor 1: Conflict density
         total_possible_attacks = len(self.arguments) * (len(self.arguments) - 1)
-        conflict_density = len(self.attacks) / total_possible_attacks if total_possible_attacks > 0 else 0
+        conflict_density = (
+            len(self.attacks) / total_possible_attacks
+            if total_possible_attacks > 0
+            else 0
+        )
         conflict_score = 1.0 - min(1.0, conflict_density * 2)  # Penalize conflicts
 
         # Factor 2: Grounded extension size
@@ -319,14 +317,12 @@ class ArgumentationFramework:
         grounded_ratio = len(grounded) / len(self.arguments)
 
         # Factor 3: Average argument confidence
-        avg_confidence = sum(arg.confidence for arg in self.arguments.values()) / len(self.arguments)
+        avg_confidence = sum(arg.confidence for arg in self.arguments.values()) / len(
+            self.arguments
+        )
 
         # Weighted combination
-        coherence = (
-            conflict_score * 0.4 +
-            grounded_ratio * 0.3 +
-            avg_confidence * 0.3
-        )
+        coherence = conflict_score * 0.4 + grounded_ratio * 0.3 + avg_confidence * 0.3
 
         return coherence
 
@@ -355,7 +351,7 @@ class ArgumentationFramework:
                     "confidence": arg.confidence,
                     "start_char": arg.start_char,
                     "end_char": arg.end_char,
-                    "parent_id": arg.parent_id
+                    "parent_id": arg.parent_id,
                 }
                 for arg_id, arg in self.arguments.items()
             },
@@ -364,7 +360,7 @@ class ArgumentationFramework:
                 for attacker, attacked in self.attacks
             ],
             "grounded_extension": list(self.compute_grounded_extension()),
-            "coherence": self.calculate_coherence()
+            "coherence": self.calculate_coherence(),
         }
 
     def to_json(self) -> str:
@@ -372,7 +368,7 @@ class ArgumentationFramework:
         return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, any]) -> 'ArgumentationFramework':
+    def from_dict(cls, data: Dict[str, any]) -> "ArgumentationFramework":
         """
         Create framework from dict.
 
@@ -393,7 +389,7 @@ class ArgumentationFramework:
                 start_char=arg_data["start_char"],
                 end_char=arg_data["end_char"],
                 confidence=arg_data["confidence"],
-                parent_id=arg_data.get("parent_id")
+                parent_id=arg_data.get("parent_id"),
             )
             framework.add_argument(arg)
 
@@ -421,7 +417,9 @@ class ArgumentationFramework:
         for arg_id, arg in self.arguments.items():
             label = f"{arg.role.value}\\n{arg.text[:30]}..."
             color = "green" if arg_id in grounded else "lightgray"
-            lines.append(f'  "{arg_id}" [label="{label}", fillcolor="{color}", style=filled];')
+            lines.append(
+                f'  "{arg_id}" [label="{label}", fillcolor="{color}", style=filled];'
+            )
 
         # Edges (attacks)
         for attacker, attacked in self.attacks:
@@ -436,9 +434,9 @@ class ArgumentationFramework:
 # HELPER FUNCTIONS
 # ============================================================================
 
+
 def build_framework_from_arguments(
-    arguments: List[Argument],
-    fallacies: List[Fallacy]
+    arguments: List[Argument], fallacies: List[Fallacy]
 ) -> ArgumentationFramework:
     """
     Build argumentation framework from arguments and fallacies.

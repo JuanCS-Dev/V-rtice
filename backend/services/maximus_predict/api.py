@@ -12,15 +12,17 @@ service is crucial for supporting proactive decision-making and strategic
 planning across the Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, HTTPException
 import numpy as np
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus Predict Service", version="1.0.0")
+
 
 # Mock ML Model (In a real scenario, this would be a loaded model)
 class MockPredictiveModel:
@@ -29,6 +31,7 @@ class MockPredictiveModel:
     Simula a funcionalidade de um modelo de ML para gerar previsões
     com base em dados de entrada, para fins de teste e desenvolvimento.
     """
+
     def predict(self, data: Dict[str, Any], prediction_type: str) -> Dict[str, Any]:
         """Simula a geração de uma previsão com base nos dados e tipo de previsão.
 
@@ -40,15 +43,29 @@ class MockPredictiveModel:
             Dict[str, Any]: Um dicionário contendo o valor previsto, confiança e outras informações.
         """
         # Simulate prediction logic
-        if prediction_type == "resource_demand":            predicted_value = data.get("current_load", 0) * 1.1 + np.random.rand() * 10
+        if prediction_type == "resource_demand":
+            predicted_value = data.get("current_load", 0) * 1.1 + np.random.rand() * 10
             confidence = 0.85
-            return {"predicted_value": predicted_value, "unit": "requests/sec", "confidence": confidence}
+            return {
+                "predicted_value": predicted_value,
+                "unit": "requests/sec",
+                "confidence": confidence,
+            }
         elif prediction_type == "threat_likelihood":
             likelihood = data.get("anomaly_score", 0) * 0.7 + np.random.rand() * 0.2
             confidence = 0.70
-            return {"likelihood": min(1.0, likelihood), "confidence": confidence, "threat_type": "DDoS"}
+            return {
+                "likelihood": min(1.0, likelihood),
+                "confidence": confidence,
+                "threat_type": "DDoS",
+            }
         else:
-            return {"predicted_value": None, "confidence": 0.0, "error": "Unknown prediction type"}
+            return {
+                "predicted_value": None,
+                "confidence": 0.0,
+                "error": "Unknown prediction type",
+            }
+
 
 predictive_model = MockPredictiveModel()
 
@@ -61,6 +78,7 @@ class PredictionRequest(BaseModel):
         prediction_type (str): The type of prediction requested (e.g., 'resource_demand', 'threat_likelihood').
         time_horizon (Optional[str]): The time horizon for the prediction (e.g., '1h', '24h').
     """
+
     data: Dict[str, Any]
     prediction_type: str
     time_horizon: Optional[str] = None
@@ -101,15 +119,21 @@ async def generate_prediction_endpoint(request: PredictionRequest) -> Dict[str, 
     Returns:
         Dict[str, Any]: A dictionary containing the prediction results and confidence.
     """
-    print(f"[API] Generating {request.prediction_type} prediction for data: {request.data}")
-    await asyncio.sleep(0.1) # Simulate prediction time
+    print(
+        f"[API] Generating {request.prediction_type} prediction for data: {request.data}"
+    )
+    await asyncio.sleep(0.1)  # Simulate prediction time
 
     prediction_result = predictive_model.predict(request.data, request.prediction_type)
 
     if prediction_result.get("error"):
         raise HTTPException(status_code=400, detail=prediction_result["error"])
 
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "prediction": prediction_result}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "prediction": prediction_result,
+    }
 
 
 if __name__ == "__main__":

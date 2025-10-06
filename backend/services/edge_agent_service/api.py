@@ -6,26 +6,24 @@ NO MOCKS - Production-ready edge API.
 """
 
 import asyncio
+from contextlib import asynccontextmanager
+from datetime import datetime
 import logging
 import socket
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
-import uvicorn
+from typing import Any, Dict, List, Optional
 
 from edge_agent_core import (
     EdgeAgentController,
-    EventType,
     EdgeAgentStatus,
+    EventType,
 )
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from pydantic import BaseModel, Field
+import uvicorn
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -42,9 +40,12 @@ async def lifespan(app: FastAPI):
 
     # Get configuration
     import os
+
     agent_id = os.getenv("EDGE_AGENT_ID", socket.gethostname())
     tenant_id = os.getenv("TENANT_ID", "default")
-    cloud_url = os.getenv("CLOUD_COORDINATOR_URL", "http://cloud_coordinator_service:8021")
+    cloud_url = os.getenv(
+        "CLOUD_COORDINATOR_URL", "http://cloud_coordinator_service:8021"
+    )
 
     # Initialize edge agent
     edge_agent = EdgeAgentController(
@@ -54,7 +55,7 @@ async def lifespan(app: FastAPI):
         cloud_coordinator_url=cloud_url,
         buffer_size=int(os.getenv("BUFFER_SIZE", "100000")),
         batch_size=int(os.getenv("BATCH_SIZE", "1000")),
-        batch_age_seconds=float(os.getenv("BATCH_AGE_SECONDS", "5.0"))
+        batch_age_seconds=float(os.getenv("BATCH_AGE_SECONDS", "5.0")),
     )
 
     edge_agent.status = EdgeAgentStatus.CONNECTED
@@ -73,7 +74,7 @@ app = FastAPI(
     title="VÉRTICE Edge Agent Service",
     description="Edge sensor for distributed organism deployment",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -81,8 +82,10 @@ app = FastAPI(
 # Request/Response Models
 # ============================================================================
 
+
 class EventRequest(BaseModel):
     """Request to collect event."""
+
     event_type: str = Field(..., description="Event type")
     severity: float = Field(..., ge=0.0, le=1.0, description="Severity (0-1)")
     data: Dict[str, Any] = Field(..., description="Event data")
@@ -91,6 +94,7 @@ class EventRequest(BaseModel):
 
 class EventResponse(BaseModel):
     """Response with event ID."""
+
     event_id: str
     status: str
     buffered: bool
@@ -98,6 +102,7 @@ class EventResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     """Agent status response."""
+
     agent_id: str
     tenant_id: str
     source_host: str
@@ -111,6 +116,7 @@ class StatusResponse(BaseModel):
 
 class BatchStatsResponse(BaseModel):
     """Batch statistics response."""
+
     current_batch_size: int
     batches_pending: int
     estimated_flush_time_seconds: float
@@ -119,6 +125,7 @@ class BatchStatsResponse(BaseModel):
 # ============================================================================
 # Background Tasks
 # ============================================================================
+
 
 async def process_buffer_loop():
     """Background task to process buffer and send batches."""
@@ -147,7 +154,7 @@ async def process_buffer_loop():
                             event_count=len(batch.events),
                             bytes_sent=len(compressed_data),
                             compression_ratio=batch.compression_ratio,
-                            latency=0.1  # Placeholder for actual send latency
+                            latency=0.1,  # Placeholder for actual send latency
                         )
 
                 # Heartbeat check
@@ -179,6 +186,7 @@ async def process_buffer_loop():
 # Event Collection Endpoints
 # ============================================================================
 
+
 @app.post("/event/collect", response_model=EventResponse)
 async def collect_event(event: EventRequest):
     """Collect edge event.
@@ -198,8 +206,7 @@ async def collect_event(event: EventRequest):
             event_type = EventType(event.event_type)
         except ValueError:
             raise HTTPException(
-                status_code=400,
-                detail=f"Invalid event type: {event.event_type}"
+                status_code=400, detail=f"Invalid event type: {event.event_type}"
             )
 
         # Collect event
@@ -207,14 +214,10 @@ async def collect_event(event: EventRequest):
             event_type=event_type,
             severity=event.severity,
             data=event.data,
-            metadata=event.metadata
+            metadata=event.metadata,
         )
 
-        return EventResponse(
-            event_id=event_id,
-            status="collected",
-            buffered=True
-        )
+        return EventResponse(event_id=event_id, status="collected", buffered=True)
 
     except Exception as e:
         logger.error(f"Error collecting event: {e}")
@@ -248,7 +251,7 @@ async def collect_event_batch(events: List[EventRequest]):
                 event_type=event_type,
                 severity=event.severity,
                 data=event.data,
-                metadata=event.metadata
+                metadata=event.metadata,
             )
 
             event_ids.append(event_id)
@@ -257,7 +260,7 @@ async def collect_event_batch(events: List[EventRequest]):
             "status": "success",
             "events_collected": len(event_ids),
             "event_ids": event_ids,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -268,6 +271,7 @@ async def collect_event_batch(events: List[EventRequest]):
 # ============================================================================
 # Status & Metrics Endpoints
 # ============================================================================
+
 
 @app.get("/status", response_model=StatusResponse)
 async def get_status():
@@ -291,7 +295,7 @@ async def get_status():
             buffer_stats=status["buffer"],
             heartbeat_stats=status["heartbeat"],
             metrics=status["metrics"],
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
     except Exception as e:
@@ -315,7 +319,7 @@ async def get_metrics():
             "tenant_id": edge_agent.tenant_id,
             "metrics": edge_agent.metrics.get_stats(),
             "buffer_utilization": edge_agent.buffer.get_stats()["utilization"],
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -339,7 +343,7 @@ async def get_buffer_stats():
         return {
             "buffer": buffer_stats,
             "current_batch_size": len(edge_agent.current_batch),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -368,7 +372,7 @@ async def get_batch_stats():
         return BatchStatsResponse(
             current_batch_size=len(edge_agent.current_batch),
             batches_pending=0,  # Batches are sent immediately
-            estimated_flush_time_seconds=time_until_flush
+            estimated_flush_time_seconds=time_until_flush,
         )
 
     except Exception as e:
@@ -380,13 +384,14 @@ async def get_batch_stats():
 # Health & Control Endpoints
 # ============================================================================
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "edge_agent",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -398,10 +403,7 @@ async def pause_agent():
 
     edge_agent.status = EdgeAgentStatus.DEGRADED
 
-    return {
-        "status": "paused",
-        "timestamp": datetime.now().isoformat()
-    }
+    return {"status": "paused", "timestamp": datetime.now().isoformat()}
 
 
 @app.post("/control/resume")
@@ -412,17 +414,8 @@ async def resume_agent():
 
     edge_agent.status = EdgeAgentStatus.CONNECTED
 
-    return {
-        "status": "resumed",
-        "timestamp": datetime.now().isoformat()
-    }
+    return {"status": "resumed", "timestamp": datetime.now().isoformat()}
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "api:app",
-        host="0.0.0.0",
-        port=8021,
-        log_level="info",
-        access_log=True
-    )
+    uvicorn.run("api:app", host="0.0.0.0", port=8021, log_level="info", access_log=True)

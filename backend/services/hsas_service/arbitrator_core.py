@@ -25,11 +25,12 @@ Like biological motor control: Basal Ganglia (habits) + Cerebellum (planning) ar
 NO MOCKS - Production-ready implementation.
 """
 
-import logging
-from datetime import datetime
-from typing import Dict, Any, Optional, Tuple
 from collections import deque
+from datetime import datetime
 from enum import Enum
+import logging
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class ControlMode(Enum):
     """Control mode selection."""
+
     MODEL_FREE = "model_free"  # Actor-Critic (fast, habitual)
     MODEL_BASED = "model_based"  # World Model (slow, deliberative)
     HYBRID = "hybrid"  # Arbitrated
@@ -54,9 +56,7 @@ class ArbitratorCore:
     """
 
     def __init__(
-        self,
-        uncertainty_threshold: float = 0.3,
-        alpha_threshold: float = 0.1
+        self, uncertainty_threshold: float = 0.3, alpha_threshold: float = 0.1
     ):
         """Initialize Arbitrator Core.
 
@@ -87,7 +87,7 @@ class ArbitratorCore:
         self,
         uncertainty: float,
         urgency: float = 0.5,
-        mode: ControlMode = ControlMode.HYBRID
+        mode: ControlMode = ControlMode.HYBRID,
     ) -> ControlMode:
         """Arbitrate between model-free and model-based control.
 
@@ -126,13 +126,15 @@ class ArbitratorCore:
             raise ValueError(f"Unknown mode: {mode}")
 
         # Record selection
-        self.mode_selection_history.append({
-            'timestamp': datetime.now().isoformat(),
-            'mode': selected_mode.value,
-            'uncertainty': uncertainty,
-            'urgency': urgency,
-            'threshold': self.uncertainty_threshold
-        })
+        self.mode_selection_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "mode": selected_mode.value,
+                "uncertainty": uncertainty,
+                "urgency": urgency,
+                "threshold": self.uncertainty_threshold,
+            }
+        )
 
         self.current_mode = selected_mode
 
@@ -159,9 +161,7 @@ class ArbitratorCore:
             if success:
                 self.model_based_successes += 1
 
-        logger.debug(
-            f"Outcome recorded: mode={mode.value}, success={success}"
-        )
+        logger.debug(f"Outcome recorded: mode={mode.value}, success={success}")
 
     def adapt_threshold(self):
         """Adapt arbitration threshold based on performance.
@@ -188,7 +188,7 @@ class ArbitratorCore:
         self.uncertainty_threshold = np.clip(
             self.uncertainty_threshold + delta_threshold,
             0.1,  # min threshold
-            0.9   # max threshold
+            0.9,  # max threshold
         )
 
         logger.info(
@@ -204,32 +204,38 @@ class ArbitratorCore:
         """
         model_free_rate = (
             self.model_free_successes / self.model_free_trials
-            if self.model_free_trials > 0 else 0.0
+            if self.model_free_trials > 0
+            else 0.0
         )
 
         model_based_rate = (
             self.model_based_successes / self.model_based_trials
-            if self.model_based_trials > 0 else 0.0
+            if self.model_based_trials > 0
+            else 0.0
         )
 
         # Count mode selections
         recent_history = list(self.mode_selection_history)[-100:]
-        model_free_count = sum(1 for h in recent_history if h['mode'] == ControlMode.MODEL_FREE.value)
-        model_based_count = sum(1 for h in recent_history if h['mode'] == ControlMode.MODEL_BASED.value)
+        model_free_count = sum(
+            1 for h in recent_history if h["mode"] == ControlMode.MODEL_FREE.value
+        )
+        model_based_count = sum(
+            1 for h in recent_history if h["mode"] == ControlMode.MODEL_BASED.value
+        )
 
         return {
-            'model_free': {
-                'trials': self.model_free_trials,
-                'successes': self.model_free_successes,
-                'success_rate': model_free_rate,
-                'recent_count': model_free_count
+            "model_free": {
+                "trials": self.model_free_trials,
+                "successes": self.model_free_successes,
+                "success_rate": model_free_rate,
+                "recent_count": model_free_count,
             },
-            'model_based': {
-                'trials': self.model_based_trials,
-                'successes': self.model_based_successes,
-                'success_rate': model_based_rate,
-                'recent_count': model_based_count
-            }
+            "model_based": {
+                "trials": self.model_based_trials,
+                "successes": self.model_based_successes,
+                "success_rate": model_based_rate,
+                "recent_count": model_based_count,
+            },
         }
 
     def get_uncertainty_statistics(self, window: int = 100) -> Dict[str, Any]:
@@ -242,18 +248,18 @@ class ArbitratorCore:
             Uncertainty statistics
         """
         if not self.mode_selection_history:
-            return {'count': 0}
+            return {"count": 0}
 
         recent = list(self.mode_selection_history)[-window:]
 
-        uncertainties = [h['uncertainty'] for h in recent]
+        uncertainties = [h["uncertainty"] for h in recent]
         mean_uncertainty = sum(uncertainties) / len(uncertainties)
 
         return {
-            'count': len(recent),
-            'mean_uncertainty': mean_uncertainty,
-            'min_uncertainty': min(uncertainties),
-            'max_uncertainty': max(uncertainties)
+            "count": len(recent),
+            "mean_uncertainty": mean_uncertainty,
+            "min_uncertainty": min(uncertainties),
+            "max_uncertainty": max(uncertainties),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -266,13 +272,17 @@ class ArbitratorCore:
         uncertainty_stats = self.get_uncertainty_statistics()
 
         return {
-            'status': 'operational',
-            'current_mode': self.current_mode.value if self.current_mode else 'N/A',
-            'uncertainty_threshold': self.uncertainty_threshold,
-            'arbitration_count': self.arbitration_count,
-            'last_arbitration': self.last_arbitration_time.isoformat() if self.last_arbitration_time else 'N/A',
-            'mode_statistics': mode_stats,
-            'uncertainty_statistics': uncertainty_stats
+            "status": "operational",
+            "current_mode": self.current_mode.value if self.current_mode else "N/A",
+            "uncertainty_threshold": self.uncertainty_threshold,
+            "arbitration_count": self.arbitration_count,
+            "last_arbitration": (
+                self.last_arbitration_time.isoformat()
+                if self.last_arbitration_time
+                else "N/A"
+            ),
+            "mode_statistics": mode_stats,
+            "uncertainty_statistics": uncertainty_stats,
         }
 
 
@@ -309,7 +319,7 @@ class DynaIntegration:
         action: int,
         reward: float,
         next_state: np.ndarray,
-        done: bool
+        done: bool,
     ):
         """Store real experience from environment.
 
@@ -321,13 +331,13 @@ class DynaIntegration:
             done: Episode termination flag
         """
         experience = {
-            'state': state,
-            'action': action,
-            'reward': reward,
-            'next_state': next_state,
-            'done': done,
-            'type': 'real',
-            'timestamp': datetime.now().isoformat()
+            "state": state,
+            "action": action,
+            "reward": reward,
+            "next_state": next_state,
+            "done": done,
+            "type": "real",
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.real_experience.append(experience)
@@ -339,7 +349,7 @@ class DynaIntegration:
         action: int,
         predicted_reward: float,
         predicted_next_state: np.ndarray,
-        uncertainty: float
+        uncertainty: float,
     ):
         """Store imaginary experience from world model.
 
@@ -351,14 +361,14 @@ class DynaIntegration:
             uncertainty: Model uncertainty
         """
         experience = {
-            'state': state,
-            'action': action,
-            'reward': predicted_reward,
-            'next_state': predicted_next_state,
-            'done': False,  # Imaginary experiences don't terminate
-            'type': 'imaginary',
-            'uncertainty': uncertainty,
-            'timestamp': datetime.now().isoformat()
+            "state": state,
+            "action": action,
+            "reward": predicted_reward,
+            "next_state": predicted_next_state,
+            "done": False,  # Imaginary experiences don't terminate
+            "type": "imaginary",
+            "uncertainty": uncertainty,
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.imaginary_experience.append(experience)
@@ -380,12 +390,16 @@ class DynaIntegration:
 
         # Sample real experience
         if len(self.real_experience) >= num_real:
-            real_indices = np.random.choice(len(self.real_experience), num_real, replace=False)
+            real_indices = np.random.choice(
+                len(self.real_experience), num_real, replace=False
+            )
             batch.extend([self.real_experience[i] for i in real_indices])
 
         # Sample imaginary experience
         if len(self.imaginary_experience) >= num_imaginary:
-            imaginary_indices = np.random.choice(len(self.imaginary_experience), num_imaginary, replace=False)
+            imaginary_indices = np.random.choice(
+                len(self.imaginary_experience), num_imaginary, replace=False
+            )
             batch.extend([self.imaginary_experience[i] for i in imaginary_indices])
 
         logger.debug(
@@ -402,10 +416,10 @@ class DynaIntegration:
             Status dictionary
         """
         return {
-            'status': 'operational',
-            'real_ratio': self.real_ratio,
-            'real_experience_buffer_size': len(self.real_experience),
-            'imaginary_experience_buffer_size': len(self.imaginary_experience),
-            'real_experience_count': self.real_experience_count,
-            'imaginary_experience_count': self.imaginary_experience_count
+            "status": "operational",
+            "real_ratio": self.real_ratio,
+            "real_experience_buffer_size": len(self.real_experience),
+            "imaginary_experience_buffer_size": len(self.imaginary_experience),
+            "real_experience_count": self.real_experience_count,
+            "imaginary_experience_count": self.imaginary_experience_count,
         }

@@ -4,18 +4,13 @@ Connector for fetching data from SINESP (Sistema Nacional de Informações
 de Segurança Pública) service.
 """
 
-import logging
-from typing import List, Dict, Any, Optional
-import httpx
 from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional
 
-from models import (
-    Veiculo,
-    Ocorrencia,
-    SinespVehicleResponse,
-    DataSource
-)
 from config import get_settings
+import httpx
+from models import DataSource, Ocorrencia, SinespVehicleResponse, Veiculo
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -41,10 +36,7 @@ class SinespConnector:
 
     async def __aenter__(self):
         """Async context manager entry."""
-        self._client = httpx.AsyncClient(
-            base_url=self.base_url,
-            timeout=self.timeout
-        )
+        self._client = httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -64,7 +56,9 @@ class SinespConnector:
         """
         try:
             if not self._client:
-                raise RuntimeError("Connector not initialized. Use async context manager.")
+                raise RuntimeError(
+                    "Connector not initialized. Use async context manager."
+                )
 
             logger.info(f"Fetching vehicle data for plate: {placa}")
 
@@ -90,10 +84,7 @@ class SinespConnector:
             logger.error(f"Error fetching vehicle {placa}: {e}", exc_info=True)
             raise
 
-    async def fetch_vehicles_batch(
-        self,
-        placas: List[str]
-    ) -> List[Veiculo]:
+    async def fetch_vehicles_batch(self, placas: List[str]) -> List[Veiculo]:
         """
         Fetch multiple vehicles in batch.
 
@@ -118,8 +109,7 @@ class SinespConnector:
         return veiculos
 
     async def fetch_occurrences(
-        self,
-        filters: Optional[Dict[str, Any]] = None
+        self, filters: Optional[Dict[str, Any]] = None
     ) -> List[Ocorrencia]:
         """
         Fetch occurrences (criminal reports) from SINESP.
@@ -132,7 +122,9 @@ class SinespConnector:
         """
         try:
             if not self._client:
-                raise RuntimeError("Connector not initialized. Use async context manager.")
+                raise RuntimeError(
+                    "Connector not initialized. Use async context manager."
+                )
 
             filters = filters or {}
             logger.info(f"Fetching occurrences with filters: {filters}")
@@ -170,8 +162,8 @@ class SinespConnector:
                         status=item.get("status"),
                         metadata={
                             "source": DataSource.SINESP,
-                            "fetched_at": datetime.utcnow().isoformat()
-                        }
+                            "fetched_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     ocorrencias.append(ocorrencia)
                 except Exception as e:
@@ -197,7 +189,9 @@ class SinespConnector:
         """
         try:
             if not self._client:
-                raise RuntimeError("Connector not initialized. Use async context manager.")
+                raise RuntimeError(
+                    "Connector not initialized. Use async context manager."
+                )
 
             response = await self._client.get("/ocorrencias/tipos")
             response.raise_for_status()
@@ -222,7 +216,9 @@ class SinespConnector:
         try:
             if not self._client:
                 # Create temporary client for health check
-                async with httpx.AsyncClient(base_url=self.base_url, timeout=5.0) as client:
+                async with httpx.AsyncClient(
+                    base_url=self.base_url, timeout=5.0
+                ) as client:
                     response = await client.get("/health")
                     return response.status_code == 200
             else:

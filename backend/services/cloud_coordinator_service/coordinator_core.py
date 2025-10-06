@@ -7,20 +7,21 @@ NO MOCKS - Production-ready cloud coordination.
 """
 
 import asyncio
-import logging
-import time
-import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Any, Optional, Set
+import logging
+import time
+from typing import Any, Dict, List, Optional, Set
+import uuid
 
 logger = logging.getLogger(__name__)
 
 
 class AgentHealth(Enum):
     """Edge agent health status."""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -30,6 +31,7 @@ class AgentHealth(Enum):
 @dataclass
 class RegisteredAgent:
     """Registered edge agent."""
+
     agent_id: str
     tenant_id: str
     host: str
@@ -68,7 +70,8 @@ class EventAggregator:
         # Cleanup old events
         cutoff = datetime.now() - timedelta(seconds=self.window_seconds)
         self.events_by_tenant[tenant_id] = [
-            e for e in self.events_by_tenant[tenant_id]
+            e
+            for e in self.events_by_tenant[tenant_id]
             if datetime.fromisoformat(e["timestamp"]) > cutoff
         ]
 
@@ -79,7 +82,7 @@ class EventAggregator:
             "total_events": total_events,
             "events_by_tenant": dict(self.event_counts),
             "active_tenants": len(self.events_by_tenant),
-            "window_seconds": self.window_seconds
+            "window_seconds": self.window_seconds,
         }
 
 
@@ -97,7 +100,9 @@ class LoadBalancer:
             return None
 
         # Filter healthy agents
-        healthy = [a for a in agents if a.health == AgentHealth.HEALTHY and a.is_alive()]
+        healthy = [
+            a for a in agents if a.health == AgentHealth.HEALTHY and a.is_alive()
+        ]
 
         if not healthy:
             return None
@@ -137,7 +142,7 @@ class CloudCoordinatorController:
         agent_id: str,
         tenant_id: str,
         host: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> RegisteredAgent:
         """Register edge agent."""
         agent = RegisteredAgent(
@@ -146,7 +151,7 @@ class CloudCoordinatorController:
             host=host,
             registered_at=datetime.now(),
             last_heartbeat=datetime.now(),
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         self.agents[agent_id] = agent
@@ -189,8 +194,10 @@ class CloudCoordinatorController:
         """Get coordinator status."""
         return {
             "total_agents": len(self.agents),
-            "healthy_agents": sum(1 for a in self.agents.values() if a.health == AgentHealth.HEALTHY),
+            "healthy_agents": sum(
+                1 for a in self.agents.values() if a.health == AgentHealth.HEALTHY
+            ),
             "total_events": self.total_events,
             "aggregator_stats": self.aggregator.get_stats(),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
