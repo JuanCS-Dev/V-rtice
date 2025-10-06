@@ -11,8 +11,13 @@ a robust and extensible architecture.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
 from all_services_tools import AllServicesTools
+
+# Avoid circular import
+if TYPE_CHECKING:
+    from ethical_tool_wrapper import EthicalToolWrapper
 
 
 class ToolOrchestrator:
@@ -29,8 +34,20 @@ class ToolOrchestrator:
             gemini_client (Any): An initialized Gemini client for tool interactions.
         """
         self.all_tools = AllServicesTools(gemini_client)
+        self.ethical_wrapper: Optional["EthicalToolWrapper"] = None  # Injected later
 
-    async def execute_tools(self, tool_calls: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def set_ethical_wrapper(self, wrapper: "EthicalToolWrapper"):
+        """
+        Injects the Ethical Tool Wrapper for ethical validation.
+
+        Args:
+            wrapper: EthicalToolWrapper instance
+        """
+        self.ethical_wrapper = wrapper
+
+    async def execute_tools(
+        self, tool_calls: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Executes a list of tool calls.
 
         Args:
@@ -47,13 +64,49 @@ class ToolOrchestrator:
 
             tool_info = self.all_tools.get_tool(tool_name)
             if not tool_info:
-                results.append({"tool_name": tool_name, "error": f"Tool '{tool_name}' not found."})
+                results.append(
+                    {"tool_name": tool_name, "error": f"Tool '{tool_name}' not found."}
+                )
                 continue
 
             try:
-                method = tool_info["method"]
-                result = await method(**tool_args)
-                results.append({"tool_name": tool_name, "output": result})
+                # Use ethical wrapper if available
+                if self.ethical_wrapper:
+                    # Execute through ethical validation
+                    execution_result = await self.ethical_wrapper.wrap_tool_execution(
+                        tool_name=tool_name,
+                        tool_method=tool_info["method"],
+                        tool_args=tool_args,
+                        actor="maximus",
+                    )
+
+                    # Return result with ethical information
+                    if execution_result.success:
+                        results.append({
+                            "tool_name": tool_name,
+                            "output": execution_result.output,
+                            "ethical_validation": {
+                                "decision": execution_result.ethical_decision.decision_type.value if execution_result.ethical_decision else "unknown",
+                                "duration_ms": execution_result.ethical_validation_duration_ms,
+                            },
+                            "execution_duration_ms": execution_result.execution_duration_ms,
+                            "total_duration_ms": execution_result.total_duration_ms,
+                        })
+                    else:
+                        results.append({
+                            "tool_name": tool_name,
+                            "error": execution_result.error,
+                            "ethical_validation": {
+                                "decision": execution_result.ethical_decision.decision_type.value if execution_result.ethical_decision else "error",
+                                "rejection_reasons": execution_result.ethical_decision.rejection_reasons if execution_result.ethical_decision else [],
+                            },
+                        })
+                else:
+                    # Original execution (no ethical validation)
+                    method = tool_info["method"]
+                    result = await method(**tool_args)
+                    results.append({"tool_name": tool_name, "output": result})
+
             except Exception as e:
                 results.append({"tool_name": tool_name, "error": str(e)})
         return results
@@ -85,7 +138,7 @@ class ToolOrchestrator:
                 for param_name, param_desc in tool["parameters"].items():
                     properties[param_name] = {
                         "type": "string",  # Default type
-                        "description": param_desc
+                        "description": param_desc,
                     }
                     # All parameters are considered optional by default
                     # unless explicitly marked as required
@@ -96,8 +149,8 @@ class ToolOrchestrator:
                 "parameters": {
                     "type": "object",
                     "properties": properties,
-                    "required": required_params  # Empty list means all params are optional
-                }
+                    "required": required_params,  # Empty list means all params are optional
+                },
             }
 
             function_declarations.append(function_declaration)
