@@ -22,6 +22,7 @@ from api.models.agents import (
 )
 from api.core_integration import AgentService
 from api.core_integration.agent_service import AgentNotFoundError, AgentServiceError
+from api.websocket import broadcaster
 
 router = APIRouter()
 
@@ -58,6 +59,10 @@ async def create_agent(agent_data: AgentCreate) -> AgentResponse:
             agent_type=agent_data.agent_type,
             config=agent_data.config or {},
         )
+
+        # Broadcast agent created event
+        await broadcaster.broadcast_agent_created(agent.model_dump())
+
         return agent
 
     except AgentServiceError as e:
@@ -149,6 +154,10 @@ async def update_agent(
     try:
         # Service handles the update with AgentUpdate object
         agent = await service.update_agent(agent_id, agent_update)
+
+        # Broadcast agent updated event
+        await broadcaster.broadcast_agent_updated(agent.model_dump())
+
         return agent
 
     except AgentNotFoundError:
@@ -180,6 +189,9 @@ async def delete_agent(
 
     try:
         await service.delete_agent(agent_id)
+
+        # Broadcast agent deleted event
+        await broadcaster.broadcast_agent_deleted(agent_id)
 
     except AgentNotFoundError:
         raise HTTPException(
