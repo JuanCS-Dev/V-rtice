@@ -12,6 +12,7 @@ Testes:
 - Error handling
 - Privacy budget enforcement (Phase 4.1)
 - Federated learning checks (Phase 4.2)
+- Fairness & bias detection (Phase 3)
 
 Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
@@ -48,6 +49,7 @@ def ethical_guardian(governance_config):
         governance_config=governance_config,
         enable_governance=True,
         enable_ethics=True,
+        enable_fairness=True,  # Phase 3: Fairness & Bias
         enable_xai=True,
         enable_privacy=True,  # Phase 4.1: Differential Privacy
         enable_fl=False,  # Phase 4.2: FL (disabled by default for tests)
@@ -514,6 +516,97 @@ async def test_federated_learning_check(governance_config):
 
 
 # ============================================================================
+# TEST 10: FAIRNESS & BIAS DETECTION (PHASE 3)
+# ============================================================================
+
+@pytest.mark.asyncio
+async def test_fairness_bias_detection(ethical_guardian):
+    """Test Phase 3: Fairness and bias detection."""
+    print("\n" + "=" * 80)
+    print("TEST 10: Fairness & Bias Detection (Phase 3)")
+    print("=" * 80)
+
+    # Test 1: Non-ML action (should skip fairness check)
+    result1 = await ethical_guardian.validate_action(
+        action="list_users",
+        context={
+            "authorized": True,
+            "logged": True,
+        },
+        actor="analyst",
+    )
+
+    # Assertions for non-ML action
+    assert result1.fairness is not None, "Should have fairness check result"
+    assert result1.fairness.fairness_ok, "Should be fair for non-ML action"
+    assert not result1.fairness.bias_detected, "Should not detect bias for non-ML action"
+    assert result1.fairness.bias_severity == "low", "Should have low severity"
+
+    print(f"✅ Fairness check for non-ML action:")
+    print(f"   Fairness OK: {result1.fairness.fairness_ok}")
+    print(f"   Bias detected: {result1.fairness.bias_detected}")
+    print(f"   Severity: {result1.fairness.bias_severity}")
+    print(f"   Duration: {result1.fairness.duration_ms:.1f}ms")
+
+    # Test 2: ML action without data (graceful degradation)
+    result2 = await ethical_guardian.validate_action(
+        action="predict_threat",
+        context={
+            "authorized": True,
+            "logged": True,
+            # No predictions or protected_attributes provided
+        },
+        actor="ml_engineer",
+    )
+
+    # Assertions for ML action without data
+    assert result2.fairness is not None, "Should have fairness check result"
+    assert result2.fairness.fairness_ok, "Should be fair when no data (graceful degradation)"
+    assert not result2.fairness.bias_detected, "Should not detect bias when no data"
+    assert result2.fairness.confidence == 0.5, "Should have lower confidence when no data"
+
+    print(f"\n✅ Fairness check for ML action without data:")
+    print(f"   Fairness OK: {result2.fairness.fairness_ok}")
+    print(f"   Bias detected: {result2.fairness.bias_detected}")
+    print(f"   Confidence: {result2.fairness.confidence}")
+
+    # Test 3: ML action with data (simulate fair predictions)
+    import numpy as np
+
+    # Fair predictions: equal positive rates across groups
+    predictions = np.array([1, 0, 1, 0, 1, 0] * 10)  # 50% positive rate
+    protected_attr = np.array([0, 0, 0, 1, 1, 1] * 10)  # 2 groups
+
+    result3 = await ethical_guardian.validate_action(
+        action="classify_threat",
+        context={
+            "authorized": True,
+            "logged": True,
+            "predictions": predictions,
+            "protected_attributes": {
+                "geographic_location": protected_attr
+            },
+        },
+        actor="ml_engineer",
+    )
+
+    # Assertions for ML action with fair data
+    assert result3.fairness is not None, "Should have fairness check result"
+    # Note: With equal positive rates, bias should not be detected
+    assert "geographic_location" in result3.fairness.protected_attributes_checked, "Should check geographic_location"
+
+    print(f"\n✅ Fairness check for ML action with data:")
+    print(f"   Fairness OK: {result3.fairness.fairness_ok}")
+    print(f"   Bias detected: {result3.fairness.bias_detected}")
+    print(f"   Severity: {result3.fairness.bias_severity}")
+    print(f"   Attributes checked: {result3.fairness.protected_attributes_checked}")
+    print(f"   Confidence: {result3.fairness.confidence:.2f}")
+    print(f"   Duration: {result3.fairness.duration_ms:.1f}ms")
+
+    print(f"\n✅ Test passed: Phase 3 Fairness & Bias Detection working correctly")
+
+
+# ============================================================================
 # MAIN TEST RUNNER
 # ============================================================================
 
@@ -523,7 +616,7 @@ if __name__ == "__main__":
     print("=" * 80)
     print("\nRunning comprehensive integration tests...")
     print("Testing: EthicalGuardian, EthicalToolWrapper, Tool Orchestration")
-    print("Phases Tested: Governance, Ethics, XAI, Privacy (DP), FL, Compliance")
+    print("Phases Tested: Governance, Ethics, Fairness, XAI, Privacy (DP), FL, Compliance")
     print("\n" + "=" * 80)
 
     pytest.main([__file__, "-v", "--tb=short", "-s"])

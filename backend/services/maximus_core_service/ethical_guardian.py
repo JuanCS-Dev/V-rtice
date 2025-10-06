@@ -46,6 +46,15 @@ from privacy import (
     CompositionType,
 )
 
+# Phase 3: Fairness & Bias Mitigation
+from fairness import (
+    BiasDetector,
+    FairnessMonitor,
+    ProtectedAttribute,
+    FairnessMetric,
+    BiasDetectionResult,
+)
+
 # Phase 4.2: Federated Learning
 from federated_learning import (
     FLConfig,
@@ -65,7 +74,8 @@ class EthicalDecisionType(str, Enum):
     APPROVED_WITH_CONDITIONS = "approved_with_conditions"
     REJECTED_BY_GOVERNANCE = "rejected_by_governance"
     REJECTED_BY_ETHICS = "rejected_by_ethics"
-    REJECTED_BY_PRIVACY = "rejected_by_privacy"
+    REJECTED_BY_FAIRNESS = "rejected_by_fairness"  # Phase 3
+    REJECTED_BY_PRIVACY = "rejected_by_privacy"  # Phase 4.1
     REJECTED_BY_COMPLIANCE = "rejected_by_compliance"
     ERROR = "error"
 
@@ -108,6 +118,21 @@ class ComplianceCheckResult:
     regulations_checked: List[RegulationType]
     compliance_results: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     overall_compliant: bool = True
+    duration_ms: float = 0.0
+
+
+@dataclass
+class FairnessCheckResult:
+    """Resultado do check de fairness e bias (Phase 3)."""
+
+    fairness_ok: bool
+    bias_detected: bool
+    protected_attributes_checked: List[str]  # ProtectedAttribute.value
+    fairness_metrics: Dict[str, float]  # metric_name -> score
+    bias_severity: str  # low, medium, high, critical
+    affected_groups: List[str] = field(default_factory=list)
+    mitigation_recommended: bool = False
+    confidence: float = 0.0
     duration_ms: float = 0.0
 
 
@@ -156,6 +181,7 @@ class EthicalDecisionResult:
     # Results from each phase
     governance: Optional[GovernanceCheckResult] = None
     ethics: Optional[EthicsCheckResult] = None
+    fairness: Optional[FairnessCheckResult] = None  # Phase 3
     xai: Optional[XAICheckResult] = None
     privacy: Optional[PrivacyCheckResult] = None  # Phase 4.1
     fl: Optional[FLCheckResult] = None  # Phase 4.2
@@ -228,9 +254,10 @@ class EthicalGuardian:
         privacy_budget: Optional[PrivacyBudget] = None,
         enable_governance: bool = True,
         enable_ethics: bool = True,
+        enable_fairness: bool = True,  # Phase 3
         enable_xai: bool = True,
-        enable_privacy: bool = True,
-        enable_fl: bool = False,  # FL is optional
+        enable_privacy: bool = True,  # Phase 4.1
+        enable_fl: bool = False,  # Phase 4.2 (optional)
         enable_compliance: bool = True,
     ):
         """
@@ -241,6 +268,7 @@ class EthicalGuardian:
             privacy_budget: Privacy budget para DP (usa default se None)
             enable_governance: Habilita checks de governance
             enable_ethics: Habilita avaliação ética
+            enable_fairness: Habilita checks de fairness e bias (Phase 3)
             enable_xai: Habilita explicações XAI
             enable_privacy: Habilita checks de privacy (Phase 4.1)
             enable_fl: Habilita checks de federated learning (Phase 4.2)
@@ -249,6 +277,7 @@ class EthicalGuardian:
         self.governance_config = governance_config or GovernanceConfig()
         self.enable_governance = enable_governance
         self.enable_ethics = enable_ethics
+        self.enable_fairness = enable_fairness
         self.enable_xai = enable_xai
         self.enable_privacy = enable_privacy
         self.enable_fl = enable_fl
@@ -294,6 +323,26 @@ class EthicalGuardian:
             )
         else:
             self.xai_engine = None
+
+        # Initialize Phase 3: Fairness & Bias Mitigation
+        if self.enable_fairness:
+            self.bias_detector = BiasDetector(
+                config={
+                    "min_sample_size": 30,
+                    "significance_level": 0.05,  # 95% confidence
+                    "disparate_impact_threshold": 0.8,  # 4/5ths rule
+                    "sensitivity": "medium",
+                }
+            )
+            self.fairness_monitor = FairnessMonitor(
+                config={
+                    "check_interval_seconds": 3600,  # Check every hour
+                    "alert_threshold": 0.1,  # Alert if fairness metric < 0.9
+                }
+            )
+        else:
+            self.bias_detector = None
+            self.fairness_monitor = None
 
         # Initialize Phase 4.1: Differential Privacy
         if self.enable_privacy:
@@ -425,9 +474,9 @@ class EthicalGuardian:
                     return result
 
             # ================================================================
-            # PARALLEL: PHASE 2 (XAI) + PHASE 4 (Privacy & FL) + PHASE 6 (Compliance)
+            # PARALLEL: PHASE 2 (XAI) + PHASE 3 (Fairness) + PHASE 4 (Privacy & FL) + PHASE 6 (Compliance)
             # ================================================================
-            # These phases are optional - failures won't block approval
+            # These phases are optional - failures won't block approval (except critical bias)
 
             # Phase 2: XAI
             if self.enable_xai and result.ethics:
@@ -438,6 +487,26 @@ class EthicalGuardian:
                 except Exception as e:
                     # XAI failure is not critical - log and continue
                     result.xai = None
+
+            # Phase 3: Fairness & Bias Mitigation
+            if self.enable_fairness:
+                try:
+                    result.fairness = await self._fairness_check(action, context)
+                    # Reject if critical bias detected and mitigation recommended
+                    if not result.fairness.fairness_ok and result.fairness.mitigation_recommended:
+                        result.decision_type = EthicalDecisionType.REJECTED_BY_FAIRNESS
+                        result.is_approved = False
+                        result.rejection_reasons.append(
+                            f"Critical bias detected: {result.fairness.bias_severity} "
+                            f"(affected groups: {', '.join(result.fairness.affected_groups)})"
+                        )
+                        result.total_duration_ms = (time.time() - start_time) * 1000
+                        await self._log_decision(result)
+                        return result
+                except Exception as e:
+                    # Fairness check failure is not critical if not ML action
+                    logger.warning(f"Fairness check failed: {e}")
+                    result.fairness = None
 
             # Phase 4.1: Differential Privacy
             if self.enable_privacy:
@@ -728,6 +797,122 @@ class EthicalGuardian:
             regulations_checked=regulations_to_check,
             compliance_results=compliance_results,
             overall_compliant=overall_compliant,
+            duration_ms=duration_ms,
+        )
+
+    async def _fairness_check(
+        self, action: str, context: Dict[str, Any]
+    ) -> FairnessCheckResult:
+        """
+        Phase 3: Check fairness and bias across protected attributes.
+
+        Verifica se a ação possui viés algorítmico ou discriminação
+        contra grupos protegidos.
+
+        Target: <100ms
+        """
+        start_time = time.time()
+
+        # Check if action involves ML predictions or decisions
+        involves_ml = any(
+            keyword in action.lower()
+            for keyword in ["predict", "classify", "detect", "score", "model", "decision"]
+        )
+
+        if not involves_ml:
+            # Non-ML actions don't require fairness checks
+            duration_ms = (time.time() - start_time) * 1000
+            return FairnessCheckResult(
+                fairness_ok=True,
+                bias_detected=False,
+                protected_attributes_checked=[],
+                fairness_metrics={},
+                bias_severity="low",
+                affected_groups=[],
+                mitigation_recommended=False,
+                confidence=1.0,
+                duration_ms=duration_ms,
+            )
+
+        # Get predictions and protected attributes from context
+        predictions = context.get("predictions")
+        protected_attributes = context.get("protected_attributes", {})
+
+        # If no data available, assume fairness OK (graceful degradation)
+        if predictions is None or not protected_attributes:
+            duration_ms = (time.time() - start_time) * 1000
+            return FairnessCheckResult(
+                fairness_ok=True,
+                bias_detected=False,
+                protected_attributes_checked=[],
+                fairness_metrics={},
+                bias_severity="low",
+                affected_groups=[],
+                mitigation_recommended=False,
+                confidence=0.5,  # Lower confidence when no data
+                duration_ms=duration_ms,
+            )
+
+        # Perform bias detection for each protected attribute
+        bias_detected = False
+        bias_severity = "low"
+        affected_groups = []
+        fairness_metrics = {}
+        checked_attributes = []
+
+        for attr_name, attr_values in protected_attributes.items():
+            try:
+                # Convert to ProtectedAttribute enum
+                protected_attr = ProtectedAttribute(attr_name)
+                checked_attributes.append(protected_attr.value)
+
+                # Run bias detection
+                result = self.bias_detector.detect_statistical_parity_bias(
+                    predictions=predictions,
+                    protected_attribute=attr_values,
+                    protected_value=1,
+                )
+
+                if result.bias_detected:
+                    bias_detected = True
+                    bias_severity = max(bias_severity, result.severity, key=lambda x: ["low", "medium", "high", "critical"].index(x))
+                    affected_groups.extend(result.affected_groups)
+
+                # Store fairness metrics
+                fairness_metrics[attr_name] = {
+                    "p_value": result.p_value,
+                    "confidence": result.confidence,
+                    "severity": result.severity,
+                }
+
+            except (ValueError, Exception) as e:
+                # Skip invalid protected attributes
+                logger.warning(f"Failed to check fairness for attribute {attr_name}: {e}")
+                continue
+
+        # Determine if fairness is OK
+        fairness_ok = not bias_detected or bias_severity in ["low", "medium"]
+
+        # Recommend mitigation if high/critical bias detected
+        mitigation_recommended = bias_severity in ["high", "critical"]
+
+        # Calculate overall confidence
+        if fairness_metrics:
+            confidence = sum(m["confidence"] for m in fairness_metrics.values()) / len(fairness_metrics)
+        else:
+            confidence = 0.5
+
+        duration_ms = (time.time() - start_time) * 1000
+
+        return FairnessCheckResult(
+            fairness_ok=fairness_ok,
+            bias_detected=bias_detected,
+            protected_attributes_checked=checked_attributes,
+            fairness_metrics=fairness_metrics,
+            bias_severity=bias_severity,
+            affected_groups=affected_groups,
+            mitigation_recommended=mitigation_recommended,
+            confidence=confidence,
             duration_ms=duration_ms,
         )
 

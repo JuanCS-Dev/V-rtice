@@ -87,6 +87,7 @@ class MaximusIntegrated:
             governance_config=self.governance_config,
             enable_governance=True,
             enable_ethics=True,
+            enable_fairness=True,  # Phase 3: Fairness & Bias Mitigation
             enable_xai=True,
             enable_privacy=True,  # Phase 4.1: Differential Privacy
             enable_fl=False,  # Phase 4.2: FL (disabled by default - optional)
