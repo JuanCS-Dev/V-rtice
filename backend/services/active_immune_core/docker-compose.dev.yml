@@ -1,0 +1,193 @@
+# Active Immune Core Service - Development Environment
+# Includes Kafka, Redis, PostgreSQL
+
+version: '3.8'
+
+services:
+  # ==================== ACTIVE IMMUNE CORE SERVICE ====================
+  active_immune_core:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: active_immune_core_dev
+    ports:
+      - "8200:8200"
+    volumes:
+      # Mount source code for hot reload
+      - ./api:/app/api
+      - ./agents:/app/agents
+      - ./communication:/app/communication
+      - ./coordination:/app/coordination
+      - ./homeostasis:/app/homeostasis
+      - ./memory:/app/memory
+      - ./monitoring:/app/monitoring
+      - ./tests:/app/tests
+      # Exclude Python cache
+      - /app/__pycache__
+      - /app/**/__pycache__
+    environment:
+      # Service
+      - ACTIVE_IMMUNE_SERVICE_PORT=8200
+      - ACTIVE_IMMUNE_LOG_LEVEL=DEBUG
+      - ACTIVE_IMMUNE_DEBUG=true
+
+      # Kafka
+      - ACTIVE_IMMUNE_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+      # Redis
+      - ACTIVE_IMMUNE_REDIS_URL=redis://redis:6379
+
+      # PostgreSQL
+      - ACTIVE_IMMUNE_POSTGRES_HOST=postgres
+      - ACTIVE_IMMUNE_POSTGRES_PORT=5432
+      - ACTIVE_IMMUNE_POSTGRES_DB=immunis_memory
+      - ACTIVE_IMMUNE_POSTGRES_USER=immunis
+      - ACTIVE_IMMUNE_POSTGRES_PASSWORD=immunis_password
+
+      # External services (mocked for now)
+      - ACTIVE_IMMUNE_RTE_SERVICE_URL=http://rte_service:8002
+      - ACTIVE_IMMUNE_IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8001
+      - ACTIVE_IMMUNE_ETHICAL_AI_URL=http://ethical_audit_service:8612
+      - ACTIVE_IMMUNE_MEMORY_SERVICE_URL=http://memory_consolidation_service:8019
+    depends_on:
+      - kafka
+      - redis
+      - postgres
+    networks:
+      - immunis_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ==================== KAFKA ====================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: immunis_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - immunis_net
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: immunis_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 24
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_NUM_PARTITIONS: 3
+    networks:
+      - immunis_net
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== REDIS ====================
+  redis:
+    image: redis:7.2-alpine
+    container_name: immunis_redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    networks:
+      - immunis_net
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ==================== POSTGRESQL ====================
+  postgres:
+    image: postgres:15-alpine
+    container_name: immunis_postgres
+    environment:
+      POSTGRES_DB: immunis_memory
+      POSTGRES_USER: immunis
+      POSTGRES_PASSWORD: immunis_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    networks:
+      - immunis_net
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U immunis -d immunis_memory"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== PROMETHEUS (METRICS) ====================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: immunis_prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    ports:
+      - "9090:9090"
+    networks:
+      - immunis_net
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+  # ==================== GRAFANA (DASHBOARDS) ====================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: immunis_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    networks:
+      - immunis_net
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+networks:
+  immunis_net:
+    driver: bridge
+
+volumes:
+  zookeeper_data:
+  zookeeper_logs:
+  kafka_data:
+  redis_data:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
