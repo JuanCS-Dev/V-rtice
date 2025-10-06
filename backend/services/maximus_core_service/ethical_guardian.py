@@ -15,12 +15,15 @@ Date: 2025-10-06
 """
 
 import asyncio
+import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
+
+logger = logging.getLogger(__name__)
 
 # Phase 0: Governance
 from governance import (
@@ -63,6 +66,18 @@ from federated_learning import (
     ModelType,
 )
 
+# Phase 5: HITL (Human-in-the-Loop)
+from hitl import (
+    HITLDecisionFramework,
+    RiskAssessor,
+    AutomationLevel,
+    RiskLevel,
+    DecisionStatus,
+    ActionType,
+    DecisionContext,
+    HITLConfig,
+)
+
 # Phase 6: Compliance
 from compliance import ComplianceEngine, ComplianceConfig, RegulationType
 
@@ -77,6 +92,7 @@ class EthicalDecisionType(str, Enum):
     REJECTED_BY_FAIRNESS = "rejected_by_fairness"  # Phase 3
     REJECTED_BY_PRIVACY = "rejected_by_privacy"  # Phase 4.1
     REJECTED_BY_COMPLIANCE = "rejected_by_compliance"
+    REQUIRES_HUMAN_REVIEW = "requires_human_review"  # Phase 5: HITL
     ERROR = "error"
 
 
@@ -169,6 +185,21 @@ class FLCheckResult:
 
 
 @dataclass
+class HITLCheckResult:
+    """Resultado do check de HITL (Phase 5)."""
+
+    requires_human_review: bool
+    automation_level: str  # AutomationLevel.value
+    risk_level: str  # RiskLevel.value
+    confidence_threshold_met: bool
+    estimated_sla_minutes: int = 0
+    escalation_recommended: bool = False
+    human_expertise_required: List[str] = field(default_factory=list)  # Required skills
+    decision_rationale: str = ""
+    duration_ms: float = 0.0
+
+
+@dataclass
 class EthicalDecisionResult:
     """Resultado completo da decisão ética."""
 
@@ -185,6 +216,7 @@ class EthicalDecisionResult:
     xai: Optional[XAICheckResult] = None
     privacy: Optional[PrivacyCheckResult] = None  # Phase 4.1
     fl: Optional[FLCheckResult] = None  # Phase 4.2
+    hitl: Optional[HITLCheckResult] = None  # Phase 5
     compliance: Optional[ComplianceCheckResult] = None
 
     # Summary
@@ -258,6 +290,7 @@ class EthicalGuardian:
         enable_xai: bool = True,
         enable_privacy: bool = True,  # Phase 4.1
         enable_fl: bool = False,  # Phase 4.2 (optional)
+        enable_hitl: bool = True,  # Phase 5: HITL
         enable_compliance: bool = True,
     ):
         """
@@ -272,6 +305,7 @@ class EthicalGuardian:
             enable_xai: Habilita explicações XAI
             enable_privacy: Habilita checks de privacy (Phase 4.1)
             enable_fl: Habilita checks de federated learning (Phase 4.2)
+            enable_hitl: Habilita checks de HITL/HOTL (Phase 5)
             enable_compliance: Habilita checks de compliance
         """
         self.governance_config = governance_config or GovernanceConfig()
@@ -281,6 +315,7 @@ class EthicalGuardian:
         self.enable_xai = enable_xai
         self.enable_privacy = enable_privacy
         self.enable_fl = enable_fl
+        self.enable_hitl = enable_hitl
         self.enable_compliance = enable_compliance
 
         # Initialize Phase 0: Governance
@@ -374,6 +409,18 @@ class EthicalGuardian:
             )
         else:
             self.fl_config = None
+
+        # Initialize Phase 5: HITL (Human-in-the-Loop)
+        if self.enable_hitl:
+            self.risk_assessor = RiskAssessor()
+            # Note: HITLConfig and SLAConfig will use defaults
+            # These can be customized in production with DB-backed config
+            self.hitl_framework = HITLDecisionFramework(
+                risk_assessor=self.risk_assessor
+            )
+        else:
+            self.risk_assessor = None
+            self.hitl_framework = None
 
         # Initialize Phase 6: Compliance
         if self.enable_compliance:
@@ -537,6 +584,37 @@ class EthicalGuardian:
                     # FL check failure is not critical
                     result.fl = None
 
+            # Phase 5: HITL (Human-in-the-Loop)
+            if self.enable_hitl:
+                try:
+                    # Calculate overall confidence from ethics result
+                    confidence_score = 0.0
+                    if result.ethics:
+                        confidence_score = result.ethics.confidence
+
+                    result.hitl = await self._hitl_check(action, context, confidence_score)
+
+                    # If human review is required, mark decision accordingly
+                    # Note: This doesn't reject the action, just flags it for human review
+                    if result.hitl.requires_human_review:
+                        # For now, we'll allow the action to proceed to compliance check
+                        # but flag it for human review in the final decision
+                        pass
+                except Exception as e:
+                    # HITL check failure is not critical - default to requiring human review for safety
+                    logger.warning(f"HITL check failed: {e}")
+                    result.hitl = HITLCheckResult(
+                        requires_human_review=True,
+                        automation_level="manual",
+                        risk_level="medium",
+                        confidence_threshold_met=False,
+                        estimated_sla_minutes=15,
+                        escalation_recommended=False,
+                        human_expertise_required=["soc_operator"],
+                        decision_rationale="HITL check failed - defaulting to human review for safety",
+                        duration_ms=0.0,
+                    )
+
             # Phase 6: Compliance
             if self.enable_compliance:
                 try:
@@ -548,8 +626,17 @@ class EthicalGuardian:
             # ================================================================
             # FINAL DECISION
             # ================================================================
+            # First check if HITL requires human review
+            if result.hitl and result.hitl.requires_human_review:
+                result.decision_type = EthicalDecisionType.REQUIRES_HUMAN_REVIEW
+                result.is_approved = False  # Not auto-approved, requires human
+                result.conditions.append(
+                    f"Human review required (Risk: {result.hitl.risk_level}, "
+                    f"SLA: {result.hitl.estimated_sla_minutes}min, "
+                    f"Expertise: {', '.join(result.hitl.human_expertise_required)})"
+                )
             # Check if approved
-            if result.ethics and result.ethics.verdict == EthicalVerdict.APPROVED:
+            elif result.ethics and result.ethics.verdict == EthicalVerdict.APPROVED:
                 result.decision_type = EthicalDecisionType.APPROVED
                 result.is_approved = True
             elif (
@@ -797,6 +884,132 @@ class EthicalGuardian:
             regulations_checked=regulations_to_check,
             compliance_results=compliance_results,
             overall_compliant=overall_compliant,
+            duration_ms=duration_ms,
+        )
+
+    async def _hitl_check(
+        self,
+        action: str,
+        context: Dict[str, Any],
+        confidence_score: float = 0.0,
+    ) -> HITLCheckResult:
+        """
+        Phase 5: HITL (Human-in-the-Loop) check.
+
+        Determines if action requires human review based on:
+        - Action risk level (from RiskAssessor)
+        - Confidence score from previous phases
+        - Automation level thresholds
+
+        Target: <50ms
+        """
+        start_time = time.time()
+
+        # Extract confidence from context or use provided score
+        if confidence_score == 0.0:
+            confidence_score = context.get("confidence", 0.0)
+
+        # Map action string to ActionType (simplified - defaults to SEND_ALERT if not recognized)
+        try:
+            # Try to match action to known ActionType values
+            action_lower = action.lower().replace(" ", "_")
+            action_type = None
+            for at in ActionType:
+                if at.value == action_lower or at.value in action_lower:
+                    action_type = at
+                    break
+            if action_type is None:
+                action_type = ActionType.SEND_ALERT  # Safe default
+        except Exception:
+            action_type = ActionType.SEND_ALERT
+
+        # Create DecisionContext for risk assessment
+        decision_context = DecisionContext(
+            action_type=action_type,
+            action_params=context,
+            confidence=confidence_score,
+            threat_score=context.get("threat_score", 0.0),
+            affected_assets=context.get("affected_assets", []),
+            asset_criticality=context.get("asset_criticality", "medium"),
+        )
+
+        # Assess risk using RiskAssessor
+        risk_score = self.risk_assessor.assess_risk(decision_context)
+
+        # Determine automation level based on confidence and risk
+        # High confidence (≥95%) + Low risk → FULL automation
+        # Medium confidence (≥80%) + Low/Medium risk → SUPERVISED
+        # Low confidence (<80%) or High/Critical risk → MANUAL
+        if confidence_score >= 0.95 and risk_score.risk_level == RiskLevel.LOW:
+            automation_level = AutomationLevel.FULL
+        elif confidence_score >= 0.80 and risk_score.risk_level in [RiskLevel.LOW, RiskLevel.MEDIUM]:
+            automation_level = AutomationLevel.SUPERVISED
+        elif confidence_score >= 0.60:
+            automation_level = AutomationLevel.ADVISORY
+        else:
+            automation_level = AutomationLevel.MANUAL
+
+        # Determine if human review is required
+        requires_human_review = automation_level in [
+            AutomationLevel.SUPERVISED,
+            AutomationLevel.ADVISORY,
+            AutomationLevel.MANUAL,
+        ]
+
+        # Confidence threshold check
+        confidence_threshold_met = False
+        if automation_level == AutomationLevel.FULL:
+            confidence_threshold_met = confidence_score >= 0.95
+        elif automation_level == AutomationLevel.SUPERVISED:
+            confidence_threshold_met = confidence_score >= 0.80
+        elif automation_level == AutomationLevel.ADVISORY:
+            confidence_threshold_met = confidence_score >= 0.60
+        else:  # MANUAL
+            confidence_threshold_met = False
+
+        # Determine SLA based on risk level
+        sla_mapping = {
+            RiskLevel.CRITICAL: 5,
+            RiskLevel.HIGH: 10,
+            RiskLevel.MEDIUM: 15,
+            RiskLevel.LOW: 30,
+        }
+        estimated_sla_minutes = sla_mapping.get(risk_score.risk_level, 15)
+
+        # Recommend escalation for critical/high risk
+        escalation_recommended = risk_score.risk_level in [RiskLevel.CRITICAL, RiskLevel.HIGH]
+
+        # Determine required human expertise
+        human_expertise_required = []
+        if risk_score.risk_level == RiskLevel.CRITICAL:
+            human_expertise_required = ["security_manager", "ciso"]
+        elif risk_score.risk_level == RiskLevel.HIGH:
+            human_expertise_required = ["soc_supervisor", "security_manager"]
+        elif requires_human_review:
+            human_expertise_required = ["soc_operator"]
+
+        # Generate decision rationale
+        decision_rationale = (
+            f"Action '{action}' assessed as {risk_score.risk_level.value} risk with "
+            f"{confidence_score:.1%} confidence. Automation level: {automation_level.value}. "
+        )
+
+        if requires_human_review:
+            decision_rationale += f"Human review required (SLA: {estimated_sla_minutes}min)."
+        else:
+            decision_rationale += "Approved for autonomous execution."
+
+        duration_ms = (time.time() - start_time) * 1000
+
+        return HITLCheckResult(
+            requires_human_review=requires_human_review,
+            automation_level=automation_level.value,
+            risk_level=risk_score.risk_level.value,
+            confidence_threshold_met=confidence_threshold_met,
+            estimated_sla_minutes=estimated_sla_minutes,
+            escalation_recommended=escalation_recommended,
+            human_expertise_required=human_expertise_required,
+            decision_rationale=decision_rationale,
             duration_ms=duration_ms,
         )
 

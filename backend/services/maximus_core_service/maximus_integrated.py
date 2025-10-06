@@ -91,6 +91,7 @@ class MaximusIntegrated:
             enable_xai=True,
             enable_privacy=True,  # Phase 4.1: Differential Privacy
             enable_fl=False,  # Phase 4.2: FL (disabled by default - optional)
+            enable_hitl=True,  # Phase 5: HITL (Human-in-the-Loop)
             enable_compliance=True,
         )
         self.ethical_wrapper = EthicalToolWrapper(
