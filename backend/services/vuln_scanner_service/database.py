@@ -16,20 +16,21 @@ assessments, allowing for trend analysis, tracking remediation efforts, and
 supporting continuous security monitoring.
 """
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from typing import Generator
 
 from config import get_settings
+from sqlalchemy import Boolean, Column, create_engine, DateTime, Integer, String, Text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 settings = get_settings()
 
 SQLALCHEMY_DATABASE_URL = settings.database_url
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} # Needed for SQLite
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},  # Needed for SQLite
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -38,24 +39,26 @@ Base = declarative_base()
 
 class ScanTask(Base):
     """SQLAlchemy model for a vulnerability scan task."""
+
     __tablename__ = "scan_tasks"
 
     id = Column(Integer, primary_key=True, index=True)
     target = Column(String, index=True)
     scan_type = Column(String)
-    status = Column(String, default="pending") # pending, running, completed, failed
+    status = Column(String, default="pending")  # pending, running, completed, failed
     start_time = Column(DateTime, default=datetime.now)
     end_time = Column(DateTime, nullable=True)
     report_path = Column(String, nullable=True)
-    raw_results = Column(Text, nullable=True) # Store raw JSON/XML results
+    raw_results = Column(Text, nullable=True)  # Store raw JSON/XML results
 
 
 class Vulnerability(Base):
     """SQLAlchemy model for a detected vulnerability finding."""
+
     __tablename__ = "vulnerabilities"
 
     id = Column(Integer, primary_key=True, index=True)
-    scan_task_id = Column(Integer, index=True) # Foreign key to ScanTask
+    scan_task_id = Column(Integer, index=True)  # Foreign key to ScanTask
     cve_id = Column(String, nullable=True)
     name = Column(String)
     severity = Column(String)

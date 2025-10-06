@@ -16,8 +16,8 @@ Maximus AI services to quickly grasp the intelligence and make informed decision
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class ReportGenerator:
@@ -33,7 +33,13 @@ class ReportGenerator:
         self.generated_reports: List[Dict[str, Any]] = []
         self.last_report_time: Optional[datetime] = None
 
-    async def generate_report(self, query: str, investigation_type: str, collected_data: List[Dict[str, Any]], analysis_results: Dict[str, Any]) -> Dict[str, Any]:
+    async def generate_report(
+        self,
+        query: str,
+        investigation_type: str,
+        collected_data: List[Dict[str, Any]],
+        analysis_results: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Generates a comprehensive OSINT report.
 
         Args:
@@ -45,8 +51,10 @@ class ReportGenerator:
         Returns:
             Dict[str, Any]: A dictionary representing the generated report.
         """
-        print(f"[ReportGenerator] Generating report for query: {query} (type: {investigation_type})...")
-        await asyncio.sleep(0.5) # Simulate report generation time
+        print(
+            f"[ReportGenerator] Generating report for query: {query} (type: {investigation_type})..."
+        )
+        await asyncio.sleep(0.5)  # Simulate report generation time
 
         report_content = f"# OSINT Investigation Report\n\n"
         report_content += f"## Query: {query}\n"
@@ -65,9 +73,9 @@ class ReportGenerator:
             "timestamp": datetime.now().isoformat(),
             "query": query,
             "investigation_type": investigation_type,
-            "report_summary": report_content[:500] + "...", # Truncate for summary
+            "report_summary": report_content[:500] + "...",  # Truncate for summary
             "full_report_content": report_content,
-            "key_findings": analysis_results
+            "key_findings": analysis_results,
         }
         self.generated_reports.append(final_report)
         self.last_report_time = datetime.now()
@@ -83,5 +91,7 @@ class ReportGenerator:
         return {
             "status": "active",
             "total_reports_generated": len(self.generated_reports),
-            "last_report": self.last_report_time.isoformat() if self.last_report_time else "N/A"
+            "last_report": (
+                self.last_report_time.isoformat() if self.last_report_time else "N/A"
+            ),
         }

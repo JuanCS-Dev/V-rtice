@@ -17,8 +17,9 @@ and analyze discussions relevant to its operational goals.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 # Mock discord.py library for demonstration
 class MockDiscordClient:
@@ -26,6 +27,7 @@ class MockDiscordClient:
 
     Simula o comportamento de um bot Discord para fins de teste e desenvolvimento.
     """
+
     def __init__(self):
         """Inicializa o MockDiscordClient com usuários e guilds mock.
 
@@ -72,7 +74,9 @@ class MockDiscordClient:
         Returns:
             MagicMock: Um objeto mock de mensagem.
         """
-        return MagicMock(author=MagicMock(name="MockUser"), content="Mock message content.")
+        return MagicMock(
+            author=MagicMock(name="MockUser"), content="Mock message content."
+        )
 
     async def fetch_channel_history(self, channel, limit: int):
         """Simula a busca do histórico de mensagens de um canal.
@@ -86,13 +90,18 @@ class MockDiscordClient:
         """
         messages = []
         for i in range(limit):
-            msg = MagicMock(author=MagicMock(name=f"User{i}"), content=f"Message {i} in {channel.name}", created_at=datetime.now())
+            msg = MagicMock(
+                author=MagicMock(name=f"User{i}"),
+                content=f"Message {i} in {channel.name}",
+                created_at=datetime.now(),
+            )
             messages.append(msg)
         return messages
 
 
-from scrapers.base_scraper import BaseScraper
 from unittest.mock import MagicMock
+
+from scrapers.base_scraper import BaseScraper
 
 
 class DiscordBotScraper(BaseScraper):
@@ -111,8 +120,10 @@ class DiscordBotScraper(BaseScraper):
         """
         self.discord_token = config.get("discord_token") if config else None
         if not self.discord_token:
-            print("[DiscordBotScraper] Warning: Discord token not provided. Running in mock mode.")
-        self.client = MockDiscordClient() # Replace with actual discord.Client()
+            print(
+                "[DiscordBotScraper] Warning: Discord token not provided. Running in mock mode."
+            )
+        self.client = MockDiscordClient()  # Replace with actual discord.Client()
         self.scraped_data: List[Dict[str, Any]] = []
         self.last_scrape_time: Optional[datetime] = None
         self.current_status: str = "initialized"
@@ -130,9 +141,11 @@ class DiscordBotScraper(BaseScraper):
         if self.current_status != "running":
             await self.connect()
 
-        print(f"[DiscordBotScraper] Scraping channel {channel_id} for {limit} messages...")
+        print(
+            f"[DiscordBotScraper] Scraping channel {channel_id} for {limit} messages..."
+        )
         self.current_status = "scraping"
-        
+
         try:
             channel = await self.client.get_channel(int(channel_id))
             if not channel:
@@ -142,13 +155,17 @@ class DiscordBotScraper(BaseScraper):
             messages = await self.client.fetch_channel_history(channel, limit=limit)
             scraped_messages = []
             for msg in messages:
-                scraped_messages.append({
-                    "timestamp": msg.created_at.isoformat(),
-                    "author": msg.author.name,
-                    "content": msg.content,
-                    "channel_id": channel_id,
-                    "server_id": channel.guild.id if hasattr(channel, 'guild') else None
-                })
+                scraped_messages.append(
+                    {
+                        "timestamp": msg.created_at.isoformat(),
+                        "author": msg.author.name,
+                        "content": msg.content,
+                        "channel_id": channel_id,
+                        "server_id": (
+                            channel.guild.id if hasattr(channel, "guild") else None
+                        ),
+                    }
+                )
             self.scraped_data.extend(scraped_messages)
             self.last_scrape_time = datetime.now()
             self.current_status = "running"
@@ -164,8 +181,10 @@ class DiscordBotScraper(BaseScraper):
             await self.client.start(self.discord_token)
             self.current_status = "running"
         else:
-            print("[DiscordBotScraper] Running in mock mode, no actual Discord connection.")
-            self.current_status = "running" # Mock connection
+            print(
+                "[DiscordBotScraper] Running in mock mode, no actual Discord connection."
+            )
+            self.current_status = "running"  # Mock connection
 
     async def disconnect(self):
         """Disconnects the Discord bot from the Discord API."""
@@ -180,6 +199,8 @@ class DiscordBotScraper(BaseScraper):
         """
         return {
             "status": self.current_status,
-            "last_scrape": self.last_scrape_time.isoformat() if self.last_scrape_time else "N/A",
-            "total_messages_scraped": len(self.scraped_data)
+            "last_scrape": (
+                self.last_scrape_time.isoformat() if self.last_scrape_time else "N/A"
+            ),
+            "total_messages_scraped": len(self.scraped_data),
         }

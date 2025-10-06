@@ -12,18 +12,20 @@ is crucial for providing detailed vulnerability reports to other Maximus AI
 services for risk assessment, patch management, and proactive defense.
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
-from . import schemas, models, database
+import database
 from database import get_db
+from fastapi import Depends, FastAPI, HTTPException, status
+import models
 from scanners.nmap_scanner import NmapScanner
 from scanners.web_scanner import WebScanner
+import schemas
+from sqlalchemy.orm import Session
+import uvicorn
 
 app = FastAPI(title="Maximus Vulnerability Scanner Service", version="1.0.0")
 
@@ -54,11 +56,16 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Vulnerability Scanner Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Vulnerability Scanner Service is operational.",
+    }
 
 
 @app.post("/scans/", response_model=schemas.ScanTask)
-async def create_scan_task(scan_request: schemas.ScanTaskCreate, db: Session = Depends(get_db)):
+async def create_scan_task(
+    scan_request: schemas.ScanTaskCreate, db: Session = Depends(get_db)
+):
     """Creates and initiates a new vulnerability scan task.
 
     Args:
@@ -74,13 +81,23 @@ async def create_scan_task(scan_request: schemas.ScanTaskCreate, db: Session = D
     db.refresh(db_scan_task)
 
     # Start scan in background
-    asyncio.create_task(run_scan(db_scan_task.id, db_scan_task.target, db_scan_task.scan_type, db_scan_task.parameters, db))
+    asyncio.create_task(
+        run_scan(
+            db_scan_task.id,
+            db_scan_task.target,
+            db_scan_task.scan_type,
+            db_scan_task.parameters,
+            db,
+        )
+    )
 
     return db_scan_task
 
 
 @app.get("/scans/", response_model=List[schemas.ScanTask])
-async def read_scan_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def read_scan_tasks(
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+):
     """Retrieves a list of vulnerability scan tasks.
 
     Args:
@@ -126,11 +143,21 @@ async def read_scan_vulnerabilities(scan_id: int, db: Session = Depends(get_db))
     Returns:
         List[schemas.Vulnerability]: A list of vulnerabilities.
     """
-    vulnerabilities = db.query(models.Vulnerability).filter(models.Vulnerability.scan_task_id == scan_id).all()
+    vulnerabilities = (
+        db.query(models.Vulnerability)
+        .filter(models.Vulnerability.scan_task_id == scan_id)
+        .all()
+    )
     return vulnerabilities
 
 
-async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: Dict[str, Any], db: Session):
+async def run_scan(
+    scan_task_id: int,
+    target: str,
+    scan_type: str,
+    parameters: Dict[str, Any],
+    db: Session,
+):
     """Executes the actual scan using the appropriate scanner and updates the database.
 
     Args:
@@ -141,8 +168,11 @@ async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: D
         db (Session): The database session.
     """
     print(f"[ScannerService] Running scan {scan_task_id} ({scan_type}) on {target}")
-    scan_task = db.query(models.ScanTask).filter(models.ScanTask.id == scan_task_id).first()
-    if not scan_task: return
+    scan_task = (
+        db.query(models.ScanTask).filter(models.ScanTask.id == scan_task_id).first()
+    )
+    if not scan_task:
+        return
 
     scan_task.status = "running"
     db.add(scan_task)
@@ -152,9 +182,13 @@ async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: D
     try:
         scan_results: Dict[str, Any] = {}
         if scan_type == "nmap_network":
-            scan_results = await nmap_scanner.scan_network(target, parameters.get("ports", []))
+            scan_results = await nmap_scanner.scan_network(
+                target, parameters.get("ports", [])
+            )
         elif scan_type == "web_application":
-            scan_results = await web_scanner.scan_web_application(target, parameters.get("depth", 1))
+            scan_results = await web_scanner.scan_web_application(
+                target, parameters.get("depth", 1)
+            )
         else:
             raise ValueError(f"Unsupported scan type: {scan_type}")
 
@@ -169,14 +203,14 @@ async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: D
                 solution=vuln_data.get("solution"),
                 host=vuln_data.get("host", target),
                 port=vuln_data.get("port"),
-                protocol=vuln_data.get("protocol")
+                protocol=vuln_data.get("protocol"),
             )
             db.add(db_vulnerability)
         db.commit()
 
         scan_task.status = "completed"
         scan_task.end_time = datetime.now()
-        scan_task.raw_results = str(scan_results) # Store raw results as string
+        scan_task.raw_results = str(scan_results)  # Store raw results as string
         db.add(scan_task)
         db.commit()
         db.refresh(scan_task)

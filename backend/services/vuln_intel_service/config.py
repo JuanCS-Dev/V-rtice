@@ -12,6 +12,7 @@ sources, ensuring adaptability across different environments.
 """
 
 import os
+
 from pydantic import BaseSettings
 
 
@@ -20,6 +21,7 @@ class Settings(BaseSettings):
 
     Settings are loaded from environment variables or a .env file.
     """
+
     app_name: str = "Maximus Vulnerability Intelligence Service"
     nvd_api_key: str = os.getenv("NVD_API_KEY", "your_nvd_api_key")
     exploitdb_api_key: str = os.getenv("EXPLOITDB_API_KEY", "your_exploitdb_api_key")
@@ -28,8 +30,9 @@ class Settings(BaseSettings):
 
     class Config:
         """Configuração para carregar variáveis de ambiente de um arquivo .env."""
+
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
 
 def get_settings() -> Settings:

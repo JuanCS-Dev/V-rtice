@@ -18,7 +18,7 @@ privacy of individuals whose data is collected.
 
 import hashlib
 import re
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class SecurityUtils:
@@ -42,7 +42,7 @@ class SecurityUtils:
             str: The sanitized string.
         """
         # Remove HTML tags
-        sanitized = re.sub(r'<.*?>', '', input_string)
+        sanitized = re.sub(r"<.*?>", "", input_string)
         # Escape special characters for SQL/shell (simplified)
         sanitized = sanitized.replace("'", "''").replace("--", "")
         return sanitized
@@ -56,14 +56,14 @@ class SecurityUtils:
 
         Returns:
             str: The hexadecimal representation of the hash.
-        
+
         Raises:
             ValueError: If an unsupported hashing algorithm is provided.
         """
         if algorithm == "sha256":
-            return hashlib.sha256(data.encode('utf-8')).hexdigest()
+            return hashlib.sha256(data.encode("utf-8")).hexdigest()
         elif algorithm == "md5":
-            return hashlib.md5(data.encode('utf-8')).hexdigest()
+            return hashlib.md5(data.encode("utf-8")).hexdigest()
         else:
             raise ValueError(f"Unsupported hashing algorithm: {algorithm}")
 
@@ -76,15 +76,15 @@ class SecurityUtils:
         Returns:
             str: The anonymized IP address.
         """
-        if "." in ip_address: # IPv4
-            parts = ip_address.split('.')
+        if "." in ip_address:  # IPv4
+            parts = ip_address.split(".")
             if len(parts) == 4:
-                return '.'.join(parts[:3]) + '.0'
-        elif ":" in ip_address: # IPv6 (simplified to mask last half)
-            parts = ip_address.split(':')
+                return ".".join(parts[:3]) + ".0"
+        elif ":" in ip_address:  # IPv6 (simplified to mask last half)
+            parts = ip_address.split(":")
             if len(parts) > 4:
-                return ':'.join(parts[:4]) + ':0:0:0:0'
-        return ip_address # Return as is if not recognized
+                return ":".join(parts[:4]) + ":0:0:0:0"
+        return ip_address  # Return as is if not recognized
 
     def validate_url(self, url: str) -> bool:
         """Validação básica para o formato de uma URL.
@@ -97,9 +97,11 @@ class SecurityUtils:
         """
         # Simple regex for URL validation
         url_regex = re.compile(
-            r'^(?:http|ftp)s?://' # http:// or https://
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' # domain...
-            r'localhost|' # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(\d+)?' # ...or ip
-            r'(?:/?|[/?]\S+)$/i', re.IGNORECASE)
+            r"^(?:http|ftp)s?://"  # http:// or https://
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
+            r"localhost|"  # localhost...
+            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(\d+)?"  # ...or ip
+            r"(?:/?|[/?]\S+)$/i",
+            re.IGNORECASE,
+        )
         return re.match(url_regex, url) is not None

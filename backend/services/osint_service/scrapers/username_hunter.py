@@ -18,8 +18,8 @@ identity verification, social engineering, or tracking threat actors.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from scrapers.base_scraper import BaseScraper
 
@@ -34,7 +34,13 @@ class UsernameHunter(BaseScraper):
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initializes the UsernameHunter."""
-        self.platforms_to_check: List[str] = ["twitter", "instagram", "github", "reddit", "pastebin"]
+        self.platforms_to_check: List[str] = [
+            "twitter",
+            "instagram",
+            "github",
+            "reddit",
+            "pastebin",
+        ]
         self.hunt_history: List[Dict[str, Any]] = []
         self.last_hunt_time: Optional[datetime] = None
         self.current_status: str = "idle"
@@ -49,21 +55,46 @@ class UsernameHunter(BaseScraper):
         Returns:
             List[Dict[str, Any]]: A list of dictionaries, each representing a discovered profile or mention.
         """
-        print(f"[UsernameHunter] Hunting for username: {username} across {len(self.platforms_to_check)} platforms...")
+        print(
+            f"[UsernameHunter] Hunting for username: {username} across {len(self.platforms_to_check)} platforms..."
+        )
         self.current_status = "hunting"
-        
+
         found_profiles: List[Dict[str, Any]] = []
 
         for platform in self.platforms_to_check:
-            await asyncio.sleep(0.1) # Simulate API call/website check
+            await asyncio.sleep(0.1)  # Simulate API call/website check
             if username.lower() == "maximus_ai" and platform in ["twitter", "github"]:
-                found_profiles.append({"platform": platform, "username": username, "found": True, "profile_url": f"https://{platform}.com/{username}"})
+                found_profiles.append(
+                    {
+                        "platform": platform,
+                        "username": username,
+                        "found": True,
+                        "profile_url": f"https://{platform}.com/{username}",
+                    }
+                )
             elif username.lower() == "shadow_hacker" and platform == "pastebin":
-                found_profiles.append({"platform": platform, "username": username, "found": True, "profile_url": f"https://{platform}.com/u/{username}", "details": "Mentioned in a data dump."})
+                found_profiles.append(
+                    {
+                        "platform": platform,
+                        "username": username,
+                        "found": True,
+                        "profile_url": f"https://{platform}.com/u/{username}",
+                        "details": "Mentioned in a data dump.",
+                    }
+                )
             else:
-                found_profiles.append({"platform": platform, "username": username, "found": False})
-        
-        self.hunt_history.append({"timestamp": datetime.now().isoformat(), "username": username, "results": found_profiles})
+                found_profiles.append(
+                    {"platform": platform, "username": username, "found": False}
+                )
+
+        self.hunt_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "username": username,
+                "results": found_profiles,
+            }
+        )
         self.last_hunt_time = datetime.now()
         self.current_status = "idle"
 
@@ -77,7 +108,9 @@ class UsernameHunter(BaseScraper):
         """
         return {
             "status": self.current_status,
-            "last_hunt": self.last_hunt_time.isoformat() if self.last_hunt_time else "N/A",
+            "last_hunt": (
+                self.last_hunt_time.isoformat() if self.last_hunt_time else "N/A"
+            ),
             "total_hunts_performed": len(self.hunt_history),
-            "platforms_monitored": len(self.platforms_to_check)
+            "platforms_monitored": len(self.platforms_to_check),
         }

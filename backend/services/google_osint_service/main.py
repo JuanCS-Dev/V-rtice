@@ -10,12 +10,13 @@ allowing other Maximus AI services to gather and analyze open-source information
 relevant to cybersecurity, threat intelligence, and situational awareness.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
 
 # In a real scenario, you would import a Google Search API client or similar
 
@@ -30,6 +31,7 @@ class OsintQueryRequest(BaseModel):
         search_type (str): The type of search (e.g., 'web', 'news', 'social').
         limit (int): The maximum number of results to return.
     """
+
     query: str
     search_type: str = "web"
     limit: int = 10
@@ -72,20 +74,54 @@ async def query_osint(request: OsintQueryRequest) -> Dict[str, Any]:
     Raises:
         HTTPException: If an invalid search type is provided.
     """
-    print(f"[API] Performing OSINT query: '{request.query}' (type: {request.search_type}, limit: {request.limit})")
-    await asyncio.sleep(0.5) # Simulate search time
+    print(
+        f"[API] Performing OSINT query: '{request.query}' (type: {request.search_type}, limit: {request.limit})"
+    )
+    await asyncio.sleep(0.5)  # Simulate search time
 
-    results = {"timestamp": datetime.now().isoformat(), "query": request.query, "search_type": request.search_type, "results": []}
+    results = {
+        "timestamp": datetime.now().isoformat(),
+        "query": request.query,
+        "search_type": request.search_type,
+        "results": [],
+    }
 
     if request.search_type == "web":
-        results["results"].append({"title": "Example Web Result 1", "url": "https://example.com/result1", "snippet": "This is a snippet from a web page."})
-        results["results"].append({"title": "Example Web Result 2", "url": "https://example.com/result2", "snippet": "Another relevant piece of information found online."})        
+        results["results"].append(
+            {
+                "title": "Example Web Result 1",
+                "url": "https://example.com/result1",
+                "snippet": "This is a snippet from a web page.",
+            }
+        )
+        results["results"].append(
+            {
+                "title": "Example Web Result 2",
+                "url": "https://example.com/result2",
+                "snippet": "Another relevant piece of information found online.",
+            }
+        )
     elif request.search_type == "news":
-        results["results"].append({"title": "Breaking News: Cyberattack on Major Corp", "url": "https://news.example.com/cyberattack", "source": "News Outlet A"})
+        results["results"].append(
+            {
+                "title": "Breaking News: Cyberattack on Major Corp",
+                "url": "https://news.example.com/cyberattack",
+                "source": "News Outlet A",
+            }
+        )
     elif request.search_type == "social":
-        results["results"].append({"user": "@threat_analyst", "platform": "X", "text": "New APT group observed using custom malware.", "timestamp": "2023-10-26T10:00:00Z"})
+        results["results"].append(
+            {
+                "user": "@threat_analyst",
+                "platform": "X",
+                "text": "New APT group observed using custom malware.",
+                "timestamp": "2023-10-26T10:00:00Z",
+            }
+        )
     else:
-        raise HTTPException(status_code=400, detail=f"Invalid search type: {request.search_type}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid search type: {request.search_type}"
+        )
 
     return results
 

@@ -19,8 +19,8 @@ the Maximus AI system.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class WebScanner:
@@ -36,7 +36,9 @@ class WebScanner:
         """Initializes the WebScanner."""
         print("[WebScanner] Initialized Web Scanner (mock mode).")
 
-    async def scan_web_application(self, target_url: str, depth: int = 1) -> Dict[str, Any]:
+    async def scan_web_application(
+        self, target_url: str, depth: int = 1
+    ) -> Dict[str, Any]:
         """Performs a simulated web application scan on the target URL.
 
         Args:
@@ -46,21 +48,46 @@ class WebScanner:
         Returns:
             Dict[str, Any]: A dictionary containing the simulated web scan results.
         """
-        print(f"[WebScanner] Simulating web application scan on {target_url} with depth {depth}")
-        await asyncio.sleep(3) # Simulate scan duration
+        print(
+            f"[WebScanner] Simulating web application scan on {target_url} with depth {depth}"
+        )
+        await asyncio.sleep(3)  # Simulate scan duration
 
         # Simulate web scan output
         vulnerabilities: List[Dict[str, Any]] = []
         if "testphp.vulnweb.com" in target_url:
-            vulnerabilities.append({"name": "SQL Injection", "severity": "critical", "host": target_url, "path": "/login.php", "description": "Parameter 'user' vulnerable to SQLi."})
-            vulnerabilities.append({"name": "XSS Reflected", "severity": "high", "host": target_url, "path": "/search.php", "description": "Reflected XSS in search parameter."})
+            vulnerabilities.append(
+                {
+                    "name": "SQL Injection",
+                    "severity": "critical",
+                    "host": target_url,
+                    "path": "/login.php",
+                    "description": "Parameter 'user' vulnerable to SQLi.",
+                }
+            )
+            vulnerabilities.append(
+                {
+                    "name": "XSS Reflected",
+                    "severity": "high",
+                    "host": target_url,
+                    "path": "/search.php",
+                    "description": "Reflected XSS in search parameter.",
+                }
+            )
         if "example.com" in target_url:
-            vulnerabilities.append({"name": "Insecure Headers", "severity": "medium", "host": target_url, "description": "Missing security headers (e.g., CSP, HSTS)."})
+            vulnerabilities.append(
+                {
+                    "name": "Insecure Headers",
+                    "severity": "medium",
+                    "host": target_url,
+                    "description": "Missing security headers (e.g., CSP, HSTS).",
+                }
+            )
 
         return {
             "scan_target": target_url,
             "scan_status": "completed",
             "timestamp": datetime.now().isoformat(),
             "vulnerabilities": vulnerabilities,
-            "pages_crawled": 10 * depth # Mock
+            "pages_crawled": 10 * depth,  # Mock
         }

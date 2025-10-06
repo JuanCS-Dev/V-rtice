@@ -12,6 +12,7 @@ sources, ensuring adaptability across different environments.
 """
 
 import os
+
 from pydantic_settings import BaseSettings
 
 
@@ -20,14 +21,17 @@ class Settings(BaseSettings):
 
     Settings are loaded from environment variables or a .env file.
     """
+
     app_name: str = "Maximus IP Intelligence Service"
-    external_ip_api_key: str = os.getenv("EXTERNAL_IP_API_KEY", "your_external_ip_api_key")
+    external_ip_api_key: str = os.getenv(
+        "EXTERNAL_IP_API_KEY", "your_external_ip_api_key"
+    )
     cache_ttl_seconds: int = os.getenv("CACHE_TTL_SECONDS", 3600)
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     class Config:
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
 
 def get_settings() -> Settings:

@@ -17,9 +17,9 @@ evidence.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import base64
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class ImageAnalyzer:
@@ -35,7 +35,9 @@ class ImageAnalyzer:
         self.analysis_history: List[Dict[str, Any]] = []
         self.last_analysis_time: Optional[datetime] = None
 
-    async def analyze_image(self, image_base64: str, analysis_types: Optional[List[str]] = None) -> Dict[str, Any]:
+    async def analyze_image(
+        self, image_base64: str, analysis_types: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         """Analyzes an image (provided as base64) for specified analysis types.
 
         Args:
@@ -45,8 +47,10 @@ class ImageAnalyzer:
         Returns:
             Dict[str, Any]: A dictionary containing the analysis results.
         """
-        print(f"[ImageAnalyzer] Analyzing image (size: {len(image_base64)} bytes) for types: {analysis_types or 'all'}...")
-        await asyncio.sleep(0.5) # Simulate image processing
+        print(
+            f"[ImageAnalyzer] Analyzing image (size: {len(image_base64)} bytes) for types: {analysis_types or 'all'}..."
+        )
+        await asyncio.sleep(0.5)  # Simulate image processing
 
         results = {
             "timestamp": datetime.now().isoformat(),
@@ -55,7 +59,7 @@ class ImageAnalyzer:
             "detected_objects": [],
             "detected_faces": [],
             "metadata": {},
-            "manipulation_detected": False
+            "manipulation_detected": False,
         }
 
         image_data = base64.b64decode(image_base64)
@@ -99,8 +103,10 @@ class ImageAnalyzer:
             List[Dict[str, Any]]: List of detected objects.
         """
         objects = []
-        if b"weapon_signature" in image_data: objects.append({"object": "weapon", "confidence": 0.95})
-        if b"vehicle_signature" in image_data: objects.append({"object": "vehicle", "confidence": 0.8})
+        if b"weapon_signature" in image_data:
+            objects.append({"object": "weapon", "confidence": 0.95})
+        if b"vehicle_signature" in image_data:
+            objects.append({"object": "vehicle", "confidence": 0.8})
         return objects
 
     def _perform_face_recognition(self, image_data: bytes) -> List[Dict[str, Any]]:
@@ -113,7 +119,8 @@ class ImageAnalyzer:
             List[Dict[str, Any]]: List of detected faces.
         """
         faces = []
-        if b"face_signature_known_person" in image_data: faces.append({"person_id": "target_alpha", "confidence": 0.99})
+        if b"face_signature_known_person" in image_data:
+            faces.append({"person_id": "target_alpha", "confidence": 0.99})
         return faces
 
     def _extract_metadata(self, image_data: bytes) -> Dict[str, Any]:
@@ -126,7 +133,11 @@ class ImageAnalyzer:
             Dict[str, Any]: Extracted metadata.
         """
         if b"gps_coords_signature" in image_data:
-            return {"make": "CameraCo", "model": "X100", "gps": {"latitude": 34.0522, "longitude": -118.2437}}
+            return {
+                "make": "CameraCo",
+                "model": "X100",
+                "gps": {"latitude": 34.0522, "longitude": -118.2437},
+            }
         return {"make": "Unknown"}
 
     def _detect_manipulation(self, image_data: bytes) -> bool:
@@ -149,5 +160,9 @@ class ImageAnalyzer:
         return {
             "status": "active",
             "total_analyses": len(self.analysis_history),
-            "last_analysis": self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"
+            "last_analysis": (
+                self.last_analysis_time.isoformat()
+                if self.last_analysis_time
+                else "N/A"
+            ),
         }

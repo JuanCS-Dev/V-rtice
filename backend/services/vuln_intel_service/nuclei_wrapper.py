@@ -12,8 +12,8 @@ threat intelligence with real-time vulnerability data.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class NucleiWrapper:
@@ -27,7 +27,12 @@ class NucleiWrapper:
         """Initializes the NucleiWrapper."""
         print("[NucleiWrapper] Initialized Nuclei Wrapper (mock mode).")
 
-    async def run_scan(self, target: str, template_path: Optional[str] = None, options: Optional[List[str]] = None) -> Dict[str, Any]:
+    async def run_scan(
+        self,
+        target: str,
+        template_path: Optional[str] = None,
+        options: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
         """Runs a simulated Nuclei scan against a target.
 
         Args:
@@ -38,22 +43,40 @@ class NucleiWrapper:
         Returns:
             Dict[str, Any]: A dictionary containing the simulated Nuclei scan results.
         """
-        print(f"[NucleiWrapper] Simulating Nuclei scan on {target} with template {template_path or 'default'}")
-        await asyncio.sleep(1.0) # Simulate scan duration
+        print(
+            f"[NucleiWrapper] Simulating Nuclei scan on {target} with template {template_path or 'default'}"
+        )
+        await asyncio.sleep(1.0)  # Simulate scan duration
 
         # Simulate Nuclei output
         findings: List[Dict[str, Any]] = []
         if "example.com" in target:
-            findings.append({"template": "cve-2023-xxxx", "severity": "high", "name": "Example Vulnerability", "host": target, "matched_at": "/admin"})
+            findings.append(
+                {
+                    "template": "cve-2023-xxxx",
+                    "severity": "high",
+                    "name": "Example Vulnerability",
+                    "host": target,
+                    "matched_at": "/admin",
+                }
+            )
         if "testphp.vulnweb.com" in target:
-            findings.append({"template": "sqli-detect", "severity": "critical", "name": "SQL Injection", "host": target, "matched_at": "/login.php"})
+            findings.append(
+                {
+                    "template": "sqli-detect",
+                    "severity": "critical",
+                    "name": "SQL Injection",
+                    "host": target,
+                    "matched_at": "/login.php",
+                }
+            )
 
         return {
             "scan_target": target,
             "scan_status": "completed",
             "timestamp": datetime.now().isoformat(),
             "findings": findings,
-            "total_findings": len(findings)
+            "total_findings": len(findings),
         }
 
     async def get_version(self) -> str:

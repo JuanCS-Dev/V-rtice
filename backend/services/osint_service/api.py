@@ -12,14 +12,14 @@ open-source information into actionable intelligence, supporting threat
 intelligence, risk assessment, and strategic planning within the Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from ai_orchestrator import AIOrchestrator
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus OSINT Service", version="1.0.0")
 
@@ -35,6 +35,7 @@ class StartInvestigationRequest(BaseModel):
         investigation_type (str): The type of investigation (e.g., 'person_recon', 'domain_analysis').
         parameters (Optional[Dict[str, Any]]): Additional parameters for the investigation.
     """
+
     query: str
     investigation_type: str
     parameters: Optional[Dict[str, Any]] = None
@@ -65,7 +66,9 @@ async def health_check() -> Dict[str, str]:
 
 
 @app.post("/start_investigation")
-async def start_osint_investigation(request: StartInvestigationRequest) -> Dict[str, Any]:
+async def start_osint_investigation(
+    request: StartInvestigationRequest,
+) -> Dict[str, Any]:
     """Initiates a new OSINT investigation.
 
     Args:
@@ -74,8 +77,12 @@ async def start_osint_investigation(request: StartInvestigationRequest) -> Dict[
     Returns:
         Dict[str, Any]: A dictionary containing the investigation ID and initial status.
     """
-    print(f"[API] Starting OSINT investigation: {request.investigation_type} for {request.query}")
-    response = await ai_orchestrator.start_investigation(request.query, request.investigation_type, request.parameters)
+    print(
+        f"[API] Starting OSINT investigation: {request.investigation_type} for {request.query}"
+    )
+    response = await ai_orchestrator.start_investigation(
+        request.query, request.investigation_type, request.parameters
+    )
     return response
 
 

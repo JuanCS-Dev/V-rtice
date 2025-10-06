@@ -17,8 +17,8 @@ AI system.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class NmapScanner:
@@ -44,16 +44,39 @@ class NmapScanner:
             Dict[str, Any]: A dictionary containing the simulated Nmap scan results.
         """
         print(f"[NmapScanner] Simulating Nmap scan on {target} for ports {ports}")
-        await asyncio.sleep(2) # Simulate scan duration
+        await asyncio.sleep(2)  # Simulate scan duration
 
         # Simulate Nmap output
         vulnerabilities: List[Dict[str, Any]] = []
         if 80 in ports or 443 in ports:
-            vulnerabilities.append({"name": "Web Server Misconfiguration", "severity": "medium", "host": target, "port": 80, "protocol": "tcp"})
+            vulnerabilities.append(
+                {
+                    "name": "Web Server Misconfiguration",
+                    "severity": "medium",
+                    "host": target,
+                    "port": 80,
+                    "protocol": "tcp",
+                }
+            )
         if 22 in ports:
-            vulnerabilities.append({"name": "SSH Weak Ciphers", "severity": "low", "host": target, "port": 22, "protocol": "tcp"})
+            vulnerabilities.append(
+                {
+                    "name": "SSH Weak Ciphers",
+                    "severity": "low",
+                    "host": target,
+                    "port": 22,
+                    "protocol": "tcp",
+                }
+            )
         if target == "192.168.1.100":
-            vulnerabilities.append({"name": "Outdated OS", "severity": "high", "host": target, "description": "Operating system is end-of-life."})
+            vulnerabilities.append(
+                {
+                    "name": "Outdated OS",
+                    "severity": "high",
+                    "host": target,
+                    "description": "Operating system is end-of-life.",
+                }
+            )
 
         return {
             "scan_target": target,
@@ -61,5 +84,5 @@ class NmapScanner:
             "timestamp": datetime.now().isoformat(),
             "vulnerabilities": vulnerabilities,
             "hosts_found": 1,
-            "open_ports_count": len(ports) # Mock
+            "open_ports_count": len(ports),  # Mock
         }

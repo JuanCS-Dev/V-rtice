@@ -11,9 +11,10 @@ API request and response modeling. This is crucial for maintaining data integrit
 and enabling efficient data exchange within the vulnerability intelligence ecosystem.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class CVEDetails(BaseModel):
@@ -29,6 +30,7 @@ class CVEDetails(BaseModel):
         references (List[str]): List of URLs to relevant advisories or articles.
         last_updated (str): ISO formatted timestamp of when the CVE info was last updated.
     """
+
     cve_id: str
     description: str
     severity: str
@@ -51,6 +53,7 @@ class NucleiScanResult(BaseModel):
         extracted_results (Optional[List[str]]): Any extracted data from the finding.
         timestamp (str): ISO formatted timestamp of the finding.
     """
+
     template: str
     severity: str
     name: str
@@ -72,6 +75,7 @@ class VulnerabilityReport(BaseModel):
         overall_risk_score (float): An aggregated risk score for the target.
         recommendations (List[str]): Actionable recommendations for remediation.
     """
+
     target: str
     scan_id: str
     scan_time: str = Field(default_factory=lambda: datetime.now().isoformat())

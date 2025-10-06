@@ -12,16 +12,16 @@ or malicious IP addresses, supporting network forensics, threat hunting, and
 geo-fencing security policies within the Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from models import IPInfo, IPQuery
-from database import get_ip_data, update_ip_data
 from config import get_settings
+from database import get_ip_data, update_ip_data
+from fastapi import Depends, FastAPI, HTTPException
+from models import IPInfo, IPQuery
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus IP Intelligence Service", version="1.0.0")
 
@@ -70,8 +70,10 @@ async def query_ip_intelligence(query: IPQuery) -> IPInfo:
     ip_info = await get_ip_data(query.ip_address)
     if not ip_info:
         # Simulate fetching from external source if not in local DB
-        print(f"[API] IP {query.ip_address} not in local cache, simulating external lookup.")
-        await asyncio.sleep(0.5) # Simulate external API call
+        print(
+            f"[API] IP {query.ip_address} not in local cache, simulating external lookup."
+        )
+        await asyncio.sleep(0.5)  # Simulate external API call
         # Mock external lookup result
         if query.ip_address == "8.8.8.8":
             ip_info = IPInfo(
@@ -81,7 +83,7 @@ async def query_ip_intelligence(query: IPQuery) -> IPInfo:
                 isp="Google LLC",
                 reputation="Clean",
                 threat_score=0.0,
-                last_checked=datetime.now().isoformat()
+                last_checked=datetime.now().isoformat(),
             )
         elif query.ip_address == "1.2.3.4":
             ip_info = IPInfo(
@@ -91,7 +93,7 @@ async def query_ip_intelligence(query: IPQuery) -> IPInfo:
                 isp="EvilCorp Hosting",
                 reputation="Malicious",
                 threat_score=0.9,
-                last_checked=datetime.now().isoformat()
+                last_checked=datetime.now().isoformat(),
             )
         else:
             ip_info = IPInfo(
@@ -101,9 +103,9 @@ async def query_ip_intelligence(query: IPQuery) -> IPInfo:
                 isp="Unknown",
                 reputation="Neutral",
                 threat_score=0.5,
-                last_checked=datetime.now().isoformat()
+                last_checked=datetime.now().isoformat(),
             )
-        await update_ip_data(ip_info) # Store in local DB
+        await update_ip_data(ip_info)  # Store in local DB
 
     return ip_info
 
@@ -124,7 +126,10 @@ async def get_ip_details(ip_address: str) -> IPInfo:
     print(f"[API] Getting IP details for: {ip_address}")
     ip_info = await get_ip_data(ip_address)
     if not ip_info:
-        raise HTTPException(status_code=404, detail=f"IP address {ip_address} not found in intelligence database.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"IP address {ip_address} not found in intelligence database.",
+        )
     return ip_info
 
 
