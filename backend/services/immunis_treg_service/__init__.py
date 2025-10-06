@@ -11,12 +11,12 @@ __author__ = "VÉRTICE Team"
 
 from .treg_core import (
     AlertSeverity,
-    ToleranceDecision,
-    SecurityAlert,
-    ToleranceProfile,
-    SuppressionDecision,
-    ToleranceLearner,
     FalsePositiveSuppressor,
+    SecurityAlert,
+    SuppressionDecision,
+    ToleranceDecision,
+    ToleranceLearner,
+    ToleranceProfile,
     TregController,
 )
 

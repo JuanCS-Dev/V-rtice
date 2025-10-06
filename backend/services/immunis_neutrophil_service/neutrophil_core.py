@@ -11,10 +11,10 @@ NO MOCKS - Production-ready implementation.
 """
 
 import asyncio
-import logging
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
+import logging
 import time
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class NeutrophilCore:
         self,
         neutrophil_id: str,
         ttl_hours: int = 24,
-        rte_endpoint: str = "http://reflex-triage-engine:8003"
+        rte_endpoint: str = "http://reflex-triage-engine:8003",
     ):
         """Initialize Neutrophil.
 
@@ -51,14 +51,12 @@ class NeutrophilCore:
         self.actions_taken = []
         self.status = "active"
 
-        logger.info(f"Neutrophil {neutrophil_id} born (TTL: {ttl_hours}h, death at {self.death_time})")
+        logger.info(
+            f"Neutrophil {neutrophil_id} born (TTL: {ttl_hours}h, death at {self.death_time})"
+        )
 
     async def initiate_rapid_response(
-        self,
-        threat_id: str,
-        threat_type: str,
-        severity: str,
-        details: Dict[str, Any]
+        self, threat_id: str, threat_type: str, severity: str, details: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Initiate rapid first-responder action against threat.
 
@@ -73,7 +71,7 @@ class NeutrophilCore:
         """
         if not self.is_alive():
             logger.warning(f"Neutrophil {self.neutrophil_id} expired - cannot respond")
-            return {'status': 'expired', 'neutrophil_id': self.neutrophil_id}
+            return {"status": "expired", "neutrophil_id": self.neutrophil_id}
 
         logger.info(f"Neutrophil {self.neutrophil_id} responding to threat {threat_id}")
 
@@ -87,17 +85,17 @@ class NeutrophilCore:
 
         # Record engagement
         engagement = {
-            'timestamp': datetime.now().isoformat(),
-            'threat_id': threat_id,
-            'threat_type': threat_type,
-            'severity': severity,
-            'action_taken': action,
-            'result': result,
-            'response_time_ms': (time.time() - start_time) * 1000
+            "timestamp": datetime.now().isoformat(),
+            "threat_id": threat_id,
+            "threat_type": threat_type,
+            "severity": severity,
+            "action_taken": action,
+            "result": result,
+            "response_time_ms": (time.time() - start_time) * 1000,
         }
 
         self.threats_engaged.append(engagement)
-        self.actions_taken.append(action['type'])
+        self.actions_taken.append(action["type"])
 
         logger.info(
             f"Neutrophil {self.neutrophil_id} responded in "
@@ -107,10 +105,7 @@ class NeutrophilCore:
         return engagement
 
     def _determine_action(
-        self,
-        threat_type: str,
-        severity: str,
-        details: Dict[str, Any]
+        self, threat_type: str, severity: str, details: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Determine appropriate rapid response action.
 
@@ -124,33 +119,30 @@ class NeutrophilCore:
         """
         if severity == "critical" or threat_type == "malware":
             return {
-                'type': 'isolate_and_quarantine',
-                'target': details.get('host_id', 'unknown'),
-                'level': 'full'
+                "type": "isolate_and_quarantine",
+                "target": details.get("host_id", "unknown"),
+                "level": "full",
             }
         elif severity == "high" or threat_type == "intrusion":
             return {
-                'type': 'block_network',
-                'target': details.get('ip_address', 'unknown'),
-                'duration': '1h'
+                "type": "block_network",
+                "target": details.get("ip_address", "unknown"),
+                "duration": "1h",
             }
         elif threat_type == "process_anomaly":
             return {
-                'type': 'kill_process',
-                'target': details.get('process_id', 'unknown')
+                "type": "kill_process",
+                "target": details.get("process_id", "unknown"),
             }
         else:
             return {
-                'type': 'monitor_intensively',
-                'target': details.get('target', 'unknown'),
-                'duration': '30m'
+                "type": "monitor_intensively",
+                "target": details.get("target", "unknown"),
+                "duration": "30m",
             }
 
     async def _execute_via_rte(
-        self,
-        action: Dict[str, Any],
-        threat_id: str,
-        details: Dict[str, Any]
+        self, action: Dict[str, Any], threat_id: str, details: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Execute action via RTE autonomous response.
 
@@ -167,40 +159,42 @@ class NeutrophilCore:
 
             # Prepare RTE request
             rte_request = {
-                'event_data': details.get('data', '').encode().hex() if isinstance(details.get('data'), str) else '',
-                'event_metadata': {
-                    'threat_id': threat_id,
-                    'ip': details.get('ip_address'),
-                    'process_id': details.get('process_id'),
-                    **details
+                "event_data": (
+                    details.get("data", "").encode().hex()
+                    if isinstance(details.get("data"), str)
+                    else ""
+                ),
+                "event_metadata": {
+                    "threat_id": threat_id,
+                    "ip": details.get("ip_address"),
+                    "process_id": details.get("process_id"),
+                    **details,
                 },
-                'auto_respond': True
+                "auto_respond": True,
             }
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    f"{self.rte_endpoint}/rte/scan",
-                    json=rte_request,
-                    timeout=5.0
+                    f"{self.rte_endpoint}/rte/scan", json=rte_request, timeout=5.0
                 )
 
                 if response.status_code == 200:
                     rte_result = response.json()
                     return {
-                        'success': True,
-                        'rte_decision': rte_result.get('decision'),
-                        'rte_action': rte_result.get('action_taken'),
-                        'latency_ms': rte_result.get('latency_ms')
+                        "success": True,
+                        "rte_decision": rte_result.get("decision"),
+                        "rte_action": rte_result.get("action_taken"),
+                        "latency_ms": rte_result.get("latency_ms"),
                     }
                 else:
                     return {
-                        'success': False,
-                        'error': f'RTE returned {response.status_code}'
+                        "success": False,
+                        "error": f"RTE returned {response.status_code}",
                     }
 
         except Exception as e:
             logger.error(f"RTE execution failed: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def is_alive(self) -> bool:
         """Check if neutrophil is alive (within TTL).
@@ -232,16 +226,16 @@ class NeutrophilCore:
         self.status = "destroyed"
 
         summary = {
-            'neutrophil_id': self.neutrophil_id,
-            'birth_time': self.birth_time.isoformat(),
-            'death_time': datetime.now().isoformat(),
-            'lifetime_hours': (datetime.now() - self.birth_time).total_seconds() / 3600,
-            'threats_engaged': len(self.threats_engaged),
-            'actions_taken': len(self.actions_taken),
-            'action_breakdown': {
+            "neutrophil_id": self.neutrophil_id,
+            "birth_time": self.birth_time.isoformat(),
+            "death_time": datetime.now().isoformat(),
+            "lifetime_hours": (datetime.now() - self.birth_time).total_seconds() / 3600,
+            "threats_engaged": len(self.threats_engaged),
+            "actions_taken": len(self.actions_taken),
+            "action_breakdown": {
                 action: self.actions_taken.count(action)
                 for action in set(self.actions_taken)
-            }
+            },
         }
 
         # Clear memory
@@ -266,7 +260,7 @@ class NeutrophilCore:
             Response status or None
         """
         for engagement in self.threats_engaged:
-            if engagement.get('threat_id') == threat_id:
+            if engagement.get("threat_id") == threat_id:
                 return engagement
         return None
 
@@ -277,13 +271,13 @@ class NeutrophilCore:
             Status dictionary
         """
         return {
-            'neutrophil_id': self.neutrophil_id,
-            'status': self.status,
-            'is_alive': self.is_alive(),
-            'birth_time': self.birth_time.isoformat(),
-            'death_time': self.death_time.isoformat(),
-            'remaining_lifetime_seconds': self.remaining_lifetime_seconds(),
-            'threats_engaged': len(self.threats_engaged),
-            'actions_taken': len(self.actions_taken),
-            'rte_endpoint': self.rte_endpoint
+            "neutrophil_id": self.neutrophil_id,
+            "status": self.status,
+            "is_alive": self.is_alive(),
+            "birth_time": self.birth_time.isoformat(),
+            "death_time": self.death_time.isoformat(),
+            "remaining_lifetime_seconds": self.remaining_lifetime_seconds(),
+            "threats_engaged": len(self.threats_engaged),
+            "actions_taken": len(self.actions_taken),
+            "rte_endpoint": self.rte_endpoint,
         }

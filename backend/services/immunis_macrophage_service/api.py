@@ -18,16 +18,16 @@ Endpoints:
 - GET /signatures - List generated YARA signatures
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 from datetime import datetime
 import logging
 import os
 import tempfile
+from typing import Any, Dict, List, Optional
 
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from macrophage_core import MacrophageCore
+from pydantic import BaseModel
+import uvicorn
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Immunis Macrophage Service",
     version="1.0.0",
-    description="Bio-inspired malware phagocytosis service (engulf, analyze, present antigens)"
+    description="Bio-inspired malware phagocytosis service (engulf, analyze, present antigens)",
 )
 
 # Initialize Macrophage core
@@ -44,8 +44,7 @@ cuckoo_url = os.getenv("CUCKOO_API_URL", "http://localhost:8090")
 kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
 macrophage_core = MacrophageCore(
-    cuckoo_url=cuckoo_url,
-    kafka_bootstrap_servers=kafka_servers
+    cuckoo_url=cuckoo_url, kafka_bootstrap_servers=kafka_servers
 )
 
 
@@ -56,6 +55,7 @@ class PhagocytoseRequest(BaseModel):
         file_path (str): Path to malware sample (temporary file)
         malware_family (str): Malware family name (if known)
     """
+
     file_path: str
     malware_family: str = "unknown"
 
@@ -66,6 +66,7 @@ class PresentAntigenRequest(BaseModel):
     Attributes:
         artifact (Dict[str, Any]): Processed artifact to present
     """
+
     artifact: Dict[str, Any]
 
 
@@ -106,7 +107,7 @@ async def health_check() -> Dict[str, Any]:
         "kafka_enabled": status["kafka_enabled"],
         "artifacts_count": status["processed_artifacts_count"],
         "signatures_count": status["generated_signatures_count"],
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -122,8 +123,7 @@ async def get_status() -> Dict[str, Any]:
 
 @app.post("/phagocytose")
 async def phagocytose_sample(
-    file: UploadFile = File(...),
-    malware_family: str = "unknown"
+    file: UploadFile = File(...), malware_family: str = "unknown"
 ) -> Dict[str, Any]:
     """Phagocytose (engulf and analyze) malware sample.
 
@@ -147,7 +147,9 @@ async def phagocytose_sample(
         logger.info(f"Received phagocytose request: {file.filename}")
 
         # Save uploaded file to temporary location
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as tmp_file:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=f"_{file.filename}"
+        ) as tmp_file:
             content = await file.read()
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
@@ -156,8 +158,7 @@ async def phagocytose_sample(
 
         # Phagocytose sample
         artifact = await macrophage_core.phagocytose(
-            sample_path=tmp_file_path,
-            malware_family=malware_family
+            sample_path=tmp_file_path, malware_family=malware_family
         )
 
         # Cleanup temporary file
@@ -170,7 +171,7 @@ async def phagocytose_sample(
             "status": "success",
             "message": "Phagocytosis complete",
             "artifact": artifact,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -192,14 +193,16 @@ async def present_antigen(request: PresentAntigenRequest) -> Dict[str, Any]:
         HTTPException: If presentation fails
     """
     try:
-        logger.info(f"Presenting antigen: {request.artifact.get('sample_hash', 'unknown')[:16]}...")
+        logger.info(
+            f"Presenting antigen: {request.artifact.get('sample_hash', 'unknown')[:16]}..."
+        )
 
         result = await macrophage_core.present_antigen(request.artifact)
 
         return {
             "status": "success",
             "presentation_result": result,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -221,7 +224,7 @@ async def trigger_cleanup() -> Dict[str, Any]:
     return {
         "status": "success",
         "cleanup_summary": summary,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -242,7 +245,7 @@ async def get_artifacts(limit: int = 10) -> Dict[str, Any]:
         "total_artifacts": len(macrophage_core.processed_artifacts),
         "returned_count": len(artifacts),
         "artifacts": artifacts,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -263,7 +266,7 @@ async def get_signatures(limit: int = 10) -> Dict[str, Any]:
         "total_signatures": len(macrophage_core.generated_signatures),
         "returned_count": len(signatures),
         "signatures": signatures,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -283,9 +286,9 @@ async def get_metrics() -> Dict[str, Any]:
             "total_signatures_generated": status["generated_signatures_count"],
             "cuckoo_sandbox_enabled": status["cuckoo_enabled"],
             "kafka_messaging_enabled": status["kafka_enabled"],
-            "last_cleanup": status["last_cleanup"]
+            "last_cleanup": status["last_cleanup"],
         },
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 

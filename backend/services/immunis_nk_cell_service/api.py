@@ -10,12 +10,13 @@ Endpoints:
 - POST /process - Main processing endpoint
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, Optional
-import uvicorn
 from datetime import datetime
 import logging
+from typing import Any, Dict, Optional
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 # Optional import of core (may not exist yet)
 try:
     from nk_cell_core import NkCellCore
+
     CORE_AVAILABLE = True
 except ImportError:
     logger.warning("NkCellCore not available - running in limited mode")
@@ -33,7 +35,7 @@ except ImportError:
 app = FastAPI(
     title="Immunis NK Cell - Rapid Cytotoxicity Service",
     version="1.0.0",
-    description="Bio-inspired nk cell - rapid cytotoxicity service"
+    description="Bio-inspired nk cell - rapid cytotoxicity service",
 )
 
 # Initialize core if available
@@ -55,6 +57,7 @@ class ProcessRequest(BaseModel):
         data (Dict[str, Any]): Input data to process
         context (Optional[Dict[str, Any]]): Optional context
     """
+
     data: Dict[str, Any]
     context: Optional[Dict[str, Any]] = None
 
@@ -84,7 +87,7 @@ async def health_check() -> Dict[str, Any]:
         "status": "healthy",
         "service": "immunis_nk_cell",
         "core_available": CORE_AVAILABLE and core is not None,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -95,7 +98,7 @@ async def get_status() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Detailed status information
     """
-    if core and hasattr(core, 'get_status'):
+    if core and hasattr(core, "get_status"):
         try:
             return await core.get_status()
         except Exception as e:
@@ -105,7 +108,7 @@ async def get_status() -> Dict[str, Any]:
         "status": "operational",
         "service": "immunis_nk_cell",
         "mode": "limited" if not core else "full",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -124,15 +127,14 @@ async def process_data(request: ProcessRequest) -> Dict[str, Any]:
     """
     if not core:
         raise HTTPException(
-            status_code=503,
-            detail="Core not available - service in limited mode"
+            status_code=503, detail="Core not available - service in limited mode"
         )
 
     try:
         # Call core processing method if available
-        if hasattr(core, 'process'):
+        if hasattr(core, "process"):
             result = await core.process(request.data, request.context)
-        elif hasattr(core, 'analyze'):
+        elif hasattr(core, "analyze"):
             result = await core.analyze(request.data, request.context)
         else:
             result = {"processed": True, "data": request.data}
@@ -141,7 +143,7 @@ async def process_data(request: ProcessRequest) -> Dict[str, Any]:
             "status": "success",
             "service": "immunis_nk_cell",
             "results": result,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:

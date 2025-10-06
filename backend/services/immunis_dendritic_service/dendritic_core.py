@@ -24,17 +24,18 @@ NO MOCKS - Production-ready implementation.
 """
 
 import asyncio
+from datetime import datetime, timedelta
+import hashlib
 import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-import hashlib
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 # Kafka for antigen consumption
 try:
     from kafka import KafkaConsumer
+
     KAFKA_AVAILABLE = True
 except ImportError:
     KAFKA_AVAILABLE = False
@@ -43,7 +44,8 @@ except ImportError:
 # Qdrant for event correlation
 try:
     from qdrant_client import QdrantClient
-    from qdrant_client.models import Distance, VectorParams, PointStruct
+    from qdrant_client.models import Distance, PointStruct, VectorParams
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
@@ -66,12 +68,12 @@ class AntigenConsumer:
         if KAFKA_AVAILABLE:
             try:
                 self.consumer = KafkaConsumer(
-                    'antigen.presentation',
+                    "antigen.presentation",
                     bootstrap_servers=kafka_bootstrap_servers,
-                    value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-                    auto_offset_reset='latest',
+                    value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+                    auto_offset_reset="latest",
                     enable_auto_commit=True,
-                    group_id='dendritic_cells'
+                    group_id="dendritic_cells",
                 )
                 logger.info("Kafka antigen consumer initialized")
             except Exception as e:
@@ -99,7 +101,9 @@ class AntigenConsumer:
                 for topic_partition, records in messages.items():
                     for record in records:
                         antigen = record.value
-                        logger.info(f"Received antigen: {antigen.get('antigen_id', 'unknown')[:16]}")
+                        logger.info(
+                            f"Received antigen: {antigen.get('antigen_id', 'unknown')[:16]}"
+                        )
 
                         try:
                             await callback(antigen)
@@ -160,9 +164,8 @@ class EventCorrelationEngine:
                 self.qdrant_client.create_collection(
                     collection_name=self.collection_name,
                     vectors_config=VectorParams(
-                        size=self.vector_size,
-                        distance=Distance.COSINE
-                    )
+                        size=self.vector_size, distance=Distance.COSINE
+                    ),
                 )
                 logger.info(f"Created Qdrant collection: {self.collection_name}")
 
@@ -184,43 +187,49 @@ class EventCorrelationEngine:
         features = []
 
         # Severity (normalized 0-1)
-        severity = threat.get('severity', 0.5)
+        severity = threat.get("severity", 0.5)
         features.extend([severity] * 10)
 
         # Malware family hash (pseudo-embedding)
-        family = threat.get('malware_family', 'unknown')
+        family = threat.get("malware_family", "unknown")
         family_hash = hashlib.md5(family.encode()).hexdigest()
-        family_vector = [int(family_hash[i:i+2], 16) / 255.0 for i in range(0, 32, 2)]
+        family_vector = [
+            int(family_hash[i : i + 2], 16) / 255.0 for i in range(0, 32, 2)
+        ]
         features.extend(family_vector[:16])
 
         # IOC counts (normalized)
-        iocs = threat.get('iocs', {})
+        iocs = threat.get("iocs", {})
         ioc_counts = [
-            len(iocs.get('ips', [])) / 100.0,
-            len(iocs.get('domains', [])) / 100.0,
-            len(iocs.get('urls', [])) / 100.0,
-            len(iocs.get('file_hashes', [])) / 100.0,
-            len(iocs.get('mutexes', [])) / 100.0,
-            len(iocs.get('registry_keys', [])) / 100.0,
+            len(iocs.get("ips", [])) / 100.0,
+            len(iocs.get("domains", [])) / 100.0,
+            len(iocs.get("urls", [])) / 100.0,
+            len(iocs.get("file_hashes", [])) / 100.0,
+            len(iocs.get("mutexes", [])) / 100.0,
+            len(iocs.get("registry_keys", [])) / 100.0,
         ]
         features.extend(ioc_counts)
 
         # Temporal features (hour of day, day of week)
-        timestamp = datetime.fromisoformat(threat.get('timestamp', datetime.now().isoformat()))
+        timestamp = datetime.fromisoformat(
+            threat.get("timestamp", datetime.now().isoformat())
+        )
         hour_vector = [1.0 if i == timestamp.hour else 0.0 for i in range(24)]
         features.extend(hour_vector)
 
         # Source features
-        source = threat.get('source', 'unknown')
+        source = threat.get("source", "unknown")
         source_hash = hashlib.md5(source.encode()).hexdigest()
-        source_vector = [int(source_hash[i:i+2], 16) / 255.0 for i in range(0, 32, 2)]
+        source_vector = [
+            int(source_hash[i : i + 2], 16) / 255.0 for i in range(0, 32, 2)
+        ]
         features.extend(source_vector[:16])
 
         # Pad or truncate to 128 dimensions
         if len(features) < self.vector_size:
             features.extend([0.0] * (self.vector_size - len(features)))
         else:
-            features = features[:self.vector_size]
+            features = features[: self.vector_size]
 
         return features
 
@@ -243,7 +252,9 @@ class EventCorrelationEngine:
 
             # Generate unique ID
             point_id = hashlib.sha256(
-                (threat.get('antigen_id', '') + str(datetime.now().timestamp())).encode()
+                (
+                    threat.get("antigen_id", "") + str(datetime.now().timestamp())
+                ).encode()
             ).hexdigest()[:16]
 
             # Create point
@@ -251,21 +262,22 @@ class EventCorrelationEngine:
                 id=int(point_id, 16) % (2**63 - 1),  # Convert to int for Qdrant
                 vector=vector,
                 payload={
-                    'threat_id': threat.get('antigen_id'),
-                    'timestamp': threat.get('timestamp'),
-                    'malware_family': threat.get('malware_family'),
-                    'severity': threat.get('severity'),
-                    'source': threat.get('source')
-                }
+                    "threat_id": threat.get("antigen_id"),
+                    "timestamp": threat.get("timestamp"),
+                    "malware_family": threat.get("malware_family"),
+                    "severity": threat.get("severity"),
+                    "source": threat.get("source"),
+                },
             )
 
             # Upsert to Qdrant
             self.qdrant_client.upsert(
-                collection_name=self.collection_name,
-                points=[point]
+                collection_name=self.collection_name, points=[point]
             )
 
-            logger.info(f"Stored threat event: {threat.get('antigen_id', 'unknown')[:16]}")
+            logger.info(
+                f"Stored threat event: {threat.get('antigen_id', 'unknown')[:16]}"
+            )
             return True
 
         except Exception as e:
@@ -273,10 +285,7 @@ class EventCorrelationEngine:
             return False
 
     async def correlate_events(
-        self,
-        threat: Dict[str, Any],
-        time_window_hours: int = 24,
-        top_k: int = 10
+        self, threat: Dict[str, Any], time_window_hours: int = 24, top_k: int = 10
     ) -> List[Dict[str, Any]]:
         """Correlate threat with historical events.
 
@@ -300,26 +309,32 @@ class EventCorrelationEngine:
             search_result = self.qdrant_client.search(
                 collection_name=self.collection_name,
                 query_vector=query_vector,
-                limit=top_k
+                limit=top_k,
             )
 
             correlated = []
             for hit in search_result:
                 # Filter by time window
-                event_time = datetime.fromisoformat(hit.payload['timestamp'])
+                event_time = datetime.fromisoformat(hit.payload["timestamp"])
                 current_time = datetime.now()
 
-                if (current_time - event_time).total_seconds() / 3600 <= time_window_hours:
-                    correlated.append({
-                        'threat_id': hit.payload['threat_id'],
-                        'timestamp': hit.payload['timestamp'],
-                        'malware_family': hit.payload['malware_family'],
-                        'severity': hit.payload['severity'],
-                        'similarity_score': hit.score,
-                        'source': hit.payload['source']
-                    })
+                if (
+                    current_time - event_time
+                ).total_seconds() / 3600 <= time_window_hours:
+                    correlated.append(
+                        {
+                            "threat_id": hit.payload["threat_id"],
+                            "timestamp": hit.payload["timestamp"],
+                            "malware_family": hit.payload["malware_family"],
+                            "severity": hit.payload["severity"],
+                            "similarity_score": hit.score,
+                            "source": hit.payload["source"],
+                        }
+                    )
 
-            logger.info(f"Found {len(correlated)} correlated events for threat {threat.get('antigen_id', '')[:16]}")
+            logger.info(
+                f"Found {len(correlated)} correlated events for threat {threat.get('antigen_id', '')[:16]}"
+            )
             return correlated
 
         except Exception as e:
@@ -344,7 +359,7 @@ class DendriticCore:
         qdrant_port: int = 6333,
         b_cell_endpoint: str = "http://immunis-bcell:8015",
         t_helper_endpoint: str = "http://immunis-helper-t:8016",
-        t_cytotoxic_endpoint: str = "http://immunis-cytotoxic-t:8017"
+        t_cytotoxic_endpoint: str = "http://immunis-cytotoxic-t:8017",
     ):
         """Initialize Dendritic Core.
 
@@ -382,14 +397,14 @@ class DendriticCore:
 
         # 1. Enrich with context
         enriched = {
-            'antigen_id': antigen.get('antigen_id'),
-            'timestamp': antigen.get('timestamp'),
-            'malware_family': antigen.get('malware_family'),
-            'severity': antigen.get('severity'),
-            'iocs': antigen.get('iocs', {}),
-            'yara_signature': antigen.get('yara_signature'),
-            'source': antigen.get('source', 'macrophage_service'),
-            'processing_timestamp': datetime.now().isoformat()
+            "antigen_id": antigen.get("antigen_id"),
+            "timestamp": antigen.get("timestamp"),
+            "malware_family": antigen.get("malware_family"),
+            "severity": antigen.get("severity"),
+            "iocs": antigen.get("iocs", {}),
+            "yara_signature": antigen.get("yara_signature"),
+            "source": antigen.get("source", "macrophage_service"),
+            "processing_timestamp": datetime.now().isoformat(),
         }
 
         # 2. Store in Qdrant for correlation
@@ -397,17 +412,15 @@ class DendriticCore:
 
         # 3. Correlate with historical events
         correlated_events = await self.correlation_engine.correlate_events(
-            enriched,
-            time_window_hours=24,
-            top_k=10
+            enriched, time_window_hours=24, top_k=10
         )
 
-        enriched['correlated_events'] = correlated_events
-        enriched['correlation_count'] = len(correlated_events)
+        enriched["correlated_events"] = correlated_events
+        enriched["correlation_count"] = len(correlated_events)
 
         # 4. Determine if activation required
         activation_required = self._should_activate(enriched)
-        enriched['activation_required'] = activation_required
+        enriched["activation_required"] = activation_required
 
         self.processed_antigens.append(enriched)
         self.last_processing_time = datetime.now()
@@ -433,8 +446,8 @@ class DendriticCore:
         # 2. Multiple correlated events (≥3)
         # 3. Novel malware family (no correlations)
 
-        severity = threat.get('severity', 0.0)
-        correlation_count = threat.get('correlation_count', 0)
+        severity = threat.get("severity", 0.0)
+        correlation_count = threat.get("correlation_count", 0)
 
         if severity >= 0.7:
             return True
@@ -463,38 +476,38 @@ class DendriticCore:
             import httpx
 
             presentation_payload = {
-                'antigen_id': threat.get('antigen_id'),
-                'malware_family': threat.get('malware_family'),
-                'iocs': threat.get('iocs'),
-                'yara_signature': threat.get('yara_signature'),
-                'severity': threat.get('severity'),
-                'correlated_events': threat.get('correlated_events', [])
+                "antigen_id": threat.get("antigen_id"),
+                "malware_family": threat.get("malware_family"),
+                "iocs": threat.get("iocs"),
+                "yara_signature": threat.get("yara_signature"),
+                "severity": threat.get("severity"),
+                "correlated_events": threat.get("correlated_events", []),
             }
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     f"{self.b_cell_endpoint}/bcell/activate",
                     json=presentation_payload,
-                    timeout=10.0
+                    timeout=10.0,
                 )
 
                 if response.status_code == 200:
                     result = response.json()
                     logger.info(f"B-Cell activated: {result}")
-                    return {'status': 'presented', 'b_cell_response': result}
+                    return {"status": "presented", "b_cell_response": result}
                 else:
                     logger.error(f"B-Cell presentation failed: {response.status_code}")
-                    return {'status': 'failed', 'error': f'HTTP {response.status_code}'}
+                    return {"status": "failed", "error": f"HTTP {response.status_code}"}
 
         except Exception as e:
             logger.error(f"B-Cell presentation error: {e}")
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     async def present_to_t_cells(
         self,
         threat: Dict[str, Any],
         activate_helper: bool = True,
-        activate_cytotoxic: bool = False
+        activate_cytotoxic: bool = False,
     ) -> Dict[str, Any]:
         """Present threat to T-Cells for orchestration and response.
 
@@ -506,7 +519,9 @@ class DendriticCore:
         Returns:
             Presentation results
         """
-        logger.info(f"Presenting threat to T-Cells: {threat.get('antigen_id', '')[:16]}")
+        logger.info(
+            f"Presenting threat to T-Cells: {threat.get('antigen_id', '')[:16]}"
+        )
 
         results = {}
 
@@ -514,11 +529,11 @@ class DendriticCore:
             import httpx
 
             presentation_payload = {
-                'antigen_id': threat.get('antigen_id'),
-                'malware_family': threat.get('malware_family'),
-                'severity': threat.get('severity'),
-                'iocs': threat.get('iocs'),
-                'correlation_count': threat.get('correlation_count', 0)
+                "antigen_id": threat.get("antigen_id"),
+                "malware_family": threat.get("malware_family"),
+                "severity": threat.get("severity"),
+                "iocs": threat.get("iocs"),
+                "correlation_count": threat.get("correlation_count", 0),
             }
 
             async with httpx.AsyncClient() as client:
@@ -528,14 +543,20 @@ class DendriticCore:
                         response = await client.post(
                             f"{self.t_helper_endpoint}/helper-t/activate",
                             json=presentation_payload,
-                            timeout=10.0
+                            timeout=10.0,
                         )
                         if response.status_code == 200:
-                            results['helper_t'] = {'status': 'activated', 'response': response.json()}
+                            results["helper_t"] = {
+                                "status": "activated",
+                                "response": response.json(),
+                            }
                         else:
-                            results['helper_t'] = {'status': 'failed', 'error': f'HTTP {response.status_code}'}
+                            results["helper_t"] = {
+                                "status": "failed",
+                                "error": f"HTTP {response.status_code}",
+                            }
                     except Exception as e:
-                        results['helper_t'] = {'status': 'error', 'error': str(e)}
+                        results["helper_t"] = {"status": "error", "error": str(e)}
 
                 # Cytotoxic T-Cell (active defense)
                 if activate_cytotoxic:
@@ -543,23 +564,31 @@ class DendriticCore:
                         response = await client.post(
                             f"{self.t_cytotoxic_endpoint}/cytotoxic-t/activate",
                             json=presentation_payload,
-                            timeout=10.0
+                            timeout=10.0,
                         )
                         if response.status_code == 200:
-                            results['cytotoxic_t'] = {'status': 'activated', 'response': response.json()}
+                            results["cytotoxic_t"] = {
+                                "status": "activated",
+                                "response": response.json(),
+                            }
                         else:
-                            results['cytotoxic_t'] = {'status': 'failed', 'error': f'HTTP {response.status_code}'}
+                            results["cytotoxic_t"] = {
+                                "status": "failed",
+                                "error": f"HTTP {response.status_code}",
+                            }
                     except Exception as e:
-                        results['cytotoxic_t'] = {'status': 'error', 'error': str(e)}
+                        results["cytotoxic_t"] = {"status": "error", "error": str(e)}
 
             logger.info(f"T-Cell presentation results: {results}")
             return results
 
         except Exception as e:
             logger.error(f"T-Cell presentation error: {e}")
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
-    async def activate_adaptive_immunity(self, threat: Dict[str, Any]) -> Dict[str, Any]:
+    async def activate_adaptive_immunity(
+        self, threat: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Activate B-cells and T-cells for adaptive immune response.
 
         Args:
@@ -568,21 +597,23 @@ class DendriticCore:
         Returns:
             Activation summary
         """
-        logger.info(f"Activating adaptive immunity for threat: {threat.get('antigen_id', '')[:16]}")
+        logger.info(
+            f"Activating adaptive immunity for threat: {threat.get('antigen_id', '')[:16]}"
+        )
 
         activation_result = {
-            'timestamp': datetime.now().isoformat(),
-            'antigen_id': threat.get('antigen_id'),
-            'severity': threat.get('severity'),
-            'activations': {}
+            "timestamp": datetime.now().isoformat(),
+            "antigen_id": threat.get("antigen_id"),
+            "severity": threat.get("severity"),
+            "activations": {},
         }
 
         # Always activate B-Cell for signature generation
         b_cell_result = await self.present_to_b_cell(threat)
-        activation_result['activations']['b_cell'] = b_cell_result
+        activation_result["activations"]["b_cell"] = b_cell_result
 
         # Activate T-Cells based on severity
-        severity = threat.get('severity', 0.0)
+        severity = threat.get("severity", 0.0)
 
         # Helper T-Cell for orchestration (always for adaptive immunity)
         activate_helper = True
@@ -593,9 +624,9 @@ class DendriticCore:
         t_cell_result = await self.present_to_t_cells(
             threat,
             activate_helper=activate_helper,
-            activate_cytotoxic=activate_cytotoxic
+            activate_cytotoxic=activate_cytotoxic,
         )
-        activation_result['activations']['t_cells'] = t_cell_result
+        activation_result["activations"]["t_cells"] = t_cell_result
 
         self.activations.append(activation_result)
 
@@ -604,13 +635,14 @@ class DendriticCore:
 
     async def start_antigen_consumption(self):
         """Start consuming antigens from Kafka."""
+
         async def antigen_callback(antigen):
             """Process each antigen."""
             # Process antigen
             processed = await self.process_antigen(antigen)
 
             # Activate adaptive immunity if required
-            if processed.get('activation_required'):
+            if processed.get("activation_required"):
                 await self.activate_adaptive_immunity(processed)
 
         await self.antigen_consumer.consume_antigens(antigen_callback)
@@ -626,11 +658,15 @@ class DendriticCore:
             Service status dictionary
         """
         return {
-            'status': 'operational',
-            'processed_antigens_count': len(self.processed_antigens),
-            'activations_count': len(self.activations),
-            'last_processing': self.last_processing_time.isoformat() if self.last_processing_time else 'N/A',
-            'kafka_enabled': self.antigen_consumer.consumer is not None,
-            'qdrant_enabled': self.correlation_engine.qdrant_client is not None,
-            'antigen_consumer_running': self.antigen_consumer.running
+            "status": "operational",
+            "processed_antigens_count": len(self.processed_antigens),
+            "activations_count": len(self.activations),
+            "last_processing": (
+                self.last_processing_time.isoformat()
+                if self.last_processing_time
+                else "N/A"
+            ),
+            "kafka_enabled": self.antigen_consumer.consumer is not None,
+            "qdrant_enabled": self.correlation_engine.qdrant_client is not None,
+            "antigen_consumer_running": self.antigen_consumer.running,
         }
