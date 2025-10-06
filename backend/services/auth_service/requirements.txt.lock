@@ -6,11 +6,12 @@
 #
 annotated-types==0.7.0
     # via pydantic
-anyio==3.7.1
+anyio==4.11.0
     # via
-    #   fastapi
-    #   httpcore
+    #   -r requirements.txt
+    #   httpx
     #   starlette
+    #   watchfiles
 bcrypt==5.0.0
     # via -r requirements.txt
 certifi==2025.10.5
@@ -21,21 +22,21 @@ cffi==2.0.0
     # via cryptography
 click==8.3.0
     # via uvicorn
-cryptography==41.0.7
-    # via
-    #   -r requirements.txt
-    #   python-jose
+cryptography==46.0.2
+    # via python-jose
 ecdsa==0.19.1
     # via python-jose
-fastapi==0.104.1
+fastapi==0.118.0
     # via -r requirements.txt
 h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
-httpcore==0.18.0
+httpcore==1.0.8
     # via httpx
-httpx==0.25.0
+httptools==0.6.4
+    # via uvicorn
+httpx==0.28.1
     # via -r requirements.txt
 idna==3.10
     # via
@@ -47,18 +48,22 @@ pyasn1==0.6.1
     #   rsa
 pycparser==2.23
     # via cffi
-pydantic==2.5.0
+pydantic==2.11.10
     # via
     #   -r requirements.txt
     #   fastapi
-pydantic-core==2.14.1
+pydantic-core==2.33.2
     # via pydantic
 pyjwt==2.8.0
     # via -r requirements.txt
-python-jose[cryptography]==3.3.0
+python-dotenv==1.1.1
+    # via uvicorn
+python-jose[cryptography]==3.5.0
     # via -r requirements.txt
-python-multipart==0.0.6
+python-multipart==0.0.20
     # via -r requirements.txt
+pyyaml==6.0.3
+    # via uvicorn
 redis==5.0.1
     # via -r requirements.txt
 rsa==4.9.1
@@ -66,16 +71,24 @@ rsa==4.9.1
 six==1.17.0
     # via ecdsa
 sniffio==1.3.1
-    # via
-    #   anyio
-    #   httpcore
-    #   httpx
-starlette==0.27.0
+    # via anyio
+starlette==0.48.0
     # via fastapi
 typing-extensions==4.15.0
     # via
+    #   anyio
     #   fastapi
     #   pydantic
     #   pydantic-core
-uvicorn==0.24.0
+    #   starlette
+    #   typing-inspection
+typing-inspection==0.4.2
+    # via pydantic
+uvicorn[standard]==0.37.0
     # via -r requirements.txt
+uvloop==0.21.0
+    # via uvicorn
+watchfiles==1.1.0
+    # via uvicorn
+websockets==15.0.1
+    # via uvicorn

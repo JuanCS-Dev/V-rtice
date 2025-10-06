@@ -10,18 +10,19 @@ secure access to all Maximus AI services. This service is critical for maintaini
 the security and integrity of the entire Maximus AI ecosystem.
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
-from typing import Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime, timedelta
-import jwt # PyJWT
-import bcrypt # bcrypt
+from typing import Any, Dict, List, Optional
+
+import bcrypt  # bcrypt
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import jwt  # PyJWT
+from pydantic import BaseModel
+import uvicorn
 
 # Configuration for JWT
-SECRET_KEY = "your-super-secret-key" # In production, use a strong, environment-variable-based key
+SECRET_KEY = "your-super-secret-key"  # In production, use a strong, environment-variable-based key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -33,14 +34,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 users_db = {
     "maximus_admin": {
         "username": "maximus_admin",
-        "hashed_password": bcrypt.hashpw("adminpass".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
-        "roles": ["admin", "user"]
+        "hashed_password": bcrypt.hashpw(
+            "adminpass".encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8"),
+        "roles": ["admin", "user"],
     },
     "maximus_user": {
         "username": "maximus_user",
-        "hashed_password": bcrypt.hashpw("userpass".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
-        "roles": ["user"]
-    }
+        "hashed_password": bcrypt.hashpw(
+            "userpass".encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8"),
+        "roles": ["user"],
+    },
 }
 
 
@@ -51,6 +56,7 @@ class Token(BaseModel):
         access_token (str): The JWT access token.
         token_type (str): The type of token (e.g., 'bearer').
     """
+
     access_token: str
     token_type: str
 
@@ -62,6 +68,7 @@ class User(BaseModel):
         username (str): The username of the user.
         roles (List[str]): List of roles assigned to the user.
     """
+
     username: str
     roles: List[str]
 
@@ -72,10 +79,13 @@ class UserInDB(User):
     Attributes:
         hashed_password (str): The hashed password of the user.
     """
+
     hashed_password: str
 
 
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None):
+def create_access_token(
+    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
+):
     """Creates a JWT access token.
 
     Args:
@@ -123,7 +133,9 @@ async def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
     user = await get_user(username)
     if not user:
         return None
-    if not bcrypt.checkpw(password.encode('utf-8'), user.hashed_password.encode('utf-8')):
+    if not bcrypt.checkpw(
+        password.encode("utf-8"), user.hashed_password.encode("utf-8")
+    ):
         return None
     return user
 
@@ -158,7 +170,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise credentials_exception
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+async def get_current_active_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
     """Retrieves the current active authenticated user.
 
     Args:
@@ -221,7 +235,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username, "roles": user.roles},
-        expires_delta=access_token_expires
+        expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -253,7 +267,9 @@ async def read_admin_resource(current_user: User = Depends(get_current_active_us
         HTTPException: If the user does not have the 'admin' role.
     """
     if "admin" not in current_user.roles:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
+        )
     return {"message": "Welcome, admin! This is a highly sensitive resource."}
 
 
