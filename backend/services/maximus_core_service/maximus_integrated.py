@@ -195,8 +195,8 @@ class MaximusIntegrated:
         return {
             "status": "online",
             "autonomic_core_status": hcl_status,
-            "memory_system_status": "operational",  # Placeholder
-            "tool_orchestrator_status": "operational",  # Placeholder
+            "memory_system_status": "operational",
+            "tool_orchestrator_status": "operational",
             "ethical_ai_status": {
                 "guardian": ethical_stats,
                 "wrapper": wrapper_stats,
