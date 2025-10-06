@@ -1,0 +1,15 @@
+# Fairness & Bias Mitigation Module - Dependencies
+# Version: 1.0.0
+
+# Core numerical computing
+numpy>=1.21.0,<2.0.0
+
+# Machine learning utilities
+scikit-learn>=1.0.0,<2.0.0
+
+# Statistical tests
+scipy>=1.7.0,<2.0.0
+
+# Testing (optional)
+# pytest>=7.0.0
+# pytest-cov>=3.0.0
