@@ -12,6 +12,7 @@ sources, ensuring adaptability across different environments.
 """
 
 import os
+
 from pydantic import BaseSettings
 
 
@@ -20,6 +21,7 @@ class Settings(BaseSettings):
 
     Settings are loaded from environment variables or a .env file.
     """
+
     app_name: str = "Maximus Network Reconnaissance Service"
     nmap_path: str = os.getenv("NMAP_PATH", "/usr/bin/nmap")
     masscan_path: str = os.getenv("MASSCAN_PATH", "/usr/bin/masscan")
@@ -28,8 +30,9 @@ class Settings(BaseSettings):
 
     class Config:
         """Configuração para carregar variáveis de ambiente de um arquivo .env."""
+
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
 
 def get_settings() -> Settings:

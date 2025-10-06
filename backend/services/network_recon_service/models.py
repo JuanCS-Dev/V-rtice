@@ -11,14 +11,16 @@ API request and response modeling. This is crucial for maintaining data integrit
 and enabling efficient data exchange within the network reconnaissance ecosystem.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class ReconStatus(str, Enum):
     """Enumeration for the status of a reconnaissance task."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -38,6 +40,7 @@ class ReconTask(BaseModel):
         end_time (Optional[str]): ISO formatted timestamp of when the task ended.
         status (ReconStatus): The current status of the task.
     """
+
     id: str
     target: str
     scan_type: str
@@ -56,6 +59,7 @@ class ReconResult(BaseModel):
         output (Dict[str, Any]): The raw output or structured data from the reconnaissance tool.
         timestamp (str): ISO formatted timestamp of when the result was recorded.
     """
+
     task_id: str
     status: str
     output: Dict[str, Any]

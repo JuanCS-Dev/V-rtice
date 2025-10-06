@@ -15,17 +15,17 @@ updates on the execution of complex, multi-service operations within the Maximus
 AI ecosystem.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
 from c2_engine import C2Engine
+from fastapi import FastAPI, HTTPException
 from metrics import MetricsCollector
-from models import Command, CommandStatus, CommandResult
+from models import Command, CommandResult, CommandStatus
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus C2 Orchestration Service", version="1.0.0")
 
@@ -42,6 +42,7 @@ class ExecuteCommandRequest(BaseModel):
         parameters (Optional[Dict[str, Any]]): Parameters for the command.
         target_service (Optional[str]): The specific Maximus service to target.
     """
+
     command_name: str
     parameters: Optional[Dict[str, Any]] = None
     target_service: Optional[str] = None
@@ -81,7 +82,9 @@ async def execute_command_endpoint(request: ExecuteCommandRequest) -> Command:
     Returns:
         Command: The details of the initiated command, including its ID and status.
     """
-    print(f"[API] Received command: {request.command_name} (target: {request.target_service})")
+    print(
+        f"[API] Received command: {request.command_name} (target: {request.target_service})"
+    )
     command_id = str(uuid.uuid4())
     command = Command(
         id=command_id,
@@ -89,9 +92,9 @@ async def execute_command_endpoint(request: ExecuteCommandRequest) -> Command:
         parameters=request.parameters or {},
         target_service=request.target_service,
         status=CommandStatus.PENDING,
-        created_at=datetime.now().isoformat()
+        created_at=datetime.now().isoformat(),
     )
-    asyncio.create_task(c2_engine.execute_command(command)) # Run in background
+    asyncio.create_task(c2_engine.execute_command(command))  # Run in background
     return command
 
 
@@ -129,7 +132,9 @@ async def get_command_results(command_id: str) -> CommandResult:
     """
     results = c2_engine.get_command_results(command_id)
     if not results:
-        raise HTTPException(status_code=404, detail="Command results not found or not yet available.")
+        raise HTTPException(
+            status_code=404, detail="Command results not found or not yet available."
+        )
     return results
 
 

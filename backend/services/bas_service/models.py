@@ -11,10 +11,11 @@ documentation of data structures, and seamless integration with FastAPI for
 API request and response modeling.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class AttackTechnique(BaseModel):
@@ -26,6 +27,7 @@ class AttackTechnique(BaseModel):
         description (str): A description of the technique.
         parameters (List[str]): List of parameters required for the technique.
     """
+
     id: str
     name: str
     description: str
@@ -34,6 +36,7 @@ class AttackTechnique(BaseModel):
 
 class SimulationStatus(str, Enum):
     """Enumeration for the status of an attack simulation."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -55,6 +58,7 @@ class AttackResult(BaseModel):
         detection_details (Dict[str, Any]): Details about the detection, if any.
         response_details (Dict[str, Any]): Details about the response, if any.
     """
+
     id: str
     technique_id: str
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
@@ -79,6 +83,7 @@ class AttackSimulation(BaseModel):
         techniques_used (List[str]): List of technique IDs used in the simulation.
         results (List[AttackResult]): List of results for each executed technique.
     """
+
     id: str
     attack_scenario: str
     target_service: str

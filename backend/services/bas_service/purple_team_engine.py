@@ -13,13 +13,13 @@ Core Service.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
 from atomic_executor import AtomicExecutor
 from metrics import MetricsCollector
-from models import AttackSimulation, AttackResult, SimulationStatus, AttackTechnique
+from models import AttackResult, AttackSimulation, AttackTechnique, SimulationStatus
 
 
 class PurpleTeamEngine:
@@ -30,7 +30,9 @@ class PurpleTeamEngine:
     detection and response capabilities, and facilitates continuous improvement.
     """
 
-    def __init__(self, atomic_executor: AtomicExecutor, metrics_collector: MetricsCollector):
+    def __init__(
+        self, atomic_executor: AtomicExecutor, metrics_collector: MetricsCollector
+    ):
         """Initializes the PurpleTeamEngine.
 
         Args:
@@ -49,7 +51,9 @@ class PurpleTeamEngine:
             simulation (AttackSimulation): The attack simulation object to run.
         """
         self.active_simulations[simulation.id] = simulation
-        print(f"[PurpleTeamEngine] Running simulation {simulation.id}: {simulation.attack_scenario}")
+        print(
+            f"[PurpleTeamEngine] Running simulation {simulation.id}: {simulation.attack_scenario}"
+        )
         self.metrics_collector.record_metric("bas_simulations_started")
 
         simulation.status = SimulationStatus.RUNNING
@@ -57,13 +61,25 @@ class PurpleTeamEngine:
 
         # Simulate execution of attack techniques
         for technique_name in simulation.techniques_used:
-            technique = AttackTechnique(id=technique_name, name=technique_name, description=f"Simulated technique {technique_name}")
+            technique = AttackTechnique(
+                id=technique_name,
+                name=technique_name,
+                description=f"Simulated technique {technique_name}",
+            )
             print(f"[PurpleTeamEngine] Executing technique: {technique.name}")
             try:
-                attack_output = await self.atomic_executor.execute_technique(technique, simulation.target_service)
+                attack_output = await self.atomic_executor.execute_technique(
+                    technique, simulation.target_service
+                )
                 # Simulate blue team detection/response here
-                detection_status = "detected" if "malicious" in attack_output.get("status", "").lower() else "not_detected"
-                response_status = "responded" if detection_status == "detected" else "no_response"
+                detection_status = (
+                    "detected"
+                    if "malicious" in attack_output.get("status", "").lower()
+                    else "not_detected"
+                )
+                response_status = (
+                    "responded" if detection_status == "detected" else "no_response"
+                )
 
                 result = AttackResult(
                     id=str(uuid.uuid4()),
@@ -73,18 +89,30 @@ class PurpleTeamEngine:
                     detection_status=detection_status,
                     response_status=response_status,
                     attack_output=attack_output,
-                    detection_details={"simulated_detection": True} if detection_status == "detected" else {},
-                    response_details={"simulated_response": True} if response_status == "responded" else {}
+                    detection_details=(
+                        {"simulated_detection": True}
+                        if detection_status == "detected"
+                        else {}
+                    ),
+                    response_details=(
+                        {"simulated_response": True}
+                        if response_status == "responded"
+                        else {}
+                    ),
                 )
                 simulation.results.append(result)
-                self.metrics_collector.record_metric(f"technique_executed_{technique.id}")
+                self.metrics_collector.record_metric(
+                    f"technique_executed_{technique.id}"
+                )
                 if detection_status == "detected":
                     self.metrics_collector.record_metric("attack_detected")
                 else:
                     self.metrics_collector.record_metric("attack_not_detected")
 
             except Exception as e:
-                print(f"[PurpleTeamEngine] Error executing technique {technique.name}: {e}")
+                print(
+                    f"[PurpleTeamEngine] Error executing technique {technique.name}: {e}"
+                )
                 result = AttackResult(
                     id=str(uuid.uuid4()),
                     technique_id=technique.id,
@@ -94,12 +122,12 @@ class PurpleTeamEngine:
                     response_status="N/A",
                     attack_output={"error": str(e)},
                     detection_details={},
-                    response_details={}
+                    response_details={},
                 )
                 simulation.results.append(result)
                 self.metrics_collector.record_metric(f"technique_failed_{technique.id}")
 
-            await asyncio.sleep(1) # Simulate time between techniques
+            await asyncio.sleep(1)  # Simulate time between techniques
 
         simulation.status = SimulationStatus.COMPLETED
         simulation.end_time = datetime.now().isoformat()
@@ -123,4 +151,8 @@ class PurpleTeamEngine:
         Returns:
             List[AttackSimulation]: A list of active AttackSimulation objects.
         """
-        return [s for s in self.active_simulations.values() if s.status == SimulationStatus.RUNNING]
+        return [
+            s
+            for s in self.active_simulations.values()
+            if s.status == SimulationStatus.RUNNING
+        ]

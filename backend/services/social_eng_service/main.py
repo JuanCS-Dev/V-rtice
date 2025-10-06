@@ -12,15 +12,17 @@ countermeasures, and supporting proactive cybersecurity defense by understanding
 and mitigating the human element in security breaches.
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
-from . import schemas, models, database
+import database
 from database import get_db
+from fastapi import Depends, FastAPI, HTTPException, status
+import models
+import schemas
+from sqlalchemy.orm import Session
+import uvicorn
 
 app = FastAPI(title="Maximus Social Engineering Service", version="1.0.0")
 
@@ -47,11 +49,16 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Social Engineering Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Social Engineering Service is operational.",
+    }
 
 
 @app.post("/campaigns/", response_model=schemas.Campaign)
-async def create_campaign(campaign: schemas.CampaignCreate, db: Session = Depends(get_db)):
+async def create_campaign(
+    campaign: schemas.CampaignCreate, db: Session = Depends(get_db)
+):
     """Creates a new social engineering campaign.
 
     Args:
@@ -69,7 +76,9 @@ async def create_campaign(campaign: schemas.CampaignCreate, db: Session = Depend
 
 
 @app.get("/campaigns/", response_model=List[schemas.Campaign])
-async def read_campaigns(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def read_campaigns(
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+):
     """Retrieves a list of social engineering campaigns.
 
     Args:
@@ -98,7 +107,9 @@ async def read_campaign(campaign_id: int, db: Session = Depends(get_db)):
     Raises:
         HTTPException: If the campaign is not found.
     """
-    campaign = db.query(models.Campaign).filter(models.Campaign.id == campaign_id).first()
+    campaign = (
+        db.query(models.Campaign).filter(models.Campaign.id == campaign_id).first()
+    )
     if campaign is None:
         raise HTTPException(status_code=404, detail="Campaign not found")
     return campaign
@@ -142,7 +153,7 @@ async def read_targets(skip: int = 0, limit: int = 100, db: Session = Depends(ge
 async def simulate_interaction(
     campaign_id: int,
     interaction: schemas.InteractionCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Simulates an interaction with a target within a campaign.
 
@@ -157,11 +168,17 @@ async def simulate_interaction(
     Raises:
         HTTPException: If the campaign or target is not found.
     """
-    db_campaign = db.query(models.Campaign).filter(models.Campaign.id == campaign_id).first()
+    db_campaign = (
+        db.query(models.Campaign).filter(models.Campaign.id == campaign_id).first()
+    )
     if db_campaign is None:
         raise HTTPException(status_code=404, detail="Campaign not found")
-    
-    db_target = db.query(models.Target).filter(models.Target.id == interaction.target_id).first()
+
+    db_target = (
+        db.query(models.Target)
+        .filter(models.Target.id == interaction.target_id)
+        .first()
+    )
     if db_target is None:
         raise HTTPException(status_code=404, detail="Target not found")
 

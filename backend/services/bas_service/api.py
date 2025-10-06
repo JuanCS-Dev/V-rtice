@@ -14,19 +14,19 @@ validate the effectiveness of security controls and improve the overall resilien
 of the Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
 from atomic_executor import AtomicExecutor
 from attack_techniques import AttackTechniques
+from fastapi import FastAPI, HTTPException
 from metrics import MetricsCollector
+from models import AttackResult, AttackSimulation, SimulationStatus
 from purple_team_engine import PurpleTeamEngine
-from models import AttackSimulation, AttackResult, SimulationStatus
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus BAS Service", version="1.0.0")
 
@@ -46,6 +46,7 @@ class StartSimulationRequest(BaseModel):
         duration_seconds (int): The duration of the simulation in seconds.
         techniques (Optional[List[str]]): Specific attack techniques to use (e.g., 'T1059').
     """
+
     attack_scenario: str
     target_service: str
     duration_seconds: int = 60
@@ -86,7 +87,9 @@ async def start_simulation(request: StartSimulationRequest) -> AttackSimulation:
     Returns:
         AttackSimulation: The details of the started simulation.
     """
-    print(f"[API] Starting simulation: {request.attack_scenario} against {request.target_service}")
+    print(
+        f"[API] Starting simulation: {request.attack_scenario} against {request.target_service}"
+    )
     simulation_id = str(uuid.uuid4())
     simulation = AttackSimulation(
         id=simulation_id,
@@ -94,7 +97,7 @@ async def start_simulation(request: StartSimulationRequest) -> AttackSimulation:
         target_service=request.target_service,
         start_time=datetime.now().isoformat(),
         status=SimulationStatus.RUNNING,
-        techniques_used=request.techniques or []
+        techniques_used=request.techniques or [],
     )
     # In a real scenario, this would trigger the PurpleTeamEngine to start the simulation
     asyncio.create_task(purple_team_engine.run_simulation(simulation))

@@ -12,7 +12,7 @@ It is crucial for offensive security operations within the Maximus AI system.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class MetasploitWrapper:
@@ -27,7 +27,13 @@ class MetasploitWrapper:
         self.connected = False
         print("[MetasploitWrapper] Initialized Metasploit Wrapper (mock mode).")
 
-    async def connect(self, host: str = "127.0.0.1", port: int = 55553, username: str = "msf", password: str = "random") -> bool:
+    async def connect(
+        self,
+        host: str = "127.0.0.1",
+        port: int = 55553,
+        username: str = "msf",
+        password: str = "random",
+    ) -> bool:
         """Connects to the Metasploit RPC server (simulated).
 
         Args:
@@ -39,8 +45,10 @@ class MetasploitWrapper:
         Returns:
             bool: True if connection is successful, False otherwise.
         """
-        print(f"[MetasploitWrapper] Simulating connection to Metasploit RPC at {host}:{port}")
-        await asyncio.sleep(0.5) # Simulate connection time
+        print(
+            f"[MetasploitWrapper] Simulating connection to Metasploit RPC at {host}:{port}"
+        )
+        await asyncio.sleep(0.5)  # Simulate connection time
         self.connected = True
         return True
 
@@ -52,7 +60,7 @@ class MetasploitWrapper:
 
         Returns:
             Dict[str, Any]: A dictionary containing the exploit results.
-        
+
         Raises:
             RuntimeError: If not connected to Metasploit.
             ValueError: If required exploit parameters are missing.
@@ -66,18 +74,29 @@ class MetasploitWrapper:
         if not exploit_name or not target_ip:
             raise ValueError("Exploit name and target IP are required.")
 
-        print(f"[MetasploitWrapper] Simulating execution of exploit '{exploit_name}' against {target_ip}")
-        await asyncio.sleep(2) # Simulate exploit execution time
+        print(
+            f"[MetasploitWrapper] Simulating execution of exploit '{exploit_name}' against {target_ip}"
+        )
+        await asyncio.sleep(2)  # Simulate exploit execution time
 
         # Simulate exploit outcome
         if "eternalblue" in exploit_name.lower() and "windows" in target_ip:
-            result = {"status": "success", "session_id": "1", "message": "Session opened!"}
+            result = {
+                "status": "success",
+                "session_id": "1",
+                "message": "Session opened!",
+            }
         else:
-            result = {"status": "failed", "message": "Exploit failed or target not vulnerable."}
-        
+            result = {
+                "status": "failed",
+                "message": "Exploit failed or target not vulnerable.",
+            }
+
         return result
 
-    async def run_module(self, module_type: str, module_name: str, options: Dict[str, Any]) -> Dict[str, Any]:
+    async def run_module(
+        self, module_type: str, module_name: str, options: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Runs a generic Metasploit module (e.g., auxiliary, post) (simulated).
 
         Args:
@@ -90,9 +109,14 @@ class MetasploitWrapper:
         """
         if not self.connected:
             raise RuntimeError("Not connected to Metasploit RPC.")
-        print(f"[MetasploitWrapper] Simulating running {module_type}/{module_name} with options: {options}")
-        await asyncio.sleep(1) # Simulate module execution
-        return {"status": "completed", "output": f"Mock output from {module_name} module."}
+        print(
+            f"[MetasploitWrapper] Simulating running {module_type}/{module_name} with options: {options}"
+        )
+        await asyncio.sleep(1)  # Simulate module execution
+        return {
+            "status": "completed",
+            "output": f"Mock output from {module_name} module.",
+        }
 
     async def disconnect(self) -> bool:
         """Disconnects from the Metasploit RPC server (simulated).

@@ -15,17 +15,17 @@ its role in proactive cybersecurity defense, while ensuring compliance with
 ethical hacking guidelines and legal frameworks.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
-from orchestrator import OffensiveOrchestrator
+from fastapi import FastAPI, HTTPException
 from metrics import MetricsCollector
-from models import OffensiveCommand, CommandStatus, CommandResult
+from models import CommandResult, CommandStatus, OffensiveCommand
+from orchestrator import OffensiveOrchestrator
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus Offensive Gateway Service", version="1.0.0")
 
@@ -43,6 +43,7 @@ class ExecuteOffensiveCommandRequest(BaseModel):
         target (str): The target for the offensive operation.
         tool (str): The offensive tool to use (e.g., 'metasploit', 'cobalt_strike').
     """
+
     command_name: str
     parameters: Optional[Dict[str, Any]] = None
     target: str
@@ -74,7 +75,9 @@ async def health_check() -> Dict[str, str]:
 
 
 @app.post("/execute_offensive_command", response_model=OffensiveCommand)
-async def execute_offensive_command_endpoint(request: ExecuteOffensiveCommandRequest) -> OffensiveCommand:
+async def execute_offensive_command_endpoint(
+    request: ExecuteOffensiveCommandRequest,
+) -> OffensiveCommand:
     """Initiates an offensive command using a specified tool against a target.
 
     Args:
@@ -84,7 +87,9 @@ async def execute_offensive_command_endpoint(request: ExecuteOffensiveCommandReq
         OffensiveCommand: The details of the initiated offensive command.
     """
     command_id = str(uuid.uuid4())
-    print(f"[API] Initiating offensive command '{request.command_name}' (ID: {command_id}) against {request.target} using {request.tool}")
+    print(
+        f"[API] Initiating offensive command '{request.command_name}' (ID: {command_id}) against {request.target} using {request.tool}"
+    )
 
     command = OffensiveCommand(
         id=command_id,
@@ -93,9 +98,11 @@ async def execute_offensive_command_endpoint(request: ExecuteOffensiveCommandReq
         target=request.target,
         tool=request.tool,
         status=CommandStatus.PENDING,
-        created_at=datetime.now().isoformat()
+        created_at=datetime.now().isoformat(),
     )
-    asyncio.create_task(offensive_orchestrator.execute_offensive_command(command)) # Run in background
+    asyncio.create_task(
+        offensive_orchestrator.execute_offensive_command(command)
+    )  # Run in background
 
     return command
 
@@ -134,7 +141,10 @@ async def get_offensive_command_results(command_id: str) -> CommandResult:
     """
     results = offensive_orchestrator.get_command_results(command_id)
     if not results:
-        raise HTTPException(status_code=404, detail="Offensive command results not found or not yet available.")
+        raise HTTPException(
+            status_code=404,
+            detail="Offensive command results not found or not yet available.",
+        )
     return results
 
 

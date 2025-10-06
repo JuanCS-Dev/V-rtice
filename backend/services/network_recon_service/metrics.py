@@ -18,7 +18,7 @@ network discovery process.
 
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class MetricsCollector:
@@ -30,7 +30,9 @@ class MetricsCollector:
 
     def __init__(self):
         """Initializes the MetricsCollector."""
-        self.metrics: Dict[str, Any] = defaultdict(lambda: {"count": 0, "total_time": 0.0, "last_update": None})
+        self.metrics: Dict[str, Any] = defaultdict(
+            lambda: {"count": 0, "total_time": 0.0, "last_update": None}
+        )
         self.start_time = datetime.now()
 
     def record_metric(self, metric_name: str, value: Optional[float] = None):
@@ -56,7 +58,9 @@ class MetricsCollector:
         """
         metric_data = self.metrics[metric_name]
         if metric_data["count"] > 0 and metric_data["total_time"] > 0:
-            metric_data["average_time"] = metric_data["total_time"] / metric_data["count"]
+            metric_data["average_time"] = (
+                metric_data["total_time"] / metric_data["count"]
+            )
         else:
             metric_data["average_time"] = 0.0
         return dict(metric_data)

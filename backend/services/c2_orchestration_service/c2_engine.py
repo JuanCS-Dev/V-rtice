@@ -12,14 +12,14 @@ and effectively, providing a unified control plane for the entire Maximus AI sys
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
-from models import Command, CommandStatus, CommandResult
-from metrics import MetricsCollector
-from metasploit_wrapper import MetasploitWrapper
 from cobalt_strike_wrapper import CobaltStrikeWrapper
+from metasploit_wrapper import MetasploitWrapper
+from metrics import MetricsCollector
+from models import Command, CommandResult, CommandStatus
 
 
 class C2Engine:
@@ -61,9 +61,13 @@ class C2Engine:
             elif command.name == "deploy_agent":
                 result_data = await self._execute_deploy_agent(command.parameters)
             elif command.name == "metasploit_exploit":
-                result_data = await self.metasploit_wrapper.execute_exploit(command.parameters)
+                result_data = await self.metasploit_wrapper.execute_exploit(
+                    command.parameters
+                )
             elif command.name == "cobalt_strike_task":
-                result_data = await self.cobalt_strike_wrapper.execute_task(command.parameters)
+                result_data = await self.cobalt_strike_wrapper.execute_task(
+                    command.parameters
+                )
             else:
                 raise ValueError(f"Unsupported command: {command.name}")
 
@@ -74,7 +78,7 @@ class C2Engine:
                 command_id=command.id,
                 status="success",
                 output=result_data,
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
             )
             print(f"[C2Engine] Command {command.id} completed successfully.")
 
@@ -86,7 +90,7 @@ class C2Engine:
                 command_id=command.id,
                 status="failed",
                 output={"error": str(e)},
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
             )
             print(f"[C2Engine] Command {command.id} failed: {e}")
 
@@ -101,8 +105,13 @@ class C2Engine:
         """
         target_ip = parameters.get("target_ip", "127.0.0.1")
         print(f"[C2Engine] Simulating recon scan for {target_ip}")
-        await asyncio.sleep(2) # Simulate scan time
-        return {"scan_type": "recon", "target": target_ip, "open_ports": [80, 443, 22], "vulnerabilities": []}
+        await asyncio.sleep(2)  # Simulate scan time
+        return {
+            "scan_type": "recon",
+            "target": target_ip,
+            "open_ports": [80, 443, 22],
+            "vulnerabilities": [],
+        }
 
     async def _execute_deploy_agent(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Simulates deploying an agent.
@@ -115,8 +124,13 @@ class C2Engine:
         """
         target_host = parameters.get("target_host", "localhost")
         print(f"[C2Engine] Simulating agent deployment on {target_host}")
-        await asyncio.sleep(3) # Simulate deployment time
-        return {"action": "deploy_agent", "target": target_host, "status": "deployed", "agent_id": str(uuid.uuid4())}
+        await asyncio.sleep(3)  # Simulate deployment time
+        return {
+            "action": "deploy_agent",
+            "target": target_host,
+            "status": "deployed",
+            "agent_id": str(uuid.uuid4()),
+        }
 
     def get_command(self, command_id: str) -> Optional[Command]:
         """Retrieves a command by its ID.
@@ -146,4 +160,8 @@ class C2Engine:
         Returns:
             List[Command]: A list of active Command objects.
         """
-        return [cmd for cmd in self.active_commands.values() if cmd.status == CommandStatus.RUNNING]
+        return [
+            cmd
+            for cmd in self.active_commands.values()
+            if cmd.status == CommandStatus.RUNNING
+        ]

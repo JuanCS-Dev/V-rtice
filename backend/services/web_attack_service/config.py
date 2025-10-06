@@ -11,9 +11,10 @@ It supports loading configurations from environment variables, files, or other
 sources, ensuring adaptability across different environments.
 """
 
-from pydantic_settings import BaseSettings
-from typing import Optional
 from functools import lru_cache
+from typing import Optional
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -52,6 +53,7 @@ class Settings(BaseSettings):
 
     class Config:
         """Configuração para carregar variáveis de ambiente de um arquivo .env."""
+
         env_file = ".env"
         case_sensitive = True
 

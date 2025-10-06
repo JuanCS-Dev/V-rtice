@@ -15,14 +15,14 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
-from nmap_wrapper import NmapWrapper
 from masscan_wrapper import MasscanWrapper
 from metrics import MetricsCollector
-from models import ReconTask, ReconResult, ReconStatus
+from models import ReconResult, ReconStatus, ReconTask
+from nmap_wrapper import NmapWrapper
 
 
 class ReconEngine:
@@ -62,7 +62,9 @@ class ReconEngine:
             if task.scan_type == "nmap_full":
                 results_data = await self.nmap_wrapper.full_scan(task.target)
             elif task.scan_type == "masscan_ports":
-                results_data = await self.masscan_wrapper.port_scan(task.target, task.parameters.get("ports", []))
+                results_data = await self.masscan_wrapper.port_scan(
+                    task.target, task.parameters.get("ports", [])
+                )
             else:
                 raise ValueError(f"Unsupported scan type: {task.scan_type}")
 
@@ -73,7 +75,7 @@ class ReconEngine:
                 task_id=task.id,
                 status="success",
                 output=results_data,
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
             )
             print(f"[ReconEngine] Recon task {task.id} completed successfully.")
 
@@ -85,7 +87,7 @@ class ReconEngine:
                 task_id=task.id,
                 status="failed",
                 output={"error": str(e)},
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
             )
             print(f"[ReconEngine] Recon task {task.id} failed: {e}")
 
@@ -117,4 +119,8 @@ class ReconEngine:
         Returns:
             List[ReconTask]: A list of active ReconTask objects.
         """
-        return [task for task in self.active_tasks.values() if task.status == ReconStatus.RUNNING]
+        return [
+            task
+            for task in self.active_tasks.values()
+            if task.status == ReconStatus.RUNNING
+        ]
