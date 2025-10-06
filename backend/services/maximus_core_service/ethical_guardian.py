@@ -639,6 +639,13 @@ class EthicalGuardian:
             elif result.ethics and result.ethics.verdict == EthicalVerdict.APPROVED:
                 result.decision_type = EthicalDecisionType.APPROVED
                 result.is_approved = True
+                # Add SUPERVISED monitoring condition if applicable
+                if result.hitl and result.hitl.automation_level == "supervised":
+                    result.decision_type = EthicalDecisionType.APPROVED_WITH_CONDITIONS
+                    result.conditions.append(
+                        f"Approved for execution with SUPERVISED monitoring "
+                        f"({result.hitl.risk_level} risk, {result.hitl.estimated_sla_minutes}min review window)"
+                    )
             elif (
                 result.ethics
                 and result.ethics.verdict == EthicalVerdict.CONDITIONAL
@@ -648,6 +655,12 @@ class EthicalGuardian:
                 result.conditions.append(
                     "Action approved with ethical framework conditions"
                 )
+                # Add SUPERVISED monitoring condition if applicable
+                if result.hitl and result.hitl.automation_level == "supervised":
+                    result.conditions.append(
+                        f"SUPERVISED monitoring required "
+                        f"({result.hitl.risk_level} risk, {result.hitl.estimated_sla_minutes}min review window)"
+                    )
             else:
                 result.decision_type = EthicalDecisionType.REJECTED_BY_ETHICS
                 result.is_approved = False
@@ -950,8 +963,9 @@ class EthicalGuardian:
             automation_level = AutomationLevel.MANUAL
 
         # Determine if human review is required
+        # SUPERVISED executes with monitoring, but does NOT require pre-approval
+        # Only ADVISORY and MANUAL require human review before execution
         requires_human_review = automation_level in [
-            AutomationLevel.SUPERVISED,
             AutomationLevel.ADVISORY,
             AutomationLevel.MANUAL,
         ]

@@ -119,6 +119,24 @@ async def test_authorized_tool_execution(ethical_wrapper):
             "logged": True,
         },
         actor="security_analyst",
+        context={
+            "purpose": "authorized_security_scan",
+            "threat_data": {
+                "severity": 0.95,  # High severity threat
+                "confidence": 0.98,  # High confidence in threat
+                "people_protected": 10000,  # Many people protected
+            },
+            "risk_level": "low",
+            "reversible": True,
+            "intent": "protect_systems",
+            "virtues": {
+                "courage": "acting_despite_risk",
+                "wisdom": "informed_deliberation",
+                "justice": "equitable_protection",
+                "temperance": "proportionate_response",
+                "honesty": "transparent_operation",
+            },
+        },
     )
 
     # Assertions
@@ -272,6 +290,24 @@ async def test_error_handling(ethical_wrapper):
         tool_name="failing_tool",
         tool_method=failing_tool,
         tool_args={"authorized": True, "logged": True},
+        context={
+            "purpose": "test_operation",
+            "threat_data": {
+                "severity": 0.95,
+                "confidence": 0.98,
+                "people_protected": 10000,
+            },
+            "risk_level": "low",
+            "reversible": True,
+            "intent": "protect_systems",
+            "virtues": {
+                "courage": "acting_despite_risk",
+                "wisdom": "informed_deliberation",
+                "justice": "equitable_protection",
+                "temperance": "proportionate_response",
+                "honesty": "transparent_operation",
+            },
+        },
     )
 
     # Assertions
