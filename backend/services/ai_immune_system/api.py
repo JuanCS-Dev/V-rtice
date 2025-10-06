@@ -14,16 +14,16 @@ the AI Immune System, enabling proactive self-defense and resilience for the
 overall Maximus AI.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from adaptive_learning import AdaptiveLearning
 from circuit_breaker import CircuitBreaker
 from consensus_validator import ConsensusValidator
-from adaptive_learning import AdaptiveLearning
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus AI Immune System", version="1.0.0")
 
@@ -41,6 +41,7 @@ class TelemetryData(BaseModel):
         metrics (Dict[str, Any]): A dictionary of metrics (e.g., CPU, memory, error rates).
         event_type (Optional[str]): The type of event (e.g., 'heartbeat', 'error', 'anomaly').
     """
+
     service_id: str
     metrics: Dict[str, Any]
     event_type: Optional[str] = None
@@ -54,6 +55,7 @@ class ImmuneResponseRequest(BaseModel):
         response_type (str): The type of immune response to trigger (e.g., 'isolate', 'quarantine', 'heal').
         parameters (Optional[Dict[str, Any]]): Parameters for the immune response.
     """
+
     threat_id: str
     response_type: str
     parameters: Optional[Dict[str, Any]] = None
@@ -94,10 +96,12 @@ async def submit_telemetry(data: TelemetryData) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the immune system's assessment of the telemetry.
     """
     print(f"[API] Received telemetry from {data.service_id} (event: {data.event_type})")
-    
+
     # Simulate anomaly detection
-    is_anomalous = await consensus_validator.validate_telemetry(data.service_id, data.metrics)
-    
+    is_anomalous = await consensus_validator.validate_telemetry(
+        data.service_id, data.metrics
+    )
+
     # Simulate circuit breaker logic
     if is_anomalous:
         circuit_breaker.trip(data.service_id)
@@ -107,7 +111,7 @@ async def submit_telemetry(data: TelemetryData) -> Dict[str, Any]:
         "timestamp": datetime.now().isoformat(),
         "service_id": data.service_id,
         "anomaly_detected": is_anomalous,
-        "circuit_breaker_status": circuit_breaker.get_status(data.service_id)
+        "circuit_breaker_status": circuit_breaker.get_status(data.service_id),
     }
 
 
@@ -121,18 +125,22 @@ async def trigger_immune_response(request: ImmuneResponseRequest) -> Dict[str, A
     Returns:
         Dict[str, Any]: A dictionary containing the result of the immune response.
     """
-    print(f"[API] Triggering immune response '{request.response_type}' for threat {request.threat_id}")
-    await asyncio.sleep(0.5) # Simulate response execution
+    print(
+        f"[API] Triggering immune response '{request.response_type}' for threat {request.threat_id}"
+    )
+    await asyncio.sleep(0.5)  # Simulate response execution
 
     # Simulate adaptive learning based on response outcome
-    learning_outcome = await adaptive_learning.learn_from_response(request.threat_id, request.response_type, {"success": True})
+    learning_outcome = await adaptive_learning.learn_from_response(
+        request.threat_id, request.response_type, {"success": True}
+    )
 
     return {
         "timestamp": datetime.now().isoformat(),
         "threat_id": request.threat_id,
         "response_type": request.response_type,
         "status": "executed",
-        "learning_outcome": learning_outcome
+        "learning_outcome": learning_outcome,
     }
 
 

@@ -6,26 +6,24 @@ NO MOCKS - Production-ready adaptive learning interface.
 """
 
 import asyncio
-import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-from contextlib import asynccontextmanager
 import base64
-
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
-import uvicorn
+from contextlib import asynccontextmanager
+from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional
 
 from adaptive_core import (
     AdaptiveImmunityController,
-    ThreatSample,
     AntibodyType,
+    ThreatSample,
 )
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from pydantic import BaseModel, Field
+import uvicorn
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -42,9 +40,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize controller
     immunity_controller = AdaptiveImmunityController(
-        initial_repertoire_size=100,
-        mutation_rate=0.1,
-        expansion_threshold=0.8
+        initial_repertoire_size=100, mutation_rate=0.1, expansion_threshold=0.8
     )
 
     logger.info("Adaptive immunity controller initialized")
@@ -58,7 +54,7 @@ app = FastAPI(
     title="VÉRTICE Adaptive Immunity Service",
     description="Antibody diversification and affinity maturation for adaptive threat detection",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -66,8 +62,10 @@ app = FastAPI(
 # Request/Response Models
 # ============================================================================
 
+
 class ThreatSampleRequest(BaseModel):
     """Request to submit threat sample."""
+
     sample_id: str = Field(..., description="Unique sample ID")
     threat_family: str = Field(..., description="Threat family (malware, exploit, etc)")
     features: Dict[str, float] = Field(..., description="Numerical features")
@@ -78,6 +76,7 @@ class ThreatSampleRequest(BaseModel):
 
 class AntibodyResponse(BaseModel):
     """Response with antibody details."""
+
     antibody_id: str
     antibody_type: str
     target_family: str
@@ -92,6 +91,7 @@ class AntibodyResponse(BaseModel):
 
 class ClonalExpansionResponse(BaseModel):
     """Response with clonal expansion details."""
+
     expansion_id: str
     parent_antibody_id: str
     clones_created: int
@@ -101,6 +101,7 @@ class ClonalExpansionResponse(BaseModel):
 
 class MaturationEventResponse(BaseModel):
     """Response with maturation event details."""
+
     event_id: str
     antibody_id: str
     mutation_type: str
@@ -111,15 +112,16 @@ class MaturationEventResponse(BaseModel):
 
 class FeedbackRequest(BaseModel):
     """Request to provide detection feedback."""
+
     antibody_id: str = Field(..., description="Antibody that made detection")
     detections: Dict[str, bool] = Field(
-        ...,
-        description="Sample ID -> was_correct (true if correct detection)"
+        ..., description="Sample ID -> was_correct (true if correct detection)"
     )
 
 
 class StatusResponse(BaseModel):
     """Service status response."""
+
     service: str
     status: str
     components: Dict[str, Any]
@@ -129,6 +131,7 @@ class StatusResponse(BaseModel):
 # ============================================================================
 # Repertoire Initialization Endpoints
 # ============================================================================
+
 
 @app.post("/repertoire/initialize")
 async def initialize_repertoire(samples: List[ThreatSampleRequest]):
@@ -152,7 +155,9 @@ async def initialize_repertoire(samples: List[ThreatSampleRequest]):
             try:
                 raw_data = base64.b64decode(request.raw_data)
             except Exception as e:
-                logger.warning(f"Failed to decode raw_data for {request.sample_id}: {e}")
+                logger.warning(
+                    f"Failed to decode raw_data for {request.sample_id}: {e}"
+                )
                 raw_data = b""
 
             # Parse timestamp
@@ -167,7 +172,7 @@ async def initialize_repertoire(samples: List[ThreatSampleRequest]):
                 features=request.features,
                 raw_data=raw_data,
                 severity=request.severity,
-                timestamp=timestamp
+                timestamp=timestamp,
             )
 
             threat_samples.append(sample)
@@ -179,7 +184,7 @@ async def initialize_repertoire(samples: List[ThreatSampleRequest]):
             "status": "success",
             "samples_processed": len(threat_samples),
             "antibody_pool_size": len(immunity_controller.antibody_pool),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -201,7 +206,7 @@ async def get_repertoire_status():
         return {
             "repertoire_initialized": immunity_controller.repertoire_initialized,
             "antibody_pool_size": len(immunity_controller.antibody_pool),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -213,11 +218,12 @@ async def get_repertoire_status():
 # Antibody Query Endpoints
 # ============================================================================
 
+
 @app.get("/antibody/list", response_model=List[AntibodyResponse])
 async def list_antibodies(
     target_family: Optional[str] = None,
     min_affinity: Optional[float] = None,
-    limit: int = 100
+    limit: int = 100,
 ):
     """List antibodies with optional filtering.
 
@@ -242,18 +248,20 @@ async def list_antibodies(
             if min_affinity is not None and antibody.affinity_score < min_affinity:
                 continue
 
-            antibodies.append(AntibodyResponse(
-                antibody_id=antibody.antibody_id,
-                antibody_type=antibody.antibody_type.value,
-                target_family=antibody.target_family,
-                affinity_score=antibody.affinity_score,
-                generation=antibody.generation,
-                parent_id=antibody.parent_id,
-                created_at=antibody.created_at.isoformat(),
-                match_count=antibody.match_count,
-                true_positive_count=antibody.true_positive_count,
-                false_positive_count=antibody.false_positive_count
-            ))
+            antibodies.append(
+                AntibodyResponse(
+                    antibody_id=antibody.antibody_id,
+                    antibody_type=antibody.antibody_type.value,
+                    target_family=antibody.target_family,
+                    affinity_score=antibody.affinity_score,
+                    generation=antibody.generation,
+                    parent_id=antibody.parent_id,
+                    created_at=antibody.created_at.isoformat(),
+                    match_count=antibody.match_count,
+                    true_positive_count=antibody.true_positive_count,
+                    false_positive_count=antibody.false_positive_count,
+                )
+            )
 
             if len(antibodies) >= limit:
                 break
@@ -281,8 +289,7 @@ async def get_antibody(antibody_id: str):
     try:
         if antibody_id not in immunity_controller.antibody_pool:
             raise HTTPException(
-                status_code=404,
-                detail=f"Antibody {antibody_id} not found"
+                status_code=404, detail=f"Antibody {antibody_id} not found"
             )
 
         antibody = immunity_controller.antibody_pool[antibody_id]
@@ -297,7 +304,7 @@ async def get_antibody(antibody_id: str):
             created_at=antibody.created_at.isoformat(),
             match_count=antibody.match_count,
             true_positive_count=antibody.true_positive_count,
-            false_positive_count=antibody.false_positive_count
+            false_positive_count=antibody.false_positive_count,
         )
 
     except HTTPException:
@@ -310,6 +317,7 @@ async def get_antibody(antibody_id: str):
 # ============================================================================
 # Adaptive Learning Endpoints
 # ============================================================================
+
 
 @app.post("/learning/provide_feedback")
 async def provide_feedback(feedback: List[FeedbackRequest]):
@@ -347,7 +355,7 @@ async def provide_feedback(feedback: List[FeedbackRequest]):
             "status": "success",
             "antibodies_updated": len(feedback_data),
             "total_detections": sum(len(fb.detections) for fb in feedback),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -386,7 +394,7 @@ async def run_maturation_cycle(feedback_data: Dict[str, Dict[str, bool]]):
             "initial_pool_size": initial_size,
             "final_pool_size": final_size,
             "new_antibodies": final_size - initial_size,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -421,7 +429,7 @@ async def run_selection_cycle():
             "initial_pool_size": initial_size,
             "final_pool_size": final_size,
             "clones_created": final_size - initial_size,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -432,6 +440,7 @@ async def run_selection_cycle():
 # ============================================================================
 # History Endpoints
 # ============================================================================
+
 
 @app.get("/history/maturation", response_model=List[MaturationEventResponse])
 async def get_maturation_history(limit: int = 50):
@@ -450,19 +459,25 @@ async def get_maturation_history(limit: int = 50):
         events = []
 
         # Get recent events (newest first)
-        recent_events = list(reversed(
-            immunity_controller.affinity_maturation_engine.maturation_events[-limit:]
-        ))
+        recent_events = list(
+            reversed(
+                immunity_controller.affinity_maturation_engine.maturation_events[
+                    -limit:
+                ]
+            )
+        )
 
         for event in recent_events:
-            events.append(MaturationEventResponse(
-                event_id=event.event_id,
-                antibody_id=event.antibody_id,
-                mutation_type=event.mutation_type,
-                affinity_before=event.affinity_before,
-                affinity_after=event.affinity_after,
-                timestamp=event.timestamp.isoformat()
-            ))
+            events.append(
+                MaturationEventResponse(
+                    event_id=event.event_id,
+                    antibody_id=event.antibody_id,
+                    mutation_type=event.mutation_type,
+                    affinity_before=event.affinity_before,
+                    affinity_after=event.affinity_after,
+                    timestamp=event.timestamp.isoformat(),
+                )
+            )
 
         return events
 
@@ -488,18 +503,20 @@ async def get_expansion_history(limit: int = 50):
         expansions = []
 
         # Get recent expansions (newest first)
-        recent_expansions = list(reversed(
-            immunity_controller.clonal_selection_manager.expansions[-limit:]
-        ))
+        recent_expansions = list(
+            reversed(immunity_controller.clonal_selection_manager.expansions[-limit:])
+        )
 
         for expansion in recent_expansions:
-            expansions.append(ClonalExpansionResponse(
-                expansion_id=expansion.expansion_id,
-                parent_antibody_id=expansion.parent_antibody_id,
-                clones_created=expansion.clones_created,
-                reason=expansion.reason,
-                timestamp=expansion.timestamp.isoformat()
-            ))
+            expansions.append(
+                ClonalExpansionResponse(
+                    expansion_id=expansion.expansion_id,
+                    parent_antibody_id=expansion.parent_antibody_id,
+                    clones_created=expansion.clones_created,
+                    reason=expansion.reason,
+                    timestamp=expansion.timestamp.isoformat(),
+                )
+            )
 
         return expansions
 
@@ -512,13 +529,14 @@ async def get_expansion_history(limit: int = 50):
 # System Endpoints
 # ============================================================================
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "adaptive_immunity",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -539,7 +557,7 @@ async def get_status():
             service="adaptive_immunity",
             status="operational",
             components=status,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
     except Exception as e:
@@ -562,18 +580,15 @@ async def get_statistics():
 
         # Compute aggregate stats
         total_matches = sum(
-            ab.match_count
-            for ab in immunity_controller.antibody_pool.values()
+            ab.match_count for ab in immunity_controller.antibody_pool.values()
         )
 
         total_tp = sum(
-            ab.true_positive_count
-            for ab in immunity_controller.antibody_pool.values()
+            ab.true_positive_count for ab in immunity_controller.antibody_pool.values()
         )
 
         total_fp = sum(
-            ab.false_positive_count
-            for ab in immunity_controller.antibody_pool.values()
+            ab.false_positive_count for ab in immunity_controller.antibody_pool.values()
         )
 
         accuracy = total_tp / max(total_matches, 1)
@@ -587,8 +602,12 @@ async def get_statistics():
             "true_positives": total_tp,
             "false_positives": total_fp,
             "accuracy": accuracy,
-            "maturation_events": status["affinity_maturation_engine"]["maturation_events"],
-            "clonal_expansions": status["clonal_selection_manager"]["expansions_performed"]
+            "maturation_events": status["affinity_maturation_engine"][
+                "maturation_events"
+            ],
+            "clonal_expansions": status["clonal_selection_manager"][
+                "expansions_performed"
+            ],
         }
 
     except Exception as e:
@@ -597,10 +616,4 @@ async def get_statistics():
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "api:app",
-        host="0.0.0.0",
-        port=8020,
-        log_level="info",
-        access_log=True
-    )
+    uvicorn.run("api:app", host="0.0.0.0", port=8020, log_level="info", access_log=True)

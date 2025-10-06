@@ -10,15 +10,15 @@ __version__ = "1.0.0"
 __author__ = "VÉRTICE Team"
 
 from .investigation_core import (
-    TTP,
-    InvestigationStatus,
-    ThreatActorProfile,
-    SecurityIncident,
-    Campaign,
-    Investigation,
-    ThreatActorProfiler,
-    CampaignCorrelator,
     AutonomousInvestigator,
+    Campaign,
+    CampaignCorrelator,
+    Investigation,
+    InvestigationStatus,
+    SecurityIncident,
+    ThreatActorProfile,
+    ThreatActorProfiler,
+    TTP,
 )
 
 __all__ = [
