@@ -13,18 +13,18 @@ This API allows other Maximus AI services or external applications to interact
 with the visual perception capabilities in a standardized and efficient manner.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
-from datetime import datetime
 import base64
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from event_driven_vision_core import EventDrivenVisionCore
 from attention_system_core import AttentionSystemCore
-from network_vision_core import NetworkVisionCore
+from event_driven_vision_core import EventDrivenVisionCore
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from malware_vision_core import MalwareVisionCore
+from network_vision_core import NetworkVisionCore
+from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Maximus Visual Cortex Service", version="1.0.0")
 
@@ -43,6 +43,7 @@ class ImageAnalysisRequest(BaseModel):
         analysis_type (str): The type of analysis to perform (e.g., 'object_detection', 'scene_understanding').
         priority (int): The priority of the analysis (1-10, 10 being highest).
     """
+
     image_base64: str
     analysis_type: str
     priority: int = 5
@@ -85,12 +86,17 @@ async def analyze_image_endpoint(request: ImageAnalysisRequest) -> Dict[str, Any
     Raises:
         HTTPException: If the image processing fails or an invalid analysis type is provided.
     """
-    print(f"[API] Received image analysis request (type: {request.analysis_type}, priority: {request.priority})")
+    print(
+        f"[API] Received image analysis request (type: {request.analysis_type}, priority: {request.priority})"
+    )
     try:
         # Decode base64 image (simplified, actual image processing would happen here)
         image_data = base64.b64decode(request.image_base64)
-        
-        results = {"timestamp": datetime.now().isoformat(), "analysis_type": request.analysis_type}
+
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "analysis_type": request.analysis_type,
+        }
 
         if request.analysis_type == "object_detection":
             detection_results = await event_driven_vision.process_image(image_data)
@@ -99,13 +105,18 @@ async def analyze_image_endpoint(request: ImageAnalysisRequest) -> Dict[str, Any
             scene_results = await attention_system.analyze_scene(image_data)
             results["scene_understanding"] = scene_results
         elif request.analysis_type == "network_traffic_visualization":
-            network_results = await network_vision.analyze_network_traffic_image(image_data)
+            network_results = await network_vision.analyze_network_traffic_image(
+                image_data
+            )
             results["network_traffic_analysis"] = network_results
         elif request.analysis_type == "malware_signature_detection":
             malware_results = await malware_vision.detect_malware_signature(image_data)
             results["malware_detection"] = malware_results
         else:
-            raise HTTPException(status_code=400, detail=f"Invalid analysis type: {request.analysis_type}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid analysis type: {request.analysis_type}",
+            )
 
         return results
     except Exception as e:

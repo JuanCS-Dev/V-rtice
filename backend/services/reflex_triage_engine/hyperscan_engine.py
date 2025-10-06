@@ -6,18 +6,19 @@ Supports YARA rules, Snort signatures, custom patterns.
 Performance: 10-50ms for 50k+ signatures (hardware-accelerated regex).
 """
 
-import logging
+from dataclasses import dataclass
 import json
+import logging
+from pathlib import Path
 import time
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 # Try to import hyperscan - graceful fallback if not available
 try:
     import hyperscan
+
     HYPERSCAN_AVAILABLE = True
 except ImportError:
     HYPERSCAN_AVAILABLE = False
@@ -28,6 +29,7 @@ except ImportError:
 @dataclass
 class SignatureMatch:
     """Match result from signature scanning."""
+
     signature_id: int
     signature_name: str
     pattern: str
@@ -62,7 +64,9 @@ class HyperscanEngine:
         if signatures_path:
             self.load_signatures(signatures_path)
 
-        logger.info(f"HyperscanEngine initialized (hyperscan={'available' if HYPERSCAN_AVAILABLE else 'FALLBACK'})")
+        logger.info(
+            f"HyperscanEngine initialized (hyperscan={'available' if HYPERSCAN_AVAILABLE else 'FALLBACK'})"
+        )
 
     def load_signatures(self, path: str):
         """Load signatures from JSON file.
@@ -80,24 +84,30 @@ class HyperscanEngine:
         ]
         """
         try:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 signatures_data = json.load(f)
 
             self.signatures = []
             self.signature_map = {}
 
             for sig in signatures_data:
-                sig_id = sig['id']
-                self.signatures.append({
-                    'id': sig_id,
-                    'pattern': sig['pattern'],
-                    'flags': hyperscan.HS_FLAG_CASELESS | hyperscan.HS_FLAG_DOTALL if HYPERSCAN_AVAILABLE else 0
-                })
+                sig_id = sig["id"]
+                self.signatures.append(
+                    {
+                        "id": sig_id,
+                        "pattern": sig["pattern"],
+                        "flags": (
+                            hyperscan.HS_FLAG_CASELESS | hyperscan.HS_FLAG_DOTALL
+                            if HYPERSCAN_AVAILABLE
+                            else 0
+                        ),
+                    }
+                )
                 self.signature_map[sig_id] = {
-                    'name': sig['name'],
-                    'pattern': sig['pattern'],
-                    'severity': sig.get('severity', 'MEDIUM'),
-                    'category': sig.get('category', 'ANOMALY')
+                    "name": sig["name"],
+                    "pattern": sig["pattern"],
+                    "severity": sig.get("severity", "MEDIUM"),
+                    "category": sig.get("category", "ANOMALY"),
                 }
 
             logger.info(f"Loaded {len(self.signatures)} signatures from {path}")
@@ -117,9 +127,9 @@ class HyperscanEngine:
         if HYPERSCAN_AVAILABLE:
             try:
                 # Compile Hyperscan database
-                patterns = [s['pattern'] for s in self.signatures]
-                ids = [s['id'] for s in self.signatures]
-                flags = [s['flags'] for s in self.signatures]
+                patterns = [s["pattern"] for s in self.signatures]
+                ids = [s["id"] for s in self.signatures]
+                flags = [s["flags"] for s in self.signatures]
 
                 self.database = hyperscan.Database()
                 self.database.compile(
@@ -127,7 +137,7 @@ class HyperscanEngine:
                     ids=ids,
                     elements=len(patterns),
                     flags=flags,
-                    mode=hyperscan.HS_MODE_BLOCK
+                    mode=hyperscan.HS_MODE_BLOCK,
                 )
 
                 # Allocate scratch space
@@ -136,7 +146,9 @@ class HyperscanEngine:
                 self.compiled = True
 
                 compile_time = (time.time() - compile_start) * 1000
-                logger.info(f"Hyperscan database compiled: {len(patterns)} patterns in {compile_time:.1f}ms")
+                logger.info(
+                    f"Hyperscan database compiled: {len(patterns)} patterns in {compile_time:.1f}ms"
+                )
 
             except Exception as e:
                 logger.error(f"Hyperscan compilation failed: {e}")
@@ -150,11 +162,8 @@ class HyperscanEngine:
 
         for sig in self.signatures:
             try:
-                compiled = re.compile(sig['pattern'], re.IGNORECASE | re.DOTALL)
-                self.fallback_patterns.append({
-                    'id': sig['id'],
-                    'regex': compiled
-                })
+                compiled = re.compile(sig["pattern"], re.IGNORECASE | re.DOTALL)
+                self.fallback_patterns.append({"id": sig["id"], "regex": compiled})
             except Exception as e:
                 logger.warning(f"Failed to compile pattern {sig['id']}: {e}")
 
@@ -185,36 +194,42 @@ class HyperscanEngine:
                     return 1  # Stop scanning
 
                 sig_meta = self.signature_map.get(id, {})
-                match_data = data[from_offset:to_offset].decode('utf-8', errors='ignore')
+                match_data = data[from_offset:to_offset].decode(
+                    "utf-8", errors="ignore"
+                )
 
-                matches.append(SignatureMatch(
-                    signature_id=id,
-                    signature_name=sig_meta.get('name', f'SIG_{id}'),
-                    pattern=sig_meta.get('pattern', ''),
-                    severity=sig_meta.get('severity', 'MEDIUM'),
-                    category=sig_meta.get('category', 'ANOMALY'),
-                    matched_offset=from_offset,
-                    matched_data=match_data[:100],  # First 100 chars
-                    confidence=1.0
-                ))
+                matches.append(
+                    SignatureMatch(
+                        signature_id=id,
+                        signature_name=sig_meta.get("name", f"SIG_{id}"),
+                        pattern=sig_meta.get("pattern", ""),
+                        severity=sig_meta.get("severity", "MEDIUM"),
+                        category=sig_meta.get("category", "ANOMALY"),
+                        matched_offset=from_offset,
+                        matched_data=match_data[:100],  # First 100 chars
+                        confidence=1.0,
+                    )
+                )
 
                 return 0  # Continue scanning
 
             try:
-                self.database.scan(data, match_event_handler=on_match, scratch=self.scratch)
+                self.database.scan(
+                    data, match_event_handler=on_match, scratch=self.scratch
+                )
             except Exception as e:
                 logger.error(f"Hyperscan scan error: {e}")
 
         else:
             # Fallback regex scan
-            data_str = data.decode('utf-8', errors='ignore')
+            data_str = data.decode("utf-8", errors="ignore")
 
             for pattern_info in self.fallback_patterns:
                 if len(matches) >= max_matches:
                     break
 
-                sig_id = pattern_info['id']
-                regex = pattern_info['regex']
+                sig_id = pattern_info["id"]
+                regex = pattern_info["regex"]
 
                 for match in regex.finditer(data_str):
                     if len(matches) >= max_matches:
@@ -222,16 +237,18 @@ class HyperscanEngine:
 
                     sig_meta = self.signature_map.get(sig_id, {})
 
-                    matches.append(SignatureMatch(
-                        signature_id=sig_id,
-                        signature_name=sig_meta.get('name', f'SIG_{sig_id}'),
-                        pattern=sig_meta.get('pattern', ''),
-                        severity=sig_meta.get('severity', 'MEDIUM'),
-                        category=sig_meta.get('category', 'ANOMALY'),
-                        matched_offset=match.start(),
-                        matched_data=match.group()[:100],
-                        confidence=0.9  # Lower confidence for fallback
-                    ))
+                    matches.append(
+                        SignatureMatch(
+                            signature_id=sig_id,
+                            signature_name=sig_meta.get("name", f"SIG_{sig_id}"),
+                            pattern=sig_meta.get("pattern", ""),
+                            severity=sig_meta.get("severity", "MEDIUM"),
+                            category=sig_meta.get("category", "ANOMALY"),
+                            matched_offset=match.start(),
+                            matched_data=match.group()[:100],
+                            confidence=0.9,  # Lower confidence for fallback
+                        )
+                    )
 
         scan_time = (time.time() - scan_start) * 1000
 
@@ -252,7 +269,7 @@ class HyperscanEngine:
             List of signature matches
         """
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 data = f.read()
             return self.scan(data)
         except Exception as e:
@@ -273,10 +290,10 @@ class HyperscanEngine:
     def get_statistics(self) -> Dict:
         """Get engine statistics."""
         return {
-            'signatures_loaded': len(self.signatures),
-            'database_compiled': self.compiled,
-            'hyperscan_available': HYPERSCAN_AVAILABLE,
-            'engine_type': 'hyperscan' if HYPERSCAN_AVAILABLE else 'fallback_regex'
+            "signatures_loaded": len(self.signatures),
+            "database_compiled": self.compiled,
+            "hyperscan_available": HYPERSCAN_AVAILABLE,
+            "engine_type": "hyperscan" if HYPERSCAN_AVAILABLE else "fallback_regex",
         }
 
     def reload_signatures(self, path: str):

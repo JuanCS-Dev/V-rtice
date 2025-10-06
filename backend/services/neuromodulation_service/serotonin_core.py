@@ -20,18 +20,19 @@ Like biological serotonin: Regulates mood and risk-taking based on outcomes.
 NO MOCKS - Production-ready implementation.
 """
 
+from collections import deque
+from datetime import datetime, timedelta
+from enum import Enum
 import logging
 import math
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
-from collections import deque
-from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class ActionOutcome(Enum):
     """Action outcome types."""
+
     SUCCESS = "success"
     FAILURE = "failure"
     PARTIAL = "partial"
@@ -52,7 +53,7 @@ class SerotoninCore:
         min_epsilon: float = 0.01,
         max_epsilon: float = 0.5,
         outcome_window_size: int = 100,
-        failure_streak_threshold: int = 5
+        failure_streak_threshold: int = 5,
     ):
         """Initialize Serotonin Core.
 
@@ -85,7 +86,7 @@ class SerotoninCore:
         self,
         outcome: ActionOutcome,
         reward: float = 0.0,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         """Record action outcome.
 
@@ -95,10 +96,10 @@ class SerotoninCore:
             metadata: Additional outcome metadata
         """
         outcome_record = {
-            'timestamp': datetime.now().isoformat(),
-            'outcome': outcome.value,
-            'reward': reward,
-            'metadata': metadata or {}
+            "timestamp": datetime.now().isoformat(),
+            "outcome": outcome.value,
+            "reward": reward,
+            "metadata": metadata or {},
         }
 
         self.outcome_history.append(outcome_record)
@@ -106,7 +107,9 @@ class SerotoninCore:
         # Update failure streak
         if outcome == ActionOutcome.FAILURE:
             self.current_failure_streak += 1
-            self.max_failure_streak = max(self.max_failure_streak, self.current_failure_streak)
+            self.max_failure_streak = max(
+                self.max_failure_streak, self.current_failure_streak
+            )
         else:
             self.current_failure_streak = 0
 
@@ -182,8 +185,12 @@ class SerotoninCore:
         if window:
             outcomes = outcomes[-window:]
 
-        successes = sum(1 for o in outcomes if o['outcome'] == ActionOutcome.SUCCESS.value)
-        partials = sum(1 for o in outcomes if o['outcome'] == ActionOutcome.PARTIAL.value)
+        successes = sum(
+            1 for o in outcomes if o["outcome"] == ActionOutcome.SUCCESS.value
+        )
+        partials = sum(
+            1 for o in outcomes if o["outcome"] == ActionOutcome.PARTIAL.value
+        )
 
         # Count partials as 0.5 success
         success_score = successes + 0.5 * partials
@@ -214,18 +221,18 @@ class SerotoninCore:
             Mood description (optimistic/neutral/pessimistic/frustrated)
         """
         if not self.outcome_history:
-            return 'neutral'
+            return "neutral"
 
         success_rate = self._compute_success_rate()
 
         if self.current_failure_streak >= self.failure_streak_threshold:
-            return 'frustrated'
+            return "frustrated"
         elif success_rate >= 0.7:
-            return 'optimistic'
+            return "optimistic"
         elif success_rate >= 0.4:
-            return 'neutral'
+            return "neutral"
         else:
-            return 'pessimistic'
+            return "pessimistic"
 
     def get_outcome_statistics(self, window: int = 100) -> Dict[str, Any]:
         """Get outcome statistics.
@@ -237,25 +244,31 @@ class SerotoninCore:
             Outcome statistics
         """
         if not self.outcome_history:
-            return {'count': 0}
+            return {"count": 0}
 
         recent_outcomes = list(self.outcome_history)[-window:]
 
-        successes = sum(1 for o in recent_outcomes if o['outcome'] == ActionOutcome.SUCCESS.value)
-        failures = sum(1 for o in recent_outcomes if o['outcome'] == ActionOutcome.FAILURE.value)
-        partials = sum(1 for o in recent_outcomes if o['outcome'] == ActionOutcome.PARTIAL.value)
+        successes = sum(
+            1 for o in recent_outcomes if o["outcome"] == ActionOutcome.SUCCESS.value
+        )
+        failures = sum(
+            1 for o in recent_outcomes if o["outcome"] == ActionOutcome.FAILURE.value
+        )
+        partials = sum(
+            1 for o in recent_outcomes if o["outcome"] == ActionOutcome.PARTIAL.value
+        )
 
         total = len(recent_outcomes)
 
         return {
-            'count': total,
-            'successes': successes,
-            'failures': failures,
-            'partials': partials,
-            'success_rate': successes / total if total > 0 else 0.0,
-            'failure_rate': failures / total if total > 0 else 0.0,
-            'current_failure_streak': self.current_failure_streak,
-            'max_failure_streak': self.max_failure_streak
+            "count": total,
+            "successes": successes,
+            "failures": failures,
+            "partials": partials,
+            "success_rate": successes / total if total > 0 else 0.0,
+            "failure_rate": failures / total if total > 0 else 0.0,
+            "current_failure_streak": self.current_failure_streak,
+            "max_failure_streak": self.max_failure_streak,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -268,12 +281,16 @@ class SerotoninCore:
         mood = self.get_mood_assessment()
 
         return {
-            'status': 'operational',
-            'current_epsilon': self.current_epsilon,
-            'base_epsilon': self.base_epsilon,
-            'epsilon_range': [self.min_epsilon, self.max_epsilon],
-            'mood_assessment': mood,
-            'modulation_count': self.modulation_count,
-            'last_modulation': self.last_modulation_time.isoformat() if self.last_modulation_time else 'N/A',
-            'outcome_statistics': stats
+            "status": "operational",
+            "current_epsilon": self.current_epsilon,
+            "base_epsilon": self.base_epsilon,
+            "epsilon_range": [self.min_epsilon, self.max_epsilon],
+            "mood_assessment": mood,
+            "modulation_count": self.modulation_count,
+            "last_modulation": (
+                self.last_modulation_time.isoformat()
+                if self.last_modulation_time
+                else "N/A"
+            ),
+            "outcome_statistics": stats,
         }

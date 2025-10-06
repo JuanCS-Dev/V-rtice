@@ -15,18 +15,18 @@ AI's cognitive functions, enabling it to adapt its behavior and optimize its
 effectiveness in real-time for various operational scenarios.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from neuromodulation_controller import NeuromodulationController
-from dopamine_core import DopamineCore
-from serotonin_core import SerotoninCore
-from noradrenaline_core import NoradrenalineCore
 from acetylcholine_core import AcetylcholineCore
+from dopamine_core import DopamineCore
+from fastapi import FastAPI, HTTPException
+from neuromodulation_controller import NeuromodulationController
+from noradrenaline_core import NoradrenalineCore
+from pydantic import BaseModel
+from serotonin_core import SerotoninCore
+import uvicorn
 
 app = FastAPI(title="Maximus Neuromodulation Service", version="1.0.0")
 
@@ -41,7 +41,7 @@ neuromodulation_controller = NeuromodulationController(
     dopamine_core=dopamine_core,
     serotonin_core=serotonin_core,
     noradrenaline_core=noradrenaline_core,
-    acetylcholine_core=acetylcholine_core
+    acetylcholine_core=acetylcholine_core,
 )
 
 
@@ -54,6 +54,7 @@ class ModulationRequest(BaseModel):
         value (float): The new value for the parameter.
         context (Optional[Dict[str, Any]]): Additional context for the modulation.
     """
+
     modulator_type: str
     parameter: str
     value: float
@@ -97,12 +98,18 @@ async def apply_neuromodulation(request: ModulationRequest) -> Dict[str, Any]:
     Raises:
         HTTPException: If the modulator type or parameter is unsupported.
     """
-    print(f"[API] Applying {request.modulator_type} modulation to {request.parameter} with value {request.value}")
+    print(
+        f"[API] Applying {request.modulator_type} modulation to {request.parameter} with value {request.value}"
+    )
     try:
         result = await neuromodulation_controller.modulate_parameter(
             request.modulator_type, request.parameter, request.value, request.context
         )
-        return {"status": "success", "timestamp": datetime.now().isoformat(), "modulation_result": result}
+        return {
+            "status": "success",
+            "timestamp": datetime.now().isoformat(),
+            "modulation_result": result,
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

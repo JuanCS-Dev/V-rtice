@@ -14,15 +14,15 @@ the HCL, enabling dynamic adaptation, performance optimization, and proactive
 management of the entire Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from fastapi import FastAPI, HTTPException
 from homeostatic_regulator import HomeostaticRegulator
+from pydantic import BaseModel
 from red_line_triggers import RedLineTriggers
+import uvicorn
 
 app = FastAPI(title="Maximus Homeostatic Regulation Service", version="1.0.0")
 
@@ -39,6 +39,7 @@ class OperationalGoalUpdate(BaseModel):
         value (Any): The new value for the operational goal.
         priority (int): The priority of this goal (1-10, 10 being highest).
     """
+
     goal_name: str
     value: Any
     priority: int = 5
@@ -51,6 +52,7 @@ class RedLineTriggerRequest(BaseModel):
         trigger_type (str): The type of red-line event (e.g., 'critical_failure', 'security_breach').
         details (Optional[Dict[str, Any]]): Additional details about the trigger.
     """
+
     trigger_type: str
     details: Optional[Dict[str, Any]] = None
 
@@ -78,7 +80,10 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Homeostatic Regulation Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Homeostatic Regulation Service is operational.",
+    }
 
 
 @app.get("/hcl_status")
@@ -101,9 +106,16 @@ async def update_operational_goal(request: OperationalGoalUpdate) -> Dict[str, A
     Returns:
         Dict[str, Any]: A dictionary confirming the goal update.
     """
-    print(f"[API] Updating operational goal '{request.goal_name}' to {request.value} with priority {request.priority}")
-    await homeostatic_regulator.update_operational_goal(request.goal_name, request.value, request.priority)
-    return {"status": "success", "message": f"Operational goal '{request.goal_name}' updated."}
+    print(
+        f"[API] Updating operational goal '{request.goal_name}' to {request.value} with priority {request.priority}"
+    )
+    await homeostatic_regulator.update_operational_goal(
+        request.goal_name, request.value, request.priority
+    )
+    return {
+        "status": "success",
+        "message": f"Operational goal '{request.goal_name}' updated.",
+    }
 
 
 @app.post("/trigger_red_line")
@@ -117,8 +129,14 @@ async def trigger_red_line_event(request: RedLineTriggerRequest) -> Dict[str, An
         Dict[str, Any]: A dictionary confirming the red-line trigger.
     """
     print(f"[API] Manually triggering red-line event: {request.trigger_type}")
-    response = await red_line_triggers.trigger_emergency_response(request.trigger_type, request.details)
-    return {"status": "success", "message": f"Red-line event '{request.trigger_type}' triggered.", "response": response}
+    response = await red_line_triggers.trigger_emergency_response(
+        request.trigger_type, request.details
+    )
+    return {
+        "status": "success",
+        "message": f"Red-line event '{request.trigger_type}' triggered.",
+        "response": response,
+    }
 
 
 if __name__ == "__main__":

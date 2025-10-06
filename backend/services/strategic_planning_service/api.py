@@ -15,14 +15,14 @@ Strategic Planning Service's capabilities, enabling Maximus to make coherent,
 goal-oriented decisions, and align its actions with overarching missions.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from strategic_planning_core import StrategicPlanningCore
+import uvicorn
 
 app = FastAPI(title="Maximus Strategic Planning Service", version="1.0.0")
 
@@ -39,6 +39,7 @@ class StrategicObjective(BaseModel):
         priority (int): The priority of this objective (1-10, 10 being highest).
         target_date (Optional[str]): ISO formatted target completion date.
     """
+
     objective_name: str
     description: str
     priority: int = 5
@@ -53,6 +54,7 @@ class ScenarioAnalysisRequest(BaseModel):
         context (Dict[str, Any]): The context and parameters for the scenario.
         risk_factors (List[str]): Key risk factors to consider.
     """
+
     scenario_name: str
     context: Dict[str, Any]
     risk_factors: List[str]
@@ -79,7 +81,10 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Strategic Planning Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Strategic Planning Service is operational.",
+    }
 
 
 @app.post("/set_objective")
@@ -93,8 +98,17 @@ async def set_strategic_objective(objective: StrategicObjective) -> Dict[str, An
         Dict[str, Any]: A dictionary confirming the objective has been set.
     """
     print(f"[API] Setting strategic objective: {objective.objective_name}")
-    await strategic_planning_core.set_objective(objective.objective_name, objective.description, objective.priority, objective.target_date)
-    return {"status": "success", "message": f"Objective '{objective.objective_name}' set.", "timestamp": datetime.now().isoformat()}
+    await strategic_planning_core.set_objective(
+        objective.objective_name,
+        objective.description,
+        objective.priority,
+        objective.target_date,
+    )
+    return {
+        "status": "success",
+        "message": f"Objective '{objective.objective_name}' set.",
+        "timestamp": datetime.now().isoformat(),
+    }
 
 
 @app.post("/analyze_scenario")
@@ -108,8 +122,14 @@ async def analyze_scenario_endpoint(request: ScenarioAnalysisRequest) -> Dict[st
         Dict[str, Any]: A dictionary containing the scenario analysis results.
     """
     print(f"[API] Analyzing scenario: {request.scenario_name}")
-    analysis_result = await strategic_planning_core.analyze_scenario(request.scenario_name, request.context, request.risk_factors)
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "analysis": analysis_result}
+    analysis_result = await strategic_planning_core.analyze_scenario(
+        request.scenario_name, request.context, request.risk_factors
+    )
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "analysis": analysis_result,
+    }
 
 
 @app.get("/strategic_plan")

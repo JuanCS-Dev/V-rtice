@@ -12,8 +12,8 @@ interpretation of complex visual information, especially in dynamic environments
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class AttentionSystemCore:
@@ -39,23 +39,39 @@ class AttentionSystemCore:
             Dict[str, Any]: A dictionary containing the identified areas of interest and scene summary.
         """
         self.current_status = "analyzing_scene"
-        print(f"[AttentionSystem] Analyzing scene (size: {len(image_data)} bytes) for areas of interest.")
-        await asyncio.sleep(0.2) # Simulate scene analysis
+        print(
+            f"[AttentionSystem] Analyzing scene (size: {len(image_data)} bytes) for areas of interest."
+        )
+        await asyncio.sleep(0.2)  # Simulate scene analysis
 
         # Simulate attention allocation based on image content
         areas_of_interest = []
         scene_summary = ""
 
-        if b"face_signature" in image_data: # Placeholder for actual visual analysis
-            areas_of_interest.append({"region": "(100,100,200,200)", "saliency": 0.9, "description": "human face"})
+        if b"face_signature" in image_data:  # Placeholder for actual visual analysis
+            areas_of_interest.append(
+                {
+                    "region": "(100,100,200,200)",
+                    "saliency": 0.9,
+                    "description": "human face",
+                }
+            )
             scene_summary += "Human presence detected. "
             self.current_focus_area = "human face"
         elif b"weapon_signature" in image_data:
-            areas_of_interest.append({"region": "(50,50,150,150)", "saliency": 0.95, "description": "potential weapon"})
+            areas_of_interest.append(
+                {
+                    "region": "(50,50,150,150)",
+                    "saliency": 0.95,
+                    "description": "potential weapon",
+                }
+            )
             scene_summary += "Potential threat detected. "
             self.current_focus_area = "potential weapon"
         else:
-            areas_of_interest.append({"region": "(0,0,W,H)", "saliency": 0.5, "description": "general scene"})
+            areas_of_interest.append(
+                {"region": "(0,0,W,H)", "saliency": 0.5, "description": "general scene"}
+            )
             scene_summary += "General environmental scan. "
             self.current_focus_area = "general scene"
 
@@ -66,7 +82,7 @@ class AttentionSystemCore:
             "timestamp": self.last_focus_time.isoformat(),
             "areas_of_interest": areas_of_interest,
             "scene_summary": scene_summary.strip(),
-            "current_focus": self.current_focus_area
+            "current_focus": self.current_focus_area,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -77,6 +93,8 @@ class AttentionSystemCore:
         """
         return {
             "status": self.current_status,
-            "last_focus": self.last_focus_time.isoformat() if self.last_focus_time else "N/A",
-            "current_focus_area": self.current_focus_area
+            "last_focus": (
+                self.last_focus_time.isoformat() if self.last_focus_time else "N/A"
+            ),
+            "current_focus_area": self.current_focus_area,
         }

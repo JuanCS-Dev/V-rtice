@@ -20,11 +20,12 @@ Like biological norepinephrine: Modulates arousal and urgency-driven behavior.
 NO MOCKS - Production-ready implementation.
 """
 
+from collections import deque
+from datetime import datetime, timedelta
 import logging
 import math
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
-from collections import deque
+from typing import Any, Dict, Optional
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ class NoradrenalineCore:
         base_temperature: float = 1.0,
         min_temperature: float = 0.1,
         max_temperature: float = 2.0,
-        urgency_window_size: int = 50
+        urgency_window_size: int = 50,
     ):
         """Initialize Noradrenaline Core.
 
@@ -70,10 +71,7 @@ class NoradrenalineCore:
         )
 
     def compute_urgency(
-        self,
-        threat_severity: float,
-        time_pressure: float,
-        stakes: float = 0.5
+        self, threat_severity: float, time_pressure: float, stakes: float = 0.5
     ) -> float:
         """Compute urgency signal from threat and time pressure.
 
@@ -88,22 +86,20 @@ class NoradrenalineCore:
             Urgency level (0-1)
         """
         # Combine factors (weighted average)
-        urgency = (
-            0.4 * threat_severity +
-            0.4 * time_pressure +
-            0.2 * stakes
-        )
+        urgency = 0.4 * threat_severity + 0.4 * time_pressure + 0.2 * stakes
 
         urgency = max(0.0, min(1.0, urgency))
 
         # Store in history
-        self.urgency_history.append({
-            'timestamp': datetime.now().isoformat(),
-            'urgency': urgency,
-            'threat_severity': threat_severity,
-            'time_pressure': time_pressure,
-            'stakes': stakes
-        })
+        self.urgency_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "urgency": urgency,
+                "threat_severity": threat_severity,
+                "time_pressure": time_pressure,
+                "stakes": stakes,
+            }
+        )
 
         self.current_urgency = urgency
 
@@ -115,9 +111,7 @@ class NoradrenalineCore:
         return urgency
 
     def modulate_temperature(
-        self,
-        urgency: Optional[float] = None,
-        confidence: float = 0.5
+        self, urgency: Optional[float] = None, confidence: float = 0.5
     ) -> float:
         """Modulate policy temperature based on urgency.
 
@@ -147,7 +141,9 @@ class NoradrenalineCore:
         log_max = math.log(self.max_temperature)
         log_base = math.log(self.base_temperature)
 
-        log_temp = log_base + (log_max - log_base) * temperature_factor * confidence_modulation
+        log_temp = (
+            log_base + (log_max - log_base) * temperature_factor * confidence_modulation
+        )
 
         temperature = math.exp(log_temp)
         temperature = max(self.min_temperature, min(self.max_temperature, temperature))
@@ -164,9 +160,7 @@ class NoradrenalineCore:
         return temperature
 
     def apply_softmax_temperature(
-        self,
-        logits: np.ndarray,
-        temperature: Optional[float] = None
+        self, logits: np.ndarray, temperature: Optional[float] = None
     ) -> np.ndarray:
         """Apply temperature-modulated softmax to policy logits.
 
@@ -211,9 +205,7 @@ class NoradrenalineCore:
         return -np.sum(probs * np.log(probs))
 
     def modulate_policy_boldness(
-        self,
-        action_values: np.ndarray,
-        urgency: Optional[float] = None
+        self, action_values: np.ndarray, urgency: Optional[float] = None
     ) -> int:
         """Select action with urgency-modulated policy.
 
@@ -256,19 +248,19 @@ class NoradrenalineCore:
             Urgency statistics
         """
         if not self.urgency_history:
-            return {'count': 0}
+            return {"count": 0}
 
         recent = list(self.urgency_history)[-window:]
 
-        urgencies = [entry['urgency'] for entry in recent]
+        urgencies = [entry["urgency"] for entry in recent]
         mean_urgency = sum(urgencies) / len(urgencies)
 
         return {
-            'count': len(recent),
-            'current_urgency': self.current_urgency,
-            'mean_urgency': mean_urgency,
-            'min_urgency': min(urgencies),
-            'max_urgency': max(urgencies)
+            "count": len(recent),
+            "current_urgency": self.current_urgency,
+            "mean_urgency": mean_urgency,
+            "min_urgency": min(urgencies),
+            "max_urgency": max(urgencies),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -280,12 +272,16 @@ class NoradrenalineCore:
         stats = self.get_urgency_statistics()
 
         return {
-            'status': 'operational',
-            'current_temperature': self.current_temperature,
-            'base_temperature': self.base_temperature,
-            'temperature_range': [self.min_temperature, self.max_temperature],
-            'current_urgency': self.current_urgency,
-            'modulation_count': self.modulation_count,
-            'last_modulation': self.last_modulation_time.isoformat() if self.last_modulation_time else 'N/A',
-            'urgency_statistics': stats
+            "status": "operational",
+            "current_temperature": self.current_temperature,
+            "base_temperature": self.base_temperature,
+            "temperature_range": [self.min_temperature, self.max_temperature],
+            "current_urgency": self.current_urgency,
+            "modulation_count": self.modulation_count,
+            "last_modulation": (
+                self.last_modulation_time.isoformat()
+                if self.last_modulation_time
+                else "N/A"
+            ),
+            "urgency_statistics": stats,
         }

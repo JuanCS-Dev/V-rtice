@@ -17,8 +17,8 @@ preventing flawed reasoning or unintended negative outcomes.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class RationalDecisionValidator:
@@ -36,7 +36,12 @@ class RationalDecisionValidator:
         self.last_validation_time: Optional[datetime] = None
         self.current_status: str = "ready_to_validate"
 
-    def validate_decision(self, decision: Dict[str, Any], criteria: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def validate_decision(
+        self,
+        decision: Dict[str, Any],
+        criteria: Dict[str, Any],
+        context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Validates a proposed decision against specified criteria and context.
 
         Args:
@@ -47,18 +52,25 @@ class RationalDecisionValidator:
         Returns:
             Dict[str, Any]: A dictionary containing the validation results and rationale.
         """
-        print(f"[RationalDecisionValidator] Validating decision: {decision.get('option_id', 'N/A')}")
-        
-        validation_score = 1.0 # Start with perfect score
+        print(
+            f"[RationalDecisionValidator] Validating decision: {decision.get('option_id', 'N/A')}"
+        )
+
+        validation_score = 1.0  # Start with perfect score
         issues: List[str] = []
         rationale = "Decision appears rational and aligned with criteria."
 
         # Simulate validation against criteria
-        if criteria.get("cost_efficiency") and decision.get("estimated_cost", 0) > criteria["cost_efficiency"]["max"]:
+        if (
+            criteria.get("cost_efficiency")
+            and decision.get("estimated_cost", 0) > criteria["cost_efficiency"]["max"]
+        ):
             validation_score -= 0.3
             issues.append("High cost, violates efficiency criteria.")
-        
-        if criteria.get("ethical_compliance") and not decision.get("ethical_review_passed", True):
+
+        if criteria.get("ethical_compliance") and not decision.get(
+            "ethical_review_passed", True
+        ):
             validation_score -= 0.5
             issues.append("Ethical concerns detected.")
 
@@ -72,10 +84,10 @@ class RationalDecisionValidator:
 
         validation_result = {
             "timestamp": datetime.now().isoformat(),
-            "decision_id": decision.get('option_id', 'N/A'),
+            "decision_id": decision.get("option_id", "N/A"),
             "validation_score": validation_score,
             "issues_found": issues,
-            "rationale": rationale
+            "rationale": rationale,
         }
         self.validation_history.append(validation_result)
         self.last_validation_time = datetime.now()
@@ -91,5 +103,9 @@ class RationalDecisionValidator:
         return {
             "status": self.current_status,
             "total_validations": len(self.validation_history),
-            "last_validation": self.last_validation_time.isoformat() if self.last_validation_time else "N/A"
+            "last_validation": (
+                self.last_validation_time.isoformat()
+                if self.last_validation_time
+                else "N/A"
+            ),
         }

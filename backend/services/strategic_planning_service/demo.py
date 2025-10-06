@@ -15,8 +15,8 @@ and align its actions with overarching missions.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from strategic_planning_core import StrategicPlanningCore
 
@@ -32,7 +32,7 @@ async def run_strategic_planning_demo():
         objective_name="Global Cyber Dominance",
         description="Achieve and maintain unparalleled cybersecurity superiority across all digital domains.",
         priority=10,
-        target_date="2028-12-31"
+        target_date="2028-12-31",
     )
     print("Objective set.")
 
@@ -41,13 +41,13 @@ async def run_strategic_planning_demo():
     scenario_context = {
         "threat_level": "critical",
         "affected_systems": ["core_network", "data_center_A"],
-        "discovery_source": "Maximus Eureka Service"
+        "discovery_source": "Maximus Eureka Service",
     }
     risk_factors = ["data_loss", "system_downtime", "reputation_damage"]
     analysis_result = await core.analyze_scenario(
         scenario_name="Zero-Day Exploit Response",
         context=scenario_context,
-        risk_factors=risk_factors
+        risk_factors=risk_factors,
     )
     print("Scenario Analysis Result:")
     print(analysis_result)

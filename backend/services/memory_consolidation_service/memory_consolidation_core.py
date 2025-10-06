@@ -15,8 +15,9 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 
 # Assuming a client for the long-term memory (e.g., VectorDBClient) exists
 class MockLongTermMemoryClient:
@@ -24,6 +25,7 @@ class MockLongTermMemoryClient:
 
     Simula o armazenamento e recuperação de conhecimento para fins de teste.
     """
+
     async def store_knowledge(self, content: str, metadata: Dict[str, Any]) -> str:
         """Simula o armazenamento de um item de conhecimento no banco de dados de longo prazo.
 
@@ -38,7 +40,9 @@ class MockLongTermMemoryClient:
         await asyncio.sleep(0.01)
         return f"ltm_id_{len(content)}"
 
-    async def retrieve_similar_knowledge(self, query: str, top_k: int = 1) -> List[Dict[str, Any]]:
+    async def retrieve_similar_knowledge(
+        self, query: str, top_k: int = 1
+    ) -> List[Dict[str, Any]]:
         """Simula a recuperação de conhecimento similar do banco de dados de longo prazo.
 
         Args:
@@ -50,7 +54,7 @@ class MockLongTermMemoryClient:
         """
         print(f"[MockLTM] Retrieving similar knowledge for: {query[:50]}...")
         await asyncio.sleep(0.01)
-        return [] # Always return empty for simplicity
+        return []  # Always return empty for simplicity
 
 
 class MemoryConsolidationCore:
@@ -77,7 +81,8 @@ class MemoryConsolidationCore:
 
     async def start_consolidation_loop(self):
         """Starts the continuous memory consolidation loop."""
-        if self.is_running: return
+        if self.is_running:
+            return
         self.is_running = True
         print("🧠 [MemoryConsolidationCore] Starting consolidation loop.")
         asyncio.create_task(self._consolidation_cycle_loop())
@@ -93,7 +98,13 @@ class MemoryConsolidationCore:
             await asyncio.sleep(self.consolidation_interval)
             await self.consolidate_memories()
 
-    async def ingest_short_term_memory(self, source_service: str, memory_type: str, payload: Dict[str, Any], timestamp: str):
+    async def ingest_short_term_memory(
+        self,
+        source_service: str,
+        memory_type: str,
+        payload: Dict[str, Any],
+        timestamp: str,
+    ):
         """Ingests a short-term memory into the temporary buffer.
 
         Args:
@@ -107,10 +118,12 @@ class MemoryConsolidationCore:
             "memory_type": memory_type,
             "payload": payload,
             "timestamp": timestamp,
-            "ingested_at": datetime.now().isoformat()
+            "ingested_at": datetime.now().isoformat(),
         }
         self.short_term_memories.append(memory_entry)
-        print(f"[MemoryConsolidationCore] Ingested short-term memory from {source_service} ({memory_type}).")
+        print(
+            f"[MemoryConsolidationCore] Ingested short-term memory from {source_service} ({memory_type})."
+        )
 
     async def consolidate_memories(self):
         """Processes short-term memories and consolidates them into long-term knowledge."""
@@ -120,9 +133,11 @@ class MemoryConsolidationCore:
 
         self.current_status = "consolidating"
         self.consolidation_cycles_run += 1
-        print(f"🧠 [MemoryConsolidationCore] Starting consolidation cycle #{self.consolidation_cycles_run} with {len(self.short_term_memories)} memories.")
+        print(
+            f"🧠 [MemoryConsolidationCore] Starting consolidation cycle #{self.consolidation_cycles_run} with {len(self.short_term_memories)} memories."
+        )
 
-        memories_to_process = list(self.short_term_memories) # Take a snapshot
+        memories_to_process = list(self.short_term_memories)  # Take a snapshot
         self.short_term_memories.clear()
 
         for memory in memories_to_process:
@@ -131,10 +146,14 @@ class MemoryConsolidationCore:
             metadata = {
                 "source_service": memory["source_service"],
                 "memory_type": memory["memory_type"],
-                "original_timestamp": memory["timestamp"]
+                "original_timestamp": memory["timestamp"],
             }
-            await self.long_term_memory_client.store_knowledge(processed_content, metadata)
-            print(f"[MemoryConsolidationCore] Consolidated memory from {memory['source_service']}.")
+            await self.long_term_memory_client.store_knowledge(
+                processed_content, metadata
+            )
+            print(
+                f"[MemoryConsolidationCore] Consolidated memory from {memory['source_service']}."
+            )
 
         self.last_consolidation_time = datetime.now()
         self.current_status = "idle"
@@ -167,5 +186,9 @@ class MemoryConsolidationCore:
             "consolidation_loop_running": self.is_running,
             "short_term_memories_count": len(self.short_term_memories),
             "consolidation_cycles_run": self.consolidation_cycles_run,
-            "last_consolidation": self.last_consolidation_time.isoformat() if self.last_consolidation_time else "N/A"
+            "last_consolidation": (
+                self.last_consolidation_time.isoformat()
+                if self.last_consolidation_time
+                else "N/A"
+            ),
         }

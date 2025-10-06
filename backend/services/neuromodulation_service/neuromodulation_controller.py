@@ -18,13 +18,13 @@ environmental conditions, enhancing its flexibility and effectiveness.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from dopamine_core import DopamineCore
-from serotonin_core import SerotoninCore
-from noradrenaline_core import NoradrenalineCore
 from acetylcholine_core import AcetylcholineCore
+from dopamine_core import DopamineCore
+from noradrenaline_core import NoradrenalineCore
+from serotonin_core import SerotoninCore
 
 
 class NeuromodulationController:
@@ -36,7 +36,13 @@ class NeuromodulationController:
     cognitive and emotional states.
     """
 
-    def __init__(self, dopamine_core: DopamineCore, serotonin_core: SerotoninCore, noradrenaline_core: NoradrenalineCore, acetylcholine_core: AcetylcholineCore):
+    def __init__(
+        self,
+        dopamine_core: DopamineCore,
+        serotonin_core: SerotoninCore,
+        noradrenaline_core: NoradrenalineCore,
+        acetylcholine_core: AcetylcholineCore,
+    ):
         """Initializes the NeuromodulationController.
 
         Args:
@@ -52,7 +58,13 @@ class NeuromodulationController:
         self.last_control_action: Optional[datetime] = None
         print("[NeuromodulationController] Initialized Neuromodulation Controller.")
 
-    async def modulate_parameter(self, modulator_type: str, parameter: str, value: float, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def modulate_parameter(
+        self,
+        modulator_type: str,
+        parameter: str,
+        value: float,
+        context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Applies neuromodulation to a specific AI parameter via the relevant core.
 
         Args:
@@ -63,7 +75,7 @@ class NeuromodulationController:
 
         Returns:
             Dict[str, Any]: A dictionary summarizing the modulation effect.
-        
+
         Raises:
             ValueError: If the modulator type or parameter is unsupported.
         """
@@ -95,7 +107,9 @@ class NeuromodulationController:
                 raise ValueError(f"Unsupported noradrenaline parameter: {parameter}")
         elif modulator_type == "acetylcholine":
             if parameter == "attention_level":
-                result = await self.acetylcholine_core.modulate_attention(context.get("target_focus", "general"), value)
+                result = await self.acetylcholine_core.modulate_attention(
+                    context.get("target_focus", "general"), value
+                )
             elif parameter == "learning_rate_modifier":
                 result = await self.acetylcholine_core.adjust_learning_rate(value)
             elif parameter == "memory_consolidation_boost":
@@ -120,9 +134,13 @@ class NeuromodulationController:
 
         return {
             "controller_status": "active",
-            "last_control_action": self.last_control_action.isoformat() if self.last_control_action else "N/A",
+            "last_control_action": (
+                self.last_control_action.isoformat()
+                if self.last_control_action
+                else "N/A"
+            ),
             "dopamine_core": dopamine_status,
             "serotonin_core": serotonin_status,
             "noradrenaline_core": noradrenaline_status,
-            "acetylcholine_core": acetylcholine_status
+            "acetylcholine_core": acetylcholine_status,
         }

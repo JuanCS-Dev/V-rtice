@@ -8,13 +8,13 @@ Bio-inspired anticipatory intelligence - predict attacks before they happen.
 NO MOCKS - Production-ready predictive algorithms.
 """
 
-import logging
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Set, Any, Optional, Tuple
 from enum import Enum
-from collections import defaultdict
 import json
+import logging
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 from scipy import stats
@@ -28,8 +28,10 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # ============================================================================
 
+
 class ThreatType(Enum):
     """Threat classification."""
+
     RECONNAISSANCE = "reconnaissance"
     EXPLOITATION = "exploitation"
     LATERAL_MOVEMENT = "lateral_movement"
@@ -42,15 +44,17 @@ class ThreatType(Enum):
 
 class ConfidenceLevel(Enum):
     """Prediction confidence levels."""
-    LOW = "low"           # < 60%
-    MEDIUM = "medium"     # 60-80%
-    HIGH = "high"         # 80-95%
-    CRITICAL = "critical" # > 95%
+
+    LOW = "low"  # < 60%
+    MEDIUM = "medium"  # 60-80%
+    HIGH = "high"  # 80-95%
+    CRITICAL = "critical"  # > 95%
 
 
 @dataclass
 class ThreatEvent:
     """Historical threat event."""
+
     event_id: str
     threat_type: ThreatType
     timestamp: datetime
@@ -64,6 +68,7 @@ class ThreatEvent:
 @dataclass
 class AttackPrediction:
     """Predicted attack."""
+
     prediction_id: str
     threat_type: ThreatType
     predicted_time: datetime
@@ -78,6 +83,7 @@ class AttackPrediction:
 @dataclass
 class VulnerabilityForecast:
     """Forecasted vulnerability exploitation."""
+
     cve_id: str
     vulnerability_name: str
     cvss_score: float
@@ -92,6 +98,7 @@ class VulnerabilityForecast:
 @dataclass
 class HuntingRecommendation:
     """Proactive hunting recommendation."""
+
     recommendation_id: str
     hunt_type: str  # "asset_scan", "log_review", "network_monitor"
     target_assets: List[str]
@@ -106,6 +113,7 @@ class HuntingRecommendation:
 # ============================================================================
 # Attack Predictor
 # ============================================================================
+
 
 class AttackPredictor:
     """Predicts future attacks using time-series analysis and pattern recognition.
@@ -138,9 +146,7 @@ class AttackPredictor:
         logger.debug(f"Ingested threat event: {event.event_id}")
 
     def predict_attacks(
-        self,
-        time_horizon_hours: int = 24,
-        min_confidence: float = 0.6
+        self, time_horizon_hours: int = 24, min_confidence: float = 0.6
     ) -> List[AttackPrediction]:
         """Predict attacks in the next time_horizon_hours.
 
@@ -194,7 +200,9 @@ class AttackPredictor:
                 now = datetime.now().timestamp()
                 if predicted_time <= now + (time_horizon_hours * 3600):
                     # Compute probability based on pattern strength
-                    pattern_strength = self._compute_pattern_strength(timestamps, periodicity_hours)
+                    pattern_strength = self._compute_pattern_strength(
+                        timestamps, periodicity_hours
+                    )
                     probability = min(0.95, pattern_strength)
 
                     # Determine confidence
@@ -208,11 +216,13 @@ class AttackPredictor:
                         indicators = [
                             f"Historical pattern: {threat_type.value} every {periodicity_hours:.1f}h",
                             f"Last occurrence: {datetime.fromtimestamp(last_attack_time).isoformat()}",
-                            f"Pattern strength: {pattern_strength:.2f}"
+                            f"Pattern strength: {pattern_strength:.2f}",
                         ]
 
                         # Recommended actions
-                        recommended_actions = self._generate_recommendations(threat_type, predicted_targets)
+                        recommended_actions = self._generate_recommendations(
+                            threat_type, predicted_targets
+                        )
 
                         prediction = AttackPrediction(
                             prediction_id=f"pred_{threat_type.value}_{int(predicted_time)}",
@@ -222,14 +232,16 @@ class AttackPredictor:
                             probability=probability,
                             confidence=confidence,
                             indicators=indicators,
-                            recommended_actions=recommended_actions
+                            recommended_actions=recommended_actions,
                         )
 
                         predictions.append(prediction)
                         self.predictions_made += 1
 
         # Detect attack sequences (multi-stage attacks)
-        sequence_predictions = self._predict_attack_sequences(time_horizon_hours, min_confidence)
+        sequence_predictions = self._predict_attack_sequences(
+            time_horizon_hours, min_confidence
+        )
         predictions.extend(sequence_predictions)
 
         return predictions
@@ -264,13 +276,15 @@ class AttackPredictor:
 
         if len(peaks) > 0:
             # Return most prominent peak
-            peak_idx = peaks[np.argmax(properties['prominences'])]
+            peak_idx = peaks[np.argmax(properties["prominences"])]
             period_hours = (bin_edges[peak_idx] + bin_edges[peak_idx + 1]) / 2
             return float(period_hours)
 
         return None
 
-    def _compute_pattern_strength(self, timestamps: np.ndarray, period_hours: float) -> float:
+    def _compute_pattern_strength(
+        self, timestamps: np.ndarray, period_hours: float
+    ) -> float:
         """Compute strength of periodic pattern.
 
         Algorithm: Measure how well actual intervals match expected period.
@@ -333,7 +347,9 @@ class AttackPredictor:
         else:
             return ConfidenceLevel.LOW
 
-    def _generate_recommendations(self, threat_type: ThreatType, targets: List[str]) -> List[str]:
+    def _generate_recommendations(
+        self, threat_type: ThreatType, targets: List[str]
+    ) -> List[str]:
         """Generate recommended defensive actions.
 
         Args:
@@ -383,9 +399,7 @@ class AttackPredictor:
         return recommendations
 
     def _predict_attack_sequences(
-        self,
-        time_horizon_hours: int,
-        min_confidence: float
+        self, time_horizon_hours: int, min_confidence: float
     ) -> List[AttackPrediction]:
         """Predict multi-stage attack sequences (kill chain).
 
@@ -408,7 +422,11 @@ class AttackPredictor:
 
         # Define kill chain patterns
         kill_chains = [
-            [ThreatType.RECONNAISSANCE, ThreatType.EXPLOITATION, ThreatType.LATERAL_MOVEMENT],
+            [
+                ThreatType.RECONNAISSANCE,
+                ThreatType.EXPLOITATION,
+                ThreatType.LATERAL_MOVEMENT,
+            ],
             [ThreatType.PHISHING, ThreatType.EXPLOITATION, ThreatType.EXFILTRATION],
             [ThreatType.EXPLOITATION, ThreatType.RANSOMWARE],
         ]
@@ -426,7 +444,9 @@ class AttackPredictor:
                 next_stage = chain[stage_idx + 1]
 
                 # Find events matching current stage
-                matching_events = [e for e in recent_events if e.threat_type == current_stage]
+                matching_events = [
+                    e for e in recent_events if e.threat_type == current_stage
+                ]
 
                 if len(matching_events) > 0:
                     # Predict next stage
@@ -435,12 +455,16 @@ class AttackPredictor:
                     # Typical time between stages: 1-12 hours
                     # Use exponential distribution (λ = 1/6 hours)
                     mean_interval_hours = 6
-                    predicted_time = last_stage_event.timestamp + timedelta(hours=mean_interval_hours)
+                    predicted_time = last_stage_event.timestamp + timedelta(
+                        hours=mean_interval_hours
+                    )
 
                     # Check if within time horizon
                     if predicted_time <= now + timedelta(hours=time_horizon_hours):
                         # Compute probability based on historical kill chain completion rate
-                        completion_rate = self._compute_kill_chain_completion_rate(chain)
+                        completion_rate = self._compute_kill_chain_completion_rate(
+                            chain
+                        )
                         probability = completion_rate
 
                         confidence = self._determine_confidence(probability)
@@ -453,13 +477,13 @@ class AttackPredictor:
                                 f"Kill chain detected: {' → '.join([t.value for t in chain])}",
                                 f"Current stage: {current_stage.value}",
                                 f"Next predicted stage: {next_stage.value}",
-                                f"Historical completion rate: {completion_rate:.2%}"
+                                f"Historical completion rate: {completion_rate:.2%}",
                             ]
 
                             recommendations = [
                                 f"Monitor {last_stage_event.target_asset} for {next_stage.value}",
                                 "Isolate asset if next stage confirmed",
-                                "Review security controls for kill chain disruption"
+                                "Review security controls for kill chain disruption",
                             ]
 
                             prediction = AttackPrediction(
@@ -470,7 +494,7 @@ class AttackPredictor:
                                 probability=probability,
                                 confidence=confidence,
                                 indicators=indicators,
-                                recommended_actions=recommendations
+                                recommended_actions=recommendations,
                             )
 
                             predictions.append(prediction)
@@ -487,7 +511,9 @@ class AttackPredictor:
             Completion rate (0.0-1.0)
         """
         # Count occurrences of first stage
-        first_stage_count = sum(1 for e in self.threat_history if e.threat_type == chain[0])
+        first_stage_count = sum(
+            1 for e in self.threat_history if e.threat_type == chain[0]
+        )
 
         if first_stage_count == 0:
             return 0.5  # Default probability
@@ -497,12 +523,11 @@ class AttackPredictor:
 
         # Sliding window through history
         for i in range(len(self.threat_history) - len(chain) + 1):
-            window = self.threat_history[i:i + len(chain)]
+            window = self.threat_history[i : i + len(chain)]
 
             # Check if types match chain
             types_match = all(
-                window[j].threat_type == chain[j]
-                for j in range(len(chain))
+                window[j].threat_type == chain[j] for j in range(len(chain))
             )
 
             # Check if same target
@@ -512,7 +537,9 @@ class AttackPredictor:
             )
 
             # Check if within reasonable time window (24 hours)
-            time_span = (window[-1].timestamp - window[0].timestamp).total_seconds() / 3600
+            time_span = (
+                window[-1].timestamp - window[0].timestamp
+            ).total_seconds() / 3600
             within_timeframe = time_span <= 24
 
             if types_match and same_target and within_timeframe:
@@ -531,7 +558,9 @@ class AttackPredictor:
         if actual_occurred:
             self.correct_predictions += 1
 
-        logger.info(f"Prediction {prediction_id}: {'HIT' if actual_occurred else 'MISS'}")
+        logger.info(
+            f"Prediction {prediction_id}: {'HIT' if actual_occurred else 'MISS'}"
+        )
 
     def get_status(self) -> Dict[str, Any]:
         """Get predictor status and statistics.
@@ -552,13 +581,14 @@ class AttackPredictor:
             "predictions_made": self.predictions_made,
             "correct_predictions": self.correct_predictions,
             "accuracy": accuracy,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 # ============================================================================
 # Vulnerability Forecaster
 # ============================================================================
+
 
 class VulnerabilityForecaster:
     """Forecasts vulnerability exploitation based on trending intelligence.
@@ -584,7 +614,7 @@ class VulnerabilityForecaster:
         published_date: datetime,
         affected_assets: List[str],
         exploit_available: bool = False,
-        patch_available: bool = False
+        patch_available: bool = False,
     ):
         """Register vulnerability in database.
 
@@ -603,7 +633,7 @@ class VulnerabilityForecaster:
             "exploit_available": exploit_available,
             "patch_available": patch_available,
             "trending_score": 0.0,
-            "exploitation_observed": False
+            "exploitation_observed": False,
         }
 
         logger.debug(f"Registered vulnerability: {cve_id}")
@@ -625,19 +655,14 @@ class VulnerabilityForecaster:
         normalized_mentions = min(mentions / 100, 1.0)
         normalized_chatter = min(dark_web_chatter / 50, 1.0)
 
-        trending_score = (
-            0.6 * normalized_mentions +
-            0.4 * normalized_chatter
-        )
+        trending_score = 0.6 * normalized_mentions + 0.4 * normalized_chatter
 
         self.vulnerability_database[cve_id]["trending_score"] = trending_score
 
         logger.debug(f"Updated trending score for {cve_id}: {trending_score:.2f}")
 
     def forecast_exploitations(
-        self,
-        time_horizon_days: int = 30,
-        min_probability: float = 0.5
+        self, time_horizon_days: int = 30, min_probability: float = 0.5
     ) -> List[VulnerabilityForecast]:
         """Forecast which vulnerabilities will be exploited.
 
@@ -671,7 +696,9 @@ class VulnerabilityForecaster:
 
             if probability >= min_probability:
                 # Estimate exploitation date
-                estimated_date = self._estimate_exploitation_date(vuln, now, probability)
+                estimated_date = self._estimate_exploitation_date(
+                    vuln, now, probability
+                )
 
                 # Check if within time horizon
                 if estimated_date <= now + timedelta(days=time_horizon_days):
@@ -686,7 +713,7 @@ class VulnerabilityForecaster:
                         estimated_exploitation_date=estimated_date,
                         affected_assets=vuln["affected_assets"],
                         mitigation_priority=priority,
-                        trending_score=vuln["trending_score"]
+                        trending_score=vuln["trending_score"],
                     )
 
                     forecasts.append(forecast)
@@ -697,7 +724,9 @@ class VulnerabilityForecaster:
 
         return forecasts
 
-    def _compute_exploitation_probability(self, vuln: Dict[str, Any], now: datetime) -> float:
+    def _compute_exploitation_probability(
+        self, vuln: Dict[str, Any], now: datetime
+    ) -> float:
         """Compute probability of exploitation.
 
         Factors:
@@ -734,15 +763,14 @@ class VulnerabilityForecaster:
         patch_factor = 0.0 if vuln["patch_available"] else 0.2
 
         # Total probability
-        probability = cvss_factor + exploit_factor + trending_factor + time_factor + patch_factor
+        probability = (
+            cvss_factor + exploit_factor + trending_factor + time_factor + patch_factor
+        )
 
         return float(np.clip(probability, 0.0, 1.0))
 
     def _estimate_exploitation_date(
-        self,
-        vuln: Dict[str, Any],
-        now: datetime,
-        probability: float
+        self, vuln: Dict[str, Any], now: datetime, probability: float
     ) -> datetime:
         """Estimate exploitation date using exponential distribution.
 
@@ -769,7 +797,9 @@ class VulnerabilityForecaster:
 
         return estimated_date
 
-    def _compute_mitigation_priority(self, vuln: Dict[str, Any], probability: float) -> int:
+    def _compute_mitigation_priority(
+        self, vuln: Dict[str, Any], probability: float
+    ) -> int:
         """Compute mitigation priority (1-5).
 
         Priority = f(CVSS, probability, affected assets)
@@ -782,11 +812,7 @@ class VulnerabilityForecaster:
             Priority level (1=low, 5=critical)
         """
         # Risk score = CVSS * probability * asset_count
-        risk_score = (
-            vuln["cvss_score"] *
-            probability *
-            len(vuln["affected_assets"])
-        )
+        risk_score = vuln["cvss_score"] * probability * len(vuln["affected_assets"])
 
         # Map to 1-5 scale
         if risk_score >= 8:
@@ -811,13 +837,14 @@ class VulnerabilityForecaster:
             "vulnerabilities_tracked": len(self.vulnerability_database),
             "forecasts_made": self.forecasts_made,
             "trending_vulnerabilities": len(self.trending_vulnerabilities),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 # ============================================================================
 # Proactive Hunter
 # ============================================================================
+
 
 class ProactiveHunter:
     """Generates proactive threat hunting recommendations.
@@ -838,7 +865,7 @@ class ProactiveHunter:
     def generate_hunting_recommendations(
         self,
         predictions: List[AttackPrediction],
-        forecasts: List[VulnerabilityForecast]
+        forecasts: List[VulnerabilityForecast],
     ) -> List[HuntingRecommendation]:
         """Generate hunting recommendations based on predictions.
 
@@ -853,7 +880,10 @@ class ProactiveHunter:
 
         # Generate recommendations from attack predictions
         for prediction in predictions:
-            if prediction.confidence in [ConfidenceLevel.HIGH, ConfidenceLevel.CRITICAL]:
+            if prediction.confidence in [
+                ConfidenceLevel.HIGH,
+                ConfidenceLevel.CRITICAL,
+            ]:
                 # High-confidence predictions warrant immediate hunts
                 rec = self._create_prediction_hunt(prediction)
                 recommendations.append(rec)
@@ -872,7 +902,9 @@ class ProactiveHunter:
 
         return recommendations
 
-    def _create_prediction_hunt(self, prediction: AttackPrediction) -> HuntingRecommendation:
+    def _create_prediction_hunt(
+        self, prediction: AttackPrediction
+    ) -> HuntingRecommendation:
         """Create hunt recommendation from attack prediction.
 
         Args:
@@ -882,7 +914,10 @@ class ProactiveHunter:
             Hunting recommendation
         """
         # Determine hunt type based on threat type
-        if prediction.threat_type in [ThreatType.RECONNAISSANCE, ThreatType.EXPLOITATION]:
+        if prediction.threat_type in [
+            ThreatType.RECONNAISSANCE,
+            ThreatType.EXPLOITATION,
+        ]:
             hunt_type = "network_monitor"
             search_queries = [
                 f"source_ip:* AND destination:{target}"
@@ -890,7 +925,10 @@ class ProactiveHunter:
             ]
             estimated_effort = 2.0
 
-        elif prediction.threat_type in [ThreatType.LATERAL_MOVEMENT, ThreatType.EXFILTRATION]:
+        elif prediction.threat_type in [
+            ThreatType.LATERAL_MOVEMENT,
+            ThreatType.EXFILTRATION,
+        ]:
             hunt_type = "log_review"
             search_queries = [
                 f"process_name:(psexec.exe OR wmic.exe) AND target:{target}"
@@ -911,7 +949,7 @@ class ProactiveHunter:
             ConfidenceLevel.CRITICAL: 5,
             ConfidenceLevel.HIGH: 4,
             ConfidenceLevel.MEDIUM: 3,
-            ConfidenceLevel.LOW: 2
+            ConfidenceLevel.LOW: 2,
         }[prediction.confidence]
 
         # Rationale
@@ -925,7 +963,7 @@ class ProactiveHunter:
         potential_findings = [
             f"Early indicators of {prediction.threat_type.value}",
             "Suspicious network connections",
-            "Anomalous process execution"
+            "Anomalous process execution",
         ]
 
         recommendation = HuntingRecommendation(
@@ -936,12 +974,14 @@ class ProactiveHunter:
             rationale=rationale,
             priority=priority,
             estimated_effort_hours=estimated_effort,
-            potential_findings=potential_findings
+            potential_findings=potential_findings,
         )
 
         return recommendation
 
-    def _create_vulnerability_hunt(self, forecast: VulnerabilityForecast) -> HuntingRecommendation:
+    def _create_vulnerability_hunt(
+        self, forecast: VulnerabilityForecast
+    ) -> HuntingRecommendation:
         """Create hunt recommendation from vulnerability forecast.
 
         Args:
@@ -966,7 +1006,7 @@ class ProactiveHunter:
         potential_findings = [
             f"Vulnerable instances of {forecast.vulnerability_name}",
             "Unpatched systems",
-            "Exploit artifacts"
+            "Exploit artifacts",
         ]
 
         recommendation = HuntingRecommendation(
@@ -977,7 +1017,7 @@ class ProactiveHunter:
             rationale=rationale,
             priority=forecast.mitigation_priority,
             estimated_effort_hours=1.0 * len(forecast.affected_assets),
-            potential_findings=potential_findings
+            potential_findings=potential_findings,
         )
 
         return recommendation
@@ -1012,5 +1052,5 @@ class ProactiveHunter:
             "hunts_executed": self.hunts_executed,
             "findings_discovered": self.findings_discovered,
             "hit_rate": hit_rate,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }

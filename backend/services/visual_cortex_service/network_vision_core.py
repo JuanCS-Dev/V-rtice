@@ -13,8 +13,8 @@ cybersecurity analysis.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class NetworkVisionCore:
@@ -40,20 +40,46 @@ class NetworkVisionCore:
             Dict[str, Any]: A dictionary containing identified network patterns, anomalies, and insights.
         """
         self.current_status = "analyzing_network_image"
-        print(f"[NetworkVision] Analyzing network traffic image (size: {len(image_data)} bytes).")
-        await asyncio.sleep(0.3) # Simulate analysis
+        print(
+            f"[NetworkVision] Analyzing network traffic image (size: {len(image_data)} bytes)."
+        )
+        await asyncio.sleep(0.3)  # Simulate analysis
 
         # Simulate detection of network patterns/anomalies based on image content
         identified_patterns = []
         anomalies = []
 
-        if b"spike_in_traffic_pattern" in image_data: # Placeholder for actual visual analysis
-            identified_patterns.append({"type": "traffic_spike", "location": "external_interface", "severity": "high"})
-            anomalies.append({"type": "unusual_traffic", "description": "Sudden surge in outbound data."})
+        if (
+            b"spike_in_traffic_pattern" in image_data
+        ):  # Placeholder for actual visual analysis
+            identified_patterns.append(
+                {
+                    "type": "traffic_spike",
+                    "location": "external_interface",
+                    "severity": "high",
+                }
+            )
+            anomalies.append(
+                {
+                    "type": "unusual_traffic",
+                    "description": "Sudden surge in outbound data.",
+                }
+            )
             self.network_anomalies_detected += 1
         if b"unusual_connection_graph" in image_data:
-            identified_patterns.append({"type": "new_connection", "source": "unknown_ip", "destination": "internal_server"})
-            anomalies.append({"type": "suspicious_connection", "description": "New connection from unlisted IP."})
+            identified_patterns.append(
+                {
+                    "type": "new_connection",
+                    "source": "unknown_ip",
+                    "destination": "internal_server",
+                }
+            )
+            anomalies.append(
+                {
+                    "type": "suspicious_connection",
+                    "description": "New connection from unlisted IP.",
+                }
+            )
             self.network_anomalies_detected += 1
 
         self.last_analysis_time = datetime.now()
@@ -63,7 +89,8 @@ class NetworkVisionCore:
             "timestamp": self.last_analysis_time.isoformat(),
             "identified_patterns": identified_patterns,
             "detected_anomalies": anomalies,
-            "network_health_score": 1.0 - (self.network_anomalies_detected * 0.1) # Simplified score
+            "network_health_score": 1.0
+            - (self.network_anomalies_detected * 0.1),  # Simplified score
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -74,6 +101,10 @@ class NetworkVisionCore:
         """
         return {
             "status": self.current_status,
-            "last_analysis": self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A",
-            "total_network_anomalies_detected": self.network_anomalies_detected
+            "last_analysis": (
+                self.last_analysis_time.isoformat()
+                if self.last_analysis_time
+                else "N/A"
+            ),
+            "total_network_anomalies_detected": self.network_anomalies_detected,
         }

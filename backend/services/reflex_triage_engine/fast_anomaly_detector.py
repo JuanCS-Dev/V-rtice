@@ -4,17 +4,19 @@ Lightweight ML-based anomaly detection optimized for speed.
 Uses pre-trained Isolation Forest for real-time detection.
 """
 
-import logging
-import time
-import numpy as np
-from typing import Dict, List, Optional
 from dataclasses import dataclass
-import pickle
+import logging
 from pathlib import Path
+import pickle
+import time
+from typing import Dict, List, Optional
+
+import numpy as np
 
 try:
     from sklearn.ensemble import IsolationForest
     from sklearn.preprocessing import StandardScaler
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -26,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AnomalyResult:
     """Anomaly detection result."""
+
     is_anomaly: bool
     anomaly_score: float  # -1 to 1 (higher = more anomalous)
     feature_contributions: Dict[str, float]
@@ -42,7 +45,7 @@ class FastAnomalyDetector:
         self,
         model_path: Optional[str] = None,
         contamination: float = 0.1,
-        n_estimators: int = 100
+        n_estimators: int = 100,
     ):
         """Initialize fast anomaly detector.
 
@@ -67,9 +70,9 @@ class FastAnomalyDetector:
             self.model = IsolationForest(
                 n_estimators=n_estimators,
                 contamination=contamination,
-                max_samples='auto',
+                max_samples="auto",
                 n_jobs=-1,  # Parallel processing
-                random_state=42
+                random_state=42,
             )
             self.scaler = StandardScaler()
 
@@ -88,50 +91,58 @@ class FastAnomalyDetector:
         features = []
 
         # Network features (10)
-        features.extend([
-            event.get('packet_size', 0),
-            event.get('packet_rate', 0),
-            event.get('protocol_tcp', 0),
-            event.get('protocol_udp', 0),
-            event.get('src_port', 0),
-            event.get('dst_port', 0),
-            event.get('connection_duration', 0),
-            event.get('bytes_sent', 0),
-            event.get('bytes_received', 0),
-            event.get('unique_destinations', 0)
-        ])
+        features.extend(
+            [
+                event.get("packet_size", 0),
+                event.get("packet_rate", 0),
+                event.get("protocol_tcp", 0),
+                event.get("protocol_udp", 0),
+                event.get("src_port", 0),
+                event.get("dst_port", 0),
+                event.get("connection_duration", 0),
+                event.get("bytes_sent", 0),
+                event.get("bytes_received", 0),
+                event.get("unique_destinations", 0),
+            ]
+        )
 
         # Process features (10)
-        features.extend([
-            event.get('cpu_usage', 0),
-            event.get('memory_usage', 0),
-            event.get('syscall_count', 0),
-            event.get('file_writes', 0),
-            event.get('file_reads', 0),
-            event.get('network_connections', 0),
-            event.get('child_processes', 0),
-            event.get('dll_loads', 0),
-            event.get('registry_writes', 0),
-            event.get('process_uptime', 0)
-        ])
+        features.extend(
+            [
+                event.get("cpu_usage", 0),
+                event.get("memory_usage", 0),
+                event.get("syscall_count", 0),
+                event.get("file_writes", 0),
+                event.get("file_reads", 0),
+                event.get("network_connections", 0),
+                event.get("child_processes", 0),
+                event.get("dll_loads", 0),
+                event.get("registry_writes", 0),
+                event.get("process_uptime", 0),
+            ]
+        )
 
         # File features (5)
-        features.extend([
-            event.get('file_entropy', 0),
-            event.get('file_size', 0),
-            event.get('is_executable', 0),
-            event.get('is_script', 0),
-            event.get('file_age_seconds', 0)
-        ])
+        features.extend(
+            [
+                event.get("file_entropy", 0),
+                event.get("file_size", 0),
+                event.get("is_executable", 0),
+                event.get("is_script", 0),
+                event.get("file_age_seconds", 0),
+            ]
+        )
 
         # Temporal features (5)
-        features.extend([
-            event.get('hour_of_day', 0),
-            event.get('day_of_week', 0),
-            event.get('is_weekend', 0),
-            event.get('time_since_last_event', 0),
-            event.get('event_frequency', 0)
-        ])
+        features.extend(
+            [
+                event.get("hour_of_day", 0),
+                event.get("day_of_week", 0),
+                event.get("is_weekend", 0),
+                event.get("time_since_last_event", 0),
+                event.get("event_frequency", 0),
+            ]
+        )
 
         return np.array(features, dtype=np.float32)
 
@@ -153,15 +164,39 @@ class FastAnomalyDetector:
         # Store feature names
         self.feature_names = [
             # Network (10)
-            'packet_size', 'packet_rate', 'tcp', 'udp', 'src_port', 'dst_port',
-            'conn_duration', 'bytes_sent', 'bytes_recv', 'unique_dests',
+            "packet_size",
+            "packet_rate",
+            "tcp",
+            "udp",
+            "src_port",
+            "dst_port",
+            "conn_duration",
+            "bytes_sent",
+            "bytes_recv",
+            "unique_dests",
             # Process (10)
-            'cpu', 'memory', 'syscalls', 'file_writes', 'file_reads',
-            'net_conns', 'child_procs', 'dll_loads', 'reg_writes', 'uptime',
+            "cpu",
+            "memory",
+            "syscalls",
+            "file_writes",
+            "file_reads",
+            "net_conns",
+            "child_procs",
+            "dll_loads",
+            "reg_writes",
+            "uptime",
             # File (5)
-            'file_entropy', 'file_size', 'is_exe', 'is_script', 'file_age',
+            "file_entropy",
+            "file_size",
+            "is_exe",
+            "is_script",
+            "file_age",
             # Temporal (5)
-            'hour', 'day', 'weekend', 'time_delta', 'frequency'
+            "hour",
+            "day",
+            "weekend",
+            "time_delta",
+            "frequency",
         ]
 
         # Fit scaler
@@ -192,7 +227,7 @@ class FastAnomalyDetector:
                 is_anomaly=False,
                 anomaly_score=0.0,
                 feature_contributions={},
-                detection_time_ms=0.0
+                detection_time_ms=0.0,
             )
 
         detect_start = time.time()
@@ -205,7 +240,7 @@ class FastAnomalyDetector:
         prediction = self.model.predict(features_scaled)[0]  # -1 = anomaly, 1 = normal
         score = self.model.score_samples(features_scaled)[0]  # Lower = more anomalous
 
-        is_anomaly = (prediction == -1)
+        is_anomaly = prediction == -1
 
         # Normalize score to 0-1 (higher = more anomalous)
         anomaly_score = 1.0 / (1.0 + np.exp(score))  # Sigmoid normalization
@@ -222,7 +257,7 @@ class FastAnomalyDetector:
             is_anomaly=is_anomaly,
             anomaly_score=float(anomaly_score),
             feature_contributions=feature_contributions,
-            detection_time_ms=detection_time
+            detection_time_ms=detection_time,
         )
 
     def _compute_contributions(self, features: np.ndarray) -> Dict[str, float]:
@@ -254,13 +289,13 @@ class FastAnomalyDetector:
             return
 
         model_data = {
-            'model': self.model,
-            'scaler': self.scaler,
-            'feature_names': self.feature_names,
-            'trained': self.trained
+            "model": self.model,
+            "scaler": self.scaler,
+            "feature_names": self.feature_names,
+            "trained": self.trained,
         }
 
-        with open(path, 'wb') as f:
+        with open(path, "wb") as f:
             pickle.dump(model_data, f)
 
         logger.info(f"Model saved to {path}")
@@ -268,13 +303,13 @@ class FastAnomalyDetector:
     def load_model(self, path: str):
         """Load trained model from file."""
         try:
-            with open(path, 'rb') as f:
+            with open(path, "rb") as f:
                 model_data = pickle.load(f)
 
-            self.model = model_data['model']
-            self.scaler = model_data['scaler']
-            self.feature_names = model_data['feature_names']
-            self.trained = model_data['trained']
+            self.model = model_data["model"]
+            self.scaler = model_data["scaler"]
+            self.feature_names = model_data["feature_names"]
+            self.trained = model_data["trained"]
 
             logger.info(f"Model loaded from {path}")
 
@@ -285,8 +320,8 @@ class FastAnomalyDetector:
     def get_statistics(self) -> Dict:
         """Get detector statistics."""
         return {
-            'trained': self.trained,
-            'n_features': len(self.feature_names),
-            'sklearn_available': SKLEARN_AVAILABLE,
-            'model_type': 'IsolationForest' if self.model else None
+            "trained": self.trained,
+            "n_features": len(self.feature_names),
+            "sklearn_available": SKLEARN_AVAILABLE,
+            "model_type": "IsolationForest" if self.model else None,
         }

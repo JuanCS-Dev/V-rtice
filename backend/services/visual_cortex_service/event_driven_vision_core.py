@@ -13,8 +13,8 @@ resource-efficient.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class EventDrivenVisionCore:
@@ -40,15 +40,23 @@ class EventDrivenVisionCore:
             Dict[str, Any]: A dictionary containing detected events and their properties.
         """
         self.current_status = "processing_event"
-        print(f"[EventDrivenVision] Processing image data (size: {len(image_data)} bytes) for events.")
-        await asyncio.sleep(0.1) # Simulate image processing
+        print(
+            f"[EventDrivenVision] Processing image data (size: {len(image_data)} bytes) for events."
+        )
+        await asyncio.sleep(0.1)  # Simulate image processing
 
         # Simulate event detection based on image content (e.g., a simple check for 'red' pixels)
         detected_events = []
-        if b"red_object_signature" in image_data: # Placeholder for actual image analysis
-            detected_events.append({"type": "new_object", "object": "red_cube", "confidence": 0.9})
+        if (
+            b"red_object_signature" in image_data
+        ):  # Placeholder for actual image analysis
+            detected_events.append(
+                {"type": "new_object", "object": "red_cube", "confidence": 0.9}
+            )
         if b"movement_signature" in image_data:
-            detected_events.append({"type": "movement", "direction": "left", "speed": "medium"})
+            detected_events.append(
+                {"type": "movement", "direction": "left", "speed": "medium"}
+            )
 
         self.event_count += len(detected_events)
         self.last_event_time = datetime.now()
@@ -57,7 +65,7 @@ class EventDrivenVisionCore:
         return {
             "timestamp": self.last_event_time.isoformat(),
             "events": detected_events,
-            "total_events_processed": self.event_count
+            "total_events_processed": self.event_count,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -68,6 +76,8 @@ class EventDrivenVisionCore:
         """
         return {
             "status": self.current_status,
-            "last_event": self.last_event_time.isoformat() if self.last_event_time else "N/A",
-            "events_processed_since_startup": self.event_count
+            "last_event": (
+                self.last_event_time.isoformat() if self.last_event_time else "N/A"
+            ),
+            "events_processed_since_startup": self.event_count,
         }

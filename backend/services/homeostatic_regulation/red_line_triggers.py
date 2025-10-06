@@ -12,15 +12,15 @@ circumstances, acting as a last line of defense for the Maximus AI system.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class RedLineTriggers:
     """Implements critical, emergency response protocols (Red Line Triggers).
 
-    Activated when the AI system detects severe threats, catastrophic failures,
-or breaches of fundamental operational boundaries.
+        Activated when the AI system detects severe threats, catastrophic failures,
+    or breaches of fundamental operational boundaries.
     """
 
     def __init__(self):
@@ -28,12 +28,20 @@ or breaches of fundamental operational boundaries.
         self.last_trigger_time: Optional[datetime] = None
         self.triggered_events: List[Dict[str, Any]] = []
         self.emergency_protocols: Dict[str, Any] = {
-            "critical_failure": {"action": "shutdown_non_essential", "severity": "extreme"},
+            "critical_failure": {
+                "action": "shutdown_non_essential",
+                "severity": "extreme",
+            },
             "security_breach": {"action": "isolate_network", "severity": "extreme"},
-            "resource_exhaustion": {"action": "minimal_mode_activate", "severity": "high"}
+            "resource_exhaustion": {
+                "action": "minimal_mode_activate",
+                "severity": "high",
+            },
         }
 
-    async def trigger_emergency_response(self, trigger_type: str, details: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def trigger_emergency_response(
+        self, trigger_type: str, details: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Triggers a predefined emergency response based on the trigger type.
 
         Args:
@@ -42,7 +50,7 @@ or breaches of fundamental operational boundaries.
 
         Returns:
             Dict[str, Any]: A dictionary summarizing the emergency response initiated.
-        
+
         Raises:
             ValueError: If an unknown trigger type is provided.
         """
@@ -50,8 +58,10 @@ or breaches of fundamental operational boundaries.
         if not protocol:
             raise ValueError(f"Unknown red-line trigger type: {trigger_type}")
 
-        print(f"🚨 [RedLineTriggers] Activating emergency protocol for: {trigger_type} (Severity: {protocol['severity']})")
-        await asyncio.sleep(0.5) # Simulate rapid response
+        print(
+            f"🚨 [RedLineTriggers] Activating emergency protocol for: {trigger_type} (Severity: {protocol['severity']})"
+        )
+        await asyncio.sleep(0.5)  # Simulate rapid response
 
         response_summary = {
             "timestamp": datetime.now().isoformat(),
@@ -59,14 +69,16 @@ or breaches of fundamental operational boundaries.
             "protocol_action": protocol["action"],
             "severity": protocol["severity"],
             "details": details,
-            "status": "initiated"
+            "status": "initiated",
         }
         self.triggered_events.append(response_summary)
         self.last_trigger_time = datetime.now()
 
         # In a real system, this would directly call infrastructure APIs or other critical services
         # to perform the emergency action (e.g., call Kubernetes API to scale down, network firewall to isolate)
-        print(f"🚨 [RedLineTriggers] Emergency action '{protocol['action']}' initiated.")
+        print(
+            f"🚨 [RedLineTriggers] Emergency action '{protocol['action']}' initiated."
+        )
 
         return response_summary
 
@@ -78,7 +90,9 @@ or breaches of fundamental operational boundaries.
         """
         return {
             "status": "active",
-            "last_trigger": self.last_trigger_time.isoformat() if self.last_trigger_time else "N/A",
+            "last_trigger": (
+                self.last_trigger_time.isoformat() if self.last_trigger_time else "N/A"
+            ),
             "total_triggered_events": len(self.triggered_events),
-            "available_protocols": list(self.emergency_protocols.keys())
+            "available_protocols": list(self.emergency_protocols.keys()),
         }

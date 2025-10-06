@@ -10,15 +10,15 @@ __version__ = "1.0.0"
 __author__ = "VÉRTICE Team"
 
 from .predictive_core import (
-    ThreatType,
-    ConfidenceLevel,
-    ThreatEvent,
     AttackPrediction,
-    VulnerabilityForecast,
-    HuntingRecommendation,
     AttackPredictor,
-    VulnerabilityForecaster,
+    ConfidenceLevel,
+    HuntingRecommendation,
     ProactiveHunter,
+    ThreatEvent,
+    ThreatType,
+    VulnerabilityForecast,
+    VulnerabilityForecaster,
 )
 
 __all__ = [
