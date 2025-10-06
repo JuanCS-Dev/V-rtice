@@ -14,8 +14,9 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
 
@@ -31,10 +32,16 @@ class OtolithOrgans:
         """Initializes the OtolithOrgans."""
         self.last_processed_time: Optional[datetime] = None
         self.current_linear_acceleration: List[float] = [0.0, 0.0, 0.0]
-        self.current_orientation_gravity: List[float] = [0.0, 0.0, 1.0] # Assuming Z is up
+        self.current_orientation_gravity: List[float] = [
+            0.0,
+            0.0,
+            1.0,
+        ]  # Assuming Z is up
         self.current_status: str = "monitoring_linear_motion"
 
-    def process_accelerometer_data(self, accelerometer_data: List[float]) -> Dict[str, Any]:
+    def process_accelerometer_data(
+        self, accelerometer_data: List[float]
+    ) -> Dict[str, Any]:
         """Processes simulated accelerometer data to determine linear motion and orientation.
 
         Args:
@@ -42,15 +49,19 @@ class OtolithOrgans:
 
         Returns:
             Dict[str, Any]: A dictionary containing the perceived linear motion and orientation.
-        
+
         Raises:
             ValueError: If accelerometer_data is not a list of 3 floats.
         """
-        if not (isinstance(accelerometer_data, list) and len(accelerometer_data) == 3 and all(isinstance(x, (int, float)) for x in accelerometer_data)):
+        if not (
+            isinstance(accelerometer_data, list)
+            and len(accelerometer_data) == 3
+            and all(isinstance(x, (int, float)) for x in accelerometer_data)
+        ):
             raise ValueError("accelerometer_data must be a list of 3 floats.")
 
         print(f"[OtolithOrgans] Processing accelerometer data: {accelerometer_data}")
-        
+
         # Simulate linear acceleration perception
         self.current_linear_acceleration = accelerometer_data
 
@@ -59,14 +70,21 @@ class OtolithOrgans:
         # If AI is static, accelerometer measures gravity in opposite direction
         gravity_vector = np.array([0.0, 0.0, -9.8])
         accel_vector = np.array(accelerometer_data)
-        
+
         # If the AI is not accelerating, the accelerometer measures -gravity
         # So, the orientation relative to gravity is roughly the inverse of the measured acceleration
-        if np.linalg.norm(accel_vector) > 0.1: # If there's significant acceleration
+        if np.linalg.norm(accel_vector) > 0.1:  # If there's significant acceleration
             # This is a very simplified model. Real orientation would use sensor fusion.
-            self.current_orientation_gravity = [-accel_vector[0], -accel_vector[1], -accel_vector[2]]
+            self.current_orientation_gravity = [
+                -accel_vector[0],
+                -accel_vector[1],
+                -accel_vector[2],
+            ]
             norm = np.linalg.norm(self.current_orientation_gravity)
-            if norm > 0: self.current_orientation_gravity = (self.current_orientation_gravity / norm).tolist()
+            if norm > 0:
+                self.current_orientation_gravity = (
+                    self.current_orientation_gravity / norm
+                ).tolist()
 
         self.last_processed_time = datetime.now()
 
@@ -74,7 +92,8 @@ class OtolithOrgans:
             "timestamp": self.last_processed_time.isoformat(),
             "linear_acceleration": self.current_linear_acceleration,
             "orientation_relative_to_gravity": self.current_orientation_gravity,
-            "motion_detected": np.linalg.norm(np.array(accelerometer_data)) > 0.1 # Simple motion detection
+            "motion_detected": np.linalg.norm(np.array(accelerometer_data))
+            > 0.1,  # Simple motion detection
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -85,7 +104,11 @@ class OtolithOrgans:
         """
         return {
             "status": self.current_status,
-            "last_processed": self.last_processed_time.isoformat() if self.last_processed_time else "N/A",
+            "last_processed": (
+                self.last_processed_time.isoformat()
+                if self.last_processed_time
+                else "N/A"
+            ),
             "current_linear_acceleration": self.current_linear_acceleration,
-            "current_orientation_gravity": self.current_orientation_gravity
+            "current_orientation_gravity": self.current_orientation_gravity,
         }

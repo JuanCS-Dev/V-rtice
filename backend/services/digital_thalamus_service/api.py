@@ -15,16 +15,16 @@ system, and higher-level cognitive services to receive pre-processed, prioritize
 sensory information for efficient decision-making.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from attention_control import AttentionControl
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 from sensory_gating import SensoryGating
 from signal_filtering import SignalFiltering
-from attention_control import AttentionControl
+import uvicorn
 
 app = FastAPI(title="Maximus Digital Thalamus Service", version="1.0.0")
 
@@ -44,6 +44,7 @@ class SensoryDataIngest(BaseModel):
         timestamp (str): ISO formatted timestamp of data collection.
         priority (int): Processing priority (1-10, 10 being highest).
     """
+
     sensor_id: str
     sensor_type: str
     data: Dict[str, Any]
@@ -85,24 +86,34 @@ async def ingest_sensory_data(request: SensoryDataIngest) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary confirming ingestion and processing status.
     """
-    print(f"[API] Ingesting {request.sensor_type} data from {request.sensor_id} (priority: {request.priority})")
-    
+    print(
+        f"[API] Ingesting {request.sensor_type} data from {request.sensor_id} (priority: {request.priority})"
+    )
+
     # Apply sensory gating
     if not sensory_gating.allow_data(request.sensor_type, request.priority):
-        return {"status": "rejected", "reason": "Sensory gating blocked data due to low priority or overload."}
+        return {
+            "status": "rejected",
+            "reason": "Sensory gating blocked data due to low priority or overload.",
+        }
 
     # Apply signal filtering
     filtered_data = signal_filtering.apply_filters(request.data, request.sensor_type)
 
     # Apply attention control (prioritization/routing)
-    processed_data = await attention_control.prioritize_and_route(filtered_data, request.sensor_type, request.priority)
+    processed_data = await attention_control.prioritize_and_route(
+        filtered_data, request.sensor_type, request.priority
+    )
 
     return {
         "timestamp": datetime.now().isoformat(),
         "sensor_id": request.sensor_id,
         "sensor_type": request.sensor_type,
         "status": "processed_and_routed",
-        "processed_payload_summary": {"keys": list(processed_data.keys()), "size": len(str(processed_data))}
+        "processed_payload_summary": {
+            "keys": list(processed_data.keys()),
+            "size": len(str(processed_data)),
+        },
     }
 
 

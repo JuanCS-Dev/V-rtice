@@ -13,7 +13,7 @@ stimuli, mimicking a crucial biological self-preservation mechanism.
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class EndogenousAnalgesia:
@@ -31,7 +31,9 @@ class EndogenousAnalgesia:
         """
         self.modulation_factor = modulation_factor
 
-    def modulate_pain(self, raw_pain_level: float, internal_state: Dict[str, Any] = None) -> float:
+    def modulate_pain(
+        self, raw_pain_level: float, internal_state: Dict[str, Any] = None
+    ) -> float:
         """Calculates the reduction in perceived pain based on the raw pain level and internal state.
 
         Args:
@@ -42,13 +44,13 @@ class EndogenousAnalgesia:
             float: The amount of pain reduction due to endogenous analgesia.
         """
         print(f"[EndogenousAnalgesia] Modulating pain level: {raw_pain_level}")
-        
+
         # Simple modulation logic: higher focus or lower stress might increase analgesia
         analgesia_effect = raw_pain_level * self.modulation_factor
-        
+
         if internal_state and internal_state.get("focus_level", 0) > 0.7:
-            analgesia_effect *= 1.2 # Increase analgesia if highly focused
-        
+            analgesia_effect *= 1.2  # Increase analgesia if highly focused
+
         return analgesia_effect
 
     def get_modulation_factor(self) -> float:
@@ -64,7 +66,7 @@ class EndogenousAnalgesia:
 
         Args:
             new_factor (float): The new modulation factor (0.0 to 1.0).
-        
+
         Raises:
             ValueError: If new_factor is outside the valid range [0.0, 1.0].
         """

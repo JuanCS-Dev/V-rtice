@@ -11,8 +11,8 @@ environmental awareness and decision-making processes.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class GustatorySystem:
@@ -37,17 +37,25 @@ class GustatorySystem:
             Dict[str, Any]: A dictionary containing the analysis results.
         """
         self.current_status = "analyzing"
-        print(f"[GustatorySystem] Performing gustatory analysis for sample: {sample_id or 'unknown'}")
-        await asyncio.sleep(1.5) # Simulate analysis time
+        print(
+            f"[GustatorySystem] Performing gustatory analysis for sample: {sample_id or 'unknown'}"
+        )
+        await asyncio.sleep(1.5)  # Simulate analysis time
 
         # Simulate detection of various tastes and properties
         results = {
             "timestamp": datetime.now().isoformat(),
             "sample_id": sample_id,
-            "taste_profile": {"sweet": 0.1, "sour": 0.3, "bitter": 0.6, "umami": 0.2, "salty": 0.1},
-            "concentration": 0.05, # Simulated concentration
+            "taste_profile": {
+                "sweet": 0.1,
+                "sour": 0.3,
+                "bitter": 0.6,
+                "umami": 0.2,
+                "salty": 0.1,
+            },
+            "concentration": 0.05,  # Simulated concentration
             "potential_hazard": True if sample_id == "toxic_substance" else False,
-            "analysis_notes": "Bitter taste detected, moderate concentration."
+            "analysis_notes": "Bitter taste detected, moderate concentration.",
         }
         self.last_analysis_time = datetime.now()
         self.current_status = "complete"
@@ -61,5 +69,9 @@ class GustatorySystem:
         """
         return {
             "status": self.current_status,
-            "last_analysis": self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"
+            "last_analysis": (
+                self.last_analysis_time.isoformat()
+                if self.last_analysis_time
+                else "N/A"
+            ),
         }

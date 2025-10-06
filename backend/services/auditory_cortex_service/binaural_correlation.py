@@ -13,8 +13,8 @@ and interact with its surroundings based on auditory cues.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, Tuple, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class BinauralCorrelation:
@@ -41,22 +41,45 @@ class BinauralCorrelation:
             List[Dict[str, Any]]: A list of dictionaries, each describing a localized sound event.
         """
         self.current_status = "localizing_sounds"
-        print(f"[BinauralCorrelation] Detecting and localizing sound events in audio (size: {len(audio_data)} bytes).")
-        await asyncio.sleep(0.3) # Simulate processing time
+        print(
+            f"[BinauralCorrelation] Detecting and localizing sound events in audio (size: {len(audio_data)} bytes)."
+        )
+        await asyncio.sleep(0.3)  # Simulate processing time
 
         localized_events = []
 
         # Simulate sound event detection and localization
         # In a real system, this would involve complex signal processing to extract
         # interaural time and level differences.
-        if b"loud_noise_left" in audio_data: # Placeholder for actual audio analysis
-            localized_events.append({"type": "loud_bang", "direction": "left", "distance": "near", "confidence": 0.9})
+        if b"loud_noise_left" in audio_data:  # Placeholder for actual audio analysis
+            localized_events.append(
+                {
+                    "type": "loud_bang",
+                    "direction": "left",
+                    "distance": "near",
+                    "confidence": 0.9,
+                }
+            )
             self.localized_sounds += 1
         if b"whisper_right" in audio_data:
-            localized_events.append({"type": "speech", "direction": "right", "distance": "medium", "confidence": 0.7})
+            localized_events.append(
+                {
+                    "type": "speech",
+                    "direction": "right",
+                    "distance": "medium",
+                    "confidence": 0.7,
+                }
+            )
             self.localized_sounds += 1
         if b"engine_hum_front" in audio_data:
-            localized_events.append({"type": "engine_noise", "direction": "front", "distance": "far", "confidence": 0.8})
+            localized_events.append(
+                {
+                    "type": "engine_noise",
+                    "direction": "front",
+                    "distance": "far",
+                    "confidence": 0.8,
+                }
+            )
             self.localized_sounds += 1
 
         self.last_localization_time = datetime.now()
@@ -72,6 +95,10 @@ class BinauralCorrelation:
         """
         return {
             "status": self.current_status,
-            "last_localization": self.last_localization_time.isoformat() if self.last_localization_time else "N/A",
-            "total_sounds_localized": self.localized_sounds
+            "last_localization": (
+                self.last_localization_time.isoformat()
+                if self.last_localization_time
+                else "N/A"
+            ),
+            "total_sounds_localized": self.localized_sounds,
         }

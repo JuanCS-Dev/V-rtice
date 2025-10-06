@@ -15,8 +15,9 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
 
@@ -32,7 +33,11 @@ class SemicircularCanals:
         """Initializes the SemicircularCanals."""
         self.last_processed_time: Optional[datetime] = None
         self.current_angular_velocity: List[float] = [0.0, 0.0, 0.0]
-        self.current_orientation_change: Dict[str, float] = {"pitch_change": 0.0, "roll_change": 0.0, "yaw_change": 0.0}
+        self.current_orientation_change: Dict[str, float] = {
+            "pitch_change": 0.0,
+            "roll_change": 0.0,
+            "yaw_change": 0.0,
+        }
         self.current_status: str = "monitoring_angular_motion"
 
     def process_gyroscope_data(self, gyroscope_data: List[float]) -> Dict[str, Any]:
@@ -43,19 +48,25 @@ class SemicircularCanals:
 
         Returns:
             Dict[str, Any]: A dictionary containing the perceived angular motion.
-        
+
         Raises:
             ValueError: If gyroscope_data is not a list of 3 floats.
         """
-        if not (isinstance(gyroscope_data, list) and len(gyroscope_data) == 3 and all(isinstance(x, (int, float)) for x in gyroscope_data)):
+        if not (
+            isinstance(gyroscope_data, list)
+            and len(gyroscope_data) == 3
+            and all(isinstance(x, (int, float)) for x in gyroscope_data)
+        ):
             raise ValueError("gyroscope_data must be a list of 3 floats.")
 
         print(f"[SemicircularCanals] Processing gyroscope data: {gyroscope_data}")
-        
+
         self.current_angular_velocity = gyroscope_data
 
         # Simulate angular changes (simplified: directly map angular velocity to changes)
-        self.current_orientation_change["pitch_change"] = gyroscope_data[0] * 0.1 # Example scaling
+        self.current_orientation_change["pitch_change"] = (
+            gyroscope_data[0] * 0.1
+        )  # Example scaling
         self.current_orientation_change["roll_change"] = gyroscope_data[1] * 0.1
         self.current_orientation_change["yaw_change"] = gyroscope_data[2] * 0.1
 
@@ -67,7 +78,8 @@ class SemicircularCanals:
             "pitch_change": self.current_orientation_change["pitch_change"],
             "roll_change": self.current_orientation_change["roll_change"],
             "yaw_change": self.current_orientation_change["yaw_change"],
-            "rotation_detected": np.linalg.norm(np.array(gyroscope_data)) > 0.05 # Simple rotation detection
+            "rotation_detected": np.linalg.norm(np.array(gyroscope_data))
+            > 0.05,  # Simple rotation detection
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -78,7 +90,11 @@ class SemicircularCanals:
         """
         return {
             "status": self.current_status,
-            "last_processed": self.last_processed_time.isoformat() if self.last_processed_time else "N/A",
+            "last_processed": (
+                self.last_processed_time.isoformat()
+                if self.last_processed_time
+                else "N/A"
+            ),
             "current_angular_velocity": self.current_angular_velocity,
-            "current_orientation_change": self.current_orientation_change
+            "current_orientation_change": self.current_orientation_change,
         }

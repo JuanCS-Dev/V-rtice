@@ -13,8 +13,8 @@ dynamic environments.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class AttentionControl:
@@ -34,10 +34,12 @@ class AttentionControl:
             "visual": 0.8,
             "auditory": 0.7,
             "chemical": 0.6,
-            "somatosensory": 0.5
+            "somatosensory": 0.5,
         }
 
-    async def prioritize_and_route(self, sensory_data: Dict[str, Any], sensor_type: str, priority: int) -> Dict[str, Any]:
+    async def prioritize_and_route(
+        self, sensory_data: Dict[str, Any], sensor_type: str, priority: int
+    ) -> Dict[str, Any]:
         """Prioritizes and routes sensory data to appropriate cortical services.
 
         Args:
@@ -49,8 +51,10 @@ class AttentionControl:
             Dict[str, Any]: The processed and routed sensory data, potentially with added metadata.
         """
         self.current_status = "prioritizing_and_routing"
-        print(f"[AttentionControl] Prioritizing {sensor_type} data with initial priority {priority}")
-        await asyncio.sleep(0.05) # Simulate processing
+        print(
+            f"[AttentionControl] Prioritizing {sensor_type} data with initial priority {priority}"
+        )
+        await asyncio.sleep(0.05)  # Simulate processing
 
         # Calculate effective priority based on initial priority and type-specific weights
         effective_priority = priority * self.priority_weights.get(sensor_type, 0.5)
@@ -58,7 +62,7 @@ class AttentionControl:
         # Simulate routing decision (e.g., to Maximus Core, Prefrontal Cortex)
         routing_destination = "Maximus_Core_Service"
         if effective_priority > 6.0:
-            routing_destination = "Prefrontal_Cortex_Service" # Higher priority to higher cognitive functions
+            routing_destination = "Prefrontal_Cortex_Service"  # Higher priority to higher cognitive functions
 
         self.current_focus = sensor_type
         self.last_prioritization_time = datetime.now()
@@ -67,7 +71,9 @@ class AttentionControl:
         processed_data = sensory_data.copy()
         processed_data["effective_priority"] = effective_priority
         processed_data["routing_destination"] = routing_destination
-        processed_data["attention_notes"] = f"Routed to {routing_destination} based on effective priority."
+        processed_data["attention_notes"] = (
+            f"Routed to {routing_destination} based on effective priority."
+        )
 
         return processed_data
 
@@ -79,9 +85,13 @@ class AttentionControl:
         """
         return {
             "status": self.current_status,
-            "last_prioritization": self.last_prioritization_time.isoformat() if self.last_prioritization_time else "N/A",
+            "last_prioritization": (
+                self.last_prioritization_time.isoformat()
+                if self.last_prioritization_time
+                else "N/A"
+            ),
             "current_focus": self.current_focus,
-            "priority_weights": self.priority_weights
+            "priority_weights": self.priority_weights,
         }
 
     def set_priority_weight(self, sensor_type: str, weight: float):
@@ -90,7 +100,7 @@ class AttentionControl:
         Args:
             sensor_type (str): The type of sensor (e.g., 'visual').
             weight (float): The new weight (0.0 to 1.0).
-        
+
         Raises:
             ValueError: If weight is outside the valid range [0.0, 1.0].
         """

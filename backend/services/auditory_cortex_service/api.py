@@ -13,18 +13,18 @@ This API allows other Maximus AI services or external applications to interact
 with the auditory perception capabilities in a standardized and efficient manner.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
-from datetime import datetime
 import base64
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from binaural_correlation import BinauralCorrelation
-from cocktail_party_triage import CocktailPartyTriage
-from ttp_signature_recognition import TTPSignatureRecognition
 from c2_beacon_detector import C2BeaconDetector
+from cocktail_party_triage import CocktailPartyTriage
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from pydantic import BaseModel
+from ttp_signature_recognition import TTPSignatureRecognition
+import uvicorn
 
 app = FastAPI(title="Maximus Auditory Cortex Service", version="1.0.0")
 
@@ -43,6 +43,7 @@ class AudioAnalysisRequest(BaseModel):
         analysis_type (str): The type of analysis to perform (e.g., 'speech_to_text', 'sound_event_detection').
         language (Optional[str]): The language of the audio (e.g., 'en-US').
     """
+
     audio_base64: str
     analysis_type: str
     language: Optional[str] = "en-US"
@@ -85,15 +86,22 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
     Raises:
         HTTPException: If the audio processing fails or an invalid analysis type is provided.
     """
-    print(f"[API] Received audio analysis request (type: {request.analysis_type}, language: {request.language})")
+    print(
+        f"[API] Received audio analysis request (type: {request.analysis_type}, language: {request.language})"
+    )
     try:
         # Decode base64 audio (simplified, actual audio processing would happen here)
         audio_data = base64.b64decode(request.audio_base64)
-        
-        results = {"timestamp": datetime.now().isoformat(), "analysis_type": request.analysis_type}
+
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "analysis_type": request.analysis_type,
+        }
 
         if request.analysis_type == "speech_to_text":
-            transcript = await cocktail_party_triage.process_audio_for_speech(audio_data, request.language)
+            transcript = await cocktail_party_triage.process_audio_for_speech(
+                audio_data, request.language
+            )
             results["transcript"] = transcript
         elif request.analysis_type == "sound_event_detection":
             events = await binaural_correlation.detect_sound_events(audio_data)
@@ -105,7 +113,10 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
             c2_detection = await c2_detector.detect_c2_beacon(audio_data)
             results["c2_beacon_detection"] = c2_detection
         else:
-            raise HTTPException(status_code=400, detail=f"Invalid analysis type: {request.analysis_type}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid analysis type: {request.analysis_type}",
+            )
 
         return results
     except Exception as e:

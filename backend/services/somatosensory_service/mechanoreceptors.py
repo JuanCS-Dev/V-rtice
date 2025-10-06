@@ -12,8 +12,8 @@ and understanding the physical environment.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class Mechanoreceptors:
@@ -29,7 +29,9 @@ class Mechanoreceptors:
         self.current_pressure: float = 0.0
         self.current_texture: str = "smooth"
 
-    async def process_touch(self, pressure: float, duration: float, location: Optional[str] = None) -> Dict[str, Any]:
+    async def process_touch(
+        self, pressure: float, duration: float, location: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Processes a simulated touch event.
 
         Args:
@@ -40,8 +42,10 @@ class Mechanoreceptors:
         Returns:
             Dict[str, Any]: A dictionary containing the mechanoreceptor response.
         """
-        print(f"[Mechanoreceptors] Processing touch: Pressure={pressure}, Duration={duration}, Location={location}")
-        await asyncio.sleep(0.05) # Simulate rapid processing
+        print(
+            f"[Mechanoreceptors] Processing touch: Pressure={pressure}, Duration={duration}, Location={location}"
+        )
+        await asyncio.sleep(0.05)  # Simulate rapid processing
 
         # Simulate detection of texture based on pressure and duration
         if pressure > 0.7 and duration > 0.5:
@@ -61,7 +65,8 @@ class Mechanoreceptors:
             "pressure_sensed": pressure,
             "duration_sensed": duration,
             "texture_detected": texture,
-            "vibration_sensed": pressure * 0.1 # Simulate some vibration based on pressure
+            "vibration_sensed": pressure
+            * 0.1,  # Simulate some vibration based on pressure
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -74,5 +79,7 @@ class Mechanoreceptors:
             "status": "active",
             "current_pressure": self.current_pressure,
             "current_texture": self.current_texture,
-            "last_touch": self.last_touch_time.isoformat() if self.last_touch_time else "N/A"
+            "last_touch": (
+                self.last_touch_time.isoformat() if self.last_touch_time else "N/A"
+            ),
         }

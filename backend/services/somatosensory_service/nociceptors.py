@@ -12,8 +12,8 @@ or resource re-allocation within the AI system.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class Nociceptors:
@@ -27,11 +27,16 @@ class Nociceptors:
         """Initializes the Nociceptors module."""
         self.last_stimulus_time: Optional[datetime] = None
         self.current_pain_level: float = 0.0
-        self.threshold_pressure: float = 0.8 # Pressure above this is noxious
-        self.threshold_temp_high: float = 40.0 # Temp above this is noxious
-        self.threshold_temp_low: float = 5.0 # Temp below this is noxious
+        self.threshold_pressure: float = 0.8  # Pressure above this is noxious
+        self.threshold_temp_high: float = 40.0  # Temp above this is noxious
+        self.threshold_temp_low: float = 5.0  # Temp below this is noxious
 
-    async def process_stimulus(self, pressure: float, temperature: Optional[float] = None, location: Optional[str] = None) -> Dict[str, Any]:
+    async def process_stimulus(
+        self,
+        pressure: float,
+        temperature: Optional[float] = None,
+        location: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Processes a simulated noxious stimulus.
 
         Args:
@@ -42,14 +47,18 @@ class Nociceptors:
         Returns:
             Dict[str, Any]: A dictionary containing the nociceptor response, including pain level.
         """
-        print(f"[Nociceptors] Processing stimulus: Pressure={pressure}, Temp={temperature}, Location={location}")
-        await asyncio.sleep(0.1) # Simulate processing time
+        print(
+            f"[Nociceptors] Processing stimulus: Pressure={pressure}, Temp={temperature}, Location={location}"
+        )
+        await asyncio.sleep(0.1)  # Simulate processing time
 
         pain_level = 0.0
         stimulus_type = []
 
         if pressure > self.threshold_pressure:
-            pain_level += (pressure - self.threshold_pressure) * 5 # Scale pain with intensity
+            pain_level += (
+                pressure - self.threshold_pressure
+            ) * 5  # Scale pain with intensity
             stimulus_type.append("high_pressure")
 
         if temperature is not None:
@@ -59,8 +68,8 @@ class Nociceptors:
             elif temperature < self.threshold_temp_low:
                 pain_level += (self.threshold_temp_low - temperature) * 0.5
                 stimulus_type.append("low_temperature")
-        
-        self.current_pain_level = min(1.0, pain_level) # Cap pain level at 1.0
+
+        self.current_pain_level = min(1.0, pain_level)  # Cap pain level at 1.0
         self.last_stimulus_time = datetime.now()
 
         return {
@@ -69,7 +78,8 @@ class Nociceptors:
             "stimulus_detected": bool(stimulus_type),
             "stimulus_type": stimulus_type,
             "raw_pain_level": self.current_pain_level,
-            "requires_attention": self.current_pain_level > 0.3 # Threshold for requiring attention
+            "requires_attention": self.current_pain_level
+            > 0.3,  # Threshold for requiring attention
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -81,5 +91,9 @@ class Nociceptors:
         return {
             "status": "active",
             "current_pain_level": self.current_pain_level,
-            "last_stimulus": self.last_stimulus_time.isoformat() if self.last_stimulus_time else "N/A"
+            "last_stimulus": (
+                self.last_stimulus_time.isoformat()
+                if self.last_stimulus_time
+                else "N/A"
+            ),
         }

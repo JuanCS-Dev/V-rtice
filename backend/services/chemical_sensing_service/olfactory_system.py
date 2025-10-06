@@ -12,8 +12,8 @@ the AI's operational space.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class OlfactorySystem:
@@ -38,24 +38,52 @@ class OlfactorySystem:
             Dict[str, Any]: A dictionary containing the scan results.
         """
         self.current_status = "scanning"
-        print(f"[OlfactorySystem] Performing olfactory scan in area: {area or 'general'}")
-        await asyncio.sleep(2) # Simulate scan duration
+        print(
+            f"[OlfactorySystem] Performing olfactory scan in area: {area or 'general'}"
+        )
+        await asyncio.sleep(2)  # Simulate scan duration
 
         # Simulate detection of various chemical compounds
         results = {
             "timestamp": datetime.now().isoformat(),
             "area": area,
             "detected_compounds": [
-                {"name": "Methane", "concentration": 0.0001, "source": "natural gas leak"} if area == "industrial_zone" else None,
-                {"name": "Ammonia", "concentration": 0.00005, "source": "cleaning products"} if area == "residential_area" else None,
-                {"name": "Ethanol", "concentration": 0.00002, "source": "fermentation"} if area == "brewery" else None,
-                {"name": "Oxygen", "concentration": 0.21, "source": "atmosphere"}
+                (
+                    {
+                        "name": "Methane",
+                        "concentration": 0.0001,
+                        "source": "natural gas leak",
+                    }
+                    if area == "industrial_zone"
+                    else None
+                ),
+                (
+                    {
+                        "name": "Ammonia",
+                        "concentration": 0.00005,
+                        "source": "cleaning products",
+                    }
+                    if area == "residential_area"
+                    else None
+                ),
+                (
+                    {
+                        "name": "Ethanol",
+                        "concentration": 0.00002,
+                        "source": "fermentation",
+                    }
+                    if area == "brewery"
+                    else None
+                ),
+                {"name": "Oxygen", "concentration": 0.21, "source": "atmosphere"},
             ],
-            "odor_intensity": 0.5, # Simulated intensity
-            "anomalies_detected": True if area == "industrial_zone" else False
+            "odor_intensity": 0.5,  # Simulated intensity
+            "anomalies_detected": True if area == "industrial_zone" else False,
         }
         # Filter out None values from detected_compounds
-        results["detected_compounds"] = [c for c in results["detected_compounds"] if c is not None]
+        results["detected_compounds"] = [
+            c for c in results["detected_compounds"] if c is not None
+        ]
 
         self.last_scan_time = datetime.now()
         self.current_status = "complete"
@@ -69,5 +97,7 @@ class OlfactorySystem:
         """
         return {
             "status": self.current_status,
-            "last_scan": self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
+            "last_scan": (
+                self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
+            ),
         }
