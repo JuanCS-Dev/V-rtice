@@ -73,81 +73,6 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-// configCmd represents the config command
-var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Configuration management",
-	Long:  `Manage vCLI configuration settings.`,
-}
-
-// configInitCmd initializes configuration
-var configInitCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("✅ Configuration initialized at ~/.vcli/config.yaml")
-		fmt.Println("📝 Edit the file to customize settings")
-	},
-}
-
-// configShowCmd shows current configuration
-var configShowCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show current configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Current Configuration:")
-		fmt.Println("  Config File: ~/.vcli/config.yaml")
-		fmt.Println("  Log Level: info")
-		fmt.Println("  Theme: dark")
-		fmt.Println("  Offline Mode: enabled")
-	},
-}
-
-// pluginCmd represents the plugin command
-var pluginCmd = &cobra.Command{
-	Use:   "plugin",
-	Short: "Plugin management",
-	Long:  `Manage vCLI plugins - install, uninstall, list, and configure.`,
-}
-
-// pluginListCmd lists plugins
-var pluginListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List plugins",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Available Plugins:")
-		fmt.Println("  kubernetes  v1.0.0  - Kubernetes integration")
-		fmt.Println("  prometheus  v1.0.0  - Prometheus monitoring")
-		fmt.Println("  git         v1.0.0  - Git integration")
-		fmt.Println("\nInstalled Plugins:")
-		fmt.Println("  (none)")
-	},
-}
-
-// pluginInstallCmd installs a plugin
-var pluginInstallCmd = &cobra.Command{
-	Use:   "install [plugin-name]",
-	Short: "Install a plugin",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		pluginName := args[0]
-		fmt.Printf("Installing plugin: %s\n", pluginName)
-		fmt.Printf("✅ Plugin %s installed successfully\n", pluginName)
-	},
-}
-
-// pluginUninstallCmd uninstalls a plugin
-var pluginUninstallCmd = &cobra.Command{
-	Use:   "uninstall [plugin-name]",
-	Short: "Uninstall a plugin",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		pluginName := args[0]
-		fmt.Printf("Uninstalling plugin: %s\n", pluginName)
-		fmt.Printf("✅ Plugin %s uninstalled successfully\n", pluginName)
-	},
-}
-
 // workspaceCmd represents the workspace command
 var workspaceCmd = &cobra.Command{
 	Use:   "workspace",
@@ -230,19 +155,8 @@ func init() {
 	// Add subcommands
 	rootCmd.AddCommand(tuiCmd)
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(configCmd)
-	rootCmd.AddCommand(pluginCmd)
 	rootCmd.AddCommand(workspaceCmd)
 	rootCmd.AddCommand(offlineCmd)
-
-	// Config subcommands
-	configCmd.AddCommand(configInitCmd)
-	configCmd.AddCommand(configShowCmd)
-
-	// Plugin subcommands
-	pluginCmd.AddCommand(pluginListCmd)
-	pluginCmd.AddCommand(pluginInstallCmd)
-	pluginCmd.AddCommand(pluginUninstallCmd)
 
 	// Workspace subcommands
 	workspaceCmd.AddCommand(workspaceListCmd)
