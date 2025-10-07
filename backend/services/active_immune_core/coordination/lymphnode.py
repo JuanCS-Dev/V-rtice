@@ -47,6 +47,7 @@ from coordination.pattern_detector import PatternDetector
 from coordination.cytokine_aggregator import CytokineAggregator
 from coordination.agent_orchestrator import AgentOrchestrator
 from coordination.temperature_controller import TemperatureController, HomeostaticState
+from coordination.lymphnode_metrics import LymphnodeMetrics
 from coordination.rate_limiter import ClonalExpansionRateLimiter
 from coordination.thread_safe_structures import (
     ThreadSafeBuffer,
@@ -164,11 +165,15 @@ class LinfonodoDigital:
             redis_client=None,  # Will be set later when Redis connects
         )
 
-        # Metrics (ATOMIC COUNTERS)
-        self.total_ameacas_detectadas = AtomicCounter()
-        self.total_neutralizacoes = AtomicCounter()
-        self.total_clones_criados = AtomicCounter()
-        self.total_clones_destruidos = AtomicCounter()
+        # Lymphnode metrics (FASE 3 - Dependency Injection)
+        self._lymphnode_metrics = LymphnodeMetrics(
+            lymphnode_id=self.id,
+        )
+        # Keep backward compatibility references
+        self.total_ameacas_detectadas = self._lymphnode_metrics.total_ameacas_detectadas
+        self.total_neutralizacoes = self._lymphnode_metrics.total_neutralizacoes
+        self.total_clones_criados = self._lymphnode_metrics.total_clones_criados
+        self.total_clones_destruidos = self._lymphnode_metrics.total_clones_destruidos
 
         # Rate limiting
         self._clonal_limiter = ClonalExpansionRateLimiter(
