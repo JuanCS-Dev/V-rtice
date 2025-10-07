@@ -200,7 +200,7 @@ class TestDecisionLogging:
         # Note: Rate limit is 100/minute, but in testing we just verify the endpoint
         # accepts requests. Full rate limit testing would require time manipulation.
         decision = create_test_decision_log()
-        payload = json.loads(decision.json())
+        payload = {"decision_log": json.loads(decision.json())}
 
         for _ in range(5):  # Test a few requests
             response = await authenticated_client.post(
@@ -237,8 +237,9 @@ class TestDecisionRetrieval:
         response = await authenticated_client.get(f"/audit/decision/{decision_id}")
         assert response.status_code == 200
         data = response.json()
-        assert "decision_id" in data
-        assert data["decision_id"] == str(decision_id)
+        # Response uses 'id' not 'decision_id' when returning the full decision object
+        assert "id" in data
+        assert data["id"] == str(decision_id)
 
     async def test_get_decision_not_found(self, authenticated_client):
         """Test retrieving non-existent decision returns 404."""
@@ -262,7 +263,7 @@ class TestDecisionHistory:
             "limit": 100,
             "offset": 0,
         }
-        response = await authenticated_client.post("/audit/decisions/query", json=query)
+        response = await authenticated_client.post("/audit/decisions/query", json={"query": query})
         assert response.status_code == 200
         data = response.json()
         assert "total_count" in data
@@ -281,7 +282,7 @@ class TestDecisionHistory:
             "limit": 50,
             "offset": 0,
         }
-        response = await authenticated_client.post("/audit/decisions/query", json=query)
+        response = await authenticated_client.post("/audit/decisions/query", json={"query": query})
         assert response.status_code == 200
 
     async def test_query_decisions_with_time_range(self, authenticated_client):
@@ -292,19 +293,19 @@ class TestDecisionHistory:
             "end_time": now.isoformat(),
             "limit": 100,
         }
-        response = await authenticated_client.post("/audit/decisions/query", json=query)
+        response = await authenticated_client.post("/audit/decisions/query", json={"query": query})
         assert response.status_code == 200
 
     async def test_query_decisions_pagination(self, authenticated_client):
         """Test decision history pagination."""
         # First page
         query = {"limit": 10, "offset": 0}
-        response = await authenticated_client.post("/audit/decisions/query", json=query)
+        response = await authenticated_client.post("/audit/decisions/query", json={"query": query})
         assert response.status_code == 200
 
         # Second page
         query = {"limit": 10, "offset": 10}
-        response = await authenticated_client.post("/audit/decisions/query", json=query)
+        response = await authenticated_client.post("/audit/decisions/query", json={"query": query})
         assert response.status_code == 200
 
 
@@ -322,7 +323,7 @@ class TestHumanOverrides:
     ):
         """Test successfully logging a human override."""
         override_request = create_test_override_request()
-        response = await authenticated_client.post("/audit/override", json=override_request)
+        response = await authenticated_client.post("/audit/override", json={"override": override_request})
         assert response.status_code == 200
         data = response.json()
         assert "override_id" in data
@@ -346,7 +347,7 @@ class TestHumanOverrides:
 
         for reason in reasons:
             override_request = create_test_override_request(override_reason=reason.value)
-            response = await authenticated_client.post("/audit/override", json=override_request)
+            response = await authenticated_client.post("/audit/override", json={"override": override_request})
             assert response.status_code == 200
 
     async def test_get_overrides_for_decision(self, authenticated_client, mock_db):
@@ -381,7 +382,7 @@ class TestComplianceLogging:
     ):
         """Test successfully logging a compliance check."""
         compliance_request = create_test_compliance_request()
-        response = await authenticated_client.post("/audit/compliance", json=compliance_request)
+        response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
         assert response.status_code == 200
         data = response.json()
         assert "compliance_id" in data
@@ -404,7 +405,7 @@ class TestComplianceLogging:
 
         for regulation in regulations:
             compliance_request = create_test_compliance_request(regulation=regulation)
-            response = await authenticated_client.post("/audit/compliance", json=compliance_request)
+            response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
             assert response.status_code == 200
 
     async def test_log_compliance_different_results(
@@ -420,7 +421,7 @@ class TestComplianceLogging:
 
         for result in results:
             compliance_request = create_test_compliance_request(check_result=result.value)
-            response = await authenticated_client.post("/audit/compliance", json=compliance_request)
+            response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
             assert response.status_code == 200
 
     async def test_log_compliance_with_remediation(
@@ -433,7 +434,7 @@ class TestComplianceLogging:
             remediation_plan="Implement additional safeguards",
             remediation_deadline=(datetime.utcnow() + timedelta(days=30)).isoformat(),
         )
-        response = await authenticated_client.post("/audit/compliance", json=compliance_request)
+        response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
         assert response.status_code == 200
         data = response.json()
         assert data["remediation_required"] is True
