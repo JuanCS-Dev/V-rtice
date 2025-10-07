@@ -6,7 +6,9 @@ Uses graceful degradation paths for testing.
 
 import asyncio
 from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import aiohttp
 import pytest
 import pytest_asyncio
 
@@ -432,5 +434,377 @@ class TestMacrofagoPatrolLogic:
 
         # Even if no connections, patrol should have run
         assert macrofago._running is True
+
+        await macrofago.parar()
+
+
+# ==================== PHASE 2: HTTP MOCKING TESTS (53%→90%) ====================
+
+
+@pytest.mark.asyncio
+class TestScanNetworkConnectionsWithHTTP:
+    """Test _scan_network_connections with mocked HTTP responses"""
+
+    async def test_scan_network_connections_success(self, macrofago):
+        """Test successful network scan with HTTP 200"""
+        await macrofago.iniciar()
+
+        # Mock HTTP response
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "connections": [
+                {"src_ip": "10.0.0.1", "dst_ip": "203.0.113.50", "dst_port": 8080},
+                {"src_ip": "10.0.0.2", "dst_ip": "203.0.113.51", "dst_port": 443},
+            ]
+        })
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'get') as mock_get:
+            mock_get.return_value = mock_ctx
+
+            connections = await macrofago._scan_network_connections()
+
+            assert len(connections) == 2
+            assert connections[0]["dst_ip"] == "203.0.113.50"
+            mock_get.assert_called_once()
+
+        await macrofago.parar()
+
+    async def test_scan_network_connections_404(self, macrofago):
+        """Test network scan with HTTP 404 (RTE service not found)"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 404
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'get') as mock_get:
+            mock_get.return_value = mock_ctx
+
+            connections = await macrofago._scan_network_connections()
+
+            assert connections == []
+
+        await macrofago.parar()
+
+    async def test_scan_network_connections_500(self, macrofago):
+        """Test network scan with HTTP 500 (server error)"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 500
+        mock_response.text = AsyncMock(return_value="Internal Server Error")
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'get') as mock_get:
+            mock_get.return_value = mock_ctx
+
+            connections = await macrofago._scan_network_connections()
+
+            assert connections == []
+
+        await macrofago.parar()
+
+    async def test_scan_network_connections_timeout(self, macrofago):
+        """Test network scan with timeout"""
+        await macrofago.iniciar()
+
+        with patch.object(macrofago._http_session, 'get') as mock_get:
+            mock_get.side_effect = asyncio.TimeoutError()
+
+            connections = await macrofago._scan_network_connections()
+
+            assert connections == []
+
+        await macrofago.parar()
+
+    async def test_scan_network_connections_generic_exception(self, macrofago):
+        """Test network scan with generic exception"""
+        await macrofago.iniciar()
+
+        with patch.object(macrofago._http_session, 'get') as mock_get:
+            mock_get.side_effect = Exception("Unexpected error")
+
+            connections = await macrofago._scan_network_connections()
+
+            assert connections == []
+
+        await macrofago.parar()
+
+
+@pytest.mark.asyncio
+class TestInvestigationWithHTTP:
+    """Test executar_investigacao with mocked HTTP responses"""
+
+    async def test_investigation_threat_detected(self, macrofago, malicious_connection):
+        """Test investigation with threat detected (high reputation)"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "reputation": {"score": 9},
+            "malicious": True,
+            "blocklists": ["spamhaus", "barracuda"],
+            "geolocation": {"country": "XX"}
+        })
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.return_value = mock_ctx
+
+            result = await macrofago.executar_investigacao(malicious_connection)
+
+            assert result["is_threat"] is True
+            assert result["threat_level"] == 9
+            assert len(result["blocklists"]) == 2
+
+        await macrofago.parar()
+
+    async def test_investigation_benign(self, macrofago, sample_connection):
+        """Test investigation with benign result"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "reputation": {"score": 2},
+            "malicious": False,
+            "blocklists": [],
+        })
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.return_value = mock_ctx
+
+            result = await macrofago.executar_investigacao(sample_connection)
+
+            assert result["is_threat"] is False
+            assert result["threat_level"] == 2
+
+        await macrofago.parar()
+
+    async def test_investigation_404_fallback_heuristic(self, macrofago, malicious_connection):
+        """Test investigation with HTTP 404 falls back to heuristics"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 404
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.return_value = mock_ctx
+
+            result = await macrofago.executar_investigacao(malicious_connection)
+
+            # Should use heuristic fallback
+            assert "is_threat" in result
+
+        await macrofago.parar()
+
+    async def test_investigation_500_fallback_heuristic(self, macrofago, sample_connection):
+        """Test investigation with HTTP 500 falls back to heuristics"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 500
+        mock_response.text = AsyncMock(return_value="Server error")
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.return_value = mock_ctx
+
+            result = await macrofago.executar_investigacao(sample_connection)
+
+            # Should use heuristic fallback
+            assert "is_threat" in result
+
+        await macrofago.parar()
+
+    async def test_investigation_timeout_fallback(self, macrofago, sample_connection):
+        """Test investigation timeout falls back to heuristics"""
+        await macrofago.iniciar()
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.side_effect = asyncio.TimeoutError()
+
+            result = await macrofago.executar_investigacao(sample_connection)
+
+            # Should use heuristic fallback
+            assert "is_threat" in result
+
+        await macrofago.parar()
+
+    async def test_investigation_generic_exception(self, macrofago, sample_connection):
+        """Test investigation generic exception returns safe error"""
+        await macrofago.iniciar()
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.side_effect = Exception("Unexpected error")
+
+            result = await macrofago.executar_investigacao(sample_connection)
+
+            assert result["is_threat"] is False
+            assert "error" in result
+
+        await macrofago.parar()
+
+
+@pytest.mark.asyncio
+class TestNeutralizationWithHTTP:
+    """Test executar_neutralizacao with mocked HTTP responses"""
+
+    async def test_neutralization_isolate_success(self, macrofago, malicious_connection):
+        """Test successful isolation with HTTP 200"""
+        await macrofago.iniciar()
+
+        # Mock cytokine messenger
+        mock_messenger = AsyncMock()
+        mock_messenger.is_running.return_value = True
+        mock_messenger.send_cytokine = AsyncMock(return_value=True)
+        macrofago._cytokine_messenger = mock_messenger
+
+        mock_response = AsyncMock()
+        mock_response.status = 200
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.return_value = mock_ctx
+
+            result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
+
+            assert result is True
+            assert malicious_connection["dst_ip"] in macrofago.fagocitados
+            # Antigen presentation should be called
+            mock_messenger.send_cytokine.assert_called_once()
+
+        await macrofago.parar()
+
+    async def test_neutralization_isolate_404(self, macrofago, malicious_connection):
+        """Test isolation with HTTP 404 (RTE unavailable, tracks locally)"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 404
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.return_value = mock_ctx
+
+            result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
+
+            # Should still return True (graceful degradation)
+            assert result is True
+            assert malicious_connection["dst_ip"] in macrofago.fagocitados
+
+        await macrofago.parar()
+
+    async def test_neutralization_isolate_500(self, macrofago, malicious_connection):
+        """Test isolation with HTTP 500 (failure)"""
+        await macrofago.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 500
+        mock_response.text = AsyncMock(return_value="Internal error")
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.return_value = mock_ctx
+
+            result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
+
+            assert result is False
+
+        await macrofago.parar()
+
+    async def test_neutralization_timeout(self, macrofago, malicious_connection):
+        """Test neutralization timeout"""
+        await macrofago.iniciar()
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.side_effect = asyncio.TimeoutError()
+
+            result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
+
+            assert result is False
+
+        await macrofago.parar()
+
+    async def test_neutralization_generic_exception(self, macrofago, malicious_connection):
+        """Test neutralization generic exception"""
+        await macrofago.iniciar()
+
+        with patch.object(macrofago._http_session, 'post') as mock_post:
+            mock_post.side_effect = Exception("Unexpected error")
+
+            result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
+
+            assert result is False
+
+        await macrofago.parar()
+
+    async def test_neutralization_unknown_method(self, macrofago, sample_connection):
+        """Test neutralization with unknown method"""
+        await macrofago.iniciar()
+
+        result = await macrofago.executar_neutralizacao(sample_connection, "unknown")
+
+        assert result is False
+
+        await macrofago.parar()
+
+
+@pytest.mark.asyncio
+class TestAntigenPresentationEdgeCases:
+    """Test _apresentar_antigeno edge cases"""
+
+    async def test_antigen_presentation_cytokine_exception(self, macrofago):
+        """Test antigen presentation handles send_cytokine exception"""
+        await macrofago.iniciar()
+
+        # Mock cytokine messenger with exception
+        mock_messenger = AsyncMock()
+        mock_messenger.is_running.return_value = True
+        mock_messenger.send_cytokine = AsyncMock(side_effect=Exception("Send failed"))
+        macrofago._cytokine_messenger = mock_messenger
+
+        threat = {"dst_ip": "198.51.100.1", "dst_port": 8080}
+
+        # Should not raise, just log error
+        await macrofago._apresentar_antigeno(threat)
+
+        # Counter should not increment on failure
+        assert macrofago.antigenos_apresentados == 0
 
         await macrofago.parar()
