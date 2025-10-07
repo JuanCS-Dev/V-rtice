@@ -46,6 +46,7 @@ from coordination.exceptions import (
 from coordination.pattern_detector import PatternDetector
 from coordination.cytokine_aggregator import CytokineAggregator
 from coordination.agent_orchestrator import AgentOrchestrator
+from coordination.temperature_controller import TemperatureController, HomeostaticState
 from coordination.rate_limiter import ClonalExpansionRateLimiter
 from coordination.thread_safe_structures import (
     ThreadSafeBuffer,
@@ -67,15 +68,6 @@ except ImportError:
     ESGTSubscriber = None  # type: ignore
     ESGTEvent = None  # type: ignore
     logger.info("ESGT integration not available (consciousness module not found)")
-
-
-class HomeostaticState(str, Enum):
-    """Homeostatic states based on temperature."""
-    REPOUSO = "REPOUSO"  # < 37.0°C
-    VIGILANCIA = "VIGILÂNCIA"  # 37.0-37.5°C
-    ATENCAO = "ATENÇÃO"  # 37.5-38.0°C
-    ATIVACAO = "ATIVAÇÃO"  # 38.0-39.0°C
-    INFLAMACAO = "INFLAMAÇÃO"  # >= 39.0°C
 
 
 class LinfonodoDigital:
@@ -134,7 +126,16 @@ class LinfonodoDigital:
 
         # Cytokine aggregation (THREAD-SAFE)
         self.cytokine_buffer = ThreadSafeBuffer[Dict[str, Any]](maxsize=1000)
-        self.temperatura_regional = ThreadSafeTemperature(initial=37.0, min_temp=36.0, max_temp=42.0)
+
+        # Temperature controller (FASE 3 - Dependency Injection)
+        self._temperature_controller = TemperatureController(
+            lymphnode_id=self.id,
+            initial_temp=37.0,
+            min_temp=36.0,
+            max_temp=42.0,
+        )
+        # Keep backward compatibility reference
+        self.temperatura_regional = self._temperature_controller.temperature
 
         # Pattern detection (THREAD-SAFE)
         self.threat_detections = ThreadSafeCounter[str]()
@@ -196,21 +197,12 @@ class LinfonodoDigital:
         """
         Compute homeostatic state based on current temperature.
 
+        REFACTORED (FASE 3): Delegates to TemperatureController.
+
         Returns:
             HomeostaticState enum value
         """
-        temp = await self.temperatura_regional.get()
-
-        if temp >= 39.0:
-            return HomeostaticState.INFLAMACAO
-        elif temp >= 38.0:
-            return HomeostaticState.ATIVACAO
-        elif temp >= 37.5:
-            return HomeostaticState.ATENCAO
-        elif temp >= 37.0:
-            return HomeostaticState.VIGILANCIA
-        else:
-            return HomeostaticState.REPOUSO
+        return await self._temperature_controller.get_homeostatic_state()
 
     @property
     def homeostatic_state(self) -> HomeostaticState:
@@ -315,18 +307,14 @@ class LinfonodoDigital:
 
     async def _adjust_temperature(self, delta: float) -> None:
         """
-        Adjust regional temperature (THREAD-SAFE).
+        Adjust regional temperature.
+
+        REFACTORED (FASE 3): Delegates to TemperatureController.
 
         Args:
             delta: Temperature change (positive = increase, negative = decrease)
         """
-        old_temp = await self.temperatura_regional.get()
-        new_temp = await self.temperatura_regional.adjust(delta)
-
-        logger.info(
-            f"Lymphnode {self.id} temperature: {old_temp:.1f}°C → {new_temp:.1f}°C "
-            f"(state={self.homeostatic_state.value})"
-        )
+        await self._temperature_controller.adjust_temperature(delta)
 
     async def _broadcast_hormone(
         self, hormone_type: str, level: float, source: str
@@ -827,10 +815,9 @@ class LinfonodoDigital:
             try:
                 await asyncio.sleep(30)
 
-                # Temperature decay (anti-inflammatory drift) - THREAD-SAFE
-                await self.temperatura_regional.multiply(0.98)  # 2% decay every 30s
+                # Temperature decay (anti-inflammatory drift) - REFACTORED (FASE 3)
+                current_temp = await self._temperature_controller.apply_decay()
 
-                current_temp = await self.temperatura_regional.get()
                 logger.debug(
                     f"Lymphnode {self.id} temperature: {current_temp:.1f}°C "
                     f"(agents: {len(self.agentes_ativos)})"
