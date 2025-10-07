@@ -44,6 +44,7 @@ from coordination.exceptions import (
     HormonePublishError,
 )
 from coordination.pattern_detector import PatternDetector
+from coordination.cytokine_aggregator import CytokineAggregator
 from coordination.rate_limiter import ClonalExpansionRateLimiter
 from coordination.thread_safe_structures import (
     ThreadSafeBuffer,
@@ -143,6 +144,13 @@ class LinfonodoDigital:
             persistent_threshold=5,
             coordinated_threshold=10,
             time_window_sec=60.0,
+        )
+
+        # Cytokine aggregator (FASE 3 - Dependency Injection)
+        self._cytokine_aggregator = CytokineAggregator(
+            area=self.area,
+            nivel=self.nivel,
+            escalation_priority_threshold=9,
         )
 
         # Metrics (ATOMIC COUNTERS)
@@ -640,16 +648,13 @@ class LinfonodoDigital:
 
                 citocina = msg.value
 
-                # VALIDATION: Validate cytokine before processing
-                try:
-                    validated = validate_cytokine(citocina)
-                    citocina_dict = validated.model_dump()
-                except ValidationError as e:
-                    logger.warning(f"Invalid cytokine received, skipping: {e}")
+                # VALIDATION: Validate cytokine via CytokineAggregator (FASE 3)
+                citocina_dict = await self._cytokine_aggregator.validate_and_parse(citocina)
+                if not citokina_dict:
                     continue
 
-                # Filter by area (only process cytokines from our area)
-                if citocina_dict.get("area_alvo") == self.area or self.nivel == "global":
+                # Filter by area via CytokineAggregator (FASE 3)
+                if await self._cytokine_aggregator.should_process_for_area(citocina_dict):
                     # Add to buffer (THREAD-SAFE)
                     await self.cytokine_buffer.append(citocina_dict)
 
@@ -671,50 +676,44 @@ class LinfonodoDigital:
         """
         Process cytokine at regional level.
 
+        REFACTORED (FASE 3): Delegates to CytokineAggregator for processing logic.
+
         Updates:
-        - Regional temperature
-        - Threat detection counts
-        - Metrics
+        - Regional temperature (via CytokineAggregator)
+        - Threat detection counts (via ProcessingResult)
+        - Metrics (via ProcessingResult)
 
         Args:
             citocina: Cytokine message
         """
-        tipo = citocina.get("tipo")
-        payload = citocina.get("payload", {})
-        prioridade = citocina.get("prioridade", 0)
+        # Process cytokine via CytokineAggregator (FASE 3)
+        result = await self._cytokine_aggregator.process_cytokine(citocina)
 
-        # Update regional temperature (inflammatory/anti-inflammatory) - THREAD-SAFE
-        if tipo in ["IL1", "IL6", "TNF", "IL8"]:
-            # Pro-inflammatory
-            await self.temperatura_regional.adjust(+0.2)
+        # Update regional temperature based on result
+        if result.temperature_delta != 0.0:
+            await self.temperatura_regional.adjust(result.temperature_delta)
 
-        elif tipo in ["IL10", "TGFbeta"]:
-            # Anti-inflammatory
-            await self.temperatura_regional.adjust(-0.1)
-
-        # Track metrics from payload
-        evento = payload.get("evento")
-
-        if evento == "ameaca_detectada" or payload.get("is_threat"):
+        # Track threat detection
+        if result.threat_detected:
             # ATOMIC INCREMENT
             await self.total_ameacas_detectadas.increment()
 
             # Track threat for pattern detection (THREAD-SAFE)
-            threat_id = payload.get("alvo", {}).get("id") or payload.get("host_id")
-            if threat_id:
-                await self.threat_detections.increment(threat_id)
+            if result.threat_id:
+                await self.threat_detections.increment(result.threat_id)
 
-        elif evento in ["neutralizacao_sucesso", "nk_cytotoxicity", "neutrophil_net_formation"]:
+        # Track neutralization
+        elif result.neutralization:
             # ATOMIC INCREMENT
             await self.total_neutralizacoes.increment()
 
         # Escalate to global lymphnode if critical
-        if prioridade >= 9 and self.nivel != "global":
+        if result.should_escalate:
             await self._escalar_para_global(citocina)
 
         current_temp = await self.temperatura_regional.get()
         logger.debug(
-            f"Lymphnode {self.id} processed cytokine: {tipo} "
+            f"Lymphnode {self.id} processed cytokine: {result.metadata.get('tipo')} "
             f"(temp={current_temp:.1f}°C)"
         )
 
