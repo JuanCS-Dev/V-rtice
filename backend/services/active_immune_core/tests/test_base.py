@@ -825,3 +825,163 @@ async def test_repr(agent: ConcreteTestAgent):
     assert "ConcreteTestAgent" in repr_str
     assert agent.state.id[:8] in repr_str
     assert str(agent.state.status) in repr_str or agent.state.status.value in repr_str
+
+
+# ==================== PHASE 2: EXCEPTION COVERAGE (84%→87%+) ====================
+
+
+@pytest.mark.asyncio
+async def test_patrol_loop_handles_exception():
+    """Test patrol loop handles exceptions from patrulhar()."""
+    class FailingAgent(ConcreteTestAgent):
+        async def patrulhar(self):
+            raise ValueError("Patrol error")
+
+    agent = FailingAgent()
+
+    mock_cytokine = AsyncMock()
+    mock_cytokine.start = AsyncMock()
+    mock_cytokine.stop = AsyncMock()
+    mock_cytokine.subscribe = AsyncMock()
+    mock_cytokine.is_running = MagicMock(return_value=True)
+
+    mock_hormone = AsyncMock()
+    mock_hormone.start = AsyncMock()
+    mock_hormone.stop = AsyncMock()
+    mock_hormone.subscribe = AsyncMock()
+    mock_hormone.is_running = MagicMock(return_value=True)
+
+    with patch("active_immune_core.agents.base.CytokineMessenger", return_value=mock_cytokine):
+        with patch("active_immune_core.agents.base.HormoneMessenger", return_value=mock_hormone):
+            await agent.iniciar()
+
+            # Wait for patrol loop to handle error
+            await asyncio.sleep(0.5)
+
+            # Agent should still be running despite patrol errors
+            assert agent._running is True
+
+            await agent.parar()
+
+
+@pytest.mark.asyncio
+async def test_criar_memoria_client_error(running_agent: ConcreteTestAgent):
+    """Test memory creation handles ClientError."""
+    import aiohttp
+
+    ameaca = {"id": "threat_005"}
+
+    async def raise_client_error(*args, **kwargs):
+        raise aiohttp.ClientError("Connection failed")
+
+    with patch.object(running_agent._http_session, "post", side_effect=raise_client_error):
+        # Should handle error gracefully
+        await running_agent._criar_memoria(ameaca)
+
+
+@pytest.mark.asyncio
+async def test_validate_ethical_client_error(running_agent: ConcreteTestAgent):
+    """Test ethical validation handles ClientError (fail-safe)."""
+    import aiohttp
+
+    alvo = {"id": "target"}
+
+    async def raise_client_error(*args, **kwargs):
+        raise aiohttp.ClientError("Connection failed")
+
+    with patch.object(running_agent._http_session, "post", side_effect=raise_client_error):
+        approved = await running_agent._validate_ethical(alvo, "isolate")
+
+        # Fail-safe: should block on error
+        assert approved is False
+
+
+@pytest.mark.asyncio
+async def test_iniciar_metrics_import_error():
+    """Test iniciar handles metrics import error gracefully."""
+    agent = ConcreteTestAgent()
+
+    mock_cytokine = AsyncMock()
+    mock_cytokine.start = AsyncMock()
+    mock_cytokine.subscribe = AsyncMock()
+    mock_cytokine.is_running = MagicMock(return_value=True)
+
+    mock_hormone = AsyncMock()
+    mock_hormone.start = AsyncMock()
+    mock_hormone.subscribe = AsyncMock()
+    mock_hormone.is_running = MagicMock(return_value=True)
+
+    with patch("active_immune_core.agents.base.CytokineMessenger", return_value=mock_cytokine):
+        with patch("active_immune_core.agents.base.HormoneMessenger", return_value=mock_hormone):
+            # Agent should start successfully even if metrics import fails
+            await agent.iniciar()
+            assert agent._running is True
+            await agent.parar()
+
+
+@pytest.mark.asyncio
+async def test_parar_messenger_errors():
+    """Test parar handles messenger stop errors gracefully."""
+    agent = ConcreteTestAgent()
+
+    mock_cytokine = AsyncMock()
+    mock_cytokine.start = AsyncMock()
+    mock_cytokine.subscribe = AsyncMock()
+    mock_cytokine.stop = AsyncMock(side_effect=Exception("Stop error"))
+    mock_cytokine.is_running = MagicMock(return_value=True)
+
+    mock_hormone = AsyncMock()
+    mock_hormone.start = AsyncMock()
+    mock_hormone.subscribe = AsyncMock()
+    mock_hormone.stop = AsyncMock(side_effect=Exception("Stop error"))
+    mock_hormone.is_running = MagicMock(return_value=True)
+
+    with patch("active_immune_core.agents.base.CytokineMessenger", return_value=mock_cytokine):
+        with patch("active_immune_core.agents.base.HormoneMessenger", return_value=mock_hormone):
+            await agent.iniciar()
+
+            # Should handle stop errors gracefully
+            await agent.parar()
+            assert agent._running is False
+
+
+@pytest.mark.asyncio
+async def test_parar_http_session_close_error():
+    """Test parar handles HTTP session close error gracefully."""
+    agent = ConcreteTestAgent()
+
+    mock_cytokine = AsyncMock()
+    mock_cytokine.start = AsyncMock()
+    mock_cytokine.subscribe = AsyncMock()
+    mock_cytokine.stop = AsyncMock()
+    mock_cytokine.is_running = MagicMock(return_value=True)
+
+    mock_hormone = AsyncMock()
+    mock_hormone.start = AsyncMock()
+    mock_hormone.subscribe = AsyncMock()
+    mock_hormone.stop = AsyncMock()
+    mock_hormone.is_running = MagicMock(return_value=True)
+
+    with patch("active_immune_core.agents.base.CytokineMessenger", return_value=mock_cytokine):
+        with patch("active_immune_core.agents.base.HormoneMessenger", return_value=mock_hormone):
+            await agent.iniciar()
+
+            # Mock HTTP session that raises error on close
+            agent._http_session.close = AsyncMock(side_effect=Exception("Close error"))
+
+            # Should handle close error gracefully
+            await agent.parar()
+            assert agent._running is False
+
+
+@pytest.mark.asyncio
+async def test_apoptose_cytokine_send_error(running_agent: ConcreteTestAgent):
+    """Test apoptosis handles cytokine send error gracefully."""
+    # Mock cytokine messenger to raise error
+    running_agent._cytokine_messenger.send_cytokine = AsyncMock(side_effect=Exception("Send error"))
+
+    # Should handle error and complete apoptosis
+    await running_agent.apoptose(reason="test_error_handling")
+
+    assert running_agent.state.status == AgentStatus.APOPTOSE
+    assert running_agent._running is False
