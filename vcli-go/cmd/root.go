@@ -10,7 +10,7 @@ import (
 	"github.com/verticedev/vcli-go/internal/core"
 	"github.com/verticedev/vcli-go/internal/plugins"
 	"github.com/verticedev/vcli-go/internal/tui"
-	"github.com/verticedev/vcli-go/internal/visual"
+	"github.com/verticedev/vcli-go/internal/visual/banner"
 )
 
 const (
@@ -29,142 +29,8 @@ var (
 
 // showBanner displays the epic V12 turbo banner with gradient colors
 func showBanner() {
-	// Get Vértice color palette
-	palette := visual.DefaultPalette()
-	gradient := palette.PrimaryGradient() // Green → Cyan → Blue
-	styles := visual.DefaultStyles()
-
-	// ASCII art logo (will be gradient colored)
-	asciiArt := []string{
-		"     ██╗   ██╗ ██████╗██╗     ██╗      ██████╗  ██████╗    ██████╗  ██████╗",
-		"     ██║   ██║██╔════╝██║     ██║     ██╔════╝ ██╔═══██╗   ╚════██╗██╔═████╗",
-		"     ██║   ██║██║     ██║     ██║     ██║  ███╗██║   ██║    █████╔╝██║██╔██║",
-		"     ╚██╗ ██╔╝██║     ██║     ██║     ██║   ██║██║   ██║   ██╔═══╝ ████╔╝██║",
-		"      ╚████╔╝ ╚██████╗███████╗██║     ╚██████╔╝╚██████╔╝   ███████╗╚██████╔╝",
-		"       ╚═══╝   ╚═════╝╚══════╝╚═╝      ╚═════╝  ╚═════╝    ╚══════╝ ╚═════╝",
-	}
-
-	// Build banner with gradient logo
-	fmt.Println("╔══════════════════════════════════════════════════════════════════════════════╗")
-	fmt.Println("║                                                                              ║")
-
-	// Print gradient logo line by line with borders
-	for _, line := range asciiArt {
-		gradientLine := visual.GradientText(line, gradient)
-		fmt.Printf("║ %s ║\n", gradientLine)
-	}
-
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║                    🏎️  %s - V12 TURBO ENGINE 🏎️              ║\n",
-		styles.Accent.Render("KUBERNETES EDITION"))
-	fmt.Println("║                                                                              ║")
-	fmt.Println("╟──────────────────────────────────────────────────────────────────────────────╢")
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   ⚡ %s                          📊 %s            ║\n",
-		styles.Accent.Bold(true).Render("ENGINE SPECS"),
-		styles.Accent.Bold(true).Render("PERFORMANCE METRICS"))
-	fmt.Printf("║   ├─ %s                          ├─ Startup:    ~85ms              ║\n",
-		styles.Info.Render("32 Commands"))
-	fmt.Printf("║   ├─ %s                           ├─ Response:   <100ms             ║\n",
-		styles.Info.Render("12,549 LOC"))
-	fmt.Printf("║   ├─ %s                       ├─ Memory:     ~42MB              ║\n",
-		styles.Success.Render("Zero Tech Debt"))
-	fmt.Printf("║   └─ %s                 └─ Efficiency: 67 LOC/1k tokens   ║\n",
-		styles.Success.Render("100%% Production Code"))
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   🏆 %s                        🎯 %s                          ║\n",
-		styles.Warning.Bold(true).Render("CERTIFICATION"),
-		styles.Accent.Bold(true).Render("STATUS"))
-	fmt.Printf("║   ├─ Production Ready:  %s                ├─ Validated:   %s                ║\n",
-		styles.Success.Render("✅"), styles.Success.Render("✅"))
-	fmt.Printf("║   ├─ kubectl Parity:    %s              ├─ Tested:      %s                ║\n",
-		styles.Success.Render("100%"), styles.Success.Render("✅"))
-	fmt.Printf("║   ├─ Security:          %s                ├─ Documented:  %s                ║\n",
-		styles.Success.Render("✅"), styles.Success.Render("✅"))
-	fmt.Printf("║   └─ Quality:           💯 %s          └─ Deployed:    %s             ║\n",
-		styles.Warning.Render("Elite"), styles.Success.Render("READY"))
-	fmt.Println("║                                                                              ║")
-	fmt.Println("╟──────────────────────────────────────────────────────────────────────────────╢")
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   🚀 %s                                                          ║\n",
-		styles.Accent.Bold(true).Render("COMMAND GROUPS"))
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   %s  │ get, apply, delete, scale, patch                   ║\n",
-		styles.Info.Render("Resource Management"))
-	fmt.Printf("║   %s        │ logs, exec, describe, port-forward, watch          ║\n",
-		styles.Info.Render("Observability"))
-	fmt.Printf("║   %s          │ status, history, undo, restart, pause, resume      ║\n",
-		styles.Info.Render("Rollout Ops"))
-	fmt.Printf("║   %s              │ top nodes, top pods (with container-level)         ║\n",
-		styles.Info.Render("Metrics"))
-	fmt.Printf("║   %s   │ create, get (full CRUD support)                    ║\n",
-		styles.Info.Render("ConfigMaps/Secrets"))
-	fmt.Printf("║   %s             │ label, annotate (add/remove operations)            ║\n",
-		styles.Info.Render("Metadata"))
-	fmt.Printf("║   %s        │ can-i, whoami (EXCLUSIVE feature!)                 ║\n",
-		styles.Info.Render("Authorization"))
-	fmt.Printf("║   %s             │ wait (with conditions)                             ║\n",
-		styles.Info.Render("Advanced"))
-	fmt.Println("║                                                                              ║")
-	fmt.Println("╟──────────────────────────────────────────────────────────────────────────────╢")
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   💨 %s                                                      ║\n",
-		styles.Success.Bold(true).Render("TURBO BOOST ACTIVE"))
-
-	// Progress bars with gradient
-	responseBar := visual.GradientText("████████████████░░░░", gradient)
-	memoryBar := visual.GradientText("██████░░░░░░░░░░░░░░", gradient)
-	binaryBar := visual.GradientText("███████████░░░░░░░░░", gradient)
-
-	fmt.Printf("║   ├─ Response Time:  %s  87%% faster than baseline        ║\n", responseBar)
-	fmt.Printf("║   ├─ Memory Usage:   %s  45%% optimized                   ║\n", memoryBar)
-	fmt.Printf("║   └─ Binary Size:    %s  84.7MB single binary            ║\n", binaryBar)
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   🏁 RPM: %s (Ready for Production Mission)                            ║\n",
-		styles.Warning.Bold(true).Render("12,000+"))
-	fmt.Println("║                                                                              ║")
-	fmt.Println("╟──────────────────────────────────────────────────────────────────────────────╢")
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   📚 %s                                                             ║\n",
-		styles.Accent.Bold(true).Render("QUICK START"))
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   %s      # List all pods                   ║\n",
-		styles.Muted.Render("vcli k8s get pods --all-namespaces"))
-	fmt.Printf("║   %s                      # View node metrics               ║\n",
-		styles.Muted.Render("vcli k8s top nodes"))
-	fmt.Printf("║   %s                    # Who am I? (EXCLUSIVE!)          ║\n",
-		styles.Muted.Render("vcli k8s auth whoami"))
-	fmt.Printf("║   %s    # Check rollout status            ║\n",
-		styles.Muted.Render("vcli k8s rollout status deploy/nginx"))
-	fmt.Printf("║   %s                             # Full command reference          ║\n",
-		styles.Muted.Render("vcli --help"))
-	fmt.Println("║                                                                              ║")
-	fmt.Println("╟──────────────────────────────────────────────────────────────────────────────╢")
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   🎖️  %s: \"18 Months → 2 Days\"                            ║\n",
-		styles.Warning.Bold(true).Render("ACHIEVEMENT UNLOCKED"))
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   History Made: %s  │  Status: %s ✅              ║\n",
-		styles.Accent.Render(buildDate),
-		styles.Success.Bold(true).Render("PRODUCTION CERTIFIED"))
-	fmt.Println("║                                                                              ║")
-	fmt.Printf("║   %s                    ║\n",
-		styles.Muted.Italic(true).Render("\"Stop Juggling Tools. Start Orchestrating Operations.\""))
-	fmt.Println("║                                                                              ║")
-	fmt.Println("╚══════════════════════════════════════════════════════════════════════════════╝")
-	fmt.Println()
-	fmt.Printf("%s - Kubernetes Edition │ Version %s │ Build %s\n",
-		visual.GradientText("vCLI 2.0", gradient),
-		styles.Accent.Render(version),
-		styles.Muted.Render(buildDate))
-	fmt.Printf("Powered by %s │ %s │ %s\n",
-		styles.Info.Render("Go 1.21+"),
-		styles.Success.Render("Production Ready"),
-		styles.Success.Render("Zero Technical Debt"))
-	fmt.Println()
-	fmt.Printf("Type %s for available commands\n", styles.Accent.Render("'vcli --help'"))
-	fmt.Printf("Type %s for Kubernetes commands\n", styles.Accent.Render("'vcli k8s --help'"))
-	fmt.Println()
+	renderer := banner.NewBannerRenderer()
+	fmt.Print(renderer.RenderFull(version, buildDate))
 }
 
 // rootCmd represents the base command
