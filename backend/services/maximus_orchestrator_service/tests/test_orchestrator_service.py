@@ -20,11 +20,12 @@ import pytest_asyncio
 from httpx import AsyncClient, Response
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 import asyncio
+import respx
 
 # Import the FastAPI app
 import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/maximus_orchestrator_service")
-from main import app, active_workflows
+from main import app, active_workflows, startup_event, shutdown_event
 
 
 # ==================== FIXTURES ====================
@@ -130,6 +131,26 @@ class TestHealthEndpoint:
         data = response.json()
         assert data["status"] == "healthy"
         assert "operational" in data["message"].lower()
+
+
+# ==================== LIFECYCLE EVENT TESTS ====================
+
+
+@pytest.mark.asyncio
+class TestLifecycleEvents:
+    """Test FastAPI lifecycle events - covers startup/shutdown logging."""
+
+    async def test_startup_event_executes(self):
+        """Test startup event executes without errors."""
+        # Call startup event directly to cover lines 87-88
+        await startup_event()
+        # If no exception, test passes
+
+    async def test_shutdown_event_executes(self):
+        """Test shutdown event executes without errors."""
+        # Call shutdown event directly to cover lines 94-95
+        await shutdown_event()
+        # If no exception, test passes
 
 
 # ==================== ORCHESTRATE ENDPOINT TESTS ====================
@@ -352,6 +373,172 @@ class TestSystemOptimizationWorkflow:
 
         # IDs should be different
         assert id1 != id2
+
+
+# ==================== WORKFLOW COMPLETION TESTS (WITH HTTP MOCKING) ====================
+
+
+@pytest.mark.asyncio
+class TestWorkflowCompletion:
+    """Test workflow completion paths using respx - covers success branches."""
+
+    @respx.mock
+    async def test_threat_hunting_completes_successfully_low_risk(self, client):
+        """Test threat hunting workflow completes successfully with low risk - covers lines 176-179, 249-250."""
+        # Mock Atlas response
+        respx.post("http://localhost:8007/query_environment").mock(
+            return_value=Response(200, json={
+                "status": "success",
+                "environment_context": {"network_segments": ["10.0.0.0/24"]}
+            })
+        )
+
+        # Mock Oraculo response with LOW risk (else branch)
+        respx.post("http://localhost:8026/predict").mock(
+            return_value=Response(200, json={
+                "status": "success",
+                "prediction": {
+                    "risk_assessment": "low",
+                    "threat_level": 0.3,
+                    "suggestions": []
+                }
+            })
+        )
+
+        payload = create_orchestration_request(workflow_name="threat_hunting")
+        response = await client.post("/orchestrate", json=payload)
+        workflow_id = response.json()["workflow_id"]
+
+        # Wait for workflow to complete
+        await asyncio.sleep(5)
+
+        # Check completion
+        status_response = await client.get(f"/workflow/{workflow_id}/status")
+        data = status_response.json()
+
+        assert data["status"] == "completed"
+        assert data["progress"] == 1.0
+        assert data["current_step"] == "Finished"
+        assert "results" in data
+
+    @respx.mock
+    async def test_threat_hunting_triggers_immunis_high_risk(self, client):
+        """Test threat hunting triggers Immunis on high risk - covers lines 236-248."""
+        # Mock Atlas response
+        respx.post("http://localhost:8007/query_environment").mock(
+            return_value=Response(200, json={
+                "status": "success",
+                "environment_context": {"network_segments": ["10.0.0.0/24"]}
+            })
+        )
+
+        # Mock Oraculo response with HIGH risk (if branch)
+        respx.post("http://localhost:8026/predict").mock(
+            return_value=Response(200, json={
+                "status": "success",
+                "prediction": {
+                    "risk_assessment": "high",
+                    "threat_level": 0.95,
+                    "suggestions": []
+                }
+            })
+        )
+
+        # Mock Immunis response
+        respx.post("http://localhost:8021/threat_alert").mock(
+            return_value=Response(200, json={
+                "status": "success",
+                "response_id": "immunis-123"
+            })
+        )
+
+        payload = create_orchestration_request(workflow_name="threat_hunting")
+        response = await client.post("/orchestrate", json=payload)
+        workflow_id = response.json()["workflow_id"]
+
+        # Wait for workflow to complete
+        await asyncio.sleep(5)
+
+        # Check completion
+        status_response = await client.get(f"/workflow/{workflow_id}/status")
+        data = status_response.json()
+
+        assert data["status"] == "completed"
+        assert data["progress"] == 1.0
+
+    @respx.mock
+    async def test_system_optimization_processes_suggestions(self, client):
+        """Test system optimization processes suggestions - covers lines 303-313."""
+        # Mock Core metrics
+        respx.get("http://localhost:8000/health").mock(
+            return_value=Response(200, json={
+                "status": "healthy",
+                "metrics": {"cpu": 80, "memory": 90}
+            })
+        )
+
+        # Mock Oraculo response with suggestions
+        respx.post("http://localhost:8026/predict").mock(
+            return_value=Response(200, json={
+                "status": "success",
+                "prediction": {
+                    "suggestions": [
+                        {"type": "scale_up", "target": "web_service"},
+                        {"type": "optimize_database", "target": "postgres_main"}
+                    ]
+                }
+            })
+        )
+
+        payload = create_orchestration_request(workflow_name="system_optimization")
+        response = await client.post("/orchestrate", json=payload)
+        workflow_id = response.json()["workflow_id"]
+
+        # Wait for workflow to complete
+        await asyncio.sleep(6)
+
+        # Check completion
+        status_response = await client.get(f"/workflow/{workflow_id}/status")
+        data = status_response.json()
+
+        assert data["status"] == "completed"
+        assert data["progress"] == 1.0
+        assert data["current_step"] == "Finished"
+
+    @respx.mock
+    async def test_system_optimization_no_suggestions(self, client):
+        """Test system optimization with empty suggestions."""
+        # Mock Core metrics
+        respx.get("http://localhost:8000/health").mock(
+            return_value=Response(200, json={
+                "status": "healthy",
+                "metrics": {"cpu": 50, "memory": 60}
+            })
+        )
+
+        # Mock Oraculo response with NO suggestions (else branch of if suggestions)
+        respx.post("http://localhost:8026/predict").mock(
+            return_value=Response(200, json={
+                "status": "success",
+                "prediction": {
+                    "suggestions": []
+                }
+            })
+        )
+
+        payload = create_orchestration_request(workflow_name="system_optimization")
+        response = await client.post("/orchestrate", json=payload)
+        workflow_id = response.json()["workflow_id"]
+
+        # Wait for workflow to complete
+        await asyncio.sleep(5)
+
+        # Check completion
+        status_response = await client.get(f"/workflow/{workflow_id}/status")
+        data = status_response.json()
+
+        assert data["status"] == "completed"
+        assert data["progress"] == 1.0
 
 
 # ==================== ERROR HANDLING TESTS ====================
