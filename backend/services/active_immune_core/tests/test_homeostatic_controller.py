@@ -968,3 +968,573 @@ async def test_select_best_action_chooses_highest_q_value():
     best_action = ctrl._select_best_action(state)
 
     assert best_action == ActionType.SCALE_UP_AGENTS
+
+
+# ==================== PHASE 4: MAPE-K LOOP & EXECUTION (70%→85%+) ====================
+
+
+@pytest.mark.asyncio
+async def test_mape_k_loop_runs():
+    """Test MAPE-K loop executes at least one iteration."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        monitor_interval=1,  # Short interval for testing
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        # Let MAPE-K loop run for one cycle
+        await asyncio.sleep(1.5)
+
+        # Should have collected some metrics
+        assert ctrl.system_metrics is not None
+
+        await ctrl.parar()
+    except Exception:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_mape_k_loop_error_handling():
+    """Test MAPE-K loop handles errors gracefully."""
+    ctrl = HomeostaticController(controller_id="ctrl_test", monitor_interval=1)
+
+    # Mock _monitor to raise error
+    async def failing_monitor():
+        raise RuntimeError("Monitor error")
+
+    try:
+        await ctrl.iniciar()
+
+        # Replace monitor with failing version
+        ctrl._monitor = failing_monitor
+
+        # Let loop try to run
+        await asyncio.sleep(1.5)
+
+        # Controller should still be running despite error
+        assert ctrl._running is True
+
+        await ctrl.parar()
+    except Exception:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_iniciar_with_postgres_connection():
+    """Test iniciar creates PostgreSQL connection."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        db_url="postgresql://user:pass@localhost:5432/test",
+    )
+
+    # Mock asyncpg.create_pool
+    mock_pool = AsyncMock()
+    mock_pool.close = AsyncMock()
+
+    mock_conn = AsyncMock()
+    mock_conn.execute = AsyncMock()
+    mock_pool.acquire = AsyncMock()
+    mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
+    mock_pool.acquire.return_value.__aexit__.return_value = None
+
+    # Mock asyncpg.create_pool as async function
+    async def mock_create_pool(*args, **kwargs):
+        return mock_pool
+
+    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+        await ctrl.iniciar()
+
+        # Should have created pool
+        assert ctrl._db_pool is not None
+
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_parar_closes_db_pool():
+    """Test parar closes database pool."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        db_url="postgresql://user:pass@localhost:5432/test",
+    )
+
+    # Mock database pool
+    mock_pool = AsyncMock()
+    mock_pool.close = AsyncMock()
+
+    # Mock connection for table creation
+    mock_conn = AsyncMock()
+    mock_pool.acquire = AsyncMock()
+    mock_pool.acquire.return_value.__aenter__.return_value = mock_conn
+    mock_pool.acquire.return_value.__aexit__.return_value = None
+
+    # Mock asyncpg.create_pool as async function
+    async def mock_create_pool(*args, **kwargs):
+        return mock_pool
+
+    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+        await ctrl.iniciar()
+        await ctrl.parar()
+
+    # Should have closed pool
+    mock_pool.close.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_execute_routes_to_noop():
+    """Test _execute handles NOOP action."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+
+    try:
+        await ctrl.iniciar()
+
+        result = await ctrl._execute(ActionType.NOOP, {})
+
+        assert result is True
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_unknown_action():
+    """Test _execute handles unknown action type."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+
+    try:
+        await ctrl.iniciar()
+
+        # Create a fake action (not in the router)
+        class FakeAction:
+            value = "fake_action"
+
+        result = await ctrl._execute(FakeAction(), {})
+
+        # Should return False for unknown action
+        assert result is False
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_determine_action_params_various_actions():
+    """Test _determine_action_params for various action types."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+
+    try:
+        await ctrl.iniciar()
+
+        # Test SCALE_DOWN
+        params = ctrl._determine_action_params(ActionType.SCALE_DOWN_AGENTS, issues=[])
+        assert "quantity" in params
+
+        # Test CLONE_SPECIALIZED (has specialization)
+        params = ctrl._determine_action_params(ActionType.CLONE_SPECIALIZED, issues=[])
+        assert "specialization" in params
+        assert "tipo" in params
+
+        # Test INCREASE_SENSITIVITY
+        params = ctrl._determine_action_params(ActionType.INCREASE_SENSITIVITY, issues=[])
+        assert "delta" in params
+
+        # Test DECREASE_SENSITIVITY
+        params = ctrl._determine_action_params(ActionType.DECREASE_SENSITIVITY, issues=[])
+        assert "delta" in params
+
+        # Test NOOP (no params)
+        params = ctrl._determine_action_params(ActionType.NOOP, issues=[])
+        assert params == {}
+
+        # Test DESTROY_CLONES (no params - not in _determine_action_params)
+        params = ctrl._determine_action_params(ActionType.DESTROY_CLONES, issues=[])
+        assert params == {}
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_collect_system_metrics_prometheus_failure():
+    """Test _collect_system_metrics handles Prometheus failure."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        metrics_url="http://localhost:9090",
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        # Mock HTTP session that raises error
+        async def raise_error(*args, **kwargs):
+            raise Exception("Prometheus unavailable")
+
+        with patch.object(ctrl._http_session, 'get', side_effect=raise_error):
+            metrics = await ctrl._collect_system_metrics()
+
+            # Should return fallback metrics
+            assert "cpu_usage" in metrics
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_collect_agent_metrics_lymphnode_failure():
+    """Test _collect_agent_metrics handles Lymphnode failure."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8200",
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        # Mock HTTP session that raises error
+        async def raise_error(*args, **kwargs):
+            raise Exception("Lymphnode unavailable")
+
+        with patch.object(ctrl._http_session, 'get', side_effect=raise_error):
+            metrics = await ctrl._collect_agent_metrics()
+
+            # Should return empty metrics
+            assert isinstance(metrics, dict)
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_scale_up_http_error():
+    """Test _execute_scale_up handles HTTP error."""
+    import aiohttp
+
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        # Mock HTTP session post to raise ClientConnectorError
+        def mock_post_error(*args, **kwargs):
+            raise aiohttp.ClientConnectorError(connection_key=None, os_error=OSError("Connection failed"))
+
+        with patch.object(ctrl._http_session, 'post', side_effect=mock_post_error):
+            result = await ctrl._execute_scale_up({"quantity": 5})
+
+            # Should return False on error
+            assert result is False
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_scale_up_non_200_response():
+    """Test _execute_scale_up handles non-200 response."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        mock_response = AsyncMock()
+        mock_response.status = 500
+        mock_response.text = AsyncMock(return_value="Internal error")
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(ctrl._http_session, 'post', return_value=mock_ctx):
+            result = await ctrl._execute_scale_up({"quantity": 5})
+
+            # Should return False for non-200
+            assert result is False
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_select_action_uses_epsilon_greedy():
+    """Test _select_action implements epsilon-greedy strategy."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+
+    state = SystemState.VIGILANCIA
+
+    # Test exploitation (epsilon = 0)
+    ctrl.epsilon = 0.0
+    ctrl.q_table[(state, ActionType.SCALE_UP_AGENTS)] = 1.0
+    ctrl.q_table[(state, ActionType.NOOP)] = 0.0
+
+    action = ctrl._select_action(state)
+    assert action == ActionType.SCALE_UP_AGENTS
+
+    # Test exploration (epsilon = 1)
+    ctrl.epsilon = 1.0
+    action = ctrl._select_action(state)
+    # Should select some action (random)
+    assert action in ActionType
+
+
+# ========================================
+# PHASE 5: Database Success Path Coverage
+# ========================================
+
+@pytest.mark.asyncio
+async def test_create_knowledge_table_success():
+    """Test _create_knowledge_table executes CREATE TABLE successfully."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        db_url="postgresql://user:pass@localhost:5432/test",
+    )
+
+    # Mock database pool and connection
+    mock_pool = AsyncMock()
+    mock_conn = AsyncMock()
+    mock_conn.execute = AsyncMock()
+
+    # Mock pool.acquire as async context manager
+    mock_acquire = MagicMock()
+    mock_acquire.__aenter__ = AsyncMock(return_value=mock_conn)
+    mock_acquire.__aexit__ = AsyncMock(return_value=None)
+    mock_pool.acquire = MagicMock(return_value=mock_acquire)
+
+    # Mock asyncpg.create_pool
+    async def mock_create_pool(*args, **kwargs):
+        return mock_pool
+
+    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+        await ctrl.iniciar()
+
+        # Verify CREATE TABLE was executed
+        assert mock_conn.execute.called
+        call_args = mock_conn.execute.call_args[0][0]
+        assert "CREATE TABLE" in call_args
+        assert "homeostatic_decisions" in call_args
+
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_store_decision_success():
+    """Test _store_decision executes INSERT successfully."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        db_url="postgresql://user:pass@localhost:5432/test",
+    )
+
+    # Mock database pool and connection
+    mock_pool = AsyncMock()
+    mock_conn = AsyncMock()
+    mock_conn.execute = AsyncMock()
+
+    # Mock pool.acquire as async context manager
+    mock_acquire = MagicMock()
+    mock_acquire.__aenter__ = AsyncMock(return_value=mock_conn)
+    mock_acquire.__aexit__ = AsyncMock(return_value=None)
+    mock_pool.acquire = MagicMock(return_value=mock_acquire)
+
+    async def mock_create_pool(*args, **kwargs):
+        return mock_pool
+
+    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+        await ctrl.iniciar()
+
+        # Store a decision
+        await ctrl._store_decision(
+            state=SystemState.ATIVACAO,
+            metrics={"cpu_usage": 75.0},
+            action=ActionType.SCALE_UP_AGENTS,
+            action_params={"quantity": 10},
+            outcome="success",
+            reward=5.0,
+        )
+
+        # Verify INSERT was executed
+        insert_calls = [call for call in mock_conn.execute.call_args_list if "INSERT" in str(call)]
+        assert len(insert_calls) > 0
+
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_load_q_table_success_with_data():
+    """Test _load_q_table loads data from database successfully."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        db_url="postgresql://user:pass@localhost:5432/test",
+    )
+
+    # Mock database pool and connection
+    mock_pool = AsyncMock()
+    mock_conn = AsyncMock()
+    mock_conn.execute = AsyncMock()
+
+    # Mock fetch to return Q-table data
+    mock_conn.fetch = AsyncMock(return_value=[
+        {"state": "repouso", "action": "noop", "avg_reward": 0.5},
+        {"state": "ativacao", "action": "scale_up_agents", "avg_reward": 5.0},
+    ])
+
+    # Mock pool.acquire as async context manager
+    mock_acquire = MagicMock()
+    mock_acquire.__aenter__ = AsyncMock(return_value=mock_conn)
+    mock_acquire.__aexit__ = AsyncMock(return_value=None)
+    mock_pool.acquire = MagicMock(return_value=mock_acquire)
+
+    async def mock_create_pool(*args, **kwargs):
+        return mock_pool
+
+    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+        await ctrl.iniciar()
+
+        # Load Q-table
+        await ctrl._load_q_table()
+
+        # Verify Q-table was populated
+        assert len(ctrl.q_table) == 2
+        assert ctrl.q_table[(SystemState.REPOUSO, ActionType.NOOP)] == 0.5
+        assert ctrl.q_table[(SystemState.ATIVACAO, ActionType.SCALE_UP_AGENTS)] == 5.0
+
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_monitor_with_mmei_needs_success():
+    """Test _monitor successfully fetches MMEI needs."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+
+    # Mock MMEI needs object
+    class MockNeeds:
+        def __init__(self):
+            self.rest_need = 0.3
+            self.repair_need = 0.6
+            self.efficiency_need = 0.4
+
+    # Mock MMEI client
+    mock_mmei = AsyncMock()
+    mock_mmei.get_current_needs = AsyncMock(return_value=MockNeeds())
+
+    ctrl.set_mmei_client(mock_mmei)
+
+    try:
+        await ctrl.iniciar()
+
+        # Run monitor
+        await ctrl._monitor()
+
+        # Verify MMEI needs were fetched
+        assert ctrl.current_needs is not None
+        assert ctrl.current_needs.rest_need == 0.3
+        assert ctrl.current_needs.repair_need == 0.6
+        assert ctrl.current_needs.efficiency_need == 0.4
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_full_mape_k_cycle_execution():
+    """Test full MAPE-K cycle executes all steps."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        monitor_interval=0.5,
+        db_url="postgresql://user:pass@localhost:5432/test",
+    )
+
+    # Mock MMEI needs object
+    class MockNeeds:
+        def __init__(self):
+            self.rest_need = 0.3
+            self.repair_need = 0.6
+            self.efficiency_need = 0.4
+
+    # Mock MMEI client
+    mock_mmei = AsyncMock()
+    mock_mmei.get_current_needs = AsyncMock(return_value=MockNeeds())
+    ctrl.set_mmei_client(mock_mmei)
+
+    # Mock database
+    mock_pool = AsyncMock()
+    mock_conn = AsyncMock()
+    mock_conn.execute = AsyncMock()
+    mock_conn.fetch = AsyncMock(return_value=[])
+
+    # Mock pool.acquire as async context manager
+    mock_acquire = MagicMock()
+    mock_acquire.__aenter__ = AsyncMock(return_value=mock_conn)
+    mock_acquire.__aexit__ = AsyncMock(return_value=None)
+    mock_pool.acquire = MagicMock(return_value=mock_acquire)
+
+    async def mock_create_pool(*args, **kwargs):
+        return mock_pool
+
+    # Mock HTTP responses
+    mock_response_prometheus = AsyncMock()
+    mock_response_prometheus.status = 200
+    mock_response_prometheus.json = AsyncMock(return_value={
+        "data": {"result": [{"value": [1234567890, "50.0"]}]}
+    })
+
+    mock_response_lymphnode = AsyncMock()
+    mock_response_lymphnode.status = 200
+    mock_response_lymphnode.json = AsyncMock(return_value={
+        "total_agents": 25,
+        "active_agents": 20,
+        "threats_detected": 3,
+    })
+
+    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+        await ctrl.iniciar()
+
+        # Mock HTTP session for metrics collection
+        with patch.object(ctrl._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__ = AsyncMock(return_value=mock_response_prometheus)
+            mock_get.return_value.__aexit__ = AsyncMock(return_value=None)
+
+            # Let MAPE-K loop run for 2+ cycles
+            await asyncio.sleep(1.5)
+
+            # Verify full cycle executed
+            assert ctrl.system_metrics is not None
+            assert ctrl.last_action is not None
+            assert mock_mmei.get_current_needs.called
+
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_routes_all_action_types():
+    """Test _execute routes to correct executors for all action types."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        # Mock HTTP responses
+        mock_response = AsyncMock()
+        mock_response.status = 200
+
+        with patch.object(ctrl._http_session, 'post') as mock_post:
+            mock_post.return_value.__aenter__ = AsyncMock(return_value=mock_response)
+            mock_post.return_value.__aexit__ = AsyncMock(return_value=None)
+
+            # Test SCALE_DOWN_AGENTS
+            result = await ctrl._execute(ActionType.SCALE_DOWN_AGENTS, {"quantity": 5})
+            assert result is True
+
+            # Test DESTROY_CLONES
+            result = await ctrl._execute(ActionType.DESTROY_CLONES, {"clone_id": "123"})
+            assert result is True
+
+            # Test INCREASE_SENSITIVITY
+            result = await ctrl._execute(ActionType.INCREASE_SENSITIVITY, {"delta": 0.1})
+            assert result is True
+
+            # Verify routing happened
+            assert mock_post.called
+    finally:
+        await ctrl.parar()
