@@ -314,5 +314,5 @@ async def _system_optimization_workflow(
     await asyncio.sleep(1)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8027)
