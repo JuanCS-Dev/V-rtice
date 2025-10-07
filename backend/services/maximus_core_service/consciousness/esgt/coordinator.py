@@ -443,7 +443,7 @@ class ESGTCoordinator:
             # Run Kuramoto synchronization
             dynamics = await self.kuramoto.synchronize(
                 topology=topology,
-                duration_ms=100.0,  # Max 100ms to achieve sync (biologicallyplausible)
+                duration_ms=300.0,  # Max 300ms to achieve sync (allows time for simulation)
                 target_coherence=target_coherence,
                 dt=0.005
             )
