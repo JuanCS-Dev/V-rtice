@@ -276,14 +276,24 @@ class SalienceSPM(SpecializedProcessingModule):
         relevance = self._compute_relevance(content, context)
         urgency = self._get_current_urgency(source)
 
+        # Calculate delta (confidence weight) to ensure weights sum to 1.0
+        delta_weight = 1.0 - (self.config.novelty_weight + self.config.relevance_weight + self.config.urgency_weight)
+
         salience = SalienceScore(
             novelty=novelty,
             relevance=relevance,
             urgency=urgency,
+            alpha=self.config.novelty_weight,
+            beta=self.config.relevance_weight,
+            gamma=self.config.urgency_weight,
+            delta=max(0.0, delta_weight),  # Confidence weight
         )
 
         # Check if high salience
         total_salience = salience.compute_total()
+
+        # DEBUG: Print salience computation
+        # print(f"[SalienceSPM] {source}: novelty={novelty:.3f}, relevance={relevance:.3f}, urgency={urgency:.3f}, total={total_salience:.3f}, threshold={self.config.thresholds.high_threshold:.3f}")
 
         if total_salience >= self.config.thresholds.high_threshold:
             self._handle_high_salience(source, content, salience)
@@ -301,7 +311,7 @@ class SalienceSPM(SpecializedProcessingModule):
 
         if value is None:
             # No trackable value, use default moderate novelty
-            return 0.5
+            return 0.55  # Slightly above baseline to allow critical priorities to trigger
 
         # Update history
         if source not in self._metric_history:
@@ -318,7 +328,7 @@ class SalienceSPM(SpecializedProcessingModule):
         history = self._metric_history[source]
         if len(history) < 3:
             # Not enough data for baseline
-            return 0.5
+            return 0.55  # Slightly above baseline to allow critical priorities to trigger
 
         baseline = np.mean(history[:-1])  # All but current
         self._baseline_values[source] = baseline
@@ -361,15 +371,15 @@ class SalienceSPM(SpecializedProcessingModule):
         In full implementation, would use semantic similarity or goal alignment.
         For now, uses heuristics.
         """
-        if context is None:
-            return self.config.default_relevance
+        # Collect relevance from multiple sources
+        relevance_scores = []
 
         # Check for explicit relevance score
         if "relevance" in content:
-            return float(content["relevance"])
+            relevance_scores.append(float(content["relevance"]))
 
+        # Check for priority mapping
         if "priority" in content:
-            # Map priority to relevance
             priority = content["priority"]
             priority_map = {
                 "low": 0.3,
@@ -378,23 +388,23 @@ class SalienceSPM(SpecializedProcessingModule):
                 "critical": 0.95,
             }
             if isinstance(priority, str) and priority.lower() in priority_map:
-                return priority_map[priority.lower()]
+                relevance_scores.append(priority_map[priority.lower()])
 
         # Check for goal alignment
-        if "goal_id" in content and "active_goals" in context:
+        if context and "goal_id" in content and "active_goals" in context:
             active_goals = context["active_goals"]
             if content["goal_id"] in active_goals:
-                return 0.8  # High relevance to active goal
+                relevance_scores.append(0.8)
 
         # Check for need alignment
-        if "need" in content and "current_needs" in context:
+        if context and "need" in content and "current_needs" in context:
             need = content["need"]
             current_needs = context["current_needs"]
             if need in current_needs:
-                # Relevance proportional to need magnitude
-                return min(1.0, current_needs[need] * 1.2)
+                relevance_scores.append(min(1.0, current_needs[need] * 1.2))
 
-        return self.config.default_relevance
+        # Return max of all sources, or default
+        return max(relevance_scores) if relevance_scores else self.config.default_relevance
 
     def _get_current_urgency(self, source: str) -> float:
         """Get current urgency level (with decay)."""

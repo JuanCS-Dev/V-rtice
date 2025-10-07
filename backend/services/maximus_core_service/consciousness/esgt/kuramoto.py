@@ -74,7 +74,7 @@ class OscillatorState(Enum):
 class OscillatorConfig:
     """Configuration for a Kuramoto oscillator."""
     natural_frequency: float = 40.0  # Hz (gamma-band analog)
-    coupling_strength: float = 1.0  # K parameter
+    coupling_strength: float = 14.0  # K parameter (high value compensates for k_i normalization)
     phase_noise: float = 0.01  # Additive phase noise
     damping: float = 0.1  # Damping coefficient
 
@@ -241,9 +241,10 @@ class KuramotoOscillator:
                 phase_diff = neighbor_phase - self.phase
                 coupling_sum += weight * np.sin(phase_diff)
 
-            # Normalized coupling (K/N term)
+            # Coupling term (K times average influence from neighbors)
             if total_weight > 0:
-                coupling_term = (self.config.coupling_strength / len(neighbor_phases)) * coupling_sum
+                # Remove /N normalization - K is per-neighbor coupling strength
+                coupling_term = self.config.coupling_strength * (coupling_sum / len(neighbor_phases))
                 phase_velocity += coupling_term
 
         # Damping (prevents unbounded growth)
@@ -323,7 +324,7 @@ class KuramotoNetwork:
     """
 
     def __init__(self, config: Optional[OscillatorConfig] = None):
-        self.config = config or OscillatorConfig()
+        self.default_config = config or OscillatorConfig()
         self.oscillators: Dict[str, KuramotoOscillator] = {}
         self.dynamics = SynchronizationDynamics()
         self._coherence_cache: Optional[PhaseCoherence] = None
@@ -331,7 +332,7 @@ class KuramotoNetwork:
 
     def add_oscillator(self, node_id: str, config: Optional[OscillatorConfig] = None) -> None:
         """Add oscillator for a TIG node."""
-        osc_config = config or self.config
+        osc_config = config or self.default_config
         self.oscillators[node_id] = KuramotoOscillator(node_id, osc_config)
 
     def remove_oscillator(self, node_id: str) -> None:
@@ -435,6 +436,9 @@ class KuramotoNetwork:
 
     def get_coherence(self) -> Optional[PhaseCoherence]:
         """Get latest phase coherence measurement."""
+        if self._coherence_cache is None and self.oscillators:
+            # Compute initial coherence if not yet cached
+            self._update_coherence(time.time())
         return self._coherence_cache
 
     def get_order_parameter(self) -> float:

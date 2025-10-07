@@ -183,13 +183,13 @@ class TriggerConditions:
 
     def check_resources(
         self,
-        tig_latency: float,
+        tig_latency_ms: float,
         available_nodes: int,
         cpu_capacity: float
     ) -> bool:
         """Check if computational resources are adequate."""
         return (
-            tig_latency <= self.max_tig_latency_ms and
+            tig_latency_ms <= self.max_tig_latency_ms and
             available_nodes >= self.min_available_nodes and
             cpu_capacity >= self.min_cpu_capacity
         )
@@ -377,8 +377,8 @@ class ESGTCoordinator:
 
     async def initiate_esgt(
         self,
-        content: Dict[str, Any],
         salience: SalienceScore,
+        content: Dict[str, Any],
         content_source: str = "unknown",
         target_duration_ms: float = 200.0,
         target_coherence: float = 0.70,
@@ -390,8 +390,8 @@ class ESGTCoordinator:
         into conscious experience through the 5-phase protocol.
 
         Args:
+            salience: Multi-factor salience score (determines if ignition occurs)
             content: Information to make conscious
-            salience: Multi-factor salience score
             content_source: SPM providing content
             target_duration_ms: How long to sustain (100-300ms typical)
             target_coherence: Minimum coherence (0.70 for consciousness)
@@ -407,9 +407,15 @@ class ESGTCoordinator:
             target_coherence=target_coherence,
         )
 
+        # Increment total events (all attempts, not just successful)
+        self.total_events += 1
+
         # Validate trigger conditions
-        if not await self._check_triggers(salience):
-            event.finalize(success=False, reason="Trigger conditions not met")
+        trigger_result, failure_reason = await self._check_triggers(salience)
+        if not trigger_result:
+            event.transition_phase(ESGTPhase.FAILED)
+            event.finalize(success=False, reason=failure_reason)
+            self.event_history.append(event)  # Record failed attempt
             return event
 
         try:
@@ -437,7 +443,7 @@ class ESGTCoordinator:
             # Run Kuramoto synchronization
             dynamics = await self.kuramoto.synchronize(
                 topology=topology,
-                duration_ms=50.0,  # Max 50ms to achieve sync
+                duration_ms=100.0,  # Max 100ms to achieve sync (biologicallyplausible)
                 target_coherence=target_coherence,
                 dt=0.005
             )
@@ -450,6 +456,9 @@ class ESGTCoordinator:
             if not coherence or not coherence.is_conscious_level():
                 event.finalize(success=False, reason=f"Sync failed: coherence={coherence.order_parameter if coherence else 0:.3f}")
                 return event
+
+            # Record peak coherence achieved during sync
+            event.achieved_coherence = coherence.order_parameter
 
             # PHASE 3: BROADCAST
             event.transition_phase(ESGTPhase.BROADCAST)
@@ -486,16 +495,15 @@ class ESGTCoordinator:
             # Exit ESGT mode
             await self.tig.exit_esgt_mode()
 
-            # Finalize
-            final_coherence = self.kuramoto.get_coherence()
-            event.achieved_coherence = final_coherence.order_parameter if final_coherence else 0.0
+            # Finalize (use max coherence from history, not post-dissolve value)
+            if event.coherence_history:
+                event.achieved_coherence = max(event.coherence_history)
             event.transition_phase(ESGTPhase.COMPLETE)
             event.finalize(success=True)
 
             # Record
             self.event_history.append(event)
             self.last_esgt_time = time.time()
-            self.total_events += 1
             if event.was_successful():
                 self.successful_events += 1
 
@@ -507,14 +515,15 @@ class ESGTCoordinator:
         except Exception as e:
             event.transition_phase(ESGTPhase.FAILED)
             event.finalize(success=False, reason=str(e))
+            self.event_history.append(event)  # Record failed attempt
             print(f"❌ ESGT {event.event_id} failed: {e}")
             return event
 
-    async def _check_triggers(self, salience: SalienceScore) -> bool:
-        """Check if all trigger conditions are met."""
+    async def _check_triggers(self, salience: SalienceScore) -> tuple[bool, str]:
+        """Check if all trigger conditions are met. Returns (success, failure_reason)."""
         # Salience check
         if not self.triggers.check_salience(salience):
-            return False
+            return False, f"Salience too low ({salience.compute_total():.2f} < {self.triggers.min_salience:.2f})"
 
         # Resource check
         tig_metrics = self.tig.get_metrics()
@@ -523,8 +532,8 @@ class ESGTCoordinator:
                              if node.node_state.value in ["active", "esgt_mode"])
         cpu_capacity = 0.60  # Simulated - would query actual metrics
 
-        if not self.triggers.check_resources(tig_latency, available_nodes, cpu_capacity):
-            return False
+        if not self.triggers.check_resources(tig_latency_ms=tig_latency, available_nodes=available_nodes, cpu_capacity=cpu_capacity):
+            return False, f"Insufficient resources (nodes={available_nodes}, latency={tig_latency:.1f}ms)"
 
         # Temporal gating
         time_since_last = time.time() - self.last_esgt_time if self.last_esgt_time > 0 else float('inf')
@@ -532,14 +541,14 @@ class ESGTCoordinator:
                           if time.time() - e.timestamp_start < 1.0)
 
         if not self.triggers.check_temporal_gating(time_since_last, recent_count):
-            return False
+            return False, f"Refractory period violation (time_since_last={time_since_last*1000:.1f}ms < {self.triggers.refractory_period_ms:.1f}ms)"
 
         # Arousal check (simulated - would query MCEA)
         arousal = 0.70  # Simulated
         if not self.triggers.check_arousal(arousal):
-            return False
+            return False, f"Arousal too low ({arousal:.2f} < {self.triggers.min_arousal:.2f})"
 
-        return True
+        return True, ""
 
     async def _recruit_nodes(self, content: Dict[str, Any]) -> Set[str]:
         """
