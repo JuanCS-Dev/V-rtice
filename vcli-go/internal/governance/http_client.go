@@ -395,3 +395,9 @@ func (c *HTTPClient) PingServer(ctx context.Context) (time.Duration, error) {
 
 	return time.Since(start), nil
 }
+
+// Close closes the HTTP client (no-op for HTTP, here for interface compatibility)
+func (c *HTTPClient) Close() error {
+	// HTTP client uses connection pooling, no explicit close needed
+	return nil
+}
