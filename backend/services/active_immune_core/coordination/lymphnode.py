@@ -940,31 +940,49 @@ class LinfonodoDigital:
         """
         Get lymphnode statistics (ASYNC - thread-safe).
 
+        REFACTORED (FASE 3): Aggregates stats from all extracted components.
+
         Returns:
             Dict with lymphnode metrics
         """
-        # Get all values from thread-safe structures
-        current_temp = await self.temperatura_regional.get()
+        # Get stats from extracted components (FASE 3)
+        temp_stats = await self._temperature_controller.get_stats()
+        metrics_stats = await self._lymphnode_metrics.get_stats()
+        agent_stats = await self._agent_orchestrator.get_stats()
+        pattern_stats = self._pattern_detector.get_stats()  # Sync method
+
+        # Get local state
         buffer_size = await self.cytokine_buffer.size()
         threats_tracked = await self.threat_detections.size()
 
-        ameacas = await self.total_ameacas_detectadas.get()
-        neutralizacoes = await self.total_neutralizacoes.get()
-        clones_criados = await self.total_clones_criados.get()
-        clones_destruidos = await self.total_clones_destruidos.get()
-
         return {
+            # Identification
             "lymphnode_id": self.id,
             "nivel": self.nivel,
             "area": self.area,
-            "temperatura_regional": current_temp,
-            "homeostatic_state": self.homeostatic_state.value,
-            "agentes_total": len(self.agentes_ativos),
-            "agentes_dormindo": len(self.agentes_dormindo),
-            "ameacas_detectadas": ameacas,
-            "neutralizacoes": neutralizacoes,
-            "clones_criados": clones_criados,
-            "clones_destruidos": clones_destruidos,
+
+            # Temperature & homeostasis (from TemperatureController)
+            "temperatura_regional": temp_stats["current_temperature"],
+            "homeostatic_state": temp_stats["homeostatic_state"],
+
+            # Agent orchestration (from AgentOrchestrator)
+            "agentes_total": agent_stats["active_agents"],
+            "agentes_dormindo": agent_stats["sleeping_agents"],
+            "total_clones_created_history": agent_stats["total_clones_created"],
+            "total_clones_destroyed_history": agent_stats["total_clones_destroyed"],
+
+            # Metrics (from LymphnodeMetrics)
+            "ameacas_detectadas": metrics_stats["total_threats_detected"],
+            "neutralizacoes": metrics_stats["total_neutralizations"],
+            "clones_criados": metrics_stats["total_clones_created"],
+            "clones_destruidos": metrics_stats["total_clones_destroyed"],
+            "neutralization_rate": metrics_stats["neutralization_rate"],
+
+            # Pattern detection (from PatternDetector)
+            "persistent_threats_detected": pattern_stats["persistent_patterns"],
+            "coordinated_attacks_detected": pattern_stats["coordinated_patterns"],
+
+            # Local state
             "cytokine_buffer_size": buffer_size,
             "threats_being_tracked": threats_tracked,
             "rate_limiter_stats": self._clonal_limiter.get_stats(),
