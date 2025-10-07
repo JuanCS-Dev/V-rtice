@@ -421,8 +421,8 @@ class EntityTransformer:
             # Try ISO format first
             try:
                 return datetime.fromisoformat(dt_value.replace("Z", "+00:00"))
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"Failed to parse datetime as ISO format '{dt_value}': {e}")
 
             # Try other formats
             for fmt in [

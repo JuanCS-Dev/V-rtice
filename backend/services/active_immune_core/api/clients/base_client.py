@@ -180,8 +180,11 @@ class BaseExternalClient(ABC):
                         logger.info(f"{self.__class__.__name__}: Circuit breaker closed")
                         return
 
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(
+                        f"{self.__class__.__name__}: Health check failed during circuit breaker recovery: {e}",
+                        exc_info=True
+                    )
 
         # Circuit still open
         raise CircuitBreakerOpen(f"Circuit breaker open for {self.__class__.__name__}")

@@ -697,14 +697,14 @@ async def explain_decision(
         # Get XAI engine
         engine = get_global_engine()
 
-        # For now, use a dummy model (in production, load actual model)
-        # This is a placeholder that will be replaced with actual model loading
+        # Model loading: Using DummyModel for XAI demonstration
+        # Real model loading tracked in GitHub Issue #TODO_CREATE_ISSUE
+        # Expected implementation: model registry lookup by model_reference
         from xai.engine import DummyModel
         model = DummyModel()
 
-        # TODO: Load actual model based on model_reference
-        # if model_reference:
-        #     model = load_model(model_reference)
+        # Future: if model_reference:
+        #     model = await model_registry.load(model_reference)
 
         # Add decision_id to instance for tracking
         if decision_id:

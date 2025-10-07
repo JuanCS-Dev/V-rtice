@@ -110,8 +110,8 @@ class SeriemaGraphClient:
                     "CREATE CONSTRAINT argument_id_unique IF NOT EXISTS "
                     "FOR (a:Argument) REQUIRE a.id IS UNIQUE"
                 )
-            except Neo4jError:
-                pass  # Already exists
+            except Neo4jError as e:
+                logger.debug(f"Constraint argument_id_unique already exists or creation failed: {e}")
 
             # Index on framework_id for fast filtering
             try:
@@ -119,8 +119,8 @@ class SeriemaGraphClient:
                     "CREATE INDEX argument_framework_idx IF NOT EXISTS "
                     "FOR (a:Argument) ON (a.framework_id)"
                 )
-            except Neo4jError:
-                pass
+            except Neo4jError as e:
+                logger.debug(f"Index argument_framework_idx already exists or creation failed: {e}")
 
             # Index on role
             try:
@@ -128,8 +128,8 @@ class SeriemaGraphClient:
                     "CREATE INDEX argument_role_idx IF NOT EXISTS "
                     "FOR (a:Argument) ON (a.role)"
                 )
-            except Neo4jError:
-                pass
+            except Neo4jError as e:
+                logger.debug(f"Index argument_role_idx already exists or creation failed: {e}")
 
             logger.info("Schema constraints and indexes created")
 

@@ -236,8 +236,8 @@ class EventBridge:
 
         try:
             await websocket.close()
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Error closing WebSocket (already closed or connection lost): {e}")
 
         logger.info(f"WebSocket disconnected (total={len(self._connections)})")
 

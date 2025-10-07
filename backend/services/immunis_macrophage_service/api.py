@@ -164,8 +164,8 @@ async def phagocytose_sample(
         # Cleanup temporary file
         try:
             os.unlink(tmp_file_path)
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to cleanup temporary file {tmp_file_path}: {e}")
 
         return {
             "status": "success",

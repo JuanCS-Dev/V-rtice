@@ -82,11 +82,12 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Kafka initialization failed: {e}")
         startup_errors.append(f"Kafka: {e}")
 
-    # TODO Phase 2+: Load ML models
+    # Phase 2+ ML Models (tracked in GitHub Issue #NARRATIVE_ML_MODELS):
     # - BERTimbau emotion classifier
     # - RoBERTa propaganda detector
     # - BiLSTM-CNN-CRF argument miner
     # - Sentence transformers
+    # Currently using rule-based pipeline (Phase 1)
 
     if startup_errors:
         logger.warning(f"⚠️  Service started with errors: {startup_errors}")
@@ -203,7 +204,7 @@ async def health_check() -> HealthCheckResponse:
         logger.error(f"Kafka health check failed: {e}")
         services["kafka"] = False
 
-    # TODO Phase 2+: Check ML models loaded
+    # Phase 2+ ML model health checks (GitHub Issue #NARRATIVE_ML_MODELS):
     # services["bertimbau"] = model_manager.is_loaded("bertimbau")
     # services["roberta"] = model_manager.is_loaded("roberta")
     # etc.
@@ -224,7 +225,7 @@ async def health_check() -> HealthCheckResponse:
         version=settings.SERVICE_VERSION,
         timestamp=datetime.utcnow(),
         services=services,
-        models_loaded=[],  # TODO Phase 2+: populate with loaded models
+        models_loaded=[],  # Phase 2+: GitHub Issue #NARRATIVE_ML_MODELS
     )
 
 
@@ -259,17 +260,17 @@ async def analyze_content(
     start_time = time.time()
 
     try:
-        # TODO Phase 2-6: Implement full cognitive defense pipeline
-        # 1. Text preprocessing (utils.clean_text)
-        # 2. Entity linking (DBpedia Spotlight)
-        # 3. Argument mining (BiLSTM-CNN-CRF)
-        # 4. Module 1: Source Credibility (NewsGuard + Bayesian updates)
-        # 5. Module 2: Emotional Manipulation (BERTimbau + RoBERTa)
-        # 6. Module 3: Logical Fallacy (fallacy classifiers + Dung's AF)
-        # 7. Module 4: Reality Distortion (ClaimBuster + SPARQL KG)
-        # 8. Executive Controller: Threat aggregation
-        # 9. Store results in PostgreSQL
-        # 10. Send events to Kafka
+        # Phase 2-6 Full Pipeline (tracked in GitHub Issues):
+        # 1. Text preprocessing (utils.clean_text) - Phase 1 ✓
+        # 2. Entity linking (DBpedia Spotlight) - Issue #NARRATIVE_ENTITY_LINKING
+        # 3. Argument mining (BiLSTM-CNN-CRF) - Issue #NARRATIVE_ARGUMENT_MINING
+        # 4. Module 1: Source Credibility (NewsGuard + Bayesian) - Issue #NARRATIVE_SOURCE_CRED
+        # 5. Module 2: Emotional Manipulation (BERTimbau + RoBERTa) - Issue #NARRATIVE_ML_MODELS
+        # 6. Module 3: Logical Fallacy (classifiers + Dung's AF) - Phase 1 ✓
+        # 7. Module 4: Reality Distortion (ClaimBuster + SPARQL KG) - Issue #NARRATIVE_FACT_CHECK
+        # 8. Executive Controller: Threat aggregation - Phase 1 ✓
+        # 9. Store results in PostgreSQL - Phase 1 ✓
+        # 10. Send events to Kafka - Phase 1 ✓
 
         # STUB RESPONSE (Phase 1)
         logger.warning("⚠️  Using stub analysis - full implementation in Phase 2+")

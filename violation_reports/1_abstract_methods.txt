@@ -1,0 +1,16 @@
+# CATEGORIA 1: Abstract Methods (ABC)
+# Status: ✅ ACCEPTABLE
+# Justificativa: Pattern de design Python - ABC com @abstractmethod
+
+/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/model_adapters.py:55:        pass
+/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/model_adapters.py:65:        pass
+/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/model_adapters.py:91:        pass
+/home/juan/vertice-dev/backend/services/maximus_core_service/consciousness/esgt/spm/base.py:188:        pass
+/home/juan/vertice-dev/backend/services/maximus_core_service/training/data_preprocessor.py:77:        pass
+/home/juan/vertice-dev/backend/services/maximus_core_service/xai/base.py:147:        pass
+/home/juan/vertice-dev/backend/services/maximus_core_service/ethics/base.py:193:        pass
+/home/juan/vertice-dev/backend/services/osint_service/scrapers/base_scraper.py:32:        pass
+/home/juan/vertice-dev/backend/services/osint_service/scrapers/base_scraper.py:45:        pass
+/home/juan/vertice-dev/backend/services/adr_core_service/connectors/base.py:32:        pass
+/home/juan/vertice-dev/backend/services/adr_core_service/connectors/base.py:41:        pass
+/home/juan/vertice-dev/backend/services/adr_core_service/connectors/base.py:50:        pass

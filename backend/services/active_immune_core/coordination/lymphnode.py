@@ -715,8 +715,8 @@ class LinfonodoDigital:
                     payload = citocina.get("payload", {})
                     if payload.get("evento") == "ameaca_detectada" or payload.get("is_threat"):
                         recent_threats += 1
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Failed to parse cytokine timestamp '{timestamp_str}': {e}")
 
         # Trigger mass response if coordinated attack detected
         if recent_threats >= 10:

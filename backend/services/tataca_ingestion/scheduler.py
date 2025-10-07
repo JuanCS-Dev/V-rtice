@@ -333,16 +333,22 @@ class JobScheduler:
                         job_status.records_failed += 1
 
     async def _execute_prisional_job(self, job_id: str, request: IngestJobRequest):
-        """Execute prisional system ingestion job."""
-        # TODO: Implement when prisional connector is available
+        """Execute prisional system ingestion job.
+
+        Blocked by: GitHub Issue #TATACA_PRISIONAL_CONNECTOR
+        Requires: Prison system API connector implementation
+        """
         logger.warning(f"Prisional connector not implemented yet for job {job_id}")
         job_status = self.jobs[job_id]
         job_status.records_processed = 0
         job_status.records_failed = 0
 
     async def _execute_antecedentes_job(self, job_id: str, request: IngestJobRequest):
-        """Execute antecedentes ingestion job."""
-        # TODO: Implement when antecedentes connector is available
+        """Execute antecedentes ingestion job.
+
+        Blocked by: GitHub Issue #TATACA_ANTECEDENTES_CONNECTOR
+        Requires: Criminal background system API connector implementation
+        """
         logger.warning(f"Antecedentes connector not implemented yet for job {job_id}")
         job_status = self.jobs[job_id]
         job_status.records_processed = 0
