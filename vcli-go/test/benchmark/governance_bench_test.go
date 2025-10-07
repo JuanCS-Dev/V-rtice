@@ -387,3 +387,267 @@ func maxDuration(d []time.Duration) time.Duration {
 	}
 	return max
 }
+
+// BenchmarkHTTPClient_RejectDecision benchmarks HTTP reject decision
+func BenchmarkHTTPClient_RejectDecision(b *testing.B) {
+	client := gov.NewHTTPClient(httpServerURL, operatorID)
+	ctx := context.Background()
+
+	// Create session first
+	_, err := client.CreateSession(ctx)
+	if err != nil {
+		b.Skip("HTTP server not available or session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		decisionID := fmt.Sprintf("bench-reject-%d", i)
+		err := client.RejectDecision(ctx, decisionID, "Benchmark test", "Performance testing")
+		if err != nil {
+			b.Logf("Reject failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkGRPCClient_RejectDecision benchmarks gRPC reject decision
+func BenchmarkGRPCClient_RejectDecision(b *testing.B) {
+	client, err := grpcclient.NewGovernanceClient(grpcServerURL)
+	if err != nil {
+		b.Skip("gRPC server not available")
+		return
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// Create session first
+	_, err = client.CreateSession(ctx, operatorID)
+	if err != nil {
+		b.Skip("Session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		decisionID := fmt.Sprintf("bench-reject-%d", i)
+		err := client.RejectDecision(ctx, decisionID, "Benchmark test", "Performance testing")
+		if err != nil {
+			b.Logf("Reject failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkHTTPClient_GetDecision benchmarks HTTP get decision
+func BenchmarkHTTPClient_GetDecision(b *testing.B) {
+	client := gov.NewHTTPClient(httpServerURL, operatorID)
+	ctx := context.Background()
+
+	// Create session first
+	_, err := client.CreateSession(ctx)
+	if err != nil {
+		b.Skip("HTTP server not available or session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	// Use a known decision ID (from POC data)
+	decisionID := "dec-001"
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := client.GetDecision(ctx, decisionID)
+		if err != nil {
+			b.Logf("Get decision failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkGRPCClient_GetDecision benchmarks gRPC get decision
+func BenchmarkGRPCClient_GetDecision(b *testing.B) {
+	client, err := grpcclient.NewGovernanceClient(grpcServerURL)
+	if err != nil {
+		b.Skip("gRPC server not available")
+		return
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// Create session first
+	_, err = client.CreateSession(ctx, operatorID)
+	if err != nil {
+		b.Skip("Session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	// Use a known decision ID (from POC data)
+	decisionID := "dec-001"
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := client.GetDecision(ctx, decisionID)
+		if err != nil {
+			b.Logf("Get decision failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkHTTPClient_EscalateDecision benchmarks HTTP escalate decision
+func BenchmarkHTTPClient_EscalateDecision(b *testing.B) {
+	client := gov.NewHTTPClient(httpServerURL, operatorID)
+	ctx := context.Background()
+
+	// Create session first
+	_, err := client.CreateSession(ctx)
+	if err != nil {
+		b.Skip("HTTP server not available or session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		decisionID := fmt.Sprintf("bench-escalate-%d", i)
+		err := client.EscalateDecision(ctx, decisionID, "Benchmark test", "soc_lead")
+		if err != nil {
+			b.Logf("Escalate failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkGRPCClient_EscalateDecision benchmarks gRPC escalate decision
+func BenchmarkGRPCClient_EscalateDecision(b *testing.B) {
+	client, err := grpcclient.NewGovernanceClient(grpcServerURL)
+	if err != nil {
+		b.Skip("gRPC server not available")
+		return
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// Create session first
+	_, err = client.CreateSession(ctx, operatorID)
+	if err != nil {
+		b.Skip("Session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		decisionID := fmt.Sprintf("bench-escalate-%d", i)
+		err := client.EscalateDecision(ctx, decisionID, "Benchmark test", "soc_lead")
+		if err != nil {
+			b.Logf("Escalate failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkHTTPClient_GetSessionStats benchmarks HTTP get session stats
+func BenchmarkHTTPClient_GetSessionStats(b *testing.B) {
+	client := gov.NewHTTPClient(httpServerURL, operatorID)
+	ctx := context.Background()
+
+	// Create session first
+	_, err := client.CreateSession(ctx)
+	if err != nil {
+		b.Skip("HTTP server not available or session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := client.GetSessionStats(ctx)
+		if err != nil {
+			b.Logf("Get session stats failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkGRPCClient_GetSessionStats benchmarks gRPC get session stats
+func BenchmarkGRPCClient_GetSessionStats(b *testing.B) {
+	client, err := grpcclient.NewGovernanceClient(grpcServerURL)
+	if err != nil {
+		b.Skip("gRPC server not available")
+		return
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// Create session first
+	_, err = client.CreateSession(ctx, operatorID)
+	if err != nil {
+		b.Skip("Session creation failed")
+		return
+	}
+	defer client.CloseSession(ctx)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := client.GetSessionStats(ctx)
+		if err != nil {
+			b.Logf("Get session stats failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkHTTPClient_CloseSession benchmarks HTTP close session
+func BenchmarkHTTPClient_CloseSession(b *testing.B) {
+	client := gov.NewHTTPClient(httpServerURL, operatorID)
+	ctx := context.Background()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		// Create session
+		_, err := client.CreateSession(ctx)
+		if err != nil {
+			b.Skip("HTTP server not available or session creation failed")
+			return
+		}
+		b.StartTimer()
+
+		// Close session
+		err = client.CloseSession(ctx)
+		if err != nil {
+			b.Logf("Close session failed: %v", err)
+		}
+	}
+}
+
+// BenchmarkGRPCClient_CloseSession benchmarks gRPC close session
+func BenchmarkGRPCClient_CloseSession(b *testing.B) {
+	client, err := grpcclient.NewGovernanceClient(grpcServerURL)
+	if err != nil {
+		b.Skip("gRPC server not available")
+		return
+	}
+	defer client.Close()
+
+	ctx := context.Background()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		// Create session
+		_, err = client.CreateSession(ctx, fmt.Sprintf("%s_%d", operatorID, i))
+		if err != nil {
+			b.Skip("Session creation failed")
+			return
+		}
+		b.StartTimer()
+
+		// Close session
+		err = client.CloseSession(ctx)
+		if err != nil {
+			b.Logf("Close session failed: %v", err)
+		}
+	}
+}
