@@ -1,0 +1,20 @@
+# Grafana Data Sources Configuration for MAXIMUS AI 3.0
+# Auto-provisioning of Prometheus datasource
+#
+# REGRA DE OURO: Production-ready configuration
+# Author: Claude Code + JuanCS-Dev
+# Date: 2025-10-06
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: POST
+      timeInterval: "10s"
+    version: 1

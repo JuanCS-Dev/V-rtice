@@ -1,0 +1,16 @@
+# Kubernetes Namespace for Active Immune Core
+# Isolates all Active Immune Core resources
+#
+# Apply: kubectl apply -f k8s/00-namespace.yaml
+#
+# NO MOCKS, NO PLACEHOLDERS, NO TODOS - Production-ready.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: active-immune
+  labels:
+    name: active-immune
+    project: vertice
+    component: cyber-defense
+    managed-by: kubectl

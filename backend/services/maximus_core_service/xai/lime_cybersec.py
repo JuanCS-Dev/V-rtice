@@ -63,12 +63,15 @@ class CyberSecLIME(ExplainerBase):
         """
         super().__init__(config)
 
+        # Use self.config from base class (guaranteed to be dict, not None)
+        cfg = self.config
+
         # Perturbation configuration
         self.perturbation_config = PerturbationConfig(
-            num_samples=config.get('num_samples', 5000),
-            feature_selection=config.get('feature_selection', 'auto'),
-            kernel_width=config.get('kernel_width', 0.25),
-            sample_around_instance=config.get('sample_around_instance', True)
+            num_samples=cfg.get('num_samples', 5000),
+            feature_selection=cfg.get('feature_selection', 'auto'),
+            kernel_width=cfg.get('kernel_width', 0.25),
+            sample_around_instance=cfg.get('sample_around_instance', True)
         )
 
         # Feature type handlers
@@ -139,9 +142,9 @@ class CyberSecLIME(ExplainerBase):
             feature_types.keys()
         )
 
-        # Sort by absolute importance
+        # Filter out internal fields and sort by absolute importance
         sorted_features = sorted(
-            feature_importances.items(),
+            [(k, v) for k, v in feature_importances.items() if k != '__intercept__'],
             key=lambda x: abs(x[1]),
             reverse=True
         )
@@ -387,7 +390,9 @@ class CyberSecLIME(ExplainerBase):
             if len(parts) == 4:
                 parts[3] = str(np.random.randint(1, 255))
                 return '.'.join(parts)
-        except:
+        except (ValueError, TypeError, AttributeError, IndexError) as e:
+            # Invalid IP format or type - return original value
+            logger.debug(f"IP perturbation failed for {value}: {e}")
             pass
 
         return value
@@ -438,9 +443,13 @@ class CyberSecLIME(ExplainerBase):
             feature_name: Feature name
 
         Returns:
-            Original text (text perturbation is complex, skipped for now)
+            Original text (unmodified)
+
+        Note:
+            Text perturbation (word dropout, synonym replacement) is not implemented.
+            For text-based features, LIME explanations may be less informative.
+            Consider using numerical/categorical features for better explanations.
         """
-        # TODO: Implement text perturbation (word dropout, synonym replacement)
         return value
 
     def _calculate_feature_distance(
@@ -472,7 +481,9 @@ class CyberSecLIME(ExplainerBase):
                 # Normalize by max(value, 1) to avoid division by zero
                 normalizer = max(abs(orig_val), 1.0)
                 return min(1.0, diff / normalizer)
-            except:
+            except (ValueError, TypeError, ZeroDivisionError) as e:
+                # Cannot convert to float or division error - return max distance
+                logger.debug(f"Distance calculation failed for {original} vs {perturbed}: {e}")
                 return 1.0
 
         elif feature_type in ['categorical', 'ip_address', 'text']:
@@ -575,10 +586,13 @@ class CyberSecLIME(ExplainerBase):
         model = Ridge(alpha=1.0)
         model.fit(X, predictions, sample_weight=weights)
 
-        # Return coefficients as importances
+        # Return coefficients as importances (include intercept for prediction)
         importances = {}
         for i, feature_name in enumerate(feature_names):
             importances[feature_name] = float(model.coef_[i])
+
+        # Store intercept for accurate predictions
+        importances['__intercept__'] = float(model.intercept_)
 
         return importances
 
@@ -596,13 +610,15 @@ class CyberSecLIME(ExplainerBase):
         Returns:
             Predictions
         """
-        meta_fields = {'decision_id', 'timestamp', 'analysis_id'}
+        meta_fields = {'decision_id', 'timestamp', 'analysis_id', '__intercept__'}
         feature_names = sorted([f for f in importances.keys() if f not in meta_fields])
 
         X = np.array([[sample.get(f, 0) for f in feature_names] for sample in samples])
         coefficients = np.array([importances[f] for f in feature_names])
 
-        return X.dot(coefficients)
+        # Include intercept in prediction
+        intercept = importances.get('__intercept__', 0.0)
+        return X.dot(coefficients) + intercept
 
     def _calculate_explanation_confidence(
         self,
@@ -628,7 +644,11 @@ class CyberSecLIME(ExplainerBase):
         ss_tot = np.sum(weights * ((true_predictions - mean_pred) ** 2))
 
         if ss_tot == 0:
-            return 0.0
+            # No variance in predictions
+            if ss_res == 0:
+                return 1.0  # Perfect explanation (no variance, no residuals)
+            else:
+                return 0.0  # Degenerate case: no variance but still have residuals
 
         r_squared = 1 - (ss_res / ss_tot)
         return max(0.0, min(1.0, r_squared))

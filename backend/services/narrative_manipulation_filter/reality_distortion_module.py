@@ -8,21 +8,21 @@ Two-tier claim verification architecture:
 Orchestrates all verification components for comprehensive fact-checking.
 """
 
-import logging
-from typing import List, Dict, Any, Optional
+import asyncio
 from datetime import datetime
 from enum import Enum
-import asyncio
+import logging
+from typing import Any, Dict, List, Optional
 
-from fact_check_aggregator import fact_check_aggregator
-from entity_linker import entity_linker
-from sparql_generator import sparql_generator
-from kg_verifier import kg_verifier
-from fact_check_queue import fact_check_queue
-from models import VerificationStatus
 from cache_manager import cache_manager, CacheCategory
-from utils import hash_text
 from config import get_settings
+from entity_linker import entity_linker
+from fact_check_aggregator import fact_check_aggregator
+from fact_check_queue import fact_check_queue
+from kg_verifier import kg_verifier
+from models import VerificationStatus
+from sparql_generator import sparql_generator
+from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class RealityDistortionResult:
         verified_claims: List[Dict[str, Any]],
         unverified_claims: List[Dict[str, Any]],
         tier2_pending: bool = False,
-        evidence: Optional[Dict[str, Any]] = None
+        evidence: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize result.
@@ -102,7 +102,7 @@ class RealityDistortionModule:
         self,
         enable_tier2: bool = True,
         start_tier2_workers: bool = False,
-        num_workers: int = 4
+        num_workers: int = 4,
     ) -> None:
         """
         Initialize verification components.
@@ -138,14 +138,16 @@ class RealityDistortionModule:
             logger.info("✅ Reality distortion module initialized")
 
         except Exception as e:
-            logger.error(f"❌ Failed to initialize reality distortion module: {e}", exc_info=True)
+            logger.error(
+                f"❌ Failed to initialize reality distortion module: {e}", exc_info=True
+            )
             raise
 
     async def verify_content(
         self,
         text: str,
         mode: ProcessingMode = ProcessingMode.STANDARD,
-        tier2_timeout: Optional[float] = None
+        tier2_timeout: Optional[float] = None,
     ) -> RealityDistortionResult:
         """
         Comprehensive reality distortion verification.
@@ -176,7 +178,7 @@ class RealityDistortionModule:
                 claims=[],
                 verified_claims=[],
                 unverified_claims=[],
-                tier2_pending=False
+                tier2_pending=False,
             )
 
         logger.info(f"Extracted {len(claims)} potential claims")
@@ -185,21 +187,29 @@ class RealityDistortionModule:
         tier1_results = await self._tier1_verification(claims)
 
         # Filter verified vs unverified
-        verified = [r for r in tier1_results if r["verification_status"] in [
-            VerificationStatus.VERIFIED_TRUE.value,
-            VerificationStatus.VERIFIED_FALSE.value,
-            VerificationStatus.MIXED.value
-        ]]
+        verified = [
+            r
+            for r in tier1_results
+            if r["verification_status"]
+            in [
+                VerificationStatus.VERIFIED_TRUE.value,
+                VerificationStatus.VERIFIED_FALSE.value,
+                VerificationStatus.MIXED.value,
+            ]
+        ]
 
-        unverified = [r for r in tier1_results if r["verification_status"] == VerificationStatus.UNVERIFIED.value]
+        unverified = [
+            r
+            for r in tier1_results
+            if r["verification_status"] == VerificationStatus.UNVERIFIED.value
+        ]
 
         # STEP 3: Tier 2 verification for unverified claims (if enabled)
         tier2_pending = False
 
         if mode == ProcessingMode.DEEP_ANALYSIS and unverified and self._tier2_enabled:
             tier2_results = await self._tier2_verification(
-                claims=[u["claim_text"] for u in unverified],
-                wait_timeout=tier2_timeout
+                claims=[u["claim_text"] for u in unverified], wait_timeout=tier2_timeout
             )
 
             # Merge Tier 2 results
@@ -207,16 +217,16 @@ class RealityDistortionModule:
                 verified.extend(tier2_results)
                 # Remove claims that were verified in Tier 2
                 verified_claim_texts = {r["claim"] for r in tier2_results}
-                unverified = [u for u in unverified if u["claim_text"] not in verified_claim_texts]
+                unverified = [
+                    u for u in unverified if u["claim_text"] not in verified_claim_texts
+                ]
             elif tier2_timeout is None:
                 # Async mode - results pending
                 tier2_pending = True
 
         # STEP 4: Calculate distortion score
         distortion_score, overall_status, confidence = self._calculate_distortion_score(
-            verified=verified,
-            unverified=unverified,
-            tier2_pending=tier2_pending
+            verified=verified, unverified=unverified, tier2_pending=tier2_pending
         )
 
         tier_used = 2 if (mode == ProcessingMode.DEEP_ANALYSIS and tier2_results) else 1
@@ -233,8 +243,8 @@ class RealityDistortionModule:
             evidence={
                 "tier1_results": tier1_results,
                 "tier2_enabled": self._tier2_enabled,
-                "processing_mode": mode.value
-            }
+                "processing_mode": mode.value,
+            },
         )
 
         logger.info(
@@ -259,7 +269,7 @@ class RealityDistortionModule:
         import re
 
         # Split by sentence-ending punctuation
-        sentences = re.split(r'[.!?]+', text)
+        sentences = re.split(r"[.!?]+", text)
 
         # Filter claims (sentences with facts, not questions or short fragments)
         claims = []
@@ -272,21 +282,30 @@ class RealityDistortionModule:
                 continue
 
             # Skip questions
-            if '?' in sentence:
+            if "?" in sentence:
                 continue
 
             # Skip if no verb (heuristic for factual claim)
-            if not any(word in sentence.lower() for word in ['é', 'foi', 'são', 'estar', 'ter', 'fazer', 'nascer', 'morrer']):
+            if not any(
+                word in sentence.lower()
+                for word in [
+                    "é",
+                    "foi",
+                    "são",
+                    "estar",
+                    "ter",
+                    "fazer",
+                    "nascer",
+                    "morrer",
+                ]
+            ):
                 continue
 
             claims.append(sentence)
 
         return claims
 
-    async def _tier1_verification(
-        self,
-        claims: List[str]
-    ) -> List[Dict[str, Any]]:
+    async def _tier1_verification(self, claims: List[str]) -> List[Dict[str, Any]]:
         """
         Tier 1: Fast verification via API matching.
 
@@ -304,9 +323,7 @@ class RealityDistortionModule:
         return results
 
     async def _tier2_verification(
-        self,
-        claims: List[str],
-        wait_timeout: Optional[float] = None
+        self, claims: List[str], wait_timeout: Optional[float] = None
     ) -> List[Dict[str, Any]]:
         """
         Tier 2: Deep verification via Knowledge Graphs.
@@ -324,9 +341,7 @@ class RealityDistortionModule:
             # Async mode: enqueue and return immediately
             for claim in claims:
                 await fact_check_queue.enqueue_claim(
-                    claim=claim,
-                    context={},
-                    priority="normal"
+                    claim=claim, context={}, priority="normal"
                 )
             logger.info(f"Enqueued {len(claims)} claims for async Tier 2 verification")
             return []
@@ -336,7 +351,9 @@ class RealityDistortionModule:
 
         for claim in claims:
             await fact_check_queue.enqueue_claim(claim=claim)
-            tasks.append(fact_check_queue.get_result(claim=claim, wait_timeout=wait_timeout))
+            tasks.append(
+                fact_check_queue.get_result(claim=claim, wait_timeout=wait_timeout)
+            )
 
         results = await asyncio.gather(*tasks)
 
@@ -347,7 +364,7 @@ class RealityDistortionModule:
         self,
         verified: List[Dict[str, Any]],
         unverified: List[Dict[str, Any]],
-        tier2_pending: bool
+        tier2_pending: bool,
     ) -> tuple:
         """
         Calculate overall distortion score and status.
@@ -367,17 +384,20 @@ class RealityDistortionModule:
 
         # Count verification statuses
         false_count = sum(
-            1 for v in verified
+            1
+            for v in verified
             if v.get("verification_status") == VerificationStatus.VERIFIED_FALSE.value
         )
 
         true_count = sum(
-            1 for v in verified
+            1
+            for v in verified
             if v.get("verification_status") == VerificationStatus.VERIFIED_TRUE.value
         )
 
         mixed_count = sum(
-            1 for v in verified
+            1
+            for v in verified
             if v.get("verification_status") == VerificationStatus.MIXED.value
         )
 
@@ -390,9 +410,9 @@ class RealityDistortionModule:
         unverified_ratio = unverified_count / total_claims
 
         distortion_score = (
-            false_ratio * 1.0 +      # False claims contribute fully
-            mixed_ratio * 0.6 +      # Mixed claims contribute partially
-            unverified_ratio * 0.4   # Unverified claims contribute less
+            false_ratio * 1.0  # False claims contribute fully
+            + mixed_ratio * 0.6  # Mixed claims contribute partially
+            + unverified_ratio * 0.4  # Unverified claims contribute less
         )
 
         # Determine overall status
@@ -417,10 +437,7 @@ class RealityDistortionModule:
 
         return distortion_score, overall_status, confidence
 
-    def generate_verification_report(
-        self,
-        result: RealityDistortionResult
-    ) -> str:
+    def generate_verification_report(self, result: RealityDistortionResult) -> str:
         """
         Generate human-readable verification report.
 
@@ -443,48 +460,50 @@ class RealityDistortionModule:
             f"- **Total Claims**: {len(result.claims)}",
             f"- **Verified Claims**: {len(result.verified_claims)}",
             f"- **Unverified Claims**: {len(result.unverified_claims)}",
-            ""
+            "",
         ]
 
         if result.tier2_pending:
-            lines.extend([
-                "⏳ **Tier 2 Deep Verification Pending**",
-                "",
-                "Some claims are being verified asynchronously via knowledge graphs. "
-                "Results will be available shortly.",
-                ""
-            ])
+            lines.extend(
+                [
+                    "⏳ **Tier 2 Deep Verification Pending**",
+                    "",
+                    "Some claims are being verified asynchronously via knowledge graphs. "
+                    "Results will be available shortly.",
+                    "",
+                ]
+            )
 
         if result.verified_claims:
-            lines.extend([
-                "## Verified Claims",
-                ""
-            ])
+            lines.extend(["## Verified Claims", ""])
 
             for i, claim in enumerate(result.verified_claims, 1):
                 status = claim.get("verification_status", "unknown")
                 confidence = claim.get("confidence", 0.0)
                 claim_text = claim.get("claim_text") or claim.get("claim", "")
 
-                lines.extend([
-                    f"### {i}. {status.upper()}",
-                    "",
-                    f"**Claim**: \"{claim_text[:100]}...\"",
-                    f"**Confidence**: {confidence:.2f}",
-                    ""
-                ])
+                lines.extend(
+                    [
+                        f"### {i}. {status.upper()}",
+                        "",
+                        f'**Claim**: "{claim_text[:100]}..."',
+                        f"**Confidence**: {confidence:.2f}",
+                        "",
+                    ]
+                )
 
         if result.unverified_claims:
-            lines.extend([
-                "## Unverified Claims",
-                "",
-                "⚠️ The following claims could not be verified:"
-                ""
-            ])
+            lines.extend(
+                [
+                    "## Unverified Claims",
+                    "",
+                    "⚠️ The following claims could not be verified:" "",
+                ]
+            )
 
             for i, claim in enumerate(result.unverified_claims, 1):
                 claim_text = claim.get("claim_text", "")
-                lines.append(f"{i}. \"{claim_text[:100]}...\"")
+                lines.append(f'{i}. "{claim_text[:100]}..."')
 
         return "\n".join(lines)
 

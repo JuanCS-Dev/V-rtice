@@ -2,7 +2,7 @@
 # Machine Learning & Time-Series Analysis
 
 # FastAPI + ASGI
-fastapi==0.109.0
+fastapi>=0.115.0  # Security fix
 uvicorn[standard]==0.27.0
 
 # Time-series forecasting
@@ -17,7 +17,7 @@ pandas==2.1.4
 numpy==1.26.3
 
 # HTTP client
-aiohttp==3.9.1
+aiohttp>=3.10.0  # Security1
 
 # Kafka
 aiokafka==0.10.0
@@ -31,3 +31,4 @@ python-dotenv==1.0.0
 # Testing
 pytest==7.4.4
 pytest-asyncio==0.23.3
+anyio>=4.4.0  # Security fix for race condition

@@ -1,0 +1,241 @@
+{
+  "dashboard": {
+    "title": "Active Immune Core - Overview",
+    "tags": ["immune-core", "overview"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health Status",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "immune_core_agents_alive",
+            "legendFormat": "Alive Agents"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1, "color": "yellow"},
+                {"value": 10, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Agents by Type",
+        "type": "piechart",
+        "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "immune_core_agents_alive",
+            "legendFormat": "{{type}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Tasks Pending",
+        "type": "gauge",
+        "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "immune_core_tasks_pending"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Leader Status",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "immune_core_has_leader"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"value": 0, "text": "NO LEADER", "color": "red"},
+              {"value": 1, "text": "HAS LEADER", "color": "green"}
+            ]
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Task Completion Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immune_core_tasks_completed_total[5m])",
+            "legendFormat": "Completed/sec - {{task_type}}"
+          },
+          {
+            "expr": "rate(immune_core_tasks_failed_total[5m])",
+            "legendFormat": "Failed/sec - {{task_type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Tasks/sec"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Average Agent Health",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "avg(immune_core_agent_health_score) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Health Score",
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Agent Load Distribution",
+        "type": "heatmap",
+        "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "immune_core_agent_load",
+            "format": "time_series"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Elections & Leader Changes",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "increase(immune_core_elections_total[5m])",
+            "legendFormat": "Elections"
+          },
+          {
+            "expr": "increase(immune_core_leader_changes_total[5m])",
+            "legendFormat": "Leader Changes"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Task Duration (95th percentile)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(immune_core_task_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 - {{task_type}}"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(immune_core_task_duration_seconds_bucket[5m]))",
+            "legendFormat": "p50 - {{task_type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"}
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Failure Detection & Recovery",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "increase(immune_core_failures_detected_total[5m])",
+            "legendFormat": "Failures Detected"
+          },
+          {
+            "expr": "increase(immune_core_recoveries_performed_total[5m])",
+            "legendFormat": "Recoveries Performed"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Total Agents Over Time",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 28, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(immune_core_agents_total)",
+            "legendFormat": "Total Agents"
+          },
+          {
+            "expr": "sum(immune_core_agents_alive)",
+            "legendFormat": "Alive Agents"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "API Request Rate",
+        "type": "graph",
+        "gridPos": {"x": 8, "y": 28, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_api_requests_total[5m])) by (endpoint)",
+            "legendFormat": "{{endpoint}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"}
+        ]
+      },
+      {
+        "id": 13,
+        "title": "API Latency (99th percentile)",
+        "type": "graph",
+        "gridPos": {"x": 16, "y": 28, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m]))",
+            "legendFormat": "p99 - {{endpoint}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"}
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+# XAI (Explainability) Module Requirements
+
+# Core ML/Scientific Computing
+numpy>=1.21.0,<2.0.0
+scikit-learn>=1.0.0,<2.0.0  # For LIME linear models, Ridge regression
+
+# Optional: SHAP library (for production TreeSHAP, DeepSHAP)
+# shap>=0.42.0  # Uncomment if using official SHAP library
+
+# Async support
+asyncio-compat>=0.1.0  # If needed for Python 3.7 compatibility

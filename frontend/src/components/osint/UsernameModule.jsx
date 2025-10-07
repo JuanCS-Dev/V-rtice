@@ -61,23 +61,16 @@ const UsernameModule = () => {
     } catch (error) {
       console.error('Erro na busca:', error);
 
-      // Fallback para dados simulados se a API não estiver disponível
-      const mockResults = {
+      // REGRA DE OURO: No mock fallback in production
+      // Return empty results with error indicator
+      setResults({
         username: username,
-        platforms_found: [
-          { platform: 'Twitter/X', url: `https://twitter.com/${username}`, status: 'found', last_activity: '2024-01-15' },
-          { platform: 'Instagram', url: `https://instagram.com/${username}`, status: 'found', last_activity: '2024-01-20' },
-          { platform: 'GitHub', url: `https://github.com/${username}`, status: 'found', last_activity: '2024-01-18' },
-          { platform: 'LinkedIn', url: `https://linkedin.com/in/${username}`, status: 'not_found', last_activity: null },
-          { platform: 'Reddit', url: `https://reddit.com/u/${username}`, status: 'found', last_activity: '2024-01-10' },
-          { platform: 'Discord', url: null, status: 'possible', last_activity: null }
-        ],
-        total_found: 4,
-        confidence_score: 85,
+        platforms_found: [],
+        total_found: 0,
+        confidence_score: 0,
+        error: 'Service unavailable. Please try again later.',
         error_mode: true
-      };
-
-      setResults(mockResults);
+      });
     } finally {
       setSearching(false);
     }

@@ -6,9 +6,10 @@ and autonomous investigation capabilities.
 NO MOCKS - Production-ready cognitive enhancement.
 """
 
-from typing import Dict, Any, List, Optional
-import aiohttp
 import logging
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class EnhancedCognitionTools:
         text: str,
         analysis_type: str = "comprehensive",
         detect_bots: bool = True,
-        track_memes: bool = True
+        track_memes: bool = True,
     ) -> Dict[str, Any]:
         """Analyze narrative for social engineering, propaganda, bots.
 
@@ -59,9 +60,9 @@ class EnhancedCognitionTools:
                         "text": text,
                         "analysis_type": analysis_type,
                         "detect_bots": detect_bots,
-                        "track_memes": track_memes
+                        "track_memes": track_memes,
                     },
-                    timeout=aiohttp.ClientTimeout(total=60)
+                    timeout=aiohttp.ClientTimeout(total=60),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -79,7 +80,7 @@ class EnhancedCognitionTools:
         context: Dict[str, Any],
         time_horizon_hours: int = 24,
         min_confidence: float = 0.6,
-        include_vuln_forecast: bool = True
+        include_vuln_forecast: bool = True,
     ) -> Dict[str, Any]:
         """Predict future threats using time-series analysis and Bayesian inference.
 
@@ -100,9 +101,9 @@ class EnhancedCognitionTools:
                         "context": context,
                         "time_horizon_hours": time_horizon_hours,
                         "min_confidence": min_confidence,
-                        "include_vulnerability_forecast": include_vuln_forecast
+                        "include_vulnerability_forecast": include_vuln_forecast,
                     },
-                    timeout=aiohttp.ClientTimeout(total=90)
+                    timeout=aiohttp.ClientTimeout(total=90),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -118,7 +119,7 @@ class EnhancedCognitionTools:
     async def hunt_proactively(
         self,
         asset_inventory: Optional[List[str]] = None,
-        threat_intel: Optional[Dict[str, Any]] = None
+        threat_intel: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Generate proactive hunting recommendations.
 
@@ -135,9 +136,9 @@ class EnhancedCognitionTools:
                     f"{self.predictive_url}/hunt/recommendations",
                     json={
                         "asset_inventory": asset_inventory or [],
-                        "threat_intel": threat_intel or {}
+                        "threat_intel": threat_intel or {},
                     },
-                    timeout=aiohttp.ClientTimeout(total=60)
+                    timeout=aiohttp.ClientTimeout(total=60),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -155,7 +156,7 @@ class EnhancedCognitionTools:
         incident_id: str,
         playbook: str = "standard",
         enable_actor_profiling: bool = True,
-        enable_campaign_correlation: bool = True
+        enable_campaign_correlation: bool = True,
     ) -> Dict[str, Any]:
         """Launch autonomous investigation for incident.
 
@@ -176,9 +177,9 @@ class EnhancedCognitionTools:
                         "incident_id": incident_id,
                         "playbook": playbook,
                         "enable_actor_profiling": enable_actor_profiling,
-                        "enable_campaign_correlation": enable_campaign_correlation
+                        "enable_campaign_correlation": enable_campaign_correlation,
                     },
-                    timeout=aiohttp.ClientTimeout(total=120)
+                    timeout=aiohttp.ClientTimeout(total=120),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -195,7 +196,7 @@ class EnhancedCognitionTools:
         self,
         incidents: List[str],
         time_window_days: int = 30,
-        correlation_threshold: float = 0.6
+        correlation_threshold: float = 0.6,
     ) -> Dict[str, Any]:
         """Correlate incidents into attack campaigns.
 
@@ -214,9 +215,9 @@ class EnhancedCognitionTools:
                     json={
                         "incidents": incidents,
                         "time_window_days": time_window_days,
-                        "correlation_threshold": correlation_threshold
+                        "correlation_threshold": correlation_threshold,
                     },
-                    timeout=aiohttp.ClientTimeout(total=90)
+                    timeout=aiohttp.ClientTimeout(total=90),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -244,8 +245,8 @@ class EnhancedCognitionTools:
                     "text": "Text or social media content to analyze",
                     "analysis_type": "Type of analysis (comprehensive, bots_only, propaganda_only, meme_tracking)",
                     "detect_bots": "Enable bot network detection (bool)",
-                    "track_memes": "Enable meme tracking (bool)"
-                }
+                    "track_memes": "Enable meme tracking (bool)",
+                },
             },
             {
                 "name": "predict_threats",
@@ -255,8 +256,8 @@ class EnhancedCognitionTools:
                     "context": "Context with historical events and current alerts",
                     "time_horizon_hours": "Prediction time horizon (default 24h)",
                     "min_confidence": "Minimum prediction confidence 0-1",
-                    "include_vuln_forecast": "Include vulnerability exploitation forecasting (bool)"
-                }
+                    "include_vuln_forecast": "Include vulnerability exploitation forecasting (bool)",
+                },
             },
             {
                 "name": "hunt_proactively",
@@ -264,8 +265,8 @@ class EnhancedCognitionTools:
                 "description": "Generate proactive threat hunting recommendations based on asset inventory and threat intel",
                 "parameters": {
                     "asset_inventory": "List of assets to focus hunting on",
-                    "threat_intel": "Current threat intelligence context"
-                }
+                    "threat_intel": "Current threat intelligence context",
+                },
             },
             {
                 "name": "investigate_incident",
@@ -275,8 +276,8 @@ class EnhancedCognitionTools:
                     "incident_id": "Incident identifier",
                     "playbook": "Investigation playbook (standard, apt, ransomware, insider)",
                     "enable_actor_profiling": "Enable threat actor profiling (bool)",
-                    "enable_campaign_correlation": "Enable campaign correlation (bool)"
-                }
+                    "enable_campaign_correlation": "Enable campaign correlation (bool)",
+                },
             },
             {
                 "name": "correlate_campaigns",
@@ -285,7 +286,7 @@ class EnhancedCognitionTools:
                 "parameters": {
                     "incidents": "List of incident IDs to correlate",
                     "time_window_days": "Temporal correlation window",
-                    "correlation_threshold": "Minimum similarity for correlation 0-1"
-                }
-            }
+                    "correlation_threshold": "Minimum similarity for correlation 0-1",
+                },
+            },
         ]

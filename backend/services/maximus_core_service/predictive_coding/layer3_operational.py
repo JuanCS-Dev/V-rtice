@@ -10,11 +10,12 @@ Prediction error = unexpected threat progression (novel attack patterns).
 """
 
 import logging
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from typing import Dict, List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class TemporalBlock(nn.Module):
         kernel_size: int,
         stride: int,
         dilation: int,
-        dropout: float = 0.2
+        dropout: float = 0.2,
     ):
         """Initialize Temporal Block.
 
@@ -47,24 +48,35 @@ class TemporalBlock(nn.Module):
         self.padding = (kernel_size - 1) * dilation
 
         self.conv1 = nn.Conv1d(
-            in_channels, out_channels, kernel_size,
-            stride=stride, padding=self.padding, dilation=dilation
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=stride,
+            padding=self.padding,
+            dilation=dilation,
         )
         self.bn1 = nn.BatchNorm1d(out_channels)
         self.relu1 = nn.ReLU()
         self.dropout1 = nn.Dropout(dropout)
 
         self.conv2 = nn.Conv1d(
-            out_channels, out_channels, kernel_size,
-            stride=stride, padding=self.padding, dilation=dilation
+            out_channels,
+            out_channels,
+            kernel_size,
+            stride=stride,
+            padding=self.padding,
+            dilation=dilation,
         )
         self.bn2 = nn.BatchNorm1d(out_channels)
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(dropout)
 
         # Residual connection
-        self.downsample = nn.Conv1d(in_channels, out_channels, 1) \
-            if in_channels != out_channels else None
+        self.downsample = (
+            nn.Conv1d(in_channels, out_channels, 1)
+            if in_channels != out_channels
+            else None
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass.
@@ -80,7 +92,7 @@ class TemporalBlock(nn.Module):
 
         # Remove future padding (causal)
         if self.padding > 0:
-            out = out[:, :, :-self.padding]
+            out = out[:, :, : -self.padding]
 
         out = self.bn1(out)
         out = self.relu1(out)
@@ -90,7 +102,7 @@ class TemporalBlock(nn.Module):
         out = self.conv2(out)
 
         if self.padding > 0:
-            out = out[:, :, :-self.padding]
+            out = out[:, :, : -self.padding]
 
         out = self.bn2(out)
         out = self.relu2(out)
@@ -101,7 +113,7 @@ class TemporalBlock(nn.Module):
 
         # Match sequence lengths
         if res.size(2) != out.size(2):
-            res = res[:, :, :out.size(2)]
+            res = res[:, :, : out.size(2)]
 
         return self.relu2(out + res)
 
@@ -114,7 +126,7 @@ class TemporalConvNet(nn.Module):
         num_inputs: int,
         num_channels: List[int],
         kernel_size: int = 3,
-        dropout: float = 0.2
+        dropout: float = 0.2,
     ):
         """Initialize TCN.
 
@@ -130,14 +142,20 @@ class TemporalConvNet(nn.Module):
         num_levels = len(num_channels)
 
         for i in range(num_levels):
-            dilation = 2 ** i  # Exponentially increasing dilation
+            dilation = 2**i  # Exponentially increasing dilation
             in_channels = num_inputs if i == 0 else num_channels[i - 1]
             out_channels = num_channels[i]
 
-            layers.append(TemporalBlock(
-                in_channels, out_channels, kernel_size,
-                stride=1, dilation=dilation, dropout=dropout
-            ))
+            layers.append(
+                TemporalBlock(
+                    in_channels,
+                    out_channels,
+                    kernel_size,
+                    stride=1,
+                    dilation=dilation,
+                    dropout=dropout,
+                )
+            )
 
         self.network = nn.Sequential(*layers)
 
@@ -166,7 +184,7 @@ class OperationalTCN(nn.Module):
         output_dim: int = 64,
         num_threat_classes: int = 15,  # Threat types
         kernel_size: int = 3,
-        dropout: float = 0.2
+        dropout: float = 0.2,
     ):
         """Initialize Operational TCN.
 
@@ -184,7 +202,7 @@ class OperationalTCN(nn.Module):
             num_inputs=input_dim,
             num_channels=hidden_channels,
             kernel_size=kernel_size,
-            dropout=dropout
+            dropout=dropout,
         )
 
         # Prediction heads
@@ -195,8 +213,7 @@ class OperationalTCN(nn.Module):
         logger.info(f"OperationalTCN initialized: {input_dim}D → {output_dim}D")
 
     def forward(
-        self,
-        sequence: torch.Tensor
+        self, sequence: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass.
 
@@ -236,8 +253,8 @@ class OperationalLayer:
     def __init__(
         self,
         latent_dim: int = 64,
-        device: str = 'cpu',
-        prediction_horizon_hours: int = 6
+        device: str = "cpu",
+        prediction_horizon_hours: int = 6,
     ):
         """Initialize Operational Layer.
 
@@ -257,7 +274,7 @@ class OperationalLayer:
             output_dim=latent_dim,
             num_threat_classes=15,
             kernel_size=3,
-            dropout=0.2
+            dropout=0.2,
         ).to(self.device)
 
         # Prediction error tracking
@@ -265,13 +282,13 @@ class OperationalLayer:
         self.error_mean = 0.0
         self.error_std = 1.0
 
-        logger.info(f"OperationalLayer initialized on {device} "
-                   f"(horizon={prediction_horizon_hours}h)")
+        logger.info(
+            f"OperationalLayer initialized on {device} "
+            f"(horizon={prediction_horizon_hours}h)"
+        )
 
     def predict(
-        self,
-        event_sequence: np.ndarray,
-        return_all_steps: bool = False
+        self, event_sequence: np.ndarray, return_all_steps: bool = False
     ) -> Dict:
         """Predict immediate threats from event sequence.
 
@@ -299,18 +316,16 @@ class OperationalLayer:
             threat_confidence = threat_probs[0, most_likely_threat_id].item()
 
             return {
-                'next_threat_embedding': next_threat.cpu().numpy()[0],
-                'threat_type_id': most_likely_threat_id,
-                'threat_type_confidence': threat_confidence,
-                'threat_probabilities': threat_probs.cpu().numpy()[0],
-                'severity_score': severity.cpu().numpy()[0, 0],
-                'prediction_horizon_hours': self.prediction_horizon
+                "next_threat_embedding": next_threat.cpu().numpy()[0],
+                "threat_type_id": most_likely_threat_id,
+                "threat_type_confidence": threat_confidence,
+                "threat_probabilities": threat_probs.cpu().numpy()[0],
+                "severity_score": severity.cpu().numpy()[0, 0],
+                "prediction_horizon_hours": self.prediction_horizon,
             }
 
     def predict_attack_progression(
-        self,
-        event_sequence: np.ndarray,
-        num_future_steps: int = 10
+        self, event_sequence: np.ndarray, num_future_steps: int = 10
     ) -> List[Dict]:
         """Predict multi-step attack progression.
 
@@ -336,29 +351,28 @@ class OperationalLayer:
                 threat_probs = F.softmax(threat_classes, dim=1)
                 most_likely = threat_probs.argmax(dim=1).item()
 
-                predictions.append({
-                    'step': step + 1,
-                    'threat_type_id': most_likely,
-                    'threat_confidence': threat_probs[0, most_likely].item(),
-                    'severity_score': severity.cpu().numpy()[0, 0]
-                })
+                predictions.append(
+                    {
+                        "step": step + 1,
+                        "threat_type_id": most_likely,
+                        "threat_confidence": threat_probs[0, most_likely].item(),
+                        "severity_score": severity.cpu().numpy()[0, 0],
+                    }
+                )
 
                 # Append prediction to sequence for next iteration
-                current_sequence = torch.cat([
-                    current_sequence,
-                    next_threat.unsqueeze(0)
-                ], dim=0)
+                current_sequence = torch.cat(
+                    [current_sequence, next_threat.unsqueeze(0)], dim=0
+                )
 
                 # Keep only last N timesteps
                 if current_sequence.size(0) > event_sequence.shape[0]:
-                    current_sequence = current_sequence[-event_sequence.shape[0]:]
+                    current_sequence = current_sequence[-event_sequence.shape[0] :]
 
         return predictions
 
     def detect_attack_indicators(
-        self,
-        event_sequence: np.ndarray,
-        severity_threshold: float = 0.7
+        self, event_sequence: np.ndarray, severity_threshold: float = 0.7
     ) -> Dict:
         """Detect attack indicators (reconnaissance, exploitation).
 
@@ -371,18 +385,17 @@ class OperationalLayer:
         """
         prediction = self.predict(event_sequence)
 
-        is_high_severity = prediction['severity_score'] > severity_threshold
-        is_high_confidence = prediction['threat_type_confidence'] > 0.8
+        is_high_severity = prediction["severity_score"] > severity_threshold
+        is_high_confidence = prediction["threat_type_confidence"] > 0.8
 
         indicators = {
-            'attack_likely': is_high_severity and is_high_confidence,
-            'severity_score': prediction['severity_score'],
-            'threat_type': self._get_threat_name(prediction['threat_type_id']),
-            'confidence': prediction['threat_type_confidence'],
-            'alert_level': self._determine_alert_level(
-                prediction['severity_score'],
-                prediction['threat_type_confidence']
-            )
+            "attack_likely": is_high_severity and is_high_confidence,
+            "severity_score": prediction["severity_score"],
+            "threat_type": self._get_threat_name(prediction["threat_type_id"]),
+            "confidence": prediction["threat_type_confidence"],
+            "alert_level": self._determine_alert_level(
+                prediction["severity_score"], prediction["threat_type_confidence"]
+            ),
         }
 
         return indicators
@@ -390,29 +403,40 @@ class OperationalLayer:
     def _get_threat_name(self, threat_id: int) -> str:
         """Map threat ID to human-readable name."""
         threat_names = [
-            'BENIGN', 'RECONNAISSANCE', 'EXPLOITATION', 'PRIVILEGE_ESCALATION',
-            'LATERAL_MOVEMENT', 'DATA_EXFILTRATION', 'RANSOMWARE', 'DDOS',
-            'PHISHING', 'MALWARE_DELIVERY', 'C2_COMMUNICATION', 'PERSISTENCE',
-            'DEFENSE_EVASION', 'CREDENTIAL_ACCESS', 'DISCOVERY'
+            "BENIGN",
+            "RECONNAISSANCE",
+            "EXPLOITATION",
+            "PRIVILEGE_ESCALATION",
+            "LATERAL_MOVEMENT",
+            "DATA_EXFILTRATION",
+            "RANSOMWARE",
+            "DDOS",
+            "PHISHING",
+            "MALWARE_DELIVERY",
+            "C2_COMMUNICATION",
+            "PERSISTENCE",
+            "DEFENSE_EVASION",
+            "CREDENTIAL_ACCESS",
+            "DISCOVERY",
         ]
 
         if 0 <= threat_id < len(threat_names):
             return threat_names[threat_id]
         else:
-            return f'UNKNOWN_{threat_id}'
+            return f"UNKNOWN_{threat_id}"
 
     def _determine_alert_level(self, severity: float, confidence: float) -> str:
         """Determine alert level based on severity and confidence."""
         combined_score = severity * confidence
 
         if combined_score >= 0.8:
-            return 'CRITICAL'
+            return "CRITICAL"
         elif combined_score >= 0.6:
-            return 'HIGH'
+            return "HIGH"
         elif combined_score >= 0.4:
-            return 'MEDIUM'
+            return "MEDIUM"
         else:
-            return 'LOW'
+            return "LOW"
 
     def train_step(
         self,
@@ -420,7 +444,7 @@ class OperationalLayer:
         target_threats: torch.Tensor,
         target_classes: torch.Tensor,
         target_severity: torch.Tensor,
-        optimizer: torch.optim.Optimizer
+        optimizer: torch.optim.Optimizer,
     ) -> Dict[str, float]:
         """Single training step.
 
@@ -458,27 +482,30 @@ class OperationalLayer:
         optimizer.step()
 
         return {
-            'total_loss': total_loss.item(),
-            'prediction_loss': pred_loss.item(),
-            'classification_loss': class_loss.item(),
-            'severity_loss': severity_loss.item()
+            "total_loss": total_loss.item(),
+            "prediction_loss": pred_loss.item(),
+            "classification_loss": class_loss.item(),
+            "severity_loss": severity_loss.item(),
         }
 
     def save_model(self, path: str):
         """Save TCN model checkpoint."""
-        torch.save({
-            'tcn_state_dict': self.tcn.state_dict(),
-            'error_mean': self.error_mean,
-            'error_std': self.error_std,
-            'latent_dim': self.latent_dim,
-            'prediction_horizon': self.prediction_horizon
-        }, path)
+        torch.save(
+            {
+                "tcn_state_dict": self.tcn.state_dict(),
+                "error_mean": self.error_mean,
+                "error_std": self.error_std,
+                "latent_dim": self.latent_dim,
+                "prediction_horizon": self.prediction_horizon,
+            },
+            path,
+        )
         logger.info(f"Model saved to {path}")
 
     def load_model(self, path: str):
         """Load TCN model checkpoint."""
         checkpoint = torch.load(path, map_location=self.device)
-        self.tcn.load_state_dict(checkpoint['tcn_state_dict'])
-        self.error_mean = checkpoint['error_mean']
-        self.error_std = checkpoint['error_std']
+        self.tcn.load_state_dict(checkpoint["tcn_state_dict"])
+        self.error_mean = checkpoint["error_mean"]
+        self.error_std = checkpoint["error_std"]
         logger.info(f"Model loaded from {path}")

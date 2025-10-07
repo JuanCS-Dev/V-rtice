@@ -14,8 +14,7 @@ Exemplos:
 
 import typer
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
+from vertice.utils.output import GeminiStyleTable, PrimordialPanel
 from rich.live import Live
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 from pathlib import Path
@@ -278,14 +277,14 @@ def alerts(
             primoroso.warning("No alerts found")
             return
 
-        table = Table(title=f"🚨 Alerts ({len(alerts_list)})")
-        table.add_column("ID", style="cyan", no_wrap=True)
+        table = GeminiStyleTable(title=f"🚨 Alerts ({len(alerts_list)})", console=console)
+        table.add_column("ID", no_wrap=True)
         table.add_column("Title")
-        table.add_column("Severity", justify="center")
-        table.add_column("Priority", justify="center")
-        table.add_column("Status", justify="center")
+        table.add_column("Severity", alignment="center")
+        table.add_column("Priority", alignment="center")
+        table.add_column("Status", alignment="center")
         table.add_column("Source")
-        table.add_column("Count", justify="center")
+        table.add_column("Count", alignment="center")
 
         for alert in alerts_list:
             severity_colors = {
@@ -306,7 +305,7 @@ def alerts(
                 str(alert.occurrence_count),
             )
 
-        console.print(table)
+        table.render()
 
     elif action == "show":
         if not alert_id:
@@ -369,8 +368,8 @@ def rules(
 
     if action == "list":
         # List rules
-        table = Table(title="📋 Detection Rules")
-        table.add_column("Name", style="cyan")
+        table = GeminiStyleTable(title="📋 Detection Rules", console=console)
+        table.add_column("Name")
         table.add_column("Type")
         table.add_column("Severity")
         table.add_column("Tags")
@@ -407,7 +406,7 @@ def rules(
                         ", ".join(data.get("tags", [])[:2]),
                     )
 
-        console.print(table)
+        table.render()
 
     elif action == "validate":
         primoroso.info("Validating rules...[/cyan]\n")
@@ -552,7 +551,10 @@ def _show_detection(detection):
     if detection.mitre_tactics:
         content += f"\n[dim]MITRE ATT&CK:[/dim] {', '.join(detection.mitre_tactics)}"
 
-    console.print(Panel(content, border_style=color))
+    panel = PrimordialPanel(content, console=console)
+    # Map severity to status
+    status_map = {"critical": "error", "high": "warning", "medium": "info", "low": "success"}
+    panel.with_status(status_map.get(detection.severity, "info")).render()
 
 
 def _show_alert_detail(alert):
@@ -580,4 +582,5 @@ def _show_alert_detail(alert):
     if alert.soar_incident_id:
         content += f"\n\n[dim]SOAR Incident:[/dim] {alert.soar_incident_id}"
 
-    console.print(Panel(content, title="🚨 Alert Details"))
+    panel = PrimordialPanel(content, title="🚨 Alert Details", console=console)
+    panel.render()

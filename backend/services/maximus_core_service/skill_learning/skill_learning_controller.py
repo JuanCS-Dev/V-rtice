@@ -6,11 +6,12 @@ Acquisition System) service, enabling skill learning within Maximus Core.
 Production-ready implementation with real HSAS integration.
 """
 
-import logging
-import httpx
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SkillExecutionResult:
     """Result of skill execution."""
+
     skill_name: str
     success: bool
     steps_executed: int
@@ -40,11 +42,7 @@ class SkillLearningController:
     This is a lightweight proxy to the full HSAS service (port 8023).
     """
 
-    def __init__(
-        self,
-        hsas_url: str = "http://localhost:8023",
-        timeout: float = 30.0
-    ):
+    def __init__(self, hsas_url: str = "http://localhost:8023", timeout: float = 30.0):
         """Initialize skill learning controller.
 
         Args:
@@ -65,7 +63,7 @@ class SkillLearningController:
         self,
         skill_name: str,
         context: Dict[str, Any],
-        mode: str = "hybrid"  # model_free, model_based, hybrid
+        mode: str = "hybrid",  # model_free, model_based, hybrid
     ) -> SkillExecutionResult:
         """Execute a learned skill.
 
@@ -83,18 +81,16 @@ class SkillLearningController:
             # Call HSAS service
             response = await self.client.post(
                 f"{self.hsas_url}/api/execute_skill",
-                json={
-                    "skill_name": skill_name,
-                    "context": context,
-                    "mode": mode
-                }
+                json={"skill_name": skill_name, "context": context, "mode": mode},
             )
             response.raise_for_status()
 
             result_data = response.json()
 
             # Track statistics
-            self._update_skill_stats(skill_name, success=result_data.get("success", False))
+            self._update_skill_stats(
+                skill_name, success=result_data.get("success", False)
+            )
 
             execution_time = (datetime.utcnow() - start_time).total_seconds()
 
@@ -105,11 +101,13 @@ class SkillLearningController:
                 total_reward=result_data.get("reward", 0.0),
                 execution_time=execution_time,
                 errors=result_data.get("errors", []),
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
             )
 
-            logger.info(f"Skill executed: {skill_name}, success={result.success}, "
-                       f"reward={result.total_reward:.2f}, time={execution_time:.2f}s")
+            logger.info(
+                f"Skill executed: {skill_name}, success={result.success}, "
+                f"reward={result.total_reward:.2f}, time={execution_time:.2f}s"
+            )
 
             return result
 
@@ -123,14 +121,11 @@ class SkillLearningController:
                 total_reward=0.0,
                 execution_time=(datetime.utcnow() - start_time).total_seconds(),
                 errors=[str(e)],
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
             )
 
     async def learn_from_demonstration(
-        self,
-        skill_name: str,
-        demonstration: List[Dict],
-        expert_name: str = "human"
+        self, skill_name: str, demonstration: List[Dict], expert_name: str = "human"
     ) -> bool:
         """Learn skill from expert demonstration (imitation learning).
 
@@ -148,18 +143,20 @@ class SkillLearningController:
                 json={
                     "skill_name": skill_name,
                     "demonstration": demonstration,
-                    "expert": expert_name
-                }
+                    "expert": expert_name,
+                },
             )
             response.raise_for_status()
 
-            logger.info(f"Skill learned from demonstration: {skill_name} (expert: {expert_name})")
+            logger.info(
+                f"Skill learned from demonstration: {skill_name} (expert: {expert_name})"
+            )
 
             # Cache locally
             self.learned_skills[skill_name] = {
                 "source": "demonstration",
                 "expert": expert_name,
-                "learned_at": datetime.utcnow().isoformat()
+                "learned_at": datetime.utcnow().isoformat(),
             }
 
             return True
@@ -169,10 +166,7 @@ class SkillLearningController:
             return False
 
     async def compose_skill(
-        self,
-        skill_name: str,
-        primitive_sequence: List[str],
-        description: str = ""
+        self, skill_name: str, primitive_sequence: List[str], description: str = ""
     ) -> bool:
         """Compose new skill from sequence of primitives.
 
@@ -190,18 +184,20 @@ class SkillLearningController:
                 json={
                     "skill_name": skill_name,
                     "primitives": primitive_sequence,
-                    "description": description
-                }
+                    "description": description,
+                },
             )
             response.raise_for_status()
 
-            logger.info(f"Skill composed: {skill_name} from {len(primitive_sequence)} primitives")
+            logger.info(
+                f"Skill composed: {skill_name} from {len(primitive_sequence)} primitives"
+            )
 
             # Cache locally
             self.learned_skills[skill_name] = {
                 "source": "composition",
                 "primitives": primitive_sequence,
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.utcnow().isoformat(),
             }
 
             return True
@@ -265,7 +261,7 @@ class SkillLearningController:
                 "executions": 0,
                 "successes": 0,
                 "failures": 0,
-                "success_rate": 0.0
+                "success_rate": 0.0,
             }
 
         stats = self.skill_stats[skill_name]
@@ -299,37 +295,10 @@ class SkillLearningController:
             "hsas_url": self.hsas_url,
             "learned_skills_count": len(self.learned_skills),
             "skill_stats": self.skill_stats,
-            "cached_skills": list(self.learned_skills.keys())
+            "cached_skills": list(self.learned_skills.keys()),
         }
 
     async def close(self):
         """Close HTTP client."""
         await self.client.aclose()
         logger.info("Skill learning controller closed")
-
-
-# Placeholder classes for completeness (actual implementations in HSAS service)
-
-class SkillPrimitive:
-    """Placeholder - Real implementation in HSAS service."""
-    pass
-
-
-class PrimitiveLibrary:
-    """Placeholder - Real implementation in HSAS service."""
-    pass
-
-
-class ModelFreeAgent:
-    """Placeholder - Real implementation in HSAS service."""
-    pass
-
-
-class ModelBasedAgent:
-    """Placeholder - Real implementation in HSAS service."""
-    pass
-
-
-class SkillComposer:
-    """Placeholder - Real implementation in HSAS service."""
-    pass

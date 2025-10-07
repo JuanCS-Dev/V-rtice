@@ -48,8 +48,16 @@ async def lifespan(app: FastAPI):
     health_checker = HealthChecker(check_interval=30, enable_auto_check=True)
     metrics_collector = MetricsCollector(history_size=1000, aggregation_interval=60)
 
+    # Initialize dependency health checker
+    from monitoring.dependency_health import DependencyHealthChecker
+
+    dep_health_checker = DependencyHealthChecker()
+
     # Register health check components
     health_checker.register_component("api", check_func=check_api_health)
+    health_checker.register_component("kafka", check_func=dep_health_checker.check_kafka_health)
+    health_checker.register_component("redis", check_func=dep_health_checker.check_redis_health)
+    health_checker.register_component("postgres", check_func=dep_health_checker.check_postgres_health)
 
     # Start auto health checks
     await health_checker.start_auto_check()

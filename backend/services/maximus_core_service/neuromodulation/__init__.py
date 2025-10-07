@@ -12,18 +12,18 @@ Author: Maximus AI Team
 Version: 1.0.0
 """
 
-from .dopamine_system import DopamineSystem
-from .serotonin_system import SerotoninSystem
-from .norepinephrine_system import NorepinephrineSystem
 from .acetylcholine_system import AcetylcholineSystem
+from .dopamine_system import DopamineSystem
 from .neuromodulation_controller import NeuromodulationController
+from .norepinephrine_system import NorepinephrineSystem
+from .serotonin_system import SerotoninSystem
 
 __all__ = [
-    'DopamineSystem',
-    'SerotoninSystem',
-    'NorepinephrineSystem',
-    'AcetylcholineSystem',
-    'NeuromodulationController',
+    "DopamineSystem",
+    "SerotoninSystem",
+    "NorepinephrineSystem",
+    "AcetylcholineSystem",
+    "NeuromodulationController",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

@@ -9,12 +9,13 @@ the Homeostatic Control Loop (HCL) and Resource Analyzer, enabling informed
 decisions about system health and resource management.
 """
 
-import psutil
-import time
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
-from autonomic_core.homeostatic_control import SystemState, OperationalMode
+import time
+from typing import Any, Dict, Optional
+
+from autonomic_core.homeostatic_control import OperationalMode, SystemState
+import psutil
 
 
 class SystemMonitor:
@@ -44,8 +45,18 @@ class SystemMonitor:
         # Collect CPU, Memory, Disk I/O, Network I/O (simplified for docstring)
         cpu_percent = psutil.cpu_percent(interval=0.1)
         memory_percent = psutil.virtual_memory().percent
-        disk_io_rate = (psutil.disk_io_counters().read_bytes - self.last_disk_io.read_bytes) / time_delta if time_delta > 0 else 0
-        network_io_rate = (psutil.net_io_counters().bytes_recv - self.last_net_io.bytes_recv) / time_delta if time_delta > 0 else 0
+        disk_io_rate = (
+            (psutil.disk_io_counters().read_bytes - self.last_disk_io.read_bytes)
+            / time_delta
+            if time_delta > 0
+            else 0
+        )
+        network_io_rate = (
+            (psutil.net_io_counters().bytes_recv - self.last_net_io.bytes_recv)
+            / time_delta
+            if time_delta > 0
+            else 0
+        )
 
         self.last_disk_io = psutil.disk_io_counters()
         self.last_net_io = psutil.net_io_counters()
@@ -61,7 +72,7 @@ class SystemMonitor:
             cpu_usage=cpu_percent,
             memory_usage=memory_percent,
             avg_latency_ms=avg_latency_ms,
-            is_healthy=is_healthy
+            is_healthy=is_healthy,
         )
 
     async def get_detailed_metrics(self) -> Dict[str, Any]:

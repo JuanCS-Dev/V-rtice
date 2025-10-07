@@ -6,9 +6,10 @@ and distributed operations.
 NO MOCKS - Production-ready distributed organism.
 """
 
-from typing import Dict, Any, List, Optional
-import aiohttp
 import logging
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +32,7 @@ class DistributedOrganismTools:
         self.edge_url = "http://localhost:8021"
         self.coordinator_url = "http://localhost:8022"
 
-    async def get_edge_status(
-        self,
-        agent_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def get_edge_status(self, agent_id: Optional[str] = None) -> Dict[str, Any]:
         """Get edge agent status and metrics.
 
         Args:
@@ -46,8 +44,7 @@ class DistributedOrganismTools:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"{self.edge_url}/status",
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    f"{self.edge_url}/status", timeout=aiohttp.ClientTimeout(total=30)
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -64,7 +61,7 @@ class DistributedOrganismTools:
         self,
         targets: List[str],
         scan_type: str = "comprehensive",
-        distribute_load: bool = True
+        distribute_load: bool = True,
     ) -> Dict[str, Any]:
         """Coordinate scan across multiple edge agents.
 
@@ -83,9 +80,9 @@ class DistributedOrganismTools:
                     json={
                         "targets": targets,
                         "scan_type": scan_type,
-                        "distribute_load": distribute_load
+                        "distribute_load": distribute_load,
                     },
-                    timeout=aiohttp.ClientTimeout(total=180)
+                    timeout=aiohttp.ClientTimeout(total=180),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -98,10 +95,7 @@ class DistributedOrganismTools:
             logger.error(f"Error in coordinate_multi_edge_scan: {e}")
             return {"error": str(e)}
 
-    async def get_global_metrics(
-        self,
-        time_range_minutes: int = 60
-    ) -> Dict[str, Any]:
+    async def get_global_metrics(self, time_range_minutes: int = 60) -> Dict[str, Any]:
         """Get aggregated global metrics from all edge agents.
 
         Args:
@@ -115,7 +109,7 @@ class DistributedOrganismTools:
                 async with session.get(
                     f"{self.coordinator_url}/metrics/global",
                     params={"time_range_minutes": time_range_minutes},
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -138,7 +132,7 @@ class DistributedOrganismTools:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     f"{self.coordinator_url}/topology",
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -162,9 +156,7 @@ class DistributedOrganismTools:
                 "name": "get_edge_status",
                 "method_name": "get_edge_status",
                 "description": "Get edge agent status and metrics (buffer, batching, compression)",
-                "parameters": {
-                    "agent_id": "Specific agent ID (None for all agents)"
-                }
+                "parameters": {"agent_id": "Specific agent ID (None for all agents)"},
             },
             {
                 "name": "coordinate_multi_edge_scan",
@@ -173,8 +165,8 @@ class DistributedOrganismTools:
                 "parameters": {
                     "targets": "List of scan targets (IPs, networks, domains)",
                     "scan_type": "Scan type (comprehensive, quick, deep)",
-                    "distribute_load": "Enable load distribution across edges (bool)"
-                }
+                    "distribute_load": "Enable load distribution across edges (bool)",
+                },
             },
             {
                 "name": "get_global_metrics",
@@ -182,12 +174,12 @@ class DistributedOrganismTools:
                 "description": "Get aggregated global metrics from all edge agents",
                 "parameters": {
                     "time_range_minutes": "Time range for metrics aggregation"
-                }
+                },
             },
             {
                 "name": "get_topology",
                 "method_name": "get_topology",
                 "description": "Get distributed organism topology with edge agents and connections",
-                "parameters": {}
-            }
+                "parameters": {},
+            },
         ]

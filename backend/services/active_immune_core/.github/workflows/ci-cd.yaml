@@ -1,0 +1,343 @@
+# Active Immune Core - CI/CD Pipeline
+# Comprehensive GitHub Actions workflow for testing, building, and deploying
+#
+# Triggers:
+# - Push to any branch (tests only)
+# - Pull requests (tests + build)
+# - Push to main (tests + build + push + deploy)
+#
+# NO MOCKS, NO PLACEHOLDERS, NO TODOS - Production-ready.
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  DOCKER_IMAGE: active-immune-core
+  DOCKER_REGISTRY: ghcr.io  # GitHub Container Registry
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ==================== STAGE 1: CODE QUALITY ====================
+  lint:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 black isort bandit
+
+      - name: Run Black (code formatting check)
+        run: black --check --diff .
+
+      - name: Run isort (import sorting check)
+        run: isort --check-only --diff .
+
+      - name: Run Flake8 (linting)
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Run Bandit (security check)
+        run: bandit -r . -ll --skip B101
+
+  # ==================== STAGE 2: UNIT TESTS ====================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      # Kafka (with Zookeeper)
+      zookeeper:
+        image: confluentinc/cp-zookeeper:7.5.0
+        env:
+          ZOOKEEPER_CLIENT_PORT: 2181
+          ZOOKEEPER_TICK_TIME: 2000
+
+      kafka:
+        image: confluentinc/cp-kafka:7.5.0
+        env:
+          KAFKA_BROKER_ID: 1
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      # Redis
+      redis:
+        image: redis:7.2-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # PostgreSQL
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: immunis_memory
+          POSTGRES_USER: immunis
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov pytest-xdist
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for services to be ready..."
+          sleep 10
+
+      - name: Run tests with coverage
+        env:
+          ACTIVE_IMMUNE_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+          ACTIVE_IMMUNE_REDIS_URL: redis://redis:6379
+          ACTIVE_IMMUNE_POSTGRES_HOST: postgres
+          ACTIVE_IMMUNE_POSTGRES_PORT: 5432
+          ACTIVE_IMMUNE_POSTGRES_DB: immunis_memory
+          ACTIVE_IMMUNE_POSTGRES_USER: immunis
+          ACTIVE_IMMUNE_POSTGRES_PASSWORD: test_password
+        run: |
+          pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  # ==================== STAGE 3: BUILD DOCKER IMAGE ====================
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE }}:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ==================== STAGE 4: PUSH IMAGE (MAIN ONLY) ====================
+  push:
+    name: Push Docker Image
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=sha,prefix=main-
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==================== STAGE 5: DEPLOY TO KUBERNETES (OPTIONAL) ====================
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Only runs if KUBE_CONFIG secret is configured
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          if [ -n "$KUBE_CONFIG" ]; then
+            mkdir -p ~/.kube
+            echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+          else
+            echo "KUBE_CONFIG secret not configured, skipping deployment"
+            exit 0
+          fi
+
+      - name: Deploy to Kubernetes
+        run: |
+          # Apply Kubernetes manifests
+          kubectl apply -f k8s/00-namespace.yaml
+          kubectl apply -f k8s/01-configmap.yaml
+          kubectl apply -f k8s/02-secret.yaml
+          kubectl apply -f k8s/05-pvc.yaml
+          kubectl apply -f k8s/03-deployment.yaml
+          kubectl apply -f k8s/04-service.yaml
+          kubectl apply -f k8s/06-hpa.yaml || echo "HPA not applied (metrics-server may not be installed)"
+
+          # Wait for rollout
+          kubectl rollout status deployment/active-immune-core -n active-immune --timeout=5m
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n active-immune
+          kubectl get svc -n active-immune
+          kubectl get hpa -n active-immune || echo "HPA not available"
+
+  # ==================== STAGE 6: INTEGRATION TESTS (POST-DEPLOY) ====================
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubectl
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          if [ -n "$KUBE_CONFIG" ]; then
+            mkdir -p ~/.kube
+            echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+          else
+            echo "KUBE_CONFIG not configured, skipping integration tests"
+            exit 0
+          fi
+
+      - name: Port-forward to service
+        run: |
+          kubectl port-forward svc/active-immune-core 8200:8200 -n active-immune &
+          sleep 5
+
+      - name: Run health check
+        run: |
+          curl -f http://localhost:8200/health || exit 1
+
+      - name: Test API endpoints
+        run: |
+          # Test root endpoint
+          curl -f http://localhost:8200/ || exit 1
+
+          # Test liveness probe
+          curl -f http://localhost:8200/health/live || exit 1
+
+          # Test readiness probe
+          curl -f http://localhost:8200/health/ready || exit 1
+
+          # Test metrics endpoint
+          curl -f http://localhost:8200/metrics || exit 1

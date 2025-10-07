@@ -9,9 +9,9 @@ Biological inspiration:
 Production-ready implementation.
 """
 
-import logging
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class NorepinephrineState:
     """Current norepinephrine state."""
+
     level: float  # Current NE level (0.0-1.0)
     arousal: float  # Arousal/alertness (0.0-1.0)
     attention_gain: float  # Attention multiplier (0.5-2.0)
@@ -40,7 +41,7 @@ class NorepinephrineSystem:
         self,
         baseline_level: float = 0.4,
         optimal_arousal: float = 0.5,
-        stress_threshold: float = 0.7
+        stress_threshold: float = 0.7,
     ):
         """Initialize norepinephrine system.
 
@@ -76,7 +77,9 @@ class NorepinephrineSystem:
         if len(self.acute_stressors) > 10:
             self.acute_stressors.pop(0)
 
-        logger.warning(f"Threat detected! NE surge: {ne_surge:.2f}, level now: {self.level:.3f}")
+        logger.warning(
+            f"Threat detected! NE surge: {ne_surge:.2f}, level now: {self.level:.3f}"
+        )
 
     def get_arousal_level(self) -> float:
         """Get current arousal level.
@@ -102,7 +105,9 @@ class NorepinephrineSystem:
         gain = 2.0 - (deviation * 2.0)  # Linear degradation
         gain = max(0.5, min(2.0, gain))
 
-        logger.debug(f"Attention gain: {gain:.2f} (arousal={self.level:.3f}, optimal={self.optimal_arousal})")
+        logger.debug(
+            f"Attention gain: {gain:.2f} (arousal={self.level:.3f}, optimal={self.optimal_arousal})"
+        )
 
         return gain
 
@@ -146,7 +151,7 @@ class NorepinephrineSystem:
             arousal=self.get_arousal_level(),
             attention_gain=self.get_attention_gain(),
             stress_response=self.is_stressed(),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
     def reset(self):

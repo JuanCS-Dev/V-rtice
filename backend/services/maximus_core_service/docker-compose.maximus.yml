@@ -1,0 +1,229 @@
+# MAXIMUS AI 3.0 + HSAS Service - Standalone Stack
+# Minimal deployment for testing and development
+#
+# REGRA DE OURO: Production-ready configuration
+# Author: Claude Code + JuanCS-Dev
+# Date: 2025-10-06
+
+version: '3.8'
+
+services:
+  # ============================
+  # REDIS CACHE
+  # ============================
+  redis:
+    image: redis:7-alpine
+    container_name: maximus-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ============================
+  # POSTGRESQL DATABASE
+  # ============================
+  postgres:
+    image: postgres:15-alpine
+    container_name: maximus-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-maximus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-maximus_secure_2025}
+      POSTGRES_DB: ${POSTGRES_DB:-maximus_kb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maximus"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ============================
+  # HSAS SERVICE (Skill Learning)
+  # ============================
+  hsas_service:
+    build:
+      context: ../hsas_service
+      dockerfile: Dockerfile
+    container_name: maximus-hsas
+    ports:
+      - "8023:8023"
+    volumes:
+      - ../hsas_service:/app
+      - hsas-models:/app/models
+      - hsas-skills:/app/skills
+    command: uvicorn api:app --host 0.0.0.0 --port 8023 --reload
+    environment:
+      - SERVICE_NAME=hsas_service
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://${POSTGRES_USER:-maximus}:${POSTGRES_PASSWORD:-maximus_secure_2025}@postgres:5432/${POSTGRES_DB:-maximus_kb}
+    networks:
+      - maximus-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8023/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================
+  # MAXIMUS CORE SERVICE
+  # ============================
+  maximus_core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: maximus-core
+    ports:
+      - "8150:8150"
+    volumes:
+      - .:/app
+      - maximus-models:/app/models
+      - maximus-logs:/app/logs
+    command: uvicorn main:app --host 0.0.0.0 --port 8150 --reload
+    environment:
+      # LLM Configuration
+      - LLM_PROVIDER=${LLM_PROVIDER:-gemini}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+      # Infrastructure
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://${POSTGRES_USER:-maximus}:${POSTGRES_PASSWORD:-maximus_secure_2025}@postgres:5432/${POSTGRES_DB:-maximus_kb}
+
+      # HSAS Service (FASE 6)
+      - HSAS_SERVICE_URL=http://hsas_service:8023
+
+      # Service Configuration
+      - SERVICE_NAME=maximus_core_service
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+
+      # Feature Flags
+      - ENABLE_PREDICTIVE_CODING=${ENABLE_PREDICTIVE_CODING:-true}
+      - ENABLE_SKILL_LEARNING=${ENABLE_SKILL_LEARNING:-true}
+      - ENABLE_NEUROMODULATION=${ENABLE_NEUROMODULATION:-true}
+      - ENABLE_ETHICAL_AI=${ENABLE_ETHICAL_AI:-true}
+    networks:
+      - maximus-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      hsas_service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8150/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ============================
+  # PROMETHEUS (Monitoring)
+  # ============================
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: maximus-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================
+  # GRAFANA (Dashboards)
+  # ============================
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: maximus-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./monitoring/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-maximus_admin_2025}
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/maximus_overview.json
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+    networks:
+      - maximus-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# ============================
+# NETWORKS
+# ============================
+networks:
+  maximus-network:
+    driver: bridge
+    name: maximus-network
+
+# ============================
+# VOLUMES
+# ============================
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  hsas-models:
+    driver: local
+  hsas-skills:
+    driver: local
+  maximus-models:
+    driver: local
+  maximus-logs:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

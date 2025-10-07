@@ -1,0 +1,19 @@
+# Federated Learning Module Requirements
+# Core dependencies for collaborative threat intelligence training
+
+# Core scientific computing
+numpy>=1.21.0,<2.0.0
+
+# Optional: Cryptography for secure aggregation (production)
+# cryptography>=41.0.0
+
+# Optional: TensorFlow/PyTorch for actual model training
+# tensorflow>=2.13.0
+# torch>=2.0.0
+
+# Optional: PySyft for advanced federated learning
+# syft>=0.8.0
+
+# Testing (development only)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0

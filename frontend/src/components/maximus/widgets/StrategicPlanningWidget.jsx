@@ -14,7 +14,7 @@
 import React, { useState, useEffect } from 'react';
 import './StrategicPlanningWidget.css';
 
-export const StrategicPlanningWidget = ({ systemHealth }) => {
+export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
   const [activePolicies, setActivePolicies] = useState([]);
   const [resources, setResources] = useState([]);
   const [risks, setRisks] = useState([]);

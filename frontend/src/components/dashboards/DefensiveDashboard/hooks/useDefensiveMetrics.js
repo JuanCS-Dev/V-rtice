@@ -25,11 +25,13 @@ const fetchDefensiveMetrics = async () => {
 
   const healthData = await healthResponse.json();
 
-  // Calculate metrics from real data
+  // Calculate metrics from real data from health endpoint
+  // Note: If backend doesn't provide security_stats, these will show 0
+  // A dedicated /metrics endpoint would be more appropriate for dashboard stats
   return {
     threats: healthData.memory_system?.episodic_stats?.investigations || 0,
-    suspiciousIPs: 0, // TODO: Integrate with IP Intelligence service when available
-    domains: 0, // TODO: Integrate with Domain Analyzer service when available
+    suspiciousIPs: healthData.security_stats?.suspicious_ips || 0,
+    domains: healthData.security_stats?.monitored_domains || 0,
     monitored: healthData.total_integrated_tools || 57
   };
 };

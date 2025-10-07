@@ -18,8 +18,8 @@ knowledge base.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class SourceCredibilityEvaluator:
@@ -47,15 +47,22 @@ class SourceCredibilityEvaluator:
         Returns:
             Dict[str, Any]: A dictionary containing the credibility assessment.
         """
-        print(f"[SourceCredibilityEvaluator] Evaluating source: {source_info.get('url', 'N/A')}")
-        
-        credibility_score = 0.5 # Neutral starting point
+        print(
+            f"[SourceCredibilityEvaluator] Evaluating source: {source_info.get('url', 'N/A')}"
+        )
+
+        credibility_score = 0.5  # Neutral starting point
         assessment = "Neutral."
         indicators: List[str] = []
 
         if not source_info or not source_info.get("url"):
             assessment = "No source information provided, credibility unknown."
-            return {"timestamp": datetime.now().isoformat(), "score": credibility_score, "assessment": assessment, "indicators": indicators}
+            return {
+                "timestamp": datetime.now().isoformat(),
+                "score": credibility_score,
+                "assessment": assessment,
+                "indicators": indicators,
+            }
 
         source_url = source_info["url"]
 
@@ -73,7 +80,7 @@ class SourceCredibilityEvaluator:
                 credibility_score += 0.2
                 indicators.append("author_reputation_positive")
             if source_info.get("age_of_source_days", 0) < 30:
-                credibility_score -= 0.1 # Newer sources might be less established
+                credibility_score -= 0.1  # Newer sources might be less established
                 indicators.append("new_source")
 
         evaluation_result = {
@@ -81,7 +88,7 @@ class SourceCredibilityEvaluator:
             "source_url": source_url,
             "score": credibility_score,
             "assessment": assessment,
-            "indicators": indicators
+            "indicators": indicators,
         }
         self.evaluation_history.append(evaluation_result)
         self.last_evaluation_time = datetime.now()
@@ -97,6 +104,10 @@ class SourceCredibilityEvaluator:
         return {
             "status": self.current_status,
             "total_evaluations": len(self.evaluation_history),
-            "last_evaluation": self.last_evaluation_time.isoformat() if self.last_evaluation_time else "N/A",
-            "trusted_sources_count": len(self.trusted_sources)
+            "last_evaluation": (
+                self.last_evaluation_time.isoformat()
+                if self.last_evaluation_time
+                else "N/A"
+            ),
+            "trusted_sources_count": len(self.trusted_sources),
         }

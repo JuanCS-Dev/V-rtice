@@ -17,8 +17,8 @@ that its responses are based on objective analysis rather than subjective influe
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class EmotionalManipulationDetector:
@@ -36,7 +36,7 @@ class EmotionalManipulationDetector:
             "fear": ["terror", "danger", "threat", "catastrophe", "panic"],
             "anger": ["outrage", "fury", "disgust", "unacceptable", "blame"],
             "pity": ["victim", "suffering", "tragedy", "helpless", "poor"],
-            "hope": ["future", "opportunity", "progress", "solution", "dream"]
+            "hope": ["future", "opportunity", "progress", "solution", "dream"],
         }
         self.detection_history: List[Dict[str, Any]] = []
         self.last_detection_time: Optional[datetime] = None
@@ -51,10 +51,14 @@ class EmotionalManipulationDetector:
         Returns:
             Dict[str, Any]: A dictionary containing the detection results.
         """
-        print(f"[EmotionalManipulationDetector] Detecting emotional manipulation in content (length: {len(content)})...")
-        
+        print(
+            f"[EmotionalManipulationDetector] Detecting emotional manipulation in content (length: {len(content)})..."
+        )
+
         emotional_score = 0.0
-        detected_emotions: Dict[str, int] = {emotion: 0 for emotion in self.emotional_keywords.keys()}
+        detected_emotions: Dict[str, int] = {
+            emotion: 0 for emotion in self.emotional_keywords.keys()
+        }
         indicators: List[str] = []
         assessment = "No significant emotional manipulation detected."
 
@@ -65,11 +69,11 @@ class EmotionalManipulationDetector:
                 if keyword in content_lower:
                     detected_emotions[emotion] += content_lower.count(keyword)
                     indicators.append(f"{emotion}_keyword_match:{keyword}")
-        
+
         # Simple scoring based on keyword counts
         total_emotional_keywords = sum(detected_emotions.values())
         if total_emotional_keywords > 0:
-            emotional_score = min(1.0, total_emotional_keywords / 10.0) # Scale to 0-1
+            emotional_score = min(1.0, total_emotional_keywords / 10.0)  # Scale to 0-1
 
         if emotional_score > 0.6:
             assessment = "High likelihood of emotional manipulation."
@@ -81,7 +85,7 @@ class EmotionalManipulationDetector:
             "emotional_score": emotional_score,
             "detected_emotions": detected_emotions,
             "indicators": indicators,
-            "assessment": assessment
+            "assessment": assessment,
         }
         self.detection_history.append(detection_result)
         self.last_detection_time = datetime.now()
@@ -97,6 +101,10 @@ class EmotionalManipulationDetector:
         return {
             "status": self.current_status,
             "total_detections": len(self.detection_history),
-            "last_detection": self.last_detection_time.isoformat() if self.last_detection_time else "N/A",
-            "known_emotional_categories": list(self.emotional_keywords.keys())
+            "last_detection": (
+                self.last_detection_time.isoformat()
+                if self.last_detection_time
+                else "N/A"
+            ),
+            "known_emotional_categories": list(self.emotional_keywords.keys()),
         }

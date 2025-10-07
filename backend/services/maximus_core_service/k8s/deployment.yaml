@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maximus-core
+  namespace: maximus-ai
+  labels:
+    app: maximus-core
+    tier: backend
+    version: v3.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: maximus-core
+  template:
+    metadata:
+      labels:
+        app: maximus-core
+        version: v3.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8150"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: maximus-core
+        image: maximus-ai/maximus-core:v3.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8150
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: SERVICE_NAME
+          value: "maximus_core_service"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: maximus-config
+              key: log_level
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: maximus-config
+              key: environment
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: maximus-config
+              key: redis_url
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: maximus-secrets
+              key: postgres_url
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: maximus-secrets
+              key: gemini_api_key
+              optional: true
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: maximus-secrets
+              key: anthropic_api_key
+              optional: true
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: maximus-secrets
+              key: openai_api_key
+              optional: true
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        volumeMounts:
+        - name: models
+          mountPath: /app/models
+        - name: logs
+          mountPath: /app/logs
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: maximus-models-pvc
+      - name: logs
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - maximus-core
+              topologyKey: kubernetes.io/hostname

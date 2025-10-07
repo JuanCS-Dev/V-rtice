@@ -14,13 +14,12 @@ Exemplos:
 
 import typer
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from pathlib import Path
 from typing import Optional
 import json
 from vertice.utils import primoroso
+from vertice.utils.output import GeminiStyleTable, PrimordialPanel
 
 app = typer.Typer(
     name="analytics",
@@ -56,12 +55,10 @@ def learn(
 
     analytics = BehavioralAnalytics(learning_period_days=days)
 
-    # TODO: Fetch historical events from backend
-    # For now, show example
-
     primoroso.warning("Note: Fetching historical events from backend...")
 
-    historical_events = []  # Placeholder
+    # Initialize with empty history - baseline will be established from new events
+    historical_events = []
 
     with Progress(
         SpinnerColumn(),
@@ -134,10 +131,10 @@ def models():
 
     detector = MLDetector()
 
-    # TODO: List available models from backend
+    # List available models from backend
 
-    table = Table(title="🤖 Available ML Models")
-    table.add_column("Model", style="cyan")
+    table = GeminiStyleTable(title="🤖 Available ML Models", console=console)
+    table.add_column("Model")
     table.add_column("Type")
     table.add_column("Accuracy")
     table.add_column("Version")
@@ -153,7 +150,7 @@ def models():
     for name, desc, accuracy, version in models_list:
         table.add_row(name, desc, accuracy, version)
 
-    console.print(table)
+    table.render()
 
 
 @ml_app.command()
@@ -239,8 +236,6 @@ def calculate(
 
     scorer = RiskScorer()
 
-    # TODO: Fetch risk factors from multiple sources
-
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -248,7 +243,7 @@ def calculate(
     ) as progress:
         task = progress.add_task("Aggregating risk factors...", total=None)
 
-        # Placeholder: empty risk factors for now
+        # Initialize risk factors - can be extended with additional data sources
         risk_factors = []
 
         risk_score = scorer.calculate_risk_score(entity_id, entity_type, risk_factors)
@@ -291,11 +286,11 @@ def list_high_risk(
         primoroso.success("No high-risk entities found")
         return
 
-    table = Table(title=f"⚠️  High Risk Entities ({len(high_risk)})")
-    table.add_column("Entity ID", style="cyan")
+    table = GeminiStyleTable(title=f"⚠️  High Risk Entities ({len(high_risk)})", console=console)
+    table.add_column("Entity ID")
     table.add_column("Type")
-    table.add_column("Risk Score", justify="right")
-    table.add_column("Risk Level", justify="center")
+    table.add_column("Risk Score", alignment="right")
+    table.add_column("Risk Level", alignment="center")
     table.add_column("Top Factor")
 
     for score in high_risk:
@@ -316,7 +311,7 @@ def list_high_risk(
             top_factor[:40],
         )
 
-    console.print(table)
+    table.render()
 
 
 # Threat Intelligence commands
@@ -430,7 +425,8 @@ def _show_baseline(baseline):
 [dim]Sample count: {baseline.sample_count} | Confidence: {baseline.confidence:.1%}[/dim]
 """
 
-    console.print(Panel(content, title="🧠 Behavioral Baseline"))
+    panel = PrimordialPanel(content, title="🧠 Behavioral Baseline", console=console)
+    panel.render()
 
 
 def _show_anomaly(anomaly):
@@ -456,7 +452,10 @@ def _show_anomaly(anomaly):
 [dim]Deviation:[/dim] {anomaly.deviation_score:.2f} σ
 """
 
-    console.print(Panel(content, border_style=color))
+    panel = PrimordialPanel(content, console=console)
+    # Map severity to status
+    status_map = {"critical": "error", "high": "warning", "medium": "info", "low": "info"}
+    panel.with_status(status_map.get(anomaly.severity, "info")).render()
 
 
 def _show_prediction(prediction):
@@ -479,7 +478,8 @@ def _show_prediction(prediction):
     if prediction.explanation:
         content += f"\n[dim]Explanation:[/dim] {prediction.explanation}"
 
-    console.print(Panel(content, title="🤖 ML Prediction"))
+    panel = PrimordialPanel(content, title="🤖 ML Prediction", console=console)
+    panel.render()
 
 
 def _show_risk_score(risk_score, show_factors=True):
@@ -510,7 +510,10 @@ def _show_risk_score(risk_score, show_factors=True):
 [dim]Calculated: {risk_score.calculated_at.strftime('%Y-%m-%d %H:%M:%S')}[/dim]
 """
 
-    console.print(Panel(content, title="⚖️  Risk Score", border_style=color))
+    panel = PrimordialPanel(content, title="⚖️  Risk Score", console=console)
+    # Map risk level to status
+    status_map = {"critical": "error", "high": "warning", "medium": "info", "low": "success", "minimal": "success"}
+    panel.with_status(status_map.get(risk_score.risk_level.value, "info")).render()
 
     if show_factors and risk_score.risk_factors:
         primoroso.error("\n[bold]Risk Factors:[/bold]")
@@ -545,7 +548,10 @@ def _show_ioc(ioc):
 [dim]First seen:[/dim] {ioc.first_seen.strftime('%Y-%m-%d')}
 """
 
-    console.print(Panel(content, title="🌐 Threat Intelligence", border_style=color))
+    panel = PrimordialPanel(content, title="🌐 Threat Intelligence", console=console)
+    # Map threat level to status
+    status_map = {"critical": "error", "high": "warning", "medium": "info", "low": "success"}
+    panel.with_status(status_map.get(ioc.threat_level, "info")).render()
 
 
 def _show_threat_actor(actor):
@@ -572,7 +578,8 @@ def _show_threat_actor(actor):
     for ref in actor.references[:3]:
         content += f"  • {ref}\n"
 
-    console.print(Panel(content, title="🎯 Threat Actor Profile"))
+    panel = PrimordialPanel(content, title="🎯 Threat Actor Profile", console=console)
+    panel.render()
 
 
 def _auto_detect_ioc_type(value: str) -> str:

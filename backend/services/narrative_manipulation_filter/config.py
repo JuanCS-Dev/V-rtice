@@ -4,10 +4,11 @@ All system configuration managed through Pydantic Settings with environment
 variable support. Provides type safety, validation, and default values.
 """
 
-from typing import Optional, Dict, Any
+from datetime import timedelta
+from typing import Any, Dict, Optional
+
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
-from datetime import timedelta
 
 
 class Settings(BaseSettings):
@@ -70,7 +71,9 @@ class Settings(BaseSettings):
     # ============================================================================
     # KAFKA CONFIGURATION
     # ============================================================================
-    KAFKA_BOOTSTRAP_SERVERS: str = Field("hcl-kafka:9092", env="KAFKA_BOOTSTRAP_SERVERS")
+    KAFKA_BOOTSTRAP_SERVERS: str = Field(
+        "hcl-kafka:9092", env="KAFKA_BOOTSTRAP_SERVERS"
+    )
     KAFKA_CLIENT_ID: str = Field("cognitive_defense", env="KAFKA_CLIENT_ID")
     KAFKA_GROUP_ID: str = Field("cognitive_defense_group", env="KAFKA_GROUP_ID")
     KAFKA_AUTO_OFFSET_RESET: str = Field("earliest", env="KAFKA_AUTO_OFFSET_RESET")
@@ -96,9 +99,13 @@ class Settings(BaseSettings):
     # EXTERNAL API KEYS
     # ============================================================================
     NEWSGUARD_API_KEY: Optional[str] = Field(None, env="NEWSGUARD_API_KEY")
-    NEWSGUARD_API_URL: str = Field("https://api.newsguardtech.com/v1", env="NEWSGUARD_API_URL")
+    NEWSGUARD_API_URL: str = Field(
+        "https://api.newsguardtech.com/v1", env="NEWSGUARD_API_URL"
+    )
 
-    GOOGLE_FACTCHECK_API_KEY: Optional[str] = Field(None, env="GOOGLE_FACTCHECK_API_KEY")
+    GOOGLE_FACTCHECK_API_KEY: Optional[str] = Field(
+        None, env="GOOGLE_FACTCHECK_API_KEY"
+    )
     GOOGLE_FACTCHECK_API_URL: str = "https://factchecktools.googleapis.com/v1alpha1"
 
     CLAIMBUSTER_API_URL: str = "https://idir.uta.edu/claimbuster/api/v2"
@@ -107,7 +114,9 @@ class Settings(BaseSettings):
     WIKIDATA_SPARQL_URL: str = "https://query.wikidata.org/sparql"
     DBPEDIA_SPARQL_URL: str = "https://dbpedia.org/sparql"
 
-    GEMINI_API_KEY: str = Field("", env="GEMINI_API_KEY")  # Optional - can be empty for health checks
+    GEMINI_API_KEY: str = Field(
+        "", env="GEMINI_API_KEY"
+    )  # Optional - can be empty for health checks
     GEMINI_MODEL: str = Field("gemini-2.0-flash-exp", env="GEMINI_MODEL")
 
     # ============================================================================
@@ -117,25 +126,18 @@ class Settings(BaseSettings):
 
     # Model paths
     BERTIMBAU_EMOTIONS_PATH: str = Field(
-        "./models/bertimbau-emotions",
-        env="BERTIMBAU_EMOTIONS_PATH"
+        "./models/bertimbau-emotions", env="BERTIMBAU_EMOTIONS_PATH"
     )
     ROBERTA_PROPAGANDA_PATH: str = Field(
-        "./models/roberta-pt-propaganda",
-        env="ROBERTA_PROPAGANDA_PATH"
+        "./models/roberta-pt-propaganda", env="ROBERTA_PROPAGANDA_PATH"
     )
     BERT_FALLACIES_PATH: str = Field(
-        "./models/bert-fallacies",
-        env="BERT_FALLACIES_PATH"
+        "./models/bert-fallacies", env="BERT_FALLACIES_PATH"
     )
     ROBERTA_CIALDINI_PATH: str = Field(
-        "./models/roberta-cialdini",
-        env="ROBERTA_CIALDINI_PATH"
+        "./models/roberta-cialdini", env="ROBERTA_CIALDINI_PATH"
     )
-    BERT_COBAIT_PATH: str = Field(
-        "./models/bert-cobait",
-        env="BERT_COBAIT_PATH"
-    )
+    BERT_COBAIT_PATH: str = Field("./models/bert-cobait", env="BERT_COBAIT_PATH")
 
     # Model serving configuration
     MODEL_BATCH_SIZE: int = Field(32, env="MODEL_BATCH_SIZE")
@@ -155,7 +157,9 @@ class Settings(BaseSettings):
 
     # Manipulation score thresholds
     MANIPULATION_THRESHOLD_HIGH: float = Field(0.7, env="MANIPULATION_THRESHOLD_HIGH")
-    MANIPULATION_THRESHOLD_MODERATE: float = Field(0.4, env="MANIPULATION_THRESHOLD_MODERATE")
+    MANIPULATION_THRESHOLD_MODERATE: float = Field(
+        0.4, env="MANIPULATION_THRESHOLD_MODERATE"
+    )
     MANIPULATION_THRESHOLD_LOW: float = Field(0.2, env="MANIPULATION_THRESHOLD_LOW")
 
     # Emotional manipulation thresholds
@@ -165,7 +169,9 @@ class Settings(BaseSettings):
     FALLACY_CONFIDENCE_THRESHOLD: float = Field(0.7, env="FALLACY_CONFIDENCE_THRESHOLD")
 
     # Fact-check similarity threshold
-    FACTCHECK_SIMILARITY_THRESHOLD: float = Field(0.85, env="FACTCHECK_SIMILARITY_THRESHOLD")
+    FACTCHECK_SIMILARITY_THRESHOLD: float = Field(
+        0.85, env="FACTCHECK_SIMILARITY_THRESHOLD"
+    )
 
     # Domain similarity threshold (for hopping detection)
     DOMAIN_SIMILARITY_THRESHOLD: float = Field(0.85, env="DOMAIN_SIMILARITY_THRESHOLD")
@@ -183,7 +189,9 @@ class Settings(BaseSettings):
     WEIGHT_NEWSGUARD: float = Field(0.7, env="WEIGHT_NEWSGUARD")
     WEIGHT_HISTORICAL: float = Field(0.3, env="WEIGHT_HISTORICAL")
 
-    @field_validator("WEIGHT_CREDIBILITY", "WEIGHT_EMOTIONAL", "WEIGHT_LOGICAL", "WEIGHT_REALITY")
+    @field_validator(
+        "WEIGHT_CREDIBILITY", "WEIGHT_EMOTIONAL", "WEIGHT_LOGICAL", "WEIGHT_REALITY"
+    )
     @classmethod
     def validate_weights(cls, v: float) -> float:
         """Ensure weights are between 0 and 1."""
@@ -244,7 +252,9 @@ class Settings(BaseSettings):
     ENABLE_MODULE_REALITY: bool = Field(True, env="ENABLE_MODULE_REALITY")
 
     ENABLE_TIER2_VERIFICATION: bool = Field(True, env="ENABLE_TIER2_VERIFICATION")
-    ENABLE_MEME_ANALYSIS: bool = Field(False, env="ENABLE_MEME_ANALYSIS")  # Disabled by default (heavy)
+    ENABLE_MEME_ANALYSIS: bool = Field(
+        False, env="ENABLE_MEME_ANALYSIS"
+    )  # Disabled by default (heavy)
 
     ENABLE_ARGUMENTATION_GRAPHS: bool = Field(True, env="ENABLE_ARGUMENTATION_GRAPHS")
     ENABLE_DOMAIN_FINGERPRINTING: bool = Field(True, env="ENABLE_DOMAIN_FINGERPRINTING")
@@ -281,7 +291,7 @@ class Settings(BaseSettings):
             "factcheck": self.CACHE_TTL_FACTCHECK,
             "analysis": self.CACHE_TTL_ANALYSIS,
             "reputation": self.CACHE_TTL_REPUTATION,
-            "session": self.CACHE_TTL_SESSION
+            "session": self.CACHE_TTL_SESSION,
         }
 
         if category not in ttl_map:
@@ -301,7 +311,7 @@ class Settings(BaseSettings):
             "claims_to_verify": self.KAFKA_TOPIC_CLAIMS_TO_VERIFY,
             "verification_results": self.KAFKA_TOPIC_VERIFICATION_RESULTS,
             "analysis_results": self.KAFKA_TOPIC_ANALYSIS_RESULTS,
-            "errors": self.KAFKA_TOPIC_ERRORS
+            "errors": self.KAFKA_TOPIC_ERRORS,
         }
 
     def validate_configuration(self) -> bool:
@@ -315,10 +325,10 @@ class Settings(BaseSettings):
         """
         # Validate weights sum to approximately 1.0
         total_weight = (
-            self.WEIGHT_CREDIBILITY +
-            self.WEIGHT_EMOTIONAL +
-            self.WEIGHT_LOGICAL +
-            self.WEIGHT_REALITY
+            self.WEIGHT_CREDIBILITY
+            + self.WEIGHT_EMOTIONAL
+            + self.WEIGHT_LOGICAL
+            + self.WEIGHT_REALITY
         )
 
         if not 0.99 <= total_weight <= 1.01:
@@ -346,48 +356,48 @@ class Settings(BaseSettings):
                 "name": self.SERVICE_NAME,
                 "version": self.SERVICE_VERSION,
                 "port": self.SERVICE_PORT,
-                "workers": self.WORKERS
+                "workers": self.WORKERS,
             },
             "database": {
                 "host": self.POSTGRES_HOST,
                 "port": self.POSTGRES_PORT,
-                "database": self.POSTGRES_DB
+                "database": self.POSTGRES_DB,
             },
             "redis": {
                 "host": self.REDIS_HOST,
                 "port": self.REDIS_PORT,
-                "db": self.REDIS_DB
+                "db": self.REDIS_DB,
             },
             "kafka": {
                 "bootstrap_servers": self.KAFKA_BOOTSTRAP_SERVERS,
-                "topics": self.get_kafka_topics()
+                "topics": self.get_kafka_topics(),
             },
             "modules_enabled": {
                 "credibility": self.ENABLE_MODULE_CREDIBILITY,
                 "emotional": self.ENABLE_MODULE_EMOTIONAL,
                 "logical": self.ENABLE_MODULE_LOGICAL,
-                "reality": self.ENABLE_MODULE_REALITY
+                "reality": self.ENABLE_MODULE_REALITY,
             },
             "features": {
                 "tier2_verification": self.ENABLE_TIER2_VERIFICATION,
                 "meme_analysis": self.ENABLE_MEME_ANALYSIS,
                 "argumentation_graphs": self.ENABLE_ARGUMENTATION_GRAPHS,
                 "domain_fingerprinting": self.ENABLE_DOMAIN_FINGERPRINTING,
-                "adversarial_defense": self.ENABLE_ADVERSARIAL_DEFENSE
+                "adversarial_defense": self.ENABLE_ADVERSARIAL_DEFENSE,
             },
             "thresholds": {
                 "check_worthiness": self.CHECK_WORTHINESS_THRESHOLD,
                 "manipulation_high": self.MANIPULATION_THRESHOLD_HIGH,
                 "manipulation_moderate": self.MANIPULATION_THRESHOLD_MODERATE,
                 "credibility_high": self.CREDIBILITY_THRESHOLD_HIGH,
-                "credibility_low": self.CREDIBILITY_THRESHOLD_LOW
+                "credibility_low": self.CREDIBILITY_THRESHOLD_LOW,
             },
             "weights": {
                 "credibility": self.WEIGHT_CREDIBILITY,
                 "emotional": self.WEIGHT_EMOTIONAL,
                 "logical": self.WEIGHT_LOGICAL,
-                "reality": self.WEIGHT_REALITY
-            }
+                "reality": self.WEIGHT_REALITY,
+            },
         }
 
 

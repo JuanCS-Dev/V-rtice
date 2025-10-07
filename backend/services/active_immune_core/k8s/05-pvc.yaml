@@ -1,0 +1,42 @@
+# Kubernetes PersistentVolumeClaim for Active Immune Core
+# Persistent storage for agent data, logs, and memory
+#
+# Apply: kubectl apply -f k8s/05-pvc.yaml -n active-immune
+# Check: kubectl get pvc -n active-immune
+# Describe: kubectl describe pvc active-immune-data-pvc -n active-immune
+#
+# NO MOCKS, NO PLACEHOLDERS, NO TODOS - Production-ready.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: active-immune-data-pvc
+  namespace: active-immune
+  labels:
+    app: active-immune-core
+    component: storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard  # Change to your storage class (e.g., gp2, gp3, fast-ssd)
+
+---
+# Optional: PVC for logs (if you want separate storage)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: active-immune-logs-pvc
+  namespace: active-immune
+  labels:
+    app: active-immune-core
+    component: logs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard

@@ -9,23 +9,30 @@ This file is retained for historical reference or potential rollback purposes,
 but it is not intended for active deployment or development.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from connectors.ip_intelligence_connector import IpIntelligenceConnector
+from connectors.threat_intel_connector import ThreatIntelConnector
 
 # Assuming these modules exist and are correctly structured within ADR
 from engines.detection_engine import DetectionEngine
-from engines.response_engine import ResponseEngine
 from engines.ml_engine import MLEngine
-from connectors.threat_intel_connector import ThreatIntelConnector
-from connectors.ip_intelligence_connector import IpIntelligenceConnector
-from models.schemas import Incident, DetectionResult, ResponseAction, ThreatIntelData, IpIntelligenceData
-from models.enums import IncidentSeverity, DetectionType, ResponseActionType
+from engines.response_engine import ResponseEngine
+from fastapi import FastAPI, HTTPException
+from models.enums import DetectionType, IncidentSeverity, ResponseActionType
+from models.schemas import (
+    DetectionResult,
+    Incident,
+    IpIntelligenceData,
+    ResponseAction,
+    ThreatIntelData,
+)
 from playbooks.loader import PlaybookLoader
+from pydantic import BaseModel
 from utils.logger import setup_logger
+import uvicorn
 
 # Setup logger
 logger = setup_logger(__name__)
@@ -48,6 +55,7 @@ class DetectRequest(BaseModel):
         event_data (Dict[str, Any]): The raw event data to be analyzed.
         source (str): The source of the event (e.g., 'siem', 'endpoint').
     """
+
     event_data: Dict[str, Any]
     source: str
 
@@ -60,6 +68,7 @@ class RespondRequest(BaseModel):
         action_type (ResponseActionType): The type of response action to take.
         parameters (Optional[Dict[str, Any]]): Parameters for the response action.
     """
+
     incident_id: str
     action_type: ResponseActionType
     parameters: Optional[Dict[str, Any]] = None
@@ -69,7 +78,9 @@ class RespondRequest(BaseModel):
 async def startup_event():
     """Performs startup tasks for the ADR Core Service."""
     logger.info("🚀 Starting Maximus ADR Core Service (Old)...")
-    await playbook_loader.load_playbooks("adr_core_service/playbooks") # Load playbooks from a directory
+    await playbook_loader.load_playbooks(
+        "adr_core_service/playbooks"
+    )  # Load playbooks from a directory
     logger.info(f"Loaded {len(playbook_loader.get_all_playbooks())} playbooks.")
     logger.info("✅ Maximus ADR Core Service (Old) started successfully.")
 
@@ -103,15 +114,21 @@ async def detect_threat(request: DetectRequest) -> List[DetectionResult]:
     """
     logger.info(f"Received detection request from {request.source}")
     try:
-        detections = await detection_engine.analyze_event(request.event_data, request.source)
+        detections = await detection_engine.analyze_event(
+            request.event_data, request.source
+        )
         # Simulate ML analysis for additional context
         for det in detections:
-            ml_score = await ml_engine.predict_threat_score(det.event_id, det.event_data)
+            ml_score = await ml_engine.predict_threat_score(
+                det.event_id, det.event_data
+            )
             det.ml_score = ml_score
         return detections
     except Exception as e:
         logger.error(f"Error during threat detection: {e}")
-        raise HTTPException(status_code=500, detail=f"Threat detection failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Threat detection failed: {str(e)}"
+        )
 
 
 @app.post("/respond", response_model=ResponseAction)
@@ -124,18 +141,29 @@ async def respond_to_incident(request: RespondRequest) -> ResponseAction:
     Returns:
         ResponseAction: The details of the executed response action.
     """
-    logger.info(f"Received response request for incident {request.incident_id} with action {request.action_type}")
+    logger.info(
+        f"Received response request for incident {request.incident_id} with action {request.action_type}"
+    )
     try:
         # Load relevant playbook
-        playbook = playbook_loader.get_playbook_for_incident(request.incident_id) # Simplified
+        playbook = playbook_loader.get_playbook_for_incident(
+            request.incident_id
+        )  # Simplified
         if not playbook:
-            raise HTTPException(status_code=404, detail=f"No playbook found for incident {request.incident_id}")
+            raise HTTPException(
+                status_code=404,
+                detail=f"No playbook found for incident {request.incident_id}",
+            )
 
-        action_result = await response_engine.execute_action(request.incident_id, request.action_type, request.parameters)
+        action_result = await response_engine.execute_action(
+            request.incident_id, request.action_type, request.parameters
+        )
         return action_result
     except Exception as e:
         logger.error(f"Error during incident response: {e}")
-        raise HTTPException(status_code=500, detail=f"Incident response failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Incident response failed: {str(e)}"
+        )
 
 
 @app.get("/threat_intel/{indicator}", response_model=ThreatIntelData)
@@ -154,7 +182,9 @@ async def get_threat_intelligence(indicator: str) -> ThreatIntelData:
         return data
     except Exception as e:
         logger.error(f"Error retrieving threat intelligence: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve threat intelligence: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve threat intelligence: {str(e)}"
+        )
 
 
 @app.get("/ip_intel/{ip_address}", response_model=IpIntelligenceData)
@@ -173,7 +203,9 @@ async def get_ip_intelligence(ip_address: str) -> IpIntelligenceData:
         return data
     except Exception as e:
         logger.error(f"Error retrieving IP intelligence: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve IP intelligence: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve IP intelligence: {str(e)}"
+        )
 
 
 if __name__ == "__main__":

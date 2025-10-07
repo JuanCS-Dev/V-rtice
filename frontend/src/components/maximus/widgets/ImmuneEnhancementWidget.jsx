@@ -25,19 +25,28 @@ export const ImmuneEnhancementWidget = () => {
   const [consolidationResults, setConsolidationResults] = useState(null);
   const [ltmResults, setLtmResults] = useState(null);
   const [ltmQuery, setLtmQuery] = useState('ransomware campaigns');
+  const [alertsInput, setAlertsInput] = useState('');
+  const [inputError, setInputError] = useState(null);
 
   const runFPSuppression = async () => {
     setLoading(true);
+    setInputError(null);
     try {
-      const mockAlerts = [
-        { id: 'alert_001', severity: 'high', entity: '192.168.1.10', type: 'port_scan' },
-        { id: 'alert_002', severity: 'medium', entity: 'john.doe', type: 'failed_login' },
-        { id: 'alert_003', severity: 'high', entity: '10.0.0.5', type: 'malware_detected' }
-      ];
+      // Parse alerts from user input (JSON format expected)
+      if (!alertsInput.trim()) {
+        throw new Error('Please provide alerts in JSON format');
+      }
 
-      const result = await suppressFalsePositives(mockAlerts, 0.7);
+      const alerts = JSON.parse(alertsInput);
+
+      if (!Array.isArray(alerts) || alerts.length === 0) {
+        throw new Error('Alerts must be a non-empty array');
+      }
+
+      const result = await suppressFalsePositives(alerts, 0.7);
       setFpResults(result);
     } catch (error) {
+      setInputError(error.message);
       console.error('FP suppression failed:', error);
     } finally {
       setLoading(false);
@@ -107,10 +116,40 @@ export const ImmuneEnhancementWidget = () => {
           <p className="description">
             Regulatory T-Cells suppress false positive alerts through tolerance learning
           </p>
+
+          <div className="input-section">
+            <label htmlFor="alerts-input" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+              Alerts (JSON Array):
+            </label>
+            <textarea
+              id="alerts-input"
+              value={alertsInput}
+              onChange={(e) => setAlertsInput(e.target.value)}
+              placeholder='[{"id": "alert_001", "severity": "high", "entity": "192.168.1.10", "type": "port_scan"}]'
+              rows={6}
+              style={{
+                width: '100%',
+                padding: '10px',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color, #333)',
+                backgroundColor: 'var(--bg-dark, #1a1a1a)',
+                color: 'var(--text-color, #fff)',
+                marginBottom: '12px'
+              }}
+            />
+            {inputError && (
+              <div style={{ color: '#ff4444', marginBottom: '12px', fontSize: '14px' }}>
+                ⚠️ {inputError}
+              </div>
+            )}
+          </div>
+
           <button
             className="action-btn"
             onClick={runFPSuppression}
-            disabled={loading}
+            disabled={loading || !alertsInput.trim()}
           >
             {loading ? '⏳ Evaluating...' : '🔬 Suppress False Positives'}
           </button>

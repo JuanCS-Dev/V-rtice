@@ -6,15 +6,15 @@ to modulate AI behavior in bio-inspired ways.
 Production-ready implementation.
 """
 
-import logging
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
+import logging
+from typing import Any, Dict, Optional
 
-from .dopamine_system import DopamineSystem, DopamineState
-from .serotonin_system import SerotoninSystem, SerotoninState
-from .norepinephrine_system import NorepinephrineSystem, NorepinephrineState
-from .acetylcholine_system import AcetylcholineSystem, AcetylcholineState
+from .acetylcholine_system import AcetylcholineState, AcetylcholineSystem
+from .dopamine_system import DopamineState, DopamineSystem
+from .norepinephrine_system import NorepinephrineState, NorepinephrineSystem
+from .serotonin_system import SerotoninState, SerotoninSystem
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GlobalNeuromodulationState:
     """Global state of all neuromodulatory systems."""
+
     dopamine: DopamineState
     serotonin: SerotoninState
     norepinephrine: NorepinephrineState
@@ -61,10 +62,7 @@ class NeuromodulationController:
         logger.info("Neuromodulation controller initialized (4 systems operational)")
 
     def process_reward(
-        self,
-        expected_reward: float,
-        actual_reward: float,
-        success: bool
+        self, expected_reward: float, actual_reward: float, success: bool
     ) -> Dict[str, float]:
         """Process task outcome through neuromodulatory systems.
 
@@ -77,7 +75,9 @@ class NeuromodulationController:
             Dict with modulation parameters
         """
         # Dopamine: Compute RPE
-        rpe = self.dopamine.compute_reward_prediction_error(expected_reward, actual_reward)
+        rpe = self.dopamine.compute_reward_prediction_error(
+            expected_reward, actual_reward
+        )
 
         # Update dopamine motivation
         self.dopamine.update_motivation()
@@ -85,13 +85,15 @@ class NeuromodulationController:
         # Serotonin: Update from outcome
         self.serotonin.update_from_outcome(success=success, stress=self.stress_level)
 
-        logger.info(f"Reward processed: expected={expected_reward:.2f}, actual={actual_reward:.2f}, "
-                   f"rpe={rpe:.2f}, success={success}")
+        logger.info(
+            f"Reward processed: expected={expected_reward:.2f}, actual={actual_reward:.2f}, "
+            f"rpe={rpe:.2f}, success={success}"
+        )
 
         return {
-            'rpe': rpe,
-            'motivation': self.dopamine.motivation_level,
-            'serotonin_level': self.serotonin.level
+            "rpe": rpe,
+            "motivation": self.dopamine.motivation_level,
+            "serotonin_level": self.serotonin.level,
         }
 
     def respond_to_threat(self, threat_severity: float):
@@ -133,8 +135,10 @@ class NeuromodulationController:
         # Norepinephrine provides attention gain
         attention_gain = self.norepinephrine.get_attention_gain()
 
-        logger.debug(f"Attention check: importance={importance:.2f}, salience={salience:.2f}, "
-                    f"attend={should_attend}, gain={attention_gain:.2f}")
+        logger.debug(
+            f"Attention check: importance={importance:.2f}, salience={salience:.2f}, "
+            f"attend={should_attend}, gain={attention_gain:.2f}"
+        )
 
         return should_attend
 
@@ -149,8 +153,7 @@ class NeuromodulationController:
         """
         # Dopamine modulates learning rate based on surprise (RPE magnitude)
         modulated_lr = self.dopamine.modulate_learning_rate(
-            base_learning_rate=base_learning_rate,
-            rpe=self.dopamine.phasic_burst
+            base_learning_rate=base_learning_rate, rpe=self.dopamine.phasic_burst
         )
 
         return modulated_lr
@@ -195,10 +198,10 @@ class NeuromodulationController:
         """
         # Weighted combination of systems
         mood = (
-            0.3 * self.dopamine.motivation_level +  # Motivation
-            0.3 * self.serotonin.level +             # Mood stability
-            0.2 * (1.0 - self.stress_level) +        # Low stress
-            0.2 * min(1.0, self.norepinephrine.level)  # Moderate arousal
+            0.3 * self.dopamine.motivation_level  # Motivation
+            + 0.3 * self.serotonin.level  # Mood stability
+            + 0.2 * (1.0 - self.stress_level)  # Low stress
+            + 0.2 * min(1.0, self.norepinephrine.level)  # Moderate arousal
         )
 
         return max(0.0, min(1.0, mood))
@@ -216,7 +219,7 @@ class NeuromodulationController:
             acetylcholine=self.acetylcholine.get_state(),
             overall_mood=self.get_overall_mood(),
             cognitive_load=self.cognitive_load,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
     def export_state(self) -> Dict[str, Any]:
@@ -228,36 +231,36 @@ class NeuromodulationController:
         global_state = self.get_global_state()
 
         return {
-            'dopamine': {
-                'tonic': global_state.dopamine.tonic_level,
-                'phasic': global_state.dopamine.phasic_burst,
-                'motivation': global_state.dopamine.motivation_level,
-                'learning_rate': global_state.dopamine.learning_rate
+            "dopamine": {
+                "tonic": global_state.dopamine.tonic_level,
+                "phasic": global_state.dopamine.phasic_burst,
+                "motivation": global_state.dopamine.motivation_level,
+                "learning_rate": global_state.dopamine.learning_rate,
             },
-            'serotonin': {
-                'level': global_state.serotonin.level,
-                'exploration_rate': global_state.serotonin.exploration_rate,
-                'risk_tolerance': global_state.serotonin.risk_tolerance,
-                'patience': global_state.serotonin.patience
+            "serotonin": {
+                "level": global_state.serotonin.level,
+                "exploration_rate": global_state.serotonin.exploration_rate,
+                "risk_tolerance": global_state.serotonin.risk_tolerance,
+                "patience": global_state.serotonin.patience,
             },
-            'norepinephrine': {
-                'level': global_state.norepinephrine.level,
-                'arousal': global_state.norepinephrine.arousal,
-                'attention_gain': global_state.norepinephrine.attention_gain,
-                'stressed': global_state.norepinephrine.stress_response
+            "norepinephrine": {
+                "level": global_state.norepinephrine.level,
+                "arousal": global_state.norepinephrine.arousal,
+                "attention_gain": global_state.norepinephrine.attention_gain,
+                "stressed": global_state.norepinephrine.stress_response,
             },
-            'acetylcholine': {
-                'level': global_state.acetylcholine.level,
-                'salience_threshold': global_state.acetylcholine.attention_filter,
-                'memory_encoding': global_state.acetylcholine.memory_encoding_rate,
-                'focus_mode': global_state.acetylcholine.focus_narrow
+            "acetylcholine": {
+                "level": global_state.acetylcholine.level,
+                "salience_threshold": global_state.acetylcholine.attention_filter,
+                "memory_encoding": global_state.acetylcholine.memory_encoding_rate,
+                "focus_mode": global_state.acetylcholine.focus_narrow,
             },
-            'global': {
-                'mood': global_state.overall_mood,
-                'cognitive_load': global_state.cognitive_load,
-                'stress': self.stress_level
+            "global": {
+                "mood": global_state.overall_mood,
+                "cognitive_load": global_state.cognitive_load,
+                "stress": self.stress_level,
             },
-            'timestamp': global_state.timestamp.isoformat()
+            "timestamp": global_state.timestamp.isoformat(),
         }
 
     def reset_all(self):

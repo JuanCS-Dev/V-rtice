@@ -1,9 +1,10 @@
 """Database Actuator - PostgreSQL/pgBouncer Connection Pool Management"""
 
 import logging
+from typing import Any, Dict, List, Optional
+
 import asyncpg
 import psycopg2
-from typing import Dict, List, Optional, Any
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ class DatabaseActuator:
         self,
         db_url: str = "postgresql://localhost:5432/vertice",
         pgbouncer_admin_url: str = "postgresql://localhost:6432/pgbouncer",
-        dry_run_mode: bool = True
+        dry_run_mode: bool = True,
     ):
         self.db_url = db_url
         self.pgbouncer_admin_url = pgbouncer_admin_url
@@ -24,10 +25,7 @@ class DatabaseActuator:
         self.action_log = []
 
     async def adjust_connection_pool(
-        self,
-        database: str,
-        pool_size: int,
-        pool_mode: str = 'transaction'
+        self, database: str, pool_size: int, pool_mode: str = "transaction"
     ) -> Dict:
         """Adjust pgBouncer connection pool size and mode.
 
@@ -37,53 +35,63 @@ class DatabaseActuator:
             pool_mode: 'session', 'transaction', or 'statement'
         """
         if self.dry_run_mode:
-            logger.info(f"DRY-RUN: Set {database} pool_size={pool_size}, pool_mode={pool_mode}")
-            self.action_log.append({
-                'action': 'adjust_pool',
-                'database': database,
-                'pool_size': pool_size,
-                'pool_mode': pool_mode,
-                'executed': False,
-                'dry_run': True
-            })
-            return {'success': True, 'dry_run': True}
+            logger.info(
+                f"DRY-RUN: Set {database} pool_size={pool_size}, pool_mode={pool_mode}"
+            )
+            self.action_log.append(
+                {
+                    "action": "adjust_pool",
+                    "database": database,
+                    "pool_size": pool_size,
+                    "pool_mode": pool_mode,
+                    "executed": False,
+                    "dry_run": True,
+                }
+            )
+            return {"success": True, "dry_run": True}
 
         try:
             # Connect to pgBouncer admin console
             conn = await asyncpg.connect(self.pgbouncer_admin_url)
 
             # Update pool configuration
-            await conn.execute(f"""
+            await conn.execute(
+                f"""
                 SET default_pool_size = {pool_size};
                 SET pool_mode = '{pool_mode}';
-            """)
+            """
+            )
 
             # Reload configuration
             await conn.execute("RELOAD;")
 
             await conn.close()
 
-            self.action_log.append({
-                'action': 'adjust_pool',
-                'database': database,
-                'pool_size': pool_size,
-                'pool_mode': pool_mode,
-                'executed': True,
-                'success': True
-            })
+            self.action_log.append(
+                {
+                    "action": "adjust_pool",
+                    "database": database,
+                    "pool_size": pool_size,
+                    "pool_mode": pool_mode,
+                    "executed": True,
+                    "success": True,
+                }
+            )
 
-            logger.info(f"Pool adjusted: {database} -> {pool_size} connections ({pool_mode} mode)")
+            logger.info(
+                f"Pool adjusted: {database} -> {pool_size} connections ({pool_mode} mode)"
+            )
 
             return {
-                'success': True,
-                'database': database,
-                'pool_size': pool_size,
-                'pool_mode': pool_mode
+                "success": True,
+                "database": database,
+                "pool_size": pool_size,
+                "pool_mode": pool_mode,
             }
 
         except Exception as e:
             logger.error(f"Pool adjustment error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def kill_idle_connections(self, idle_threshold_seconds: int = 300) -> Dict:
         """Terminate idle connections to free resources.
@@ -93,25 +101,29 @@ class DatabaseActuator:
         """
         if self.dry_run_mode:
             logger.info(f"DRY-RUN: Kill connections idle >{idle_threshold_seconds}s")
-            self.action_log.append({
-                'action': 'kill_idle',
-                'threshold': idle_threshold_seconds,
-                'executed': False,
-                'dry_run': True
-            })
-            return {'success': True, 'dry_run': True}
+            self.action_log.append(
+                {
+                    "action": "kill_idle",
+                    "threshold": idle_threshold_seconds,
+                    "executed": False,
+                    "dry_run": True,
+                }
+            )
+            return {"success": True, "dry_run": True}
 
         try:
             conn = await asyncpg.connect(self.db_url)
 
             # Get idle connections
-            idle_conns = await conn.fetch(f"""
+            idle_conns = await conn.fetch(
+                f"""
                 SELECT pid, usename, state, state_change
                 FROM pg_stat_activity
                 WHERE state = 'idle'
                   AND state_change < NOW() - INTERVAL '{idle_threshold_seconds} seconds'
                   AND pid != pg_backend_pid()
-            """)
+            """
+            )
 
             # Terminate idle connections
             killed_count = 0
@@ -124,25 +136,27 @@ class DatabaseActuator:
 
             await conn.close()
 
-            self.action_log.append({
-                'action': 'kill_idle',
-                'threshold': idle_threshold_seconds,
-                'killed_count': killed_count,
-                'executed': True,
-                'success': True
-            })
+            self.action_log.append(
+                {
+                    "action": "kill_idle",
+                    "threshold": idle_threshold_seconds,
+                    "killed_count": killed_count,
+                    "executed": True,
+                    "success": True,
+                }
+            )
 
             logger.info(f"Killed {killed_count} idle connections")
 
             return {
-                'success': True,
-                'killed_count': killed_count,
-                'threshold_seconds': idle_threshold_seconds
+                "success": True,
+                "killed_count": killed_count,
+                "threshold_seconds": idle_threshold_seconds,
             }
 
         except Exception as e:
             logger.error(f"Connection termination error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def vacuum_analyze(self, table: str, analyze_only: bool = False) -> Dict:
         """Run VACUUM ANALYZE to reclaim space and update statistics.
@@ -154,14 +168,16 @@ class DatabaseActuator:
         if self.dry_run_mode:
             action = "ANALYZE" if analyze_only else "VACUUM ANALYZE"
             logger.info(f"DRY-RUN: {action} {table}")
-            self.action_log.append({
-                'action': 'vacuum_analyze',
-                'table': table,
-                'analyze_only': analyze_only,
-                'executed': False,
-                'dry_run': True
-            })
-            return {'success': True, 'dry_run': True}
+            self.action_log.append(
+                {
+                    "action": "vacuum_analyze",
+                    "table": table,
+                    "analyze_only": analyze_only,
+                    "executed": False,
+                    "dry_run": True,
+                }
+            )
+            return {"success": True, "dry_run": True}
 
         try:
             # Use psycopg2 for VACUUM (asyncpg doesn't support it)
@@ -179,23 +195,25 @@ class DatabaseActuator:
             cursor.close()
             sync_conn.close()
 
-            self.action_log.append({
-                'action': 'vacuum_analyze',
-                'table': table,
-                'analyze_only': analyze_only,
-                'executed': True,
-                'success': True
-            })
+            self.action_log.append(
+                {
+                    "action": "vacuum_analyze",
+                    "table": table,
+                    "analyze_only": analyze_only,
+                    "executed": True,
+                    "success": True,
+                }
+            )
 
             return {
-                'success': True,
-                'table': table,
-                'operation': 'ANALYZE' if analyze_only else 'VACUUM ANALYZE'
+                "success": True,
+                "table": table,
+                "operation": "ANALYZE" if analyze_only else "VACUUM ANALYZE",
             }
 
         except Exception as e:
             logger.error(f"VACUUM error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def get_database_stats(self) -> Dict:
         """Get database performance statistics."""
@@ -203,7 +221,8 @@ class DatabaseActuator:
             conn = await asyncpg.connect(self.db_url)
 
             # Connection stats
-            conn_stats = await conn.fetchrow("""
+            conn_stats = await conn.fetchrow(
+                """
                 SELECT
                     COUNT(*) as total_connections,
                     COUNT(*) FILTER (WHERE state = 'active') as active_connections,
@@ -211,10 +230,12 @@ class DatabaseActuator:
                     COUNT(*) FILTER (WHERE wait_event_type IS NOT NULL) as waiting_connections
                 FROM pg_stat_activity
                 WHERE pid != pg_backend_pid()
-            """)
+            """
+            )
 
             # Cache hit ratio
-            cache_stats = await conn.fetchrow("""
+            cache_stats = await conn.fetchrow(
+                """
                 SELECT
                     SUM(blks_hit) as cache_hits,
                     SUM(blks_read) as disk_reads,
@@ -223,10 +244,12 @@ class DatabaseActuator:
                         2
                     ) as cache_hit_ratio
                 FROM pg_stat_database
-            """)
+            """
+            )
 
             # Query performance
-            slow_queries = await conn.fetch("""
+            slow_queries = await conn.fetch(
+                """
                 SELECT
                     query,
                     state,
@@ -237,41 +260,44 @@ class DatabaseActuator:
                   AND query_start < NOW() - INTERVAL '5 seconds'
                 ORDER BY duration_seconds DESC
                 LIMIT 5
-            """)
+            """
+            )
 
             # Database size
-            db_size = await conn.fetchrow("""
+            db_size = await conn.fetchrow(
+                """
                 SELECT pg_database_size(current_database()) as size_bytes
-            """)
+            """
+            )
 
             await conn.close()
 
             return {
-                'success': True,
-                'connections': {
-                    'total': conn_stats['total_connections'],
-                    'active': conn_stats['active_connections'],
-                    'idle': conn_stats['idle_connections'],
-                    'waiting': conn_stats['waiting_connections']
+                "success": True,
+                "connections": {
+                    "total": conn_stats["total_connections"],
+                    "active": conn_stats["active_connections"],
+                    "idle": conn_stats["idle_connections"],
+                    "waiting": conn_stats["waiting_connections"],
                 },
-                'cache': {
-                    'hit_ratio_percent': float(cache_stats['cache_hit_ratio'] or 0),
-                    'hits': cache_stats['cache_hits'],
-                    'disk_reads': cache_stats['disk_reads']
+                "cache": {
+                    "hit_ratio_percent": float(cache_stats["cache_hit_ratio"] or 0),
+                    "hits": cache_stats["cache_hits"],
+                    "disk_reads": cache_stats["disk_reads"],
                 },
-                'slow_queries': [
+                "slow_queries": [
                     {
-                        'query': q['query'][:200],
-                        'duration_seconds': float(q['duration_seconds'])
+                        "query": q["query"][:200],
+                        "duration_seconds": float(q["duration_seconds"]),
                     }
                     for q in slow_queries
                 ],
-                'database_size_mb': round(db_size['size_bytes'] / (1024 * 1024), 2)
+                "database_size_mb": round(db_size["size_bytes"] / (1024 * 1024), 2),
             }
 
         except Exception as e:
             logger.error(f"Stats retrieval error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def adjust_work_mem(self, work_mem_mb: int) -> Dict:
         """Adjust work_mem for current session (affects sort/hash operations).
@@ -281,13 +307,15 @@ class DatabaseActuator:
         """
         if self.dry_run_mode:
             logger.info(f"DRY-RUN: SET work_mem = {work_mem_mb}MB")
-            self.action_log.append({
-                'action': 'adjust_work_mem',
-                'work_mem_mb': work_mem_mb,
-                'executed': False,
-                'dry_run': True
-            })
-            return {'success': True, 'dry_run': True}
+            self.action_log.append(
+                {
+                    "action": "adjust_work_mem",
+                    "work_mem_mb": work_mem_mb,
+                    "executed": False,
+                    "dry_run": True,
+                }
+            )
+            return {"success": True, "dry_run": True}
 
         try:
             conn = await asyncpg.connect(self.db_url)
@@ -300,23 +328,22 @@ class DatabaseActuator:
 
             await conn.close()
 
-            self.action_log.append({
-                'action': 'adjust_work_mem',
-                'work_mem_mb': work_mem_mb,
-                'executed': True,
-                'success': True
-            })
+            self.action_log.append(
+                {
+                    "action": "adjust_work_mem",
+                    "work_mem_mb": work_mem_mb,
+                    "executed": True,
+                    "success": True,
+                }
+            )
 
             logger.info(f"work_mem set to {result}")
 
-            return {
-                'success': True,
-                'work_mem': result
-            }
+            return {"success": True, "work_mem": result}
 
         except Exception as e:
             logger.error(f"work_mem adjustment error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     def get_action_log(self) -> List[Dict]:
         """Return action history for audit."""

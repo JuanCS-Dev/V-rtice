@@ -10,11 +10,12 @@ Performance Targets:
 """
 
 import logging
+from typing import Dict, List, Tuple
+
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple
-from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import r2_score
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class ResourceDemandForecaster:
     def __init__(
         self,
         order: Tuple[int, int, int] = (1, 1, 1),
-        seasonal_order: Tuple[int, int, int, int] = (1, 1, 1, 24)
+        seasonal_order: Tuple[int, int, int, int] = (1, 1, 1, 24),
     ):
         """
         Initialize SARIMA forecaster.
@@ -74,31 +75,31 @@ class ResourceDemandForecaster:
 
             # Ensure datetime index
             if not isinstance(historical_data.index, pd.DatetimeIndex):
-                historical_data = historical_data.set_index('timestamp')
+                historical_data = historical_data.set_index("timestamp")
 
             # Exogenous features
-            exog = historical_data[['hour_of_day', 'day_of_week', 'is_weekend']]
+            exog = historical_data[["hour_of_day", "day_of_week", "is_weekend"]]
 
             # Train CPU model
             logger.info("Training CPU demand forecaster...")
             self.cpu_model = SARIMAX(
-                historical_data['cpu_usage'],
+                historical_data["cpu_usage"],
                 exog=exog,
                 order=self.order,
                 seasonal_order=self.seasonal_order,
                 enforce_stationarity=False,
-                enforce_invertibility=False
+                enforce_invertibility=False,
             ).fit(disp=False)
 
             # Train Memory model
             logger.info("Training Memory demand forecaster...")
             self.memory_model = SARIMAX(
-                historical_data['memory_usage'],
+                historical_data["memory_usage"],
                 exog=exog,
                 order=self.order,
                 seasonal_order=self.seasonal_order,
                 enforce_stationarity=False,
-                enforce_invertibility=False
+                enforce_invertibility=False,
             ).fit(disp=False)
 
             # Store for validation
@@ -110,7 +111,7 @@ class ResourceDemandForecaster:
             logger.error(f"Error training SARIMA models: {e}", exc_info=True)
             raise
 
-    def predict(self, horizon: str = '1h') -> Dict[str, List[float]]:
+    def predict(self, horizon: str = "1h") -> Dict[str, List[float]]:
         """
         Forecast resource demand.
 
@@ -125,9 +126,9 @@ class ResourceDemandForecaster:
 
         # Map horizon to steps (15-min intervals)
         steps_map = {
-            '1h': 4,     # 4 steps * 15min = 1 hour
-            '6h': 24,    # 24 steps * 15min = 6 hours
-            '24h': 96    # 96 steps * 15min = 24 hours
+            "1h": 4,  # 4 steps * 15min = 1 hour
+            "6h": 24,  # 24 steps * 15min = 6 hours
+            "24h": 96,  # 96 steps * 15min = 24 hours
         }
 
         steps = steps_map.get(horizon, 4)
@@ -149,10 +150,10 @@ class ResourceDemandForecaster:
             )
 
             return {
-                'cpu_forecast': cpu_forecast.tolist(),
-                'memory_forecast': memory_forecast.tolist(),
-                'horizon': horizon,
-                'steps': steps
+                "cpu_forecast": cpu_forecast.tolist(),
+                "memory_forecast": memory_forecast.tolist(),
+                "horizon": horizon,
+                "steps": steps,
             }
 
         except Exception as e:
@@ -166,17 +167,18 @@ class ResourceDemandForecaster:
 
         # Generate future timestamps (15-min intervals)
         future_timestamps = pd.date_range(
-            start=last_timestamp + pd.Timedelta(minutes=15),
-            periods=steps,
-            freq='15min'
+            start=last_timestamp + pd.Timedelta(minutes=15), periods=steps, freq="15min"
         )
 
         # Create exogenous features
-        future_exog = pd.DataFrame({
-            'hour_of_day': future_timestamps.hour,
-            'day_of_week': future_timestamps.dayofweek,
-            'is_weekend': future_timestamps.dayofweek >= 5
-        }, index=future_timestamps)
+        future_exog = pd.DataFrame(
+            {
+                "hour_of_day": future_timestamps.hour,
+                "day_of_week": future_timestamps.dayofweek,
+                "is_weekend": future_timestamps.dayofweek >= 5,
+            },
+            index=future_timestamps,
+        )
 
         return future_exog
 
@@ -195,11 +197,11 @@ class ResourceDemandForecaster:
 
         try:
             # Get actual values
-            actual_cpu = test_data['cpu_usage'].values
-            actual_memory = test_data['memory_usage'].values
+            actual_cpu = test_data["cpu_usage"].values
+            actual_memory = test_data["memory_usage"].values
 
             # Generate exog for test period
-            exog = test_data[['hour_of_day', 'day_of_week', 'is_weekend']]
+            exog = test_data[["hour_of_day", "day_of_week", "is_weekend"]]
 
             # Predict
             pred_cpu = self.cpu_model.forecast(steps=len(test_data), exog=exog)
@@ -214,10 +216,10 @@ class ResourceDemandForecaster:
             )
 
             return {
-                'cpu_r2': cpu_r2,
-                'memory_r2': memory_r2,
-                'meets_target_1h': cpu_r2 > 0.7 and memory_r2 > 0.7,
-                'meets_target_24h': cpu_r2 > 0.5 and memory_r2 > 0.5
+                "cpu_r2": cpu_r2,
+                "memory_r2": memory_r2,
+                "meets_target_1h": cpu_r2 > 0.7 and memory_r2 > 0.7,
+                "meets_target_24h": cpu_r2 > 0.5 and memory_r2 > 0.5,
             }
 
         except Exception as e:

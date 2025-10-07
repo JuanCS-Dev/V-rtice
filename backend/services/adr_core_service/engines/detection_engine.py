@@ -11,8 +11,8 @@ SIEM, EDR, network logs) to generate actionable detection results.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 import uuid
 
 from models.enums import DetectionType, IncidentSeverity
@@ -75,10 +75,10 @@ class DetectionEngine:
                     timestamp=datetime.now().isoformat(),
                     detection_type=rule["type"],
                     severity=rule["severity"],
-                    description=f"Rule '{rule["id"]}' triggered: {rule["pattern"]}",
+                    description=f"Rule '{rule['id']}' triggered: {rule['pattern']}",
                     raw_event=event_data
                 ))
-                logger.warning(f"[DetectionEngine] Detected threat: {rule["pattern"]} in event {event_data.get('event_id', 'N/A')}")
+                logger.warning(f"[DetectionEngine] Detected threat: {rule['pattern']} in event {event_data.get('event_id', 'N/A')}")
 
         if not detections:
             logger.info(f"[DetectionEngine] No threats detected for event {event_data.get('event_id', 'N/A')}")

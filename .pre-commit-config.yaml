@@ -1,0 +1,288 @@
+# ============================================================================
+# Vértice Platform - Pre-Commit Hooks Configuration
+# ============================================================================
+# Pre-commit hooks automatically check and fix code before committing.
+# Install: pip install pre-commit
+# Setup: pre-commit install
+# Run manually: pre-commit run --all-files
+# ============================================================================
+
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+default_language_version:
+  python: python3.10
+
+# Global settings
+fail_fast: false  # Continue running hooks even if one fails
+minimum_pre_commit_version: '3.0.0'
+
+repos:
+  # ============================================================================
+  # GENERAL FILE CHECKS
+  # ============================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # File formatting
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+        exclude: '\.min\.(js|css)$'
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+      # File checks
+      - id: check-added-large-files
+        args: ['--maxkb=1000']  # Max file size 1MB
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
+
+      # Python-specific
+      - id: check-ast               # Check Python syntax
+      - id: check-builtin-literals  # Require literal syntax
+      - id: check-docstring-first   # Docstring before code
+      - id: debug-statements        # Check for debugger imports
+      - id: name-tests-test         # Test files must match test_*.py
+        args: ['--pytest-test-first']
+
+      # JSON/YAML/TOML checks
+      - id: check-json
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom tags in YAML
+      - id: check-toml
+
+      # Security checks
+      - id: detect-private-key      # Detect SSH private keys
+
+  # ============================================================================
+  # PYTHON CODE FORMATTING
+  # ============================================================================
+
+  # Black - Opinionated code formatter
+  - repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+      - id: black
+        language_version: python3.10
+        args: ['--line-length=88']
+        exclude: '^(LEGADO|venv|\.venv|env|build|dist|node_modules)/'
+
+  # isort - Import statement organizer
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ['--profile=black', '--line-length=88']
+        exclude: '^(LEGADO|venv|\.venv|env|build|dist|node_modules)/'
+
+  # ============================================================================
+  # PYTHON LINTING
+  # ============================================================================
+
+  # Flake8 - Style guide enforcement
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-comprehensions
+          - flake8-docstrings
+          - flake8-quotes
+          - flake8-bandit
+          - pep8-naming
+        args: ['--config=.flake8']
+        exclude: '^(LEGADO|venv|\.venv|env|build|dist|node_modules|tests)/'
+
+  # Ruff - Fast Python linter (alternative to Flake8)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.0
+    hooks:
+      - id: ruff
+        args: ['--fix', '--exit-non-zero-on-fix']
+        exclude: '^(LEGADO|venv|\.venv|env|build|dist|node_modules)/'
+
+  # ============================================================================
+  # SECURITY SCANNING
+  # ============================================================================
+
+  # Bandit - Security linter for Python
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.7
+    hooks:
+      - id: bandit
+        args: ['-c', 'pyproject.toml', '-r', 'backend/', '--skip', 'B101,B601']
+        additional_dependencies: ['bandit[toml]']
+        exclude: '^(tests|LEGADO)/'
+
+  # Safety - Check for known security vulnerabilities in dependencies
+  # Scans all requirements files for CVEs in dependency database
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.3
+    hooks:
+      - id: python-safety-dependencies-check
+        args: ['--short-report', '--file']
+        files: 'requirements.*\.(txt|lock)$'
+
+  # pip-audit - Official PyPA vulnerability scanner
+  # More comprehensive than safety, uses OSV database
+  - repo: local
+    hooks:
+      - id: pip-audit
+        name: pip-audit (CVE scanner)
+        entry: bash -c 'pip-audit --require-hashes --disable-pip || true'
+        language: system
+        files: 'requirements.*\.lock$'
+        pass_filenames: false
+
+  # ============================================================================
+  # TYPE CHECKING
+  # ============================================================================
+
+  # MyPy - Static type checker
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.9.0
+    hooks:
+      - id: mypy
+        args: ['--config-file=pyproject.toml', '--ignore-missing-imports']
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+          - types-python-dateutil
+        exclude: '^(tests|LEGADO|venv|\.venv|env)/'
+        # Only run on modified files (too slow for all files)
+        pass_filenames: true
+
+  # ============================================================================
+  # YAML/JSON FORMATTING
+  # ============================================================================
+
+  # yamllint - YAML linter
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: ['-d', '{extends: default, rules: {line-length: {max: 120}, document-start: disable}}']
+        exclude: '^(LEGADO|node_modules)/'
+
+  # prettier - Multi-language formatter (JS/TS/JSON/YAML/Markdown)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [javascript, jsx, ts, tsx, json, yaml, markdown, css, scss]
+        exclude: '^(LEGADO|venv|\.venv|env|build|dist|node_modules|package-lock\.json)/'
+
+  # ============================================================================
+  # DOCKER
+  # ============================================================================
+
+  # hadolint - Dockerfile linter
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3013']  # Pin versions warning
+        exclude: '^LEGADO/'
+
+  # ============================================================================
+  # SHELL SCRIPTS
+  # ============================================================================
+
+  # shellcheck - Shell script linter
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ['-x', '--severity=warning']  # Follow sourced files
+        exclude: '^(LEGADO|node_modules)/'
+
+  # shfmt - Shell script formatter
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.8.0-1
+    hooks:
+      - id: shfmt
+        args: ['-i', '2', '-ci', '-bn', '-sr']  # 2 spaces, indent switch cases
+        exclude: '^(LEGADO|node_modules)/'
+
+  # ============================================================================
+  # SECRETS DETECTION
+  # ============================================================================
+
+  # detect-secrets - Find secrets in code
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: '^(LEGADO|venv|\.venv|env|package-lock\.json)/'
+
+  # gitleaks - Git secrets scanner
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+        exclude: '^(LEGADO|venv|\.venv|env)/'
+
+  # ============================================================================
+  # COMMIT MESSAGE LINTING
+  # ============================================================================
+
+  # commitizen - Enforce conventional commit messages
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.16.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  # ============================================================================
+  # DOCUMENTATION
+  # ============================================================================
+
+  # pydocstyle - Docstring style checker
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: ['--convention=google', '--add-ignore=D100,D101,D102,D103,D104']
+        exclude: '^(tests|LEGADO|venv|\.venv|env)/'
+
+  # ============================================================================
+  # CUSTOM LOCAL HOOKS
+  # ============================================================================
+
+  - repo: local
+    hooks:
+      # Check for dependency drift in services with lock files
+      - id: check-dependency-drift
+        name: Dependency Drift Detection
+        entry: bash -c 'if [ -f "$PRE_COMMIT_LOCAL_REPO/scripts/check-dependency-drift.sh" ]; then bash "$PRE_COMMIT_LOCAL_REPO/scripts/check-dependency-drift.sh"; fi'
+        language: system
+        pass_filenames: false
+        files: 'requirements.*\.(txt|lock)$'
+        # Only run when requirements files change
+
+      # Check for TODO/FIXME comments (warning only)
+      - id: check-todos
+        name: Check for TODO/FIXME
+        entry: grep -rniI --color=always 'TODO\|FIXME\|XXX\|HACK' --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=LEGADO
+        language: system
+        pass_filenames: false
+        stages: [manual]  # Only run manually with --hook-stage manual
+
+      # Run pytest on commit (optional, can be slow)
+      # - id: pytest
+      #   name: Run pytest
+      #   entry: pytest tests/ -v --tb=short
+      #   language: system
+      #   pass_filenames: false
+      #   stages: [push]  # Only run on push, not commit
+
+# ============================================================================
+# CI SKIP PATTERNS
+# ============================================================================
+# Use 'SKIP=hook_id git commit' to skip specific hooks
+# Use 'git commit --no-verify' to skip all hooks (not recommended)

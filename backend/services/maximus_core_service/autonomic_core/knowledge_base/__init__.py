@@ -8,4 +8,4 @@ FastAPI endpoints for CRUD operations.
 from .database_schema import create_schema
 from .decision_api import DecisionAPI
 
-__all__ = ['create_schema', 'DecisionAPI']
+__all__ = ["create_schema", "DecisionAPI"]

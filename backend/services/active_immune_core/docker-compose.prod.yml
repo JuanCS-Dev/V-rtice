@@ -1,0 +1,310 @@
+# Active Immune Core - Production Docker Compose
+# Complete production stack with all dependencies
+#
+# Usage:
+#   docker-compose -f docker-compose.prod.yml up -d
+#   docker-compose -f docker-compose.prod.yml logs -f active_immune_core
+#   docker-compose -f docker-compose.prod.yml down
+#
+# NO MOCKS, NO PLACEHOLDERS, NO TODOS - Production-ready.
+
+version: '3.8'
+
+services:
+  # ==================== ACTIVE IMMUNE CORE ====================
+  active_immune_core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: active-immune-core:1.0.0
+    container_name: active_immune_core_prod
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      # Service Configuration
+      - ACTIVE_IMMUNE_SERVICE_NAME=active_immune_core
+      - ACTIVE_IMMUNE_SERVICE_PORT=8200
+      - ACTIVE_IMMUNE_HOST=0.0.0.0
+      - ACTIVE_IMMUNE_LOG_LEVEL=INFO
+      - ACTIVE_IMMUNE_DEBUG=false
+
+      # Kafka (Cytokines)
+      - ACTIVE_IMMUNE_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - ACTIVE_IMMUNE_KAFKA_CYTOKINE_TOPIC_PREFIX=immunis.cytokines
+      - ACTIVE_IMMUNE_KAFKA_CONSUMER_GROUP_PREFIX=active_immune
+      - ACTIVE_IMMUNE_KAFKA_ACKS=all
+      - ACTIVE_IMMUNE_KAFKA_COMPRESSION=gzip
+
+      # Redis (Hormones + State)
+      - ACTIVE_IMMUNE_REDIS_URL=redis://redis:6379
+      - ACTIVE_IMMUNE_REDIS_AGENT_STATE_TTL=60
+      - ACTIVE_IMMUNE_REDIS_MAX_CONNECTIONS=50
+
+      # PostgreSQL (Memory)
+      - ACTIVE_IMMUNE_POSTGRES_HOST=postgres
+      - ACTIVE_IMMUNE_POSTGRES_PORT=5432
+      - ACTIVE_IMMUNE_POSTGRES_DB=immunis_memory
+      - ACTIVE_IMMUNE_POSTGRES_USER=immunis
+      - ACTIVE_IMMUNE_POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-immunis_password}
+      - ACTIVE_IMMUNE_POSTGRES_POOL_SIZE=10
+
+      # External Services
+      - ACTIVE_IMMUNE_TREG_SERVICE_URL=http://treg_service:8018
+      - ACTIVE_IMMUNE_MEMORY_SERVICE_URL=http://memory_service:8019
+      - ACTIVE_IMMUNE_ADAPTIVE_IMMUNITY_URL=http://adaptive_service:8020
+      - ACTIVE_IMMUNE_IP_INTEL_SERVICE_URL=http://ip_intel:8022
+      - ACTIVE_IMMUNE_GOVERNANCE_URL=http://governance:8002
+      - ACTIVE_IMMUNE_EXTERNAL_SERVICE_TIMEOUT=30
+
+      # Homeostasis
+      - ACTIVE_IMMUNE_BASELINE_ACTIVE_PERCENTAGE=0.15
+      - ACTIVE_IMMUNE_MAX_AGENT_LIFESPAN_HOURS=24
+      - ACTIVE_IMMUNE_ENERGY_DECAY_RATE_PER_MINUTE=0.5
+
+      # Agent Limits
+      - ACTIVE_IMMUNE_MAX_TOTAL_AGENTS=1000
+      - ACTIVE_IMMUNE_MAX_AGENTS_PER_LYMPHNODE=200
+
+      # Observability
+      - ACTIVE_IMMUNE_METRICS_ENABLED=true
+      - ACTIVE_IMMUNE_STRUCTURED_LOGGING=true
+    volumes:
+      # Persistent data
+      - immune_logs:/app/logs
+      - immune_data:/app/data
+    networks:
+      - immunis_net
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # ==================== KAFKA ====================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: immunis_zookeeper_prod
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 5
+      ZOOKEEPER_INIT_LIMIT: 10
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+    networks:
+      - immunis_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: immunis_kafka_prod
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_COMPRESSION_TYPE: gzip
+      KAFKA_LOG_CLEANUP_POLICY: delete
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - immunis_net
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1.5G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # ==================== REDIS ====================
+  redis:
+    image: redis:7.2-alpine
+    container_name: immunis_redis_prod
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - immunis_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1.5G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
+  # ==================== POSTGRESQL ====================
+  postgres:
+    image: postgres:15-alpine
+    container_name: immunis_postgres_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: immunis_memory
+      POSTGRES_USER: immunis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-immunis_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - immunis_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U immunis -d immunis_memory"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ==================== PROMETHEUS (METRICS) ====================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: immunis_prometheus_prod
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - immunis_net
+    depends_on:
+      - active_immune_core
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+
+  # ==================== GRAFANA (DASHBOARDS) ====================
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: immunis_grafana_prod
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - immunis_net
+    depends_on:
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  immunis_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  # Persistent volumes
+  immune_logs:
+    driver: local
+  immune_data:
+    driver: local
+  zookeeper_data:
+    driver: local
+  zookeeper_logs:
+    driver: local
+  kafka_data:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

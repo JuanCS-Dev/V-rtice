@@ -5,21 +5,20 @@ Tests the foveal/peripheral attention mechanism with simulated data sources.
 
 import asyncio
 import logging
-import time
 import random
+import time
 from typing import Dict
 
 from attention_core import (
     AttentionSystem,
-    PeripheralMonitor,
+    FovealAnalysis,
     FovealAnalyzer,
-    FovealAnalysis
+    PeripheralMonitor,
 )
-from salience_scorer import SalienceScorer, SalienceLevel
+from salience_scorer import SalienceLevel, SalienceScorer
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 
@@ -46,15 +45,15 @@ def create_mock_data_source(source_id: str, anomaly_probability: float = 0.1):
             event_count = random.randint(10, 50)
 
         return {
-            'id': source_id,
-            'value': value,
-            'event_count': event_count,
-            'time_window_seconds': 60,
-            'distribution': [random.randint(1, 100) for _ in range(20)],
-            'normal_min': 30,
-            'normal_max': 70,
-            'critical_min': 0,
-            'critical_max': 150
+            "id": source_id,
+            "value": value,
+            "event_count": event_count,
+            "time_window_seconds": 60,
+            "distribution": [random.randint(1, 100) for _ in range(20)],
+            "normal_min": 30,
+            "normal_max": 70,
+            "critical_min": 0,
+            "critical_max": 150,
         }
 
     return get_data
@@ -70,7 +69,7 @@ async def test_peripheral_monitor():
 
     # Create mock data sources
     sources = [
-        create_mock_data_source(f'source_{i}', anomaly_probability=0.3)
+        create_mock_data_source(f"source_{i}", anomaly_probability=0.3)
         for i in range(10)
     ]
 
@@ -81,8 +80,10 @@ async def test_peripheral_monitor():
     print(f"✓ Peripheral scan complete: {len(detections)} detections")
 
     for detection in detections[:5]:  # Show first 5
-        print(f"  - {detection.target_id}: {detection.detection_type} "
-              f"(confidence={detection.confidence:.2f})")
+        print(
+            f"  - {detection.target_id}: {detection.detection_type} "
+            f"(confidence={detection.confidence:.2f})"
+        )
 
     print(f"\n✓ Test passed - Peripheral monitor functional")
 
@@ -99,16 +100,11 @@ async def test_foveal_analyzer():
     from attention_core import PeripheralDetection
 
     detection = PeripheralDetection(
-        target_id='test_target',
-        detection_type='statistical_anomaly',
+        target_id="test_target",
+        detection_type="statistical_anomaly",
         confidence=0.95,
         timestamp=time.time(),
-        metadata={
-            'z_score': 5.5,
-            'value': 120,
-            'mean': 50,
-            'std': 10
-        }
+        metadata={"z_score": 5.5, "value": 120, "mean": 50, "std": 10},
     )
 
     print("\nPerforming deep analysis on high-salience target...")
@@ -124,7 +120,9 @@ async def test_foveal_analyzer():
     if analysis.analysis_time_ms < 100:
         print(f"\n✓ Performance target met (<100ms)")
     else:
-        print(f"\n⚠ Performance warning: {analysis.analysis_time_ms:.1f}ms (target <100ms)")
+        print(
+            f"\n⚠ Performance warning: {analysis.analysis_time_ms:.1f}ms (target <100ms)"
+        )
 
     print(f"\n✓ Test passed - Foveal analyzer functional")
 
@@ -140,30 +138,30 @@ async def test_salience_scorer():
     # Test various events
     test_events = [
         {
-            'id': 'benign_event',
-            'value': 50,
-            'metric': 'cpu_usage',
-            'error_rate': 0.5,
-            'security_alert': False,
-            'anomaly_score': 0.1
+            "id": "benign_event",
+            "value": 50,
+            "metric": "cpu_usage",
+            "error_rate": 0.5,
+            "security_alert": False,
+            "anomaly_score": 0.1,
         },
         {
-            'id': 'suspicious_event',
-            'value': 85,
-            'metric': 'memory_usage',
-            'error_rate': 5.0,
-            'security_alert': False,
-            'anomaly_score': 0.6
+            "id": "suspicious_event",
+            "value": 85,
+            "metric": "memory_usage",
+            "error_rate": 5.0,
+            "security_alert": False,
+            "anomaly_score": 0.6,
         },
         {
-            'id': 'critical_event',
-            'value': 150,
-            'metric': 'latency',
-            'error_rate': 25.0,
-            'security_alert': True,
-            'anomaly_score': 0.95,
-            'failure_probability': 0.9
-        }
+            "id": "critical_event",
+            "value": 150,
+            "metric": "latency",
+            "error_rate": 25.0,
+            "security_alert": True,
+            "anomaly_score": 0.95,
+            "failure_probability": 0.9,
+        },
     ]
 
     print("\nScoring events for salience...")
@@ -173,8 +171,10 @@ async def test_salience_scorer():
         print(f"\n  Event: {event['id']}")
         print(f"    Score: {score.score:.3f} ({score.level.name})")
         print(f"    Foveal required: {score.requires_foveal}")
-        print(f"    Factors: novelty={score.factors['novelty']:.2f}, "
-              f"threat={score.factors['threat']:.2f}")
+        print(
+            f"    Factors: novelty={score.factors['novelty']:.2f}, "
+            f"threat={score.factors['threat']:.2f}"
+        )
 
     print(f"\n✓ Test passed - Salience scorer functional")
 
@@ -185,21 +185,20 @@ async def test_full_attention_system():
     print("Test 4: Full Attention System")
     print("=" * 60)
 
-    attention = AttentionSystem(
-        foveal_threshold=0.6,
-        scan_interval=0.5
-    )
+    attention = AttentionSystem(foveal_threshold=0.6, scan_interval=0.5)
 
     # Create data sources with varying anomaly rates
     sources = [
-        create_mock_data_source(f'network_flow_{i}', anomaly_probability=0.2)
+        create_mock_data_source(f"network_flow_{i}", anomaly_probability=0.2)
         for i in range(5)
     ]
 
-    sources.extend([
-        create_mock_data_source(f'system_metric_{i}', anomaly_probability=0.1)
-        for i in range(5)
-    ])
+    sources.extend(
+        [
+            create_mock_data_source(f"system_metric_{i}", anomaly_probability=0.1)
+            for i in range(5)
+        ]
+    )
 
     # Callback for critical findings
     critical_findings = []
@@ -213,6 +212,7 @@ async def test_full_attention_system():
 
     async def run_cycles():
         cycle_count = 0
+
         async def limited_monitor():
             nonlocal cycle_count
             async for _ in attention.monitor(sources, on_critical_finding=on_critical):
@@ -236,10 +236,10 @@ async def test_full_attention_system():
         foveal_count = 0
         for detection in detections:
             event = {
-                'id': detection.target_id,
-                'value': detection.confidence,
-                'metric': detection.detection_type,
-                'anomaly_score': detection.confidence
+                "id": detection.target_id,
+                "value": detection.confidence,
+                "metric": detection.detection_type,
+                "anomaly_score": detection.confidence,
             }
 
             salience = attention.salience_scorer.calculate_salience(event)
@@ -248,7 +248,7 @@ async def test_full_attention_system():
                 analysis = await attention.foveal.deep_analyze(detection)
                 foveal_count += 1
 
-                if analysis.threat_level == 'CRITICAL':
+                if analysis.threat_level == "CRITICAL":
                     on_critical(analysis)
 
         print(f"    Foveal: {foveal_count} deep analyses")
@@ -286,5 +286,5 @@ async def main():
     print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

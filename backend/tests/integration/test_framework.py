@@ -12,13 +12,14 @@ NO MOCKS - Production-ready testing.
 """
 
 import asyncio
+from dataclasses import dataclass
+from datetime import datetime
 import logging
 import time
-from datetime import datetime
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass
-import numpy as np
+from typing import Any, Dict, List, Optional, Tuple
+
 import aiohttp
+import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TestResult:
     """Test execution result."""
+
     test_name: str
     status: str  # 'pass', 'fail', 'error'
     duration_ms: float
@@ -38,6 +40,7 @@ class TestResult:
 @dataclass
 class PerformanceMetrics:
     """Performance test metrics."""
+
     throughput_events_per_sec: float
     latency_p50_ms: float
     latency_p95_ms: float
@@ -57,11 +60,7 @@ class IntegrationTestFramework:
     - Resource monitoring
     """
 
-    def __init__(
-        self,
-        base_url: str = "http://localhost",
-        timeout_sec: int = 300
-    ):
+    def __init__(self, base_url: str = "http://localhost", timeout_sec: int = 300):
         """Initialize test framework.
 
         Args:
@@ -73,14 +72,14 @@ class IntegrationTestFramework:
 
         # Service endpoints
         self.services = {
-            'maximus_core': f"{base_url}:8001",
-            'hsas': f"{base_url}:8051",
-            'neuromodulation': f"{base_url}:8052",
-            'immunis_api': f"{base_url}:8040",
-            'rte': f"{base_url}:8010",
-            'hpc': f"{base_url}:8011",
-            'domain_service': f"{base_url}:8002",
-            'ip_service': f"{base_url}:8003",
+            "maximus_core": f"{base_url}:8001",
+            "hsas": f"{base_url}:8051",
+            "neuromodulation": f"{base_url}:8052",
+            "immunis_api": f"{base_url}:8040",
+            "rte": f"{base_url}:8010",
+            "hpc": f"{base_url}:8011",
+            "domain_service": f"{base_url}:8002",
+            "ip_service": f"{base_url}:8003",
         }
 
         # Test results
@@ -104,8 +103,7 @@ class IntegrationTestFramework:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"{url}/health",
-                    timeout=aiohttp.ClientTimeout(total=5)
+                    f"{url}/health", timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     if response.status == 200:
                         return True, "Healthy"
@@ -133,11 +131,7 @@ class IntegrationTestFramework:
         return health_status
 
     async def run_test_scenario(
-        self,
-        scenario_name: str,
-        test_func,
-        *args,
-        **kwargs
+        self, scenario_name: str, test_func, *args, **kwargs
     ) -> TestResult:
         """Run test scenario with timing and error handling.
 
@@ -154,21 +148,20 @@ class IntegrationTestFramework:
         start_time = time.time()
         errors = []
         metrics = {}
-        status = 'pass'
+        status = "pass"
 
         try:
             # Run test with timeout
             metrics = await asyncio.wait_for(
-                test_func(*args, **kwargs),
-                timeout=self.timeout_sec
+                test_func(*args, **kwargs), timeout=self.timeout_sec
             )
 
         except asyncio.TimeoutError:
-            status = 'error'
+            status = "error"
             errors.append(f"Timeout after {self.timeout_sec}s")
 
         except Exception as e:
-            status = 'fail'
+            status = "fail"
             errors.append(f"{type(e).__name__}: {str(e)}")
             logger.error(f"Test failed: {e}", exc_info=True)
 
@@ -180,13 +173,13 @@ class IntegrationTestFramework:
             duration_ms=duration_ms,
             metrics=metrics or {},
             errors=errors,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         self.test_results.append(result)
 
         # Log result
-        status_icon = "✓" if status == 'pass' else "✗"
+        status_icon = "✓" if status == "pass" else "✗"
         logger.info(
             f"  {status_icon} {scenario_name}: {status.upper()} "
             f"({duration_ms:.0f}ms)"
@@ -203,7 +196,7 @@ class IntegrationTestFramework:
         test_name: str,
         event_generator,
         target_events: int = 10000,
-        target_throughput: int = 1000
+        target_throughput: int = 1000,
     ) -> PerformanceMetrics:
         """Run performance test with load generation.
 
@@ -267,7 +260,7 @@ class IntegrationTestFramework:
             latency_p99_ms=float(np.percentile(latencies_arr, 99)),
             success_rate=(target_events - errors) / target_events,
             total_events=target_events,
-            duration_sec=duration_sec
+            duration_sec=duration_sec,
         )
 
         logger.info(
@@ -285,30 +278,30 @@ class IntegrationTestFramework:
             Test report with all results
         """
         total_tests = len(self.test_results)
-        passed = sum(1 for r in self.test_results if r.status == 'pass')
-        failed = sum(1 for r in self.test_results if r.status == 'fail')
-        errors = sum(1 for r in self.test_results if r.status == 'error')
+        passed = sum(1 for r in self.test_results if r.status == "pass")
+        failed = sum(1 for r in self.test_results if r.status == "fail")
+        errors = sum(1 for r in self.test_results if r.status == "error")
 
         report = {
-            'summary': {
-                'total_tests': total_tests,
-                'passed': passed,
-                'failed': failed,
-                'errors': errors,
-                'pass_rate': passed / total_tests if total_tests > 0 else 0.0
+            "summary": {
+                "total_tests": total_tests,
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+                "pass_rate": passed / total_tests if total_tests > 0 else 0.0,
             },
-            'results': [
+            "results": [
                 {
-                    'test_name': r.test_name,
-                    'status': r.status,
-                    'duration_ms': r.duration_ms,
-                    'metrics': r.metrics,
-                    'errors': r.errors,
-                    'timestamp': r.timestamp
+                    "test_name": r.test_name,
+                    "status": r.status,
+                    "duration_ms": r.duration_ms,
+                    "metrics": r.metrics,
+                    "errors": r.errors,
+                    "timestamp": r.timestamp,
                 }
                 for r in self.test_results
             ],
-            'timestamp': datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         return report
@@ -316,7 +309,7 @@ class IntegrationTestFramework:
     def print_test_summary(self):
         """Print test summary to console."""
         report = self.generate_test_report()
-        summary = report['summary']
+        summary = report["summary"]
 
         print("\n" + "=" * 80)
         print("INTEGRATION TEST SUMMARY")
@@ -331,8 +324,4 @@ class IntegrationTestFramework:
 
 
 # Export
-__all__ = [
-    'IntegrationTestFramework',
-    'TestResult',
-    'PerformanceMetrics'
-]
+__all__ = ["IntegrationTestFramework", "TestResult", "PerformanceMetrics"]

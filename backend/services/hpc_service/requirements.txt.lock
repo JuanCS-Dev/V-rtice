@@ -8,6 +8,7 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.11.0
     # via
+    #   -r requirements.txt
     #   starlette
     #   watchfiles
 arviz==0.17.0
@@ -33,7 +34,7 @@ etuples==0.3.10
     # via
     #   minikanren
     #   pytensor
-fastapi==0.109.0
+fastapi==0.118.0
     # via -r requirements.txt
 fastprogress==1.0.3
     # via pymc
@@ -112,7 +113,7 @@ python-dateutil==2.9.0.post0
     #   pandas
 python-dotenv==1.1.1
     # via uvicorn
-python-multipart==0.0.6
+python-multipart==0.0.20
     # via -r requirements.txt
 pytz==2025.2
     # via pandas
@@ -129,7 +130,7 @@ six==1.17.0
     # via python-dateutil
 sniffio==1.3.1
     # via anyio
-starlette==0.35.1
+starlette==0.48.0
     # via fastapi
 toolz==1.0.0
     # via
@@ -145,6 +146,7 @@ typing-extensions==4.15.0
     #   pydantic-core
     #   pymc
     #   pytensor
+    #   starlette
 tzdata==2025.2
     # via pandas
 uvicorn[standard]==0.27.0

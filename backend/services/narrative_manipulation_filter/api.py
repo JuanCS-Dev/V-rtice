@@ -5,32 +5,30 @@ Refactored API with dependency injection, lifespan management,
 and comprehensive health checks for all infrastructure components.
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from contextlib import asynccontextmanager
+from datetime import datetime
+import logging
+import time
+from typing import Any, Dict
+
+from cache_manager import cache_manager
+from config import get_settings
+from database import db_manager, get_db_session
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import logging
-from datetime import datetime
-from typing import Dict, Any
-import time
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from config import get_settings
+from kafka_client import kafka_client
 from models import (
     AnalysisRequest,
     AnalysisResponse,
     CognitiveDefenseReport,
-    HealthCheckResponse
+    HealthCheckResponse,
 )
-from database import db_manager, get_db_session
-from cache_manager import cache_manager
-from kafka_client import kafka_client
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -40,6 +38,7 @@ settings = get_settings()
 # ============================================================================
 # LIFESPAN MANAGEMENT
 # ============================================================================
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -94,7 +93,9 @@ async def lifespan(app: FastAPI):
     else:
         logger.info("✅ All systems initialized successfully")
 
-    logger.info(f"🎯 Cognitive Defense System v{settings.SERVICE_VERSION} ready on port {settings.SERVICE_PORT}")
+    logger.info(
+        f"🎯 Cognitive Defense System v{settings.SERVICE_VERSION} ready on port {settings.SERVICE_PORT}"
+    )
 
     yield
 
@@ -151,6 +152,7 @@ app.add_middleware(
 # EXCEPTION HANDLERS
 # ============================================================================
 
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler for unexpected errors."""
@@ -160,14 +162,15 @@ async def global_exception_handler(request, exc):
         content={
             "success": False,
             "error": "Internal server error",
-            "detail": str(exc) if settings.DEBUG else "An unexpected error occurred"
-        }
+            "detail": str(exc) if settings.DEBUG else "An unexpected error occurred",
+        },
     )
 
 
 # ============================================================================
 # HEALTH CHECK ENDPOINT
 # ============================================================================
+
 
 @app.get("/health", response_model=HealthCheckResponse)
 async def health_check() -> HealthCheckResponse:
@@ -221,7 +224,7 @@ async def health_check() -> HealthCheckResponse:
         version=settings.SERVICE_VERSION,
         timestamp=datetime.utcnow(),
         services=services,
-        models_loaded=[]  # TODO Phase 2+: populate with loaded models
+        models_loaded=[],  # TODO Phase 2+: populate with loaded models
     )
 
 
@@ -235,10 +238,10 @@ async def simple_health_check() -> Dict[str, str]:
 # ANALYSIS ENDPOINT (STUB - FULL IMPLEMENTATION IN PHASE 2+)
 # ============================================================================
 
+
 @app.post("/api/analyze", response_model=AnalysisResponse)
 async def analyze_content(
-    request: AnalysisRequest,
-    db: AsyncSession = Depends(get_db_session)
+    request: AnalysisRequest, db: AsyncSession = Depends(get_db_session)
 ) -> AnalysisResponse:
     """
     Analyze content for narrative manipulation.
@@ -271,19 +274,20 @@ async def analyze_content(
         # STUB RESPONSE (Phase 1)
         logger.warning("⚠️  Using stub analysis - full implementation in Phase 2+")
 
-        from models import (
-            CognitiveDefenseReport,
-            SourceCredibilityResult,
-            EmotionalManipulationResult,
-            LogicalFallacyResult,
-            RealityDistortionResult,
-            ManipulationSeverity,
-            CognitiveDefenseAction,
-            CredibilityRating,
-            EmotionProfile,
-            EmotionCategory
-        )
         from uuid import uuid4
+
+        from models import (
+            CognitiveDefenseAction,
+            CognitiveDefenseReport,
+            CredibilityRating,
+            EmotionalManipulationResult,
+            EmotionCategory,
+            EmotionProfile,
+            LogicalFallacyResult,
+            ManipulationSeverity,
+            RealityDistortionResult,
+            SourceCredibilityResult,
+        )
 
         # Stub module results
         credibility_result = SourceCredibilityResult(
@@ -300,7 +304,7 @@ async def analyze_content(
             reveals_whos_in_charge=0.5,
             provides_names_of_content_creators=0.5,
             historical_reliability=0.5,
-            tier_used=1
+            tier_used=1,
         )
 
         emotional_result = EmotionalManipulationResult(
@@ -309,18 +313,14 @@ async def analyze_content(
                 primary_emotion=EmotionCategory.NEUTRAL,
                 emotion_scores={EmotionCategory.NEUTRAL: 1.0},
                 arousal=0.3,
-                valence=0.0
-            )
+                valence=0.0,
+            ),
         )
 
-        logical_result = LogicalFallacyResult(
-            fallacy_score=0.2,
-            coherence_score=0.8
-        )
+        logical_result = LogicalFallacyResult(fallacy_score=0.2, coherence_score=0.8)
 
         reality_result = RealityDistortionResult(
-            distortion_score=0.25,
-            factuality_score=0.75
+            distortion_score=0.25, factuality_score=0.75
         )
 
         processing_time = (time.time() - start_time) * 1000
@@ -342,27 +342,20 @@ async def analyze_content(
             reasoning="STUB: Full analysis not yet implemented (Phase 2+)",
             evidence=["Infrastructure initialized", "Awaiting ML models"],
             processing_time_ms=processing_time,
-            models_used=[]
+            models_used=[],
         )
 
-        return AnalysisResponse(
-            success=True,
-            report=stub_report,
-            error=None
-        )
+        return AnalysisResponse(success=True, report=stub_report, error=None)
 
     except Exception as e:
         logger.error(f"Analysis error: {e}", exc_info=True)
-        return AnalysisResponse(
-            success=False,
-            report=None,
-            error=str(e)
-        )
+        return AnalysisResponse(success=False, report=None, error=str(e))
 
 
 # ============================================================================
 # LEGACY COMPATIBILITY ENDPOINT (TO BE DEPRECATED)
 # ============================================================================
+
 
 @app.post("/analyze_content")
 async def legacy_analyze_content(request: AnalysisRequest) -> Dict[str, Any]:
@@ -371,7 +364,9 @@ async def legacy_analyze_content(request: AnalysisRequest) -> Dict[str, Any]:
 
     DEPRECATED: Use /api/analyze instead.
     """
-    logger.warning("⚠️  Legacy endpoint /analyze_content called - use /api/analyze instead")
+    logger.warning(
+        "⚠️  Legacy endpoint /analyze_content called - use /api/analyze instead"
+    )
 
     response = await analyze_content(request)
 
@@ -379,18 +374,18 @@ async def legacy_analyze_content(request: AnalysisRequest) -> Dict[str, Any]:
         return {
             "status": "success",
             "timestamp": datetime.utcnow().isoformat(),
-            "analysis": response.report.model_dump() if response.report else {}
+            "analysis": response.report.model_dump() if response.report else {},
         }
     else:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=response.error
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=response.error
         )
 
 
 # ============================================================================
 # STATISTICS & MONITORING ENDPOINTS
 # ============================================================================
+
 
 @app.get("/stats/cache")
 async def cache_stats() -> Dict[str, Any]:
@@ -400,8 +395,7 @@ async def cache_stats() -> Dict[str, Any]:
         return {"success": True, "stats": stats}
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
 
@@ -417,7 +411,7 @@ async def database_stats() -> Dict[str, Any]:
             "fact_check_cache",
             "entity_cache",
             "propaganda_patterns",
-            "ml_model_metrics"
+            "ml_model_metrics",
         ]
 
         counts = {}
@@ -431,8 +425,7 @@ async def database_stats() -> Dict[str, Any]:
         return {"success": True, "table_counts": counts}
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
 
 
@@ -443,7 +436,7 @@ async def service_info() -> Dict[str, Any]:
         "service": "Cognitive Defense System",
         "version": settings.SERVICE_VERSION,
         "environment": "development" if settings.DEBUG else "production",
-        "config": settings.get_info()
+        "config": settings.get_info(),
     }
 
 
@@ -460,5 +453,5 @@ if __name__ == "__main__":
         port=settings.SERVICE_PORT,
         workers=settings.WORKERS,
         log_level="debug" if settings.DEBUG else "info",
-        reload=settings.DEBUG
+        reload=settings.DEBUG,
     )

@@ -1,0 +1,273 @@
+# Dependabot Configuration for Vértice Platform
+#
+# This configuration manages automated dependency updates with intelligent
+# grouping, auto-merge rules, and security-first priorities.
+#
+# See: DEPENDENCY_POLICY.md for governance rules
+
+version: 2
+
+updates:
+  # ============================================================================
+  # Active Immune Core Service
+  # ============================================================================
+  - package-ecosystem: "pip"
+    directory: "/backend/services/active_immune_core"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "UTC"
+
+    # Limit concurrent PRs to avoid overwhelming reviewers
+    open-pull-requests-limit: 5
+
+    # Required reviewers for all PRs
+    reviewers:
+      - "security-team"
+      - "backend-leads"
+
+    # Automatic labels for categorization
+    labels:
+      - "dependencies"
+      - "automated"
+      - "active-immune-core"
+
+    # Intelligent grouping strategy
+    groups:
+      # Security patches get highest priority (separate PRs)
+      security-patches:
+        patterns:
+          - "*"
+        dependency-type: "production"
+        update-types:
+          - "patch"
+        # Only if CVE present (Dependabot auto-detects)
+
+      # Group all patch updates together (non-security)
+      patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+        exclude-patterns:
+          # Critical packages get individual PRs even for patches
+          - "fastapi"
+          - "starlette"
+          - "uvicorn"
+          - "sqlalchemy"
+          - "asyncpg"
+          - "aiohttp"
+          - "pydantic"
+
+      # Minor updates grouped by ecosystem
+      minor-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+
+    # Commit message format following conventional commits
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(dev-deps)"
+      include: "scope"
+
+    # Use lockfile-only strategy (update lock file, not requirements.txt)
+    versioning-strategy: "lockfile-only"
+
+    # Ignore major version bumps (require manual RFC)
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ============================================================================
+  # Maximus Core Service
+  # ============================================================================
+  - package-ecosystem: "pip"
+    directory: "/backend/services/maximus_core_service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "01:00"
+      timezone: "UTC"
+
+    open-pull-requests-limit: 5
+
+    reviewers:
+      - "security-team"
+      - "backend-leads"
+
+    labels:
+      - "dependencies"
+      - "automated"
+      - "maximus-core"
+
+    groups:
+      security-patches:
+        patterns: ["*"]
+        dependency-type: "production"
+        update-types: ["patch"]
+
+      patch-updates:
+        patterns: ["*"]
+        update-types: ["patch"]
+        exclude-patterns:
+          - "fastapi"
+          - "google-generativeai"
+          - "anthropic"
+          - "openai"
+
+      minor-updates:
+        patterns: ["*"]
+        update-types: ["minor"]
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    versioning-strategy: "lockfile-only"
+
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ============================================================================
+  # Narrative Manipulation Filter
+  # ============================================================================
+  - package-ecosystem: "pip"
+    directory: "/backend/services/narrative_manipulation_filter"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:00"
+      timezone: "UTC"
+
+    open-pull-requests-limit: 5
+
+    reviewers:
+      - "security-team"
+      - "ml-team"
+
+    labels:
+      - "dependencies"
+      - "automated"
+      - "narrative-filter"
+
+    groups:
+      security-patches:
+        patterns: ["*"]
+        dependency-type: "production"
+        update-types: ["patch"]
+
+      patch-updates:
+        patterns: ["*"]
+        update-types: ["patch"]
+        exclude-patterns:
+          - "transformers"
+          - "torch"
+          - "tensorflow"
+
+      minor-updates:
+        patterns: ["*"]
+        update-types: ["minor"]
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    versioning-strategy: "lockfile-only"
+
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ============================================================================
+  # GitHub Actions Workflows
+  # ============================================================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "UTC"
+
+    open-pull-requests-limit: 3
+
+    reviewers:
+      - "devops-team"
+
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+
+    # Allow patch and minor updates for actions
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ============================================================================
+  # Docker Base Images
+  # ============================================================================
+  - package-ecosystem: "docker"
+    directory: "/backend/services/active_immune_core"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+
+    open-pull-requests-limit: 2
+
+    reviewers:
+      - "security-team"
+      - "devops-team"
+
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+
+    # Be conservative with Docker image updates
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+# ============================================================================
+# CONFIGURATION NOTES
+# ============================================================================
+#
+# Auto-merge eligibility (configured in GitHub Actions):
+# - Patch updates only
+# - CI must pass (tests, linting, security scans)
+# - CVSS < 7.0 (or no CVE)
+# - Package NOT on critical list
+#
+# Critical packages (require manual review even for patches):
+# - fastapi, starlette, uvicorn (API framework)
+# - sqlalchemy, asyncpg (database)
+# - aiohttp, httpx (HTTP clients)
+# - pydantic (data validation)
+# - transformers, torch, tensorflow (ML frameworks)
+# - google-generativeai, anthropic, openai (LLM APIs)
+#
+# Major version updates:
+# - Blocked by default (require RFC process)
+# - See DEPENDENCY_POLICY.md § "Major Updates (X.y.z)"
+#
+# Schedule rationale:
+# - Monday 00:00 UTC = Sunday evening US / Monday morning EU
+# - Staggered times (1h apart) to avoid CI/CD overload
+# - Weekly frequency balances security with review burden
+#
+# ============================================================================

@@ -9,9 +9,9 @@ Biological inspiration:
 Production-ready implementation.
 """
 
-import logging
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AcetylcholineState:
     """Current acetylcholine state."""
+
     level: float  # Current ACh level (0.0-1.0)
     attention_filter: float  # Salience threshold (0.0-1.0)
     memory_encoding_rate: float  # Memory consolidation rate (0.0-1.0)
@@ -40,7 +41,7 @@ class AcetylcholineSystem:
         self,
         baseline_level: float = 0.5,
         min_salience_threshold: float = 0.3,
-        max_salience_threshold: float = 0.9
+        max_salience_threshold: float = 0.9,
     ):
         """Initialize acetylcholine system.
 
@@ -75,9 +76,11 @@ class AcetylcholineSystem:
         self.level = 0.8 * self.level + 0.2 * target_level
 
         # Enter focus mode if very important
-        self.focus_mode = (importance > 0.8)
+        self.focus_mode = importance > 0.8
 
-        logger.debug(f"ACh modulated: importance={importance:.2f}, level={self.level:.3f}, focus={self.focus_mode}")
+        logger.debug(
+            f"ACh modulated: importance={importance:.2f}, level={self.level:.3f}, focus={self.focus_mode}"
+        )
 
     def get_salience_threshold(self) -> float:
         """Get current salience threshold for attention filtering.
@@ -89,7 +92,9 @@ class AcetylcholineSystem:
             Salience threshold (0.0-1.0)
         """
         # Inverted: high ACh → low threshold (let more through)
-        threshold = self.max_salience_threshold - (self.level * (self.max_salience_threshold - self.min_salience_threshold))
+        threshold = self.max_salience_threshold - (
+            self.level * (self.max_salience_threshold - self.min_salience_threshold)
+        )
 
         logger.debug(f"Salience threshold: {threshold:.3f} (ACh={self.level:.3f})")
 
@@ -122,7 +127,9 @@ class AcetylcholineSystem:
         should_attend = salience >= threshold
 
         if should_attend:
-            logger.debug(f"Attention triggered: salience={salience:.2f} >= threshold={threshold:.2f}")
+            logger.debug(
+                f"Attention triggered: salience={salience:.2f} >= threshold={threshold:.2f}"
+            )
 
         return should_attend
 
@@ -154,7 +161,7 @@ class AcetylcholineSystem:
             attention_filter=self.get_salience_threshold(),
             memory_encoding_rate=self.get_memory_encoding_rate(),
             focus_narrow=self.focus_mode,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
     def reset(self):

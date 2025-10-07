@@ -11,11 +11,11 @@ documentation of data structures, and seamless integration with FastAPI for
 API request and response modeling.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from enums import IncidentSeverity, DetectionType, ResponseActionType
+from models.enums import DetectionType, IncidentSeverity, ResponseActionType
+from pydantic import BaseModel, Field
 
 
 class DetectionResult(BaseModel):
@@ -31,6 +31,7 @@ class DetectionResult(BaseModel):
         raw_event (Dict[str, Any]): The raw event data that triggered the detection.
         ml_score (Optional[float]): Machine learning threat score (0.0 to 1.0).
     """
+
     detection_id: str
     event_id: str
     timestamp: str
@@ -56,6 +57,7 @@ class Incident(BaseModel):
         affected_assets (List[str]): List of assets (e.g., hostnames, IPs) affected by the incident.
         assigned_to (Optional[str]): User or system assigned to handle the incident.
     """
+
     incident_id: str
     title: str
     description: str
@@ -80,6 +82,7 @@ class ResponseAction(BaseModel):
         details (str): Detailed outcome or message regarding the action.
         parameters (Optional[Dict[str, Any]]): Parameters used to execute the action.
     """
+
     action_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     incident_id: str
     action_type: ResponseActionType
@@ -100,6 +103,7 @@ class ThreatIntelData(BaseModel):
         last_updated (str): ISO formatted timestamp of when the intelligence was last updated.
         sources (List[str]): List of threat intelligence sources.
     """
+
     indicator: str
     threat_type: str
     severity: str
@@ -120,6 +124,7 @@ class IpIntelligenceData(BaseModel):
         threat_score (float): A numerical threat score for the IP (0.0 to 1.0).
         last_checked (str): ISO formatted timestamp of when the IP was last checked.
     """
+
     ip_address: str
     country: str
     city: str
@@ -140,6 +145,7 @@ class PlaybookStep(BaseModel):
         next_step_on_success (Optional[str]): ID of the next step if current step succeeds.
         next_step_on_failure (Optional[str]): ID of the next step if current step fails.
     """
+
     step_id: str
     description: str
     action: ResponseActionType
@@ -158,6 +164,7 @@ class Playbook(BaseModel):
         trigger_conditions (Dict[str, Any]): Conditions that trigger this playbook.
         steps (List[PlaybookStep]): Ordered list of steps in the playbook.
     """
+
     id: str
     name: str
     description: str

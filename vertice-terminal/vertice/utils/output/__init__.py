@@ -1,4 +1,7 @@
-"""Output utilities for Vertice CLI."""
+"""
+Output utilities for Vertice CLI.
+UI/UX Blueprint v1.2 - Production Ready
+"""
 
 from .console_utils import (
     console,
@@ -17,6 +20,8 @@ from .formatters import (
     format_ip_analysis,
 )
 from .ui_components import spinner_task, styled_input, styled_confirm, styled_select
+from .table_builder import GeminiStyleTable
+from .panel_builder import PrimordialPanel
 
 __all__ = [
     "console",
@@ -35,4 +40,6 @@ __all__ = [
     "styled_input",
     "styled_confirm",
     "styled_select",
+    "GeminiStyleTable",
+    "PrimordialPanel",
 ]

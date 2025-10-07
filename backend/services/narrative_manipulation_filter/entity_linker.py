@@ -7,19 +7,18 @@ Integrates:
 - Wikidata ID resolution for canonical identifiers
 """
 
-import logging
-from typing import List, Dict, Any, Optional, Set
-from dataclasses import dataclass
 import asyncio
+from dataclasses import dataclass
+import logging
+from typing import Any, Dict, List, Optional, Set
 
+from cache_manager import cache_manager, CacheCategory
+from config import get_settings
+from dbpedia_client import dbpedia_client
 import spacy
 from spacy.language import Language
-
-from dbpedia_client import dbpedia_client
-from wikidata_client import wikidata_client
-from cache_manager import cache_manager, CacheCategory
 from utils import hash_text
-from config import get_settings
+from wikidata_client import wikidata_client
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +107,9 @@ class EntityLinker:
                 try:
                     self.nlp = spacy.load("pt_core_news_sm")
                 except OSError:
-                    logger.error("No Portuguese spaCy model found. Please install: python -m spacy download pt_core_news_lg")
+                    logger.error(
+                        "No Portuguese spaCy model found. Please install: python -m spacy download pt_core_news_lg"
+                    )
                     raise
 
             # Optimize pipeline (disable unnecessary components)
@@ -135,7 +136,7 @@ class EntityLinker:
         text: str,
         min_confidence: float = 0.5,
         use_cache: bool = True,
-        enrich_with_metadata: bool = True
+        enrich_with_metadata: bool = True,
     ) -> List[Entity]:
         """
         Extract and link entities from text.
@@ -170,10 +171,7 @@ class EntityLinker:
         logger.info(f"Extracted {len(entities)} entities via spaCy NER")
 
         # STEP 2: DBpedia Spotlight disambiguation (parallel)
-        tasks = [
-            self._disambiguate_entity(entity, text)
-            for entity in entities
-        ]
+        tasks = [self._disambiguate_entity(entity, text) for entity in entities]
 
         disambiguated = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -210,7 +208,7 @@ class EntityLinker:
                     "wikidata_id": e.wikidata_id,
                     "confidence": e.confidence,
                     "description": e.description,
-                    "aliases": e.aliases
+                    "aliases": e.aliases,
                 }
                 for e in linked_entities
             ]
@@ -232,17 +230,13 @@ class EntityLinker:
                 label=ent.label_,
                 start=ent.start_char,
                 end=ent.end_char,
-                confidence=0.0  # Will be updated after disambiguation
+                confidence=0.0,  # Will be updated after disambiguation
             )
             entities.append(entity)
 
         return entities
 
-    async def _disambiguate_entity(
-        self,
-        entity: Entity,
-        full_text: str
-    ) -> Entity:
+    async def _disambiguate_entity(self, entity: Entity, full_text: str) -> Entity:
         """
         Disambiguate entity using DBpedia Spotlight.
 
@@ -258,7 +252,7 @@ class EntityLinker:
             annotations = await dbpedia_client.spotlight_annotate(
                 text=full_text,
                 confidence=0.3,  # Lower threshold, we filter later
-                support=20
+                support=20,
             )
 
             # Find annotation matching our entity
@@ -359,9 +353,7 @@ class EntityLinker:
             return None
 
     async def _search_wikidata(
-        self,
-        entity_text: str,
-        entity_type: str
+        self, entity_text: str, entity_type: str
     ) -> Optional[str]:
         """
         Search Wikidata for entity (fallback when Spotlight fails).
@@ -375,9 +367,7 @@ class EntityLinker:
         """
         try:
             results = await wikidata_client.search(
-                query=entity_text,
-                language="pt",
-                limit=5
+                query=entity_text, language="pt", limit=5
             )
 
             if not results:
@@ -459,7 +449,9 @@ class EntityLinker:
 
                 aliases_str = binding.get("aliases", {}).get("value", "")
                 if aliases_str:
-                    entity.aliases = [a.strip() for a in aliases_str.split("|") if a.strip()]
+                    entity.aliases = [
+                        a.strip() for a in aliases_str.split("|") if a.strip()
+                    ]
 
         except Exception as e:
             logger.warning(f"Metadata fetch failed for {entity.wikidata_id}: {e}")
@@ -467,9 +459,7 @@ class EntityLinker:
         return entity
 
     def get_entities_by_type(
-        self,
-        entities: List[Entity],
-        entity_types: List[str]
+        self, entities: List[Entity], entity_types: List[str]
     ) -> List[Entity]:
         """
         Filter entities by type.

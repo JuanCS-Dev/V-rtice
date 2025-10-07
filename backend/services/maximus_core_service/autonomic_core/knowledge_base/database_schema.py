@@ -47,6 +47,7 @@ GROUP BY hour, operational_mode;
 async def create_schema(connection):
     """Create database schema."""
     import logging
+
     logger = logging.getLogger(__name__)
 
     try:

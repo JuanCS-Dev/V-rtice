@@ -11,14 +11,16 @@ performance.
 """
 
 import asyncio
-from typing import Dict, Any, List
 from datetime import datetime
-from pydantic import BaseModel
 from enum import Enum
+from typing import Any, Dict, List
+
+from pydantic import BaseModel
 
 
 class ActionType(str, Enum):
     """Enumeration for different types of resource actions."""
+
     SCALE_UP = "scale_up"
     SCALE_DOWN = "scale_down"
     OPTIMIZE_MEMORY = "optimize_memory"
@@ -34,6 +36,7 @@ class ExecutionResult(BaseModel):
         actions_executed (List[str]): A list of actions that were successfully performed.
         errors (List[str]): Any errors encountered during execution.
     """
+
     timestamp: str
     success: bool
     actions_executed: List[str]
@@ -67,8 +70,10 @@ class ResourceExecutor:
         # Simplified execution for demonstration
         for action in plan.actions:
             try:
-                if action == ActionType.SCALE_UP: await self._scale_workers(up=True)
-                elif action == ActionType.OPTIMIZE_MEMORY: await self._optimize_memory()
+                if action == ActionType.SCALE_UP:
+                    await self._scale_workers(up=True)
+                elif action == ActionType.OPTIMIZE_MEMORY:
+                    await self._optimize_memory()
                 actions_executed.append(action.value)
             except Exception as e:
                 errors.append(str(e))
@@ -78,23 +83,23 @@ class ResourceExecutor:
             timestamp=datetime.now().isoformat(),
             success=not errors,
             actions_executed=actions_executed,
-            errors=errors
+            errors=errors,
         )
 
     async def _scale_workers(self, up: bool) -> bool:
         """Simulates scaling workers up or down."""
         print(f"Simulating worker scale {'up' if up else 'down'}")
-        await asyncio.sleep(0.1) # Simulate work
+        await asyncio.sleep(0.1)  # Simulate work
         return True
 
     async def _optimize_memory(self) -> bool:
         """Simulates memory optimization actions."""
         print("Simulating memory optimization")
-        await asyncio.sleep(0.1) # Simulate work
+        await asyncio.sleep(0.1)  # Simulate work
         return True
 
     async def apply_mode(self, mode: Any) -> bool:
         """Applies a specific operational mode to the system."""
         print(f"Applying operational mode: {mode}")
-        await asyncio.sleep(0.1) # Simulate work
+        await asyncio.sleep(0.1)  # Simulate work
         return True

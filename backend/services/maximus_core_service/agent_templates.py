@@ -10,7 +10,7 @@ match the requirements of a given situation, ensuring more appropriate and
 effective responses. This allows for flexible and context-aware AI behavior.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class AgentTemplates:
@@ -28,22 +28,22 @@ class AgentTemplates:
                 "description": "A general-purpose helpful AI assistant.",
                 "instructions": "You are a helpful AI assistant. Provide concise and accurate information.",
                 "tone": "neutral",
-                "expertise": ["general knowledge"]
+                "expertise": ["general knowledge"],
             },
             "technical_expert": {
                 "name": "Technical Expert",
                 "description": "An AI specialized in technical problem-solving and explanations.",
                 "instructions": "You are a technical expert. Provide detailed, accurate, and precise technical information. Use code examples where appropriate.",
                 "tone": "formal and precise",
-                "expertise": ["software engineering", "cloud computing", "AI/ML"]
+                "expertise": ["software engineering", "cloud computing", "AI/ML"],
             },
             "creative_writer": {
                 "name": "Creative Writer",
                 "description": "An AI skilled in generating creative content.",
                 "instructions": "You are a creative writer. Generate imaginative and engaging content. Focus on storytelling and vivid descriptions.",
                 "tone": "imaginative and engaging",
-                "expertise": ["storytelling", "poetry", "marketing copy"]
-            }
+                "expertise": ["storytelling", "poetry", "marketing copy"],
+            },
         }
 
     def get_template(self, template_name: str) -> Optional[Dict[str, Any]]:
@@ -71,7 +71,7 @@ class AgentTemplates:
         Args:
             template_name (str): The name of the new template.
             template_data (Dict[str, Any]): The data defining the new template.
-        
+
         Raises:
             ValueError: If a template with the given name already exists.
         """
@@ -85,7 +85,7 @@ class AgentTemplates:
         Args:
             template_name (str): The name of the template to update.
             template_data (Dict[str, Any]): The new data for the template.
-        
+
         Raises:
             ValueError: If the template with the given name does not exist.
         """
@@ -98,7 +98,7 @@ class AgentTemplates:
 
         Args:
             template_name (str): The name of the template to delete.
-        
+
         Raises:
             ValueError: If the template with the given name does not exist.
         """

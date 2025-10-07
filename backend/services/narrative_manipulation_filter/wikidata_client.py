@@ -8,18 +8,17 @@ Integrates Wikidata knowledge graph for fact verification:
 4. Cross-referencing with external databases
 """
 
-import logging
-from typing import List, Dict, Set, Tuple, Optional, Any
-from datetime import datetime
 import asyncio
+from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import aiohttp
-from SPARQLWrapper import SPARQLWrapper, JSON
-
-from models import Entity, EntityType, KnowledgeGraphFact
 from cache_manager import cache_manager, CacheCategory
-from utils import hash_text
 from config import get_settings
+from models import Entity, EntityType, KnowledgeGraphFact
+from SPARQLWrapper import JSON, SPARQLWrapper
+from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +32,7 @@ class WikidataSearchClient:
     Searches and resolves entities to Wikidata QIDs.
     """
 
-    def __init__(
-        self,
-        search_endpoint: str = "https://www.wikidata.org/w/api.php"
-    ):
+    def __init__(self, search_endpoint: str = "https://www.wikidata.org/w/api.php"):
         """
         Initialize Wikidata search client.
 
@@ -60,11 +56,7 @@ class WikidataSearchClient:
             self.session = None
 
     async def search_entity(
-        self,
-        query: str,
-        language: str = "pt",
-        limit: int = 5,
-        use_cache: bool = True
+        self, query: str, language: str = "pt", limit: int = 5, use_cache: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Search for entities in Wikidata.
@@ -94,12 +86,11 @@ class WikidataSearchClient:
                 "format": "json",
                 "language": language,
                 "search": query,
-                "limit": limit
+                "limit": limit,
             }
 
             async with self.session.get(
-                self.search_endpoint,
-                params=params
+                self.search_endpoint, params=params
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -112,10 +103,7 @@ class WikidataSearchClient:
             if use_cache:
                 cache_key = f"wikidata_search:{hash_text(query)}:{language}"
                 await cache_manager.set(
-                    CacheCategory.EXTERNAL_API,
-                    cache_key,
-                    results,
-                    ttl_override=3600
+                    CacheCategory.EXTERNAL_API, cache_key, results, ttl_override=3600
                 )
 
             logger.info(f"Found {len(results)} Wikidata entities for '{query}'")
@@ -129,10 +117,7 @@ class WikidataSearchClient:
             return []
 
     async def get_entity_by_id(
-        self,
-        entity_id: str,
-        language: str = "pt",
-        use_cache: bool = True
+        self, entity_id: str, language: str = "pt", use_cache: bool = True
     ) -> Optional[Dict[str, Any]]:
         """
         Get entity data by Wikidata ID.
@@ -160,12 +145,11 @@ class WikidataSearchClient:
                 "action": "wbgetentities",
                 "format": "json",
                 "ids": entity_id,
-                "languages": language
+                "languages": language,
             }
 
             async with self.session.get(
-                self.search_endpoint,
-                params=params
+                self.search_endpoint, params=params
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -181,7 +165,7 @@ class WikidataSearchClient:
                     CacheCategory.EXTERNAL_API,
                     cache_key,
                     entity_data,
-                    ttl_override=3600
+                    ttl_override=3600,
                 )
 
             return entity_data
@@ -201,10 +185,7 @@ class WikidataSPARQLClient:
     Queries Wikidata knowledge graph using SPARQL.
     """
 
-    def __init__(
-        self,
-        sparql_endpoint: str = "https://query.wikidata.org/sparql"
-    ):
+    def __init__(self, sparql_endpoint: str = "https://query.wikidata.org/sparql"):
         """
         Initialize SPARQL client.
 
@@ -219,9 +200,7 @@ class WikidataSPARQLClient:
         self.sparql.addCustomHttpHeader("User-Agent", "VerticeCognitiveDefense/2.0")
 
     async def query(
-        self,
-        sparql_query: str,
-        use_cache: bool = True
+        self, sparql_query: str, use_cache: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Execute SPARQL query.
@@ -253,10 +232,7 @@ class WikidataSPARQLClient:
             if use_cache:
                 cache_key = f"wikidata_sparql:{hash_text(sparql_query)}"
                 await cache_manager.set(
-                    CacheCategory.EXTERNAL_API,
-                    cache_key,
-                    bindings,
-                    ttl_override=3600
+                    CacheCategory.EXTERNAL_API, cache_key, bindings, ttl_override=3600
                 )
 
             logger.info(f"Wikidata SPARQL query returned {len(bindings)} results")
@@ -267,9 +243,7 @@ class WikidataSPARQLClient:
             return []
 
     async def get_entity_claims(
-        self,
-        entity_id: str,
-        property_id: Optional[str] = None
+        self, entity_id: str, property_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Get claims/statements for an entity.
@@ -306,10 +280,7 @@ class WikidataSPARQLClient:
         return results
 
     async def verify_claim(
-        self,
-        entity_id: str,
-        property_id: str,
-        expected_value: str
+        self, entity_id: str, property_id: str, expected_value: str
     ) -> Dict[str, Any]:
         """
         Verify if entity has specific claim.
@@ -352,15 +323,11 @@ class WikidataSPARQLClient:
             "property_id": property_id,
             "expected_value": expected_value,
             "actual_values": [
-                v.get("valueLabel", {}).get("value", "")
-                for v in actual_values
-            ]
+                v.get("valueLabel", {}).get("value", "") for v in actual_values
+            ],
         }
 
-    async def get_birth_death_dates(
-        self,
-        entity_id: str
-    ) -> Dict[str, Optional[str]]:
+    async def get_birth_death_dates(self, entity_id: str) -> Dict[str, Optional[str]]:
         """
         Get birth and death dates for person.
 
@@ -385,15 +352,12 @@ class WikidataSPARQLClient:
             binding = results[0]
             return {
                 "birth_date": binding.get("birthDate", {}).get("value"),
-                "death_date": binding.get("deathDate", {}).get("value")
+                "death_date": binding.get("deathDate", {}).get("value"),
             }
 
         return {"birth_date": None, "death_date": None}
 
-    async def get_occupation(
-        self,
-        entity_id: str
-    ) -> List[str]:
+    async def get_occupation(self, entity_id: str) -> List[str]:
         """
         Get occupations for person/organization.
 
@@ -412,17 +376,11 @@ class WikidataSPARQLClient:
         """
 
         results = await self.query(query)
-        occupations = [
-            r.get("occupationLabel", {}).get("value", "")
-            for r in results
-        ]
+        occupations = [r.get("occupationLabel", {}).get("value", "") for r in results]
 
         return occupations
 
-    async def get_instance_of(
-        self,
-        entity_id: str
-    ) -> List[str]:
+    async def get_instance_of(self, entity_id: str) -> List[str]:
         """
         Get 'instance of' (P31) types for entity.
 
@@ -441,17 +399,12 @@ class WikidataSPARQLClient:
         """
 
         results = await self.query(query)
-        types = [
-            r.get("typeLabel", {}).get("value", "")
-            for r in results
-        ]
+        types = [r.get("typeLabel", {}).get("value", "") for r in results]
 
         return types
 
     async def check_temporal_overlap(
-        self,
-        entity1_id: str,
-        entity2_id: str
+        self, entity1_id: str, entity2_id: str
     ) -> Dict[str, Any]:
         """
         Check if two entities have temporal overlap (e.g., lived at same time).
@@ -492,14 +445,11 @@ class WikidataSPARQLClient:
             "entity2_id": entity2_id,
             "entity1_dates": dates1,
             "entity2_dates": dates2,
-            "temporal_overlap": overlap
+            "temporal_overlap": overlap,
         }
 
     async def find_common_properties(
-        self,
-        entity1_id: str,
-        entity2_id: str,
-        max_properties: int = 10
+        self, entity1_id: str, entity2_id: str, max_properties: int = 10
     ) -> List[Dict[str, str]]:
         """
         Find common properties between two entities.
@@ -527,11 +477,13 @@ class WikidataSPARQLClient:
 
         common_props = []
         for r in results:
-            common_props.append({
-                "property": r.get("propertyLabel", {}).get("value", ""),
-                "entity1_value": r.get("value1Label", {}).get("value", ""),
-                "entity2_value": r.get("value2Label", {}).get("value", "")
-            })
+            common_props.append(
+                {
+                    "property": r.get("propertyLabel", {}).get("value", ""),
+                    "entity1_value": r.get("value1Label", {}).get("value", ""),
+                    "entity2_value": r.get("value2Label", {}).get("value", ""),
+                }
+            )
 
         return common_props
 
@@ -562,9 +514,7 @@ class WikidataClient:
         self._initialized = False
 
     async def resolve_entity(
-        self,
-        entity_text: str,
-        language: str = "pt"
+        self, entity_text: str, language: str = "pt"
     ) -> Optional[str]:
         """
         Resolve entity text to Wikidata ID.
@@ -577,9 +527,7 @@ class WikidataClient:
             Wikidata entity ID (e.g., Q42) or None
         """
         results = await self.search.search_entity(
-            query=entity_text,
-            language=language,
-            limit=1
+            query=entity_text, language=language, limit=1
         )
 
         if results:
@@ -587,9 +535,7 @@ class WikidataClient:
         return None
 
     async def get_entity_summary(
-        self,
-        entity_id: str,
-        language: str = "pt"
+        self, entity_id: str, language: str = "pt"
     ) -> Dict[str, Any]:
         """
         Get comprehensive entity summary.
@@ -632,15 +578,11 @@ class WikidataClient:
             "label": label,
             "description": description,
             "types": types,
-            "additional_info": additional_info
+            "additional_info": additional_info,
         }
 
     async def verify_factual_statement(
-        self,
-        subject: str,
-        predicate: str,
-        object_value: str,
-        language: str = "pt"
+        self, subject: str, predicate: str, object_value: str, language: str = "pt"
     ) -> Dict[str, Any]:
         """
         Verify factual statement.
@@ -658,17 +600,16 @@ class WikidataClient:
         subject_id = await self.resolve_entity(subject, language)
 
         if not subject_id:
-            return {
-                "verified": False,
-                "error": "Subject entity not found in Wikidata"
-            }
+            return {"verified": False, "error": "Subject entity not found in Wikidata"}
 
         # Resolve object to Wikidata ID (if applicable)
         object_id = await self.resolve_entity(object_value, language)
 
         # Get property ID (simplified - in production, use property search)
         # For now, assume predicate is already a P-ID or we have a mapping
-        property_id = predicate if predicate.startswith("P") else "P31"  # Default to instance of
+        property_id = (
+            predicate if predicate.startswith("P") else "P31"
+        )  # Default to instance of
 
         if object_id:
             # Verify entity-to-entity claim
@@ -676,16 +617,13 @@ class WikidataClient:
         else:
             # Get all claims for property and check if object_value matches
             claims = await self.sparql.get_entity_claims(subject_id, property_id)
-            verified = any(
-                object_value.lower() in str(c).lower()
-                for c in claims
-            )
+            verified = any(object_value.lower() in str(c).lower() for c in claims)
             result = {
                 "verified": verified,
                 "entity_id": subject_id,
                 "property_id": property_id,
                 "expected_value": object_value,
-                "actual_values": [str(c) for c in claims[:5]]
+                "actual_values": [str(c) for c in claims[:5]],
             }
 
         return result

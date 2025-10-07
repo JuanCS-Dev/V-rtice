@@ -4,7 +4,7 @@
 # ============================================================================
 
 # Web Framework
-fastapi==0.109.0
+fastapi>=0.115.0  # Security fix
 uvicorn[standard]==0.27.0
 pydantic==2.5.3
 pydantic-settings==2.1.0
@@ -41,3 +41,4 @@ pytest-cov==4.1.0
 
 # Note: masscan and nmap must be installed at OS level
 # apt-get install masscan nmap
+anyio>=4.4.0  # Security fix for race condition

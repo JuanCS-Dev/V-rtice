@@ -157,9 +157,12 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Login failed:', error);
 
-      // Fallback para mock em caso de erro (desenvolvimento)
-      console.warn('Falling back to mock auth due to error');
-      return login(email, true);
+      // REGRA DE OURO: No fallback to mock in production
+      // Return error instead - UI should show appropriate error message
+      return {
+        success: false,
+        error: error.message || 'Authentication service unavailable. Please try again later.'
+      };
     }
   };
 

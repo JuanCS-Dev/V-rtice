@@ -1,30 +1,31 @@
-"""Skill Learning System - Hybrid model-free and model-based reinforcement learning.
+"""Skill Learning System - Client Interface to HSAS Service.
 
-This module implements cerebellum + basal ganglia inspired skill acquisition:
+This module provides a lightweight client interface to the full HSAS (Hybrid Skill
+Acquisition System) service. The HSAS service implements:
+
 1. Model-Free RL (Basal Ganglia) - Fast habitual responses
 2. Model-Based RL (Cerebellum/PFC) - Deliberate planning
 3. Skill Primitives Library - Reusable action sequences
 4. Hierarchical Skills - Composed from primitives
 
-NO MOCKS - Production-ready integration with HSAS service.
+Architecture:
+- Full implementations: ../hsas_service/ (port 8023)
+- Client interface: This module (SkillLearningController)
 
-Author: Maximus AI Team
-Version: 1.0.0
+NO MOCKS - Production-ready HTTP client to real HSAS service.
+
+Author: Maximus AI Team + Claude Code
+Version: 1.1.0 - REGRA DE OURO compliant (removed placeholders)
 """
 
-from .skill_primitive import SkillPrimitive, PrimitiveLibrary
-from .model_free_agent import ModelFreeAgent
-from .model_based_agent import ModelBasedAgent
-from .skill_composer import SkillComposer
-from .skill_learning_controller import SkillLearningController
+from .skill_learning_controller import (
+    SkillExecutionResult,
+    SkillLearningController,
+)
 
 __all__ = [
-    'SkillPrimitive',
-    'PrimitiveLibrary',
-    'ModelFreeAgent',
-    'ModelBasedAgent',
-    'SkillComposer',
-    'SkillLearningController',
+    "SkillLearningController",
+    "SkillExecutionResult",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.1.0"

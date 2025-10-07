@@ -1,2 +1,2 @@
 export { SocialMediaWidget } from './SocialMediaWidget';
-export default SocialMediaWidget;
+export { default } from './SocialMediaWidget';

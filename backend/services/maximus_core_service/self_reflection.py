@@ -12,7 +12,7 @@ performance without constant external intervention.
 """
 
 import asyncio
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class SelfReflection:
@@ -26,7 +26,9 @@ class SelfReflection:
         """Initializes the SelfReflection module."""
         pass
 
-    async def reflect_and_refine(self, current_response: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    async def reflect_and_refine(
+        self, current_response: Dict[str, Any], context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Performs self-reflection on the current response and refines it if necessary.
 
         Args:
@@ -37,18 +39,18 @@ class SelfReflection:
             Dict[str, Any]: The refined response.
         """
         print("[SelfReflection] Reflecting on the response...")
-        await asyncio.sleep(0.2) # Simulate reflection process
+        await asyncio.sleep(0.2)  # Simulate reflection process
 
         # Simplified reflection logic for demonstration
         if "error" in current_response.get("output", "").lower():
             refined_response = {
                 "output": "Upon reflection, an error was detected. Attempting to re-evaluate and correct.",
-                "reflection_notes": "Identified potential error in previous output."
+                "reflection_notes": "Identified potential error in previous output.",
             }
         else:
             refined_response = {
                 "output": current_response.get("output", ""),
-                "reflection_notes": "No significant issues found. Response is coherent."
+                "reflection_notes": "No significant issues found. Response is coherent.",
             }
 
         return refined_response
@@ -66,5 +68,11 @@ class SelfReflection:
         await asyncio.sleep(0.1)
         # Simplified analysis
         if len(reasoning_path) > 5:
-            return {"analysis": "Reasoning path is somewhat long, consider optimizing.", "efficiency_score": 0.7}
-        return {"analysis": "Reasoning path appears logical and efficient.", "efficiency_score": 0.9}
+            return {
+                "analysis": "Reasoning path is somewhat long, consider optimizing.",
+                "efficiency_score": 0.7,
+            }
+        return {
+            "analysis": "Reasoning path appears logical and efficient.",
+            "efficiency_score": 0.9,
+        }

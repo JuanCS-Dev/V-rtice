@@ -10,15 +10,17 @@ self-regulation and adaptive behavior.
 """
 
 import asyncio
-import time
-from typing import Dict, Any, Optional, List
 from datetime import datetime
-from pydantic import BaseModel
 from enum import Enum
+import time
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel
 
 
 class OperationalMode(str, Enum):
     """Enumeration for the different operational modes of the system."""
+
     HIGH_PERFORMANCE = "high_performance"
     BALANCED = "balanced"
     ENERGY_EFFICIENT = "energy_efficient"
@@ -35,6 +37,7 @@ class SystemState(BaseModel):
         avg_latency_ms (float): Average system latency in milliseconds.
         is_healthy (bool): True if the system is considered healthy.
     """
+
     timestamp: str
     mode: OperationalMode
     cpu_usage: float
@@ -56,7 +59,7 @@ class HomeostaticControlLoop:
         analyzer=None,
         planner=None,
         executor=None,
-        check_interval_seconds: float = 5.0
+        check_interval_seconds: float = 5.0,
     ):
         """Initializes the HomeostaticControlLoop.
 
@@ -80,7 +83,8 @@ class HomeostaticControlLoop:
 
     async def start(self):
         """Starts the homeostatic control loop."""
-        if self.is_running: return
+        if self.is_running:
+            return
         self.is_running = True
         print("🧠 [HCL] Homeostatic Control Loop started")
         # In a real implementation, this would start an asyncio task

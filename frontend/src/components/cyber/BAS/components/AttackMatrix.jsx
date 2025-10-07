@@ -23,47 +23,13 @@ export const AttackMatrix = ({
     );
   };
 
-  // Mock techniques for demonstration
+  // REGRA DE OURO: Use real techniques from props (from backend API)
+  // Filter techniques by selected tactic
   const getTechniquesForTactic = (tacticId) => {
-    const mockTechniques = {
-      'TA0001': [
-        { id: 'T1190', name: 'Exploit Public-Facing Application', severity: 'high' },
-        { id: 'T1133', name: 'External Remote Services', severity: 'medium' },
-        { id: 'T1566', name: 'Phishing', severity: 'high' },
-        { id: 'T1078', name: 'Valid Accounts', severity: 'high' },
-      ],
-      'TA0002': [
-        { id: 'T1059', name: 'Command and Scripting Interpreter', severity: 'high' },
-        { id: 'T1203', name: 'Exploitation for Client Execution', severity: 'high' },
-        { id: 'T1053', name: 'Scheduled Task/Job', severity: 'medium' },
-        { id: 'T1569', name: 'System Services', severity: 'medium' },
-      ],
-      'TA0003': [
-        { id: 'T1547', name: 'Boot or Logon Autostart Execution', severity: 'medium' },
-        { id: 'T1053', name: 'Scheduled Task/Job', severity: 'medium' },
-        { id: 'T1136', name: 'Create Account', severity: 'high' },
-        { id: 'T1543', name: 'Create or Modify System Process', severity: 'high' },
-      ],
-      'TA0004': [
-        { id: 'T1068', name: 'Exploitation for Privilege Escalation', severity: 'critical' },
-        { id: 'T1134', name: 'Access Token Manipulation', severity: 'high' },
-        { id: 'T1548', name: 'Abuse Elevation Control Mechanism', severity: 'high' },
-      ],
-      'TA0005': [
-        { id: 'T1055', name: 'Process Injection', severity: 'high' },
-        { id: 'T1140', name: 'Deobfuscate/Decode Files or Information', severity: 'medium' },
-        { id: 'T1562', name: 'Impair Defenses', severity: 'critical' },
-        { id: 'T1070', name: 'Indicator Removal', severity: 'high' },
-      ],
-      'TA0006': [
-        { id: 'T1003', name: 'OS Credential Dumping', severity: 'critical' },
-        { id: 'T1110', name: 'Brute Force', severity: 'high' },
-        { id: 'T1555', name: 'Credentials from Password Stores', severity: 'high' },
-        { id: 'T1056', name: 'Input Capture', severity: 'high' },
-      ],
-    };
-
-    return mockTechniques[tacticId] || [];
+    if (!techniques || !Array.isArray(techniques)) {
+      return [];
+    }
+    return techniques.filter(t => t.tactic_id === tacticId);
   };
 
   const tacticTechniques = selectedTactic ? getTechniquesForTactic(selectedTactic.id) : [];

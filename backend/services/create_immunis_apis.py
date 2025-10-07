@@ -173,9 +173,12 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port={port})
 '''
 
+
 def create_api_file(service_id, port, service_title):
     """Create api.py file for a service."""
-    service_dir = Path(f"/home/juan/vertice-dev/backend/services/immunis_{service_id}_service")
+    service_dir = Path(
+        f"/home/juan/vertice-dev/backend/services/immunis_{service_id}_service"
+    )
 
     if not service_dir.exists():
         print(f"❌ Directory not found: {service_dir}")
@@ -188,7 +191,7 @@ def create_api_file(service_id, port, service_title):
         return False
 
     # Generate core class name
-    core_class = ''.join(word.capitalize() for word in service_id.split('_')) + "Core"
+    core_class = "".join(word.capitalize() for word in service_id.split("_")) + "Core"
     core_module = service_id + "_core"
 
     # Generate api.py content
@@ -198,13 +201,14 @@ def create_api_file(service_id, port, service_title):
         service_desc=service_title.lower(),
         core_module=core_module,
         core_class=core_class,
-        port=port
+        port=port,
     )
 
     # Write file
     api_file.write_text(content)
     print(f"✅ Created: {api_file}")
     return True
+
 
 def main():
     """Main execution."""
@@ -220,6 +224,7 @@ def main():
     print("=" * 60)
     print(f"✅ Created {created}/{len(SERVICES)} api.py files")
     print("=" * 60)
+
 
 if __name__ == "__main__":
     main()

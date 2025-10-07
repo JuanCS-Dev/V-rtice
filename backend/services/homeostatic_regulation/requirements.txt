@@ -4,16 +4,15 @@
 # ============================================================================
 
 # Web Framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
+fastapi==0.118.0  # Latest stable version
+uvicorn[standard]>=0.32.0  # Compatibility with updated fastapi
+pydantic>=2.9.0  # Latest security patches
+pydantic-settings>=2.1.0  # Keep current
 
 # HTTP Client for inter-service communication
-httpx==0.26.0
+httpx>=0.27.0  # Security updates
 
-# Async Support
-asyncio==3.4.3
+# Async Support (asyncio is Python stdlib, removing explicit dependency)
 aiofiles==23.2.1
 
 # Data Processing
@@ -35,7 +34,8 @@ typing-extensions==4.9.0
 python-dateutil==2.8.2
 
 # Testing (optional, for development)
-pytest==7.4.4
-pytest-asyncio==0.23.3
-pytest-cov==4.1.0
-httpx==0.26.0  # For testing async HTTP calls
+pytest>=7.4.4  # Keep current
+pytest-asyncio>=0.23.3  # Keep current
+pytest-cov>=4.1.0  # Keep current
+# httpx already specified above, removed duplicate
+anyio>=4.4.0  # Security fix for race condition

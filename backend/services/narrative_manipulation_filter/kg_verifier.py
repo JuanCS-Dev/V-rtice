@@ -4,19 +4,19 @@ Knowledge Graph Verifier for Claim Verification.
 Executes SPARQL queries against Wikidata and DBpedia to verify factual claims.
 """
 
-import logging
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional
 
-from sparql_generator import SPARQLQuery, TriplePattern
-from wikidata_client import wikidata_client
+from cache_manager import cache_manager, CacheCategory
+from config import get_settings
 from dbpedia_client import dbpedia_client
 from entity_linker import Entity
 from models import VerificationStatus
-from cache_manager import cache_manager, CacheCategory
+from sparql_generator import SPARQLQuery, TriplePattern
 from utils import hash_text
-from config import get_settings
+from wikidata_client import wikidata_client
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +95,7 @@ class KnowledgeGraphVerifier:
         self,
         sparql_query: SPARQLQuery,
         use_cache: bool = True,
-        fallback_to_dbpedia: bool = True
+        fallback_to_dbpedia: bool = True,
     ) -> VerificationResult:
         """
         Verify claim using generated SPARQL query.
@@ -137,7 +137,11 @@ class KnowledgeGraphVerifier:
             cache_data = {
                 "claim": result.claim,
                 "verified": result.verified,
-                "verification_status": result.verification_status.value if isinstance(result.verification_status, VerificationStatus) else result.verification_status,
+                "verification_status": (
+                    result.verification_status.value
+                    if isinstance(result.verification_status, VerificationStatus)
+                    else result.verification_status
+                ),
                 "confidence": result.confidence,
                 "verdict": result.verdict,
                 "evidence": result.evidence,
@@ -145,7 +149,7 @@ class KnowledgeGraphVerifier:
                 "kg_source": result.kg_source,
                 "actual_value": result.actual_value,
                 "expected_value": result.expected_value,
-                "timestamp": result.timestamp.isoformat() if result.timestamp else None
+                "timestamp": result.timestamp.isoformat() if result.timestamp else None,
             }
             await cache_manager.set(CacheCategory.FACTCHECK, cache_key, cache_data)
 
@@ -157,8 +161,7 @@ class KnowledgeGraphVerifier:
         return result
 
     async def _verify_on_wikidata(
-        self,
-        sparql_query: SPARQLQuery
+        self, sparql_query: SPARQLQuery
     ) -> VerificationResult:
         """Execute SPARQL query on Wikidata."""
         try:
@@ -178,7 +181,7 @@ class KnowledgeGraphVerifier:
                         verdict="TRUE",
                         evidence={"wikidata_result": "confirmed"},
                         sparql_query=sparql_query.query,
-                        kg_source="wikidata"
+                        kg_source="wikidata",
                     )
                 else:
                     return VerificationResult(
@@ -189,7 +192,7 @@ class KnowledgeGraphVerifier:
                         verdict="FALSE",
                         evidence={"wikidata_result": "not_found"},
                         sparql_query=sparql_query.query,
-                        kg_source="wikidata"
+                        kg_source="wikidata",
                     )
 
             elif sparql_query.query_type == "select":
@@ -205,7 +208,7 @@ class KnowledgeGraphVerifier:
                         verdict="NO_DATA",
                         evidence={},
                         sparql_query=sparql_query.query,
-                        kg_source="wikidata"
+                        kg_source="wikidata",
                     )
 
                 # Extract actual value(s)
@@ -214,10 +217,7 @@ class KnowledgeGraphVerifier:
                     value = binding.get("value", {}).get("value", "")
                     label = binding.get("valueLabel", {}).get("value", value)
 
-                    actual_values.append({
-                        "value": value,
-                        "label": label
-                    })
+                    actual_values.append({"value": value, "label": label})
 
                 # Compare with expected value (if provided)
                 expected_entity = sparql_query.expected_result
@@ -226,10 +226,7 @@ class KnowledgeGraphVerifier:
                     # Check if expected entity is in actual values
                     expected_id = expected_entity.wikidata_id
 
-                    matched = any(
-                        expected_id in v["value"]
-                        for v in actual_values
-                    )
+                    matched = any(expected_id in v["value"] for v in actual_values)
 
                     if matched:
                         return VerificationResult(
@@ -242,7 +239,7 @@ class KnowledgeGraphVerifier:
                             sparql_query=sparql_query.query,
                             kg_source="wikidata",
                             actual_value=str(actual_values),
-                            expected_value=expected_entity.text
+                            expected_value=expected_entity.text,
                         )
                     else:
                         return VerificationResult(
@@ -255,7 +252,7 @@ class KnowledgeGraphVerifier:
                             sparql_query=sparql_query.query,
                             kg_source="wikidata",
                             actual_value=str(actual_values),
-                            expected_value=expected_entity.text
+                            expected_value=expected_entity.text,
                         )
                 else:
                     # No expected value - return found values
@@ -268,7 +265,7 @@ class KnowledgeGraphVerifier:
                         evidence={"wikidata_values": actual_values},
                         sparql_query=sparql_query.query,
                         kg_source="wikidata",
-                        actual_value=str(actual_values)
+                        actual_value=str(actual_values),
                     )
 
         except Exception as e:
@@ -281,13 +278,10 @@ class KnowledgeGraphVerifier:
                 verdict="ERROR",
                 evidence={"error": str(e)},
                 sparql_query=sparql_query.query,
-                kg_source="wikidata"
+                kg_source="wikidata",
             )
 
-    async def _verify_on_dbpedia(
-        self,
-        sparql_query: SPARQLQuery
-    ) -> VerificationResult:
+    async def _verify_on_dbpedia(self, sparql_query: SPARQLQuery) -> VerificationResult:
         """Execute SPARQL query on DBpedia (fallback)."""
         try:
             # Adapt query for DBpedia (replace wd: prefixes)
@@ -303,12 +297,18 @@ class KnowledgeGraphVerifier:
                 return VerificationResult(
                     claim=sparql_query.original_claim,
                     verified=verified,
-                    verification_status=VerificationStatus.VERIFIED_TRUE if verified else VerificationStatus.VERIFIED_FALSE,
+                    verification_status=(
+                        VerificationStatus.VERIFIED_TRUE
+                        if verified
+                        else VerificationStatus.VERIFIED_FALSE
+                    ),
                     confidence=0.85,  # Slightly lower confidence for DBpedia
                     verdict="TRUE" if verified else "FALSE",
-                    evidence={"dbpedia_result": "confirmed" if verified else "not_found"},
+                    evidence={
+                        "dbpedia_result": "confirmed" if verified else "not_found"
+                    },
                     sparql_query=dbpedia_query,
-                    kg_source="dbpedia"
+                    kg_source="dbpedia",
                 )
 
             else:
@@ -323,13 +323,12 @@ class KnowledgeGraphVerifier:
                         verdict="NO_DATA",
                         evidence={},
                         sparql_query=dbpedia_query,
-                        kg_source="dbpedia"
+                        kg_source="dbpedia",
                     )
 
                 # Extract values
                 actual_values = [
-                    binding.get("value", {}).get("value", "")
-                    for binding in bindings
+                    binding.get("value", {}).get("value", "") for binding in bindings
                 ]
 
                 return VerificationResult(
@@ -341,7 +340,7 @@ class KnowledgeGraphVerifier:
                     evidence={"dbpedia_values": actual_values},
                     sparql_query=dbpedia_query,
                     kg_source="dbpedia",
-                    actual_value=str(actual_values)
+                    actual_value=str(actual_values),
                 )
 
         except Exception as e:
@@ -354,7 +353,7 @@ class KnowledgeGraphVerifier:
                 verdict="ERROR",
                 evidence={"error": str(e)},
                 sparql_query=sparql_query.query,
-                kg_source="dbpedia"
+                kg_source="dbpedia",
             )
 
     @staticmethod
@@ -385,16 +384,12 @@ class KnowledgeGraphVerifier:
         return query
 
     async def batch_verify(
-        self,
-        sparql_queries: List[SPARQLQuery]
+        self, sparql_queries: List[SPARQLQuery]
     ) -> List[VerificationResult]:
         """Verify multiple claims in parallel."""
         import asyncio
 
-        tasks = [
-            self.verify_claim(query)
-            for query in sparql_queries
-        ]
+        tasks = [self.verify_claim(query) for query in sparql_queries]
 
         return await asyncio.gather(*tasks)
 

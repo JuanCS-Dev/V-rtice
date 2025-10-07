@@ -12,16 +12,18 @@ Model: gemini-2.0-flash-exp (mais rápido e barato)
 Alternative: gemini-1.5-pro (mais poderoso)
 """
 
-import os
-import json
-import httpx
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+import json
+import os
+from typing import Any, Dict, List, Optional
+
+import httpx
 
 
 @dataclass
 class GeminiConfig:
     """Configuração do Gemini"""
+
     api_key: str
     model: str = "gemini-1.5-flash"  # Modelo sem quota limite
     temperature: float = 0.7
@@ -53,7 +55,7 @@ class GeminiClient:
         system_instruction: Optional[str] = None,
         tools: Optional[List[Dict]] = None,
         temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None
+        max_tokens: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Gera texto usando Gemini.
@@ -72,16 +74,11 @@ class GeminiClient:
 
         # Build request
         request_body = {
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": prompt}]
-                }
-            ],
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {
                 "temperature": temperature or self.config.temperature,
                 "maxOutputTokens": max_tokens or self.config.max_tokens,
-            }
+            },
         }
 
         # Add system instruction
@@ -93,9 +90,7 @@ class GeminiClient:
         # Add tools (function declarations)
         if tools:
             request_body["tools"] = [
-                {
-                    "functionDeclarations": self._convert_tools_to_gemini_format(tools)
-                }
+                {"functionDeclarations": self._convert_tools_to_gemini_format(tools)}
             ]
 
         # Call API
@@ -104,12 +99,14 @@ class GeminiClient:
                 url,
                 params={"key": self.api_key},
                 json=request_body,
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
 
             if response.status_code != 200:
                 error_detail = response.text
-                raise Exception(f"Gemini API error: {response.status_code} - {error_detail}")
+                raise Exception(
+                    f"Gemini API error: {response.status_code} - {error_detail}"
+                )
 
             result = response.json()
 
@@ -120,7 +117,7 @@ class GeminiClient:
         self,
         messages: List[Dict[str, str]],
         system_instruction: Optional[str] = None,
-        tools: Optional[List[Dict]] = None
+        tools: Optional[List[Dict]] = None,
     ) -> Dict[str, Any]:
         """
         Gera texto com histórico de conversa.
@@ -139,17 +136,14 @@ class GeminiClient:
         contents = []
         for msg in messages:
             role = "model" if msg["role"] in ["assistant", "model"] else "user"
-            contents.append({
-                "role": role,
-                "parts": [{"text": msg["content"]}]
-            })
+            contents.append({"role": role, "parts": [{"text": msg["content"]}]})
 
         request_body = {
             "contents": contents,
             "generationConfig": {
                 "temperature": self.config.temperature,
                 "maxOutputTokens": self.config.max_tokens,
-            }
+            },
         }
 
         if system_instruction:
@@ -159,9 +153,7 @@ class GeminiClient:
 
         if tools:
             request_body["tools"] = [
-                {
-                    "functionDeclarations": self._convert_tools_to_gemini_format(tools)
-                }
+                {"functionDeclarations": self._convert_tools_to_gemini_format(tools)}
             ]
 
         async with httpx.AsyncClient(timeout=self.config.timeout) as client:
@@ -169,11 +161,13 @@ class GeminiClient:
                 url,
                 params={"key": self.api_key},
                 json=request_body,
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
 
             if response.status_code != 200:
-                raise Exception(f"Gemini API error: {response.status_code} - {response.text}")
+                raise Exception(
+                    f"Gemini API error: {response.status_code} - {response.text}"
+                )
 
             result = response.json()
 
@@ -193,9 +187,7 @@ class GeminiClient:
 
         request_body = {
             "model": "models/text-embedding-004",
-            "content": {
-                "parts": [{"text": text}]
-            }
+            "content": {"parts": [{"text": text}]},
         }
 
         async with httpx.AsyncClient(timeout=30) as client:
@@ -203,7 +195,7 @@ class GeminiClient:
                 url,
                 params={"key": self.api_key},
                 json=request_body,
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
 
             if response.status_code != 200:
@@ -276,7 +268,7 @@ class GeminiClient:
                 "text": "",
                 "tool_calls": [],
                 "finish_reason": "error",
-                "raw": result
+                "raw": result,
             }
 
         candidate = candidates[0]
@@ -294,10 +286,12 @@ class GeminiClient:
             # Function call (tool use)
             elif "functionCall" in part:
                 func_call = part["functionCall"]
-                tool_calls.append({
-                    "name": func_call.get("name"),
-                    "arguments": func_call.get("args", {})
-                })
+                tool_calls.append(
+                    {
+                        "name": func_call.get("name"),
+                        "arguments": func_call.get("args", {}),
+                    }
+                )
 
         finish_reason = candidate.get("finishReason", "STOP")
 
@@ -305,13 +299,14 @@ class GeminiClient:
             "text": text,
             "tool_calls": tool_calls,
             "finish_reason": finish_reason,
-            "raw": result
+            "raw": result,
         }
 
 
 # ============================================================================
 # EXEMPLO DE USO
 # ============================================================================
+
 
 async def example_usage():
     """Demonstra uso do Gemini client"""
@@ -320,7 +315,7 @@ async def example_usage():
     config = GeminiConfig(
         api_key=os.getenv("GEMINI_API_KEY"),
         model="gemini-2.0-flash-exp",
-        temperature=0.7
+        temperature=0.7,
     )
 
     client = GeminiClient(config)
@@ -329,7 +324,7 @@ async def example_usage():
     print("=== EXAMPLE 1: Simple Text Generation ===")
     response = await client.generate_text(
         prompt="What are the top 3 cybersecurity threats in 2024?",
-        system_instruction="You are Maximus, an elite cybersecurity AI analyst."
+        system_instruction="You are Maximus, an elite cybersecurity AI analyst.",
     )
     print(f"Text: {response['text'][:200]}...")
 
@@ -344,15 +339,15 @@ async def example_usage():
                 "properties": {
                     "ip": {"type": "string", "description": "IP address to analyze"}
                 },
-                "required": ["ip"]
-            }
+                "required": ["ip"],
+            },
         }
     ]
 
     response = await client.generate_text(
         prompt="Analyze the IP 8.8.8.8 for threats",
         system_instruction="You are Maximus. Use the available tools to answer.",
-        tools=tools
+        tools=tools,
     )
 
     print(f"Text: {response['text']}")
@@ -362,13 +357,15 @@ async def example_usage():
     print("\n=== EXAMPLE 3: Conversation ===")
     messages = [
         {"role": "user", "content": "What is a DDoS attack?"},
-        {"role": "model", "content": "A DDoS is a distributed denial-of-service attack..."},
-        {"role": "user", "content": "How can I protect against it?"}
+        {
+            "role": "model",
+            "content": "A DDoS is a distributed denial-of-service attack...",
+        },
+        {"role": "user", "content": "How can I protect against it?"},
     ]
 
     response = await client.generate_with_conversation(
-        messages=messages,
-        system_instruction="You are Maximus, a cybersecurity expert."
+        messages=messages, system_instruction="You are Maximus, a cybersecurity expert."
     )
     print(f"Response: {response['text'][:200]}...")
 
@@ -381,4 +378,5 @@ async def example_usage():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(example_usage())

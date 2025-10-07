@@ -5,17 +5,16 @@ Implements event-driven architecture with async Kafka producers/consumers
 for scalable, decoupled processing pipeline.
 """
 
-import logging
-import json
 import asyncio
-from typing import Optional, Dict, Any, Callable, List
-from datetime import datetime
 from contextlib import asynccontextmanager
+from datetime import datetime
+import json
+import logging
+from typing import Any, Callable, Dict, List, Optional
 
-from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from aiokafka.errors import KafkaError
 from aiokafka.structs import TopicPartition
-
 from config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -45,10 +44,10 @@ class KafkaClient:
         try:
             self.producer = AIOKafkaProducer(
                 bootstrap_servers=self.settings.KAFKA_BOOTSTRAP_SERVERS,
-                value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-                key_serializer=lambda k: k.encode('utf-8') if k else None,
-                compression_type='gzip',
-                acks='all',  # Wait for all replicas
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                key_serializer=lambda k: k.encode("utf-8") if k else None,
+                compression_type="gzip",
+                acks="all",  # Wait for all replicas
                 enable_idempotence=True,  # Exactly-once semantics
                 request_timeout_ms=30000,
             )
@@ -75,7 +74,7 @@ class KafkaClient:
         topic: str,
         message: Dict[str, Any],
         key: Optional[str] = None,
-        partition: Optional[int] = None
+        partition: Optional[int] = None,
     ) -> bool:
         """
         Send event to Kafka topic.
@@ -95,15 +94,12 @@ class KafkaClient:
 
         try:
             # Add timestamp if not present
-            if 'timestamp' not in message:
-                message['timestamp'] = datetime.utcnow().isoformat()
+            if "timestamp" not in message:
+                message["timestamp"] = datetime.utcnow().isoformat()
 
             # Send to Kafka
             await self.producer.send(
-                topic=topic,
-                value=message,
-                key=key,
-                partition=partition
+                topic=topic, value=message, key=key, partition=partition
             )
 
             logger.debug(f"Sent event to {topic}: {key or 'no-key'}")
@@ -117,10 +113,7 @@ class KafkaClient:
             return False
 
     async def create_consumer(
-        self,
-        topics: List[str],
-        group_id: str,
-        auto_offset_reset: str = 'earliest'
+        self, topics: List[str], group_id: str, auto_offset_reset: str = "earliest"
     ) -> AIOKafkaConsumer:
         """
         Create Kafka consumer for specified topics.
@@ -139,8 +132,8 @@ class KafkaClient:
                 bootstrap_servers=self.settings.KAFKA_BOOTSTRAP_SERVERS,
                 group_id=group_id,
                 auto_offset_reset=auto_offset_reset,
-                value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-                key_deserializer=lambda k: k.decode('utf-8') if k else None,
+                value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+                key_deserializer=lambda k: k.decode("utf-8") if k else None,
                 enable_auto_commit=True,
                 auto_commit_interval_ms=5000,
                 max_poll_records=100,
@@ -180,7 +173,7 @@ class KafkaClient:
         topics: List[str],
         group_id: str,
         message_handler: Callable,
-        auto_offset_reset: str = 'earliest'
+        auto_offset_reset: str = "earliest",
     ) -> None:
         """
         Consume messages from topics with handler function.
@@ -201,7 +194,7 @@ class KafkaClient:
                         key=message.key,
                         value=message.value,
                         partition=message.partition,
-                        offset=message.offset
+                        offset=message.offset,
                     )
                 except Exception as e:
                     logger.error(
@@ -221,7 +214,7 @@ class KafkaClient:
         topics: List[str],
         group_id: str,
         message_handler: Callable,
-        auto_offset_reset: str = 'earliest'
+        auto_offset_reset: str = "earliest",
     ) -> asyncio.Task:
         """
         Start consumer in background task.
@@ -256,7 +249,10 @@ class KafkaClient:
             # Try to send a test message to a health topic
             await self.producer.send(
                 topic=self.settings.KAFKA_TOPIC_ERRORS,
-                value={'type': 'health_check', 'timestamp': datetime.utcnow().isoformat()}
+                value={
+                    "type": "health_check",
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
             )
             return True
         except Exception as e:
@@ -268,16 +264,15 @@ class KafkaClient:
 # TOPIC-SPECIFIC HELPER FUNCTIONS
 # ============================================================================
 
-async def send_raw_text_event(client: KafkaClient, text: str, analysis_id: str, metadata: Dict = None) -> bool:
+
+async def send_raw_text_event(
+    client: KafkaClient, text: str, analysis_id: str, metadata: Dict = None
+) -> bool:
     """Send raw text to processing pipeline."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_RAW_TEXT,
-        message={
-            'analysis_id': analysis_id,
-            'text': text,
-            'metadata': metadata or {}
-        },
-        key=analysis_id
+        message={"analysis_id": analysis_id, "text": text, "metadata": metadata or {}},
+        key=analysis_id,
     )
 
 
@@ -286,37 +281,34 @@ async def send_processed_text_event(
     analysis_id: str,
     entities: List[Dict],
     arguments: List[Dict],
-    metadata: Dict = None
+    metadata: Dict = None,
 ) -> bool:
     """Send processed text with extracted features."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_PROCESSED_TEXT,
         message={
-            'analysis_id': analysis_id,
-            'entities': entities,
-            'arguments': arguments,
-            'metadata': metadata or {}
+            "analysis_id": analysis_id,
+            "entities": entities,
+            "arguments": arguments,
+            "metadata": metadata or {},
         },
-        key=analysis_id
+        key=analysis_id,
     )
 
 
 async def send_claim_verification_request(
-    client: KafkaClient,
-    analysis_id: str,
-    claims: List[str],
-    priority: int = 5
+    client: KafkaClient, analysis_id: str, claims: List[str], priority: int = 5
 ) -> bool:
     """Send claims for Tier 2 verification."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_CLAIMS_TO_VERIFY,
         message={
-            'analysis_id': analysis_id,
-            'claims': claims,
-            'priority': priority,
-            'request_timestamp': datetime.utcnow().isoformat()
+            "analysis_id": analysis_id,
+            "claims": claims,
+            "priority": priority,
+            "request_timestamp": datetime.utcnow().isoformat(),
         },
-        key=analysis_id
+        key=analysis_id,
     )
 
 
@@ -326,20 +318,20 @@ async def send_verification_result(
     claim: str,
     verification_status: str,
     sources: List[Dict],
-    confidence: float
+    confidence: float,
 ) -> bool:
     """Send verification result back to pipeline."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_VERIFICATION_RESULTS,
         message={
-            'analysis_id': analysis_id,
-            'claim': claim,
-            'verification_status': verification_status,
-            'sources': sources,
-            'confidence': confidence,
-            'verified_at': datetime.utcnow().isoformat()
+            "analysis_id": analysis_id,
+            "claim": claim,
+            "verification_status": verification_status,
+            "sources": sources,
+            "confidence": confidence,
+            "verified_at": datetime.utcnow().isoformat(),
         },
-        key=analysis_id
+        key=analysis_id,
     )
 
 
@@ -348,37 +340,34 @@ async def send_analysis_complete(
     analysis_id: str,
     threat_score: float,
     severity: str,
-    processing_time_ms: float
+    processing_time_ms: float,
 ) -> bool:
     """Send final analysis result."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_ANALYSIS_RESULTS,
         message={
-            'analysis_id': analysis_id,
-            'threat_score': threat_score,
-            'severity': severity,
-            'processing_time_ms': processing_time_ms,
-            'completed_at': datetime.utcnow().isoformat()
+            "analysis_id": analysis_id,
+            "threat_score": threat_score,
+            "severity": severity,
+            "processing_time_ms": processing_time_ms,
+            "completed_at": datetime.utcnow().isoformat(),
         },
-        key=analysis_id
+        key=analysis_id,
     )
 
 
 async def send_error_event(
-    client: KafkaClient,
-    error_type: str,
-    error_message: str,
-    context: Dict = None
+    client: KafkaClient, error_type: str, error_message: str, context: Dict = None
 ) -> bool:
     """Send error event for monitoring."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_ERRORS,
         message={
-            'error_type': error_type,
-            'error_message': error_message,
-            'context': context or {},
-            'timestamp': datetime.utcnow().isoformat()
-        }
+            "error_type": error_type,
+            "error_message": error_message,
+            "context": context or {},
+            "timestamp": datetime.utcnow().isoformat(),
+        },
     )
 
 
@@ -392,6 +381,7 @@ kafka_client = KafkaClient()
 # ============================================================================
 # LIFESPAN MANAGEMENT FOR FASTAPI
 # ============================================================================
+
 
 @asynccontextmanager
 async def lifespan_kafka(app):

@@ -11,7 +11,7 @@ facilitating adaptive behavior in uncertain situations.
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class ConfidenceScoring:
@@ -36,7 +36,7 @@ class ConfidenceScoring:
             float: A confidence score between 0.0 and 1.0.
         """
         print("[ConfidenceScoring] Calculating confidence score...")
-        await asyncio.sleep(0.1) # Simulate scoring process
+        await asyncio.sleep(0.1)  # Simulate scoring process
 
         # Simplified scoring logic for demonstration
         # Factors could include:
@@ -48,7 +48,9 @@ class ConfidenceScoring:
         base_score = 0.7
         if "error" in response.get("output", "").lower():
             base_score -= 0.3
-        if context.get("tool_results") and any("error" in r for r in context["tool_results"]):
+        if context.get("tool_results") and any(
+            "error" in r for r in context["tool_results"]
+        ):
             base_score -= 0.2
         if context.get("retrieved_docs"):
             base_score += 0.1

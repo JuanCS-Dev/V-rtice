@@ -5,18 +5,17 @@ Detects 18 propaganda techniques from SemEval-2020 Task 11:
 Fine-grained Propaganda Detection using token-level classification.
 """
 
-import logging
-from typing import List, Dict, Tuple, Optional
-import numpy as np
 import asyncio
+import logging
+from typing import Dict, List, Optional, Tuple
 
-import torch
-from transformers import AutoTokenizer, AutoModelForTokenClassification
-
-from models import PropagandaSpan, PropagandaTechnique
 from cache_manager import cache_manager, CacheCategory
-from utils import hash_text
 from config import get_settings
+from models import PropagandaSpan, PropagandaTechnique
+import numpy as np
+import torch
+from transformers import AutoModelForTokenClassification, AutoTokenizer
+from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +52,7 @@ class RoBERTaPropagandaDetector:
         17: PropagandaTechnique.STRAW_MAN,
     }
 
-    def __init__(
-        self,
-        model_name: str = "xlm-roberta-base",
-        device: str = "cpu"
-    ):
+    def __init__(self, model_name: str = "xlm-roberta-base", device: str = "cpu"):
         """
         Initialize RoBERTa propaganda detector.
 
@@ -84,16 +79,14 @@ class RoBERTaPropagandaDetector:
 
             # Load tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                use_fast=True
+                self.model_name, use_fast=True
             )
 
             # Load model for token classification
             # Note: In production, use fine-tuned model on SemEval-2020 dataset
             num_labels = len(self.TECHNIQUE_LABELS) * 2 + 1  # B-/I- tags + O
             self.model = AutoModelForTokenClassification.from_pretrained(
-                self.model_name,
-                num_labels=num_labels
+                self.model_name, num_labels=num_labels
             )
 
             self.model.to(self.device)
@@ -102,9 +95,7 @@ class RoBERTaPropagandaDetector:
             # Quantization for CPU
             if self.device == "cpu":
                 self.model = torch.quantization.quantize_dynamic(
-                    self.model,
-                    {torch.nn.Linear},
-                    dtype=torch.qint8
+                    self.model, {torch.nn.Linear}, dtype=torch.qint8
                 )
 
             self._initialized = True
@@ -116,10 +107,7 @@ class RoBERTaPropagandaDetector:
 
     @torch.no_grad()
     def detect_propaganda_spans(
-        self,
-        text: str,
-        min_confidence: float = 0.7,
-        use_cache: bool = True
+        self, text: str, min_confidence: float = 0.7, use_cache: bool = True
     ) -> List[PropagandaSpan]:
         """
         Detect propaganda technique spans in text.
@@ -151,7 +139,7 @@ class RoBERTaPropagandaDetector:
             truncation=True,
             max_length=512,
             padding=True,
-            return_offsets_mapping=True
+            return_offsets_mapping=True,
         ).to(self.device)
 
         offset_mapping = inputs.pop("offset_mapping")[0].cpu().numpy()
@@ -165,11 +153,7 @@ class RoBERTaPropagandaDetector:
 
         # Convert to BIO tags
         spans = self._extract_spans_from_bio(
-            text,
-            predictions,
-            offset_mapping,
-            logits,
-            min_confidence
+            text, predictions, offset_mapping, logits, min_confidence
         )
 
         # Cache result
@@ -180,7 +164,7 @@ class RoBERTaPropagandaDetector:
                     CacheCategory.MODEL_CACHE,
                     cache_key,
                     [span.model_dump() for span in spans],
-                    ttl_override=3600
+                    ttl_override=3600,
                 )
             )
 
@@ -192,7 +176,7 @@ class RoBERTaPropagandaDetector:
         predictions: np.ndarray,
         offset_mapping: np.ndarray,
         logits: np.ndarray,
-        min_confidence: float
+        min_confidence: float,
     ) -> List[PropagandaSpan]:
         """
         Extract propaganda spans from BIO predictions.
@@ -250,7 +234,7 @@ class RoBERTaPropagandaDetector:
                     text=text[start_char:end_char],
                     start_char=start_char,
                     end_char=end_char,
-                    confidence=confidence
+                    confidence=confidence,
                 )
                 current_technique = technique
 
@@ -262,7 +246,7 @@ class RoBERTaPropagandaDetector:
                 if current_span and technique == current_technique:
                     end_char = int(offset[1])
                     current_span.end_char = end_char
-                    current_span.text = text[current_span.start_char:end_char]
+                    current_span.text = text[current_span.start_char : end_char]
                     # Update confidence (average)
                     current_span.confidence = (current_span.confidence + confidence) / 2
 
@@ -273,8 +257,7 @@ class RoBERTaPropagandaDetector:
         return spans
 
     def merge_overlapping_spans(
-        self,
-        spans: List[PropagandaSpan]
+        self, spans: List[PropagandaSpan]
     ) -> List[PropagandaSpan]:
         """
         Merge overlapping propaganda spans.
@@ -301,7 +284,7 @@ class RoBERTaPropagandaDetector:
                 # Merge if same technique
                 if current.technique == prev.technique:
                     prev.end_char = max(prev.end_char, current.end_char)
-                    prev.text = prev.text[:prev.end_char - prev.start_char]
+                    prev.text = prev.text[: prev.end_char - prev.start_char]
                     prev.confidence = max(prev.confidence, current.confidence)
                 else:
                     # Keep both if different techniques
@@ -312,9 +295,7 @@ class RoBERTaPropagandaDetector:
         return merged
 
     def calculate_propaganda_density(
-        self,
-        text: str,
-        spans: List[PropagandaSpan]
+        self, text: str, spans: List[PropagandaSpan]
     ) -> float:
         """
         Calculate propaganda density (% of text containing propaganda).
@@ -329,17 +310,13 @@ class RoBERTaPropagandaDetector:
         if not text or not spans:
             return 0.0
 
-        total_propaganda_chars = sum(
-            span.end_char - span.start_char
-            for span in spans
-        )
+        total_propaganda_chars = sum(span.end_char - span.start_char for span in spans)
 
         density = total_propaganda_chars / len(text)
         return float(np.clip(density, 0.0, 1.0))
 
     def get_technique_distribution(
-        self,
-        spans: List[PropagandaSpan]
+        self, spans: List[PropagandaSpan]
     ) -> Dict[PropagandaTechnique, int]:
         """
         Get distribution of propaganda techniques.
@@ -357,8 +334,7 @@ class RoBERTaPropagandaDetector:
         return distribution
 
     def detect_multi_technique_patterns(
-        self,
-        spans: List[PropagandaSpan]
+        self, spans: List[PropagandaSpan]
     ) -> List[Dict[str, any]]:
         """
         Detect patterns of multiple techniques used together.
@@ -381,32 +357,34 @@ class RoBERTaPropagandaDetector:
 
         # Check for co-occurrence within 100 chars
         for i, span1 in enumerate(spans):
-            for span2 in spans[i+1:]:
+            for span2 in spans[i + 1 :]:
                 distance = span2.start_char - span1.end_char
 
                 if 0 <= distance <= 100:  # Close proximity
-                    technique_pair = tuple(sorted([
-                        span1.technique.value,
-                        span2.technique.value
-                    ]))
+                    technique_pair = tuple(
+                        sorted([span1.technique.value, span2.technique.value])
+                    )
 
                     pattern_name = KNOWN_PATTERNS.get(technique_pair)
 
                     if pattern_name:
-                        patterns.append({
-                            "pattern": pattern_name,
-                            "techniques": [span1.technique.value, span2.technique.value],
-                            "span1": span1,
-                            "span2": span2,
-                            "distance": distance
-                        })
+                        patterns.append(
+                            {
+                                "pattern": pattern_name,
+                                "techniques": [
+                                    span1.technique.value,
+                                    span2.technique.value,
+                                ],
+                                "span1": span1,
+                                "span2": span2,
+                                "distance": distance,
+                            }
+                        )
 
         return patterns
 
     def batch_detect(
-        self,
-        texts: List[str],
-        batch_size: int = 16
+        self, texts: List[str], batch_size: int = 16
     ) -> List[List[PropagandaSpan]]:
         """
         Batch propaganda detection for efficiency.
@@ -421,7 +399,7 @@ class RoBERTaPropagandaDetector:
         results = []
 
         for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+            batch = texts[i : i + batch_size]
 
             # Tokenize batch
             inputs = self.tokenizer(
@@ -430,7 +408,7 @@ class RoBERTaPropagandaDetector:
                 truncation=True,
                 max_length=512,
                 padding=True,
-                return_offsets_mapping=True
+                return_offsets_mapping=True,
             ).to(self.device)
 
             offset_mappings = inputs.pop("offset_mapping").cpu().numpy()
@@ -444,11 +422,7 @@ class RoBERTaPropagandaDetector:
             for text, logit, offset_mapping in zip(batch, logits, offset_mappings):
                 predictions = np.argmax(logit, axis=-1)
                 spans = self._extract_spans_from_bio(
-                    text,
-                    predictions,
-                    offset_mapping,
-                    logit,
-                    min_confidence=0.7
+                    text, predictions, offset_mapping, logit, min_confidence=0.7
                 )
                 results.append(spans)
 

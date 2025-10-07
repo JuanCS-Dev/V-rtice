@@ -8,19 +8,18 @@ Integrates:
 4. Fact verification against DBpedia knowledge base
 """
 
-import logging
-from typing import List, Dict, Set, Tuple, Optional, Any
-from datetime import datetime
 import asyncio
-
-import aiohttp
-from SPARQLWrapper import SPARQLWrapper, JSON
+from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib.parse import quote
 
-from models import Entity, EntityType, KnowledgeGraphFact
+import aiohttp
 from cache_manager import cache_manager, CacheCategory
-from utils import hash_text
 from config import get_settings
+from models import Entity, EntityType, KnowledgeGraphFact
+from SPARQLWrapper import JSON, SPARQLWrapper
+from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class DBpediaSpotlightClient:
         self,
         spotlight_endpoint: str = "https://api.dbpedia-spotlight.org/en/annotate",
         confidence: float = 0.4,
-        support: int = 20
+        support: int = 20,
     ):
         """
         Initialize DBpedia Spotlight client.
@@ -66,11 +65,7 @@ class DBpediaSpotlightClient:
             await self.session.close()
             self.session = None
 
-    async def extract_entities(
-        self,
-        text: str,
-        use_cache: bool = True
-    ) -> List[Entity]:
+    async def extract_entities(self, text: str, use_cache: bool = True) -> List[Entity]:
         """
         Extract and disambiguate entities from text.
 
@@ -96,16 +91,12 @@ class DBpediaSpotlightClient:
             params = {
                 "text": text,
                 "confidence": self.confidence,
-                "support": self.support
+                "support": self.support,
             }
-            headers = {
-                "Accept": "application/json"
-            }
+            headers = {"Accept": "application/json"}
 
             async with self.session.get(
-                self.spotlight_endpoint,
-                params=params,
-                headers=headers
+                self.spotlight_endpoint, params=params, headers=headers
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -124,7 +115,7 @@ class DBpediaSpotlightClient:
                     CacheCategory.EXTERNAL_API,
                     cache_key,
                     [e.model_dump() for e in entities],
-                    ttl_override=3600
+                    ttl_override=3600,
                 )
 
             logger.info(f"Extracted {len(entities)} entities from DBpedia Spotlight")
@@ -162,10 +153,7 @@ class DBpediaSpotlightClient:
                 confidence=similarity_score,
                 start_char=offset,
                 end_char=offset + len(surface_form),
-                metadata={
-                    "dbpedia_types": types,
-                    "support": support
-                }
+                metadata={"dbpedia_types": types, "support": support},
             )
             entities.append(entity)
 
@@ -178,7 +166,11 @@ class DBpediaSpotlightClient:
 
         if "person" in type_str or "agent" in type_str:
             return EntityType.PERSON
-        elif "organisation" in type_str or "organization" in type_str or "company" in type_str:
+        elif (
+            "organisation" in type_str
+            or "organization" in type_str
+            or "company" in type_str
+        ):
             return EntityType.ORGANIZATION
         elif "place" in type_str or "location" in type_str:
             return EntityType.LOCATION
@@ -197,10 +189,7 @@ class DBpediaSPARQLClient:
     Queries DBpedia knowledge graph for fact verification.
     """
 
-    def __init__(
-        self,
-        sparql_endpoint: str = "https://dbpedia.org/sparql"
-    ):
+    def __init__(self, sparql_endpoint: str = "https://dbpedia.org/sparql"):
         """
         Initialize SPARQL client.
 
@@ -213,9 +202,7 @@ class DBpediaSPARQLClient:
         self.sparql.setTimeout(30)
 
     async def query(
-        self,
-        sparql_query: str,
-        use_cache: bool = True
+        self, sparql_query: str, use_cache: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Execute SPARQL query.
@@ -247,10 +234,7 @@ class DBpediaSPARQLClient:
             if use_cache:
                 cache_key = f"dbpedia_sparql:{hash_text(sparql_query)}"
                 await cache_manager.set(
-                    CacheCategory.EXTERNAL_API,
-                    cache_key,
-                    bindings,
-                    ttl_override=3600
+                    CacheCategory.EXTERNAL_API, cache_key, bindings, ttl_override=3600
                 )
 
             logger.info(f"SPARQL query returned {len(bindings)} results")
@@ -260,10 +244,7 @@ class DBpediaSPARQLClient:
             logger.error(f"SPARQL query error: {e}", exc_info=True)
             return []
 
-    async def get_entity_properties(
-        self,
-        entity_uri: str
-    ) -> Dict[str, List[str]]:
+    async def get_entity_properties(self, entity_uri: str) -> Dict[str, List[str]]:
         """
         Get all properties for an entity.
 
@@ -295,9 +276,7 @@ class DBpediaSPARQLClient:
         return properties
 
     async def get_entity_abstract(
-        self,
-        entity_uri: str,
-        language: str = "pt"
+        self, entity_uri: str, language: str = "pt"
     ) -> Optional[str]:
         """
         Get entity abstract (summary).
@@ -325,10 +304,7 @@ class DBpediaSPARQLClient:
         return None
 
     async def verify_relationship(
-        self,
-        subject_uri: str,
-        predicate_uri: str,
-        object_uri: str
+        self, subject_uri: str, predicate_uri: str, object_uri: str
     ) -> bool:
         """
         Verify if relationship exists in DBpedia.
@@ -354,10 +330,7 @@ class DBpediaSPARQLClient:
 
         return results_dict.get("boolean", False)
 
-    async def get_entity_type(
-        self,
-        entity_uri: str
-    ) -> List[str]:
+    async def get_entity_type(self, entity_uri: str) -> List[str]:
         """
         Get RDF types for entity.
 
@@ -379,9 +352,7 @@ class DBpediaSPARQLClient:
         return types
 
     async def find_related_entities(
-        self,
-        entity_uri: str,
-        max_results: int = 10
+        self, entity_uri: str, max_results: int = 10
     ) -> List[Tuple[str, str, str]]:
         """
         Find entities related to given entity.
@@ -415,10 +386,7 @@ class DBpediaSPARQLClient:
 
         return related
 
-    async def get_temporal_facts(
-        self,
-        entity_uri: str
-    ) -> List[Dict[str, Any]]:
+    async def get_temporal_facts(self, entity_uri: str) -> List[Dict[str, Any]]:
         """
         Get temporal facts about entity (birth/death dates, founding dates, etc.).
 
@@ -450,10 +418,9 @@ class DBpediaSPARQLClient:
             prop = binding.get("property", {}).get("value", "")
             date = binding.get("date", {}).get("value", "")
 
-            facts.append({
-                "property": prop.split("/")[-1],  # Extract property name
-                "date": date
-            })
+            facts.append(
+                {"property": prop.split("/")[-1], "date": date}  # Extract property name
+            )
 
         return facts
 
@@ -484,9 +451,7 @@ class DBpediaClient:
         self._initialized = False
 
     async def extract_and_enrich_entities(
-        self,
-        text: str,
-        include_abstracts: bool = False
+        self, text: str, include_abstracts: bool = False
     ) -> List[Entity]:
         """
         Extract entities and enrich with DBpedia data.
@@ -509,17 +474,16 @@ class DBpediaClient:
 
             # Get abstract (optional)
             if include_abstracts:
-                abstract = await self.sparql.get_entity_abstract(entity.uri, language="pt")
+                abstract = await self.sparql.get_entity_abstract(
+                    entity.uri, language="pt"
+                )
                 if abstract:
                     entity.metadata["abstract"] = abstract
 
         return entities
 
     async def verify_fact(
-        self,
-        subject: str,
-        predicate: str,
-        object: str
+        self, subject: str, predicate: str, object: str
     ) -> Dict[str, Any]:
         """
         Verify factual statement against DBpedia.
@@ -533,15 +497,25 @@ class DBpediaClient:
             Verification result dict
         """
         # If subject/object are text, try to resolve to URIs
-        subject_uri = subject if subject.startswith("http") else f"http://dbpedia.org/resource/{quote(subject)}"
-        object_uri = object if object.startswith("http") else f"http://dbpedia.org/resource/{quote(object)}"
-        predicate_uri = predicate if predicate.startswith("http") else f"http://dbpedia.org/property/{quote(predicate)}"
+        subject_uri = (
+            subject
+            if subject.startswith("http")
+            else f"http://dbpedia.org/resource/{quote(subject)}"
+        )
+        object_uri = (
+            object
+            if object.startswith("http")
+            else f"http://dbpedia.org/resource/{quote(object)}"
+        )
+        predicate_uri = (
+            predicate
+            if predicate.startswith("http")
+            else f"http://dbpedia.org/property/{quote(predicate)}"
+        )
 
         # Check relationship
         exists = await self.sparql.verify_relationship(
-            subject_uri=subject_uri,
-            predicate_uri=predicate_uri,
-            object_uri=object_uri
+            subject_uri=subject_uri, predicate_uri=predicate_uri, object_uri=object_uri
         )
 
         # Get subject properties for additional context
@@ -552,14 +526,11 @@ class DBpediaClient:
             "subject_uri": subject_uri,
             "predicate_uri": predicate_uri,
             "object_uri": object_uri,
-            "subject_properties": subject_props
+            "subject_properties": subject_props,
         }
 
     async def check_temporal_consistency(
-        self,
-        entity_uri: str,
-        claimed_date: str,
-        event_type: str = "general"
+        self, entity_uri: str, claimed_date: str, event_type: str = "general"
     ) -> Dict[str, Any]:
         """
         Check if claimed date is consistent with DBpedia temporal facts.
@@ -578,10 +549,7 @@ class DBpediaClient:
         try:
             claimed_year = int(claimed_date[:4])
         except (ValueError, IndexError):
-            return {
-                "consistent": None,
-                "error": "Invalid date format"
-            }
+            return {"consistent": None, "error": "Invalid date format"}
 
         # Check against temporal facts
         for fact in temporal_facts:
@@ -593,18 +561,17 @@ class DBpediaClient:
 
             # Check consistency based on event type
             if event_type == "birth" and "birth" in fact["property"].lower():
-                consistent = abs(fact_year - claimed_year) <= 1  # Allow 1 year tolerance
+                consistent = (
+                    abs(fact_year - claimed_year) <= 1
+                )  # Allow 1 year tolerance
                 return {
                     "consistent": consistent,
                     "dbpedia_date": fact_date,
                     "claimed_date": claimed_date,
-                    "difference_years": abs(fact_year - claimed_year)
+                    "difference_years": abs(fact_year - claimed_year),
                 }
 
-        return {
-            "consistent": None,
-            "error": "No temporal facts found in DBpedia"
-        }
+        return {"consistent": None, "error": "No temporal facts found in DBpedia"}
 
 
 # ============================================================================

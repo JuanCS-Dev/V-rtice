@@ -1,0 +1,167 @@
+# ============================================================================
+# Vértice Platform - Development Dependencies
+# ============================================================================
+# Install with: pip install -r requirements-dev.txt
+# ============================================================================
+
+# ============================================================================
+# CODE FORMATTING & LINTING
+# ============================================================================
+
+# Black - Opinionated code formatter
+black>=24.0.0
+
+# isort - Import statement organizer
+isort>=5.13.0
+
+# Flake8 - Style guide enforcement
+flake8>=7.0.0
+
+# Flake8 plugins for enhanced linting
+flake8-bugbear>=24.0.0          # Find likely bugs and design problems
+flake8-comprehensions>=3.14.0   # Better list/dict/set comprehensions
+flake8-docstrings>=1.7.0        # Docstring linting (pydocstyle)
+flake8-isort>=6.1.0             # isort integration
+flake8-quotes>=3.4.0            # Quote consistency
+flake8-bandit>=4.1.1            # Security linting
+flake8-print>=5.0.0             # Check for print statements
+flake8-annotations>=3.0.0       # Type annotation checks
+pep8-naming>=0.13.3             # PEP 8 naming conventions
+
+# Ruff - Fast alternative linter (optional, for comparison)
+ruff>=0.3.0
+
+# Pydocstyle - Docstring style checker
+pydocstyle>=6.3.0
+
+
+# ============================================================================
+# SECURITY SCANNING
+# ============================================================================
+
+# Bandit - Security issue scanner
+bandit[toml]>=1.7.7
+
+# Safety - Dependency vulnerability scanner
+safety>=3.0.0
+
+# pip-audit - Audit Python packages for known vulnerabilities
+pip-audit>=2.7.0
+
+
+# ============================================================================
+# TYPE CHECKING
+# ============================================================================
+
+# MyPy - Static type checker
+mypy>=1.9.0
+
+# Type stubs for common libraries
+types-requests>=2.31.0
+types-PyYAML>=6.0.12
+types-python-dateutil>=2.8.19
+
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+# Pytest - Testing framework
+pytest>=8.0.0
+pytest-cov>=4.1.0               # Coverage plugin
+pytest-asyncio>=0.23.0          # Async test support
+pytest-mock>=3.12.0             # Mocking support
+pytest-xdist>=3.5.0             # Parallel test execution
+pytest-timeout>=2.2.0           # Test timeout enforcement
+
+# Coverage - Code coverage measurement
+coverage[toml]>=7.4.0
+
+
+# ============================================================================
+# PRE-COMMIT HOOKS
+# ============================================================================
+
+# Pre-commit - Git hook framework
+pre-commit>=3.6.0
+
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+
+# Sphinx - Documentation generator
+sphinx>=7.2.0
+sphinx-rtd-theme>=2.0.0         # ReadTheDocs theme
+sphinx-autodoc-typehints>=2.0.0 # Type hints in docs
+
+# MkDocs - Alternative documentation (Markdown-based)
+mkdocs>=1.5.0
+mkdocs-material>=9.5.0
+
+
+# ============================================================================
+# DEVELOPMENT UTILITIES
+# ============================================================================
+
+# IPython - Enhanced interactive shell
+ipython>=8.21.0
+
+# IPdb - IPython debugger
+ipdb>=0.13.13
+
+# Python Language Server (for IDE support)
+python-lsp-server[all]>=1.10.0
+
+# Rope - Python refactoring library
+rope>=1.12.0
+
+# Autopep8 - Automatic PEP 8 formatter (backup to Black)
+autopep8>=2.0.4
+
+# Pylint - Comprehensive linter (optional, strict)
+pylint>=3.0.0
+
+
+# ============================================================================
+# PERFORMANCE PROFILING
+# ============================================================================
+
+# py-spy - Sampling profiler
+py-spy>=0.3.14
+
+# memory-profiler - Memory usage profiling
+memory-profiler>=0.61.0
+
+# line-profiler - Line-by-line profiling
+line-profiler>=4.1.0
+
+
+# ============================================================================
+# DATABASE TOOLS
+# ============================================================================
+
+# Alembic - Database migrations (for SQLAlchemy)
+alembic>=1.13.0
+
+
+# ============================================================================
+# API DEVELOPMENT
+# ============================================================================
+
+# HTTPie - Modern HTTP client for testing APIs
+httpie>=3.2.0
+
+# Requests-mock - Mock HTTP requests in tests
+requests-mock>=1.11.0
+
+
+# ============================================================================
+# DOCKER & DEPLOYMENT
+# ============================================================================
+
+# Docker Compose - Multi-container orchestration
+docker-compose>=1.29.2
+
+# Python-dotenv - .env file support
+python-dotenv>=1.0.1

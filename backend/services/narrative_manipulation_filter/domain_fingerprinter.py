@@ -5,12 +5,12 @@ Detects domain hopping attacks where bad actors create similar-looking
 domains to evade reputation systems.
 """
 
+import hashlib
 import logging
 import re
-from typing import List, Set, Dict, Any, Tuple, Optional
-from datasketch import MinHash, MinHashLSH
-import hashlib
+from typing import Any, Dict, List, Optional, Set, Tuple
 
+from datasketch import MinHash, MinHashLSH
 from utils import minhash_jaccard_estimate
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class DomainFingerprinter:
         self,
         num_perm: int = 128,
         threshold: float = 0.7,
-        weights: Tuple[float, float] = (0.5, 0.5)
+        weights: Tuple[float, float] = (0.5, 0.5),
     ):
         """
         Initialize domain fingerprinter.
@@ -49,11 +49,7 @@ class DomainFingerprinter:
         self.domain_fingerprints: Dict[str, MinHash] = {}
         self.domain_metadata: Dict[str, Dict[str, Any]] = {}
 
-    def extract_domain_shingles(
-        self,
-        domain: str,
-        shingle_size: int = 3
-    ) -> Set[str]:
+    def extract_domain_shingles(self, domain: str, shingle_size: int = 3) -> Set[str]:
         """
         Extract character-level shingles from domain.
 
@@ -68,16 +64,18 @@ class DomainFingerprinter:
         domain_clean = domain.lower().strip()
 
         # Remove TLD for better similarity
-        domain_no_tld = re.sub(r'\.(com|org|net|info|biz|co|io|tv|me)$', '', domain_clean)
+        domain_no_tld = re.sub(
+            r"\.(com|org|net|info|biz|co|io|tv|me)$", "", domain_clean
+        )
 
         # Extract character shingles
         shingles = set()
         for i in range(len(domain_no_tld) - shingle_size + 1):
-            shingle = domain_no_tld[i:i + shingle_size]
+            shingle = domain_no_tld[i : i + shingle_size]
             shingles.add(shingle)
 
         # Add word-level shingles (split by -, ., _)
-        words = re.split(r'[-._]', domain_no_tld)
+        words = re.split(r"[-._]", domain_no_tld)
         for word in words:
             if len(word) >= 3:
                 shingles.add(word)
@@ -97,12 +95,12 @@ class DomainFingerprinter:
         features = set()
 
         # TLD
-        tld_match = re.search(r'\.([a-z]+)$', domain.lower())
+        tld_match = re.search(r"\.([a-z]+)$", domain.lower())
         if tld_match:
             features.add(f"tld:{tld_match.group(1)}")
 
         # Domain length category
-        domain_base = domain.split('.')[0]
+        domain_base = domain.split(".")[0]
         if len(domain_base) < 10:
             features.add("length:short")
         elif len(domain_base) < 20:
@@ -113,15 +111,25 @@ class DomainFingerprinter:
         # Character type features
         if any(c.isdigit() for c in domain_base):
             features.add("has:numbers")
-        if '-' in domain_base:
+        if "-" in domain_base:
             features.add("has:hyphens")
-        if '_' in domain_base:
+        if "_" in domain_base:
             features.add("has:underscores")
 
         # Suspicious patterns
         suspicious_keywords = [
-            'news', 'truth', 'real', 'official', 'verified', 'authentic',
-            'breaking', 'urgent', 'alert', 'expose', 'leaked', 'insider'
+            "news",
+            "truth",
+            "real",
+            "official",
+            "verified",
+            "authentic",
+            "breaking",
+            "urgent",
+            "alert",
+            "expose",
+            "leaked",
+            "insider",
         ]
         for keyword in suspicious_keywords:
             if keyword in domain_base.lower():
@@ -130,9 +138,7 @@ class DomainFingerprinter:
         return features
 
     def create_fingerprint(
-        self,
-        domain: str,
-        metadata: Optional[Dict[str, Any]] = None
+        self, domain: str, metadata: Optional[Dict[str, Any]] = None
     ) -> MinHash:
         """
         Create MinHash fingerprint for domain.
@@ -149,19 +155,17 @@ class DomainFingerprinter:
         # Add domain shingles
         shingles = self.extract_domain_shingles(domain)
         for shingle in shingles:
-            minhash.update(shingle.encode('utf-8'))
+            minhash.update(shingle.encode("utf-8"))
 
         # Add metadata features
         meta_features = self.extract_metadata_features(domain)
         for feature in meta_features:
-            minhash.update(feature.encode('utf-8'))
+            minhash.update(feature.encode("utf-8"))
 
         return minhash
 
     def fingerprint_domain(
-        self,
-        domain: str,
-        metadata: Optional[Dict[str, Any]] = None
+        self, domain: str, metadata: Optional[Dict[str, Any]] = None
     ) -> str:
         """
         Generate and store domain fingerprint.
@@ -191,15 +195,13 @@ class DomainFingerprinter:
 
         # Generate fingerprint hash for storage
         fingerprint_hash = hashlib.sha256(
-            ''.join(map(str, minhash.hashvalues)).encode()
+            "".join(map(str, minhash.hashvalues)).encode()
         ).hexdigest()[:32]
 
         return fingerprint_hash
 
     def find_similar_domains(
-        self,
-        domain: str,
-        min_similarity: float = 0.7
+        self, domain: str, min_similarity: float = 0.7
     ) -> List[Tuple[str, float]]:
         """
         Find domains similar to the given domain.
@@ -239,9 +241,7 @@ class DomainFingerprinter:
         return results
 
     def detect_domain_hopping(
-        self,
-        domain: str,
-        cluster_threshold: float = 0.75
+        self, domain: str, cluster_threshold: float = 0.75
     ) -> Dict[str, Any]:
         """
         Detect if domain is part of a domain hopping network.
@@ -262,8 +262,11 @@ class DomainFingerprinter:
         if len(similar_domains) >= 2:
             intra_cluster_similarities = []
             for i, (dom1, _) in enumerate(similar_domains):
-                for dom2, _ in similar_domains[i+1:]:
-                    if dom1 in self.domain_fingerprints and dom2 in self.domain_fingerprints:
+                for dom2, _ in similar_domains[i + 1 :]:
+                    if (
+                        dom1 in self.domain_fingerprints
+                        and dom2 in self.domain_fingerprints
+                    ):
                         sim = self.domain_fingerprints[dom1].jaccard(
                             self.domain_fingerprints[dom2]
                         )
@@ -271,16 +274,14 @@ class DomainFingerprinter:
 
             cluster_density = (
                 sum(intra_cluster_similarities) / len(intra_cluster_similarities)
-                if intra_cluster_similarities else 0.0
+                if intra_cluster_similarities
+                else 0.0
             )
         else:
             cluster_density = 1.0 if len(similar_domains) == 1 else 0.0
 
         # Domain hopping indicators
-        is_likely_hopping = (
-            cluster_size >= 3 and
-            cluster_density >= 0.6
-        )
+        is_likely_hopping = cluster_size >= 3 and cluster_density >= 0.6
 
         # Risk assessment
         if cluster_size >= 10 and cluster_density >= 0.7:
@@ -302,23 +303,19 @@ class DomainFingerprinter:
                 {"domain": d, "similarity": s}
                 for d, s in similar_domains[:10]  # Top 10
             ],
-            "cluster_id": self._generate_cluster_id(domain, similar_domains)
+            "cluster_id": self._generate_cluster_id(domain, similar_domains),
         }
 
     def _generate_cluster_id(
-        self,
-        domain: str,
-        similar_domains: List[Tuple[str, float]]
+        self, domain: str, similar_domains: List[Tuple[str, float]]
     ) -> str:
         """Generate stable cluster ID from domain set."""
         all_domains = sorted([domain] + [d for d, _ in similar_domains])
-        cluster_str = '|'.join(all_domains)
+        cluster_str = "|".join(all_domains)
         return hashlib.sha256(cluster_str.encode()).hexdigest()[:16]
 
     def typosquatting_detection(
-        self,
-        domain: str,
-        trusted_domains: List[str]
+        self, domain: str, trusted_domains: List[str]
     ) -> Dict[str, Any]:
         """
         Detect typosquatting attempts.
@@ -334,7 +331,7 @@ class DomainFingerprinter:
             "is_typosquatting": False,
             "target_domain": None,
             "similarity": 0.0,
-            "techniques": []
+            "techniques": [],
         }
 
         domain_clean = domain.lower()
@@ -361,7 +358,10 @@ class DomainFingerprinter:
                 results["techniques"].append("missing_character")
 
             # Calculate similarity
-            if domain in self.domain_fingerprints and trusted in self.domain_fingerprints:
+            if (
+                domain in self.domain_fingerprints
+                and trusted in self.domain_fingerprints
+            ):
                 sim = self.domain_fingerprints[domain].jaccard(
                     self.domain_fingerprints[trusted]
                 )
@@ -395,8 +395,12 @@ class DomainFingerprinter:
     def _contains_homoglyphs(domain: str, trusted: str) -> bool:
         """Check for homoglyph characters."""
         homoglyph_pairs = [
-            ('0', 'o'), ('1', 'l'), ('1', 'i'),
-            ('rn', 'm'), ('vv', 'w'), ('cl', 'd')
+            ("0", "o"),
+            ("1", "l"),
+            ("1", "i"),
+            ("rn", "m"),
+            ("vv", "w"),
+            ("cl", "d"),
         ]
 
         for fake, real in homoglyph_pairs:
@@ -417,19 +421,23 @@ class DomainFingerprinter:
     def export_lsh_index(self) -> bytes:
         """Export LSH index for persistence."""
         import pickle
-        return pickle.dumps({
-            'lsh': self.lsh,
-            'fingerprints': self.domain_fingerprints,
-            'metadata': self.domain_metadata
-        })
+
+        return pickle.dumps(
+            {
+                "lsh": self.lsh,
+                "fingerprints": self.domain_fingerprints,
+                "metadata": self.domain_metadata,
+            }
+        )
 
     def import_lsh_index(self, data: bytes) -> None:
         """Import LSH index from persistence."""
         import pickle
+
         imported = pickle.loads(data)
-        self.lsh = imported['lsh']
-        self.domain_fingerprints = imported['fingerprints']
-        self.domain_metadata = imported['metadata']
+        self.lsh = imported["lsh"]
+        self.domain_fingerprints = imported["fingerprints"]
+        self.domain_metadata = imported["metadata"]
 
 
 # ============================================================================

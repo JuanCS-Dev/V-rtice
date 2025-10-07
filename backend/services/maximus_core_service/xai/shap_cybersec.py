@@ -64,12 +64,15 @@ class CyberSecSHAP(ExplainerBase):
         """
         super().__init__(config)
 
+        # Use self.config from base class (guaranteed to be dict, not None)
+        cfg = self.config
+
         # SHAP configuration
         self.shap_config = SHAPConfig(
-            algorithm=config.get('algorithm', 'kernel'),
-            num_background_samples=config.get('num_background_samples', 100),
-            num_features=config.get('num_features', None),
-            check_additivity=config.get('check_additivity', False)
+            algorithm=cfg.get('algorithm', 'kernel'),
+            num_background_samples=cfg.get('num_background_samples', 100),
+            num_features=cfg.get('num_features', None),
+            check_additivity=cfg.get('check_additivity', False)
         )
 
         # Background dataset (for kernel SHAP)

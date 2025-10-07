@@ -10,13 +10,13 @@ Detects exploitation of Cialdini's 6 principles of influence:
 6. Scarcity (escassez)
 """
 
+from collections import Counter
 import logging
 import re
-from typing import List, Dict, Optional, Tuple
-from collections import Counter
+from typing import Dict, List, Optional, Tuple
 
-from models import CialdiniPrinciple
 from config import get_settings
+from models import CialdiniPrinciple
 
 logger = logging.getLogger(__name__)
 
@@ -35,104 +35,194 @@ class CialdiniAnalyzer:
     PRINCIPLE_PATTERNS = {
         "reciprocity": {
             "keywords": [
-                r"\bgrátis\b", r"\bgift\b", r"\bpresente\b", r"\bbônus\b",
-                r"\boferta especial\b", r"\bexclusivo para você\b",
-                r"\bem retribuição\b", r"\bcomo agradecimento\b",
-                r"\bem troca\b", r"\bretribuir\b", r"\bdevolver o favor\b",
-                r"\bcompensação\b", r"\brecompensa\b"
+                r"\bgrátis\b",
+                r"\bgift\b",
+                r"\bpresente\b",
+                r"\bbônus\b",
+                r"\boferta especial\b",
+                r"\bexclusivo para você\b",
+                r"\bem retribuição\b",
+                r"\bcomo agradecimento\b",
+                r"\bem troca\b",
+                r"\bretribuir\b",
+                r"\bdevolver o favor\b",
+                r"\bcompensação\b",
+                r"\brecompensa\b",
             ],
             "phrases": [
-                "nós demos a você", "você ganhou", "como presente",
-                "gratuitamente", "sem custo", "oferecemos grátis",
-                "em agradecimento", "retribuir", "devolução"
-            ]
+                "nós demos a você",
+                "você ganhou",
+                "como presente",
+                "gratuitamente",
+                "sem custo",
+                "oferecemos grátis",
+                "em agradecimento",
+                "retribuir",
+                "devolução",
+            ],
         },
         "commitment": {
             "keywords": [
-                r"\bcompromisso\b", r"\bprometemos\b", r"\bgarantimos\b",
-                r"\bconsistente\b", r"\bcoerente\b", r"\bmanter\b",
-                r"\bcumprir\b", r"\bfiel a\b", r"\badere\b",
-                r"\bassine\b", r"\bconcorde\b", r"\baceite\b"
+                r"\bcompromisso\b",
+                r"\bprometemos\b",
+                r"\bgarantimos\b",
+                r"\bconsistente\b",
+                r"\bcoerente\b",
+                r"\bmanter\b",
+                r"\bcumprir\b",
+                r"\bfiel a\b",
+                r"\badere\b",
+                r"\bassine\b",
+                r"\bconcorde\b",
+                r"\baceite\b",
             ],
             "phrases": [
-                "você já começou", "já que você", "seja consistente",
-                "mantenha sua palavra", "cumpra o prometido",
-                "você disse que", "você concordou", "assine agora"
-            ]
+                "você já começou",
+                "já que você",
+                "seja consistente",
+                "mantenha sua palavra",
+                "cumpra o prometido",
+                "você disse que",
+                "você concordou",
+                "assine agora",
+            ],
         },
         "social_proof": {
             "keywords": [
-                r"\bmilhões de\b", r"\btodos estão\b", r"\bmaioria\b",
-                r"\bmais vendido\b", r"\bpopular\b", r"\btendência\b",
-                r"\bviral\b", r"\boutros também\b", r"\btestemunhos\b",
-                r"\bavaliações\b", r"\bclientes satisfeitos\b"
+                r"\bmilhões de\b",
+                r"\btodos estão\b",
+                r"\bmaioria\b",
+                r"\bmais vendido\b",
+                r"\bpopular\b",
+                r"\btendência\b",
+                r"\bviral\b",
+                r"\boutros também\b",
+                r"\btestemunhos\b",
+                r"\bavaliações\b",
+                r"\bclientes satisfeitos\b",
             ],
             "phrases": [
-                "milhões já", "todo mundo está", "não fique de fora",
-                "junte-se a", "faça como", "outros também",
-                "aprovado por", "recomendado por", "usado por",
-                "testemunho", "5 estrelas"
-            ]
+                "milhões já",
+                "todo mundo está",
+                "não fique de fora",
+                "junte-se a",
+                "faça como",
+                "outros também",
+                "aprovado por",
+                "recomendado por",
+                "usado por",
+                "testemunho",
+                "5 estrelas",
+            ],
         },
         "authority": {
             "keywords": [
-                r"\bespecialista\b", r"\bdoutor\b", r"\bDr\.\b",
-                r"\bprofessor\b", r"\bprof\.\b", r"\bautoridade\b",
-                r"\bcertificado\b", r"\baprovado\b", r"\bcientista\b",
-                r"\bpesquisa\b", r"\bestudo\b", r"\bcomprovado\b"
+                r"\bespecialista\b",
+                r"\bdoutor\b",
+                r"\bDr\.\b",
+                r"\bprofessor\b",
+                r"\bprof\.\b",
+                r"\bautoridade\b",
+                r"\bcertificado\b",
+                r"\baprovado\b",
+                r"\bcientista\b",
+                r"\bpesquisa\b",
+                r"\bestudo\b",
+                r"\bcomprovado\b",
             ],
             "phrases": [
-                "especialistas dizem", "segundo pesquisas",
-                "comprovado cientificamente", "aprovado por",
-                "recomendado por médicos", "estudos mostram",
-                "a ciência comprova", "dados revelam"
-            ]
+                "especialistas dizem",
+                "segundo pesquisas",
+                "comprovado cientificamente",
+                "aprovado por",
+                "recomendado por médicos",
+                "estudos mostram",
+                "a ciência comprova",
+                "dados revelam",
+            ],
         },
         "liking": {
             "keywords": [
-                r"\bamigo\b", r"\bquerido\b", r"\bamado\b",
-                r"\bconfiança\b", r"\bsincero\b", r"\bhonesto\b",
-                r"\bparece com você\b", r"\bmesmos valores\b",
-                r"\bcompartilhamos\b", r"\bjuntos\b", r"\bcomunidade\b"
+                r"\bamigo\b",
+                r"\bquerido\b",
+                r"\bamado\b",
+                r"\bconfiança\b",
+                r"\bsincero\b",
+                r"\bhonesto\b",
+                r"\bparece com você\b",
+                r"\bmesmos valores\b",
+                r"\bcompartilhamos\b",
+                r"\bjuntos\b",
+                r"\bcomunidade\b",
             ],
             "phrases": [
-                "somos como você", "compartilhamos valores",
-                "pessoas como você", "da sua comunidade",
-                "seu amigo", "confiável", "transparente",
-                "honesto com você", "juntos podemos"
-            ]
+                "somos como você",
+                "compartilhamos valores",
+                "pessoas como você",
+                "da sua comunidade",
+                "seu amigo",
+                "confiável",
+                "transparente",
+                "honesto com você",
+                "juntos podemos",
+            ],
         },
         "scarcity": {
             "keywords": [
-                r"\bpoucas unidades\b", r"\últimas\b", r"\bacaba em\b",
-                r"\blimitado\b", r"\bexclusivo\b", r"\braro\b",
-                r"\bagora ou nunca\b", r"\bsó hoje\b", r"\benquanto durar\b",
-                r"\bvagas limitadas\b", r"\btempo limitado\b"
+                r"\bpoucas unidades\b",
+                r"\últimas\b",
+                r"\bacaba em\b",
+                r"\blimitado\b",
+                r"\bexclusivo\b",
+                r"\braro\b",
+                r"\bagora ou nunca\b",
+                r"\bsó hoje\b",
+                r"\benquanto durar\b",
+                r"\bvagas limitadas\b",
+                r"\btempo limitado\b",
             ],
             "phrases": [
-                "últimas unidades", "estoque limitado",
-                "oferta por tempo limitado", "só hoje",
-                "enquanto durar", "não perca", "última chance",
-                "acaba em", "vagas limitadas", "exclusivo",
-                "apenas para", "somente"
-            ]
-        }
+                "últimas unidades",
+                "estoque limitado",
+                "oferta por tempo limitado",
+                "só hoje",
+                "enquanto durar",
+                "não perca",
+                "última chance",
+                "acaba em",
+                "vagas limitadas",
+                "exclusivo",
+                "apenas para",
+                "somente",
+            ],
+        },
     }
 
     # Manipulation intent indicators
     MANIPULATION_MARKERS = {
         "urgency": [
-            r"\bagora\b", r"\bjá\b", r"\brapidamente\b", r"\bimediatamente\b",
-            r"\bnão espere\b", r"\bnão perca tempo\b"
+            r"\bagora\b",
+            r"\bjá\b",
+            r"\brapidamente\b",
+            r"\bimediatamente\b",
+            r"\bnão espere\b",
+            r"\bnão perca tempo\b",
         ],
         "pressure": [
-            r"\bvocê deve\b", r"\bprecisa\b", r"\bobrigado a\b",
-            r"\bnão tem escolha\b", r"\bé necessário\b"
+            r"\bvocê deve\b",
+            r"\bprecisa\b",
+            r"\bobrigado a\b",
+            r"\bnão tem escolha\b",
+            r"\bé necessário\b",
         ],
         "exclusivity": [
-            r"\bapenas você\b", r"\bsomente para\b", r"\bselecionado\b",
-            r"\bvip\b", r"\belite\b", r"\bprivilegiado\b"
-        ]
+            r"\bapenas você\b",
+            r"\bsomente para\b",
+            r"\bselecionado\b",
+            r"\bvip\b",
+            r"\belite\b",
+            r"\bprivilegiado\b",
+        ],
     }
 
     def detect_reciprocity(self, text: str) -> List[CialdiniPrinciple]:
@@ -145,17 +235,20 @@ class CialdiniAnalyzer:
             for match in matches:
                 context = self._extract_context(text, match.start(), match.end())
                 confidence = self._calculate_confidence(
-                    context,
-                    self.PRINCIPLE_PATTERNS["reciprocity"]
+                    context, self.PRINCIPLE_PATTERNS["reciprocity"]
                 )
 
                 if confidence > 0.3:
-                    detections.append(CialdiniPrinciple(
-                        principle="reciprocity",
-                        confidence=confidence,
-                        evidence_text=context,
-                        manipulation_intent=self._assess_manipulation_intent(context)
-                    ))
+                    detections.append(
+                        CialdiniPrinciple(
+                            principle="reciprocity",
+                            confidence=confidence,
+                            evidence_text=context,
+                            manipulation_intent=self._assess_manipulation_intent(
+                                context
+                            ),
+                        )
+                    )
 
         return self._deduplicate_detections(detections)
 
@@ -169,24 +262,28 @@ class CialdiniAnalyzer:
             r"você (já|sempre|costuma)",
             r"(como|assim que) você (disse|concordou|aceitou)",
             r"mantenha (sua|o) (palavra|compromisso)",
-            r"seja consistente"
+            r"seja consistente",
         ]
 
         for pattern in commitment_markers:
             matches = re.finditer(pattern, text_lower)
             for match in matches:
                 context = self._extract_context(text, match.start(), match.end())
-                confidence = min(0.8, self._calculate_confidence(
-                    context,
-                    self.PRINCIPLE_PATTERNS["commitment"]
-                ))
+                confidence = min(
+                    0.8,
+                    self._calculate_confidence(
+                        context, self.PRINCIPLE_PATTERNS["commitment"]
+                    ),
+                )
 
-                detections.append(CialdiniPrinciple(
-                    principle="commitment",
-                    confidence=confidence,
-                    evidence_text=context,
-                    manipulation_intent=self._assess_manipulation_intent(context)
-                ))
+                detections.append(
+                    CialdiniPrinciple(
+                        principle="commitment",
+                        confidence=confidence,
+                        evidence_text=context,
+                        manipulation_intent=self._assess_manipulation_intent(context),
+                    )
+                )
 
         return self._deduplicate_detections(detections)
 
@@ -200,7 +297,7 @@ class CialdiniAnalyzer:
             r"(\d+\.?\d*)\s*(milhões?|mil|bilhões?)\s*(de|já|usam|compraram)",
             r"(todos|maioria|a maior parte)\s*(estão?|fazem|usam)",
             r"\d+\s*estrelas",
-            r"\d+%\s*(recomendam|aprovam|satisfeitos)"
+            r"\d+%\s*(recomendam|aprovam|satisfeitos)",
         ]
 
         for pattern in number_patterns:
@@ -209,12 +306,14 @@ class CialdiniAnalyzer:
                 context = self._extract_context(text, match.start(), match.end())
                 confidence = 0.7  # High confidence for quantified social proof
 
-                detections.append(CialdiniPrinciple(
-                    principle="social_proof",
-                    confidence=confidence,
-                    evidence_text=context,
-                    manipulation_intent=self._assess_manipulation_intent(context)
-                ))
+                detections.append(
+                    CialdiniPrinciple(
+                        principle="social_proof",
+                        confidence=confidence,
+                        evidence_text=context,
+                        manipulation_intent=self._assess_manipulation_intent(context),
+                    )
+                )
 
         return self._deduplicate_detections(detections)
 
@@ -228,7 +327,7 @@ class CialdiniAnalyzer:
             r"(dr\.|doutor|doutora|professor|professora)\s+\w+",
             r"(especialistas?|cientistas?|pesquisadores?)\s+(dizem|afirmam|comprovam)",
             r"(estudos?|pesquisas?|dados)\s+(mostram|revelam|comprovam|indicam)",
-            r"(aprovado|certificado|recomendado)\s+por\s+\w+"
+            r"(aprovado|certificado|recomendado)\s+por\s+\w+",
         ]
 
         for pattern in authority_patterns:
@@ -237,12 +336,14 @@ class CialdiniAnalyzer:
                 context = self._extract_context(text, match.start(), match.end())
                 confidence = 0.75
 
-                detections.append(CialdiniPrinciple(
-                    principle="authority",
-                    confidence=confidence,
-                    evidence_text=context,
-                    manipulation_intent=self._assess_manipulation_intent(context)
-                ))
+                detections.append(
+                    CialdiniPrinciple(
+                        principle="authority",
+                        confidence=confidence,
+                        evidence_text=context,
+                        manipulation_intent=self._assess_manipulation_intent(context),
+                    )
+                )
 
         return self._deduplicate_detections(detections)
 
@@ -256,7 +357,7 @@ class CialdiniAnalyzer:
             r"(somos|pessoas)\s+como\s+você",
             r"(compartilhamos|temos os mesmos)\s+(valores|objetivos|ideais)",
             r"(seu|nossa)\s+(amigo|comunidade|família)",
-            r"(confiável|honesto|transparente|sincero)\s+com\s+você"
+            r"(confiável|honesto|transparente|sincero)\s+com\s+você",
         ]
 
         for pattern in liking_patterns:
@@ -265,12 +366,14 @@ class CialdiniAnalyzer:
                 context = self._extract_context(text, match.start(), match.end())
                 confidence = 0.65
 
-                detections.append(CialdiniPrinciple(
-                    principle="liking",
-                    confidence=confidence,
-                    evidence_text=context,
-                    manipulation_intent=self._assess_manipulation_intent(context)
-                ))
+                detections.append(
+                    CialdiniPrinciple(
+                        principle="liking",
+                        confidence=confidence,
+                        evidence_text=context,
+                        manipulation_intent=self._assess_manipulation_intent(context),
+                    )
+                )
 
         return self._deduplicate_detections(detections)
 
@@ -285,7 +388,7 @@ class CialdiniAnalyzer:
             r"(oferta|promoção)\s+(limitada|exclusiva|por tempo limitado)",
             r"(só|somente|apenas)\s+(hoje|agora|até|enquanto)",
             r"(acaba|termina|expira)\s+em\s+\d+",
-            r"(não|nunca)\s+(perca|deixe|espere)"
+            r"(não|nunca)\s+(perca|deixe|espere)",
         ]
 
         for pattern in scarcity_patterns:
@@ -294,12 +397,14 @@ class CialdiniAnalyzer:
                 context = self._extract_context(text, match.start(), match.end())
                 confidence = 0.8  # High confidence for scarcity
 
-                detections.append(CialdiniPrinciple(
-                    principle="scarcity",
-                    confidence=confidence,
-                    evidence_text=context,
-                    manipulation_intent=self._assess_manipulation_intent(context)
-                ))
+                detections.append(
+                    CialdiniPrinciple(
+                        principle="scarcity",
+                        confidence=confidence,
+                        evidence_text=context,
+                        manipulation_intent=self._assess_manipulation_intent(context),
+                    )
+                )
 
         return self._deduplicate_detections(detections)
 
@@ -320,22 +425,14 @@ class CialdiniAnalyzer:
         return all_detections
 
     def _extract_context(
-        self,
-        text: str,
-        start: int,
-        end: int,
-        window: int = 50
+        self, text: str, start: int, end: int, window: int = 50
     ) -> str:
         """Extract context around match."""
         context_start = max(0, start - window)
         context_end = min(len(text), end + window)
         return text[context_start:context_end].strip()
 
-    def _calculate_confidence(
-        self,
-        context: str,
-        principle_patterns: Dict
-    ) -> float:
+    def _calculate_confidence(self, context: str, principle_patterns: Dict) -> float:
         """Calculate detection confidence based on pattern density."""
         context_lower = context.lower()
         match_count = 0
@@ -351,7 +448,9 @@ class CialdiniAnalyzer:
                 match_count += 0.5
 
         # Normalize
-        max_matches = len(principle_patterns.get("keywords", [])) + len(principle_patterns.get("phrases", []))
+        max_matches = len(principle_patterns.get("keywords", [])) + len(
+            principle_patterns.get("phrases", [])
+        )
         confidence = min(1.0, match_count / max(max_matches, 1))
 
         return confidence
@@ -375,8 +474,7 @@ class CialdiniAnalyzer:
         return min(1.0, manipulation_score)
 
     def _deduplicate_detections(
-        self,
-        detections: List[CialdiniPrinciple]
+        self, detections: List[CialdiniPrinciple]
     ) -> List[CialdiniPrinciple]:
         """Remove duplicate detections based on evidence overlap."""
         if len(detections) <= 1:
@@ -395,8 +493,7 @@ class CialdiniAnalyzer:
         return unique
 
     def get_principle_statistics(
-        self,
-        detections: List[CialdiniPrinciple]
+        self, detections: List[CialdiniPrinciple]
     ) -> Dict[str, any]:
         """Get statistics about detected principles."""
         principle_counts = Counter(d.principle for d in detections)
@@ -405,10 +502,20 @@ class CialdiniAnalyzer:
             "total_detections": len(detections),
             "unique_principles": len(principle_counts),
             "principle_distribution": dict(principle_counts),
-            "avg_confidence": sum(d.confidence for d in detections) / len(detections) if detections else 0.0,
-            "avg_manipulation_intent": sum(d.manipulation_intent for d in detections) / len(detections) if detections else 0.0,
+            "avg_confidence": (
+                sum(d.confidence for d in detections) / len(detections)
+                if detections
+                else 0.0
+            ),
+            "avg_manipulation_intent": (
+                sum(d.manipulation_intent for d in detections) / len(detections)
+                if detections
+                else 0.0
+            ),
             "high_confidence_count": sum(1 for d in detections if d.confidence > 0.7),
-            "high_manipulation_count": sum(1 for d in detections if d.manipulation_intent > 0.6)
+            "high_manipulation_count": sum(
+                1 for d in detections if d.manipulation_intent > 0.6
+            ),
         }
 
 

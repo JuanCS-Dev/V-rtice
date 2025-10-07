@@ -45,6 +45,7 @@ COMMAND_MODULES = [
     "distributed",  # Distributed Organism (FASE 10)
     "hcl",  # Human-Centric Language
     "memory",  # Memory System Management
+    "governance",  # Ethical AI Governance Workspace (HITL)
     "menu",
     "project",  # Workspace & State Management
     "plugin",  # Plugin Management & Extension System

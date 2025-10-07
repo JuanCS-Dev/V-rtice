@@ -64,14 +64,17 @@ class CounterfactualGenerator(ExplainerBase):
         """
         super().__init__(config)
 
+        # Use self.config from base class (guaranteed to be dict, not None)
+        cfg = self.config
+
         # Counterfactual configuration
         self.cf_config = CounterfactualConfig(
-            desired_outcome=config.get('desired_outcome', None),
-            max_iterations=config.get('max_iterations', 1000),
-            num_candidates=config.get('num_candidates', 10),
-            proximity_weight=config.get('proximity_weight', 1.0),
-            sparsity_weight=config.get('sparsity_weight', 0.5),
-            validity_weight=config.get('validity_weight', 0.3)
+            desired_outcome=cfg.get('desired_outcome', None),
+            max_iterations=cfg.get('max_iterations', 1000),
+            num_candidates=cfg.get('num_candidates', 10),
+            proximity_weight=cfg.get('proximity_weight', 1.0),
+            sparsity_weight=cfg.get('sparsity_weight', 0.5),
+            validity_weight=cfg.get('validity_weight', 0.3)
         )
 
         # Feature constraints (for cybersecurity domains)

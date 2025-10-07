@@ -10,11 +10,12 @@ Prediction error = unexpected campaign evolution (novel TTPs).
 """
 
 import logging
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from typing import Dict, List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class TacticalLSTM(nn.Module):
         num_layers: int = 2,
         output_dim: int = 64,
         num_campaign_types: int = 20,
-        dropout: float = 0.3
+        dropout: float = 0.3,
     ):
         """Initialize Tactical LSTM.
 
@@ -56,7 +57,7 @@ class TacticalLSTM(nn.Module):
             num_layers=num_layers,
             batch_first=True,
             bidirectional=True,
-            dropout=dropout if num_layers > 1 else 0
+            dropout=dropout if num_layers > 1 else 0,
         )
 
         # Prediction heads
@@ -68,13 +69,15 @@ class TacticalLSTM(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-        logger.info(f"TacticalLSTM initialized: {input_dim}D → {output_dim}D "
-                   f"(hidden={hidden_dim}, layers={num_layers})")
+        logger.info(
+            f"TacticalLSTM initialized: {input_dim}D → {output_dim}D "
+            f"(hidden={hidden_dim}, layers={num_layers})"
+        )
 
     def forward(
         self,
         sequence: torch.Tensor,
-        hidden: Optional[Tuple[torch.Tensor, torch.Tensor]] = None
+        hidden: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, Tuple]:
         """Forward pass.
 
@@ -116,8 +119,8 @@ class TacticalLayer:
     def __init__(
         self,
         latent_dim: int = 64,
-        device: str = 'cpu',
-        prediction_horizon_days: int = 7
+        device: str = "cpu",
+        prediction_horizon_days: int = 7,
     ):
         """Initialize Tactical Layer.
 
@@ -137,15 +140,14 @@ class TacticalLayer:
             num_layers=2,
             output_dim=latent_dim,
             num_campaign_types=20,
-            dropout=0.3
+            dropout=0.3,
         ).to(self.device)
 
-        logger.info(f"TacticalLayer initialized (horizon={prediction_horizon_days} days)")
+        logger.info(
+            f"TacticalLayer initialized (horizon={prediction_horizon_days} days)"
+        )
 
-    def predict(
-        self,
-        event_sequence: np.ndarray
-    ) -> Dict:
+    def predict(self, event_sequence: np.ndarray) -> Dict:
         """Predict campaign evolution from event sequence.
 
         Args:
@@ -159,7 +161,9 @@ class TacticalLayer:
         with torch.no_grad():
             sequence = torch.FloatTensor(event_sequence).unsqueeze(0).to(self.device)
 
-            campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(sequence)
+            campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(
+                sequence
+            )
 
             # Campaign type
             campaign_probs = F.softmax(campaign_class, dim=1)
@@ -169,20 +173,18 @@ class TacticalLayer:
             top_ttps = torch.topk(ttp_scores[0], k=5)
 
             return {
-                'next_campaign_embedding': campaign_pred.cpu().numpy()[0],
-                'campaign_type_id': campaign_id,
-                'campaign_confidence': campaign_probs[0, campaign_id].item(),
-                'campaign_probabilities': campaign_probs.cpu().numpy()[0],
-                'persistence_score': persistence.cpu().numpy()[0, 0],
-                'top_ttp_ids': top_ttps.indices.cpu().numpy().tolist(),
-                'top_ttp_scores': top_ttps.values.cpu().numpy().tolist(),
-                'prediction_horizon_days': self.prediction_horizon
+                "next_campaign_embedding": campaign_pred.cpu().numpy()[0],
+                "campaign_type_id": campaign_id,
+                "campaign_confidence": campaign_probs[0, campaign_id].item(),
+                "campaign_probabilities": campaign_probs.cpu().numpy()[0],
+                "persistence_score": persistence.cpu().numpy()[0, 0],
+                "top_ttp_ids": top_ttps.indices.cpu().numpy().tolist(),
+                "top_ttp_scores": top_ttps.values.cpu().numpy().tolist(),
+                "prediction_horizon_days": self.prediction_horizon,
             }
 
     def detect_apt_indicators(
-        self,
-        event_sequence: np.ndarray,
-        persistence_threshold: float = 0.7
+        self, event_sequence: np.ndarray, persistence_threshold: float = 0.7
     ) -> Dict:
         """Detect APT campaign indicators.
 
@@ -195,16 +197,18 @@ class TacticalLayer:
         """
         prediction = self.predict(event_sequence)
 
-        is_apt = prediction['persistence_score'] > persistence_threshold
-        campaign_name = self._get_campaign_name(prediction['campaign_type_id'])
+        is_apt = prediction["persistence_score"] > persistence_threshold
+        campaign_name = self._get_campaign_name(prediction["campaign_type_id"])
 
         indicators = {
-            'apt_likely': is_apt,
-            'campaign_type': campaign_name,
-            'persistence_score': prediction['persistence_score'],
-            'confidence': prediction['campaign_confidence'],
-            'ttps': [self._get_ttp_name(ttp_id) for ttp_id in prediction['top_ttp_ids']],
-            'severity': 'CRITICAL' if is_apt else 'MEDIUM'
+            "apt_likely": is_apt,
+            "campaign_type": campaign_name,
+            "persistence_score": prediction["persistence_score"],
+            "confidence": prediction["campaign_confidence"],
+            "ttps": [
+                self._get_ttp_name(ttp_id) for ttp_id in prediction["top_ttp_ids"]
+            ],
+            "severity": "CRITICAL" if is_apt else "MEDIUM",
         }
 
         return indicators
@@ -212,22 +216,52 @@ class TacticalLayer:
     def _get_campaign_name(self, campaign_id: int) -> str:
         """Map campaign ID to name."""
         campaigns = [
-            'BENIGN', 'APT29_COZY_BEAR', 'APT28_FANCY_BEAR', 'LAZARUS_GROUP',
-            'CARBANAK', 'FIN7', 'WINNTI', 'EQUATION_GROUP', 'TURLA',
-            'APT41', 'SANDWORM', 'DARKHOTEL', 'OCEANLOTUS', 'HAFNIUM',
-            'NOBELIUM', 'STRONTIUM', 'PLATINUM', 'GALLIUM', 'PHOSPHORUS', 'THALLIUM'
+            "BENIGN",
+            "APT29_COZY_BEAR",
+            "APT28_FANCY_BEAR",
+            "LAZARUS_GROUP",
+            "CARBANAK",
+            "FIN7",
+            "WINNTI",
+            "EQUATION_GROUP",
+            "TURLA",
+            "APT41",
+            "SANDWORM",
+            "DARKHOTEL",
+            "OCEANLOTUS",
+            "HAFNIUM",
+            "NOBELIUM",
+            "STRONTIUM",
+            "PLATINUM",
+            "GALLIUM",
+            "PHOSPHORUS",
+            "THALLIUM",
         ]
-        return campaigns[campaign_id] if campaign_id < len(campaigns) else f'UNKNOWN_{campaign_id}'
+        return (
+            campaigns[campaign_id]
+            if campaign_id < len(campaigns)
+            else f"UNKNOWN_{campaign_id}"
+        )
 
     def _get_ttp_name(self, ttp_id: int) -> str:
         """Map TTP ID to MITRE ATT&CK tactic."""
         tactics = [
-            'Reconnaissance', 'Resource Development', 'Initial Access', 'Execution',
-            'Persistence', 'Privilege Escalation', 'Defense Evasion', 'Credential Access',
-            'Discovery', 'Lateral Movement', 'Collection', 'Command and Control',
-            'Exfiltration', 'Impact'
+            "Reconnaissance",
+            "Resource Development",
+            "Initial Access",
+            "Execution",
+            "Persistence",
+            "Privilege Escalation",
+            "Defense Evasion",
+            "Credential Access",
+            "Discovery",
+            "Lateral Movement",
+            "Collection",
+            "Command and Control",
+            "Exfiltration",
+            "Impact",
         ]
-        return tactics[ttp_id] if ttp_id < len(tactics) else f'TTP_{ttp_id}'
+        return tactics[ttp_id] if ttp_id < len(tactics) else f"TTP_{ttp_id}"
 
     def train_step(
         self,
@@ -236,7 +270,7 @@ class TacticalLayer:
         target_classes: torch.Tensor,
         target_ttps: torch.Tensor,
         target_persistence: torch.Tensor,
-        optimizer: torch.optim.Optimizer
+        optimizer: torch.optim.Optimizer,
     ) -> Dict[str, float]:
         """Single training step."""
         self.lstm.train()
@@ -248,7 +282,9 @@ class TacticalLayer:
         target_persistence = target_persistence.to(self.device)
 
         # Forward
-        campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(sequence_batch)
+        campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(
+            sequence_batch
+        )
 
         # Losses
         pred_loss = F.mse_loss(campaign_pred, target_campaigns)
@@ -264,24 +300,27 @@ class TacticalLayer:
         optimizer.step()
 
         return {
-            'total_loss': total_loss.item(),
-            'prediction_loss': pred_loss.item(),
-            'classification_loss': class_loss.item(),
-            'ttp_loss': ttp_loss.item(),
-            'persistence_loss': persist_loss.item()
+            "total_loss": total_loss.item(),
+            "prediction_loss": pred_loss.item(),
+            "classification_loss": class_loss.item(),
+            "ttp_loss": ttp_loss.item(),
+            "persistence_loss": persist_loss.item(),
         }
 
     def save_model(self, path: str):
         """Save model checkpoint."""
-        torch.save({
-            'lstm_state_dict': self.lstm.state_dict(),
-            'latent_dim': self.latent_dim,
-            'prediction_horizon': self.prediction_horizon
-        }, path)
+        torch.save(
+            {
+                "lstm_state_dict": self.lstm.state_dict(),
+                "latent_dim": self.latent_dim,
+                "prediction_horizon": self.prediction_horizon,
+            },
+            path,
+        )
         logger.info(f"Model saved to {path}")
 
     def load_model(self, path: str):
         """Load model checkpoint."""
         checkpoint = torch.load(path, map_location=self.device)
-        self.lstm.load_state_dict(checkpoint['lstm_state_dict'])
+        self.lstm.load_state_dict(checkpoint["lstm_state_dict"])
         logger.info(f"Model loaded from {path}")

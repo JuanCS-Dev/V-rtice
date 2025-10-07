@@ -1,8 +1,8 @@
 """Safety Manager - Dry-run, Rollback, Rate Limiting"""
 
+from collections import deque
 import logging
 import time
-from collections import deque
 from typing import Dict
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class SafetyManager:
 
     def check_rate_limit(self, action_type: str) -> bool:
         """Prevent action oscillation - max 1 critical action/min."""
-        if action_type == 'CRITICAL':
+        if action_type == "CRITICAL":
             current_time = time.time()
             if current_time - self.last_critical_action < 60:
                 logger.warning("Rate limit exceeded: CRITICAL action throttled")
@@ -25,11 +25,13 @@ class SafetyManager:
             self.last_critical_action = current_time
         return True
 
-    def auto_rollback(self, action: Dict, metrics_before: Dict, metrics_after: Dict) -> bool:
+    def auto_rollback(
+        self, action: Dict, metrics_before: Dict, metrics_after: Dict
+    ) -> bool:
         """Revert if metrics worsened >20% within 60s."""
         try:
             # Check key metrics for degradation
-            for metric in ['cpu_usage', 'latency_p99', 'error_rate']:
+            for metric in ["cpu_usage", "latency_p99", "error_rate"]:
                 before = metrics_before.get(metric, 0)
                 after = metrics_after.get(metric, 0)
 
@@ -50,7 +52,4 @@ class SafetyManager:
 
     def log_action(self, action: Dict):
         """Log action for audit trail."""
-        self.action_history.append({
-            'timestamp': time.time(),
-            'action': action
-        })
+        self.action_history.append({"timestamp": time.time(), "action": action})

@@ -19,8 +19,6 @@ Examples:
 import typer
 import asyncio
 from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
 from rich.live import Live
 from rich.spinner import Spinner
 from rich.markdown import Markdown
@@ -28,7 +26,7 @@ from typing_extensions import Annotated
 from enum import Enum
 
 from ..connectors.maximus_universal import MaximusUniversalConnector
-from ..utils.output import output_json, print_error, print_success
+from ..utils.output import output_json, print_error, print_success, GeminiStyleTable, PrimordialPanel
 from ..utils.auth import require_auth
 from vertice.utils import primoroso
 
@@ -129,37 +127,39 @@ def _display_investigation_results(response_data: dict, target: str, inv_type: I
     """Exibe resultados da investigação de forma primorosa."""
     # Header
     console.print()
-    console.print(Panel(
+    panel = PrimordialPanel(
         f"[bold cyan]Target:[/bold cyan] {target}\n"
         f"[bold cyan]Type:[/bold cyan] {inv_type.value}",
-        title="[bold green]🔍 Investigation Report[/bold green]",
-        border_style="green"
-    ))
+        title="🔍 Investigation Report",
+        console=console
+    )
+    panel.with_status("success").render()
     console.print()
 
     # Main response
     response_text = response_data.get("response", "No response")
-    console.print(Panel(
+    panel = PrimordialPanel(
         Markdown(response_text),
-        title="[bold cyan]Findings[/bold cyan]",
-        border_style="cyan"
-    ))
+        title="Findings",
+        console=console
+    )
+    panel.with_status("info").render()
     console.print()
 
     # Tools used
     tools_used = response_data.get("tools_used", [])
     if tools_used:
         console.print("[bold]Tools Executed:[/bold]")
-        tools_table = Table(show_header=True, header_style="bold magenta")
-        tools_table.add_column("Tool", style="cyan")
-        tools_table.add_column("Status", style="green")
+        tools_table = GeminiStyleTable(title="Tools Executed", console=console)
+        tools_table.add_column("Tool")
+        tools_table.add_column("Status")
 
         for tool in tools_used:
             tool_name = tool.get("tool_name", "unknown")
             status = "✓ Success" if tool.get("result") else "✗ Failed"
             tools_table.add_row(tool_name, status)
 
-        console.print(tools_table)
+        tools_table.render()
         console.print()
 
     # Reasoning trace (if available)
@@ -168,13 +168,14 @@ def _display_investigation_results(response_data: dict, target: str, inv_type: I
         confidence = reasoning.get("confidence", 0)
         thoughts_count = reasoning.get("total_thoughts", 0)
 
-        console.print(Panel(
+        panel = PrimordialPanel(
             f"[bold]Confidence:[/bold] {confidence:.1f}%\n"
             f"[bold]Reasoning Steps:[/bold] {thoughts_count}\n"
             f"[bold]Duration:[/bold] {reasoning.get('duration', 'N/A')}",
-            title="[bold yellow]⚡ Maximus Reasoning[/bold yellow]",
-            border_style="yellow"
-        ))
+            title="⚡ Maximus Reasoning",
+            console=console
+        )
+        panel.with_status("warning").render()
         console.print()
 
 
@@ -265,8 +266,8 @@ def multi(
     console.print()
 
     if parallel:
-        # TODO: Implement parallel investigation
-        primoroso.warning("Parallel mode not yet implemented. Running sequentially...")
+        # Parallel mode: Future enhancement for concurrent investigations
+        primoroso.warning("Parallel mode not yet available. Running sequentially...")
 
     for target in target_list:
         asyncio.run(_execute_investigation(
@@ -303,11 +304,12 @@ def history(
 
             if response:
                 console.print()
-                console.print(Panel(
+                panel = PrimordialPanel(
                     Markdown(response.get("response", "No history found")),
-                    title="[bold green]📚 Investigation History[/bold green]",
-                    border_style="green"
-                ))
+                    title="📚 Investigation History",
+                    console=console
+                )
+                panel.with_status("success").render()
                 console.print()
             else:
                 primoroso.warning("No investigation history found")
@@ -349,12 +351,13 @@ def similar(
                 console.print()
 
                 for inv in similar_invs:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         f"[bold]Target:[/bold] {inv.get('target', 'N/A')}\n"
                         f"[bold]Findings:[/bold] {inv.get('summary', 'N/A')[:200]}...",
-                        title=f"[cyan]{inv.get('investigation_id', 'unknown')}[/cyan]",
-                        border_style="cyan"
-                    ))
+                        title=inv.get('investigation_id', 'unknown'),
+                        console=console
+                    )
+                    panel.with_status("info").render()
                 console.print()
             else:
                 primoroso.warning(f"No similar investigations found for '{target}'")

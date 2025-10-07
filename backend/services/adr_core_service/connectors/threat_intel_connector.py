@@ -12,8 +12,8 @@ the overall security posture.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 from models.schemas import ThreatIntelData
 from utils.logger import setup_logger
@@ -30,7 +30,9 @@ class ThreatIntelConnector:
 
     def __init__(self):
         """Initializes the ThreatIntelConnector."""
-        logger.info("[ThreatIntelConnector] Initializing Threat Intelligence Connector...")
+        logger.info(
+            "[ThreatIntelConnector] Initializing Threat Intelligence Connector..."
+        )
         # In a real scenario, establish connection to a TIP API (e.g., VirusTotal, AlienVault OTX)
         self.service_available = True
         logger.info("[ThreatIntelConnector] Threat Intelligence Connector initialized.")
@@ -43,15 +45,19 @@ class ThreatIntelConnector:
 
         Returns:
             ThreatIntelData: A Pydantic model containing the threat intelligence information.
-        
+
         Raises:
             HTTPException: If the service is unavailable or the indicator is not found.
         """
         if not self.service_available:
-            raise HTTPException(status_code=503, detail="Threat intelligence service is not available.")
+            raise HTTPException(
+                status_code=503, detail="Threat intelligence service is not available."
+            )
 
-        logger.info(f"[ThreatIntelConnector] Querying threat intelligence for indicator: {indicator}")
-        await asyncio.sleep(0.2) # Simulate API call latency
+        logger.info(
+            f"[ThreatIntelConnector] Querying threat intelligence for indicator: {indicator}"
+        )
+        await asyncio.sleep(0.2)  # Simulate API call latency
 
         # Simulate threat intelligence lookup
         if "malicious.com" in indicator or "1.1.1.1" == indicator:
@@ -61,7 +67,7 @@ class ThreatIntelConnector:
                 severity="High",
                 description=f"Known {indicator} associated with active malware campaigns.",
                 last_updated=datetime.now().isoformat(),
-                sources=["MockTIPlatform"]
+                sources=["MockTIPlatform"],
             )
         elif "phishing.link" in indicator:
             return ThreatIntelData(
@@ -70,7 +76,7 @@ class ThreatIntelConnector:
                 severity="Medium",
                 description=f"Reported {indicator} as a phishing site.",
                 last_updated=datetime.now().isoformat(),
-                sources=["MockTIPlatform"]
+                sources=["MockTIPlatform"],
             )
         else:
             return ThreatIntelData(
@@ -79,7 +85,7 @@ class ThreatIntelConnector:
                 severity="None",
                 description="No known threat intelligence found.",
                 last_updated=datetime.now().isoformat(),
-                sources=[]
+                sources=[],
             )
 
     async def update_feed(self) -> Dict[str, Any]:
@@ -89,5 +95,9 @@ class ThreatIntelConnector:
             Dict[str, Any]: A dictionary with the update status.
         """
         logger.info("[ThreatIntelConnector] Updating threat intelligence feed...")
-        await asyncio.sleep(1) # Simulate feed update
-        return {"status": "success", "message": "Threat intelligence feed updated.", "last_update": datetime.now().isoformat()}
+        await asyncio.sleep(1)  # Simulate feed update
+        return {
+            "status": "success",
+            "message": "Threat intelligence feed updated.",
+            "last_update": datetime.now().isoformat(),
+        }

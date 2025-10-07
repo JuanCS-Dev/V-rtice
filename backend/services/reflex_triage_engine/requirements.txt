@@ -1,7 +1,7 @@
-fastapi==0.104.1
+fastapi>=0.115.0  # Security fix
 uvicorn[standard]==0.24.0
 pydantic==2.4.2
-python-multipart==0.0.6
+python-multipart>=0.0.18  # CVE-2024-53981 fix
 
 # Pattern matching
 # hyperscan>=0.7.0  # Optional - requires Intel Hyperscan library
@@ -12,3 +12,4 @@ numpy>=1.24.0
 
 # File handling
 python-magic>=0.4.27
+anyio>=4.4.0  # Security fix for race condition

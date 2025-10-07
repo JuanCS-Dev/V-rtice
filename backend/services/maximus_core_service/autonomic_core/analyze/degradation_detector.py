@@ -1,9 +1,10 @@
 """Performance Degradation Detector - PELT Change Point Detection"""
 
 import logging
+from typing import Dict, Optional
+
 import numpy as np
 import ruptures as rpt
-from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class PerformanceDegradationDetector:
             Dict with degradation_detected, changepoint_index, severity
         """
         if len(latency_timeseries) < 10:
-            return {'degradation_detected': False, 'reason': 'insufficient_data'}
+            return {"degradation_detected": False, "reason": "insufficient_data"}
 
         try:
             # Detect change points
@@ -48,16 +49,16 @@ class PerformanceDegradationDetector:
                     )
 
                     return {
-                        'degradation_detected': True,
-                        'changepoint_index': int(changepoint_idx),
-                        'severity': float(severity),
-                        'latency_before': float(before),
-                        'latency_after': float(after),
-                        'should_scale': severity > 0.3
+                        "degradation_detected": True,
+                        "changepoint_index": int(changepoint_idx),
+                        "severity": float(severity),
+                        "latency_before": float(before),
+                        "latency_after": float(after),
+                        "should_scale": severity > 0.3,
                     }
 
-            return {'degradation_detected': False}
+            return {"degradation_detected": False}
 
         except Exception as e:
             logger.error(f"Error in degradation detection: {e}")
-            return {'degradation_detected': False, 'error': str(e)}
+            return {"degradation_detected": False, "error": str(e)}

@@ -9,11 +9,11 @@ Biological inspiration:
 Production-ready implementation.
 """
 
-import logging
-from typing import Optional
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 import math
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SerotoninState:
     """Current serotonin system state."""
+
     level: float  # Current serotonin level (0.0-1.0)
     risk_tolerance: float  # Willingness to explore (0.0-1.0)
     patience: float  # Discount factor for future rewards (0.0-1.0)
@@ -43,7 +44,7 @@ class SerotoninSystem:
         baseline_level: float = 0.6,
         min_exploration: float = 0.05,
         max_exploration: float = 0.3,
-        baseline_patience: float = 0.95
+        baseline_patience: float = 0.95,
     ):
         """Initialize serotonin system.
 
@@ -90,8 +91,10 @@ class SerotoninSystem:
         # Homeostatic drift back to baseline
         self.level = 0.95 * self.level + 0.05 * self.baseline_level
 
-        logger.debug(f"Serotonin updated: success={success}, stress={stress:.2f}, "
-                    f"level={self.level:.3f}, failures={self.consecutive_failures}")
+        logger.debug(
+            f"Serotonin updated: success={success}, stress={stress:.2f}, "
+            f"level={self.level:.3f}, failures={self.consecutive_failures}"
+        )
 
     def get_exploration_rate(self) -> float:
         """Calculate exploration rate (epsilon) based on serotonin.
@@ -103,13 +106,17 @@ class SerotoninSystem:
             Exploration rate (epsilon for epsilon-greedy)
         """
         # Inverted relationship: low serotonin → high exploration
-        exploration = self.max_exploration - (self.level * (self.max_exploration - self.min_exploration))
+        exploration = self.max_exploration - (
+            self.level * (self.max_exploration - self.min_exploration)
+        )
 
         # Increase exploration after consecutive failures (exploration bonus)
         failure_bonus = min(0.2, self.consecutive_failures * 0.02)
         exploration = min(1.0, exploration + failure_bonus)
 
-        logger.debug(f"Exploration rate: {exploration:.3f} (serotonin={self.level:.3f})")
+        logger.debug(
+            f"Exploration rate: {exploration:.3f} (serotonin={self.level:.3f})"
+        )
 
         return exploration
 
@@ -152,7 +159,7 @@ class SerotoninSystem:
             risk_tolerance=self.get_risk_tolerance(),
             patience=self.get_patience(),
             exploration_rate=self.get_exploration_rate(),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
     def reset(self):

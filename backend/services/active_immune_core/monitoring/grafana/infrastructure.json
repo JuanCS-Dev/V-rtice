@@ -1,0 +1,267 @@
+{
+  "dashboard": {
+    "title": "Active Immune Core - Infrastructure",
+    "tags": ["immune-core", "infrastructure"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Cytokine Traffic Overview",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_cytokines_sent_total[5m]))",
+            "legendFormat": "Sent/sec"
+          },
+          {
+            "expr": "sum(rate(immune_core_cytokines_received_total[5m]))",
+            "legendFormat": "Received/sec"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Hormone Publications",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_hormones_published_total[5m]))"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Cytokines Sent by Type",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immune_core_cytokines_sent_total[5m])",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Messages/sec"}
+        ],
+        "stack": true
+      },
+      {
+        "id": 4,
+        "title": "Cytokines Received by Type",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immune_core_cytokines_received_total[5m])",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Messages/sec"}
+        ],
+        "stack": true
+      },
+      {
+        "id": 5,
+        "title": "Cytokine Flow Balance (Sent vs Received)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_cytokines_sent_total[5m])) by (type)",
+            "legendFormat": "Sent - {{type}}"
+          },
+          {
+            "expr": "-sum(rate(immune_core_cytokines_received_total[5m])) by (type)",
+            "legendFormat": "Received - {{type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Messages/sec"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Cytokine Types Distribution",
+        "type": "piechart",
+        "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(immune_core_cytokines_sent_total[1h])) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Top 5 Cytokine Types",
+        "type": "bargauge",
+        "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "topk(5, sum(rate(immune_core_cytokines_sent_total[5m])) by (type))",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 8,
+        "title": "Hormones Published by Type",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 28, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immune_core_hormones_published_total[5m])",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Publications/sec"}
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Hormone Types Distribution",
+        "type": "piechart",
+        "gridPos": {"x": 12, "y": 28, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(immune_core_hormones_published_total[1h])) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Lymph Node Registrations",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 36, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "immune_core_lymphnode_registrations_total"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Total Registrations"}
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Lymph Node Registration Rate",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 36, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immune_core_lymphnode_registrations_total[5m])",
+            "legendFormat": "Registrations/sec"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Registrations/sec"}
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Cytokine Latency (Send to Receive)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 44, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "(sum(rate(immune_core_cytokines_received_total[5m])) - sum(rate(immune_core_cytokines_sent_total[5m]))) / sum(rate(immune_core_cytokines_sent_total[5m]))",
+            "legendFormat": "Relative Delay"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "Delay %"}
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Infrastructure Health Score",
+        "type": "gauge",
+        "gridPos": {"x": 12, "y": 44, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "min(rate(immune_core_cytokines_sent_total[5m]) > 0, rate(immune_core_cytokines_received_total[5m]) > 0, rate(immune_core_hormones_published_total[5m]) > 0)",
+            "legendFormat": "Health"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 1,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.5, "color": "yellow"},
+                {"value": 0.8, "color": "green"}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Message Throughput Heatmap",
+        "type": "heatmap",
+        "gridPos": {"x": 0, "y": 52, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_cytokines_sent_total[1m]))",
+            "format": "time_series"
+          }
+        ],
+        "options": {
+          "calculate": true,
+          "color": {
+            "mode": "scheme",
+            "scheme": "Blues"
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "Cytokine Traffic by Hour",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 60, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(immune_core_cytokines_sent_total[1h]))",
+            "legendFormat": "Messages per hour"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Messages"}
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Hormone Publications by Hour",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 60, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(immune_core_hormones_published_total[1h]))",
+            "legendFormat": "Publications per hour"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Publications"}
+        ]
+      }
+    ]
+  }
+}

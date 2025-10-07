@@ -8,23 +8,21 @@ Orchestrates:
 - Seriema Graph persistence and graph analytics
 """
 
-import logging
-from typing import List, Dict, Any, Optional
-from datetime import datetime
 import asyncio
+from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional
 
 from argument_miner import argument_miner
-from fallacy_classifier import fallacy_classifier
-from argumentation_framework import ArgumentationFramework, build_framework_from_arguments
-from seriema_graph_client import seriema_graph_client
-from models import (
-    LogicalFallacyResult,
-    Argument,
-    Fallacy,
-    ArgumentStructureAnalysis
+from argumentation_framework import (
+    ArgumentationFramework,
+    build_framework_from_arguments,
 )
-from utils import hash_text
 from config import get_settings
+from fallacy_classifier import fallacy_classifier
+from models import Argument, ArgumentStructureAnalysis, Fallacy, LogicalFallacyResult
+from seriema_graph_client import seriema_graph_client
+from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +61,7 @@ class LogicalFallacyModule:
 
             # Initialize models in parallel
             await asyncio.gather(
-                argument_miner.initialize(),
-                fallacy_classifier.initialize()
+                argument_miner.initialize(), fallacy_classifier.initialize()
             )
 
             self._models_initialized = True
@@ -84,7 +81,7 @@ class LogicalFallacyModule:
         self,
         text: str,
         persist_to_graph: bool = False,
-        framework_id: Optional[str] = None
+        framework_id: Optional[str] = None,
     ) -> LogicalFallacyResult:
         """
         Comprehensive logical fallacy detection.
@@ -104,9 +101,7 @@ class LogicalFallacyModule:
         # ========== STAGE 1: ARGUMENT MINING ==========
 
         arguments = argument_miner.extract_arguments(
-            text=text,
-            min_confidence=0.6,
-            use_cache=True
+            text=text, min_confidence=0.6, use_cache=True
         )
 
         logger.info(f"Extracted {len(arguments)} arguments from text")
@@ -127,8 +122,8 @@ class LogicalFallacyModule:
                     supported_claims=0,
                     unsupported_claims=0,
                     avg_premises_per_claim=0.0,
-                    structure_quality=0.0
-                )
+                    structure_quality=0.0,
+                ),
             )
 
         # ========== STAGE 2: FALLACY CLASSIFICATION ==========
@@ -138,9 +133,7 @@ class LogicalFallacyModule:
         for argument in arguments:
             # Hybrid detection (ML + patterns)
             detected_fallacies = fallacy_classifier.analyze_argument_for_fallacies(
-                argument=argument,
-                use_ml=True,
-                use_patterns=True
+                argument=argument, use_ml=True, use_patterns=True
             )
             fallacies.extend(detected_fallacies)
 
@@ -149,8 +142,7 @@ class LogicalFallacyModule:
         # ========== STAGE 3: ARGUMENTATION FRAMEWORK ANALYSIS ==========
 
         framework = build_framework_from_arguments(
-            arguments=arguments,
-            fallacies=fallacies
+            arguments=arguments, fallacies=fallacies
         )
 
         # Calculate coherence
@@ -183,20 +175,17 @@ class LogicalFallacyModule:
                 "text_hash": hash_text(text),
                 "text_length": len(text),
                 "num_fallacies": len(fallacies),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
             }
 
             success = await seriema_graph_client.store_framework(
-                framework=framework,
-                framework_id=framework_id,
-                metadata=metadata
+                framework=framework, framework_id=framework_id, metadata=metadata
             )
 
             if success:
                 # Get graph analytics
                 centrality = await seriema_graph_client.get_argument_centrality(
-                    framework_id=framework_id,
-                    algorithm="degree"
+                    framework_id=framework_id, algorithm="degree"
                 )
 
                 graph_stats = await seriema_graph_client.get_framework_statistics(
@@ -206,7 +195,7 @@ class LogicalFallacyModule:
                 graph_metadata = {
                     "framework_id": framework_id,
                     "centrality": centrality,
-                    "statistics": graph_stats
+                    "statistics": graph_stats,
                 }
 
                 logger.info(f"Persisted framework to Seriema Graph: {framework_id}")
@@ -218,7 +207,7 @@ class LogicalFallacyModule:
             fallacies=fallacies,
             coherence=coherence,
             structure_analysis=structure_analysis,
-            circular_patterns=circular_patterns
+            circular_patterns=circular_patterns,
         )
 
         # ========== BUILD RESULT ==========
@@ -231,7 +220,7 @@ class LogicalFallacyModule:
             winning_arguments=winning_arguments,
             structure_analysis=ArgumentStructureAnalysis(**structure_analysis),
             circular_reasoning_detected=len(circular_patterns) > 0,
-            graph_metadata=graph_metadata if graph_metadata else None
+            graph_metadata=graph_metadata if graph_metadata else None,
         )
 
         logger.info(
@@ -247,7 +236,7 @@ class LogicalFallacyModule:
         fallacies: List[Fallacy],
         coherence: float,
         structure_analysis: Dict[str, Any],
-        circular_patterns: List[Any]
+        circular_patterns: List[Any],
     ) -> float:
         """
         Calculate overall logical fallacy score.
@@ -292,20 +281,17 @@ class LogicalFallacyModule:
 
         # Weighted combination
         base_score = (
-            fallacy_density_score * 0.40 +
-            severity_score * 0.30 +
-            coherence_score * 0.20 +
-            structure_score * 0.10
+            fallacy_density_score * 0.40
+            + severity_score * 0.30
+            + coherence_score * 0.20
+            + structure_score * 0.10
         )
 
         # Boosters for severe cases
         boosters = 0.0
 
         # High-severity fallacies (Straw Man, Circular Reasoning)
-        critical_fallacies = [
-            f for f in fallacies
-            if f.severity > 0.8
-        ]
+        critical_fallacies = [f for f in fallacies if f.severity > 0.8]
         if len(critical_fallacies) >= 2:
             boosters += 0.15
 
@@ -314,7 +300,9 @@ class LogicalFallacyModule:
             boosters += 0.10
 
         # Many unsupported claims
-        unsupported_ratio = structure_analysis.get("unsupported_claims", 0) / max(1, structure_analysis.get("claims", 1))
+        unsupported_ratio = structure_analysis.get("unsupported_claims", 0) / max(
+            1, structure_analysis.get("claims", 1)
+        )
         if unsupported_ratio > 0.7:
             boosters += 0.10
 
@@ -326,10 +314,7 @@ class LogicalFallacyModule:
 
         return final_score
 
-    async def analyze_argument_graph(
-        self,
-        framework_id: str
-    ) -> Dict[str, Any]:
+    async def analyze_argument_graph(self, framework_id: str) -> Dict[str, Any]:
         """
         Perform graph analytics on persisted framework.
 
@@ -350,13 +335,11 @@ class LogicalFallacyModule:
 
         # Centrality analysis
         pagerank = await seriema_graph_client.get_argument_centrality(
-            framework_id=framework_id,
-            algorithm="pagerank"
+            framework_id=framework_id, algorithm="pagerank"
         )
 
         degree = await seriema_graph_client.get_argument_centrality(
-            framework_id=framework_id,
-            algorithm="degree"
+            framework_id=framework_id, algorithm="degree"
         )
 
         # Circular arguments
@@ -370,34 +353,20 @@ class LogicalFallacyModule:
         )
 
         # Top central arguments
-        top_pagerank = sorted(
-            pagerank.items(),
-            key=lambda x: x[1],
-            reverse=True
-        )[:5]
+        top_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)[:5]
 
-        top_degree = sorted(
-            degree.items(),
-            key=lambda x: x[1],
-            reverse=True
-        )[:5]
+        top_degree = sorted(degree.items(), key=lambda x: x[1], reverse=True)[:5]
 
         return {
             "framework_id": framework_id,
             "statistics": stats,
-            "centrality": {
-                "pagerank": dict(top_pagerank),
-                "degree": dict(top_degree)
-            },
+            "centrality": {"pagerank": dict(top_pagerank), "degree": dict(top_degree)},
             "circular_arguments": cycles,
             "coherence": framework.calculate_coherence(),
-            "grounded_extension": framework.get_winning_arguments()
+            "grounded_extension": framework.get_winning_arguments(),
         }
 
-    def get_fallacy_explanation(
-        self,
-        fallacy: Fallacy
-    ) -> Dict[str, str]:
+    def get_fallacy_explanation(self, fallacy: Fallacy) -> Dict[str, str]:
         """
         Get detailed explanation for a fallacy.
 
@@ -413,7 +382,7 @@ class LogicalFallacyModule:
             "evidence": fallacy.evidence,
             "counter_argument": fallacy.counter_argument,
             "severity": f"{fallacy.severity:.2f}",
-            "recommendation": self._get_fallacy_recommendation(fallacy)
+            "recommendation": self._get_fallacy_recommendation(fallacy),
         }
 
     @staticmethod
@@ -428,10 +397,7 @@ class LogicalFallacyModule:
         else:
             return "LOW: Monitor but allow, minor logical issue detected."
 
-    def generate_fallacy_report(
-        self,
-        result: LogicalFallacyResult
-    ) -> str:
+    def generate_fallacy_report(self, result: LogicalFallacyResult) -> str:
         """
         Generate human-readable fallacy report.
 
@@ -459,47 +425,55 @@ class LogicalFallacyModule:
             f"- **Structure Quality**: {result.structure_analysis.structure_quality:.2f}/1.00",
             "",
             "## Detected Fallacies",
-            ""
+            "",
         ]
 
         if not result.fallacies:
             lines.append("✅ No logical fallacies detected.")
         else:
             for i, fallacy in enumerate(result.fallacies, 1):
-                lines.extend([
-                    f"### {i}. {fallacy.fallacy_type.value.upper()}",
-                    "",
-                    f"**Severity**: {fallacy.severity:.2f}/1.00",
-                    f"**Description**: {fallacy.description}",
-                    f"**Evidence**: \"{fallacy.evidence[:100]}...\"",
-                    f"**Counter-Argument**: {fallacy.counter_argument}",
-                    ""
-                ])
+                lines.extend(
+                    [
+                        f"### {i}. {fallacy.fallacy_type.value.upper()}",
+                        "",
+                        f"**Severity**: {fallacy.severity:.2f}/1.00",
+                        f"**Description**: {fallacy.description}",
+                        f'**Evidence**: "{fallacy.evidence[:100]}..."',
+                        f"**Counter-Argument**: {fallacy.counter_argument}",
+                        "",
+                    ]
+                )
 
         if result.circular_reasoning_detected:
-            lines.extend([
-                "## ⚠️ Circular Reasoning Detected",
-                "",
-                "The text contains circular reasoning patterns where premises ",
-                "refer back to their own conclusions.",
-                ""
-            ])
+            lines.extend(
+                [
+                    "## ⚠️ Circular Reasoning Detected",
+                    "",
+                    "The text contains circular reasoning patterns where premises ",
+                    "refer back to their own conclusions.",
+                    "",
+                ]
+            )
 
-        lines.extend([
-            "## Winning Arguments",
-            "",
-            f"Arguments in grounded extension: {len(result.winning_arguments)}",
-            ""
-        ])
+        lines.extend(
+            [
+                "## Winning Arguments",
+                "",
+                f"Arguments in grounded extension: {len(result.winning_arguments)}",
+                "",
+            ]
+        )
 
         if result.graph_metadata:
-            lines.extend([
-                "## Graph Analytics",
-                "",
-                f"**Framework ID**: {result.graph_metadata.get('framework_id', 'N/A')}",
-                f"**Graph Statistics**: {result.graph_metadata.get('statistics', {})}",
-                ""
-            ])
+            lines.extend(
+                [
+                    "## Graph Analytics",
+                    "",
+                    f"**Framework ID**: {result.graph_metadata.get('framework_id', 'N/A')}",
+                    f"**Graph Statistics**: {result.graph_metadata.get('statistics', {})}",
+                    "",
+                ]
+            )
 
         return "\n".join(lines)
 

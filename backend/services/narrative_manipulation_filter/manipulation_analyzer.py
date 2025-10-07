@@ -17,8 +17,8 @@ it to operate with a trusted view of information.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class ManipulationAnalyzer:
@@ -35,7 +35,9 @@ class ManipulationAnalyzer:
         self.last_analysis_time: Optional[datetime] = None
         self.current_status: str = "ready_for_analysis"
 
-    async def analyze(self, content: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def analyze(
+        self, content: str, context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Analyzes textual content for signs of narrative manipulation.
 
         Args:
@@ -45,8 +47,10 @@ class ManipulationAnalyzer:
         Returns:
             Dict[str, Any]: A dictionary containing the analysis results.
         """
-        print(f"[ManipulationAnalyzer] Analyzing content (length: {len(content)}) for manipulation...")
-        await asyncio.sleep(0.2) # Simulate analysis
+        print(
+            f"[ManipulationAnalyzer] Analyzing content (length: {len(content)}) for manipulation..."
+        )
+        await asyncio.sleep(0.2)  # Simulate analysis
 
         manipulation_score = 0.0
         indicators: List[str] = []
@@ -56,10 +60,12 @@ class ManipulationAnalyzer:
         if "fake news" in content.lower() or "hoax" in content.lower():
             manipulation_score += 0.3
             indicators.append("disinformation_keywords")
-        if content.count("!") > 5 or content.count("?") > 5: # Excessive punctuation
+        if content.count("!") > 5 or content.count("?") > 5:  # Excessive punctuation
             manipulation_score += 0.1
             indicators.append("excessive_punctuation")
-        if len(content.split()) < 10 and manipulation_score > 0: # Short, impactful, potentially manipulative
+        if (
+            len(content.split()) < 10 and manipulation_score > 0
+        ):  # Short, impactful, potentially manipulative
             manipulation_score += 0.2
             indicators.append("concise_manipulative_statement")
 
@@ -73,7 +79,7 @@ class ManipulationAnalyzer:
             "manipulation_score": manipulation_score,
             "indicators": indicators,
             "assessment": assessment,
-            "context_used": context
+            "context_used": context,
         }
         self.analysis_history.append(analysis_result)
         self.last_analysis_time = datetime.now()
@@ -89,5 +95,9 @@ class ManipulationAnalyzer:
         return {
             "status": self.current_status,
             "total_analyses_performed": len(self.analysis_history),
-            "last_analysis": self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"
+            "last_analysis": (
+                self.last_analysis_time.isoformat()
+                if self.last_analysis_time
+                else "N/A"
+            ),
         }

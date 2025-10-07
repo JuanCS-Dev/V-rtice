@@ -13,7 +13,7 @@
 import React, { useState, useEffect } from 'react';
 import './MemoryConsolidationWidget.css';
 
-export const MemoryConsolidationWidget = ({ systemHealth }) => {
+export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
   const [currentMode, setCurrentMode] = useState('WAKE');
   const [bufferStats, setBufferStats] = useState({
     current_size: 0,

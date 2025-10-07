@@ -12,11 +12,11 @@ adaptation to evolving threat landscapes.
 """
 
 import os
-import yaml # Assuming PyYAML is installed for YAML parsing
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
-from models.schemas import Playbook, PlaybookStep, ResponseActionType, IncidentSeverity
+from models.schemas import IncidentSeverity, Playbook, PlaybookStep, ResponseActionType
 from utils.logger import setup_logger
+import yaml  # Assuming PyYAML is installed for YAML parsing
 
 logger = setup_logger(__name__)
 
@@ -38,7 +38,7 @@ class PlaybookLoader:
 
         Args:
             directory_path (str): The path to the directory containing playbook YAML/JSON files.
-        
+
         Raises:
             FileNotFoundError: If the directory_path does not exist.
             ValueError: If a playbook file is malformed or invalid.
@@ -48,23 +48,34 @@ class PlaybookLoader:
 
         logger.info(f"[PlaybookLoader] Loading playbooks from: {directory_path}")
         for filename in os.listdir(directory_path):
-            if filename.endswith(".yaml") or filename.endswith(".yml") or filename.endswith(".json"):
+            if (
+                filename.endswith(".yaml")
+                or filename.endswith(".yml")
+                or filename.endswith(".json")
+            ):
                 filepath = os.path.join(directory_path, filename)
                 try:
-                    with open(filepath, 'r') as f:
+                    with open(filepath, "r") as f:
                         if filename.endswith(".json"):
                             import json
+
                             data = json.load(f)
                         else:
                             data = yaml.safe_load(f)
-                    
-                    playbook = Playbook(**data) # Validate with Pydantic schema
+
+                    playbook = Playbook(**data)  # Validate with Pydantic schema
                     self.playbooks[playbook.id] = playbook
                     logger.info(f"[PlaybookLoader] Loaded playbook: {playbook.id}")
                 except Exception as e:
-                    logger.error(f"[PlaybookLoader] Error loading playbook {filename}: {e}")
-                    raise ValueError(f"Malformed or invalid playbook file: {filename} - {e}")
-        logger.info(f"[PlaybookLoader] Finished loading {len(self.playbooks)} playbooks.")
+                    logger.error(
+                        f"[PlaybookLoader] Error loading playbook {filename}: {e}"
+                    )
+                    raise ValueError(
+                        f"Malformed or invalid playbook file: {filename} - {e}"
+                    )
+        logger.info(
+            f"[PlaybookLoader] Finished loading {len(self.playbooks)} playbooks."
+        )
 
     def get_playbook(self, playbook_id: str) -> Optional[Playbook]:
         """Retrieves a specific playbook by its ID.
@@ -88,7 +99,9 @@ class PlaybookLoader:
         """
         # Simplified logic: In a real system, this would involve matching incident
         # characteristics (type, severity, affected assets) to playbook triggers.
-        logger.info(f"[PlaybookLoader] Attempting to find playbook for incident: {incident_id}")
+        logger.info(
+            f"[PlaybookLoader] Attempting to find playbook for incident: {incident_id}"
+        )
         for playbook in self.playbooks.values():
             # Example: if playbook name contains a keyword from incident_id
             if "malware" in incident_id.lower() and "malware" in playbook.id.lower():

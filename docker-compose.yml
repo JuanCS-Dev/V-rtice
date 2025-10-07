@@ -33,6 +33,7 @@ services:
       - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8150
       - MAXIMUS_EUREKA_URL=http://maximus_eureka:8200
       - MAXIMUS_ORACULO_URL=http://maximus_oraculo:8201
+      - ETHICAL_AUDIT_SERVICE_URL=http://ethical_audit_service:8612
       - IMMUNIS_API_URL=http://immunis_api_service:8300
       - HCL_ANALYZER_URL=http://hcl_analyzer_service:8426
       - HCL_EXECUTOR_URL=http://hcl_executor_service:8432
@@ -249,7 +250,7 @@ services:
     volumes:
       - ./backend/services/osint_service:/app
       - osint-data:/app/data
-    command: uvicorn main:app --host 0.0.0.0 --port 8007 --reload
+    command: uvicorn api:app --host 0.0.0.0 --port 8007 --reload
     networks:
       - vertice-network
     restart: unless-stopped
@@ -265,7 +266,7 @@ services:
     environment:
       - MODEL_PATH=/models
       - PYTHONUNBUFFERED=1
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    command: uvicorn api:app --host 0.0.0.0 --port 80 --reload
     networks:
       - vertice-network
     restart: unless-stopped
@@ -495,7 +496,7 @@ services:
     build: ./backend/services/maximus_core_service
     container_name: maximus-core
     ports:
-      - "8150:8001"
+      - "8150:8000"
     volumes:
       - ./backend/services/maximus_core_service:/app
     command: python main.py
@@ -530,6 +531,32 @@ services:
     networks:
       - vertice-network
     restart: unless-stopped
+
+  # ============================================================================
+  # ETHICAL AI SERVICES - Audit & Compliance
+  # ============================================================================
+
+  ethical_audit_service:
+    build: ./backend/services/ethical_audit_service
+    container_name: ethical-audit
+    ports:
+      - "8612:8612"
+    volumes:
+      - ./backend/services/ethical_audit_service:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8612 --reload
+    environment:
+      - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/aurora
+    depends_on:
+      - postgres
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8612/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # ============================================================================
   # HCL SERVICES - Homeostatic Control Loop (Production Ready)
@@ -1236,6 +1263,12 @@ services:
     networks:
       - vertice-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8013/health/simple', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   ai_immune_system:
     build: ./backend/services/ai_immune_system
@@ -1892,7 +1925,7 @@ services:
       - vertice-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8018/health')"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8018/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1928,7 +1961,7 @@ services:
       - vertice-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8019/health')"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8019/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1967,7 +2000,7 @@ services:
       - vertice-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8020/health')"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8020/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1993,7 +2026,7 @@ services:
       - vertice-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8033/health')"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8033/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2019,7 +2052,7 @@ services:
       - vertice-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8042/health')"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8042/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2043,7 +2076,7 @@ services:
       - vertice-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8051/health')"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8051/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2119,27 +2152,28 @@ services:
       retries: 3
       start_period: 10s
 
-  maximus_oraculo:
-    build: ./backend/services/maximus_oraculo
-    container_name: vertice-maximus_oraculo
-    env_file: .env
-    ports:
-      - "9104:8201"
-    volumes:
-      - ./backend/services/maximus_oraculo:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8201 --reload
-    environment:
-      - SERVICE_NAME=maximus_oraculo
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-    networks:
-      - vertice-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8201/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+  # REMOVED: Duplicate of maximus-oraculo (line ~826)
+  # maximus_oraculo:
+  #   build: ./backend/services/maximus_oraculo
+  #   container_name: vertice-maximus_oraculo
+  #   env_file: .env
+  #   ports:
+  #     - "9104:8201"
+  #   volumes:
+  #     - ./backend/services/maximus_oraculo:/app
+  #   command: uvicorn api:app --host 0.0.0.0 --port 8201 --reload
+  #   environment:
+  #     - SERVICE_NAME=maximus_oraculo
+  #     - LOG_LEVEL=${LOG_LEVEL:-INFO}
+  #   networks:
+  #     - vertice-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8201/health')"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
 
   osint_service:
     build: ./backend/services/osint_service

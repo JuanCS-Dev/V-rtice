@@ -9,20 +9,19 @@ Automated retraining with:
 - Automatic rollback if performance degrades
 """
 
-import logging
-from typing import Dict, List, Any, Optional
+import asyncio
 from datetime import datetime, timedelta
 from enum import Enum
-import asyncio
+import logging
+from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-
+from adversarial_training import adversarial_generator, AdversarialTrainer
+from config import get_settings
 from database import get_db_session
 from db_models import AnalysisRecord
-from adversarial_training import AdversarialTrainer, adversarial_generator
 from model_quantization import model_quantizer
-from config import get_settings
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -77,9 +76,7 @@ class ModelRetrainingPipeline:
         self.retraining_history: List[Dict[str, Any]] = []
 
     async def execute_pipeline(
-        self,
-        model_name: str,
-        trigger: TriggerType = TriggerType.MANUAL
+        self, model_name: str, trigger: TriggerType = TriggerType.MANUAL
     ) -> Dict[str, Any]:
         """
         Execute full retraining pipeline.
@@ -91,7 +88,9 @@ class ModelRetrainingPipeline:
         Returns:
             Pipeline execution result
         """
-        logger.info(f"🚀 Starting retraining pipeline for {model_name} (trigger={trigger.value})")
+        logger.info(
+            f"🚀 Starting retraining pipeline for {model_name} (trigger={trigger.value})"
+        )
 
         job_id = f"{model_name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
 
@@ -104,7 +103,7 @@ class ModelRetrainingPipeline:
             "end_time": None,
             "metrics": {},
             "deployed": False,
-            "error": None
+            "error": None,
         }
 
         try:
@@ -120,7 +119,9 @@ class ModelRetrainingPipeline:
 
             # STEP 3: Model Training (with adversarial augmentation)
             result["status"] = RetrainingStatus.TRAINING.value
-            new_model, training_metrics = await self._train_model(model_name, train_data)
+            new_model, training_metrics = await self._train_model(
+                model_name, train_data
+            )
 
             logger.info(f"Training complete: loss={training_metrics['final_loss']:.4f}")
 
@@ -136,7 +137,9 @@ class ModelRetrainingPipeline:
             result["metrics"] = eval_metrics
 
             # Check if improvement threshold met
-            current_f1 = self.current_model_metrics.get(model_name, {}).get("f1_score", 0.0)
+            current_f1 = self.current_model_metrics.get(model_name, {}).get(
+                "f1_score", 0.0
+            )
             improvement = eval_metrics["f1_score"] - current_f1
 
             if improvement < self.MIN_IMPROVEMENT_THRESHOLD:
@@ -155,11 +158,12 @@ class ModelRetrainingPipeline:
 
             # Run A/B test
             ab_results = await self._run_ab_test(
-                model_name=model_name,
-                duration_hours=self.AB_TEST_DURATION_HOURS
+                model_name=model_name, duration_hours=self.AB_TEST_DURATION_HOURS
             )
 
-            logger.info(f"A/B test complete: new_model_better={ab_results['new_model_better']}")
+            logger.info(
+                f"A/B test complete: new_model_better={ab_results['new_model_better']}"
+            )
 
             # STEP 6: Production Deployment (if A/B test passed)
             if ab_results["new_model_better"]:
@@ -169,7 +173,7 @@ class ModelRetrainingPipeline:
                 quantized_path = model_quantizer.quantize_sequence_classification(
                     model_name="neuralmind/bert-base-portuguese-cased",  # Base model
                     output_name=f"{model_name}_retrained",
-                    num_labels=eval_metrics.get("num_labels", 2)
+                    num_labels=eval_metrics.get("num_labels", 2),
                 )
 
                 logger.info(f"Model quantized: {quantized_path}")
@@ -201,9 +205,7 @@ class ModelRetrainingPipeline:
         return result
 
     async def _collect_training_data(
-        self,
-        model_name: str,
-        min_samples: int = 1000
+        self, model_name: str, min_samples: int = 1000
     ) -> Dict[str, List]:
         """
         Collect training data from PostgreSQL analysis records.
@@ -257,11 +259,7 @@ class ModelRetrainingPipeline:
 
             logger.info(f"Collected {len(texts)} samples for {model_name}")
 
-            return {
-                "texts": texts,
-                "labels": labels,
-                "num_samples": len(texts)
-            }
+            return {"texts": texts, "labels": labels, "num_samples": len(texts)}
 
     def _validate_data(self, data: Dict[str, List]) -> bool:
         """
@@ -295,7 +293,7 @@ class ModelRetrainingPipeline:
         if label_counts:
             max_count = max(label_counts.values())
             min_count = min(label_counts.values())
-            imbalance_ratio = max_count / min_count if min_count > 0 else float('inf')
+            imbalance_ratio = max_count / min_count if min_count > 0 else float("inf")
 
             if imbalance_ratio > 10:
                 logger.warning(f"High class imbalance: {imbalance_ratio:.1f}:1")
@@ -310,11 +308,7 @@ class ModelRetrainingPipeline:
         logger.info("✅ Data validation passed")
         return True
 
-    async def _train_model(
-        self,
-        model_name: str,
-        train_data: Dict[str, List]
-    ) -> tuple:
+    async def _train_model(self, model_name: str, train_data: Dict[str, List]) -> tuple:
         """
         Train model with adversarial augmentation.
 
@@ -332,8 +326,7 @@ class ModelRetrainingPipeline:
         base_model_name = "neuralmind/bert-base-portuguese-cased"
 
         model = AutoModelForSequenceClassification.from_pretrained(
-            base_model_name,
-            num_labels=2  # Binary classification
+            base_model_name, num_labels=2  # Binary classification
         )
 
         tokenizer = AutoTokenizer.from_pretrained(base_model_name)
@@ -345,16 +338,12 @@ class ModelRetrainingPipeline:
             train_texts=train_data["texts"],
             train_labels=train_data["labels"],
             epochs=3,
-            learning_rate=2e-5
+            learning_rate=2e-5,
         )
 
         return model, metrics
 
-    async def _evaluate_model(
-        self,
-        model: Any,
-        model_name: str
-    ) -> Dict[str, float]:
+    async def _evaluate_model(self, model: Any, model_name: str) -> Dict[str, float]:
         """
         Evaluate model on test set.
 
@@ -376,16 +365,12 @@ class ModelRetrainingPipeline:
             "accuracy": 0.89,
             "precision": 0.87,
             "recall": 0.89,
-            "num_labels": 2
+            "num_labels": 2,
         }
 
         return metrics
 
-    async def _deploy_to_staging(
-        self,
-        model: Any,
-        model_name: str
-    ) -> None:
+    async def _deploy_to_staging(self, model: Any, model_name: str) -> None:
         """Deploy model to staging environment."""
         logger.info(f"Deploying {model_name} to staging...")
 
@@ -394,11 +379,7 @@ class ModelRetrainingPipeline:
 
         logger.info(f"✅ {model_name} deployed to staging")
 
-    async def _deploy_to_production(
-        self,
-        model: Any,
-        model_name: str
-    ) -> None:
+    async def _deploy_to_production(self, model: Any, model_name: str) -> None:
         """Deploy model to production environment."""
         logger.info(f"Deploying {model_name} to production...")
 
@@ -415,9 +396,7 @@ class ModelRetrainingPipeline:
         logger.info(f"✅ Old {model_name} archived")
 
     async def _run_ab_test(
-        self,
-        model_name: str,
-        duration_hours: int = 24
+        self, model_name: str, duration_hours: int = 24
     ) -> Dict[str, Any]:
         """
         Run A/B test comparing new vs old model.
@@ -442,10 +421,12 @@ class ModelRetrainingPipeline:
             "new_model_f1": 0.88,
             "old_model_f1": 0.85,
             "improvement": 0.03,
-            "duration_hours": duration_hours
+            "duration_hours": duration_hours,
         }
 
-        logger.info(f"✅ A/B test complete: new_model_better={result['new_model_better']}")
+        logger.info(
+            f"✅ A/B test complete: new_model_better={result['new_model_better']}"
+        )
 
         return result
 

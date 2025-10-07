@@ -1,0 +1,348 @@
+{
+  "dashboard": {
+    "title": "Active Immune Core - Coordination Metrics",
+    "tags": ["immune-core", "coordination"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Leadership Status",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 0, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "immune_core_has_leader"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "value": 0,
+                "text": "NO LEADER",
+                "color": "red"
+              },
+              {
+                "value": 1,
+                "text": "HAS LEADER",
+                "color": "green"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Elections",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 0, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "immune_core_elections_total"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Leader Changes",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 0, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "immune_core_leader_changes_total"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Elections Over Time",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "increase(immune_core_elections_total[5m])",
+            "legendFormat": "Elections (5m window)"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Elections"}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [10],
+                "type": "gt"
+              },
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Election Rate",
+          "message": "System is running too many leader elections",
+          "noDataState": "no_data"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Leader Changes Over Time",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "increase(immune_core_leader_changes_total[5m])",
+            "legendFormat": "Leader Changes (5m window)"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Changes"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Tasks Submitted vs Assigned",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immune_core_tasks_submitted_total[5m])",
+            "legendFormat": "Submitted - {{task_type}}"
+          },
+          {
+            "expr": "rate(immune_core_tasks_assigned_total[5m])",
+            "legendFormat": "Assigned - {{task_type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Tasks/sec"}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Task Assignment Lag",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_tasks_submitted_total[5m])) - sum(rate(immune_core_tasks_assigned_total[5m]))",
+            "legendFormat": "Assignment Lag (tasks/sec)"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Lag"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Tasks Pending",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "immune_core_tasks_pending"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Pending Tasks"}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [100],
+                "type": "gt"
+              },
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Task Backlog",
+          "message": "Task queue is backing up"
+        }
+      },
+      {
+        "id": 9,
+        "title": "Task Completion Rate by Type",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(immune_core_tasks_completed_total[5m])",
+            "legendFormat": "{{task_type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Completions/sec"}
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Consensus Proposals by Type",
+        "type": "bargauge",
+        "gridPos": {"x": 0, "y": 28, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "immune_core_proposals_total",
+            "legendFormat": "{{proposal_type}}"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 11,
+        "title": "Proposal Approval Rate",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 28, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_proposals_approved_total[5m])) by (proposal_type) / (sum(rate(immune_core_proposals_approved_total[5m])) by (proposal_type) + sum(rate(immune_core_proposals_rejected_total[5m])) by (proposal_type))",
+            "legendFormat": "{{proposal_type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Approval Rate",
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Votes Cast by Decision",
+        "type": "piechart",
+        "gridPos": {"x": 0, "y": 36, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "immune_core_votes_cast_total",
+            "legendFormat": "{{decision}}"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Task Success Rate",
+        "type": "gauge",
+        "gridPos": {"x": 12, "y": 36, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_tasks_completed_total[5m])) / (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])))"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 1,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.8, "color": "yellow"},
+                {"value": 0.95, "color": "green"}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Task Duration Distribution",
+        "type": "heatmap",
+        "gridPos": {"x": 0, "y": 44, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_task_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}"
+          }
+        ],
+        "options": {
+          "calculate": true,
+          "color": {
+            "mode": "scheme",
+            "scheme": "Spectral"
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "Task Retry Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 52, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(immune_core_task_retries_bucket[5m]))",
+            "legendFormat": "p95 retries - {{task_type}}"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(immune_core_task_retries_bucket[5m]))",
+            "legendFormat": "p50 retries - {{task_type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Retries"}
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Coordination Health Score",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 52, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "(immune_core_has_leader) * (1 - (immune_core_tasks_pending / 100)) * (sum(rate(immune_core_tasks_completed_total[5m])) / (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001))",
+            "legendFormat": "Health Score"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 1,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.7, "color": "yellow"},
+                {"value": 0.9, "color": "green"}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        }
+      }
+    ]
+  }
+}

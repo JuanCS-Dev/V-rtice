@@ -4,14 +4,15 @@ Source Reputation Repository for Cognitive Defense System.
 Data access layer for source credibility tracking with Bayesian updates.
 """
 
-import logging
-from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
-from sqlalchemy import select, update, delete, func, and_, or_
+import logging
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db_models import SourceReputation, FactCheckCache
 from ..database import BaseRepository
+from ..db_models import FactCheckCache, SourceReputation
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +20,7 @@ logger = logging.getLogger(__name__)
 class SourceReputationRepository(BaseRepository):
     """Repository for source reputation management."""
 
-    async def get_by_domain(
-        self,
-        domain: str
-    ) -> Optional[SourceReputation]:
+    async def get_by_domain(self, domain: str) -> Optional[SourceReputation]:
         """
         Get source reputation by domain.
 
@@ -45,7 +43,7 @@ class SourceReputationRepository(BaseRepository):
         prior_credibility: float = 0.5,
         alpha: float = 1.0,
         beta: float = 1.0,
-        domain_fingerprint: Optional[str] = None
+        domain_fingerprint: Optional[str] = None,
     ) -> SourceReputation:
         """
         Create or update source reputation.
@@ -70,8 +68,12 @@ class SourceReputationRepository(BaseRepository):
             existing.newsguard_score = newsguard_score or existing.newsguard_score
             existing.newsguard_rating = newsguard_rating or existing.newsguard_rating
             existing.newsguard_last_updated = datetime.utcnow()
-            existing.newsguard_nutrition_label = newsguard_nutrition_label or existing.newsguard_nutrition_label
-            existing.domain_fingerprint = domain_fingerprint or existing.domain_fingerprint
+            existing.newsguard_nutrition_label = (
+                newsguard_nutrition_label or existing.newsguard_nutrition_label
+            )
+            existing.domain_fingerprint = (
+                domain_fingerprint or existing.domain_fingerprint
+            )
             existing.last_analyzed = datetime.utcnow()
 
             await self.session.flush()
@@ -92,7 +94,7 @@ class SourceReputationRepository(BaseRepository):
                 beta=beta,
                 domain_fingerprint=domain_fingerprint,
                 first_seen=datetime.utcnow(),
-                last_analyzed=datetime.utcnow()
+                last_analyzed=datetime.utcnow(),
             )
 
             await self.add(source)
@@ -101,11 +103,7 @@ class SourceReputationRepository(BaseRepository):
             return source
 
     async def update_bayesian_parameters(
-        self,
-        domain: str,
-        new_alpha: float,
-        new_beta: float,
-        is_reliable: bool
+        self, domain: str, new_alpha: float, new_beta: float, is_reliable: bool
     ) -> SourceReputation:
         """
         Update Bayesian credibility parameters.
@@ -145,10 +143,7 @@ class SourceReputationRepository(BaseRepository):
         return source
 
     async def add_similar_domains(
-        self,
-        domain: str,
-        similar_domains: List[str],
-        cluster_id: str
+        self, domain: str, similar_domains: List[str], cluster_id: str
     ) -> SourceReputation:
         """
         Add similar domains for domain hopping detection.
@@ -172,10 +167,7 @@ class SourceReputationRepository(BaseRepository):
         await self.session.refresh(source)
         return source
 
-    async def get_cluster_members(
-        self,
-        cluster_id: str
-    ) -> List[SourceReputation]:
+    async def get_cluster_members(self, cluster_id: str) -> List[SourceReputation]:
         """
         Get all domains in a cluster.
 
@@ -185,16 +177,12 @@ class SourceReputationRepository(BaseRepository):
         Returns:
             List of SourceReputation in cluster
         """
-        stmt = select(SourceReputation).where(
-            SourceReputation.cluster_id == cluster_id
-        )
+        stmt = select(SourceReputation).where(SourceReputation.cluster_id == cluster_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
     async def get_unreliable_domains(
-        self,
-        threshold: float = 0.3,
-        min_analyses: int = 3
+        self, threshold: float = 0.3, min_analyses: int = 3
     ) -> List[SourceReputation]:
         """
         Get domains with low credibility.
@@ -206,20 +194,22 @@ class SourceReputationRepository(BaseRepository):
         Returns:
             List of unreliable SourceReputation
         """
-        stmt = select(SourceReputation).where(
-            and_(
-                SourceReputation.posterior_credibility <= threshold,
-                SourceReputation.total_analyses >= min_analyses
+        stmt = (
+            select(SourceReputation)
+            .where(
+                and_(
+                    SourceReputation.posterior_credibility <= threshold,
+                    SourceReputation.total_analyses >= min_analyses,
+                )
             )
-        ).order_by(SourceReputation.posterior_credibility.asc())
+            .order_by(SourceReputation.posterior_credibility.asc())
+        )
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
     async def get_top_credible_domains(
-        self,
-        limit: int = 100,
-        min_analyses: int = 5
+        self, limit: int = 100, min_analyses: int = 5
     ) -> List[SourceReputation]:
         """
         Get most credible domains.
@@ -231,19 +221,18 @@ class SourceReputationRepository(BaseRepository):
         Returns:
             List of top credible SourceReputation
         """
-        stmt = select(SourceReputation).where(
-            SourceReputation.total_analyses >= min_analyses
-        ).order_by(
-            SourceReputation.posterior_credibility.desc()
-        ).limit(limit)
+        stmt = (
+            select(SourceReputation)
+            .where(SourceReputation.total_analyses >= min_analyses)
+            .order_by(SourceReputation.posterior_credibility.desc())
+            .limit(limit)
+        )
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
     async def get_recently_analyzed(
-        self,
-        hours: int = 24,
-        limit: int = 100
+        self, hours: int = 24, limit: int = 100
     ) -> List[SourceReputation]:
         """
         Get recently analyzed domains.
@@ -257,19 +246,17 @@ class SourceReputationRepository(BaseRepository):
         """
         since = datetime.utcnow() - timedelta(hours=hours)
 
-        stmt = select(SourceReputation).where(
-            SourceReputation.last_analyzed >= since
-        ).order_by(
-            SourceReputation.last_analyzed.desc()
-        ).limit(limit)
+        stmt = (
+            select(SourceReputation)
+            .where(SourceReputation.last_analyzed >= since)
+            .order_by(SourceReputation.last_analyzed.desc())
+            .limit(limit)
+        )
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def search_by_pattern(
-        self,
-        pattern: str
-    ) -> List[SourceReputation]:
+    async def search_by_pattern(self, pattern: str) -> List[SourceReputation]:
         """
         Search domains by pattern.
 
@@ -279,9 +266,11 @@ class SourceReputationRepository(BaseRepository):
         Returns:
             Matching SourceReputation
         """
-        stmt = select(SourceReputation).where(
-            SourceReputation.domain.like(pattern)
-        ).order_by(SourceReputation.domain)
+        stmt = (
+            select(SourceReputation)
+            .where(SourceReputation.domain.like(pattern))
+            .order_by(SourceReputation.domain)
+        )
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -299,14 +288,18 @@ class SourceReputationRepository(BaseRepository):
         total_domains = total_result.scalar()
 
         # Credibility distribution
-        trusted_stmt = select(func.count()).select_from(SourceReputation).where(
-            SourceReputation.posterior_credibility >= 0.7
+        trusted_stmt = (
+            select(func.count())
+            .select_from(SourceReputation)
+            .where(SourceReputation.posterior_credibility >= 0.7)
         )
         trusted_result = await self.session.execute(trusted_stmt)
         trusted_count = trusted_result.scalar()
 
-        unreliable_stmt = select(func.count()).select_from(SourceReputation).where(
-            SourceReputation.posterior_credibility <= 0.3
+        unreliable_stmt = (
+            select(func.count())
+            .select_from(SourceReputation)
+            .where(SourceReputation.posterior_credibility <= 0.3)
         )
         unreliable_result = await self.session.execute(unreliable_stmt)
         unreliable_count = unreliable_result.scalar()
@@ -317,9 +310,9 @@ class SourceReputationRepository(BaseRepository):
         avg_credibility = avg_result.scalar() or 0.0
 
         # Clusters
-        cluster_stmt = select(func.count(func.distinct(SourceReputation.cluster_id))).where(
-            SourceReputation.cluster_id.isnot(None)
-        )
+        cluster_stmt = select(
+            func.count(func.distinct(SourceReputation.cluster_id))
+        ).where(SourceReputation.cluster_id.isnot(None))
         cluster_result = await self.session.execute(cluster_stmt)
         total_clusters = cluster_result.scalar()
 
@@ -329,7 +322,7 @@ class SourceReputationRepository(BaseRepository):
             "unreliable_count": unreliable_count,
             "neutral_count": total_domains - trusted_count - unreliable_count,
             "average_credibility": float(avg_credibility),
-            "total_clusters": total_clusters
+            "total_clusters": total_clusters,
         }
 
     async def cache_fact_check(
@@ -342,7 +335,7 @@ class SourceReputationRepository(BaseRepository):
         api_response: Dict[str, Any],
         expires_in_days: int = 30,
         source_url: Optional[str] = None,
-        rating_text: Optional[str] = None
+        rating_text: Optional[str] = None,
     ) -> FactCheckCache:
         """
         Cache fact-check result.
@@ -372,7 +365,7 @@ class SourceReputationRepository(BaseRepository):
             source_url=source_url,
             rating_text=rating_text,
             api_response_json=api_response,
-            expires_at=expires_at
+            expires_at=expires_at,
         )
 
         await self.add(cache_entry)
@@ -380,10 +373,7 @@ class SourceReputationRepository(BaseRepository):
         await self.session.refresh(cache_entry)
         return cache_entry
 
-    async def get_cached_fact_check(
-        self,
-        claim_hash: str
-    ) -> Optional[FactCheckCache]:
+    async def get_cached_fact_check(self, claim_hash: str) -> Optional[FactCheckCache]:
         """
         Get cached fact-check result.
 
@@ -398,7 +388,7 @@ class SourceReputationRepository(BaseRepository):
         stmt = select(FactCheckCache).where(
             and_(
                 FactCheckCache.claim_text_hash == claim_hash,
-                FactCheckCache.expires_at > now
+                FactCheckCache.expires_at > now,
             )
         )
 
@@ -422,9 +412,7 @@ class SourceReputationRepository(BaseRepository):
         """
         now = datetime.utcnow()
 
-        stmt = delete(FactCheckCache).where(
-            FactCheckCache.expires_at <= now
-        )
+        stmt = delete(FactCheckCache).where(FactCheckCache.expires_at <= now)
 
         result = await self.session.execute(stmt)
         await self.session.commit()

@@ -10,19 +10,18 @@ Improves throughput by batching inference requests:
 Achieves 10x throughput improvement for high-load scenarios.
 """
 
-import logging
 import asyncio
-import time
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
+import logging
+import time
+from typing import Any, Dict, List, Optional, Tuple
 import uuid
 
-import torch
-import numpy as np
-from transformers import AutoTokenizer
-
 from config import get_settings
+import numpy as np
+import torch
+from transformers import AutoTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ class BatchInferenceEngine:
         batch_size: int = 32,
         wait_time_ms: int = 100,
         max_length: int = 512,
-        device: str = "cpu"
+        device: str = "cpu",
     ):
         """
         Initialize batch inference engine.
@@ -136,10 +135,7 @@ class BatchInferenceEngine:
         future = asyncio.get_event_loop().create_future()
 
         request = BatchRequest(
-            request_id=request_id,
-            text=text,
-            timestamp=time.time(),
-            future=future
+            request_id=request_id, text=text, timestamp=time.time(), future=future
         )
 
         # Add to queue
@@ -175,8 +171,7 @@ class BatchInferenceEngine:
 
                     try:
                         request = await asyncio.wait_for(
-                            self.queue.get(),
-                            timeout=remaining_time
+                            self.queue.get(), timeout=remaining_time
                         )
                         batch.append(request)
 
@@ -215,7 +210,7 @@ class BatchInferenceEngine:
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
-                max_length=self.max_length
+                max_length=self.max_length,
             )
 
             # Move to device
@@ -268,21 +263,23 @@ class BatchInferenceEngine:
                 "total_batches": 0,
                 "avg_batch_size": 0.0,
                 "avg_latency_ms": 0.0,
-                "throughput_qps": 0.0
+                "throughput_qps": 0.0,
             }
 
         avg_batch_size = self.total_requests / self.total_batches
         avg_latency_ms = self.total_latency / self.total_batches
 
         # Throughput: samples per second
-        throughput_qps = 1000 * avg_batch_size / avg_latency_ms if avg_latency_ms > 0 else 0
+        throughput_qps = (
+            1000 * avg_batch_size / avg_latency_ms if avg_latency_ms > 0 else 0
+        )
 
         return {
             "total_requests": self.total_requests,
             "total_batches": self.total_batches,
             "avg_batch_size": avg_batch_size,
             "avg_latency_ms": avg_latency_ms,
-            "throughput_qps": throughput_qps
+            "throughput_qps": throughput_qps,
         }
 
 
@@ -303,7 +300,7 @@ class MultiModelBatchEngine:
         model: torch.nn.Module,
         tokenizer: AutoTokenizer,
         batch_size: int = 32,
-        wait_time_ms: int = 100
+        wait_time_ms: int = 100,
     ) -> None:
         """
         Register model for batched inference.
@@ -319,7 +316,7 @@ class MultiModelBatchEngine:
             model=model,
             tokenizer=tokenizer,
             batch_size=batch_size,
-            wait_time_ms=wait_time_ms
+            wait_time_ms=wait_time_ms,
         )
 
         self.engines[model_name] = engine
@@ -342,11 +339,7 @@ class MultiModelBatchEngine:
 
         logger.info(f"✅ Stopped {len(self.engines)} batch engines")
 
-    async def predict(
-        self,
-        model_name: str,
-        text: str
-    ) -> np.ndarray:
+    async def predict(self, model_name: str, text: str) -> np.ndarray:
         """
         Submit prediction to specific model.
 
@@ -369,10 +362,7 @@ class MultiModelBatchEngine:
         Returns:
             Dict mapping model name to metrics
         """
-        return {
-            name: engine.get_metrics()
-            for name, engine in self.engines.items()
-        }
+        return {name: engine.get_metrics() for name, engine in self.engines.items()}
 
 
 # ============================================================================

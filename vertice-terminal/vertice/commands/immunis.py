@@ -35,12 +35,11 @@ Examples:
 import typer
 import asyncio
 from rich.console import Console
-from rich.panel import Panel
 from rich.markdown import Markdown
 from typing_extensions import Annotated
 
 from ..connectors.immunis import ImmunisConnector
-from ..utils.output import output_json, print_error, print_success
+from ..utils.output import output_json, print_error, print_success, PrimordialPanel
 from ..utils.auth import require_auth
 from vertice.utils import primoroso
 
@@ -75,11 +74,12 @@ def status(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(result.get("response", str(result))),
-                        title="[green]🛡️ Immunis Status[/green]",
-                        border_style="green"
-                    ))
+                        title="🛡️ Immunis Status",
+                        console=console
+                    )
+                    panel.with_status("success").render()
                 print_success("Status retrieved")
             else:
                 print_error("Failed to get status")
@@ -129,11 +129,12 @@ def detect(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title="[red]Threat Detection[/red]",
-                        border_style="red"
-                    ))
+                        title="Threat Detection",
+                        console=console
+                    )
+                    panel.with_status("error").render()
                 print_success("Detection complete")
             else:
                 print_error("Detection failed")
@@ -172,11 +173,12 @@ def respond(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[green]Response: {threat_id}[/green]",
-                        border_style="green"
-                    ))
+                        title=f"Response: {threat_id}",
+                        console=console
+                    )
+                    panel.with_status("success").render()
                 print_success("Response complete")
             else:
                 print_error("Response failed")
@@ -227,11 +229,12 @@ def patrol(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(result.get("response", str(result))),
-                        title=f"[cyan]NK Patrol: {scope}[/cyan]",
-                        border_style="cyan"
-                    ))
+                        title=f"NK Patrol: {scope}",
+                        console=console
+                    )
+                    panel.with_status("info").render()
                 print_success("Patrol activated")
             else:
                 print_error("Patrol activation failed")
@@ -264,11 +267,12 @@ def memory(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(result.get("response", str(result))),
-                        title=f"[yellow]Immune Memory: {antigen}[/yellow]",
-                        border_style="yellow"
-                    ))
+                        title=f"Immune Memory: {antigen}",
+                        console=console
+                    )
+                    panel.with_status("warning").render()
                 print_success("Memory query complete")
             else:
                 print_error("No memory found")
@@ -322,11 +326,12 @@ def suppress_fp(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[blue]FP Suppression (threshold: {threshold})[/blue]",
-                        border_style="blue"
-                    ))
+                        title=f"FP Suppression (threshold: {threshold})",
+                        console=console
+                    )
+                    panel.with_status("info").render()
                 print_success("Evaluation complete")
             else:
                 print_error("Evaluation failed")
@@ -365,11 +370,12 @@ def tolerance(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[cyan]Tolerance Profile: {entity_id}[/cyan]",
-                        border_style="cyan"
-                    ))
+                        title=f"Tolerance Profile: {entity_id}",
+                        console=console
+                    )
+                    panel.with_status("info").render()
                 print_success("Profile retrieved")
             else:
                 print_error("Profile not found")
@@ -407,11 +413,12 @@ def consolidate(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title="[magenta]Memory Consolidation (STM → LTM)[/magenta]",
-                        border_style="magenta"
-                    ))
+                        title="Memory Consolidation (STM → LTM)",
+                        console=console
+                    )
+                    panel.with_status("info").render()
                 print_success("Consolidation complete")
             else:
                 print_error("Consolidation failed")
@@ -447,11 +454,12 @@ def ltm(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[yellow]Long-Term Memory: {query[:50]}...[/yellow]",
-                        border_style="yellow"
-                    ))
+                        title=f"Long-Term Memory: {query[:50]}...",
+                        console=console
+                    )
+                    panel.with_status("warning").render()
                 print_success("LTM query complete")
             else:
                 print_error("No memories found")
@@ -501,11 +509,12 @@ def antibodies(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title="[green]Antibody Diversification (V(D)J)[/green]",
-                        border_style="green"
-                    ))
+                        title="Antibody Diversification (V(D)J)",
+                        console=console
+                    )
+                    panel.with_status("success").render()
                 print_success("Antibody repertoire initialized")
             else:
                 print_error("Diversification failed")
@@ -553,11 +562,12 @@ def mature(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title="[red]Affinity Maturation (Somatic Hypermutation)[/red]",
-                        border_style="red"
-                    ))
+                        title="Affinity Maturation (Somatic Hypermutation)",
+                        console=console
+                    )
+                    panel.with_status("error").render()
                 print_success("Maturation complete")
             else:
                 print_error("Maturation failed")

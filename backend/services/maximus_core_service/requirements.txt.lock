@@ -4,7 +4,9 @@
 #
 #    pip-compile --output-file=requirements.txt.lock requirements.txt
 #
-aiohttp==3.9.1
+aiohappyeyeballs==2.6.1
+    # via aiohttp
+aiohttp==3.13.0
     # via -r requirements.txt
 aiosignal==1.4.0
     # via aiohttp
@@ -15,7 +17,6 @@ anthropic==0.69.0
 anyio==3.7.1
     # via
     #   anthropic
-    #   fastapi
     #   httpx
     #   openai
     #   starlette
@@ -56,7 +57,7 @@ durationpy==0.10
     # via kubernetes
 farama-notifications==0.0.4
     # via gymnasium
-fastapi==0.104.1
+fastapi==0.118.0
     # via -r requirements.txt
 filelock==3.19.1
     # via
@@ -124,7 +125,7 @@ httplib2==0.31.0
     #   google-auth-httplib2
 httptools==0.6.4
     # via uvicorn
-httpx==0.25.1
+httpx==0.28.1
     # via
     #   -r requirements.txt
     #   anthropic
@@ -240,7 +241,9 @@ pillow==11.3.0
 prometheus-client==0.23.1
     # via -r requirements.txt
 propcache==0.4.0
-    # via yarl
+    # via
+    #   aiohttp
+    #   yarl
 proto-plus==1.26.1
     # via
     #   google-ai-generativelanguage
@@ -263,14 +266,14 @@ pyasn1==0.6.1
     #   rsa
 pyasn1-modules==0.4.2
     # via google-auth
-pydantic==2.4.2
+pydantic==2.11.10
     # via
     #   -r requirements.txt
     #   anthropic
     #   fastapi
     #   google-generativeai
     #   openai
-pydantic-core==2.10.1
+pydantic-core==2.33.2
     # via pydantic
 pyparsing==3.2.5
     # via
@@ -332,11 +335,10 @@ sniffio==1.3.1
     # via
     #   anthropic
     #   anyio
-    #   httpx
     #   openai
 stable-baselines3==2.7.0
     # via -r requirements.txt
-starlette==0.27.0
+starlette==0.48.0
     # via fastapi
 statsmodels==0.14.5
     # via -r requirements.txt
@@ -372,7 +374,11 @@ typing-extensions==4.15.0
     #   openai
     #   pydantic
     #   pydantic-core
+    #   starlette
     #   torch
+    #   typing-inspection
+typing-inspection==0.4.2
+    # via pydantic
 tzdata==2025.2
     # via pandas
 uritemplate==4.2.0
@@ -382,7 +388,7 @@ urllib3==2.3.0
     #   docker
     #   kubernetes
     #   requests
-uvicorn[standard]==0.24.0
+uvicorn[standard]==0.37.0
     # via -r requirements.txt
 uvloop==0.21.0
     # via uvicorn

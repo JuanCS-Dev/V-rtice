@@ -120,24 +120,11 @@ export const useThreatData = () => {
 
     } catch (err) {
       console.error('Error fetching threats:', err);
-      setError(err.message || 'Erro ao carregar ameaças');
+      setError(err.message || 'Erro ao carregar ameaças. Serviços de threat intelligence podem estar offline.');
 
-      // Fallback: dados mock se serviços estiverem offline
-      const mockThreats = Array.from({ length: 30 }, (_, i) => ({
-        id: i,
-        lat: -23.5505 + (Math.random() - 0.5) * 20,
-        lng: -46.6333 + (Math.random() - 0.5) * 20,
-        severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)],
-        type: ['malware', 'botnet', 'phishing', 'ddos', 'exploit'][Math.floor(Math.random() * 5)],
-        timestamp: new Date().toISOString(),
-        source: `IP ${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-        description: 'Simulated threat (services offline)',
-        country: 'Unknown',
-        city: 'Unknown',
-        threatScore: Math.floor(Math.random() * 100),
-        isMalicious: Math.random() > 0.5
-      }));
-      setThreats(mockThreats);
+      // Graceful degradation: retorna lista vazia em vez de mocks
+      // UI deve mostrar empty state apropriado baseado em error !== null
+      setThreats([]);
     } finally {
       setLoading(false);
     }

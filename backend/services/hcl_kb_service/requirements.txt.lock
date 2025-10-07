@@ -10,6 +10,7 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.11.0
     # via
+    #   -r requirements.txt
     #   httpx
     #   starlette
     #   watchfiles
@@ -35,7 +36,7 @@ ecdsa==0.19.1
     # via python-jose
 email-validator==2.1.0
     # via -r requirements.txt
-fastapi==0.109.0
+fastapi==0.118.0
     # via -r requirements.txt
 greenlet==3.2.4
     # via sqlalchemy
@@ -104,7 +105,7 @@ python-jose[cryptography]==3.3.0
     # via -r requirements.txt
 python-json-logger==2.0.7
     # via -r requirements.txt
-python-multipart==0.0.6
+python-multipart==0.0.20
     # via -r requirements.txt
 pyyaml==6.0.3
     # via uvicorn
@@ -120,7 +121,7 @@ sqlalchemy[asyncio]==2.0.25
     # via
     #   -r requirements.txt
     #   alembic
-starlette==0.35.1
+starlette==0.48.0
     # via fastapi
 types-pyasn1==0.6.0.20250914
     # via types-python-jose
@@ -135,6 +136,7 @@ typing-extensions==4.15.0
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
+    #   starlette
 uvicorn[standard]==0.27.0
     # via -r requirements.txt
 uvloop==0.21.0

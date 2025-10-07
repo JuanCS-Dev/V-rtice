@@ -4,7 +4,9 @@
 #
 #    pip-compile --output-file=requirements.txt.lock requirements.txt
 #
-aiohttp==3.9.1
+aiohappyeyeballs==2.6.1
+    # via aiohttp
+aiohttp==3.13.0
     # via
     #   -r requirements.txt
     #   discord-py
@@ -14,6 +16,7 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.11.0
     # via
+    #   -r requirements.txt
     #   httpx
     #   starlette
     #   watchfiles
@@ -47,7 +50,7 @@ click==8.3.0
     # via uvicorn
 colorama==0.4.6
     # via -r requirements.txt
-cryptography==42.0.2
+cryptography==46.0.2
     # via -r requirements.txt
 discord-py==2.3.2
     # via -r requirements.txt
@@ -65,7 +68,7 @@ exifread==3.0.0
     # via -r requirements.txt
 fake-useragent==1.4.0
     # via -r requirements.txt
-fastapi==0.109.0
+fastapi==0.118.0
     # via -r requirements.txt
 frozenlist==1.8.0
     # via
@@ -141,7 +144,9 @@ pillow==10.2.0
 playwright==1.41.1
     # via -r requirements.txt
 propcache==0.4.0
-    # via yarl
+    # via
+    #   aiohttp
+    #   yarl
 pyaes==1.6.1
     # via telethon
 pyasn1==0.6.1
@@ -168,9 +173,9 @@ python-dotenv==1.0.0
     # via
     #   -r requirements.txt
     #   uvicorn
-python-jose==3.3.0
+python-jose==3.5.0
     # via -r requirements.txt
-python-multipart==0.0.6
+python-multipart==0.0.20
     # via -r requirements.txt
 python-whois==0.8.0
     # via -r requirements.txt
@@ -212,7 +217,7 @@ sortedcontainers==2.4.0
     # via trio
 soupsieve==2.8
     # via beautifulsoup4
-starlette==0.35.1
+starlette==0.48.0
     # via fastapi
 telethon==1.34.0
     # via -r requirements.txt
@@ -237,6 +242,7 @@ typing-extensions==4.15.0
     #   pydantic-core
     #   pyee
     #   selenium
+    #   starlette
 tzdata==2025.2
     # via pandas
 urllib3[socks]==2.1.0

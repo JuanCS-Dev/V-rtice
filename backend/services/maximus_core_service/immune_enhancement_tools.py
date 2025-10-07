@@ -6,9 +6,10 @@ and adaptive immunity capabilities.
 NO MOCKS - Production-ready immune enhancement.
 """
 
-from typing import Dict, Any, List, Optional
-import aiohttp
 import logging
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +35,7 @@ class ImmuneEnhancementTools:
         self.adaptive_url = "http://localhost:8020"
 
     async def suppress_false_positives(
-        self,
-        alerts: List[Dict[str, Any]],
-        suppression_threshold: float = 0.6
+        self, alerts: List[Dict[str, Any]], suppression_threshold: float = 0.6
     ) -> Dict[str, Any]:
         """Suppress false positive alerts using Regulatory T-Cells.
 
@@ -53,9 +52,9 @@ class ImmuneEnhancementTools:
                     f"{self.treg_url}/alert/evaluate_batch",
                     json={
                         "alerts": alerts,
-                        "suppression_threshold": suppression_threshold
+                        "suppression_threshold": suppression_threshold,
                     },
-                    timeout=aiohttp.ClientTimeout(total=60)
+                    timeout=aiohttp.ClientTimeout(total=60),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -69,9 +68,7 @@ class ImmuneEnhancementTools:
             return {"error": str(e)}
 
     async def get_tolerance_profile(
-        self,
-        entity_id: str,
-        entity_type: str = "ip"
+        self, entity_id: str, entity_type: str = "ip"
     ) -> Dict[str, Any]:
         """Get immune tolerance profile for entity.
 
@@ -87,7 +84,7 @@ class ImmuneEnhancementTools:
                 async with session.get(
                     f"{self.treg_url}/tolerance/profile/{entity_id}",
                     params={"entity_type": entity_type},
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -101,9 +98,7 @@ class ImmuneEnhancementTools:
             return {"error": str(e)}
 
     async def consolidate_memory(
-        self,
-        trigger_manual: bool = False,
-        importance_threshold: float = 0.6
+        self, trigger_manual: bool = False, importance_threshold: float = 0.6
     ) -> Dict[str, Any]:
         """Trigger memory consolidation cycle (STM → LTM).
 
@@ -120,9 +115,9 @@ class ImmuneEnhancementTools:
                     f"{self.memory_url}/consolidation/trigger",
                     json={
                         "importance_threshold": importance_threshold,
-                        "manual_trigger": trigger_manual
+                        "manual_trigger": trigger_manual,
                     },
-                    timeout=aiohttp.ClientTimeout(total=120)
+                    timeout=aiohttp.ClientTimeout(total=120),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -136,10 +131,7 @@ class ImmuneEnhancementTools:
             return {"error": str(e)}
 
     async def query_long_term_memory(
-        self,
-        query: str,
-        limit: int = 10,
-        min_importance: float = 0.5
+        self, query: str, limit: int = 10, min_importance: float = 0.5
     ) -> Dict[str, Any]:
         """Query long-term immunological memory.
 
@@ -158,9 +150,9 @@ class ImmuneEnhancementTools:
                     params={
                         "query": query,
                         "limit": limit,
-                        "min_importance": min_importance
+                        "min_importance": min_importance,
                     },
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -174,9 +166,7 @@ class ImmuneEnhancementTools:
             return {"error": str(e)}
 
     async def diversify_antibodies(
-        self,
-        threat_samples: List[Dict[str, Any]],
-        repertoire_size: int = 100
+        self, threat_samples: List[Dict[str, Any]], repertoire_size: int = 100
     ) -> Dict[str, Any]:
         """Initialize antibody repertoire from threat samples.
 
@@ -193,9 +183,9 @@ class ImmuneEnhancementTools:
                     f"{self.adaptive_url}/repertoire/initialize",
                     json={
                         "samples": threat_samples,
-                        "repertoire_size": repertoire_size
+                        "repertoire_size": repertoire_size,
                     },
-                    timeout=aiohttp.ClientTimeout(total=90)
+                    timeout=aiohttp.ClientTimeout(total=90),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -209,8 +199,7 @@ class ImmuneEnhancementTools:
             return {"error": str(e)}
 
     async def run_affinity_maturation(
-        self,
-        feedback_data: Dict[str, Dict[str, bool]]
+        self, feedback_data: Dict[str, Dict[str, bool]]
     ) -> Dict[str, Any]:
         """Run affinity maturation cycle (somatic hypermutation).
 
@@ -225,7 +214,7 @@ class ImmuneEnhancementTools:
                 async with session.post(
                     f"{self.adaptive_url}/learning/run_maturation",
                     json=feedback_data,
-                    timeout=aiohttp.ClientTimeout(total=90)
+                    timeout=aiohttp.ClientTimeout(total=90),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -251,8 +240,8 @@ class ImmuneEnhancementTools:
                 "description": "Suppress false positive alerts using Regulatory T-Cells tolerance learning",
                 "parameters": {
                     "alerts": "List of alerts to evaluate",
-                    "suppression_threshold": "Tolerance threshold for suppression 0-1"
-                }
+                    "suppression_threshold": "Tolerance threshold for suppression 0-1",
+                },
             },
             {
                 "name": "get_tolerance_profile",
@@ -260,8 +249,8 @@ class ImmuneEnhancementTools:
                 "description": "Get immune tolerance profile for entity with behavioral fingerprint",
                 "parameters": {
                     "entity_id": "Entity identifier (IP, user, domain)",
-                    "entity_type": "Entity type (ip, user, domain, service)"
-                }
+                    "entity_type": "Entity type (ip, user, domain, service)",
+                },
             },
             {
                 "name": "consolidate_memory",
@@ -269,8 +258,8 @@ class ImmuneEnhancementTools:
                 "description": "Trigger memory consolidation cycle (STM → LTM) with pattern extraction",
                 "parameters": {
                     "trigger_manual": "Trigger manual consolidation (bool)",
-                    "importance_threshold": "Minimum importance for consolidation 0-1"
-                }
+                    "importance_threshold": "Minimum importance for consolidation 0-1",
+                },
             },
             {
                 "name": "query_long_term_memory",
@@ -279,8 +268,8 @@ class ImmuneEnhancementTools:
                 "parameters": {
                     "query": "Search query",
                     "limit": "Maximum results to return",
-                    "min_importance": "Minimum importance threshold 0-1"
-                }
+                    "min_importance": "Minimum importance threshold 0-1",
+                },
             },
             {
                 "name": "diversify_antibodies",
@@ -288,8 +277,8 @@ class ImmuneEnhancementTools:
                 "description": "Initialize antibody repertoire from threat samples (V(D)J recombination)",
                 "parameters": {
                     "threat_samples": "Threat samples for training",
-                    "repertoire_size": "Size of initial antibody repertoire"
-                }
+                    "repertoire_size": "Size of initial antibody repertoire",
+                },
             },
             {
                 "name": "run_affinity_maturation",
@@ -297,6 +286,6 @@ class ImmuneEnhancementTools:
                 "description": "Run affinity maturation cycle with somatic hypermutation",
                 "parameters": {
                     "feedback_data": "Antibody feedback (antibody_id -> sample detections)"
-                }
-            }
+                },
+            },
         ]

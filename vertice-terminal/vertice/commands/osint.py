@@ -21,12 +21,11 @@ Examples:
 import typer
 import asyncio
 from rich.console import Console
-from rich.panel import Panel
 from rich.markdown import Markdown
 from typing_extensions import Annotated
 
 from ..connectors.osint import OSINTConnector
-from ..utils.output import output_json, print_error, print_success
+from ..utils.output import output_json, print_error, print_success, PrimordialPanel
 from ..utils.auth import require_auth
 from vertice.utils import primoroso
 
@@ -73,11 +72,12 @@ def username(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[green]Social Media Profile: {username}[/green]",
-                        border_style="green"
-                    ))
+                        title=f"Social Media Profile: {username}",
+                        console=console
+                    )
+                    panel.with_status("success").render()
                 print_success("OSINT complete")
             else:
                 print_error("No results")
@@ -115,11 +115,12 @@ def breach(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[red]Breach Data: {identifier}[/red]",
-                        border_style="red"
-                    ))
+                        title=f"Breach Data: {identifier}",
+                        console=console
+                    )
+                    panel.with_status("error").render()
                 print_success("Search complete")
             else:
                 print_error("No breaches found")
@@ -152,11 +153,12 @@ def vehicle(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[cyan]Vehicle: {plate}[/cyan]",
-                        border_style="cyan"
-                    ))
+                        title=f"Vehicle: {plate}",
+                        console=console
+                    )
+                    panel.with_status("info").render()
                 print_success("Query complete")
             else:
                 print_error("Vehicle not found")
@@ -194,11 +196,12 @@ def multi(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(str(result.get("result", result))),
-                        title=f"[green]OSINT Results: {query}[/green]",
-                        border_style="green"
-                    ))
+                        title=f"OSINT Results: {query}",
+                        console=console
+                    )
+                    panel.with_status("success").render()
                 print_success("Search complete")
             else:
                 print_error("No results")
@@ -236,11 +239,12 @@ def comprehensive(
                 if json:
                     output_json(result)
                 else:
-                    console.print(Panel(
+                    panel = PrimordialPanel(
                         Markdown(result.get("response", str(result))),
-                        title=f"[green]OSINT Report: {target}[/green]",
-                        border_style="green"
-                    ))
+                        title=f"OSINT Report: {target}",
+                        console=console
+                    )
+                    panel.with_status("success").render()
                 print_success("Investigation complete")
             else:
                 print_error("Investigation failed")

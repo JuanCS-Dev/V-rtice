@@ -1,11 +1,12 @@
 """Anomaly Detector - Isolation Forest + LSTM Autoencoder"""
 
 import logging
+from typing import Dict
+
 import numpy as np
+from sklearn.ensemble import IsolationForest
 import torch
 import torch.nn as nn
-from typing import Dict
-from sklearn.ensemble import IsolationForest
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class AnomalyDetector:
         anomaly_score = 0.6 * iso_score + 0.4 * lstm_score
 
         return {
-            'is_anomaly': anomaly_score > self.threshold,
-            'score': float(anomaly_score),
-            'components': {'isolation': float(iso_score), 'lstm': float(lstm_score)}
+            "is_anomaly": anomaly_score > self.threshold,
+            "score": float(anomaly_score),
+            "components": {"isolation": float(iso_score), "lstm": float(lstm_score)},
         }
