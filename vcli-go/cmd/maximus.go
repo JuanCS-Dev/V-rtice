@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/grpc"
+	"github.com/verticedev/vcli-go/internal/maximus"
 	pb "github.com/verticedev/vcli-go/api/grpc/maximus"
 )
 
@@ -44,6 +45,27 @@ var (
 	// Output
 	outputFormat     string
 	watch            bool
+
+	// Maximus AI services endpoints
+	eurekaEndpoint   string
+	oraculoEndpoint  string
+	predictEndpoint  string
+	maximusToken     string
+
+	// Eureka flags
+	dataFile         string
+	dataType         string
+	contextFile      string
+	patternFile      string
+
+	// Oraculo flags
+	predictionType   string
+	timeHorizon      string
+	codeFile         string
+	language         string
+	analysisType     string
+	taskDesc         string
+	targetLang       string
 )
 
 // maximusCmd represents the maximus command
@@ -480,8 +502,333 @@ func runGetMetrics(cmd *cobra.Command, args []string) error {
 }
 
 // ============================================================================
+// EUREKA COMMANDS (Insight Generation)
+// ============================================================================
+
+var maximusEurekaCmd = &cobra.Command{
+	Use:   "eureka",
+	Short: "Interact with Maximus Eureka (Insight Generation)",
+	Long: `Maximus Eureka Service for novel insights, pattern detection, and IoC extraction.
+
+Examples:
+  # Generate insights from data
+  vcli maximus eureka generate-insight --data-file data.json --data-type logs
+
+  # Detect patterns
+  vcli maximus eureka detect-pattern --data-file data.json --pattern-file pattern.json
+
+  # Extract IoCs
+  vcli maximus eureka extract-iocs --data-file data.json`,
+}
+
+var eurekaGenerateInsightCmd = &cobra.Command{
+	Use:   "generate-insight",
+	Short: "Generate novel insights from data",
+	RunE:  runEurekaGenerateInsight,
+}
+
+func runEurekaGenerateInsight(cmd *cobra.Command, args []string) error {
+	if dataFile == "" || dataType == "" {
+		return fmt.Errorf("--data-file and --data-type are required")
+	}
+
+	// Read data file
+	data, err := readJSONFile(dataFile)
+	if err != nil {
+		return fmt.Errorf("failed to read data file: %w", err)
+	}
+
+	// Read context if provided
+	var context map[string]interface{}
+	if contextFile != "" {
+		context, err = readJSONFile(contextFile)
+		if err != nil {
+			return fmt.Errorf("failed to read context file: %w", err)
+		}
+	}
+
+	client := maximus.NewEurekaClient(eurekaEndpoint, maximusToken)
+	resp, err := client.GenerateInsight(data, dataType, context)
+	if err != nil {
+		return fmt.Errorf("failed to generate insight: %w", err)
+	}
+
+	printJSON(resp)
+	return nil
+}
+
+var eurekaDetectPatternCmd = &cobra.Command{
+	Use:   "detect-pattern",
+	Short: "Detect specific patterns in data",
+	RunE:  runEurekaDetectPattern,
+}
+
+func runEurekaDetectPattern(cmd *cobra.Command, args []string) error {
+	if dataFile == "" || patternFile == "" {
+		return fmt.Errorf("--data-file and --pattern-file are required")
+	}
+
+	data, err := readJSONFile(dataFile)
+	if err != nil {
+		return fmt.Errorf("failed to read data file: %w", err)
+	}
+
+	pattern, err := readJSONFile(patternFile)
+	if err != nil {
+		return fmt.Errorf("failed to read pattern file: %w", err)
+	}
+
+	client := maximus.NewEurekaClient(eurekaEndpoint, maximusToken)
+	resp, err := client.DetectPattern(data, pattern)
+	if err != nil {
+		return fmt.Errorf("failed to detect pattern: %w", err)
+	}
+
+	printJSON(resp)
+	return nil
+}
+
+var eurekaExtractIoCsCmd = &cobra.Command{
+	Use:   "extract-iocs",
+	Short: "Extract Indicators of Compromise from data",
+	RunE:  runEurekaExtractIoCs,
+}
+
+func runEurekaExtractIoCs(cmd *cobra.Command, args []string) error {
+	if dataFile == "" {
+		return fmt.Errorf("--data-file is required")
+	}
+
+	data, err := readJSONFile(dataFile)
+	if err != nil {
+		return fmt.Errorf("failed to read data file: %w", err)
+	}
+
+	client := maximus.NewEurekaClient(eurekaEndpoint, maximusToken)
+	resp, err := client.ExtractIoCs(data)
+	if err != nil {
+		return fmt.Errorf("failed to extract IoCs: %w", err)
+	}
+
+	printJSON(resp)
+	return nil
+}
+
+var eurekaHealthCmd = &cobra.Command{
+	Use:   "health",
+	Short: "Check Eureka service health",
+	RunE:  runEurekaHealth,
+}
+
+func runEurekaHealth(cmd *cobra.Command, args []string) error {
+	client := maximus.NewEurekaClient(eurekaEndpoint, maximusToken)
+	resp, err := client.Health()
+	if err != nil {
+		return fmt.Errorf("health check failed: %w", err)
+	}
+
+	fmt.Printf("Status: %s - %s\n", resp.Status, resp.Message)
+	return nil
+}
+
+// ============================================================================
+// ORACULO COMMANDS (Predictions & Code Analysis)
+// ============================================================================
+
+var maximusOraculoCmd = &cobra.Command{
+	Use:   "oraculo",
+	Short: "Interact with Maximus Oraculo (Predictions & Code Analysis)",
+	Long: `Maximus Oraculo Service for predictive insights and code analysis.
+
+Examples:
+  # Generate prediction
+  vcli maximus oraculo predict --data-file data.json --prediction-type threat_level --time-horizon 24h
+
+  # Analyze code
+  vcli maximus oraculo analyze-code --code-file app.go --language go --analysis-type vulnerability
+
+  # Auto-implement code
+  vcli maximus oraculo auto-implement --task "create REST endpoint" --target-lang go`,
+}
+
+var oraculoPredictCmd = &cobra.Command{
+	Use:   "predict",
+	Short: "Generate predictive insights",
+	RunE:  runOraculoPredict,
+}
+
+func runOraculoPredict(cmd *cobra.Command, args []string) error {
+	if dataFile == "" || predictionType == "" || timeHorizon == "" {
+		return fmt.Errorf("--data-file, --prediction-type, and --time-horizon are required")
+	}
+
+	data, err := readJSONFile(dataFile)
+	if err != nil {
+		return fmt.Errorf("failed to read data file: %w", err)
+	}
+
+	client := maximus.NewOraculoClient(oraculoEndpoint, maximusToken)
+	resp, err := client.Predict(data, predictionType, timeHorizon)
+	if err != nil {
+		return fmt.Errorf("failed to generate prediction: %w", err)
+	}
+
+	printJSON(resp)
+	return nil
+}
+
+var oraculoAnalyzeCodeCmd = &cobra.Command{
+	Use:   "analyze-code",
+	Short: "Analyze code for vulnerabilities or issues",
+	RunE:  runOraculoAnalyzeCode,
+}
+
+func runOraculoAnalyzeCode(cmd *cobra.Command, args []string) error {
+	if codeFile == "" || language == "" || analysisType == "" {
+		return fmt.Errorf("--code-file, --language, and --analysis-type are required")
+	}
+
+	code, err := os.ReadFile(codeFile)
+	if err != nil {
+		return fmt.Errorf("failed to read code file: %w", err)
+	}
+
+	client := maximus.NewOraculoClient(oraculoEndpoint, maximusToken)
+	resp, err := client.AnalyzeCode(string(code), language, analysisType)
+	if err != nil {
+		return fmt.Errorf("failed to analyze code: %w", err)
+	}
+
+	printJSON(resp)
+	return nil
+}
+
+var oraculoAutoImplementCmd = &cobra.Command{
+	Use:   "auto-implement",
+	Short: "Request automated code implementation",
+	RunE:  runOraculoAutoImplement,
+}
+
+func runOraculoAutoImplement(cmd *cobra.Command, args []string) error {
+	if taskDesc == "" || targetLang == "" {
+		return fmt.Errorf("--task and --target-lang are required")
+	}
+
+	var context map[string]interface{}
+	if contextFile != "" {
+		var err error
+		context, err = readJSONFile(contextFile)
+		if err != nil {
+			return fmt.Errorf("failed to read context file: %w", err)
+		}
+	}
+
+	client := maximus.NewOraculoClient(oraculoEndpoint, maximusToken)
+	resp, err := client.AutoImplement(taskDesc, targetLang, context)
+	if err != nil {
+		return fmt.Errorf("failed to auto-implement: %w", err)
+	}
+
+	printJSON(resp)
+	return nil
+}
+
+var oraculoHealthCmd = &cobra.Command{
+	Use:   "health",
+	Short: "Check Oraculo service health",
+	RunE:  runOraculoHealth,
+}
+
+func runOraculoHealth(cmd *cobra.Command, args []string) error {
+	client := maximus.NewOraculoClient(oraculoEndpoint, maximusToken)
+	resp, err := client.Health()
+	if err != nil {
+		return fmt.Errorf("health check failed: %w", err)
+	}
+
+	fmt.Printf("Status: %s - %s\n", resp.Status, resp.Message)
+	return nil
+}
+
+// ============================================================================
+// PREDICT COMMANDS (ML Predictions)
+// ============================================================================
+
+var maximusPredictCmd = &cobra.Command{
+	Use:   "predict",
+	Short: "Interact with Maximus Predict (ML Predictions)",
+	Long: `Maximus Predict Service for machine learning predictions.
+
+Examples:
+  # Generate prediction
+  vcli maximus predict generate --data-file data.json --prediction-type resource_demand --time-horizon 1h`,
+}
+
+var predictGenerateCmd = &cobra.Command{
+	Use:   "generate",
+	Short: "Generate ML prediction",
+	RunE:  runPredictGenerate,
+}
+
+func runPredictGenerate(cmd *cobra.Command, args []string) error {
+	if dataFile == "" || predictionType == "" {
+		return fmt.Errorf("--data-file and --prediction-type are required")
+	}
+
+	data, err := readJSONFile(dataFile)
+	if err != nil {
+		return fmt.Errorf("failed to read data file: %w", err)
+	}
+
+	client := maximus.NewPredictClient(predictEndpoint, maximusToken)
+	resp, err := client.Predict(data, predictionType, timeHorizon)
+	if err != nil {
+		return fmt.Errorf("failed to generate prediction: %w", err)
+	}
+
+	printJSON(resp)
+	return nil
+}
+
+var predictHealthCmd = &cobra.Command{
+	Use:   "health",
+	Short: "Check Predict service health",
+	RunE:  runPredictHealth,
+}
+
+func runPredictHealth(cmd *cobra.Command, args []string) error {
+	client := maximus.NewPredictClient(predictEndpoint, maximusToken)
+	resp, err := client.Health()
+	if err != nil {
+		return fmt.Errorf("health check failed: %w", err)
+	}
+
+	fmt.Printf("Status: %s - %s\n", resp.Status, resp.Message)
+	return nil
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
+
+func readJSONFile(path string) (map[string]interface{}, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func printJSON(v interface{}) {
+	data, _ := json.MarshalIndent(v, "", "  ")
+	fmt.Println(string(data))
+}
 
 func truncate(s string, maxLen int) string {
 	if len(s) <= maxLen {
@@ -503,6 +850,27 @@ func init() {
 	maximusCmd.AddCommand(maximusGetCmd)
 	maximusCmd.AddCommand(maximusWatchCmd)
 	maximusCmd.AddCommand(maximusMetricsCmd)
+
+	// Add Maximus AI service commands
+	maximusCmd.AddCommand(maximusEurekaCmd)
+	maximusCmd.AddCommand(maximusOraculoCmd)
+	maximusCmd.AddCommand(maximusPredictCmd)
+
+	// Eureka subcommands
+	maximusEurekaCmd.AddCommand(eurekaGenerateInsightCmd)
+	maximusEurekaCmd.AddCommand(eurekaDetectPatternCmd)
+	maximusEurekaCmd.AddCommand(eurekaExtractIoCsCmd)
+	maximusEurekaCmd.AddCommand(eurekaHealthCmd)
+
+	// Oraculo subcommands
+	maximusOraculoCmd.AddCommand(oraculoPredictCmd)
+	maximusOraculoCmd.AddCommand(oraculoAnalyzeCodeCmd)
+	maximusOraculoCmd.AddCommand(oraculoAutoImplementCmd)
+	maximusOraculoCmd.AddCommand(oraculoHealthCmd)
+
+	// Predict subcommands
+	maximusPredictCmd.AddCommand(predictGenerateCmd)
+	maximusPredictCmd.AddCommand(predictHealthCmd)
 
 	// Global flags
 	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "localhost:50051", "MAXIMUS server address")
@@ -529,4 +897,42 @@ func init() {
 
 	// Metrics flags
 	maximusMetricsCmd.Flags().StringVar(&filterContext, "context", "", "Filter by context")
+
+	// Maximus AI service endpoints
+	maximusEurekaCmd.PersistentFlags().StringVar(&eurekaEndpoint, "eureka-endpoint", "http://localhost:8024", "Eureka service endpoint")
+	maximusOraculoCmd.PersistentFlags().StringVar(&oraculoEndpoint, "oraculo-endpoint", "http://localhost:8026", "Oraculo service endpoint")
+	maximusPredictCmd.PersistentFlags().StringVar(&predictEndpoint, "predict-endpoint", "http://localhost:8028", "Predict service endpoint")
+
+	// Auth token for all AI services
+	maximusEurekaCmd.PersistentFlags().StringVar(&maximusToken, "token", "", "Authentication token")
+	maximusOraculoCmd.PersistentFlags().StringVar(&maximusToken, "token", "", "Authentication token")
+	maximusPredictCmd.PersistentFlags().StringVar(&maximusToken, "token", "", "Authentication token")
+
+	// Eureka flags
+	eurekaGenerateInsightCmd.Flags().StringVar(&dataFile, "data-file", "", "Data file (JSON)")
+	eurekaGenerateInsightCmd.Flags().StringVar(&dataType, "data-type", "", "Data type (logs, network_traffic, threat_intel)")
+	eurekaGenerateInsightCmd.Flags().StringVar(&contextFile, "context-file", "", "Context file (JSON, optional)")
+
+	eurekaDetectPatternCmd.Flags().StringVar(&dataFile, "data-file", "", "Data file (JSON)")
+	eurekaDetectPatternCmd.Flags().StringVar(&patternFile, "pattern-file", "", "Pattern definition file (JSON)")
+
+	eurekaExtractIoCsCmd.Flags().StringVar(&dataFile, "data-file", "", "Data file (JSON)")
+
+	// Oraculo flags
+	oraculoPredictCmd.Flags().StringVar(&dataFile, "data-file", "", "Data file (JSON)")
+	oraculoPredictCmd.Flags().StringVar(&predictionType, "prediction-type", "", "Prediction type (threat_level, resource_demand)")
+	oraculoPredictCmd.Flags().StringVar(&timeHorizon, "time-horizon", "", "Time horizon (24h, 7d)")
+
+	oraculoAnalyzeCodeCmd.Flags().StringVar(&codeFile, "code-file", "", "Code file to analyze")
+	oraculoAnalyzeCodeCmd.Flags().StringVar(&language, "language", "", "Programming language")
+	oraculoAnalyzeCodeCmd.Flags().StringVar(&analysisType, "analysis-type", "", "Analysis type (vulnerability, performance, refactoring)")
+
+	oraculoAutoImplementCmd.Flags().StringVar(&taskDesc, "task", "", "Task description")
+	oraculoAutoImplementCmd.Flags().StringVar(&targetLang, "target-lang", "", "Target programming language")
+	oraculoAutoImplementCmd.Flags().StringVar(&contextFile, "context-file", "", "Context file (JSON, optional)")
+
+	// Predict flags
+	predictGenerateCmd.Flags().StringVar(&dataFile, "data-file", "", "Data file (JSON)")
+	predictGenerateCmd.Flags().StringVar(&predictionType, "prediction-type", "", "Prediction type (resource_demand, threat_likelihood)")
+	predictGenerateCmd.Flags().StringVar(&timeHorizon, "time-horizon", "", "Time horizon (1h, 24h, optional)")
 }
