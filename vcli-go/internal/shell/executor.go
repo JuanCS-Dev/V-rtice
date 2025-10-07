@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/palette"
 	"github.com/verticedev/vcli-go/internal/suggestions"
 	"github.com/verticedev/vcli-go/internal/visual"
 )
@@ -77,6 +78,8 @@ func (e *Executor) handleSlashCommand(input string) {
 		fmt.Print("\033[H\033[2J")
 	case "/history":
 		e.showHistory()
+	case "/palette", "/p":
+		e.openCommandPalette()
 	case "/theme":
 		fmt.Println(e.styles.Info.Render("Theme management coming soon in FASE 1.3!"))
 	default:
@@ -160,6 +163,26 @@ func (e *Executor) extractTypo(errMsg string) string {
 	return errMsg[start+1 : start+1+end]
 }
 
+// openCommandPalette opens the command palette for fuzzy search
+func (e *Executor) openCommandPalette() {
+	selected, err := palette.Run(e.rootCmd)
+
+	if err != nil {
+		fmt.Println(e.styles.Error.Render(fmt.Sprintf("Error opening command palette: %v", err)))
+		return
+	}
+
+	if selected == nil {
+		// Cancelled
+		return
+	}
+
+	// Execute the selected command
+	fmt.Println(e.styles.Info.Render(fmt.Sprintf("▶ Executing: %s", selected.Command)))
+	fmt.Println()
+	e.Execute(selected.Command)
+}
+
 // showHelp displays shell help
 func (e *Executor) showHelp() {
 	gradient := visual.DefaultPalette().PrimaryGradient()
@@ -171,6 +194,7 @@ func (e *Executor) showHelp() {
 
 	fmt.Println(e.styles.Accent.Bold(true).Render("Shell Commands:"))
 	fmt.Println(e.styles.Info.Render("  /help, /?        ") + e.styles.Muted.Render("Show this help"))
+	fmt.Println(e.styles.Info.Render("  /palette, /p     ") + e.styles.Muted.Render("Open command palette (fuzzy search)"))
 	fmt.Println(e.styles.Info.Render("  /exit, /quit     ") + e.styles.Muted.Render("Exit the shell"))
 	fmt.Println(e.styles.Info.Render("  /clear           ") + e.styles.Muted.Render("Clear the screen"))
 	fmt.Println(e.styles.Info.Render("  /history         ") + e.styles.Muted.Render("Show command history"))
