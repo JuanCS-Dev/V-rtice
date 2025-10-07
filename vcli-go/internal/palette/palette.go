@@ -175,8 +175,8 @@ func (m Model) View() string {
 
 	gradient := m.palette.PrimaryGradient()
 
-	// Title
-	title := visual.GradientText("Command Palette", gradient)
+	// Title with gradient and icon
+	title := "🔍 " + visual.GradientText("Command Palette", gradient)
 
 	// Search box
 	searchPrompt := m.styles.Accent.Render("Search: ")
@@ -199,7 +199,13 @@ func (m Model) View() string {
 		// Cursor indicator
 		cursor := "  "
 		if i == m.cursor {
-			cursor = m.styles.Accent.Render("▶ ")
+			cursor = m.styles.Accent.Render("→ ")
+		}
+
+		// Icon
+		icon := GetIconForCommand(item.Command)
+		if icon != "" {
+			icon = icon + " "
 		}
 
 		// Command
@@ -212,19 +218,23 @@ func (m Model) View() string {
 
 		// Description
 		desc := item.Description
-		if len(desc) > 50 {
-			desc = desc[:47] + "..."
+		maxDescLen := 45
+		if m.width > 100 {
+			maxDescLen = 55
+		}
+		if len(desc) > maxDescLen {
+			desc = desc[:maxDescLen-3] + "..."
 		}
 		descText := m.styles.Muted.Render(desc)
 
-		results.WriteString(fmt.Sprintf("%s%-40s %s\n", cursor, cmdText, descText))
+		results.WriteString(fmt.Sprintf("%s%s%-35s %s\n", cursor, icon, cmdText, descText))
 	}
 
-	// Footer
-	resultCount := fmt.Sprintf("%d results", len(m.filtered))
+	// Footer with count
+	resultCount := fmt.Sprintf("%d commands found", len(m.filtered))
 	footer := m.styles.Muted.Render(fmt.Sprintf("↑↓: Navigate │ Enter: Select │ Esc: Cancel │ %s", resultCount))
 
-	// Box style
+	// Box style with gradient border
 	boxStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(m.palette.Cyan.ToTermenv()).
