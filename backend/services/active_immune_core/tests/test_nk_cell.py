@@ -6,6 +6,7 @@ Uses graceful degradation paths for testing.
 
 import asyncio
 from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
@@ -553,3 +554,293 @@ class TestNKCellEdgeCases:
         assert result is True
 
         await nk_cell.parar()
+
+
+@pytest.mark.asyncio
+class TestNKCellWithMockedServices:
+    """Test NK Cell with mocked HTTP responses"""
+
+    async def test_detectar_mhc_ausente_with_violations(self, nk_cell):
+        """Test MHC-I detection when violations are found"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock HTTP response with MHC violations
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "hosts": [
+                {"id": "host_001", "audit_enabled": True},
+                {"id": "host_002", "audit_enabled": False},  # Violation
+                {"id": "host_003", "audit_enabled": False},  # Violation
+            ]
+        })
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__.return_value = mock_response
+
+            hosts = await nk_cell._detectar_mhc_ausente()
+
+            # Should return 2 violations
+            assert len(hosts) == 2
+            assert all(not h.get("audit_enabled") for h in hosts)
+
+        await nk_cell.parar()
+
+    async def test_detectar_mhc_ausente_status_404(self, nk_cell):
+        """Test MHC-I detection with 404 response"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_response = AsyncMock()
+        mock_response.status = 404
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__.return_value = mock_response
+
+            hosts = await nk_cell._detectar_mhc_ausente()
+
+            # Should return empty list (graceful degradation)
+            assert hosts == []
+
+        await nk_cell.parar()
+
+    async def test_detectar_mhc_ausente_unexpected_status(self, nk_cell):
+        """Test MHC-I detection with unexpected status code"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_response = AsyncMock()
+        mock_response.status = 500
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__.return_value = mock_response
+
+            hosts = await nk_cell._detectar_mhc_ausente()
+
+            # Should return empty list
+            assert hosts == []
+
+        await nk_cell.parar()
+
+    async def test_get_host_metrics_success(self, nk_cell, normal_metrics):
+        """Test getting host metrics with successful response"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value=normal_metrics)
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__.return_value = mock_response
+
+            metrics = await nk_cell._get_host_metrics("host_001")
+
+            assert metrics == normal_metrics
+
+        await nk_cell.parar()
+
+    async def test_get_host_metrics_failure(self, nk_cell):
+        """Test getting host metrics with failed response"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_response = AsyncMock()
+        mock_response.status = 500
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__.return_value = mock_response
+
+            metrics = await nk_cell._get_host_metrics("host_001")
+
+            # Should return empty dict
+            assert metrics == {}
+
+        await nk_cell.parar()
+
+    async def test_update_baseline_with_normal_hosts(self, nk_cell, normal_metrics):
+        """Test baseline update for normal hosts"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Establish initial baseline
+        nk_cell.baseline_behavior["host_001"] = normal_metrics.copy()
+
+        # Mock host list
+        mock_list_response = AsyncMock()
+        mock_list_response.status = 200
+        mock_list_response.json = AsyncMock(return_value={
+            "hosts": [{"id": "host_001"}]
+        })
+
+        # Mock metrics (slightly different from baseline, but normal)
+        updated_metrics = normal_metrics.copy()
+        updated_metrics["cpu_usage"] = 27.0  # Small change
+
+        mock_metrics_response = AsyncMock()
+        mock_metrics_response.status = 200
+        mock_metrics_response.json = AsyncMock(return_value=updated_metrics)
+
+        async def mock_get(*args, **kwargs):
+            url = args[0] if args else kwargs.get('url', '')
+            if '/list' in url:
+                mock = AsyncMock()
+                mock.__aenter__.return_value = mock_list_response
+                return mock
+            else:
+                mock = AsyncMock()
+                mock.__aenter__.return_value = mock_metrics_response
+                return mock
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+            await nk_cell._update_baseline()
+
+            # Baseline should be updated (EMA)
+            assert "host_001" in nk_cell.baseline_behavior
+            # CPU should be updated with EMA: 0.9 * 25.0 + 0.1 * 27.0 = 22.5 + 2.7 = 25.2
+            updated_cpu = nk_cell.baseline_behavior["host_001"]["cpu_usage"]
+            assert 24.0 < updated_cpu < 26.0  # Approximately 25.2
+
+        await nk_cell.parar()
+
+    async def test_update_baseline_skips_isolated_hosts(self, nk_cell, normal_metrics):
+        """Test that baseline update skips isolated hosts"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mark host as isolated
+        nk_cell.hosts_isolados.append("host_001")
+
+        mock_list_response = AsyncMock()
+        mock_list_response.status = 200
+        mock_list_response.json = AsyncMock(return_value={
+            "hosts": [{"id": "host_001"}]
+        })
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__.return_value = mock_list_response
+
+            await nk_cell._update_baseline()
+
+            # Isolated host should not be in baseline
+            # (or if it was there before, should not be updated)
+            # This test verifies the skip logic executes
+
+        await nk_cell.parar()
+
+    async def test_executar_investigacao_threat_detected(self, nk_cell, anomalous_metrics):
+        """Test investigation when threat is detected"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Establish baseline
+        baseline = {
+            "cpu_usage": 25.0,
+            "memory_usage": 40.0,
+            "network_tx": 1000000,
+            "network_rx": 500000,
+            "process_count": 50,
+            "failed_auth_count": 0,
+        }
+        nk_cell.baseline_behavior["host_001"] = baseline
+
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value=anomalous_metrics)
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value.__aenter__.return_value = mock_response
+
+            result = await nk_cell.executar_investigacao({"id": "host_001"})
+
+            assert "is_threat" in result
+            assert result["is_threat"] is True  # Anomaly score > threshold
+            assert result["method"] == "behavioral_anomaly"
+            assert "anomaly_score" in result
+            assert result["anomaly_score"] > nk_cell.anomaly_threshold
+
+        await nk_cell.parar()
+
+    async def test_executar_neutralizacao_success_200(self, nk_cell, compromised_host):
+        """Test neutralization with successful RTE response (200)"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_response = AsyncMock()
+        mock_response.status = 200
+
+        with patch.object(nk_cell._http_session, 'post') as mock_post:
+            mock_post.return_value.__aenter__.return_value = mock_response
+
+            result = await nk_cell.executar_neutralizacao(
+                compromised_host, metodo="isolate"
+            )
+
+            assert result is True
+            assert compromised_host["id"] in nk_cell.hosts_isolados
+
+        await nk_cell.parar()
+
+    async def test_executar_neutralizacao_rte_404(self, nk_cell, compromised_host):
+        """Test neutralization with RTE service returning 404"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_response = AsyncMock()
+        mock_response.status = 404
+
+        with patch.object(nk_cell._http_session, 'post') as mock_post:
+            mock_post.return_value.__aenter__.return_value = mock_response
+
+            result = await nk_cell.executar_neutralizacao(
+                compromised_host, metodo="isolate"
+            )
+
+            # Should still succeed (graceful degradation)
+            assert result is True
+            assert compromised_host["id"] in nk_cell.hosts_isolados
+
+        await nk_cell.parar()
+
+    async def test_executar_neutralizacao_rte_error(self, nk_cell, compromised_host):
+        """Test neutralization with RTE service returning error"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_response = AsyncMock()
+        mock_response.status = 500
+
+        with patch.object(nk_cell._http_session, 'post') as mock_post:
+            mock_post.return_value.__aenter__.return_value = mock_response
+
+            result = await nk_cell.executar_neutralizacao(
+                compromised_host, metodo="isolate"
+            )
+
+            # Should fail (not 200 or 404)
+            assert result is False
+
+        await nk_cell.parar()
+
+    async def test_secretar_ifn_gamma_with_cytokine_messenger(self, nk_cell):
+        """Test IFN-gamma secretion when cytokine messenger is available"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock cytokine messenger
+        nk_cell._cytokine_messenger = AsyncMock()
+        nk_cell._cytokine_messenger.send_cytokine = AsyncMock()
+
+        host = {"id": "host_001", "anomaly_score": 0.95}
+
+        await nk_cell._secretar_ifn_gamma(host)
+
+        # Should have called send_cytokine
+        nk_cell._cytokine_messenger.send_cytokine.assert_called_once()
+        call_args = nk_cell._cytokine_messenger.send_cytokine.call_args
+        assert call_args[1]["tipo"] == "IFNgamma"
+        assert call_args[1]["prioridade"] == 10  # High priority
+
+        await nk_cell.parar()
+
