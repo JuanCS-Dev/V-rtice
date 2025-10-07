@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: log-generator
+  namespace: vcli-test
+  labels:
+    app: log-generator
+spec:
+  containers:
+  - name: logger
+    image: busybox:latest
+    command:
+    - sh
+    - -c
+    - |
+      i=0
+      while true; do
+        echo "[INFO] Log entry $i - $(date)"
+        echo "[DEBUG] Processing request $i"
+        if [ $((i % 5)) -eq 0 ]; then
+          echo "[WARNING] High memory usage detected"
+        fi
+        if [ $((i % 10)) -eq 0 ]; then
+          echo "[ERROR] Connection timeout to database"
+        fi
+        i=$((i+1))
+        sleep 2
+      done
+  restartPolicy: Always
