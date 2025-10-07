@@ -27,6 +27,7 @@ async def test_repeated_fabric_creation_no_leak():
     for i in range(50):
         config = TopologyConfig(node_count=8, target_density=0.2)
         fabric = TIGFabric(config)
+        await fabric.initialize()  # CRITICAL: Initialize before use
         await fabric.enter_esgt_mode()
         await fabric.exit_esgt_mode()
         del fabric

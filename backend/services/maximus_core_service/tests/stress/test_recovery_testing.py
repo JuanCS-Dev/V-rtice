@@ -26,6 +26,7 @@ from consciousness.tig.fabric import TIGFabric, TopologyConfig
 async def tig_fabric():
     config = TopologyConfig(node_count=16, target_density=0.25)
     fabric = TIGFabric(config)
+    await fabric.initialize()  # CRITICAL: Initialize before use
     await fabric.enter_esgt_mode()
     yield fabric
     await fabric.exit_esgt_mode()

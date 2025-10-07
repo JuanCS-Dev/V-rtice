@@ -29,6 +29,7 @@ async def tig_fabric():
     """TIG fabric for latency testing."""
     config = TopologyConfig(node_count=24, target_density=0.25)
     fabric = TIGFabric(config)
+    await fabric.initialize()  # CRITICAL: Initialize before use
     await fabric.enter_esgt_mode()
     yield fabric
     await fabric.exit_esgt_mode()
@@ -37,7 +38,15 @@ async def tig_fabric():
 @pytest_asyncio.fixture
 async def esgt_coordinator(tig_fabric):
     """ESGT coordinator for latency testing."""
-    coordinator = ESGTCoordinator(tig_fabric=tig_fabric, triggers=None, coordinator_id="latency-test")
+    from consciousness.esgt.coordinator import TriggerConditions
+
+    # Configure triggers for latency testing
+    triggers = TriggerConditions()
+    triggers.refractory_period_ms = 30.0  # Very short for rapid latency measurements
+    triggers.max_esgt_frequency_hz = 30.0  # High frequency for latency testing
+    triggers.min_available_nodes = 8
+
+    coordinator = ESGTCoordinator(tig_fabric=tig_fabric, triggers=triggers, coordinator_id="latency-test")
     await coordinator.start()
     yield coordinator
     await coordinator.stop()
@@ -48,13 +57,16 @@ async def test_esgt_ignition_latency_p99(esgt_coordinator):
     """Test ESGT ignition latency P99 <100ms."""
     latencies = []
 
-    # Run 100 ignitions
+    # Run 100 ignitions with minimal delay to respect refractory period
     for i in range(100):
         start = time.time()
         salience = SalienceScore(novelty=0.8, relevance=0.85, urgency=0.75)
         event = await esgt_coordinator.initiate_esgt(salience, {"test": i})
         latency_ms = (time.time() - start) * 1000
         latencies.append(latency_ms)
+
+        # Minimal delay to respect 30ms refractory period
+        await asyncio.sleep(0.032)  # 32ms between ignitions
 
     sorted_latencies = sorted(latencies)
     p99 = sorted_latencies[99]
@@ -72,7 +84,11 @@ async def test_esgt_ignition_latency_p99(esgt_coordinator):
 @pytest.mark.asyncio
 async def test_arousal_modulation_latency():
     """Test arousal modulation response time <20ms."""
-    controller = ArousalController(update_interval_s=0.1)
+    # Import ArousalConfig to set update_interval_ms correctly
+    from consciousness.mcea.controller import ArousalConfig
+
+    config = ArousalConfig(update_interval_ms=100.0)  # 10 Hz (100ms interval)
+    controller = ArousalController(config=config, controller_id="latency-test")
     await controller.start()
 
     latencies = []
@@ -80,10 +96,10 @@ async def test_arousal_modulation_latency():
     # Test 50 modulations
     for i in range(50):
         start = time.time()
-        await controller.request_arousal_modulation(
+        controller.request_modulation(
             source=f"test-{i}",
             delta=0.1,
-            duration_s=1.0
+            duration_seconds=1.0
         )
         latency_ms = (time.time() - start) * 1000
         latencies.append(latency_ms)
