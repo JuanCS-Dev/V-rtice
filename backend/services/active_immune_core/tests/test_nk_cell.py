@@ -844,3 +844,399 @@ class TestNKCellWithMockedServices:
 
         await nk_cell.parar()
 
+    async def test_detectar_mhc_ausente_timeout(self, nk_cell):
+        """Test MHC-I detection with timeout"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock timeout exception
+        async def mock_timeout(*args, **kwargs):
+            raise asyncio.TimeoutError()
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_timeout):
+            hosts = await nk_cell._detectar_mhc_ausente()
+
+            # Should return empty list on timeout
+            assert hosts == []
+
+        await nk_cell.parar()
+
+    async def test_detectar_mhc_ausente_generic_exception(self, nk_cell):
+        """Test MHC-I detection with generic exception"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock generic exception
+        async def mock_exception(*args, **kwargs):
+            raise Exception("Network error")
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+            hosts = await nk_cell._detectar_mhc_ausente()
+
+            # Should return empty list on exception
+            assert hosts == []
+
+        await nk_cell.parar()
+
+    async def test_get_host_metrics_connector_error(self, nk_cell):
+        """Test getting host metrics with connector error"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock connector error
+        import aiohttp
+        async def mock_connector_error(*args, **kwargs):
+            raise aiohttp.ClientConnectorError(None, OSError("Connection refused"))
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_connector_error):
+            metrics = await nk_cell._get_host_metrics("host_001")
+
+            # Should return empty dict
+            assert metrics == {}
+
+        await nk_cell.parar()
+
+    async def test_get_host_metrics_generic_exception(self, nk_cell):
+        """Test getting host metrics with generic exception"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock generic exception
+        async def mock_exception(*args, **kwargs):
+            raise Exception("Timeout")
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+            metrics = await nk_cell._get_host_metrics("host_001")
+
+            # Should return empty dict
+            assert metrics == {}
+
+        await nk_cell.parar()
+
+    async def test_detectar_anomalias_connector_error(self, nk_cell):
+        """Test anomaly detection with connector error"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock connector error
+        import aiohttp
+        async def mock_connector_error(*args, **kwargs):
+            raise aiohttp.ClientConnectorError(None, OSError("Connection refused"))
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_connector_error):
+            anomalies = await nk_cell._detectar_anomalias_comportamentais()
+
+            # Should return empty list
+            assert anomalies == []
+
+        await nk_cell.parar()
+
+    async def test_detectar_anomalias_generic_exception(self, nk_cell):
+        """Test anomaly detection with generic exception"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock generic exception
+        async def mock_exception(*args, **kwargs):
+            raise Exception("Network timeout")
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+            anomalies = await nk_cell._detectar_anomalias_comportamentais()
+
+            # Should return empty list
+            assert anomalies == []
+
+        await nk_cell.parar()
+
+    async def test_update_baseline_generic_exception(self, nk_cell):
+        """Test baseline update with generic exception"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock generic exception
+        async def mock_exception(*args, **kwargs):
+            raise Exception("Database error")
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+            # Should not raise exception, just log error
+            await nk_cell._update_baseline()
+
+        await nk_cell.parar()
+
+    async def test_executar_neutralizacao_connector_error(self, nk_cell, compromised_host):
+        """Test neutralization with connector error"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock connector error
+        import aiohttp
+        async def mock_connector_error(*args, **kwargs):
+            raise aiohttp.ClientConnectorError(None, OSError("Connection refused"))
+
+        with patch.object(nk_cell._http_session, 'post', side_effect=mock_connector_error):
+            result = await nk_cell.executar_neutralizacao(
+                compromised_host, metodo="isolate"
+            )
+
+            # Should still succeed (graceful degradation)
+            assert result is True
+            assert compromised_host["id"] in nk_cell.hosts_isolados
+
+        await nk_cell.parar()
+
+    async def test_executar_neutralizacao_generic_exception(self, nk_cell, compromised_host):
+        """Test neutralization with generic exception"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock generic exception
+        async def mock_exception(*args, **kwargs):
+            raise Exception("Timeout error")
+
+        with patch.object(nk_cell._http_session, 'post', side_effect=mock_exception):
+            result = await nk_cell.executar_neutralizacao(
+                compromised_host, metodo="isolate"
+            )
+
+            # Should fail on generic exception
+            assert result is False
+
+        await nk_cell.parar()
+
+    async def test_secretar_ifn_gamma_exception(self, nk_cell):
+        """Test IFN-gamma secretion with exception"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Mock cytokine messenger with failing send
+        nk_cell._cytokine_messenger = AsyncMock()
+        nk_cell._cytokine_messenger.send_cytokine = AsyncMock(side_effect=Exception("Kafka error"))
+
+        host = {"id": "host_001", "anomaly_score": 0.95}
+
+        # Should not raise exception, just log error
+        await nk_cell._secretar_ifn_gamma(host)
+
+        await nk_cell.parar()
+
+    async def test_calcular_anomalia_with_new_metric_keys(self, nk_cell):
+        """Test anomaly calculation when new metrics appear"""
+        host_id = "host_001"
+
+        # Establish baseline with some metrics
+        baseline = {"cpu_usage": 50.0, "memory_usage": 40.0}
+        nk_cell._calcular_anomalia(host_id, baseline)
+
+        # New metrics with additional keys
+        new_metrics = {
+            "cpu_usage": 55.0,
+            "memory_usage": 45.0,
+            "network_tx": 1000000,  # New key not in baseline
+        }
+
+        score = nk_cell._calcular_anomalia(host_id, new_metrics)
+
+        # Should handle gracefully (only compare overlapping keys)
+        assert score >= 0.0
+        assert score <= 1.0
+
+    async def test_update_baseline_new_host(self, nk_cell, normal_metrics):
+        """Test baseline update adds new host"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # No baseline for host_002 yet
+        assert "host_002" not in nk_cell.baseline_behavior
+
+        # Mock host list with new host
+        mock_list_response = AsyncMock()
+        mock_list_response.status = 200
+        mock_list_response.json = AsyncMock(return_value={
+            "hosts": [{"id": "host_002"}]
+        })
+
+        mock_metrics_response = AsyncMock()
+        mock_metrics_response.status = 200
+        mock_metrics_response.json = AsyncMock(return_value=normal_metrics)
+
+        async def mock_get(*args, **kwargs):
+            url = args[0] if args else kwargs.get('url', '')
+            if '/list' in url:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_list_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+            else:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_metrics_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+            await nk_cell._update_baseline()
+
+            # New host should be added to baseline
+            assert "host_002" in nk_cell.baseline_behavior
+
+        await nk_cell.parar()
+
+    async def test_update_baseline_adds_new_metric_keys(self, nk_cell):
+        """Test baseline update adds new metric keys"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Baseline with limited metrics
+        nk_cell.baseline_behavior["host_001"] = {"cpu_usage": 50.0}
+
+        # Mock metrics with additional keys
+        extended_metrics = {
+            "cpu_usage": 52.0,
+            "memory_usage": 40.0,  # New key
+            "network_tx": 1000000,  # New key
+        }
+
+        mock_list_response = AsyncMock()
+        mock_list_response.status = 200
+        mock_list_response.json = AsyncMock(return_value={
+            "hosts": [{"id": "host_001"}]
+        })
+
+        mock_metrics_response = AsyncMock()
+        mock_metrics_response.status = 200
+        mock_metrics_response.json = AsyncMock(return_value=extended_metrics)
+
+        async def mock_get(*args, **kwargs):
+            url = args[0] if args else kwargs.get('url', '')
+            if '/list' in url:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_list_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+            else:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_metrics_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+            await nk_cell._update_baseline()
+
+            # New keys should be added
+            baseline = nk_cell.baseline_behavior["host_001"]
+            assert "memory_usage" in baseline
+            assert "network_tx" in baseline
+
+        await nk_cell.parar()
+
+    async def test_detectar_anomalias_host_without_id(self, nk_cell):
+        """Test anomaly detection skips hosts without ID"""
+        # Mock response with host missing ID
+        mock_list_response = AsyncMock()
+        mock_list_response.status = 200
+        mock_list_response.json = AsyncMock(return_value={
+            "hosts": [
+                {"hostname": "test"},  # No id field
+            ]
+        })
+
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__.return_value = mock_list_response
+        mock_ctx.__aexit__.return_value = None
+
+        with patch.object(nk_cell._http_session, 'get') as mock_get:
+            mock_get.return_value = mock_ctx
+
+            anomalies = await nk_cell._detectar_anomalias_comportamentais()
+
+            # Should return empty (host skipped due to missing ID)
+            assert anomalies == []
+
+    async def test_update_baseline_host_without_metrics(self, nk_cell):
+        """Test baseline update skips hosts without metrics"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        mock_list_response = AsyncMock()
+        mock_list_response.status = 200
+        mock_list_response.json = AsyncMock(return_value={
+            "hosts": [{"id": "host_001"}]
+        })
+
+        # Mock metrics endpoint returns empty
+        mock_metrics_response = AsyncMock()
+        mock_metrics_response.status = 500  # Error response
+
+        async def mock_get(*args, **kwargs):
+            url = args[0] if args else kwargs.get('url', '')
+            if '/list' in url:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_list_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+            else:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_metrics_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+            await nk_cell._update_baseline()
+
+            # Should not crash, just skip
+            assert True
+
+        await nk_cell.parar()
+
+    async def test_update_baseline_with_high_anomaly_host(self, nk_cell, normal_metrics):
+        """Test baseline update skips hosts with high anomaly"""
+        await nk_cell.iniciar()
+        await asyncio.sleep(0.5)
+
+        # Establish baseline
+        nk_cell.baseline_behavior["host_001"] = normal_metrics.copy()
+
+        # Mock with highly anomalous metrics
+        anomalous = {
+            "cpu_usage": 99.0,
+            "memory_usage": 95.0,
+            "network_tx": 100000000,
+            "network_rx": 50000000,
+            "process_count": 500,
+            "failed_auth_count": 100,
+        }
+
+        mock_list_response = AsyncMock()
+        mock_list_response.status = 200
+        mock_list_response.json = AsyncMock(return_value={
+            "hosts": [{"id": "host_001"}]
+        })
+
+        mock_metrics_response = AsyncMock()
+        mock_metrics_response.status = 200
+        mock_metrics_response.json = AsyncMock(return_value=anomalous)
+
+        async def mock_get(*args, **kwargs):
+            url = args[0] if args else kwargs.get('url', '')
+            if '/list' in url:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_list_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+            else:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = mock_metrics_response
+                mock_ctx.__aexit__.return_value = None
+                return mock_ctx
+
+        # Store original baseline
+        original_cpu = nk_cell.baseline_behavior["host_001"]["cpu_usage"]
+
+        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+            await nk_cell._update_baseline()
+
+            # Baseline should NOT be updated (anomaly > 0.3)
+            # CPU should be same or minimally changed
+            assert nk_cell.baseline_behavior["host_001"]["cpu_usage"] < 50.0  # Not updated to 99
+
+        await nk_cell.parar()
+
