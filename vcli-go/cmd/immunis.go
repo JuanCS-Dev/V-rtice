@@ -13,12 +13,20 @@ var (
 	bcellEndpoint       string
 	helperTEndpoint     string
 	cytotoxicTEndpoint  string
+	lymphnodeEndpoint   string
 	immunisToken        string
 
 	// Macrophage flags
 	sampleFile     string
 	malwareFamily  string
 	artifactFile   string
+
+	// Lymphnode flags
+	cloneAgentID        string
+	cloneEspecializacao string
+	cloneNumClones      int
+	cloneMutate         bool
+	cloneMutationRate   float64
 
 	// Generic flags for immunis (reuse from maximus.go)
 	// dataFile and contextFile are already declared in maximus.go
@@ -459,6 +467,108 @@ func runCytotoxicTStatus(cmd *cobra.Command, args []string) error {
 // ============================================================================
 
 // ============================================================================
+// LYMPHNODE COMMANDS
+// ============================================================================
+
+var lymphnodeCmd = &cobra.Command{
+	Use:   "lymphnode",
+	Short: "Lymphnode coordination operations",
+	Long:  "Lymphnode operations: clonal expansion, apoptosis, metrics, homeostatic state",
+}
+
+var lymphnodeCloneCmd = &cobra.Command{
+	Use:   "clone",
+	Short: "Clone an agent (clonal expansion)",
+	Long:  "Create specialized clones of a high-performing agent to respond to specific threats",
+	RunE:  runLymphnodeClone,
+}
+
+var lymphnodeDestroyCmd = &cobra.Command{
+	Use:   "destroy <especializacao>",
+	Short: "Destroy clones by specialization (apoptosis)",
+	Long:  "Trigger programmed cell death for all clones with a specific specialization",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runLymphnodeDestroy,
+}
+
+var lymphnodeMetricsCmd = &cobra.Command{
+	Use:   "metrics",
+	Short: "Get lymphnode metrics",
+	Long:  "Retrieve lymphnode operational metrics and statistics",
+	RunE:  runLymphnodeMetrics,
+}
+
+var lymphnodeHomeostaticStateCmd = &cobra.Command{
+	Use:   "homeostatic-state",
+	Short: "Get homeostatic state",
+	Long:  "Retrieve current homeostatic state (REPOUSO, VIGILÂNCIA, ATENÇÃO, ATIVAÇÃO, INFLAMAÇÃO)",
+	RunE:  runLymphnodeHomeostaticState,
+}
+
+// ============================================================================
+// LYMPHNODE COMMAND IMPLEMENTATIONS
+// ============================================================================
+
+func runLymphnodeClone(cmd *cobra.Command, args []string) error {
+	client := immunis.NewLymphnodeClient(lymphnodeEndpoint, immunisToken)
+
+	req := immunis.CloneRequest{
+		AgentID:      cloneAgentID,
+		NumClones:    cloneNumClones,
+		Mutate:       cloneMutate,
+		MutationRate: cloneMutationRate,
+	}
+
+	if cloneEspecializacao != "" {
+		req.Especializacao = &cloneEspecializacao
+	}
+
+	result, err := client.CloneAgent(req)
+	if err != nil {
+		return fmt.Errorf("failed to clone agent: %w", err)
+	}
+
+	printJSON(result)
+	return nil
+}
+
+func runLymphnodeDestroy(cmd *cobra.Command, args []string) error {
+	client := immunis.NewLymphnodeClient(lymphnodeEndpoint, immunisToken)
+
+	result, err := client.DestroyClones(args[0])
+	if err != nil {
+		return fmt.Errorf("failed to destroy clones: %w", err)
+	}
+
+	printJSON(result)
+	return nil
+}
+
+func runLymphnodeMetrics(cmd *cobra.Command, args []string) error {
+	client := immunis.NewLymphnodeClient(lymphnodeEndpoint, immunisToken)
+
+	result, err := client.GetMetrics()
+	if err != nil {
+		return fmt.Errorf("failed to get metrics: %w", err)
+	}
+
+	printJSON(result)
+	return nil
+}
+
+func runLymphnodeHomeostaticState(cmd *cobra.Command, args []string) error {
+	client := immunis.NewLymphnodeClient(lymphnodeEndpoint, immunisToken)
+
+	result, err := client.GetHomeostaticState()
+	if err != nil {
+		return fmt.Errorf("failed to get homeostatic state: %w", err)
+	}
+
+	printJSON(result)
+	return nil
+}
+
+// ============================================================================
 // INIT
 // ============================================================================
 
@@ -470,6 +580,7 @@ func init() {
 	immunisCmd.AddCommand(bcellCmd)
 	immunisCmd.AddCommand(helperTCmd)
 	immunisCmd.AddCommand(cytotoxicTCmd)
+	immunisCmd.AddCommand(lymphnodeCmd)
 
 	// Macrophage subcommands
 	macrophageCmd.AddCommand(macrophagePhagocytoseCmd)
@@ -495,17 +606,25 @@ func init() {
 	cytotoxicTCmd.AddCommand(cytotoxicTHealthCmd)
 	cytotoxicTCmd.AddCommand(cytotoxicTStatusCmd)
 
+	// Lymphnode subcommands
+	lymphnodeCmd.AddCommand(lymphnodeCloneCmd)
+	lymphnodeCmd.AddCommand(lymphnodeDestroyCmd)
+	lymphnodeCmd.AddCommand(lymphnodeMetricsCmd)
+	lymphnodeCmd.AddCommand(lymphnodeHomeostaticStateCmd)
+
 	// Service endpoints
 	macrophageCmd.PersistentFlags().StringVar(&macrophageEndpoint, "macrophage-endpoint", "http://localhost:8030", "Macrophage service endpoint")
 	bcellCmd.PersistentFlags().StringVar(&bcellEndpoint, "bcell-endpoint", "http://localhost:8031", "B-Cell service endpoint")
 	helperTCmd.PersistentFlags().StringVar(&helperTEndpoint, "helper-t-endpoint", "http://localhost:8032", "Helper T-Cell service endpoint")
 	cytotoxicTCmd.PersistentFlags().StringVar(&cytotoxicTEndpoint, "cytotoxic-t-endpoint", "http://localhost:8033", "Cytotoxic T-Cell service endpoint")
+	lymphnodeCmd.PersistentFlags().StringVar(&lymphnodeEndpoint, "lymphnode-endpoint", "http://localhost:8034", "Lymphnode service endpoint")
 
 	// Auth tokens
 	macrophageCmd.PersistentFlags().StringVar(&immunisToken, "token", "", "Authentication token")
 	bcellCmd.PersistentFlags().StringVar(&immunisToken, "token", "", "Authentication token")
 	helperTCmd.PersistentFlags().StringVar(&immunisToken, "token", "", "Authentication token")
 	cytotoxicTCmd.PersistentFlags().StringVar(&immunisToken, "token", "", "Authentication token")
+	lymphnodeCmd.PersistentFlags().StringVar(&immunisToken, "token", "", "Authentication token")
 
 	// Macrophage flags
 	macrophagePhagocytoseCmd.Flags().StringVar(&sampleFile, "sample", "", "Malware sample file")
@@ -523,4 +642,12 @@ func init() {
 	// Cytotoxic T-Cell flags
 	cytotoxicTProcessCmd.Flags().StringVar(&dataFile, "data-file", "", "Data file (JSON)")
 	cytotoxicTProcessCmd.Flags().StringVar(&contextFile, "context-file", "", "Context file (JSON, optional)")
+
+	// Lymphnode flags
+	lymphnodeCloneCmd.Flags().StringVar(&cloneAgentID, "agent-id", "", "ID of agent to clone")
+	lymphnodeCloneCmd.Flags().StringVar(&cloneEspecializacao, "especializacao", "", "Specialization for clones (optional)")
+	lymphnodeCloneCmd.Flags().IntVar(&cloneNumClones, "num-clones", 1, "Number of clones to create (1-10)")
+	lymphnodeCloneCmd.Flags().BoolVar(&cloneMutate, "mutate", true, "Apply somatic hypermutation")
+	lymphnodeCloneCmd.Flags().Float64Var(&cloneMutationRate, "mutation-rate", 0.1, "Mutation rate (0.0-1.0)")
+	lymphnodeCloneCmd.MarkFlagRequired("agent-id")
 }
