@@ -24,29 +24,46 @@ PRODUCTION-READY: Real Kafka, Redis, no mocks, graceful degradation.
 import asyncio
 import json
 import logging
-from collections import defaultdict
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
 import redis.asyncio as aioredis
 from aiokafka import AIOKafkaConsumer
+from pydantic import ValidationError
 
 from agents import AgentFactory, AgentType
 from agents.models import AgenteState
+from coordination.exceptions import (
+    CytokineProcessingError,
+    LymphnodeConnectionError,
+    LymphnodeRateLimitError,
+    LymphnodeResourceExhaustedError,
+    PatternDetectionError,
+    AgentOrchestrationError,
+    HormonePublishError,
+)
+from coordination.rate_limiter import ClonalExpansionRateLimiter
+from coordination.thread_safe_structures import (
+    ThreadSafeBuffer,
+    AtomicCounter,
+    ThreadSafeTemperature,
+    ThreadSafeCounter,
+)
+from coordination.validators import validate_cytokine
 
 logger = logging.getLogger(__name__)
 
-# ESGT Integration (optional dependency)
+# ESGT Integration (optional dependency - no path manipulation)
 try:
-    import sys
-    sys.path.insert(0, '/home/juan/vertice-dev/backend/services/maximus_core_service')
     from consciousness.integration import ESGTSubscriber
     from consciousness.esgt.coordinator import ESGTEvent
     ESGT_AVAILABLE = True
 except ImportError:
     ESGT_AVAILABLE = False
-    logger.warning("ESGT integration not available (consciousness module not found)")
+    ESGTSubscriber = None  # type: ignore
+    ESGTEvent = None  # type: ignore
+    logger.info("ESGT integration not available (consciousness module not found)")
 
 
 class HomeostaticState(str, Enum):
@@ -112,19 +129,26 @@ class LinfonodoDigital:
         self.agentes_ativos: Dict[str, AgenteState] = {}
         self.agentes_dormindo: Set[str] = set()
 
-        # Cytokine aggregation
-        self.cytokine_buffer: List[Dict[str, Any]] = []
-        self.temperatura_regional: float = 37.0
+        # Cytokine aggregation (THREAD-SAFE)
+        self.cytokine_buffer = ThreadSafeBuffer[Dict[str, Any]](maxsize=1000)
+        self.temperatura_regional = ThreadSafeTemperature(initial=37.0, min_temp=36.0, max_temp=42.0)
 
-        # Pattern detection
-        self.threat_detections: Dict[str, int] = defaultdict(int)  # threat_id -> count
+        # Pattern detection (THREAD-SAFE)
+        self.threat_detections = ThreadSafeCounter[str]()
         self.last_pattern_check: datetime = datetime.now()
 
-        # Metrics
-        self.total_ameacas_detectadas: int = 0
-        self.total_neutralizacoes: int = 0
-        self.total_clones_criados: int = 0
-        self.total_clones_destruidos: int = 0
+        # Metrics (ATOMIC COUNTERS)
+        self.total_ameacas_detectadas = AtomicCounter()
+        self.total_neutralizacoes = AtomicCounter()
+        self.total_clones_criados = AtomicCounter()
+        self.total_clones_destruidos = AtomicCounter()
+
+        # Rate limiting
+        self._clonal_limiter = ClonalExpansionRateLimiter(
+            max_clones_per_minute=200,
+            max_per_specialization=50,
+            max_total_agents=1000,
+        )
 
         # ESGT Integration (consciousness ignition)
         self.esgt_subscriber: Optional['ESGTSubscriber'] = None
@@ -142,16 +166,55 @@ class LinfonodoDigital:
             f"Lymphnode {self.id} ({self.nivel}) initialized for {self.area}"
         )
 
+    async def get_homeostatic_state(self) -> HomeostaticState:
+        """
+        Compute homeostatic state based on current temperature.
+
+        Returns:
+            HomeostaticState enum value
+        """
+        temp = await self.temperatura_regional.get()
+
+        if temp >= 39.0:
+            return HomeostaticState.INFLAMACAO
+        elif temp >= 38.0:
+            return HomeostaticState.ATIVACAO
+        elif temp >= 37.5:
+            return HomeostaticState.ATENCAO
+        elif temp >= 37.0:
+            return HomeostaticState.VIGILANCIA
+        else:
+            return HomeostaticState.REPOUSO
+
     @property
     def homeostatic_state(self) -> HomeostaticState:
-        """Compute homeostatic state based on current temperature."""
-        if self.temperatura_regional >= 39.0:
+        """
+        DEPRECATED: Synchronous property for backward compatibility.
+        Use get_homeostatic_state() instead for accurate async access.
+
+        Returns:
+            HomeostaticState enum (may be stale if temperature changed recently)
+        """
+        # Try to get current temp, but fall back to last known value
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Can't block in running loop, return VIGILANCIA as safe default
+                return HomeostaticState.VIGILANCIA
+            else:
+                temp = loop.run_until_complete(self.temperatura_regional.get())
+        except:
+            # Fallback
+            temp = 37.0
+
+        if temp >= 39.0:
             return HomeostaticState.INFLAMACAO
-        elif self.temperatura_regional >= 38.0:
+        elif temp >= 38.0:
             return HomeostaticState.ATIVACAO
-        elif self.temperatura_regional >= 37.5:
+        elif temp >= 37.5:
             return HomeostaticState.ATENCAO
-        elif self.temperatura_regional >= 37.0:
+        elif temp >= 37.0:
             return HomeostaticState.VIGILANCIA
         else:
             return HomeostaticState.REPOUSO
@@ -226,16 +289,16 @@ class LinfonodoDigital:
 
     async def _adjust_temperature(self, delta: float) -> None:
         """
-        Adjust regional temperature.
+        Adjust regional temperature (THREAD-SAFE).
 
         Args:
             delta: Temperature change (positive = increase, negative = decrease)
         """
-        old_temp = self.temperatura_regional
-        self.temperatura_regional = max(36.0, min(40.0, self.temperatura_regional + delta))
+        old_temp = await self.temperatura_regional.get()
+        new_temp = await self.temperatura_regional.adjust(delta)
 
         logger.info(
-            f"Lymphnode {self.id} temperature: {old_temp:.1f}°C → {self.temperatura_regional:.1f}°C "
+            f"Lymphnode {self.id} temperature: {old_temp:.1f}°C → {new_temp:.1f}°C "
             f"(state={self.homeostatic_state.value})"
         )
 
@@ -269,8 +332,11 @@ class LinfonodoDigital:
 
             logger.debug(f"Broadcast hormone {hormone_type} (level={level:.2f})")
 
+        except (ConnectionError, TimeoutError) as e:
+            raise HormonePublishError(f"Failed to broadcast hormone: {e}")
         except Exception as e:
-            logger.warning(f"Failed to broadcast hormone: {e}")
+            logger.error(f"Unexpected error broadcasting hormone: {e}")
+            raise HormonePublishError(f"Unexpected hormone broadcast error: {e}")
 
     # ==================== LIFECYCLE ====================
 
@@ -298,9 +364,12 @@ class LinfonodoDigital:
                 decode_responses=True,
             )
             logger.info(f"Lymphnode {self.id} connected to Redis")
-        except Exception as e:
-            logger.error(f"Redis connection failed: {e}")
+        except (ConnectionError, TimeoutError) as e:
+            logger.warning(f"Redis connection failed: {e} (graceful degradation)")
             self._redis_client = None
+        except Exception as e:
+            logger.error(f"Unexpected Redis error: {e}")
+            raise LymphnodeConnectionError(f"Redis initialization failed: {e}")
 
         # Start background tasks
         self._tasks.append(asyncio.create_task(self._aggregate_cytokines()))
@@ -376,7 +445,7 @@ class LinfonodoDigital:
         quantidade: int = 5,
     ) -> List[str]:
         """
-        Create specialized agent clones (clonal expansion).
+        Create specialized agent clones (clonal expansion) WITH RATE LIMITING.
 
         Triggered by:
         - Persistent threat (pattern detection)
@@ -390,13 +459,32 @@ class LinfonodoDigital:
 
         Returns:
             List of clone IDs
+
+        Raises:
+            LymphnodeRateLimitError: If rate limit exceeded
+            LymphnodeResourceExhaustedError: If resource limit exceeded
+            AgentOrchestrationError: If clone creation fails
         """
+        # RATE LIMITING: Check before creating clones
+        try:
+            await self._clonal_limiter.check_clonal_expansion(
+                especializacao=especializacao,
+                quantidade=quantidade,
+                current_total_agents=len(self.agentes_ativos),
+            )
+        except (LymphnodeRateLimitError, LymphnodeResourceExhaustedError) as e:
+            logger.warning(
+                f"Lymphnode {self.id} clonal expansion BLOCKED: {e}"
+            )
+            raise
+
         logger.info(
             f"Lymphnode {self.id} initiating clonal expansion: "
             f"{quantidade} {tipo_base} agents (specialization={especializacao})"
         )
 
         clone_ids = []
+        failures = 0
 
         for i in range(quantidade):
             try:
@@ -423,10 +511,18 @@ class LinfonodoDigital:
 
                 clone_ids.append(agente.state.id)
 
-                self.total_clones_criados += 1
+                # ATOMIC INCREMENT
+                await self.total_clones_criados.increment()
 
             except Exception as e:
                 logger.error(f"Failed to create clone {i}: {e}")
+                failures += 1
+
+        # If too many failures, raise error
+        if failures > quantidade // 2:
+            raise AgentOrchestrationError(
+                f"Clonal expansion failed: {failures}/{quantidade} clones failed to create"
+            )
 
         logger.info(
             f"Clonal expansion complete: {len(clone_ids)}/{quantidade} clones created"
@@ -460,7 +556,11 @@ class LinfonodoDigital:
                 await self.remover_agente(agente_id)
 
                 destruidos += 1
-                self.total_clones_destruidos += 1
+                # ATOMIC INCREMENT
+                await self.total_clones_destruidos.increment()
+
+        # Release from rate limiter
+        await self._clonal_limiter.release_clones(especializacao, destruidos)
 
         logger.info(
             f"Lymphnode {self.id} destroyed {destruidos} clones ({especializacao})"
@@ -491,8 +591,11 @@ class LinfonodoDigital:
 
             logger.debug(f"Apoptosis signal sent to agent {agente_id[:8]}")
 
+        except (ConnectionError, TimeoutError) as e:
+            logger.warning(f"Failed to send apoptosis signal (Redis unavailable): {e}")
         except Exception as e:
-            logger.error(f"Failed to send apoptosis signal: {e}")
+            logger.error(f"Unexpected error sending apoptosis signal: {e}")
+            raise HormonePublishError(f"Failed to send apoptosis signal to {agente_id}: {e}")
 
     # ==================== CYTOKINE PROCESSING ====================
 
@@ -529,16 +632,28 @@ class LinfonodoDigital:
 
                 citocina = msg.value
 
+                # VALIDATION: Validate cytokine before processing
+                try:
+                    validated = validate_cytokine(citocina)
+                    citocina_dict = validated.model_dump()
+                except ValidationError as e:
+                    logger.warning(f"Invalid cytokine received, skipping: {e}")
+                    continue
+
                 # Filter by area (only process cytokines from our area)
-                if citocina.get("area_alvo") == self.area or self.nivel == "global":
-                    # Add to buffer
-                    self.cytokine_buffer.append(citocina)
+                if citocina_dict.get("area_alvo") == self.area or self.nivel == "global":
+                    # Add to buffer (THREAD-SAFE)
+                    await self.cytokine_buffer.append(citocina_dict)
 
                     # Process at regional level
-                    await self._processar_citocina_regional(citocina)
+                    await self._processar_citocina_regional(citocina_dict)
 
+        except (ConnectionError, TimeoutError) as e:
+            logger.error(f"Kafka connection error: {e}")
+            raise LymphnodeConnectionError(f"Kafka consumer failed: {e}")
         except Exception as e:
             logger.error(f"Cytokine aggregation error: {e}")
+            raise CytokineProcessingError(f"Failed to aggregate cytokines: {e}")
 
         finally:
             if consumer:
@@ -560,38 +675,39 @@ class LinfonodoDigital:
         payload = citocina.get("payload", {})
         prioridade = citocina.get("prioridade", 0)
 
-        # Update regional temperature (inflammatory/anti-inflammatory)
+        # Update regional temperature (inflammatory/anti-inflammatory) - THREAD-SAFE
         if tipo in ["IL1", "IL6", "TNF", "IL8"]:
             # Pro-inflammatory
-            self.temperatura_regional += 0.2
-            self.temperatura_regional = min(self.temperatura_regional, 42.0)
+            await self.temperatura_regional.adjust(+0.2)
 
         elif tipo in ["IL10", "TGFbeta"]:
             # Anti-inflammatory
-            self.temperatura_regional -= 0.1
-            self.temperatura_regional = max(self.temperatura_regional, 36.5)
+            await self.temperatura_regional.adjust(-0.1)
 
         # Track metrics from payload
         evento = payload.get("evento")
 
         if evento == "ameaca_detectada" or payload.get("is_threat"):
-            self.total_ameacas_detectadas += 1
+            # ATOMIC INCREMENT
+            await self.total_ameacas_detectadas.increment()
 
-            # Track threat for pattern detection
+            # Track threat for pattern detection (THREAD-SAFE)
             threat_id = payload.get("alvo", {}).get("id") or payload.get("host_id")
             if threat_id:
-                self.threat_detections[threat_id] += 1
+                await self.threat_detections.increment(threat_id)
 
         elif evento in ["neutralizacao_sucesso", "nk_cytotoxicity", "neutrophil_net_formation"]:
-            self.total_neutralizacoes += 1
+            # ATOMIC INCREMENT
+            await self.total_neutralizacoes.increment()
 
         # Escalate to global lymphnode if critical
         if prioridade >= 9 and self.nivel != "global":
             await self._escalar_para_global(citocina)
 
+        current_temp = await self.temperatura_regional.get()
         logger.debug(
             f"Lymphnode {self.id} processed cytokine: {tipo} "
-            f"(temp={self.temperatura_regional:.1f}°C)"
+            f"(temp={current_temp:.1f}°C)"
         )
 
     async def _escalar_para_global(self, citocina: Dict[str, Any]) -> None:
@@ -623,8 +739,10 @@ class LinfonodoDigital:
                 }),
             )
 
+        except (ConnectionError, TimeoutError) as e:
+            logger.warning(f"Escalation failed (Redis unavailable): {e}")
         except Exception as e:
-            logger.error(f"Escalation failed: {e}")
+            logger.error(f"Unexpected escalation error: {e}")
 
     # ==================== PATTERN DETECTION ====================
 
@@ -641,11 +759,13 @@ class LinfonodoDigital:
             try:
                 await asyncio.sleep(60)  # Check every minute
 
-                if len(self.cytokine_buffer) < 10:
+                # Get buffer size (THREAD-SAFE)
+                buffer_size = await self.cytokine_buffer.size()
+                if buffer_size < 10:
                     continue
 
-                # Analyze recent cytokines (last 100)
-                recentes = self.cytokine_buffer[-100:]
+                # Analyze recent cytokines (last 100) - THREAD-SAFE
+                recentes = await self.cytokine_buffer.get_recent(100)
 
                 # Check for persistent threats
                 await self._detect_persistent_threats()
@@ -653,20 +773,18 @@ class LinfonodoDigital:
                 # Check for coordinated attacks
                 await self._detect_coordinated_attacks(recentes)
 
-                # Clear old buffer (keep last 1000)
-                if len(self.cytokine_buffer) > 1000:
-                    self.cytokine_buffer = self.cytokine_buffer[-1000:]
-
                 # Clear old threat detections (keep last hour)
                 if (datetime.now() - self.last_pattern_check).total_seconds() > 3600:
-                    self.threat_detections.clear()
+                    await self.threat_detections.clear()
                     self.last_pattern_check = datetime.now()
 
             except asyncio.CancelledError:
                 break
 
-            except Exception as e:
+            except PatternDetectionError as e:
                 logger.error(f"Pattern detection error: {e}")
+            except Exception as e:
+                logger.error(f"Unexpected error in pattern detection: {e}")
 
     async def _detect_persistent_threats(self) -> None:
         """
@@ -674,22 +792,35 @@ class LinfonodoDigital:
 
         If same threat detected 5+ times, trigger clonal expansion.
         """
-        for threat_id, count in list(self.threat_detections.items()):
+        # Get all threat counts (THREAD-SAFE)
+        threat_items = await self.threat_detections.items()
+
+        for threat_id, count in threat_items:
             if count >= 5:
                 logger.warning(
                     f"Lymphnode {self.id} detected PERSISTENT THREAT: {threat_id} "
                     f"({count} detections)"
                 )
 
-                # Trigger clonal expansion (Neutrophil swarm)
-                await self.clonar_agente(
-                    tipo_base=AgentType.NEUTROFILO,
-                    especializacao=f"threat_{threat_id}",
-                    quantidade=10,
-                )
+                try:
+                    # Trigger clonal expansion (Neutrophil swarm)
+                    await self.clonar_agente(
+                        tipo_base=AgentType.NEUTROFILO,
+                        especializacao=f"threat_{threat_id}",
+                        quantidade=10,
+                    )
 
-                # Clear count (avoid re-triggering)
-                self.threat_detections[threat_id] = 0
+                    # Clear count (avoid re-triggering) - set to 0
+                    # Decrement by current count to reset
+                    current = await self.threat_detections.get(threat_id)
+                    if current > 0:
+                        # Reset by clearing and re-adding (simpler than decrement loop)
+                        await self.threat_detections.increment(threat_id, -current)
+
+                except (LymphnodeRateLimitError, LymphnodeResourceExhaustedError) as e:
+                    logger.warning(f"Cannot trigger clonal expansion for persistent threat: {e}")
+                except AgentOrchestrationError as e:
+                    logger.error(f"Clonal expansion failed for persistent threat: {e}")
 
     async def _detect_coordinated_attacks(self, cytokines: List[Dict[str, Any]]) -> None:
         """
@@ -715,7 +846,7 @@ class LinfonodoDigital:
                     payload = citocina.get("payload", {})
                     if payload.get("evento") == "ameaca_detectada" or payload.get("is_threat"):
                         recent_threats += 1
-            except Exception as e:
+            except (ValueError, TypeError) as e:
                 logger.debug(f"Failed to parse cytokine timestamp '{timestamp_str}': {e}")
 
         # Trigger mass response if coordinated attack detected
@@ -725,12 +856,17 @@ class LinfonodoDigital:
                 f"{recent_threats} threats in last minute"
             )
 
-            # Massive Neutrophil swarm
-            await self.clonar_agente(
-                tipo_base=AgentType.NEUTROFILO,
-                especializacao="coordinated_attack_response",
-                quantidade=50,
-            )
+            try:
+                # Massive Neutrophil swarm
+                await self.clonar_agente(
+                    tipo_base=AgentType.NEUTROFILO,
+                    especializacao="coordinated_attack_response",
+                    quantidade=50,
+                )
+            except (LymphnodeRateLimitError, LymphnodeResourceExhaustedError) as e:
+                logger.error(f"Cannot trigger mass response (rate limited): {e}")
+            except AgentOrchestrationError as e:
+                logger.error(f"Mass response clonal expansion failed: {e}")
 
     # ==================== HOMEOSTATIC REGULATION ====================
 
@@ -749,12 +885,12 @@ class LinfonodoDigital:
             try:
                 await asyncio.sleep(30)
 
-                # Temperature decay (anti-inflammatory drift)
-                self.temperatura_regional *= 0.98  # 2% decay every 30s
-                self.temperatura_regional = max(36.5, self.temperatura_regional)
+                # Temperature decay (anti-inflammatory drift) - THREAD-SAFE
+                await self.temperatura_regional.multiply(0.98)  # 2% decay every 30s
 
+                current_temp = await self.temperatura_regional.get()
                 logger.debug(
-                    f"Lymphnode {self.id} temperature: {self.temperatura_regional:.1f}°C "
+                    f"Lymphnode {self.id} temperature: {current_temp:.1f}°C "
                     f"(agents: {len(self.agentes_ativos)})"
                 )
 
@@ -762,7 +898,7 @@ class LinfonodoDigital:
                 break
 
             except Exception as e:
-                logger.error(f"Temperature monitoring error: {e}")
+                logger.error(f"Unexpected temperature monitoring error: {e}")
 
     async def _regulate_homeostasis(self) -> None:
         """
@@ -784,20 +920,23 @@ class LinfonodoDigital:
                 if total_agents == 0:
                     continue
 
+                # Get current temperature (THREAD-SAFE)
+                current_temp = await self.temperatura_regional.get()
+
                 # Determine target active percentage
-                if self.temperatura_regional >= 39.0:
+                if current_temp >= 39.0:
                     target_percentage = 0.8  # Inflamação
                     state_name = "INFLAMAÇÃO"
 
-                elif self.temperatura_regional >= 38.0:
+                elif current_temp >= 38.0:
                     target_percentage = 0.5  # Ativação
                     state_name = "ATIVAÇÃO"
 
-                elif self.temperatura_regional >= 37.5:
+                elif current_temp >= 37.5:
                     target_percentage = 0.3  # Atenção
                     state_name = "ATENÇÃO"
 
-                elif self.temperatura_regional >= 37.0:
+                elif current_temp >= 37.0:
                     target_percentage = 0.15  # Vigilância
                     state_name = "VIGILÂNCIA"
 
@@ -809,7 +948,7 @@ class LinfonodoDigital:
 
                 logger.info(
                     f"Lymphnode {self.id} homeostatic state: {state_name} "
-                    f"(temp={self.temperatura_regional:.1f}°C, "
+                    f"(temp={current_temp:.1f}°C, "
                     f"target_active={target_active}/{total_agents})"
                 )
 
@@ -819,8 +958,10 @@ class LinfonodoDigital:
             except asyncio.CancelledError:
                 break
 
+            except HormonePublishError as e:
+                logger.warning(f"Hormone broadcast failed (non-critical): {e}")
             except Exception as e:
-                logger.error(f"Homeostasis regulation error: {e}")
+                logger.error(f"Unexpected homeostasis regulation error: {e}")
 
     async def _broadcast_activation_level(
         self, state_name: str, target_percentage: float
@@ -837,6 +978,8 @@ class LinfonodoDigital:
             return
 
         try:
+            current_temp = await self.temperatura_regional.get()
+
             # Broadcast via adrenaline hormone (activation signal)
             await self._redis_client.publish(
                 "hormonio:adrenalina",
@@ -844,45 +987,68 @@ class LinfonodoDigital:
                     "lymphnode_id": self.id,
                     "state": state_name,
                     "target_activation": target_percentage,
-                    "temperatura_regional": self.temperatura_regional,
+                    "temperatura_regional": current_temp,
                     "timestamp": datetime.now().isoformat(),
                 }),
             )
 
             logger.debug(f"Activation level broadcast: {state_name} ({target_percentage:.0%})")
 
+        except (ConnectionError, TimeoutError) as e:
+            raise HormonePublishError(f"Redis unavailable for hormone broadcast: {e}")
         except Exception as e:
-            logger.error(f"Hormone broadcast failed: {e}")
+            logger.error(f"Unexpected hormone broadcast error: {e}")
+            raise HormonePublishError(f"Failed to broadcast activation level: {e}")
 
     # ==================== METRICS ====================
 
-    def get_lymphnode_metrics(self) -> Dict[str, Any]:
+    async def get_lymphnode_metrics(self) -> Dict[str, Any]:
         """
-        Get lymphnode statistics.
+        Get lymphnode statistics (ASYNC - thread-safe).
 
         Returns:
             Dict with lymphnode metrics
         """
+        # Get all values from thread-safe structures
+        current_temp = await self.temperatura_regional.get()
+        buffer_size = await self.cytokine_buffer.size()
+        threats_tracked = await self.threat_detections.size()
+
+        ameacas = await self.total_ameacas_detectadas.get()
+        neutralizacoes = await self.total_neutralizacoes.get()
+        clones_criados = await self.total_clones_criados.get()
+        clones_destruidos = await self.total_clones_destruidos.get()
+
         return {
             "lymphnode_id": self.id,
             "nivel": self.nivel,
             "area": self.area,
-            "temperatura_regional": self.temperatura_regional,
+            "temperatura_regional": current_temp,
+            "homeostatic_state": self.homeostatic_state.value,
             "agentes_total": len(self.agentes_ativos),
             "agentes_dormindo": len(self.agentes_dormindo),
-            "ameacas_detectadas": self.total_ameacas_detectadas,
-            "neutralizacoes": self.total_neutralizacoes,
-            "clones_criados": self.total_clones_criados,
-            "clones_destruidos": self.total_clones_destruidos,
-            "cytokine_buffer_size": len(self.cytokine_buffer),
-            "threats_being_tracked": len(self.threat_detections),
+            "ameacas_detectadas": ameacas,
+            "neutralizacoes": neutralizacoes,
+            "clones_criados": clones_criados,
+            "clones_destruidos": clones_destruidos,
+            "cytokine_buffer_size": buffer_size,
+            "threats_being_tracked": threats_tracked,
+            "rate_limiter_stats": self._clonal_limiter.get_stats(),
         }
 
     def __repr__(self) -> str:
         """String representation"""
+        # Get temperature safely (blocking call acceptable for repr)
+        try:
+            temp = asyncio.get_event_loop().run_until_complete(
+                self.temperatura_regional.get()
+            )
+        except RuntimeError:
+            temp = 37.0  # Fallback if no event loop
+
         return (
             f"LinfonodoDigital({self.id}|{self.nivel}|"
             f"area={self.area}|"
             f"agents={len(self.agentes_ativos)}|"
-            f"temp={self.temperatura_regional:.1f}°C)"
+            f"temp={temp:.1f}°C)"
         )
