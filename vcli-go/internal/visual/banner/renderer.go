@@ -140,12 +140,12 @@ func (b *BannerRenderer) renderLogo() string {
 	gradient := b.palette.PrimaryGradient()
 
 	asciiArt := []string{
-		"     ██╗   ██╗ ██████╗██╗     ██╗      ██████╗  ██████╗    ██████╗  ██████╗",
+		"     ██╗   ██╗ ██████╗██╗     ██╗      ██████╗  ██████╗    ██████╗  ██████╗ ",
 		"     ██║   ██║██╔════╝██║     ██║     ██╔════╝ ██╔═══██╗   ╚════██╗██╔═████╗",
 		"     ██║   ██║██║     ██║     ██║     ██║  ███╗██║   ██║    █████╔╝██║██╔██║",
 		"     ╚██╗ ██╔╝██║     ██║     ██║     ██║   ██║██║   ██║   ██╔═══╝ ████╔╝██║",
 		"      ╚████╔╝ ╚██████╗███████╗██║     ╚██████╔╝╚██████╔╝   ███████╗╚██████╔╝",
-		"       ╚═══╝   ╚═════╝╚══════╝╚═╝      ╚═════╝  ╚═════╝    ╚══════╝ ╚═════╝",
+		"       ╚═══╝   ╚═════╝╚══════╝╚═╝      ╚═════╝  ╚═════╝    ╚══════╝ ╚═════╝ ",
 	}
 
 	var output strings.Builder
@@ -174,13 +174,13 @@ func (b *BannerRenderer) renderSpecs() string {
 	output.WriteString(fmt.Sprintf("║   ⚡ %s                          📊 %s            ║\n",
 		b.styles.Accent.Bold(true).Render("ENGINE SPECS"),
 		b.styles.Accent.Bold(true).Render("PERFORMANCE METRICS")))
-	output.WriteString(fmt.Sprintf("║   ├─ %s                          ├─ Startup:    ~85ms              ║\n",
+	output.WriteString(fmt.Sprintf("║   ├─ %s                          ├─ Startup:    ~85ms               ║\n",
 		b.styles.Info.Render("32 Commands")))
-	output.WriteString(fmt.Sprintf("║   ├─ %s                           ├─ Response:   <100ms             ║\n",
+	output.WriteString(fmt.Sprintf("║   ├─ %s                           ├─ Response:   <100ms              ║\n",
 		b.styles.Info.Render("12,549 LOC")))
-	output.WriteString(fmt.Sprintf("║   ├─ %s                       ├─ Memory:     ~42MB              ║\n",
+	output.WriteString(fmt.Sprintf("║   ├─ %s                       ├─ Memory:     ~42MB               ║\n",
 		b.styles.Success.Render("Zero Tech Debt")))
-	output.WriteString(fmt.Sprintf("║   └─ %s                 └─ Efficiency: 67 LOC/1k tokens   ║\n",
+	output.WriteString(fmt.Sprintf("║   └─ %s                 └─ Efficiency: 67 LOC/1k tokens    ║\n",
 		b.styles.Success.Render("100%% Production Code")))
 	output.WriteString("║                                                                              ║")
 
@@ -195,8 +195,8 @@ func (b *BannerRenderer) renderCertification() string {
 		b.styles.Accent.Bold(true).Render("STATUS")))
 	output.WriteString(fmt.Sprintf("║   ├─ Production Ready:  %s                ├─ Validated:   %s                ║\n",
 		b.styles.Success.Render("✅"), b.styles.Success.Render("✅")))
-	output.WriteString(fmt.Sprintf("║   ├─ kubectl Parity:    %s              ├─ Tested:      %s                ║\n",
-		b.styles.Success.Render("100%"), b.styles.Success.Render("✅")))
+	output.WriteString(fmt.Sprintf("║   ├─ kubectl Parity:    %s              ├─ Tested:      %s                  ║\n",
+		b.styles.Success.Render("100%%"), b.styles.Success.Render("✅")))
 	output.WriteString(fmt.Sprintf("║   ├─ Security:          %s                ├─ Documented:  %s                ║\n",
 		b.styles.Success.Render("✅"), b.styles.Success.Render("✅")))
 	output.WriteString(fmt.Sprintf("║   └─ Quality:           💯 %s          └─ Deployed:    %s             ║\n",
@@ -210,24 +210,24 @@ func (b *BannerRenderer) renderCommandGroups() string {
 	var output strings.Builder
 
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   🚀 %s                                                          ║\n",
+	output.WriteString(fmt.Sprintf("║   🚀 %s                                                         ║\n",
 		b.styles.Accent.Bold(true).Render("COMMAND GROUPS")))
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   %s  │ get, apply, delete, scale, patch                   ║\n",
+	output.WriteString(fmt.Sprintf("║   %s  │ get, apply, delete, scale, patch                  ║\n",
 		b.styles.Info.Render("Resource Management")))
-	output.WriteString(fmt.Sprintf("║   %s        │ logs, exec, describe, port-forward, watch          ║\n",
+	output.WriteString(fmt.Sprintf("║   %s        │ logs, exec, describe, port-forward, watch         ║\n",
 		b.styles.Info.Render("Observability")))
-	output.WriteString(fmt.Sprintf("║   %s          │ status, history, undo, restart, pause, resume      ║\n",
+	output.WriteString(fmt.Sprintf("║   %s          │ status, history, undo, restart, pause, resume     ║\n",
 		b.styles.Info.Render("Rollout Ops")))
-	output.WriteString(fmt.Sprintf("║   %s              │ top nodes, top pods (with container-level)         ║\n",
+	output.WriteString(fmt.Sprintf("║   %s              │ top nodes, top pods (with container-level)        ║\n",
 		b.styles.Info.Render("Metrics")))
-	output.WriteString(fmt.Sprintf("║   %s   │ create, get (full CRUD support)                    ║\n",
+	output.WriteString(fmt.Sprintf("║   %s   │ create, get (full CRUD support)                   ║\n",
 		b.styles.Info.Render("ConfigMaps/Secrets")))
-	output.WriteString(fmt.Sprintf("║   %s             │ label, annotate (add/remove operations)            ║\n",
+	output.WriteString(fmt.Sprintf("║   %s             │ label, annotate (add/remove operations)           ║\n",
 		b.styles.Info.Render("Metadata")))
-	output.WriteString(fmt.Sprintf("║   %s        │ can-i, whoami (EXCLUSIVE feature!)                 ║\n",
+	output.WriteString(fmt.Sprintf("║   %s        │ can-i, whoami (EXCLUSIVE feature!)                ║\n",
 		b.styles.Info.Render("Authorization")))
-	output.WriteString(fmt.Sprintf("║   %s             │ wait (with conditions)                             ║\n",
+	output.WriteString(fmt.Sprintf("║   %s             │ wait (with conditions)                            ║\n",
 		b.styles.Info.Render("Advanced")))
 	output.WriteString("║                                                                              ║")
 
@@ -240,7 +240,7 @@ func (b *BannerRenderer) renderTurboBoost() string {
 	var output strings.Builder
 
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   💨 %s                                                      ║\n",
+	output.WriteString(fmt.Sprintf("║   💨 %s                                                     ║\n",
 		b.styles.Success.Bold(true).Render("TURBO BOOST ACTIVE")))
 
 	// Progress bars with gradient
@@ -248,11 +248,11 @@ func (b *BannerRenderer) renderTurboBoost() string {
 	memoryBar := visual.GradientText("██████░░░░░░░░░░░░░░", gradient)
 	binaryBar := visual.GradientText("███████████░░░░░░░░░", gradient)
 
-	output.WriteString(fmt.Sprintf("║   ├─ Response Time:  %s  87%% faster than baseline        ║\n", responseBar))
-	output.WriteString(fmt.Sprintf("║   ├─ Memory Usage:   %s  45%% optimized                   ║\n", memoryBar))
-	output.WriteString(fmt.Sprintf("║   └─ Binary Size:    %s  84.7MB single binary            ║\n", binaryBar))
+	output.WriteString(fmt.Sprintf("║   ├─ Response Time:  %s  87%% faster than baseline       ║\n", responseBar))
+	output.WriteString(fmt.Sprintf("║   ├─ Memory Usage:   %s  45%% optimized                  ║\n", memoryBar))
+	output.WriteString(fmt.Sprintf("║   └─ Binary Size:    %s  84.7MB single binary           ║\n", binaryBar))
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   🏁 RPM: %s (Ready for Production Mission)                            ║\n",
+	output.WriteString(fmt.Sprintf("║   🏁 RPM: %s (Ready for Production Mission)                           ║\n",
 		b.styles.Warning.Bold(true).Render("12,000+")))
 	output.WriteString("║                                                                              ║")
 
@@ -263,18 +263,18 @@ func (b *BannerRenderer) renderQuickStart() string {
 	var output strings.Builder
 
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   📚 %s                                                             ║\n",
+	output.WriteString(fmt.Sprintf("║   📚 %s                                                            ║\n",
 		b.styles.Accent.Bold(true).Render("QUICK START")))
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   %s      # List all pods                   ║\n",
+	output.WriteString(fmt.Sprintf("║   %s      # List all pods                  ║\n",
 		b.styles.Muted.Render("vcli k8s get pods --all-namespaces")))
-	output.WriteString(fmt.Sprintf("║   %s                      # View node metrics               ║\n",
+	output.WriteString(fmt.Sprintf("║   %s                      # View node metrics              ║\n",
 		b.styles.Muted.Render("vcli k8s top nodes")))
-	output.WriteString(fmt.Sprintf("║   %s                    # Who am I? (EXCLUSIVE!)          ║\n",
+	output.WriteString(fmt.Sprintf("║   %s                    # Who am I? (EXCLUSIVE!)         ║\n",
 		b.styles.Muted.Render("vcli k8s auth whoami")))
-	output.WriteString(fmt.Sprintf("║   %s    # Check rollout status            ║\n",
+	output.WriteString(fmt.Sprintf("║   %s    # Check rollout status           ║\n",
 		b.styles.Muted.Render("vcli k8s rollout status deploy/nginx")))
-	output.WriteString(fmt.Sprintf("║   %s                             # Full command reference          ║\n",
+	output.WriteString(fmt.Sprintf("║   %s                             # Full command reference         ║\n",
 		b.styles.Muted.Render("vcli --help")))
 	output.WriteString("║                                                                              ║")
 
@@ -285,14 +285,14 @@ func (b *BannerRenderer) renderAchievement(buildDate string) string {
 	var output strings.Builder
 
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   🎖️  %s: \"18 Months → 2 Days\"                            ║\n",
+	output.WriteString(fmt.Sprintf("║   🎖️  %s: \"18 Months → 2 Days\"                           ║\n",
 		b.styles.Warning.Bold(true).Render("ACHIEVEMENT UNLOCKED")))
 	output.WriteString("║                                                                              ║\n")
 	output.WriteString(fmt.Sprintf("║   History Made: %s  │  Status: %s ✅              ║\n",
 		b.styles.Accent.Render(buildDate),
 		b.styles.Success.Bold(true).Render("PRODUCTION CERTIFIED")))
 	output.WriteString("║                                                                              ║\n")
-	output.WriteString(fmt.Sprintf("║   %s                    ║\n",
+	output.WriteString(fmt.Sprintf("║   %s                   ║\n",
 		b.styles.Muted.Italic(true).Render("\"Stop Juggling Tools. Start Orchestrating Operations.\"")))
 	output.WriteString("║                                                                              ║")
 
