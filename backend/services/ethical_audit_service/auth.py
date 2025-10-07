@@ -12,6 +12,7 @@ from typing import List, Optional
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
+from pydantic import BaseModel
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -38,13 +39,12 @@ class UserRole(str, Enum):
     READONLY = "readonly"
 
 
-class TokenData:
+class TokenData(BaseModel):
     """Data extracted from JWT token."""
 
-    def __init__(self, user_id: str, username: str, roles: List[str]):
-        self.user_id = user_id
-        self.username = username
-        self.roles = roles
+    user_id: str
+    username: str
+    roles: List[str]
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -183,7 +183,7 @@ def require_role(required_roles: List[UserRole]):
 
 
 # Convenience dependencies for common role requirements
-require_admin = Depends(require_role([UserRole.ADMIN]))
-require_soc_or_admin = Depends(require_role([UserRole.SOC_OPERATOR, UserRole.ADMIN]))
-require_auditor_or_admin = Depends(require_role([UserRole.AUDITOR, UserRole.ADMIN]))
-require_any_role = Depends(get_current_user)  # Just need to be authenticated
+require_admin = require_role([UserRole.ADMIN])
+require_soc_or_admin = require_role([UserRole.SOC_OPERATOR, UserRole.ADMIN])
+require_auditor_or_admin = require_role([UserRole.AUDITOR, UserRole.ADMIN])
+require_any_role = get_current_user  # Just need to be authenticated

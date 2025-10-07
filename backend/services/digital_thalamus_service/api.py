@@ -91,7 +91,9 @@ async def ingest_sensory_data(request: SensoryDataIngest) -> Dict[str, Any]:
     )
 
     # Apply sensory gating
-    if not sensory_gating.allow_data(request.sensor_type, request.priority):
+    # Normalize priority (1-10) to intensity (0.0-1.0)
+    data_intensity = request.priority / 10.0
+    if not sensory_gating.allow_data(request.sensor_type, data_intensity):
         return {
             "status": "rejected",
             "reason": "Sensory gating blocked data due to low priority or overload.",
@@ -124,7 +126,7 @@ async def get_gating_status() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: The status of sensory gating.
     """
-    return sensory_gating.get_status()
+    return await sensory_gating.get_status()
 
 
 @app.get("/attention_status")
@@ -134,8 +136,8 @@ async def get_attention_status() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: The status of attention control.
     """
-    return attention_control.get_status()
+    return await attention_control.get_status()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8012)

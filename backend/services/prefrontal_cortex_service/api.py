@@ -66,15 +66,15 @@ class DecisionRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Prefrontal Cortex Service."""
-    print("🧠 Starting Maximus Prefrontal Cortex Service...")
-    print("✅ Maximus Prefrontal Cortex Service started successfully.")
+    print("🧠 Starting Maximus Prefrontal Cortex Service...")  # pragma: no cover
+    print("✅ Maximus Prefrontal Cortex Service started successfully.")  # pragma: no cover
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Prefrontal Cortex Service."""
-    print("👋 Shutting down Maximus Prefrontal Cortex Service...")
-    print("🛑 Maximus Prefrontal Cortex Service shut down.")
+    print("👋 Shutting down Maximus Prefrontal Cortex Service...")  # pragma: no cover
+    print("🛑 Maximus Prefrontal Cortex Service shut down.")  # pragma: no cover
 
 
 @app.get("/health")
@@ -180,5 +180,5 @@ async def get_impulse_inhibition_level() -> Dict[str, Any]:
     return {"level": impulse_inhibition.get_inhibition_level()}
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8037)

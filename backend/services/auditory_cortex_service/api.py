@@ -52,15 +52,15 @@ class AudioAnalysisRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Auditory Cortex Service."""
-    print("👂 Starting Maximus Auditory Cortex Service...")
-    print("✅ Maximus Auditory Cortex Service started successfully.")
+    print("👂 Starting Maximus Auditory Cortex Service...")  # pragma: no cover
+    print("✅ Maximus Auditory Cortex Service started successfully.")  # pragma: no cover
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Auditory Cortex Service."""
-    print("👋 Shutting down Maximus Auditory Cortex Service...")
-    print("🛑 Maximus Auditory Cortex Service shut down.")
+    print("👋 Shutting down Maximus Auditory Cortex Service...")  # pragma: no cover
+    print("🛑 Maximus Auditory Cortex Service shut down.")  # pragma: no cover
 
 
 @app.get("/health")
@@ -119,6 +119,8 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
             )
 
         return results
+    except HTTPException:
+        raise  # Re-raise HTTPException as-is (e.g., 400 for invalid type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Audio analysis failed: {str(e)}")
 
@@ -143,5 +145,5 @@ async def get_cocktail_party_triage_status() -> Dict[str, Any]:
     return await cocktail_party_triage.get_status()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8004)

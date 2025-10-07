@@ -1,0 +1,248 @@
+syntax = "proto3";
+
+package maximus.v1;
+
+option go_package = "github.com/vertice/vcli-go/api/grpc/maximus";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// ============================================================
+// MAXIMUS Orchestrator Service
+// ============================================================
+
+service MaximusOrchestrator {
+  // Decision Management
+  rpc SubmitDecision(SubmitDecisionRequest) returns (SubmitDecisionResponse);
+  rpc GetDecision(GetDecisionRequest) returns (Decision);
+  rpc ListDecisions(ListDecisionsRequest) returns (ListDecisionsResponse);
+  rpc UpdateDecisionStatus(UpdateDecisionStatusRequest) returns (Decision);
+  rpc DeleteDecision(DeleteDecisionRequest) returns (DeleteDecisionResponse);
+
+  // Real-time Events (Server Streaming)
+  rpc WatchDecision(WatchDecisionRequest) returns (stream DecisionEvent);
+  rpc StreamAllEvents(StreamEventsRequest) returns (stream DecisionEvent);
+
+  // Governance Metrics
+  rpc GetGovernanceMetrics(GetMetricsRequest) returns (GovernanceMetrics);
+  rpc GetServiceHealth(HealthCheckRequest) returns (HealthCheckResponse);
+
+  // Batch Operations
+  rpc BatchSubmitDecisions(BatchSubmitRequest) returns (BatchSubmitResponse);
+}
+
+// ============================================================
+// Decision Messages
+// ============================================================
+
+message SubmitDecisionRequest {
+  string decision_type = 1;       // e.g., "deployment", "scaling", "security"
+  string title = 2;
+  string description = 3;
+  string context = 4;             // e.g., "production", "staging"
+  google.protobuf.Struct metadata = 5;  // Flexible metadata
+  repeated string tags = 6;
+  string priority = 7;            // "low", "medium", "high", "critical"
+  string requester_id = 8;        // User/service requesting decision
+}
+
+message SubmitDecisionResponse {
+  string decision_id = 1;
+  string status = 2;              // "pending", "approved", "rejected"
+  google.protobuf.Timestamp created_at = 3;
+  string message = 4;
+}
+
+message GetDecisionRequest {
+  string decision_id = 1;
+}
+
+message ListDecisionsRequest {
+  // Filters
+  string status = 1;              // Filter by status
+  string decision_type = 2;       // Filter by type
+  string context = 3;             // Filter by context
+  repeated string tags = 4;       // Filter by tags
+
+  // Pagination
+  int32 page = 5;
+  int32 page_size = 6;
+
+  // Sorting
+  string sort_by = 7;             // "created_at", "priority", "status"
+  string sort_order = 8;          // "asc" or "desc"
+
+  // Time range
+  google.protobuf.Timestamp start_time = 9;
+  google.protobuf.Timestamp end_time = 10;
+}
+
+message ListDecisionsResponse {
+  repeated Decision decisions = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+  bool has_more = 5;
+}
+
+message UpdateDecisionStatusRequest {
+  string decision_id = 1;
+  string new_status = 2;          // "approved", "rejected", "in_review"
+  string reason = 3;
+  string updated_by = 4;
+}
+
+message DeleteDecisionRequest {
+  string decision_id = 1;
+  string reason = 2;
+}
+
+message DeleteDecisionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message Decision {
+  string decision_id = 1;
+  string decision_type = 2;
+  string title = 3;
+  string description = 4;
+  string context = 5;
+  string status = 6;
+  string priority = 7;
+  repeated string tags = 8;
+  google.protobuf.Struct metadata = 9;
+
+  // Timestamps
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  google.protobuf.Timestamp resolved_at = 12;
+
+  // Tracking
+  string requester_id = 13;
+  string approver_id = 14;
+  string resolution_reason = 15;
+
+  // Metrics
+  int64 processing_time_ms = 16;
+  int32 revision_count = 17;
+}
+
+// ============================================================
+// Events (Real-time Streaming)
+// ============================================================
+
+message WatchDecisionRequest {
+  string decision_id = 1;
+}
+
+message StreamEventsRequest {
+  // Filters for event stream
+  repeated string decision_types = 1;
+  repeated string statuses = 2;
+  string context = 3;
+}
+
+message DecisionEvent {
+  enum EventType {
+    EVENT_TYPE_UNSPECIFIED = 0;
+    NEW_DECISION = 1;
+    DECISION_UPDATED = 2;
+    DECISION_RESOLVED = 3;
+    DECISION_APPROVED = 4;
+    DECISION_REJECTED = 5;
+    DECISION_CANCELLED = 6;
+  }
+
+  EventType event_type = 1;
+  string decision_id = 2;
+  Decision decision = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  string triggered_by = 5;
+  google.protobuf.Struct changes = 6;  // What changed (for UPDATED events)
+}
+
+// ============================================================
+// Governance Metrics
+// ============================================================
+
+message GetMetricsRequest {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+  string context = 3;             // Filter by context
+  repeated string decision_types = 4;  // Filter by types
+}
+
+message GovernanceMetrics {
+  // Counts
+  int64 total_decisions = 1;
+  int64 pending_decisions = 2;
+  int64 approved_decisions = 3;
+  int64 rejected_decisions = 4;
+
+  // Performance
+  double avg_resolution_time_ms = 5;
+  double p50_resolution_time_ms = 6;
+  double p95_resolution_time_ms = 7;
+  double p99_resolution_time_ms = 8;
+
+  // By priority
+  map<string, int64> decisions_by_priority = 9;
+
+  // By type
+  map<string, int64> decisions_by_type = 10;
+
+  // Time range
+  google.protobuf.Timestamp start_time = 11;
+  google.protobuf.Timestamp end_time = 12;
+
+  // Approval rate
+  double approval_rate = 13;      // Percentage of approved decisions
+}
+
+// ============================================================
+// Health Check
+// ============================================================
+
+message HealthCheckRequest {
+  string service = 1;  // Optional: check specific sub-service
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3;
+  }
+
+  ServingStatus status = 1;
+  string version = 2;
+  google.protobuf.Timestamp timestamp = 3;
+
+  // Detailed health
+  map<string, bool> components = 4;  // e.g., {"database": true, "kafka": true}
+  repeated string unhealthy_components = 5;
+}
+
+// ============================================================
+// Batch Operations
+// ============================================================
+
+message BatchSubmitRequest {
+  repeated SubmitDecisionRequest decisions = 1;
+}
+
+message BatchSubmitResponse {
+  message Result {
+    int32 index = 1;              // Index in original batch
+    bool success = 2;
+    string decision_id = 3;       // If success
+    string error = 4;             // If failure
+  }
+
+  repeated Result results = 1;
+  int32 total_count = 2;
+  int32 success_count = 3;
+  int32 failure_count = 4;
+}
