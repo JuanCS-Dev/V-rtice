@@ -43,6 +43,7 @@ from coordination.exceptions import (
     AgentOrchestrationError,
     HormonePublishError,
 )
+from coordination.pattern_detector import PatternDetector
 from coordination.rate_limiter import ClonalExpansionRateLimiter
 from coordination.thread_safe_structures import (
     ThreadSafeBuffer,
@@ -136,6 +137,13 @@ class LinfonodoDigital:
         # Pattern detection (THREAD-SAFE)
         self.threat_detections = ThreadSafeCounter[str]()
         self.last_pattern_check: datetime = datetime.now()
+
+        # Pattern detector (FASE 3 - Dependency Injection)
+        self._pattern_detector = PatternDetector(
+            persistent_threshold=5,
+            coordinated_threshold=10,
+            time_window_sec=60.0,
+        )
 
         # Metrics (ATOMIC COUNTERS)
         self.total_ameacas_detectadas = AtomicCounter()
@@ -791,36 +799,42 @@ class LinfonodoDigital:
         Detect threats that persist across multiple detections.
 
         If same threat detected 5+ times, trigger clonal expansion.
+
+        REFACTORED (FASE 3): Delegates to PatternDetector.
         """
         # Get all threat counts (THREAD-SAFE)
         threat_items = await self.threat_detections.items()
+        threat_counts_dict = dict(threat_items)
 
-        for threat_id, count in threat_items:
-            if count >= 5:
-                logger.warning(
-                    f"Lymphnode {self.id} detected PERSISTENT THREAT: {threat_id} "
-                    f"({count} detections)"
+        # Use PatternDetector to identify persistent threats
+        patterns = await self._pattern_detector.detect_persistent_threats(threat_counts_dict)
+
+        for pattern in patterns:
+            threat_id = pattern.threat_ids[0]  # Single threat per persistent pattern
+
+            logger.warning(
+                f"Lymphnode {self.id} detected PERSISTENT THREAT: {threat_id} "
+                f"({pattern.detection_count} detections, confidence={pattern.confidence:.2f})"
+            )
+
+            try:
+                # Trigger clonal expansion (Neutrophil swarm)
+                await self.clonar_agente(
+                    tipo_base=AgentType.NEUTROFILO,
+                    especializacao=f"threat_{threat_id}",
+                    quantidade=10,
                 )
 
-                try:
-                    # Trigger clonal expansion (Neutrophil swarm)
-                    await self.clonar_agente(
-                        tipo_base=AgentType.NEUTROFILO,
-                        especializacao=f"threat_{threat_id}",
-                        quantidade=10,
-                    )
+                # Clear count (avoid re-triggering) - set to 0
+                current = await self.threat_detections.get(threat_id)
+                if current > 0:
+                    # Reset by decrement
+                    await self.threat_detections.increment(threat_id, -current)
 
-                    # Clear count (avoid re-triggering) - set to 0
-                    # Decrement by current count to reset
-                    current = await self.threat_detections.get(threat_id)
-                    if current > 0:
-                        # Reset by clearing and re-adding (simpler than decrement loop)
-                        await self.threat_detections.increment(threat_id, -current)
-
-                except (LymphnodeRateLimitError, LymphnodeResourceExhaustedError) as e:
-                    logger.warning(f"Cannot trigger clonal expansion for persistent threat: {e}")
-                except AgentOrchestrationError as e:
-                    logger.error(f"Clonal expansion failed for persistent threat: {e}")
+            except (LymphnodeRateLimitError, LymphnodeResourceExhaustedError) as e:
+                logger.warning(f"Cannot trigger clonal expansion for persistent threat: {e}")
+            except AgentOrchestrationError as e:
+                logger.error(f"Clonal expansion failed for persistent threat: {e}")
 
     async def _detect_coordinated_attacks(self, cytokines: List[Dict[str, Any]]) -> None:
         """
@@ -828,32 +842,20 @@ class LinfonodoDigital:
 
         If 10+ threats detected in last minute, trigger mass response.
 
+        REFACTORED (FASE 3): Delegates to PatternDetector.
+
         Args:
             cytokines: Recent cytokine messages
         """
-        # Count threats in last minute
-        now = datetime.now()
-        recent_threats = 0
+        # Use PatternDetector to identify coordinated attacks
+        patterns = await self._pattern_detector.detect_coordinated_attacks(cytokines)
 
-        for citocina in cytokines:
-            timestamp_str = citocina.get("timestamp")
-            if not timestamp_str:
-                continue
-
-            try:
-                timestamp = datetime.fromisoformat(timestamp_str)
-                if (now - timestamp).total_seconds() < 60:
-                    payload = citocina.get("payload", {})
-                    if payload.get("evento") == "ameaca_detectada" or payload.get("is_threat"):
-                        recent_threats += 1
-            except (ValueError, TypeError) as e:
-                logger.debug(f"Failed to parse cytokine timestamp '{timestamp_str}': {e}")
-
-        # Trigger mass response if coordinated attack detected
-        if recent_threats >= 10:
+        for pattern in patterns:
             logger.critical(
                 f"Lymphnode {self.id} detected COORDINATED ATTACK: "
-                f"{recent_threats} threats in last minute"
+                f"{pattern.detection_count} threats in last {pattern.time_window_sec}s "
+                f"(confidence={pattern.confidence:.2f}, "
+                f"unique_threats={pattern.metadata.get('unique_threats', 0)})"
             )
 
             try:
