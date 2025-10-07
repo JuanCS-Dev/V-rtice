@@ -507,3 +507,208 @@ async def test_repr(controller: HomeostaticController):
     assert "ctrl_test_001" in repr_str
     # Repr includes either the enum value or the full enum name
     assert (SystemState.REPOUSO.value in repr_str or "SystemState.REPOUSO" in repr_str)
+
+
+# ==================== PHASE 2: ADVANCED COVERAGE (56%→85%) ====================
+
+
+@pytest.mark.asyncio
+async def test_execute_scale_up_success():
+    """Test successful scale up execution."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        from unittest.mock import AsyncMock, patch
+        with patch.object(ctrl._http_session, 'post') as mock_post:
+            mock_response = AsyncMock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value={"success": True})
+
+            mock_ctx = AsyncMock()
+            mock_ctx.__aenter__.return_value = mock_response
+            mock_ctx.__aexit__.return_value = None
+            mock_post.return_value = mock_ctx
+
+            result = await ctrl._execute_scale_up({"quantity": 5, "reason": "high_load"})
+
+            assert result is True
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_scale_down_success():
+    """Test successful scale down execution."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        from unittest.mock import AsyncMock, patch
+        with patch.object(ctrl._http_session, 'post') as mock_post:
+            mock_response = AsyncMock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value={"success": True})
+
+            mock_ctx = AsyncMock()
+            mock_ctx.__aenter__.return_value = mock_response
+            mock_ctx.__aexit__.return_value = None
+            mock_post.return_value = mock_ctx
+
+            result = await ctrl._execute_scale_down({"quantity": 3})
+
+            assert result is True
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_clone_specialized_success():
+    """Test successful specialized clone creation."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        from unittest.mock import AsyncMock, patch
+        with patch.object(ctrl._http_session, 'post') as mock_post:
+            mock_response = AsyncMock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value={"clone_ids": ["clone_001", "clone_002"]})
+
+            mock_ctx = AsyncMock()
+            mock_ctx.__aenter__.return_value = mock_response
+            mock_ctx.__aexit__.return_value = None
+            mock_post.return_value = mock_ctx
+
+            result = await ctrl._execute_clone_specialized({"specialization": "malware_hunter", "quantity": 2})
+
+            assert result is True
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_destroy_clones_success():
+    """Test successful clone destruction."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        from unittest.mock import AsyncMock, patch
+        with patch.object(ctrl._http_session, 'post') as mock_post:
+            mock_response = AsyncMock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value={"destroyed": 3})
+
+            mock_ctx = AsyncMock()
+            mock_ctx.__aenter__.return_value = mock_response
+            mock_ctx.__aexit__.return_value = None
+            mock_post.return_value = mock_ctx
+
+            result = await ctrl._execute_destroy_clones({"specialization": "old_threat"})
+
+            assert result is True
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_execute_adjust_sensitivity_success():
+    """Test successful sensitivity adjustment."""
+    ctrl = HomeostaticController(
+        controller_id="ctrl_test",
+        lymphnode_url="http://localhost:8001"
+    )
+
+    try:
+        await ctrl.iniciar()
+
+        from unittest.mock import AsyncMock, patch
+        with patch.object(ctrl._http_session, 'post') as mock_post:
+            mock_response = AsyncMock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value={"success": True})
+
+            mock_ctx = AsyncMock()
+            mock_ctx.__aenter__.return_value = mock_response
+            mock_ctx.__aexit__.return_value = None
+            mock_post.return_value = mock_ctx
+
+            result = await ctrl._execute_adjust_sensitivity({"delta": 0.1})
+
+            assert result is True
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_select_action_with_exploration():
+    """Test action selection with exploration (epsilon-greedy)."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+    ctrl.exploration_rate = 1.0  # Force exploration
+
+    try:
+        await ctrl.iniciar()
+
+        state = SystemState.VIGILANCIA
+        action = ctrl._select_action(state)
+
+        # Should select some action (random due to exploration)
+        assert action in ActionType
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_determine_action_params_scale_up():
+    """Test action parameter determination for scale up."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+
+    try:
+        await ctrl.iniciar()
+
+        params = ctrl._determine_action_params(
+            ActionType.SCALE_UP_AGENTS,
+            issues=["cpu_high", "memory_high"]
+        )
+
+        assert "quantity" in params
+        assert "reason" in params
+        assert params["quantity"] > 0
+    finally:
+        await ctrl.parar()
+
+
+@pytest.mark.asyncio
+async def test_determine_action_params_clone_specialized():
+    """Test action parameter determination for specialized cloning."""
+    ctrl = HomeostaticController(controller_id="ctrl_test")
+
+    try:
+        await ctrl.iniciar()
+
+        params = ctrl._determine_action_params(
+            ActionType.CLONE_SPECIALIZED,
+            issues=["persistent_threat"]
+        )
+
+        assert "specialization" in params
+        assert "quantity" in params
+    finally:
+        await ctrl.parar()
