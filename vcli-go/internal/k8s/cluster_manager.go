@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	metricsv1beta1 "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 // ClusterManager manages connections and operations for Kubernetes clusters
@@ -14,6 +15,7 @@ type ClusterManager struct {
 	// Kubernetes clients
 	clientset     *kubernetes.Clientset
 	dynamicClient dynamic.Interface
+	metricsClient *metricsv1beta1.Clientset
 	config        *rest.Config
 
 	// Configuration
@@ -77,6 +79,13 @@ func (cm *ClusterManager) Connect() error {
 		return fmt.Errorf("failed to create dynamic client: %w", err)
 	}
 	cm.dynamicClient = dynamicClient
+
+	// Create metrics client for top operations
+	metricsClient, err := metricsv1beta1.NewForConfig(config)
+	if err != nil {
+		return fmt.Errorf("failed to create metrics client: %w", err)
+	}
+	cm.metricsClient = metricsClient
 
 	// Verify connectivity with health check
 	if err := cm.healthCheck(); err != nil {

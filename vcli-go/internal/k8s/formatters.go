@@ -39,6 +39,10 @@ type Formatter interface {
 	FormatConfigMaps(configmaps []ConfigMap) (string, error)
 	// FormatSecrets formats a list of secrets
 	FormatSecrets(secrets []Secret) (string, error)
+	// FormatNodeMetrics formats node metrics
+	FormatNodeMetrics(metrics []NodeMetrics) (string, error)
+	// FormatPodMetrics formats pod metrics
+	FormatPodMetrics(metrics []PodMetrics, showContainers bool) (string, error)
 }
 
 // NewFormatter creates a new formatter based on the specified format
@@ -365,6 +369,123 @@ func (tf *TableFormatter) FormatSecrets(secrets []Secret) (string, error) {
 	return header + "\n" + strings.Join(rows, "\n") + "\n", nil
 }
 
+// FormatNodeMetrics formats node metrics as a table
+func (tf *TableFormatter) FormatNodeMetrics(metrics []NodeMetrics) (string, error) {
+	if len(metrics) == 0 {
+		return "No resources found.\n", nil
+	}
+
+	// Calculate column widths
+	nameWidth := max(4, maxLen(metrics, func(m NodeMetrics) string { return m.Name }))
+
+	// Header
+	header := tf.styleHeader.Render(
+		fmt.Sprintf("%-*s  %-10s  %-10s",
+			nameWidth, "NAME",
+			"CPU(cores)",
+			"MEMORY(bytes)"))
+
+	// Rows
+	var rows []string
+	for _, m := range metrics {
+		cpuStr := FormatCPU(m.CPUUsage)
+		memStr := FormatMemory(m.MemoryUsage)
+
+		row := fmt.Sprintf("%-*s  %-10s  %-10s",
+			nameWidth, truncate(m.Name, nameWidth),
+			cpuStr,
+			memStr)
+		rows = append(rows, row)
+	}
+
+	return header + "\n" + strings.Join(rows, "\n") + "\n", nil
+}
+
+// FormatPodMetrics formats pod metrics as a table
+func (tf *TableFormatter) FormatPodMetrics(metrics []PodMetrics, showContainers bool) (string, error) {
+	if len(metrics) == 0 {
+		return "No resources found.\n", nil
+	}
+
+	if showContainers {
+		return tf.formatPodMetricsWithContainers(metrics)
+	}
+
+	// Calculate column widths
+	nameWidth := max(4, maxLen(metrics, func(m PodMetrics) string { return m.Name }))
+	nsWidth := max(9, maxLen(metrics, func(m PodMetrics) string { return m.Namespace }))
+
+	// Header
+	header := tf.styleHeader.Render(
+		fmt.Sprintf("%-*s  %-*s  %-10s  %-10s",
+			nameWidth, "NAME",
+			nsWidth, "NAMESPACE",
+			"CPU(cores)",
+			"MEMORY(bytes)"))
+
+	// Rows
+	var rows []string
+	for _, m := range metrics {
+		cpuStr := FormatCPU(m.CPUUsage)
+		memStr := FormatMemory(m.MemoryUsage)
+
+		row := fmt.Sprintf("%-*s  %-*s  %-10s  %-10s",
+			nameWidth, truncate(m.Name, nameWidth),
+			nsWidth, truncate(m.Namespace, nsWidth),
+			cpuStr,
+			memStr)
+		rows = append(rows, row)
+	}
+
+	return header + "\n" + strings.Join(rows, "\n") + "\n", nil
+}
+
+// formatPodMetricsWithContainers formats pod metrics showing individual containers
+func (tf *TableFormatter) formatPodMetricsWithContainers(metrics []PodMetrics) (string, error) {
+	if len(metrics) == 0 {
+		return "No resources found.\n", nil
+	}
+
+	// Calculate column widths
+	var allPodNames []string
+	var allContainerNames []string
+	for _, m := range metrics {
+		allPodNames = append(allPodNames, m.Name)
+		for _, c := range m.Containers {
+			allContainerNames = append(allContainerNames, c.Name)
+		}
+	}
+
+	podWidth := max(4, maxLenSlice(allPodNames))
+	containerWidth := max(9, maxLenSlice(allContainerNames))
+
+	// Header
+	header := tf.styleHeader.Render(
+		fmt.Sprintf("%-*s  %-*s  %-10s  %-10s",
+			podWidth, "POD",
+			containerWidth, "CONTAINER",
+			"CPU(cores)",
+			"MEMORY(bytes)"))
+
+	// Rows
+	var rows []string
+	for _, m := range metrics {
+		for _, c := range m.Containers {
+			cpuStr := FormatCPU(c.CPUUsage)
+			memStr := FormatMemory(c.MemoryUsage)
+
+			row := fmt.Sprintf("%-*s  %-*s  %-10s  %-10s",
+				podWidth, truncate(m.Name, podWidth),
+				containerWidth, truncate(c.Name, containerWidth),
+				cpuStr,
+				memStr)
+			rows = append(rows, row)
+		}
+	}
+
+	return header + "\n" + strings.Join(rows, "\n") + "\n", nil
+}
+
 // colorizeStatus applies color to status based on its value
 func (tf *TableFormatter) colorizeStatus(status string) string {
 	// Normalize status to match exact width
@@ -436,6 +557,16 @@ func (jf *JSONFormatter) FormatSecrets(secrets []Secret) (string, error) {
 	return jf.marshal(secrets)
 }
 
+// FormatNodeMetrics formats node metrics as JSON
+func (jf *JSONFormatter) FormatNodeMetrics(metrics []NodeMetrics) (string, error) {
+	return jf.marshal(metrics)
+}
+
+// FormatPodMetrics formats pod metrics as JSON
+func (jf *JSONFormatter) FormatPodMetrics(metrics []PodMetrics, showContainers bool) (string, error) {
+	return jf.marshal(metrics)
+}
+
 // marshal converts data to JSON string
 func (jf *JSONFormatter) marshal(v interface{}) (string, error) {
 	var data []byte
@@ -499,6 +630,16 @@ func (yf *YAMLFormatter) FormatConfigMaps(configmaps []ConfigMap) (string, error
 // FormatSecrets formats secrets as YAML
 func (yf *YAMLFormatter) FormatSecrets(secrets []Secret) (string, error) {
 	return yf.marshal(secrets)
+}
+
+// FormatNodeMetrics formats node metrics as YAML
+func (yf *YAMLFormatter) FormatNodeMetrics(metrics []NodeMetrics) (string, error) {
+	return yf.marshal(metrics)
+}
+
+// FormatPodMetrics formats pod metrics as YAML
+func (yf *YAMLFormatter) FormatPodMetrics(metrics []PodMetrics, showContainers bool) (string, error) {
+	return yf.marshal(metrics)
 }
 
 // marshal converts data to YAML string
@@ -573,6 +714,17 @@ func maxLen[T any](items []T, getter func(T) string) int {
 		length := len(getter(item))
 		if length > maxLength {
 			maxLength = length
+		}
+	}
+	return maxLength
+}
+
+// maxLenSlice finds the maximum length of strings in a slice
+func maxLenSlice(items []string) int {
+	maxLength := 0
+	for _, item := range items {
+		if len(item) > maxLength {
+			maxLength = len(item)
 		}
 	}
 	return maxLength

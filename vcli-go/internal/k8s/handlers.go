@@ -778,3 +778,534 @@ func HandleGetSecret(cmd *cobra.Command, args []string) error {
 		return formatter.FormatSecrets([]Secret{*secret})
 	})
 }
+
+// ============================================================================
+// TOP (METRICS) HANDLERS
+// ============================================================================
+
+// HandleTopNodes handles the 'top nodes' command
+func HandleTopNodes(cmd *cobra.Command, args []string) error {
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get node metrics
+	metrics, err := manager.GetNodeMetrics()
+	if err != nil {
+		return fmt.Errorf("failed to get node metrics: %w", err)
+	}
+
+	// Format and print
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatNodeMetrics(metrics)
+	})
+}
+
+// HandleTopNode handles the 'top node [name]' command
+// If no name is provided, delegates to HandleTopNodes to list all nodes
+func HandleTopNode(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		// No name provided - list all nodes like 'top nodes'
+		return HandleTopNodes(cmd, args)
+	}
+
+	nodeName := args[0]
+
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get single node metrics
+	metrics, err := manager.GetNodeMetricsByName(nodeName)
+	if err != nil {
+		return fmt.Errorf("failed to get metrics for node %s: %w", nodeName, err)
+	}
+
+	// Format and print (wrap in slice for formatters)
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatNodeMetrics([]NodeMetrics{*metrics})
+	})
+}
+
+// HandleTopPods handles the 'top pods' command
+func HandleTopPods(cmd *cobra.Command, args []string) error {
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Get containers flag
+	showContainers, err := cmd.Flags().GetBool("containers")
+	if err != nil {
+		return fmt.Errorf("failed to get containers flag: %w", err)
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get pod metrics
+	namespace := config.Namespace
+	if config.AllNamespaces {
+		namespace = "" // Empty string means all namespaces
+	}
+
+	metrics, err := manager.GetPodMetrics(namespace)
+	if err != nil {
+		return fmt.Errorf("failed to get pod metrics: %w", err)
+	}
+
+	// Format and print
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatPodMetrics(metrics, showContainers)
+	})
+}
+
+// HandleTopPod handles the 'top pod [name]' command
+// If no name is provided, delegates to HandleTopPods to list all pods
+func HandleTopPod(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		// No name provided - list all pods like 'top pods'
+		return HandleTopPods(cmd, args)
+	}
+
+	podName := args[0]
+
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Get containers flag
+	showContainers, err := cmd.Flags().GetBool("containers")
+	if err != nil {
+		return fmt.Errorf("failed to get containers flag: %w", err)
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get single pod metrics
+	metrics, err := manager.GetPodMetricsByName(config.Namespace, podName)
+	if err != nil {
+		return fmt.Errorf("failed to get metrics for pod %s: %w", podName, err)
+	}
+
+	// Format and print (wrap in slice for formatters)
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatPodMetrics([]PodMetrics{*metrics}, showContainers)
+	})
+}
+
+// ============================================================================
+// LABEL & ANNOTATE HANDLERS
+// ============================================================================
+
+// HandleLabel handles the 'label' command
+func HandleLabel(cmd *cobra.Command, args []string) error {
+	if len(args) < 2 {
+		return fmt.Errorf("resource type, name, and at least one label are required")
+	}
+
+	kind := args[0]
+	name := args[1]
+	labelArgs := args[2:]
+
+	// Parse flags
+	namespace, err := cmd.Flags().GetString("namespace")
+	if err != nil {
+		return fmt.Errorf("failed to get namespace flag: %w", err)
+	}
+
+	overwrite, err := cmd.Flags().GetBool("overwrite")
+	if err != nil {
+		return fmt.Errorf("failed to get overwrite flag: %w", err)
+	}
+
+	dryRunStr, err := cmd.Flags().GetString("dry-run")
+	if err != nil {
+		return fmt.Errorf("failed to get dry-run flag: %w", err)
+	}
+
+	// Parse label changes
+	changes, err := ParseLabelChanges(labelArgs)
+	if err != nil {
+		return fmt.Errorf("failed to parse labels: %w", err)
+	}
+
+	// Get kubeconfig path
+	kubeconfigPath := getDefaultKubeconfigPath()
+	if cmd.Flags().Changed("kubeconfig") {
+		path, err := cmd.Flags().GetString("kubeconfig")
+		if err != nil {
+			return err
+		}
+		kubeconfigPath = path
+	}
+
+	// Create cluster manager
+	manager, err := NewClusterManager(kubeconfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to create cluster manager: %w", err)
+	}
+
+	// Connect to cluster
+	if err := manager.Connect(); err != nil {
+		return fmt.Errorf("failed to connect to cluster: %w", err)
+	}
+	defer manager.Disconnect()
+
+	// Prepare options
+	opts := NewLabelAnnotateOptions()
+	opts.Changes = changes
+	opts.Overwrite = overwrite
+
+	// Set dry-run mode
+	switch dryRunStr {
+	case "none", "":
+		opts.DryRun = DryRunNone
+	case "client":
+		opts.DryRun = DryRunClient
+	case "server":
+		opts.DryRun = DryRunServer
+	default:
+		return fmt.Errorf("invalid dry-run value: %s", dryRunStr)
+	}
+
+	// Update labels
+	if err := manager.UpdateLabels(kind, name, namespace, opts); err != nil {
+		return fmt.Errorf("failed to update labels: %w", err)
+	}
+
+	// Print result
+	if opts.DryRun != DryRunNone {
+		fmt.Printf("%s/%s labeled (dry run)\n", kind, name)
+	} else {
+		fmt.Printf("%s/%s labeled\n", kind, name)
+	}
+
+	return nil
+}
+
+// HandleAnnotate handles the 'annotate' command
+func HandleAnnotate(cmd *cobra.Command, args []string) error {
+	if len(args) < 2 {
+		return fmt.Errorf("resource type, name, and at least one annotation are required")
+	}
+
+	kind := args[0]
+	name := args[1]
+	annotationArgs := args[2:]
+
+	// Parse flags
+	namespace, err := cmd.Flags().GetString("namespace")
+	if err != nil {
+		return fmt.Errorf("failed to get namespace flag: %w", err)
+	}
+
+	overwrite, err := cmd.Flags().GetBool("overwrite")
+	if err != nil {
+		return fmt.Errorf("failed to get overwrite flag: %w", err)
+	}
+
+	dryRunStr, err := cmd.Flags().GetString("dry-run")
+	if err != nil {
+		return fmt.Errorf("failed to get dry-run flag: %w", err)
+	}
+
+	// Parse annotation changes
+	changes, err := ParseLabelChanges(annotationArgs)
+	if err != nil {
+		return fmt.Errorf("failed to parse annotations: %w", err)
+	}
+
+	// Get kubeconfig path
+	kubeconfigPath := getDefaultKubeconfigPath()
+	if cmd.Flags().Changed("kubeconfig") {
+		path, err := cmd.Flags().GetString("kubeconfig")
+		if err != nil {
+			return err
+		}
+		kubeconfigPath = path
+	}
+
+	// Create cluster manager
+	manager, err := NewClusterManager(kubeconfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to create cluster manager: %w", err)
+	}
+
+	// Connect to cluster
+	if err := manager.Connect(); err != nil {
+		return fmt.Errorf("failed to connect to cluster: %w", err)
+	}
+	defer manager.Disconnect()
+
+	// Prepare options
+	opts := NewLabelAnnotateOptions()
+	opts.Changes = changes
+	opts.Overwrite = overwrite
+
+	// Set dry-run mode
+	switch dryRunStr {
+	case "none", "":
+		opts.DryRun = DryRunNone
+	case "client":
+		opts.DryRun = DryRunClient
+	case "server":
+		opts.DryRun = DryRunServer
+	default:
+		return fmt.Errorf("invalid dry-run value: %s", dryRunStr)
+	}
+
+	// Update annotations
+	if err := manager.UpdateAnnotations(kind, name, namespace, opts); err != nil {
+		return fmt.Errorf("failed to update annotations: %w", err)
+	}
+
+	// Print result
+	if opts.DryRun != DryRunNone {
+		fmt.Printf("%s/%s annotated (dry run)\n", kind, name)
+	} else {
+		fmt.Printf("%s/%s annotated\n", kind, name)
+	}
+
+	return nil
+}
+
+// HandleCanI handles the 'auth can-i' command
+func HandleCanI(cmd *cobra.Command, args []string) error {
+	// Args: VERB RESOURCE [RESOURCENAME]
+	if len(args) < 2 {
+		return fmt.Errorf("requires at least 2 arguments: VERB RESOURCE")
+	}
+
+	verb := args[0]
+	resource := args[1]
+	var resourceName string
+	if len(args) >= 3 {
+		resourceName = args[2]
+	}
+
+	// Get namespace
+	namespace, err := cmd.Flags().GetString("namespace")
+	if err != nil {
+		return err
+	}
+
+	// Get all-namespaces flag
+	allNamespaces, err := cmd.Flags().GetBool("all-namespaces")
+	if err != nil {
+		return err
+	}
+
+	// If all-namespaces is true, set namespace to empty
+	if allNamespaces {
+		namespace = ""
+	}
+
+	// Get subresource flag
+	subresource, err := cmd.Flags().GetString("subresource")
+	if err != nil {
+		return err
+	}
+
+	// Get kubeconfig path
+	kubeconfigPath := getDefaultKubeconfigPath()
+	if cmd.Flags().Changed("kubeconfig") {
+		path, err := cmd.Flags().GetString("kubeconfig")
+		if err != nil {
+			return err
+		}
+		kubeconfigPath = path
+	}
+
+	// Create cluster manager
+	manager, err := NewClusterManager(kubeconfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to create cluster manager: %w", err)
+	}
+
+	// Connect to cluster
+	if err := manager.Connect(); err != nil {
+		return fmt.Errorf("failed to connect to cluster: %w", err)
+	}
+	defer manager.Disconnect()
+
+	// Perform authorization check
+	var result *AuthCheckResult
+	if subresource != "" {
+		// Check with subresource
+		result, err = manager.CanIWithSubresource(verb, resource, subresource, namespace)
+	} else if resourceName != "" {
+		// Check with resource name
+		result, err = manager.CanIWithResourceName(verb, resource, resourceName, namespace)
+	} else {
+		// Standard check
+		result, err = manager.CanI(verb, resource, namespace)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to check authorization: %w", err)
+	}
+
+	// Print result
+	if result.Allowed {
+		fmt.Println("yes")
+	} else {
+		fmt.Println("no")
+		if result.Reason != "" {
+			fmt.Printf("  Reason: %s\n", result.Reason)
+		}
+		if result.EvaluationError != "" {
+			fmt.Printf("  Error: %s\n", result.EvaluationError)
+		}
+	}
+
+	return nil
+}
+
+// HandleWhoAmI handles the 'auth whoami' command
+func HandleWhoAmI(cmd *cobra.Command, args []string) error {
+	// Get output format
+	outputFormat, err := cmd.Flags().GetString("output")
+	if err != nil {
+		return err
+	}
+
+	// Get kubeconfig path
+	kubeconfigPath := getDefaultKubeconfigPath()
+	if cmd.Flags().Changed("kubeconfig") {
+		path, err := cmd.Flags().GetString("kubeconfig")
+		if err != nil {
+			return err
+		}
+		kubeconfigPath = path
+	}
+
+	// Create cluster manager
+	manager, err := NewClusterManager(kubeconfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to create cluster manager: %w", err)
+	}
+
+	// Connect to cluster
+	if err := manager.Connect(); err != nil {
+		return fmt.Errorf("failed to connect to cluster: %w", err)
+	}
+	defer manager.Disconnect()
+
+	// Get user info
+	userInfo, err := manager.WhoAmI()
+	if err != nil {
+		return fmt.Errorf("failed to get user info: %w", err)
+	}
+
+	// Format output
+	switch outputFormat {
+	case "json":
+		output, err := formatUserInfoJSON(userInfo)
+		if err != nil {
+			return err
+		}
+		fmt.Println(output)
+
+	case "yaml":
+		output, err := formatUserInfoYAML(userInfo)
+		if err != nil {
+			return err
+		}
+		fmt.Println(output)
+
+	default:
+		// Table format
+		fmt.Printf("Username: %s\n", userInfo.Username)
+		if userInfo.UID != "" {
+			fmt.Printf("UID:      %s\n", userInfo.UID)
+		}
+		if len(userInfo.Groups) > 0 {
+			fmt.Printf("Groups:   %v\n", userInfo.Groups)
+		}
+		if len(userInfo.Extra) > 0 {
+			fmt.Println("Extra:")
+			for k, v := range userInfo.Extra {
+				fmt.Printf("  %s: %v\n", k, v)
+			}
+		}
+	}
+
+	return nil
+}
+
+// formatUserInfoJSON formats UserInfo as JSON
+func formatUserInfoJSON(userInfo *UserInfo) (string, error) {
+	data := map[string]interface{}{
+		"username": userInfo.Username,
+		"uid":      userInfo.UID,
+		"groups":   userInfo.Groups,
+		"extra":    userInfo.Extra,
+	}
+
+	jsonFormatter := &JSONFormatter{}
+	return jsonFormatter.marshal(data)
+}
+
+// formatUserInfoYAML formats UserInfo as YAML
+func formatUserInfoYAML(userInfo *UserInfo) (string, error) {
+	data := map[string]interface{}{
+		"username": userInfo.Username,
+		"uid":      userInfo.UID,
+		"groups":   userInfo.Groups,
+		"extra":    userInfo.Extra,
+	}
+
+	yamlFormatter := &YAMLFormatter{}
+	return yamlFormatter.marshal(data)
+}
