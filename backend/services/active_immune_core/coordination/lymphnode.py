@@ -45,6 +45,7 @@ from coordination.exceptions import (
 )
 from coordination.pattern_detector import PatternDetector
 from coordination.cytokine_aggregator import CytokineAggregator
+from coordination.agent_orchestrator import AgentOrchestrator
 from coordination.rate_limiter import ClonalExpansionRateLimiter
 from coordination.thread_safe_structures import (
     ThreadSafeBuffer,
@@ -151,6 +152,15 @@ class LinfonodoDigital:
             area=self.area,
             nivel=self.nivel,
             escalation_priority_threshold=9,
+        )
+
+        # Agent orchestrator (FASE 3 - Dependency Injection)
+        self._agent_orchestrator = AgentOrchestrator(
+            lymphnode_id=self.id,
+            area=self.area,
+            factory=self.factory,
+            rate_limiter=None,  # Will use AgentOrchestrator's internal rate limiter
+            redis_client=None,  # Will be set later when Redis connects
         )
 
         # Metrics (ATOMIC COUNTERS)
@@ -428,31 +438,27 @@ class LinfonodoDigital:
         """
         Register agent with lymphnode.
 
+        REFACTORED (FASE 3): Delegates to AgentOrchestrator.
+
         Args:
             agente_state: Agent state snapshot
         """
-        self.agentes_ativos[agente_state.id] = agente_state
-
-        logger.info(
-            f"Agent {agente_state.id[:8]} ({agente_state.tipo}) registered "
-            f"with lymphnode {self.id}"
-        )
+        await self._agent_orchestrator.register_agent(agente_state)
+        # Keep local reference for backward compatibility
+        self.agentes_ativos = self._agent_orchestrator.agentes_ativos
 
     async def remover_agente(self, agente_id: str) -> None:
         """
         Remove agent from lymphnode (apoptosis/migration).
 
+        REFACTORED (FASE 3): Delegates to AgentOrchestrator.
+
         Args:
             agente_id: Agent UUID
         """
-        if agente_id in self.agentes_ativos:
-            agente_state = self.agentes_ativos[agente_id]
-            del self.agentes_ativos[agente_id]
-
-            logger.info(
-                f"Agent {agente_id[:8]} ({agente_state.tipo}) removed "
-                f"from lymphnode {self.id}"
-            )
+        await self._agent_orchestrator.remove_agent(agente_id)
+        # Keep local reference for backward compatibility
+        self.agentes_ativos = self._agent_orchestrator.agentes_ativos
 
     async def clonar_agente(
         self,
@@ -463,10 +469,7 @@ class LinfonodoDigital:
         """
         Create specialized agent clones (clonal expansion) WITH RATE LIMITING.
 
-        Triggered by:
-        - Persistent threat (pattern detection)
-        - High cytokine concentration (inflammation)
-        - MAXIMUS directive (manual intervention)
+        REFACTORED (FASE 3): Delegates to AgentOrchestrator.
 
         Args:
             tipo_base: Base agent type to clone
@@ -481,68 +484,20 @@ class LinfonodoDigital:
             LymphnodeResourceExhaustedError: If resource limit exceeded
             AgentOrchestrationError: If clone creation fails
         """
-        # RATE LIMITING: Check before creating clones
-        try:
-            await self._clonal_limiter.check_clonal_expansion(
-                especializacao=especializacao,
-                quantidade=quantidade,
-                current_total_agents=len(self.agentes_ativos),
-            )
-        except (LymphnodeRateLimitError, LymphnodeResourceExhaustedError) as e:
-            logger.warning(
-                f"Lymphnode {self.id} clonal expansion BLOCKED: {e}"
-            )
-            raise
-
-        logger.info(
-            f"Lymphnode {self.id} initiating clonal expansion: "
-            f"{quantidade} {tipo_base} agents (specialization={especializacao})"
+        # Delegate to AgentOrchestrator
+        clone_ids = await self._agent_orchestrator.create_clones(
+            tipo_base=tipo_base,
+            especializacao=especializacao,
+            quantidade=quantidade,
         )
 
-        clone_ids = []
-        failures = 0
+        # Update local references
+        self.agentes_ativos = self._agent_orchestrator.agentes_ativos
+        stats = await self._agent_orchestrator.get_stats()
 
-        for i in range(quantidade):
-            try:
-                # Create agent via factory
-                agente = await self.factory.create_agent(
-                    tipo=tipo_base,
-                    area_patrulha=self.area,
-                )
-
-                # Set specialization
-                agente.state.especializacao = especializacao
-
-                # Apply somatic hypermutation (variation in sensitivity/aggressiveness)
-                mutation = (i * 0.04) - 0.1  # Range: -10% to +10%
-                agente.state.sensibilidade = max(
-                    0.0, min(1.0, agente.state.sensibilidade + mutation)
-                )
-
-                # Start agent
-                await agente.iniciar()
-
-                # Register with lymphnode
-                await self.registrar_agente(agente.state)
-
-                clone_ids.append(agente.state.id)
-
-                # ATOMIC INCREMENT
-                await self.total_clones_criados.increment()
-
-            except Exception as e:
-                logger.error(f"Failed to create clone {i}: {e}")
-                failures += 1
-
-        # If too many failures, raise error
-        if failures > quantidade // 2:
-            raise AgentOrchestrationError(
-                f"Clonal expansion failed: {failures}/{quantidade} clones failed to create"
-            )
-
-        logger.info(
-            f"Clonal expansion complete: {len(clone_ids)}/{quantidade} clones created"
-        )
+        # Update local metrics
+        for _ in range(len(clone_ids)):
+            await self.total_clones_criados.increment()
 
         return clone_ids
 
@@ -550,10 +505,7 @@ class LinfonodoDigital:
         """
         Destroy clones with specific specialization (apoptosis).
 
-        Triggered by:
-        - Threat eliminated
-        - Resource constraints
-        - Homeostatic regulation (too many agents)
+        REFACTORED (FASE 3): Delegates to AgentOrchestrator.
 
         Args:
             especializacao: Specialization marker
@@ -561,26 +513,15 @@ class LinfonodoDigital:
         Returns:
             Number of clones destroyed
         """
-        destruidos = 0
+        # Delegate to AgentOrchestrator
+        destruidos = await self._agent_orchestrator.destroy_clones(especializacao)
 
-        for agente_id, state in list(self.agentes_ativos.items()):
-            if state.especializacao == especializacao:
-                # Send apoptosis signal via hormone (graceful shutdown)
-                await self._send_apoptosis_signal(agente_id)
+        # Update local references
+        self.agentes_ativos = self._agent_orchestrator.agentes_ativos
 
-                # Remove from registry
-                await self.remover_agente(agente_id)
-
-                destruidos += 1
-                # ATOMIC INCREMENT
-                await self.total_clones_destruidos.increment()
-
-        # Release from rate limiter
-        await self._clonal_limiter.release_clones(especializacao, destruidos)
-
-        logger.info(
-            f"Lymphnode {self.id} destroyed {destruidos} clones ({especializacao})"
-        )
+        # Update local metrics
+        for _ in range(destruidos):
+            await self.total_clones_destruidos.increment()
 
         return destruidos
 
