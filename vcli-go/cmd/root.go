@@ -1,16 +1,16 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
-	"github.com/verticedev/vcli-go/internal/core"
-	"github.com/verticedev/vcli-go/internal/plugins"
-	"github.com/verticedev/vcli-go/internal/tui"
 	"github.com/verticedev/vcli-go/internal/visual/banner"
+	"github.com/verticedev/vcli-go/internal/workspace"
+	"github.com/verticedev/vcli-go/internal/workspace/governance"
+	"github.com/verticedev/vcli-go/internal/workspace/investigation"
+	"github.com/verticedev/vcli-go/internal/workspace/situational"
 )
 
 const (
@@ -254,51 +254,19 @@ func init() {
 	offlineCmd.AddCommand(offlineClearCmd)
 }
 
-// launchTUI initializes and launches the TUI
+// launchTUI initializes and launches the TUI with workspaces
 func launchTUI() {
-	ctx := context.Background()
+	// Create workspace manager
+	manager := workspace.NewManager()
 
-	// Initialize core state
-	state := core.NewState(version)
+	// Add workspaces
+	manager.AddWorkspace(situational.NewPlaceholder())
+	manager.AddWorkspace(investigation.NewPlaceholder())
+	manager.AddWorkspace(governance.NewPlaceholder())
 
-	// Set backend type from CLI flag
-	state.Config.GovernanceBackend = backend
-
-	// Initialize plugin system
-	// Using InMemoryLoader for now - allows dynamic registration without .so files
-	loader := plugins.NewInMemoryLoader()
-
-	// Using NoopSandbox for now - can be replaced with PluginSandbox for resource limits
-	sandbox := plugins.NewNoopSandbox()
-
-	// Using LocalRegistry - scans ~/.vcli/plugins directory for .so files
-	registry := plugins.NewLocalRegistry(os.ExpandEnv("$HOME/.vcli/plugins"))
-
-	pluginManager := plugins.NewPluginManager(loader, sandbox, registry)
-
-	// Start plugin manager
-	if err := pluginManager.Start(ctx); err != nil {
-		fmt.Printf("Error starting plugin manager: %v\n", err)
-		os.Exit(1)
-	}
-	defer pluginManager.Stop(ctx)
-
-	// Plugins can be loaded dynamically via:
-	// - CLI commands: vcli plugin install kubernetes
-	// - Configuration file: ~/.vcli/config.yaml
-	// - Programmatically: pluginManager.LoadPlugin(ctx, "kubernetes")
-	//
-	// Example (commented out):
-	// if err := pluginManager.LoadPlugin(ctx, "kubernetes"); err != nil {
-	//     log.Printf("Failed to load kubernetes plugin: %v", err)
-	// }
-
-	// Create TUI model with plugin manager
-	model := tui.NewModelWithPlugins(state, version, pluginManager, ctx)
-
-	// Create Bubble Tea program
+	// Create Bubble Tea program with workspace manager
 	p := tea.NewProgram(
-		model,
+		manager,
 		tea.WithAltScreen(),       // Use alternate screen buffer
 		tea.WithMouseCellMotion(), // Enable mouse support
 	)
