@@ -2,23 +2,30 @@ package bubbletea
 
 import (
 	"fmt"
+	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 	"github.com/verticedev/vcli-go/internal/visual"
 	"github.com/verticedev/vcli-go/internal/visual/banner"
 )
 
 // Run starts the bubble tea interactive shell
 func Run(rootCmd *cobra.Command, version, buildDate string) error {
+	// Check if stdin is a terminal
+	if !term.IsTerminal(int(os.Stdin.Fd())) {
+		return fmt.Errorf("shell requires an interactive terminal (TTY)")
+	}
+
 	// Show welcome banner
 	showWelcomeBanner(version, buildDate)
 
 	// Create model
 	m := NewModel(rootCmd, version, buildDate)
 
-	// Create program
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	// Create program (without AltScreen to avoid TTY issues)
+	p := tea.NewProgram(m)
 
 	// Run
 	if _, err := p.Run(); err != nil {
