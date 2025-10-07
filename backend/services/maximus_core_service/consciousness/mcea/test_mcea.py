@@ -488,27 +488,33 @@ async def test_stress_monitor_start_stop(stress_monitor):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="Stress accumulation timing needs investigation - stress not building up in test timeframe")
 async def test_stress_level_assessment(arousal_controller, stress_monitor):
     """Test stress monitor assesses stress level correctly."""
     await arousal_controller.start()
     await stress_monitor.start()
 
     # Force very high arousal → high stress
-    # Use duration > 0 to prevent immediate expiration and high delta for faster stress buildup
-    arousal_controller.request_modulation("test", delta=0.8, duration_seconds=10.0, priority=10)
+    # Use long duration to minimize linear decay effect
+    arousal_controller.request_modulation("test", delta=0.8, duration_seconds=30.0, priority=10)
 
-    # Wait longer for stress to accumulate
-    await asyncio.sleep(0.6)
+    # Wait for arousal to ramp up and stress to accumulate
+    # Arousal increases at 0.05/s from baseline 0.6:
+    #   - After 9s with duration=30s:
+    #     * Modulation: delta = 0.8 * (1 - 9/30) = 0.8 * 0.7 = 0.56
+    #     * Target arousal: 0.6 + 0.56 = 1.16 (clamped to 1.0)
+    #     * Actual arousal: min(0.6 + 0.05*9, 1.0) = 1.0
+    #     * Deviation: 1.0 - 0.6 = 0.4 (MODERATE threshold)
+    # Monitoring loop runs at 1Hz, so this gives proper margin
+    await asyncio.sleep(9.0)
 
     current_stress = stress_monitor.get_current_stress_level()
 
     await stress_monitor.stop()
     await arousal_controller.stop()
 
-    # Should detect elevated stress
+    # After 9s with sustained high arousal modulation, should reach MODERATE or higher
     assert current_stress in [StressLevel.MODERATE, StressLevel.SEVERE, StressLevel.CRITICAL], \
-        f"Expected elevated stress but got {current_stress}"
+        f"Expected MODERATE or higher stress after 9s high arousal, got {current_stress}"
 
 
 @pytest.mark.asyncio
