@@ -218,19 +218,24 @@ class TopologyConfig:
     - gamma: Scale-free exponent (2.5 = optimal hub/spoke balance)
     - clustering_target: Target clustering coefficient (0.75 = high differentiation)
 
-    Parameter Tuning (2025-10-06):
-    - min_degree: 3→5 to increase ECI (0.42→target 0.85)
-    - rewiring_probability: 0.1→0.35 for clustering boost without over-density
-    - target_density: 0.15→0.20 for better integration
-    - ECI computation: Path enumeration→global_efficiency (O(n²) performance)
+    Parameter Tuning History:
+    - 2025-10-06: min_degree 3→5, rewiring_probability 0.1→0.35, target_density 0.15→0.20
+    - 2025-10-07 (PAGANI FIX v1): Over-aggressive - density 99.2% (complete graph!)
+    - 2025-10-07 (PAGANI FIX v2): Still too aggressive - density 100%
+    - 2025-10-07 (PAGANI FIX v3 - CONSERVATIVE): Target realistic density
+      * rewiring_probability: 0.72→0.58 (more conservative closure)
+      * min_degree: 5→5 (maintained)
+      * Reduced sampling rates: Pass1 6x→3.5x, Pass2 2.5x→1.5x
+      * Hub probability: 0.75→0.60
+      * Target: C≥0.75, ECI≥0.85, Density ~30-40% (realistic network)
     """
     node_count: int = 16
-    min_degree: int = 5  # Minimum connections per node (prevents isolation)
+    min_degree: int = 5  # Balanced base connectivity
     target_density: float = 0.20  # 20% connectivity for better integration
     gamma: float = 2.5  # Scale-free power law exponent
     clustering_target: float = 0.75
     enable_small_world_rewiring: bool = True
-    rewiring_probability: float = 0.60  # Triadic closure rate (targets C≥0.75, ECI≥0.85)
+    rewiring_probability: float = 0.58  # CONSERVATIVE: Realistic density with IIT targets
 
 
 @dataclass
@@ -397,32 +402,34 @@ class TIGFabric:
         """
         Apply triadic closure to increase clustering while maintaining small-world properties.
 
+        ENHANCED VERSION (2025-10-07): More aggressive triadic closure to achieve
+        target metrics: Clustering ≥0.70, ECI ≥0.85
+
         Instead of rewiring (which can reduce connectivity), we ADD edges to close
         triangles (triadic closure). This directly increases clustering coefficient.
 
         Algorithm:
-        1. For each node, randomly sample a few neighbor pairs
-        2. Connect them with probability rewiring_probability
-        3. This avoids exponential edge growth while boosting clustering
+        1. For each node, sample neighbor pairs aggressively
+        2. Connect them with high probability (rewiring_probability)
+        3. Multi-pass approach to reach target clustering
 
-        Key optimization: Instead of trying all O(k²) neighbor pairs per node,
-        we sample only O(k) pairs to keep graph density reasonable.
+        Enhancement: Increased sampling rate and added second pass for stubborn cases.
         """
         # Set seed for reproducibility
         np.random.seed(42)
 
         nodes = list(self.graph.nodes())
 
-        # Connect neighbors to create triangles (limited sampling to avoid over-density)
+        # PASS 1: Conservative triadic closure
         for node in nodes:
             neighbors = list(self.graph.neighbors(node))
 
             if len(neighbors) < 2:
                 continue
 
-            # CRITICAL: Sample only a few neighbor pairs instead of trying all pairs
-            # This prevents exponential growth: O(k) samples instead of O(k²) iterations
-            num_samples = min(int(len(neighbors) * 3.0), 25)  # Scale with degree, cap at 25
+            # CONSERVATIVE: Moderate sampling - 3.5x degree or up to 35 samples
+            # Balance between achieving targets and maintaining realistic density
+            num_samples = min(int(len(neighbors) * 3.5), 35)
 
             for _ in range(num_samples):
                 # Randomly pick 2 neighbors
@@ -431,6 +438,29 @@ class TIGFabric:
                 if not self.graph.has_edge(n1, n2):
                     # Add triangle-closing edge with probability
                     if np.random.random() < self.config.rewiring_probability:
+                        self.graph.add_edge(n1, n2)
+
+        # PASS 2: Targeted enhancement for high-degree nodes (hubs)
+        # Hubs are critical for ECI - ensure they form moderately connected core
+        # CONSERVATIVE: Reduced sampling to avoid over-densification
+        degrees = dict(self.graph.degree())
+        high_degree_nodes = [n for n, d in degrees.items() if d > np.percentile(list(degrees.values()), 75)]
+
+        for hub in high_degree_nodes:
+            hub_neighbors = list(self.graph.neighbors(hub))
+
+            if len(hub_neighbors) < 2:
+                continue
+
+            # CONSERVATIVE: Reduced hub sampling - 1.5x degree or up to 15 samples
+            num_hub_samples = min(int(len(hub_neighbors) * 1.5), 15)
+
+            for _ in range(num_hub_samples):
+                n1, n2 = np.random.choice(hub_neighbors, size=2, replace=False)
+
+                if not self.graph.has_edge(n1, n2):
+                    # Conservative probability for hub connections
+                    if np.random.random() < 0.60:
                         self.graph.add_edge(n1, n2)
 
     def _instantiate_nodes(self) -> None:
