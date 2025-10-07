@@ -313,6 +313,8 @@ func (b *BannerRenderer) renderFooter(version, buildDate string) string {
 		b.styles.Info.Render("Go 1.21+"),
 		b.styles.Success.Render("Production Ready"),
 		b.styles.Success.Render("Zero Technical Debt")))
+	output.WriteString(fmt.Sprintf("Created by %s\n",
+		b.styles.Warning.Bold(true).Render("Juan Carlos e Anthropic Claude")))
 	output.WriteString("\n")
 	output.WriteString(fmt.Sprintf("Type %s for available commands\n", b.styles.Accent.Render("'vcli --help'")))
 	output.WriteString(fmt.Sprintf("Type %s for Kubernetes commands\n", b.styles.Accent.Render("'vcli k8s --help'")))
