@@ -75,16 +75,18 @@ func (c *HTTPClient) ApproveDecision(ctx context.Context, decisionID, comment st
 }
 
 // RejectDecision rejects a pending decision
-func (c *HTTPClient) RejectDecision(ctx context.Context, decisionID, comment string) error {
+func (c *HTTPClient) RejectDecision(ctx context.Context, decisionID, reason string) error {
 	url := fmt.Sprintf("%s/api/v1/governance/decision/%s/reject", c.baseURL, decisionID)
 
 	request := struct {
 		SessionID string `json:"session_id"`
+		Reason    string `json:"reason"` // Required field
 		Comment   string `json:"comment,omitempty"`
 		Reasoning string `json:"reasoning,omitempty"`
 	}{
 		SessionID: c.sessionID,
-		Comment:   comment,
+		Reason:    reason,
+		Comment:   reason, // Also set comment for compatibility
 	}
 
 	body, err := json.Marshal(request)

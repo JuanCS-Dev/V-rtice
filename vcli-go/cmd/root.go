@@ -23,6 +23,7 @@ var (
 	configFile  string
 	offline     bool
 	noTelemetry bool
+	backend     string // Backend type: http or grpc
 )
 
 // rootCmd represents the base command
@@ -217,6 +218,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file (default: ~/.vcli/config.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&offline, "offline", false, "Enable offline mode")
 	rootCmd.PersistentFlags().BoolVar(&noTelemetry, "no-telemetry", false, "Disable telemetry")
+	rootCmd.PersistentFlags().StringVar(&backend, "backend", "http", "Backend type: http or grpc (default: http)")
 
 	// Add subcommands
 	rootCmd.AddCommand(tuiCmd)
@@ -251,6 +253,9 @@ func launchTUI() {
 
 	// Initialize core state
 	state := core.NewState(version)
+
+	// Set backend type from CLI flag
+	state.Config.GovernanceBackend = backend
 
 	// Initialize plugin system
 	// Using InMemoryLoader for now - allows dynamic registration without .so files

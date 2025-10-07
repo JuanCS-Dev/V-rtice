@@ -259,12 +259,13 @@ func (m Model) handleWorkspaceLoaded(msg WorkspaceLoadedMsg) (tea.Model, tea.Cmd
 
 // handleWorkspaceInitialized handles workspace initialization complete
 func (m Model) handleWorkspaceInitialized(msg WorkspaceInitializedMsg) (tea.Model, tea.Cmd) {
-	m.AddEvent(NewEventMsg(
+	eventMsg := NewEventMsg(
 		EventTypeInfo,
 		"workspace",
 		map[string]string{"id": msg.WorkspaceID},
 		SeverityLow,
-	))
+	)
+	m.AddEvent(eventMsg.Event)
 	return m, nil
 }
 

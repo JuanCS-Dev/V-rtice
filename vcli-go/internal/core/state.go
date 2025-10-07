@@ -43,10 +43,11 @@ type PluginInfo struct {
 
 // Configuration represents application configuration
 type Configuration struct {
-	LogLevel      string
-	CacheEnabled  bool
-	OfflineMode   bool
+	LogLevel         string
+	CacheEnabled     bool
+	OfflineMode      bool
 	TelemetryEnabled bool
+	GovernanceBackend string // "http" or "grpc"
 }
 
 // UserContext holds user-specific information
@@ -64,10 +65,11 @@ func NewState(version string) *State {
 		StartTime: time.Now(),
 		Plugins:   make(map[string]PluginInfo),
 		Config: Configuration{
-			LogLevel:     "info",
-			CacheEnabled: true,
-			OfflineMode:  false,
-			TelemetryEnabled: true,
+			LogLevel:          "info",
+			CacheEnabled:      true,
+			OfflineMode:       false,
+			TelemetryEnabled:  true,
+			GovernanceBackend: "http", // default to HTTP
 		},
 		User: UserContext{
 			Permissions: make([]string, 0),

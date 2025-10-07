@@ -115,9 +115,9 @@ func (pmw *PluginManagerWrapper) ListPluginsCmd() tea.Cmd {
 		pluginInfos := pmw.manager.ListPlugins()
 
 		// Convert to TUI message format
-		plugins := make([]PluginInfo, 0, len(pluginInfos))
+		pluginsList := make([]PluginInfo, 0, len(pluginInfos))
 		for _, info := range pluginInfos {
-			plugins = append(plugins, PluginInfo{
+			pluginsList = append(pluginsList, PluginInfo{
 				Name:        info.Metadata.Name,
 				Version:     info.Metadata.Version,
 				Enabled:     info.Status == plugins.LoadStatusRunning,
@@ -130,7 +130,7 @@ func (pmw *PluginManagerWrapper) ListPluginsCmd() tea.Cmd {
 		}
 
 		return PluginListMsg{
-			Plugins: plugins,
+			Plugins: pluginsList,
 		}
 	}
 }

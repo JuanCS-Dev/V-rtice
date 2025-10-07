@@ -225,11 +225,14 @@ func (m *Model) SetActiveWorkspace(wsID string) error {
 		return NewModelError("workspace not found: " + wsID)
 	}
 
-	// Save current position in navigation history
-	if m.activeWS != "" {
-		m.navigation.History = append(m.navigation.History, m.activeWS)
-		m.navigation.Current++
+	// Add new workspace to navigation history
+	// If we're not at the end of history, truncate forward history
+	if m.navigation.Current < len(m.navigation.History)-1 {
+		m.navigation.History = m.navigation.History[:m.navigation.Current+1]
 	}
+
+	m.navigation.History = append(m.navigation.History, wsID)
+	m.navigation.Current = len(m.navigation.History) - 1
 
 	m.activeWS = wsID
 	m.activeView = ViewTypeWorkspace

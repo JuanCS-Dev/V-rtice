@@ -12,6 +12,8 @@ type Manager struct {
 	// Backend clients
 	sseClient  *SSEClient
 	httpClient *HTTPClient
+	client     Client // Unified client interface (HTTP or gRPC)
+	backendType BackendType
 
 	// Local decision queue (synchronized with backend)
 	mu               sync.RWMutex
@@ -61,10 +63,16 @@ const (
 
 // NewManager creates a new Governance manager
 func NewManager(serverURL, operatorID, sessionID string) *Manager {
+	return NewManagerWithBackend(serverURL, operatorID, sessionID, BackendHTTP)
+}
+
+// NewManagerWithBackend creates a new Governance manager with specified backend type
+func NewManagerWithBackend(serverURL, operatorID, sessionID string, backendType BackendType) *Manager {
 	return &Manager{
 		serverURL:         serverURL,
 		operatorID:        operatorID,
 		sessionID:         sessionID,
+		backendType:       backendType,
 		pendingDecisions:  make(map[string]*Decision),
 		resolvedDecisions: make(map[string]*Decision),
 		decisionCh:        make(chan *Decision, 100),
@@ -84,17 +92,30 @@ func (m *Manager) Start(ctx context.Context) error {
 	m.running = true
 	m.mu.Unlock()
 
-	// Create HTTP client
-	m.httpClient = NewHTTPClient(m.serverURL, m.operatorID)
+	// Create client based on backend type
+	var err error
+	m.client, err = NewClient(ClientConfig{
+		BackendType: m.backendType,
+		ServerURL:   m.serverURL,
+		OperatorID:  m.operatorID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create %s client: %w", m.backendType, err)
+	}
+
+	// Keep HTTP client for backward compatibility
+	if m.backendType == BackendHTTP {
+		m.httpClient = m.client.(*HTTPClient)
+	}
 
 	// Health check before starting
-	healthy, err := m.httpClient.HealthCheck(ctx)
+	healthy, err := m.client.HealthCheck(ctx)
 	if err != nil || !healthy {
 		return fmt.Errorf("backend health check failed: %w", err)
 	}
 
 	// Create operator session
-	session, err := m.httpClient.CreateSession(ctx, m.operatorID, "soc_operator")
+	session, err := m.client.CreateSession(ctx, m.operatorID, "soc_operator")
 	if err != nil {
 		return fmt.Errorf("failed to create session: %w", err)
 	}
@@ -103,17 +124,22 @@ func (m *Manager) Start(ctx context.Context) error {
 	m.mu.Lock()
 	m.sessionID = session.SessionID
 	m.mu.Unlock()
+	m.client.SetSessionID(session.SessionID)
 
-	// Create SSE client with session ID
-	m.sseClient = NewSSEClient(m.serverURL, m.operatorID, m.sessionID)
+	// Only create SSE client for HTTP backend (gRPC has built-in streaming)
+	if m.backendType == BackendHTTP {
+		// Create SSE client with session ID
+		m.sseClient = NewSSEClient(m.serverURL, m.operatorID, m.sessionID)
 
-	// Connect SSE stream
-	if err := m.sseClient.Connect(ctx); err != nil {
-		return fmt.Errorf("failed to connect SSE: %w", err)
+		// Connect SSE stream
+		if err := m.sseClient.Connect(ctx); err != nil {
+			return fmt.Errorf("failed to connect SSE: %w", err)
+		}
+
+		// Start event processing for HTTP/SSE
+		go m.processEvents(ctx)
 	}
 
-	// Start event processing
-	go m.processEvents(ctx)
 	go m.metricsUpdateLoop(ctx)
 
 	// Load initial pending decisions
@@ -179,7 +205,7 @@ func (m *Manager) ApproveDecision(ctx context.Context, decisionID, comment strin
 	}
 
 	// Submit approval to backend
-	if err := m.httpClient.ApproveDecision(ctx, decisionID, comment); err != nil {
+	if err := m.client.ApproveDecision(ctx, decisionID, comment); err != nil {
 		return fmt.Errorf("failed to approve decision: %w", err)
 	}
 
@@ -210,7 +236,7 @@ func (m *Manager) RejectDecision(ctx context.Context, decisionID, comment string
 		return fmt.Errorf("decision not pending: %s", decisionID)
 	}
 
-	if err := m.httpClient.RejectDecision(ctx, decisionID, comment); err != nil {
+	if err := m.client.RejectDecision(ctx, decisionID, comment); err != nil {
 		return fmt.Errorf("failed to reject decision: %w", err)
 	}
 
@@ -236,7 +262,7 @@ func (m *Manager) EscalateDecision(ctx context.Context, decisionID, reason strin
 		return fmt.Errorf("decision not found: %s", decisionID)
 	}
 
-	if err := m.httpClient.EscalateDecision(ctx, decisionID, reason); err != nil {
+	if err := m.client.EscalateDecision(ctx, decisionID, reason); err != nil {
 		return fmt.Errorf("failed to escalate decision: %w", err)
 	}
 
@@ -400,7 +426,7 @@ func (m *Manager) syncPendingDecisions(ctx context.Context) error {
 		Limit:  100,
 	}
 
-	decisions, err := m.httpClient.ListDecisions(ctx, filter)
+	decisions, err := m.client.ListDecisions(ctx, filter)
 	if err != nil {
 		return fmt.Errorf("failed to list decisions: %w", err)
 	}
@@ -433,7 +459,7 @@ func (m *Manager) metricsUpdateLoop(ctx context.Context) {
 
 // updateMetrics fetches and updates metrics from backend
 func (m *Manager) updateMetrics(ctx context.Context) {
-	metrics, err := m.httpClient.GetMetrics(ctx)
+	metrics, err := m.client.GetMetrics(ctx)
 	if err != nil {
 		m.emitError(fmt.Errorf("failed to fetch metrics: %w", err))
 		return

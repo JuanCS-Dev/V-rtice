@@ -33,7 +33,8 @@ type GovernanceWorkspace struct {
 	sessionID  string
 
 	// Configuration
-	serverURL string
+	serverURL   string
+	backendType gov.BackendType
 }
 
 // Section represents different UI sections
@@ -57,13 +58,19 @@ const (
 
 // NewGovernanceWorkspace creates a new Governance workspace
 func NewGovernanceWorkspace(ctx context.Context, serverURL, operatorID, sessionID string) *GovernanceWorkspace {
+	return NewGovernanceWorkspaceWithBackend(ctx, serverURL, operatorID, sessionID, gov.BackendHTTP)
+}
+
+// NewGovernanceWorkspaceWithBackend creates a new Governance workspace with specified backend type
+func NewGovernanceWorkspaceWithBackend(ctx context.Context, serverURL, operatorID, sessionID string, backendType gov.BackendType) *GovernanceWorkspace {
 	return &GovernanceWorkspace{
-		ctx:        ctx,
-		serverURL:  serverURL,
-		operatorID: operatorID,
-		sessionID:  sessionID,
-		focused:    SectionDecisionList,
-		filterMode: FilterAll,
+		ctx:         ctx,
+		serverURL:   serverURL,
+		operatorID:  operatorID,
+		sessionID:   sessionID,
+		backendType: backendType,
+		focused:     SectionDecisionList,
+		filterMode:  FilterAll,
 	}
 }
 
@@ -84,8 +91,8 @@ func (w *GovernanceWorkspace) Description() string {
 
 // Initialize initializes the workspace
 func (w *GovernanceWorkspace) Initialize() error {
-	// Create governance manager
-	w.manager = gov.NewManager(w.serverURL, w.operatorID, w.sessionID)
+	// Create governance manager with configured backend type
+	w.manager = gov.NewManagerWithBackend(w.serverURL, w.operatorID, w.sessionID, w.backendType)
 
 	// Start manager and connect to backend
 	if err := w.manager.Start(w.ctx); err != nil {
@@ -96,6 +103,18 @@ func (w *GovernanceWorkspace) Initialize() error {
 	go w.processManagerEvents()
 
 	return nil
+}
+
+// Init implements tea.Model interface
+// This is called by Bubble Tea when the workspace is first initialized
+func (w *GovernanceWorkspace) Init() tea.Cmd {
+	// Initialize workspace asynchronously
+	return func() tea.Msg {
+		if err := w.Initialize(); err != nil {
+			return ErrorMsg{Error: err}
+		}
+		return InitializedMsg{}
+	}
 }
 
 // Update handles Bubble Tea messages
@@ -439,7 +458,7 @@ func (w *GovernanceWorkspace) processManagerEvents() {
 		select {
 		case <-w.ctx.Done():
 			return
-		case decision := <-w.manager.Decisions():
+		case <-w.manager.Decisions():
 			// New decision received
 			w.decisions = w.manager.GetPendingDecisions()
 			w.metrics = w.manager.GetMetrics()
@@ -471,6 +490,14 @@ type DecisionUpdateMsg struct {
 type ConnectionStatusMsg struct {
 	Status gov.ConnectionStatus
 }
+
+// ErrorMsg is sent when an error occurs during initialization
+type ErrorMsg struct {
+	Error error
+}
+
+// InitializedMsg is sent when workspace initialization is complete
+type InitializedMsg struct {}
 
 // wrapText wraps text to fit within specified width
 func wrapText(text string, width int) string {
