@@ -3,12 +3,16 @@ package shell
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/k8s"
 	"github.com/verticedev/vcli-go/internal/palette"
 	"github.com/verticedev/vcli-go/internal/suggestions"
 	"github.com/verticedev/vcli-go/internal/visual"
+	"github.com/verticedev/vcli-go/internal/visual/banner"
+	"github.com/verticedev/vcli-go/internal/visual/components"
 )
 
 // Executor handles command execution in the shell
@@ -17,15 +21,19 @@ type Executor struct {
 	styles    *visual.Styles
 	history   []string
 	suggester *suggestions.Suggester
+	version   string
+	buildDate string
 }
 
 // NewExecutor creates a new command executor
-func NewExecutor(rootCmd *cobra.Command) *Executor {
+func NewExecutor(rootCmd *cobra.Command, version, buildDate string) *Executor {
 	return &Executor{
 		rootCmd:   rootCmd,
 		styles:    visual.DefaultStyles(),
 		history:   make([]string, 0),
 		suggester: suggestions.NewSuggester(rootCmd),
+		version:   version,
+		buildDate: buildDate,
 	}
 }
 
@@ -167,13 +175,17 @@ func (e *Executor) extractTypo(errMsg string) string {
 func (e *Executor) openCommandPalette() {
 	selected, err := palette.Run(e.rootCmd)
 
+	// After palette exits, redraw welcome screen to reset terminal state
+	// This fixes bug where autocomplete stays active after ESC
+	e.redrawWelcome()
+
 	if err != nil {
 		fmt.Println(e.styles.Error.Render(fmt.Sprintf("Error opening command palette: %v", err)))
 		return
 	}
 
 	if selected == nil {
-		// Cancelled
+		// Cancelled - user pressed ESC
 		return
 	}
 
@@ -181,6 +193,94 @@ func (e *Executor) openCommandPalette() {
 	fmt.Println(e.styles.Info.Render(fmt.Sprintf("▶ Executing: %s", selected.Command)))
 	fmt.Println()
 	e.Execute(selected.Command)
+}
+
+// redrawWelcome redraws the welcome screen (used after palette exit)
+func (e *Executor) redrawWelcome() {
+	// Clear screen
+	fmt.Print("\033[H\033[2J")
+
+	// Show compact banner
+	renderer := banner.NewBannerRenderer()
+	fmt.Print(renderer.RenderCompact(e.version, e.buildDate))
+
+	// Show statusline with K8s context if available
+	statusline := e.renderStatusline()
+	if statusline != "" {
+		fmt.Println(statusline)
+		fmt.Println()
+	}
+
+	// Help line
+	fmt.Printf("%s │ %s │ %s │ %s\n\n",
+		e.styles.Muted.Render("Tab/↓: Complete"),
+		e.styles.Muted.Render("/help: Help"),
+		e.styles.Muted.Render("/palette: Search"),
+		e.styles.Muted.Render("Ctrl+D: Exit"))
+}
+
+// renderStatusline renders context information (cluster, namespace, etc)
+func (e *Executor) renderStatusline() string {
+	// Try to get K8s context
+	kubeconfigPath := e.getKubeconfigPath()
+	if kubeconfigPath == "" {
+		return "" // No kubeconfig, no statusline
+	}
+
+	// Load kubeconfig to get context
+	config, err := k8s.LoadKubeconfig(kubeconfigPath)
+	if err != nil {
+		return "" // Failed to load, skip statusline
+	}
+
+	// Get current context
+	currentContext := config.GetCurrentContext()
+	if currentContext == "" {
+		return "" // No current context
+	}
+
+	// Get context info
+	contextInfo, err := config.GetContextInfo(currentContext)
+	if err != nil {
+		return "" // Failed to get context info
+	}
+
+	// Create statusline
+	statusline := components.NewStatusline(80)
+
+	// Add context
+	statusline.AddItem("Context", currentContext, "⎈")
+
+	// Add namespace
+	statusline.AddItem("Namespace", contextInfo.Namespace, "")
+
+	// Add cluster
+	statusline.AddItem("Cluster", contextInfo.ClusterName, "")
+
+	return statusline.RenderCompact()
+}
+
+// getKubeconfigPath returns the kubeconfig path from env or default location
+func (e *Executor) getKubeconfigPath() string {
+	// Try KUBECONFIG env var first
+	if kubeconfig := os.Getenv("KUBECONFIG"); kubeconfig != "" {
+		return kubeconfig
+	}
+
+	// Default to ~/.kube/config
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+
+	kubeconfigPath := filepath.Join(home, ".kube", "config")
+
+	// Check if file exists
+	if _, err := os.Stat(kubeconfigPath); err != nil {
+		return "" // File doesn't exist
+	}
+
+	return kubeconfigPath
 }
 
 // showHelp displays shell help
@@ -200,18 +300,30 @@ func (e *Executor) showHelp() {
 	fmt.Println(e.styles.Info.Render("  /history         ") + e.styles.Muted.Render("Show command history"))
 	fmt.Println()
 
-	fmt.Println(e.styles.Accent.Bold(true).Render("Navigation:"))
-	fmt.Println(e.styles.Info.Render("  ↑/↓              ") + e.styles.Muted.Render("Navigate command history"))
-	fmt.Println(e.styles.Info.Render("  Tab              ") + e.styles.Muted.Render("Auto-complete commands"))
+	fmt.Println(e.styles.Accent.Bold(true).Render("Keyboard Shortcuts:"))
+	fmt.Println(e.styles.Info.Render("  Tab              ") + e.styles.Muted.Render("Trigger autocomplete"))
+	fmt.Println(e.styles.Info.Render("  ↑/↓              ") + e.styles.Muted.Render("Navigate history/suggestions"))
 	fmt.Println(e.styles.Info.Render("  Ctrl+C           ") + e.styles.Muted.Render("Cancel current input"))
+	fmt.Println(e.styles.Info.Render("  Ctrl+D           ") + e.styles.Muted.Render("Exit shell"))
+	fmt.Println(e.styles.Info.Render("  Ctrl+A/E         ") + e.styles.Muted.Render("Move to start/end of line"))
+	fmt.Println(e.styles.Info.Render("  Ctrl+W/K         ") + e.styles.Muted.Render("Delete word/to end"))
 	fmt.Println()
 
-	fmt.Println(e.styles.Accent.Bold(true).Render("vCLI Commands:"))
-	fmt.Println(e.styles.Muted.Render("  Type any vCLI command without the 'vcli' prefix"))
-	fmt.Println(e.styles.Muted.Render("  Example: k8s get pods --all-namespaces"))
+	fmt.Println(e.styles.Accent.Bold(true).Render("Autocomplete Features:"))
+	fmt.Println(e.styles.Muted.Render("  • Context-aware suggestions (k8s, orchestrate, flags)"))
+	fmt.Println(e.styles.Muted.Render("  • Fuzzy matching (kgp → k8s get pods)"))
+	fmt.Println(e.styles.Muted.Render("  • Smart slash commands (/p → /palette)"))
 	fmt.Println()
 
-	fmt.Println(e.styles.Muted.Render("For full command list, type: ") + e.styles.Info.Render("--help"))
+	fmt.Println(e.styles.Accent.Bold(true).Render("Usage:"))
+	fmt.Println(e.styles.Muted.Render("  Type any command without 'vcli' prefix:"))
+	fmt.Println(e.styles.Info.Render("    k8s get pods --all-namespaces"))
+	fmt.Println(e.styles.Info.Render("    orchestrate offensive apt-simulation"))
+	fmt.Println(e.styles.Info.Render("    data query \"MATCH (n) RETURN n\""))
+	fmt.Println()
+
+	fmt.Println(e.styles.Muted.Render("📖 Full keyboard shortcuts: ") + e.styles.Info.Render("docs/KEYBOARD_SHORTCUTS.md"))
+	fmt.Println(e.styles.Muted.Render("📋 Command reference: ") + e.styles.Info.Render("--help"))
 	fmt.Println()
 }
 

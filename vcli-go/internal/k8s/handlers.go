@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/visual/components"
 )
 
 // HandlerConfig holds configuration for K8s command handlers
@@ -139,10 +140,24 @@ func HandleGetPods(cmd *cobra.Command, args []string) error {
 		namespace = "" // Empty string means all namespaces
 	}
 
+	// Show spinner while fetching pods
+	spinnerMsg := "Fetching pods"
+	if namespace != "" {
+		spinnerMsg = fmt.Sprintf("Fetching pods from namespace %s", namespace)
+	} else {
+		spinnerMsg = "Fetching pods from all namespaces"
+	}
+	spinner := components.NewSpinner(spinnerMsg)
+	stopChan := spinner.Start()
+
 	pods, err := manager.GetPods(namespace)
+
 	if err != nil {
+		spinner.Stop(stopChan, fmt.Sprintf("Failed to fetch pods: %v", err), false)
 		return fmt.Errorf("failed to get pods: %w", err)
 	}
+
+	spinner.Stop(stopChan, fmt.Sprintf("Found %d pods", len(pods)), true)
 
 	// Format and print
 	formatter, err := NewFormatter(config.OutputFormat)
@@ -214,11 +229,18 @@ func HandleGetNamespaces(cmd *cobra.Command, args []string) error {
 	}
 	defer manager.Disconnect()
 
-	// Get namespaces
+	// Get namespaces with spinner
+	spinner := components.NewSpinner("Fetching namespaces")
+	stopChan := spinner.Start()
+
 	namespaces, err := manager.GetNamespaces()
+
 	if err != nil {
+		spinner.Stop(stopChan, fmt.Sprintf("Failed to fetch namespaces: %v", err), false)
 		return fmt.Errorf("failed to get namespaces: %w", err)
 	}
+
+	spinner.Stop(stopChan, fmt.Sprintf("Found %d namespaces", len(namespaces)), true)
 
 	// Format and print
 	formatter, err := NewFormatter(config.OutputFormat)
@@ -290,11 +312,18 @@ func HandleGetNodes(cmd *cobra.Command, args []string) error {
 	}
 	defer manager.Disconnect()
 
-	// Get nodes
+	// Get nodes with spinner
+	spinner := components.NewSpinner("Fetching cluster nodes")
+	stopChan := spinner.Start()
+
 	nodes, err := manager.GetNodes()
+
 	if err != nil {
+		spinner.Stop(stopChan, fmt.Sprintf("Failed to fetch nodes: %v", err), false)
 		return fmt.Errorf("failed to get nodes: %w", err)
 	}
+
+	spinner.Stop(stopChan, fmt.Sprintf("Found %d nodes", len(nodes)), true)
 
 	// Format and print
 	formatter, err := NewFormatter(config.OutputFormat)
@@ -372,10 +401,24 @@ func HandleGetDeployments(cmd *cobra.Command, args []string) error {
 		namespace = "" // Empty string means all namespaces
 	}
 
+	// Show spinner while fetching deployments
+	spinnerMsg := "Fetching deployments"
+	if namespace != "" {
+		spinnerMsg = fmt.Sprintf("Fetching deployments from namespace %s", namespace)
+	} else {
+		spinnerMsg = "Fetching deployments from all namespaces"
+	}
+	spinner := components.NewSpinner(spinnerMsg)
+	stopChan := spinner.Start()
+
 	deployments, err := manager.GetDeployments(namespace)
+
 	if err != nil {
+		spinner.Stop(stopChan, fmt.Sprintf("Failed to fetch deployments: %v", err), false)
 		return fmt.Errorf("failed to get deployments: %w", err)
 	}
+
+	spinner.Stop(stopChan, fmt.Sprintf("Found %d deployments", len(deployments)), true)
 
 	// Format and print
 	formatter, err := NewFormatter(config.OutputFormat)
@@ -453,10 +496,24 @@ func HandleGetServices(cmd *cobra.Command, args []string) error {
 		namespace = "" // Empty string means all namespaces
 	}
 
+	// Show spinner while fetching services
+	spinnerMsg := "Fetching services"
+	if namespace != "" {
+		spinnerMsg = fmt.Sprintf("Fetching services from namespace %s", namespace)
+	} else {
+		spinnerMsg = "Fetching services from all namespaces"
+	}
+	spinner := components.NewSpinner(spinnerMsg)
+	stopChan := spinner.Start()
+
 	services, err := manager.GetServices(namespace)
+
 	if err != nil {
+		spinner.Stop(stopChan, fmt.Sprintf("Failed to fetch services: %v", err), false)
 		return fmt.Errorf("failed to get services: %w", err)
 	}
+
+	spinner.Stop(stopChan, fmt.Sprintf("Found %d services", len(services)), true)
 
 	// Format and print
 	formatter, err := NewFormatter(config.OutputFormat)

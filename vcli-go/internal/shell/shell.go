@@ -21,7 +21,7 @@ type Shell struct {
 
 // NewShell creates a new interactive shell
 func NewShell(rootCmd *cobra.Command, version, buildDate string) *Shell {
-	executor := NewExecutor(rootCmd)
+	executor := NewExecutor(rootCmd, version, buildDate)
 	completer := NewCompleter(rootCmd)
 
 	shell := &Shell{
@@ -39,15 +39,37 @@ func (s *Shell) Run() {
 	// Show welcome banner
 	s.showWelcome()
 
-	// Create prompt
+	// Create prompt with minimal prefix (gemini-style)
 	p := prompt.New(
 		s.execute,
 		s.complete,
-		prompt.OptionPrefix("vcli> "),
+		prompt.OptionPrefix("┃ "), // Vertical bar indicator
 		prompt.OptionPrefixTextColor(prompt.Cyan),
-		prompt.OptionLivePrefix(s.livePrefix),
 		prompt.OptionTitle("vCLI Interactive Shell"),
 		prompt.OptionHistory(s.executor.GetHistory()),
+
+		// Suggestion dropdown colors (cyan background like gemini)
+		prompt.OptionSelectedSuggestionBGColor(prompt.Cyan),
+		prompt.OptionSelectedSuggestionTextColor(prompt.Black),
+		prompt.OptionSuggestionBGColor(prompt.Black),
+		prompt.OptionSuggestionTextColor(prompt.White),
+		prompt.OptionDescriptionBGColor(prompt.Cyan),
+		prompt.OptionDescriptionTextColor(prompt.Black),
+		prompt.OptionSelectedDescriptionBGColor(prompt.Cyan),
+		prompt.OptionSelectedDescriptionTextColor(prompt.Black),
+
+		// Input colors
+		prompt.OptionInputTextColor(prompt.White),
+		prompt.OptionInputBGColor(prompt.Black),
+
+		// Scrollbar
+		prompt.OptionScrollbarBGColor(prompt.DarkGray),
+		prompt.OptionScrollbarThumbColor(prompt.Cyan),
+
+		// Show more suggestions
+		prompt.OptionMaxSuggestion(20),
+		prompt.OptionCompletionOnDown(),
+
 		prompt.OptionAddKeyBind(prompt.KeyBind{
 			Key: prompt.ControlC,
 			Fn: func(buf *prompt.Buffer) {
@@ -82,21 +104,10 @@ func (s *Shell) complete(d prompt.Document) []prompt.Suggest {
 	return s.completer.Complete(d)
 }
 
-// livePrefix returns the dynamic prompt prefix
-func (s *Shell) livePrefix() (string, bool) {
-	palette := visual.DefaultPalette()
-	gradient := palette.PrimaryGradient()
-
-	// Create gradient "vcli> " prompt
-	vcli := visual.GradientText("vcli", gradient)
-	return vcli + "> ", true
-}
 
 // showWelcome displays the welcome message
 func (s *Shell) showWelcome() {
 	styles := visual.DefaultStyles()
-	palette := visual.DefaultPalette()
-	gradient := palette.PrimaryGradient()
 
 	// Clear screen
 	fmt.Print("\033[H\033[2J")
@@ -104,19 +115,20 @@ func (s *Shell) showWelcome() {
 	// Show compact banner
 	renderer := banner.NewBannerRenderer()
 	fmt.Print(renderer.RenderCompact(s.version, s.buildDate))
-	fmt.Println()
 
-	// Welcome message
-	fmt.Println(styles.Accent.Bold(true).Render("🚀 Interactive Shell Mode"))
-	fmt.Println(styles.Muted.Render("Type commands without 'vcli' prefix │ Tab for completion │ /help for help"))
-	fmt.Println()
+	// Show statusline with K8s context if available
+	statusline := s.executor.renderStatusline()
+	if statusline != "" {
+		fmt.Println(statusline)
+		fmt.Println()
+	}
 
-	// Example commands
-	fmt.Println(styles.Muted.Render("Examples:"))
-	fmt.Printf("  %s\n", visual.GradientText("k8s get pods --all-namespaces", gradient))
-	fmt.Printf("  %s\n", visual.GradientText("k8s top nodes", gradient))
-	fmt.Printf("  %s\n", visual.GradientText("k8s auth whoami", gradient))
-	fmt.Println()
+	// Simple help line (no box)
+	fmt.Printf("%s │ %s │ %s │ %s\n\n",
+		styles.Muted.Render("Tab/↓: Complete"),
+		styles.Muted.Render("/help: Help"),
+		styles.Muted.Render("/palette: Search"),
+		styles.Muted.Render("Ctrl+D: Exit"))
 }
 
 // ShowHelp displays shell help
