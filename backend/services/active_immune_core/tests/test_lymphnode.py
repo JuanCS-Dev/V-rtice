@@ -717,25 +717,30 @@ async def test_homeostatic_state_property(lymphnode: LinfonodoDigital):
     """Test homeostatic state property calculation."""
     await lymphnode.iniciar()
 
-    # Test normal state
+    # Test REPOUSO state (< 37.0)
+    lymphnode.temperatura_regional = 36.0
+    state = lymphnode.homeostatic_state
+    assert state == HomeostaticState.REPOUSO
+
+    # Test VIGILANCIA state (37.0-37.5)
+    lymphnode.temperatura_regional = 37.2
+    state = lymphnode.homeostatic_state
+    assert state == HomeostaticState.VIGILANCIA
+
+    # Test ATENCAO state (37.5-38.0)
+    lymphnode.temperatura_regional = 37.7
+    state = lymphnode.homeostatic_state
+    assert state == HomeostaticState.ATENCAO
+
+    # Test ATIVACAO state (38.0-39.0)
+    lymphnode.temperatura_regional = 38.5
+    state = lymphnode.homeostatic_state
+    assert state == HomeostaticState.ATIVACAO
+
+    # Test INFLAMACAO state (>= 39.0)
     lymphnode.temperatura_regional = 40.0
     state = lymphnode.homeostatic_state
-    assert state == HomeostaticState.NORMAL
-
-    # Test fever state
-    lymphnode.temperatura_regional = 70.0
-    state = lymphnode.homeostatic_state
-    assert state == HomeostaticState.FEVER
-
-    # Test stress state
-    lymphnode.temperatura_regional = 55.0
-    state = lymphnode.homeostatic_state
-    assert state == HomeostaticState.STRESS
-
-    # Test hypothermia state
-    lymphnode.temperatura_regional = 30.0
-    state = lymphnode.homeostatic_state
-    assert state == HomeostaticState.HYPOTHERMIA
+    assert state == HomeostaticState.INFLAMACAO
 
     await lymphnode.parar()
 
@@ -750,6 +755,7 @@ async def test_send_apoptosis_signal(lymphnode: LinfonodoDigital):
         id="test_agent_apoptosis",
         tipo=AgentType.NEUTROFILO,
         area_patrulha="test_area",
+        localizacao_atual="10.0.1.1",
     )
     await lymphnode.registrar_agente(agent_state)
 
