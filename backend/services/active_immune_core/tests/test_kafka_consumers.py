@@ -538,3 +538,186 @@ async def test_repr_after_start():
         assert "kafka_available=True" in repr_str
 
         await consumer.stop()
+
+
+# ==================== PHASE 2: EVENT CONSUMPTION COVERAGE (81%→85%+) ====================
+
+
+@pytest.mark.asyncio
+async def test_consume_events_with_messages():
+    """Test _consume_events processes messages from Kafka."""
+    consumer = KafkaEventConsumer()
+
+    # Track handler calls
+    handler_called = False
+    received_data = {}
+
+    async def test_handler(event_data: Dict[str, Any]) -> None:
+        nonlocal handler_called, received_data
+        handler_called = True
+        received_data = event_data
+
+    consumer.register_handler(ExternalTopic.THREATS_INTEL, test_handler)
+
+    # Mock Kafka message
+    mock_msg = MagicMock()
+    mock_msg.topic = "vertice.threats.intel"
+    mock_msg.value = {"threat_type": "malware", "severity": "high"}
+
+    # Mock async iterator that yields one message then stops
+    async def mock_aiter(self):
+        yield mock_msg
+        # After yielding, consumer will be stopped
+        consumer._running = False
+
+    mock_kafka_consumer = AsyncMock()
+    mock_kafka_consumer.start = AsyncMock()
+    mock_kafka_consumer.stop = AsyncMock()
+    mock_kafka_consumer.__aiter__ = mock_aiter
+
+    with patch("active_immune_core.communication.kafka_consumers.AIOKafkaConsumer", return_value=mock_kafka_consumer):
+        await consumer.start()
+
+        # Wait for message to be processed
+        await asyncio.sleep(0.2)
+
+        await consumer.stop()
+
+        # Handler should have been called
+        assert handler_called is True
+        assert received_data == {"threat_type": "malware", "severity": "high"}
+        assert consumer.total_events_consumed == 1
+        assert consumer.total_events_processed == 1
+
+
+@pytest.mark.asyncio
+async def test_consume_events_unknown_topic():
+    """Test _consume_events handles unknown topic gracefully."""
+    consumer = KafkaEventConsumer()
+
+    # Mock message with unknown topic
+    mock_msg = MagicMock()
+    mock_msg.topic = "unknown.topic"
+    mock_msg.value = {"data": "test"}
+
+    async def mock_aiter(self):
+        yield mock_msg
+        consumer._running = False
+
+    mock_kafka_consumer = AsyncMock()
+    mock_kafka_consumer.start = AsyncMock()
+    mock_kafka_consumer.stop = AsyncMock()
+    mock_kafka_consumer.__aiter__ = mock_aiter
+
+    with patch("active_immune_core.communication.kafka_consumers.AIOKafkaConsumer", return_value=mock_kafka_consumer):
+        await consumer.start()
+        await asyncio.sleep(0.2)
+        await consumer.stop()
+
+        # Should have consumed but not processed (unknown topic)
+        assert consumer.total_events_consumed == 0  # ValueError prevents increment
+
+
+@pytest.mark.asyncio
+async def test_consume_events_processing_error():
+    """Test _consume_events handles processing errors."""
+    consumer = KafkaEventConsumer()
+
+    # Register handler that raises error
+    async def failing_handler(event_data: Dict[str, Any]) -> None:
+        raise Exception("Handler error")
+
+    consumer.register_handler(ExternalTopic.NETWORK_EVENTS, failing_handler)
+
+    mock_msg = MagicMock()
+    mock_msg.topic = "vertice.network.events"
+    mock_msg.value = {"event_type": "anomaly"}
+
+    async def mock_aiter(self):
+        yield mock_msg
+        consumer._running = False
+
+    mock_kafka_consumer = AsyncMock()
+    mock_kafka_consumer.start = AsyncMock()
+    mock_kafka_consumer.stop = AsyncMock()
+    mock_kafka_consumer.__aiter__ = mock_aiter
+
+    with patch("active_immune_core.communication.kafka_consumers.AIOKafkaConsumer", return_value=mock_kafka_consumer):
+        await consumer.start()
+        await asyncio.sleep(0.2)
+        await consumer.stop()
+
+        # Should have consumed and failed
+        assert consumer.total_events_consumed == 1
+        assert consumer.total_events_failed == 1
+
+
+@pytest.mark.asyncio
+async def test_consume_events_cancelled():
+    """Test _consume_events handles CancelledError."""
+    consumer = KafkaEventConsumer()
+
+    async def mock_aiter(self):
+        # Raise CancelledError during iteration
+        raise asyncio.CancelledError()
+
+    mock_kafka_consumer = AsyncMock()
+    mock_kafka_consumer.start = AsyncMock()
+    mock_kafka_consumer.stop = AsyncMock()
+    mock_kafka_consumer.__aiter__ = mock_aiter
+
+    with patch("active_immune_core.communication.kafka_consumers.AIOKafkaConsumer", return_value=mock_kafka_consumer):
+        await consumer.start()
+        await asyncio.sleep(0.1)
+        await consumer.stop()
+
+
+@pytest.mark.asyncio
+async def test_consume_events_no_consumer():
+    """Test _consume_events handles missing consumer gracefully."""
+    consumer = KafkaEventConsumer()
+    consumer._consumer = None
+
+    # Should return immediately without crashing
+    await consumer._consume_events()
+
+
+@pytest.mark.asyncio
+async def test_consume_events_generic_exception():
+    """Test _consume_events handles generic exception in loop."""
+    consumer = KafkaEventConsumer()
+
+    async def mock_aiter(self):
+        # Raise generic exception
+        raise RuntimeError("Consumer error")
+
+    mock_kafka_consumer = AsyncMock()
+    mock_kafka_consumer.start = AsyncMock()
+    mock_kafka_consumer.stop = AsyncMock()
+    mock_kafka_consumer.__aiter__ = mock_aiter
+
+    with patch("active_immune_core.communication.kafka_consumers.AIOKafkaConsumer", return_value=mock_kafka_consumer):
+        await consumer.start()
+        await asyncio.sleep(0.2)
+
+        # kafka_available should be set to False after exception
+        assert consumer._kafka_available is False
+
+        await consumer.stop()
+
+
+@pytest.mark.asyncio
+async def test_route_event_handler_invocation_error(consumer: KafkaEventConsumer):
+    """Test _route_event handles handler invocation error."""
+    # Register handler that will cause invocation error
+    def bad_handler(event_data: Dict[str, Any]) -> None:
+        # This is intentionally wrong signature (sync instead of async)
+        pass
+
+    # Manually add to handlers to bypass register_handler
+    consumer._handlers[ExternalTopic.ENDPOINT_EVENTS].append(bad_handler)
+
+    event_data = {"test": "data"}
+
+    # Should handle invocation error gracefully
+    await consumer._route_event(ExternalTopic.ENDPOINT_EVENTS, event_data)
