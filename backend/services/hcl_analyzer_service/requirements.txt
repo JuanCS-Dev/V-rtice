@@ -2,15 +2,15 @@
 # Machine Learning & Time-Series Analysis
 
 # FastAPI + ASGI
-fastapi>=0.115.0  # Security fix
-uvicorn[standard]==0.27.0
+fastapi>=0.115.0  # Security fixes for starlette
+uvicorn[standard]>=0.32.0  # Compatibility with updated fastapi
 
 # Time-series forecasting
-statsmodels==0.14.1
+statsmodels>=0.14.1  # Keep current
 
 # Machine Learning
-scikit-learn==1.4.0
-xgboost==2.0.3
+scikit-learn>=1.5.0  # CVE-2024-5206 fix
+xgboost>=2.0.3  # Keep current
 
 # Data processing
 pandas==2.1.4

@@ -155,10 +155,12 @@ func HandleGetPods(cmd *cobra.Command, args []string) error {
 	})
 }
 
-// HandleGetPod handles the 'get pod <name>' command
+// HandleGetPod handles the 'get pod [name]' command
+// If no name is provided, delegates to HandleGetPods to list all pods
 func HandleGetPod(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("pod name is required")
+		// No name provided - list all pods like 'get pods'
+		return HandleGetPods(cmd, args)
 	}
 
 	podName := args[0]
@@ -229,10 +231,12 @@ func HandleGetNamespaces(cmd *cobra.Command, args []string) error {
 	})
 }
 
-// HandleGetNamespace handles the 'get namespace <name>' command
+// HandleGetNamespace handles the 'get namespace [name]' command
+// If no name is provided, delegates to HandleGetNamespaces to list all namespaces
 func HandleGetNamespace(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("namespace name is required")
+		// No name provided - list all namespaces like 'get namespaces'
+		return HandleGetNamespaces(cmd, args)
 	}
 
 	namespaceName := args[0]
@@ -303,10 +307,12 @@ func HandleGetNodes(cmd *cobra.Command, args []string) error {
 	})
 }
 
-// HandleGetNode handles the 'get node <name>' command
+// HandleGetNode handles the 'get node [name]' command
+// If no name is provided, delegates to HandleGetNodes to list all nodes
 func HandleGetNode(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("node name is required")
+		// No name provided - list all nodes like 'get nodes'
+		return HandleGetNodes(cmd, args)
 	}
 
 	nodeName := args[0]
@@ -382,10 +388,12 @@ func HandleGetDeployments(cmd *cobra.Command, args []string) error {
 	})
 }
 
-// HandleGetDeployment handles the 'get deployment <name>' command
+// HandleGetDeployment handles the 'get deployment [name]' command
+// If no name is provided, delegates to HandleGetDeployments to list all deployments
 func HandleGetDeployment(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("deployment name is required")
+		// No name provided - list all deployments like 'get deployments'
+		return HandleGetDeployments(cmd, args)
 	}
 
 	deploymentName := args[0]
@@ -461,10 +469,12 @@ func HandleGetServices(cmd *cobra.Command, args []string) error {
 	})
 }
 
-// HandleGetService handles the 'get service <name>' command
+// HandleGetService handles the 'get service [name]' command
+// If no name is provided, delegates to HandleGetServices to list all services
 func HandleGetService(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("service name is required")
+		// No name provided - list all services like 'get services'
+		return HandleGetServices(cmd, args)
 	}
 
 	serviceName := args[0]
@@ -605,4 +615,166 @@ func HandleListContexts(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// ============================================================================
+// CONFIGMAP HANDLERS
+// ============================================================================
+
+// HandleGetConfigMaps handles the 'get configmaps' command
+func HandleGetConfigMaps(cmd *cobra.Command, args []string) error {
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get configmaps
+	namespace := config.Namespace
+	if config.AllNamespaces {
+		namespace = "" // Empty string means all namespaces
+	}
+
+	configmaps, err := manager.GetConfigMaps(namespace)
+	if err != nil {
+		return fmt.Errorf("failed to get configmaps: %w", err)
+	}
+
+	// Format and print
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatConfigMaps(configmaps)
+	})
+}
+
+// HandleGetConfigMap handles the 'get configmap [name]' command
+// If no name is provided, delegates to HandleGetConfigMaps to list all configmaps
+func HandleGetConfigMap(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		// No name provided - list all configmaps like 'get configmaps'
+		return HandleGetConfigMaps(cmd, args)
+	}
+
+	configmapName := args[0]
+
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get single configmap
+	configmap, err := manager.GetConfigMapByName(config.Namespace, configmapName)
+	if err != nil {
+		return fmt.Errorf("failed to get configmap %s: %w", configmapName, err)
+	}
+
+	// Format and print (wrap in slice for formatters)
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatConfigMaps([]ConfigMap{*configmap})
+	})
+}
+
+// ============================================================================
+// SECRET HANDLERS
+// ============================================================================
+
+// HandleGetSecrets handles the 'get secrets' command
+func HandleGetSecrets(cmd *cobra.Command, args []string) error {
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get secrets
+	namespace := config.Namespace
+	if config.AllNamespaces {
+		namespace = "" // Empty string means all namespaces
+	}
+
+	secrets, err := manager.GetSecrets(namespace)
+	if err != nil {
+		return fmt.Errorf("failed to get secrets: %w", err)
+	}
+
+	// Format and print
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatSecrets(secrets)
+	})
+}
+
+// HandleGetSecret handles the 'get secret [name]' command
+// If no name is provided, delegates to HandleGetSecrets to list all secrets
+func HandleGetSecret(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		// No name provided - list all secrets like 'get secrets'
+		return HandleGetSecrets(cmd, args)
+	}
+
+	secretName := args[0]
+
+	// Parse flags
+	config, err := parseCommonFlags(cmd)
+	if err != nil {
+		return err
+	}
+
+	// Initialize cluster manager
+	manager, err := initClusterManager(config.KubeconfigPath)
+	if err != nil {
+		return err
+	}
+	defer manager.Disconnect()
+
+	// Get single secret
+	secret, err := manager.GetSecretByName(config.Namespace, secretName)
+	if err != nil {
+		return fmt.Errorf("failed to get secret %s: %w", secretName, err)
+	}
+
+	// Format and print (wrap in slice for formatters)
+	formatter, err := NewFormatter(config.OutputFormat)
+	if err != nil {
+		return err
+	}
+
+	return formatAndPrint(formatter, func() (string, error) {
+		return formatter.FormatSecrets([]Secret{*secret})
+	})
 }

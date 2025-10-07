@@ -124,7 +124,7 @@ typing-extensions==4.15.0
     #   torch
 tzdata==2025.2
     # via pandas
-uvicorn[standard]==0.27.0
+uvicorn[standard]==0.37.0
     # via -r requirements.txt
 uvloop==0.21.0
     # via uvicorn

@@ -8,6 +8,7 @@ import (
 )
 
 // GetPods retrieves all pods in the specified namespace
+// If namespace is empty string, retrieves pods from all namespaces
 func (cm *ClusterManager) GetPods(namespace string) ([]Pod, error) {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
@@ -16,10 +17,7 @@ func (cm *ClusterManager) GetPods(namespace string) ([]Pod, error) {
 		return nil, ErrNotConnected
 	}
 
-	if namespace == "" {
-		namespace = "default"
-	}
-
+	// Empty string means all namespaces (don't default to "default")
 	ctx := context.Background()
 	podList, err := cm.clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -154,6 +152,7 @@ func (cm *ClusterManager) GetNode(name string) (*Node, error) {
 }
 
 // GetDeployments retrieves all deployments in the specified namespace
+// If namespace is empty string, retrieves deployments from all namespaces
 func (cm *ClusterManager) GetDeployments(namespace string) ([]Deployment, error) {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
@@ -162,10 +161,7 @@ func (cm *ClusterManager) GetDeployments(namespace string) ([]Deployment, error)
 		return nil, ErrNotConnected
 	}
 
-	if namespace == "" {
-		namespace = "default"
-	}
-
+	// Empty string means all namespaces (don't default to "default")
 	ctx := context.Background()
 	deployList, err := cm.clientset.AppsV1().Deployments(namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -208,6 +204,7 @@ func (cm *ClusterManager) GetDeployment(namespace, name string) (*Deployment, er
 }
 
 // GetServices retrieves all services in the specified namespace
+// If namespace is empty string, retrieves services from all namespaces
 func (cm *ClusterManager) GetServices(namespace string) ([]Service, error) {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
@@ -216,10 +213,7 @@ func (cm *ClusterManager) GetServices(namespace string) ([]Service, error) {
 		return nil, ErrNotConnected
 	}
 
-	if namespace == "" {
-		namespace = "default"
-	}
-
+	// Empty string means all namespaces (don't default to "default")
 	ctx := context.Background()
 	svcList, err := cm.clientset.CoreV1().Services(namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -259,4 +253,108 @@ func (cm *ClusterManager) GetService(namespace, name string) (*Service, error) {
 
 	svc := convertService(k8sService)
 	return &svc, nil
+}
+
+// GetConfigMaps retrieves all configmaps in the specified namespace
+// If namespace is empty string, retrieves configmaps from all namespaces
+func (cm *ClusterManager) GetConfigMaps(namespace string) ([]ConfigMap, error) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+
+	if !cm.connected {
+		return nil, ErrNotConnected
+	}
+
+	// Use the existing ConfigMap operations
+	listOpts := NewConfigMapListOptions()
+	result, err := cm.ListConfigMaps(namespace, listOpts)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to list configmaps: %v", ErrOperationFailed, err)
+	}
+
+	configmaps := make([]ConfigMap, len(result.Items))
+	for i, k8sCM := range result.Items {
+		configmaps[i] = convertConfigMap(&k8sCM)
+	}
+
+	return configmaps, nil
+}
+
+// GetConfigMapByName retrieves a specific configmap by name in the specified namespace
+func (cm *ClusterManager) GetConfigMapByName(namespace, name string) (*ConfigMap, error) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+
+	if !cm.connected {
+		return nil, ErrNotConnected
+	}
+
+	if namespace == "" {
+		namespace = "default"
+	}
+
+	if name == "" {
+		return nil, ErrResourceNameEmpty
+	}
+
+	// Use the existing ConfigMap operations
+	k8sCM, err := cm.GetConfigMap(name, namespace)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to get configmap %s: %v", ErrResourceNotFound, name, err)
+	}
+
+	cm2 := convertConfigMap(k8sCM)
+	return &cm2, nil
+}
+
+// GetSecrets retrieves all secrets in the specified namespace
+// If namespace is empty string, retrieves secrets from all namespaces
+func (cm *ClusterManager) GetSecrets(namespace string) ([]Secret, error) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+
+	if !cm.connected {
+		return nil, ErrNotConnected
+	}
+
+	// Use the existing Secret operations
+	listOpts := NewSecretListOptions()
+	result, err := cm.ListSecrets(namespace, listOpts)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to list secrets: %v", ErrOperationFailed, err)
+	}
+
+	secrets := make([]Secret, len(result.Items))
+	for i, k8sSecret := range result.Items {
+		secrets[i] = convertSecret(&k8sSecret)
+	}
+
+	return secrets, nil
+}
+
+// GetSecretByName retrieves a specific secret by name in the specified namespace
+func (cm *ClusterManager) GetSecretByName(namespace, name string) (*Secret, error) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+
+	if !cm.connected {
+		return nil, ErrNotConnected
+	}
+
+	if namespace == "" {
+		namespace = "default"
+	}
+
+	if name == "" {
+		return nil, ErrResourceNameEmpty
+	}
+
+	// Use the existing Secret operations
+	k8sSecret, err := cm.GetSecret(name, namespace)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to get secret %s: %v", ErrResourceNotFound, name, err)
+	}
+
+	secret := convertSecret(k8sSecret)
+	return &secret, nil
 }

@@ -37,6 +37,17 @@ from agents.models import AgenteState
 
 logger = logging.getLogger(__name__)
 
+# ESGT Integration (optional dependency)
+try:
+    import sys
+    sys.path.insert(0, '/home/juan/vertice-dev/backend/services/maximus_core_service')
+    from consciousness.integration import ESGTSubscriber
+    from consciousness.esgt.coordinator import ESGTEvent
+    ESGT_AVAILABLE = True
+except ImportError:
+    ESGT_AVAILABLE = False
+    logger.warning("ESGT integration not available (consciousness module not found)")
+
 
 class HomeostaticState(str, Enum):
     """Homeostatic states based on temperature."""
@@ -115,6 +126,11 @@ class LinfonodoDigital:
         self.total_clones_criados: int = 0
         self.total_clones_destruidos: int = 0
 
+        # ESGT Integration (consciousness ignition)
+        self.esgt_subscriber: Optional['ESGTSubscriber'] = None
+        self.recent_ignitions: List['ESGTEvent'] = []
+        self.max_ignition_history: int = 100
+
         # Background tasks
         self._tasks: List[asyncio.Task] = []
         self._running = False
@@ -139,6 +155,122 @@ class LinfonodoDigital:
             return HomeostaticState.VIGILANCIA
         else:
             return HomeostaticState.REPOUSO
+
+    # ==================== ESGT INTEGRATION ====================
+
+    def set_esgt_subscriber(self, subscriber: 'ESGTSubscriber') -> None:
+        """
+        Set ESGT subscriber for conscious ignition integration.
+
+        Args:
+            subscriber: ESGTSubscriber instance
+        """
+        if not ESGT_AVAILABLE:
+            logger.warning("ESGT integration not available (module not found)")
+            return
+
+        self.esgt_subscriber = subscriber
+        # Register handler for ESGT ignition events
+        subscriber.on_ignition(self._handle_esgt_ignition)
+        logger.info(f"Lymphnode {self.id} connected to ESGT (ignition response enabled)")
+
+    async def _handle_esgt_ignition(self, event: 'ESGTEvent') -> None:
+        """
+        Handle ESGT ignition event.
+
+        High salience conscious events trigger coordinated immune response.
+
+        Args:
+            event: ESGT ignition event
+        """
+        # Store event
+        self.recent_ignitions.append(event)
+        if len(self.recent_ignitions) > self.max_ignition_history:
+            self.recent_ignitions.pop(0)
+
+        # Extract salience
+        salience = event.salience.composite_score()
+
+        logger.info(
+            f"🧠 ESGT ignition detected (salience={salience:.2f}, event_id={event.id})"
+        )
+
+        # High salience → Threat response
+        if salience > 0.8:
+            logger.warning(
+                f"🚨 High salience ESGT ({salience:.2f}) → Triggering immune activation"
+            )
+
+            # Increase temperature (inflammation)
+            await self._adjust_temperature(delta=+1.0)
+
+            # Broadcast pro-inflammatory cytokine
+            await self._broadcast_hormone(
+                hormone_type="IL-1",
+                level=salience,
+                source=f"esgt_ignition_{event.id}",
+            )
+
+            logger.info("Immune activation triggered by conscious event")
+
+        # Medium salience → Increase vigilance
+        elif salience > 0.6:
+            logger.info(
+                f"📊 Medium salience ESGT ({salience:.2f}) → Increasing vigilance"
+            )
+            await self._adjust_temperature(delta=+0.5)
+
+        # Low salience → No action
+        else:
+            logger.debug(f"Low salience ESGT ({salience:.2f}) → No immune action")
+
+    async def _adjust_temperature(self, delta: float) -> None:
+        """
+        Adjust regional temperature.
+
+        Args:
+            delta: Temperature change (positive = increase, negative = decrease)
+        """
+        old_temp = self.temperatura_regional
+        self.temperatura_regional = max(36.0, min(40.0, self.temperatura_regional + delta))
+
+        logger.info(
+            f"Lymphnode {self.id} temperature: {old_temp:.1f}°C → {self.temperatura_regional:.1f}°C "
+            f"(state={self.homeostatic_state.value})"
+        )
+
+    async def _broadcast_hormone(
+        self, hormone_type: str, level: float, source: str
+    ) -> None:
+        """
+        Broadcast hormone signal via Redis (global).
+
+        Args:
+            hormone_type: Type of hormone (e.g., "IL-1", "IL-6")
+            level: Hormone level (0-1)
+            source: Source of signal
+        """
+        if not self._redis_client:
+            logger.warning("Redis unavailable, cannot broadcast hormone")
+            return
+
+        try:
+            message = {
+                "lymphnode_id": self.id,
+                "hormone_type": hormone_type,
+                "level": level,
+                "source": source,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+            await self._redis_client.publish(
+                f"immunis:hormones:{hormone_type}", json.dumps(message)
+            )
+
+            logger.debug(f"Broadcast hormone {hormone_type} (level={level:.2f})")
+
+        except Exception as e:
+            logger.warning(f"Failed to broadcast hormone: {e}")
 
     # ==================== LIFECYCLE ====================
 

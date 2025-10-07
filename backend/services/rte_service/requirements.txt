@@ -2,7 +2,7 @@
 
 # Web framework
 fastapi>=0.115.0  # Security fix
-uvicorn[standard]==0.27.0
+uvicorn[standard]>=0.32.0  # Compatibility
 pydantic==2.5.3
 
 # Intel Hyperscan Python bindings

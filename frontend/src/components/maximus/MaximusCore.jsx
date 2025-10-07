@@ -24,6 +24,7 @@ import {
   callTool,
   getMaximusHealth
 } from '../../api/maximusAI';
+import { escapeHTML } from '../../utils/security';
 import './MaximusCore.css';
 
 export const MaximusCore = ({ aiStatus, setAiStatus }) => {
@@ -281,7 +282,8 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
             <pre className="tool-output">{msg.content}</pre>
           ) : (
             <div className="message-text" dangerouslySetInnerHTML={{
-              __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              __html: escapeHTML(msg.content)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br/>')
             }} />
           )}
@@ -449,7 +451,8 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
                 </div>
                 <div className="message-content">
                   <div className="message-text" dangerouslySetInnerHTML={{
-                    __html: currentStreamingMessage.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    __html: escapeHTML(currentStreamingMessage)
+                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                       .replace(/\n/g, '<br/>')
                   }} />
                 </div>

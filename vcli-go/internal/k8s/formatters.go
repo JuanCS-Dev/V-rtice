@@ -35,6 +35,10 @@ type Formatter interface {
 	FormatDeployments(deployments []Deployment) (string, error)
 	// FormatServices formats a list of services
 	FormatServices(services []Service) (string, error)
+	// FormatConfigMaps formats a list of configmaps
+	FormatConfigMaps(configmaps []ConfigMap) (string, error)
+	// FormatSecrets formats a list of secrets
+	FormatSecrets(secrets []Secret) (string, error)
 }
 
 // NewFormatter creates a new formatter based on the specified format
@@ -288,6 +292,79 @@ func (tf *TableFormatter) FormatServices(services []Service) (string, error) {
 	return header + "\n" + strings.Join(rows, "\n") + "\n", nil
 }
 
+// FormatConfigMaps formats configmaps as a table
+func (tf *TableFormatter) FormatConfigMaps(configmaps []ConfigMap) (string, error) {
+	if len(configmaps) == 0 {
+		return "No resources found.\n", nil
+	}
+
+	// Calculate column widths
+	nameWidth := max(4, maxLen(configmaps, func(cm ConfigMap) string { return cm.Name }))
+	nsWidth := max(9, maxLen(configmaps, func(cm ConfigMap) string { return cm.Namespace }))
+
+	// Header
+	header := tf.styleHeader.Render(
+		fmt.Sprintf("%-*s  %-*s  %-4s  %s",
+			nameWidth, "NAME",
+			nsWidth, "NAMESPACE",
+			"DATA",
+			"AGE"))
+
+	// Rows
+	var rows []string
+	for _, cm := range configmaps {
+		dataCount := len(cm.Data) + len(cm.BinaryData)
+		age := formatAge(cm.CreatedAt)
+
+		row := fmt.Sprintf("%-*s  %-*s  %-4d  %s",
+			nameWidth, truncate(cm.Name, nameWidth),
+			nsWidth, truncate(cm.Namespace, nsWidth),
+			dataCount,
+			age)
+		rows = append(rows, row)
+	}
+
+	return header + "\n" + strings.Join(rows, "\n") + "\n", nil
+}
+
+// FormatSecrets formats secrets as a table
+func (tf *TableFormatter) FormatSecrets(secrets []Secret) (string, error) {
+	if len(secrets) == 0 {
+		return "No resources found.\n", nil
+	}
+
+	// Calculate column widths
+	nameWidth := max(4, maxLen(secrets, func(s Secret) string { return s.Name }))
+	nsWidth := max(9, maxLen(secrets, func(s Secret) string { return s.Namespace }))
+	typeWidth := max(4, maxLen(secrets, func(s Secret) string { return string(s.Type) }))
+
+	// Header
+	header := tf.styleHeader.Render(
+		fmt.Sprintf("%-*s  %-*s  %-*s  %-4s  %s",
+			nameWidth, "NAME",
+			nsWidth, "NAMESPACE",
+			typeWidth, "TYPE",
+			"DATA",
+			"AGE"))
+
+	// Rows
+	var rows []string
+	for _, secret := range secrets {
+		dataCount := len(secret.Data)
+		age := formatAge(secret.CreatedAt)
+
+		row := fmt.Sprintf("%-*s  %-*s  %-*s  %-4d  %s",
+			nameWidth, truncate(secret.Name, nameWidth),
+			nsWidth, truncate(secret.Namespace, nsWidth),
+			typeWidth, truncate(string(secret.Type), typeWidth),
+			dataCount,
+			age)
+		rows = append(rows, row)
+	}
+
+	return header + "\n" + strings.Join(rows, "\n") + "\n", nil
+}
+
 // colorizeStatus applies color to status based on its value
 func (tf *TableFormatter) colorizeStatus(status string) string {
 	// Normalize status to match exact width
@@ -349,6 +426,16 @@ func (jf *JSONFormatter) FormatServices(services []Service) (string, error) {
 	return jf.marshal(services)
 }
 
+// FormatConfigMaps formats configmaps as JSON
+func (jf *JSONFormatter) FormatConfigMaps(configmaps []ConfigMap) (string, error) {
+	return jf.marshal(configmaps)
+}
+
+// FormatSecrets formats secrets as JSON
+func (jf *JSONFormatter) FormatSecrets(secrets []Secret) (string, error) {
+	return jf.marshal(secrets)
+}
+
 // marshal converts data to JSON string
 func (jf *JSONFormatter) marshal(v interface{}) (string, error) {
 	var data []byte
@@ -402,6 +489,16 @@ func (yf *YAMLFormatter) FormatDeployments(deployments []Deployment) (string, er
 // FormatServices formats services as YAML
 func (yf *YAMLFormatter) FormatServices(services []Service) (string, error) {
 	return yf.marshal(services)
+}
+
+// FormatConfigMaps formats configmaps as YAML
+func (yf *YAMLFormatter) FormatConfigMaps(configmaps []ConfigMap) (string, error) {
+	return yf.marshal(configmaps)
+}
+
+// FormatSecrets formats secrets as YAML
+func (yf *YAMLFormatter) FormatSecrets(secrets []Secret) (string, error) {
+	return yf.marshal(secrets)
 }
 
 // marshal converts data to YAML string

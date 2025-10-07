@@ -28,6 +28,8 @@ charset-normalizer==3.4.3
     # via requests
 click==8.3.0
     # via uvicorn
+durationpy==0.10
+    # via kubernetes
 fastapi==0.118.0
     # via -r requirements.txt
 google-auth==2.41.1
@@ -40,19 +42,17 @@ httpcore==1.0.9
     # via httpx
 httptools==0.6.4
     # via uvicorn
-httpx==0.26.0
+httpx==0.28.1
     # via -r requirements.txt
 idna==3.10
     # via
     #   anyio
     #   httpx
     #   requests
-kubernetes==28.1.0
+kubernetes==34.1.0
     # via -r requirements.txt
 oauthlib==3.3.1
-    # via
-    #   kubernetes
-    #   requests-oauthlib
+    # via requests-oauthlib
 packaging==25.0
     # via aiokafka
 pyasn1==0.6.1
@@ -61,11 +61,11 @@ pyasn1==0.6.1
     #   rsa
 pyasn1-modules==0.4.2
     # via google-auth
-pydantic==2.5.3
+pydantic==2.11.10
     # via
     #   -r requirements.txt
     #   fastapi
-pydantic-core==2.14.6
+pydantic-core==2.33.2
     # via pydantic
 python-dateutil==2.9.0.post0
     # via kubernetes
@@ -88,9 +88,7 @@ six==1.17.0
     #   kubernetes
     #   python-dateutil
 sniffio==1.3.1
-    # via
-    #   anyio
-    #   httpx
+    # via anyio
 starlette==0.48.0
     # via fastapi
 typing-extensions==4.15.0
@@ -100,11 +98,14 @@ typing-extensions==4.15.0
     #   pydantic
     #   pydantic-core
     #   starlette
+    #   typing-inspection
+typing-inspection==0.4.2
+    # via pydantic
 urllib3==1.26.20
     # via
     #   kubernetes
     #   requests
-uvicorn[standard]==0.27.0
+uvicorn[standard]==0.37.0
     # via -r requirements.txt
 uvloop==0.21.0
     # via uvicorn

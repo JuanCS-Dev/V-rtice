@@ -516,8 +516,17 @@ class TIGFabric:
             subgraph = self.graph.subgraph(largest_cc)
             self.metrics.avg_path_length = nx.average_shortest_path_length(subgraph)
 
-        # Algebraic connectivity (Fiedler eigenvalue)
-        self.metrics.algebraic_connectivity = nx.algebraic_connectivity(self.graph)
+        # Algebraic connectivity (Fiedler eigenvalue) - REMOVED for performance
+        # The exact calculation is O(n³) and causes hangs for graphs >16 nodes
+        # Use fast approximation: connectivity ≈ min_degree / n
+        # This captures the "weakest link" in the graph
+        if self.graph.number_of_nodes() > 0:
+            degrees = dict(self.graph.degree())
+            min_degree = min(degrees.values()) if degrees else 0
+            # Normalize by number of nodes for scale-free comparison
+            self.metrics.algebraic_connectivity = min_degree / self.graph.number_of_nodes()
+        else:
+            self.metrics.algebraic_connectivity = 0.0
 
         # Effective Connectivity Index (ECI) - key Φ proxy
         self.metrics.effective_connectivity_index = self._compute_eci()

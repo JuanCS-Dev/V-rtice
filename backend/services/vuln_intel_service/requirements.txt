@@ -4,13 +4,13 @@
 # ============================================================================
 
 # Web Framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
+fastapi>=0.115.0  # Security fixes
+uvicorn[standard]>=0.32.0  # Compatibility
 pydantic==2.5.3
 pydantic-settings==2.1.0
 
 # HTTP Client
-httpx==0.26.0
+httpx>=0.27.0  # Security0
 
 # Async Support
 asyncio==3.4.3
@@ -44,3 +44,4 @@ pytest-cov==4.1.0
 
 # Note: Nuclei must be installed separately
 # GO111MODULE=on go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+anyio>=4.4.0  # Security fix

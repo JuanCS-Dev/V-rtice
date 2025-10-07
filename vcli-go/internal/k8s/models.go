@@ -110,6 +110,28 @@ type ServicePort struct {
 	NodePort   int32
 }
 
+// ConfigMap represents a Kubernetes ConfigMap
+type ConfigMap struct {
+	Name        string
+	Namespace   string
+	Data        map[string]string
+	BinaryData  map[string][]byte
+	CreatedAt   time.Time
+	Labels      map[string]string
+	Annotations map[string]string
+}
+
+// Secret represents a Kubernetes Secret
+type Secret struct {
+	Name        string
+	Namespace   string
+	Type        corev1.SecretType
+	Data        map[string][]byte
+	CreatedAt   time.Time
+	Labels      map[string]string
+	Annotations map[string]string
+}
+
 // convertPod converts a Kubernetes Pod to our internal model
 func convertPod(k8sPod *corev1.Pod) Pod {
 	pod := Pod{
@@ -280,4 +302,30 @@ func convertService(k8sService *corev1.Service) Service {
 	}
 
 	return service
+}
+
+// convertConfigMap converts a Kubernetes ConfigMap to our internal model
+func convertConfigMap(k8sCM *corev1.ConfigMap) ConfigMap {
+	return ConfigMap{
+		Name:        k8sCM.Name,
+		Namespace:   k8sCM.Namespace,
+		Data:        k8sCM.Data,
+		BinaryData:  k8sCM.BinaryData,
+		CreatedAt:   k8sCM.CreationTimestamp.Time,
+		Labels:      k8sCM.Labels,
+		Annotations: k8sCM.Annotations,
+	}
+}
+
+// convertSecret converts a Kubernetes Secret to our internal model
+func convertSecret(k8sSecret *corev1.Secret) Secret {
+	return Secret{
+		Name:        k8sSecret.Name,
+		Namespace:   k8sSecret.Namespace,
+		Type:        k8sSecret.Type,
+		Data:        k8sSecret.Data,
+		CreatedAt:   k8sSecret.CreationTimestamp.Time,
+		Labels:      k8sSecret.Labels,
+		Annotations: k8sSecret.Annotations,
+	}
 }

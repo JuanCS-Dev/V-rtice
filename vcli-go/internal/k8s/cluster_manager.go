@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"sync"
 
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
 // ClusterManager manages connections and operations for Kubernetes clusters
 type ClusterManager struct {
-	// Kubernetes client
-	clientset *kubernetes.Clientset
-	config    *rest.Config
+	// Kubernetes clients
+	clientset     *kubernetes.Clientset
+	dynamicClient dynamic.Interface
+	config        *rest.Config
 
 	// Configuration
 	kubeconfigPath string
@@ -68,6 +70,13 @@ func (cm *ClusterManager) Connect() error {
 		return fmt.Errorf("failed to create clientset: %w", err)
 	}
 	cm.clientset = clientset
+
+	// Create dynamic client for apply operations
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return fmt.Errorf("failed to create dynamic client: %w", err)
+	}
+	cm.dynamicClient = dynamicClient
 
 	// Verify connectivity with health check
 	if err := cm.healthCheck(); err != nil {

@@ -43,6 +43,17 @@ from agents.models import AgentType, AgenteState
 
 logger = logging.getLogger(__name__)
 
+# MCEA Integration (optional dependency)
+try:
+    import sys
+    sys.path.insert(0, '/home/juan/vertice-dev/backend/services/maximus_core_service')
+    from consciousness.integration import MCEAClient
+    from consciousness.mcea.controller import ArousalState
+    MCEA_AVAILABLE = True
+except ImportError:
+    MCEA_AVAILABLE = False
+    logger.warning("MCEA integration not available (consciousness module not found)")
+
 
 class FitnessMetrics:
     """Agent fitness metrics for evolutionary selection"""
@@ -148,6 +159,10 @@ class ClonalSelectionEngine:
         # Current population fitness
         self.population_fitness: Dict[str, FitnessMetrics] = {}
 
+        # MCEA Integration (arousal modulation)
+        self.mcea_client: Optional['MCEAClient'] = None
+        self.current_arousal: float = 0.5  # Default baseline
+
         # Evolutionary statistics
         self.generation: int = 0
         self.total_selections: int = 0
@@ -165,6 +180,22 @@ class ClonalSelectionEngine:
         self._db_pool: Optional[asyncpg.Pool] = None
 
         logger.info(f"ClonalSelectionEngine {self.id} initialized")
+
+    # ==================== MCEA INTEGRATION ====================
+
+    def set_mcea_client(self, client: 'MCEAClient') -> None:
+        """
+        Set MCEA client for arousal-modulated selection.
+
+        Args:
+            client: MCEAClient instance for fetching arousal state
+        """
+        if not MCEA_AVAILABLE:
+            logger.warning("MCEA integration not available (module not found)")
+            return
+
+        self.mcea_client = client
+        logger.info(f"Engine {self.id} connected to MCEA (arousal modulation enabled)")
 
     # ==================== LIFECYCLE ====================
 
@@ -323,10 +354,23 @@ class ClonalSelectionEngine:
                     f"Engine {self.id} starting generation {self.generation}"
                 )
 
+                # 0. FETCH AROUSAL (MCEA integration)
+                if self.mcea_client:
+                    try:
+                        arousal_state = await self.mcea_client.get_current_arousal()
+                        if arousal_state:
+                            self.current_arousal = arousal_state.arousal
+                            logger.info(
+                                f"MCEA arousal={self.current_arousal:.2f} "
+                                f"(level={arousal_state.level.value})"
+                            )
+                    except Exception as e:
+                        logger.warning(f"Failed to fetch MCEA arousal: {e}")
+
                 # 1. EVALUATE FITNESS
                 await self._evaluate_population()
 
-                # 2. SELECTION
+                # 2. SELECTION (arousal-modulated)
                 survivors = await self._select_survivors()
 
                 # 3. CLONING + MUTATION
@@ -467,17 +511,59 @@ class ClonalSelectionEngine:
             reverse=True,
         )
 
-        # Select top N%
-        num_survivors = max(1, int(len(sorted_agents) * self.selection_rate))
+        # Compute arousal-modulated selection rate
+        modulated_selection_rate = self._compute_selection_pressure(self.current_arousal)
+
+        # Select top N% (arousal-modulated)
+        num_survivors = max(1, int(len(sorted_agents) * modulated_selection_rate))
         survivors = sorted_agents[:num_survivors]
 
         logger.info(
             f"Engine {self.id} selected {len(survivors)}/{len(sorted_agents)} survivors "
-            f"(min_fitness={survivors[-1].fitness_score:.3f}, "
+            f"(arousal={self.current_arousal:.2f}, pressure={modulated_selection_rate:.2f}, "
+            f"min_fitness={survivors[-1].fitness_score:.3f}, "
             f"max_fitness={survivors[0].fitness_score:.3f})"
         )
 
         return survivors
+
+    def _compute_selection_pressure(self, arousal: float) -> float:
+        """
+        Map arousal to selection pressure.
+
+        Low arousal (0.2) → Conservative (keep 50% of population)
+        High arousal (0.8) → Aggressive (keep only top 10%)
+
+        Inverse relationship: high arousal = strict selection
+
+        Args:
+            arousal: Current arousal level (0-1)
+
+        Returns:
+            Selection rate (0-1)
+        """
+        # Inverse mapping: arousal 0.2 → 0.5, arousal 0.8 → 0.1
+        pressure = 0.5 - (0.4 * arousal)
+        return max(0.05, min(0.5, pressure))  # Clamp to [0.05, 0.5]
+
+    def _compute_mutation_rate(self, arousal: float) -> float:
+        """
+        Map arousal to mutation rate.
+
+        Low arousal (0.2) → Low exploration (mutation=0.05)
+        High arousal (0.8) → High exploration (mutation=0.15)
+
+        Direct relationship: high arousal = more mutations
+
+        Args:
+            arousal: Current arousal level (0-1)
+
+        Returns:
+            Mutation rate (0-1)
+        """
+        # Direct mapping: arousal 0.2 → 0.05, arousal 0.8 → 0.15
+        rate = 0.05 + (0.10 * arousal)
+        return max(0.05, min(0.20, rate))  # Clamp to [0.05, 0.20]
 
     # ==================== CLONING + MUTATION ====================
 

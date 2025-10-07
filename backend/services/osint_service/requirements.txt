@@ -1,5 +1,5 @@
 fastapi>=0.115.0  # Security fix
-uvicorn[standard]==0.27.0
+uvicorn[standard]>=0.32.0  # Compatibility
 pydantic==2.5.3
 pydantic[email]
 redis==5.0.1
@@ -22,7 +22,7 @@ discord.py==2.3.2
 instaloader==4.10.3
 linkedin-api==2.0.0a5
 telethon==1.34.0
-httpx==0.26.0
+httpx>=0.27.0  # Security0
 numpy==1.26.3
 scikit-learn==1.4.0
 pandas==2.1.4

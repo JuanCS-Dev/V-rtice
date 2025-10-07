@@ -58,13 +58,17 @@ Supported resources:
   - nodes (no)
   - deployments (deploy)
   - services (svc)
+  - configmaps (cm)
+  - secrets
 
 Examples:
   vcli k8s get pods
   vcli k8s get namespaces
   vcli k8s get nodes
   vcli k8s get deployments
-  vcli k8s get services`,
+  vcli k8s get services
+  vcli k8s get configmaps
+  vcli k8s get secrets`,
 }
 
 // ============================================================================
@@ -74,7 +78,7 @@ Examples:
 // getPodsCmd gets all pods in a namespace
 var getPodsCmd = &cobra.Command{
 	Use:     "pods",
-	Aliases: []string{"pod", "po"},
+	Aliases: []string{"po"},
 	Short:   "Get pods",
 	Long: `Get all pods in a namespace or across all namespaces.
 
@@ -96,13 +100,16 @@ Examples:
 	RunE: k8s.HandleGetPods,
 }
 
-// getPodCmd gets a single pod
+// getPodCmd gets a single pod or lists all pods if no name provided
 var getPodCmd = &cobra.Command{
 	Use:   "pod [name]",
-	Short: "Get a specific pod",
-	Long: `Get details of a specific pod by name.
+	Short: "Get a specific pod or list all pods",
+	Long: `Get details of a specific pod by name, or list all pods if no name provided.
 
 Examples:
+  # List all pods (same as 'get pods')
+  vcli k8s get pod
+
   # Get pod details
   vcli k8s get pod nginx-7848d4b86f-9xvzk
 
@@ -111,7 +118,7 @@ Examples:
 
   # Get pod details in JSON format
   vcli k8s get pod nginx-7848d4b86f-9xvzk --output json`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	RunE: k8s.HandleGetPod,
 }
 
@@ -122,7 +129,7 @@ Examples:
 // getNamespacesCmd gets all namespaces
 var getNamespacesCmd = &cobra.Command{
 	Use:     "namespaces",
-	Aliases: []string{"namespace", "ns"},
+	Aliases: []string{"ns"},
 	Short:   "Get namespaces",
 	Long: `Get all namespaces in the cluster.
 
@@ -138,19 +145,22 @@ Examples:
 	RunE: k8s.HandleGetNamespaces,
 }
 
-// getNamespaceCmd gets a single namespace
+// getNamespaceCmd gets a single namespace or lists all namespaces if no name provided
 var getNamespaceCmd = &cobra.Command{
 	Use:   "namespace [name]",
-	Short: "Get a specific namespace",
-	Long: `Get details of a specific namespace by name.
+	Short: "Get a specific namespace or list all namespaces",
+	Long: `Get details of a specific namespace by name, or list all namespaces if no name provided.
 
 Examples:
+  # List all namespaces (same as 'get namespaces')
+  vcli k8s get namespace
+
   # Get namespace details
   vcli k8s get namespace kube-system
 
   # Get namespace in JSON format
   vcli k8s get namespace default --output json`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	RunE: k8s.HandleGetNamespace,
 }
 
@@ -161,7 +171,7 @@ Examples:
 // getNodesCmd gets all nodes
 var getNodesCmd = &cobra.Command{
 	Use:     "nodes",
-	Aliases: []string{"node", "no"},
+	Aliases: []string{"no"},
 	Short:   "Get nodes",
 	Long: `Get all nodes in the cluster.
 
@@ -177,19 +187,22 @@ Examples:
 	RunE: k8s.HandleGetNodes,
 }
 
-// getNodeCmd gets a single node
+// getNodeCmd gets a single node or lists all nodes if no name provided
 var getNodeCmd = &cobra.Command{
 	Use:   "node [name]",
-	Short: "Get a specific node",
-	Long: `Get details of a specific node by name.
+	Short: "Get a specific node or list all nodes",
+	Long: `Get details of a specific node by name, or list all nodes if no name provided.
 
 Examples:
+  # List all nodes (same as 'get nodes')
+  vcli k8s get node
+
   # Get node details
   vcli k8s get node worker-node-1
 
   # Get node in JSON format
   vcli k8s get node master-node --output json`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	RunE: k8s.HandleGetNode,
 }
 
@@ -200,7 +213,7 @@ Examples:
 // getDeploymentsCmd gets all deployments
 var getDeploymentsCmd = &cobra.Command{
 	Use:     "deployments",
-	Aliases: []string{"deployment", "deploy"},
+	Aliases: []string{"deploy"},
 	Short:   "Get deployments",
 	Long: `Get all deployments in a namespace or across all namespaces.
 
@@ -219,13 +232,16 @@ Examples:
 	RunE: k8s.HandleGetDeployments,
 }
 
-// getDeploymentCmd gets a single deployment
+// getDeploymentCmd gets a single deployment or lists all deployments if no name provided
 var getDeploymentCmd = &cobra.Command{
 	Use:   "deployment [name]",
-	Short: "Get a specific deployment",
-	Long: `Get details of a specific deployment by name.
+	Short: "Get a specific deployment or list all deployments",
+	Long: `Get details of a specific deployment by name, or list all deployments if no name provided.
 
 Examples:
+  # List all deployments (same as 'get deployments')
+  vcli k8s get deployment
+
   # Get deployment details
   vcli k8s get deployment nginx-deployment
 
@@ -234,7 +250,7 @@ Examples:
 
   # Get deployment in JSON format
   vcli k8s get deployment web-app --output json`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	RunE: k8s.HandleGetDeployment,
 }
 
@@ -245,7 +261,7 @@ Examples:
 // getServicesCmd gets all services
 var getServicesCmd = &cobra.Command{
 	Use:     "services",
-	Aliases: []string{"service", "svc"},
+	Aliases: []string{"svc"},
 	Short:   "Get services",
 	Long: `Get all services in a namespace or across all namespaces.
 
@@ -264,13 +280,16 @@ Examples:
 	RunE: k8s.HandleGetServices,
 }
 
-// getServiceCmd gets a single service
+// getServiceCmd gets a single service or lists all services if no name provided
 var getServiceCmd = &cobra.Command{
 	Use:   "service [name]",
-	Short: "Get a specific service",
-	Long: `Get details of a specific service by name.
+	Short: "Get a specific service or list all services",
+	Long: `Get details of a specific service by name, or list all services if no name provided.
 
 Examples:
+  # List all services (same as 'get services')
+  vcli k8s get service
+
   # Get service details
   vcli k8s get service kubernetes
 
@@ -279,8 +298,103 @@ Examples:
 
   # Get service in JSON format
   vcli k8s get service api-gateway --output json`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	RunE: k8s.HandleGetService,
+}
+
+// ============================================================================
+// GET CONFIGMAP COMMANDS
+// ============================================================================
+
+// getConfigMapsCmd gets all configmaps
+var getConfigMapsCmd = &cobra.Command{
+	Use:     "configmaps",
+	Aliases: []string{"cm"},
+	Short:   "Get configmaps",
+	Long: `Get all configmaps in a namespace or across all namespaces.
+
+Examples:
+  # List all configmaps in default namespace
+  vcli k8s get configmaps
+
+  # List configmaps in specific namespace
+  vcli k8s get configmaps --namespace kube-system
+
+  # List all configmaps across all namespaces
+  vcli k8s get configmaps --all-namespaces
+
+  # Output in JSON format
+  vcli k8s get configmaps --output json`,
+	RunE: k8s.HandleGetConfigMaps,
+}
+
+// getConfigMapCmd gets a single configmap or lists all configmaps if no name provided
+var getConfigMapCmd = &cobra.Command{
+	Use:   "configmap [name]",
+	Short: "Get a specific configmap or list all configmaps",
+	Long: `Get details of a specific configmap by name, or list all configmaps if no name provided.
+
+Examples:
+  # List all configmaps (same as 'get configmaps')
+  vcli k8s get configmap
+
+  # Get configmap details
+  vcli k8s get configmap app-config
+
+  # Get configmap in specific namespace
+  vcli k8s get configmap database-config --namespace production
+
+  # Get configmap in JSON format
+  vcli k8s get configmap nginx-config --output json`,
+	Args: cobra.MaximumNArgs(1),
+	RunE: k8s.HandleGetConfigMap,
+}
+
+// ============================================================================
+// GET SECRET COMMANDS
+// ============================================================================
+
+// getSecretsCmd gets all secrets
+var getSecretsCmd = &cobra.Command{
+	Use:   "secrets",
+	Short: "Get secrets",
+	Long: `Get all secrets in a namespace or across all namespaces.
+
+Examples:
+  # List all secrets in default namespace
+  vcli k8s get secrets
+
+  # List secrets in specific namespace
+  vcli k8s get secrets --namespace kube-system
+
+  # List all secrets across all namespaces
+  vcli k8s get secrets --all-namespaces
+
+  # Output in JSON format
+  vcli k8s get secrets --output json`,
+	RunE: k8s.HandleGetSecrets,
+}
+
+// getSecretCmd gets a single secret or lists all secrets if no name provided
+var getSecretCmd = &cobra.Command{
+	Use:   "secret [name]",
+	Short: "Get a specific secret or list all secrets",
+	Long: `Get details of a specific secret by name, or list all secrets if no name provided.
+
+Examples:
+  # List all secrets (same as 'get secrets')
+  vcli k8s get secret
+
+  # Get secret details
+  vcli k8s get secret api-token
+
+  # Get secret in specific namespace
+  vcli k8s get secret database-password --namespace production
+
+  # Get secret in JSON format
+  vcli k8s get secret tls-cert --output json`,
+	Args: cobra.MaximumNArgs(1),
+	RunE: k8s.HandleGetSecret,
 }
 
 // ============================================================================
@@ -375,6 +489,10 @@ func init() {
 	k8sGetCmd.AddCommand(getDeploymentCmd)
 	k8sGetCmd.AddCommand(getServicesCmd)
 	k8sGetCmd.AddCommand(getServiceCmd)
+	k8sGetCmd.AddCommand(getConfigMapsCmd)
+	k8sGetCmd.AddCommand(getConfigMapCmd)
+	k8sGetCmd.AddCommand(getSecretsCmd)
+	k8sGetCmd.AddCommand(getSecretCmd)
 
 	// Add config command to k8s
 	k8sCmd.AddCommand(k8sConfigCmd)

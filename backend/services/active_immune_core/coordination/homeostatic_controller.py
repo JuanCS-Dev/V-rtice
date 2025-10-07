@@ -36,6 +36,17 @@ import asyncpg
 
 logger = logging.getLogger(__name__)
 
+# MMEI Integration (optional dependency)
+try:
+    import sys
+    sys.path.insert(0, '/home/juan/vertice-dev/backend/services/maximus_core_service')
+    from consciousness.integration import MMEIClient
+    from consciousness.mmei.monitor import AbstractNeeds
+    MMEI_AVAILABLE = True
+except ImportError:
+    MMEI_AVAILABLE = False
+    logger.warning("MMEI integration not available (consciousness module not found)")
+
 
 class SystemState(str, Enum):
     """System homeostatic states"""
@@ -107,6 +118,10 @@ class HomeostaticController:
         self.system_metrics: Dict[str, float] = {}
         self.agent_metrics: Dict[str, Any] = {}
 
+        # MMEI Integration (consciousness needs)
+        self.mmei_client: Optional['MMEIClient'] = None
+        self.current_needs: Optional['AbstractNeeds'] = None
+
         # Thresholds (fuzzy logic boundaries)
         self.cpu_threshold_high = 0.8  # 80%
         self.memory_threshold_high = 0.85  # 85%
@@ -130,6 +145,22 @@ class HomeostaticController:
         self._http_session: Optional[aiohttp.ClientSession] = None
 
         logger.info(f"HomeostaticController {self.id} initialized")
+
+    # ==================== MMEI INTEGRATION ====================
+
+    def set_mmei_client(self, client: 'MMEIClient') -> None:
+        """
+        Set MMEI client for consciousness needs integration.
+
+        Args:
+            client: MMEIClient instance for fetching abstract needs
+        """
+        if not MMEI_AVAILABLE:
+            logger.warning("MMEI integration not available (module not found)")
+            return
+
+        self.mmei_client = client
+        logger.info(f"Controller {self.id} connected to MMEI (needs integration enabled)")
 
     # ==================== LIFECYCLE ====================
 
@@ -391,6 +422,20 @@ class HomeostaticController:
         # Collect agent metrics (from Lymphnode)
         self.agent_metrics = await self._collect_agent_metrics()
 
+        # Collect consciousness needs (from MMEI)
+        if self.mmei_client:
+            try:
+                self.current_needs = await self.mmei_client.get_current_needs()
+                if self.current_needs:
+                    logger.debug(
+                        f"MMEI needs: rest={self.current_needs.rest_need:.2f}, "
+                        f"repair={self.current_needs.repair_need:.2f}, "
+                        f"efficiency={self.current_needs.efficiency_need:.2f}"
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to fetch MMEI needs: {e}")
+                self.current_needs = None
+
         # Update system state based on metrics
         self._update_system_state()
 
@@ -556,6 +601,32 @@ class HomeostaticController:
         if threats > self.threat_rate_threshold:
             issues.append("high_threat_load")
 
+        # Analyze consciousness needs (MMEI integration)
+        if self.current_needs:
+            # High rest_need → System fatigue
+            if self.current_needs.rest_need > 0.7:
+                issues.append("high_rest_need_fatigue")
+                logger.info(
+                    f"Detected high rest_need={self.current_needs.rest_need:.2f} "
+                    "(system fatigue)"
+                )
+
+            # High repair_need → System alert
+            if self.current_needs.repair_need > 0.7:
+                issues.append("high_repair_need_alert")
+                logger.info(
+                    f"Detected high repair_need={self.current_needs.repair_need:.2f} "
+                    "(system alert)"
+                )
+
+            # High efficiency_need → Optimization needed
+            if self.current_needs.efficiency_need > 0.6:
+                issues.append("efficiency_optimization_needed")
+                logger.info(
+                    f"Detected high efficiency_need={self.current_needs.efficiency_need:.2f} "
+                    "(optimization needed)"
+                )
+
         if issues:
             logger.warning(f"Controller {self.id} detected issues: {issues}")
 
@@ -648,15 +719,28 @@ class HomeostaticController:
         params = {}
 
         if action == ActionType.SCALE_UP_AGENTS:
-            # Scale based on threat load
+            # Scale based on threat load or repair need
             threats = self.agent_metrics.get("threats_detected", 0)
             if "high_threat_load" in issues:
                 params["quantity"] = min(50, threats * 2)
+                params["reason"] = "high_threat_load"
+            elif "high_repair_need_alert" in issues:
+                # MMEI repair_need triggers agent scale-up
+                params["quantity"] = 15
+                params["reason"] = "high_repair_need"
             else:
                 params["quantity"] = 10
+                params["reason"] = "generic"
 
         elif action == ActionType.SCALE_DOWN_AGENTS:
-            params["quantity"] = 5
+            # Consider rest_need for scale-down decision
+            if "high_rest_need_fatigue" in issues:
+                # MMEI rest_need triggers conservation
+                params["quantity"] = 10
+                params["reason"] = "rest_need_conservation"
+            else:
+                params["quantity"] = 5
+                params["reason"] = "generic"
 
         elif action == ActionType.CLONE_SPECIALIZED:
             params["tipo"] = "neutrofilo"
@@ -665,9 +749,20 @@ class HomeostaticController:
 
         elif action == ActionType.INCREASE_SENSITIVITY:
             params["delta"] = 0.1
+            params["reason"] = "generic"
 
         elif action == ActionType.DECREASE_SENSITIVITY:
             params["delta"] = -0.1
+            params["reason"] = "generic"
+
+        elif action == ActionType.ADJUST_TEMPERATURE:
+            # Map efficiency_need to temperature adjustment
+            if "efficiency_optimization_needed" in issues:
+                params["delta"] = -0.5  # Cool down for efficiency
+                params["reason"] = "efficiency_optimization"
+            else:
+                params["delta"] = 0.5
+                params["reason"] = "generic"
 
         return params
 

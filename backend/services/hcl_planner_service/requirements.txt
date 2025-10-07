@@ -2,7 +2,7 @@
 
 # Web framework
 fastapi>=0.115.0  # Security fix
-uvicorn[standard]==0.27.0
+uvicorn[standard]>=0.32.0  # Compatibility
 pydantic==2.5.3
 
 # Fuzzy Logic
@@ -17,7 +17,7 @@ gymnasium==0.29.1
 aiokafka==0.10.0
 
 # HTTP client
-httpx==0.26.0
+httpx>=0.27.0  # Security0
 
 # Scientific computing
 numpy==1.26.3
