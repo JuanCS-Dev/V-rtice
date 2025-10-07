@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 
 import asyncpg
 import psycopg2
+from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 logger = logging.getLogger(__name__)
@@ -51,10 +52,17 @@ class DatabaseActuator:
             return {"success": True, "dry_run": True}
 
         try:
+            # Validate inputs
+            if not isinstance(pool_size, int) or not (10 <= pool_size <= 100):
+                raise ValueError(f"Invalid pool_size: {pool_size}. Must be int 10-100.")
+
+            if pool_mode not in ("session", "transaction", "statement"):
+                raise ValueError(f"Invalid pool_mode: {pool_mode}. Must be 'session', 'transaction', or 'statement'.")
+
             # Connect to pgBouncer admin console
             conn = await asyncpg.connect(self.pgbouncer_admin_url)
 
-            # Update pool configuration
+            # Update pool configuration (safe: validated as int and enum)
             await conn.execute(
                 f"""
                 SET default_pool_size = {pool_size};
@@ -129,8 +137,12 @@ class DatabaseActuator:
             killed_count = 0
             for row in idle_conns:
                 try:
-                    await conn.execute(f"SELECT pg_terminate_backend({row['pid']})")
+                    # Validate PID is integer before using
+                    pid = int(row['pid'])
+                    await conn.execute("SELECT pg_terminate_backend($1)", pid)
                     killed_count += 1
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Invalid PID {row['pid']}: {e}")
                 except Exception as e:
                     logger.warning(f"Failed to kill PID {row['pid']}: {e}")
 
@@ -180,16 +192,24 @@ class DatabaseActuator:
             return {"success": True, "dry_run": True}
 
         try:
+            # Validate table name (alphanumeric + underscore only)
+            if not table or not table.replace('_', '').replace('.', '').isalnum():
+                raise ValueError(f"Invalid table name: {table}. Must be alphanumeric with underscores/dots only.")
+
             # Use psycopg2 for VACUUM (asyncpg doesn't support it)
             sync_conn = psycopg2.connect(self.db_url)
             sync_conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             cursor = sync_conn.cursor()
 
             if analyze_only:
-                cursor.execute(f"ANALYZE {table};")
+                # Use sql.Identifier to safely quote table name
+                query = sql.SQL("ANALYZE {}").format(sql.Identifier(table))
+                cursor.execute(query)
                 logger.info(f"ANALYZE completed for {table}")
             else:
-                cursor.execute(f"VACUUM ANALYZE {table};")
+                # Use sql.Identifier to safely quote table name
+                query = sql.SQL("VACUUM ANALYZE {}").format(sql.Identifier(table))
+                cursor.execute(query)
                 logger.info(f"VACUUM ANALYZE completed for {table}")
 
             cursor.close()
@@ -318,10 +338,15 @@ class DatabaseActuator:
             return {"success": True, "dry_run": True}
 
         try:
+            # Validate work_mem_mb is integer in valid range
+            if not isinstance(work_mem_mb, int) or not (4 <= work_mem_mb <= 256):
+                raise ValueError(f"Invalid work_mem_mb: {work_mem_mb}. Must be int 4-256.")
+
             conn = await asyncpg.connect(self.db_url)
 
-            # Set work_mem for this session
-            await conn.execute(f"SET work_mem = '{work_mem_mb}MB';")
+            # Set work_mem for this session (safe: validated as int, explicitly cast)
+            work_mem_value = f"{int(work_mem_mb)}MB"
+            await conn.execute(f"SET work_mem = '{work_mem_value}';")
 
             # Verify setting
             result = await conn.fetchval("SHOW work_mem;")
