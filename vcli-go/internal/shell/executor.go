@@ -6,22 +6,25 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/suggestions"
 	"github.com/verticedev/vcli-go/internal/visual"
 )
 
 // Executor handles command execution in the shell
 type Executor struct {
-	rootCmd *cobra.Command
-	styles  *visual.Styles
-	history []string
+	rootCmd   *cobra.Command
+	styles    *visual.Styles
+	history   []string
+	suggester *suggestions.Suggester
 }
 
 // NewExecutor creates a new command executor
 func NewExecutor(rootCmd *cobra.Command) *Executor {
 	return &Executor{
-		rootCmd: rootCmd,
-		styles:  visual.DefaultStyles(),
-		history: make([]string, 0),
+		rootCmd:   rootCmd,
+		styles:    visual.DefaultStyles(),
+		history:   make([]string, 0),
+		suggester: suggestions.NewSuggester(rootCmd),
 	}
 }
 
@@ -110,13 +113,51 @@ func (e *Executor) executeCobraCommand(args []string) {
 	// Reset Cobra command for reuse
 	e.rootCmd.SetArgs(args)
 
-	// Capture output
+	// Silence Cobra errors temporarily (we'll handle them ourselves)
+	originalSilenceErrors := e.rootCmd.SilenceErrors
+	originalSilenceUsage := e.rootCmd.SilenceUsage
+	e.rootCmd.SilenceErrors = true
+	e.rootCmd.SilenceUsage = true
+
+	// Execute command
 	err := e.rootCmd.Execute()
 
+	// Restore Cobra settings
+	e.rootCmd.SilenceErrors = originalSilenceErrors
+	e.rootCmd.SilenceUsage = originalSilenceUsage
+
 	if err != nil {
-		// Error already printed by Cobra
+		// Check if it's an unknown command error
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "unknown command") || strings.Contains(errMsg, "unknown flag") {
+			// Extract the typo from error message
+			typo := e.extractTypo(errMsg)
+			if typo != "" {
+				// Show our formatted suggestion
+				suggestion := e.suggester.SuggestCommand(typo)
+				fmt.Print(suggestion)
+				return
+			}
+		}
+
+		// For other errors, show the error
+		fmt.Println(e.styles.Error.Render("Error: " + errMsg))
 		return
 	}
+}
+
+// extractTypo extracts the typo from an error message
+func (e *Executor) extractTypo(errMsg string) string {
+	// Try to extract quoted text
+	start := strings.Index(errMsg, "\"")
+	if start == -1 {
+		return ""
+	}
+	end := strings.Index(errMsg[start+1:], "\"")
+	if end == -1 {
+		return ""
+	}
+	return errMsg[start+1 : start+1+end]
 }
 
 // showHelp displays shell help
