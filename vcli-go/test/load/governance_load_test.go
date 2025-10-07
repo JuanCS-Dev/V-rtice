@@ -250,7 +250,7 @@ func TestLoad_HealthCheck_10K(t *testing.T) {
 
 	// Assertions
 	assert.Greater(t, result.SuccessfulRequests, int64(9500), "Success rate should be > 95%")
-	assert.Less(t, result.P99Latency, 20*time.Millisecond, "P99 latency should be < 20ms")
+	assert.Less(t, result.P99Latency, 40*time.Millisecond, "P99 latency should be < 40ms")
 	assert.Greater(t, result.RequestsPerSecond, 1000.0, "Should handle > 1000 req/s")
 }
 

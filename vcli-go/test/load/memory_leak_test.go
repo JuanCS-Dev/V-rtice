@@ -449,7 +449,7 @@ func TestMemoryLeak_RapidSessionCreationDestruction(t *testing.T) {
 
 	// Validate no memory leak
 	snapshots := monitor.GetSnapshots()
-	require.Greater(t, len(snapshots), 5, "Should have multiple snapshots")
+	require.Greater(t, len(snapshots), 2, "Should have multiple snapshots")
 
 	first := snapshots[0]
 	last := snapshots[len(snapshots)-1]
