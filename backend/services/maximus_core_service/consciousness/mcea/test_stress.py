@@ -159,7 +159,7 @@ class TestStressResponse:
             initial_arousal=0.5,
             peak_arousal=1.0,
             final_arousal=1.0,
-            arousal_stability_cv=0.2,  # Keep low to avoid extra penalty
+            arousal_stability_cv=0.5,
             peak_rest_need=0.0,
             peak_repair_need=0.0,
             peak_efficiency_need=0.0,
@@ -714,7 +714,7 @@ class TestStressMonitorInit:
         """Test start method (lines 351-362)."""
         # ARRANGE: Create monitor
         controller = ArousalController()
-        # Note: Controller uses default arousal of 0.6
+        controller._arousal = 0.4  # Set baseline
         monitor = StressMonitor(controller)
         assert monitor._running is False
         assert monitor._baseline_arousal is None
@@ -728,7 +728,7 @@ class TestStressMonitorInit:
         # ASSERT: Monitor started (lines 357-362)
         assert monitor._running is True
         assert monitor._monitoring_task is not None
-        assert monitor._baseline_arousal == 0.6  # Captured baseline (default arousal, line 357)
+        assert monitor._baseline_arousal == 0.4  # Captured baseline (line 357)
 
         # CLEANUP
         await monitor.stop()
@@ -834,9 +834,9 @@ class TestAssessStressLevel:
         """Test assessment returns NONE (lines 404-430)."""
         # ARRANGE: Controller with low arousal
         controller = ArousalController()
-        # Note: Controller default arousal is 0.6, not settable via _arousal
+        controller._arousal = 0.3
         monitor = StressMonitor(controller)
-        monitor._baseline_arousal = 0.5  # Close to default 0.6
+        monitor._baseline_arousal = 0.3  # Same as current
 
         # Mock controller.get_stress_level()
         controller.get_stress_level = Mock(return_value=0.1)
@@ -844,7 +844,7 @@ class TestAssessStressLevel:
         # ACT: Assess stress (lines 404-430)
         stress_level = monitor._assess_stress_level()
 
-        # ASSERT: NONE (arousal deviation ~0.1, controller stress 0.1, max=0.1 < 0.2)
+        # ASSERT: NONE (line 421-422)
         assert stress_level == StressLevel.NONE
 
     def test_assess_stress_level_mild(self):
