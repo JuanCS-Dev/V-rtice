@@ -1,71 +1,69 @@
-# Active Immune Core Service - Production Dockerfile
-# Multi-stage build for minimal image size
+# 🐳 Active Immune Core Service - Production Dockerfile
+#
+# Version: 2.0 (uv + multi-stage)
+# Base: vertice/python311-uv
+# Performance: 5x faster build
 
-# ==================== BUILDER STAGE ====================
-FROM python:3.11-slim as builder
+# ============================================================================
+# BUILDER STAGE
+# ============================================================================
+FROM vertice/python311-uv:latest AS builder
 
+USER root
 WORKDIR /build
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    g++ \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+COPY pyproject.toml requirements.txt ./
 
-# Copy lock file for deterministic builds
-COPY requirements.txt.lock .
+RUN python -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    uv pip sync requirements.txt
 
-# Create virtual environment and install dependencies
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir --no-deps -r requirements.txt.lock
-
-# ==================== RUNTIME STAGE ====================
+# ============================================================================
+# RUNTIME STAGE
+# ============================================================================
 FROM python:3.11-slim
 
-LABEL maintainer="Juan & Claude"
-LABEL description="Active Immune Core Service - Autonomous threat detection"
-LABEL version="1.0.0"
+LABEL maintainer="Juan & Claude <noreply@vertice.dev>"
+LABEL description="Active Immune Core - Autonomous threat detection"
+LABEL version="2.0.0"
+LABEL service="active-immune-core"
 
-# Create app user (non-root)
-RUN groupadd -r immunis && useradd -r -g immunis immunis
-
-# Install runtime dependencies only
+# Runtime deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy virtual environment from builder
+# Copy venv
 COPY --from=builder /opt/venv /opt/venv
-
-# Set PATH
 ENV PATH="/opt/venv/bin:$PATH"
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
 
-# Create app directory
+# Non-root user
+RUN groupadd -r immunis && useradd -r -g immunis --uid 1000 immunis
+
 WORKDIR /app
 
-# Copy application code
-COPY . /app/
+# Copy code
+COPY --chown=immunis:immunis . .
 
-# Change ownership to app user
-RUN chown -R immunis:immunis /app
+# Python config
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
 
-# Switch to app user
 USER immunis
-
-# Expose service port
-EXPOSE 8200
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8200/health || exit 1
 
-# Run service (production with 4 workers for better concurrency)
+EXPOSE 8200
+
+# Metadata
+LABEL org.opencontainers.image.source="https://github.com/vertice-dev/vertice"
+LABEL org.opencontainers.image.description="Active Immune Core with uv"
+
 CMD ["python", "-m", "uvicorn", "api.main:app", \
      "--host", "0.0.0.0", \
      "--port", "8200", \

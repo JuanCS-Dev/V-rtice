@@ -1,26 +1,18 @@
+FROM vertice/python311-uv:latest AS builder
+USER root
+WORKDIR /build
+COPY pyproject.toml requirements.txt ./
+RUN python -m venv /opt/venv && . /opt/venv/bin/activate && uv pip sync requirements.txt
+
 FROM python:3.11-slim
-
+LABEL maintainer="Juan & Claude" version="2.0.0"
+RUN apt-get update && apt-get install -y --no-install-recommends curl libpq5 ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+RUN groupadd -r appuser && useradd -r -g appuser --uid 1000 appuser
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
-# Expose API port
-EXPOSE 8612
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8612/health', timeout=5)"
-
-# Run the application
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8612", "--workers", "4"]
+COPY --chown=appuser:appuser . .
+USER appuser
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8350/health || exit 1
+EXPOSE 8350
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8350"]

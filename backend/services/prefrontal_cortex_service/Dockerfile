@@ -1,45 +1,18 @@
-# ============================================================================
-# PREFRONTAL CORTEX SERVICE - Docker Container
-# Rational Control and Emotional Regulation for Maximus AI 3.0
-# ============================================================================
+FROM vertice/python311-uv:latest AS builder
+USER root
+WORKDIR /build
+COPY pyproject.toml requirements.txt ./
+RUN python -m venv /opt/venv && . /opt/venv/bin/activate && uv pip sync requirements.txt
 
 FROM python:3.11-slim
-
-# Set working directory
+LABEL maintainer="Juan & Claude" version="2.0.0"
+RUN apt-get update && apt-get install -y --no-install-recommends curl libpq5 ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+RUN groupadd -r appuser && useradd -r -g appuser --uid 1000 appuser
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy service code
-COPY . .
-
-# Create log directory
-RUN mkdir -p /var/log/prefrontal_cortex
-
-# Expose service port
-EXPOSE 8011
-
-# Expose Prometheus metrics port
-EXPOSE 9011
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8011/health || exit 1
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV SERVICE_NAME=prefrontal_cortex_service
-ENV SERVICE_HOST=0.0.0.0
-ENV SERVICE_PORT=8011
-
-# Run the service
-CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8011", "--log-config", "logging.yaml"]
+COPY --chown=appuser:appuser . .
+USER appuser
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8051/health || exit 1
+EXPOSE 8051
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8051"]

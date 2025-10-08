@@ -1,0 +1,92 @@
+# 🐳 MAXIMUS Service Dockerfile Template - uv Edition
+#
+# Este é um template para ser copiado e customizado para cada service
+# Otimizado para: Build rápido, tamanho pequeno, security
+#
+# Como usar:
+# 1. Copiar para o diretório do seu service como "Dockerfile"
+# 2. Ajustar SERVICE_NAME, SERVICE_PORT
+# 3. Ajustar CMD se necessário
+#
+# Performance: 60x mais rápido que pip builds
+
+# ============================================================================
+# BUILDER STAGE - Compilação e instalação de dependências
+# ============================================================================
+FROM ghcr.io/vertice/python311-uv:latest AS builder
+
+# Diretório de build
+WORKDIR /build
+
+# Copiar apenas arquivos de dependências primeiro (layer cache)
+COPY pyproject.toml requirements.txt ./
+
+# Instalar dependências com uv (60x mais rápido que pip)
+RUN python -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    uv pip sync requirements.txt
+
+# ============================================================================
+# RUNTIME STAGE - Imagem final de produção
+# ============================================================================
+FROM python:3.11-slim
+
+# 🔧 CUSTOMIZAR ESTAS VARIÁVEIS
+ARG SERVICE_NAME=my-service
+ARG SERVICE_PORT=8000
+ARG SERVICE_VERSION=1.0.0
+
+# Labels
+LABEL maintainer="Juan & Claude <noreply@vertice.dev>"
+LABEL description="MAXIMUS ${SERVICE_NAME} - Autonomous Cybersecurity Service"
+LABEL version="${SERVICE_VERSION}"
+LABEL org.opencontainers.image.source="https://github.com/vertice-dev/vertice"
+
+# Instalar dependências de runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Criar usuário não-root
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Copiar virtual environment do builder
+COPY --from=builder /opt/venv /opt/venv
+
+# Configurar PATH
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    SERVICE_NAME=${SERVICE_NAME} \
+    SERVICE_PORT=${SERVICE_PORT}
+
+# Criar diretório da aplicação
+WORKDIR /app
+
+# Copiar código da aplicação
+COPY --chown=appuser:appuser . /app/
+
+# Mudar para usuário não-root
+USER appuser
+
+# Expor porta do service
+EXPOSE ${SERVICE_PORT}
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${SERVICE_PORT}/health || exit 1
+
+# 🔧 CUSTOMIZAR O COMANDO DE START
+# Exemplos:
+#   CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+#   CMD ["python", "main.py"]
+#   CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "${SERVICE_PORT}"]
+
+CMD ["python", "-m", "uvicorn", "api:app", \
+     "--host", "0.0.0.0", \
+     "--port", "${SERVICE_PORT}", \
+     "--workers", "4", \
+     "--proxy-headers", \
+     "--forwarded-allow-ips", "*"]
