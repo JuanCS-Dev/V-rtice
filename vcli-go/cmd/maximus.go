@@ -1047,6 +1047,24 @@ var consciousnessMetricsCmd = &cobra.Command{
 	RunE:  runConsciousnessMetrics,
 }
 
+// Watch command
+var consciousnessWatchCmd = &cobra.Command{
+	Use:   "watch",
+	Short: "Watch consciousness events in real-time",
+	Long: `Watch consciousness system events via WebSocket streaming.
+
+Streams real-time events:
+  - ESGT ignitions (success/failure)
+  - Arousal level changes
+  - System heartbeats
+
+Press Ctrl+C to stop watching.
+
+Example:
+  vcli maximus consciousness watch`,
+	RunE: runConsciousnessWatch,
+}
+
 func runConsciousnessMetrics(cmd *cobra.Command, args []string) error {
 	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
 
@@ -1062,6 +1080,119 @@ func runConsciousnessMetrics(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(maximus.FormatMetrics(metrics))
+	return nil
+}
+
+func runConsciousnessWatch(cmd *cobra.Command, args []string) error {
+	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+	styles := visual.DefaultStyles()
+
+	// Print header
+	fmt.Printf("👁️  Watching consciousness system...\n")
+	fmt.Printf("Press Ctrl+C to stop\n")
+	fmt.Printf("%s\n\n", strings.Repeat("━", 80))
+
+	// Connect to WebSocket and handle events
+	err := client.ConnectWebSocket(func(event *maximus.WSEvent) error {
+		timestamp := event.Timestamp
+		if t, err := time.Parse(time.RFC3339, event.Timestamp); err == nil {
+			timestamp = t.Format("15:04:05")
+		}
+
+		switch event.Type {
+		case maximus.WSEventESGT:
+			esgtEvent, err := maximus.ParseESGTEvent(event)
+			if err != nil {
+				fmt.Printf("[%s] %s Error parsing ESGT event: %v\n",
+					styles.Muted.Render(timestamp),
+					styles.Error.Render("❌"),
+					err)
+				return nil
+			}
+
+			// Format ESGT event
+			icon := "✅"
+			status := styles.Success.Render("ESGT_EVENT")
+			if !esgtEvent.Success {
+				icon = "❌"
+				status = styles.Error.Render("ESGT_FAILED")
+			}
+
+			coherenceStr := ""
+			if esgtEvent.Coherence != nil {
+				coherenceStr = fmt.Sprintf(" | coherence: %.2f", *esgtEvent.Coherence)
+			}
+
+			fmt.Printf("[%s] %s %s - %s%s\n",
+				styles.Muted.Render(timestamp),
+				icon,
+				status,
+				styles.Info.Render(esgtEvent.EventID),
+				coherenceStr)
+
+			if esgtEvent.Reason != nil && *esgtEvent.Reason != "" {
+				fmt.Printf("         Reason: %s\n", styles.Error.Render(*esgtEvent.Reason))
+			}
+
+		case maximus.WSEventArousalChange:
+			arousalEvent, err := maximus.ParseArousalChangeEvent(event)
+			if err != nil {
+				fmt.Printf("[%s] %s Error parsing arousal event: %v\n",
+					styles.Muted.Render(timestamp),
+					styles.Error.Render("❌"),
+					err)
+				return nil
+			}
+
+			// Format arousal change
+			arrow := "→"
+			if arousalEvent.NewLevel > arousalEvent.OldLevel {
+				arrow = styles.Success.Render("↑")
+			} else if arousalEvent.NewLevel < arousalEvent.OldLevel {
+				arrow = styles.Warning.Render("↓")
+			}
+
+			fmt.Printf("[%s] 📊 %s - Level: %s (%.2f %s %.2f)\n",
+				styles.Muted.Render(timestamp),
+				styles.Accent.Render("AROUSAL_CHANGE"),
+				styles.Accent.Render(arousalEvent.NewClass),
+				arousalEvent.OldLevel,
+				arrow,
+				arousalEvent.NewLevel)
+
+		case maximus.WSEventHeartbeat:
+			heartbeat, err := maximus.ParseHeartbeatEvent(event)
+			if err != nil {
+				fmt.Printf("[%s] %s Error parsing heartbeat: %v\n",
+					styles.Muted.Render(timestamp),
+					styles.Error.Render("❌"),
+					err)
+				return nil
+			}
+
+			// Format heartbeat (muted, less prominent)
+			fmt.Printf("[%s] %s - %s (uptime: %ds, events: %d)\n",
+				styles.Muted.Render(timestamp),
+				styles.Muted.Render("💓 HEARTBEAT"),
+				styles.Muted.Render(heartbeat.Status),
+				heartbeat.Uptime,
+				heartbeat.ESGTCount)
+
+		default:
+			// Unknown event type
+			fmt.Printf("[%s] %s Unknown event type: %s\n",
+				styles.Muted.Render(timestamp),
+				styles.Warning.Render("⚠️"),
+				event.Type)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("WebSocket error: %w", err)
+	}
+
 	return nil
 }
 
@@ -1136,6 +1267,7 @@ func init() {
 	maximusConsciousnessCmd.AddCommand(consciousnessESGTCmd)
 	maximusConsciousnessCmd.AddCommand(consciousnessArousalCmd)
 	maximusConsciousnessCmd.AddCommand(consciousnessMetricsCmd)
+	maximusConsciousnessCmd.AddCommand(consciousnessWatchCmd)
 
 	// ESGT subcommands
 	consciousnessESGTCmd.AddCommand(consciousnessESGTEventsCmd)

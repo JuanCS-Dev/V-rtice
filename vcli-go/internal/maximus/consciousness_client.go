@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 // ConsciousnessClient handles communication with MAXIMUS Consciousness API
@@ -261,9 +264,9 @@ func (c *ConsciousnessClient) AdjustArousal(adjustment ArousalAdjustment) (*Arou
 
 // Health checks if the consciousness API is reachable
 func (c *ConsciousnessClient) Health() error {
-	url := fmt.Sprintf("%s/health", c.baseURL)
+	healthURL := fmt.Sprintf("%s/health", c.baseURL)
 
-	resp, err := c.httpClient.Get(url)
+	resp, err := c.httpClient.Get(healthURL)
 	if err != nil {
 		return fmt.Errorf("consciousness API unreachable: %w", err)
 	}
@@ -274,4 +277,137 @@ func (c *ConsciousnessClient) Health() error {
 	}
 
 	return nil
+}
+
+// ==================== WEBSOCKET TYPES ====================
+
+// WSEventType represents WebSocket event types
+type WSEventType string
+
+const (
+	WSEventESGT          WSEventType = "esgt_event"
+	WSEventArousalChange WSEventType = "arousal_change"
+	WSEventHeartbeat     WSEventType = "heartbeat"
+)
+
+// WSEvent represents a WebSocket event
+type WSEvent struct {
+	Type      WSEventType     `json:"type"`
+	Timestamp string          `json:"timestamp"`
+	Data      json.RawMessage `json:"data"`
+}
+
+// ESGTWebSocketEvent represents an ESGT event from WebSocket
+type ESGTWebSocketEvent struct {
+	EventID            string             `json:"event_id"`
+	Success            bool               `json:"success"`
+	Salience           map[string]float64 `json:"salience"`
+	Coherence          *float64           `json:"coherence"`
+	DurationMs         *float64           `json:"duration_ms"`
+	NodesParticipating int                `json:"nodes_participating"`
+	Reason             *string            `json:"reason"`
+}
+
+// ArousalChangeEvent represents an arousal change event from WebSocket
+type ArousalChangeEvent struct {
+	OldLevel float64 `json:"old_level"`
+	NewLevel float64 `json:"new_level"`
+	OldClass string  `json:"old_classification"`
+	NewClass string  `json:"new_classification"`
+}
+
+// HeartbeatEvent represents a heartbeat event from WebSocket
+type HeartbeatEvent struct {
+	Status    string `json:"status"`
+	Uptime    int64  `json:"uptime_seconds"`
+	ESGTCount int    `json:"esgt_event_count"`
+}
+
+// EventCallback is called when a WebSocket event is received
+type EventCallback func(event *WSEvent) error
+
+// ==================== WEBSOCKET METHODS ====================
+
+// ConnectWebSocket connects to the consciousness WebSocket endpoint
+func (c *ConsciousnessClient) ConnectWebSocket(callback EventCallback) error {
+	// Parse base URL and convert to WebSocket URL
+	parsedURL, err := url.Parse(c.baseURL)
+	if err != nil {
+		return fmt.Errorf("invalid base URL: %w", err)
+	}
+
+	// Convert http:// to ws://
+	wsScheme := "ws"
+	if parsedURL.Scheme == "https" {
+		wsScheme = "wss"
+	}
+
+	wsURL := fmt.Sprintf("%s://%s/api/consciousness/ws", wsScheme, parsedURL.Host)
+
+	// Connect to WebSocket
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to connect to WebSocket: %w", err)
+	}
+	defer conn.Close()
+
+	// Read messages in a loop
+	for {
+		var event WSEvent
+		err := conn.ReadJSON(&event)
+		if err != nil {
+			// Check if connection was closed
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+				return nil
+			}
+			return fmt.Errorf("error reading WebSocket message: %w", err)
+		}
+
+		// Call user callback
+		if err := callback(&event); err != nil {
+			return fmt.Errorf("callback error: %w", err)
+		}
+	}
+}
+
+// ParseESGTEvent parses ESGT event data from WebSocket event
+func ParseESGTEvent(event *WSEvent) (*ESGTWebSocketEvent, error) {
+	if event.Type != WSEventESGT {
+		return nil, fmt.Errorf("not an ESGT event (type: %s)", event.Type)
+	}
+
+	var esgtEvent ESGTWebSocketEvent
+	if err := json.Unmarshal(event.Data, &esgtEvent); err != nil {
+		return nil, fmt.Errorf("failed to parse ESGT event: %w", err)
+	}
+
+	return &esgtEvent, nil
+}
+
+// ParseArousalChangeEvent parses arousal change event from WebSocket event
+func ParseArousalChangeEvent(event *WSEvent) (*ArousalChangeEvent, error) {
+	if event.Type != WSEventArousalChange {
+		return nil, fmt.Errorf("not an arousal change event (type: %s)", event.Type)
+	}
+
+	var arousalEvent ArousalChangeEvent
+	if err := json.Unmarshal(event.Data, &arousalEvent); err != nil {
+		return nil, fmt.Errorf("failed to parse arousal event: %w", err)
+	}
+
+	return &arousalEvent, nil
+}
+
+// ParseHeartbeatEvent parses heartbeat event from WebSocket event
+func ParseHeartbeatEvent(event *WSEvent) (*HeartbeatEvent, error) {
+	if event.Type != WSEventHeartbeat {
+		return nil, fmt.Errorf("not a heartbeat event (type: %s)", event.Type)
+	}
+
+	var heartbeat HeartbeatEvent
+	if err := json.Unmarshal(event.Data, &heartbeat); err != nil {
+		return nil, fmt.Errorf("failed to parse heartbeat: %w", err)
+	}
+
+	return &heartbeat, nil
 }
