@@ -18,10 +18,13 @@ func Run(rootCmd *cobra.Command, version, buildDate string) error {
 		return fmt.Errorf("shell requires an interactive terminal (TTY)")
 	}
 
+	// Clear screen before starting (like Claude Code does)
+	fmt.Print("\033[2J\033[H")
+
 	// Create model
 	m := NewModel(rootCmd, version, buildDate)
 
-	// Create program with initial window size
+	// Create program with alternate screen buffer
 	p := tea.NewProgram(
 		m,
 		tea.WithAltScreen(),       // Use alternate screen buffer
@@ -32,6 +35,15 @@ func Run(rootCmd *cobra.Command, version, buildDate string) error {
 	if _, err := p.Run(); err != nil {
 		return fmt.Errorf("error running shell: %w", err)
 	}
+
+	// Force terminal cleanup after bubble tea exits
+	// This ensures terminal is fully restored
+	fmt.Print("\033[?25h")     // Show cursor
+	fmt.Print("\033[0m")       // Reset all attributes
+	fmt.Print("\033[2J\033[H") // Clear screen
+	fmt.Println()              // Newline for clean exit
+	fmt.Println("👋 Goodbye!")
+	fmt.Println()              // Extra newline to prevent zsh % bug
 
 	return nil
 }

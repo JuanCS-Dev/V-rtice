@@ -12,8 +12,8 @@ import (
 // View renders the shell
 func (m Model) View() string {
 	if m.quitting {
-		// Clear screen and show goodbye message
-		return "\033[2J\033[H" + m.styles.Info.Render("👋 Goodbye!") + "\n\n"
+		// Return empty - let shell.go handle cleanup
+		return ""
 	}
 
 	var output strings.Builder
@@ -197,13 +197,11 @@ func (m Model) renderWelcomeBanner() string {
 	workflowsTitle := visual.GradientText("AI-Powered Workflows", gradient)
 
 	// Calculate exact spacing for perfect alignment
-	// Left column: 2 spaces padding + content
-	// Gap: spacing between columns
-	// Right column: content
-	titleGap := 24 // Spacing between column titles
-	if titleGap < 0 {
-		titleGap = 4 // Minimum gap
-	}
+	// Right column starts at position 46 (same as content below)
+	// "Key Features" = 12 chars
+	// 2 (prefix) + 12 (text) = 14
+	// Gap needed: 46 - 14 = 32 spaces
+	titleGap := 32
 
 	output.WriteString(fmt.Sprintf("  %s%s%s\n",
 		featuresTitle,
@@ -214,52 +212,54 @@ func (m Model) renderWelcomeBanner() string {
 	// Feature bullets (left column) - Most impactful features
 	features := []string{
 		"🧠 MAXIMUS Conscious AI integration",
-		"🛡️  Active Immune System protection",
+		"🛡️ Active Immune System protection",
 		"⎈ Real-time Kubernetes orchestration",
 		"🔍 AI-powered threat hunting",
 	}
 
-	// Workflows (right column)
+	// Workflows data (right column)
 	workflows := []struct {
-		num   int
+		emoji string
 		name  string
 		alias string
 	}{
-		{1, "Threat Hunt", "wf1"},
-		{2, "Incident Response", "wf2"},
-		{3, "Security Audit", "wf3"},
-		{4, "Compliance Check", "wf4"},
+		{"🎯", "Threat Hunt", "wf1"},
+		{"🚨", "Incident Response", "wf2"},
+		{"🔐", "Security Audit", "wf3"},
+		{"✅", "Compliance Check", "wf4"},
 	}
 
-	// Print both columns side by side with perfect alignment
-	// Left column width: 40 chars (visible) for consistent spacing
-	leftColWidth := 40
+	// Use lipgloss for PERFECT alignment (Stack Overflow style! 😄)
+	leftColStyle := lipgloss.NewStyle().
+		Width(45).
+		Align(lipgloss.Left).
+		PaddingLeft(2)
+
+	rightColStyle := lipgloss.NewStyle().
+		Width(35).
+		Align(lipgloss.Left)
 
 	for i := 0; i < 4; i++ {
-		// Left column - plain text length for spacing calculation
-		leftText := features[i]
-		leftStyled := m.styles.Muted.Render(leftText)
+		// Left column with fixed width
+		leftText := m.styles.Muted.Render(features[i])
+		leftCol := leftColStyle.Render(leftText)
 
-		// Calculate padding needed (accounting for emoji width)
-		// Note: Emojis count as 1 char in len() but render wider
-		textLen := len(leftText)
-		leftPadding := leftColWidth - textLen
-
-		// Ensure padding is never negative
-		if leftPadding < 0 {
-			leftPadding = 0
+		// Right column with fixed width
+		// Add extra space before 2nd workflow to align it
+		spacing := ""
+		if i == 1 { // Incident Response needs 1 extra space
+			spacing = " "
 		}
+		rightText := fmt.Sprintf("%s%s %s (%s)",
+			spacing,
+			workflows[i].emoji,
+			m.styles.Muted.Render(workflows[i].name),
+			m.styles.Accent.Render(workflows[i].alias))
+		rightCol := rightColStyle.Render(rightText)
 
-		// Right column - format: "N. Name (alias)"
-		wf := workflows[i]
-		alias := m.styles.Accent.Render(wf.alias)
-		name := m.styles.Muted.Render(wf.name)
-		rightCol := fmt.Sprintf("%d. %s (%s)", wf.num, name, alias)
-
-		output.WriteString(fmt.Sprintf("  %s%s    %s\n",
-			leftStyled,
-			strings.Repeat(" ", leftPadding),
-			rightCol))
+		// Join horizontally with lipgloss magic
+		line := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, rightCol)
+		output.WriteString(line + "\n")
 	}
 
 	return output.String()

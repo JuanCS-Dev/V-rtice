@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/investigation"
+	"github.com/verticedev/vcli-go/internal/osint"
 )
 
 // investigateCmd represents the investigate command group
@@ -560,7 +561,7 @@ func runReconHealth(cmd *cobra.Command, args []string) error {
 // ============================================================================
 
 func runOSINTStart(cmd *cobra.Command, args []string) error {
-	client := investigation.NewOSINTClient(osintEndpoint, investigateToken)
+	client := osint.NewOSINTClient(osintEndpoint)
 
 	var params map[string]interface{}
 	if osintParamsFile != "" {
@@ -571,47 +572,65 @@ func runOSINTStart(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	result, err := client.StartInvestigation(osintQuery, osintType, params)
+	req := osint.StartInvestigationRequest{
+		Query:             osintQuery,
+		InvestigationType: osintType,
+		Parameters:        params,
+	}
+
+	result, err := client.StartInvestigation(req)
 	if err != nil {
 		return fmt.Errorf("failed to start OSINT investigation: %w", err)
 	}
 
-	printJSON(result)
+	fmt.Println(osint.FormatInvestigationResponse(result))
 	return nil
 }
 
 func runOSINTStatus(cmd *cobra.Command, args []string) error {
-	client := investigation.NewOSINTClient(osintEndpoint, investigateToken)
+	client := osint.NewOSINTClient(osintEndpoint)
 
-	result, err := client.GetInvestigationStatus(args[0])
+	result, err := client.GetStatus(args[0])
 	if err != nil {
 		return fmt.Errorf("failed to get OSINT investigation status: %w", err)
 	}
 
-	printJSON(result)
+	fmt.Println(osint.FormatStatusResponse(result))
 	return nil
 }
 
 func runOSINTReport(cmd *cobra.Command, args []string) error {
-	client := investigation.NewOSINTClient(osintEndpoint, investigateToken)
+	client := osint.NewOSINTClient(osintEndpoint)
 
-	result, err := client.GetInvestigationReport(args[0])
+	result, err := client.GetReport(args[0])
 	if err != nil {
 		return fmt.Errorf("failed to get OSINT investigation report: %w", err)
 	}
 
-	printJSON(result)
+	fmt.Println(osint.FormatReportResponse(result))
 	return nil
 }
 
 func runOSINTHealth(cmd *cobra.Command, args []string) error {
-	client := investigation.NewOSINTClient(osintEndpoint, investigateToken)
+	client := osint.NewOSINTClient(osintEndpoint)
 
-	result, err := client.Health()
+	err := client.Health()
 	if err != nil {
-		return fmt.Errorf("failed to check health: %w", err)
+		return fmt.Errorf("OSINT service unhealthy: %w", err)
 	}
 
-	printJSON(result)
+	// Get detailed health info for better display
+	details, err := client.GetHealthDetails()
+	if err != nil {
+		// Fallback to simple success message if details unavailable
+		fmt.Println("✓ OSINT Service is healthy")
+		return nil
+	}
+
+	// Format health details
+	fmt.Printf("✓ OSINT Service Status: %s\n", details.Status)
+	if details.Message != "" {
+		fmt.Printf("  Message: %s\n", details.Message)
+	}
 	return nil
 }
