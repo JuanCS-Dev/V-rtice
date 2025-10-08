@@ -54,6 +54,13 @@ var CommandIcon = map[string]string{
 
 	// Metrics
 	"metrics": "📊",
+
+	// Narrative Manipulation Filter
+	"narrative":          "🛡️",
+	"narrative analyze":  "🔍",
+	"narrative health":   "💚",
+	"narrative info":     "ℹ️",
+	"narrative stats":    "📊",
 }
 
 // GetIconForCommand returns an icon for a command

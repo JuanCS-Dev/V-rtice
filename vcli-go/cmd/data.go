@@ -82,7 +82,6 @@ var narrativeCmd = &cobra.Command{
 
 var narrativeAnalyzeCmd = &cobra.Command{Use: "analyze", Short: "Analyze content", RunE: runNarrativeAnalyze}
 var narrativeHealthCmd = &cobra.Command{Use: "health", Short: "Check health", RunE: runNarrativeHealth}
-var narrativeSimpleHealthCmd = &cobra.Command{Use: "simple-health", Short: "Simple health check", RunE: runNarrativeSimpleHealth}
 var narrativeCacheStatsCmd = &cobra.Command{Use: "cache-stats", Short: "Get cache statistics", RunE: runNarrativeCacheStats}
 var narrativeDbStatsCmd = &cobra.Command{Use: "db-stats", Short: "Get database statistics", RunE: runNarrativeDbStats}
 var narrativeInfoCmd = &cobra.Command{Use: "info", Short: "Get service info", RunE: runNarrativeInfo}
@@ -141,7 +140,7 @@ func init() {
 	rteCmd.AddCommand(rteExecuteCmd, rteIngestCmd, rteHealthCmd)
 
 	// Narrative subcommands
-	narrativeCmd.AddCommand(narrativeAnalyzeCmd, narrativeHealthCmd, narrativeSimpleHealthCmd,
+	narrativeCmd.AddCommand(narrativeAnalyzeCmd, narrativeHealthCmd,
 		narrativeCacheStatsCmd, narrativeDbStatsCmd, narrativeInfoCmd)
 
 	// Persistent flags for endpoints
@@ -464,7 +463,7 @@ func runRTEHealth(cmd *cobra.Command, args []string) error {
 // ============================================================================
 
 func runNarrativeAnalyze(cmd *cobra.Command, args []string) error {
-	client := narrative.NewNarrativeFilterClient(narrativeEndpoint, dataToken)
+	client := narrative.NewNarrativeClient(narrativeEndpoint)
 
 	analysisData, err := readJSONFile(narrativeAnalysisFile)
 	if err != nil {
@@ -475,7 +474,7 @@ func runNarrativeAnalyze(cmd *cobra.Command, args []string) error {
 	jsonBytes, _ := json.Marshal(analysisData)
 	json.Unmarshal(jsonBytes, &analysisReq)
 
-	result, err := client.AnalyzeContent(analysisReq)
+	result, err := client.Analyze(analysisReq.Text, analysisReq.SourceURL)
 	if err != nil {
 		return err
 	}
@@ -485,21 +484,14 @@ func runNarrativeAnalyze(cmd *cobra.Command, args []string) error {
 }
 
 func runNarrativeHealth(cmd *cobra.Command, args []string) error {
-	client := narrative.NewNarrativeFilterClient(narrativeEndpoint, dataToken)
+	client := narrative.NewNarrativeClient(narrativeEndpoint)
 	result, _ := client.Health()
 	printJSON(result)
 	return nil
 }
 
-func runNarrativeSimpleHealth(cmd *cobra.Command, args []string) error {
-	client := narrative.NewNarrativeFilterClient(narrativeEndpoint, dataToken)
-	result, _ := client.SimpleHealth()
-	printJSON(result)
-	return nil
-}
-
-func runNarrativeCacheStats(cmd *cobra.Command, args []string) error {
-	client := narrative.NewNarrativeFilterClient(narrativeEndpoint, dataToken)
+func runNarrativeCacheStats(cmd *cobra.Command, args []string) error{
+	client := narrative.NewNarrativeClient(narrativeEndpoint)
 	result, err := client.GetCacheStats()
 	if err != nil {
 		return err
@@ -509,7 +501,7 @@ func runNarrativeCacheStats(cmd *cobra.Command, args []string) error {
 }
 
 func runNarrativeDbStats(cmd *cobra.Command, args []string) error {
-	client := narrative.NewNarrativeFilterClient(narrativeEndpoint, dataToken)
+	client := narrative.NewNarrativeClient(narrativeEndpoint)
 	result, err := client.GetDatabaseStats()
 	if err != nil {
 		return err
@@ -519,7 +511,7 @@ func runNarrativeDbStats(cmd *cobra.Command, args []string) error {
 }
 
 func runNarrativeInfo(cmd *cobra.Command, args []string) error {
-	client := narrative.NewNarrativeFilterClient(narrativeEndpoint, dataToken)
+	client := narrative.NewNarrativeClient(narrativeEndpoint)
 	result, err := client.GetServiceInfo()
 	if err != nil {
 		return err

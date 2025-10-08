@@ -60,7 +60,7 @@ type OrchestrationEngine struct {
 	// Data & Graph (3 services)
 	SeriemaGraph    *graph.SeriemaClient
 	TatacaIngestion *data.IngestionClient
-	NarrativeFilter *narrative.NarrativeFilterClient
+	NarrativeFilter *narrative.NarrativeClient
 
 	// Triage & RTE (1 service)
 	RTE *triage.RTEClient
@@ -151,7 +151,7 @@ func NewOrchestrationEngine(config EngineConfig) *OrchestrationEngine {
 
 		SeriemaGraph:    graph.NewSeriemaClient(config.SeriemaGraphEndpoint, config.AuthToken),
 		TatacaIngestion: data.NewIngestionClient(config.TatacaIngestionEndpoint, config.AuthToken),
-		NarrativeFilter: narrative.NewNarrativeFilterClient(config.NarrativeFilterEndpoint, config.AuthToken),
+		NarrativeFilter: narrative.NewNarrativeClient(config.NarrativeFilterEndpoint),
 
 		RTE: triage.NewRTEClient(config.RTEEndpoint, config.AuthToken),
 

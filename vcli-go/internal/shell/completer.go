@@ -269,6 +269,13 @@ func (c *Completer) buildSuggestions() {
 		{Text: "maximus consciousness arousal adjust", Description: "Adjust arousal level"},
 		{Text: "maximus consciousness metrics", Description: "Get consciousness metrics"},
 		{Text: "maximus consciousness watch", Description: "Watch events real-time (WebSocket)"},
+
+		// Narrative Manipulation Filter
+		{Text: "narrative analyze", Description: "Analyze text for manipulation"},
+		{Text: "narrative health", Description: "Check service health"},
+		{Text: "narrative info", Description: "Get service info"},
+		{Text: "narrative stats cache", Description: "Cache statistics"},
+		{Text: "narrative stats database", Description: "Database statistics"},
 	}...)
 
 	// Add Kubernetes commands explicitly

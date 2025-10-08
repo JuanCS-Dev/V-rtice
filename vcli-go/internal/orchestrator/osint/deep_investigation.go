@@ -320,13 +320,8 @@ func NewDeepInvestigationWorkflow(options DeepInvestigationOptions) orchestrator
 				}
 
 				analysisRequest := narrative.AnalysisRequest{
-					Text:        narrativeText,
-					EnableTier2: true,
-					Priority:    5,
-					Metadata: map[string]interface{}{
-						"subject":      options.Subject,
-						"investigation_type": options.SubjectType,
-					},
+					Text:      narrativeText,
+					SourceURL: nil,
 				}
 
 				ctx.SetVariable("narrative_input", analysisRequest)

@@ -217,14 +217,8 @@ func NewAPTSimulationWorkflow(options APTSimulationOptions) orchestrator.Workflo
 			Service:     "narrative_filter",
 			Operation:   "AnalyzeContent",
 			Input: narrative.AnalysisRequest{
-				Text:        options.NarrativeContext,
-				EnableTier2: true,
-				Priority:    8,
-				Metadata: map[string]interface{}{
-					"actor":     options.ActorName,
-					"campaign":  "apt_simulation",
-					"timestamp": time.Now().Format(time.RFC3339),
-				},
+				Text:      options.NarrativeContext,
+				SourceURL: nil,
 			},
 			OnError:    orchestrator.ErrorContinue,
 			Timeout:    10 * time.Minute,
