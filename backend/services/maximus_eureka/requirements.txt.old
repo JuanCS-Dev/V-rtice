@@ -1,0 +1,15 @@
+# MAXIMUS EUREKA - Deep Malware Analysis Engine
+# ==============================================
+
+# Core dependencies (já no projeto principal)
+# pyyaml>=6.0
+# requests>=2.31.0
+
+# Optional: Para análise YARA (futuro)
+# yara-python==4.5.0
+
+# Optional: Para STIX export (futuro)
+# stix2>=3.0.0
+
+# Optional: Para análise de PE files (futuro)
+# pefile>=2023.2.7

@@ -6,19 +6,18 @@ Coordinates multiple edge agents in multi-tenant environment.
 NO MOCKS - Production-ready cloud coordination API.
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from coordinator_core import AgentHealth, CloudCoordinatorController
+import uvicorn
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
-import uvicorn
+
+from coordinator_core import CloudCoordinatorController
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
@@ -42,9 +41,7 @@ class AgentRegistrationRequest(BaseModel):
     agent_id: str = Field(..., description="Unique agent identifier")
     tenant_id: str = Field(..., description="Tenant identifier")
     host: str = Field(..., description="Agent host address")
-    metadata: Optional[Dict[str, Any]] = Field(
-        default=None, description="Additional metadata"
-    )
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
 
 
 class HeartbeatRequest(BaseModel):
@@ -230,9 +227,7 @@ async def get_agent_details(agent_id: str) -> Dict[str, Any]:
         Agent details
     """
     if agent_id not in coordinator.agents:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Agent {agent_id} not found")
 
     agent = coordinator.agents[agent_id]
 

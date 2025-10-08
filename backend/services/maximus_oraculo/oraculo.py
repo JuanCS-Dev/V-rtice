@@ -19,8 +19,6 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-import numpy as np
-
 
 class OraculoEngine:
     """Provides predictive insights, probabilistic forecasts, and strategic guidance
@@ -48,9 +46,7 @@ class OraculoEngine:
         Returns:
             Dict[str, Any]: A dictionary containing the prediction results and confidence.
         """
-        print(
-            f"[OraculoEngine] Generating {prediction_type} prediction for {time_horizon}..."
-        )
+        print(f"[OraculoEngine] Generating {prediction_type} prediction for {time_horizon}...")
         await asyncio.sleep(0.5)  # Simulate complex predictive modeling
 
         predicted_event = "N/A"
@@ -100,9 +96,5 @@ class OraculoEngine:
         return {
             "status": self.current_status,
             "total_predictions_generated": len(self.prediction_history),
-            "last_prediction": (
-                self.last_prediction_time.isoformat()
-                if self.last_prediction_time
-                else "N/A"
-            ),
+            "last_prediction": (self.last_prediction_time.isoformat() if self.last_prediction_time else "N/A"),
         }

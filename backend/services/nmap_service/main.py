@@ -13,13 +13,13 @@ within the Maximus AI system.
 """
 
 import asyncio
+import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import uuid
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus Nmap Service", version="1.0.0")
 
@@ -79,14 +79,10 @@ async def initiate_nmap_scan(request: NmapScanRequest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the scan ID and initial status.
     """
     scan_id = str(uuid.uuid4())
-    print(
-        f"[API] Initiating Nmap scan (ID: {scan_id}, target: {request.target}, type: {request.scan_type})"
-    )
+    print(f"[API] Initiating Nmap scan (ID: {scan_id}, target: {request.target}, type: {request.scan_type})")
 
     # Simulate Nmap scan in a background task
-    asyncio.create_task(
-        perform_nmap_scan(scan_id, request.target, request.scan_type, request.options)
-    )
+    asyncio.create_task(perform_nmap_scan(scan_id, request.target, request.scan_type, request.options))
 
     return {
         "scan_id": scan_id,
@@ -110,15 +106,11 @@ async def get_nmap_scan_results(scan_id: str) -> Dict[str, Any]:
     """
     results = scan_results_db.get(scan_id)
     if not results:
-        raise HTTPException(
-            status_code=404, detail="Scan results not found or not yet available."
-        )
+        raise HTTPException(status_code=404, detail="Scan results not found or not yet available.")
     return results
 
 
-async def perform_nmap_scan(
-    scan_id: str, target: str, scan_type: str, options: Optional[List[str]]
-):
+async def perform_nmap_scan(scan_id: str, target: str, scan_type: str, options: Optional[List[str]]):
     """Simulates an Nmap scan and stores its results.
 
     Args:
@@ -151,9 +143,7 @@ async def perform_nmap_scan(
         output["details"] = "Full scan completed."
     elif scan_type == "port_scan":
         output["hosts_found"] = 1
-        output["open_ports"] = [
-            p for p in [21, 22, 23, 80, 443] if str(p) in str(options)
-        ]  # Simulate specific ports
+        output["open_ports"] = [p for p in [21, 22, 23, 80, 443] if str(p) in str(options)]  # Simulate specific ports
         output["details"] = "Specific port scan completed."
     else:
         output["status"] = "failed"

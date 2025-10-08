@@ -13,12 +13,11 @@ diverse operational contexts.
 """
 
 import asyncio
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus Domain Service", version="1.0.0")
 
@@ -105,9 +104,7 @@ async def get_domain_info(domain_name: str) -> Dict[str, Any]:
     """
     domain_info = domain_knowledge_base.get(domain_name)
     if not domain_info:
-        raise HTTPException(
-            status_code=404, detail=f"Domain '{domain_name}' not found."
-        )
+        raise HTTPException(status_code=404, detail=f"Domain '{domain_name}' not found.")
     return domain_info
 
 
@@ -127,9 +124,7 @@ async def query_domain(request: DomainQueryRequest) -> Dict[str, Any]:
     print(f"[API] Querying domain '{request.domain_name}' with: {request.query}")
     domain_info = domain_knowledge_base.get(request.domain_name)
     if not domain_info:
-        raise HTTPException(
-            status_code=404, detail=f"Domain '{request.domain_name}' not found."
-        )
+        raise HTTPException(status_code=404, detail=f"Domain '{request.domain_name}' not found.")
 
     await asyncio.sleep(0.1)  # Simulate processing
 
@@ -138,9 +133,7 @@ async def query_domain(request: DomainQueryRequest) -> Dict[str, Any]:
     if "rules" in request.query.lower():
         response["results"].append({"type": "rules", "content": domain_info["rules"]})
     if "entities" in request.query.lower():
-        response["results"].append(
-            {"type": "entities", "content": domain_info["entities"]}
-        )
+        response["results"].append({"type": "entities", "content": domain_info["entities"]})
     if not response["results"]:
         response["results"].append(
             {

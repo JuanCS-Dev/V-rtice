@@ -15,17 +15,17 @@ Oraculo Service's advanced foresight capabilities, supporting high-level
 decision-making and long-term planning for the Maximus AI system.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from auto_implementer import AutoImplementer
 from code_scanner import CodeScanner
-from fastapi import FastAPI, HTTPException
 from oraculo import OraculoEngine
-from pydantic import BaseModel
 from suggestion_generator import SuggestionGenerator
-import uvicorn
 
 app = FastAPI(title="Maximus Oraculo Service", version="1.0.0")
 
@@ -112,9 +112,7 @@ async def get_prediction(request: PredictionRequest) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary containing the prediction results and confidence.
     """
-    print(
-        f"[API] Generating {request.prediction_type} prediction for {request.time_horizon}."
-    )
+    print(f"[API] Generating {request.prediction_type} prediction for {request.time_horizon}.")
     prediction_result = await oraculo_engine.generate_prediction(
         request.data, request.prediction_type, request.time_horizon
     )
@@ -138,9 +136,7 @@ async def analyze_code_endpoint(request: CodeAnalysisRequest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the code analysis results.
     """
     print(f"[API] Analyzing {request.language} code for {request.analysis_type}.")
-    analysis_result = await code_scanner.scan_code(
-        request.code, request.language, request.analysis_type
-    )
+    analysis_result = await code_scanner.scan_code(request.code, request.language, request.analysis_type)
     return {
         "status": "success",
         "timestamp": datetime.now().isoformat(),

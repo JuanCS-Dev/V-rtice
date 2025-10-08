@@ -10,7 +10,6 @@ of new predictive capabilities, ensuring their accuracy, robustness, and
 performance without affecting the stability of the production system.
 """
 
-from unittest.mock import MagicMock
 
 import pytest
 

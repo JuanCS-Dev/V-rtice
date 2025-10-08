@@ -12,11 +12,11 @@ understand the operational environment.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Atlas Service", version="1.0.0")
 
@@ -89,9 +89,7 @@ async def update_environment(request: EnvironmentUpdateRequest) -> Dict[str, Any
     Returns:
         Dict[str, Any]: A dictionary confirming the update and providing current environmental status.
     """
-    print(
-        f"[API] Received environment update from {request.data_source} at {request.timestamp}"
-    )
+    print(f"[API] Received environment update from {request.data_source} at {request.timestamp}")
     # In a real system, this would process sensor_data to update the internal environmental model
     await asyncio.sleep(0.1)  # Simulate processing
 

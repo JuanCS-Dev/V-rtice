@@ -31,9 +31,7 @@ class CodeScanner:
         self.last_scan_time: Optional[datetime] = None
         self.current_status: str = "ready_to_scan"
 
-    async def scan_code(
-        self, code: str, language: str, analysis_type: str
-    ) -> Dict[str, Any]:
+    async def scan_code(self, code: str, language: str, analysis_type: str) -> Dict[str, Any]:
         """Scans a given code snippet for specified analysis types.
 
         Args:
@@ -113,7 +111,5 @@ class CodeScanner:
         return {
             "status": self.current_status,
             "total_scans_performed": len(self.scan_history),
-            "last_scan": (
-                self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
-            ),
+            "last_scan": (self.last_scan_time.isoformat() if self.last_scan_time else "N/A"),
         }

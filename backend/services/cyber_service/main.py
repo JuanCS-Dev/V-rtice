@@ -12,13 +12,13 @@ for the Maximus AI system.
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 # Assuming these services are available and can be called via HTTP or directly
 # In a real microservices architecture, these would be client calls to other services
@@ -146,9 +146,7 @@ async def initiate_incident_response(
     Returns:
         Dict[str, Any]: The status and outcome of the initiated response.
     """
-    print(
-        f"[API] Initiating response plan '{request.response_plan}' for incident {request.incident_id}"
-    )
+    print(f"[API] Initiating response plan '{request.response_plan}' for incident {request.incident_id}")
     await asyncio.sleep(1.5)  # Simulate response execution
 
     # In a real scenario, this would call out to the ADR Core Service's response engine

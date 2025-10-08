@@ -6,15 +6,12 @@ Coordinates multiple edge agents.
 NO MOCKS - Production-ready cloud coordination.
 """
 
-import asyncio
+import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-import logging
-import time
-from typing import Any, Dict, List, Optional, Set
-import uuid
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -70,9 +67,7 @@ class EventAggregator:
         # Cleanup old events
         cutoff = datetime.now() - timedelta(seconds=self.window_seconds)
         self.events_by_tenant[tenant_id] = [
-            e
-            for e in self.events_by_tenant[tenant_id]
-            if datetime.fromisoformat(e["timestamp"]) > cutoff
+            e for e in self.events_by_tenant[tenant_id] if datetime.fromisoformat(e["timestamp"]) > cutoff
         ]
 
     def get_stats(self) -> Dict[str, Any]:
@@ -100,9 +95,7 @@ class LoadBalancer:
             return None
 
         # Filter healthy agents
-        healthy = [
-            a for a in agents if a.health == AgentHealth.HEALTHY and a.is_alive()
-        ]
+        healthy = [a for a in agents if a.health == AgentHealth.HEALTHY and a.is_alive()]
 
         if not healthy:
             return None
@@ -194,9 +187,7 @@ class CloudCoordinatorController:
         """Get coordinator status."""
         return {
             "total_agents": len(self.agents),
-            "healthy_agents": sum(
-                1 for a in self.agents.values() if a.health == AgentHealth.HEALTHY
-            ),
+            "healthy_agents": sum(1 for a in self.agents.values() if a.health == AgentHealth.HEALTHY),
             "total_events": self.total_events,
             "aggregator_stats": self.aggregator.get_stats(),
             "timestamp": datetime.now().isoformat(),

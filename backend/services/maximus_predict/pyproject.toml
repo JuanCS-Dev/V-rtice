@@ -1,0 +1,38 @@
+[project]
+name = "maximus_predict"
+version = "1.0.0"
+description = "MAXIMUS Service"
+requires-python = ">=3.11"
+dependencies = [
+        "fastapi",     "uvicorn[standard]",     "scikit-learn",     "pandas",     "numpy"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.13.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "B", "C90", "UP", "S", "T20", "RET", "SIM"]
+ignore = ["E501", "S101", "S311", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["S101", "ANN001", "ANN201", "D103"]
+"__init__.py" = ["F401", "D104"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_*.py"]
+addopts = ["--verbose", "--tb=short"]
+asyncio_mode = "auto"
+

@@ -106,9 +106,5 @@ class SuggestionGenerator:
         return {
             "status": self.current_status,
             "total_suggestions_generated": len(self.generated_suggestions),
-            "last_generation": (
-                self.last_generation_time.isoformat()
-                if self.last_generation_time
-                else "N/A"
-            ),
+            "last_generation": (self.last_generation_time.isoformat() if self.last_generation_time else "N/A"),
         }

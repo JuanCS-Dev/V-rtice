@@ -13,22 +13,19 @@ external tools, data sources, and services, extending its capabilities and
 operational reach.
 """
 
-import asyncio
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
 import httpx
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Integration Service", version="1.0.0")
 
 # Mock external service URLs
 MOCK_EXTERNAL_CRM_URL = os.getenv("MOCK_EXTERNAL_CRM_URL", "http://localhost:8030/crm")
-MOCK_EXTERNAL_SIEM_URL = os.getenv(
-    "MOCK_EXTERNAL_SIEM_URL", "http://localhost:8031/siem"
-)
+MOCK_EXTERNAL_SIEM_URL = os.getenv("MOCK_EXTERNAL_SIEM_URL", "http://localhost:8031/siem")
 
 
 class ExternalServiceRequest(BaseModel):
@@ -86,9 +83,7 @@ async def interact_external_service(request: ExternalServiceRequest) -> Dict[str
     Raises:
         HTTPException: If the external service is unknown or an error occurs during interaction.
     """
-    print(
-        f"[API] Interacting with external service: {request.service_name} at {request.endpoint}"
-    )
+    print(f"[API] Interacting with external service: {request.service_name} at {request.endpoint}")
 
     base_url = None
     if request.service_name == "crm":
@@ -96,9 +91,7 @@ async def interact_external_service(request: ExternalServiceRequest) -> Dict[str
     elif request.service_name == "siem":
         base_url = MOCK_EXTERNAL_SIEM_URL
     else:
-        raise HTTPException(
-            status_code=400, detail=f"Unknown external service: {request.service_name}"
-        )
+        raise HTTPException(status_code=400, detail=f"Unknown external service: {request.service_name}")
 
     url = f"{base_url}/{request.endpoint}"
     async with httpx.AsyncClient() as client:
@@ -107,19 +100,13 @@ async def interact_external_service(request: ExternalServiceRequest) -> Dict[str
             if request.method.upper() == "GET":
                 response = await client.get(url, headers=request.headers)
             elif request.method.upper() == "POST":
-                response = await client.post(
-                    url, json=request.payload, headers=request.headers
-                )
+                response = await client.post(url, json=request.payload, headers=request.headers)
             elif request.method.upper() == "PUT":
-                response = await client.put(
-                    url, json=request.payload, headers=request.headers
-                )
+                response = await client.put(url, json=request.payload, headers=request.headers)
             elif request.method.upper() == "DELETE":
                 response = await client.delete(url, headers=request.headers)
             else:
-                raise HTTPException(
-                    status_code=405, detail=f"Method {request.method} not allowed."
-                )
+                raise HTTPException(status_code=405, detail=f"Method {request.method} not allowed.")
 
             response.raise_for_status()
             return {
@@ -128,9 +115,7 @@ async def interact_external_service(request: ExternalServiceRequest) -> Dict[str
                 "timestamp": datetime.now().isoformat(),
             }
         except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=500, detail=f"External service communication error: {e}"
-            )
+            raise HTTPException(status_code=500, detail=f"External service communication error: {e}")
         except httpx.HTTPStatusError as e:
             raise HTTPException(
                 status_code=e.response.status_code,

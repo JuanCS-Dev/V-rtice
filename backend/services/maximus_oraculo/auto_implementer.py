@@ -46,9 +46,7 @@ class AutoImplementer:
         Returns:
             Dict[str, Any]: A dictionary containing the generated code and implementation details.
         """
-        print(
-            f"[AutoImplementer] Implementing code for task: {task_description} in {target_language}"
-        )
+        print(f"[AutoImplementer] Implementing code for task: {task_description} in {target_language}")
         await asyncio.sleep(0.5)  # Simulate code generation and implementation
 
         generated_code = f"# Auto-generated {target_language} code for: {task_description}\n\ndef {task_description.replace(' ', '_').lower()}():\n    # Your implementation logic here\n    print('Task completed!')\n"
@@ -81,8 +79,6 @@ class AutoImplementer:
             "status": self.current_status,
             "total_implementations": len(self.implementation_history),
             "last_implementation": (
-                self.last_implementation_time.isoformat()
-                if self.last_implementation_time
-                else "N/A"
+                self.last_implementation_time.isoformat() if self.last_implementation_time else "N/A"
             ),
         }

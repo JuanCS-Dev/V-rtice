@@ -15,9 +15,9 @@ Key functionalities include:
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Any
 
 
 class EurekaEngine:
@@ -30,16 +30,16 @@ class EurekaEngine:
 
     def __init__(self):
         """Initializes the EurekaEngine."""
-        self.discovery_history: List[Dict[str, Any]] = []
-        self.last_discovery_time: Optional[datetime] = None
+        self.discovery_history: list[dict[str, Any]] = []
+        self.last_discovery_time: datetime | None = None
         self.current_status: str = "seeking_insights"
 
     async def analyze_data(
         self,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         data_type: str,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Analyzes incoming data to identify novel insights and potential discoveries.
 
         Args:
@@ -57,10 +57,7 @@ class EurekaEngine:
         analysis_notes = "No significant novel insights found in this batch."
 
         # Simulate discovery based on data content
-        if (
-            "unusual_pattern" in str(data).lower()
-            or "zero_day_exploit" in str(data).lower()
-        ):
+        if "unusual_pattern" in str(data).lower() or "zero_day_exploit" in str(data).lower():
             discovery_id = str(uuid.uuid4())
             novel_discovery = {
                 "id": discovery_id,
@@ -80,7 +77,7 @@ class EurekaEngine:
             "novel_discovery": novel_discovery,
         }
 
-    async def get_status(self) -> Dict[str, Any]:
+    async def get_status(self) -> dict[str, Any]:
         """Retrieves the current operational status of the Eureka Engine.
 
         Returns:
@@ -89,9 +86,5 @@ class EurekaEngine:
         return {
             "status": self.current_status,
             "total_discoveries": len(self.discovery_history),
-            "last_discovery": (
-                self.last_discovery_time.isoformat()
-                if self.last_discovery_time
-                else "N/A"
-            ),
+            "last_discovery": (self.last_discovery_time.isoformat() if self.last_discovery_time else "N/A"),
         }

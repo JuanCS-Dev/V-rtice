@@ -14,12 +14,12 @@ planning across the Maximus AI system.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from fastapi import FastAPI, HTTPException
 import numpy as np
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Predict Service", version="1.0.0")
 
@@ -32,7 +32,7 @@ class MockPredictiveModel:
     com base em dados de entrada, para fins de teste e desenvolvimento.
     """
 
-    def predict(self, data: Dict[str, Any], prediction_type: str) -> Dict[str, Any]:
+    def predict(self, data: dict[str, Any], prediction_type: str) -> dict[str, Any]:
         """Simula a geração de uma previsão com base nos dados e tipo de previsão.
 
         Args:
@@ -51,7 +51,7 @@ class MockPredictiveModel:
                 "unit": "requests/sec",
                 "confidence": confidence,
             }
-        elif prediction_type == "threat_likelihood":
+        if prediction_type == "threat_likelihood":
             likelihood = data.get("anomaly_score", 0) * 0.7 + np.random.rand() * 0.2
             confidence = 0.70
             return {
@@ -59,12 +59,11 @@ class MockPredictiveModel:
                 "confidence": confidence,
                 "threat_type": "DDoS",
             }
-        else:
-            return {
-                "predicted_value": None,
-                "confidence": 0.0,
-                "error": "Unknown prediction type",
-            }
+        return {
+            "predicted_value": None,
+            "confidence": 0.0,
+            "error": "Unknown prediction type",
+        }
 
 
 predictive_model = MockPredictiveModel()
@@ -79,9 +78,9 @@ class PredictionRequest(BaseModel):
         time_horizon (Optional[str]): The time horizon for the prediction (e.g., '1h', '24h').
     """
 
-    data: Dict[str, Any]
+    data: dict[str, Any]
     prediction_type: str
-    time_horizon: Optional[str] = None
+    time_horizon: str | None = None
 
 
 @app.on_event("startup")
@@ -100,7 +99,7 @@ async def shutdown_event():
 
 
 @app.get("/health")
-async def health_check() -> Dict[str, str]:
+async def health_check() -> dict[str, str]:
     """Performs a health check of the Predict Service.
 
     Returns:
@@ -110,7 +109,7 @@ async def health_check() -> Dict[str, str]:
 
 
 @app.post("/predict")
-async def generate_prediction_endpoint(request: PredictionRequest) -> Dict[str, Any]:
+async def generate_prediction_endpoint(request: PredictionRequest) -> dict[str, Any]:
     """Generates a prediction based on the provided data and prediction type.
 
     Args:

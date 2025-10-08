@@ -10,13 +10,12 @@ IoC extraction logic, and playbook generation rules, validating the robustness
 and accuracy of the Eureka Service's discovery capabilities.
 """
 
-from unittest.mock import AsyncMock, MagicMock
+import pytest
 
 from maximus_eureka.eureka import EurekaEngine
 from maximus_eureka.ioc_extractor import IoCExtractor
 from maximus_eureka.pattern_detector import PatternDetector
 from maximus_eureka.playbook_generator import PlaybookGenerator
-import pytest
 
 
 @pytest.fixture
@@ -100,6 +99,4 @@ def test_playbook_generator_critical_insight(playbook_generator):
     }
     playbook = playbook_generator.generate_playbook(insight)
     assert playbook["name"] == "Response to zero_day_exploit_potential"
-    assert any(
-        "isolate_affected_systems" == step["action"] for step in playbook["steps"]
-    )
+    assert any(step["action"] == "isolate_affected_systems" for step in playbook["steps"])

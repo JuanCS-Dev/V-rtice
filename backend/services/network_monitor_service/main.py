@@ -13,13 +13,13 @@ detection, and incident response.
 """
 
 import asyncio
-from datetime import datetime
 import random
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="Maximus Network Monitor Service", version="1.0.0")
 
@@ -88,9 +88,7 @@ async def ingest_network_event(event: NetworkEvent) -> Dict[str, Any]:
     network_events.append(event.dict())
     if len(network_events) > 1000:  # Keep history size manageable
         network_events.pop(0)
-    print(
-        f"[API] Ingested network event: {event.event_type} from {event.source_ip} to {event.destination_ip}"
-    )
+    print(f"[API] Ingested network event: {event.event_type} from {event.source_ip} to {event.destination_ip}")
     return {
         "status": "success",
         "message": "Event ingested.",
@@ -108,10 +106,7 @@ async def get_network_status() -> Dict[str, Any]:
     # Simulate analysis of recent events
     anomalies = [e for e in network_events if e.get("event_type") == "anomaly"]
     suspicious_connections = [
-        e
-        for e in network_events
-        if e.get("event_type") == "connection"
-        and e.get("details", {}).get("suspicious")
+        e for e in network_events if e.get("event_type") == "connection" and e.get("details", {}).get("suspicious")
     ]
 
     return {
@@ -119,9 +114,7 @@ async def get_network_status() -> Dict[str, Any]:
         "total_events_ingested": len(network_events),
         "anomalies_detected": len(anomalies),
         "suspicious_connections": len(suspicious_connections),
-        "network_health": (
-            "optimal" if not anomalies and not suspicious_connections else "degraded"
-        ),
+        "network_health": ("optimal" if not anomalies and not suspicious_connections else "degraded"),
     }
 
 
@@ -140,9 +133,7 @@ async def get_recent_events(limit: int = 10) -> List[NetworkEvent]:
 
 async def simulate_network_traffic():
     """Simulates continuous network traffic and events."""
-    ips = [f"192.168.1.{i}" for i in range(10, 20)] + [
-        f"10.0.0.{i}" for i in range(1, 5)
-    ]
+    ips = [f"192.168.1.{i}" for i in range(10, 20)] + [f"10.0.0.{i}" for i in range(1, 5)]
     event_types = ["connection", "connection", "connection", "packet_drop", "anomaly"]
     protocols = ["TCP", "UDP", "ICMP"]
 
@@ -157,13 +148,9 @@ async def simulate_network_traffic():
         details = {}
 
         if event_type == "anomaly":
-            details["reason"] = random.choice(
-                ["unusual_port_scan", "high_bandwidth_usage", "failed_login_attempts"]
-            )
+            details["reason"] = random.choice(["unusual_port_scan", "high_bandwidth_usage", "failed_login_attempts"])
             details["severity"] = random.choice(["medium", "high"])
-        elif (
-            event_type == "connection" and random.random() < 0.1
-        ):  # 10% chance of suspicious connection
+        elif event_type == "connection" and random.random() < 0.1:  # 10% chance of suspicious connection
             details["suspicious"] = True
             details["reason"] = "connection to known bad IP"
 
