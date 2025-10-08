@@ -6,15 +6,33 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/verticedev/vcli-go/internal/visual"
+	"github.com/verticedev/vcli-go/internal/visual/banner"
 )
 
 // View renders the shell
 func (m Model) View() string {
 	if m.quitting {
-		return m.styles.Info.Render("👋 Goodbye!\n")
+		// Clear screen and show goodbye message
+		return "\033[2J\033[H" + m.styles.Info.Render("👋 Goodbye!") + "\n\n"
 	}
 
 	var output strings.Builder
+
+	// Show welcome banner on first render
+	if m.showWelcome {
+		output.WriteString(m.renderWelcomeBanner())
+		output.WriteString("\n\n")
+	}
+
+	// Warning if terminal is too small (below minimum)
+	if m.width < MinWidth || m.height < MinHeight {
+		warning := m.styles.Warning.Render(fmt.Sprintf(
+			"⚠️  Terminal too small! Minimum: %dx%d (current: %dx%d)",
+			MinWidth, MinHeight, m.width, m.height,
+		))
+		output.WriteString(warning)
+		output.WriteString("\n\n")
+	}
 
 	// Render prompt
 	output.WriteString(m.renderPrompt())
@@ -134,13 +152,10 @@ func (m Model) renderSuggestions() string {
 
 // renderToolbar renders the bottom toolbar with keybindings
 func (m Model) renderToolbar() string {
-	// Separator line
+	// Separator line - use full width with minimum enforcement
 	separatorWidth := m.width
-	if separatorWidth < 80 {
-		separatorWidth = 80
-	}
-	if separatorWidth > 120 {
-		separatorWidth = 120
+	if separatorWidth < MinWidth {
+		separatorWidth = MinWidth
 	}
 	separator := m.styles.Muted.Render(strings.Repeat("━", separatorWidth))
 
@@ -165,4 +180,87 @@ func (m Model) renderToolbar() string {
 	toolbar := strings.Join(formattedBindings, " │ ")
 
 	return separator + "\n" + toolbar
+}
+
+// renderWelcomeBanner renders the welcome banner with two columns
+func (m Model) renderWelcomeBanner() string {
+	var output strings.Builder
+	gradient := m.palette.PrimaryGradient()
+
+	// Show compact banner with gradient
+	renderer := banner.NewBannerRenderer()
+	output.WriteString(renderer.RenderCompact(m.version, m.buildDate))
+	output.WriteString("\n")
+
+	// Column headers with gradient
+	featuresTitle := visual.GradientText("Key Features", gradient)
+	workflowsTitle := visual.GradientText("AI-Powered Workflows", gradient)
+
+	// Calculate exact spacing for perfect alignment
+	// Left column: 2 spaces padding + content
+	// Gap: spacing between columns
+	// Right column: content
+	titleGap := 24 // Spacing between column titles
+	if titleGap < 0 {
+		titleGap = 4 // Minimum gap
+	}
+
+	output.WriteString(fmt.Sprintf("  %s%s%s\n",
+		featuresTitle,
+		strings.Repeat(" ", titleGap),
+		workflowsTitle))
+	output.WriteString("\n")
+
+	// Feature bullets (left column) - Most impactful features
+	features := []string{
+		"🧠 MAXIMUS Conscious AI integration",
+		"🛡️  Active Immune System protection",
+		"⎈ Real-time Kubernetes orchestration",
+		"🔍 AI-powered threat hunting",
+	}
+
+	// Workflows (right column)
+	workflows := []struct {
+		num   int
+		name  string
+		alias string
+	}{
+		{1, "Threat Hunt", "wf1"},
+		{2, "Incident Response", "wf2"},
+		{3, "Security Audit", "wf3"},
+		{4, "Compliance Check", "wf4"},
+	}
+
+	// Print both columns side by side with perfect alignment
+	// Left column width: 40 chars (visible) for consistent spacing
+	leftColWidth := 40
+
+	for i := 0; i < 4; i++ {
+		// Left column - plain text length for spacing calculation
+		leftText := features[i]
+		leftStyled := m.styles.Muted.Render(leftText)
+
+		// Calculate padding needed (accounting for emoji width)
+		// Note: Emojis count as 1 char in len() but render wider
+		textLen := len(leftText)
+		leftPadding := leftColWidth - textLen
+
+		// Ensure padding is never negative
+		if leftPadding < 0 {
+			leftPadding = 0
+		}
+
+		// Right column - format: "N. Name (alias)"
+		wf := workflows[i]
+		alias := m.styles.Accent.Render(wf.alias)
+		name := m.styles.Muted.Render(wf.name)
+		rightCol := fmt.Sprintf("%d. %s (%s)", wf.num, name, alias)
+
+		output.WriteString(fmt.Sprintf("  %s%s    %s\n",
+			leftStyled,
+			strings.Repeat(" ", leftPadding),
+			rightCol))
+	}
+
+	return output.String()
 }

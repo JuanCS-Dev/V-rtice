@@ -12,9 +12,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		// Enforce minimum dimensions
 		m.width = msg.Width
+		if m.width < MinWidth {
+			m.width = MinWidth
+		}
+
 		m.height = msg.Height
-		m.textInput.Width = msg.Width - 10
+		if m.height < MinHeight {
+			m.height = MinHeight
+		}
+
+		// Update text input width
+		m.textInput.Width = m.width - 10
 
 	case tea.KeyMsg:
 		return m.handleKeyPress(msg)
@@ -52,6 +62,9 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyEnter:
+		// Hide welcome banner on first interaction
+		m.showWelcome = false
+
 		// Execute command or accept suggestion
 		if m.suggestCursor >= 0 && len(m.suggestions) > 0 {
 			// Accept suggestion

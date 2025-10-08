@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/shell"
 	"github.com/verticedev/vcli-go/internal/visual/banner"
 	"github.com/verticedev/vcli-go/internal/workspace"
 	"github.com/verticedev/vcli-go/internal/workspace/governance"
@@ -47,8 +48,9 @@ It provides an interactive TUI for cybersecurity operations including:
 - Offline Mode Support`,
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Show epic banner
-		showBanner()
+		// Launch interactive shell by default
+		sh := shell.NewShell(cmd.Root(), version, buildDate)
+		sh.Run()
 	},
 }
 
@@ -190,6 +192,11 @@ func launchTUI() {
 		fmt.Printf("Error running TUI: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// GetRootCommand returns the root command for testing
+func GetRootCommand() *cobra.Command {
+	return rootCmd
 }
 
 func main() {

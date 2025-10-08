@@ -18,14 +18,15 @@ func Run(rootCmd *cobra.Command, version, buildDate string) error {
 		return fmt.Errorf("shell requires an interactive terminal (TTY)")
 	}
 
-	// Show welcome banner
-	showWelcomeBanner(version, buildDate)
-
 	// Create model
 	m := NewModel(rootCmd, version, buildDate)
 
-	// Create program (without AltScreen to avoid TTY issues)
-	p := tea.NewProgram(m)
+	// Create program with initial window size
+	p := tea.NewProgram(
+		m,
+		tea.WithAltScreen(),       // Use alternate screen buffer
+		tea.WithMouseCellMotion(), // Enable mouse support
+	)
 
 	// Run
 	if _, err := p.Run(); err != nil {
@@ -48,20 +49,46 @@ func showWelcomeBanner(version, buildDate string) {
 	renderer := banner.NewBannerRenderer()
 	fmt.Print(renderer.RenderCompact(version, buildDate))
 
-	// Welcome message with gradient
-	welcome := visual.GradientText("Modern Interactive Shell", gradient)
-	fmt.Printf("  %s\n", welcome)
+	// Two-column layout: Features and Workflows
+	fmt.Println()
 
-	// Feature bullets
+	// Column headers with gradient
+	shellTitle := visual.GradientText("Modern Interactive Shell", gradient)
+	workflowsTitle := visual.GradientText("AI Workflows", gradient)
+
+	fmt.Printf("  %-50s  %s\n", shellTitle, workflowsTitle)
+	fmt.Println()
+
+	// Feature bullets (left column)
 	features := []string{
-		"✨ Autocomplete appears as you type",
+		"✨ Autocomplete",
 		"📦 Icons for commands",
 		"⌨️  Full keyboard navigation",
 		"🎨 Visual feedback",
 	}
 
-	for _, feature := range features {
-		fmt.Printf("  %s\n", styles.Muted.Render(feature))
+	// Workflows (right column)
+	workflows := []struct {
+		num   int
+		name  string
+		alias string
+	}{
+		{1, "Threat Hunt", "wf1"},
+		{2, "Incident Response", "wf2"},
+		{3, "Security Audit", "wf3"},
+		{4, "Compliance Check", "wf4"},
+	}
+
+	// Print both columns side by side
+	for i := 0; i < 4; i++ {
+		leftCol := styles.Muted.Render(features[i])
+
+		wf := workflows[i]
+		alias := styles.Accent.Render(wf.alias)
+		name := styles.Muted.Render(wf.name)
+		rightCol := fmt.Sprintf("%d. %s (%s)", wf.num, name, alias)
+
+		fmt.Printf("  %-50s  %s\n", leftCol, rightCol)
 	}
 	fmt.Println()
 

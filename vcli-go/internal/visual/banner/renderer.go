@@ -102,24 +102,39 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 
 	var output strings.Builder
 
-	// Compact logo
-	logo := "vCLI 2.0"
-	output.WriteString(visual.GradientText(logo, gradient))
-	output.WriteString(" ")
-	output.WriteString(b.styles.Muted.Render("- Kubernetes Edition"))
-	output.WriteString("\n")
+	// ASCII Logo - VCLI GO
+	// All lines: exactly 56 chars (aligned left, padded right)
+	asciiArt := []string{
+		"██╗   ██╗ ██████╗██╗     ██╗       ██████╗  ██████╗  ",
+		"██║   ██║██╔════╝██║     ██║      ██╔════╝ ██╔═══██╗ ",
+		"██║   ██║██║     ██║     ██║█████╗██║  ███╗██║   ██║ ",
+		"╚██╗ ██╔╝██║     ██║     ██║╚════╝██║   ██║██║   ██║ ",
+		" ╚████╔╝ ╚██████╗███████╗██║      ╚██████╔╝╚██████╔╝ ",
+		"  ╚═══╝   ╚═════╝╚══════╝╚═╝       ╚═════╝  ╚═════╝  ",
+	}
 
-	// Version info
-	output.WriteString(b.styles.Muted.Render(fmt.Sprintf("Version %s │ Build %s", version, buildDate)))
-	output.WriteString("\n")
+	// Center each line in 80-char width for perfect alignment
+	for _, line := range asciiArt {
+		gradientLine := visual.GradientText(line, gradient)
+		// Center the 56-char line in 80-char terminal
+		padding := (80 - 56) / 2
+		centeredLine := strings.Repeat(" ", padding) + gradientLine
+		output.WriteString(centeredLine)
+		output.WriteString("\n")
+	}
 
-	// Quick status
-	output.WriteString(b.styles.Success.Render("✅ Production Ready"))
-	output.WriteString(" │ ")
-	output.WriteString(b.styles.Info.Render("32 Commands"))
-	output.WriteString(" │ ")
-	output.WriteString(b.styles.Accent.Render("Type 'vcli --help'"))
+	// MAXIMUS branding - centered with gradient
 	output.WriteString("\n")
+	maximusText := "MAXIMUS CONSCIOUS AI"
+	gradientMaximus := visual.GradientText(maximusText, gradient)
+	maximusPadding := (80 - len(maximusText)) / 2
+	output.WriteString(strings.Repeat(" ", maximusPadding) + gradientMaximus + "\n")
+
+	// Authorship - centered
+	author := "Created by Juan Carlos e Anthropic Claude"
+	styledAuthor := b.styles.Muted.Italic(true).Render(author)
+	authorPadding := (80 - len(author)) / 2
+	output.WriteString(strings.Repeat(" ", authorPadding) + styledAuthor + "\n\n")
 
 	return output.String()
 }

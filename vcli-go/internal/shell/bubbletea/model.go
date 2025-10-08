@@ -8,6 +8,17 @@ import (
 	"github.com/verticedev/vcli-go/internal/visual"
 )
 
+const (
+	// MinWidth is the minimum terminal width
+	MinWidth = 100
+	// MinHeight is the minimum terminal height
+	MinHeight = 30
+	// InitialWidth is the initial/preferred terminal width
+	InitialWidth = 120
+	// InitialHeight is the initial/preferred terminal height
+	InitialHeight = 40
+)
+
 // Model represents the bubble tea shell state
 type Model struct {
 	// Core components
@@ -24,6 +35,7 @@ type Model struct {
 	width       int
 	height      int
 	statusline  string
+	showWelcome bool  // Show welcome banner on first render
 
 	// Styling
 	styles      *visual.Styles
@@ -49,7 +61,7 @@ func NewModel(rootCmd *cobra.Command, version, buildDate string) Model {
 	ti.Placeholder = "Type a command... (or /help)"
 	ti.Focus()
 	ti.CharLimit = 256
-	ti.Width = 80
+	ti.Width = InitialWidth - 10
 
 	// Create executor and completer
 	executor := shell.NewExecutor(rootCmd, version, buildDate)
@@ -62,8 +74,9 @@ func NewModel(rootCmd *cobra.Command, version, buildDate string) Model {
 		suggestions:     make([]Suggestion, 0),
 		suggestCursor:   -1,
 		showSuggestions: false,
-		width:           80,
-		height:          24,
+		width:           InitialWidth,
+		height:          InitialHeight,
+		showWelcome:     true,  // Show welcome banner on first render
 		styles:          visual.DefaultStyles(),
 		palette:         visual.DefaultPalette(),
 		version:         version,
