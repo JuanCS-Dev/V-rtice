@@ -12,9 +12,8 @@ service has recovered. This pattern enhances the overall resilience and stabilit
 of the Maximus AI system.
 """
 
-import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict
 
 
 class CircuitBreaker:
@@ -24,7 +23,12 @@ class CircuitBreaker:
     the overall resilience and stability of the Maximus AI system.
     """
 
-    def __init__(self, failure_threshold: int = 3, cooldown_seconds: int = 30, reset_timeout_seconds: int = 60):
+    def __init__(
+        self,
+        failure_threshold: int = 3,
+        cooldown_seconds: int = 30,
+        reset_timeout_seconds: int = 60,
+    ):
         """Initializes the CircuitBreaker.
 
         Args:
@@ -41,10 +45,10 @@ class CircuitBreaker:
         """Retrieves or initializes the state for a given service ID."""
         if service_id not in self.services:
             self.services[service_id] = {
-                "state": "closed", # closed, open, half-open
+                "state": "closed",  # closed, open, half-open
                 "failures": 0,
                 "last_failure_time": None,
-                "last_trip_time": None
+                "last_trip_time": None,
             }
         return self.services[service_id]
 
@@ -101,9 +105,11 @@ class CircuitBreaker:
         if state["state"] == "closed":
             return True
         elif state["state"] == "open":
-            if state["last_trip_time"] and (current_time - state["last_trip_time"]) > timedelta(seconds=self.cooldown_seconds):
+            if state["last_trip_time"] and (current_time - state["last_trip_time"]) > timedelta(
+                seconds=self.cooldown_seconds
+            ):
                 self.half_open(service_id)
-                return True # Allow one test request
+                return True  # Allow one test request
             return False
         elif state["state"] == "half-open":
             # In half-open, allow one request, if it fails, go back to open.
@@ -126,6 +132,6 @@ class CircuitBreaker:
             "service_id": service_id,
             "state": state["state"],
             "failures": state["failures"],
-            "last_failure_time": state["last_failure_time"].isoformat() if state["last_failure_time"] else None,
-            "last_trip_time": state["last_trip_time"].isoformat() if state["last_trip_time"] else None
+            "last_failure_time": (state["last_failure_time"].isoformat() if state["last_failure_time"] else None),
+            "last_trip_time": (state["last_trip_time"].isoformat() if state["last_trip_time"] else None),
         }

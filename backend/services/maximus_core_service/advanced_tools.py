@@ -12,7 +12,7 @@ functionality.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 
 class AdvancedTools:
@@ -36,12 +36,20 @@ class AdvancedTools:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "data": {"type": "array", "items": {"type": "number"}, "description": "List of numerical data points."},
-                        "method": {"type": "string", "enum": ["mean", "median", "std_dev"], "description": "Statistical method to apply."}
+                        "data": {
+                            "type": "array",
+                            "items": {"type": "number"},
+                            "description": "List of numerical data points.",
+                        },
+                        "method": {
+                            "type": "string",
+                            "enum": ["mean", "median", "std_dev"],
+                            "description": "Statistical method to apply.",
+                        },
                     },
-                    "required": ["data", "method"]
+                    "required": ["data", "method"],
                 },
-                "method_name": "_data_analysis"
+                "method_name": "_data_analysis",
             },
             {
                 "name": "system_diagnostics",
@@ -49,20 +57,27 @@ class AdvancedTools:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "component": {"type": "string", "description": "The system component to diagnose (e.g., 'database', 'network')."},
-                        "level": {"type": "string", "enum": ["basic", "deep"], "description": "Level of diagnostic detail."}
+                        "component": {
+                            "type": "string",
+                            "description": "The system component to diagnose (e.g., 'database', 'network').",
+                        },
+                        "level": {
+                            "type": "string",
+                            "enum": ["basic", "deep"],
+                            "description": "Level of diagnostic detail.",
+                        },
                     },
-                    "required": ["component"]
+                    "required": ["component"],
                 },
-                "method_name": "_system_diagnostics"
-            }
+                "method_name": "_system_diagnostics",
+            },
         ]
 
-    def list_available_tools(self) -> List[Dict[str, Any]]:
+    def list_available_tools(self) -> list[dict[str, Any]]:
         """Returns a list of dictionaries, each describing an available advanced tool."""
         return self.available_tools
 
-    async def execute_tool(self, tool_name: str, tool_args: Dict[str, Any]) -> Any:
+    async def execute_tool(self, tool_name: str, tool_args: dict[str, Any]) -> Any:
         """Executes a specified advanced tool with the given arguments.
 
         Args:
@@ -87,7 +102,7 @@ class AdvancedTools:
         method = getattr(self, tool_info["method_name"])
         return await method(**tool_args)
 
-    async def _data_analysis(self, data: List[float], method: str) -> Dict[str, Any]:
+    async def _data_analysis(self, data: list[float], method: str) -> dict[str, Any]:
         """Simulates advanced statistical analysis on provided data.
 
         Args:
@@ -98,7 +113,7 @@ class AdvancedTools:
             Dict[str, Any]: A dictionary with the analysis result.
         """
         print(f"[AdvancedTools] Performing {method} analysis on data: {data}")
-        await asyncio.sleep(0.7) # Simulate computation
+        await asyncio.sleep(0.7)  # Simulate computation
         if method == "mean":
             result = sum(data) / len(data) if data else 0
         elif method == "median":
@@ -106,17 +121,18 @@ class AdvancedTools:
             mid = len(sorted_data) // 2
             result = (sorted_data[mid - 1] + sorted_data[mid]) / 2 if len(sorted_data) % 2 == 0 else sorted_data[mid]
         elif method == "std_dev":
-            if len(data) < 2: result = 0.0
+            if len(data) < 2:
+                result = 0.0
             else:
                 n = len(data)
                 mean = sum(data) / n
                 variance = sum([(x - mean) ** 2 for x in data]) / (n - 1)
-                result = variance ** 0.5
+                result = variance**0.5
         else:
             raise ValueError(f"Unsupported analysis method: {method}")
         return {"method": method, "result": result, "data_points": len(data)}
 
-    async def _system_diagnostics(self, component: str, level: str = "basic") -> Dict[str, Any]:
+    async def _system_diagnostics(self, component: str, level: str = "basic") -> dict[str, Any]:
         """Simulates running diagnostic checks on a system component.
 
         Args:
@@ -127,7 +143,14 @@ class AdvancedTools:
             Dict[str, Any]: A dictionary with the diagnostic results.
         """
         print(f"[AdvancedTools] Running {level} diagnostics on {component}")
-        await asyncio.sleep(1.0) # Simulate diagnostic time
+        await asyncio.sleep(1.0)  # Simulate diagnostic time
         status = "healthy" if component != "network" else "degraded"
-        details = f"All {component} checks passed." if status == "healthy" else f"Network latency high, check connectivity."
-        return {"component": component, "status": status, "details": details, "level": level}
+        details = (
+            f"All {component} checks passed." if status == "healthy" else "Network latency high, check connectivity."
+        )
+        return {
+            "component": component,
+            "status": status,
+            "details": details,
+            "level": level,
+        }

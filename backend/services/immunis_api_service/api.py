@@ -16,14 +16,14 @@ integrate with and leverage the advanced self-defense capabilities of the
 Maximus AI Immune System.
 """
 
+import os
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import httpx
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
-import httpx
-import os
 
 app = FastAPI(title="Maximus Immunis API Service", version="1.0.0")
 
@@ -48,6 +48,7 @@ class ThreatAlert(BaseModel):
         details (Dict[str, Any]): Detailed information about the threat.
         source (str): The source that detected the threat.
     """
+
     threat_id: str
     threat_type: str
     severity: str
@@ -63,6 +64,7 @@ class ImmuneResponseTrigger(BaseModel):
         target_id (str): The ID of the entity to target (e.g., 'malware_hash', 'compromised_host_id').
         parameters (Optional[Dict[str, Any]]): Additional parameters for the response.
     """
+
     response_type: str
     target_id: str
     parameters: Optional[Dict[str, Any]] = None
@@ -103,23 +105,30 @@ async def submit_threat_alert(alert: ThreatAlert) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary confirming the alert submission and initial Immunis action.
     """
     print(f"[API] Received threat alert: {alert.threat_type} (Severity: {alert.severity}) from {alert.source}")
-    
+
     # Simulate routing to appropriate Immunis sub-service based on threat type/severity
-    target_service_url = IMMUNIS_MACROPHAGE_SERVICE_URL # Default for general threats
+    target_service_url = IMMUNIS_MACROPHAGE_SERVICE_URL  # Default for general threats
     if alert.threat_type == "malware":
-        target_service_url = IMMUNIS_BCELL_SERVICE_URL # B-cells for antibody production (signature generation)
+        target_service_url = IMMUNIS_BCELL_SERVICE_URL  # B-cells for antibody production (signature generation)
     elif alert.threat_type == "intrusion":
-        target_service_url = IMMUNIS_CYTOTOXIC_T_SERVICE_URL # Cytotoxic T-cells for direct attack
+        target_service_url = IMMUNIS_CYTOTOXIC_T_SERVICE_URL  # Cytotoxic T-cells for direct attack
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(f"{target_service_url}/process_threat", json=alert.dict())
             response.raise_for_status()
-            return {"status": "success", "message": "Threat alert submitted to Immunis.", "immunis_response": response.json()}
+            return {
+                "status": "success",
+                "message": "Threat alert submitted to Immunis.",
+                "immunis_response": response.json(),
+            }
     except httpx.RequestError as e:
         raise HTTPException(status_code=500, detail=f"Error communicating with Immunis sub-service: {e}")
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"Immunis sub-service error: {e.response.text}")
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"Immunis sub-service error: {e.response.text}",
+        )
 
 
 @app.post("/trigger_immune_response")
@@ -134,7 +143,7 @@ async def trigger_immune_response(trigger: ImmuneResponseTrigger) -> Dict[str, A
     """
     print(f"[API] Triggering immune response: {trigger.response_type} for target {trigger.target_id}")
 
-    target_service_url = IMMUNIS_MACROPHAGE_SERVICE_URL # Default
+    target_service_url = IMMUNIS_MACROPHAGE_SERVICE_URL  # Default
     if "b_cell" in trigger.response_type.lower():
         target_service_url = IMMUNIS_BCELL_SERVICE_URL
     elif "t_cell" in trigger.response_type.lower():
@@ -144,11 +153,18 @@ async def trigger_immune_response(trigger: ImmuneResponseTrigger) -> Dict[str, A
         async with httpx.AsyncClient() as client:
             response = await client.post(f"{target_service_url}/activate_response", json=trigger.dict())
             response.raise_for_status()
-            return {"status": "success", "message": "Immune response triggered.", "immunis_action": response.json()}
+            return {
+                "status": "success",
+                "message": "Immune response triggered.",
+                "immunis_action": response.json(),
+            }
     except httpx.RequestError as e:
         raise HTTPException(status_code=500, detail=f"Error communicating with Immunis sub-service: {e}")
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=f"Immunis sub-service error: {e.response.text}")
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=f"Immunis sub-service error: {e.response.text}",
+        )
 
 
 @app.get("/immunis_status")
@@ -165,7 +181,7 @@ async def get_immunis_status() -> Dict[str, Any]:
         "active_responses": 2,
         "threat_level": "low",
         "b_cell_status": "active",
-        "t_cell_status": "monitoring"
+        "t_cell_status": "monitoring",
     }
 
 

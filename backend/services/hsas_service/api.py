@@ -16,12 +16,12 @@ the HSAS, promoting transparent, ethical, and beneficial AI behavior within the
 overall Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from hsas_core import HSASCore
 
@@ -40,6 +40,7 @@ class HumanFeedback(BaseModel):
         feedback_details (str): Detailed description of the feedback.
         rating (Optional[int]): A numerical rating (e.g., 1-5).
     """
+
     feedback_type: str
     context: Dict[str, Any]
     feedback_details: str
@@ -53,6 +54,7 @@ class ExplanationRequest(BaseModel):
         decision_id (str): The ID of the AI decision to explain.
         context (Optional[Dict[str, Any]]): Additional context for the explanation request.
     """
+
     decision_id: str
     context: Optional[Dict[str, Any]] = None
 
@@ -92,8 +94,14 @@ async def submit_human_feedback(request: HumanFeedback) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary confirming the feedback submission.
     """
     print(f"[API] Received human feedback (type: {request.feedback_type}, rating: {request.rating})")
-    await hsas_core.process_human_feedback(request.feedback_type, request.context, request.feedback_details, request.rating)
-    return {"status": "success", "message": "Feedback submitted successfully.", "timestamp": datetime.now().isoformat()}
+    await hsas_core.process_human_feedback(
+        request.feedback_type, request.context, request.feedback_details, request.rating
+    )
+    return {
+        "status": "success",
+        "message": "Feedback submitted successfully.",
+        "timestamp": datetime.now().isoformat(),
+    }
 
 
 @app.post("/request_explanation")
@@ -108,7 +116,12 @@ async def request_ai_explanation(request: ExplanationRequest) -> Dict[str, Any]:
     """
     print(f"[API] Requesting explanation for decision ID: {request.decision_id}")
     explanation = await hsas_core.generate_explanation(request.decision_id, request.context)
-    return {"status": "success", "decision_id": request.decision_id, "explanation": explanation, "timestamp": datetime.now().isoformat()}
+    return {
+        "status": "success",
+        "decision_id": request.decision_id,
+        "explanation": explanation,
+        "timestamp": datetime.now().isoformat(),
+    }
 
 
 @app.get("/alignment_status")

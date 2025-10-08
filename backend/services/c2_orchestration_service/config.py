@@ -12,6 +12,7 @@ sources, ensuring adaptability across different environments.
 """
 
 import os
+
 from pydantic import BaseSettings
 
 
@@ -20,6 +21,7 @@ class Settings(BaseSettings):
 
     Settings are loaded from environment variables or a .env file.
     """
+
     app_name: str = "Maximus C2 Orchestration Service"
     metasploit_rpc_host: str = os.getenv("METASPLOIT_RPC_HOST", "localhost")
     metasploit_rpc_port: int = os.getenv("METASPLOIT_RPC_PORT", 55553)
@@ -34,7 +36,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
 
 def get_settings() -> Settings:

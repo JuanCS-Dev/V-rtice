@@ -5,11 +5,12 @@ service for relationship analysis and graph queries.
 """
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 import httpx
 
-from models import EntityType, EntityRelationship, LoadResult
 from config import get_settings
+from models import EntityRelationship, EntityType, LoadResult
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -39,10 +40,7 @@ class Neo4jLoader:
         try:
             logger.info("Initializing Neo4j loader (via Seriema Graph)...")
 
-            self._client = httpx.AsyncClient(
-                base_url=self.seriema_url,
-                timeout=self.timeout
-            )
+            self._client = httpx.AsyncClient(base_url=self.seriema_url, timeout=self.timeout)
 
             # Health check
             is_healthy = await self.health_check()
@@ -61,11 +59,7 @@ class Neo4jLoader:
             await self._client.aclose()
             logger.info("Neo4j loader closed")
 
-    async def load_entity(
-        self,
-        entity_type: EntityType,
-        entity_data: Dict[str, Any]
-    ) -> LoadResult:
+    async def load_entity(self, entity_type: EntityType, entity_data: Dict[str, Any]) -> LoadResult:
         """
         Load a single entity as a node in Neo4j.
 
@@ -87,7 +81,7 @@ class Neo4jLoader:
             node_data = {
                 "type": entity_type.value,
                 "id": entity_id,
-                "properties": entity_data
+                "properties": entity_data,
             }
 
             response = await self._client.post("/nodes", json=node_data)
@@ -99,7 +93,7 @@ class Neo4jLoader:
                 success=True,
                 entity_type=entity_type,
                 entity_id=entity_id,
-                neo4j_loaded=True
+                neo4j_loaded=True,
             )
 
         except httpx.HTTPStatusError as e:
@@ -111,7 +105,7 @@ class Neo4jLoader:
                     entity_type=entity_type,
                     entity_id=self._get_entity_id(entity_type, entity_data),
                     neo4j_loaded=False,
-                    error_message="Neo4j loading skipped (service not ready)"
+                    error_message="Neo4j loading skipped (service not ready)",
                 )
             else:
                 logger.error(f"HTTP error loading node: {e}")
@@ -120,7 +114,7 @@ class Neo4jLoader:
                     entity_type=entity_type,
                     entity_id=self._get_entity_id(entity_type, entity_data),
                     neo4j_loaded=False,
-                    error_message=str(e)
+                    error_message=str(e),
                 )
 
         except Exception as e:
@@ -130,13 +124,10 @@ class Neo4jLoader:
                 entity_type=entity_type,
                 entity_id=self._get_entity_id(entity_type, entity_data),
                 neo4j_loaded=False,
-                error_message=str(e)
+                error_message=str(e),
             )
 
-    async def load_relationship(
-        self,
-        relationship: EntityRelationship
-    ) -> bool:
+    async def load_relationship(self, relationship: EntityRelationship) -> bool:
         """
         Load a relationship as an edge in Neo4j.
 
@@ -157,7 +148,7 @@ class Neo4jLoader:
                 "target_type": relationship.target_type.value,
                 "target_id": relationship.target_id,
                 "relation_type": relationship.relation_type.value,
-                "properties": relationship.properties
+                "properties": relationship.properties,
             }
 
             response = await self._client.post("/edges", json=edge_data)
@@ -183,11 +174,7 @@ class Neo4jLoader:
             logger.error(f"Error loading relationship to Neo4j: {e}", exc_info=True)
             return False
 
-    async def load_batch(
-        self,
-        entity_type: EntityType,
-        entities: List[Dict[str, Any]]
-    ) -> List[LoadResult]:
+    async def load_batch(self, entity_type: EntityType, entities: List[Dict[str, Any]]) -> List[LoadResult]:
         """
         Load multiple entities in batch.
 
@@ -209,10 +196,7 @@ class Neo4jLoader:
 
         return results
 
-    async def load_relationships_batch(
-        self,
-        relationships: List[EntityRelationship]
-    ) -> int:
+    async def load_relationships_batch(self, relationships: List[EntityRelationship]) -> int:
         """
         Load multiple relationships in batch.
 
@@ -233,11 +217,7 @@ class Neo4jLoader:
 
         return success_count
 
-    async def query_graph(
-        self,
-        query: str,
-        params: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def query_graph(self, query: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Execute a Cypher query via Seriema Graph service.
 
@@ -252,10 +232,7 @@ class Neo4jLoader:
             if not self._client:
                 raise RuntimeError("Neo4j loader not initialized")
 
-            request_data = {
-                "query": query,
-                "params": params or {}
-            }
+            request_data = {"query": query, "params": params or {}}
 
             response = await self._client.post("/query", json=request_data)
             response.raise_for_status()
@@ -274,12 +251,7 @@ class Neo4jLoader:
             logger.error(f"Error executing graph query: {e}", exc_info=True)
             raise
 
-    async def get_entity_neighbors(
-        self,
-        entity_type: EntityType,
-        entity_id: str,
-        max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_entity_neighbors(self, entity_type: EntityType, entity_id: str, max_depth: int = 2) -> Dict[str, Any]:
         """
         Get neighboring entities in the graph.
 
@@ -295,7 +267,7 @@ class Neo4jLoader:
             query_params = {
                 "entity_type": entity_type.value,
                 "entity_id": entity_id,
-                "max_depth": max_depth
+                "max_depth": max_depth,
             }
 
             response = await self._client.get("/neighbors", params=query_params)
@@ -321,7 +293,7 @@ class Neo4jLoader:
         source_id: str,
         target_type: EntityType,
         target_id: str,
-        max_depth: int = 5
+        max_depth: int = 5,
     ) -> Dict[str, Any]:
         """
         Find shortest path between two entities.
@@ -342,7 +314,7 @@ class Neo4jLoader:
                 "source_id": source_id,
                 "target_type": target_type.value,
                 "target_id": target_id,
-                "max_depth": max_depth
+                "max_depth": max_depth,
             }
 
             response = await self._client.post("/paths", json=path_query)

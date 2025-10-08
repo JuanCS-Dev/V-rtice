@@ -1,4 +1,3 @@
-
 """Maximus Web Attack Service - OWASP ZAP Wrapper.
 
 This module provides a wrapper for integrating the Maximus AI's Web Attack
@@ -13,18 +12,13 @@ identifying web-specific attack vectors.
 """
 
 import asyncio
-from typing import List, Dict, Optional
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Dict, List, Optional
+
 from zapv2 import ZAPv2
 
-from models import (
-    ZAPScanRequest,
-    ZAPScanResult,
-    ZAPAlert,
-    Severity,
-    ScanType
-)
+from models import ScanType, Severity, ZAPAlert, ZAPScanRequest, ZAPScanResult
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +36,7 @@ class ZAPWrapper:
     def __init__(
         self,
         zap_api_url: str = "http://localhost:8080",
-        zap_api_key: Optional[str] = None
+        zap_api_key: Optional[str] = None,
     ):
         """Inicializa o ZAPWrapper.
 
@@ -50,15 +44,9 @@ class ZAPWrapper:
             zap_api_url (str): A URL da API do ZAP.
             zap_api_key (Optional[str]): A chave da API do ZAP para autenticação.
         """
-        self.zap = ZAPv2(
-            apikey=zap_api_key,
-            proxies={'http': zap_api_url, 'https': zap_api_url}
-        )
+        self.zap = ZAPv2(apikey=zap_api_key, proxies={"http": zap_api_url, "https": zap_api_url})
 
-    async def scan(
-        self,
-        request: ZAPScanRequest
-    ) -> ZAPScanResult:
+    async def scan(self, request: ZAPScanRequest) -> ZAPScanResult:
         """
         Execute ZAP scan
 
@@ -107,7 +95,7 @@ class ZAPWrapper:
             alerts=alerts,
             urls_found=urls_found,
             scan_duration=duration,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
     async def _create_context(self, request: ZAPScanRequest) -> str:
@@ -122,10 +110,7 @@ class ZAPWrapper:
         context_name = request.context_name or "default_context"
 
         # Create context
-        context_id = await asyncio.to_thread(
-            self.zap.context.new_context,
-            contextname=context_name
-        )
+        context_id = await asyncio.to_thread(self.zap.context.new_context, contextname=context_name)
 
         # Include URLs
         if request.include_in_context:
@@ -133,7 +118,7 @@ class ZAPWrapper:
                 await asyncio.to_thread(
                     self.zap.context.include_in_context,
                     contextname=context_name,
-                    regex=pattern
+                    regex=pattern,
                 )
 
         # Exclude URLs
@@ -142,7 +127,7 @@ class ZAPWrapper:
                 await asyncio.to_thread(
                     self.zap.context.exclude_from_context,
                     contextname=context_name,
-                    regex=pattern
+                    regex=pattern,
                 )
 
         return context_id
@@ -159,22 +144,18 @@ class ZAPWrapper:
                 self.zap.authentication.set_authentication_method,
                 contextid=context_id,
                 authmethodname="formBasedAuthentication",
-                authmethodconfigparams=f"loginUrl={request.login_url}"
+                authmethodconfigparams=f"loginUrl={request.login_url}",
             )
 
         # Set credentials
         if request.username and request.password:
-            await asyncio.to_thread(
-                self.zap.users.new_user,
-                contextid=context_id,
-                name="test_user"
-            )
+            await asyncio.to_thread(self.zap.users.new_user, contextid=context_id, name="test_user")
 
             await asyncio.to_thread(
                 self.zap.users.set_authentication_credentials,
                 contextid=context_id,
                 userid="1",
-                authcredentialsconfigparams=f"username={request.username}&password={request.password}"
+                authcredentialsconfigparams=f"username={request.username}&password={request.password}",
             )
 
     async def _spider_scan(self, target_url: str, request: ZAPScanRequest):
@@ -191,7 +172,7 @@ class ZAPWrapper:
             url=target_url,
             maxchildren=request.max_children,
             recurse=request.recurse,
-            subtreeonly=request.subtree_only
+            subtreeonly=request.subtree_only,
         )
 
         # Wait for completion
@@ -209,11 +190,7 @@ class ZAPWrapper:
         """
         logger.info(f"Starting AJAX spider on {target_url}")
 
-        await asyncio.to_thread(
-            self.zap.ajaxSpider.scan,
-            url=target_url,
-            inscope="true"
-        )
+        await asyncio.to_thread(self.zap.ajaxSpider.scan, url=target_url, inscope="true")
 
         # Wait for completion
         while self.zap.ajaxSpider.status == "running":
@@ -221,12 +198,7 @@ class ZAPWrapper:
 
         logger.info("AJAX spider complete")
 
-    async def _active_scan(
-        self,
-        target_url: str,
-        request: ZAPScanRequest,
-        context_id: str
-    ):
+    async def _active_scan(self, target_url: str, request: ZAPScanRequest, context_id: str):
         """Executa uma varredura ativa do ZAP no URL alvo.
 
         Args:
@@ -241,13 +213,13 @@ class ZAPWrapper:
         await asyncio.to_thread(
             self.zap.ascan.set_policy_attack_strength,
             scanpolicyname=policy_name,
-            attackstrength=request.policy.attack_strength
+            attackstrength=request.policy.attack_strength,
         )
 
         await asyncio.to_thread(
             self.zap.ascan.set_policy_alert_threshold,
             scanpolicyname=policy_name,
-            alertthreshold=request.policy.alert_threshold
+            alertthreshold=request.policy.alert_threshold,
         )
 
         # Start scan
@@ -255,7 +227,7 @@ class ZAPWrapper:
             self.zap.ascan.scan,
             url=target_url,
             scanpolicyname=policy_name,
-            contextid=context_id
+            contextid=context_id,
         )
 
         # Wait for completion
@@ -275,10 +247,7 @@ class ZAPWrapper:
         Returns:
             List[ZAPAlert]: Uma lista de objetos ZAPAlert.
         """
-        alerts_data = await asyncio.to_thread(
-            self.zap.core.alerts,
-            baseurl=target_url
-        )
+        alerts_data = await asyncio.to_thread(self.zap.core.alerts, baseurl=target_url)
 
         alerts = []
         for alert_data in alerts_data:
@@ -299,29 +268,29 @@ class ZAPWrapper:
         """
         try:
             risk_map = {
-                'High': Severity.HIGH,
-                'Medium': Severity.MEDIUM,
-                'Low': Severity.LOW,
-                'Informational': Severity.INFO
+                "High": Severity.HIGH,
+                "Medium": Severity.MEDIUM,
+                "Low": Severity.LOW,
+                "Informational": Severity.INFO,
             }
 
             return ZAPAlert(
-                alert_id=int(alert_data.get('id', 0)),
-                plugin_id=int(alert_data.get('pluginId', 0)),
-                alert_name=alert_data.get('alert', 'Unknown'),
-                risk=risk_map.get(alert_data.get('risk', 'Medium'), Severity.MEDIUM),
-                confidence=alert_data.get('confidence', 'Medium'),
-                url=alert_data.get('url', ''),
-                method=alert_data.get('method', 'GET'),
-                param=alert_data.get('param'),
-                attack=alert_data.get('attack'),
-                evidence=alert_data.get('evidence'),
-                description=alert_data.get('description', ''),
-                solution=alert_data.get('solution', ''),
-                reference=alert_data.get('reference', ''),
-                cwe_id=int(alert_data.get('cweid', 0)) if alert_data.get('cweid') else None,
-                wasc_id=int(alert_data.get('wascid', 0)) if alert_data.get('wascid') else None,
-                timestamp=datetime.now()
+                alert_id=int(alert_data.get("id", 0)),
+                plugin_id=int(alert_data.get("pluginId", 0)),
+                alert_name=alert_data.get("alert", "Unknown"),
+                risk=risk_map.get(alert_data.get("risk", "Medium"), Severity.MEDIUM),
+                confidence=alert_data.get("confidence", "Medium"),
+                url=alert_data.get("url", ""),
+                method=alert_data.get("method", "GET"),
+                param=alert_data.get("param"),
+                attack=alert_data.get("attack"),
+                evidence=alert_data.get("evidence"),
+                description=alert_data.get("description", ""),
+                solution=alert_data.get("solution", ""),
+                reference=alert_data.get("reference", ""),
+                cwe_id=(int(alert_data.get("cweid", 0)) if alert_data.get("cweid") else None),
+                wasc_id=(int(alert_data.get("wascid", 0)) if alert_data.get("wascid") else None),
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -335,4 +304,5 @@ class ZAPWrapper:
             str: Um ID de varredura único formatado.
         """
         import uuid
+
         return f"zap_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"

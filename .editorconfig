@@ -1,0 +1,207 @@
+# ============================================================================
+# Vértice Platform - Editor Configuration
+# ============================================================================
+# EditorConfig helps maintain consistent coding styles across different
+# editors and IDEs. See https://editorconfig.org for more information.
+# ============================================================================
+
+# Top-most EditorConfig file
+root = true
+
+# ============================================================================
+# DEFAULTS FOR ALL FILES
+# ============================================================================
+[*]
+# Character set
+charset = utf-8
+
+# End of line normalization (Unix-style)
+end_of_line = lf
+
+# Remove trailing whitespace
+trim_trailing_whitespace = true
+
+# Insert final newline
+insert_final_newline = true
+
+# Indentation style (spaces)
+indent_style = space
+
+# Indentation size
+indent_size = 4
+
+
+# ============================================================================
+# PYTHON FILES
+# ============================================================================
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 88  # Black standard
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+
+# ============================================================================
+# YAML FILES (Docker Compose, Kubernetes, CI/CD)
+# ============================================================================
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+
+# ============================================================================
+# JSON FILES
+# ============================================================================
+[*.json]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+
+# ============================================================================
+# JAVASCRIPT/TYPESCRIPT FILES
+# ============================================================================
+[*.{js,jsx,ts,tsx}]
+indent_style = space
+indent_size = 2
+max_line_length = 100
+quote_type = single  # Prefer single quotes
+
+
+# ============================================================================
+# CSS/SCSS FILES
+# ============================================================================
+[*.{css,scss,sass,less}]
+indent_style = space
+indent_size = 2
+
+
+# ============================================================================
+# HTML/TEMPLATE FILES
+# ============================================================================
+[*.{html,htm,jinja,jinja2}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+
+# ============================================================================
+# MARKDOWN FILES
+# ============================================================================
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false  # Preserve trailing spaces for line breaks
+max_line_length = 80
+
+
+# ============================================================================
+# CONFIGURATION FILES
+# ============================================================================
+
+# TOML (pyproject.toml, Cargo.toml)
+[*.toml]
+indent_style = space
+indent_size = 4
+
+# INI files (.flake8, .editorconfig)
+[*.{ini,cfg}]
+indent_style = space
+indent_size = 4
+
+# Shell scripts
+[*.{sh,bash,zsh}]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+
+# Dockerfile
+[Dockerfile*]
+indent_style = space
+indent_size = 4
+
+# Makefile (requires tabs)
+[Makefile]
+indent_style = tab
+indent_size = 4
+
+# Git config
+[.gitconfig]
+indent_style = tab
+indent_size = 4
+
+
+# ============================================================================
+# REQUIREMENTS FILES
+# ============================================================================
+[requirements*.txt]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+
+# ReStructuredText (Sphinx)
+[*.rst]
+indent_style = space
+indent_size = 3
+max_line_length = 80
+
+# AsciiDoc
+[*.adoc]
+indent_style = space
+indent_size = 2
+
+
+# ============================================================================
+# DATA FILES
+# ============================================================================
+
+# CSV files
+[*.csv]
+trim_trailing_whitespace = false
+insert_final_newline = false
+
+# XML files
+[*.xml]
+indent_style = space
+indent_size = 2
+
+
+# ============================================================================
+# SPECIAL FILES
+# ============================================================================
+
+# Package.json (always 2 spaces)
+[package.json]
+indent_style = space
+indent_size = 2
+
+# .gitignore, .dockerignore
+[.{gitignore,dockerignore,npmignore}]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+
+# ============================================================================
+# EXCLUDE PATTERNS
+# ============================================================================
+# These files should not be reformatted
+
+# Minified files
+[*.min.{js,css}]
+indent_style = ignore
+insert_final_newline = ignore
+
+# Binary files (should be rare in git)
+[*.{png,jpg,jpeg,gif,ico,svg,woff,woff2,ttf,eot,mp4,webm}]
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+charset = unset

@@ -6,29 +6,24 @@ propaganda attribution, and meme tracking.
 NO MOCKS - Production-ready HTTP interface.
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from narrative_core import (
-    SocialGraphAnalyzer,
     BotDetector,
-    PropagandaAttributor,
     MemeTracker,
-    NarrativeEntity,
+    PropagandaAttributor,
+    SocialGraphAnalyzer,
 )
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instances
@@ -62,7 +57,7 @@ app = FastAPI(
     title="VÉRTICE Narrative Analysis Service",
     description="Advanced narrative intelligence for information warfare detection",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -70,8 +65,10 @@ app = FastAPI(
 # Request/Response Models
 # ============================================================================
 
+
 class SocialRelationRequest(BaseModel):
     """Request to add social relationship."""
+
     source_id: str = Field(..., description="Source account ID")
     target_id: str = Field(..., description="Target account ID")
     relation_type: str = Field(..., description="Relationship type (follows, retweets, mentions)")
@@ -80,6 +77,7 @@ class SocialRelationRequest(BaseModel):
 
 class InfluenceScoresResponse(BaseModel):
     """Response with influence scores."""
+
     scores: Dict[str, float] = Field(..., description="Account ID -> influence score")
     algorithm: str = Field("pagerank", description="Algorithm used")
     timestamp: str = Field(..., description="Analysis timestamp")
@@ -87,12 +85,14 @@ class InfluenceScoresResponse(BaseModel):
 
 class CoordinationDetectionRequest(BaseModel):
     """Request for coordinated behavior detection."""
+
     min_cluster_size: int = Field(3, description="Minimum accounts in cluster")
     time_window_hours: int = Field(24, description="Time window for coordination")
 
 
 class BotAnalysisRequest(BaseModel):
     """Request for bot detection analysis."""
+
     account_id: str = Field(..., description="Account ID to analyze")
     posts: List[Dict[str, Any]] = Field(..., description="Recent posts from account")
     account_metadata: Dict[str, Any] = Field(..., description="Account metadata (created_at, followers, etc)")
@@ -100,6 +100,7 @@ class BotAnalysisRequest(BaseModel):
 
 class BotScoreResponse(BaseModel):
     """Response with bot detection score."""
+
     entity_id: str
     bot_probability: float
     indicators: Dict[str, float]
@@ -109,12 +110,14 @@ class BotScoreResponse(BaseModel):
 
 class PropagandaAnalysisRequest(BaseModel):
     """Request for propaganda attribution."""
+
     narrative_id: str = Field(..., description="Narrative/post ID")
     text: str = Field(..., description="Text content to analyze")
 
 
 class PropagandaAttributionResponse(BaseModel):
     """Response with propaganda attribution."""
+
     narrative_id: str
     attributed_source_id: Optional[str]
     similarity_score: float
@@ -125,6 +128,7 @@ class PropagandaAttributionResponse(BaseModel):
 
 class MemeTrackingRequest(BaseModel):
     """Request for meme tracking."""
+
     meme_id: str = Field(..., description="Meme ID")
     image_data: str = Field(..., description="Base64-encoded image data")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
@@ -132,6 +136,7 @@ class MemeTrackingRequest(BaseModel):
 
 class MemeLineageResponse(BaseModel):
     """Response with meme lineage."""
+
     meme_id: str
     parent_meme_id: Optional[str]
     generation: int
@@ -143,6 +148,7 @@ class MemeLineageResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     """Service status response."""
+
     service: str
     status: str
     components: Dict[str, Dict[str, Any]]
@@ -152,6 +158,7 @@ class StatusResponse(BaseModel):
 # ============================================================================
 # Social Graph Endpoints
 # ============================================================================
+
 
 @app.post("/graph/add_relation")
 async def add_social_relation(request: SocialRelationRequest):
@@ -177,14 +184,14 @@ async def add_social_relation(request: SocialRelationRequest):
             source=request.source_id,
             target=request.target_id,
             relation_type=request.relation_type,
-            timestamp=timestamp
+            timestamp=timestamp,
         )
 
         return {
             "status": "success",
             "source": request.source_id,
             "target": request.target_id,
-            "relation_type": request.relation_type
+            "relation_type": request.relation_type,
         }
 
     except Exception as e:
@@ -205,11 +212,7 @@ async def get_influence_scores():
     try:
         scores = social_graph.compute_influence_scores()
 
-        return InfluenceScoresResponse(
-            scores=scores,
-            algorithm="pagerank",
-            timestamp=datetime.now().isoformat()
-        )
+        return InfluenceScoresResponse(scores=scores, algorithm="pagerank", timestamp=datetime.now().isoformat())
 
     except Exception as e:
         logger.error(f"Error computing influence scores: {e}")
@@ -232,17 +235,12 @@ async def detect_coordinated_behavior(request: CoordinationDetectionRequest):
     try:
         clusters = social_graph.detect_coordinated_behavior(
             min_cluster_size=request.min_cluster_size,
-            time_window_hours=request.time_window_hours
+            time_window_hours=request.time_window_hours,
         )
 
         # Convert sets to lists for JSON serialization
         clusters_list = [
-            {
-                "cluster_id": idx,
-                "accounts": list(cluster),
-                "size": len(cluster)
-            }
-            for idx, cluster in enumerate(clusters)
+            {"cluster_id": idx, "accounts": list(cluster), "size": len(cluster)} for idx, cluster in enumerate(clusters)
         ]
 
         return {
@@ -250,7 +248,7 @@ async def detect_coordinated_behavior(request: CoordinationDetectionRequest):
             "total_clusters": len(clusters_list),
             "min_cluster_size": request.min_cluster_size,
             "time_window_hours": request.time_window_hours,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -276,11 +274,7 @@ async def detect_communities(resolution: float = 1.0):
 
         # Convert to serializable format
         communities_list = [
-            {
-                "community_id": comm_id,
-                "members": list(members),
-                "size": len(members)
-            }
+            {"community_id": comm_id, "members": list(members), "size": len(members)}
             for comm_id, members in communities.items()
         ]
 
@@ -288,7 +282,7 @@ async def detect_communities(resolution: float = 1.0):
             "communities": communities_list,
             "total_communities": len(communities_list),
             "resolution": resolution,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -299,6 +293,7 @@ async def detect_communities(resolution: float = 1.0):
 # ============================================================================
 # Bot Detection Endpoints
 # ============================================================================
+
 
 @app.post("/bot/analyze", response_model=BotScoreResponse)
 async def analyze_account_for_bots(request: BotAnalysisRequest):
@@ -318,7 +313,7 @@ async def analyze_account_for_bots(request: BotAnalysisRequest):
         bot_score = bot_detector.analyze_account(
             account_id=request.account_id,
             posts=request.posts,
-            account_metadata=request.account_metadata
+            account_metadata=request.account_metadata,
         )
 
         return BotScoreResponse(
@@ -326,7 +321,7 @@ async def analyze_account_for_bots(request: BotAnalysisRequest):
             bot_probability=bot_score.bot_probability,
             indicators=bot_score.indicators,
             confidence=bot_score.confidence,
-            timestamp=bot_score.timestamp.isoformat()
+            timestamp=bot_score.timestamp.isoformat(),
         )
 
     except Exception as e:
@@ -335,10 +330,7 @@ async def analyze_account_for_bots(request: BotAnalysisRequest):
 
 
 @app.post("/bot/batch_analyze")
-async def batch_analyze_accounts(
-    accounts: List[BotAnalysisRequest],
-    background_tasks: BackgroundTasks
-):
+async def batch_analyze_accounts(accounts: List[BotAnalysisRequest], background_tasks: BackgroundTasks):
     """Batch analyze multiple accounts.
 
     Args:
@@ -358,21 +350,23 @@ async def batch_analyze_accounts(
             bot_score = bot_detector.analyze_account(
                 account_id=request.account_id,
                 posts=request.posts,
-                account_metadata=request.account_metadata
+                account_metadata=request.account_metadata,
             )
 
-            results.append({
-                "entity_id": bot_score.entity_id,
-                "bot_probability": bot_score.bot_probability,
-                "indicators": bot_score.indicators,
-                "confidence": bot_score.confidence,
-                "timestamp": bot_score.timestamp.isoformat()
-            })
+            results.append(
+                {
+                    "entity_id": bot_score.entity_id,
+                    "bot_probability": bot_score.bot_probability,
+                    "indicators": bot_score.indicators,
+                    "confidence": bot_score.confidence,
+                    "timestamp": bot_score.timestamp.isoformat(),
+                }
+            )
 
         return {
             "results": results,
             "total_analyzed": len(results),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -383,6 +377,7 @@ async def batch_analyze_accounts(
 # ============================================================================
 # Propaganda Attribution Endpoints
 # ============================================================================
+
 
 @app.post("/propaganda/analyze", response_model=PropagandaAttributionResponse)
 async def analyze_propaganda(request: PropagandaAnalysisRequest):
@@ -399,10 +394,7 @@ async def analyze_propaganda(request: PropagandaAnalysisRequest):
 
     try:
         # Analyze narrative
-        attribution = propaganda_attributor.attribute_narrative(
-            narrative_id=request.narrative_id,
-            text=request.text
-        )
+        attribution = propaganda_attributor.attribute_narrative(narrative_id=request.narrative_id, text=request.text)
 
         return PropagandaAttributionResponse(
             narrative_id=attribution.narrative_id,
@@ -410,7 +402,7 @@ async def analyze_propaganda(request: PropagandaAnalysisRequest):
             similarity_score=attribution.similarity_score,
             matching_features=attribution.matching_features,
             confidence=attribution.confidence,
-            timestamp=attribution.timestamp.isoformat()
+            timestamp=attribution.timestamp.isoformat(),
         )
 
     except Exception as e:
@@ -419,10 +411,7 @@ async def analyze_propaganda(request: PropagandaAnalysisRequest):
 
 
 @app.post("/propaganda/register_source")
-async def register_propaganda_source(
-    source_id: str,
-    texts: List[str]
-):
+async def register_propaganda_source(source_id: str, texts: List[str]):
     """Register known propaganda source with sample texts.
 
     Args:
@@ -437,16 +426,13 @@ async def register_propaganda_source(
 
     try:
         # Register source
-        propaganda_attributor.register_source(
-            source_id=source_id,
-            sample_texts=texts
-        )
+        propaganda_attributor.register_source(source_id=source_id, sample_texts=texts)
 
         return {
             "status": "success",
             "source_id": source_id,
             "samples_registered": len(texts),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -457,6 +443,7 @@ async def register_propaganda_source(
 # ============================================================================
 # Meme Tracking Endpoints
 # ============================================================================
+
 
 @app.post("/meme/track", response_model=MemeLineageResponse)
 async def track_meme(request: MemeTrackingRequest):
@@ -474,14 +461,11 @@ async def track_meme(request: MemeTrackingRequest):
     try:
         # Decode base64 image data
         import base64
+
         image_data = base64.b64decode(request.image_data)
 
         # Track meme
-        lineage = meme_tracker.track_meme(
-            meme_id=request.meme_id,
-            image_data=image_data,
-            metadata=request.metadata
-        )
+        lineage = meme_tracker.track_meme(meme_id=request.meme_id, image_data=image_data, metadata=request.metadata)
 
         return MemeLineageResponse(
             meme_id=lineage.meme_id,
@@ -490,7 +474,7 @@ async def track_meme(request: MemeTrackingRequest):
             mutation_distance=lineage.mutation_distance,
             perceptual_hash=lineage.perceptual_hash,
             first_seen=lineage.first_seen.isoformat(),
-            propagation_count=lineage.propagation_count
+            propagation_count=lineage.propagation_count,
         )
 
     except Exception as e:
@@ -522,12 +506,14 @@ async def get_meme_lineage(meme_id: str):
         descendants = []
         for mid, lin in meme_tracker.meme_database.items():
             if lin.parent_meme_id == meme_id:
-                descendants.append({
-                    "meme_id": mid,
-                    "generation": lin.generation,
-                    "mutation_distance": lin.mutation_distance,
-                    "first_seen": lin.first_seen.isoformat()
-                })
+                descendants.append(
+                    {
+                        "meme_id": mid,
+                        "generation": lin.generation,
+                        "mutation_distance": lin.mutation_distance,
+                        "first_seen": lin.first_seen.isoformat(),
+                    }
+                )
 
         return {
             "meme_id": meme_id,
@@ -538,7 +524,7 @@ async def get_meme_lineage(meme_id: str):
             "first_seen": lineage.first_seen.isoformat(),
             "propagation_count": lineage.propagation_count,
             "descendants": descendants,
-            "descendants_count": len(descendants)
+            "descendants_count": len(descendants),
         }
 
     except HTTPException:
@@ -552,13 +538,14 @@ async def get_meme_lineage(meme_id: str):
 # System Endpoints
 # ============================================================================
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "narrative_analysis",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -591,7 +578,7 @@ async def get_status():
         service="narrative_analysis",
         status="operational",
         components=components,
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
     )
 
 
@@ -605,7 +592,7 @@ async def get_statistics():
     stats = {
         "service": "narrative_analysis",
         "timestamp": datetime.now().isoformat(),
-        "components": {}
+        "components": {},
     }
 
     # Gather stats from all components
@@ -614,7 +601,7 @@ async def get_statistics():
         stats["components"]["social_graph"] = {
             "nodes": status["nodes"],
             "edges": status["edges"],
-            "density": status["density"]
+            "density": status["density"],
         }
 
     if bot_detector is not None:
@@ -622,7 +609,7 @@ async def get_statistics():
         stats["components"]["bot_detector"] = {
             "accounts_analyzed": status["accounts_analyzed"],
             "bots_detected": status["bots_detected"],
-            "detection_rate": status["detection_rate"]
+            "detection_rate": status["detection_rate"],
         }
 
     if propaganda_attributor is not None:
@@ -630,7 +617,7 @@ async def get_statistics():
         stats["components"]["propaganda_attributor"] = {
             "registered_sources": status["registered_sources"],
             "narratives_analyzed": status["narratives_analyzed"],
-            "attributions_made": status["attributions_made"]
+            "attributions_made": status["attributions_made"],
         }
 
     if meme_tracker is not None:
@@ -638,17 +625,11 @@ async def get_statistics():
         stats["components"]["meme_tracker"] = {
             "memes_tracked": status["memes_tracked"],
             "unique_lineages": status["unique_lineages"],
-            "avg_generation": status["avg_generation"]
+            "avg_generation": status["avg_generation"],
         }
 
     return stats
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "api:app",
-        host="0.0.0.0",
-        port=8015,
-        log_level="info",
-        access_log=True
-    )
+    uvicorn.run("api:app", host="0.0.0.0", port=8015, log_level="info", access_log=True)

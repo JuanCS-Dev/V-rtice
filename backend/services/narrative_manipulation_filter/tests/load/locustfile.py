@@ -9,12 +9,10 @@ For distributed testing:
 
 """
 
-import json
 import random
-from typing import List, Dict
-from locust import HttpUser, task, between, events
-from locust.contrib.fasthttp import FastHttpUser
 
+from locust import between, events, task
+from locust.contrib.fasthttp import FastHttpUser
 
 # ============================================================================
 # TEST DATA - Realistic content samples
@@ -70,6 +68,7 @@ def get_random_source() -> str:
 # LOCUST USER CLASS
 # ============================================================================
 
+
 class CognitiveDefenseUser(FastHttpUser):
     """
     Simulates user behavior for the Cognitive Defense System.
@@ -100,16 +99,16 @@ class CognitiveDefenseUser(FastHttpUser):
             "source_info": {
                 "domain": get_random_source(),
                 "url": f"https://{get_random_source()}/article/123",
-                "timestamp": "2024-01-15T10:30:00Z"
+                "timestamp": "2024-01-15T10:30:00Z",
             },
-            "mode": "FAST_TRACK"
+            "mode": "FAST_TRACK",
         }
 
         with self.client.post(
             "/api/v2/analyze",
             json=payload,
             catch_response=True,
-            name="Analyze Content (Fast)"
+            name="Analyze Content (Fast)",
         ) as response:
             if response.status_code == 200:
                 result = response.json()
@@ -130,16 +129,16 @@ class CognitiveDefenseUser(FastHttpUser):
             "source_info": {
                 "domain": get_random_source(),
                 "url": f"https://{get_random_source()}/article/456",
-                "timestamp": "2024-01-15T10:30:00Z"
+                "timestamp": "2024-01-15T10:30:00Z",
             },
-            "mode": "STANDARD"
+            "mode": "STANDARD",
         }
 
         with self.client.post(
             "/api/v2/analyze",
             json=payload,
             catch_response=True,
-            name="Analyze Content (Standard)"
+            name="Analyze Content (Standard)",
         ) as response:
             if response.status_code == 200:
                 response.success()
@@ -154,16 +153,16 @@ class CognitiveDefenseUser(FastHttpUser):
             "source_info": {
                 "domain": "unknown-blog.com",
                 "url": "https://unknown-blog.com/fake-article/789",
-                "timestamp": "2024-01-15T10:30:00Z"
+                "timestamp": "2024-01-15T10:30:00Z",
             },
-            "mode": "DEEP_ANALYSIS"
+            "mode": "DEEP_ANALYSIS",
         }
 
         with self.client.post(
             "/api/v2/analyze",
             json=payload,
             catch_response=True,
-            name="Analyze Content (Deep)"
+            name="Analyze Content (Deep)",
         ) as response:
             if response.status_code == 200:
                 response.success()
@@ -173,16 +172,13 @@ class CognitiveDefenseUser(FastHttpUser):
     @task(3)  # Weight: 3
     def get_analysis_history(self):
         """Retrieve historical analysis results."""
-        params = {
-            "limit": 10,
-            "offset": 0
-        }
+        params = {"limit": 10, "offset": 0}
 
         with self.client.get(
             "/api/v2/history",
             params=params,
             catch_response=True,
-            name="Get Analysis History"
+            name="Get Analysis History",
         ) as response:
             if response.status_code == 200:
                 response.success()
@@ -192,15 +188,13 @@ class CognitiveDefenseUser(FastHttpUser):
     @task(2)  # Weight: 2
     def verify_specific_claim(self):
         """Verify a specific claim against fact-checkers."""
-        payload = {
-            "claim": random.choice(FAKE_NEWS_SAMPLES)
-        }
+        payload = {"claim": random.choice(FAKE_NEWS_SAMPLES)}
 
         with self.client.post(
             "/api/v2/verify-claim",
             json=payload,
             catch_response=True,
-            name="Verify Claim"
+            name="Verify Claim",
         ) as response:
             if response.status_code == 200:
                 response.success()
@@ -210,11 +204,7 @@ class CognitiveDefenseUser(FastHttpUser):
     @task(1)  # Weight: 1 (metrics endpoint)
     def get_metrics(self):
         """Fetch Prometheus metrics."""
-        with self.client.get(
-            "/metrics",
-            catch_response=True,
-            name="Get Metrics"
-        ) as response:
+        with self.client.get("/metrics", catch_response=True, name="Get Metrics") as response:
             if response.status_code == 200:
                 response.success()
             else:
@@ -223,11 +213,7 @@ class CognitiveDefenseUser(FastHttpUser):
     @task(1)  # Weight: 1
     def health_check(self):
         """Health check endpoint."""
-        with self.client.get(
-            "/health",
-            catch_response=True,
-            name="Health Check"
-        ) as response:
+        with self.client.get("/health", catch_response=True, name="Health Check") as response:
             if response.status_code == 200:
                 result = response.json()
                 if result.get("status") == "healthy":
@@ -242,23 +228,24 @@ class CognitiveDefenseUser(FastHttpUser):
 # EVENT HANDLERS - Custom metrics and reporting
 # ============================================================================
 
+
 @events.test_start.add_listener
 def on_test_start(environment, **kwargs):
     """Called when test starts."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("COGNITIVE DEFENSE SYSTEM - LOAD TEST STARTING")
-    print("="*80)
+    print("=" * 80)
     print(f"Host: {environment.host}")
     print(f"Users: {environment.runner.user_count if environment.runner else 'N/A'}")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
 
 @events.test_stop.add_listener
 def on_test_stop(environment, **kwargs):
     """Called when test stops."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("LOAD TEST COMPLETED")
-    print("="*80)
+    print("=" * 80)
 
     if environment.stats:
         print(f"\nTotal Requests: {environment.stats.total.num_requests}")
@@ -268,11 +255,10 @@ def on_test_stop(environment, **kwargs):
         print(f"Requests/sec: {environment.stats.total.total_rps:.2f}")
 
         if environment.stats.total.num_requests > 0:
-            failure_rate = (environment.stats.total.num_failures /
-                          environment.stats.total.num_requests) * 100
+            failure_rate = (environment.stats.total.num_failures / environment.stats.total.num_requests) * 100
             print(f"Failure Rate: {failure_rate:.2f}%")
 
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
 
 # ============================================================================
@@ -280,6 +266,7 @@ def on_test_stop(environment, **kwargs):
 # ============================================================================
 
 from locust import LoadTestShape
+
 
 class StepLoadShape(LoadTestShape):
     """

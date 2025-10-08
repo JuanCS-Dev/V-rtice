@@ -4,17 +4,18 @@ This module defines the core data structures used throughout the fairness
 and bias mitigation system.
 """
 
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import logging
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class ProtectedAttribute(str, Enum):
     """Protected attributes for fairness analysis in cybersecurity context."""
+
     GEOGRAPHIC_LOCATION = "geographic_location"  # Country/region
     ORGANIZATION_SIZE = "organization_size"  # SMB vs Enterprise
     INDUSTRY_VERTICAL = "industry_vertical"  # Finance, healthcare, tech, etc.
@@ -22,6 +23,7 @@ class ProtectedAttribute(str, Enum):
 
 class FairnessMetric(str, Enum):
     """Fairness metrics supported by the system."""
+
     DEMOGRAPHIC_PARITY = "demographic_parity"  # P(Ŷ=1|A=0) = P(Ŷ=1|A=1)
     EQUALIZED_ODDS = "equalized_odds"  # TPR and FPR equal across groups
     EQUAL_OPPORTUNITY = "equal_opportunity"  # TPR equal across groups
@@ -48,6 +50,7 @@ class FairnessResult:
         sample_size_1: Sample size for group 1
         metadata: Additional metadata
     """
+
     metric: FairnessMetric
     protected_attribute: ProtectedAttribute
     group_0_value: float
@@ -59,7 +62,7 @@ class FairnessResult:
     timestamp: datetime = field(default_factory=datetime.utcnow)
     sample_size_0: int = 0
     sample_size_1: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate fairness result."""
@@ -98,17 +101,18 @@ class BiasDetectionResult:
         sample_size: Total sample size
         metadata: Additional metadata
     """
+
     bias_detected: bool
     protected_attribute: ProtectedAttribute
     detection_method: str
-    p_value: Optional[float] = None
-    effect_size: Optional[float] = None
+    p_value: float | None = None
+    effect_size: float | None = None
     confidence: float = 0.0
-    affected_groups: List[str] = field(default_factory=list)
+    affected_groups: list[str] = field(default_factory=list)
     severity: str = "low"
     timestamp: datetime = field(default_factory=datetime.utcnow)
     sample_size: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate bias detection result."""
@@ -116,7 +120,7 @@ class BiasDetectionResult:
             raise ValueError(f"confidence must be in [0,1], got {self.confidence}")
         if self.p_value is not None and not 0.0 <= self.p_value <= 1.0:
             raise ValueError(f"p_value must be in [0,1], got {self.p_value}")
-        valid_severities = ['low', 'medium', 'high', 'critical']
+        valid_severities = ["low", "medium", "high", "critical"]
         if self.severity not in valid_severities:
             raise ValueError(f"severity must be one of {valid_severities}")
 
@@ -135,14 +139,15 @@ class MitigationResult:
         timestamp: When mitigation was performed
         metadata: Additional metadata
     """
+
     mitigation_method: str
     protected_attribute: ProtectedAttribute
-    fairness_before: Dict[str, float]
-    fairness_after: Dict[str, float]
-    performance_impact: Dict[str, float]  # e.g., {'accuracy': -0.02, 'f1': -0.01}
+    fairness_before: dict[str, float]
+    fairness_after: dict[str, float]
+    performance_impact: dict[str, float]  # e.g., {'accuracy': -0.02, 'f1': -0.01}
     success: bool
     timestamp: datetime = field(default_factory=datetime.utcnow)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def get_fairness_improvement(self, metric: str) -> float:
         """Get fairness improvement for a specific metric.
@@ -163,6 +168,7 @@ class MitigationResult:
 
 class FairnessException(Exception):
     """Base exception for fairness module errors."""
+
     pass
 
 
@@ -173,8 +179,7 @@ class InsufficientDataException(FairnessException):
         self.required_samples = required_samples
         self.actual_samples = actual_samples
         super().__init__(
-            f"Insufficient data for fairness analysis. "
-            f"Required: {required_samples}, Got: {actual_samples}"
+            f"Insufficient data for fairness analysis. Required: {required_samples}, Got: {actual_samples}"
         )
 
 

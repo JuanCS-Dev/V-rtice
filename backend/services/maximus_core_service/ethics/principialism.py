@@ -11,7 +11,7 @@ Core Principles:
 """
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from .base import ActionContext, EthicalFramework, EthicalFrameworkResult, EthicalVerdict
 
@@ -19,7 +19,7 @@ from .base import ActionContext, EthicalFramework, EthicalFrameworkResult, Ethic
 class PrinciplismFramework(EthicalFramework):
     """Four principles ethics framework."""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize principialism framework.
 
         Args:
@@ -48,11 +48,9 @@ class PrinciplismFramework(EthicalFramework):
         )
 
         # Approval threshold
-        self.approval_threshold = (
-            config.get("approval_threshold", 0.65) if config else 0.65
-        )
+        self.approval_threshold = config.get("approval_threshold", 0.65) if config else 0.65
 
-    def get_framework_principles(self) -> List[str]:
+    def get_framework_principles(self) -> list[str]:
         """Get principialism principles.
 
         Returns:
@@ -106,9 +104,7 @@ class PrinciplismFramework(EthicalFramework):
 
         # Check for principle conflicts
         reasoning_steps.append("Analyzing principle conflicts...")
-        conflicts = self._identify_conflicts(
-            beneficence_score, non_maleficence_score, autonomy_score, justice_score
-        )
+        conflicts = self._identify_conflicts(beneficence_score, non_maleficence_score, autonomy_score, justice_score)
         metadata["principle_conflicts"] = conflicts
 
         if conflicts:
@@ -125,9 +121,7 @@ class PrinciplismFramework(EthicalFramework):
         )
 
         metadata["weighted_score"] = weighted_score
-        reasoning_steps.append(
-            f"Weighted principle score: {weighted_score:.3f} (threshold: {self.approval_threshold})"
-        )
+        reasoning_steps.append(f"Weighted principle score: {weighted_score:.3f} (threshold: {self.approval_threshold})")
 
         # Apply conflict penalty if serious conflicts exist
         if len(conflicts) > 0:
@@ -148,7 +142,9 @@ class PrinciplismFramework(EthicalFramework):
             verdict = EthicalVerdict.APPROVED
             reasoning_steps.append(f"✅ {explanation}")
         else:
-            explanation = f"Action violates or conflicts with principles (score: {final_score:.3f} < {self.approval_threshold})"
+            explanation = (
+                f"Action violates or conflicts with principles (score: {final_score:.3f} < {self.approval_threshold})"
+            )
             verdict = EthicalVerdict.REJECTED
             reasoning_steps.append(f"❌ {explanation}")
 
@@ -183,9 +179,7 @@ class PrinciplismFramework(EthicalFramework):
             people_protected = action_context.threat_data.get("people_protected", 0)
 
             # Benefit proportional to threat severity and people protected
-            benefit_magnitude = (
-                threat_severity + min(people_protected / 1000, 1.0)
-            ) / 2
+            benefit_magnitude = (threat_severity + min(people_protected / 1000, 1.0)) / 2
             score += benefit_magnitude * 0.5
 
         # Does action improve future security?
@@ -221,9 +215,7 @@ class PrinciplismFramework(EthicalFramework):
         # Check for potential harms
         if action_context.impact_assessment:
             # Service disruption is harm
-            disruption_level = action_context.impact_assessment.get(
-                "disruption_level", 0.0
-            )
+            disruption_level = action_context.impact_assessment.get("disruption_level", 0.0)
             score -= disruption_level * 0.4
 
             # Collateral damage
@@ -283,9 +275,7 @@ class PrinciplismFramework(EthicalFramework):
 
         # Informed consent?
         if action_context.action_type in ["data_access", "surveillance"]:
-            if action_context.threat_data and action_context.threat_data.get(
-                "informed_consent"
-            ):
+            if action_context.threat_data and action_context.threat_data.get("informed_consent"):
                 score += 0.2
             else:
                 score -= 0.25  # No consent is autonomy violation
@@ -353,7 +343,7 @@ class PrinciplismFramework(EthicalFramework):
         non_maleficence: float,
         autonomy: float,
         justice: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """Identify conflicts between principles.
 
         Args:
@@ -369,15 +359,11 @@ class PrinciplismFramework(EthicalFramework):
 
         # Beneficence vs. Non-maleficence (doing good vs. avoiding harm)
         if beneficence > 0.7 and non_maleficence < 0.5:
-            conflicts.append(
-                "Beneficence-Nonmaleficence: Action does good but causes harm"
-            )
+            conflicts.append("Beneficence-Nonmaleficence: Action does good but causes harm")
 
         # Beneficence vs. Autonomy (doing good vs. respecting choice)
         if beneficence > 0.7 and autonomy < 0.4:
-            conflicts.append(
-                "Beneficence-Autonomy: Action benefits but overrides autonomy"
-            )
+            conflicts.append("Beneficence-Autonomy: Action benefits but overrides autonomy")
 
         # Non-maleficence vs. Justice (avoiding harm vs. fairness)
         if non_maleficence < 0.5 and justice > 0.7:
@@ -385,8 +371,6 @@ class PrinciplismFramework(EthicalFramework):
 
         # Autonomy vs. Justice (individual choice vs. collective fairness)
         if autonomy > 0.7 and justice < 0.5:
-            conflicts.append(
-                "Autonomy-Justice: Respects autonomy but distributively unfair"
-            )
+            conflicts.append("Autonomy-Justice: Respects autonomy but distributively unfair")
 
         return conflicts

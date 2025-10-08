@@ -9,16 +9,15 @@ Neo4j integration for storing and analyzing argumentation frameworks:
 """
 
 import logging
-from typing import List, Dict, Set, Tuple, Optional, Any
-from datetime import datetime, timedelta
-import asyncio
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from neo4j import AsyncGraphDatabase, AsyncDriver, AsyncSession
-from neo4j.exceptions import ServiceUnavailable, Neo4jError
+from neo4j import AsyncDriver, AsyncGraphDatabase
+from neo4j.exceptions import Neo4jError
 
-from models import Argument, ArgumentRole, Fallacy
 from argumentation_framework import ArgumentationFramework
 from config import get_settings
+from models import Argument, ArgumentRole
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ class SeriemaGraphClient:
         user: str = "neo4j",
         password: str = "neo4j",
         database: str = "neo4j",
-        max_connection_pool_size: int = 50
+        max_connection_pool_size: int = 50,
     ):
         """
         Initialize Seriema Graph client.
@@ -73,7 +72,7 @@ class SeriemaGraphClient:
                 self.uri,
                 auth=(self.user, self.password),
                 max_connection_pool_size=50,
-                connection_timeout=30.0
+                connection_timeout=30.0,
             )
 
             # Verify connectivity
@@ -106,29 +105,24 @@ class SeriemaGraphClient:
             # Constraint on Argument ID
             try:
                 await session.run(
-                    "CREATE CONSTRAINT argument_id_unique IF NOT EXISTS "
-                    "FOR (a:Argument) REQUIRE a.id IS UNIQUE"
+                    "CREATE CONSTRAINT argument_id_unique IF NOT EXISTS FOR (a:Argument) REQUIRE a.id IS UNIQUE"
                 )
-            except Neo4jError:
-                pass  # Already exists
+            except Neo4jError as e:
+                logger.debug(f"Constraint argument_id_unique already exists or creation failed: {e}")
 
             # Index on framework_id for fast filtering
             try:
                 await session.run(
-                    "CREATE INDEX argument_framework_idx IF NOT EXISTS "
-                    "FOR (a:Argument) ON (a.framework_id)"
+                    "CREATE INDEX argument_framework_idx IF NOT EXISTS FOR (a:Argument) ON (a.framework_id)"
                 )
-            except Neo4jError:
-                pass
+            except Neo4jError as e:
+                logger.debug(f"Index argument_framework_idx already exists or creation failed: {e}")
 
             # Index on role
             try:
-                await session.run(
-                    "CREATE INDEX argument_role_idx IF NOT EXISTS "
-                    "FOR (a:Argument) ON (a.role)"
-                )
-            except Neo4jError:
-                pass
+                await session.run("CREATE INDEX argument_role_idx IF NOT EXISTS FOR (a:Argument) ON (a.role)")
+            except Neo4jError as e:
+                logger.debug(f"Index argument_role_idx already exists or creation failed: {e}")
 
             logger.info("Schema constraints and indexes created")
 
@@ -136,7 +130,7 @@ class SeriemaGraphClient:
         self,
         framework: ArgumentationFramework,
         framework_id: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> bool:
         """
         Store argumentation framework in Neo4j.
@@ -155,12 +149,7 @@ class SeriemaGraphClient:
         try:
             async with self.driver.session(database=self.database) as session:
                 # Use transaction for atomicity
-                await session.execute_write(
-                    self._store_framework_tx,
-                    framework,
-                    framework_id,
-                    metadata or {}
-                )
+                await session.execute_write(self._store_framework_tx, framework, framework_id, metadata or {})
 
             logger.info(
                 f"Stored framework {framework_id}: {len(framework.arguments)} arguments, "
@@ -177,7 +166,7 @@ class SeriemaGraphClient:
         tx,
         framework: ArgumentationFramework,
         framework_id: str,
-        metadata: Dict[str, Any]
+        metadata: Dict[str, Any],
     ):
         """Transaction function for storing framework."""
         timestamp = datetime.utcnow().isoformat()
@@ -185,7 +174,7 @@ class SeriemaGraphClient:
         # Delete existing framework (if any)
         await tx.run(
             "MATCH (a:Argument {framework_id: $framework_id}) DETACH DELETE a",
-            framework_id=framework_id
+            framework_id=framework_id,
         )
 
         # Create argument nodes
@@ -212,7 +201,7 @@ class SeriemaGraphClient:
                 end_char=arg.end_char,
                 confidence=arg.confidence,
                 parent_id=arg.parent_id,
-                created_at=timestamp
+                created_at=timestamp,
             )
 
         # Create attack relationships
@@ -226,7 +215,7 @@ class SeriemaGraphClient:
                 attacker_id=attacker_id,
                 attacked_id=attacked_id,
                 framework_id=framework_id,
-                created_at=timestamp
+                created_at=timestamp,
             )
 
         # Store metadata as FrameworkMetadata node
@@ -248,13 +237,10 @@ class SeriemaGraphClient:
             num_attacks=len(framework.attacks),
             grounded_size=len(framework.compute_grounded_extension()),
             created_at=timestamp,
-            metadata=metadata
+            metadata=metadata,
         )
 
-    async def retrieve_framework(
-        self,
-        framework_id: str
-    ) -> Optional[ArgumentationFramework]:
+    async def retrieve_framework(self, framework_id: str) -> Optional[ArgumentationFramework]:
         """
         Retrieve argumentation framework from Neo4j.
 
@@ -277,7 +263,7 @@ class SeriemaGraphClient:
                            a.start_char AS start_char, a.end_char AS end_char,
                            a.confidence AS confidence, a.parent_id AS parent_id
                     """,
-                    framework_id=framework_id
+                    framework_id=framework_id,
                 )
 
                 arguments = []
@@ -289,7 +275,7 @@ class SeriemaGraphClient:
                         start_char=record["start_char"],
                         end_char=record["end_char"],
                         confidence=record["confidence"],
-                        parent_id=record["parent_id"]
+                        parent_id=record["parent_id"],
                     )
                     arguments.append(arg)
 
@@ -302,7 +288,7 @@ class SeriemaGraphClient:
                     MATCH (attacker:Argument {framework_id: $framework_id})-[:ATTACKS]->(attacked:Argument)
                     RETURN attacker.id AS attacker_id, attacked.id AS attacked_id
                     """,
-                    framework_id=framework_id
+                    framework_id=framework_id,
                 )
 
                 attacks = []
@@ -323,11 +309,7 @@ class SeriemaGraphClient:
             logger.error(f"Failed to retrieve framework {framework_id}: {e}", exc_info=True)
             return None
 
-    async def get_argument_centrality(
-        self,
-        framework_id: str,
-        algorithm: str = "pagerank"
-    ) -> Dict[str, float]:
+    async def get_argument_centrality(self, framework_id: str, algorithm: str = "pagerank") -> Dict[str, float]:
         """
         Calculate argument centrality scores.
 
@@ -355,7 +337,7 @@ class SeriemaGraphClient:
                     MATCH (a:Argument) WHERE id(a) = nodeId
                     RETURN a.id AS argument_id, score
                     """,
-                    framework_id=framework_id
+                    framework_id=framework_id,
                 )
             elif algorithm == "degree":
                 # Degree centrality (in-degree + out-degree)
@@ -367,7 +349,7 @@ class SeriemaGraphClient:
                     RETURN a.id AS argument_id,
                            (COUNT(DISTINCT r_out) + COUNT(DISTINCT r_in)) AS score
                     """,
-                    framework_id=framework_id
+                    framework_id=framework_id,
                 )
             else:
                 raise ValueError(f"Unknown algorithm: {algorithm}")
@@ -379,11 +361,7 @@ class SeriemaGraphClient:
             return centrality
 
     async def find_argument_paths(
-        self,
-        framework_id: str,
-        source_id: str,
-        target_id: str,
-        max_depth: int = 5
+        self, framework_id: str, source_id: str, target_id: str, max_depth: int = 5
     ) -> List[List[str]]:
         """
         Find all attack paths from source to target.
@@ -412,7 +390,7 @@ class SeriemaGraphClient:
                 framework_id=framework_id,
                 source_id=source_id,
                 target_id=target_id,
-                max_depth=max_depth
+                max_depth=max_depth,
             )
 
             paths = []
@@ -421,12 +399,7 @@ class SeriemaGraphClient:
 
             return paths
 
-    async def get_argument_neighborhoods(
-        self,
-        framework_id: str,
-        argument_id: str,
-        depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_argument_neighborhoods(self, framework_id: str, argument_id: str, depth: int = 2) -> Dict[str, Any]:
         """
         Get k-hop neighborhood of argument.
 
@@ -449,16 +422,12 @@ class SeriemaGraphClient:
                 RETURN attacker.id AS id, attacker.text AS text, attacker.role AS role
                 """,
                 framework_id=framework_id,
-                argument_id=argument_id
+                argument_id=argument_id,
             )
 
             attackers = []
             async for record in result:
-                attackers.append({
-                    "id": record["id"],
-                    "text": record["text"],
-                    "role": record["role"]
-                })
+                attackers.append({"id": record["id"], "text": record["text"], "role": record["role"]})
 
             # Direct attacked
             result = await session.run(
@@ -467,16 +436,12 @@ class SeriemaGraphClient:
                 RETURN attacked.id AS id, attacked.text AS text, attacked.role AS role
                 """,
                 framework_id=framework_id,
-                argument_id=argument_id
+                argument_id=argument_id,
             )
 
             attacked = []
             async for record in result:
-                attacked.append({
-                    "id": record["id"],
-                    "text": record["text"],
-                    "role": record["role"]
-                })
+                attacked.append({"id": record["id"], "text": record["text"], "role": record["role"]})
 
             # Indirect (k-hop)
             result = await session.run(
@@ -491,29 +456,28 @@ class SeriemaGraphClient:
                 """,
                 framework_id=framework_id,
                 argument_id=argument_id,
-                depth=depth
+                depth=depth,
             )
 
             indirect = []
             async for record in result:
-                indirect.append({
-                    "id": record["id"],
-                    "text": record["text"],
-                    "role": record["role"],
-                    "distance": record["distance"]
-                })
+                indirect.append(
+                    {
+                        "id": record["id"],
+                        "text": record["text"],
+                        "role": record["role"],
+                        "distance": record["distance"],
+                    }
+                )
 
             return {
                 "argument_id": argument_id,
                 "direct_attackers": attackers,
                 "direct_attacked": attacked,
-                "indirect_neighbors": indirect
+                "indirect_neighbors": indirect,
             }
 
-    async def detect_circular_arguments(
-        self,
-        framework_id: str
-    ) -> List[List[str]]:
+    async def detect_circular_arguments(self, framework_id: str) -> List[List[str]]:
         """
         Detect circular attack patterns (cycles).
 
@@ -534,7 +498,7 @@ class SeriemaGraphClient:
                 RETURN [node IN nodes(path) | node.id] AS cycle
                 LIMIT 20
                 """,
-                framework_id=framework_id
+                framework_id=framework_id,
             )
 
             cycles = []
@@ -543,10 +507,7 @@ class SeriemaGraphClient:
 
             return cycles
 
-    async def get_framework_statistics(
-        self,
-        framework_id: str
-    ) -> Dict[str, Any]:
+    async def get_framework_statistics(self, framework_id: str) -> Dict[str, Any]:
         """
         Get comprehensive framework statistics.
 
@@ -576,7 +537,7 @@ class SeriemaGraphClient:
                     MAX(in_degree) AS max_in_degree,
                     COLLECT(DISTINCT a.role) AS roles
                 """,
-                framework_id=framework_id
+                framework_id=framework_id,
             )
 
             record = await result.single()
@@ -592,13 +553,10 @@ class SeriemaGraphClient:
                 "avg_in_degree": float(record["avg_in_degree"] or 0),
                 "max_out_degree": record["max_out_degree"],
                 "max_in_degree": record["max_in_degree"],
-                "roles": record["roles"]
+                "roles": record["roles"],
             }
 
-    async def delete_framework(
-        self,
-        framework_id: str
-    ) -> bool:
+    async def delete_framework(self, framework_id: str) -> bool:
         """
         Delete framework from Neo4j.
 
@@ -619,7 +577,7 @@ class SeriemaGraphClient:
                     MATCH (a:Argument {framework_id: $framework_id})
                     DETACH DELETE a
                     """,
-                    framework_id=framework_id
+                    framework_id=framework_id,
                 )
 
                 await session.run(
@@ -627,7 +585,7 @@ class SeriemaGraphClient:
                     MATCH (m:FrameworkMetadata {framework_id: $framework_id})
                     DELETE m
                     """,
-                    framework_id=framework_id
+                    framework_id=framework_id,
                 )
 
             logger.info(f"Deleted framework {framework_id}")
@@ -669,5 +627,5 @@ seriema_graph_client = SeriemaGraphClient(
     uri=getattr(settings, "SERIEMA_GRAPH_URI", "bolt://localhost:7687"),
     user=getattr(settings, "SERIEMA_GRAPH_USER", "neo4j"),
     password=getattr(settings, "SERIEMA_GRAPH_PASSWORD", "neo4j"),
-    database=getattr(settings, "SERIEMA_GRAPH_DATABASE", "neo4j")
+    database=getattr(settings, "SERIEMA_GRAPH_DATABASE", "neo4j"),
 )

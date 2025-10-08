@@ -13,7 +13,7 @@
 import React, { useState, useEffect } from 'react';
 import './NeuromodulationWidget.css';
 
-export const NeuromodulationWidget = ({ systemHealth }) => {
+export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
   const [modulators, setModulators] = useState({
     dopamine: { current_value: 0.001, baseline: 0.001, min_value: 0.0001, max_value: 0.01, update_count: 0 },
     serotonin: { current_value: 0.1, baseline: 0.1, min_value: 0.01, max_value: 0.5, update_count: 0 },

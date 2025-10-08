@@ -22,9 +22,9 @@ NO MOCKS - Production-ready implementation.
 
 import logging
 import math
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
 from collections import deque
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class DopamineCore:
         base_learning_rate: float = 0.001,
         min_lr: float = 0.0001,
         max_lr: float = 0.01,
-        rpe_window_size: int = 100
+        rpe_window_size: int = 100,
     ):
         """Initialize Dopamine Core.
 
@@ -64,16 +64,13 @@ class DopamineCore:
         self.last_modulation_time: Optional[datetime] = None
         self.modulation_count = 0
 
-        logger.info(
-            f"DopamineCore initialized (base_lr={base_learning_rate}, "
-            f"range=[{min_lr}, {max_lr}])"
-        )
+        logger.info(f"DopamineCore initialized (base_lr={base_learning_rate}, range=[{min_lr}, {max_lr}])")
 
     def compute_rpe(
         self,
         actual_reward: float,
         expected_reward: float,
-        discount_factor: float = 0.99
+        discount_factor: float = 0.99,
     ) -> float:
         """Compute Reward Prediction Error (RPE).
 
@@ -97,10 +94,7 @@ class DopamineCore:
         self.reward_history.append(actual_reward)
         self.expected_reward_history.append(expected_reward)
 
-        logger.debug(
-            f"RPE computed: {rpe:.4f} (actual={actual_reward:.4f}, "
-            f"expected={expected_reward:.4f})"
-        )
+        logger.debug(f"RPE computed: {rpe:.4f} (actual={actual_reward:.4f}, expected={expected_reward:.4f})")
 
         return rpe
 
@@ -147,10 +141,7 @@ class DopamineCore:
         self.last_modulation_time = datetime.now()
         self.modulation_count += 1
 
-        logger.info(
-            f"LR modulated: {new_lr:.6f} (RPE={rpe:.4f}, "
-            f"surprise={normalized_rpe:.2f}, urgency={urgency:.2f})"
-        )
+        logger.info(f"LR modulated: {new_lr:.6f} (RPE={rpe:.4f}, surprise={normalized_rpe:.2f}, urgency={urgency:.2f})")
 
         return new_lr
 
@@ -169,12 +160,7 @@ class DopamineCore:
 
         return math.sqrt(variance)
 
-    def integrate_with_pytorch_optimizer(
-        self,
-        optimizer,
-        rpe: float,
-        urgency: float = 0.5
-    ):
+    def integrate_with_pytorch_optimizer(self, optimizer, rpe: float, urgency: float = 0.5):
         """Integrate with PyTorch optimizer (modify LR in-place).
 
         Args:
@@ -186,7 +172,7 @@ class DopamineCore:
 
         # Update optimizer LR
         for param_group in optimizer.param_groups:
-            param_group['lr'] = new_lr
+            param_group["lr"] = new_lr
 
         logger.info(f"PyTorch optimizer LR updated: {new_lr:.6f}")
 
@@ -200,7 +186,7 @@ class DopamineCore:
             RPE statistics
         """
         if not self.rpe_history:
-            return {'count': 0}
+            return {"count": 0}
 
         recent_rpe = list(self.rpe_history)[-window:]
 
@@ -211,13 +197,13 @@ class DopamineCore:
         negative_rpe = [x for x in recent_rpe if x < 0]
 
         return {
-            'count': len(recent_rpe),
-            'mean_rpe': mean_rpe,
-            'abs_mean_rpe': abs_mean_rpe,
-            'std_rpe': self._compute_rpe_std(),
-            'positive_count': len(positive_rpe),
-            'negative_count': len(negative_rpe),
-            'positive_ratio': len(positive_rpe) / len(recent_rpe) if recent_rpe else 0.0
+            "count": len(recent_rpe),
+            "mean_rpe": mean_rpe,
+            "abs_mean_rpe": abs_mean_rpe,
+            "std_rpe": self._compute_rpe_std(),
+            "positive_count": len(positive_rpe),
+            "negative_count": len(negative_rpe),
+            "positive_ratio": (len(positive_rpe) / len(recent_rpe) if recent_rpe else 0.0),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -229,11 +215,11 @@ class DopamineCore:
         stats = self.get_rpe_statistics()
 
         return {
-            'status': 'operational',
-            'current_lr': self.current_lr,
-            'base_lr': self.base_lr,
-            'lr_range': [self.min_lr, self.max_lr],
-            'modulation_count': self.modulation_count,
-            'last_modulation': self.last_modulation_time.isoformat() if self.last_modulation_time else 'N/A',
-            'rpe_statistics': stats
+            "status": "operational",
+            "current_lr": self.current_lr,
+            "base_lr": self.base_lr,
+            "lr_range": [self.min_lr, self.max_lr],
+            "modulation_count": self.modulation_count,
+            "last_modulation": (self.last_modulation_time.isoformat() if self.last_modulation_time else "N/A"),
+            "rpe_statistics": stats,
         }

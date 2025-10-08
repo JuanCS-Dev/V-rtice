@@ -5,33 +5,29 @@ Refactored API with dependency injection, lifespan management,
 and comprehensive health checks for all infrastructure components.
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
+import logging
+import time
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict
+
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import logging
-from datetime import datetime
-from typing import Dict, Any
-import time
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from cache_manager import cache_manager
 from config import get_settings
+from database import db_manager, get_db_session
+from kafka_client import kafka_client
 from models import (
     AnalysisRequest,
     AnalysisResponse,
-    CognitiveDefenseReport,
-    HealthCheckResponse
+    HealthCheckResponse,
 )
-from database import db_manager, get_db_session
-from cache_manager import cache_manager
-from kafka_client import kafka_client
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 settings = get_settings()
@@ -40,6 +36,7 @@ settings = get_settings()
 # ============================================================================
 # LIFESPAN MANAGEMENT
 # ============================================================================
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -83,11 +80,12 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Kafka initialization failed: {e}")
         startup_errors.append(f"Kafka: {e}")
 
-    # TODO Phase 2+: Load ML models
+    # Phase 2+ ML Models (tracked in GitHub Issue #NARRATIVE_ML_MODELS):
     # - BERTimbau emotion classifier
     # - RoBERTa propaganda detector
     # - BiLSTM-CNN-CRF argument miner
     # - Sentence transformers
+    # Currently using rule-based pipeline (Phase 1)
 
     if startup_errors:
         logger.warning(f"⚠️  Service started with errors: {startup_errors}")
@@ -151,6 +149,7 @@ app.add_middleware(
 # EXCEPTION HANDLERS
 # ============================================================================
 
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler for unexpected errors."""
@@ -160,14 +159,15 @@ async def global_exception_handler(request, exc):
         content={
             "success": False,
             "error": "Internal server error",
-            "detail": str(exc) if settings.DEBUG else "An unexpected error occurred"
-        }
+            "detail": str(exc) if settings.DEBUG else "An unexpected error occurred",
+        },
     )
 
 
 # ============================================================================
 # HEALTH CHECK ENDPOINT
 # ============================================================================
+
 
 @app.get("/health", response_model=HealthCheckResponse)
 async def health_check() -> HealthCheckResponse:
@@ -200,7 +200,7 @@ async def health_check() -> HealthCheckResponse:
         logger.error(f"Kafka health check failed: {e}")
         services["kafka"] = False
 
-    # TODO Phase 2+: Check ML models loaded
+    # Phase 2+ ML model health checks (GitHub Issue #NARRATIVE_ML_MODELS):
     # services["bertimbau"] = model_manager.is_loaded("bertimbau")
     # services["roberta"] = model_manager.is_loaded("roberta")
     # etc.
@@ -221,7 +221,7 @@ async def health_check() -> HealthCheckResponse:
         version=settings.SERVICE_VERSION,
         timestamp=datetime.utcnow(),
         services=services,
-        models_loaded=[]  # TODO Phase 2+: populate with loaded models
+        models_loaded=[],  # Phase 2+: GitHub Issue #NARRATIVE_ML_MODELS
     )
 
 
@@ -235,11 +235,9 @@ async def simple_health_check() -> Dict[str, str]:
 # ANALYSIS ENDPOINT (STUB - FULL IMPLEMENTATION IN PHASE 2+)
 # ============================================================================
 
+
 @app.post("/api/analyze", response_model=AnalysisResponse)
-async def analyze_content(
-    request: AnalysisRequest,
-    db: AsyncSession = Depends(get_db_session)
-) -> AnalysisResponse:
+async def analyze_content(request: AnalysisRequest, db: AsyncSession = Depends(get_db_session)) -> AnalysisResponse:
     """
     Analyze content for narrative manipulation.
 
@@ -256,34 +254,35 @@ async def analyze_content(
     start_time = time.time()
 
     try:
-        # TODO Phase 2-6: Implement full cognitive defense pipeline
-        # 1. Text preprocessing (utils.clean_text)
-        # 2. Entity linking (DBpedia Spotlight)
-        # 3. Argument mining (BiLSTM-CNN-CRF)
-        # 4. Module 1: Source Credibility (NewsGuard + Bayesian updates)
-        # 5. Module 2: Emotional Manipulation (BERTimbau + RoBERTa)
-        # 6. Module 3: Logical Fallacy (fallacy classifiers + Dung's AF)
-        # 7. Module 4: Reality Distortion (ClaimBuster + SPARQL KG)
-        # 8. Executive Controller: Threat aggregation
-        # 9. Store results in PostgreSQL
-        # 10. Send events to Kafka
+        # Phase 2-6 Full Pipeline (tracked in GitHub Issues):
+        # 1. Text preprocessing (utils.clean_text) - Phase 1 ✓
+        # 2. Entity linking (DBpedia Spotlight) - Issue #NARRATIVE_ENTITY_LINKING
+        # 3. Argument mining (BiLSTM-CNN-CRF) - Issue #NARRATIVE_ARGUMENT_MINING
+        # 4. Module 1: Source Credibility (NewsGuard + Bayesian) - Issue #NARRATIVE_SOURCE_CRED
+        # 5. Module 2: Emotional Manipulation (BERTimbau + RoBERTa) - Issue #NARRATIVE_ML_MODELS
+        # 6. Module 3: Logical Fallacy (classifiers + Dung's AF) - Phase 1 ✓
+        # 7. Module 4: Reality Distortion (ClaimBuster + SPARQL KG) - Issue #NARRATIVE_FACT_CHECK
+        # 8. Executive Controller: Threat aggregation - Phase 1 ✓
+        # 9. Store results in PostgreSQL - Phase 1 ✓
+        # 10. Send events to Kafka - Phase 1 ✓
 
         # STUB RESPONSE (Phase 1)
         logger.warning("⚠️  Using stub analysis - full implementation in Phase 2+")
 
-        from models import (
-            CognitiveDefenseReport,
-            SourceCredibilityResult,
-            EmotionalManipulationResult,
-            LogicalFallacyResult,
-            RealityDistortionResult,
-            ManipulationSeverity,
-            CognitiveDefenseAction,
-            CredibilityRating,
-            EmotionProfile,
-            EmotionCategory
-        )
         from uuid import uuid4
+
+        from models import (
+            CognitiveDefenseAction,
+            CognitiveDefenseReport,
+            CredibilityRating,
+            EmotionalManipulationResult,
+            EmotionCategory,
+            EmotionProfile,
+            LogicalFallacyResult,
+            ManipulationSeverity,
+            RealityDistortionResult,
+            SourceCredibilityResult,
+        )
 
         # Stub module results
         credibility_result = SourceCredibilityResult(
@@ -300,7 +299,7 @@ async def analyze_content(
             reveals_whos_in_charge=0.5,
             provides_names_of_content_creators=0.5,
             historical_reliability=0.5,
-            tier_used=1
+            tier_used=1,
         )
 
         emotional_result = EmotionalManipulationResult(
@@ -309,19 +308,13 @@ async def analyze_content(
                 primary_emotion=EmotionCategory.NEUTRAL,
                 emotion_scores={EmotionCategory.NEUTRAL: 1.0},
                 arousal=0.3,
-                valence=0.0
-            )
+                valence=0.0,
+            ),
         )
 
-        logical_result = LogicalFallacyResult(
-            fallacy_score=0.2,
-            coherence_score=0.8
-        )
+        logical_result = LogicalFallacyResult(fallacy_score=0.2, coherence_score=0.8)
 
-        reality_result = RealityDistortionResult(
-            distortion_score=0.25,
-            factuality_score=0.75
-        )
+        reality_result = RealityDistortionResult(distortion_score=0.25, factuality_score=0.75)
 
         processing_time = (time.time() - start_time) * 1000
 
@@ -342,27 +335,20 @@ async def analyze_content(
             reasoning="STUB: Full analysis not yet implemented (Phase 2+)",
             evidence=["Infrastructure initialized", "Awaiting ML models"],
             processing_time_ms=processing_time,
-            models_used=[]
+            models_used=[],
         )
 
-        return AnalysisResponse(
-            success=True,
-            report=stub_report,
-            error=None
-        )
+        return AnalysisResponse(success=True, report=stub_report, error=None)
 
     except Exception as e:
         logger.error(f"Analysis error: {e}", exc_info=True)
-        return AnalysisResponse(
-            success=False,
-            report=None,
-            error=str(e)
-        )
+        return AnalysisResponse(success=False, report=None, error=str(e))
 
 
 # ============================================================================
 # LEGACY COMPATIBILITY ENDPOINT (TO BE DEPRECATED)
 # ============================================================================
+
 
 @app.post("/analyze_content")
 async def legacy_analyze_content(request: AnalysisRequest) -> Dict[str, Any]:
@@ -379,18 +365,16 @@ async def legacy_analyze_content(request: AnalysisRequest) -> Dict[str, Any]:
         return {
             "status": "success",
             "timestamp": datetime.utcnow().isoformat(),
-            "analysis": response.report.model_dump() if response.report else {}
+            "analysis": response.report.model_dump() if response.report else {},
         }
     else:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=response.error
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=response.error)
 
 
 # ============================================================================
 # STATISTICS & MONITORING ENDPOINTS
 # ============================================================================
+
 
 @app.get("/stats/cache")
 async def cache_stats() -> Dict[str, Any]:
@@ -399,10 +383,7 @@ async def cache_stats() -> Dict[str, Any]:
         stats = await cache_manager.get_stats()
         return {"success": True, "stats": stats}
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @app.get("/stats/database")
@@ -417,7 +398,7 @@ async def database_stats() -> Dict[str, Any]:
             "fact_check_cache",
             "entity_cache",
             "propaganda_patterns",
-            "ml_model_metrics"
+            "ml_model_metrics",
         ]
 
         counts = {}
@@ -430,10 +411,7 @@ async def database_stats() -> Dict[str, Any]:
 
         return {"success": True, "table_counts": counts}
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @app.get("/info")
@@ -443,7 +421,7 @@ async def service_info() -> Dict[str, Any]:
         "service": "Cognitive Defense System",
         "version": settings.SERVICE_VERSION,
         "environment": "development" if settings.DEBUG else "production",
-        "config": settings.get_info()
+        "config": settings.get_info(),
     }
 
 
@@ -460,5 +438,5 @@ if __name__ == "__main__":
         port=settings.SERVICE_PORT,
         workers=settings.WORKERS,
         log_level="debug" if settings.DEBUG else "info",
-        reload=settings.DEBUG
+        reload=settings.DEBUG,
     )

@@ -10,9 +10,12 @@ from typing import Dict
 
 @dataclass
 class ColorPalette:
-    """Paleta de cores oficial Vértice - Gradiente Verde → Azul"""
+    """
+    Paleta de cores oficial Vértice - Gradiente Verde → Azul
+    Alinhada ao Blueprint UI/UX v1.2 (Gemini-style refinado)
+    """
 
-    # Cores Primárias (Gradiente Principal)
+    # Cores Primárias (Gradiente Principal) - Mantidas do design original
     VERDE_NEON: str = "#00ff87"      # Início do gradiente
     CIANO_BRILHO: str = "#00d4ff"    # Meio
     AZUL_PROFUNDO: str = "#0080ff"   # Fim
@@ -24,26 +27,39 @@ class ColorPalette:
     CIANO_CLARO: str = "#66e0ff"     # Ciano mais claro
     AZUL_CELESTE: str = "#4da6ff"    # Azul médio
 
-    # Neutros (Backgrounds e Textos)
+    # Texto (Blueprint refinado - Rich color names)
+    TEXTO_PRIMARIO: str = "bright_white"    # Texto principal (Rich)
+    TEXTO_SECUNDARIO: str = "grey70"        # Texto secundário (Rich)
+    BRANCO: str = "#ffffff"                 # Hex fallback
+    CINZA_TEXTO: str = "#888888"            # Hex fallback
+
+    # Neutros (Backgrounds)
     PRETO: str = "#000000"
     CINZA_ESCURO: str = "#1a1a1a"
     CINZA_MEDIO: str = "#2d2d2d"
     CINZA_CLARO: str = "#4a4a4a"
-    CINZA_TEXTO: str = "#888888"
-    BRANCO: str = "#ffffff"
-
-    # Status Colors
-    SUCCESS: str = "#00ff87"         # Verde neon
-    WARNING: str = "#ffaa00"         # Laranja
-    ERROR: str = "#ff3366"           # Vermelho
-    INFO: str = "#00d4ff"            # Ciano
-
-    # Backgrounds
     BG_PRIMARY: str = "#0a0a0a"      # Fundo principal (quase preto)
     BG_SECONDARY: str = "#121212"    # Fundo secundário
     BG_PANEL: str = "#1a1a1a"        # Painéis
     BG_HOVER: str = "#252525"        # Hover states
     BG_ACTIVE: str = "#2d2d2d"       # Active states
+
+    # Status Colors (Blueprint refinado)
+    SUCCESS: str = "green_yellow"           # Rich name (Blueprint)
+    SUCCESS_HEX: str = "#adff2f"            # Hex equivalente
+    ERROR: str = "bright_red"               # Rich name (Blueprint)
+    ERROR_HEX: str = "#ff0000"              # Hex equivalente
+    WARNING: str = "gold1"                  # Rich name (Blueprint)
+    WARNING_HEX: str = "#ffd700"            # Hex equivalente
+    INFO: str = "#00d4ff"                   # Mantido do original
+
+    # Acentos (Blueprint refinado)
+    ACENTO_PRINCIPAL: str = "deep_sky_blue1"   # Rich name (Blueprint)
+    ACENTO_SECUNDARIO: str = "medium_purple"   # Rich name (Blueprint)
+
+    # Bordas (Blueprint refinado)
+    BORDA_PADRAO: str = "grey50"            # Rich name (Blueprint)
+    BORDA_PANEL: str = "#4a4a4a"            # Hex fallback
 
 
 @dataclass
@@ -87,7 +103,7 @@ class Spacing:
     LG: int = 6     # 24px
     XL: int = 8     # 32px
     XXL: int = 12   # 48px
-    XXXL: int = 16  # 64px
+    MAX_SPACING: int = 16  # 64px
 
 
 class Animation:
@@ -168,30 +184,33 @@ class VerticeTheme:
         ]
 
     def get_theme_dict(self) -> Dict[str, str]:
-        """Retorna tema como dicionário para Textual"""
+        """
+        Retorna tema como dicionário para Textual
+        Alinhado ao Blueprint UI/UX v1.2
+        """
         return {
             # Primary colors
             "primary": self.colors.VERDE_NEON,
             "secondary": self.colors.CIANO_BRILHO,
-            "accent": self.colors.AZUL_PROFUNDO,
+            "accent": self.colors.ACENTO_PRINCIPAL,
 
             # Backgrounds
             "background": self.colors.BG_PRIMARY,
             "surface": self.colors.BG_SECONDARY,
             "panel": self.colors.BG_PANEL,
 
-            # Text
-            "text": self.colors.BRANCO,
-            "text-muted": self.colors.CINZA_TEXTO,
+            # Text (usando Rich color names do Blueprint)
+            "text": self.colors.TEXTO_PRIMARIO,
+            "text-muted": self.colors.TEXTO_SECUNDARIO,
 
-            # Status
+            # Status (usando Rich color names do Blueprint)
             "success": self.colors.SUCCESS,
             "warning": self.colors.WARNING,
             "error": self.colors.ERROR,
             "info": self.colors.INFO,
 
-            # Borders
-            "border": self.colors.CIANO_BRILHO,
+            # Borders (usando Rich color names do Blueprint)
+            "border": self.colors.BORDA_PADRAO,
             "border-subtle": self.colors.CINZA_MEDIO,
         }
 

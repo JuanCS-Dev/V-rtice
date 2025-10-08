@@ -4,17 +4,17 @@ Extracts relationships between entities for knowledge graph construction in Neo4
 """
 
 import logging
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from models import (
-    EntityType,
-    RelationType,
-    EntityRelationship,
-    Pessoa,
-    Veiculo,
     Endereco,
-    Ocorrencia
+    EntityRelationship,
+    EntityType,
+    Ocorrencia,
+    Pessoa,
+    RelationType,
+    Veiculo,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,11 +32,7 @@ class RelationshipExtractor:
         """Initialize relationship extractor."""
         pass
 
-    def extract_pessoa_relationships(
-        self,
-        pessoa: Pessoa,
-        raw_data: Dict[str, Any]
-    ) -> List[EntityRelationship]:
+    def extract_pessoa_relationships(self, pessoa: Pessoa, raw_data: Dict[str, Any]) -> List[EntityRelationship]:
         """
         Extract relationships for a Pessoa entity.
 
@@ -63,8 +59,8 @@ class RelationshipExtractor:
                         properties={
                             "desde": veiculo_data.get("data_aquisicao"),
                             "ativo": veiculo_data.get("ativo", True),
-                            "created_at": datetime.utcnow().isoformat()
-                        }
+                            "created_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     relationships.append(rel)
                     logger.debug(f"Extracted POSSUI relationship: {pessoa.nome} -> {placa}")
@@ -84,8 +80,8 @@ class RelationshipExtractor:
                             "tipo": endereco_data.get("tipo", "residencial"),
                             "principal": endereco_data.get("principal", False),
                             "desde": endereco_data.get("desde"),
-                            "created_at": datetime.utcnow().isoformat()
-                        }
+                            "created_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     relationships.append(rel)
                     logger.debug(f"Extracted RESIDE_EM relationship: {pessoa.nome} -> {endereco_id}")
@@ -104,19 +100,15 @@ class RelationshipExtractor:
                         properties={
                             "papel": ocorrencia_ref.get("papel", "envolvido"),  # vitima, suspeito, testemunha
                             "data_envolvimento": ocorrencia_ref.get("data"),
-                            "created_at": datetime.utcnow().isoformat()
-                        }
+                            "created_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     relationships.append(rel)
                     logger.debug(f"Extracted ENVOLVIDO_EM relationship: {pessoa.nome} -> {numero_bo}")
 
         return relationships
 
-    def extract_veiculo_relationships(
-        self,
-        veiculo: Veiculo,
-        raw_data: Dict[str, Any]
-    ) -> List[EntityRelationship]:
+    def extract_veiculo_relationships(self, veiculo: Veiculo, raw_data: Dict[str, Any]) -> List[EntityRelationship]:
         """
         Extract relationships for a Veiculo entity.
 
@@ -139,8 +131,8 @@ class RelationshipExtractor:
                 relation_type=RelationType.POSSUI,
                 properties={
                     "source": "vehicle_registration",
-                    "created_at": datetime.utcnow().isoformat()
-                }
+                    "created_at": datetime.utcnow().isoformat(),
+                },
             )
             relationships.append(rel)
             logger.debug(f"Extracted POSSUI relationship: {veiculo.proprietario_cpf} -> {veiculo.placa}")
@@ -160,8 +152,8 @@ class RelationshipExtractor:
                 properties={
                     "municipio": municipio,
                     "uf": uf,
-                    "created_at": datetime.utcnow().isoformat()
-                }
+                    "created_at": datetime.utcnow().isoformat(),
+                },
             )
             relationships.append(rel)
             logger.debug(f"Extracted REGISTRADO_EM relationship: {veiculo.placa} -> {endereco_id}")
@@ -179,8 +171,8 @@ class RelationshipExtractor:
                         relation_type=RelationType.ENVOLVIDO_EM,
                         properties={
                             "tipo_envolvimento": ocorrencia_ref.get("tipo", "mencionado"),
-                            "created_at": datetime.utcnow().isoformat()
-                        }
+                            "created_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     relationships.append(rel)
                     logger.debug(f"Extracted ENVOLVIDO_EM relationship: {veiculo.placa} -> {numero_bo}")
@@ -188,9 +180,7 @@ class RelationshipExtractor:
         return relationships
 
     def extract_ocorrencia_relationships(
-        self,
-        ocorrencia: Ocorrencia,
-        raw_data: Dict[str, Any]
+        self, ocorrencia: Ocorrencia, raw_data: Dict[str, Any]
     ) -> List[EntityRelationship]:
         """
         Extract relationships for an Ocorrencia entity.
@@ -206,12 +196,14 @@ class RelationshipExtractor:
 
         # Extract Ocorrencia -> Endereco (OCORREU_EM)
         if ocorrencia.local_logradouro and ocorrencia.local_cidade and ocorrencia.local_estado:
-            endereco_id = self._build_endereco_id({
-                "logradouro": ocorrencia.local_logradouro,
-                "cidade": ocorrencia.local_cidade,
-                "estado": ocorrencia.local_estado,
-                "bairro": ocorrencia.local_bairro
-            })
+            endereco_id = self._build_endereco_id(
+                {
+                    "logradouro": ocorrencia.local_logradouro,
+                    "cidade": ocorrencia.local_cidade,
+                    "estado": ocorrencia.local_estado,
+                    "bairro": ocorrencia.local_bairro,
+                }
+            )
 
             rel = EntityRelationship(
                 source_type=EntityType.OCORRENCIA,
@@ -224,8 +216,8 @@ class RelationshipExtractor:
                     "tipo_ocorrencia": ocorrencia.tipo,
                     "latitude": raw_data.get("latitude"),
                     "longitude": raw_data.get("longitude"),
-                    "created_at": datetime.utcnow().isoformat()
-                }
+                    "created_at": datetime.utcnow().isoformat(),
+                },
             )
             relationships.append(rel)
             logger.debug(f"Extracted OCORREU_EM relationship: {ocorrencia.numero_bo} -> {endereco_id}")
@@ -244,8 +236,8 @@ class RelationshipExtractor:
                         properties={
                             "papel": pessoa_ref.get("papel", "envolvido"),
                             "nome": pessoa_ref.get("nome"),
-                            "created_at": datetime.utcnow().isoformat()
-                        }
+                            "created_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     relationships.append(rel)
                     logger.debug(f"Extracted ENVOLVIDO_EM relationship: {pessoa_id} -> {ocorrencia.numero_bo}")
@@ -263,19 +255,15 @@ class RelationshipExtractor:
                         relation_type=RelationType.ENVOLVIDO_EM,
                         properties={
                             "situacao": veiculo_ref.get("situacao", "mencionado"),
-                            "created_at": datetime.utcnow().isoformat()
-                        }
+                            "created_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     relationships.append(rel)
                     logger.debug(f"Extracted ENVOLVIDO_EM relationship: {placa} -> {ocorrencia.numero_bo}")
 
         return relationships
 
-    def extract_endereco_relationships(
-        self,
-        endereco: Endereco,
-        raw_data: Dict[str, Any]
-    ) -> List[EntityRelationship]:
+    def extract_endereco_relationships(self, endereco: Endereco, raw_data: Dict[str, Any]) -> List[EntityRelationship]:
         """
         Extract relationships for an Endereco entity.
 
@@ -327,10 +315,7 @@ class RelationshipExtractor:
         endereco_id = "-".join(parts).lower().replace(" ", "_")
         return endereco_id
 
-    def infer_relationships_from_context(
-        self,
-        entities: List[Dict[str, Any]]
-    ) -> List[EntityRelationship]:
+    def infer_relationships_from_context(self, entities: List[Dict[str, Any]]) -> List[EntityRelationship]:
         """
         Infer implicit relationships from entity context.
 

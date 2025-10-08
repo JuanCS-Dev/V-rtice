@@ -5,18 +5,18 @@ Extracts argumentative components (claims, premises) using BERT-based
 token classification following the TARGER framework.
 """
 
-import logging
-from typing import List, Dict, Tuple, Optional
-import numpy as np
 import asyncio
+import logging
+from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import torch
-from transformers import AutoTokenizer, AutoModelForTokenClassification
+from transformers import AutoModelForTokenClassification, AutoTokenizer
 
-from models import Argument, ArgumentRole
-from cache_manager import cache_manager, CacheCategory
-from utils import hash_text
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
+from models import Argument, ArgumentRole
+from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class ArgumentMiner:
     def __init__(
         self,
         model_name: str = "neuralmind/bert-base-portuguese-cased",
-        device: str = "cpu"
+        device: str = "cpu",
     ):
         """
         Initialize argument miner.
@@ -80,29 +80,19 @@ class ArgumentMiner:
             logger.info(f"Loading argument miner: {self.model_name}")
 
             # Load tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                use_fast=True
-            )
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
 
             # Load model for token classification
             # Note: In production, use fine-tuned model on argument mining dataset
             num_labels = len(self.TAG_MAPPING)
-            self.model = AutoModelForTokenClassification.from_pretrained(
-                self.model_name,
-                num_labels=num_labels
-            )
+            self.model = AutoModelForTokenClassification.from_pretrained(self.model_name, num_labels=num_labels)
 
             self.model.to(self.device)
             self.model.eval()
 
             # Quantization
             if self.device == "cpu":
-                self.model = torch.quantization.quantize_dynamic(
-                    self.model,
-                    {torch.nn.Linear},
-                    dtype=torch.qint8
-                )
+                self.model = torch.quantization.quantize_dynamic(self.model, {torch.nn.Linear}, dtype=torch.qint8)
 
             self._initialized = True
             logger.info("✅ Argument miner initialized")
@@ -112,12 +102,7 @@ class ArgumentMiner:
             raise
 
     @torch.no_grad()
-    def extract_arguments(
-        self,
-        text: str,
-        min_confidence: float = 0.6,
-        use_cache: bool = True
-    ) -> List[Argument]:
+    def extract_arguments(self, text: str, min_confidence: float = 0.6, use_cache: bool = True) -> List[Argument]:
         """
         Extract arguments from text.
 
@@ -148,7 +133,7 @@ class ArgumentMiner:
             truncation=True,
             max_length=512,
             padding=True,
-            return_offsets_mapping=True
+            return_offsets_mapping=True,
         ).to(self.device)
 
         offset_mapping = inputs.pop("offset_mapping")[0].cpu().numpy()
@@ -161,13 +146,7 @@ class ArgumentMiner:
         predictions = np.argmax(logits, axis=-1)
 
         # Extract argument spans
-        arguments = self._extract_argument_spans(
-            text,
-            predictions,
-            offset_mapping,
-            logits,
-            min_confidence
-        )
+        arguments = self._extract_argument_spans(text, predictions, offset_mapping, logits, min_confidence)
 
         # Link premises to claims
         arguments = self._link_premises_to_claims(arguments)
@@ -180,7 +159,7 @@ class ArgumentMiner:
                     CacheCategory.MODEL_CACHE,
                     cache_key,
                     [arg.model_dump() for arg in arguments],
-                    ttl_override=3600
+                    ttl_override=3600,
                 )
             )
 
@@ -192,7 +171,7 @@ class ArgumentMiner:
         predictions: np.ndarray,
         offset_mapping: np.ndarray,
         logits: np.ndarray,
-        min_confidence: float
+        min_confidence: float,
     ) -> List[Argument]:
         """
         Extract argument spans from BIO predictions.
@@ -253,7 +232,7 @@ class ArgumentMiner:
                     role=role,
                     start_char=start_char,
                     end_char=end_char,
-                    confidence=confidence
+                    confidence=confidence,
                 )
                 current_type = arg_type
 
@@ -264,7 +243,7 @@ class ArgumentMiner:
                 if current_arg and arg_type == current_type:
                     end_char = int(offset[1])
                     current_arg.end_char = end_char
-                    current_arg.text = text[current_arg.start_char:end_char]
+                    current_arg.text = text[current_arg.start_char : end_char]
                     # Update confidence (average)
                     current_arg.confidence = (current_arg.confidence + confidence) / 2
 
@@ -274,10 +253,7 @@ class ArgumentMiner:
 
         return arguments
 
-    def _link_premises_to_claims(
-        self,
-        arguments: List[Argument]
-    ) -> List[Argument]:
+    def _link_premises_to_claims(self, arguments: List[Argument]) -> List[Argument]:
         """
         Link premises to their supporting claims.
 
@@ -296,10 +272,7 @@ class ArgumentMiner:
         for arg in arguments:
             if arg.role == ArgumentRole.PREMISE:
                 # Find closest claim before this premise
-                candidates = [
-                    claim for claim in claims
-                    if claim.end_char <= arg.start_char
-                ]
+                candidates = [claim for claim in claims if claim.end_char <= arg.start_char]
 
                 if candidates:
                     # Get closest (by end position)
@@ -308,10 +281,7 @@ class ArgumentMiner:
 
         return arguments
 
-    def get_argument_structure(
-        self,
-        arguments: List[Argument]
-    ) -> Dict[str, any]:
+    def get_argument_structure(self, arguments: List[Argument]) -> Dict[str, any]:
         """
         Analyze argument structure.
 
@@ -326,10 +296,7 @@ class ArgumentMiner:
         premises = [a for a in arguments if a.role == ArgumentRole.PREMISE]
 
         # Count supported claims (have premises)
-        supported_claims = sum(
-            1 for claim in claims
-            if any(p.parent_id == claim.id for p in premises)
-        )
+        supported_claims = sum(1 for claim in claims if any(p.parent_id == claim.id for p in premises))
 
         # Average premises per claim
         avg_premises = len(premises) / len(claims) if claims else 0
@@ -342,19 +309,11 @@ class ArgumentMiner:
             "supported_claims": supported_claims,
             "unsupported_claims": len(claims) - supported_claims,
             "avg_premises_per_claim": avg_premises,
-            "structure_quality": self._assess_structure_quality(
-                claims,
-                premises,
-                supported_claims
-            )
+            "structure_quality": self._assess_structure_quality(claims, premises, supported_claims),
         }
 
     @staticmethod
-    def _assess_structure_quality(
-        claims: List[Argument],
-        premises: List[Argument],
-        supported_claims: int
-    ) -> float:
+    def _assess_structure_quality(claims: List[Argument], premises: List[Argument], supported_claims: int) -> float:
         """
         Assess quality of argument structure.
 
@@ -378,13 +337,10 @@ class ArgumentMiner:
         # Factor 3: Confidence
         avg_confidence = sum(a.confidence for a in claims + premises) / (len(claims) + len(premises))
 
-        quality = (support_ratio * 0.5 + premise_density * 0.3 + avg_confidence * 0.2)
+        quality = support_ratio * 0.5 + premise_density * 0.3 + avg_confidence * 0.2
         return quality
 
-    def detect_circular_reasoning(
-        self,
-        arguments: List[Argument]
-    ) -> List[Tuple[str, str]]:
+    def detect_circular_reasoning(self, arguments: List[Argument]) -> List[Tuple[str, str]]:
         """
         Detect circular reasoning patterns.
 
@@ -401,10 +357,7 @@ class ArgumentMiner:
                 continue
 
             # Check if premise text is very similar to its claim
-            parent_claim = next(
-                (a for a in arguments if a.id == premise.parent_id),
-                None
-            )
+            parent_claim = next((a for a in arguments if a.id == premise.parent_id), None)
 
             if parent_claim:
                 # Simple similarity check (production should use embeddings)
@@ -422,11 +375,7 @@ class ArgumentMiner:
 
         return circular_patterns
 
-    def batch_extract(
-        self,
-        texts: List[str],
-        batch_size: int = 16
-    ) -> List[List[Argument]]:
+    def batch_extract(self, texts: List[str], batch_size: int = 16) -> List[List[Argument]]:
         """
         Batch argument extraction.
 
@@ -440,7 +389,7 @@ class ArgumentMiner:
         results = []
 
         for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+            batch = texts[i : i + batch_size]
 
             # Tokenize batch
             inputs = self.tokenizer(
@@ -449,7 +398,7 @@ class ArgumentMiner:
                 truncation=True,
                 max_length=512,
                 padding=True,
-                return_offsets_mapping=True
+                return_offsets_mapping=True,
             ).to(self.device)
 
             offset_mappings = inputs.pop("offset_mapping").cpu().numpy()
@@ -462,13 +411,7 @@ class ArgumentMiner:
             # Process each text
             for text, logit, offset_mapping in zip(batch, logits, offset_mappings):
                 predictions = np.argmax(logit, axis=-1)
-                arguments = self._extract_argument_spans(
-                    text,
-                    predictions,
-                    offset_mapping,
-                    logit,
-                    min_confidence=0.6
-                )
+                arguments = self._extract_argument_spans(text, predictions, offset_mapping, logit, min_confidence=0.6)
                 arguments = self._link_premises_to_claims(arguments)
                 results.append(arguments)
 
@@ -479,6 +422,4 @@ class ArgumentMiner:
 # GLOBAL INSTANCE
 # ============================================================================
 
-argument_miner = ArgumentMiner(
-    device="cuda" if torch.cuda.is_available() else "cpu"
-)
+argument_miner = ArgumentMiner(device="cuda" if torch.cuda.is_available() else "cpu")

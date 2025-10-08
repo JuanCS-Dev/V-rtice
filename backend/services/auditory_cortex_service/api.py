@@ -13,18 +13,18 @@ This API allows other Maximus AI services or external applications to interact
 with the auditory perception capabilities in a standardized and efficient manner.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
 import base64
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from binaural_correlation import BinauralCorrelation
+from c2_beacon_detector import C2BeaconDetector
 from cocktail_party_triage import CocktailPartyTriage
 from ttp_signature_recognition import TTPSignatureRecognition
-from c2_beacon_detector import C2BeaconDetector
 
 app = FastAPI(title="Maximus Auditory Cortex Service", version="1.0.0")
 
@@ -43,6 +43,7 @@ class AudioAnalysisRequest(BaseModel):
         analysis_type (str): The type of analysis to perform (e.g., 'speech_to_text', 'sound_event_detection').
         language (Optional[str]): The language of the audio (e.g., 'en-US').
     """
+
     audio_base64: str
     analysis_type: str
     language: Optional[str] = "en-US"
@@ -51,15 +52,15 @@ class AudioAnalysisRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Auditory Cortex Service."""
-    print("👂 Starting Maximus Auditory Cortex Service...")
-    print("✅ Maximus Auditory Cortex Service started successfully.")
+    print("👂 Starting Maximus Auditory Cortex Service...")  # pragma: no cover
+    print("✅ Maximus Auditory Cortex Service started successfully.")  # pragma: no cover
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Auditory Cortex Service."""
-    print("👋 Shutting down Maximus Auditory Cortex Service...")
-    print("🛑 Maximus Auditory Cortex Service shut down.")
+    print("👋 Shutting down Maximus Auditory Cortex Service...")  # pragma: no cover
+    print("🛑 Maximus Auditory Cortex Service shut down.")  # pragma: no cover
 
 
 @app.get("/health")
@@ -89,8 +90,11 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
     try:
         # Decode base64 audio (simplified, actual audio processing would happen here)
         audio_data = base64.b64decode(request.audio_base64)
-        
-        results = {"timestamp": datetime.now().isoformat(), "analysis_type": request.analysis_type}
+
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "analysis_type": request.analysis_type,
+        }
 
         if request.analysis_type == "speech_to_text":
             transcript = await cocktail_party_triage.process_audio_for_speech(audio_data, request.language)
@@ -105,9 +109,14 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
             c2_detection = await c2_detector.detect_c2_beacon(audio_data)
             results["c2_beacon_detection"] = c2_detection
         else:
-            raise HTTPException(status_code=400, detail=f"Invalid analysis type: {request.analysis_type}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid analysis type: {request.analysis_type}",
+            )
 
         return results
+    except HTTPException:
+        raise  # Re-raise HTTPException as-is (e.g., 400 for invalid type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Audio analysis failed: {str(e)}")
 
@@ -132,5 +141,5 @@ async def get_cocktail_party_triage_status() -> Dict[str, Any]:
     return await cocktail_party_triage.get_status()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8004)

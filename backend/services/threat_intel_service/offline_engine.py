@@ -18,8 +18,8 @@ known threats efficiently.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 
 class OfflineThreatIntelEngine:
@@ -33,9 +33,27 @@ class OfflineThreatIntelEngine:
     def __init__(self):
         """Initializes the OfflineThreatIntelEngine with a mock threat intelligence database."""
         self.threat_intel_db: Dict[str, Dict[str, Any]] = {
-            "ip:1.2.3.4": {"indicator": "1.2.3.4", "type": "ip", "threat_level": "high", "description": "Known C2 server", "last_updated": (datetime.now() - timedelta(days=7)).isoformat()},
-            "domain:malicious.com": {"indicator": "malicious.com", "type": "domain", "threat_level": "critical", "description": "Phishing domain", "last_updated": (datetime.now() - timedelta(days=1)).isoformat()},
-            "hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {"indicator": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "type": "hash", "threat_level": "medium", "description": "Known malware sample", "last_updated": datetime.now().isoformat()}
+            "ip:1.2.3.4": {
+                "indicator": "1.2.3.4",
+                "type": "ip",
+                "threat_level": "high",
+                "description": "Known C2 server",
+                "last_updated": (datetime.now() - timedelta(days=7)).isoformat(),
+            },
+            "domain:malicious.com": {
+                "indicator": "malicious.com",
+                "type": "domain",
+                "threat_level": "critical",
+                "description": "Phishing domain",
+                "last_updated": (datetime.now() - timedelta(days=1)).isoformat(),
+            },
+            "hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
+                "indicator": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "type": "hash",
+                "threat_level": "medium",
+                "description": "Known malware sample",
+                "last_updated": datetime.now().isoformat(),
+            },
         }
         self.last_db_update: Optional[datetime] = datetime.now()
         self.query_count: int = 0
@@ -51,16 +69,19 @@ class OfflineThreatIntelEngine:
             Dict[str, Any]: A dictionary containing the threat intelligence information.
         """
         print(f"[OfflineThreatIntelEngine] Querying offline DB for {indicator_type}: {indicator}")
-        await asyncio.sleep(0.05) # Simulate fast lookup
+        await asyncio.sleep(0.05)  # Simulate fast lookup
 
         key = f"{indicator_type}:{indicator}"
-        result = self.threat_intel_db.get(key, {
-            "indicator": indicator,
-            "type": indicator_type,
-            "threat_level": "unknown",
-            "description": "No offline intelligence found.",
-            "last_updated": datetime.now().isoformat()
-        })
+        result = self.threat_intel_db.get(
+            key,
+            {
+                "indicator": indicator,
+                "type": indicator_type,
+                "threat_level": "unknown",
+                "description": "No offline intelligence found.",
+                "last_updated": datetime.now().isoformat(),
+            },
+        )
         self.query_count += 1
         return result
 
@@ -71,7 +92,7 @@ class OfflineThreatIntelEngine:
             new_intel (List[Dict[str, Any]]): A list of new threat intelligence entries.
         """
         print(f"[OfflineThreatIntelEngine] Updating offline DB with {len(new_intel)} new entries.")
-        await asyncio.sleep(0.1) # Simulate update time
+        await asyncio.sleep(0.1)  # Simulate update time
         for entry in new_intel:
             key = f"{entry['type']}:{entry['indicator']}"
             self.threat_intel_db[key] = entry
@@ -86,6 +107,6 @@ class OfflineThreatIntelEngine:
         return {
             "status": "active",
             "total_indicators_in_db": len(self.threat_intel_db),
-            "last_db_update": self.last_db_update.isoformat() if self.last_db_update else "N/A",
-            "total_queries": self.query_count
+            "last_db_update": (self.last_db_update.isoformat() if self.last_db_update else "N/A"),
+            "total_queries": self.query_count,
         }

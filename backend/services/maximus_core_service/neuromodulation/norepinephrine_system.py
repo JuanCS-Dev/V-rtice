@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class NorepinephrineState:
     """Current norepinephrine state."""
+
     level: float  # Current NE level (0.0-1.0)
     arousal: float  # Arousal/alertness (0.0-1.0)
     attention_gain: float  # Attention multiplier (0.5-2.0)
@@ -40,7 +41,7 @@ class NorepinephrineSystem:
         self,
         baseline_level: float = 0.4,
         optimal_arousal: float = 0.5,
-        stress_threshold: float = 0.7
+        stress_threshold: float = 0.7,
     ):
         """Initialize norepinephrine system.
 
@@ -146,7 +147,7 @@ class NorepinephrineSystem:
             arousal=self.get_arousal_level(),
             attention_gain=self.get_attention_gain(),
             stress_response=self.is_stressed(),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
     def reset(self):

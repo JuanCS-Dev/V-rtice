@@ -12,15 +12,17 @@ is crucial for providing detailed vulnerability reports to other Maximus AI
 services for risk assessment, patch management, and proactive defense.
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
-import uuid
+from typing import Any, Dict, List
 
-from . import schemas, models, database
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
+import database
+import models
+import schemas
 from database import get_db
 from scanners.nmap_scanner import NmapScanner
 from scanners.web_scanner import WebScanner
@@ -54,7 +56,10 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Vulnerability Scanner Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Vulnerability Scanner Service is operational.",
+    }
 
 
 @app.post("/scans/", response_model=schemas.ScanTask)
@@ -74,7 +79,15 @@ async def create_scan_task(scan_request: schemas.ScanTaskCreate, db: Session = D
     db.refresh(db_scan_task)
 
     # Start scan in background
-    asyncio.create_task(run_scan(db_scan_task.id, db_scan_task.target, db_scan_task.scan_type, db_scan_task.parameters, db))
+    asyncio.create_task(
+        run_scan(
+            db_scan_task.id,
+            db_scan_task.target,
+            db_scan_task.scan_type,
+            db_scan_task.parameters,
+            db,
+        )
+    )
 
     return db_scan_task
 
@@ -130,7 +143,13 @@ async def read_scan_vulnerabilities(scan_id: int, db: Session = Depends(get_db))
     return vulnerabilities
 
 
-async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: Dict[str, Any], db: Session):
+async def run_scan(
+    scan_task_id: int,
+    target: str,
+    scan_type: str,
+    parameters: Dict[str, Any],
+    db: Session,
+):
     """Executes the actual scan using the appropriate scanner and updates the database.
 
     Args:
@@ -142,7 +161,8 @@ async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: D
     """
     print(f"[ScannerService] Running scan {scan_task_id} ({scan_type}) on {target}")
     scan_task = db.query(models.ScanTask).filter(models.ScanTask.id == scan_task_id).first()
-    if not scan_task: return
+    if not scan_task:
+        return
 
     scan_task.status = "running"
     db.add(scan_task)
@@ -169,14 +189,14 @@ async def run_scan(scan_task_id: int, target: str, scan_type: str, parameters: D
                 solution=vuln_data.get("solution"),
                 host=vuln_data.get("host", target),
                 port=vuln_data.get("port"),
-                protocol=vuln_data.get("protocol")
+                protocol=vuln_data.get("protocol"),
             )
             db.add(db_vulnerability)
         db.commit()
 
         scan_task.status = "completed"
         scan_task.end_time = datetime.now()
-        scan_task.raw_results = str(scan_results) # Store raw results as string
+        scan_task.raw_results = str(scan_results)  # Store raw results as string
         db.add(scan_task)
         db.commit()
         db.refresh(scan_task)

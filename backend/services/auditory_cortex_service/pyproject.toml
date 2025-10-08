@@ -1,0 +1,45 @@
+[project]
+name = "auditory_cortex_service"
+version = "1.0.0"
+description = "MAXIMUS Cortex Service - Sensory Processing Module"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.4.0",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.25.0",
+    "numpy>=1.24.0",
+    "scipy>=1.11.0",
+    "prometheus-client>=0.19.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.13.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["S101", "ANN001", "D103"]
+"__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = [".", "tests"]
+python_files = ["test_*.py"]
+addopts = ["--verbose", "--tb=short", "--cov=.", "--cov-report=term-missing"]
+asyncio_mode = "auto"

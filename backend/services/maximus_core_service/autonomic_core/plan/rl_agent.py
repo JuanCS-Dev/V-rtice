@@ -1,9 +1,12 @@
 """SAC RL Agent - Continuous Resource Optimization"""
 
 import logging
+
 import numpy as np
+
 try:
     from stable_baselines3 import SAC
+
     SB3_AVAILABLE = True
 except ImportError:
     SB3_AVAILABLE = False
@@ -33,25 +36,27 @@ class SACAgent:
         if not self.model or not SB3_AVAILABLE:
             # Fallback: conservative allocation
             return {
-                'cpu_percent': 75.0,
-                'memory_percent': 60.0,
-                'gpu_percent': 50.0,
-                'replicas': 3
+                "cpu_percent": 75.0,
+                "memory_percent": 60.0,
+                "gpu_percent": 50.0,
+                "replicas": 3,
             }
 
         action, _ = self.model.predict(state, deterministic=True)
 
-        return self._apply_safety_constraints({
-            'cpu_percent': float(action[0]),
-            'memory_percent': float(action[1]),
-            'gpu_percent': float(action[2]),
-            'replicas': int(action[3])
-        })
+        return self._apply_safety_constraints(
+            {
+                "cpu_percent": float(action[0]),
+                "memory_percent": float(action[1]),
+                "gpu_percent": float(action[2]),
+                "replicas": int(action[3]),
+            }
+        )
 
     def _apply_safety_constraints(self, action: dict) -> dict:
         """Apply hard limits: never <10% CPU, never >90% memory."""
-        action['cpu_percent'] = np.clip(action['cpu_percent'], 10, 100)
-        action['memory_percent'] = np.clip(action['memory_percent'], 10, 90)
-        action['gpu_percent'] = np.clip(action['gpu_percent'], 0, 100)
-        action['replicas'] = np.clip(action['replicas'], 1, 20)
+        action["cpu_percent"] = np.clip(action["cpu_percent"], 10, 100)
+        action["memory_percent"] = np.clip(action["memory_percent"], 10, 90)
+        action["gpu_percent"] = np.clip(action["gpu_percent"], 0, 100)
+        action["replicas"] = np.clip(action["replicas"], 1, 20)
         return action

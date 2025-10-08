@@ -1,9 +1,19 @@
+"""
+Threat Intelligence Commands - PRODUCTION READY
+UI/UX Blueprint v1.2 - Gemini-style refinado
+"""
+
 import typer
 from rich.console import Console
-from rich.table import Table
 from typing_extensions import Annotated
 from ..connectors.threat_intel import ThreatIntelConnector
-from ..utils.output import print_json, spinner_task, print_error, print_table
+from ..utils.output import (
+    print_json,
+    spinner_task,
+    print_error,
+    GeminiStyleTable,
+    PrimordialPanel,
+)
 from ..utils.decorators import with_connector
 from vertice.utils import primoroso
 
@@ -44,11 +54,18 @@ async def lookup(
     if json_output:
         print_json(result)
     else:
-        primoroso.success(f"Threat Lookup Result for {indicator}:")
-        table_data = []
+        # Usa GeminiStyleTable para exibir resultado
+        table = GeminiStyleTable(
+            title=f"Threat Lookup: {indicator}",
+            console=console
+        )
+        table.add_column("Field", width=20)
+        table.add_column("Value", width=60)
+
         for key, value in result.items():
-            table_data.append({"Field": key, "Value": str(value)})
-        print_table(table_data)
+            table.add_row(str(key), str(value))
+
+        table.render()
 
 
 @app.command()
@@ -79,11 +96,18 @@ async def check(
     if json_output:
         print_json(result)
     else:
-        primoroso.success(f"Threat Check Result for {target}:")
-        table_data = []
+        # Usa GeminiStyleTable para exibir resultado
+        table = GeminiStyleTable(
+            title=f"Threat Check: {target}",
+            console=console
+        )
+        table.add_column("Field", width=20)
+        table.add_column("Value", width=60)
+
         for key, value in result.items():
-            table_data.append({"Field": key, "Value": str(value)})
-        print_table(table_data)
+            table.add_row(str(key), str(value))
+
+        table.render()
 
 
 @app.command()
@@ -114,11 +138,18 @@ async def scan(
     if json_output:
         print_json(result)
     else:
-        primoroso.success(f"Threat Scan Result for {file_path}:")
-        table_data = []
+        # Usa GeminiStyleTable para exibir resultado
+        table = GeminiStyleTable(
+            title=f"Threat Scan: {file_path}",
+            console=console
+        )
+        table.add_column("Field", width=20)
+        table.add_column("Value", width=60)
+
         for key, value in result.items():
-            table_data.append({"Field": key, "Value": str(value)})
-        print_table(table_data)
+            table.add_row(str(key), str(value))
+
+        table.render()
 
 
 @app.command()

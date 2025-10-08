@@ -15,18 +15,18 @@ Web Attack Service's capabilities for automated penetration testing, red teaming
 and proactive cybersecurity defense, focusing on web-specific attack surfaces.
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, List
 import logging
-from datetime import datetime
 from contextlib import asynccontextmanager
+from datetime import datetime
 
-from models import *
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from ai_copilot import AICoPilot
 from burp_wrapper import BurpSuiteWrapper
-from zap_wrapper import ZAPWrapper
 from config import get_settings
+from models import *
+from zap_wrapper import ZAPWrapper
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,22 +58,16 @@ async def lifespan(app: FastAPI):
         gemini_api_key=settings.GEMINI_API_KEY,
         anthropic_api_key=settings.ANTHROPIC_API_KEY,
         default_provider=AIProvider.AUTO,
-        prefrontal_cortex_url=settings.PREFRONTAL_CORTEX_URL
+        prefrontal_cortex_url=settings.PREFRONTAL_CORTEX_URL,
     )
 
     # Initialize Burp Suite
     if settings.BURP_API_URL:
-        burp_wrapper = BurpSuiteWrapper(
-            burp_api_url=settings.BURP_API_URL,
-            burp_api_key=settings.BURP_API_KEY
-        )
+        burp_wrapper = BurpSuiteWrapper(burp_api_url=settings.BURP_API_URL, burp_api_key=settings.BURP_API_KEY)
 
     # Initialize ZAP
     if settings.ZAP_API_URL:
-        zap_wrapper = ZAPWrapper(
-            zap_api_url=settings.ZAP_API_URL,
-            zap_api_key=settings.ZAP_API_KEY
-        )
+        zap_wrapper = ZAPWrapper(zap_api_url=settings.ZAP_API_URL, zap_api_key=settings.ZAP_API_KEY)
 
     yield
 
@@ -84,7 +78,7 @@ app = FastAPI(
     title="Web Application Attack Service",
     description="AI-Powered Web Security Testing: Burp Suite + OWASP ZAP + AI Co-Pilot",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -109,7 +103,7 @@ async def health_check():
         "ai_copilot": ai_copilot is not None,
         "burp_suite": burp_wrapper is not None,
         "zap": zap_wrapper is not None,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -175,4 +169,5 @@ async def generate_attack_payloads(request: AICoPilotRequest):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8034)

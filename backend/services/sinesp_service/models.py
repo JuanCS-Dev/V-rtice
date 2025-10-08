@@ -11,14 +11,16 @@ API request and response modeling. This is crucial for maintaining data integrit
 and enabling efficient data exchange within the Sinesp integration ecosystem.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field
 
 
 class SinespQueryType(str, Enum):
     """Enumeration for different types of Sinesp queries."""
+
     PLATE = "plate"
     CHASSIS = "chassis"
 
@@ -30,6 +32,7 @@ class SinespQuery(BaseModel):
         identifier (str): The identifier to query (e.g., vehicle plate, chassis number).
         query_type (SinespQueryType): The type of query.
     """
+
     identifier: str
     query_type: SinespQueryType
 
@@ -48,6 +51,7 @@ class VehicleInfo(BaseModel):
         last_updated (str): ISO formatted timestamp of when the information was last updated.
         additional_info (Optional[Dict[str, Any]]): Any additional information from Sinesp.
     """
+
     plate: str
     model: str
     color: str

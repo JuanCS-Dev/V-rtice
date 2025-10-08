@@ -10,21 +10,26 @@ engines, response engines, machine learning models, and external connectors,
 to provide a comprehensive and automated cybersecurity defense solution.
 """
 
+from typing import Any, Dict, List, Optional
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
+
+from connectors.ip_intelligence_connector import IpIntelligenceConnector
+from connectors.threat_intel_connector import ThreatIntelConnector
 
 # Assuming these modules exist and are correctly structured within ADR
 from engines.detection_engine import DetectionEngine
-from engines.response_engine import ResponseEngine
 from engines.ml_engine import MLEngine
-from connectors.threat_intel_connector import ThreatIntelConnector
-from connectors.ip_intelligence_connector import IpIntelligenceConnector
-from models.schemas import Incident, DetectionResult, ResponseAction, ThreatIntelData, IpIntelligenceData
-from models.enums import IncidentSeverity, DetectionType, ResponseActionType
+from engines.response_engine import ResponseEngine
+from models.enums import ResponseActionType
+from models.schemas import (
+    DetectionResult,
+    IpIntelligenceData,
+    ResponseAction,
+    ThreatIntelData,
+)
 from playbooks.loader import PlaybookLoader
 from utils.logger import setup_logger
 
@@ -49,6 +54,7 @@ class DetectRequest(BaseModel):
         event_data (Dict[str, Any]): The raw event data to be analyzed.
         source (str): The source of the event (e.g., 'siem', 'endpoint').
     """
+
     event_data: Dict[str, Any]
     source: str
 
@@ -61,6 +67,7 @@ class RespondRequest(BaseModel):
         action_type (ResponseActionType): The type of response action to take.
         parameters (Optional[Dict[str, Any]]): Parameters for the response action.
     """
+
     incident_id: str
     action_type: ResponseActionType
     parameters: Optional[Dict[str, Any]] = None
@@ -70,8 +77,11 @@ class RespondRequest(BaseModel):
 async def startup_event():
     """Performs startup tasks for the ADR Core Service."""
     logger.info("🚀 Starting Maximus ADR Core Service...")
-    await playbook_loader.load_playbooks("adr_core_service/playbooks") # Load playbooks from a directory
-    logger.info(f"Loaded {len(playbook_loader.get_all_playbooks())} playbooks.")
+    try:
+        await playbook_loader.load_playbooks("playbooks")  # Load playbooks from a directory
+        logger.info(f"Loaded {len(playbook_loader.get_all_playbooks())} playbooks.")
+    except Exception as e:
+        logger.warning(f"⚠️  Could not load playbooks: {e}. Service will run with limited functionality.")
     logger.info("✅ Maximus ADR Core Service started successfully.")
 
 
@@ -128,11 +138,16 @@ async def respond_to_incident(request: RespondRequest) -> ResponseAction:
     logger.info(f"Received response request for incident {request.incident_id} with action {request.action_type}")
     try:
         # Load relevant playbook
-        playbook = playbook_loader.get_playbook_for_incident(request.incident_id) # Simplified
+        playbook = playbook_loader.get_playbook_for_incident(request.incident_id)  # Simplified
         if not playbook:
-            raise HTTPException(status_code=404, detail=f"No playbook found for incident {request.incident_id}")
+            raise HTTPException(
+                status_code=404,
+                detail=f"No playbook found for incident {request.incident_id}",
+            )
 
-        action_result = await response_engine.execute_action(request.incident_id, request.action_type, request.parameters)
+        action_result = await response_engine.execute_action(
+            request.incident_id, request.action_type, request.parameters
+        )
         return action_result
     except Exception as e:
         logger.error(f"Error during incident response: {e}")

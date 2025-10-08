@@ -5,17 +5,16 @@ including demographic parity, equalized odds, and calibration metrics.
 """
 
 import logging
+from typing import Any
+
 import numpy as np
-from typing import Dict, Any, List, Optional, Tuple
-from collections import defaultdict
 
 from .base import (
-    ProtectedAttribute,
     FairnessMetric,
     FairnessResult,
-    FairnessException,
+    FairnessViolationException,
     InsufficientDataException,
-    FairnessViolationException
+    ProtectedAttribute,
 )
 
 logger = logging.getLogger(__name__)
@@ -28,7 +27,7 @@ class FairnessConstraints:
     across different protected groups in threat detection and security decisions.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize FairnessConstraints.
 
         Args:
@@ -38,27 +37,24 @@ class FairnessConstraints:
 
         # Fairness thresholds (max allowed disparity)
         self.thresholds = {
-            FairnessMetric.DEMOGRAPHIC_PARITY: config.get('demographic_parity_threshold', 0.1),  # 10%
-            FairnessMetric.EQUALIZED_ODDS: config.get('equalized_odds_threshold', 0.1),
-            FairnessMetric.EQUAL_OPPORTUNITY: config.get('equal_opportunity_threshold', 0.1),
-            FairnessMetric.CALIBRATION: config.get('calibration_threshold', 0.1),
-            FairnessMetric.PREDICTIVE_PARITY: config.get('predictive_parity_threshold', 0.1),
-            FairnessMetric.TREATMENT_EQUALITY: config.get('treatment_equality_threshold', 0.2)
+            FairnessMetric.DEMOGRAPHIC_PARITY: config.get("demographic_parity_threshold", 0.1),  # 10%
+            FairnessMetric.EQUALIZED_ODDS: config.get("equalized_odds_threshold", 0.1),
+            FairnessMetric.EQUAL_OPPORTUNITY: config.get("equal_opportunity_threshold", 0.1),
+            FairnessMetric.CALIBRATION: config.get("calibration_threshold", 0.1),
+            FairnessMetric.PREDICTIVE_PARITY: config.get("predictive_parity_threshold", 0.1),
+            FairnessMetric.TREATMENT_EQUALITY: config.get("treatment_equality_threshold", 0.2),
         }
 
         # Minimum sample size per group
-        self.min_sample_size = config.get('min_sample_size', 30)
+        self.min_sample_size = config.get("min_sample_size", 30)
 
         # Enforcement mode
-        self.enforcement_mode = config.get('enforcement_mode', 'warn')  # 'warn' or 'reject'
+        self.enforcement_mode = config.get("enforcement_mode", "warn")  # 'warn' or 'reject'
 
         logger.info(f"FairnessConstraints initialized with enforcement_mode={self.enforcement_mode}")
 
     def evaluate_demographic_parity(
-        self,
-        predictions: np.ndarray,
-        protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        self, predictions: np.ndarray, protected_attribute: np.ndarray, protected_value: Any = 1
     ) -> FairnessResult:
         """Evaluate demographic parity: P(Ŷ=1|A=0) ≈ P(Ŷ=1|A=1).
 
@@ -85,10 +81,7 @@ class FairnessConstraints:
         n1 = np.sum(group_1_mask)
 
         if n0 < self.min_sample_size or n1 < self.min_sample_size:
-            raise InsufficientDataException(
-                self.min_sample_size,
-                min(n0, n1)
-            )
+            raise InsufficientDataException(self.min_sample_size, min(n0, n1))
 
         # Calculate positive prediction rates
         pr_0 = np.mean(binary_predictions[group_0_mask])
@@ -112,15 +105,12 @@ class FairnessConstraints:
             is_fair=is_fair,
             threshold=threshold,
             sample_size_0=int(n0),
-            sample_size_1=int(n1)
+            sample_size_1=int(n1),
         )
 
-        logger.debug(
-            f"Demographic Parity: Group0={pr_0:.3f}, Group1={pr_1:.3f}, "
-            f"Diff={difference:.3f}, Fair={is_fair}"
-        )
+        logger.debug(f"Demographic Parity: Group0={pr_0:.3f}, Group1={pr_1:.3f}, Diff={difference:.3f}, Fair={is_fair}")
 
-        if not is_fair and self.enforcement_mode == 'reject':
+        if not is_fair and self.enforcement_mode == "reject":
             raise FairnessViolationException(FairnessMetric.DEMOGRAPHIC_PARITY, result)
 
         return result
@@ -130,7 +120,7 @@ class FairnessConstraints:
         predictions: np.ndarray,
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        protected_value: Any = 1,
     ) -> FairnessResult:
         """Evaluate equalized odds: TPR and FPR equal across groups.
 
@@ -171,8 +161,11 @@ class FairnessConstraints:
 
         # Combined metric: max of TPR and FPR differences
         max_difference = max(tpr_diff, fpr_diff)
-        avg_ratio = (min(tpr_0, tpr_1) / max(tpr_0, tpr_1) + min(fpr_0, fpr_1) / max(fpr_0, fpr_1)) / 2 \
-                    if max(tpr_0, tpr_1) > 0 and max(fpr_0, fpr_1) > 0 else 1.0
+        avg_ratio = (
+            (min(tpr_0, tpr_1) / max(tpr_0, tpr_1) + min(fpr_0, fpr_1) / max(fpr_0, fpr_1)) / 2
+            if max(tpr_0, tpr_1) > 0 and max(fpr_0, fpr_1) > 0
+            else 1.0
+        )
 
         threshold = self.thresholds[FairnessMetric.EQUALIZED_ODDS]
         is_fair = max_difference <= threshold
@@ -189,13 +182,13 @@ class FairnessConstraints:
             sample_size_0=int(n0),
             sample_size_1=int(n1),
             metadata={
-                'tpr_0': tpr_0,
-                'tpr_1': tpr_1,
-                'fpr_0': fpr_0,
-                'fpr_1': fpr_1,
-                'tpr_diff': tpr_diff,
-                'fpr_diff': fpr_diff
-            }
+                "tpr_0": tpr_0,
+                "tpr_1": tpr_1,
+                "fpr_0": fpr_0,
+                "fpr_1": fpr_1,
+                "tpr_diff": tpr_diff,
+                "fpr_diff": fpr_diff,
+            },
         )
 
         logger.debug(
@@ -203,7 +196,7 @@ class FairnessConstraints:
             f"Max_diff={max_difference:.3f}, Fair={is_fair}"
         )
 
-        if not is_fair and self.enforcement_mode == 'reject':
+        if not is_fair and self.enforcement_mode == "reject":
             raise FairnessViolationException(FairnessMetric.EQUALIZED_ODDS, result)
 
         return result
@@ -213,7 +206,7 @@ class FairnessConstraints:
         predictions: np.ndarray,
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        protected_value: Any = 1,
     ) -> FairnessResult:
         """Evaluate equal opportunity: TPR equal across groups.
 
@@ -258,15 +251,12 @@ class FairnessConstraints:
             is_fair=is_fair,
             threshold=threshold,
             sample_size_0=int(n0),
-            sample_size_1=int(n1)
+            sample_size_1=int(n1),
         )
 
-        logger.debug(
-            f"Equal Opportunity: TPR0={tpr_0:.3f}, TPR1={tpr_1:.3f}, "
-            f"Diff={difference:.3f}, Fair={is_fair}"
-        )
+        logger.debug(f"Equal Opportunity: TPR0={tpr_0:.3f}, TPR1={tpr_1:.3f}, Diff={difference:.3f}, Fair={is_fair}")
 
-        if not is_fair and self.enforcement_mode == 'reject':
+        if not is_fair and self.enforcement_mode == "reject":
             raise FairnessViolationException(FairnessMetric.EQUAL_OPPORTUNITY, result)
 
         return result
@@ -277,7 +267,7 @@ class FairnessConstraints:
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
         protected_value: Any = 1,
-        num_bins: int = 10
+        num_bins: int = 10,
     ) -> FairnessResult:
         """Evaluate calibration: P(Y=1|Ŷ=p,A=0) ≈ P(Y=1|Ŷ=p,A=1).
 
@@ -301,22 +291,15 @@ class FairnessConstraints:
             raise InsufficientDataException(self.min_sample_size, min(n0, n1))
 
         # Calculate calibration error for each group
-        cal_error_0 = self._calculate_calibration_error(
-            predictions[group_0_mask],
-            true_labels[group_0_mask],
-            num_bins
-        )
+        cal_error_0 = self._calculate_calibration_error(predictions[group_0_mask], true_labels[group_0_mask], num_bins)
 
-        cal_error_1 = self._calculate_calibration_error(
-            predictions[group_1_mask],
-            true_labels[group_1_mask],
-            num_bins
-        )
+        cal_error_1 = self._calculate_calibration_error(predictions[group_1_mask], true_labels[group_1_mask], num_bins)
 
         # Difference in calibration errors
         difference = abs(cal_error_0 - cal_error_1)
-        ratio = min(cal_error_0, cal_error_1) / max(cal_error_0, cal_error_1) \
-                if max(cal_error_0, cal_error_1) > 0 else 1.0
+        ratio = (
+            min(cal_error_0, cal_error_1) / max(cal_error_0, cal_error_1) if max(cal_error_0, cal_error_1) > 0 else 1.0
+        )
 
         threshold = self.thresholds[FairnessMetric.CALIBRATION]
         is_fair = difference <= threshold
@@ -331,15 +314,14 @@ class FairnessConstraints:
             is_fair=is_fair,
             threshold=threshold,
             sample_size_0=int(n0),
-            sample_size_1=int(n1)
+            sample_size_1=int(n1),
         )
 
         logger.debug(
-            f"Calibration: Error0={cal_error_0:.3f}, Error1={cal_error_1:.3f}, "
-            f"Diff={difference:.3f}, Fair={is_fair}"
+            f"Calibration: Error0={cal_error_0:.3f}, Error1={cal_error_1:.3f}, Diff={difference:.3f}, Fair={is_fair}"
         )
 
-        if not is_fair and self.enforcement_mode == 'reject':
+        if not is_fair and self.enforcement_mode == "reject":
             raise FairnessViolationException(FairnessMetric.CALIBRATION, result)
 
         return result
@@ -347,10 +329,10 @@ class FairnessConstraints:
     def evaluate_all_metrics(
         self,
         predictions: np.ndarray,
-        true_labels: Optional[np.ndarray],
+        true_labels: np.ndarray | None,
         protected_attribute: np.ndarray,
-        protected_value: Any = 1
-    ) -> Dict[FairnessMetric, FairnessResult]:
+        protected_value: Any = 1,
+    ) -> dict[FairnessMetric, FairnessResult]:
         """Evaluate all applicable fairness metrics.
 
         Args:
@@ -431,12 +413,7 @@ class FairnessConstraints:
         false_positives = np.sum((predictions == 1) & (true_labels == 0))
         return false_positives / np.sum(negatives)
 
-    def _calculate_calibration_error(
-        self,
-        predictions: np.ndarray,
-        true_labels: np.ndarray,
-        num_bins: int
-    ) -> float:
+    def _calculate_calibration_error(self, predictions: np.ndarray, true_labels: np.ndarray, num_bins: int) -> float:
         """Calculate Expected Calibration Error (ECE).
 
         Args:

@@ -1,0 +1,8 @@
+# --- Base da API ---
+fastapi
+uvicorn[standard]
+
+# --- Ferramentas de Machine Learning & Data Science ---
+scikit-learn
+pandas
+numpy

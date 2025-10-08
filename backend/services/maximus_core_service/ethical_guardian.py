@@ -14,18 +14,37 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
 # Phase 0: Governance
+# Phase 6: Compliance
+from compliance import ComplianceConfig, ComplianceEngine, RegulationType
+
+# Phase 1: Ethics
+from ethics import ActionContext, EthicalIntegrationEngine, EthicalVerdict
+
+# Phase 3: Fairness & Bias Mitigation
+from fairness import (
+    BiasDetector,
+    FairnessMonitor,
+    ProtectedAttribute,
+)
+
+# Phase 4.2: Federated Learning
+from federated_learning import (
+    AggregationStrategy,
+    FLConfig,
+    FLStatus,
+    ModelType,
+)
 from governance import (
     AuditLogger,
     GovernanceAction,
@@ -34,52 +53,25 @@ from governance import (
     PolicyType,
 )
 
-# Phase 1: Ethics
-from ethics import ActionContext, EthicalIntegrationEngine, EthicalVerdict
-
-# Phase 2: XAI
-from xai import DetailLevel, ExplanationEngine, ExplanationType
+# Phase 5: HITL (Human-in-the-Loop)
+from hitl import (
+    ActionType,
+    AutomationLevel,
+    DecisionContext,
+    HITLDecisionFramework,
+    RiskAssessor,
+    RiskLevel,
+)
 
 # Phase 4.1: Differential Privacy
 from privacy import (
+    CompositionType,
     PrivacyAccountant,
     PrivacyBudget,
-    PrivacyLevel,
-    DPAggregator,
-    CompositionType,
 )
 
-# Phase 3: Fairness & Bias Mitigation
-from fairness import (
-    BiasDetector,
-    FairnessMonitor,
-    ProtectedAttribute,
-    FairnessMetric,
-    BiasDetectionResult,
-)
-
-# Phase 4.2: Federated Learning
-from federated_learning import (
-    FLConfig,
-    FLStatus,
-    AggregationStrategy,
-    ModelType,
-)
-
-# Phase 5: HITL (Human-in-the-Loop)
-from hitl import (
-    HITLDecisionFramework,
-    RiskAssessor,
-    AutomationLevel,
-    RiskLevel,
-    DecisionStatus,
-    ActionType,
-    DecisionContext,
-    HITLConfig,
-)
-
-# Phase 6: Compliance
-from compliance import ComplianceEngine, ComplianceConfig, RegulationType
+# Phase 2: XAI
+from xai import DetailLevel, ExplanationEngine, ExplanationType
 
 
 class EthicalDecisionType(str, Enum):
@@ -101,9 +93,9 @@ class GovernanceCheckResult:
     """Resultado do check de governance."""
 
     is_compliant: bool
-    policies_checked: List[PolicyType]
-    violations: List[Dict[str, Any]] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    policies_checked: list[PolicyType]
+    violations: list[dict[str, Any]] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     duration_ms: float = 0.0
 
 
@@ -113,7 +105,7 @@ class EthicsCheckResult:
 
     verdict: EthicalVerdict
     confidence: float
-    framework_results: List[Dict[str, Any]] = field(default_factory=list)
+    framework_results: list[dict[str, Any]] = field(default_factory=list)
     duration_ms: float = 0.0
 
 
@@ -123,7 +115,7 @@ class XAICheckResult:
 
     explanation_type: str
     summary: str
-    feature_importances: List[Dict[str, Any]] = field(default_factory=list)
+    feature_importances: list[dict[str, Any]] = field(default_factory=list)
     duration_ms: float = 0.0
 
 
@@ -131,8 +123,8 @@ class XAICheckResult:
 class ComplianceCheckResult:
     """Resultado do check de compliance."""
 
-    regulations_checked: List[RegulationType]
-    compliance_results: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    regulations_checked: list[RegulationType]
+    compliance_results: dict[str, dict[str, Any]] = field(default_factory=dict)
     overall_compliant: bool = True
     duration_ms: float = 0.0
 
@@ -143,10 +135,10 @@ class FairnessCheckResult:
 
     fairness_ok: bool
     bias_detected: bool
-    protected_attributes_checked: List[str]  # ProtectedAttribute.value
-    fairness_metrics: Dict[str, float]  # metric_name -> score
+    protected_attributes_checked: list[str]  # ProtectedAttribute.value
+    fairness_metrics: dict[str, float]  # metric_name -> score
     bias_severity: str  # low, medium, high, critical
-    affected_groups: List[str] = field(default_factory=list)
+    affected_groups: list[str] = field(default_factory=list)
     mitigation_recommended: bool = False
     confidence: float = 0.0
     duration_ms: float = 0.0
@@ -175,12 +167,12 @@ class FLCheckResult:
 
     fl_ready: bool
     fl_status: str  # FLStatus.value
-    model_type: Optional[str] = None  # ModelType.value
-    aggregation_strategy: Optional[str] = None  # AggregationStrategy.value
+    model_type: str | None = None  # ModelType.value
+    aggregation_strategy: str | None = None  # AggregationStrategy.value
     requires_dp: bool = False
-    dp_epsilon: Optional[float] = None
-    dp_delta: Optional[float] = None
-    notes: List[str] = field(default_factory=list)
+    dp_epsilon: float | None = None
+    dp_delta: float | None = None
+    notes: list[str] = field(default_factory=list)
     duration_ms: float = 0.0
 
 
@@ -194,7 +186,7 @@ class HITLCheckResult:
     confidence_threshold_met: bool
     estimated_sla_minutes: int = 0
     escalation_recommended: bool = False
-    human_expertise_required: List[str] = field(default_factory=list)  # Required skills
+    human_expertise_required: list[str] = field(default_factory=list)  # Required skills
     decision_rationale: str = ""
     duration_ms: float = 0.0
 
@@ -210,27 +202,27 @@ class EthicalDecisionResult:
     timestamp: datetime = field(default_factory=datetime.utcnow)
 
     # Results from each phase
-    governance: Optional[GovernanceCheckResult] = None
-    ethics: Optional[EthicsCheckResult] = None
-    fairness: Optional[FairnessCheckResult] = None  # Phase 3
-    xai: Optional[XAICheckResult] = None
-    privacy: Optional[PrivacyCheckResult] = None  # Phase 4.1
-    fl: Optional[FLCheckResult] = None  # Phase 4.2
-    hitl: Optional[HITLCheckResult] = None  # Phase 5
-    compliance: Optional[ComplianceCheckResult] = None
+    governance: GovernanceCheckResult | None = None
+    ethics: EthicsCheckResult | None = None
+    fairness: FairnessCheckResult | None = None  # Phase 3
+    xai: XAICheckResult | None = None
+    privacy: PrivacyCheckResult | None = None  # Phase 4.1
+    fl: FLCheckResult | None = None  # Phase 4.2
+    hitl: HITLCheckResult | None = None  # Phase 5
+    compliance: ComplianceCheckResult | None = None
 
     # Summary
     is_approved: bool = False
-    conditions: List[str] = field(default_factory=list)
-    rejection_reasons: List[str] = field(default_factory=list)
+    conditions: list[str] = field(default_factory=list)
+    rejection_reasons: list[str] = field(default_factory=list)
 
     # Performance
     total_duration_ms: float = 0.0
 
     # Audit
-    audit_log_id: Optional[str] = None
+    audit_log_id: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "decision_id": self.decision_id,
@@ -247,20 +239,28 @@ class EthicalDecisionResult:
                 "is_compliant": self.governance.is_compliant if self.governance else False,
                 "policies_checked": [p.value for p in self.governance.policies_checked] if self.governance else [],
                 "violations_count": len(self.governance.violations) if self.governance else 0,
-            } if self.governance else None,
+            }
+            if self.governance
+            else None,
             "ethics": {
                 "verdict": self.ethics.verdict.value if self.ethics else "unknown",
                 "confidence": self.ethics.confidence if self.ethics else 0.0,
                 "frameworks_count": len(self.ethics.framework_results) if self.ethics else 0,
-            } if self.ethics else None,
+            }
+            if self.ethics
+            else None,
             "xai": {
                 "summary": self.xai.summary if self.xai else "",
                 "features_count": len(self.xai.feature_importances) if self.xai else 0,
-            } if self.xai else None,
+            }
+            if self.xai
+            else None,
             "compliance": {
                 "overall_compliant": self.compliance.overall_compliant if self.compliance else False,
                 "regulations_checked": len(self.compliance.regulations_checked) if self.compliance else 0,
-            } if self.compliance else None,
+            }
+            if self.compliance
+            else None,
         }
 
 
@@ -282,8 +282,8 @@ class EthicalGuardian:
 
     def __init__(
         self,
-        governance_config: Optional[GovernanceConfig] = None,
-        privacy_budget: Optional[PrivacyBudget] = None,
+        governance_config: GovernanceConfig | None = None,
+        privacy_budget: PrivacyBudget | None = None,
         enable_governance: bool = True,
         enable_ethics: bool = True,
         enable_fairness: bool = True,  # Phase 3
@@ -415,9 +415,7 @@ class EthicalGuardian:
             self.risk_assessor = RiskAssessor()
             # Note: HITLConfig and SLAConfig will use defaults
             # These can be customized in production with DB-backed config
-            self.hitl_framework = HITLDecisionFramework(
-                risk_assessor=self.risk_assessor
-            )
+            self.hitl_framework = HITLDecisionFramework(risk_assessor=self.risk_assessor)
         else:
             self.risk_assessor = None
             self.hitl_framework = None
@@ -447,9 +445,9 @@ class EthicalGuardian:
     async def validate_action(
         self,
         action: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         actor: str = "maximus",
-        tool_name: Optional[str] = None,
+        tool_name: str | None = None,
     ) -> EthicalDecisionResult:
         """
         Valida uma ação através do stack ético completo.
@@ -489,8 +487,7 @@ class EthicalGuardian:
                     result.decision_type = EthicalDecisionType.REJECTED_BY_GOVERNANCE
                     result.is_approved = False
                     result.rejection_reasons = [
-                        f"Policy violation: {v.get('title', 'Unknown')}"
-                        for v in governance_result.violations
+                        f"Policy violation: {v.get('title', 'Unknown')}" for v in governance_result.violations
                     ]
                     result.total_duration_ms = (time.time() - start_time) * 1000
                     await self._log_decision(result)
@@ -513,9 +510,7 @@ class EthicalGuardian:
                 if ethics_result.verdict == EthicalVerdict.REJECTED:
                     result.decision_type = EthicalDecisionType.REJECTED_BY_ETHICS
                     result.is_approved = False
-                    result.rejection_reasons.append(
-                        f"Ethical verdict: {ethics_result.verdict.value}"
-                    )
+                    result.rejection_reasons.append(f"Ethical verdict: {ethics_result.verdict.value}")
                     result.total_duration_ms = (time.time() - start_time) * 1000
                     await self._log_decision(result)
                     return result
@@ -528,10 +523,8 @@ class EthicalGuardian:
             # Phase 2: XAI
             if self.enable_xai and result.ethics:
                 try:
-                    result.xai = await self._generate_explanation(
-                        action, context, result.ethics
-                    )
-                except Exception as e:
+                    result.xai = await self._generate_explanation(action, context, result.ethics)
+                except Exception:
                     # XAI failure is not critical - log and continue
                     result.xai = None
 
@@ -561,8 +554,7 @@ class EthicalGuardian:
                     result.privacy = await self._privacy_check(action, context)
                     # Reject if privacy budget exhausted and action processes PII
                     if not result.privacy.privacy_budget_ok and (
-                        context.get("processes_personal_data")
-                        or context.get("has_pii")
+                        context.get("processes_personal_data") or context.get("has_pii")
                     ):
                         result.decision_type = EthicalDecisionType.REJECTED_BY_PRIVACY
                         result.is_approved = False
@@ -572,7 +564,7 @@ class EthicalGuardian:
                         result.total_duration_ms = (time.time() - start_time) * 1000
                         await self._log_decision(result)
                         return result
-                except Exception as e:
+                except Exception:
                     # Privacy check failure is not critical if not processing PII
                     result.privacy = None
 
@@ -580,7 +572,7 @@ class EthicalGuardian:
             if self.enable_fl:
                 try:
                     result.fl = await self._fl_check(action, context)
-                except Exception as e:
+                except Exception:
                     # FL check failure is not critical
                     result.fl = None
 
@@ -619,7 +611,7 @@ class EthicalGuardian:
             if self.enable_compliance:
                 try:
                     result.compliance = await self._compliance_check(action, context)
-                except Exception as e:
+                except Exception:
                     # Compliance check failure is not critical - log and continue
                     result.compliance = None
 
@@ -646,15 +638,10 @@ class EthicalGuardian:
                         f"Approved for execution with SUPERVISED monitoring "
                         f"({result.hitl.risk_level} risk, {result.hitl.estimated_sla_minutes}min review window)"
                     )
-            elif (
-                result.ethics
-                and result.ethics.verdict == EthicalVerdict.CONDITIONAL
-            ):
+            elif result.ethics and result.ethics.verdict == EthicalVerdict.CONDITIONAL:
                 result.decision_type = EthicalDecisionType.APPROVED_WITH_CONDITIONS
                 result.is_approved = True
-                result.conditions.append(
-                    "Action approved with ethical framework conditions"
-                )
+                result.conditions.append("Action approved with ethical framework conditions")
                 # Add SUPERVISED monitoring condition if applicable
                 if result.hitl and result.hitl.automation_level == "supervised":
                     result.conditions.append(
@@ -680,8 +667,7 @@ class EthicalGuardian:
         # Final timing
         result.total_duration_ms = (time.time() - start_time) * 1000
         self.avg_duration_ms = (
-            self.avg_duration_ms * (self.total_validations - 1)
-            + result.total_duration_ms
+            self.avg_duration_ms * (self.total_validations - 1) + result.total_duration_ms
         ) / self.total_validations
 
         # Log decision
@@ -689,9 +675,7 @@ class EthicalGuardian:
 
         return result
 
-    async def _governance_check(
-        self, action: str, context: Dict[str, Any], actor: str
-    ) -> GovernanceCheckResult:
+    async def _governance_check(self, action: str, context: dict[str, Any], actor: str) -> GovernanceCheckResult:
         """
         Phase 0: Check governance policies.
 
@@ -753,9 +737,7 @@ class EthicalGuardian:
             duration_ms=duration_ms,
         )
 
-    async def _ethics_evaluation(
-        self, action: str, context: Dict[str, Any], actor: str
-    ) -> EthicsCheckResult:
+    async def _ethics_evaluation(self, action: str, context: dict[str, Any], actor: str) -> EthicsCheckResult:
         """
         Phase 1: Evaluate with 4 ethical frameworks.
 
@@ -783,9 +765,7 @@ class EthicalGuardian:
             "CONDITIONAL": EthicalVerdict.CONDITIONAL,
             "ESCALATED_HITL": EthicalVerdict.CONDITIONAL,  # Treat HITL as conditional
         }
-        verdict = verdict_map.get(
-            ethical_decision.final_decision, EthicalVerdict.REJECTED
-        )
+        verdict = verdict_map.get(ethical_decision.final_decision, EthicalVerdict.REJECTED)
 
         # Extract framework results (dict -> list)
         framework_results = [
@@ -807,7 +787,7 @@ class EthicalGuardian:
         )
 
     async def _generate_explanation(
-        self, action: str, context: Dict[str, Any], ethics_result: EthicsCheckResult
+        self, action: str, context: dict[str, Any], ethics_result: EthicsCheckResult
     ) -> XAICheckResult:
         """
         Phase 2: Generate XAI explanation.
@@ -850,9 +830,7 @@ class EthicalGuardian:
             duration_ms=duration_ms,
         )
 
-    async def _compliance_check(
-        self, action: str, context: Dict[str, Any]
-    ) -> ComplianceCheckResult:
+    async def _compliance_check(self, action: str, context: dict[str, Any]) -> ComplianceCheckResult:
         """
         Phase 6: Check compliance with regulations.
 
@@ -870,9 +848,7 @@ class EthicalGuardian:
 
         for regulation in regulations_to_check:
             try:
-                result = self.compliance_engine.check_compliance(
-                    regulation=regulation, scope=action
-                )
+                result = self.compliance_engine.check_compliance(regulation=regulation, scope=action)
 
                 compliance_results[regulation.value] = {
                     "is_compliant": result.is_compliant,
@@ -903,7 +879,7 @@ class EthicalGuardian:
     async def _hitl_check(
         self,
         action: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         confidence_score: float = 0.0,
     ) -> HITLCheckResult:
         """
@@ -1027,9 +1003,7 @@ class EthicalGuardian:
             duration_ms=duration_ms,
         )
 
-    async def _fairness_check(
-        self, action: str, context: Dict[str, Any]
-    ) -> FairnessCheckResult:
+    async def _fairness_check(self, action: str, context: dict[str, Any]) -> FairnessCheckResult:
         """
         Phase 3: Check fairness and bias across protected attributes.
 
@@ -1042,8 +1016,7 @@ class EthicalGuardian:
 
         # Check if action involves ML predictions or decisions
         involves_ml = any(
-            keyword in action.lower()
-            for keyword in ["predict", "classify", "detect", "score", "model", "decision"]
+            keyword in action.lower() for keyword in ["predict", "classify", "detect", "score", "model", "decision"]
         )
 
         if not involves_ml:
@@ -1102,7 +1075,9 @@ class EthicalGuardian:
 
                 if result.bias_detected:
                     bias_detected = True
-                    bias_severity = max(bias_severity, result.severity, key=lambda x: ["low", "medium", "high", "critical"].index(x))
+                    bias_severity = max(
+                        bias_severity, result.severity, key=lambda x: ["low", "medium", "high", "critical"].index(x)
+                    )
                     affected_groups.extend(result.affected_groups)
 
                 # Store fairness metrics
@@ -1143,9 +1118,7 @@ class EthicalGuardian:
             duration_ms=duration_ms,
         )
 
-    async def _privacy_check(
-        self, action: str, context: Dict[str, Any]
-    ) -> PrivacyCheckResult:
+    async def _privacy_check(self, action: str, context: dict[str, Any]) -> PrivacyCheckResult:
         """
         Phase 4.1: Check differential privacy budget and constraints.
 
@@ -1160,9 +1133,7 @@ class EthicalGuardian:
         budget_ok = not budget.budget_exhausted
 
         # Check if action processes personal data
-        processes_pii = context.get("processes_personal_data", False) or context.get(
-            "has_pii", False
-        )
+        processes_pii = context.get("processes_personal_data", False) or context.get("has_pii", False)
 
         # If action processes PII, check budget
         if processes_pii and budget.budget_exhausted:
@@ -1184,9 +1155,7 @@ class EthicalGuardian:
             duration_ms=duration_ms,
         )
 
-    async def _fl_check(
-        self, action: str, context: Dict[str, Any]
-    ) -> FLCheckResult:
+    async def _fl_check(self, action: str, context: dict[str, Any]) -> FLCheckResult:
         """
         Phase 4.2: Check federated learning readiness and constraints.
 
@@ -1198,8 +1167,7 @@ class EthicalGuardian:
 
         # Check if action involves model training/aggregation
         is_model_training = any(
-            keyword in action.lower()
-            for keyword in ["train", "model", "learn", "aggregate", "federated"]
+            keyword in action.lower() for keyword in ["train", "model", "learn", "aggregate", "federated"]
         )
 
         # FL is ready if config exists and action involves training
@@ -1209,9 +1177,7 @@ class EthicalGuardian:
         if fl_ready:
             fl_status = FLStatus.INITIALIZING.value
             model_type = self.fl_config.model_type.value if self.fl_config else None
-            aggregation_strategy = (
-                self.fl_config.aggregation_strategy.value if self.fl_config else None
-            )
+            aggregation_strategy = self.fl_config.aggregation_strategy.value if self.fl_config else None
             requires_dp = self.fl_config.use_differential_privacy if self.fl_config else False
             dp_epsilon = self.fl_config.dp_epsilon if self.fl_config else None
             dp_delta = self.fl_config.dp_delta if self.fl_config else None
@@ -1223,11 +1189,7 @@ class EthicalGuardian:
             requires_dp = False
             dp_epsilon = None
             dp_delta = None
-            notes = (
-                ["FL not configured"]
-                if is_model_training
-                else ["Action does not require FL"]
-            )
+            notes = ["FL not configured"] if is_model_training else ["Action does not require FL"]
 
         duration_ms = (time.time() - start_time) * 1000
 
@@ -1243,7 +1205,7 @@ class EthicalGuardian:
             duration_ms=duration_ms,
         )
 
-    async def _log_decision(self, decision: EthicalDecisionResult) -> Optional[str]:
+    async def _log_decision(self, decision: EthicalDecisionResult) -> str | None:
         """Log decision to audit trail."""
         if not self.audit_logger:
             return None
@@ -1262,17 +1224,13 @@ class EthicalGuardian:
         except Exception:
             return None
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get validation statistics."""
         return {
             "total_validations": self.total_validations,
             "total_approved": self.total_approved,
             "total_rejected": self.total_rejected,
-            "approval_rate": (
-                self.total_approved / self.total_validations
-                if self.total_validations > 0
-                else 0.0
-            ),
+            "approval_rate": (self.total_approved / self.total_validations if self.total_validations > 0 else 0.0),
             "avg_duration_ms": self.avg_duration_ms,
             "enabled_phases": {
                 "governance": self.enable_governance,

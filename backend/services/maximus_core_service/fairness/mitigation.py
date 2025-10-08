@@ -11,18 +11,13 @@ Mitigation Strategies:
 """
 
 import logging
-import numpy as np
-from typing import Dict, Any, List, Optional, Tuple, Callable
-from collections import defaultdict
-from sklearn.linear_model import LogisticRegression
-from datetime import datetime
+from collections.abc import Callable
+from typing import Any
 
-from .base import (
-    ProtectedAttribute,
-    FairnessMetric,
-    MitigationResult,
-    FairnessException
-)
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+
+from .base import FairnessException, FairnessMetric, MitigationResult, ProtectedAttribute
 from .constraints import FairnessConstraints
 
 logger = logging.getLogger(__name__)
@@ -40,7 +35,7 @@ class MitigationEngine:
         fairness_improvement_threshold: Minimum fairness improvement required
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize MitigationEngine.
 
         Args:
@@ -49,21 +44,19 @@ class MitigationEngine:
         config = config or {}
 
         # Initialize fairness constraints evaluator
-        self.fairness_constraints = FairnessConstraints(config.get('fairness_config', {}))
+        self.fairness_constraints = FairnessConstraints(config.get("fairness_config", {}))
 
         # Performance constraints
-        self.performance_threshold = config.get('performance_threshold', 0.75)  # Min 75% accuracy
-        self.max_performance_loss = config.get('max_performance_loss', 0.05)  # Max 5% loss
+        self.performance_threshold = config.get("performance_threshold", 0.75)  # Min 75% accuracy
+        self.max_performance_loss = config.get("max_performance_loss", 0.05)  # Max 5% loss
 
         # Fairness improvement threshold
-        self.fairness_improvement_threshold = config.get('fairness_improvement_threshold', 0.05)
+        self.fairness_improvement_threshold = config.get("fairness_improvement_threshold", 0.05)
 
         # Mitigation strategies to try (in order)
-        self.mitigation_strategies = config.get('mitigation_strategies', [
-            'threshold_optimization',
-            'reweighing',
-            'calibration_adjustment'
-        ])
+        self.mitigation_strategies = config.get(
+            "mitigation_strategies", ["threshold_optimization", "reweighing", "calibration_adjustment"]
+        )
 
         logger.info(
             f"MitigationEngine initialized with {len(self.mitigation_strategies)} strategies, "
@@ -76,7 +69,7 @@ class MitigationEngine:
         y_train: np.ndarray,
         protected_attribute: np.ndarray,
         protected_value: Any = 1,
-        model: Optional[Any] = None
+        model: Any | None = None,
     ) -> MitigationResult:
         """Mitigate bias using reweighing strategy (pre-processing).
 
@@ -96,21 +89,12 @@ class MitigationEngine:
         logger.info("Starting reweighing mitigation...")
 
         # Calculate sample weights
-        weights = self._calculate_reweighing_weights(
-            y_train,
-            protected_attribute,
-            protected_value
-        )
+        weights = self._calculate_reweighing_weights(y_train, protected_attribute, protected_value)
 
         # Evaluate fairness before mitigation
         if model is not None:
             predictions_before = self._get_predictions(model, X_train)
-            fairness_before = self._evaluate_fairness(
-                predictions_before,
-                y_train,
-                protected_attribute,
-                protected_value
-            )
+            fairness_before = self._evaluate_fairness(predictions_before, y_train, protected_attribute, protected_value)
             performance_before = self._evaluate_performance(predictions_before, y_train)
         else:
             fairness_before = {}
@@ -120,12 +104,7 @@ class MitigationEngine:
         if model is not None:
             model_after = self._retrain_with_weights(model, X_train, y_train, weights)
             predictions_after = self._get_predictions(model_after, X_train)
-            fairness_after = self._evaluate_fairness(
-                predictions_after,
-                y_train,
-                protected_attribute,
-                protected_value
-            )
+            fairness_after = self._evaluate_fairness(predictions_after, y_train, protected_attribute, protected_value)
             performance_after = self._evaluate_performance(predictions_after, y_train)
         else:
             fairness_after = fairness_before
@@ -133,34 +112,30 @@ class MitigationEngine:
 
         # Calculate performance impact
         performance_impact = {
-            key: performance_after.get(key, 0) - performance_before.get(key, 0)
-            for key in performance_before.keys()
+            key: performance_after.get(key, 0) - performance_before.get(key, 0) for key in performance_before.keys()
         }
 
         # Check success criteria
         fairness_improved = self._check_fairness_improvement(fairness_before, fairness_after)
-        performance_acceptable = self._check_performance_acceptable(
-            performance_before,
-            performance_after
-        )
+        performance_acceptable = self._check_performance_acceptable(performance_before, performance_after)
 
         success = fairness_improved and performance_acceptable
 
         result = MitigationResult(
-            mitigation_method='reweighing',
+            mitigation_method="reweighing",
             protected_attribute=ProtectedAttribute.GEOGRAPHIC_LOCATION,
             fairness_before=fairness_before,
             fairness_after=fairness_after,
             performance_impact=performance_impact,
             success=success,
             metadata={
-                'weights_min': float(np.min(weights)),
-                'weights_max': float(np.max(weights)),
-                'weights_mean': float(np.mean(weights)),
-                'weights_std': float(np.std(weights)),
-                'performance_before': performance_before,
-                'performance_after': performance_after
-            }
+                "weights_min": float(np.min(weights)),
+                "weights_max": float(np.max(weights)),
+                "weights_mean": float(np.mean(weights)),
+                "weights_std": float(np.std(weights)),
+                "performance_before": performance_before,
+                "performance_after": performance_after,
+            },
         )
 
         logger.info(
@@ -177,7 +152,7 @@ class MitigationEngine:
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
         protected_value: Any = 1,
-        metric: FairnessMetric = FairnessMetric.EQUALIZED_ODDS
+        metric: FairnessMetric = FairnessMetric.EQUALIZED_ODDS,
     ) -> MitigationResult:
         """Mitigate bias using threshold optimization (post-processing).
 
@@ -199,20 +174,13 @@ class MitigationEngine:
         # Evaluate fairness before (using 0.5 threshold)
         binary_preds_before = (predictions > 0.5).astype(int)
         fairness_before = self._evaluate_fairness(
-            binary_preds_before,
-            true_labels,
-            protected_attribute,
-            protected_value
+            binary_preds_before, true_labels, protected_attribute, protected_value
         )
         performance_before = self._evaluate_performance(binary_preds_before, true_labels)
 
         # Find optimal thresholds
         threshold_0, threshold_1 = self._find_optimal_thresholds(
-            predictions,
-            true_labels,
-            protected_attribute,
-            protected_value,
-            metric
+            predictions, true_labels, protected_attribute, protected_value, metric
         )
 
         # Apply optimized thresholds
@@ -224,48 +192,38 @@ class MitigationEngine:
         binary_preds_after[group_1_mask] = (predictions[group_1_mask] > threshold_1).astype(int)
 
         # Evaluate fairness after
-        fairness_after = self._evaluate_fairness(
-            binary_preds_after,
-            true_labels,
-            protected_attribute,
-            protected_value
-        )
+        fairness_after = self._evaluate_fairness(binary_preds_after, true_labels, protected_attribute, protected_value)
         performance_after = self._evaluate_performance(binary_preds_after, true_labels)
 
         # Calculate performance impact
         performance_impact = {
-            key: performance_after.get(key, 0) - performance_before.get(key, 0)
-            for key in performance_before.keys()
+            key: performance_after.get(key, 0) - performance_before.get(key, 0) for key in performance_before.keys()
         }
 
         # Check success
         fairness_improved = self._check_fairness_improvement(fairness_before, fairness_after)
-        performance_acceptable = self._check_performance_acceptable(
-            performance_before,
-            performance_after
-        )
+        performance_acceptable = self._check_performance_acceptable(performance_before, performance_after)
 
         success = fairness_improved and performance_acceptable
 
         result = MitigationResult(
-            mitigation_method='threshold_optimization',
+            mitigation_method="threshold_optimization",
             protected_attribute=ProtectedAttribute.GEOGRAPHIC_LOCATION,
             fairness_before=fairness_before,
             fairness_after=fairness_after,
             performance_impact=performance_impact,
             success=success,
             metadata={
-                'threshold_group_0': float(threshold_0),
-                'threshold_group_1': float(threshold_1),
-                'target_metric': metric.value,
-                'performance_before': performance_before,
-                'performance_after': performance_after
-            }
+                "threshold_group_0": float(threshold_0),
+                "threshold_group_1": float(threshold_1),
+                "target_metric": metric.value,
+                "performance_before": performance_before,
+                "performance_after": performance_after,
+            },
         )
 
         logger.info(
-            f"Threshold optimization complete: success={success}, "
-            f"thresholds=({threshold_0:.3f}, {threshold_1:.3f})"
+            f"Threshold optimization complete: success={success}, thresholds=({threshold_0:.3f}, {threshold_1:.3f})"
         )
 
         return result
@@ -275,7 +233,7 @@ class MitigationEngine:
         predictions: np.ndarray,
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        protected_value: Any = 1,
     ) -> MitigationResult:
         """Mitigate bias using calibration adjustment (post-processing).
 
@@ -295,10 +253,7 @@ class MitigationEngine:
         # Evaluate before
         binary_preds_before = (predictions > 0.5).astype(int)
         fairness_before = self._evaluate_fairness(
-            binary_preds_before,
-            true_labels,
-            protected_attribute,
-            protected_value
+            binary_preds_before, true_labels, protected_attribute, protected_value
         )
         performance_before = self._evaluate_performance(binary_preds_before, true_labels)
 
@@ -307,14 +262,8 @@ class MitigationEngine:
         group_1_mask = protected_attribute == protected_value
 
         # Fit calibration models
-        calibrator_0 = self._fit_calibrator(
-            predictions[group_0_mask],
-            true_labels[group_0_mask]
-        )
-        calibrator_1 = self._fit_calibrator(
-            predictions[group_1_mask],
-            true_labels[group_1_mask]
-        )
+        calibrator_0 = self._fit_calibrator(predictions[group_0_mask], true_labels[group_0_mask])
+        calibrator_1 = self._fit_calibrator(predictions[group_1_mask], true_labels[group_1_mask])
 
         # Apply calibration
         adjusted_predictions = predictions.copy()
@@ -326,42 +275,33 @@ class MitigationEngine:
 
         # Evaluate after
         binary_preds_after = (adjusted_predictions > 0.5).astype(int)
-        fairness_after = self._evaluate_fairness(
-            binary_preds_after,
-            true_labels,
-            protected_attribute,
-            protected_value
-        )
+        fairness_after = self._evaluate_fairness(binary_preds_after, true_labels, protected_attribute, protected_value)
         performance_after = self._evaluate_performance(binary_preds_after, true_labels)
 
         # Calculate impact
         performance_impact = {
-            key: performance_after.get(key, 0) - performance_before.get(key, 0)
-            for key in performance_before.keys()
+            key: performance_after.get(key, 0) - performance_before.get(key, 0) for key in performance_before.keys()
         }
 
         # Check success
         fairness_improved = self._check_fairness_improvement(fairness_before, fairness_after)
-        performance_acceptable = self._check_performance_acceptable(
-            performance_before,
-            performance_after
-        )
+        performance_acceptable = self._check_performance_acceptable(performance_before, performance_after)
 
         success = fairness_improved and performance_acceptable
 
         result = MitigationResult(
-            mitigation_method='calibration_adjustment',
+            mitigation_method="calibration_adjustment",
             protected_attribute=ProtectedAttribute.GEOGRAPHIC_LOCATION,
             fairness_before=fairness_before,
             fairness_after=fairness_after,
             performance_impact=performance_impact,
             success=success,
             metadata={
-                'predictions_before_mean': float(np.mean(predictions)),
-                'predictions_after_mean': float(np.mean(adjusted_predictions)),
-                'performance_before': performance_before,
-                'performance_after': performance_after
-            }
+                "predictions_before_mean": float(np.mean(predictions)),
+                "predictions_after_mean": float(np.mean(adjusted_predictions)),
+                "performance_before": performance_before,
+                "performance_after": performance_after,
+            },
         )
 
         logger.info(f"Calibration adjustment complete: success={success}")
@@ -374,9 +314,9 @@ class MitigationEngine:
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
         protected_value: Any = 1,
-        X_train: Optional[np.ndarray] = None,
-        y_train: Optional[np.ndarray] = None,
-        model: Optional[Any] = None
+        X_train: np.ndarray | None = None,
+        y_train: np.ndarray | None = None,
+        model: Any | None = None,
     ) -> MitigationResult:
         """Automatically select and apply best mitigation strategy.
 
@@ -401,32 +341,20 @@ class MitigationEngine:
         # Try each strategy
         for strategy in self.mitigation_strategies:
             try:
-                if strategy == 'threshold_optimization':
+                if strategy == "threshold_optimization":
                     result = self.mitigate_threshold_optimization(
-                        predictions,
-                        true_labels,
-                        protected_attribute,
-                        protected_value
+                        predictions, true_labels, protected_attribute, protected_value
                     )
                     results.append(result)
 
-                elif strategy == 'calibration_adjustment':
+                elif strategy == "calibration_adjustment":
                     result = self.mitigate_calibration_adjustment(
-                        predictions,
-                        true_labels,
-                        protected_attribute,
-                        protected_value
+                        predictions, true_labels, protected_attribute, protected_value
                     )
                     results.append(result)
 
-                elif strategy == 'reweighing' and X_train is not None and model is not None:
-                    result = self.mitigate_reweighing(
-                        X_train,
-                        y_train,
-                        protected_attribute,
-                        protected_value,
-                        model
-                    )
+                elif strategy == "reweighing" and X_train is not None and model is not None:
+                    result = self.mitigate_reweighing(X_train, y_train, protected_attribute, protected_value, model)
                     results.append(result)
 
             except Exception as e:
@@ -440,17 +368,13 @@ class MitigationEngine:
         best_result = self._select_best_result(results)
 
         logger.info(
-            f"Auto mitigation complete: selected {best_result.mitigation_method}, "
-            f"success={best_result.success}"
+            f"Auto mitigation complete: selected {best_result.mitigation_method}, success={best_result.success}"
         )
 
         return best_result
 
     def _calculate_reweighing_weights(
-        self,
-        y: np.ndarray,
-        protected_attribute: np.ndarray,
-        protected_value: Any
+        self, y: np.ndarray, protected_attribute: np.ndarray, protected_value: Any
     ) -> np.ndarray:
         """Calculate reweighing weights for training samples.
 
@@ -512,8 +436,8 @@ class MitigationEngine:
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
         protected_value: Any,
-        metric: FairnessMetric
-    ) -> Tuple[float, float]:
+        metric: FairnessMetric,
+    ) -> tuple[float, float]:
         """Find optimal classification thresholds for each group.
 
         Args:
@@ -529,7 +453,7 @@ class MitigationEngine:
         # Search space for thresholds
         thresholds = np.linspace(0.1, 0.9, 50)
 
-        best_score = float('-inf')
+        best_score = float("-inf")
         best_thresholds = (0.5, 0.5)
 
         group_0_mask = protected_attribute != protected_value
@@ -545,10 +469,7 @@ class MitigationEngine:
 
                 # Evaluate fairness
                 fairness_results = self.fairness_constraints.evaluate_all_metrics(
-                    binary_preds,
-                    true_labels,
-                    protected_attribute,
-                    protected_value
+                    binary_preds, true_labels, protected_attribute, protected_value
                 )
 
                 # Evaluate performance
@@ -568,11 +489,7 @@ class MitigationEngine:
 
         return best_thresholds
 
-    def _fit_calibrator(
-        self,
-        predictions: np.ndarray,
-        true_labels: np.ndarray
-    ) -> Callable:
+    def _fit_calibrator(self, predictions: np.ndarray, true_labels: np.ndarray) -> Callable:
         """Fit isotonic calibration model.
 
         Args:
@@ -583,7 +500,6 @@ class MitigationEngine:
             Calibration function
         """
         # Use Platt scaling (logistic regression)
-        from sklearn.linear_model import LogisticRegression
 
         # Reshape for sklearn
         X = predictions.reshape(-1, 1)
@@ -599,13 +515,7 @@ class MitigationEngine:
 
         return calibrate
 
-    def _retrain_with_weights(
-        self,
-        model: Any,
-        X: np.ndarray,
-        y: np.ndarray,
-        weights: np.ndarray
-    ) -> Any:
+    def _retrain_with_weights(self, model: Any, X: np.ndarray, y: np.ndarray, weights: np.ndarray) -> Any:
         """Retrain model with sample weights.
 
         Args:
@@ -618,7 +528,7 @@ class MitigationEngine:
             Retrained model
         """
         # Check if model supports sample weights
-        if hasattr(model, 'fit'):
+        if hasattr(model, "fit"):
             try:
                 # Try to fit with sample weights
                 model.fit(X, y, sample_weight=weights)
@@ -639,20 +549,15 @@ class MitigationEngine:
         Returns:
             Predictions array
         """
-        if hasattr(model, 'predict_proba'):
+        if hasattr(model, "predict_proba"):
             return model.predict_proba(X)[:, 1]
-        elif hasattr(model, 'predict'):
+        if hasattr(model, "predict"):
             return model.predict(X)
-        else:
-            raise FairnessException("Model has no predict or predict_proba method")
+        raise FairnessException("Model has no predict or predict_proba method")
 
     def _evaluate_fairness(
-        self,
-        predictions: np.ndarray,
-        true_labels: np.ndarray,
-        protected_attribute: np.ndarray,
-        protected_value: Any
-    ) -> Dict[str, float]:
+        self, predictions: np.ndarray, true_labels: np.ndarray, protected_attribute: np.ndarray, protected_value: Any
+    ) -> dict[str, float]:
         """Evaluate fairness metrics.
 
         Args:
@@ -665,26 +570,19 @@ class MitigationEngine:
             Dictionary of fairness metrics
         """
         results = self.fairness_constraints.evaluate_all_metrics(
-            predictions,
-            true_labels,
-            protected_attribute,
-            protected_value
+            predictions, true_labels, protected_attribute, protected_value
         )
 
         # Convert to simple dict
         fairness_dict = {}
         for metric, result in results.items():
-            fairness_dict[f'{metric.value}_difference'] = result.difference
-            fairness_dict[f'{metric.value}_ratio'] = result.ratio
-            fairness_dict[f'{metric.value}_is_fair'] = 1.0 if result.is_fair else 0.0
+            fairness_dict[f"{metric.value}_difference"] = result.difference
+            fairness_dict[f"{metric.value}_ratio"] = result.ratio
+            fairness_dict[f"{metric.value}_is_fair"] = 1.0 if result.is_fair else 0.0
 
         return fairness_dict
 
-    def _evaluate_performance(
-        self,
-        predictions: np.ndarray,
-        true_labels: np.ndarray
-    ) -> Dict[str, float]:
+    def _evaluate_performance(self, predictions: np.ndarray, true_labels: np.ndarray) -> dict[str, float]:
         """Evaluate model performance.
 
         Args:
@@ -712,18 +610,9 @@ class MitigationEngine:
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
         f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
 
-        return {
-            'accuracy': float(accuracy),
-            'precision': float(precision),
-            'recall': float(recall),
-            'f1': float(f1)
-        }
+        return {"accuracy": float(accuracy), "precision": float(precision), "recall": float(recall), "f1": float(f1)}
 
-    def _check_fairness_improvement(
-        self,
-        before: Dict[str, float],
-        after: Dict[str, float]
-    ) -> bool:
+    def _check_fairness_improvement(self, before: dict[str, float], after: dict[str, float]) -> bool:
         """Check if fairness improved.
 
         Args:
@@ -737,18 +626,14 @@ class MitigationEngine:
             return False
 
         # Check if any fairness metric improved significantly
-        for key in before.keys():
-            if '_difference' in key and key in after:
+        for key in before:
+            if "_difference" in key and key in after:
                 if before[key] - after[key] > self.fairness_improvement_threshold:
                     return True
 
         return False
 
-    def _check_performance_acceptable(
-        self,
-        before: Dict[str, float],
-        after: Dict[str, float]
-    ) -> bool:
+    def _check_performance_acceptable(self, before: dict[str, float], after: dict[str, float]) -> bool:
         """Check if performance is acceptable after mitigation.
 
         Args:
@@ -762,8 +647,8 @@ class MitigationEngine:
             return True  # Assume acceptable if no data
 
         # Check accuracy
-        accuracy_before = before.get('accuracy', 0)
-        accuracy_after = after.get('accuracy', 0)
+        accuracy_before = before.get("accuracy", 0)
+        accuracy_after = after.get("accuracy", 0)
 
         # Must maintain minimum threshold
         if accuracy_after < self.performance_threshold:
@@ -775,10 +660,7 @@ class MitigationEngine:
 
         return True
 
-    def _select_best_result(
-        self,
-        results: List[MitigationResult]
-    ) -> MitigationResult:
+    def _select_best_result(self, results: list[MitigationResult]) -> MitigationResult:
         """Select best mitigation result.
 
         Args:
@@ -799,14 +681,12 @@ class MitigationEngine:
                 successful,
                 key=lambda r: sum(
                     r.fairness_before.get(k, 0) - r.fairness_after.get(k, 0)
-                    for k in r.fairness_before.keys() if '_difference' in k
-                )
+                    for k in r.fairness_before.keys()
+                    if "_difference" in k
+                ),
             )
             return best
 
         # If none successful, return the one with least performance loss
-        best = min(
-            results,
-            key=lambda r: abs(r.performance_impact.get('accuracy', 0))
-        )
+        best = min(results, key=lambda r: abs(r.performance_impact.get("accuracy", 0)))
         return best

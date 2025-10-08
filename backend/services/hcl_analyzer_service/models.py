@@ -11,14 +11,16 @@ documentation of data structures, and seamless integration with FastAPI for
 API request and response modeling.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List
+
+from pydantic import BaseModel, Field
 
 
 class AnomalyType(str, Enum):
     """Enumeration for different types of anomalies detected."""
+
     SPIKE = "spike"
     DROP = "drop"
     TREND = "trend"
@@ -35,6 +37,7 @@ class Anomaly(BaseModel):
         severity (float): The severity of the anomaly (0.0 to 1.0).
         description (str): A human-readable description of the anomaly.
     """
+
     type: AnomalyType
     metric_name: str
     current_value: float
@@ -53,6 +56,7 @@ class AnalysisResult(BaseModel):
         recommendations (List[str]): Suggested actions based on the analysis.
         requires_intervention (bool): True if the analysis indicates a need for intervention.
     """
+
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
     overall_health_score: float
     anomalies: List[Anomaly]
@@ -74,6 +78,7 @@ class SystemMetrics(BaseModel):
         error_rate (float): Rate of errors in the system.
         service_status (Dict[str, str]): Status of various sub-services.
     """
+
     timestamp: str
     cpu_usage: float
     memory_usage: float

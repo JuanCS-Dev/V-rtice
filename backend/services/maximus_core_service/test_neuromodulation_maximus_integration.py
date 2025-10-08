@@ -15,14 +15,12 @@ Quality: REGRA DE OURO - Zero mocks, 100% production code
 """
 
 import pytest
-import asyncio
-
 from maximus_integrated import MaximusIntegrated
-
 
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 async def maximus():
@@ -36,6 +34,7 @@ async def maximus():
 # ============================================================================
 # TEST 1: NEUROMODULATION CONTROLLER INITIALIZED
 # ============================================================================
+
 
 def test_neuromodulation_initialized(maximus):
     """Test that NeuromodulationController is properly initialized."""
@@ -60,6 +59,7 @@ def test_neuromodulation_initialized(maximus):
 # TEST 2: ATTENTION SYSTEM INITIALIZED
 # ============================================================================
 
+
 def test_attention_system_initialized(maximus):
     """Test that AttentionSystem is properly initialized."""
     print("\n" + "=" * 80)
@@ -81,6 +81,7 @@ def test_attention_system_initialized(maximus):
 # ============================================================================
 # TEST 3: NEUROMODULATED PARAMETERS ACCESSIBLE
 # ============================================================================
+
 
 def test_neuromodulated_parameters_accessible(maximus):
     """Test that neuromodulated parameters can be retrieved."""
@@ -104,7 +105,7 @@ def test_neuromodulated_parameters_accessible(maximus):
     assert 0.0 < params["arousal_gain"] <= 2.0, "Arousal gain should be in (0, 2]"
     assert 0.0 < params["temperature"] <= 1.0, "Temperature should be in (0, 1]"
 
-    print(f"✅ Neuromodulated parameters accessible:")
+    print("✅ Neuromodulated parameters accessible:")
     print(f"   Learning Rate: {params['learning_rate']:.4f}")
     print(f"   Attention Threshold: {params['attention_threshold']:.3f}")
     print(f"   Arousal Gain: {params['arousal_gain']:.2f}x")
@@ -114,6 +115,7 @@ def test_neuromodulated_parameters_accessible(maximus):
 # ============================================================================
 # TEST 4: OUTCOME PROCESSING (DOPAMINE + SEROTONIN)
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_outcome_processing(maximus):
@@ -128,11 +130,7 @@ async def test_outcome_processing(maximus):
     initial_serotonin = initial_params["raw_neuromodulation"]["serotonin_level"]
 
     # Process positive outcome (better than expected)
-    result = await maximus.process_outcome(
-        expected_reward=0.5,
-        actual_reward=0.8,
-        success=True
-    )
+    result = await maximus.process_outcome(expected_reward=0.5, actual_reward=0.8, success=True)
 
     # Verify result structure
     assert "rpe" in result, "Should return RPE"
@@ -147,7 +145,7 @@ async def test_outcome_processing(maximus):
     updated_dopamine = updated_params["raw_neuromodulation"]["dopamine_level"]
     updated_serotonin = updated_params["raw_neuromodulation"]["serotonin_level"]
 
-    print(f"✅ Outcome processed successfully:")
+    print("✅ Outcome processed successfully:")
     print(f"   RPE: {result['rpe']:.3f} (positive surprise)")
     print(f"   Motivation: {result['motivation']:.2f}")
     print(f"   Dopamine: {initial_dopamine:.2f} → {updated_dopamine:.2f}")
@@ -157,6 +155,7 @@ async def test_outcome_processing(maximus):
 # ============================================================================
 # TEST 5: THREAT RESPONSE (NOREPINEPHRINE)
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_threat_response(maximus):
@@ -171,10 +170,7 @@ async def test_threat_response(maximus):
     initial_threshold = initial_params["attention_threshold"]
 
     # Respond to high-severity threat
-    threat_result = await maximus.respond_to_threat(
-        threat_severity=0.8,
-        threat_type="intrusion"
-    )
+    threat_result = await maximus.respond_to_threat(threat_severity=0.8, threat_type="intrusion")
 
     # Verify result structure
     assert "threat_severity" in threat_result, "Should return threat_severity"
@@ -189,7 +185,7 @@ async def test_threat_response(maximus):
     # Verify attention threshold was updated
     updated_threshold = threat_result["updated_attention_threshold"]
     # Note: Threshold might go up or down depending on ACh level, just verify it changed
-    print(f"✅ Threat response activated:")
+    print("✅ Threat response activated:")
     print(f"   Threat Severity: {threat_result['threat_severity']:.1f}")
     print(f"   Arousal Level: {threat_result['arousal_level']:.2f}")
     print(f"   Attention Gain: {initial_arousal:.2f}x → {threat_result['attention_gain']:.2f}x")
@@ -199,6 +195,7 @@ async def test_threat_response(maximus):
 # ============================================================================
 # TEST 6: SYSTEM STATUS INCLUDES NEUROMODULATION
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_system_status_includes_neuromodulation(maximus):
@@ -230,7 +227,7 @@ async def test_system_status_includes_neuromodulation(maximus):
     # Verify attention system status present
     assert "attention_system_status" in status, "System status should include attention system"
 
-    print(f"✅ System status includes neuromodulation:")
+    print("✅ System status includes neuromodulation:")
     print(f"   Dopamine: {global_state['dopamine']:.2f}")
     print(f"   Serotonin: {global_state['serotonin']:.2f}")
     print(f"   Norepinephrine: {global_state['norepinephrine']:.2f}")

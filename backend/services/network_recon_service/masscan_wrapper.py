@@ -12,7 +12,7 @@ and building a comprehensive understanding of the network attack surface.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List
 
 
 class MasscanWrapper:
@@ -35,7 +35,7 @@ class MasscanWrapper:
 
         Returns:
             Dict[str, Any]: A dictionary containing the scan results.
-        
+
         Raises:
             ValueError: If no ports are specified.
         """
@@ -43,19 +43,25 @@ class MasscanWrapper:
             raise ValueError("At least one port must be specified for Masscan scan.")
 
         print(f"[MasscanWrapper] Simulating Masscan port scan on {target} for ports {ports}")
-        await asyncio.sleep(0.5) # Simulate scan time
+        await asyncio.sleep(0.5)  # Simulate scan time
 
         open_ports = []
         for port in ports:
-            if port % 2 == 0: # Simulate some open ports
-                open_ports.append({"port": port, "state": "open", "service": "http" if port == 80 else "unknown"})
+            if port % 2 == 0:  # Simulate some open ports
+                open_ports.append(
+                    {
+                        "port": port,
+                        "state": "open",
+                        "service": "http" if port == 80 else "unknown",
+                    }
+                )
 
         return {
             "scan_type": "masscan_port_scan",
             "target": target,
             "scanned_ports": ports,
             "open_ports": open_ports,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     async def get_version(self) -> str:

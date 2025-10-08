@@ -1,0 +1,51 @@
+[project]
+name = "maximus-eureka"
+version = "1.0.0"
+description = "MAXIMUS EUREKA - Deep Malware Analysis Engine with Pattern Detection"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.13.0",
+]
+future = [
+    # Optional: Para análise YARA (futuro)
+    "yara-python>=4.5.0",
+    # Optional: Para STIX export (futuro)
+    "stix2>=3.0.0",
+    # Optional: Para análise de PE files (futuro)
+    "pefile>=2023.2.7",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "B", "C90", "UP", "ANN", "S", "T20", "RET", "SIM", "TCH"]
+ignore = ["E501", "ANN101", "ANN102", "ANN401", "S101", "S311", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["S101", "ANN001", "ANN201", "ANN202", "D103"]
+"__init__.py" = ["F401", "D104"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_*.py"]
+addopts = [
+    "--verbose",
+    "--tb=short",
+    "--strict-markers",
+]
+asyncio_mode = "auto"

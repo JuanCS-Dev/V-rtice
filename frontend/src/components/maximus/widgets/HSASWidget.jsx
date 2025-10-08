@@ -13,7 +13,7 @@
 import React, { useState, useEffect } from 'react';
 import './HSASWidget.css';
 
-export const HSASWidget = ({ systemHealth }) => {
+export const HSASWidget = ({ systemHealth: _systemHealth }) => {
   const [learningMode, setLearningMode] = useState('hybrid');
   const [skills, setSkills] = useState([]);
   const [primitives, setPrimitives] = useState([]);

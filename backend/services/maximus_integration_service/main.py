@@ -13,13 +13,13 @@ external tools, data sources, and services, extending its capabilities and
 operational reach.
 """
 
+import os
+from typing import Any, Dict, Optional
+
+import httpx
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
-import httpx
-import os
 
 app = FastAPI(title="Maximus Integration Service", version="1.0.0")
 
@@ -38,6 +38,7 @@ class ExternalServiceRequest(BaseModel):
         payload (Optional[Dict[str, Any]]): The request payload for POST/PUT methods.
         headers (Optional[Dict[str, str]]): Additional headers for the request.
     """
+
     service_name: str
     endpoint: str
     method: str = "GET"
@@ -83,7 +84,7 @@ async def interact_external_service(request: ExternalServiceRequest) -> Dict[str
         HTTPException: If the external service is unknown or an error occurs during interaction.
     """
     print(f"[API] Interacting with external service: {request.service_name} at {request.endpoint}")
-    
+
     base_url = None
     if request.service_name == "crm":
         base_url = MOCK_EXTERNAL_CRM_URL
@@ -108,11 +109,18 @@ async def interact_external_service(request: ExternalServiceRequest) -> Dict[str
                 raise HTTPException(status_code=405, detail=f"Method {request.method} not allowed.")
 
             response.raise_for_status()
-            return {"status": "success", "external_response": response.json(), "timestamp": datetime.now().isoformat()}
+            return {
+                "status": "success",
+                "external_response": response.json(),
+                "timestamp": datetime.now().isoformat(),
+            }
         except httpx.RequestError as e:
             raise HTTPException(status_code=500, detail=f"External service communication error: {e}")
         except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail=f"External service error: {e.response.text}")
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=f"External service error: {e.response.text}",
+            )
 
 
 if __name__ == "__main__":

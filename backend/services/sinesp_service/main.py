@@ -12,12 +12,11 @@ is crucial for supporting investigations, situational awareness, and law
 enforcement support within the Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
+from typing import Any, Dict
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
 
 from intelligence_agent import IntelligenceAgent
 from llm_client import LLMClient
@@ -89,7 +88,11 @@ async def analyze_vehicle_details(vehicle_info: VehicleInfo) -> Dict[str, Any]:
     """
     print(f"[API] Analyzing vehicle details for plate: {vehicle_info.plate}")
     insights = await intelligence_agent.analyze_vehicle_info(vehicle_info)
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "insights": insights}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "insights": insights,
+    }
 
 
 if __name__ == "__main__":

@@ -16,12 +16,13 @@ to formulate long-term goals, evaluate potential actions, and maintain coherent,
 goal-oriented behavior across the entire AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from emotional_state_monitor import EmotionalStateMonitor
 from impulse_inhibition import ImpulseInhibition
@@ -43,6 +44,7 @@ class StrategicPlanRequest(BaseModel):
         current_context (Dict[str, Any]): The current operational context.
         long_term_goals (List[str]): The long-term goals to consider.
     """
+
     problem_description: str
     current_context: Dict[str, Any]
     long_term_goals: List[str]
@@ -56,6 +58,7 @@ class DecisionRequest(BaseModel):
         criteria (Dict[str, Any]): Criteria for evaluating the options.
         context (Optional[Dict[str, Any]]): Additional context for the decision.
     """
+
     options: List[Dict[str, Any]]
     criteria: Dict[str, Any]
     context: Optional[Dict[str, Any]] = None
@@ -64,15 +67,15 @@ class DecisionRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Prefrontal Cortex Service."""
-    print("🧠 Starting Maximus Prefrontal Cortex Service...")
-    print("✅ Maximus Prefrontal Cortex Service started successfully.")
+    print("🧠 Starting Maximus Prefrontal Cortex Service...")  # pragma: no cover
+    print("✅ Maximus Prefrontal Cortex Service started successfully.")  # pragma: no cover
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Prefrontal Cortex Service."""
-    print("👋 Shutting down Maximus Prefrontal Cortex Service...")
-    print("🛑 Maximus Prefrontal Cortex Service shut down.")
+    print("👋 Shutting down Maximus Prefrontal Cortex Service...")  # pragma: no cover
+    print("🛑 Maximus Prefrontal Cortex Service shut down.")  # pragma: no cover
 
 
 @app.get("/health")
@@ -96,7 +99,7 @@ async def generate_strategic_plan(request: StrategicPlanRequest) -> Dict[str, An
         Dict[str, Any]: A dictionary containing the generated strategic plan.
     """
     print(f"[API] Generating strategic plan for: {request.problem_description}")
-    await asyncio.sleep(0.5) # Simulate complex planning
+    await asyncio.sleep(0.5)  # Simulate complex planning
 
     # Simulate plan generation, considering emotional state and impulse control
     emotional_state = await emotional_state_monitor.get_current_state()
@@ -104,12 +107,31 @@ async def generate_strategic_plan(request: StrategicPlanRequest) -> Dict[str, An
 
     plan_details = f"Strategic plan for '{request.problem_description}' considering emotional state ({emotional_state.get('mood')}) and impulse control ({impulse_level:.2f})."
     plan_steps = [
-        {"step": 1, "action": "gather_more_information", "details": "Collect data relevant to the problem.", "priority": "high"},
-        {"step": 2, "action": "evaluate_risks", "details": "Assess potential risks and opportunities.", "priority": "high"},
-        {"step": 3, "action": "propose_solutions", "details": "Develop multiple solution pathways.", "priority": "medium"}
+        {
+            "step": 1,
+            "action": "gather_more_information",
+            "details": "Collect data relevant to the problem.",
+            "priority": "high",
+        },
+        {
+            "step": 2,
+            "action": "evaluate_risks",
+            "details": "Assess potential risks and opportunities.",
+            "priority": "high",
+        },
+        {
+            "step": 3,
+            "action": "propose_solutions",
+            "details": "Develop multiple solution pathways.",
+            "priority": "medium",
+        },
     ]
 
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "plan": {"description": plan_details, "steps": plan_steps}}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "plan": {"description": plan_details, "steps": plan_steps},
+    }
 
 
 @app.post("/make_decision")
@@ -123,13 +145,18 @@ async def make_decision_endpoint(request: DecisionRequest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the chosen decision and rationale.
     """
     print(f"[API] Making decision based on {len(request.options)} options.")
-    await asyncio.sleep(0.3) # Simulate decision making
+    await asyncio.sleep(0.3)  # Simulate decision making
 
     # Simulate decision making, validated by rational decision validator
-    chosen_option = request.options[0] # Simple mock: always choose first
+    chosen_option = request.options[0]  # Simple mock: always choose first
     validation_result = rational_decision_validator.validate_decision(chosen_option, request.criteria, request.context)
 
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "chosen_option": chosen_option, "rationale": validation_result}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "chosen_option": chosen_option,
+        "rationale": validation_result,
+    }
 
 
 @app.get("/emotional_state")
@@ -152,5 +179,5 @@ async def get_impulse_inhibition_level() -> Dict[str, Any]:
     return {"level": impulse_inhibition.get_inhibition_level()}
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8037)

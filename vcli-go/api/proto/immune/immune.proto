@@ -1,0 +1,378 @@
+syntax = "proto3";
+
+package immune.v1;
+
+option go_package = "github.com/vertice/vcli-go/api/grpc/immune";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// ============================================================
+// Active Immune Core Service
+// ============================================================
+
+service ActiveImmuneCore {
+  // Agent Management
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse);
+  rpc GetAgent(GetAgentRequest) returns (Agent);
+  rpc CloneAgent(CloneAgentRequest) returns (CloneAgentResponse);
+  rpc TerminateAgent(TerminateAgentRequest) returns (TerminateAgentResponse);
+  rpc GetAgentMetrics(GetAgentMetricsRequest) returns (AgentMetrics);
+
+  // Lymphnode Operations
+  rpc ListLymphnodes(ListLymphnodesRequest) returns (ListLymphnodesResponse);
+  rpc GetLymphnodeStatus(GetLymphnodeRequest) returns (LymphnodeStatus);
+  rpc GetLymphnodeMetrics(GetLymphnodeRequest) returns (LymphnodeMetrics);
+
+  // Cytokine Streaming
+  rpc StreamCytokines(StreamCytokinesRequest) returns (stream Cytokine);
+  rpc PublishCytokine(PublishCytokineRequest) returns (PublishCytokineResponse);
+
+  // Hormone System
+  rpc StreamHormones(StreamHormonesRequest) returns (stream Hormone);
+  rpc PublishHormone(PublishHormoneRequest) returns (PublishHormoneResponse);
+
+  // Coordination
+  rpc TriggerMassResponse(MassResponseRequest) returns (MassResponseResponse);
+  rpc GetSystemHealth(SystemHealthRequest) returns (SystemHealthResponse);
+}
+
+// ============================================================
+// Agent Messages
+// ============================================================
+
+enum AgentType {
+  AGENT_TYPE_UNSPECIFIED = 0;
+  NEUTROPHIL = 1;              // Fast response, short-lived
+  MACROPHAGE = 2;              // Phagocytosis, antigen presentation
+  DENDRITIC_CELL = 3;          // Antigen presentation, immune activation
+  T_CELL = 4;                  // Adaptive immunity coordination
+  B_CELL = 5;                  // Antibody production
+  MEMORY_CELL = 6;             // Long-term immunity memory
+  NK_CELL = 7;                 // Natural killer - immediate response
+  BASOPHIL = 8;                // Inflammatory response
+  EOSINOPHIL = 9;              // Parasite/allergen response
+}
+
+enum AgentState {
+  STATE_UNSPECIFIED = 0;
+  INACTIVE = 1;
+  ACTIVE = 2;
+  HUNTING = 3;
+  ATTACKING = 4;
+  RESTING = 5;
+  DYING = 6;
+  DEAD = 7;
+  MEMORY = 8;
+}
+
+message ListAgentsRequest {
+  string lymphnode_id = 1;     // Filter by lymphnode
+  AgentType agent_type = 2;    // Filter by type
+  AgentState state = 3;        // Filter by state
+  int32 page = 4;
+  int32 page_size = 5;
+  bool include_metrics = 6;
+}
+
+message ListAgentsResponse {
+  repeated Agent agents = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message GetAgentRequest {
+  string agent_id = 1;
+  bool include_metrics = 2;
+  bool include_history = 3;
+}
+
+message Agent {
+  string agent_id = 1;
+  AgentType type = 2;
+  AgentState state = 3;
+  string lymphnode_id = 4;
+
+  // Agent vitals
+  double energia = 5;           // Energy level (0-100)
+  double sensibilidade = 6;     // Sensitivity (0-10)
+  double nivel_agressividade = 7;  // Aggressiveness (0-10)
+  double temperatura = 8;       // Temperature (immune activation)
+
+  // Lifecycle
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp last_heartbeat = 10;
+  int32 age_seconds = 11;
+  int32 max_age_seconds = 12;
+
+  // Activity
+  int32 threats_detected = 13;
+  int32 threats_neutralized = 14;
+  int32 cytokines_emitted = 15;
+
+  // Location
+  string current_zone = 16;
+  string patrol_area = 17;
+
+  // Metadata
+  google.protobuf.Struct metadata = 18;
+}
+
+message CloneAgentRequest {
+  string agent_id = 1;         // Agent to clone
+  int32 clone_count = 2;       // Number of clones
+  string lymphnode_id = 3;     // Target lymphnode
+  google.protobuf.Struct config_overrides = 4;
+}
+
+message CloneAgentResponse {
+  repeated string cloned_agent_ids = 1;
+  int32 success_count = 2;
+  int32 failure_count = 3;
+  repeated string errors = 4;
+}
+
+message TerminateAgentRequest {
+  string agent_id = 1;
+  string reason = 2;
+  bool graceful = 3;           // Graceful shutdown vs force kill
+}
+
+message TerminateAgentResponse {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp terminated_at = 3;
+}
+
+message GetAgentMetricsRequest {
+  string agent_id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+}
+
+message AgentMetrics {
+  string agent_id = 1;
+
+  // Performance
+  double avg_response_time_ms = 2;
+  int64 total_actions = 3;
+  double success_rate = 4;
+
+  // Resource usage
+  double avg_cpu_percent = 5;
+  double avg_memory_mb = 6;
+
+  // Activity timeline
+  repeated MetricDataPoint timeline = 7;
+}
+
+message MetricDataPoint {
+  google.protobuf.Timestamp timestamp = 1;
+  double value = 2;
+  string metric_name = 3;
+}
+
+// ============================================================
+// Lymphnode Messages
+// ============================================================
+
+message ListLymphnodesRequest {
+  string zone = 1;             // Filter by zone
+  bool include_metrics = 2;
+}
+
+message ListLymphnodesResponse {
+  repeated Lymphnode lymphnodes = 1;
+  int32 total_count = 2;
+}
+
+message GetLymphnodeRequest {
+  string lymphnode_id = 1;
+}
+
+message Lymphnode {
+  string lymphnode_id = 1;
+  string zone = 2;
+  string region = 3;
+
+  // Status
+  bool is_healthy = 4;
+  double temperature = 5;      // Activation level
+  string status = 6;           // "active", "degraded", "failing"
+
+  // Agent population
+  int32 total_agents = 7;
+  map<string, int32> agents_by_type = 8;  // type -> count
+
+  // Activity
+  int32 cytokines_per_second = 9;
+  int32 threats_active = 10;
+  google.protobuf.Timestamp last_mass_response = 11;
+
+  // Metadata
+  google.protobuf.Struct metadata = 12;
+}
+
+message LymphnodeStatus {
+  Lymphnode lymphnode = 1;
+
+  // Health details
+  repeated HealthCheck health_checks = 2;
+  repeated string warnings = 3;
+  repeated string errors = 4;
+
+  // Resource usage
+  double cpu_percent = 5;
+  double memory_mb = 6;
+  int32 kafka_lag = 7;
+}
+
+message HealthCheck {
+  string component = 1;
+  bool healthy = 2;
+  string message = 3;
+  google.protobuf.Timestamp checked_at = 4;
+}
+
+message LymphnodeMetrics {
+  string lymphnode_id = 1;
+
+  // Agent metrics
+  int32 total_agents = 2;
+  int32 active_agents = 3;
+  int32 dying_agents = 4;
+
+  // Cytokine metrics
+  int64 cytokines_received = 5;
+  int64 cytokines_filtered = 6;
+  double cytokine_rate = 7;
+
+  // Threat metrics
+  int32 threats_detected_hour = 8;
+  int32 threats_neutralized_hour = 9;
+
+  // Cloning activity
+  int32 clones_created_hour = 10;
+  int32 mass_responses_triggered_hour = 11;
+}
+
+// ============================================================
+// Cytokine Messages
+// ============================================================
+
+message StreamCytokinesRequest {
+  repeated string topics = 1;   // Kafka topics to stream
+  string lymphnode_id = 2;      // Filter by lymphnode
+  string event_type = 3;        // Filter by event type
+  int32 severity_min = 4;       // Min severity (1-10)
+}
+
+message Cytokine {
+  string cytokine_id = 1;
+  string emitter_id = 2;        // Agent that emitted
+  string lymphnode_id = 3;
+
+  // Content
+  string event_type = 4;        // "ameaca_detectada", "ameaca_neutralizada", etc.
+  int32 severity = 5;           // 1-10
+  google.protobuf.Struct payload = 6;
+
+  // Metadata
+  google.protobuf.Timestamp timestamp = 7;
+  string zone = 8;
+  repeated string tags = 9;
+}
+
+message PublishCytokineRequest {
+  string emitter_id = 1;
+  string event_type = 2;
+  int32 severity = 3;
+  google.protobuf.Struct payload = 4;
+  repeated string tags = 5;
+}
+
+message PublishCytokineResponse {
+  bool success = 1;
+  string cytokine_id = 2;
+  string message = 3;
+}
+
+// ============================================================
+// Hormone Messages
+// ============================================================
+
+message StreamHormonesRequest {
+  repeated string hormone_types = 1;  // "cortisol", "adrenalina", "melatonina"
+  string zone = 2;
+}
+
+message Hormone {
+  string hormone_id = 1;
+  string type = 2;              // "cortisol", "adrenalina", "melatonina"
+  double nivel = 3;             // Level (0-10)
+  string source = 4;            // What triggered it
+  google.protobuf.Timestamp timestamp = 5;
+  google.protobuf.Struct metadata = 6;
+}
+
+message PublishHormoneRequest {
+  string type = 1;
+  double nivel = 2;
+  string source = 3;
+  google.protobuf.Struct metadata = 4;
+}
+
+message PublishHormoneResponse {
+  bool success = 1;
+  string hormone_id = 2;
+}
+
+// ============================================================
+// Coordination Messages
+// ============================================================
+
+message MassResponseRequest {
+  string lymphnode_id = 1;
+  string threat_type = 2;
+  int32 agent_count = 3;        // Number of agents to clone
+  AgentType agent_type = 4;     // Type of agent to clone
+  string reason = 5;
+}
+
+message MassResponseResponse {
+  bool success = 1;
+  int32 agents_cloned = 2;
+  repeated string agent_ids = 3;
+  string message = 4;
+}
+
+message SystemHealthRequest {
+  bool include_all_lymphnodes = 1;
+  bool include_agent_stats = 2;
+}
+
+message SystemHealthResponse {
+  enum OverallStatus {
+    UNKNOWN = 0;
+    HEALTHY = 1;
+    DEGRADED = 2;
+    CRITICAL = 3;
+  }
+
+  OverallStatus status = 1;
+
+  // System-wide stats
+  int32 total_lymphnodes = 2;
+  int32 healthy_lymphnodes = 3;
+  int32 total_agents = 4;
+  int32 active_agents = 5;
+
+  // Service health
+  map<string, bool> services = 6;  // "kafka" -> true, "redis" -> true
+
+  // Detailed breakdown
+  repeated LymphnodeStatus lymphnode_statuses = 7;
+
+  google.protobuf.Timestamp timestamp = 8;
+}

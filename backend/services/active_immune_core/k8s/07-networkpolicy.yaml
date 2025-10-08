@@ -1,0 +1,152 @@
+# Kubernetes NetworkPolicy for Active Immune Core
+# Network-level security controls
+#
+# Prerequisites: CNI plugin with NetworkPolicy support (e.g., Calico, Cilium, Weave)
+#
+# Apply: kubectl apply -f k8s/07-networkpolicy.yaml -n active-immune
+# Check: kubectl get networkpolicy -n active-immune
+# Describe: kubectl describe networkpolicy active-immune-core-netpol -n active-immune
+#
+# NO MOCKS, NO PLACEHOLDERS, NO TODOS - Production-ready.
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: active-immune-core-netpol
+  namespace: active-immune
+  labels:
+    app: active-immune-core
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: active-immune-core
+
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # Ingress rules - who can talk to Active Immune Core
+  ingress:
+    # Allow from API Gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: vertice
+          podSelector:
+            matchLabels:
+              app: api-gateway
+      ports:
+        - protocol: TCP
+          port: 8200
+
+    # Allow from Prometheus (for metrics scraping)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 8200
+
+    # Allow from same namespace (for internal communication)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: active-immune-core
+      ports:
+        - protocol: TCP
+          port: 8200
+
+  # Egress rules - what Active Immune Core can talk to
+  egress:
+    # Allow DNS lookups (CoreDNS)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+
+    # Allow Kafka (in kafka namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+          podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # Allow Redis (in redis namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: redis
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow PostgreSQL (in postgres namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: postgres
+          podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow Vertice services (Treg, Memory, Adaptive, etc.)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: vertice
+      ports:
+        - protocol: TCP
+          port: 8018  # Treg
+        - protocol: TCP
+          port: 8019  # Memory
+        - protocol: TCP
+          port: 8020  # Adaptive
+        - protocol: TCP
+          port: 8022  # IP Intelligence
+        - protocol: TCP
+          port: 8002  # Governance
+
+    # Allow HTTPS egress for external integrations (e.g., Ethical AI)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8612  # Ethical AI
+
+---
+# Default Deny All policy (optional - for maximum security)
+# IMPORTANT: Only enable this if you have all required NetworkPolicies in place
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: default-deny-all
+#   namespace: active-immune
+# spec:
+#   podSelector: {}
+#   policyTypes:
+#     - Ingress
+#     - Egress

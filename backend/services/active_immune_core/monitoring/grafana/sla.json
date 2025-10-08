@@ -1,0 +1,450 @@
+{
+  "dashboard": {
+    "title": "Active Immune Core - SLA Monitoring",
+    "tags": ["immune-core", "sla", "slo"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Overall System Availability (99.9% SLO)",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 0, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "(sum(immune_core_agents_alive) / sum(immune_core_agents_total))",
+            "legendFormat": "Availability"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 1,
+            "min": 0.99,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0.99, "color": "red"},
+                {"value": 0.995, "color": "yellow"},
+                {"value": 0.999, "color": "green"}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        },
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.999],
+                "type": "lt"
+              },
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "name": "Availability SLO Breach",
+          "message": "System availability dropped below 99.9% SLO"
+        }
+      },
+      {
+        "id": 2,
+        "title": "API Latency p99 (< 500ms SLO)",
+        "type": "gauge",
+        "gridPos": {"x": 8, "y": 0, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m])) * 1000"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 1000,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 300, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            },
+            "unit": "ms"
+          }
+        },
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [500],
+                "type": "gt"
+              },
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "name": "API Latency SLO Breach",
+          "message": "API p99 latency exceeded 500ms SLO"
+        }
+      },
+      {
+        "id": 3,
+        "title": "Task Success Rate (> 95% SLO)",
+        "type": "gauge",
+        "gridPos": {"x": 16, "y": 0, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_tasks_completed_total[5m])) / (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 1,
+            "min": 0.9,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0.9, "color": "red"},
+                {"value": 0.95, "color": "yellow"},
+                {"value": 0.98, "color": "green"}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        },
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.95],
+                "type": "lt"
+              },
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "name": "Task Success Rate SLO Breach",
+          "message": "Task success rate dropped below 95% SLO"
+        }
+      },
+      {
+        "id": 4,
+        "title": "SLO Compliance (Last 24h)",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 6, "w": 24, "h": 4},
+        "targets": [
+          {
+            "expr": "(avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[24h:]) >= 0.999) and (avg_over_time(histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m]))[24h:]) <= 0.5) and (avg_over_time((sum(rate(immune_core_tasks_completed_total[5m])) / (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001))[24h:]) >= 0.95)",
+            "legendFormat": "All SLOs Met"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"value": 0, "text": "SLO BREACH", "color": "red"},
+              {"value": 1, "text": "ALL SLOs MET", "color": "green"}
+            ]
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Availability Trend (7 days)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 10, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[1h:])",
+            "legendFormat": "Availability"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Availability",
+            "min": 0.99,
+            "max": 1
+          }
+        ],
+        "lines": true,
+        "fill": 1,
+        "thresholds": [
+          {
+            "value": 0.999,
+            "colorMode": "critical",
+            "op": "lt",
+            "fill": true,
+            "line": true
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "API Latency Trend (p50, p95, p99)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 10, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m])) * 1000",
+            "legendFormat": "p99"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(immune_core_api_latency_seconds_bucket[5m])) * 1000",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(immune_core_api_latency_seconds_bucket[5m])) * 1000",
+            "legendFormat": "p50"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ms",
+            "label": "Latency"
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 500,
+            "colorMode": "critical",
+            "op": "gt",
+            "fill": true,
+            "line": true
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Error Budget Remaining (99.9% SLO)",
+        "type": "bargauge",
+        "gridPos": {"x": 0, "y": 18, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "1 - ((1 - avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[24h:])) / (1 - 0.999))",
+            "legendFormat": "Error Budget Remaining"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "max": 1,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.2, "color": "yellow"},
+                {"value": 0.5, "color": "green"}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 8,
+        "title": "Mean Time Between Failures (MTBF)",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 18, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "time() / (immune_core_failures_detected_total + 1)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Mean Time To Recovery (MTTR)",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 18, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "avg_over_time((time() - (immune_core_failures_detected_total * 60))[1h:])"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 300, "color": "yellow"},
+                {"value": 600, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "API Request Success Rate by Endpoint",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 26, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_api_requests_total{status=~\"2..\"}[5m])) by (endpoint) / sum(rate(immune_core_api_requests_total[5m])) by (endpoint)",
+            "legendFormat": "{{endpoint}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Success Rate",
+            "min": 0.9,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Task Duration SLO Compliance (< 30s)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 26, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_task_duration_seconds_bucket{le=\"30\"}[5m])) / sum(rate(immune_core_task_duration_seconds_count[5m]))",
+            "legendFormat": "Tasks completed within 30s"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Compliance",
+            "min": 0.9,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "SLO Violation Events (Last 7 days)",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 34, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "ALERTS{alertname=~\".*SLO.*\"}",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"__name__": true},
+              "indexByName": {
+                "alertname": 0,
+                "alertstate": 1,
+                "severity": 2,
+                "Time": 3
+              },
+              "renameByName": {
+                "alertname": "Alert",
+                "alertstate": "State",
+                "severity": "Severity",
+                "Time": "Timestamp"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Downtime Minutes (Last 30 days)",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 42, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "(1 - avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[30d:])) * 43200"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "m",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 43.2, "color": "yellow"},
+                {"value": 432, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Nines of Availability",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 42, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "floor(-log10(1 - avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[24h:])))"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"value": 2, "text": "99% (Two Nines)"},
+              {"value": 3, "text": "99.9% (Three Nines)"},
+              {"value": 4, "text": "99.99% (Four Nines)"},
+              {"value": 5, "text": "99.999% (Five Nines)"}
+            ]
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "SLO Budget Burn Rate",
+        "type": "graph",
+        "gridPos": {"x": 16, "y": 42, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "rate((1 - (sum(immune_core_agents_alive) / sum(immune_core_agents_total)))[1h:]) / (1 - 0.999)",
+            "legendFormat": "Burn Rate"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Burn Rate"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [1],
+                "type": "gt"
+              },
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Error Budget Burn Rate",
+          "message": "Error budget is burning faster than expected"
+        }
+      }
+    ]
+  }
+}

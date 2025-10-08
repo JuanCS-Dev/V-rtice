@@ -11,13 +11,14 @@ defense mechanisms, to provide a unified and intelligent cybersecurity solution
 for the Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 # Assuming these services are available and can be called via HTTP or directly
 # In a real microservices architecture, these would be client calls to other services
@@ -33,6 +34,7 @@ class ThreatDetectionRequest(BaseModel):
         scan_type (str): The type of scan to perform (e.g., 'vulnerability', 'malware', 'intrusion').
         parameters (Optional[Dict[str, Any]]): Additional parameters for the scan.
     """
+
     scan_target: str
     scan_type: str
     parameters: Optional[Dict[str, Any]] = None
@@ -46,6 +48,7 @@ class IncidentResponseRequest(BaseModel):
         response_plan (str): The name of the response plan to execute.
         parameters (Optional[Dict[str, Any]]): Parameters for the response plan.
     """
+
     incident_id: str
     response_plan: str
     parameters: Optional[Dict[str, Any]] = None
@@ -86,7 +89,7 @@ async def trigger_threat_detection(request: ThreatDetectionRequest) -> Dict[str,
         Dict[str, Any]: The results of the threat detection scan.
     """
     print(f"[API] Triggering {request.scan_type} scan on {request.scan_target}")
-    await asyncio.sleep(1.0) # Simulate scan time
+    await asyncio.sleep(1.0)  # Simulate scan time
 
     # In a real scenario, this would call out to specialized detection services
     # e.g., ADR Core Service, Malware Analysis Service, Nmap Service
@@ -97,21 +100,44 @@ async def trigger_threat_detection(request: ThreatDetectionRequest) -> Dict[str,
         "scan_target": request.scan_target,
         "scan_type": request.scan_type,
         "status": "completed",
-        "findings": []
+        "findings": [],
     }
 
     if request.scan_type == "vulnerability":
-        results["findings"].append({"type": "vulnerability", "severity": "high", "description": "SQL Injection vulnerability found.", "target": request.scan_target})
+        results["findings"].append(
+            {
+                "type": "vulnerability",
+                "severity": "high",
+                "description": "SQL Injection vulnerability found.",
+                "target": request.scan_target,
+            }
+        )
     elif request.scan_type == "malware":
-        results["findings"].append({"type": "malware", "severity": "critical", "description": "Ransomware signature detected.", "target": request.scan_target})
+        results["findings"].append(
+            {
+                "type": "malware",
+                "severity": "critical",
+                "description": "Ransomware signature detected.",
+                "target": request.scan_target,
+            }
+        )
     elif request.scan_type == "intrusion":
-        results["findings"].append({"type": "intrusion", "severity": "medium", "description": "Unusual login activity from foreign IP.", "target": request.scan_target})
+        results["findings"].append(
+            {
+                "type": "intrusion",
+                "severity": "medium",
+                "description": "Unusual login activity from foreign IP.",
+                "target": request.scan_target,
+            }
+        )
 
     return results
 
 
 @app.post("/incident_response")
-async def initiate_incident_response(request: IncidentResponseRequest) -> Dict[str, Any]:
+async def initiate_incident_response(
+    request: IncidentResponseRequest,
+) -> Dict[str, Any]:
     """Initiates an incident response plan for a given incident.
 
     Args:
@@ -121,7 +147,7 @@ async def initiate_incident_response(request: IncidentResponseRequest) -> Dict[s
         Dict[str, Any]: The status and outcome of the initiated response.
     """
     print(f"[API] Initiating response plan '{request.response_plan}' for incident {request.incident_id}")
-    await asyncio.sleep(1.5) # Simulate response execution
+    await asyncio.sleep(1.5)  # Simulate response execution
 
     # In a real scenario, this would call out to the ADR Core Service's response engine
     response_id = str(uuid.uuid4())
@@ -138,7 +164,7 @@ async def initiate_incident_response(request: IncidentResponseRequest) -> Dict[s
         "incident_id": request.incident_id,
         "timestamp": datetime.now().isoformat(),
         "status": status,
-        "details": details
+        "details": details,
     }
 
 
@@ -156,7 +182,7 @@ async def get_security_posture() -> Dict[str, Any]:
         "threat_level": "low",
         "active_incidents": 0,
         "vulnerabilities_found": 5,
-        "last_assessment": datetime.now().isoformat()
+        "last_assessment": datetime.now().isoformat(),
     }
 
 

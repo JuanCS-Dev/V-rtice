@@ -13,18 +13,13 @@ Key Adaptations:
 
 import logging
 import time
-import numpy as np
-from typing import Dict, Any, List, Optional, Callable
-from dataclasses import dataclass
 import uuid
+from dataclasses import dataclass
+from typing import Any
 
-from .base import (
-    ExplainerBase,
-    ExplanationResult,
-    ExplanationType,
-    DetailLevel,
-    FeatureImportance
-)
+import numpy as np
+
+from .base import DetailLevel, ExplainerBase, ExplanationResult, ExplanationType, FeatureImportance
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +34,9 @@ class PerturbationConfig:
         kernel_width: Width of the exponential kernel
         sample_around_instance: Whether to sample around the instance
     """
+
     num_samples: int = 5000
-    feature_selection: str = 'auto'
+    feature_selection: str = "auto"
     kernel_width: float = 0.25
     sample_around_instance: bool = True
 
@@ -55,7 +51,7 @@ class CyberSecLIME(ExplainerBase):
         - Narrative manipulation detection
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize CyberSecLIME.
 
         Args:
@@ -63,32 +59,31 @@ class CyberSecLIME(ExplainerBase):
         """
         super().__init__(config)
 
+        # Use self.config from base class (guaranteed to be dict, not None)
+        cfg = self.config
+
         # Perturbation configuration
         self.perturbation_config = PerturbationConfig(
-            num_samples=config.get('num_samples', 5000),
-            feature_selection=config.get('feature_selection', 'auto'),
-            kernel_width=config.get('kernel_width', 0.25),
-            sample_around_instance=config.get('sample_around_instance', True)
+            num_samples=cfg.get("num_samples", 5000),
+            feature_selection=cfg.get("feature_selection", "auto"),
+            kernel_width=cfg.get("kernel_width", 0.25),
+            sample_around_instance=cfg.get("sample_around_instance", True),
         )
 
         # Feature type handlers
         self.feature_handlers = {
-            'numeric': self._perturb_numeric,
-            'categorical': self._perturb_categorical,
-            'ip_address': self._perturb_ip,
-            'port': self._perturb_port,
-            'score': self._perturb_score,
-            'text': self._perturb_text
+            "numeric": self._perturb_numeric,
+            "categorical": self._perturb_categorical,
+            "ip_address": self._perturb_ip,
+            "port": self._perturb_port,
+            "score": self._perturb_score,
+            "text": self._perturb_text,
         }
 
         logger.info(f"CyberSecLIME initialized with {self.perturbation_config.num_samples} samples")
 
     async def explain(
-        self,
-        model: Any,
-        instance: Dict[str, Any],
-        prediction: Any,
-        detail_level: DetailLevel = DetailLevel.DETAILED
+        self, model: Any, instance: dict[str, Any], prediction: Any, detail_level: DetailLevel = DetailLevel.DETAILED
     ) -> ExplanationResult:
         """Generate LIME explanation for a cybersecurity prediction.
 
@@ -106,11 +101,11 @@ class CyberSecLIME(ExplainerBase):
         self.validate_instance(instance)
 
         # Validate model has prediction method
-        if not hasattr(model, 'predict') and not hasattr(model, 'predict_proba'):
+        if not hasattr(model, "predict") and not hasattr(model, "predict_proba"):
             raise ValueError("Model must have 'predict' or 'predict_proba' method")
 
         explanation_id = str(uuid.uuid4())
-        decision_id = instance.get('decision_id', str(uuid.uuid4()))
+        decision_id = instance.get("decision_id", str(uuid.uuid4()))
 
         # Determine feature types
         feature_types = self._infer_feature_types(instance)
@@ -118,9 +113,7 @@ class CyberSecLIME(ExplainerBase):
         # Generate perturbed samples
         logger.debug(f"Generating {self.perturbation_config.num_samples} perturbed samples")
         perturbed_samples, distances = self._generate_perturbed_samples(
-            instance,
-            feature_types,
-            self.perturbation_config.num_samples
+            instance, feature_types, self.perturbation_config.num_samples
         )
 
         # Get predictions for perturbed samples
@@ -133,38 +126,37 @@ class CyberSecLIME(ExplainerBase):
         # Fit interpretable model (weighted linear regression)
         logger.debug("Fitting interpretable model")
         feature_importances = self._fit_interpretable_model(
-            perturbed_samples,
-            predictions,
-            weights,
-            feature_types.keys()
+            perturbed_samples, predictions, weights, feature_types.keys()
         )
 
-        # Sort by absolute importance
+        # Filter out internal fields and sort by absolute importance
         sorted_features = sorted(
-            feature_importances.items(),
+            [(k, v) for k, v in feature_importances.items() if k != "__intercept__"],
             key=lambda x: abs(x[1]),
-            reverse=True
+            reverse=True,
         )
 
         # Create FeatureImportance objects
         all_features = []
         for feature_name, importance in sorted_features:
-            feature_value = instance.get(feature_name, None)
+            feature_value = instance.get(feature_name)
             description = self.format_feature_description(feature_name, feature_value)
 
-            all_features.append(FeatureImportance(
-                feature_name=feature_name,
-                importance=importance,
-                value=feature_value,
-                description=description,
-                contribution=importance  # For LIME, contribution = importance
-            ))
+            all_features.append(
+                FeatureImportance(
+                    feature_name=feature_name,
+                    importance=importance,
+                    value=feature_value,
+                    description=description,
+                    contribution=importance,  # For LIME, contribution = importance
+                )
+            )
 
         # Top features (based on detail level)
         num_top_features = {
             DetailLevel.SUMMARY: 3,
             DetailLevel.DETAILED: 10,
-            DetailLevel.TECHNICAL: len(all_features)
+            DetailLevel.TECHNICAL: len(all_features),
         }.get(detail_level, 10)
 
         top_features = all_features[:num_top_features]
@@ -174,17 +166,11 @@ class CyberSecLIME(ExplainerBase):
 
         # Calculate explanation confidence (R² of interpretable model)
         confidence = self._calculate_explanation_confidence(
-            predictions,
-            self._predict_interpretable_model(perturbed_samples, feature_importances),
-            weights
+            predictions, self._predict_interpretable_model(perturbed_samples, feature_importances), weights
         )
 
         # Visualization data for SHAP-style plots
-        visualization_data = self._generate_visualization_data(
-            top_features,
-            prediction,
-            detail_level
-        )
+        visualization_data = self._generate_visualization_data(top_features, prediction, detail_level)
 
         latency_ms = int((time.time() - explain_start) * 1000)
 
@@ -203,28 +189,28 @@ class CyberSecLIME(ExplainerBase):
             model_type=type(model).__name__,
             latency_ms=latency_ms,
             metadata={
-                'num_samples': self.perturbation_config.num_samples,
-                'num_features': len(all_features),
-                'prediction': prediction
-            }
+                "num_samples": self.perturbation_config.num_samples,
+                "num_features": len(all_features),
+                "prediction": prediction,
+            },
         )
 
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """Get list of supported model types.
 
         Returns:
             List of supported model types
         """
         return [
-            'sklearn',
-            'xgboost',
-            'lightgbm',
-            'pytorch',
-            'tensorflow',
-            'custom'  # Any model with predict() method
+            "sklearn",
+            "xgboost",
+            "lightgbm",
+            "pytorch",
+            "tensorflow",
+            "custom",  # Any model with predict() method
         ]
 
-    def _infer_feature_types(self, instance: Dict[str, Any]) -> Dict[str, str]:
+    def _infer_feature_types(self, instance: dict[str, Any]) -> dict[str, str]:
         """Infer feature types from instance data.
 
         Args:
@@ -237,33 +223,30 @@ class CyberSecLIME(ExplainerBase):
 
         for feature_name, value in instance.items():
             # Skip meta fields
-            if feature_name in ['decision_id', 'timestamp', 'analysis_id']:
+            if feature_name in ["decision_id", "timestamp", "analysis_id"]:
                 continue
 
             # Infer type based on name and value
-            if 'ip' in feature_name.lower() or 'address' in feature_name.lower():
-                feature_types[feature_name] = 'ip_address'
-            elif 'port' in feature_name.lower():
-                feature_types[feature_name] = 'port'
-            elif 'score' in feature_name.lower() or 'confidence' in feature_name.lower():
-                feature_types[feature_name] = 'score'
+            if "ip" in feature_name.lower() or "address" in feature_name.lower():
+                feature_types[feature_name] = "ip_address"
+            elif "port" in feature_name.lower():
+                feature_types[feature_name] = "port"
+            elif "score" in feature_name.lower() or "confidence" in feature_name.lower():
+                feature_types[feature_name] = "score"
             elif isinstance(value, (int, float)):
-                feature_types[feature_name] = 'numeric'
+                feature_types[feature_name] = "numeric"
             elif isinstance(value, str):
                 if len(value) > 50:
-                    feature_types[feature_name] = 'text'
+                    feature_types[feature_name] = "text"
                 else:
-                    feature_types[feature_name] = 'categorical'
+                    feature_types[feature_name] = "categorical"
             else:
-                feature_types[feature_name] = 'categorical'
+                feature_types[feature_name] = "categorical"
 
         return feature_types
 
     def _generate_perturbed_samples(
-        self,
-        instance: Dict[str, Any],
-        feature_types: Dict[str, str],
-        num_samples: int
+        self, instance: dict[str, Any], feature_types: dict[str, str], num_samples: int
     ) -> tuple:
         """Generate perturbed samples around the instance.
 
@@ -292,18 +275,14 @@ class CyberSecLIME(ExplainerBase):
                 perturbed[feature_name] = perturbed_value
 
                 # Calculate distance (normalized)
-                feature_distance = self._calculate_feature_distance(
-                    original_value,
-                    perturbed_value,
-                    feature_type
-                )
-                distance += feature_distance ** 2
+                feature_distance = self._calculate_feature_distance(original_value, perturbed_value, feature_type)
+                distance += feature_distance**2
 
             # Euclidean distance
             distance = np.sqrt(distance / len(feature_types))
 
             # Copy meta fields
-            for key in ['decision_id', 'timestamp', 'analysis_id']:
+            for key in ["decision_id", "timestamp", "analysis_id"]:
                 if key in instance:
                     perturbed[key] = instance[key]
 
@@ -330,7 +309,7 @@ class CyberSecLIME(ExplainerBase):
         perturbed = value + np.random.normal(0, std)
 
         # Keep non-negative for certain features
-        if any(keyword in feature_name.lower() for keyword in ['count', 'size', 'length', 'num_']):
+        if any(keyword in feature_name.lower() for keyword in ["count", "size", "length", "num_"]):
             perturbed = max(0, perturbed)
 
         return perturbed
@@ -354,10 +333,10 @@ class CyberSecLIME(ExplainerBase):
 
         # Common categorical values for cybersecurity
         common_values = {
-            'protocol': ['TCP', 'UDP', 'ICMP', 'HTTP', 'HTTPS', 'DNS', 'SSH'],
-            'http_method': ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            'severity': ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
-            'decision': ['BLOCK', 'ALLOW', 'INVESTIGATE']
+            "protocol": ["TCP", "UDP", "ICMP", "HTTP", "HTTPS", "DNS", "SSH"],
+            "http_method": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+            "severity": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+            "decision": ["BLOCK", "ALLOW", "INVESTIGATE"],
         }
 
         # Try to find matching category
@@ -383,11 +362,13 @@ class CyberSecLIME(ExplainerBase):
 
         try:
             # Keep first 3 octets, randomize last octet
-            parts = value.split('.')
+            parts = value.split(".")
             if len(parts) == 4:
                 parts[3] = str(np.random.randint(1, 255))
-                return '.'.join(parts)
-        except:
+                return ".".join(parts)
+        except (ValueError, TypeError, AttributeError, IndexError) as e:
+            # Invalid IP format or type - return original value
+            logger.debug(f"IP perturbation failed for {value}: {e}")
             pass
 
         return value
@@ -438,17 +419,16 @@ class CyberSecLIME(ExplainerBase):
             feature_name: Feature name
 
         Returns:
-            Original text (text perturbation is complex, skipped for now)
+            Original text (unmodified)
+
+        Note:
+            Text perturbation (word dropout, synonym replacement) is not implemented.
+            For text-based features, LIME explanations may be less informative.
+            Consider using numerical/categorical features for better explanations.
         """
-        # TODO: Implement text perturbation (word dropout, synonym replacement)
         return value
 
-    def _calculate_feature_distance(
-        self,
-        original: Any,
-        perturbed: Any,
-        feature_type: str
-    ) -> float:
+    def _calculate_feature_distance(self, original: Any, perturbed: Any, feature_type: str) -> float:
         """Calculate distance between original and perturbed feature.
 
         Args:
@@ -462,7 +442,7 @@ class CyberSecLIME(ExplainerBase):
         if original is None or perturbed is None:
             return 1.0
 
-        if feature_type in ['numeric', 'score', 'port']:
+        if feature_type in ["numeric", "score", "port"]:
             # Normalized numeric distance
             try:
                 orig_val = float(original)
@@ -472,16 +452,18 @@ class CyberSecLIME(ExplainerBase):
                 # Normalize by max(value, 1) to avoid division by zero
                 normalizer = max(abs(orig_val), 1.0)
                 return min(1.0, diff / normalizer)
-            except:
+            except (ValueError, TypeError, ZeroDivisionError) as e:
+                # Cannot convert to float or division error - return max distance
+                logger.debug(f"Distance calculation failed for {original} vs {perturbed}: {e}")
                 return 1.0
 
-        elif feature_type in ['categorical', 'ip_address', 'text']:
+        elif feature_type in ["categorical", "ip_address", "text"]:
             # Binary distance for categorical
             return 0.0 if original == perturbed else 1.0
 
         return 1.0
 
-    def _get_model_predictions(self, model: Any, samples: List[Dict[str, Any]]) -> np.ndarray:
+    def _get_model_predictions(self, model: Any, samples: list[dict[str, Any]]) -> np.ndarray:
         """Get model predictions for perturbed samples.
 
         Args:
@@ -492,7 +474,7 @@ class CyberSecLIME(ExplainerBase):
             Array of predictions
         """
         # Try predict_proba first (for classifiers)
-        if hasattr(model, 'predict_proba'):
+        if hasattr(model, "predict_proba"):
             # Convert samples to format expected by model
             X = self._samples_to_model_input(samples, model)
             proba = model.predict_proba(X)
@@ -503,14 +485,13 @@ class CyberSecLIME(ExplainerBase):
             return proba
 
         # Fall back to predict()
-        elif hasattr(model, 'predict'):
+        if hasattr(model, "predict"):
             X = self._samples_to_model_input(samples, model)
             return model.predict(X)
 
-        else:
-            raise ValueError("Model must have 'predict' or 'predict_proba' method")
+        raise ValueError("Model must have 'predict' or 'predict_proba' method")
 
-    def _samples_to_model_input(self, samples: List[Dict[str, Any]], model: Any) -> Any:
+    def _samples_to_model_input(self, samples: list[dict[str, Any]], model: Any) -> Any:
         """Convert samples to model input format.
 
         Args:
@@ -524,7 +505,7 @@ class CyberSecLIME(ExplainerBase):
         # Assume features are in same order as original training
 
         # Get feature names (excluding meta fields)
-        meta_fields = {'decision_id', 'timestamp', 'analysis_id'}
+        meta_fields = {"decision_id", "timestamp", "analysis_id"}
         feature_names = sorted([k for k in samples[0].keys() if k not in meta_fields])
 
         # Convert to numpy array
@@ -543,15 +524,11 @@ class CyberSecLIME(ExplainerBase):
             Array of weights
         """
         # Exponential kernel: exp(-d^2 / width^2)
-        return np.exp(-(distances ** 2) / (kernel_width ** 2))
+        return np.exp(-(distances**2) / (kernel_width**2))
 
     def _fit_interpretable_model(
-        self,
-        samples: List[Dict[str, Any]],
-        predictions: np.ndarray,
-        weights: np.ndarray,
-        feature_names: List[str]
-    ) -> Dict[str, float]:
+        self, samples: list[dict[str, Any]], predictions: np.ndarray, weights: np.ndarray, feature_names: list[str]
+    ) -> dict[str, float]:
         """Fit weighted linear regression model.
 
         Args:
@@ -566,7 +543,7 @@ class CyberSecLIME(ExplainerBase):
         from sklearn.linear_model import Ridge
 
         # Convert samples to feature matrix
-        meta_fields = {'decision_id', 'timestamp', 'analysis_id'}
+        meta_fields = {"decision_id", "timestamp", "analysis_id"}
         feature_names = sorted([f for f in feature_names if f not in meta_fields])
 
         X = np.array([[sample.get(f, 0) for f in feature_names] for sample in samples])
@@ -575,18 +552,17 @@ class CyberSecLIME(ExplainerBase):
         model = Ridge(alpha=1.0)
         model.fit(X, predictions, sample_weight=weights)
 
-        # Return coefficients as importances
+        # Return coefficients as importances (include intercept for prediction)
         importances = {}
         for i, feature_name in enumerate(feature_names):
             importances[feature_name] = float(model.coef_[i])
 
+        # Store intercept for accurate predictions
+        importances["__intercept__"] = float(model.intercept_)
+
         return importances
 
-    def _predict_interpretable_model(
-        self,
-        samples: List[Dict[str, Any]],
-        importances: Dict[str, float]
-    ) -> np.ndarray:
+    def _predict_interpretable_model(self, samples: list[dict[str, Any]], importances: dict[str, float]) -> np.ndarray:
         """Predict using interpretable model.
 
         Args:
@@ -596,19 +572,18 @@ class CyberSecLIME(ExplainerBase):
         Returns:
             Predictions
         """
-        meta_fields = {'decision_id', 'timestamp', 'analysis_id'}
-        feature_names = sorted([f for f in importances.keys() if f not in meta_fields])
+        meta_fields = {"decision_id", "timestamp", "analysis_id", "__intercept__"}
+        feature_names = sorted([f for f in importances if f not in meta_fields])
 
         X = np.array([[sample.get(f, 0) for f in feature_names] for sample in samples])
         coefficients = np.array([importances[f] for f in feature_names])
 
-        return X.dot(coefficients)
+        # Include intercept in prediction
+        intercept = importances.get("__intercept__", 0.0)
+        return X.dot(coefficients) + intercept
 
     def _calculate_explanation_confidence(
-        self,
-        true_predictions: np.ndarray,
-        interpretable_predictions: np.ndarray,
-        weights: np.ndarray
+        self, true_predictions: np.ndarray, interpretable_predictions: np.ndarray, weights: np.ndarray
     ) -> float:
         """Calculate explanation confidence (weighted R²).
 
@@ -622,22 +597,22 @@ class CyberSecLIME(ExplainerBase):
         """
         # Weighted R²
         residuals = true_predictions - interpretable_predictions
-        ss_res = np.sum(weights * (residuals ** 2))
+        ss_res = np.sum(weights * (residuals**2))
 
         mean_pred = np.average(true_predictions, weights=weights)
         ss_tot = np.sum(weights * ((true_predictions - mean_pred) ** 2))
 
         if ss_tot == 0:
-            return 0.0
+            # No variance in predictions
+            if ss_res == 0:
+                return 1.0  # Perfect explanation (no variance, no residuals)
+            return 0.0  # Degenerate case: no variance but still have residuals
 
         r_squared = 1 - (ss_res / ss_tot)
         return max(0.0, min(1.0, r_squared))
 
     def _generate_summary(
-        self,
-        top_features: List[FeatureImportance],
-        prediction: Any,
-        detail_level: DetailLevel
+        self, top_features: list[FeatureImportance], prediction: Any, detail_level: DetailLevel
     ) -> str:
         """Generate human-readable summary.
 
@@ -657,11 +632,13 @@ class CyberSecLIME(ExplainerBase):
             top_feature = top_features[0]
             direction = "increases" if top_feature.importance > 0 else "decreases"
 
-            return (f"Prediction: {prediction}. "
-                    f"The most important factor is {top_feature.feature_name} "
-                    f"which {direction} the likelihood of this prediction.")
+            return (
+                f"Prediction: {prediction}. "
+                f"The most important factor is {top_feature.feature_name} "
+                f"which {direction} the likelihood of this prediction."
+            )
 
-        elif detail_level == DetailLevel.DETAILED:
+        if detail_level == DetailLevel.DETAILED:
             # Detailed summary with top 3 features
             summary_parts = [f"Prediction: {prediction}."]
 
@@ -678,26 +655,22 @@ class CyberSecLIME(ExplainerBase):
 
             return " ".join(summary_parts)
 
-        else:  # TECHNICAL
-            # Full technical details
-            summary_parts = [f"LIME Explanation for prediction: {prediction}"]
-            summary_parts.append(f"Top {len(top_features)} features by importance:")
+        # TECHNICAL
+        # Full technical details
+        summary_parts = [f"LIME Explanation for prediction: {prediction}"]
+        summary_parts.append(f"Top {len(top_features)} features by importance:")
 
-            for i, feature in enumerate(top_features[:10], 1):
-                direction = "+" if feature.importance >= 0 else "-"
-                summary_parts.append(
-                    f"{i}. {feature.feature_name}: {direction}{abs(feature.importance):.4f} "
-                    f"(value: {feature.value})"
-                )
+        for i, feature in enumerate(top_features[:10], 1):
+            direction = "+" if feature.importance >= 0 else "-"
+            summary_parts.append(
+                f"{i}. {feature.feature_name}: {direction}{abs(feature.importance):.4f} (value: {feature.value})"
+            )
 
-            return "\n".join(summary_parts)
+        return "\n".join(summary_parts)
 
     def _generate_visualization_data(
-        self,
-        top_features: List[FeatureImportance],
-        prediction: Any,
-        detail_level: DetailLevel
-    ) -> Dict[str, Any]:
+        self, top_features: list[FeatureImportance], prediction: Any, detail_level: DetailLevel
+    ) -> dict[str, Any]:
         """Generate data for visualization.
 
         Args:
@@ -709,14 +682,9 @@ class CyberSecLIME(ExplainerBase):
             Visualization data dict
         """
         return {
-            'type': 'lime_bar_chart',
-            'prediction': float(prediction) if isinstance(prediction, (int, float, np.number)) else str(prediction),
-            'features': [
-                {
-                    'name': f.feature_name,
-                    'importance': f.importance,
-                    'value': str(f.value)
-                }
-                for f in top_features
-            ]
+            "type": "lime_bar_chart",
+            "prediction": float(prediction) if isinstance(prediction, (int, float, np.number)) else str(prediction),
+            "features": [
+                {"name": f.feature_name, "importance": f.importance, "value": str(f.value)} for f in top_features
+            ],
         }

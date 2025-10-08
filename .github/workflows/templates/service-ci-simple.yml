@@ -1,0 +1,80 @@
+# 🎯 MAXIMUS Service CI Template (Simplified) - uv + ruff
+#
+# Para services simples SEM Docker/Deploy
+# Quality-First | 60x mais rápido que pip
+#
+# Como usar:
+# 1. Copie para .github/workflows/ci.yml no seu service
+# 2. Ajuste SERVICE_NAME se necessário
+# 3. Commit e push
+
+name: Service CI
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: [main, develop]
+
+env:
+  SERVICE_NAME: my-service  # ALTERAR
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ============================================================================
+  # QUALITY + TESTS (combinados para ser mais rápido)
+  # ============================================================================
+  quality-and-tests:
+    name: 🎨 Quality & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: ⚡ Install uv + ruff
+        run: |
+          pip install --no-cache-dir uv ruff
+
+      - name: 📦 Install dependencies
+        run: |
+          uv pip sync requirements.txt
+          uv pip install pytest pytest-asyncio pytest-cov
+
+      - name: 🔍 Ruff Check
+        run: |
+          ruff check .
+
+      - name: 🎨 Ruff Format
+        run: |
+          ruff format --check .
+
+      - name: 🧪 Run Tests
+        run: |
+          PYTHONPATH=. pytest -v --cov=. --cov-report=term-missing
+
+  # ============================================================================
+  # SECURITY SCAN
+  # ============================================================================
+  security:
+    name: 🔒 Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 🔍 Bandit Scan
+        run: |
+          pip install bandit[toml]
+          bandit -r . -ll || true

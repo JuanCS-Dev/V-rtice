@@ -10,15 +10,15 @@ __version__ = "1.0.0"
 __author__ = "VÉRTICE Team"
 
 from .adaptive_core import (
-    AntibodyType,
-    ThreatSample,
-    Antibody,
-    ClonalExpansion,
-    AffinityMaturationEvent,
-    AntibodyGenerator,
-    AffinityMaturationEngine,
-    ClonalSelectionManager,
     AdaptiveImmunityController,
+    AffinityMaturationEngine,
+    AffinityMaturationEvent,
+    Antibody,
+    AntibodyGenerator,
+    AntibodyType,
+    ClonalExpansion,
+    ClonalSelectionManager,
+    ThreatSample,
 )
 
 __all__ = [

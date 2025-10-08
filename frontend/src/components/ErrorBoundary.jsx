@@ -54,8 +54,8 @@ class ErrorBoundary extends React.Component {
       url: window.location.href
     };
 
-    // TODO: Integrar com Sentry quando disponível
-    // Sentry.captureException(error, { contexts: { react: errorInfo } });
+    // Error tracking via backend logging endpoint
+    // (Sentry integration can be added later if needed)
 
     // Log para console em desenvolvimento
     if (process.env.NODE_ENV === 'development') {

@@ -13,27 +13,24 @@ The service exposes endpoints for:
 
 import logging
 from contextlib import asynccontextmanager
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, status, Depends
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, status
+from pydantic import BaseModel, Field
 
 # Import local SeriemaGraphClient
 try:
     from seriema_graph_client import SeriemaGraphClient
+
     CLIENT_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"SeriemaGraphClient not available - running in limited mode: {e}")
     CLIENT_AVAILABLE = False
     SeriemaGraphClient = None
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global client instance
@@ -42,6 +39,7 @@ graph_client: Optional[SeriemaGraphClient] = None
 
 class ArgumentNode(BaseModel):
     """Argument node model for API requests."""
+
     id: str = Field(..., description="Unique argument identifier")
     text: str = Field(..., description="Argument text content")
     role: str = Field(default="claim", description="Argument role (claim/premise/etc)")
@@ -51,6 +49,7 @@ class ArgumentNode(BaseModel):
 
 class AttackRelation(BaseModel):
     """Attack relation model for API requests."""
+
     attacker_id: str = Field(..., description="ID of attacking argument")
     target_id: str = Field(..., description="ID of target argument")
     attack_type: str = Field(default="defeats", description="Type of attack")
@@ -59,6 +58,7 @@ class AttackRelation(BaseModel):
 
 class FrameworkRequest(BaseModel):
     """Request model for storing argumentation framework."""
+
     framework_id: str = Field(..., description="Unique framework identifier")
     arguments: List[ArgumentNode] = Field(..., description="List of arguments")
     attacks: List[AttackRelation] = Field(default_factory=list, description="Attack relations")
@@ -67,6 +67,7 @@ class FrameworkRequest(BaseModel):
 
 class PathQueryRequest(BaseModel):
     """Request model for path finding queries."""
+
     start_id: str = Field(..., description="Start argument ID")
     end_id: str = Field(..., description="End argument ID")
     max_depth: int = Field(default=5, ge=1, le=20, description="Maximum path depth")
@@ -86,7 +87,7 @@ async def lifespan(app: FastAPI):
                 uri="bolt://neo4j:7687",
                 user="neo4j",
                 password="neo4j123",
-                database="neo4j"
+                database="neo4j",
             )
             await graph_client.initialize()
             logger.info("✅ Seriema Graph Service started successfully")
@@ -113,7 +114,7 @@ app = FastAPI(
     title="Maximus Seriema Graph Service",
     description="Knowledge Graph Management for Maximus AI Platform",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -122,7 +123,7 @@ def get_client() -> SeriemaGraphClient:
     if not graph_client:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Graph service not initialized or running in limited mode"
+            detail="Graph service not initialized or running in limited mode",
         )
     return graph_client
 
@@ -139,7 +140,7 @@ async def health_check() -> Dict[str, Any]:
         "service": "seriema_graph",
         "timestamp": datetime.utcnow().isoformat(),
         "client_available": CLIENT_AVAILABLE,
-        "neo4j_connected": False
+        "neo4j_connected": False,
     }
 
     if graph_client:
@@ -156,8 +157,7 @@ async def health_check() -> Dict[str, Any]:
 
 @app.post("/framework/store")
 async def store_framework(
-    request: FrameworkRequest,
-    client: SeriemaGraphClient = Depends(get_client)
+    request: FrameworkRequest, client: SeriemaGraphClient = Depends(get_client)
 ) -> Dict[str, Any]:
     """
     Store an argumentation framework in the graph database.
@@ -171,14 +171,14 @@ async def store_framework(
             "id": request.framework_id,
             "arguments": [arg.dict() for arg in request.arguments],
             "attacks": [att.dict() for att in request.attacks],
-            "metadata": request.metadata
+            "metadata": request.metadata,
         }
 
         # Note: The actual store_framework method expects ArgumentationFramework object
         # This is a simplified version - proper implementation would convert the data
         await client.store_framework(
             framework_id=request.framework_id,
-            framework=framework_data  # In production, convert to proper type
+            framework=framework_data,  # In production, convert to proper type
         )
 
         return {
@@ -186,21 +186,18 @@ async def store_framework(
             "framework_id": request.framework_id,
             "arguments_stored": len(request.arguments),
             "attacks_stored": len(request.attacks),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Error storing framework: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to store framework: {str(e)}"
+            detail=f"Failed to store framework: {str(e)}",
         )
 
 
 @app.get("/framework/{framework_id}")
-async def retrieve_framework(
-    framework_id: str,
-    client: SeriemaGraphClient = Depends(get_client)
-) -> Dict[str, Any]:
+async def retrieve_framework(framework_id: str, client: SeriemaGraphClient = Depends(get_client)) -> Dict[str, Any]:
     """
     Retrieve an argumentation framework from the graph database.
 
@@ -212,14 +209,14 @@ async def retrieve_framework(
         if not framework:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Framework {framework_id} not found"
+                detail=f"Framework {framework_id} not found",
             )
 
         return {
             "status": "success",
             "framework_id": framework_id,
             "framework": framework,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except HTTPException:
         raise
@@ -227,7 +224,7 @@ async def retrieve_framework(
         logger.error(f"Error retrieving framework: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve framework: {str(e)}"
+            detail=f"Failed to retrieve framework: {str(e)}",
         )
 
 
@@ -235,7 +232,7 @@ async def retrieve_framework(
 async def get_argument_centrality(
     framework_id: str,
     algorithm: str = "betweenness",
-    client: SeriemaGraphClient = Depends(get_client)
+    client: SeriemaGraphClient = Depends(get_client),
 ) -> Dict[str, Any]:
     """
     Calculate centrality measures for arguments in a framework.
@@ -250,13 +247,13 @@ async def get_argument_centrality(
             "framework_id": framework_id,
             "algorithm": algorithm,
             "centrality": centrality,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Error calculating centrality: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to calculate centrality: {str(e)}"
+            detail=f"Failed to calculate centrality: {str(e)}",
         )
 
 
@@ -264,7 +261,7 @@ async def get_argument_centrality(
 async def find_argument_paths(
     framework_id: str,
     query: PathQueryRequest,
-    client: SeriemaGraphClient = Depends(get_client)
+    client: SeriemaGraphClient = Depends(get_client),
 ) -> Dict[str, Any]:
     """
     Find all paths between two arguments in a framework.
@@ -276,7 +273,7 @@ async def find_argument_paths(
             framework_id=framework_id,
             start_id=query.start_id,
             end_id=query.end_id,
-            max_depth=query.max_depth
+            max_depth=query.max_depth,
         )
 
         return {
@@ -286,13 +283,13 @@ async def find_argument_paths(
             "end_id": query.end_id,
             "paths": paths,
             "path_count": len(paths) if paths else 0,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Error finding paths: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to find paths: {str(e)}"
+            detail=f"Failed to find paths: {str(e)}",
         )
 
 
@@ -301,7 +298,7 @@ async def get_argument_neighborhood(
     framework_id: str,
     argument_id: str,
     depth: int = 2,
-    client: SeriemaGraphClient = Depends(get_client)
+    client: SeriemaGraphClient = Depends(get_client),
 ) -> Dict[str, Any]:
     """
     Get the neighborhood subgraph around an argument.
@@ -310,9 +307,7 @@ async def get_argument_neighborhood(
     """
     try:
         neighborhood = await client.get_argument_neighborhoods(
-            framework_id=framework_id,
-            argument_ids=[argument_id],
-            depth=depth
+            framework_id=framework_id, argument_ids=[argument_id], depth=depth
         )
 
         return {
@@ -321,20 +316,19 @@ async def get_argument_neighborhood(
             "argument_id": argument_id,
             "depth": depth,
             "neighborhood": neighborhood,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Error getting neighborhood: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get neighborhood: {str(e)}"
+            detail=f"Failed to get neighborhood: {str(e)}",
         )
 
 
 @app.get("/framework/{framework_id}/circular-arguments")
 async def detect_circular_arguments(
-    framework_id: str,
-    client: SeriemaGraphClient = Depends(get_client)
+    framework_id: str, client: SeriemaGraphClient = Depends(get_client)
 ) -> Dict[str, Any]:
     """
     Detect circular argument patterns (logical fallacies).
@@ -349,20 +343,19 @@ async def detect_circular_arguments(
             "framework_id": framework_id,
             "circular_arguments": cycles,
             "cycle_count": len(cycles) if cycles else 0,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Error detecting circular arguments: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to detect circular arguments: {str(e)}"
+            detail=f"Failed to detect circular arguments: {str(e)}",
         )
 
 
 @app.get("/framework/{framework_id}/statistics")
 async def get_framework_statistics(
-    framework_id: str,
-    client: SeriemaGraphClient = Depends(get_client)
+    framework_id: str, client: SeriemaGraphClient = Depends(get_client)
 ) -> Dict[str, Any]:
     """
     Get comprehensive statistics for a framework.
@@ -376,21 +369,18 @@ async def get_framework_statistics(
             "status": "success",
             "framework_id": framework_id,
             "statistics": stats,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Error getting statistics: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get statistics: {str(e)}"
+            detail=f"Failed to get statistics: {str(e)}",
         )
 
 
 @app.delete("/framework/{framework_id}")
-async def delete_framework(
-    framework_id: str,
-    client: SeriemaGraphClient = Depends(get_client)
-) -> Dict[str, Any]:
+async def delete_framework(framework_id: str, client: SeriemaGraphClient = Depends(get_client)) -> Dict[str, Any]:
     """
     Delete an argumentation framework from the database.
 
@@ -403,21 +393,15 @@ async def delete_framework(
             "status": "success",
             "framework_id": framework_id,
             "message": "Framework deleted successfully",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Error deleting framework: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete framework: {str(e)}"
+            detail=f"Failed to delete framework: {str(e)}",
         )
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8029,
-        reload=True,
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8029, reload=True, log_level="info")

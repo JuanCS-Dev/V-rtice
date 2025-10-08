@@ -10,11 +10,11 @@ Prediction error = reconstruction error (events that don't fit learned patterns)
 """
 
 import logging
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from typing import Dict, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class EventVAE(nn.Module):
         self,
         input_dim: int = 10000,
         hidden_dims: list = [1024, 256],
-        latent_dim: int = 64
+        latent_dim: int = 64,
     ):
         """Initialize Event VAE.
 
@@ -51,12 +51,14 @@ class EventVAE(nn.Module):
         in_dim = input_dim
 
         for h_dim in hidden_dims:
-            encoder_layers.extend([
-                nn.Linear(in_dim, h_dim),
-                nn.BatchNorm1d(h_dim),
-                nn.ReLU(),
-                nn.Dropout(0.2)
-            ])
+            encoder_layers.extend(
+                [
+                    nn.Linear(in_dim, h_dim),
+                    nn.BatchNorm1d(h_dim),
+                    nn.ReLU(),
+                    nn.Dropout(0.2),
+                ]
+            )
             in_dim = h_dim
 
         self.encoder = nn.Sequential(*encoder_layers)
@@ -70,12 +72,14 @@ class EventVAE(nn.Module):
         in_dim = latent_dim
 
         for h_dim in reversed(hidden_dims):
-            decoder_layers.extend([
-                nn.Linear(in_dim, h_dim),
-                nn.BatchNorm1d(h_dim),
-                nn.ReLU(),
-                nn.Dropout(0.2)
-            ])
+            decoder_layers.extend(
+                [
+                    nn.Linear(in_dim, h_dim),
+                    nn.BatchNorm1d(h_dim),
+                    nn.ReLU(),
+                    nn.Dropout(0.2),
+                ]
+            )
             in_dim = h_dim
 
         decoder_layers.append(nn.Linear(in_dim, input_dim))
@@ -85,7 +89,7 @@ class EventVAE(nn.Module):
 
         logger.info(f"EventVAE initialized: {input_dim}D → {latent_dim}D latent")
 
-    def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def encode(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Encode input to latent distribution parameters.
 
         Args:
@@ -126,7 +130,7 @@ class EventVAE(nn.Module):
         """
         return self.decoder(z)
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass through VAE.
 
         Args:
@@ -150,9 +154,9 @@ class EventVAE(nn.Module):
         x_reconstructed = self.decode(z)
 
         # Compute prediction error (reconstruction error)
-        prediction_error = F.binary_cross_entropy(
-            x_reconstructed, x, reduction='none'
-        ).sum(dim=1)  # Sum over features, keep batch dimension
+        prediction_error = F.binary_cross_entropy(x_reconstructed, x, reduction="none").sum(
+            dim=1
+        )  # Sum over features, keep batch dimension
 
         return z, x_reconstructed, mu, logvar, prediction_error
 
@@ -162,8 +166,8 @@ class EventVAE(nn.Module):
         x_reconstructed: torch.Tensor,
         mu: torch.Tensor,
         logvar: torch.Tensor,
-        beta: float = 1.0
-    ) -> Tuple[torch.Tensor, Dict[str, float]]:
+        beta: float = 1.0,
+    ) -> tuple[torch.Tensor, dict[str, float]]:
         """Compute VAE loss (ELBO).
 
         Loss = Reconstruction Loss + β * KL Divergence
@@ -179,7 +183,7 @@ class EventVAE(nn.Module):
             (total_loss, loss_dict): Total loss and individual components
         """
         # Reconstruction loss (Binary Cross Entropy)
-        recon_loss = F.binary_cross_entropy(x_reconstructed, x, reduction='sum')
+        recon_loss = F.binary_cross_entropy(x_reconstructed, x, reduction="sum")
 
         # KL Divergence: KL(q(z|x) || p(z)) where p(z) = N(0, I)
         # KL = -0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
@@ -189,10 +193,10 @@ class EventVAE(nn.Module):
         total_loss = recon_loss + beta * kl_div
 
         loss_dict = {
-            'total_loss': total_loss.item(),
-            'reconstruction_loss': recon_loss.item(),
-            'kl_divergence': kl_div.item(),
-            'beta': beta
+            "total_loss": total_loss.item(),
+            "reconstruction_loss": recon_loss.item(),
+            "kl_divergence": kl_div.item(),
+            "beta": beta,
         }
 
         return total_loss, loss_dict
@@ -209,8 +213,8 @@ class SensoryLayer:
         self,
         input_dim: int = 10000,
         latent_dim: int = 64,
-        device: str = 'cpu',
-        anomaly_threshold: float = 3.0
+        device: str = "cpu",
+        anomaly_threshold: float = 3.0,
     ):
         """Initialize Sensory Layer.
 
@@ -225,11 +229,7 @@ class SensoryLayer:
         self.anomaly_threshold = anomaly_threshold
 
         # VAE model
-        self.vae = EventVAE(
-            input_dim=input_dim,
-            hidden_dims=[1024, 256],
-            latent_dim=latent_dim
-        ).to(self.device)
+        self.vae = EventVAE(input_dim=input_dim, hidden_dims=[1024, 256], latent_dim=latent_dim).to(self.device)
 
         # Prediction error statistics (for anomaly detection)
         self.error_mean = 0.0
@@ -238,7 +238,7 @@ class SensoryLayer:
 
         logger.info(f"SensoryLayer initialized on {device}")
 
-    def predict(self, event: np.ndarray) -> Dict:
+    def predict(self, event: np.ndarray) -> dict:
         """Predict event representation and detect anomalies.
 
         Args:
@@ -280,19 +280,19 @@ class SensoryLayer:
             self.error_std = np.std(self.error_history)
 
             return {
-                'latent_z': z.cpu().numpy()[0],  # [latent_dim]
-                'reconstruction': x_recon.cpu().numpy()[0],  # [input_dim]
-                'prediction_error': error_value,
-                'is_anomalous': is_anomalous,
-                'anomaly_score': z_score
+                "latent_z": z.cpu().numpy()[0],  # [latent_dim]
+                "reconstruction": x_recon.cpu().numpy()[0],  # [input_dim]
+                "prediction_error": error_value,
+                "is_anomalous": is_anomalous,
+                "anomaly_score": z_score,
             }
 
     def train_step(
         self,
         events_batch: np.ndarray,
         optimizer: torch.optim.Optimizer,
-        beta: float = 1.0
-    ) -> Dict[str, float]:
+        beta: float = 1.0,
+    ) -> dict[str, float]:
         """Single training step.
 
         Args:
@@ -323,18 +323,21 @@ class SensoryLayer:
 
     def save_model(self, path: str):
         """Save VAE model checkpoint."""
-        torch.save({
-            'vae_state_dict': self.vae.state_dict(),
-            'error_mean': self.error_mean,
-            'error_std': self.error_std,
-            'latent_dim': self.latent_dim
-        }, path)
+        torch.save(
+            {
+                "vae_state_dict": self.vae.state_dict(),
+                "error_mean": self.error_mean,
+                "error_std": self.error_std,
+                "latent_dim": self.latent_dim,
+            },
+            path,
+        )
         logger.info(f"Model saved to {path}")
 
     def load_model(self, path: str):
         """Load VAE model checkpoint."""
         checkpoint = torch.load(path, map_location=self.device)
-        self.vae.load_state_dict(checkpoint['vae_state_dict'])
-        self.error_mean = checkpoint['error_mean']
-        self.error_std = checkpoint['error_std']
+        self.vae.load_state_dict(checkpoint["vae_state_dict"])
+        self.error_mean = checkpoint["error_mean"]
+        self.error_std = checkpoint["error_std"]
         logger.info(f"Model loaded from {path}")

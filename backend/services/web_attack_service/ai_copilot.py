@@ -18,13 +18,14 @@ it to intelligently identify and simulate web-based attack scenarios.
 
 import asyncio
 import json
-from typing import List, Dict, Optional
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Dict, List, Optional
 
 # Gemini (Google)
 try:
     import google.generativeai as genai
+
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -32,18 +33,20 @@ except ImportError:
 # Anthropic (Claude)
 try:
     import anthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 import httpx
+
 from models import (
     AICoPilotRequest,
     AICoPilotResponse,
     AIGeneratedPayload,
     AIProvider,
+    Severity,
     VulnerabilityType,
-    Severity
 )
 
 logger = logging.getLogger(__name__)
@@ -70,7 +73,7 @@ class AICoPilot:
         gemini_api_key: Optional[str] = None,
         anthropic_api_key: Optional[str] = None,
         default_provider: AIProvider = AIProvider.AUTO,
-        prefrontal_cortex_url: Optional[str] = None
+        prefrontal_cortex_url: Optional[str] = None,
     ):
         """Inicializa o AICoPilot.
 
@@ -91,7 +94,7 @@ class AICoPilot:
 
         if GEMINI_AVAILABLE and gemini_api_key:
             genai.configure(api_key=gemini_api_key)
-            self.gemini_client = genai.GenerativeModel('gemini-pro')
+            self.gemini_client = genai.GenerativeModel("gemini-pro")
             logger.info("Gemini AI initialized")
 
         if ANTHROPIC_AVAILABLE and anthropic_api_key:
@@ -101,10 +104,7 @@ class AICoPilot:
         if not self.gemini_client and not self.anthropic_client:
             logger.warning("No AI provider available - Co-Pilot disabled")
 
-    async def generate_attack_vectors(
-        self,
-        request: AICoPilotRequest
-    ) -> AICoPilotResponse:
+    async def generate_attack_vectors(self, request: AICoPilotRequest) -> AICoPilotResponse:
         """
         Generate attack vectors using AI
 
@@ -145,13 +145,13 @@ class AICoPilot:
         recommendations = self._extract_recommendations(response_text)
 
         return AICoPilotResponse(
-            analysis=response_text.split('\n\n')[0],  # First paragraph
+            analysis=response_text.split("\n\n")[0],  # First paragraph
             attack_vectors=validated_payloads,
             recommendations=recommendations,
             provider_used=provider,
             tokens_used=tokens_used,
             confidence=0.85,  # Based on validation pass rate
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
     async def _select_provider(self, requested: AIProvider) -> Optional[AIProvider]:
@@ -185,7 +185,7 @@ class AICoPilot:
         Returns:
             str: O prompt formatado para a IA.
         """
-        vuln_type = request.attack_type.value.replace('_', ' ').title()
+        vuln_type = request.attack_type.value.replace("_", " ").title()
 
         prompt = f"""You are a web application security expert conducting an ethical penetration test.
 
@@ -233,12 +233,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
 
         return prompt
 
-    async def _generate_with_gemini(
-        self,
-        prompt: str,
-        temperature: float,
-        max_tokens: int
-    ) -> tuple[str, int]:
+    async def _generate_with_gemini(self, prompt: str, temperature: float, max_tokens: int) -> tuple[str, int]:
         """Gera uma resposta usando o modelo Gemini.
 
         Args:
@@ -256,10 +251,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             response = await asyncio.to_thread(
                 self.gemini_client.generate_content,
                 prompt,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=temperature,
-                    max_output_tokens=max_tokens
-                )
+                generation_config=genai.types.GenerationConfig(temperature=temperature, max_output_tokens=max_tokens),
             )
 
             text = response.text
@@ -272,12 +264,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             logger.error(f"Gemini generation failed: {str(e)}")
             raise
 
-    async def _generate_with_anthropic(
-        self,
-        prompt: str,
-        temperature: float,
-        max_tokens: int
-    ) -> tuple[str, int]:
+    async def _generate_with_anthropic(self, prompt: str, temperature: float, max_tokens: int) -> tuple[str, int]:
         """Gera uma resposta usando o modelo Anthropic.
 
         Args:
@@ -297,9 +284,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
                 model="claude-3-sonnet-20240229",
                 max_tokens=max_tokens,
                 temperature=temperature,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             text = response.content[0].text
@@ -311,11 +296,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             logger.error(f"Anthropic generation failed: {str(e)}")
             raise
 
-    def _parse_ai_response(
-        self,
-        response_text: str,
-        attack_type: VulnerabilityType
-    ) -> List[AIGeneratedPayload]:
+    def _parse_ai_response(self, response_text: str, attack_type: VulnerabilityType) -> List[AIGeneratedPayload]:
         """Analisa a resposta da IA, extraindo payloads de ataque estruturados.
 
         Args:
@@ -329,36 +310,33 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
 
         try:
             # Try to extract JSON block
-            if '```json' in response_text:
-                json_start = response_text.find('```json') + 7
-                json_end = response_text.find('```', json_start)
+            if "```json" in response_text:
+                json_start = response_text.find("```json") + 7
+                json_end = response_text.find("```", json_start)
                 json_str = response_text[json_start:json_end].strip()
             else:
                 # Try to find JSON object
-                json_start = response_text.find('{')
-                json_end = response_text.rfind('}') + 1
+                json_start = response_text.find("{")
+                json_end = response_text.rfind("}") + 1
                 json_str = response_text[json_start:json_end]
 
             data = json.loads(json_str)
 
-            for p in data.get('payloads', []):
+            for p in data.get("payloads", []):
                 severity_map = {
-                    'critical': Severity.CRITICAL,
-                    'high': Severity.HIGH,
-                    'medium': Severity.MEDIUM,
-                    'low': Severity.LOW
+                    "critical": Severity.CRITICAL,
+                    "high": Severity.HIGH,
+                    "medium": Severity.MEDIUM,
+                    "low": Severity.LOW,
                 }
 
                 payload = AIGeneratedPayload(
-                    payload=p.get('payload', ''),
+                    payload=p.get("payload", ""),
                     payload_type=attack_type,
-                    explanation=p.get('explanation', ''),
-                    risk_level=severity_map.get(
-                        p.get('risk_level', 'medium').lower(),
-                        Severity.MEDIUM
-                    ),
+                    explanation=p.get("explanation", ""),
+                    risk_level=severity_map.get(p.get("risk_level", "medium").lower(), Severity.MEDIUM),
                     prefrontal_cortex_approved=False,
-                    destructiveness_score=self._calculate_destructiveness(p.get('payload', ''))
+                    destructiveness_score=self._calculate_destructiveness(p.get("payload", "")),
                 )
                 payloads.append(payload)
 
@@ -379,16 +357,16 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             float: O score de destrutividade.
         """
         destructive_keywords = {
-            'drop': 0.9,
-            'delete': 0.9,
-            'truncate': 0.9,
-            'update': 0.7,
-            'insert': 0.6,
-            'exec': 0.8,
-            'system': 0.8,
-            'shell': 0.8,
-            'rm ': 0.9,
-            'format': 0.8,
+            "drop": 0.9,
+            "delete": 0.9,
+            "truncate": 0.9,
+            "update": 0.7,
+            "insert": 0.6,
+            "exec": 0.8,
+            "system": 0.8,
+            "shell": 0.8,
+            "rm ": 0.9,
+            "format": 0.8,
         }
 
         score = 0.0
@@ -400,11 +378,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
 
         return score
 
-    def _fallback_parse(
-        self,
-        response_text: str,
-        attack_type: VulnerabilityType
-    ) -> List[AIGeneratedPayload]:
+    def _fallback_parse(self, response_text: str, attack_type: VulnerabilityType) -> List[AIGeneratedPayload]:
         """Parser de fallback quando a extração JSON da resposta da IA falha.
 
         Tenta extrair payloads de texto usando heurísticas simples.
@@ -419,29 +393,28 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
         payloads = []
 
         # Simple heuristic: look for code blocks or quoted strings
-        lines = response_text.split('\n')
+        lines = response_text.split("\n")
 
         for line in lines:
             # Look for payload patterns
-            if any(marker in line for marker in ['payload:', 'Payload:', '```', '`']):
+            if any(marker in line for marker in ["payload:", "Payload:", "```", "`"]):
                 # Extract potential payload
-                payload_text = line.split(':', 1)[-1].strip('` \'"')
+                payload_text = line.split(":", 1)[-1].strip("` '\"")
 
                 if len(payload_text) > 5:  # Minimum payload length
-                    payloads.append(AIGeneratedPayload(
-                        payload=payload_text,
-                        payload_type=attack_type,
-                        explanation="Extracted from AI response (fallback parser)",
-                        risk_level=Severity.MEDIUM,
-                        destructiveness_score=self._calculate_destructiveness(payload_text)
-                    ))
+                    payloads.append(
+                        AIGeneratedPayload(
+                            payload=payload_text,
+                            payload_type=attack_type,
+                            explanation="Extracted from AI response (fallback parser)",
+                            risk_level=Severity.MEDIUM,
+                            destructiveness_score=self._calculate_destructiveness(payload_text),
+                        )
+                    )
 
         return payloads[:5]  # Limit to 5
 
-    async def _validate_payloads(
-        self,
-        payloads: List[AIGeneratedPayload]
-    ) -> List[AIGeneratedPayload]:
+    async def _validate_payloads(self, payloads: List[AIGeneratedPayload]) -> List[AIGeneratedPayload]:
         """Valida payloads através do serviço Prefrontal Cortex (inibição de impulso).
 
         Args:
@@ -466,10 +439,10 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
                             "payload": {
                                 "payload_text": payload.payload,
                                 "attack_type": payload.payload_type.value,
-                                "risk_level": payload.risk_level.value
+                                "risk_level": payload.risk_level.value,
                             },
-                            "destructiveness_score": payload.destructiveness_score
-                        }
+                            "destructiveness_score": payload.destructiveness_score,
+                        },
                     )
 
                     if response.status_code == 200:
@@ -479,9 +452,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
                             payload.prefrontal_cortex_approved = True
                             validated.append(payload)
                         else:
-                            logger.info(
-                                f"Payload blocked by Prefrontal Cortex: {payload.payload[:50]}"
-                            )
+                            logger.info(f"Payload blocked by Prefrontal Cortex: {payload.payload[:50]}")
 
                 except Exception as e:
                     logger.warning(f"Prefrontal Cortex validation failed: {str(e)}")
@@ -503,29 +474,26 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
 
         try:
             # Try JSON extraction first
-            if '```json' in response_text:
-                json_start = response_text.find('```json') + 7
-                json_end = response_text.find('```', json_start)
+            if "```json" in response_text:
+                json_start = response_text.find("```json") + 7
+                json_end = response_text.find("```", json_start)
                 json_str = response_text[json_start:json_end].strip()
                 data = json.loads(json_str)
-                recommendations = data.get('recommendations', [])
+                recommendations = data.get("recommendations", [])
 
         except Exception:
             # Fallback: look for recommendation patterns
-            lines = response_text.split('\n')
+            lines = response_text.split("\n")
             for line in lines:
-                if any(keyword in line.lower() for keyword in ['recommend', 'should', 'must', 'remediation']):
-                    cleaned = line.strip('- *#').strip()
+                if any(keyword in line.lower() for keyword in ["recommend", "should", "must", "remediation"]):
+                    cleaned = line.strip("- *#").strip()
                     if len(cleaned) > 20:  # Meaningful recommendation
                         recommendations.append(cleaned)
 
         return recommendations[:5]  # Limit to 5
 
     async def analyze_vulnerability_context(
-        self,
-        http_request: Dict,
-        http_response: Dict,
-        suspected_vuln: VulnerabilityType
+        self, http_request: Dict, http_response: Dict, suspected_vuln: VulnerabilityType
     ) -> str:
         """
         Analyze HTTP traffic for vulnerability insights

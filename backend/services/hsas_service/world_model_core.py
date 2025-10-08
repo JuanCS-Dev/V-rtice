@@ -27,9 +27,10 @@ NO MOCKS - Production-ready implementation.
 
 import logging
 import math
-from datetime import datetime
-from typing import Dict, Any, Optional, Tuple, List
 from collections import deque
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -38,12 +39,7 @@ logger = logging.getLogger(__name__)
 class TransitionModel:
     """Learns state transition dynamics: s' = f(s, a)."""
 
-    def __init__(
-        self,
-        state_dim: int,
-        action_dim: int,
-        hidden_dim: int = 256
-    ):
+    def __init__(self, state_dim: int, action_dim: int, hidden_dim: int = 256):
         """Initialize Transition Model.
 
         Args:
@@ -70,10 +66,7 @@ class TransitionModel:
         self.w_var = self._xavier_init((hidden_dim, state_dim))
         self.b_var = np.zeros(state_dim)
 
-        logger.info(
-            f"TransitionModel initialized (state={state_dim}, action={action_dim}, "
-            f"hidden={hidden_dim})"
-        )
+        logger.info(f"TransitionModel initialized (state={state_dim}, action={action_dim}, hidden={hidden_dim})")
 
     def _xavier_init(self, shape: Tuple[int, int]) -> np.ndarray:
         """Xavier weight initialization."""
@@ -98,11 +91,7 @@ class TransitionModel:
         one_hot[action] = 1.0
         return one_hot
 
-    def predict(
-        self,
-        state: np.ndarray,
-        action: int
-    ) -> Tuple[np.ndarray, float]:
+    def predict(self, state: np.ndarray, action: int) -> Tuple[np.ndarray, float]:
         """Predict next state and uncertainty.
 
         Args:
@@ -131,11 +120,7 @@ class TransitionModel:
 
         return next_state_mean, uncertainty
 
-    def predict_batch(
-        self,
-        states: np.ndarray,
-        actions: List[int]
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def predict_batch(self, states: np.ndarray, actions: List[int]) -> Tuple[np.ndarray, np.ndarray]:
         """Predict next states for batch.
 
         Args:
@@ -158,12 +143,7 @@ class TransitionModel:
 class RewardModel:
     """Learns reward function: r = g(s, a)."""
 
-    def __init__(
-        self,
-        state_dim: int,
-        action_dim: int,
-        hidden_dim: int = 256
-    ):
+    def __init__(self, state_dim: int, action_dim: int, hidden_dim: int = 256):
         """Initialize Reward Model.
 
         Args:
@@ -185,10 +165,7 @@ class RewardModel:
         self.w3 = self._xavier_init((hidden_dim, 1))
         self.b3 = np.zeros(1)
 
-        logger.info(
-            f"RewardModel initialized (state={state_dim}, action={action_dim}, "
-            f"hidden={hidden_dim})"
-        )
+        logger.info(f"RewardModel initialized (state={state_dim}, action={action_dim}, hidden={hidden_dim})")
 
     def _xavier_init(self, shape: Tuple[int, int]) -> np.ndarray:
         """Xavier weight initialization."""
@@ -247,7 +224,7 @@ class WorldModelCore:
         action_dim: int = 50,
         hidden_dim: int = 256,
         planning_horizon: int = 5,
-        num_rollouts: int = 10
+        num_rollouts: int = 10,
     ):
         """Initialize World Model Core.
 
@@ -275,16 +252,9 @@ class WorldModelCore:
         self.planning_count = 0
         self.last_planning_time: Optional[datetime] = None
 
-        logger.info(
-            f"WorldModelCore initialized (state={state_dim}, action={action_dim}, "
-            f"horizon={planning_horizon})"
-        )
+        logger.info(f"WorldModelCore initialized (state={state_dim}, action={action_dim}, horizon={planning_horizon})")
 
-    def predict_next_state(
-        self,
-        state: np.ndarray,
-        action: int
-    ) -> Tuple[np.ndarray, float]:
+    def predict_next_state(self, state: np.ndarray, action: int) -> Tuple[np.ndarray, float]:
         """Predict next state and uncertainty.
 
         Args:
@@ -336,7 +306,7 @@ class WorldModelCore:
         self,
         state: np.ndarray,
         horizon: Optional[int] = None,
-        num_rollouts: Optional[int] = None
+        num_rollouts: Optional[int] = None,
     ) -> Tuple[int, float]:
         """Plan action using Model Predictive Control.
 
@@ -354,14 +324,11 @@ class WorldModelCore:
         num_rollouts = num_rollouts or self.num_rollouts
 
         best_action = None
-        best_value = -float('inf')
+        best_value = -float("inf")
 
         for _ in range(num_rollouts):
             # Generate random action sequence
-            action_sequence = [
-                int(np.random.randint(0, self.action_dim))
-                for _ in range(horizon)
-            ]
+            action_sequence = [int(np.random.randint(0, self.action_dim)) for _ in range(horizon)]
 
             # Rollout with world model
             cumulative_reward = 0.0
@@ -383,9 +350,7 @@ class WorldModelCore:
         self.planning_count += 1
         self.last_planning_time = datetime.now()
 
-        logger.debug(
-            f"MPC planning: best_action={best_action}, expected_return={best_value:.4f}"
-        )
+        logger.debug(f"MPC planning: best_action={best_action}, expected_return={best_value:.4f}")
 
         return best_action, best_value
 
@@ -395,7 +360,7 @@ class WorldModelCore:
         action: int,
         reward: float,
         next_state: np.ndarray,
-        done: bool
+        done: bool,
     ):
         """Store transition for model training.
 
@@ -407,22 +372,17 @@ class WorldModelCore:
             done: Episode termination flag
         """
         transition = {
-            'state': state,
-            'action': action,
-            'reward': reward,
-            'next_state': next_state,
-            'done': done,
-            'timestamp': datetime.now().isoformat()
+            "state": state,
+            "action": action,
+            "reward": reward,
+            "next_state": next_state,
+            "done": done,
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.training_buffer.append(transition)
 
-    def compute_prediction_error(
-        self,
-        state: np.ndarray,
-        action: int,
-        actual_next_state: np.ndarray
-    ) -> float:
+    def compute_prediction_error(self, state: np.ndarray, action: int, actual_next_state: np.ndarray) -> float:
         """Compute prediction error (for model evaluation).
 
         Args:
@@ -451,7 +411,7 @@ class WorldModelCore:
             Training statistics
         """
         if len(self.training_buffer) < batch_size:
-            return {'error': 'insufficient_data'}
+            return {"error": "insufficient_data"}
 
         # Sample batch
         indices = np.random.choice(len(self.training_buffer), batch_size, replace=False)
@@ -462,34 +422,31 @@ class WorldModelCore:
         reward_loss = 0.0
 
         for transition in batch:
-            state = transition['state']
-            action = transition['action']
-            reward = transition['reward']
-            next_state = transition['next_state']
+            state = transition["state"]
+            action = transition["action"]
+            reward = transition["reward"]
+            next_state = transition["next_state"]
 
             # Transition prediction error
             predicted_next_state, _ = self.predict_next_state(state, action)
             transition_error = np.linalg.norm(next_state - predicted_next_state)
-            transition_loss += transition_error ** 2
+            transition_loss += transition_error**2
 
             # Reward prediction error
             predicted_reward = self.predict_reward(state, action)
             reward_error = reward - predicted_reward
-            reward_loss += reward_error ** 2
+            reward_loss += reward_error**2
 
         transition_loss /= batch_size
         reward_loss /= batch_size
 
         # Update models (simplified - use PyTorch/TensorFlow in production)
-        logger.info(
-            f"Models updated: transition_loss={transition_loss:.4f}, "
-            f"reward_loss={reward_loss:.4f}"
-        )
+        logger.info(f"Models updated: transition_loss={transition_loss:.4f}, reward_loss={reward_loss:.4f}")
 
         return {
-            'transition_loss': transition_loss,
-            'reward_loss': reward_loss,
-            'batch_size': batch_size
+            "transition_loss": transition_loss,
+            "reward_loss": reward_loss,
+            "batch_size": batch_size,
         }
 
     def get_prediction_error_statistics(self, window: int = 100) -> Dict[str, Any]:
@@ -502,17 +459,17 @@ class WorldModelCore:
             Prediction error statistics
         """
         if not self.prediction_errors:
-            return {'count': 0}
+            return {"count": 0}
 
         recent = list(self.prediction_errors)[-window:]
 
         mean_error = sum(recent) / len(recent)
 
         return {
-            'count': len(recent),
-            'mean_error': mean_error,
-            'min_error': min(recent),
-            'max_error': max(recent)
+            "count": len(recent),
+            "mean_error": mean_error,
+            "min_error": min(recent),
+            "max_error": max(recent),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -524,13 +481,13 @@ class WorldModelCore:
         error_stats = self.get_prediction_error_statistics()
 
         return {
-            'status': 'operational',
-            'state_dim': self.state_dim,
-            'action_dim': self.action_dim,
-            'planning_horizon': self.planning_horizon,
-            'num_rollouts': self.num_rollouts,
-            'training_buffer_size': len(self.training_buffer),
-            'planning_count': self.planning_count,
-            'last_planning': self.last_planning_time.isoformat() if self.last_planning_time else 'N/A',
-            'prediction_error_statistics': error_stats
+            "status": "operational",
+            "state_dim": self.state_dim,
+            "action_dim": self.action_dim,
+            "planning_horizon": self.planning_horizon,
+            "num_rollouts": self.num_rollouts,
+            "training_buffer_size": len(self.training_buffer),
+            "planning_count": self.planning_count,
+            "last_planning": (self.last_planning_time.isoformat() if self.last_planning_time else "N/A"),
+            "prediction_error_statistics": error_stats,
         }

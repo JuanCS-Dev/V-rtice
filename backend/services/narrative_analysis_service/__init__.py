@@ -10,14 +10,14 @@ __version__ = "1.0.0"
 __author__ = "VÉRTICE Team"
 
 from .narrative_core import (
-    NarrativeEntity,
-    SocialGraphAnalyzer,
+    AttributionResult,
     BotDetector,
     BotScore,
-    PropagandaAttributor,
-    AttributionResult,
-    MemeTracker,
     MemeLineage,
+    MemeTracker,
+    NarrativeEntity,
+    PropagandaAttributor,
+    SocialGraphAnalyzer,
 )
 
 __all__ = [

@@ -12,10 +12,9 @@ into concrete operational plans, bridging the gap between discovery and response
 and supporting adaptive security and operational strategies.
 """
 
-import asyncio
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any
 
 
 class PlaybookGenerator:
@@ -27,11 +26,11 @@ class PlaybookGenerator:
 
     def __init__(self):
         """Initializes the PlaybookGenerator."""
-        self.generated_playbooks: List[Dict[str, Any]] = []
-        self.last_generation_time: Optional[datetime] = None
+        self.generated_playbooks: list[dict[str, Any]] = []
+        self.last_generation_time: datetime | None = None
         self.current_status: str = "ready_to_generate"
 
-    def generate_playbook(self, insight: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_playbook(self, insight: dict[str, Any]) -> dict[str, Any]:
         """Generates a response playbook based on a given insight or discovery.
 
         Args:
@@ -41,10 +40,12 @@ class PlaybookGenerator:
             Dict[str, Any]: A dictionary representing the generated playbook.
         """
         print(f"[PlaybookGenerator] Generating playbook for insight: {insight.get('id', 'N/A')}")
-        
+
         playbook_id = f"PB-{uuid.uuid4()}"
         playbook_name = f"Response to {insight.get('type', 'Novel Insight')}"
-        description = f"Automated playbook generated in response to a novel discovery: {insight.get('description', 'N/A')}"
+        description = (
+            f"Automated playbook generated in response to a novel discovery: {insight.get('description', 'N/A')}"
+        )
 
         steps = self._propose_steps(insight)
 
@@ -53,15 +54,15 @@ class PlaybookGenerator:
             "name": playbook_name,
             "description": description,
             "created_at": datetime.now().isoformat(),
-            "trigger_insight_id": insight.get('id'),
-            "steps": steps
+            "trigger_insight_id": insight.get("id"),
+            "steps": steps,
         }
         self.generated_playbooks.append(generated_playbook)
         self.last_generation_time = datetime.now()
 
         return generated_playbook
 
-    def _propose_steps(self, insight: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _propose_steps(self, insight: dict[str, Any]) -> list[dict[str, Any]]:
         """Proposes a sequence of steps for the playbook based on the insight (mock).
 
         Args:
@@ -72,18 +73,54 @@ class PlaybookGenerator:
         """
         steps = []
         if insight.get("severity") == "critical":
-            steps.append({"order": 1, "action": "isolate_affected_systems", "parameters": {"target": insight.get('related_data', {}).get('host')}})
-            steps.append({"order": 2, "action": "collect_forensics", "parameters": {"target": insight.get('related_data', {}).get('host')}})
-            steps.append({"order": 3, "action": "notify_security_team", "parameters": {"message": f"Critical insight: {insight.get('description')}"}})
+            steps.append(
+                {
+                    "order": 1,
+                    "action": "isolate_affected_systems",
+                    "parameters": {"target": insight.get("related_data", {}).get("host")},
+                }
+            )
+            steps.append(
+                {
+                    "order": 2,
+                    "action": "collect_forensics",
+                    "parameters": {"target": insight.get("related_data", {}).get("host")},
+                }
+            )
+            steps.append(
+                {
+                    "order": 3,
+                    "action": "notify_security_team",
+                    "parameters": {"message": f"Critical insight: {insight.get('description')}"},
+                }
+            )
         elif insight.get("type") == "zero_day_exploit_potential":
-            steps.append({"order": 1, "action": "deploy_patch_if_available", "parameters": {"vulnerability": insight.get('id')}})
-            steps.append({"order": 2, "action": "monitor_for_exploitation", "parameters": {"pattern": insight.get('related_data', {}).get('pattern')}})
+            steps.append(
+                {
+                    "order": 1,
+                    "action": "deploy_patch_if_available",
+                    "parameters": {"vulnerability": insight.get("id")},
+                }
+            )
+            steps.append(
+                {
+                    "order": 2,
+                    "action": "monitor_for_exploitation",
+                    "parameters": {"pattern": insight.get("related_data", {}).get("pattern")},
+                }
+            )
         else:
-            steps.append({"order": 1, "action": "investigate_further", "parameters": {"details": insight.get('description')}})
+            steps.append(
+                {
+                    "order": 1,
+                    "action": "investigate_further",
+                    "parameters": {"details": insight.get("description")},
+                }
+            )
 
         return steps
 
-    async def get_status(self) -> Dict[str, Any]:
+    async def get_status(self) -> dict[str, Any]:
         """Retrieves the current operational status of the Playbook Generator.
 
         Returns:
@@ -92,5 +129,5 @@ class PlaybookGenerator:
         return {
             "status": self.current_status,
             "total_playbooks_generated": len(self.generated_playbooks),
-            "last_generation": self.last_generation_time.isoformat() if self.last_generation_time else "N/A"
+            "last_generation": (self.last_generation_time.isoformat() if self.last_generation_time else "N/A"),
         }

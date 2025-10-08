@@ -11,14 +11,16 @@ API request and response modeling. This is crucial for maintaining data integrit
 and enabling efficient data exchange within the offensive operations ecosystem.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field
 
 
 class CommandStatus(str, Enum):
     """Enumeration for the status of an offensive command."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -39,6 +41,7 @@ class OffensiveCommand(BaseModel):
         created_at (str): ISO formatted timestamp of when the command was created.
         completed_at (Optional[str]): ISO formatted timestamp of when the command completed.
     """
+
     id: str
     name: str
     parameters: Dict[str, Any]
@@ -58,6 +61,7 @@ class CommandResult(BaseModel):
         output (Dict[str, Any]): The raw output or structured data from the offensive tool.
         timestamp (str): ISO formatted timestamp of when the result was recorded.
     """
+
     command_id: str
     status: str
     output: Dict[str, Any]

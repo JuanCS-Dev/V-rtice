@@ -14,7 +14,7 @@
 import React, { useState, useEffect } from 'react';
 import './ImmunisWidget.css';
 
-export const ImmunisWidget = ({ systemHealth }) => {
+export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
   const [innateStatus, setInnateStatus] = useState(null);
   const [adaptiveStatus, setAdaptiveStatus] = useState(null);
   const [cytokineActivity, setCytokineActivity] = useState(null);
@@ -130,7 +130,6 @@ export const ImmunisWidget = ({ systemHealth }) => {
 
   const renderOverview = () => {
     const inflammationLevel = cytokineActivity?.inflammation_level || 0;
-    const totalThreats = innateStatus?.total_threats_detected || 0;
     const totalEliminations = innateStatus?.total_pathogens_eliminated || 0;
 
     return (

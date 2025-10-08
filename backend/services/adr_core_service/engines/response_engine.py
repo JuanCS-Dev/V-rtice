@@ -12,8 +12,8 @@ mitigate threats.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 from models.enums import ResponseActionType
 from models.schemas import ResponseAction
@@ -35,7 +35,12 @@ class ResponseEngine:
         # In a real scenario, establish connections to security tools/APIs here
         logger.info("[ResponseEngine] Response Engine initialized.")
 
-    async def execute_action(self, incident_id: str, action_type: ResponseActionType, parameters: Optional[Dict[str, Any]] = None) -> ResponseAction:
+    async def execute_action(
+        self,
+        incident_id: str,
+        action_type: ResponseActionType,
+        parameters: Optional[Dict[str, Any]] = None,
+    ) -> ResponseAction:
         """Executes a specific response action for a given incident.
 
         Args:
@@ -45,12 +50,12 @@ class ResponseEngine:
 
         Returns:
             ResponseAction: Details of the executed action, including its status.
-        
+
         Raises:
             ValueError: If the action type is unsupported.
         """
         logger.info(f"[ResponseEngine] Executing action '{action_type.value}' for incident {incident_id}")
-        await asyncio.sleep(0.1) # Simulate action execution time
+        await asyncio.sleep(0.1)  # Simulate action execution time
 
         status = "failed"
         details = f"Action '{action_type.value}' not yet implemented."
@@ -71,13 +76,15 @@ class ResponseEngine:
             logger.warning(f"[ResponseEngine] Unsupported response action type: {action_type.value}")
             raise ValueError(f"Unsupported response action type: {action_type.value}")
 
-        logger.info(f"[ResponseEngine] Action '{action_type.value}' for incident {incident_id} completed with status: {status}")
+        logger.info(
+            f"[ResponseEngine] Action '{action_type.value}' for incident {incident_id} completed with status: {status}"
+        )
         return ResponseAction(
             incident_id=incident_id,
             action_type=action_type,
             timestamp=datetime.now().isoformat(),
             status=status,
-            details=details
+            details=details,
         )
 
     async def get_action_status(self, action_id: str) -> Dict[str, Any]:
@@ -90,6 +97,10 @@ class ResponseEngine:
             Dict[str, Any]: A dictionary containing the status and details of the action.
         """
         logger.info(f"[ResponseEngine] Retrieving status for action {action_id}")
-        await asyncio.sleep(0.05) # Simulate status retrieval
+        await asyncio.sleep(0.05)  # Simulate status retrieval
         # In a real system, this would query a database or the tool itself
-        return {"action_id": action_id, "status": "completed", "details": "Mock status: Action completed successfully."}
+        return {
+            "action_id": action_id,
+            "status": "completed",
+            "details": "Mock status: Action completed successfully.",
+        }

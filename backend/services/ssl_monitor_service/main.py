@@ -12,14 +12,15 @@ the cryptographic health of monitored assets and providing real-time intelligenc
 to other Maximus AI services.
 """
 
+import asyncio
+import socket
+import ssl
+from datetime import datetime, timedelta
+from typing import Any, Dict
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
-from datetime import datetime, timedelta
-import ssl
-import socket
 
 app = FastAPI(title="Maximus SSL Monitor Service", version="1.0.0")
 
@@ -35,9 +36,10 @@ class MonitorRequest(BaseModel):
         port (int): The port to connect to (default: 443).
         check_interval_seconds (int): How often to check the SSL certificate in seconds.
     """
+
     domain: str
     port: int = 443
-    check_interval_seconds: int = 3600 # Default to 1 hour
+    check_interval_seconds: int = 3600  # Default to 1 hour
 
 
 @app.on_event("startup")
@@ -83,7 +85,7 @@ async def add_to_monitor(request: MonitorRequest) -> Dict[str, Any]:
         "check_interval_seconds": request.check_interval_seconds,
         "last_checked": None,
         "status": "pending",
-        "certificate_info": None
+        "certificate_info": None,
     }
     print(f"[API] Added {domain_key} to monitoring list.")
     return {"status": "success", "message": f"Monitoring started for {domain_key}."}
@@ -123,37 +125,42 @@ async def check_ssl_certificate(domain: str, port: int) -> Dict[str, Any]:
         with socket.create_connection((domain, port), timeout=5) as sock:
             with context.wrap_socket(sock, server_hostname=domain) as ssock:
                 cert = ssock.getpeercert()
-                
+
                 # Extract relevant info
-                not_before = datetime.strptime(cert['notBefore'][0:-4], "%b %d %H:%M:%S %Y")
-                not_after = datetime.strptime(cert['notAfter'][0:-4], "%b %d %H:%M:%S %Y")
-                issuer = dict(x[0] for x in cert['issuer'])
-                subject = dict(x[0] for x in cert['subject'])
+                not_before = datetime.strptime(cert["notBefore"][0:-4], "%b %d %H:%M:%S %Y")
+                not_after = datetime.strptime(cert["notAfter"][0:-4], "%b %d %H:%M:%S %Y")
+                issuer = dict(x[0] for x in cert["issuer"])
+                subject = dict(x[0] for x in cert["subject"])
 
                 days_remaining = (not_after - datetime.now()).days
                 status = "valid" if days_remaining > 0 else "expired"
-                if days_remaining < 30: status = "expiring_soon"
+                if days_remaining < 30:
+                    status = "expiring_soon"
 
                 return {
                     "status": status,
                     "valid_from": not_before.isoformat(),
                     "valid_until": not_after.isoformat(),
                     "days_remaining": days_remaining,
-                    "issuer": issuer.get('organizationName', 'N/A'),
-                    "subject": subject.get('commonName', 'N/A'),
-                    "error": None
+                    "issuer": issuer.get("organizationName", "N/A"),
+                    "subject": subject.get("commonName", "N/A"),
+                    "error": None,
                 }
     except Exception as e:
-        return {"status": "error", "error": str(e), "details": "Could not retrieve certificate."}
+        return {
+            "status": "error",
+            "error": str(e),
+            "details": "Could not retrieve certificate.",
+        }
 
 
 async def continuous_monitoring():
     """Background task for continuously monitoring SSL certificates."""
     while True:
-        await asyncio.sleep(1) # Check every second if any domain needs checking
+        await asyncio.sleep(1)  # Check every second if any domain needs checking
         current_time = datetime.now()
 
-        for domain_key, info in list(monitored_domains.items()): # Iterate over a copy
+        for domain_key, info in list(monitored_domains.items()):  # Iterate over a copy
             last_checked = info["last_checked"]
             check_interval = timedelta(seconds=info["check_interval_seconds"])
 

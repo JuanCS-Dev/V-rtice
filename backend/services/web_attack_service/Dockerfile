@@ -1,40 +1,18 @@
-# ============================================================================
-# WEB APPLICATION ATTACK SERVICE - Dockerfile
-# AI-Powered Web Security Testing
-# ============================================================================
+FROM vertice/python311-uv:latest AS builder
+USER root
+WORKDIR /build
+COPY pyproject.toml requirements.txt ./
+RUN python -m venv /opt/venv && . /opt/venv/bin/activate && uv pip sync requirements.txt
 
 FROM python:3.11-slim
-
+LABEL maintainer="Juan & Claude" version="2.0.0"
+RUN apt-get update && apt-get install -y --no-install-recommends curl libpq5 ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+RUN groupadd -r appuser && useradd -r -g appuser --uid 1000 appuser
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
-# Create log directory
-RUN mkdir -p /var/log/web_attack
-
-# Expose ports
-EXPOSE 8034 9034
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8034/health || exit 1
-
-# Environment variables
-ENV PYTHONUNBUFFERED=1 \
-    SERVICE_NAME=web_application_attack \
-    SERVICE_PORT=8034
-
-# Run the application
-CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8034"]
+COPY --chown=appuser:appuser . .
+USER appuser
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8064/health || exit 1
+EXPOSE 8064
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8064"]

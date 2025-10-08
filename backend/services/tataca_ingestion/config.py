@@ -4,9 +4,10 @@ Configuration management for the ETL pipeline that ingests data from multiple
 sources into the Vertice platform.
 """
 
-from pydantic_settings import BaseSettings
-from pydantic import Field
 from typing import Optional
+
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -34,16 +35,10 @@ class Settings(BaseSettings):
         )
 
     # Neo4j configuration (via Seriema Graph service)
-    SERIEMA_GRAPH_URL: str = Field(
-        default="http://seriema_graph:8029",
-        env="SERIEMA_GRAPH_URL"
-    )
+    SERIEMA_GRAPH_URL: str = Field(default="http://seriema_graph:8029", env="SERIEMA_GRAPH_URL")
 
     # SINESP API configuration
-    SINESP_SERVICE_URL: str = Field(
-        default="http://sinesp_service:8018",
-        env="SINESP_SERVICE_URL"
-    )
+    SINESP_SERVICE_URL: str = Field(default="http://sinesp_service:8018", env="SINESP_SERVICE_URL")
 
     # Data sources configuration
     ENABLE_SINESP_CONNECTOR: bool = Field(default=True, env="ENABLE_SINESP_CONNECTOR")

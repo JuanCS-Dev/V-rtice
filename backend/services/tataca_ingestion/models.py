@@ -3,14 +3,16 @@
 Pydantic models for entities in the criminal investigation domain.
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class JobStatus(str, Enum):
     """Job execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -20,6 +22,7 @@ class JobStatus(str, Enum):
 
 class DataSource(str, Enum):
     """Data source identifiers."""
+
     SINESP = "sinesp"
     PRISIONAL = "prisional"
     ANTECEDENTES = "antecedentes"
@@ -29,6 +32,7 @@ class DataSource(str, Enum):
 
 class EntityType(str, Enum):
     """Entity types in the knowledge graph."""
+
     PESSOA = "pessoa"
     VEICULO = "veiculo"
     ENDERECO = "endereco"
@@ -37,6 +41,7 @@ class EntityType(str, Enum):
 
 class RelationType(str, Enum):
     """Relationship types in the knowledge graph."""
+
     POSSUI = "possui"  # Pessoa -> Veículo
     ENVOLVIDO_EM = "envolvido_em"  # Pessoa -> Ocorrência
     RESIDE_EM = "reside_em"  # Pessoa -> Endereço
@@ -46,8 +51,10 @@ class RelationType(str, Enum):
 
 # Domain Entities
 
+
 class Pessoa(BaseModel):
     """Person entity."""
+
     cpf: Optional[str] = Field(None, description="CPF number")
     nome: str = Field(..., description="Full name")
     data_nascimento: Optional[datetime] = Field(None, description="Birth date")
@@ -60,6 +67,7 @@ class Pessoa(BaseModel):
 
 class Veiculo(BaseModel):
     """Vehicle entity."""
+
     placa: str = Field(..., description="License plate")
     renavam: Optional[str] = Field(None, description="RENAVAM number")
     chassi: Optional[str] = Field(None, description="Chassis number")
@@ -75,6 +83,7 @@ class Veiculo(BaseModel):
 
 class Endereco(BaseModel):
     """Address entity."""
+
     cep: Optional[str] = Field(None, description="ZIP code")
     logradouro: str = Field(..., description="Street address")
     numero: Optional[str] = Field(None, description="Number")
@@ -89,6 +98,7 @@ class Endereco(BaseModel):
 
 class Ocorrencia(BaseModel):
     """Criminal occurrence entity."""
+
     numero_bo: str = Field(..., description="Police report number")
     tipo: str = Field(..., description="Occurrence type")
     data_hora: datetime = Field(..., description="Date and time")
@@ -104,8 +114,10 @@ class Ocorrencia(BaseModel):
 
 # ETL Models
 
+
 class IngestJobRequest(BaseModel):
     """Request to create an ingestion job."""
+
     source: DataSource = Field(..., description="Data source")
     entity_type: Optional[EntityType] = Field(None, description="Entity type to ingest")
     filters: Dict[str, Any] = Field(default_factory=dict, description="Query filters")
@@ -116,6 +128,7 @@ class IngestJobRequest(BaseModel):
 
 class IngestJobResponse(BaseModel):
     """Response for job creation."""
+
     job_id: str = Field(..., description="Job ID")
     status: JobStatus = Field(..., description="Job status")
     source: DataSource = Field(..., description="Data source")
@@ -125,6 +138,7 @@ class IngestJobResponse(BaseModel):
 
 class IngestJobStatus(BaseModel):
     """Job status response."""
+
     job_id: str = Field(..., description="Job ID")
     status: JobStatus = Field(..., description="Current status")
     source: DataSource = Field(..., description="Data source")
@@ -139,6 +153,7 @@ class IngestJobStatus(BaseModel):
 
 class ScheduleJobRequest(BaseModel):
     """Request to schedule a recurring job."""
+
     source: DataSource = Field(..., description="Data source")
     entity_type: Optional[EntityType] = Field(None, description="Entity type")
     cron_expression: str = Field(..., description="Cron expression for scheduling")
@@ -148,6 +163,7 @@ class ScheduleJobRequest(BaseModel):
 
 class EntityRelationship(BaseModel):
     """Relationship between entities for Neo4j."""
+
     source_type: EntityType = Field(..., description="Source entity type")
     source_id: str = Field(..., description="Source entity ID")
     target_type: EntityType = Field(..., description="Target entity type")
@@ -158,8 +174,10 @@ class EntityRelationship(BaseModel):
 
 # Connector Response Models
 
+
 class SinespVehicleResponse(BaseModel):
     """SINESP vehicle data response."""
+
     placa: str
     situacao: str
     marca: Optional[str] = None
@@ -179,27 +197,23 @@ class SinespVehicleResponse(BaseModel):
             ano_modelo=int(self.ano) if self.ano else None,
             cor=self.cor,
             situacao=self.situacao,
-            metadata={
-                "municipio": self.municipio,
-                "source": "sinesp"
-            }
+            metadata={"municipio": self.municipio, "source": "sinesp"},
         )
 
 
 class TransformResult(BaseModel):
     """Result of data transformation."""
+
     success: bool = Field(..., description="Whether transformation succeeded")
     entity_type: EntityType = Field(..., description="Entity type")
     entity_data: Optional[Dict[str, Any]] = Field(None, description="Transformed entity data")
-    relationships: List[EntityRelationship] = Field(
-        default_factory=list,
-        description="Related entities"
-    )
+    relationships: List[EntityRelationship] = Field(default_factory=list, description="Related entities")
     error_message: Optional[str] = Field(None, description="Error if failed")
 
 
 class LoadResult(BaseModel):
     """Result of data loading."""
+
     success: bool = Field(..., description="Whether load succeeded")
     entity_type: EntityType = Field(..., description="Entity type")
     entity_id: str = Field(..., description="Entity ID")

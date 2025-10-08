@@ -15,18 +15,18 @@ AI's cognitive functions, enabling it to adapt its behavior and optimize its
 effectiveness in real-time for various operational scenarios.
 """
 
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
 
-from neuromodulation_controller import NeuromodulationController
-from dopamine_core import DopamineCore
-from serotonin_core import SerotoninCore
-from noradrenaline_core import NoradrenalineCore
 from acetylcholine_core import AcetylcholineCore
+from dopamine_core import DopamineCore
+from neuromodulation_controller import NeuromodulationController
+from noradrenaline_core import NoradrenalineCore
+from serotonin_core import SerotoninCore
 
 app = FastAPI(title="Maximus Neuromodulation Service", version="1.0.0")
 
@@ -41,7 +41,7 @@ neuromodulation_controller = NeuromodulationController(
     dopamine_core=dopamine_core,
     serotonin_core=serotonin_core,
     noradrenaline_core=noradrenaline_core,
-    acetylcholine_core=acetylcholine_core
+    acetylcholine_core=acetylcholine_core,
 )
 
 
@@ -54,6 +54,7 @@ class ModulationRequest(BaseModel):
         value (float): The new value for the parameter.
         context (Optional[Dict[str, Any]]): Additional context for the modulation.
     """
+
     modulator_type: str
     parameter: str
     value: float
@@ -102,7 +103,11 @@ async def apply_neuromodulation(request: ModulationRequest) -> Dict[str, Any]:
         result = await neuromodulation_controller.modulate_parameter(
             request.modulator_type, request.parameter, request.value, request.context
         )
-        return {"status": "success", "timestamp": datetime.now().isoformat(), "modulation_result": result}
+        return {
+            "status": "success",
+            "timestamp": datetime.now().isoformat(),
+            "modulation_result": result,
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

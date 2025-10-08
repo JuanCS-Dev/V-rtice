@@ -1,0 +1,179 @@
+# ============================================================================
+# Vértice Platform - Flake8 Configuration
+# ============================================================================
+# Flake8: Python style guide enforcement (PEP 8)
+# Note: Flake8 does not support pyproject.toml, requires separate config
+# ============================================================================
+
+[flake8]
+# ============================================================================
+# BASIC SETTINGS
+# ============================================================================
+# Max line length (matches Black)
+max-line-length = 88
+
+# Max complexity (cyclomatic complexity threshold)
+max-complexity = 15
+
+# Target Python version
+python-version = 3.10
+
+
+# ============================================================================
+# IGNORE RULES
+# ============================================================================
+# Rules to ignore:
+# - E203, E266, E501, W503, W504: Black compatibility
+# - D100-D107: Docstring rules (handled by pydocstyle separately)
+# - S603, S607, S608: Security rules for offensive tools
+# - ANN*: Type annotation (gradual typing approach)
+# - B008: FastAPI Depends pattern
+# - N802, N806: Naming conventions exceptions
+ignore =
+    E203,
+    E266,
+    E501,
+    W503,
+    W504,
+    D100,
+    D101,
+    D102,
+    D103,
+    D104,
+    D105,
+    D107,
+    S603,
+    S607,
+    S608,
+    ANN001,
+    ANN002,
+    ANN003,
+    ANN101,
+    ANN102,
+    ANN201,
+    B008,
+    N802,
+    N806
+
+
+# ============================================================================
+# FILE/DIRECTORY EXCLUSIONS
+# ============================================================================
+exclude =
+    .git,
+    .gitignore,
+    .github,
+    __pycache__,
+    *.pyc,
+    .pytest_cache,
+    .mypy_cache,
+    .tox,
+    .venv,
+    venv,
+    env,
+    ENV,
+    .env,
+    build,
+    dist,
+    *.egg-info,
+    .eggs,
+    .vscode,
+    .idea,
+    *.swp,
+    *.swo,
+    *~,
+    LEGADO,
+    migrations,
+    node_modules,
+    .terraform,
+    htmlcov,
+    .ipynb_checkpoints,
+    *.ipynb,
+    frontend/node_modules,
+    frontend/build,
+    frontend/dist
+
+
+# ============================================================================
+# PER-FILE IGNORES
+# ============================================================================
+# __init__.py: F401 (unused imports), E402 (module level import not at top)
+# tests/*: S101 (assert), F401 (unused imports), S106 (hardcoded passwords)
+# config.py/settings.py: S105 (hardcoded passwords), S106 (hardcoded passwords)
+# vertice CLI: T201 (print statements), S603 (subprocess)
+per-file-ignores =
+    __init__.py:F401,E402,
+    tests/*:S101,F401,S106,
+    *_test.py:S101,F401,S106,
+    test_*.py:S101,F401,S106,
+    config.py:S105,S106,
+    settings.py:S105,S106,
+    vertice/cli.py:T201,S603,
+    vertice/commands/*.py:T201,S603,
+    vcli-smart:T201,S603
+
+
+# ============================================================================
+# IMPORT ORDER (flake8-isort integration)
+# ============================================================================
+# Import order should match isort configuration
+import-order-style = google
+application-import-names = backend,frontend,vertice
+
+
+# ============================================================================
+# DOCSTRING CONFIGURATION (flake8-docstrings)
+# ============================================================================
+# Google-style docstrings
+docstring-convention = google
+
+
+# ============================================================================
+# FILENAME CHECKS
+# ============================================================================
+# Allowed file name patterns
+filename = *.py
+
+
+# ============================================================================
+# BUILTINS (flake8-builtins)
+# ============================================================================
+# Allow these builtin shadowing (common patterns)
+builtins-allowed-modules = typing
+
+
+# ============================================================================
+# STATISTICS & FORMATTING
+# ============================================================================
+# Show statistics for each error/warning code
+statistics = True
+
+# Show source code for each error
+show-source = True
+
+# Count errors
+count = True
+
+# Use color output (if terminal supports it)
+color = auto
+
+
+# ============================================================================
+# PLUGINS CONFIGURATION
+# ============================================================================
+# Enable these flake8 plugins if installed:
+# - flake8-bugbear (B)
+# - flake8-comprehensions (C4)
+# - flake8-docstrings (D)
+# - flake8-isort (I)
+# - flake8-quotes (Q)
+# - flake8-bandit (S)
+# - flake8-print (T)
+# - flake8-annotations (ANN)
+# - pep8-naming (N)
+
+# Inline quotes (use double quotes)
+inline-quotes = double
+
+# Enable noqa comments
+enable-extensions = G

@@ -16,8 +16,9 @@ decisions under uncertainty, enabling sophisticated threat prediction and
 autonomous security operations.
 """
 
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 from pydantic import BaseModel
 
@@ -30,6 +31,7 @@ class Observation(BaseModel):
         features (np.ndarray): Numerical features of the observation.
         source_id (str): Identifier of the source of the observation.
     """
+
     timestamp: int
     features: np.ndarray
     source_id: str
@@ -47,6 +49,7 @@ class BeliefState(BaseModel):
         entropy (float): The entropy of the belief state, indicating uncertainty.
         timestamp (str): ISO formatted timestamp of the last update.
     """
+
     mean: np.ndarray
     covariance: np.ndarray
     entropy: float
@@ -64,6 +67,7 @@ class PredictionError(BaseModel):
         magnitude (float): The scalar magnitude of the prediction error.
         timestamp (str): ISO formatted timestamp of when the error was computed.
     """
+
     error_vector: np.ndarray
     magnitude: float
     timestamp: str
@@ -97,26 +101,30 @@ class BayesianCore:
 
         Args:
             normal_observations (List[Observation]): A list of observations representing normal system behavior.
-        
+
         Raises:
             ValueError: If no observations are provided or features do not match num_features.
         """
         if not normal_observations:
             raise ValueError("Cannot learn prior from empty observations.")
-        
+
         features_matrix = np.array([obs.features for obs in normal_observations])
         if features_matrix.shape[1] != self.num_features:
-            raise ValueError(f"Observation features ({features_matrix.shape[1]}) do not match expected num_features ({self.num_features}).")
+            raise ValueError(
+                f"Observation features ({features_matrix.shape[1]}) do not match expected num_features ({self.num_features})."
+            )
 
         self.prior_mean = np.mean(features_matrix, axis=0)
-        self.prior_covariance = np.cov(features_matrix, rowvar=False) + np.eye(self.num_features) * 1e-6 # Add small value for stability
-        
+        self.prior_covariance = (
+            np.cov(features_matrix, rowvar=False) + np.eye(self.num_features) * 1e-6
+        )  # Add small value for stability
+
         # Initialize belief state with prior
         self.belief_state = BeliefState(
             mean=self.prior_mean,
             covariance=self.prior_covariance,
             entropy=self._calculate_entropy(self.prior_covariance),
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
         print(f"[BayesianCore] Prior learned from {len(normal_observations)} observations.")
 
@@ -125,13 +133,13 @@ class BayesianCore:
 
         Returns:
             Dict[str, Any]: A dictionary containing the predicted state and its uncertainty.
-        
+
         Raises:
             RuntimeError: If the prior has not been learned yet.
         """
         if not self.belief_state:
             raise RuntimeError("Prior not learned. Call learn_prior first.")
-        
+
         # In a full predictive coding model, this would involve a generative model
         # to produce a prediction from the latent belief state.
         # For simplicity, we return the mean of the belief state as the prediction.
@@ -139,7 +147,7 @@ class BayesianCore:
         return {
             "predicted_state": self.belief_state.mean,
             "predicted_uncertainty": np.diag(self.belief_state.covariance),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     def compute_prediction_error(self, observation: Observation, prediction: Dict[str, Any]) -> PredictionError:
@@ -151,7 +159,7 @@ class BayesianCore:
 
         Returns:
             PredictionError: The computed prediction error.
-        
+
         Raises:
             ValueError: If observation features do not match prediction dimensions.
         """
@@ -165,7 +173,7 @@ class BayesianCore:
         return PredictionError(
             error_vector=error_vector,
             magnitude=magnitude,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
     def update_beliefs(self, observation: Observation, prediction_error: PredictionError) -> BeliefState:
@@ -177,7 +185,7 @@ class BayesianCore:
 
         Returns:
             BeliefState: The updated belief state.
-        
+
         Raises:
             RuntimeError: If the prior has not been learned yet.
         """
@@ -187,9 +195,11 @@ class BayesianCore:
         # Simplified Bayesian update (e.g., Kalman filter-like update)
         # This is a highly simplified representation of a complex Bayesian update.
         # In a real system, this would involve more sophisticated probabilistic inference.
-        
+
         # Update mean towards the observation, weighted by uncertainty
-        kalman_gain = self.belief_state.covariance @ np.linalg.inv(self.belief_state.covariance + np.eye(self.num_features) * self.initial_uncertainty)
+        kalman_gain = self.belief_state.covariance @ np.linalg.inv(
+            self.belief_state.covariance + np.eye(self.num_features) * self.initial_uncertainty
+        )
         new_mean = self.belief_state.mean + kalman_gain @ prediction_error.error_vector
         new_covariance = (np.eye(self.num_features) - kalman_gain) @ self.belief_state.covariance
 
@@ -197,7 +207,7 @@ class BayesianCore:
             mean=new_mean,
             covariance=new_covariance,
             entropy=self._calculate_entropy(new_covariance),
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
         print(f"[BayesianCore] Beliefs updated. New entropy: {self.belief_state.entropy:.4f}")
         return self.belief_state
@@ -218,7 +228,7 @@ class BayesianCore:
         if sign == -1:
             # This indicates a singular or near-singular matrix, which can happen with mock data
             # In a real system, this would require more robust handling or regularization
-            return np.inf # Indicate very high uncertainty
+            return np.inf  # Indicate very high uncertainty
         return 0.5 * (self.num_features * (1.0 + np.log(2 * np.pi)) + logdet)
 
     def get_belief_state(self) -> Optional[BeliefState]:

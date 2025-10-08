@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Enhanced help system for vCLI.
+UI/UX Blueprint v1.2 - Fuzzy search integrado
 
-Provides interactive help, examples, search, and man-page style documentation.
+Provides interactive help, examples, fuzzy search, and man-page style documentation.
 """
 
 import typer
@@ -11,8 +12,10 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.syntax import Syntax
-from typing import Optional
+from typing import Optional, List, Tuple
 import re
+from ..utils.fuzzy import FuzzyMatcher, fuzzy_find
+from ..utils.output import GeminiStyleTable, PrimordialPanel
 
 app = typer.Typer(
     name="help",
@@ -329,49 +332,97 @@ def show_help(
 def search_help(
     keyword: str = typer.Argument(..., help="Keyword to search for"),
     show_examples: bool = typer.Option(False, "--examples", "-e", help="Show examples in results"),
+    fuzzy: bool = typer.Option(True, "--fuzzy/--exact", help="Use fuzzy matching (default)"),
 ):
     """
-    🔍 Search help across all commands.
+    🔍 Search help across all commands with fuzzy matching.
 
     Examples:
         vcli help search malware
         vcli help search "threat hunting"
         vcli help search investigation --examples
+        vcli help search mlwr --fuzzy  # Fuzzy matches "malware"
     """
     keyword_lower = keyword.lower()
     results = []
 
-    # Search in command names and descriptions
-    for cmd, desc in ALL_COMMANDS.items():
-        if keyword_lower in cmd.lower() or keyword_lower in desc.lower():
-            results.append((cmd, desc, "command"))
+    if fuzzy:
+        # Fuzzy search usando Levenshtein
+        matcher = FuzzyMatcher(threshold=0.5)
 
-    # Search in examples
-    for cmd, data in COMMAND_EXAMPLES.items():
-        for example in data.get("examples", []):
-            if keyword_lower in example["desc"].lower() or keyword_lower in example["cmd"].lower():
-                if cmd not in [r[0] for r in results]:
-                    results.append((cmd, data["description"], "example"))
+        # Busca fuzzy em command names
+        command_names = list(ALL_COMMANDS.keys())
+        fuzzy_matches = matcher.find_matches(keyword_lower, command_names, limit=10)
+
+        for score, cmd in fuzzy_matches:
+            desc = ALL_COMMANDS[cmd]
+            results.append((cmd, desc, "command", score))
+
+        # Busca fuzzy em descriptions
+        for cmd, desc in ALL_COMMANDS.items():
+            desc_words = desc.lower().split()
+            for word in desc_words:
+                score = matcher.similarity_score(keyword_lower, word)
+                if score >= matcher.threshold and cmd not in [r[0] for r in results]:
+                    results.append((cmd, desc, "description", score))
+                    break
+
+        # Ordena por score descendente
+        results.sort(key=lambda x: x[3], reverse=True)
+
+    else:
+        # Busca exata (comportamento original)
+        for cmd, desc in ALL_COMMANDS.items():
+            if keyword_lower in cmd.lower() or keyword_lower in desc.lower():
+                results.append((cmd, desc, "command", 1.0))
+
+    # Search in examples (only for exact match or as fallback)
+    if not fuzzy or len(results) < 3:
+        for cmd, data in COMMAND_EXAMPLES.items():
+            for example in data.get("examples", []):
+                if keyword_lower in example["desc"].lower() or keyword_lower in example["cmd"].lower():
+                    if cmd not in [r[0] for r in results]:
+                        results.append((cmd, data["description"], "example", 0.3))
 
     if not results:
-        console.print(f"[yellow]No results found for '{keyword}'[/yellow]")
-        console.print("\nTry: [cyan]vcli help list[/cyan] to see all commands")
+        # Sugere correções usando fuzzy matching
+        matcher = FuzzyMatcher(threshold=0.3)
+        suggestions = matcher.suggest_correction(keyword, list(ALL_COMMANDS.keys()), top_n=5)
+
+        PrimordialPanel.warning(
+            suggestions,
+            title="🔍 No Results Found",
+            console=console
+        )
+        console.print("\n[cyan]Tip: Try 'vcli help list' to see all commands[/cyan]")
         raise typer.Exit(1)
 
-    # Display results
-    console.print(f"\n[bold]🔍 Search results for '{keyword}':[/bold]\n")
+    # Display results usando GeminiStyleTable
+    table = GeminiStyleTable(
+        title=f"Search Results: '{keyword}'",
+        console=console
+    )
+    table.add_column("Command", width=20)
+    table.add_column("Description", width=50)
+    table.add_column("Match", alignment="center", width=15)
 
-    table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("Command", style="cyan", width=20)
-    table.add_column("Description", width=60)
-    table.add_column("Match", style="dim", width=10)
+    if fuzzy:
+        table.add_column("Score", alignment="center", width=10)
 
-    for cmd, desc, match_type in results:
-        table.add_row(cmd, desc, match_type)
+    for result in results[:10]:  # Limita a 10 resultados
+        if fuzzy:
+            cmd, desc, match_type, score = result
+            # Formata score como percentual
+            score_percent = f"{int(score * 100)}%"
+            table.add_row(cmd, desc, match_type, score_percent)
+        else:
+            cmd, desc, match_type, _ = result
+            table.add_row(cmd, desc, match_type)
 
-    console.print(table)
-    console.print(f"\n[dim]Found {len(results)} match(es)[/dim]")
-    console.print(f"\n[cyan]Tip: Use 'vcli help show <command>' for detailed help[/cyan]")
+    table.render()
+
+    console.print(f"\n[grey70]Found {len(results)} match(es)[/grey70]")
+    console.print(f"\n[deep_sky_blue1]💡 Tip: Use 'vcli help show <command>' for detailed help[/deep_sky_blue1]")
 
     # Show examples if requested
     if show_examples and results:

@@ -17,8 +17,8 @@ more informed decisions and conduct more effective investigations.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class AIProcessor:
@@ -47,38 +47,48 @@ class AIProcessor:
             Dict[str, Any]: A dictionary containing AI-generated insights and summaries.
         """
         print(f"[AIProcessor] Processing {len(raw_data)} raw data entries for query: {query_context}")
-        await asyncio.sleep(0.5) # Simulate AI processing time
+        await asyncio.sleep(0.5)  # Simulate AI processing time
 
         synthesized_summary = f"AI-generated summary for query '{query_context}':\n"
         extracted_entities: List[str] = []
-        sentiment_analysis: Dict[str, float] = {"positive": 0.0, "negative": 0.0, "neutral": 1.0}
+        sentiment_analysis: Dict[str, float] = {
+            "positive": 0.0,
+            "negative": 0.0,
+            "neutral": 1.0,
+        }
 
         for entry in raw_data:
             content = str(entry.get("data", ""))
             synthesized_summary += f"- From {entry.get('source')}: {content[:100]}...\n"
-            
+
             # Simulate entity extraction
-            if "email" in content: extracted_entities.append("email_address")
-            if "phone" in content: extracted_entities.append("phone_number")
-            if "malware" in content: extracted_entities.append("malware_reference")
+            if "email" in content:
+                extracted_entities.append("email_address")
+            if "phone" in content:
+                extracted_entities.append("phone_number")
+            if "malware" in content:
+                extracted_entities.append("malware_reference")
 
             # Simulate sentiment analysis
-            if "positive" in content.lower(): sentiment_analysis["positive"] += 0.1
-            if "negative" in content.lower(): sentiment_analysis["negative"] += 0.1
+            if "positive" in content.lower():
+                sentiment_analysis["positive"] += 0.1
+            if "negative" in content.lower():
+                sentiment_analysis["negative"] += 0.1
             sentiment_analysis["neutral"] -= 0.1
 
         # Normalize sentiment
         total_sentiment = sum(sentiment_analysis.values())
         if total_sentiment > 0:
-            for key in sentiment_analysis: sentiment_analysis[key] /= total_sentiment
+            for key in sentiment_analysis:
+                sentiment_analysis[key] /= total_sentiment
 
         processed_result = {
             "timestamp": datetime.now().isoformat(),
             "query_context": query_context,
             "synthesized_summary": synthesized_summary,
-            "extracted_entities": list(set(extracted_entities)), # Remove duplicates
+            "extracted_entities": list(set(extracted_entities)),  # Remove duplicates
             "sentiment_analysis": sentiment_analysis,
-            "potential_insights": "Identified potential connections between entities and events."
+            "potential_insights": "Identified potential connections between entities and events.",
         }
         self.processing_history.append(processed_result)
         self.last_processing_time = datetime.now()
@@ -94,5 +104,5 @@ class AIProcessor:
         return {
             "status": self.current_status,
             "total_processing_tasks": len(self.processing_history),
-            "last_processing": self.last_processing_time.isoformat() if self.last_processing_time else "N/A"
+            "last_processing": (self.last_processing_time.isoformat() if self.last_processing_time else "N/A"),
         }

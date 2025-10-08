@@ -15,17 +15,18 @@ updates on the execution of complex, multi-service operations within the Maximus
 AI ecosystem.
 """
 
+import asyncio
+import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
-import uuid
 
 from c2_engine import C2Engine
 from metrics import MetricsCollector
-from models import Command, CommandStatus, CommandResult
+from models import Command, CommandResult, CommandStatus
 
 app = FastAPI(title="Maximus C2 Orchestration Service", version="1.0.0")
 
@@ -42,6 +43,7 @@ class ExecuteCommandRequest(BaseModel):
         parameters (Optional[Dict[str, Any]]): Parameters for the command.
         target_service (Optional[str]): The specific Maximus service to target.
     """
+
     command_name: str
     parameters: Optional[Dict[str, Any]] = None
     target_service: Optional[str] = None
@@ -89,9 +91,9 @@ async def execute_command_endpoint(request: ExecuteCommandRequest) -> Command:
         parameters=request.parameters or {},
         target_service=request.target_service,
         status=CommandStatus.PENDING,
-        created_at=datetime.now().isoformat()
+        created_at=datetime.now().isoformat(),
     )
-    asyncio.create_task(c2_engine.execute_command(command)) # Run in background
+    asyncio.create_task(c2_engine.execute_command(command))  # Run in background
     return command
 
 

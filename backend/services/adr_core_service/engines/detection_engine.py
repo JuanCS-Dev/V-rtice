@@ -11,9 +11,9 @@ SIEM, EDR, network logs) to generate actionable detection results.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List
 
 from models.enums import DetectionType, IncidentSeverity
 from models.schemas import DetectionResult
@@ -45,9 +45,24 @@ class DetectionEngine:
         """
         # In a real system, these would be loaded from a database, YAML files, etc.
         return [
-            {"id": "rule_001", "pattern": "malware_signature_detected", "type": DetectionType.MALWARE, "severity": IncidentSeverity.CRITICAL},
-            {"id": "rule_002", "pattern": "unusual_login_attempt", "type": DetectionType.ANOMALY, "severity": IncidentSeverity.HIGH},
-            {"id": "rule_003", "pattern": "port_scan_activity", "type": DetectionType.NETWORK_SCAN, "severity": IncidentSeverity.MEDIUM},
+            {
+                "id": "rule_001",
+                "pattern": "malware_signature_detected",
+                "type": DetectionType.MALWARE,
+                "severity": IncidentSeverity.CRITICAL,
+            },
+            {
+                "id": "rule_002",
+                "pattern": "unusual_login_attempt",
+                "type": DetectionType.ANOMALY,
+                "severity": IncidentSeverity.HIGH,
+            },
+            {
+                "id": "rule_003",
+                "pattern": "port_scan_activity",
+                "type": DetectionType.NETWORK_SCAN,
+                "severity": IncidentSeverity.MEDIUM,
+            },
         ]
 
     async def analyze_event(self, event_data: Dict[str, Any], source: str) -> List[DetectionResult]:
@@ -61,7 +76,7 @@ class DetectionEngine:
             List[DetectionResult]: A list of detected threats or anomalies.
         """
         logger.info(f"[DetectionEngine] Analyzing event from {source}: {event_data.get('event_id', 'N/A')}")
-        await asyncio.sleep(0.03) # Simulate analysis time
+        await asyncio.sleep(0.03)  # Simulate analysis time
 
         detections: List[DetectionResult] = []
         event_str = str(event_data).lower()
@@ -69,16 +84,20 @@ class DetectionEngine:
         for rule in self.detection_rules:
             if rule["pattern"] in event_str:
                 detection_id = str(uuid.uuid4())
-                detections.append(DetectionResult(
-                    detection_id=detection_id,
-                    event_id=event_data.get("event_id", "unknown"),
-                    timestamp=datetime.now().isoformat(),
-                    detection_type=rule["type"],
-                    severity=rule["severity"],
-                    description=f"Rule '{rule["id"]}' triggered: {rule["pattern"]}",
-                    raw_event=event_data
-                ))
-                logger.warning(f"[DetectionEngine] Detected threat: {rule["pattern"]} in event {event_data.get('event_id', 'N/A')}")
+                detections.append(
+                    DetectionResult(
+                        detection_id=detection_id,
+                        event_id=event_data.get("event_id", "unknown"),
+                        timestamp=datetime.now().isoformat(),
+                        detection_type=rule["type"],
+                        severity=rule["severity"],
+                        description=f"Rule '{rule['id']}' triggered: {rule['pattern']}",
+                        raw_event=event_data,
+                    )
+                )
+                logger.warning(
+                    f"[DetectionEngine] Detected threat: {rule['pattern']} in event {event_data.get('event_id', 'N/A')}"
+                )
 
         if not detections:
             logger.info(f"[DetectionEngine] No threats detected for event {event_data.get('event_id', 'N/A')}")

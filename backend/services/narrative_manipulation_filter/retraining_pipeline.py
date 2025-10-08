@@ -9,20 +9,19 @@ Automated retraining with:
 - Automatic rollback if performance degrades
 """
 
+import asyncio
 import logging
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 from enum import Enum
-import asyncio
+from typing import Any, Dict, List
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
+from adversarial_training import AdversarialTrainer
+from config import get_settings
 from database import get_db_session
 from db_models import AnalysisRecord
-from adversarial_training import AdversarialTrainer, adversarial_generator
 from model_quantization import model_quantizer
-from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -76,11 +75,7 @@ class ModelRetrainingPipeline:
         self.current_model_metrics: Dict[str, Dict[str, float]] = {}
         self.retraining_history: List[Dict[str, Any]] = []
 
-    async def execute_pipeline(
-        self,
-        model_name: str,
-        trigger: TriggerType = TriggerType.MANUAL
-    ) -> Dict[str, Any]:
+    async def execute_pipeline(self, model_name: str, trigger: TriggerType = TriggerType.MANUAL) -> Dict[str, Any]:
         """
         Execute full retraining pipeline.
 
@@ -104,7 +99,7 @@ class ModelRetrainingPipeline:
             "end_time": None,
             "metrics": {},
             "deployed": False,
-            "error": None
+            "error": None,
         }
 
         try:
@@ -128,10 +123,7 @@ class ModelRetrainingPipeline:
             result["status"] = RetrainingStatus.EVALUATION.value
             eval_metrics = await self._evaluate_model(new_model, model_name)
 
-            logger.info(
-                f"Evaluation: F1={eval_metrics['f1_score']:.3f}, "
-                f"Acc={eval_metrics['accuracy']:.3f}"
-            )
+            logger.info(f"Evaluation: F1={eval_metrics['f1_score']:.3f}, Acc={eval_metrics['accuracy']:.3f}")
 
             result["metrics"] = eval_metrics
 
@@ -140,9 +132,7 @@ class ModelRetrainingPipeline:
             improvement = eval_metrics["f1_score"] - current_f1
 
             if improvement < self.MIN_IMPROVEMENT_THRESHOLD:
-                logger.warning(
-                    f"Insufficient improvement: {improvement:.3f} < {self.MIN_IMPROVEMENT_THRESHOLD}"
-                )
+                logger.warning(f"Insufficient improvement: {improvement:.3f} < {self.MIN_IMPROVEMENT_THRESHOLD}")
                 result["status"] = RetrainingStatus.COMPLETED.value
                 result["deployed"] = False
                 result["end_time"] = datetime.utcnow().isoformat()
@@ -154,10 +144,7 @@ class ModelRetrainingPipeline:
             await self._deploy_to_staging(new_model, model_name)
 
             # Run A/B test
-            ab_results = await self._run_ab_test(
-                model_name=model_name,
-                duration_hours=self.AB_TEST_DURATION_HOURS
-            )
+            ab_results = await self._run_ab_test(model_name=model_name, duration_hours=self.AB_TEST_DURATION_HOURS)
 
             logger.info(f"A/B test complete: new_model_better={ab_results['new_model_better']}")
 
@@ -169,7 +156,7 @@ class ModelRetrainingPipeline:
                 quantized_path = model_quantizer.quantize_sequence_classification(
                     model_name="neuralmind/bert-base-portuguese-cased",  # Base model
                     output_name=f"{model_name}_retrained",
-                    num_labels=eval_metrics.get("num_labels", 2)
+                    num_labels=eval_metrics.get("num_labels", 2),
                 )
 
                 logger.info(f"Model quantized: {quantized_path}")
@@ -200,11 +187,7 @@ class ModelRetrainingPipeline:
 
         return result
 
-    async def _collect_training_data(
-        self,
-        model_name: str,
-        min_samples: int = 1000
-    ) -> Dict[str, List]:
+    async def _collect_training_data(self, model_name: str, min_samples: int = 1000) -> Dict[str, List]:
         """
         Collect training data from PostgreSQL analysis records.
 
@@ -220,17 +203,13 @@ class ModelRetrainingPipeline:
             cutoff_date = datetime.utcnow() - timedelta(days=30)
 
             result = await session.execute(
-                select(AnalysisRecord)
-                .where(AnalysisRecord.timestamp >= cutoff_date)
-                .limit(10000)  # Max 10k samples
+                select(AnalysisRecord).where(AnalysisRecord.timestamp >= cutoff_date).limit(10000)  # Max 10k samples
             )
 
             records = result.scalars().all()
 
             if len(records) < min_samples:
-                logger.warning(
-                    f"Insufficient training data: {len(records)} < {min_samples}"
-                )
+                logger.warning(f"Insufficient training data: {len(records)} < {min_samples}")
 
             # Extract texts and labels (model-specific logic)
             texts = []
@@ -257,11 +236,7 @@ class ModelRetrainingPipeline:
 
             logger.info(f"Collected {len(texts)} samples for {model_name}")
 
-            return {
-                "texts": texts,
-                "labels": labels,
-                "num_samples": len(texts)
-            }
+            return {"texts": texts, "labels": labels, "num_samples": len(texts)}
 
     def _validate_data(self, data: Dict[str, List]) -> bool:
         """
@@ -295,7 +270,7 @@ class ModelRetrainingPipeline:
         if label_counts:
             max_count = max(label_counts.values())
             min_count = min(label_counts.values())
-            imbalance_ratio = max_count / min_count if min_count > 0 else float('inf')
+            imbalance_ratio = max_count / min_count if min_count > 0 else float("inf")
 
             if imbalance_ratio > 10:
                 logger.warning(f"High class imbalance: {imbalance_ratio:.1f}:1")
@@ -310,11 +285,7 @@ class ModelRetrainingPipeline:
         logger.info("✅ Data validation passed")
         return True
 
-    async def _train_model(
-        self,
-        model_name: str,
-        train_data: Dict[str, List]
-    ) -> tuple:
+    async def _train_model(self, model_name: str, train_data: Dict[str, List]) -> tuple:
         """
         Train model with adversarial augmentation.
 
@@ -325,7 +296,6 @@ class ModelRetrainingPipeline:
         Returns:
             (trained_model, training_metrics)
         """
-        import torch
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
         # Load base model
@@ -333,7 +303,7 @@ class ModelRetrainingPipeline:
 
         model = AutoModelForSequenceClassification.from_pretrained(
             base_model_name,
-            num_labels=2  # Binary classification
+            num_labels=2,  # Binary classification
         )
 
         tokenizer = AutoTokenizer.from_pretrained(base_model_name)
@@ -345,16 +315,12 @@ class ModelRetrainingPipeline:
             train_texts=train_data["texts"],
             train_labels=train_data["labels"],
             epochs=3,
-            learning_rate=2e-5
+            learning_rate=2e-5,
         )
 
         return model, metrics
 
-    async def _evaluate_model(
-        self,
-        model: Any,
-        model_name: str
-    ) -> Dict[str, float]:
+    async def _evaluate_model(self, model: Any, model_name: str) -> Dict[str, float]:
         """
         Evaluate model on test set.
 
@@ -376,16 +342,12 @@ class ModelRetrainingPipeline:
             "accuracy": 0.89,
             "precision": 0.87,
             "recall": 0.89,
-            "num_labels": 2
+            "num_labels": 2,
         }
 
         return metrics
 
-    async def _deploy_to_staging(
-        self,
-        model: Any,
-        model_name: str
-    ) -> None:
+    async def _deploy_to_staging(self, model: Any, model_name: str) -> None:
         """Deploy model to staging environment."""
         logger.info(f"Deploying {model_name} to staging...")
 
@@ -394,11 +356,7 @@ class ModelRetrainingPipeline:
 
         logger.info(f"✅ {model_name} deployed to staging")
 
-    async def _deploy_to_production(
-        self,
-        model: Any,
-        model_name: str
-    ) -> None:
+    async def _deploy_to_production(self, model: Any, model_name: str) -> None:
         """Deploy model to production environment."""
         logger.info(f"Deploying {model_name} to production...")
 
@@ -414,11 +372,7 @@ class ModelRetrainingPipeline:
 
         logger.info(f"✅ Old {model_name} archived")
 
-    async def _run_ab_test(
-        self,
-        model_name: str,
-        duration_hours: int = 24
-    ) -> Dict[str, Any]:
+    async def _run_ab_test(self, model_name: str, duration_hours: int = 24) -> Dict[str, Any]:
         """
         Run A/B test comparing new vs old model.
 
@@ -442,7 +396,7 @@ class ModelRetrainingPipeline:
             "new_model_f1": 0.88,
             "old_model_f1": 0.85,
             "improvement": 0.03,
-            "duration_hours": duration_hours
+            "duration_hours": duration_hours,
         }
 
         logger.info(f"✅ A/B test complete: new_model_better={result['new_model_better']}")

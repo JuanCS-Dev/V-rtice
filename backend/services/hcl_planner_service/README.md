@@ -577,3 +577,47 @@ curl -X POST http://localhost:8003/decide \
 - **Soft Actor-Critic:** Haarnoja et al. (2018). Soft Actor-Critic Algorithms and Applications.
 - **Stable-Baselines3:** https://stable-baselines3.readthedocs.io/
 - **Gymnasium:** https://gymnasium.farama.org/
+
+---
+
+## 📦 Dependency Management
+
+This service follows **strict dependency governance** to ensure security, stability, and reproducibility.
+
+### Quick Reference
+
+**Check for vulnerabilities**:
+```bash
+bash scripts/dependency-audit.sh
+```
+
+**Add new dependency**:
+```bash
+echo "package==1.2.3" >> requirements.txt
+pip-compile requirements.txt --output-file requirements.txt.lock
+bash scripts/dependency-audit.sh  # Verify no CVEs
+git add requirements.txt requirements.txt.lock
+git commit -m "feat: add package for feature X"
+```
+
+### Policies & SLAs
+
+📋 **[DEPENDENCY_POLICY.md](./DEPENDENCY_POLICY.md)** - Complete policy documentation
+
+**Key SLAs**:
+- **CRITICAL (CVSS >= 9.0)**: 24 hours
+- **HIGH (CVSS >= 7.0)**: 72 hours
+- **MEDIUM (CVSS >= 4.0)**: 2 weeks
+- **LOW (CVSS < 4.0)**: 1 month
+
+### Available Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `dependency-audit.sh` | Full CVE scan |
+| `check-cve-whitelist.sh` | Validate whitelist |
+| `audit-whitelist-expiration.sh` | Check expired CVEs |
+| `generate-dependency-metrics.sh` | Generate metrics JSON |
+
+See [Active Immune Core README](../active_immune_core/README.md#-dependency-management) for complete documentation.
+

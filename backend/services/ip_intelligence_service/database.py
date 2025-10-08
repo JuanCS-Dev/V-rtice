@@ -16,6 +16,7 @@ IP-related queries.
 """
 
 from typing import Dict, Optional
+
 from models import IPInfo
 
 # In-memory database for IP intelligence (mock)

@@ -18,8 +18,9 @@ malicious activity or critical events in real-time data flows.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 # Mocking Hyperscan library for demonstration purposes
 class MockHyperscan:
@@ -27,6 +28,7 @@ class MockHyperscan:
 
     Simula a compilação de padrões e a varredura de dados para fins de teste e desenvolvimento.
     """
+
     def __init__(self):
         """Inicializa o MockHyperscan.
 
@@ -47,7 +49,7 @@ class MockHyperscan:
         """
         print(f"[MockHyperscan] Compiling {len(patterns)} patterns.")
         self.patterns = patterns
-        return MagicMock() # Return a mock database
+        return MagicMock()  # Return a mock database
 
     def scan(self, database: Any, data: bytes, callback: Any, context: Any):
         """Simula a varredura de um dado binário em busca de padrões compilados.
@@ -61,9 +63,9 @@ class MockHyperscan:
         print(f"[MockHyperscan] Scanning data (size: {len(data)} bytes) with {len(self.patterns)} patterns.")
         matches = []
         for pattern_idx, pattern_str in enumerate(self.patterns):
-            if pattern_str.encode('utf-8') in data:
+            if pattern_str.encode("utf-8") in data:
                 matches.append({"id": pattern_idx, "from": 0, "to": len(data)})
-        
+
         for match in matches:
             callback(match["id"], match["from"], match["to"], 0, context)
 
@@ -80,7 +82,7 @@ class HyperscanMatcher:
 
     def __init__(self):
         """Initializes the HyperscanMatcher."""
-        self.hs = MockHyperscan() # Replace with actual hyperscan.Scanner()
+        self.hs = MockHyperscan()  # Replace with actual hyperscan.Scanner()
         self.compiled_database: Optional[Any] = None
         self.patterns: List[str] = []
         self.last_scan_time: Optional[datetime] = None
@@ -96,17 +98,25 @@ class HyperscanMatcher:
             Dict[str, Any]: A dictionary confirming the compilation status.
         """
         print(f"[HyperscanMatcher] Compiling {len(patterns)} patterns...")
-        await asyncio.sleep(0.1) # Simulate compilation time
+        await asyncio.sleep(0.1)  # Simulate compilation time
 
         try:
             # In a real scenario, this would use hyperscan.compile()
             self.compiled_database = self.hs.compile(patterns)
             self.patterns = patterns
             self.current_status = "patterns_compiled"
-            return {"status": "success", "message": f"{len(patterns)} patterns compiled.", "timestamp": datetime.now().isoformat()}
+            return {
+                "status": "success",
+                "message": f"{len(patterns)} patterns compiled.",
+                "timestamp": datetime.now().isoformat(),
+            }
         except Exception as e:
             self.current_status = "compilation_failed"
-            return {"status": "failed", "message": f"Pattern compilation failed: {e}", "timestamp": datetime.now().isoformat()}
+            return {
+                "status": "failed",
+                "message": f"Pattern compilation failed: {e}",
+                "timestamp": datetime.now().isoformat(),
+            }
 
     async def scan_data(self, data: bytes) -> List[Dict[str, Any]]:
         """Scans a byte string for occurrences of compiled patterns.
@@ -116,7 +126,7 @@ class HyperscanMatcher:
 
         Returns:
             List[Dict[str, Any]]: A list of dictionaries, each representing a detected match.
-        
+
         Raises:
             RuntimeError: If patterns have not been compiled yet.
         """
@@ -127,7 +137,14 @@ class HyperscanMatcher:
         matches: List[Dict[str, Any]] = []
 
         def on_match(id, start, end, flags, context):
-            matches.append({"pattern_id": id, "start": start, "end": end, "pattern": self.patterns[id]})
+            matches.append(
+                {
+                    "pattern_id": id,
+                    "start": start,
+                    "end": end,
+                    "pattern": self.patterns[id],
+                }
+            )
 
         # In a real scenario, this would use self.hs.scan()
         self.hs.scan(self.compiled_database, data, on_match, None)
@@ -144,5 +161,5 @@ class HyperscanMatcher:
         return {
             "status": self.current_status,
             "patterns_loaded": len(self.patterns),
-            "last_scan": self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
+            "last_scan": (self.last_scan_time.isoformat() if self.last_scan_time else "N/A"),
         }

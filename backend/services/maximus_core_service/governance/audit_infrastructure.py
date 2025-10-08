@@ -10,15 +10,17 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import hashlib
 import json
+from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import Any, Dict, Generator, List, Optional
-import hashlib
+from typing import Any
 
 try:
     import psycopg2
     from psycopg2.extras import RealDictCursor
+
     PSYCOPG2_AVAILABLE = True
 except ImportError:
     PSYCOPG2_AVAILABLE = False
@@ -26,16 +28,9 @@ except ImportError:
 from .base import (
     AuditLog,
     AuditLogLevel,
-    ERBDecision,
-    ERBMeeting,
-    ERBMember,
     GovernanceAction,
     GovernanceConfig,
-    Policy,
-    PolicyViolation,
-    WhistleblowerReport,
 )
-
 
 # ============================================================================
 # DATABASE SCHEMA
@@ -342,11 +337,11 @@ class AuditLogger:
         target_entity_type: str = "",
         target_entity_id: str = "",
         log_level: AuditLogLevel = AuditLogLevel.INFO,
-        details: Optional[Dict[str, Any]] = None,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
-        session_id: Optional[str] = None,
-        correlation_id: Optional[str] = None,
+        details: dict[str, Any] | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        session_id: str | None = None,
+        correlation_id: str | None = None,
     ) -> str:
         """
         Log governance action to audit trail.
@@ -416,13 +411,13 @@ class AuditLogger:
 
     def query_logs(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        action: Optional[GovernanceAction] = None,
-        actor: Optional[str] = None,
-        log_level: Optional[AuditLogLevel] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        action: GovernanceAction | None = None,
+        actor: str | None = None,
+        log_level: AuditLogLevel | None = None,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Query audit logs with filters."""
         query = "SELECT * FROM audit_logs WHERE 1=1"
         params = []
@@ -491,7 +486,7 @@ class AuditLogger:
 
         if output_format == "json":
             return json.dumps(logs, indent=2, default=str)
-        elif output_format == "csv":
+        if output_format == "csv":
             # Simplified CSV export
             if not logs:
                 return ""
@@ -500,10 +495,9 @@ class AuditLogger:
             for log in logs:
                 csv_lines.append(",".join(str(log.get(h, "")) for h in headers))
             return "\n".join(csv_lines)
-        else:
-            raise ValueError(f"Unsupported format: {output_format}")
+        raise ValueError(f"Unsupported format: {output_format}")
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get audit log statistics."""
         with self.get_connection() as conn:
             cursor = conn.cursor()

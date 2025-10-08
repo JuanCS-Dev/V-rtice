@@ -4,10 +4,10 @@ All system configuration managed through Pydantic Settings with environment
 variable support. Provides type safety, validation, and default values.
 """
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
-from datetime import timedelta
 
 
 class Settings(BaseSettings):
@@ -116,26 +116,11 @@ class Settings(BaseSettings):
     MODEL_DIR: str = Field("./models", env="MODEL_DIR")
 
     # Model paths
-    BERTIMBAU_EMOTIONS_PATH: str = Field(
-        "./models/bertimbau-emotions",
-        env="BERTIMBAU_EMOTIONS_PATH"
-    )
-    ROBERTA_PROPAGANDA_PATH: str = Field(
-        "./models/roberta-pt-propaganda",
-        env="ROBERTA_PROPAGANDA_PATH"
-    )
-    BERT_FALLACIES_PATH: str = Field(
-        "./models/bert-fallacies",
-        env="BERT_FALLACIES_PATH"
-    )
-    ROBERTA_CIALDINI_PATH: str = Field(
-        "./models/roberta-cialdini",
-        env="ROBERTA_CIALDINI_PATH"
-    )
-    BERT_COBAIT_PATH: str = Field(
-        "./models/bert-cobait",
-        env="BERT_COBAIT_PATH"
-    )
+    BERTIMBAU_EMOTIONS_PATH: str = Field("./models/bertimbau-emotions", env="BERTIMBAU_EMOTIONS_PATH")
+    ROBERTA_PROPAGANDA_PATH: str = Field("./models/roberta-pt-propaganda", env="ROBERTA_PROPAGANDA_PATH")
+    BERT_FALLACIES_PATH: str = Field("./models/bert-fallacies", env="BERT_FALLACIES_PATH")
+    ROBERTA_CIALDINI_PATH: str = Field("./models/roberta-cialdini", env="ROBERTA_CIALDINI_PATH")
+    BERT_COBAIT_PATH: str = Field("./models/bert-cobait", env="BERT_COBAIT_PATH")
 
     # Model serving configuration
     MODEL_BATCH_SIZE: int = Field(32, env="MODEL_BATCH_SIZE")
@@ -281,7 +266,7 @@ class Settings(BaseSettings):
             "factcheck": self.CACHE_TTL_FACTCHECK,
             "analysis": self.CACHE_TTL_ANALYSIS,
             "reputation": self.CACHE_TTL_REPUTATION,
-            "session": self.CACHE_TTL_SESSION
+            "session": self.CACHE_TTL_SESSION,
         }
 
         if category not in ttl_map:
@@ -301,7 +286,7 @@ class Settings(BaseSettings):
             "claims_to_verify": self.KAFKA_TOPIC_CLAIMS_TO_VERIFY,
             "verification_results": self.KAFKA_TOPIC_VERIFICATION_RESULTS,
             "analysis_results": self.KAFKA_TOPIC_ANALYSIS_RESULTS,
-            "errors": self.KAFKA_TOPIC_ERRORS
+            "errors": self.KAFKA_TOPIC_ERRORS,
         }
 
     def validate_configuration(self) -> bool:
@@ -314,12 +299,7 @@ class Settings(BaseSettings):
             ValueError: If configuration is invalid
         """
         # Validate weights sum to approximately 1.0
-        total_weight = (
-            self.WEIGHT_CREDIBILITY +
-            self.WEIGHT_EMOTIONAL +
-            self.WEIGHT_LOGICAL +
-            self.WEIGHT_REALITY
-        )
+        total_weight = self.WEIGHT_CREDIBILITY + self.WEIGHT_EMOTIONAL + self.WEIGHT_LOGICAL + self.WEIGHT_REALITY
 
         if not 0.99 <= total_weight <= 1.01:
             raise ValueError(
@@ -346,48 +326,48 @@ class Settings(BaseSettings):
                 "name": self.SERVICE_NAME,
                 "version": self.SERVICE_VERSION,
                 "port": self.SERVICE_PORT,
-                "workers": self.WORKERS
+                "workers": self.WORKERS,
             },
             "database": {
                 "host": self.POSTGRES_HOST,
                 "port": self.POSTGRES_PORT,
-                "database": self.POSTGRES_DB
+                "database": self.POSTGRES_DB,
             },
             "redis": {
                 "host": self.REDIS_HOST,
                 "port": self.REDIS_PORT,
-                "db": self.REDIS_DB
+                "db": self.REDIS_DB,
             },
             "kafka": {
                 "bootstrap_servers": self.KAFKA_BOOTSTRAP_SERVERS,
-                "topics": self.get_kafka_topics()
+                "topics": self.get_kafka_topics(),
             },
             "modules_enabled": {
                 "credibility": self.ENABLE_MODULE_CREDIBILITY,
                 "emotional": self.ENABLE_MODULE_EMOTIONAL,
                 "logical": self.ENABLE_MODULE_LOGICAL,
-                "reality": self.ENABLE_MODULE_REALITY
+                "reality": self.ENABLE_MODULE_REALITY,
             },
             "features": {
                 "tier2_verification": self.ENABLE_TIER2_VERIFICATION,
                 "meme_analysis": self.ENABLE_MEME_ANALYSIS,
                 "argumentation_graphs": self.ENABLE_ARGUMENTATION_GRAPHS,
                 "domain_fingerprinting": self.ENABLE_DOMAIN_FINGERPRINTING,
-                "adversarial_defense": self.ENABLE_ADVERSARIAL_DEFENSE
+                "adversarial_defense": self.ENABLE_ADVERSARIAL_DEFENSE,
             },
             "thresholds": {
                 "check_worthiness": self.CHECK_WORTHINESS_THRESHOLD,
                 "manipulation_high": self.MANIPULATION_THRESHOLD_HIGH,
                 "manipulation_moderate": self.MANIPULATION_THRESHOLD_MODERATE,
                 "credibility_high": self.CREDIBILITY_THRESHOLD_HIGH,
-                "credibility_low": self.CREDIBILITY_THRESHOLD_LOW
+                "credibility_low": self.CREDIBILITY_THRESHOLD_LOW,
             },
             "weights": {
                 "credibility": self.WEIGHT_CREDIBILITY,
                 "emotional": self.WEIGHT_EMOTIONAL,
                 "logical": self.WEIGHT_LOGICAL,
-                "reality": self.WEIGHT_REALITY
-            }
+                "reality": self.WEIGHT_REALITY,
+            },
         }
 
 

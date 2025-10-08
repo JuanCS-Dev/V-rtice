@@ -14,14 +14,13 @@ Quantized models:
 
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any
-import os
+from typing import Dict
 
 import torch
 from transformers import (
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
-    AutoTokenizer
+    AutoTokenizer,
 )
 
 from config import get_settings
@@ -53,12 +52,7 @@ class ModelQuantizer:
 
         self.quantized_models: Dict[str, torch.nn.Module] = {}
 
-    def quantize_sequence_classification(
-        self,
-        model_name: str,
-        output_name: str,
-        num_labels: int
-    ) -> Path:
+    def quantize_sequence_classification(self, model_name: str, output_name: str, num_labels: int) -> Path:
         """
         Quantize sequence classification model.
 
@@ -73,16 +67,13 @@ class ModelQuantizer:
         logger.info(f"🔧 Quantizing {model_name}...")
 
         # Load model
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_name,
-            num_labels=num_labels
-        )
+        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
 
         # Apply dynamic quantization
         quantized_model = torch.quantization.quantize_dynamic(
             model,
             {torch.nn.Linear, torch.nn.Embedding},  # Layers to quantize
-            dtype=torch.qint8
+            dtype=torch.qint8,
         )
 
         # Save quantized model
@@ -100,31 +91,17 @@ class ModelQuantizer:
         logger.info(f"✅ Quantized model saved: {output_path}")
 
         # Calculate size reduction
-        original_size = sum(
-            p.element_size() * p.numel()
-            for p in model.parameters()
-        ) / (1024**2)  # MB
+        original_size = sum(p.element_size() * p.numel() for p in model.parameters()) / (1024**2)  # MB
 
-        quantized_size = sum(
-            p.element_size() * p.numel()
-            for p in quantized_model.parameters()
-        ) / (1024**2)  # MB
+        quantized_size = sum(p.element_size() * p.numel() for p in quantized_model.parameters()) / (1024**2)  # MB
 
         reduction = (1 - quantized_size / original_size) * 100
 
-        logger.info(
-            f"Size: {original_size:.1f}MB → {quantized_size:.1f}MB "
-            f"({reduction:.1f}% reduction)"
-        )
+        logger.info(f"Size: {original_size:.1f}MB → {quantized_size:.1f}MB ({reduction:.1f}% reduction)")
 
         return output_path
 
-    def quantize_token_classification(
-        self,
-        model_name: str,
-        output_name: str,
-        num_labels: int
-    ) -> Path:
+    def quantize_token_classification(self, model_name: str, output_name: str, num_labels: int) -> Path:
         """
         Quantize token classification model.
 
@@ -139,16 +116,11 @@ class ModelQuantizer:
         logger.info(f"🔧 Quantizing token classifier {model_name}...")
 
         # Load model
-        model = AutoModelForTokenClassification.from_pretrained(
-            model_name,
-            num_labels=num_labels
-        )
+        model = AutoModelForTokenClassification.from_pretrained(model_name, num_labels=num_labels)
 
         # Apply dynamic quantization
         quantized_model = torch.quantization.quantize_dynamic(
-            model,
-            {torch.nn.Linear, torch.nn.Embedding},
-            dtype=torch.qint8
+            model, {torch.nn.Linear, torch.nn.Embedding}, dtype=torch.qint8
         )
 
         # Save
@@ -169,7 +141,7 @@ class ModelQuantizer:
         self,
         model_name: str,
         model_type: str = "sequence_classification",
-        num_labels: int = 2
+        num_labels: int = 2,
     ) -> torch.nn.Module:
         """
         Load quantized model from disk.
@@ -198,23 +170,15 @@ class ModelQuantizer:
             # In production, save model config alongside weights
             base_model_name = "neuralmind/bert-base-portuguese-cased"  # Default
 
-            model = AutoModelForSequenceClassification.from_pretrained(
-                base_model_name,
-                num_labels=num_labels
-            )
+            model = AutoModelForSequenceClassification.from_pretrained(base_model_name, num_labels=num_labels)
         else:
             base_model_name = "neuralmind/bert-base-portuguese-cased"
 
-            model = AutoModelForTokenClassification.from_pretrained(
-                base_model_name,
-                num_labels=num_labels
-            )
+            model = AutoModelForTokenClassification.from_pretrained(base_model_name, num_labels=num_labels)
 
         # Apply quantization
         quantized_model = torch.quantization.quantize_dynamic(
-            model,
-            {torch.nn.Linear, torch.nn.Embedding},
-            dtype=torch.qint8
+            model, {torch.nn.Linear, torch.nn.Embedding}, dtype=torch.qint8
         )
 
         # Load weights
@@ -227,12 +191,7 @@ class ModelQuantizer:
 
         return quantized_model
 
-    def benchmark_model(
-        self,
-        model_name: str,
-        test_inputs: list,
-        num_iterations: int = 100
-    ) -> Dict[str, float]:
+    def benchmark_model(self, model_name: str, test_inputs: list, num_iterations: int = 100) -> Dict[str, float]:
         """
         Benchmark quantized model performance.
 
@@ -282,7 +241,7 @@ class ModelQuantizer:
             "p50_latency_ms": np.percentile(latencies, 50),
             "p95_latency_ms": np.percentile(latencies, 95),
             "p99_latency_ms": np.percentile(latencies, 99),
-            "throughput_qps": 1000 / np.mean(latencies)
+            "throughput_qps": 1000 / np.mean(latencies),
         }
 
 
@@ -316,7 +275,7 @@ class QuantizationPipeline:
             path = self.quantizer.quantize_sequence_classification(
                 model_name="neuralmind/bert-base-portuguese-cased",
                 output_name="bertimbau_emotions_int8",
-                num_labels=7  # 7 emotions
+                num_labels=7,  # 7 emotions
             )
             quantized_paths["bertimbau_emotions"] = path
         except Exception as e:
@@ -327,7 +286,7 @@ class QuantizationPipeline:
             path = self.quantizer.quantize_token_classification(
                 model_name="neuralmind/bert-base-portuguese-cased",
                 output_name="roberta_propaganda_int8",
-                num_labels=14  # 14 propaganda techniques
+                num_labels=14,  # 14 propaganda techniques
             )
             quantized_paths["roberta_propaganda"] = path
         except Exception as e:
@@ -338,7 +297,7 @@ class QuantizationPipeline:
             path = self.quantizer.quantize_token_classification(
                 model_name="neuralmind/bert-base-portuguese-cased",
                 output_name="bert_argument_mining_int8",
-                num_labels=7  # BIO tagging (O, B-MajorClaim, I-MajorClaim, B-Claim, I-Claim, B-Premise, I-Premise)
+                num_labels=7,  # BIO tagging (O, B-MajorClaim, I-MajorClaim, B-Claim, I-Claim, B-Premise, I-Premise)
             )
             quantized_paths["bert_argument_mining"] = path
         except Exception as e:
@@ -349,7 +308,7 @@ class QuantizationPipeline:
             path = self.quantizer.quantize_sequence_classification(
                 model_name="neuralmind/bert-base-portuguese-cased",
                 output_name="fallacy_classifier_int8",
-                num_labels=21  # 21 fallacy types
+                num_labels=21,  # 21 fallacy types
             )
             quantized_paths["fallacy_classifier"] = path
         except Exception as e:
@@ -369,7 +328,7 @@ class QuantizationPipeline:
         test_texts = [
             "Este é um texto de exemplo para benchmark.",
             "Análise de desempenho do modelo quantizado.",
-            "Verificação de latência e throughput em produção."
+            "Verificação de latência e throughput em produção.",
         ]
 
         benchmarks = {}
@@ -377,9 +336,7 @@ class QuantizationPipeline:
         for model_name in self.quantizer.quantized_models.keys():
             try:
                 metrics = self.quantizer.benchmark_model(
-                    model_name=model_name,
-                    test_inputs=test_texts,
-                    num_iterations=50
+                    model_name=model_name, test_inputs=test_texts, num_iterations=50
                 )
 
                 benchmarks[model_name] = metrics

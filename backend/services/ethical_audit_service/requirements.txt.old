@@ -1,0 +1,19 @@
+# FastAPI and ASGI server
+fastapi>=0.115.0  # Security fixes for starlette
+uvicorn[standard]>=0.32.0  # Compatibility with updated fastapi
+pydantic>=2.9.0  # Latest security patches
+pydantic-settings>=2.1.0  # Keep current
+
+# Database
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+
+# Utilities
+python-multipart>=0.0.18  # CVE-2024-53981 fix
+python-jose[cryptography]>=3.4.0  # CVE-2024-33663, CVE-2024-33664 fixes
+PyJWT>=2.8.0  # Keep current
+requests>=2.32.4  # CVE-2024-47081 fix (.netrc credential leak)
+
+# Security & Rate Limiting
+slowapi==0.1.9
+anyio>=4.4.0  # Security fix for race condition

@@ -7,7 +7,7 @@ Dynamic resource allocation using:
 """
 
 from .fuzzy_controller import FuzzyLogicController
-from .rl_agent import SACAgent
 from .mode_definitions import OPERATIONAL_MODES
+from .rl_agent import SACAgent
 
-__all__ = ['FuzzyLogicController', 'SACAgent', 'OPERATIONAL_MODES']
+__all__ = ["FuzzyLogicController", "SACAgent", "OPERATIONAL_MODES"]

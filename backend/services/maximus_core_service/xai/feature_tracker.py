@@ -11,10 +11,10 @@ Key Features:
 """
 
 import logging
-import time
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any
+
 import numpy as np
 
 from .base import FeatureImportance
@@ -34,14 +34,15 @@ class FeatureHistory:
         std_importance: Standard deviation of importance
         trend: Trend direction ('increasing', 'decreasing', 'stable')
     """
+
     feature_name: str
-    importances: List[float] = field(default_factory=list)
-    timestamps: List[datetime] = field(default_factory=list)
+    importances: list[float] = field(default_factory=list)
+    timestamps: list[datetime] = field(default_factory=list)
     mean_importance: float = 0.0
     std_importance: float = 0.0
     trend: str = "stable"
 
-    def add_observation(self, importance: float, timestamp: Optional[datetime] = None):
+    def add_observation(self, importance: float, timestamp: datetime | None = None):
         """Add new importance observation.
 
         Args:
@@ -81,7 +82,7 @@ class FeatureHistory:
             else:
                 self.trend = "stable"
 
-    def get_recent_importances(self, hours: int = 24) -> List[float]:
+    def get_recent_importances(self, hours: int = 24) -> list[float]:
         """Get importances from last N hours.
 
         Args:
@@ -93,7 +94,7 @@ class FeatureHistory:
         cutoff = datetime.utcnow() - timedelta(hours=hours)
         recent = []
 
-        for importance, timestamp in zip(self.importances, self.timestamps):
+        for importance, timestamp in zip(self.importances, self.timestamps, strict=False):
             if timestamp >= cutoff:
                 recent.append(importance)
 
@@ -112,7 +113,7 @@ class FeatureImportanceTracker:
         self.max_history = max_history
 
         # Feature histories
-        self.feature_histories: Dict[str, FeatureHistory] = {}
+        self.feature_histories: dict[str, FeatureHistory] = {}
 
         # Global statistics
         self.total_explanations: int = 0
@@ -120,11 +121,7 @@ class FeatureImportanceTracker:
 
         logger.info(f"FeatureImportanceTracker initialized (max_history={max_history})")
 
-    def track_explanation(
-        self,
-        features: List[FeatureImportance],
-        timestamp: Optional[datetime] = None
-    ):
+    def track_explanation(self, features: list[FeatureImportance], timestamp: datetime | None = None):
         """Track features from an explanation.
 
         Args:
@@ -137,24 +134,22 @@ class FeatureImportanceTracker:
         # Track each feature
         for feature in features:
             if feature.feature_name not in self.feature_histories:
-                self.feature_histories[feature.feature_name] = FeatureHistory(
-                    feature_name=feature.feature_name
-                )
+                self.feature_histories[feature.feature_name] = FeatureHistory(feature_name=feature.feature_name)
 
             history = self.feature_histories[feature.feature_name]
             history.add_observation(feature.importance, timestamp)
 
             # Trim history if too large
             if len(history.importances) > self.max_history:
-                history.importances = history.importances[-self.max_history:]
-                history.timestamps = history.timestamps[-self.max_history:]
+                history.importances = history.importances[-self.max_history :]
+                history.timestamps = history.timestamps[-self.max_history :]
                 history._update_statistics()
 
         self.total_explanations += 1
 
         logger.debug(f"Tracked {len(features)} features (total explanations: {self.total_explanations})")
 
-    def get_top_features(self, n: int = 10, time_window_hours: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_top_features(self, n: int = 10, time_window_hours: int | None = None) -> list[dict[str, Any]]:
         """Get top N most important features.
 
         Args:
@@ -175,25 +170,22 @@ class FeatureImportanceTracker:
             if importances:
                 mean_importance = np.mean(np.abs(importances))  # Absolute importance
 
-                feature_stats.append({
-                    'feature_name': feature_name,
-                    'mean_importance': float(mean_importance),
-                    'std_importance': float(np.std(importances)),
-                    'count': len(importances),
-                    'trend': history.trend
-                })
+                feature_stats.append(
+                    {
+                        "feature_name": feature_name,
+                        "mean_importance": float(mean_importance),
+                        "std_importance": float(np.std(importances)),
+                        "count": len(importances),
+                        "trend": history.trend,
+                    }
+                )
 
         # Sort by mean importance
-        feature_stats.sort(key=lambda x: x['mean_importance'], reverse=True)
+        feature_stats.sort(key=lambda x: x["mean_importance"], reverse=True)
 
         return feature_stats[:n]
 
-    def detect_drift(
-        self,
-        feature_name: str,
-        window_size: int = 100,
-        threshold: float = 0.2
-    ) -> Dict[str, Any]:
+    def detect_drift(self, feature_name: str, window_size: int = 100, threshold: float = 0.2) -> dict[str, Any]:
         """Detect drift in feature importance.
 
         Args:
@@ -205,22 +197,16 @@ class FeatureImportanceTracker:
             Drift detection result dict
         """
         if feature_name not in self.feature_histories:
-            return {
-                'drift_detected': False,
-                'reason': 'Feature not tracked'
-            }
+            return {"drift_detected": False, "reason": "Feature not tracked"}
 
         history = self.feature_histories[feature_name]
 
         if len(history.importances) < window_size * 2:
-            return {
-                'drift_detected': False,
-                'reason': 'Insufficient data'
-            }
+            return {"drift_detected": False, "reason": "Insufficient data"}
 
         # Compare recent window to older window
         recent = history.importances[-window_size:]
-        older = history.importances[-2*window_size:-window_size]
+        older = history.importances[-2 * window_size : -window_size]
 
         recent_mean = np.mean(np.abs(recent))
         older_mean = np.mean(np.abs(older))
@@ -234,22 +220,17 @@ class FeatureImportanceTracker:
         drift_detected = abs(relative_change) > threshold
 
         return {
-            'drift_detected': drift_detected,
-            'feature_name': feature_name,
-            'recent_mean': float(recent_mean),
-            'older_mean': float(older_mean),
-            'relative_change': float(relative_change),
-            'threshold': threshold,
-            'direction': 'increase' if relative_change > 0 else 'decrease',
-            'severity': 'high' if abs(relative_change) > 2*threshold else 'medium'
+            "drift_detected": drift_detected,
+            "feature_name": feature_name,
+            "recent_mean": float(recent_mean),
+            "older_mean": float(older_mean),
+            "relative_change": float(relative_change),
+            "threshold": threshold,
+            "direction": "increase" if relative_change > 0 else "decrease",
+            "severity": "high" if abs(relative_change) > 2 * threshold else "medium",
         }
 
-    def detect_global_drift(
-        self,
-        top_n: int = 20,
-        window_size: int = 100,
-        threshold: float = 0.2
-    ) -> Dict[str, Any]:
+    def detect_global_drift(self, top_n: int = 20, window_size: int = 100, threshold: float = 0.2) -> dict[str, Any]:
         """Detect drift across all tracked features.
 
         Args:
@@ -264,32 +245,32 @@ class FeatureImportanceTracker:
         drifted_features = []
 
         for feature_info in top_features:
-            feature_name = feature_info['feature_name']
+            feature_name = feature_info["feature_name"]
             drift_result = self.detect_drift(feature_name, window_size, threshold)
 
-            if drift_result['drift_detected']:
+            if drift_result["drift_detected"]:
                 drifted_features.append(drift_result)
 
         # Global drift severity
         if len(drifted_features) >= len(top_features) * 0.5:
-            severity = 'critical'
+            severity = "critical"
         elif len(drifted_features) >= len(top_features) * 0.25:
-            severity = 'high'
+            severity = "high"
         elif len(drifted_features) > 0:
-            severity = 'medium'
+            severity = "medium"
         else:
-            severity = 'none'
+            severity = "none"
 
         return {
-            'drift_detected': len(drifted_features) > 0,
-            'num_drifted_features': len(drifted_features),
-            'total_features_checked': len(top_features),
-            'drift_percentage': (len(drifted_features) / len(top_features) * 100) if top_features else 0,
-            'severity': severity,
-            'drifted_features': drifted_features
+            "drift_detected": len(drifted_features) > 0,
+            "num_drifted_features": len(drifted_features),
+            "total_features_checked": len(top_features),
+            "drift_percentage": (len(drifted_features) / len(top_features) * 100) if top_features else 0,
+            "severity": severity,
+            "drifted_features": drifted_features,
         }
 
-    def get_feature_trend(self, feature_name: str) -> Dict[str, Any]:
+    def get_feature_trend(self, feature_name: str) -> dict[str, Any]:
         """Get trend information for a feature.
 
         Args:
@@ -299,25 +280,22 @@ class FeatureImportanceTracker:
             Trend information dict
         """
         if feature_name not in self.feature_histories:
-            return {
-                'found': False,
-                'feature_name': feature_name
-            }
+            return {"found": False, "feature_name": feature_name}
 
         history = self.feature_histories[feature_name]
 
         return {
-            'found': True,
-            'feature_name': feature_name,
-            'mean_importance': history.mean_importance,
-            'std_importance': history.std_importance,
-            'trend': history.trend,
-            'num_observations': len(history.importances),
-            'first_seen': history.timestamps[0].isoformat() if history.timestamps else None,
-            'last_seen': history.timestamps[-1].isoformat() if history.timestamps else None
+            "found": True,
+            "feature_name": feature_name,
+            "mean_importance": history.mean_importance,
+            "std_importance": history.std_importance,
+            "trend": history.trend,
+            "num_observations": len(history.importances),
+            "first_seen": history.timestamps[0].isoformat() if history.timestamps else None,
+            "last_seen": history.timestamps[-1].isoformat() if history.timestamps else None,
         }
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get global tracker statistics.
 
         Returns:
@@ -326,12 +304,12 @@ class FeatureImportanceTracker:
         uptime = (datetime.utcnow() - self.start_time).total_seconds()
 
         return {
-            'total_explanations': self.total_explanations,
-            'num_features_tracked': len(self.feature_histories),
-            'uptime_seconds': uptime,
-            'explanations_per_second': self.total_explanations / uptime if uptime > 0 else 0,
-            'start_time': self.start_time.isoformat(),
-            'memory_usage_mb': self._estimate_memory_usage()
+            "total_explanations": self.total_explanations,
+            "num_features_tracked": len(self.feature_histories),
+            "uptime_seconds": uptime,
+            "explanations_per_second": self.total_explanations / uptime if uptime > 0 else 0,
+            "start_time": self.start_time.isoformat(),
+            "memory_usage_mb": self._estimate_memory_usage(),
         }
 
     def _estimate_memory_usage(self) -> float:
@@ -344,24 +322,24 @@ class FeatureImportanceTracker:
         total_observations = sum(len(h.importances) for h in self.feature_histories.values())
         return (total_observations * 100) / (1024 * 1024)
 
-    def export_to_dict(self) -> Dict[str, Any]:
+    def export_to_dict(self) -> dict[str, Any]:
         """Export tracker state to dictionary.
 
         Returns:
             Dictionary representation
         """
         return {
-            'statistics': self.get_statistics(),
-            'top_features': self.get_top_features(n=50),
-            'feature_histories': {
+            "statistics": self.get_statistics(),
+            "top_features": self.get_top_features(n=50),
+            "feature_histories": {
                 name: {
-                    'mean_importance': history.mean_importance,
-                    'std_importance': history.std_importance,
-                    'trend': history.trend,
-                    'num_observations': len(history.importances)
+                    "mean_importance": history.mean_importance,
+                    "std_importance": history.std_importance,
+                    "trend": history.trend,
+                    "num_observations": len(history.importances),
                 }
                 for name, history in self.feature_histories.items()
-            }
+            },
         }
 
     def clear_old_data(self, days: int = 30):

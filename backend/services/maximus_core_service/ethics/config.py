@@ -4,10 +4,10 @@ This module provides default configurations for all ethical frameworks
 and the integration engine.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 # Default configuration for Ethical Integration Engine
-DEFAULT_INTEGRATION_CONFIG: Dict[str, Any] = {
+DEFAULT_INTEGRATION_CONFIG: dict[str, Any] = {
     # Framework weights (must sum to 1.0)
     "framework_weights": {
         "kantian_deontology": 0.30,  # Highest weight due to veto power
@@ -66,7 +66,7 @@ DEFAULT_INTEGRATION_CONFIG: Dict[str, Any] = {
 
 
 # Production configuration (stricter)
-PRODUCTION_CONFIG: Dict[str, Any] = {
+PRODUCTION_CONFIG: dict[str, Any] = {
     **DEFAULT_INTEGRATION_CONFIG,
     # Stricter thresholds in production
     "approval_threshold": 0.75,
@@ -91,7 +91,7 @@ PRODUCTION_CONFIG: Dict[str, Any] = {
 
 
 # Development/testing configuration (more permissive)
-DEV_CONFIG: Dict[str, Any] = {
+DEV_CONFIG: dict[str, Any] = {
     **DEFAULT_INTEGRATION_CONFIG,
     # More permissive in dev
     "approval_threshold": 0.60,
@@ -103,7 +103,7 @@ DEV_CONFIG: Dict[str, Any] = {
 
 
 # Red team / offensive operations configuration
-OFFENSIVE_CONFIG: Dict[str, Any] = {
+OFFENSIVE_CONFIG: dict[str, Any] = {
     **DEFAULT_INTEGRATION_CONFIG,
     # Much stricter for offensive ops
     "approval_threshold": 0.85,
@@ -128,7 +128,7 @@ OFFENSIVE_CONFIG: Dict[str, Any] = {
 }
 
 
-def get_config(environment: str = "production") -> Dict[str, Any]:
+def get_config(environment: str = "production") -> dict[str, Any]:
     """Get configuration for specified environment.
 
     Args:
@@ -148,7 +148,7 @@ def get_config(environment: str = "production") -> Dict[str, Any]:
     return configs.get(environment.lower(), DEFAULT_INTEGRATION_CONFIG)
 
 
-def get_framework_weights(environment: str = "production") -> Dict[str, float]:
+def get_framework_weights(environment: str = "production") -> dict[str, float]:
     """Get framework weights for environment.
 
     Args:
@@ -161,7 +161,7 @@ def get_framework_weights(environment: str = "production") -> Dict[str, float]:
     return config["framework_weights"]
 
 
-def get_thresholds(environment: str = "production") -> Dict[str, float]:
+def get_thresholds(environment: str = "production") -> dict[str, float]:
     """Get decision thresholds for environment.
 
     Args:
@@ -178,7 +178,7 @@ def get_thresholds(environment: str = "production") -> Dict[str, float]:
 
 
 # Risk-level based configuration overrides
-RISK_CONFIGS: Dict[str, Dict[str, Any]] = {
+RISK_CONFIGS: dict[str, dict[str, Any]] = {
     "low": {
         "approval_threshold": 0.60,
         "rejection_threshold": 0.45,
@@ -203,9 +203,7 @@ RISK_CONFIGS: Dict[str, Dict[str, Any]] = {
 }
 
 
-def get_config_for_risk(
-    risk_level: str, base_environment: str = "production"
-) -> Dict[str, Any]:
+def get_config_for_risk(risk_level: str, base_environment: str = "production") -> dict[str, Any]:
     """Get configuration adjusted for risk level.
 
     Args:

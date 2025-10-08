@@ -1,0 +1,20 @@
+# Grafana Dashboard Provisioning for MAXIMUS AI 3.0
+# Auto-load dashboards from monitoring/dashboards/
+#
+# REGRA DE OURO: Production-ready configuration
+# Author: Claude Code + JuanCS-Dev
+# Date: 2025-10-06
+
+apiVersion: 1
+
+providers:
+  - name: 'MAXIMUS AI 3.0 Dashboards'
+    orgId: 1
+    folder: 'MAXIMUS AI'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

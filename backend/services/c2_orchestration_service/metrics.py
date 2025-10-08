@@ -17,7 +17,7 @@ continuous improvement of the C2 Orchestration capabilities.
 
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class MetricsCollector:

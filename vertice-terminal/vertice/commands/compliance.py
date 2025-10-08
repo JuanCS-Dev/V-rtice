@@ -31,13 +31,12 @@ Examples:
 
 import typer
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 from rich import box
 from datetime import datetime, timedelta
 from typing import Optional
 import logging
 from vertice.utils import primoroso
+from vertice.utils.output import GeminiStyleTable, PrimordialPanel
 
 app = typer.Typer(
     name="compliance",
@@ -122,17 +121,18 @@ def assess(
             assessor=assessor,
         )
 
-        # Display results
-        console.print(Panel(
+        # Display results with PrimordialPanel
+        panel = PrimordialPanel(
             f"[bold green]Compliance Score: {assessment.compliance_score:.1f}%[/bold green]",
             title="Assessment Result",
-            border_style="green",
-        ))
+            console=console
+        )
+        panel.with_status("success").render()
 
         # Summary table
-        table = Table(title="Control Summary", box=box.ROUNDED)
-        table.add_column("Status", style="cyan")
-        table.add_column("Count", justify="right", style="magenta")
+        table = GeminiStyleTable(title="Control Summary", console=console)
+        table.add_column("Status")
+        table.add_column("Count", alignment="right")
 
         table.add_row("✅ Implemented", str(assessment.implemented))
         table.add_row("⚠️  Partially Implemented", str(assessment.partially_implemented))
@@ -140,7 +140,7 @@ def assess(
         table.add_row("➖ Not Applicable", str(assessment.not_applicable))
         table.add_row("[bold]Total[/bold]", f"[bold]{assessment.total_controls}[/bold]")
 
-        console.print(table)
+        table.render()
 
         # Show gaps
         if assessment.gaps:
@@ -223,12 +223,12 @@ def controls_list(
     controls = controls[:limit]
 
     # Display
-    table = Table(title=f"Compliance Controls ({len(controls)})", box=box.ROUNDED)
-    table.add_column("ID", style="cyan")
-    table.add_column("Framework", style="blue")
-    table.add_column("Title", style="white")
-    table.add_column("Status", style="magenta")
-    table.add_column("Priority", style="yellow")
+    table = GeminiStyleTable(title=f"Compliance Controls ({len(controls)})", console=console)
+    table.add_column("ID")
+    table.add_column("Framework")
+    table.add_column("Title", max_width=50)
+    table.add_column("Status")
+    table.add_column("Priority")
 
     for control in controls:
         # Status symbol
@@ -250,7 +250,7 @@ def controls_list(
             control.priority,
         )
 
-    console.print(table)
+    table.render()
 
 
 @controls_app.command("update")
@@ -316,12 +316,13 @@ def gaps(
     gap_analysis = engine.get_gap_analysis(framework_enum)
 
     # Display
-    console.print(Panel(
+    panel = PrimordialPanel(
         f"[bold yellow]{gap_analysis['total_gaps']} total gaps\n"
         f"{gap_analysis['critical_gaps']} critical gaps[/bold yellow]",
         title=f"Gap Analysis: {framework_enum.value.upper()}",
-        border_style="yellow",
-    ))
+        console=console
+    )
+    panel.with_status("warning").render()
 
     # Critical gaps
     if gap_analysis['critical_gaps_list']:
@@ -395,12 +396,12 @@ def audit_query(
     )
 
     # Display
-    table = Table(title=f"Audit Trail ({len(events)} events)", box=box.ROUNDED)
-    table.add_column("Timestamp", style="cyan")
-    table.add_column("Event Type", style="blue")
-    table.add_column("Actor", style="yellow")
-    table.add_column("Resource", style="white")
-    table.add_column("Result", style="magenta")
+    table = GeminiStyleTable(title=f"Audit Trail ({len(events)} events)", console=console)
+    table.add_column("Timestamp")
+    table.add_column("Event Type")
+    table.add_column("Actor")
+    table.add_column("Resource", max_width=30)
+    table.add_column("Result")
 
     for event in events:
         # Result color
@@ -414,7 +415,7 @@ def audit_query(
             f"[{result_color}]{event.result}[/{result_color}]",
         )
 
-    console.print(table)
+    table.render()
 
     # Statistics
     stats = audit_logger.get_statistics(start_time=start_time)
@@ -439,19 +440,21 @@ def audit_verify():
     is_valid = audit_logger.verify_chain_integrity()
 
     if is_valid:
-        console.print(Panel(
+        panel = PrimordialPanel(
             f"[bold green]✅ Audit chain integrity VERIFIED[/bold green]\n"
             f"Total events: {len(audit_logger.event_chain)}",
             title="Integrity Check",
-            border_style="green",
-        ))
+            console=console
+        )
+        panel.with_status("success").render()
     else:
-        console.print(Panel(
+        panel = PrimordialPanel(
             "[bold red]❌ Audit chain integrity COMPROMISED[/bold red]\n"
             "Tampering detected!",
             title="Integrity Check",
-            border_style="red",
-        ))
+            console=console
+        )
+        panel.with_status("error").render()
         raise typer.Exit(1)
 
 
@@ -559,15 +562,16 @@ def report_generate(
         raise typer.Exit(1)
 
     # Display result
-    console.print(Panel(
+    panel = PrimordialPanel(
         f"[bold green]✅ Report generated successfully[/bold green]\n\n"
         f"Report ID: {report.id}\n"
         f"Type: {report.report_type.value}\n"
         f"Format: {report.format.value}\n"
         f"Output: {report.output_path}",
         title="Report Generated",
-        border_style="green",
-    ))
+        console=console
+    )
+    panel.with_status("success").render()
 
 
 # ==================== Metrics Commands ====================
@@ -607,12 +611,12 @@ def metrics_show(
         raise typer.Exit(1)
 
     # Display KPIs
-    table = Table(title=f"KPI Dashboard ({kpi_group.upper()})", box=box.ROUNDED)
-    table.add_column("KPI", style="cyan")
-    table.add_column("Current", justify="right", style="magenta")
-    table.add_column("Target", justify="right", style="blue")
-    table.add_column("Trend", justify="center", style="yellow")
-    table.add_column("Status", justify="center")
+    table = GeminiStyleTable(title=f"KPI Dashboard ({kpi_group.upper()})", console=console)
+    table.add_column("KPI")
+    table.add_column("Current", alignment="right")
+    table.add_column("Target", alignment="right")
+    table.add_column("Trend", alignment="center")
+    table.add_column("Status", alignment="center")
 
     for kpi in kpis.values():
         # Status symbol
@@ -641,7 +645,7 @@ def metrics_show(
             f"{status_symbol} {kpi.status}",
         )
 
-    console.print(table)
+    table.render()
 
 
 @metrics_app.command("export")

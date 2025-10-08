@@ -10,12 +10,12 @@ Prediction error = unexpected graph patterns (e.g., anomalous process chains).
 """
 
 import logging
+from dataclasses import dataclass
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from typing import Dict, List, Tuple, Optional
-from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +23,11 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EventGraph:
     """Event graph representation."""
+
     node_features: torch.Tensor  # [num_nodes, feature_dim]
     edge_index: torch.Tensor  # [2, num_edges] (source, target pairs)
-    edge_features: Optional[torch.Tensor] = None  # [num_edges, edge_feature_dim]
-    node_labels: Optional[torch.Tensor] = None  # [num_nodes] ground truth
+    edge_features: torch.Tensor | None = None  # [num_edges, edge_feature_dim]
+    node_labels: torch.Tensor | None = None  # [num_nodes] ground truth
 
 
 class GraphConvLayer(nn.Module):
@@ -44,11 +45,7 @@ class GraphConvLayer(nn.Module):
         self.linear = nn.Linear(in_features, out_features)
         self.activation = nn.ReLU()
 
-    def forward(
-        self,
-        x: torch.Tensor,
-        edge_index: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass: aggregate neighbor features.
 
         Args:
@@ -90,9 +87,9 @@ class BehavioralGNN(nn.Module):
     def __init__(
         self,
         input_dim: int = 64,  # From L1 latent representations
-        hidden_dims: List[int] = [128, 128, 64],
+        hidden_dims: list[int] = [128, 128, 64],
         output_dim: int = 64,  # Predicted next event embedding
-        num_classes: int = 10  # Event types (e.g., benign, malware, exploit)
+        num_classes: int = 10,  # Event types (e.g., benign, malware, exploit)
     ):
         """Initialize Behavioral GNN.
 
@@ -122,10 +119,8 @@ class BehavioralGNN(nn.Module):
         logger.info(f"BehavioralGNN initialized: {input_dim}D → {output_dim}D")
 
     def forward(
-        self,
-        node_features: torch.Tensor,
-        edge_index: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        self, node_features: torch.Tensor, edge_index: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass through GNN.
 
         Args:
@@ -163,12 +158,7 @@ class BehavioralLayer:
     Detects anomalous process chains, suspicious network flows, etc.
     """
 
-    def __init__(
-        self,
-        latent_dim: int = 64,
-        device: str = 'cpu',
-        anomaly_threshold: float = 0.7
-    ):
+    def __init__(self, latent_dim: int = 64, device: str = "cpu", anomaly_threshold: float = 0.7):
         """Initialize Behavioral Layer.
 
         Args:
@@ -185,7 +175,7 @@ class BehavioralLayer:
             input_dim=latent_dim,
             hidden_dims=[128, 128, 64],
             output_dim=latent_dim,
-            num_classes=10
+            num_classes=10,
         ).to(self.device)
 
         # Prediction error statistics
@@ -195,7 +185,7 @@ class BehavioralLayer:
 
         logger.info(f"BehavioralLayer initialized on {device}")
 
-    def predict(self, event_graph: EventGraph) -> Dict:
+    def predict(self, event_graph: EventGraph) -> dict:
         """Predict behavioral patterns and detect anomalies.
 
         Args:
@@ -211,14 +201,12 @@ class BehavioralLayer:
             edge_index = event_graph.edge_index.to(self.device)
 
             # Forward pass
-            embeddings, next_event_pred, event_classes = self.gnn(
-                node_features, edge_index
-            )
+            embeddings, next_event_pred, event_classes = self.gnn(node_features, edge_index)
 
             # Compute prediction error (if ground truth available)
             if event_graph.node_labels is not None:
                 labels = event_graph.node_labels.to(self.device)
-                pred_error = F.cross_entropy(event_classes, labels, reduction='none')
+                pred_error = F.cross_entropy(event_classes, labels, reduction="none")
 
                 # Anomaly detection via prediction error
                 error_mean = pred_error.mean().item()
@@ -240,18 +228,14 @@ class BehavioralLayer:
                 anomaly_scores = 1.0 - max_probs
 
             return {
-                'node_embeddings': embeddings.cpu().numpy(),
-                'next_event_predictions': next_event_pred.cpu().numpy(),
-                'event_class_probs': F.softmax(event_classes, dim=1).cpu().numpy(),
-                'is_anomalous': is_anomalous.cpu().numpy(),
-                'anomaly_scores': anomaly_scores.cpu().numpy()
+                "node_embeddings": embeddings.cpu().numpy(),
+                "next_event_predictions": next_event_pred.cpu().numpy(),
+                "event_class_probs": F.softmax(event_classes, dim=1).cpu().numpy(),
+                "is_anomalous": is_anomalous.cpu().numpy(),
+                "anomaly_scores": anomaly_scores.cpu().numpy(),
             }
 
-    def detect_anomalous_chains(
-        self,
-        event_graph: EventGraph,
-        chain_length: int = 5
-    ) -> List[List[int]]:
+    def detect_anomalous_chains(self, event_graph: EventGraph, chain_length: int = 5) -> list[list[int]]:
         """Detect anomalous event chains (e.g., suspicious process trees).
 
         Args:
@@ -262,7 +246,7 @@ class BehavioralLayer:
             List of anomalous node chains (process trees, attack paths)
         """
         prediction = self.predict(event_graph)
-        is_anomalous = prediction['is_anomalous']
+        is_anomalous = prediction["is_anomalous"]
 
         # Find anomalous nodes
         anomalous_nodes = np.where(is_anomalous)[0]
@@ -278,12 +262,7 @@ class BehavioralLayer:
 
         return chains
 
-    def _trace_chain_backwards(
-        self,
-        node: int,
-        edge_index: np.ndarray,
-        max_length: int
-    ) -> List[int]:
+    def _trace_chain_backwards(self, node: int, edge_index: np.ndarray, max_length: int) -> list[int]:
         """Trace event chain backwards from anomalous node.
 
         Args:
@@ -310,11 +289,7 @@ class BehavioralLayer:
 
         return list(reversed(chain))  # Chronological order
 
-    def train_step(
-        self,
-        event_graph: EventGraph,
-        optimizer: torch.optim.Optimizer
-    ) -> Dict[str, float]:
+    def train_step(self, event_graph: EventGraph, optimizer: torch.optim.Optimizer) -> dict[str, float]:
         """Single training step.
 
         Args:
@@ -354,25 +329,28 @@ class BehavioralLayer:
         optimizer.step()
 
         return {
-            'total_loss': total_loss.item(),
-            'classification_loss': class_loss.item(),
-            'prediction_loss': pred_loss.item()
+            "total_loss": total_loss.item(),
+            "classification_loss": class_loss.item(),
+            "prediction_loss": pred_loss.item(),
         }
 
     def save_model(self, path: str):
         """Save GNN model checkpoint."""
-        torch.save({
-            'gnn_state_dict': self.gnn.state_dict(),
-            'error_mean': self.error_mean,
-            'error_std': self.error_std,
-            'latent_dim': self.latent_dim
-        }, path)
+        torch.save(
+            {
+                "gnn_state_dict": self.gnn.state_dict(),
+                "error_mean": self.error_mean,
+                "error_std": self.error_std,
+                "latent_dim": self.latent_dim,
+            },
+            path,
+        )
         logger.info(f"Model saved to {path}")
 
     def load_model(self, path: str):
         """Load GNN model checkpoint."""
         checkpoint = torch.load(path, map_location=self.device)
-        self.gnn.load_state_dict(checkpoint['gnn_state_dict'])
-        self.error_mean = checkpoint['error_mean']
-        self.error_std = checkpoint['error_std']
+        self.gnn.load_state_dict(checkpoint["gnn_state_dict"])
+        self.error_mean = checkpoint["error_mean"]
+        self.error_std = checkpoint["error_std"]
         logger.info(f"Model loaded from {path}")

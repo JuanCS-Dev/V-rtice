@@ -4,11 +4,11 @@ This module defines the abstract base class that all explainers must implement,
 ensuring a consistent interface for explanation generation across the VÉRTICE platform.
 """
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -55,9 +55,7 @@ class FeatureImportance:
         if not self.feature_name:
             raise ValueError("feature_name is required")
         if not isinstance(self.importance, (int, float)):
-            raise ValueError(
-                f"importance must be a number, got {type(self.importance)}"
-            )
+            raise ValueError(f"importance must be a number, got {type(self.importance)}")
 
 
 @dataclass
@@ -85,21 +83,19 @@ class ExplanationResult:
     explanation_type: ExplanationType
     detail_level: DetailLevel
     summary: str
-    top_features: List[FeatureImportance]
-    all_features: List[FeatureImportance]
+    top_features: list[FeatureImportance]
+    all_features: list[FeatureImportance]
     confidence: float
-    counterfactual: Optional[str] = None
-    visualization_data: Optional[Dict[str, Any]] = None
+    counterfactual: str | None = None
+    visualization_data: dict[str, Any] | None = None
     model_type: str = "unknown"
     latency_ms: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate explanation result."""
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError(
-                f"Confidence must be between 0.0 and 1.0, got {self.confidence}"
-            )
+            raise ValueError(f"Confidence must be between 0.0 and 1.0, got {self.confidence}")
         if not self.summary:
             raise ValueError("summary is required and cannot be empty")
         if not self.top_features:
@@ -115,7 +111,7 @@ class ExplainerBase(ABC):
     and implement the explain() method.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the explainer.
 
         Args:
@@ -129,7 +125,7 @@ class ExplainerBase(ABC):
     async def explain(
         self,
         model: Any,
-        instance: Dict[str, Any],
+        instance: dict[str, Any],
         prediction: Any,
         detail_level: DetailLevel = DetailLevel.DETAILED,
     ) -> ExplanationResult:
@@ -147,7 +143,7 @@ class ExplainerBase(ABC):
         pass
 
     @abstractmethod
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """Get list of supported model types.
 
         Returns:
@@ -171,7 +167,7 @@ class ExplainerBase(ABC):
         """
         return self.config.get("version", "1.0.0")
 
-    def validate_instance(self, instance: Dict[str, Any]) -> bool:
+    def validate_instance(self, instance: dict[str, Any]) -> bool:
         """Validate that instance has required fields.
 
         Args:
@@ -221,9 +217,7 @@ class ExplainerBase(ABC):
             "credibility_score": f"Source credibility: {value:.2f}",
         }
 
-        return feature_descriptions.get(
-            feature_name, f'{feature_name.replace("_", " ").title()}: {value}'
-        )
+        return feature_descriptions.get(feature_name, f"{feature_name.replace('_', ' ').title()}: {value}")
 
 
 class ExplanationCache:
@@ -239,14 +233,12 @@ class ExplanationCache:
             max_size: Maximum number of cached explanations
             ttl_seconds: Time-to-live for cached explanations in seconds
         """
-        self._cache: Dict[str, Tuple[ExplanationResult, float]] = {}
+        self._cache: dict[str, tuple[ExplanationResult, float]] = {}
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
-        logger.info(
-            f"ExplanationCache initialized: max_size={max_size}, ttl={ttl_seconds}s"
-        )
+        logger.info(f"ExplanationCache initialized: max_size={max_size}, ttl={ttl_seconds}s")
 
-    def get(self, cache_key: str) -> Optional[ExplanationResult]:
+    def get(self, cache_key: str) -> ExplanationResult | None:
         """Get a cached explanation.
 
         Args:
@@ -262,10 +254,9 @@ class ExplanationCache:
             if time.time() - timestamp < self.ttl_seconds:
                 logger.debug(f"Cache HIT for key: {cache_key}")
                 return result
-            else:
-                # Expired, remove it
-                logger.debug(f"Cache EXPIRED for key: {cache_key}")
-                del self._cache[cache_key]
+            # Expired, remove it
+            logger.debug(f"Cache EXPIRED for key: {cache_key}")
+            del self._cache[cache_key]
 
         logger.debug(f"Cache MISS for key: {cache_key}")
         return None
@@ -314,7 +305,7 @@ class ExplanationCache:
         self._cache.clear()
         logger.info("ExplanationCache cleared")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics.
 
         Returns:
@@ -337,13 +328,10 @@ class ExplanationException(Exception):
 class ModelNotSupportedException(ExplanationException):
     """Exception raised when a model type is not supported."""
 
-    def __init__(self, model_type: str, supported_types: List[str]):
+    def __init__(self, model_type: str, supported_types: list[str]):
         self.model_type = model_type
         self.supported_types = supported_types
-        super().__init__(
-            f"Model type '{model_type}' is not supported. "
-            f"Supported types: {', '.join(supported_types)}"
-        )
+        super().__init__(f"Model type '{model_type}' is not supported. Supported types: {', '.join(supported_types)}")
 
 
 class ExplanationTimeoutException(ExplanationException):
@@ -351,6 +339,4 @@ class ExplanationTimeoutException(ExplanationException):
 
     def __init__(self, timeout_seconds: int):
         self.timeout_seconds = timeout_seconds
-        super().__init__(
-            f"Explanation generation exceeded timeout of {timeout_seconds} seconds"
-        )
+        super().__init__(f"Explanation generation exceeded timeout of {timeout_seconds} seconds")

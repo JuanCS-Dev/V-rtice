@@ -17,19 +17,19 @@ into actionable intelligence.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from scrapers.social_scraper import SocialMediaScraper
-from scrapers.username_hunter import UsernameHunter
-from scrapers.discord_bot import DiscordBotScraper
+from ai_processor import AIProcessor
 from analyzers.email_analyzer import EmailAnalyzer
-from analyzers.phone_analyzer import PhoneAnalyzer
 from analyzers.image_analyzer import ImageAnalyzer
 from analyzers.pattern_detector import PatternDetector
+from analyzers.phone_analyzer import PhoneAnalyzer
 from report_generator import ReportGenerator
-from ai_processor import AIProcessor
+from scrapers.discord_bot import DiscordBotScraper
+from scrapers.social_scraper import SocialMediaScraper
+from scrapers.username_hunter import UsernameHunter
 
 
 class AIOrchestrator:
@@ -55,7 +55,12 @@ class AIOrchestrator:
         self.active_investigations: Dict[str, Dict[str, Any]] = {}
         print("[AIOrchestrator] Initialized OSINT AI Orchestrator.")
 
-    async def start_investigation(self, query: str, investigation_type: str, parameters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def start_investigation(
+        self,
+        query: str,
+        investigation_type: str,
+        parameters: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Starts a new OSINT investigation.
 
         Args:
@@ -77,15 +82,25 @@ class AIOrchestrator:
             "progress": 0.0,
             "start_time": datetime.now().isoformat(),
             "results": {},
-            "parameters": parameters or {}
+            "parameters": parameters or {},
         }
 
         # Run the investigation workflow in a background task
         asyncio.create_task(self._run_investigation_workflow(investigation_id, query, investigation_type, parameters))
 
-        return {"investigation_id": investigation_id, "status": "initiated", "timestamp": datetime.now().isoformat()}
+        return {
+            "investigation_id": investigation_id,
+            "status": "initiated",
+            "timestamp": datetime.now().isoformat(),
+        }
 
-    async def _run_investigation_workflow(self, investigation_id: str, query: str, investigation_type: str, parameters: Optional[Dict[str, Any]]):
+    async def _run_investigation_workflow(
+        self,
+        investigation_id: str,
+        query: str,
+        investigation_type: str,
+        parameters: Optional[Dict[str, Any]],
+    ):
         """Executes the multi-step OSINT investigation workflow.
 
         Args:
@@ -110,8 +125,13 @@ class AIOrchestrator:
                 all_collected_data.append({"source": "username_hunter", "data": username_data})
             elif investigation_type == "domain_analysis":
                 # Simulate domain-specific scraping
-                all_collected_data.append({"source": "domain_whois", "data": {"domain": query, "registrant": "mock_registrant"}})
-            
+                all_collected_data.append(
+                    {
+                        "source": "domain_whois",
+                        "data": {"domain": query, "registrant": "mock_registrant"},
+                    }
+                )
+
             # Step 2: AI Processing (LLM for initial synthesis)
             investigation["progress"] = 0.5
             investigation["current_step"] = "AI Processing"
@@ -134,7 +154,9 @@ class AIOrchestrator:
             investigation["progress"] = 0.9
             investigation["current_step"] = "Generating report"
             print(f"[AIOrchestrator] {investigation_id}: Generating report...")
-            final_report = await self.report_generator.generate_report(query, investigation_type, all_collected_data, analysis_results)
+            final_report = await self.report_generator.generate_report(
+                query, investigation_type, all_collected_data, analysis_results
+            )
 
             investigation["results"] = final_report
             investigation["status"] = "completed"

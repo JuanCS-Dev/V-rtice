@@ -10,20 +10,23 @@ Prefrontal cortex-inspired orchestrator that integrates:
 Master pipeline for comprehensive manipulation detection.
 """
 
-import logging
-from typing import Dict, Any, Optional
-from datetime import datetime
 import asyncio
+import logging
+from datetime import datetime
+from typing import Any, Dict, Optional
 
-from cognitive_control_layer import cognitive_control, ProcessingMode
-from working_memory_system import working_memory
-from source_credibility_module import source_credibility_module
+from cognitive_control_layer import ProcessingMode, cognitive_control
+from config import get_settings
 from emotional_manipulation_module import emotional_manipulation_module
 from logical_fallacy_module import logical_fallacy_module
-from reality_distortion_module import reality_distortion_module, ProcessingMode as RealityMode
+from reality_distortion_module import ProcessingMode as RealityMode
+from reality_distortion_module import (
+    reality_distortion_module,
+)
+from source_credibility_module import source_credibility_module
 from threat_assessment_engine import threat_assessment_engine
 from utils import hash_text
-from config import get_settings
+from working_memory_system import working_memory
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +67,7 @@ class ExecutiveController:
                 emotional_manipulation_module.initialize(),
                 logical_fallacy_module.initialize(),
                 reality_distortion_module.initialize(enable_tier2=True, start_tier2_workers=False),
-                threat_assessment_engine.initialize()
+                threat_assessment_engine.initialize(),
             )
 
             self._initialized = True
@@ -78,7 +81,7 @@ class ExecutiveController:
         self,
         content: str,
         source_info: Optional[Dict[str, Any]] = None,
-        mode: Optional[ProcessingMode] = None
+        mode: Optional[ProcessingMode] = None,
     ) -> Dict[str, Any]:
         """
         Comprehensive manipulation analysis.
@@ -124,8 +127,7 @@ class ExecutiveController:
         context = await working_memory.load_context(sanitized_content, source_info)
 
         logger.debug(
-            f"Context loaded: reputation={context.source_reputation.score:.2f}, "
-            f"history={len(context.recent_analyses)}"
+            f"Context loaded: reputation={context.source_reputation.score:.2f}, history={len(context.recent_analyses)}"
         )
 
         # ========== STAGE 3: MODULE EXECUTION ==========
@@ -134,7 +136,7 @@ class ExecutiveController:
         reality_mode_map = {
             ProcessingMode.FAST_TRACK: RealityMode.FAST_TRACK,
             ProcessingMode.STANDARD: RealityMode.STANDARD,
-            ProcessingMode.DEEP_ANALYSIS: RealityMode.DEEP_ANALYSIS
+            ProcessingMode.DEEP_ANALYSIS: RealityMode.DEEP_ANALYSIS,
         }
 
         reality_mode = reality_mode_map.get(mode, RealityMode.STANDARD)
@@ -148,29 +150,22 @@ class ExecutiveController:
                 url=source_info.get("url", ""),
                 domain=source_info.get("domain", ""),
                 author=source_info.get("author"),
-                publisher=source_info.get("publisher")
+                publisher=source_info.get("publisher"),
             ),
-
             # Module 2: Emotional Manipulation
-            emotional_manipulation_module.detect_emotional_manipulation(
-                text=sanitized_content,
-                persist_to_db=True
-            ),
-
+            emotional_manipulation_module.detect_emotional_manipulation(text=sanitized_content, persist_to_db=True),
             # Module 3: Logical Fallacy
             logical_fallacy_module.detect_logical_fallacies(
                 text=sanitized_content,
-                persist_to_graph=False  # Skip graph for performance
+                persist_to_graph=False,  # Skip graph for performance
             ),
-
             # Module 4: Reality Distortion
             reality_distortion_module.verify_content(
                 text=sanitized_content,
                 mode=reality_mode,
-                tier2_timeout=None  # Async Tier 2
+                tier2_timeout=None,  # Async Tier 2
             ),
-
-            return_exceptions=True
+            return_exceptions=True,
         )
 
         # Unpack results (handle exceptions)
@@ -188,8 +183,8 @@ class ExecutiveController:
             reality_result=reality_result,
             context={
                 "source_domain": context.source_domain,
-                "content_hash": content_hash
-            }
+                "content_hash": content_hash,
+            },
         )
 
         # ========== STAGE 5: PERFORMANCE MONITORING ==========
@@ -203,7 +198,7 @@ class ExecutiveController:
             "manipulation_score": report.manipulation_score,
             "confidence": report.confidence,
             "latency_ms": latency_ms,
-            "error": False
+            "error": False,
         }
 
         await cognitive_control.detect_model_drift(performance_report)
@@ -227,7 +222,7 @@ class ExecutiveController:
             "content": sanitized_content,
             "arguments": logical_result.get("arguments", []),
             "fallacies": logical_result.get("fallacies", []),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
         await working_memory.store_analysis(storage_report)
@@ -240,14 +235,10 @@ class ExecutiveController:
             source_domain=context.source_domain,
             latency_ms=latency_ms,
             mode=mode,
-            is_adversarial=is_adversarial
+            is_adversarial=is_adversarial,
         )
 
-    def _unwrap_result(
-        self,
-        result: Any,
-        module_name: str
-    ) -> Dict[str, Any]:
+    def _unwrap_result(self, result: Any, module_name: str) -> Dict[str, Any]:
         """
         Unwrap module result, handling exceptions.
 
@@ -260,18 +251,11 @@ class ExecutiveController:
         """
         if isinstance(result, Exception):
             logger.error(f"Module {module_name} failed: {result}", exc_info=True)
-            return {
-                "error": str(result),
-                "module": module_name
-            }
+            return {"error": str(result), "module": module_name}
 
         return result
 
-    def _build_skip_report(
-        self,
-        content_hash: str,
-        source_info: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _build_skip_report(self, content_hash: str, source_info: Dict[str, Any]) -> Dict[str, Any]:
         """Build report for skipped content."""
         return {
             "content_hash": content_hash,
@@ -282,7 +266,7 @@ class ExecutiveController:
             "confidence": 1.0,
             "processing_mode": "skip",
             "latency_ms": 0,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     def _build_response(
@@ -292,7 +276,7 @@ class ExecutiveController:
         source_domain: str,
         latency_ms: float,
         mode: ProcessingMode,
-        is_adversarial: bool
+        is_adversarial: bool,
     ) -> Dict[str, Any]:
         """
         Build final API response.
@@ -319,25 +303,21 @@ class ExecutiveController:
                 "source_credibility": report.credibility_assessment.score,
                 "emotional_manipulation": report.emotional_assessment.score,
                 "logical_fallacy": report.logical_assessment.score,
-                "reality_distortion": report.reality_assessment.score
+                "reality_distortion": report.reality_assessment.score,
             },
             "module_confidences": {
                 "source_credibility": report.credibility_assessment.confidence,
                 "emotional_manipulation": report.emotional_assessment.confidence,
                 "logical_fallacy": report.logical_assessment.confidence,
-                "reality_distortion": report.reality_assessment.confidence
+                "reality_distortion": report.reality_assessment.confidence,
             },
             "processing_mode": mode.value,
             "latency_ms": latency_ms,
             "adversarial_detected": is_adversarial,
-            "timestamp": report.timestamp.isoformat()
+            "timestamp": report.timestamp.isoformat(),
         }
 
-    async def get_detailed_report(
-        self,
-        content: str,
-        source_info: Optional[Dict[str, Any]] = None
-    ) -> str:
+    async def get_detailed_report(self, content: str, source_info: Optional[Dict[str, Any]] = None) -> str:
         """
         Get detailed markdown report.
 
@@ -371,7 +351,7 @@ class ExecutiveController:
             "",
             "## Explanation",
             "",
-            result['explanation'],
+            result["explanation"],
             "",
             "## Module Scores",
             "",
@@ -379,16 +359,18 @@ class ExecutiveController:
             f"- **Emotional Manipulation**: {result['module_scores']['emotional_manipulation']:.2f}",
             f"- **Logical Fallacy**: {result['module_scores']['logical_fallacy']:.2f}",
             f"- **Reality Distortion**: {result['module_scores']['reality_distortion']:.2f}",
-            ""
+            "",
         ]
 
-        if result.get('adversarial_detected'):
-            lines.extend([
-                "## ⚠️ Security Alert",
-                "",
-                "Adversarial input patterns detected. Content has been sanitized.",
-                ""
-            ])
+        if result.get("adversarial_detected"):
+            lines.extend(
+                [
+                    "## ⚠️ Security Alert",
+                    "",
+                    "Adversarial input patterns detected. Content has been sanitized.",
+                    "",
+                ]
+            )
 
         return "\n".join(lines)
 

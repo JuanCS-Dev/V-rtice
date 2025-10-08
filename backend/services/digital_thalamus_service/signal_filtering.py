@@ -12,9 +12,8 @@ for improving the accuracy and efficiency of subsequent perception and reasoning
 tasks, preventing the AI from being overwhelmed by noisy or irrelevant data.
 """
 
-import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class SignalFiltering:
@@ -74,6 +73,6 @@ class SignalFiltering:
         """
         return {
             "status": self.current_status,
-            "last_filter": self.last_filter_time.isoformat() if self.last_filter_time else "N/A",
-            "total_data_processed": self.processed_data_count
+            "last_filter": (self.last_filter_time.isoformat() if self.last_filter_time else "N/A"),
+            "total_data_processed": self.processed_data_count,
         }

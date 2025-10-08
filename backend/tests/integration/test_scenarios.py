@@ -17,12 +17,12 @@ NO MOCKS - Production-ready scenarios.
 """
 
 import asyncio
+from datetime import datetime
 import logging
 import random
-from typing import Dict, Any, List
-from datetime import datetime
-import aiohttp
+from typing import Any, Dict, List
 
+import aiohttp
 from test_framework import IntegrationTestFramework
 
 logger = logging.getLogger(__name__)
@@ -51,11 +51,11 @@ class APTSimulation:
         logger.info("Starting APT simulation...")
 
         metrics = {
-            'stages_completed': 0,
-            'detections': [],
-            'response_actions': [],
-            'time_to_detect_sec': [],
-            'time_to_respond_sec': []
+            "stages_completed": 0,
+            "detections": [],
+            "response_actions": [],
+            "time_to_detect_sec": [],
+            "time_to_respond_sec": [],
         }
 
         # Stage 1: Reconnaissance
@@ -64,14 +64,14 @@ class APTSimulation:
         recon_detected = await self._simulate_reconnaissance()
         if recon_detected:
             detection_time = (datetime.now() - stage_start).total_seconds()
-            metrics['detections'].append('reconnaissance')
-            metrics['time_to_detect_sec'].append(detection_time)
+            metrics["detections"].append("reconnaissance")
+            metrics["time_to_detect_sec"].append(detection_time)
 
             # Trigger immune response
-            response = await self._trigger_immune_response('port_scan')
-            metrics['response_actions'].append(response)
+            response = await self._trigger_immune_response("port_scan")
+            metrics["response_actions"].append(response)
 
-        metrics['stages_completed'] += 1
+        metrics["stages_completed"] += 1
 
         # Stage 2: Initial Compromise
         stage_start = datetime.now()
@@ -79,13 +79,13 @@ class APTSimulation:
         compromise_detected = await self._simulate_initial_compromise()
         if compromise_detected:
             detection_time = (datetime.now() - stage_start).total_seconds()
-            metrics['detections'].append('phishing')
-            metrics['time_to_detect_sec'].append(detection_time)
+            metrics["detections"].append("phishing")
+            metrics["time_to_detect_sec"].append(detection_time)
 
-            response = await self._trigger_immune_response('malware_execution')
-            metrics['response_actions'].append(response)
+            response = await self._trigger_immune_response("malware_execution")
+            metrics["response_actions"].append(response)
 
-        metrics['stages_completed'] += 1
+        metrics["stages_completed"] += 1
 
         # Stage 3: Lateral Movement
         stage_start = datetime.now()
@@ -93,13 +93,13 @@ class APTSimulation:
         lateral_detected = await self._simulate_lateral_movement()
         if lateral_detected:
             detection_time = (datetime.now() - stage_start).total_seconds()
-            metrics['detections'].append('lateral_movement')
-            metrics['time_to_detect_sec'].append(detection_time)
+            metrics["detections"].append("lateral_movement")
+            metrics["time_to_detect_sec"].append(detection_time)
 
-            response = await self._trigger_immune_response('credential_theft')
-            metrics['response_actions'].append(response)
+            response = await self._trigger_immune_response("credential_theft")
+            metrics["response_actions"].append(response)
 
-        metrics['stages_completed'] += 1
+        metrics["stages_completed"] += 1
 
         # Stage 4: Persistence
         stage_start = datetime.now()
@@ -107,13 +107,13 @@ class APTSimulation:
         persistence_detected = await self._simulate_persistence()
         if persistence_detected:
             detection_time = (datetime.now() - stage_start).total_seconds()
-            metrics['detections'].append('persistence')
-            metrics['time_to_detect_sec'].append(detection_time)
+            metrics["detections"].append("persistence")
+            metrics["time_to_detect_sec"].append(detection_time)
 
-            response = await self._trigger_immune_response('backdoor')
-            metrics['response_actions'].append(response)
+            response = await self._trigger_immune_response("backdoor")
+            metrics["response_actions"].append(response)
 
-        metrics['stages_completed'] += 1
+        metrics["stages_completed"] += 1
 
         # Stage 5: Data Exfiltration
         stage_start = datetime.now()
@@ -121,19 +121,21 @@ class APTSimulation:
         exfil_detected = await self._simulate_data_exfiltration()
         if exfil_detected:
             detection_time = (datetime.now() - stage_start).total_seconds()
-            metrics['detections'].append('exfiltration')
-            metrics['time_to_detect_sec'].append(detection_time)
+            metrics["detections"].append("exfiltration")
+            metrics["time_to_detect_sec"].append(detection_time)
 
-            response = await self._trigger_immune_response('data_exfiltration')
-            metrics['response_actions'].append(response)
+            response = await self._trigger_immune_response("data_exfiltration")
+            metrics["response_actions"].append(response)
 
-        metrics['stages_completed'] += 1
+        metrics["stages_completed"] += 1
 
         # Compute averages
-        if metrics['time_to_detect_sec']:
-            metrics['avg_detection_time_sec'] = sum(metrics['time_to_detect_sec']) / len(metrics['time_to_detect_sec'])
+        if metrics["time_to_detect_sec"]:
+            metrics["avg_detection_time_sec"] = sum(
+                metrics["time_to_detect_sec"]
+            ) / len(metrics["time_to_detect_sec"])
 
-        metrics['detection_rate'] = len(metrics['detections']) / 5  # 5 stages
+        metrics["detection_rate"] = len(metrics["detections"]) / 5  # 5 stages
 
         logger.info(
             f"APT simulation complete: "
@@ -152,26 +154,24 @@ class APTSimulation:
                 # Send REAL port scan events to RTE
                 for port in [22, 80, 443, 3389, 8080]:
                     event = {
-                        'type': 'network_connection',
-                        'src_ip': '10.0.0.100',
-                        'dst_ip': '192.168.1.10',
-                        'dst_port': port,
-                        'protocol': 'tcp',
-                        'flags': 'SYN',
-                        'timestamp': datetime.now().isoformat()
+                        "type": "network_connection",
+                        "src_ip": "10.0.0.100",
+                        "dst_ip": "192.168.1.10",
+                        "dst_port": port,
+                        "protocol": "tcp",
+                        "flags": "SYN",
+                        "timestamp": datetime.now().isoformat(),
                     }
 
                     # REAL HTTP POST to RTE service
                     try:
                         url = f"{self.framework.services['rte']}/scan"
                         async with session.post(
-                            url,
-                            json=event,
-                            timeout=aiohttp.ClientTimeout(total=1)
+                            url, json=event, timeout=aiohttp.ClientTimeout(total=1)
                         ) as response:
                             if response.status == 200:
                                 result = await response.json()
-                                if result.get('threat_detected'):
+                                if result.get("threat_detected"):
                                     detection_count += 1
                     except Exception as e:
                         logger.debug(f"RTE call failed for port {port}: {e}")
@@ -183,8 +183,8 @@ class APTSimulation:
                     url = f"{self.framework.services['rte']}/recent_detections"
                     async with session.get(
                         url,
-                        params={'limit': 10, 'type': 'port_scan'},
-                        timeout=aiohttp.ClientTimeout(total=2)
+                        params={"limit": 10, "type": "port_scan"},
+                        timeout=aiohttp.ClientTimeout(total=2),
                     ) as response:
                         if response.status == 200:
                             detections = await response.json()
@@ -205,29 +205,27 @@ class APTSimulation:
         try:
             async with aiohttp.ClientSession() as session:
                 event = {
-                    'type': 'process_execution',
-                    'process_name': 'invoice.exe',
-                    'parent_process': 'outlook.exe',
-                    'user': 'john.doe',
-                    'suspicious_indicators': [
-                        'unsigned_binary',
-                        'network_connection_on_startup',
-                        'registry_modification'
+                    "type": "process_execution",
+                    "process_name": "invoice.exe",
+                    "parent_process": "outlook.exe",
+                    "user": "john.doe",
+                    "suspicious_indicators": [
+                        "unsigned_binary",
+                        "network_connection_on_startup",
+                        "registry_modification",
                     ],
-                    'timestamp': datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 # REAL HTTP POST to NK Cell service
                 try:
                     url = f"{self.framework.services['immunis_nk']}/detect"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=2)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=2)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('detected', False)
+                            return result.get("detected", False)
                 except aiohttp.ClientError:
                     # Service may not be available, check RTE fallback
                     pass
@@ -236,13 +234,11 @@ class APTSimulation:
                 try:
                     url = f"{self.framework.services['rte']}/scan"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=1)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=1)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('threat_detected', False)
+                            return result.get("threat_detected", False)
                 except Exception as e:
                     logger.debug(f"RTE fallback failed: {e}")
 
@@ -257,24 +253,22 @@ class APTSimulation:
         try:
             async with aiohttp.ClientSession() as session:
                 event = {
-                    'type': 'credential_access',
-                    'technique': 'lsass_memory_dump',
-                    'tool': 'mimikatz',
-                    'user': 'SYSTEM',
-                    'timestamp': datetime.now().isoformat()
+                    "type": "credential_access",
+                    "technique": "lsass_memory_dump",
+                    "tool": "mimikatz",
+                    "user": "SYSTEM",
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 # REAL HTTP POST to Dendritic Cell service
                 try:
                     url = f"{self.framework.services['immunis_dendritic']}/present_antigen"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=2)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=2)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('antigen_presented', False)
+                            return result.get("antigen_presented", False)
                 except aiohttp.ClientError:
                     pass
 
@@ -282,13 +276,11 @@ class APTSimulation:
                 try:
                     url = f"{self.framework.services['rte']}/scan"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=1)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=1)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('threat_detected', False)
+                            return result.get("threat_detected", False)
                 except Exception:
                     pass
 
@@ -303,24 +295,22 @@ class APTSimulation:
         try:
             async with aiohttp.ClientSession() as session:
                 event = {
-                    'type': 'persistence',
-                    'method': 'registry_run_key',
-                    'path': 'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
-                    'value': 'C:\\Windows\\Temp\\svchost.exe',
-                    'timestamp': datetime.now().isoformat()
+                    "type": "persistence",
+                    "method": "registry_run_key",
+                    "path": "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                    "value": "C:\\Windows\\Temp\\svchost.exe",
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 # REAL HTTP POST to Helper T Cell service
                 try:
                     url = f"{self.framework.services['immunis_helper_t']}/coordinate"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=2)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=2)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('coordination_triggered', False)
+                            return result.get("coordination_triggered", False)
                 except aiohttp.ClientError:
                     pass
 
@@ -328,13 +318,11 @@ class APTSimulation:
                 try:
                     url = f"{self.framework.services['rte']}/scan"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=1)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=1)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('threat_detected', False)
+                            return result.get("threat_detected", False)
                 except Exception:
                     pass
 
@@ -349,26 +337,24 @@ class APTSimulation:
         try:
             async with aiohttp.ClientSession() as session:
                 event = {
-                    'type': 'network_traffic',
-                    'direction': 'outbound',
-                    'dst_ip': '185.220.101.1',  # Suspicious external IP
-                    'protocol': 'https',
-                    'bytes_transferred': 524288000,  # 500MB
-                    'duration_sec': 120,
-                    'timestamp': datetime.now().isoformat()
+                    "type": "network_traffic",
+                    "direction": "outbound",
+                    "dst_ip": "185.220.101.1",  # Suspicious external IP
+                    "protocol": "https",
+                    "bytes_transferred": 524288000,  # 500MB
+                    "duration_sec": 120,
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 # REAL HTTP POST to Cytotoxic T Cell service
                 try:
                     url = f"{self.framework.services['immunis_cytotoxic_t']}/eliminate"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=2)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=2)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('eliminated', False)
+                            return result.get("eliminated", False)
                 except aiohttp.ClientError:
                     pass
 
@@ -376,13 +362,11 @@ class APTSimulation:
                 try:
                     url = f"{self.framework.services['rte']}/scan"
                     async with session.post(
-                        url,
-                        json=event,
-                        timeout=aiohttp.ClientTimeout(total=1)
+                        url, json=event, timeout=aiohttp.ClientTimeout(total=1)
                     ) as response:
                         if response.status == 200:
                             result = await response.json()
-                            return result.get('threat_detected', False)
+                            return result.get("threat_detected", False)
                 except Exception:
                     pass
 
@@ -408,17 +392,17 @@ class APTSimulation:
 
                 async with session.post(
                     url,
-                    json={'threat_type': threat_type},
-                    timeout=aiohttp.ClientTimeout(total=10)
+                    json={"threat_type": threat_type},
+                    timeout=aiohttp.ClientTimeout(total=10),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
                     else:
-                        return {'status': 'error', 'code': response.status}
+                        return {"status": "error", "code": response.status}
 
         except Exception as e:
             logger.error(f"Immune response failed: {e}")
-            return {'status': 'error', 'message': str(e)}
+            return {"status": "error", "message": str(e)}
 
 
 class RansomwareSimulation:
@@ -443,10 +427,10 @@ class RansomwareSimulation:
         logger.info("Starting ransomware simulation...")
 
         metrics = {
-            'detected': False,
-            'time_to_detect_ms': 0,
-            'files_encrypted_before_block': 0,
-            'response_action': None
+            "detected": False,
+            "time_to_detect_ms": 0,
+            "files_encrypted_before_block": 0,
+            "response_action": None,
         }
 
         start_time = datetime.now()
@@ -463,12 +447,14 @@ class RansomwareSimulation:
                 detection_time_ms = (datetime.now() - start_time).total_seconds() * 1000
 
                 if detection_time_ms < 100:  # < 100ms (immune system)
-                    metrics['detected'] = True
-                    metrics['time_to_detect_ms'] = detection_time_ms
-                    metrics['files_encrypted_before_block'] = i
+                    metrics["detected"] = True
+                    metrics["time_to_detect_ms"] = detection_time_ms
+                    metrics["files_encrypted_before_block"] = i
 
                     # Trigger HSAS skill: isolate_host + kill_process
-                    metrics['response_action'] = await self._execute_ransomware_playbook()
+                    metrics["response_action"] = (
+                        await self._execute_ransomware_playbook()
+                    )
 
                     break
 
@@ -492,17 +478,17 @@ class RansomwareSimulation:
 
                 async with session.post(
                     url,
-                    json={'incident_type': 'ransomware'},
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    json={"incident_type": "ransomware"},
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         return await response.json()
                     else:
-                        return {'status': 'error', 'code': response.status}
+                        return {"status": "error", "code": response.status}
 
         except Exception as e:
             logger.error(f"Playbook execution failed: {e}")
-            return {'status': 'error', 'message': str(e)}
+            return {"status": "error", "message": str(e)}
 
 
 class DDoSSimulation:
@@ -526,16 +512,16 @@ class DDoSSimulation:
         logger.info("Starting DDoS simulation...")
 
         metrics = {
-            'attack_events': 10000,
-            'detected': False,
-            'time_to_detect_sec': 0,
-            'mitigation_applied': False
+            "attack_events": 10000,
+            "detected": False,
+            "time_to_detect_sec": 0,
+            "mitigation_applied": False,
         }
 
         start_time = datetime.now()
 
         # Simulate high packet rate
-        for i in range(metrics['attack_events']):
+        for i in range(metrics["attack_events"]):
             # Generate attack packet
             src_ip = f"10.0.{random.randint(0, 255)}.{random.randint(1, 254)}"
 
@@ -543,15 +529,15 @@ class DDoSSimulation:
             await asyncio.sleep(0.0001)  # 10k packets/s
 
             # Check detection after 1000 packets
-            if i == 1000 and not metrics['detected']:
+            if i == 1000 and not metrics["detected"]:
                 detection_time = (datetime.now() - start_time).total_seconds()
 
                 # Should be detected quickly
-                metrics['detected'] = True
-                metrics['time_to_detect_sec'] = detection_time
+                metrics["detected"] = True
+                metrics["time_to_detect_sec"] = detection_time
 
                 # Apply rate limiting
-                metrics['mitigation_applied'] = await self._apply_ddos_mitigation()
+                metrics["mitigation_applied"] = await self._apply_ddos_mitigation()
 
                 break
 
@@ -575,14 +561,12 @@ class DDoSSimulation:
                 url = f"{self.framework.services['hsas']}/execute_skill"
 
                 payload = {
-                    'action_index': 2,  # rate_limit_ip
-                    'parameters': {'rate_limit': 10}
+                    "action_index": 2,  # rate_limit_ip
+                    "parameters": {"rate_limit": 10},
                 }
 
                 async with session.post(
-                    url,
-                    json=payload,
-                    timeout=aiohttp.ClientTimeout(total=5)
+                    url, json=payload, timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     return response.status == 200
 
@@ -612,10 +596,10 @@ class ZeroDaySimulation:
         logger.info("Starting zero-day simulation...")
 
         metrics = {
-            'detected_by_signatures': False,
-            'detected_by_anomaly': False,
-            'time_to_detect_sec': 0,
-            'prediction_error_spike': False
+            "detected_by_signatures": False,
+            "detected_by_anomaly": False,
+            "time_to_detect_sec": 0,
+            "prediction_error_spike": False,
         }
 
         start_time = datetime.now()
@@ -630,9 +614,9 @@ class ZeroDaySimulation:
         detection_time = (datetime.now() - start_time).total_seconds()
 
         # Simulate hPC detection
-        metrics['detected_by_anomaly'] = True
-        metrics['time_to_detect_sec'] = detection_time
-        metrics['prediction_error_spike'] = True
+        metrics["detected_by_anomaly"] = True
+        metrics["time_to_detect_sec"] = detection_time
+        metrics["prediction_error_spike"] = True
 
         logger.info(
             f"Zero-day simulation complete: "
@@ -645,8 +629,8 @@ class ZeroDaySimulation:
 
 # Export
 __all__ = [
-    'APTSimulation',
-    'RansomwareSimulation',
-    'DDoSSimulation',
-    'ZeroDaySimulation'
+    "APTSimulation",
+    "RansomwareSimulation",
+    "DDoSSimulation",
+    "ZeroDaySimulation",
 ]

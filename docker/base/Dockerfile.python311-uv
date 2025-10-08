@@ -1,0 +1,103 @@
+# 🐳 MAXIMUS Base Image - Python 3.11 + uv
+#
+# Purpose: Base image otimizada para todos os services MAXIMUS
+# Performance: 60x mais rápido que pip
+# Size: Otimizada (multi-stage build)
+#
+# Uso:
+#   FROM ghcr.io/vertice/python311-uv:latest AS builder
+#
+# Versão: 1.0.0
+# Data: 2025-10-08
+
+# ============================================================================
+# BUILDER STAGE - Para compilação e instalação de dependências
+# ============================================================================
+FROM python:3.11-slim AS builder
+
+LABEL maintainer="Juan & Claude <noreply@vertice.dev>"
+LABEL description="MAXIMUS Base Image - Python 3.11 + uv (builder stage)"
+LABEL version="1.0.0"
+
+# Variáveis de build (usar latest stable versions)
+ARG UV_VERSION=latest
+ARG RUFF_VERSION=latest
+
+# Instalar dependências de build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    make \
+    libpq-dev \
+    libssl-dev \
+    libffi-dev \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar uv e ruff globalmente
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir uv ruff
+
+# Criar diretório para virtual environment
+RUN mkdir -p /opt/venv
+
+# Configurar PATH para incluir uv
+ENV PATH="/opt/venv/bin:/root/.local/bin:$PATH"
+
+# Verificar instalação
+RUN uv --version && \
+    ruff --version && \
+    echo "✅ Base builder image ready"
+
+# ============================================================================
+# RUNTIME STAGE - Imagem final minimalista
+# ============================================================================
+FROM python:3.11-slim AS runtime
+
+LABEL maintainer="Juan & Claude <noreply@vertice.dev>"
+LABEL description="MAXIMUS Base Image - Python 3.11 + uv (runtime)"
+LABEL version="1.0.0"
+
+# Instalar apenas dependências de runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    libssl3 \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar uv do builder
+COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
+COPY --from=builder /usr/local/bin/ruff /usr/local/bin/ruff
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+
+# Configurar Python para produção
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Criar usuário não-root padrão
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Verificar instalação
+RUN uv --version && \
+    ruff --version && \
+    python --version && \
+    echo "✅ Runtime image ready"
+
+# Health check padrão (services devem sobrescrever)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Default working directory
+WORKDIR /app
+
+# Default user (services podem sobrescrever)
+USER appuser
+
+# Metadata
+LABEL org.opencontainers.image.source="https://github.com/vertice-dev/vertice"
+LABEL org.opencontainers.image.description="MAXIMUS Base Image with uv package manager"
+LABEL org.opencontainers.image.licenses="Proprietary"

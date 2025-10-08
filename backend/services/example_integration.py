@@ -7,19 +7,18 @@ Este arquivo demonstra como usar os dois sistemas finais em conjunto.
 
 import asyncio
 import time
+
 import numpy as np
-from memory_consolidation_service import (
-    MemoryConsolidationEngine,
-    OperationalMode
-)
+
 from hsas_service import (
+    Action,
     HybridSkillAcquisitionSystem,
     LearningMode,
-    State,
-    Action,
     SkillPrimitiveType,
-    Transition
+    State,
+    Transition,
 )
+from memory_consolidation_service import MemoryConsolidationEngine
 
 
 async def example_workflow():
@@ -31,9 +30,9 @@ async def example_workflow():
     4. MCE armazena experiência
     5. Consolidação periódica
     """
-    print("="*70)
+    print("=" * 70)
     print("MAXIMUS AI 3.0 - EXEMPLO DE INTEGRAÇÃO")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # ========================================================================
@@ -45,15 +44,11 @@ async def example_workflow():
     mce = MemoryConsolidationEngine(
         replay_buffer_size=10000,
         consolidation_interval_hours=1.0,  # Consolidar a cada 1h
-        replay_batch_size=100
+        replay_batch_size=100,
     )
 
     # Hybrid Skill Acquisition System
-    hsas = HybridSkillAcquisitionSystem(
-        state_dim=5,
-        action_dim=20,
-        default_mode=LearningMode.HYBRID
-    )
+    hsas = HybridSkillAcquisitionSystem(state_dim=5, action_dim=20, default_mode=LearningMode.HYBRID)
 
     # Aprender skills compostos
     await hsas.learn_skill(
@@ -65,8 +60,8 @@ async def example_workflow():
             "snapshot_vm",
             "scan_host",
             "extract_iocs",
-            "alert_analyst"
-        ]
+            "alert_analyst",
+        ],
     )
 
     await hsas.learn_skill(
@@ -76,8 +71,8 @@ async def example_workflow():
             "block_ip",
             "network_capture",
             "collect_logs",
-            "escalate_incident"
-        ]
+            "escalate_incident",
+        ],
     )
 
     print("✅ Sistemas inicializados")
@@ -103,10 +98,10 @@ async def example_workflow():
             severity="high" if np.random.random() > 0.5 else "critical",
             source_type="external",
             confidence=np.random.uniform(0.8, 0.98),
-            attack_type="malware"
+            attack_type="malware",
         )
 
-        print(f"📊 Estado detectado:")
+        print("📊 Estado detectado:")
         print(f"   Threat Level: {state.threat_level:.2f}")
         print(f"   Alerts: {state.num_alerts}")
         print(f"   Severity: {state.severity}")
@@ -120,15 +115,15 @@ async def example_workflow():
                 primitive_type=SkillPrimitiveType.ISOLATION,
                 parameters={"host": f"workstation-{episode}"},
                 cost=5.0,
-                risk=0.2
+                risk=0.2,
             ),
             Action(
                 action_id=f"action_block_{episode}",
                 action_type="block_ip",
                 primitive_type=SkillPrimitiveType.BLOCKING,
-                parameters={"ip_address": f"192.168.1.{100+episode}"},
+                parameters={"ip_address": f"192.168.1.{100 + episode}"},
                 cost=1.0,
-                risk=0.1
+                risk=0.1,
             ),
             Action(
                 action_id=f"action_quarantine_{episode}",
@@ -136,20 +131,17 @@ async def example_workflow():
                 primitive_type=SkillPrimitiveType.CONTAINMENT,
                 parameters={
                     "file_path": "/tmp/malware.exe",
-                    "host": f"workstation-{episode}"
+                    "host": f"workstation-{episode}",
                 },
                 cost=2.0,
-                risk=0.05
-            )
+                risk=0.05,
+            ),
         ]
 
         # HSAS seleciona ação
-        selected_action, mode_used = await hsas.select_action(
-            state,
-            available_actions
-        )
+        selected_action, mode_used = await hsas.select_action(state, available_actions)
 
-        print(f"🤖 HSAS Decisão:")
+        print("🤖 HSAS Decisão:")
         print(f"   Modo: {mode_used}")
         print(f"   Ação: {selected_action.action_type}")
         print(f"   Parâmetros: {selected_action.parameters}")
@@ -167,7 +159,7 @@ async def example_workflow():
             severity="medium" if result.value == "success" else state.severity,
             source_type="external",
             confidence=min(1.0, state.confidence + 0.05),
-            attack_type="malware"
+            attack_type="malware",
         )
 
         # Calcular recompensa
@@ -188,7 +180,7 @@ async def example_workflow():
                 "threat_level": state.threat_level,
                 "num_alerts": state.num_alerts,
                 "severity": state.severity,
-                "confidence": state.confidence
+                "confidence": state.confidence,
             },
             action=selected_action.action_type,
             reward=reward,
@@ -196,11 +188,11 @@ async def example_workflow():
                 "threat_level": next_state.threat_level,
                 "num_alerts": next_state.num_alerts,
                 "severity": next_state.severity,
-                "confidence": next_state.confidence
+                "confidence": next_state.confidence,
             },
             done=True,
             td_error=td_error,
-            metadata={"episode": episode, "result": result.value}
+            metadata={"episode": episode, "result": result.value},
         )
 
         print(f"🧠 Experiência armazenada: {experience.experience_id}")
@@ -214,19 +206,19 @@ async def example_workflow():
             action=selected_action,
             next_state=next_state,
             reward=reward,
-            done=True
+            done=True,
         )
 
         await hsas.learn_from_transition(transition)
-        print(f"📚 HSAS aprendeu da transição")
+        print("📚 HSAS aprendeu da transição")
         print()
 
     # ========================================================================
     # CONSOLIDAÇÃO DE MEMÓRIA
     # ========================================================================
-    print("="*70)
+    print("=" * 70)
     print("💤 INICIANDO CONSOLIDAÇÃO DE MEMÓRIA")
-    print("="*70)
+    print("=" * 70)
     print()
 
     # Forçar consolidação (ignorando intervalo)
@@ -235,9 +227,9 @@ async def example_workflow():
     metrics = await mce.consolidate()
 
     print()
-    print("="*70)
+    print("=" * 70)
     print("📊 RESULTADOS DA CONSOLIDAÇÃO")
-    print("="*70)
+    print("=" * 70)
     print(f"Session ID: {metrics.session_id}")
     print(f"Duração: {metrics.end_time - metrics.start_time:.2f}s")
     print()
@@ -255,9 +247,9 @@ async def example_workflow():
     # ========================================================================
     # ESTATÍSTICAS FINAIS
     # ========================================================================
-    print("="*70)
+    print("=" * 70)
     print("📈 ESTATÍSTICAS FINAIS")
-    print("="*70)
+    print("=" * 70)
     print()
 
     mce_stats = mce.get_statistics()
@@ -279,9 +271,9 @@ async def example_workflow():
     print(f"   Conhecimento do world model: {hsas_stats['learning']['world_model_knowledge']} transições")
     print()
 
-    print("="*70)
+    print("=" * 70)
     print("✅ INTEGRAÇÃO COMPLETA")
-    print("="*70)
+    print("=" * 70)
 
 
 if __name__ == "__main__":

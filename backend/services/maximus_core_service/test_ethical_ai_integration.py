@@ -14,42 +14,37 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-import asyncio
-import pytest
 from datetime import datetime
-from typing import Dict, Any
+
+import pytest
+
+# Phase 6: Compliance
+from compliance import (
+    ComplianceConfig,
+    ComplianceEngine,
+    RegulationType,
+)
+
+# Phase 1: Ethics
+from ethics import ActionContext, EthicalIntegrationEngine
 
 # Phase 0: Governance
 from governance import (
     ERBManager,
+    ERBMemberRole,
+    GovernanceConfig,
     PolicyEngine,
     PolicyRegistry,
-    AuditLogger,
-    GovernanceConfig,
     PolicyType,
-    ERBMemberRole,
-    GovernanceAction,
-    AuditLogLevel,
 )
-
-# Phase 1: Ethics
-from ethics import EthicalIntegrationEngine, ActionContext
 
 # Phase 2: XAI
-from xai import ExplanationEngine, ExplanationType, DetailLevel
-
-# Phase 6: Compliance
-from compliance import (
-    ComplianceEngine,
-    ComplianceConfig,
-    RegulationType,
-    ComplianceStatus,
-)
-
+from xai import DetailLevel, ExplanationEngine, ExplanationType
 
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def governance_config():
@@ -152,6 +147,7 @@ def compliance_engine():
 # TEST 1: HIGH-RISK THREAT MITIGATION WITH FULL ETHICAL STACK
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_high_risk_threat_mitigation_full_stack(
     erb_manager,
@@ -239,8 +235,7 @@ async def test_high_risk_threat_mitigation_full_stack(
     for result in ethical_decision.framework_results:
         print(f"  - {result.framework_name}: {result.verdict.value} (score: {result.score:.2f})")
 
-    assert ethical_decision.verdict.value in ["approved", "approved_with_conditions"], \
-        "Should be ethically approved"
+    assert ethical_decision.verdict.value in ["approved", "approved_with_conditions"], "Should be ethically approved"
 
     # === PHASE 2: XAI ===
     print("\n🔍 Phase 2: XAI Explanation")
@@ -298,11 +293,11 @@ async def test_high_risk_threat_mitigation_full_stack(
     print("\n✅ FINAL DECISION")
     print("-" * 80)
     print(f"Action: {action}")
-    print(f"Governance: ✅ PASS")
+    print("Governance: ✅ PASS")
     print(f"Ethics: {ethical_decision.verdict.value.upper()}")
-    print(f"XAI: Explanation generated")
-    print(f"Compliance: ✅ PASS (GDPR, SOC2)")
-    print(f"\n🎉 Action APPROVED with full ethical stack validation!")
+    print("XAI: Explanation generated")
+    print("Compliance: ✅ PASS (GDPR, SOC2)")
+    print("\n🎉 Action APPROVED with full ethical stack validation!")
 
     # Log to ERB audit trail
     meeting_result = erb_manager.schedule_meeting(
@@ -316,6 +311,7 @@ async def test_high_risk_threat_mitigation_full_stack(
 # ============================================================================
 # TEST 2: UNAUTHORIZED ACTION - FULL STACK REJECTION
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_unauthorized_action_full_stack(
@@ -366,14 +362,15 @@ async def test_unauthorized_action_full_stack(
     print("\n❌ FINAL DECISION")
     print("-" * 80)
     print(f"Action: {action}")
-    print(f"Governance: ❌ BLOCKED")
+    print("Governance: ❌ BLOCKED")
     print(f"Violations: {len(red_team_result.violations)}")
-    print(f"\n🛑 Action REJECTED by governance policies (as expected)")
+    print("\n🛑 Action REJECTED by governance policies (as expected)")
 
 
 # ============================================================================
 # TEST 3: POLICY STATISTICS AND REPORTING
 # ============================================================================
+
 
 def test_governance_statistics(policy_engine, policy_registry, erb_manager):
     """Test governance statistics and reporting."""
@@ -389,12 +386,14 @@ def test_governance_statistics(policy_engine, policy_registry, erb_manager):
     print(f"Approved Policies: {summary['approved_policies']}")
     print(f"Pending Approval: {summary['pending_approval']}")
     print("\nPolicies:")
-    for policy_type, details in summary['policies'].items():
-        print(f"  - {policy_type}: {details['total_rules']} rules, "
-              f"enforcement={details['enforcement_level']}, "
-              f"approved={details['approved']}")
+    for policy_type, details in summary["policies"].items():
+        print(
+            f"  - {policy_type}: {details['total_rules']} rules, "
+            f"enforcement={details['enforcement_level']}, "
+            f"approved={details['approved']}"
+        )
 
-    assert summary['total_policies'] == 5, "Should have 5 policies"
+    assert summary["total_policies"] == 5, "Should have 5 policies"
 
     # Policy Engine Stats
     print("\n📊 Policy Engine Statistics")
@@ -415,12 +414,13 @@ def test_governance_statistics(policy_engine, policy_registry, erb_manager):
     print(f"Total Meetings: {erb_stats['meetings']['total']}")
     print(f"Total Decisions: {erb_stats['decisions']['total']}")
 
-    assert erb_stats['members']['active'] >= 2, "Should have at least 2 active members"
+    assert erb_stats["members"]["active"] >= 2, "Should have at least 2 active members"
 
 
 # ============================================================================
 # TEST 4: END-TO-END COMPLIANCE WORKFLOW
 # ============================================================================
+
 
 def test_end_to_end_compliance_workflow(compliance_engine):
     """Test complete compliance workflow."""

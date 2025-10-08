@@ -76,35 +76,30 @@ Components:
 ==========
 """
 
-from .layer1_sensory import SensoryLayer, EventVAE
-from .layer2_behavioral import BehavioralLayer, BehavioralGNN, EventGraph
+from .hpc_network import HierarchicalPredictiveCodingNetwork
+from .layer1_sensory import EventVAE, SensoryLayer
+from .layer2_behavioral import BehavioralGNN, BehavioralLayer, EventGraph
 from .layer3_operational import OperationalLayer, OperationalTCN
 from .layer4_tactical import TacticalLayer, TacticalLSTM
 from .layer5_strategic import StrategicLayer, StrategicTransformer
-from .hpc_network import HierarchicalPredictiveCodingNetwork
 
 __all__ = [
     # Main orchestrator
-    'HierarchicalPredictiveCodingNetwork',
-
+    "HierarchicalPredictiveCodingNetwork",
     # Layer 1
-    'SensoryLayer',
-    'EventVAE',
-
+    "SensoryLayer",
+    "EventVAE",
     # Layer 2
-    'BehavioralLayer',
-    'BehavioralGNN',
-    'EventGraph',
-
+    "BehavioralLayer",
+    "BehavioralGNN",
+    "EventGraph",
     # Layer 3
-    'OperationalLayer',
-    'OperationalTCN',
-
+    "OperationalLayer",
+    "OperationalTCN",
     # Layer 4
-    'TacticalLayer',
-    'TacticalLSTM',
-
+    "TacticalLayer",
+    "TacticalLSTM",
     # Layer 5
-    'StrategicLayer',
-    'StrategicTransformer',
+    "StrategicLayer",
+    "StrategicTransformer",
 ]

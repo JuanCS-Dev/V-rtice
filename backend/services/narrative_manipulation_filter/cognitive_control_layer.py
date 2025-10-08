@@ -11,14 +11,15 @@ Implements prefrontal cortex-inspired cognitive control:
 import logging
 import re
 import unicodedata
-from typing import Tuple, Dict, Any, Optional
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, Tuple
+
 import numpy as np
 
-from fact_check_aggregator import fact_check_aggregator
-from cache_manager import cache_manager, CacheCategory
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
+from fact_check_aggregator import fact_check_aggregator
 
 logger = logging.getLogger(__name__)
 
@@ -97,11 +98,7 @@ class CognitiveControlLayer:
         self._initialized = True
         logger.info("✅ Cognitive control layer initialized")
 
-    async def determine_mode(
-        self,
-        content: str,
-        source_info: Dict[str, Any]
-    ) -> ProcessingMode:
+    async def determine_mode(self, content: str, source_info: Dict[str, Any]) -> ProcessingMode:
         """
         Determine optimal processing mode.
 
@@ -144,10 +141,7 @@ class CognitiveControlLayer:
 
         # Deep analysis if bad reputation or high check-worthiness
         if reputation < 0.3 or check_worthiness > 0.7:
-            logger.debug(
-                f"Mode: DEEP_ANALYSIS (reputation={reputation:.3f}, "
-                f"check_worthiness={check_worthiness:.3f})"
-            )
+            logger.debug(f"Mode: DEEP_ANALYSIS (reputation={reputation:.3f}, check_worthiness={check_worthiness:.3f})")
             return ProcessingMode.DEEP_ANALYSIS
 
         # Default: standard processing
@@ -167,10 +161,7 @@ class CognitiveControlLayer:
             Check-worthiness score (0-1)
         """
         try:
-            result = await fact_check_aggregator.claimbuster_client.score_claim(
-                text=content,
-                use_cache=True
-            )
+            result = await fact_check_aggregator.claimbuster_client.score_claim(text=content, use_cache=True)
 
             score = result.get("score", 0.5)
             return score
@@ -222,12 +213,26 @@ class CognitiveControlLayer:
             return True
 
         # Check for first-person pronouns (opinion indicators)
-        first_person = ["eu acho", "na minha opinião", "acredito que", "penso que", "eu sinto", "me parece"]
+        first_person = [
+            "eu acho",
+            "na minha opinião",
+            "acredito que",
+            "penso que",
+            "eu sinto",
+            "me parece",
+        ]
         if any(phrase in content_lower for phrase in first_person):
             return True
 
         # Check for opinion keywords
-        opinion_keywords = ["opinião", "acho", "acredito", "deveria", "poderia", "talvez"]
+        opinion_keywords = [
+            "opinião",
+            "acho",
+            "acredito",
+            "deveria",
+            "poderia",
+            "talvez",
+        ]
         if sum(1 for kw in opinion_keywords if kw in content_lower) >= 2:
             return True
 
@@ -274,18 +279,15 @@ class CognitiveControlLayer:
             flagged = True
 
         # STEP 5: Remove excessive newlines/whitespace
-        sanitized = re.sub(r'\n{3,}', '\n\n', sanitized)
-        sanitized = re.sub(r' {2,}', ' ', sanitized)
+        sanitized = re.sub(r"\n{3,}", "\n\n", sanitized)
+        sanitized = re.sub(r" {2,}", " ", sanitized)
 
         if flagged:
             logger.warning("Adversarial input detected and sanitized")
 
         return sanitized, flagged
 
-    async def detect_model_drift(
-        self,
-        report: Dict[str, Any]
-    ) -> bool:
+    async def detect_model_drift(self, report: Dict[str, Any]) -> bool:
         """
         Monitor for model performance degradation.
 
@@ -306,19 +308,18 @@ class CognitiveControlLayer:
         had_error = report.get("error", False)
 
         # Store in performance history
-        self._performance_history.append({
-            "confidence": confidence,
-            "latency_ms": latency_ms,
-            "error": had_error,
-            "timestamp": datetime.utcnow()
-        })
+        self._performance_history.append(
+            {
+                "confidence": confidence,
+                "latency_ms": latency_ms,
+                "error": had_error,
+                "timestamp": datetime.utcnow(),
+            }
+        )
 
         # Keep only last 24 hours
         cutoff = datetime.utcnow() - timedelta(hours=24)
-        self._performance_history = [
-            m for m in self._performance_history
-            if m["timestamp"] > cutoff
-        ]
+        self._performance_history = [m for m in self._performance_history if m["timestamp"] > cutoff]
 
         # Need minimum history for drift detection
         if len(self._performance_history) < 10:
@@ -333,9 +334,9 @@ class CognitiveControlLayer:
 
         # Check thresholds
         drift_detected = (
-            avg_confidence < self.CONFIDENCE_THRESHOLD or
-            avg_latency > self.LATENCY_THRESHOLD_MS or
-            error_rate > self.ERROR_RATE_THRESHOLD
+            avg_confidence < self.CONFIDENCE_THRESHOLD
+            or avg_latency > self.LATENCY_THRESHOLD_MS
+            or error_rate > self.ERROR_RATE_THRESHOLD
         )
 
         if drift_detected:
@@ -345,12 +346,14 @@ class CognitiveControlLayer:
             )
 
             # Alert (in production, trigger retraining pipeline)
-            await self._send_drift_alert({
-                "avg_confidence": avg_confidence,
-                "avg_latency": avg_latency,
-                "error_rate": error_rate,
-                "sample_size": len(recent_metrics)
-            })
+            await self._send_drift_alert(
+                {
+                    "avg_confidence": avg_confidence,
+                    "avg_latency": avg_latency,
+                    "error_rate": error_rate,
+                    "sample_size": len(recent_metrics),
+                }
+            )
 
         return drift_detected
 
@@ -371,16 +374,10 @@ class CognitiveControlLayer:
         # Cache alert to prevent spam
         alert_key = "model_drift_alert"
 
-        await cache_manager.set(
-            CacheCategory.ANALYSIS,
-            alert_key,
-            metrics
-        )
+        await cache_manager.set(CacheCategory.ANALYSIS, alert_key, metrics)
 
     def reconcile_signals(
-        self,
-        signal_scores: Dict[str, float],
-        signal_confidences: Dict[str, float]
+        self, signal_scores: Dict[str, float], signal_confidences: Dict[str, float]
     ) -> Tuple[float, float]:
         """
         Reconcile conflicting signals from multiple modules.
@@ -398,29 +395,20 @@ class CognitiveControlLayer:
             return 0.0, 0.0
 
         # Confidence-weighted average
-        weighted_sum = sum(
-            signal_scores[module] * signal_confidences.get(module, 1.0)
-            for module in signal_scores
-        )
+        weighted_sum = sum(signal_scores[module] * signal_confidences.get(module, 1.0) for module in signal_scores)
 
-        total_weight = sum(
-            signal_confidences.get(module, 1.0)
-            for module in signal_scores
-        )
+        total_weight = sum(signal_confidences.get(module, 1.0) for module in signal_scores)
 
         reconciled_score = weighted_sum / total_weight if total_weight > 0 else 0.0
 
         # Confidence: harmonic mean of individual confidences
         confidences = list(signal_confidences.values())
         if confidences:
-            reconciled_confidence = len(confidences) / sum(1/c for c in confidences if c > 0)
+            reconciled_confidence = len(confidences) / sum(1 / c for c in confidences if c > 0)
         else:
             reconciled_confidence = 0.0
 
-        logger.debug(
-            f"Signal reconciliation: score={reconciled_score:.3f}, "
-            f"confidence={reconciled_confidence:.3f}"
-        )
+        logger.debug(f"Signal reconciliation: score={reconciled_score:.3f}, confidence={reconciled_confidence:.3f}")
 
         return reconciled_score, reconciled_confidence
 

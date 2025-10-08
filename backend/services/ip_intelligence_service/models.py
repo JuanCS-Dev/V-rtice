@@ -11,9 +11,9 @@ API request and response modeling. This is crucial for maintaining data integrit
 and enabling efficient data exchange within the IP intelligence ecosystem.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel
 
 
 class IPInfo(BaseModel):
@@ -30,6 +30,7 @@ class IPInfo(BaseModel):
         tags (List[str]): Optional tags associated with the IP (e.g., 'VPN', 'TOR', 'Botnet').
         asn (Optional[str]): Autonomous System Number.
     """
+
     ip_address: str
     country: str
     city: str
@@ -47,4 +48,5 @@ class IPQuery(BaseModel):
     Attributes:
         ip_address (str): The IP address to query.
     """
+
     ip_address: str

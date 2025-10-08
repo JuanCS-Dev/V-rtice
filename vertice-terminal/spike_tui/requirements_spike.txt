@@ -1,0 +1,15 @@
+# Spike Técnico - TUI Governance Workspace
+# Dependências isoladas para validação de arquitetura
+
+# TUI Framework
+textual==0.47.1
+
+# HTTP Client (SSE streaming)
+httpx==0.25.2
+
+# Backend SSE Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Type hints support
+typing-extensions==4.9.0

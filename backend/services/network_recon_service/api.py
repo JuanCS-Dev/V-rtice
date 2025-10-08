@@ -16,17 +16,18 @@ vulnerability management, and offensive operations, building a comprehensive
 understanding of the network attack surface.
 """
 
+import asyncio
+import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
-import uuid
 
-from recon_engine import ReconEngine
 from metrics import MetricsCollector
-from models import ReconTask, ReconResult, ReconStatus
+from models import ReconResult, ReconStatus, ReconTask
+from recon_engine import ReconEngine
 
 app = FastAPI(title="Maximus Network Reconnaissance Service", version="1.0.0")
 
@@ -43,6 +44,7 @@ class StartReconRequest(BaseModel):
         scan_type (str): The type of scan to perform (e.g., 'nmap_full', 'masscan_ports').
         parameters (Optional[Dict[str, Any]]): Additional parameters for the scan (e.g., 'ports' for masscan).
     """
+
     target: str
     scan_type: str
     parameters: Optional[Dict[str, Any]] = None
@@ -69,7 +71,10 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Network Reconnaissance Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Network Reconnaissance Service is operational.",
+    }
 
 
 @app.post("/start_recon", response_model=ReconTask)
@@ -90,9 +95,9 @@ async def start_recon_task_endpoint(request: StartReconRequest) -> ReconTask:
         scan_type=request.scan_type,
         parameters=request.parameters or {},
         start_time=datetime.now().isoformat(),
-        status=ReconStatus.PENDING
+        status=ReconStatus.PENDING,
     )
-    asyncio.create_task(recon_engine.start_recon_task(task)) # Run in background
+    asyncio.create_task(recon_engine.start_recon_task(task))  # Run in background
     return task
 
 
@@ -130,7 +135,10 @@ async def get_recon_task_results(task_id: str) -> ReconResult:
     """
     results = recon_engine.get_task_results(task_id)
     if not results:
-        raise HTTPException(status_code=404, detail="Reconnaissance task results not found or not yet available.")
+        raise HTTPException(
+            status_code=404,
+            detail="Reconnaissance task results not found or not yet available.",
+        )
     return results
 
 

@@ -11,14 +11,14 @@ __author__ = "VÉRTICE Team"
 
 from .investigation_core import (
     TTP,
-    InvestigationStatus,
-    ThreatActorProfile,
-    SecurityIncident,
-    Campaign,
-    Investigation,
-    ThreatActorProfiler,
-    CampaignCorrelator,
     AutonomousInvestigator,
+    Campaign,
+    CampaignCorrelator,
+    Investigation,
+    InvestigationStatus,
+    SecurityIncident,
+    ThreatActorProfile,
+    ThreatActorProfiler,
 )
 
 __all__ = [

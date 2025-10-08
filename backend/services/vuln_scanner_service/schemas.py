@@ -10,13 +10,15 @@ designed for data validation and serialization, providing a clean separation
 between database models and API models.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel
 
 
 class ScanTaskBase(BaseModel):
     """Base Pydantic model for a vulnerability scan task."""
+
     target: str
     scan_type: str
     parameters: Dict[str, Any]
@@ -24,6 +26,7 @@ class ScanTaskBase(BaseModel):
 
 class ScanTaskCreate(ScanTaskBase):
     """Pydantic model for creating a new vulnerability scan task."""
+
     pass
 
 
@@ -41,18 +44,22 @@ class ScanTask(ScanTaskBase):
     Config:
         orm_mode = True
     """
+
     id: int
     status: str
     start_time: datetime
     end_time: Optional[datetime]
     report_path: Optional[str]
+
     class Config:
         """Configuração para habilitar o modo ORM."""
+
         orm_mode = True
 
 
 class VulnerabilityBase(BaseModel):
     """Base Pydantic model for a detected vulnerability finding."""
+
     scan_task_id: int
     cve_id: Optional[str]
     name: str
@@ -66,6 +73,7 @@ class VulnerabilityBase(BaseModel):
 
 class VulnerabilityCreate(VulnerabilityBase):
     """Pydantic model for creating a new vulnerability finding."""
+
     pass
 
 
@@ -81,6 +89,7 @@ class Vulnerability(VulnerabilityBase):
     Config:
         orm_mode = True
     """
+
     id: int
     discovered_at: datetime
     is_false_positive: bool
@@ -88,4 +97,5 @@ class Vulnerability(VulnerabilityBase):
 
     class Config:
         """Configuração para habilitar o modo ORM."""
+
         orm_mode = True

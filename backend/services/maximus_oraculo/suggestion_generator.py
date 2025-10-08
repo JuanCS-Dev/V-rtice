@@ -14,8 +14,8 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class SuggestionGenerator:
@@ -31,7 +31,9 @@ class SuggestionGenerator:
         self.last_generation_time: Optional[datetime] = None
         self.current_status: str = "ready_to_suggest"
 
-    async def generate_suggestions(self, analysis_result: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    async def generate_suggestions(
+        self, analysis_result: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
         """Generates actionable suggestions based on an analysis result.
 
         Args:
@@ -41,8 +43,10 @@ class SuggestionGenerator:
         Returns:
             List[Dict[str, Any]]: A list of generated suggestions.
         """
-        print(f"[SuggestionGenerator] Generating suggestions based on analysis: {analysis_result.get('prediction_type', 'N/A')}")
-        await asyncio.sleep(0.2) # Simulate generation time
+        print(
+            f"[SuggestionGenerator] Generating suggestions based on analysis: {analysis_result.get('prediction_type', 'N/A')}"
+        )
+        await asyncio.sleep(0.2)  # Simulate generation time
 
         suggestions = []
         prediction_type = analysis_result.get("prediction_type")
@@ -50,13 +54,43 @@ class SuggestionGenerator:
         confidence = analysis_result.get("confidence", 0.5)
 
         if prediction_type == "threat_detection" and confidence > 0.7:
-            suggestions.append({"type": "security_alert", "description": f"Immediate action required: {predicted_event}. Initiate containment protocol.", "priority": "critical"})
-            suggestions.append({"type": "investigation", "description": f"Conduct deep dive into {predicted_event} to understand root cause.", "priority": "high"})
+            suggestions.append(
+                {
+                    "type": "security_alert",
+                    "description": f"Immediate action required: {predicted_event}. Initiate containment protocol.",
+                    "priority": "critical",
+                }
+            )
+            suggestions.append(
+                {
+                    "type": "investigation",
+                    "description": f"Conduct deep dive into {predicted_event} to understand root cause.",
+                    "priority": "high",
+                }
+            )
         elif prediction_type == "resource_optimization" and confidence > 0.6:
-            suggestions.append({"type": "scale_up", "description": "Increase compute resources for service X by 20% to meet predicted demand.", "priority": "medium"})
-            suggestions.append({"type": "optimize_database", "description": "Review database queries for performance bottlenecks.", "priority": "low"})
+            suggestions.append(
+                {
+                    "type": "scale_up",
+                    "description": "Increase compute resources for service X by 20% to meet predicted demand.",
+                    "priority": "medium",
+                }
+            )
+            suggestions.append(
+                {
+                    "type": "optimize_database",
+                    "description": "Review database queries for performance bottlenecks.",
+                    "priority": "low",
+                }
+            )
         else:
-            suggestions.append({"type": "monitor_closely", "description": "Continue monitoring for further developments.", "priority": "low"})
+            suggestions.append(
+                {
+                    "type": "monitor_closely",
+                    "description": "Continue monitoring for further developments.",
+                    "priority": "low",
+                }
+            )
 
         self.generated_suggestions.extend(suggestions)
         self.last_generation_time = datetime.now()
@@ -72,5 +106,5 @@ class SuggestionGenerator:
         return {
             "status": self.current_status,
             "total_suggestions_generated": len(self.generated_suggestions),
-            "last_generation": self.last_generation_time.isoformat() if self.last_generation_time else "N/A"
+            "last_generation": (self.last_generation_time.isoformat() if self.last_generation_time else "N/A"),
         }

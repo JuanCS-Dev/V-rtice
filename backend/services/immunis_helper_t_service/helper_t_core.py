@@ -25,17 +25,17 @@ Like biological Helper T-cells: Orchestrates adaptive immunity.
 NO MOCKS - Production-ready implementation.
 """
 
-import asyncio
 import logging
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class ImmuneStrategy(Enum):
     """Immune response strategy types."""
+
     TH1 = "th1"  # Cell-mediated (aggressive, active defense)
     TH2 = "th2"  # Humoral (defensive, signature-based)
     BALANCED = "balanced"  # Mixed strategy
@@ -43,6 +43,7 @@ class ImmuneStrategy(Enum):
 
 class ResponseIntensity(Enum):
     """Response intensity levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -62,7 +63,7 @@ class HelperTCellCore:
     def __init__(
         self,
         b_cell_endpoint: str = "http://immunis-bcell:8015",
-        cytotoxic_endpoint: str = "http://immunis-cytotoxic-t:8017"
+        cytotoxic_endpoint: str = "http://immunis-cytotoxic-t:8017",
     ):
         """Initialize Helper T-Cell Core.
 
@@ -91,10 +92,10 @@ class HelperTCellCore:
         """
         logger.info(f"Helper T-Cell activated with antigen: {antigen.get('antigen_id', '')[:16]}")
 
-        antigen_id = antigen.get('antigen_id')
-        malware_family = antigen.get('malware_family', 'unknown')
-        severity = antigen.get('severity', 0.5)
-        correlation_count = antigen.get('correlation_count', 0)
+        antigen_id = antigen.get("antigen_id")
+        malware_family = antigen.get("malware_family", "unknown")
+        severity = antigen.get("severity", 0.5)
+        correlation_count = antigen.get("correlation_count", 0)
 
         # 1. Determine immune strategy (Th1 vs Th2)
         strategy = self._select_immune_strategy(antigen)
@@ -103,33 +104,28 @@ class HelperTCellCore:
         intensity = self._calculate_response_intensity(severity, correlation_count)
 
         # 3. Coordinate immune cells
-        coordination_result = await self._coordinate_immune_response(
-            antigen, strategy, intensity
-        )
+        coordination_result = await self._coordinate_immune_response(antigen, strategy, intensity)
 
         # 4. Store threat intelligence
         self.threat_intelligence[antigen_id] = {
-            'timestamp': datetime.now().isoformat(),
-            'malware_family': malware_family,
-            'severity': severity,
-            'strategy': strategy.value,
-            'intensity': intensity.value,
-            'coordination': coordination_result
+            "timestamp": datetime.now().isoformat(),
+            "malware_family": malware_family,
+            "severity": severity,
+            "strategy": strategy.value,
+            "intensity": intensity.value,
+            "coordination": coordination_result,
         }
 
         self.last_coordination_time = datetime.now()
 
-        logger.info(
-            f"Helper T-Cell orchestration: strategy={strategy.value}, "
-            f"intensity={intensity.value}"
-        )
+        logger.info(f"Helper T-Cell orchestration: strategy={strategy.value}, intensity={intensity.value}")
 
         return {
-            'timestamp': datetime.now().isoformat(),
-            'antigen_id': antigen_id,
-            'strategy': strategy.value,
-            'intensity': intensity.value,
-            'coordination': coordination_result
+            "timestamp": datetime.now().isoformat(),
+            "antigen_id": antigen_id,
+            "strategy": strategy.value,
+            "intensity": intensity.value,
+            "coordination": coordination_result,
         }
 
     def _select_immune_strategy(self, antigen: Dict[str, Any]) -> ImmuneStrategy:
@@ -141,9 +137,9 @@ class HelperTCellCore:
         Returns:
             Selected immune strategy
         """
-        severity = antigen.get('severity', 0.5)
-        malware_family = antigen.get('malware_family', 'unknown')
-        correlation_count = antigen.get('correlation_count', 0)
+        severity = antigen.get("severity", 0.5)
+        malware_family = antigen.get("malware_family", "unknown")
+        correlation_count = antigen.get("correlation_count", 0)
 
         # Th1 strategy (cell-mediated, aggressive):
         # - High severity threats (≥0.7)
@@ -159,7 +155,7 @@ class HelperTCellCore:
             return ImmuneStrategy.TH1
 
         # Aggressive malware families
-        aggressive_families = ['ransomware', 'worm', 'rootkit', 'apt']
+        aggressive_families = ["ransomware", "worm", "rootkit", "apt"]
         if any(family in malware_family.lower() for family in aggressive_families):
             logger.info(f"Th1 strategy selected: Aggressive malware family ({malware_family})")
             return ImmuneStrategy.TH1
@@ -177,11 +173,7 @@ class HelperTCellCore:
         logger.info("Balanced strategy selected: Mixed threat characteristics")
         return ImmuneStrategy.BALANCED
 
-    def _calculate_response_intensity(
-        self,
-        severity: float,
-        correlation_count: int
-    ) -> ResponseIntensity:
+    def _calculate_response_intensity(self, severity: float, correlation_count: int) -> ResponseIntensity:
         """Calculate proportionate response intensity.
 
         Args:
@@ -214,7 +206,7 @@ class HelperTCellCore:
         self,
         antigen: Dict[str, Any],
         strategy: ImmuneStrategy,
-        intensity: ResponseIntensity
+        intensity: ResponseIntensity,
     ) -> Dict[str, Any]:
         """Coordinate B-cell and Cytotoxic T-cell responses.
 
@@ -227,35 +219,42 @@ class HelperTCellCore:
             Coordination results
         """
         coordination = {
-            'b_cell_activated': False,
-            'cytotoxic_t_activated': False,
-            'directives': []
+            "b_cell_activated": False,
+            "cytotoxic_t_activated": False,
+            "directives": [],
         }
 
         # B-Cell activation (always for signature generation)
-        if strategy in [ImmuneStrategy.TH2, ImmuneStrategy.BALANCED, ImmuneStrategy.TH1]:
+        if strategy in [
+            ImmuneStrategy.TH2,
+            ImmuneStrategy.BALANCED,
+            ImmuneStrategy.TH1,
+        ]:
             directive = {
-                'cell_type': 'b_cell',
-                'action': 'generate_signature',
-                'priority': 'high' if intensity in [ResponseIntensity.HIGH, ResponseIntensity.CRITICAL] else 'medium',
-                'antigen': antigen
+                "cell_type": "b_cell",
+                "action": "generate_signature",
+                "priority": ("high" if intensity in [ResponseIntensity.HIGH, ResponseIntensity.CRITICAL] else "medium"),
+                "antigen": antigen,
             }
-            coordination['directives'].append(directive)
-            coordination['b_cell_activated'] = True
+            coordination["directives"].append(directive)
+            coordination["b_cell_activated"] = True
 
         # Cytotoxic T-Cell activation (Th1 strategy or high intensity)
-        if strategy == ImmuneStrategy.TH1 or intensity in [ResponseIntensity.HIGH, ResponseIntensity.CRITICAL]:
+        if strategy == ImmuneStrategy.TH1 or intensity in [
+            ResponseIntensity.HIGH,
+            ResponseIntensity.CRITICAL,
+        ]:
             directive = {
-                'cell_type': 'cytotoxic_t',
-                'action': 'active_defense',
-                'priority': 'critical' if intensity == ResponseIntensity.CRITICAL else 'high',
-                'antigen': antigen
+                "cell_type": "cytotoxic_t",
+                "action": "active_defense",
+                "priority": ("critical" if intensity == ResponseIntensity.CRITICAL else "high"),
+                "antigen": antigen,
             }
-            coordination['directives'].append(directive)
-            coordination['cytotoxic_t_activated'] = True
+            coordination["directives"].append(directive)
+            coordination["cytotoxic_t_activated"] = True
 
         # Store directives
-        self.response_directives.extend(coordination['directives'])
+        self.response_directives.extend(coordination["directives"])
 
         logger.info(
             f"Coordination: B-cell={coordination['b_cell_activated']}, "
@@ -269,7 +268,7 @@ class HelperTCellCore:
         antigen_id: str,
         outcome: str,
         time_to_containment: Optional[float] = None,
-        false_positive: bool = False
+        false_positive: bool = False,
     ) -> Dict[str, Any]:
         """Record outcome of immune response.
 
@@ -283,26 +282,24 @@ class HelperTCellCore:
             Outcome record
         """
         outcome_record = {
-            'timestamp': datetime.now().isoformat(),
-            'antigen_id': antigen_id,
-            'outcome': outcome,
-            'time_to_containment': time_to_containment,
-            'false_positive': false_positive
+            "timestamp": datetime.now().isoformat(),
+            "antigen_id": antigen_id,
+            "outcome": outcome,
+            "time_to_containment": time_to_containment,
+            "false_positive": false_positive,
         }
 
         self.response_outcomes.append(outcome_record)
 
         logger.info(
-            f"Response outcome recorded: {outcome}, "
-            f"ttc={time_to_containment:.1f}s" if time_to_containment else f"ttc=N/A"
+            f"Response outcome recorded: {outcome}, ttc={time_to_containment:.1f}s"
+            if time_to_containment
+            else "ttc=N/A"
         )
 
         return outcome_record
 
-    async def get_effectiveness_metrics(
-        self,
-        time_window_hours: int = 24
-    ) -> Dict[str, Any]:
+    async def get_effectiveness_metrics(self, time_window_hours: int = 24) -> Dict[str, Any]:
         """Get effectiveness metrics for immune responses.
 
         Args:
@@ -314,34 +311,28 @@ class HelperTCellCore:
         cutoff_time = datetime.now() - timedelta(hours=time_window_hours)
 
         # Filter recent outcomes
-        recent_outcomes = [
-            o for o in self.response_outcomes
-            if datetime.fromisoformat(o['timestamp']) >= cutoff_time
-        ]
+        recent_outcomes = [o for o in self.response_outcomes if datetime.fromisoformat(o["timestamp"]) >= cutoff_time]
 
         if not recent_outcomes:
-            return {
-                'time_window_hours': time_window_hours,
-                'total_responses': 0
-            }
+            return {"time_window_hours": time_window_hours, "total_responses": 0}
 
         total = len(recent_outcomes)
-        successes = sum(1 for o in recent_outcomes if o['outcome'] == 'success')
-        false_positives = sum(1 for o in recent_outcomes if o['false_positive'])
+        successes = sum(1 for o in recent_outcomes if o["outcome"] == "success")
+        false_positives = sum(1 for o in recent_outcomes if o["false_positive"])
 
         # Calculate average time-to-containment
-        ttc_values = [o['time_to_containment'] for o in recent_outcomes if o['time_to_containment'] is not None]
+        ttc_values = [o["time_to_containment"] for o in recent_outcomes if o["time_to_containment"] is not None]
         avg_ttc = sum(ttc_values) / len(ttc_values) if ttc_values else None
 
         return {
-            'time_window_hours': time_window_hours,
-            'total_responses': total,
-            'successes': successes,
-            'failures': total - successes,
-            'success_rate': successes / total if total > 0 else 0.0,
-            'false_positives': false_positives,
-            'fp_rate': false_positives / total if total > 0 else 0.0,
-            'avg_time_to_containment': avg_ttc
+            "time_window_hours": time_window_hours,
+            "total_responses": total,
+            "successes": successes,
+            "failures": total - successes,
+            "success_rate": successes / total if total > 0 else 0.0,
+            "false_positives": false_positives,
+            "fp_rate": false_positives / total if total > 0 else 0.0,
+            "avg_time_to_containment": avg_ttc,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -351,9 +342,9 @@ class HelperTCellCore:
             Service status dictionary
         """
         return {
-            'status': 'operational',
-            'threat_intel_count': len(self.threat_intelligence),
-            'directives_issued': len(self.response_directives),
-            'outcomes_recorded': len(self.response_outcomes),
-            'last_coordination': self.last_coordination_time.isoformat() if self.last_coordination_time else 'N/A'
+            "status": "operational",
+            "threat_intel_count": len(self.threat_intelligence),
+            "directives_issued": len(self.response_directives),
+            "outcomes_recorded": len(self.response_outcomes),
+            "last_coordination": (self.last_coordination_time.isoformat() if self.last_coordination_time else "N/A"),
         }

@@ -5,30 +5,25 @@ REST API for attack prediction, vulnerability forecasting, and hunting recommend
 NO MOCKS - Production-ready predictive intelligence interface.
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from predictive_core import (
     AttackPredictor,
-    VulnerabilityForecaster,
     ProactiveHunter,
     ThreatEvent,
     ThreatType,
-    ConfidenceLevel,
+    VulnerabilityForecaster,
 )
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instances
@@ -60,7 +55,7 @@ app = FastAPI(
     title="VÉRTICE Predictive Threat Hunting Service",
     description="Attack prediction and vulnerability forecasting for proactive defense",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -68,8 +63,10 @@ app = FastAPI(
 # Request/Response Models
 # ============================================================================
 
+
 class ThreatEventRequest(BaseModel):
     """Request to ingest threat event."""
+
     event_id: str = Field(..., description="Unique event ID")
     threat_type: str = Field(..., description="Threat type (reconnaissance, exploitation, etc)")
     timestamp: Optional[str] = Field(None, description="ISO timestamp (default: now)")
@@ -82,12 +79,14 @@ class ThreatEventRequest(BaseModel):
 
 class PredictAttacksRequest(BaseModel):
     """Request for attack predictions."""
+
     time_horizon_hours: int = Field(24, ge=1, le=168, description="Prediction window (1-168 hours)")
     min_confidence: float = Field(0.6, ge=0.0, le=1.0, description="Minimum confidence threshold")
 
 
 class AttackPredictionResponse(BaseModel):
     """Response with attack prediction."""
+
     prediction_id: str
     threat_type: str
     predicted_time: str
@@ -101,6 +100,7 @@ class AttackPredictionResponse(BaseModel):
 
 class VulnerabilityRegistrationRequest(BaseModel):
     """Request to register vulnerability."""
+
     cve_id: str = Field(..., description="CVE identifier")
     cvss_score: float = Field(..., ge=0.0, le=10.0, description="CVSS v3 score")
     published_date: str = Field(..., description="ISO timestamp of publication")
@@ -111,6 +111,7 @@ class VulnerabilityRegistrationRequest(BaseModel):
 
 class TrendingScoreUpdate(BaseModel):
     """Request to update trending score."""
+
     cve_id: str = Field(..., description="CVE identifier")
     mentions: int = Field(0, ge=0, description="Exploit-DB/forum mentions (last 7 days)")
     dark_web_chatter: int = Field(0, ge=0, description="Dark web discussions (last 7 days)")
@@ -118,12 +119,14 @@ class TrendingScoreUpdate(BaseModel):
 
 class ForecastVulnerabilitiesRequest(BaseModel):
     """Request for vulnerability forecasts."""
+
     time_horizon_days: int = Field(30, ge=1, le=365, description="Forecast window (1-365 days)")
     min_probability: float = Field(0.5, ge=0.0, le=1.0, description="Minimum probability threshold")
 
 
 class VulnerabilityForecastResponse(BaseModel):
     """Response with vulnerability forecast."""
+
     cve_id: str
     vulnerability_name: str
     cvss_score: float
@@ -137,6 +140,7 @@ class VulnerabilityForecastResponse(BaseModel):
 
 class HuntingRecommendationResponse(BaseModel):
     """Response with hunting recommendation."""
+
     recommendation_id: str
     hunt_type: str
     target_assets: List[str]
@@ -150,12 +154,14 @@ class HuntingRecommendationResponse(BaseModel):
 
 class HuntExecutionRequest(BaseModel):
     """Request to record hunt execution."""
+
     recommendation_id: str = Field(..., description="Recommendation ID")
     findings_count: int = Field(..., ge=0, description="Number of findings discovered")
 
 
 class StatusResponse(BaseModel):
     """Service status response."""
+
     service: str
     status: str
     components: Dict[str, Dict[str, Any]]
@@ -165,6 +171,7 @@ class StatusResponse(BaseModel):
 # ============================================================================
 # Attack Prediction Endpoints
 # ============================================================================
+
 
 @app.post("/prediction/ingest_event")
 async def ingest_threat_event(request: ThreatEventRequest):
@@ -184,10 +191,7 @@ async def ingest_threat_event(request: ThreatEventRequest):
         try:
             threat_type = ThreatType(request.threat_type.lower())
         except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid threat type: {request.threat_type}"
-            )
+            raise HTTPException(status_code=400, detail=f"Invalid threat type: {request.threat_type}")
 
         # Parse timestamp
         if request.timestamp:
@@ -204,7 +208,7 @@ async def ingest_threat_event(request: ThreatEventRequest):
             target_asset=request.target_asset,
             severity=request.severity,
             indicators=request.indicators,
-            metadata=request.metadata
+            metadata=request.metadata,
         )
 
         # Ingest event
@@ -214,7 +218,7 @@ async def ingest_threat_event(request: ThreatEventRequest):
             "status": "success",
             "event_id": request.event_id,
             "threat_type": threat_type.value,
-            "timestamp": timestamp.isoformat()
+            "timestamp": timestamp.isoformat(),
         }
 
     except HTTPException:
@@ -241,7 +245,7 @@ async def predict_attacks(request: PredictAttacksRequest):
         # Generate predictions
         predictions = attack_predictor.predict_attacks(
             time_horizon_hours=request.time_horizon_hours,
-            min_confidence=request.min_confidence
+            min_confidence=request.min_confidence,
         )
 
         # Convert to response models
@@ -255,7 +259,7 @@ async def predict_attacks(request: PredictAttacksRequest):
                 confidence=pred.confidence.value,
                 indicators=pred.indicators,
                 recommended_actions=pred.recommended_actions,
-                timestamp=pred.timestamp.isoformat()
+                timestamp=pred.timestamp.isoformat(),
             )
             for pred in predictions
         ]
@@ -268,10 +272,7 @@ async def predict_attacks(request: PredictAttacksRequest):
 
 
 @app.post("/prediction/validate")
-async def validate_prediction(
-    prediction_id: str,
-    actual_occurred: bool
-):
+async def validate_prediction(prediction_id: str, actual_occurred: bool):
     """Validate prediction accuracy (for learning).
 
     Args:
@@ -291,7 +292,7 @@ async def validate_prediction(
             "status": "success",
             "prediction_id": prediction_id,
             "actual_occurred": actual_occurred,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -302,6 +303,7 @@ async def validate_prediction(
 # ============================================================================
 # Vulnerability Forecasting Endpoints
 # ============================================================================
+
 
 @app.post("/vulnerability/register")
 async def register_vulnerability(request: VulnerabilityRegistrationRequest):
@@ -327,7 +329,7 @@ async def register_vulnerability(request: VulnerabilityRegistrationRequest):
             published_date=published_date,
             affected_assets=request.affected_assets,
             exploit_available=request.exploit_available,
-            patch_available=request.patch_available
+            patch_available=request.patch_available,
         )
 
         return {
@@ -335,7 +337,7 @@ async def register_vulnerability(request: VulnerabilityRegistrationRequest):
             "cve_id": request.cve_id,
             "cvss_score": request.cvss_score,
             "affected_assets_count": len(request.affected_assets),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -360,7 +362,7 @@ async def update_trending_score(request: TrendingScoreUpdate):
         vuln_forecaster.update_trending_score(
             cve_id=request.cve_id,
             mentions=request.mentions,
-            dark_web_chatter=request.dark_web_chatter
+            dark_web_chatter=request.dark_web_chatter,
         )
 
         return {
@@ -368,7 +370,7 @@ async def update_trending_score(request: TrendingScoreUpdate):
             "cve_id": request.cve_id,
             "mentions": request.mentions,
             "dark_web_chatter": request.dark_web_chatter,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -393,7 +395,7 @@ async def forecast_vulnerabilities(request: ForecastVulnerabilitiesRequest):
         # Generate forecasts
         forecasts = vuln_forecaster.forecast_exploitations(
             time_horizon_days=request.time_horizon_days,
-            min_probability=request.min_probability
+            min_probability=request.min_probability,
         )
 
         # Convert to response models
@@ -407,7 +409,7 @@ async def forecast_vulnerabilities(request: ForecastVulnerabilitiesRequest):
                 affected_assets=forecast.affected_assets,
                 mitigation_priority=forecast.mitigation_priority,
                 trending_score=forecast.trending_score,
-                timestamp=forecast.timestamp.isoformat()
+                timestamp=forecast.timestamp.isoformat(),
             )
             for forecast in forecasts
         ]
@@ -423,6 +425,7 @@ async def forecast_vulnerabilities(request: ForecastVulnerabilitiesRequest):
 # Proactive Hunting Endpoints
 # ============================================================================
 
+
 @app.post("/hunt/recommendations", response_model=List[HuntingRecommendationResponse])
 async def generate_hunting_recommendations():
     """Generate hunting recommendations from current predictions and forecasts.
@@ -435,21 +438,14 @@ async def generate_hunting_recommendations():
 
     try:
         # Get current predictions
-        predictions = attack_predictor.predict_attacks(
-            time_horizon_hours=24,
-            min_confidence=0.6
-        )
+        predictions = attack_predictor.predict_attacks(time_horizon_hours=24, min_confidence=0.6)
 
         # Get current forecasts
-        forecasts = vuln_forecaster.forecast_exploitations(
-            time_horizon_days=30,
-            min_probability=0.5
-        )
+        forecasts = vuln_forecaster.forecast_exploitations(time_horizon_days=30, min_probability=0.5)
 
         # Generate recommendations
         recommendations = proactive_hunter.generate_hunting_recommendations(
-            predictions=predictions,
-            forecasts=forecasts
+            predictions=predictions, forecasts=forecasts
         )
 
         # Convert to response models
@@ -463,7 +459,7 @@ async def generate_hunting_recommendations():
                 priority=rec.priority,
                 estimated_effort_hours=rec.estimated_effort_hours,
                 potential_findings=rec.potential_findings,
-                timestamp=rec.timestamp.isoformat()
+                timestamp=rec.timestamp.isoformat(),
             )
             for rec in recommendations
         ]
@@ -491,14 +487,14 @@ async def record_hunt_execution(request: HuntExecutionRequest):
     try:
         proactive_hunter.record_hunt_execution(
             recommendation_id=request.recommendation_id,
-            findings_count=request.findings_count
+            findings_count=request.findings_count,
         )
 
         return {
             "status": "success",
             "recommendation_id": request.recommendation_id,
             "findings_count": request.findings_count,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -510,13 +506,14 @@ async def record_hunt_execution(request: HuntExecutionRequest):
 # System Endpoints
 # ============================================================================
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "predictive_threat_hunting",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -545,7 +542,7 @@ async def get_status():
         service="predictive_threat_hunting",
         status="operational",
         components=components,
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
     )
 
 
@@ -559,7 +556,7 @@ async def get_statistics():
     stats = {
         "service": "predictive_threat_hunting",
         "timestamp": datetime.now().isoformat(),
-        "components": {}
+        "components": {},
     }
 
     # Gather stats from all components
@@ -568,14 +565,14 @@ async def get_statistics():
         stats["components"]["attack_predictor"] = {
             "threat_events": status["threat_events_ingested"],
             "predictions_made": status["predictions_made"],
-            "accuracy": status["accuracy"]
+            "accuracy": status["accuracy"],
         }
 
     if vuln_forecaster is not None:
         status = vuln_forecaster.get_status()
         stats["components"]["vulnerability_forecaster"] = {
             "vulnerabilities_tracked": status["vulnerabilities_tracked"],
-            "forecasts_made": status["forecasts_made"]
+            "forecasts_made": status["forecasts_made"],
         }
 
     if proactive_hunter is not None:
@@ -584,17 +581,11 @@ async def get_statistics():
             "recommendations_generated": status["recommendations_generated"],
             "hunts_executed": status["hunts_executed"],
             "findings_discovered": status["findings_discovered"],
-            "hit_rate": status["hit_rate"]
+            "hit_rate": status["hit_rate"],
         }
 
     return stats
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "api:app",
-        host="0.0.0.0",
-        port=8016,
-        log_level="info",
-        access_log=True
-    )
+    uvicorn.run("api:app", host="0.0.0.0", port=8016, log_level="info", access_log=True)

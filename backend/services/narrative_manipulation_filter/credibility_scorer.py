@@ -6,18 +6,18 @@ exponential temporal decay, and Wilson score confidence intervals.
 """
 
 import logging
+from datetime import datetime
+from typing import Any, Dict, List, Tuple
+
 import numpy as np
-from typing import Tuple, Dict, Any, List
-from datetime import datetime, timedelta
 from scipy.stats import beta as beta_dist
 
-from utils import (
-    exponential_decay_weight,
-    bayesian_update,
-    beta_distribution_credibility,
-    wilson_score_interval
-)
 from models import CredibilityRating
+from utils import (
+    beta_distribution_credibility,
+    exponential_decay_weight,
+    wilson_score_interval,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class BayesianCredibilityScorer:
         self,
         prior_alpha: float = 1.0,
         prior_beta: float = 1.0,
-        decay_half_life_days: int = 30
+        decay_half_life_days: int = 30,
     ):
         """
         Initialize Bayesian scorer.
@@ -47,10 +47,7 @@ class BayesianCredibilityScorer:
         self.prior_beta = prior_beta
         self.decay_half_life_days = decay_half_life_days
 
-    def initialize_from_newsguard(
-        self,
-        newsguard_score: float
-    ) -> Tuple[float, float]:
+    def initialize_from_newsguard(self, newsguard_score: float) -> Tuple[float, float]:
         """
         Initialize Beta parameters from NewsGuard score.
 
@@ -73,9 +70,9 @@ class BayesianCredibilityScorer:
         elif newsguard_score >= 60:
             concentration = 10  # Moderately confident
         elif newsguard_score >= 40:
-            concentration = 5   # Low confidence
+            concentration = 5  # Low confidence
         else:
-            concentration = 2   # Very uncertain
+            concentration = 2  # Very uncertain
 
         alpha = p * concentration + 1
         beta = (1 - p) * concentration + 1
@@ -88,7 +85,7 @@ class BayesianCredibilityScorer:
         beta: float,
         is_reliable: bool,
         timestamp: datetime,
-        weight: float = 1.0
+        weight: float = 1.0,
     ) -> Tuple[float, float]:
         """
         Update Beta parameters with new observation.
@@ -120,12 +117,7 @@ class BayesianCredibilityScorer:
 
         return alpha_new, beta_new
 
-    def batch_update(
-        self,
-        alpha: float,
-        beta: float,
-        observations: List[Dict[str, Any]]
-    ) -> Tuple[float, float]:
+    def batch_update(self, alpha: float, beta: float, observations: List[Dict[str, Any]]) -> Tuple[float, float]:
         """
         Update with batch of observations.
 
@@ -146,17 +138,12 @@ class BayesianCredibilityScorer:
                 beta_current,
                 is_reliable=obs["is_reliable"],
                 timestamp=obs["timestamp"],
-                weight=obs.get("weight", 1.0)
+                weight=obs.get("weight", 1.0),
             )
 
         return alpha_current, beta_current
 
-    def get_credibility_score(
-        self,
-        alpha: float,
-        beta: float,
-        method: str = "mean"
-    ) -> float:
+    def get_credibility_score(self, alpha: float, beta: float, method: str = "mean") -> float:
         """
         Calculate credibility score from Beta parameters.
 
@@ -187,12 +174,7 @@ class BayesianCredibilityScorer:
         else:
             raise ValueError(f"Unknown method: {method}")
 
-    def get_confidence_interval(
-        self,
-        alpha: float,
-        beta: float,
-        confidence: float = 0.95
-    ) -> Tuple[float, float]:
+    def get_confidence_interval(self, alpha: float, beta: float, confidence: float = 0.95) -> Tuple[float, float]:
         """
         Calculate credibility confidence interval.
 
@@ -209,11 +191,7 @@ class BayesianCredibilityScorer:
         upper = dist.ppf((1 + confidence) / 2)
         return lower, upper
 
-    def get_uncertainty(
-        self,
-        alpha: float,
-        beta: float
-    ) -> float:
+    def get_uncertainty(self, alpha: float, beta: float) -> float:
         """
         Calculate uncertainty (variance) of credibility estimate.
 
@@ -226,11 +204,7 @@ class BayesianCredibilityScorer:
         """
         return (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1))
 
-    def categorize_credibility(
-        self,
-        score: float,
-        uncertainty: float = 0.0
-    ) -> CredibilityRating:
+    def categorize_credibility(self, score: float, uncertainty: float = 0.0) -> CredibilityRating:
         """
         Convert score to categorical rating.
 
@@ -261,12 +235,7 @@ class BayesianCredibilityScorer:
         else:
             return CredibilityRating.HIGHLY_UNRELIABLE
 
-    def wilson_score_lower_bound(
-        self,
-        true_count: int,
-        total_count: int,
-        confidence: float = 0.95
-    ) -> float:
+    def wilson_score_lower_bound(self, true_count: int, total_count: int, confidence: float = 0.95) -> float:
         """
         Calculate Wilson score lower bound.
 
@@ -286,11 +255,7 @@ class BayesianCredibilityScorer:
         lower, _ = wilson_score_interval(true_count, total_count, confidence)
         return lower
 
-    def combine_scores(
-        self,
-        scores: List[float],
-        weights: List[float] = None
-    ) -> float:
+    def combine_scores(self, scores: List[float], weights: List[float] = None) -> float:
         """
         Combine multiple credibility scores.
 
@@ -321,11 +286,7 @@ class BayesianCredibilityScorer:
         harmonic_mean = total_weight / sum(w / s for w, s in zip(weights, safe_scores))
         return np.clip(harmonic_mean, 0.0, 1.0)
 
-    def reputation_decay(
-        self,
-        current_score: float,
-        days_since_update: int
-    ) -> float:
+    def reputation_decay(self, current_score: float, days_since_update: int) -> float:
         """
         Apply reputation decay over time.
 
@@ -345,12 +306,7 @@ class BayesianCredibilityScorer:
         decayed = current_score * decay_factor + 0.5 * (1 - decay_factor)
         return decayed
 
-    def simulate_future_credibility(
-        self,
-        alpha: float,
-        beta: float,
-        num_simulations: int = 1000
-    ) -> Dict[str, Any]:
+    def simulate_future_credibility(self, alpha: float, beta: float, num_simulations: int = 1000) -> Dict[str, Any]:
         """
         Monte Carlo simulation of future credibility.
 
@@ -374,13 +330,14 @@ class BayesianCredibilityScorer:
             "percentile_75": np.percentile(samples, 75),
             "percentile_95": np.percentile(samples, 95),
             "probability_high_credibility": np.mean(samples >= 0.7),
-            "probability_low_credibility": np.mean(samples <= 0.3)
+            "probability_low_credibility": np.mean(samples <= 0.3),
         }
 
 
 # ============================================================================
 # CREDIBILITY AGGREGATION STRATEGIES
 # ============================================================================
+
 
 class CredibilityAggregator:
     """Aggregate credibility signals from multiple sources."""
@@ -391,7 +348,7 @@ class CredibilityAggregator:
         historical_score: float,
         historical_confidence: float,
         newsguard_weight: float = 0.6,
-        history_weight: float = 0.4
+        history_weight: float = 0.4,
     ) -> float:
         """
         Combine NewsGuard score with historical performance.
@@ -414,10 +371,7 @@ class CredibilityAggregator:
         adjusted_ng_weight = newsguard_weight + (1 - historical_confidence) * history_weight / 2
         adjusted_hist_weight = 1 - adjusted_ng_weight
 
-        combined = (
-            ng_normalized * adjusted_ng_weight +
-            historical_score * adjusted_hist_weight
-        )
+        combined = ng_normalized * adjusted_ng_weight + historical_score * adjusted_hist_weight
 
         return np.clip(combined, 0.0, 1.0)
 
@@ -426,7 +380,7 @@ class CredibilityAggregator:
         base_score: float,
         false_content_count: int,
         total_count: int,
-        severity: float = 0.5
+        severity: float = 0.5,
     ) -> float:
         """
         Apply penalty for false content history.
@@ -450,11 +404,7 @@ class CredibilityAggregator:
         return max(penalized, 0.0)
 
     @staticmethod
-    def boost_for_corrections(
-        base_score: float,
-        correction_rate: float,
-        boost_factor: float = 0.1
-    ) -> float:
+    def boost_for_corrections(base_score: float, correction_rate: float, boost_factor: float = 0.1) -> float:
         """
         Boost score for transparent error corrections.
 

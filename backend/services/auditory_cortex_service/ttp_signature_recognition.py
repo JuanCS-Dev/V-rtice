@@ -13,8 +13,8 @@ to provide early warning and intelligence on potential security breaches.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class TTPSignatureRecognition:
@@ -41,14 +41,14 @@ class TTPSignatureRecognition:
         """
         self.current_status = "recognizing_ttp"
         print(f"[TTPSignatureRecognition] Analyzing audio data (size: {len(audio_data)} bytes) for TTP signatures.")
-        await asyncio.sleep(0.4) # Simulate analysis
+        await asyncio.sleep(0.4)  # Simulate analysis
 
         # Simulate TTP detection based on audio content
         ttp_detected = False
         ttp_type = "N/A"
         confidence = 0.0
 
-        if b"malicious_protocol_signature" in audio_data: # Placeholder for actual audio analysis
+        if b"malicious_protocol_signature" in audio_data:  # Placeholder for actual audio analysis
             ttp_detected = True
             ttp_type = "Command and Control (C2) Communication"
             confidence = 0.95
@@ -67,7 +67,11 @@ class TTPSignatureRecognition:
             "ttp_detected": ttp_detected,
             "ttp_type": ttp_type,
             "confidence": confidence,
-            "details": "Specific auditory patterns consistent with known TTPs were identified." if ttp_detected else "No known TTP signatures detected."
+            "details": (
+                "Specific auditory patterns consistent with known TTPs were identified."
+                if ttp_detected
+                else "No known TTP signatures detected."
+            ),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -78,6 +82,6 @@ class TTPSignatureRecognition:
         """
         return {
             "status": self.current_status,
-            "last_detection": self.last_detection_time.isoformat() if self.last_detection_time else "N/A",
-            "total_ttp_incidents_detected": self.ttp_incidents_detected
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
+            "total_ttp_incidents_detected": self.ttp_incidents_detected,
         }

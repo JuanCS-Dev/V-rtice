@@ -1,0 +1,94 @@
+# Prometheus Configuration for MAXIMUS AI 3.0
+# Production-ready monitoring configuration
+#
+# REGRA DE OURO: Zero mocks, real metrics collection
+# Author: Claude Code + JuanCS-Dev
+# Date: 2025-10-06
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    cluster: 'maximus-ai-3.0'
+    environment: 'production'
+    version: '3.0.0'
+
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# Rule files for alerting
+rule_files:
+  - "alert_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # ============================================================
+  # MAXIMUS CORE SERVICE
+  # ============================================================
+  - job_name: 'maximus_core'
+    static_configs:
+      - targets: ['maximus_core:8150']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    params:
+      format: ['prometheus']
+
+  # ============================================================
+  # CONSCIOUSNESS SAFETY PROTOCOL (FASE VII)
+  # ============================================================
+  - job_name: 'consciousness_safety'
+    static_configs:
+      - targets: ['maximus_core:8001']
+    metrics_path: '/api/consciousness/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 3s
+    params:
+      format: ['prometheus']
+
+  # ============================================================
+  # HSAS SERVICE (Skill Learning - FASE 6)
+  # ============================================================
+  - job_name: 'hsas_service'
+    static_configs:
+      - targets: ['hsas_service:8023']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # ============================================================
+  # POSTGRESQL EXPORTER
+  # ============================================================
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 15s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'maximus-postgres'
+
+  # ============================================================
+  # REDIS EXPORTER
+  # ============================================================
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 15s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'maximus-redis'
+
+  # ============================================================
+  # PROMETHEUS SELF-MONITORING
+  # ============================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s

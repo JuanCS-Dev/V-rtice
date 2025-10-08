@@ -1,0 +1,60 @@
+# MAXIMUS AI 3.0 - Production Dockerfile
+# Multi-stage build for optimized image size and security
+
+# ============================================================================
+# Stage 1: Builder
+# ============================================================================
+FROM python:3.11-slim as builder
+
+WORKDIR /build
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# ============================================================================
+# Stage 2: Runtime
+# ============================================================================
+FROM python:3.11-slim
+
+LABEL maintainer="Claude Code + JuanCS-Dev"
+LABEL version="3.0.0"
+LABEL description="MAXIMUS AI 3.0 - Ethical AI for Cybersecurity"
+
+# Create non-root user
+RUN useradd --create-home --uid 1000 --shell /bin/bash maximus
+
+WORKDIR /app
+
+# Copy Python dependencies from builder
+COPY --from=builder --chown=maximus:maximus /root/.local /home/maximus/.local
+
+# Copy application code
+COPY --chown=maximus:maximus . .
+
+# Set PATH for user-installed packages
+ENV PATH=/home/maximus/.local/bin:$PATH
+
+# Create necessary directories
+RUN mkdir -p /app/models /app/logs && \
+    chown -R maximus:maximus /app
+
+# Switch to non-root user
+USER maximus
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8150/health')" || exit 1
+
+# Expose ports
+EXPOSE 8150 9090
+
+# Run application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8150", "--workers", "4"]

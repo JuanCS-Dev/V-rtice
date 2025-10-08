@@ -15,12 +15,12 @@ physically, and maintain stability with a robust sense of its own motion and
 spatial position.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
+from typing import Any, Dict, List
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
 from otolith_organs import OtolithOrgans
 from semicircular_canals import SemicircularCanals
@@ -41,6 +41,7 @@ class MotionDataIngest(BaseModel):
         gyroscope_data (List[float]): [x, y, z] angular velocity values.
         timestamp (str): ISO formatted timestamp of data collection.
     """
+
     sensor_id: str
     accelerometer_data: List[float]
     gyroscope_data: List[float]
@@ -82,7 +83,7 @@ async def ingest_motion_data(request: MotionDataIngest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the processed spatial orientation data.
     """
     print(f"[API] Ingesting motion data from {request.sensor_id}.")
-    
+
     linear_motion = otolith_organs.process_accelerometer_data(request.accelerometer_data)
     angular_motion = semicircular_canals.process_gyroscope_data(request.gyroscope_data)
 
@@ -91,7 +92,7 @@ async def ingest_motion_data(request: MotionDataIngest) -> Dict[str, Any]:
         "pitch": angular_motion.get("pitch_change", 0) * 10,
         "roll": angular_motion.get("roll_change", 0) * 10,
         "yaw": angular_motion.get("yaw_change", 0) * 10,
-        "linear_acceleration": linear_motion.get("linear_acceleration", [0,0,0])
+        "linear_acceleration": linear_motion.get("linear_acceleration", [0, 0, 0]),
     }
 
     return {
@@ -100,7 +101,7 @@ async def ingest_motion_data(request: MotionDataIngest) -> Dict[str, Any]:
         "sensor_id": request.sensor_id,
         "linear_motion_perception": linear_motion,
         "angular_motion_perception": angular_motion,
-        "current_orientation": current_orientation
+        "current_orientation": current_orientation,
     }
 
 
@@ -118,7 +119,7 @@ async def get_current_orientation() -> Dict[str, Any]:
         "current_pitch": 0.5,
         "current_roll": 0.2,
         "current_yaw": 1.0,
-        "linear_acceleration": [0.1, 0.0, 0.0]
+        "linear_acceleration": [0.1, 0.0, 0.0],
     }
 
 

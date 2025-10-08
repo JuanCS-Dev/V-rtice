@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Linters
+.mypy_cache/
+.ruff_cache/
+.pylint.d/
+
+# Build
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Documentation
+*.md
+docs/
+BLUEPRINT*.md
+FASE*.md
+ROADMAP*.md
+STATE_SNAPSHOT*.md
+REFACTORING*.md
+
+# Logs
+*.log
+logs/
+
+# Temporários
+tmp/
+temp/
+*.tmp
+*.bak
+*.old
+
+# Data
+data/
+*.csv
+*.json
+*.parquet
+
+# Models (grandes arquivos)
+models/*.pt
+models/*.pth
+models/*.h5
+models/*.pkl
+
+# Snapshots
+snapshots/
+incident_reports/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile.old
+Dockerfile.*.old
+docker-compose*.yml

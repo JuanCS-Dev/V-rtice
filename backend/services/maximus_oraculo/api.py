@@ -15,17 +15,17 @@ Oraculo Service's advanced foresight capabilities, supporting high-level
 decision-making and long-term planning for the Maximus AI system.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
+from typing import Any, Dict, Optional
 
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from auto_implementer import AutoImplementer
+from code_scanner import CodeScanner
 from oraculo import OraculoEngine
 from suggestion_generator import SuggestionGenerator
-from code_scanner import CodeScanner
-from auto_implementer import AutoImplementer
 
 app = FastAPI(title="Maximus Oraculo Service", version="1.0.0")
 
@@ -44,6 +44,7 @@ class PredictionRequest(BaseModel):
         prediction_type (str): The type of prediction requested (e.g., 'threat_level', 'resource_demand').
         time_horizon (str): The time horizon for the prediction (e.g., '24h', '7d').
     """
+
     data: Dict[str, Any]
     prediction_type: str
     time_horizon: str
@@ -57,6 +58,7 @@ class CodeAnalysisRequest(BaseModel):
         language (str): The programming language of the code.
         analysis_type (str): The type of analysis (e.g., 'vulnerability', 'performance', 'refactoring').
     """
+
     code: str
     language: str
     analysis_type: str
@@ -70,6 +72,7 @@ class ImplementationRequest(BaseModel):
         context (Optional[Dict[str, Any]]): Additional context or existing code.
         target_language (str): The target programming language.
     """
+
     task_description: str
     context: Optional[Dict[str, Any]] = None
     target_language: str
@@ -110,10 +113,16 @@ async def get_prediction(request: PredictionRequest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the prediction results and confidence.
     """
     print(f"[API] Generating {request.prediction_type} prediction for {request.time_horizon}.")
-    prediction_result = await oraculo_engine.generate_prediction(request.data, request.prediction_type, request.time_horizon)
+    prediction_result = await oraculo_engine.generate_prediction(
+        request.data, request.prediction_type, request.time_horizon
+    )
     suggestions = await suggestion_generator.generate_suggestions(prediction_result)
     prediction_result["suggestions"] = suggestions
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "prediction": prediction_result}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "prediction": prediction_result,
+    }
 
 
 @app.post("/analyze_code")
@@ -128,11 +137,17 @@ async def analyze_code_endpoint(request: CodeAnalysisRequest) -> Dict[str, Any]:
     """
     print(f"[API] Analyzing {request.language} code for {request.analysis_type}.")
     analysis_result = await code_scanner.scan_code(request.code, request.language, request.analysis_type)
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "analysis_result": analysis_result}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "analysis_result": analysis_result,
+    }
 
 
 @app.post("/auto_implement")
-async def auto_implement_code_endpoint(request: ImplementationRequest) -> Dict[str, Any]:
+async def auto_implement_code_endpoint(
+    request: ImplementationRequest,
+) -> Dict[str, Any]:
     """Requests automated code implementation based on a task description.
 
     Args:
@@ -142,8 +157,14 @@ async def auto_implement_code_endpoint(request: ImplementationRequest) -> Dict[s
         Dict[str, Any]: A dictionary containing the generated code and implementation details.
     """
     print(f"[API] Requesting auto-implementation for task: {request.task_description}")
-    implementation_result = await auto_implementer.implement_code(request.task_description, request.context, request.target_language)
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "implementation_result": implementation_result}
+    implementation_result = await auto_implementer.implement_code(
+        request.task_description, request.context, request.target_language
+    )
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "implementation_result": implementation_result,
+    }
 
 
 if __name__ == "__main__":

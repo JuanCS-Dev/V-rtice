@@ -12,7 +12,7 @@ and adhere to all legal and ethical guidelines before deployment.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 
 class OffensiveArsenalTools:
@@ -37,12 +37,19 @@ class OffensiveArsenalTools:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "target_host": {"type": "string", "description": "The IP address or hostname to scan."},
-                        "ports": {"type": "array", "items": {"type": "integer"}, "description": "List of ports to scan (e.g., [80, 443, 22])."}
+                        "target_host": {
+                            "type": "string",
+                            "description": "The IP address or hostname to scan.",
+                        },
+                        "ports": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "List of ports to scan (e.g., [80, 443, 22]).",
+                        },
                     },
-                    "required": ["target_host", "ports"]
+                    "required": ["target_host", "ports"],
                 },
-                "method_name": "_port_scan"
+                "method_name": "_port_scan",
             },
             {
                 "name": "vulnerability_check",
@@ -50,20 +57,26 @@ class OffensiveArsenalTools:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "target_host": {"type": "string", "description": "The IP address or hostname to check."},
-                        "service_name": {"type": "string", "description": "Specific service to check (e.g., 'apache', 'nginx')."}
+                        "target_host": {
+                            "type": "string",
+                            "description": "The IP address or hostname to check.",
+                        },
+                        "service_name": {
+                            "type": "string",
+                            "description": "Specific service to check (e.g., 'apache', 'nginx').",
+                        },
                     },
-                    "required": ["target_host"]
+                    "required": ["target_host"],
                 },
-                "method_name": "_vulnerability_check"
-            }
+                "method_name": "_vulnerability_check",
+            },
         ]
 
-    def list_available_tools(self) -> List[Dict[str, Any]]:
+    def list_available_tools(self) -> list[dict[str, Any]]:
         """Returns a list of dictionaries, each describing an available offensive tool."""
         return self.available_tools
 
-    async def execute_tool(self, tool_name: str, tool_args: Dict[str, Any]) -> Any:
+    async def execute_tool(self, tool_name: str, tool_args: dict[str, Any]) -> Any:
         """Executes a specified offensive tool with the given arguments.
 
         Args:
@@ -88,7 +101,7 @@ class OffensiveArsenalTools:
         method = getattr(self, tool_info["method_name"])
         return await method(**tool_args)
 
-    async def _port_scan(self, target_host: str, ports: List[int]) -> Dict[str, Any]:
+    async def _port_scan(self, target_host: str, ports: list[int]) -> dict[str, Any]:
         """Simulates a port scan on the target host for the given ports.
 
         Args:
@@ -99,16 +112,16 @@ class OffensiveArsenalTools:
             Dict[str, Any]: A dictionary with the scan results.
         """
         print(f"[OffensiveArsenal] Simulating port scan on {target_host} for ports {ports}")
-        await asyncio.sleep(1) # Simulate network delay
+        await asyncio.sleep(1)  # Simulate network delay
         results = {"target_host": target_host, "open_ports": [], "closed_ports": []}
         for port in ports:
-            if port % 2 == 0: # Simulate some open/closed ports
+            if port % 2 == 0:  # Simulate some open/closed ports
                 results["open_ports"].append(port)
             else:
                 results["closed_ports"].append(port)
         return results
 
-    async def _vulnerability_check(self, target_host: str, service_name: Optional[str] = None) -> Dict[str, Any]:
+    async def _vulnerability_check(self, target_host: str, service_name: str | None = None) -> dict[str, Any]:
         """Simulates a vulnerability check on the target host.
 
         Args:
@@ -119,10 +132,22 @@ class OffensiveArsenalTools:
             Dict[str, Any]: A dictionary with the vulnerability check results.
         """
         print(f"[OffensiveArsenal] Simulating vulnerability check on {target_host} for service {service_name or 'all'}")
-        await asyncio.sleep(1.5) # Simulate check duration
+        await asyncio.sleep(1.5)  # Simulate check duration
         vulnerabilities = []
         if "example.com" in target_host:
-            vulnerabilities.append({"name": "SQL Injection", "severity": "HIGH", "description": "Potential SQLi in login form."})
+            vulnerabilities.append(
+                {
+                    "name": "SQL Injection",
+                    "severity": "HIGH",
+                    "description": "Potential SQLi in login form.",
+                }
+            )
         if service_name == "apache":
-            vulnerabilities.append({"name": "CVE-2021-XXXX", "severity": "MEDIUM", "description": "Outdated Apache version."})
+            vulnerabilities.append(
+                {
+                    "name": "CVE-2021-XXXX",
+                    "severity": "MEDIUM",
+                    "description": "Outdated Apache version.",
+                }
+            )
         return {"target_host": target_host, "vulnerabilities": vulnerabilities}

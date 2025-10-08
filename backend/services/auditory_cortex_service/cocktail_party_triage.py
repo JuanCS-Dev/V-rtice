@@ -13,8 +13,8 @@ settings.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class CocktailPartyTriage:
@@ -42,14 +42,14 @@ class CocktailPartyTriage:
         """
         self.current_status = "transcribing_speech"
         print(f"[CocktailPartyTriage] Processing audio (size: {len(audio_data)} bytes) for speech in {language}.")
-        await asyncio.sleep(0.7) # Simulate processing time
+        await asyncio.sleep(0.7)  # Simulate processing time
 
         # Simulate speech transcription and speaker identification
         transcript = ""
         speakers = []
         noise_level = 0.0
 
-        if b"human_speech_signature" in audio_data: # Placeholder for actual audio analysis
+        if b"human_speech_signature" in audio_data:  # Placeholder for actual audio analysis
             transcript = "Hello Maximus, we have a situation. Repeat, situation critical."
             speakers.append({"id": "speaker_1", "gender": "male", "confidence": 0.9})
             noise_level = 0.3
@@ -70,7 +70,7 @@ class CocktailPartyTriage:
             "speakers": speakers,
             "noise_level": noise_level,
             "language": language,
-            "clarity_score": 1.0 - noise_level # Simplified clarity score
+            "clarity_score": 1.0 - noise_level,  # Simplified clarity score
         }
 
     async def detect_sound_events(self, audio_data: bytes) -> Dict[str, Any]:
@@ -93,7 +93,7 @@ class CocktailPartyTriage:
 
         return {
             "timestamp": datetime.now().isoformat(),
-            "sound_events": detected_events
+            "sound_events": detected_events,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -104,6 +104,6 @@ class CocktailPartyTriage:
         """
         return {
             "status": self.current_status,
-            "last_triage": self.last_triage_time.isoformat() if self.last_triage_time else "N/A",
-            "total_streams_processed": self.processed_streams
+            "last_triage": (self.last_triage_time.isoformat() if self.last_triage_time else "N/A"),
+            "total_streams_processed": self.processed_streams,
         }

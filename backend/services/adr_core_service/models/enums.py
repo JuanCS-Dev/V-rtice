@@ -19,6 +19,7 @@ from enum import Enum
 
 class IncidentSeverity(str, Enum):
     """Enumeration for the severity levels of security incidents."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -27,6 +28,7 @@ class IncidentSeverity(str, Enum):
 
 class DetectionType(str, Enum):
     """Enumeration for different types of threat detections."""
+
     MALWARE = "malware"
     ANOMALY = "anomaly"
     NETWORK_SCAN = "network_scan"
@@ -38,6 +40,7 @@ class DetectionType(str, Enum):
 
 class ResponseActionType(str, Enum):
     """Enumeration for different types of automated response actions."""
+
     ISOLATE_HOST = "isolate_host"
     BLOCK_IP = "block_ip"
     TERMINATE_PROCESS = "terminate_process"

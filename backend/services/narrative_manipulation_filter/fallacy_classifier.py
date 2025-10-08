@@ -7,18 +7,18 @@ Detects 21 types of logical fallacies using:
 3. Argument structure analysis
 """
 
+import asyncio
 import logging
 import re
-from typing import List, Dict, Tuple, Optional
-import asyncio
+from typing import List, Optional
 
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from models import Fallacy, FallacyType, Argument, ArgumentRole
-from cache_manager import cache_manager, CacheCategory
-from utils import hash_text
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
+from models import Argument, Fallacy, FallacyType
+from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -37,79 +37,108 @@ class FallacyClassifier:
         FallacyType.AD_HOMINEM: {
             "keywords": [
                 r"\bvocê (é|está) (idiota|burro|ignorante)\b",
-                r"\bataque pessoal\b", r"\bcontra a pessoa\b",
-                r"\bdesqualificar\b", r"\binsulto\b"
+                r"\bataque pessoal\b",
+                r"\bcontra a pessoa\b",
+                r"\bdesqualificar\b",
+                r"\binsulto\b",
             ],
-            "phrases": ["você não entende", "típico de", "esperado de alguém como"]
+            "phrases": ["você não entende", "típico de", "esperado de alguém como"],
         },
         FallacyType.STRAW_MAN: {
             "keywords": [
                 r"\bvocê (diz|afirma|defende) que\b.*\b(mas na verdade|porém)\b",
-                r"\bdistorcer\b", r"\bdeturpar\b", r"\bexagerar posição\b"
+                r"\bdistorcer\b",
+                r"\bdeturpar\b",
+                r"\bexagerar posição\b",
             ],
-            "phrases": ["então você está dizendo", "você quer dizer que", "basicamente você defende"]
+            "phrases": [
+                "então você está dizendo",
+                "você quer dizer que",
+                "basicamente você defende",
+            ],
         },
         FallacyType.FALSE_DILEMMA: {
             "keywords": [
-                r"\bou\s+\w+\s+ou\s+\w+\b", r"\bsó (há|existe) (duas|2) opções\b",
-                r"\b(é|são) (isso|aquilo) ou nada\b", r"\bnão há meio termo\b"
+                r"\bou\s+\w+\s+ou\s+\w+\b",
+                r"\bsó (há|existe) (duas|2) opções\b",
+                r"\b(é|são) (isso|aquilo) ou nada\b",
+                r"\bnão há meio termo\b",
             ],
-            "phrases": ["ou você está comigo ou contra mim", "ou aceita ou", "apenas duas escolhas"]
+            "phrases": [
+                "ou você está comigo ou contra mim",
+                "ou aceita ou",
+                "apenas duas escolhas",
+            ],
         },
         FallacyType.SLIPPERY_SLOPE: {
             "keywords": [
                 r"\bse (permitirmos|aceitarmos)\b.*\bentão\b.*\b(em breve|logo|depois)\b",
                 r"\blevar[áa] (inevitavelmente)?\s*(a|à)\b",
-                r"\bcadeia de eventos\b", r"\bconsequências catastróficas\b"
+                r"\bcadeia de eventos\b",
+                r"\bconsequências catastróficas\b",
             ],
-            "phrases": ["se começarmos", "isso vai levar a", "o próximo passo será", "daqui a pouco"]
+            "phrases": [
+                "se começarmos",
+                "isso vai levar a",
+                "o próximo passo será",
+                "daqui a pouco",
+            ],
         },
         FallacyType.APPEAL_TO_AUTHORITY: {
             "keywords": [
                 r"\b(especialistas?|cientistas?|médicos?) (dizem|afirmam)\b",
                 r"\b(segundo|conforme) (dr\.|doutor|professor)\b",
-                r"\bautoridade no assunto\b"
+                r"\bautoridade no assunto\b",
             ],
-            "phrases": ["fulano disse", "especialistas concordam", "a ciência prova"]
+            "phrases": ["fulano disse", "especialistas concordam", "a ciência prova"],
         },
         FallacyType.AD_POPULUM: {
             "keywords": [
                 r"\btod(os|as) (pensam|acreditam|sabem)\b",
-                r"\ba maioria (diz|afirma)\b", r"\bsenso comum\b",
-                r"\b(todo mundo|todos) (fazem|sabem)\b"
+                r"\ba maioria (diz|afirma)\b",
+                r"\bsenso comum\b",
+                r"\b(todo mundo|todos) (fazem|sabem)\b",
             ],
-            "phrases": ["todo mundo sabe", "a maioria concorda", "é óbvio para todos"]
+            "phrases": ["todo mundo sabe", "a maioria concorda", "é óbvio para todos"],
         },
         FallacyType.HASTY_GENERALIZATION: {
             "keywords": [
                 r"\btodos os \w+ (são|estão)\b",
                 r"\bnenhum \w+ (é|está)\b",
                 r"\bsempre\b.*\bnunca\b",
-                r"\bem todos os casos\b"
+                r"\bem todos os casos\b",
             ],
-            "phrases": ["todos são assim", "nenhum é", "sempre foi assim", "nunca muda"]
+            "phrases": [
+                "todos são assim",
+                "nenhum é",
+                "sempre foi assim",
+                "nunca muda",
+            ],
         },
         FallacyType.FALSE_CAUSALITY: {
             "keywords": [
-                r"\bpor causa (de|disso)\b", r"\bdevido a\b",
+                r"\bpor causa (de|disso)\b",
+                r"\bdevido a\b",
                 r"\b(causa|provocou|gerou)\b",
-                r"\bcorrelação (é|implica) causalidade\b"
+                r"\bcorrelação (é|implica) causalidade\b",
             ],
-            "phrases": ["isso causou", "por conta disso", "foi o motivo de"]
+            "phrases": ["isso causou", "por conta disso", "foi o motivo de"],
         },
         FallacyType.CIRCULAR_REASONING: {
             "keywords": [
-                r"\bporque (é|sim)\b", r"\bé verdade porque é\b",
-                r"\bmesma (premissa|conclusão)\b"
+                r"\bporque (é|sim)\b",
+                r"\bé verdade porque é\b",
+                r"\bmesma (premissa|conclusão)\b",
             ],
-            "phrases": ["é assim porque é", "porque sim", "está certo porque está"]
+            "phrases": ["é assim porque é", "porque sim", "está certo porque está"],
         },
         FallacyType.BEGGING_THE_QUESTION: {
             "keywords": [
-                r"\bpressupõe que\b", r"\bassume-se que\b",
-                r"\b(óbvio|evidente) que\b"
+                r"\bpressupõe que\b",
+                r"\bassume-se que\b",
+                r"\b(óbvio|evidente) que\b",
             ],
-            "phrases": ["é óbvio que", "claramente", "naturalmente"]
+            "phrases": ["é óbvio que", "claramente", "naturalmente"],
         },
     }
 
@@ -130,7 +159,7 @@ class FallacyClassifier:
     def __init__(
         self,
         model_name: str = "neuralmind/bert-base-portuguese-cased",
-        device: str = "cpu"
+        device: str = "cpu",
     ):
         """
         Initialize fallacy classifier.
@@ -156,17 +185,14 @@ class FallacyClassifier:
         try:
             logger.info(f"Loading fallacy classifier: {self.model_name}")
 
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                use_fast=True
-            )
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
 
             # Multi-class classification (21 fallacies)
             num_labels = len(FallacyType)
             self.model = AutoModelForSequenceClassification.from_pretrained(
                 self.model_name,
                 num_labels=num_labels,
-                problem_type="single_label_classification"
+                problem_type="single_label_classification",
             )
 
             self.model.to(self.device)
@@ -174,11 +200,7 @@ class FallacyClassifier:
 
             # Quantization
             if self.device == "cpu":
-                self.model = torch.quantization.quantize_dynamic(
-                    self.model,
-                    {torch.nn.Linear},
-                    dtype=torch.qint8
-                )
+                self.model = torch.quantization.quantize_dynamic(self.model, {torch.nn.Linear}, dtype=torch.qint8)
 
             self._initialized = True
             logger.info("✅ Fallacy classifier initialized")
@@ -189,10 +211,7 @@ class FallacyClassifier:
 
     @torch.no_grad()
     def classify_fallacy(
-        self,
-        argument: Argument,
-        min_confidence: float = 0.6,
-        use_cache: bool = True
+        self, argument: Argument, min_confidence: float = 0.6, use_cache: bool = True
     ) -> Optional[Fallacy]:
         """
         Classify fallacy in argument.
@@ -220,13 +239,9 @@ class FallacyClassifier:
                 return Fallacy(**cached) if cached else None
 
         # Tokenize
-        inputs = self.tokenizer(
-            text,
-            return_tensors="pt",
-            truncation=True,
-            max_length=512,
-            padding=True
-        ).to(self.device)
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512, padding=True).to(
+            self.device
+        )
 
         # Forward pass
         outputs = self.model(**inputs)
@@ -251,10 +266,7 @@ class FallacyClassifier:
             description=self._generate_description(fallacy_type, text),
             severity=self._calculate_severity(fallacy_type, confidence),
             evidence=text,
-            counter_argument=self.COUNTER_TEMPLATES.get(
-                fallacy_type,
-                "Este argumento contém uma falácia lógica."
-            )
+            counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Este argumento contém uma falácia lógica."),
         )
 
         # Cache
@@ -265,16 +277,13 @@ class FallacyClassifier:
                     CacheCategory.MODEL_CACHE,
                     cache_key,
                     fallacy.model_dump(),
-                    ttl_override=3600
+                    ttl_override=3600,
                 )
             )
 
         return fallacy
 
-    def detect_fallacies_by_patterns(
-        self,
-        argument: Argument
-    ) -> List[Fallacy]:
+    def detect_fallacies_by_patterns(self, argument: Argument) -> List[Fallacy]:
         """
         Detect fallacies using pattern matching.
 
@@ -290,15 +299,11 @@ class FallacyClassifier:
         for fallacy_type, patterns in self.FALLACY_PATTERNS.items():
             # Check keywords
             keyword_matches = sum(
-                1 for pattern in patterns.get("keywords", [])
-                if re.search(pattern, text_lower, re.IGNORECASE)
+                1 for pattern in patterns.get("keywords", []) if re.search(pattern, text_lower, re.IGNORECASE)
             )
 
             # Check phrases
-            phrase_matches = sum(
-                1 for phrase in patterns.get("phrases", [])
-                if phrase.lower() in text_lower
-            )
+            phrase_matches = sum(1 for phrase in patterns.get("phrases", []) if phrase.lower() in text_lower)
 
             total_matches = keyword_matches + phrase_matches
 
@@ -311,17 +316,14 @@ class FallacyClassifier:
                     description=self._generate_description(fallacy_type, argument.text),
                     severity=self._calculate_severity(fallacy_type, confidence),
                     evidence=argument.text,
-                    counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Falácia detectada.")
+                    counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Falácia detectada."),
                 )
                 fallacies.append(fallacy)
 
         return fallacies
 
     def analyze_argument_for_fallacies(
-        self,
-        argument: Argument,
-        use_ml: bool = True,
-        use_patterns: bool = True
+        self, argument: Argument, use_ml: bool = True, use_patterns: bool = True
     ) -> List[Fallacy]:
         """
         Comprehensive fallacy detection (ML + patterns).
@@ -374,10 +376,7 @@ class FallacyClassifier:
             FallacyType.BEGGING_THE_QUESTION: f"Assume como verdade o que deveria provar: '{text[:100]}...'",
         }
 
-        return descriptions.get(
-            fallacy_type,
-            f"Falácia {fallacy_type.value} detectada: '{text[:100]}...'"
-        )
+        return descriptions.get(fallacy_type, f"Falácia {fallacy_type.value} detectada: '{text[:100]}...'")
 
     @staticmethod
     def _calculate_severity(fallacy_type: FallacyType, confidence: float) -> float:
@@ -410,11 +409,7 @@ class FallacyClassifier:
 
         return min(1.0, severity)
 
-    def batch_classify(
-        self,
-        arguments: List[Argument],
-        batch_size: int = 16
-    ) -> List[Optional[Fallacy]]:
+    def batch_classify(self, arguments: List[Argument], batch_size: int = 16) -> List[Optional[Fallacy]]:
         """
         Batch fallacy classification.
 
@@ -428,7 +423,7 @@ class FallacyClassifier:
         results = []
 
         for i in range(0, len(arguments), batch_size):
-            batch = arguments[i:i + batch_size]
+            batch = arguments[i : i + batch_size]
             texts = [arg.text for arg in batch]
 
             # Tokenize
@@ -437,7 +432,7 @@ class FallacyClassifier:
                 return_tensors="pt",
                 truncation=True,
                 max_length=512,
-                padding=True
+                padding=True,
             ).to(self.device)
 
             # Forward pass
@@ -464,7 +459,7 @@ class FallacyClassifier:
                     description=self._generate_description(fallacy_type, arg.text),
                     severity=self._calculate_severity(fallacy_type, confidence),
                     evidence=arg.text,
-                    counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Falácia detectada.")
+                    counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Falácia detectada."),
                 )
 
                 results.append(fallacy)
@@ -476,6 +471,4 @@ class FallacyClassifier:
 # GLOBAL INSTANCE
 # ============================================================================
 
-fallacy_classifier = FallacyClassifier(
-    device="cuda" if torch.cuda.is_available() else "cpu"
-)
+fallacy_classifier = FallacyClassifier(device="cuda" if torch.cuda.is_available() else "cpu")

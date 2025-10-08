@@ -21,8 +21,8 @@ effectively in complex and dynamic environments.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class StrategicPlanningCore:
@@ -40,7 +40,13 @@ class StrategicPlanningCore:
         self.last_plan_update: Optional[datetime] = None
         self.current_status: str = "idle"
 
-    async def set_objective(self, objective_name: str, description: str, priority: int, target_date: Optional[str] = None):
+    async def set_objective(
+        self,
+        objective_name: str,
+        description: str,
+        priority: int,
+        target_date: Optional[str] = None,
+    ):
         """Sets a new strategic objective for Maximus AI.
 
         Args:
@@ -53,11 +59,13 @@ class StrategicPlanningCore:
             "description": description,
             "priority": priority,
             "target_date": target_date,
-            "set_at": datetime.now().isoformat()
+            "set_at": datetime.now().isoformat(),
         }
         print(f"[StrategicPlanningCore] Strategic objective '{objective_name}' set.")
 
-    async def analyze_scenario(self, scenario_name: str, context: Dict[str, Any], risk_factors: List[str]) -> Dict[str, Any]:
+    async def analyze_scenario(
+        self, scenario_name: str, context: Dict[str, Any], risk_factors: List[str]
+    ) -> Dict[str, Any]:
         """Analyzes a given scenario to evaluate potential outcomes and risks.
 
         Args:
@@ -69,7 +77,7 @@ class StrategicPlanningCore:
             Dict[str, Any]: A dictionary containing the scenario analysis results.
         """
         print(f"[StrategicPlanningCore] Analyzing scenario: {scenario_name}...")
-        await asyncio.sleep(0.5) # Simulate complex analysis
+        await asyncio.sleep(0.5)  # Simulate complex analysis
 
         # Simulate risk assessment and outcome prediction
         risk_score = 0.0
@@ -88,7 +96,9 @@ class StrategicPlanningCore:
             "risk_score": min(1.0, risk_score),
             "potential_outcomes": potential_outcomes,
             "key_risk_factors_evaluated": risk_factors,
-            "recommendations": ["Prioritize defensive measures." if risk_score > 0.5 else "Maintain current operational posture."]
+            "recommendations": [
+                ("Prioritize defensive measures." if risk_score > 0.5 else "Maintain current operational posture.")
+            ],
         }
         return analysis_result
 
@@ -102,7 +112,7 @@ class StrategicPlanningCore:
             Dict[str, Any]: A dictionary representing the generated strategic plan.
         """
         print("[StrategicPlanningCore] Generating strategic plan...")
-        await asyncio.sleep(0.7) # Simulate plan generation
+        await asyncio.sleep(0.7)  # Simulate plan generation
 
         plan_id = f"SP-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         plan_summary = f"Strategic plan to address scenario '{analysis_result.get('scenario_name')}'."
@@ -110,18 +120,42 @@ class StrategicPlanningCore:
 
         # Simulate plan steps based on analysis result
         if analysis_result.get("risk_score", 0) > 0.6:
-            plan_steps.append({"order": 1, "action": "activate_emergency_protocols", "details": "Initiate red-line response."})
-            plan_steps.append({"order": 2, "action": "reallocate_critical_resources", "details": "Shift resources to defense."})
+            plan_steps.append(
+                {
+                    "order": 1,
+                    "action": "activate_emergency_protocols",
+                    "details": "Initiate red-line response.",
+                }
+            )
+            plan_steps.append(
+                {
+                    "order": 2,
+                    "action": "reallocate_critical_resources",
+                    "details": "Shift resources to defense.",
+                }
+            )
         else:
-            plan_steps.append({"order": 1, "action": "optimize_resource_utilization", "details": "Enhance efficiency."})
-            plan_steps.append({"order": 2, "action": "monitor_threat_landscape", "details": "Maintain vigilance."})
+            plan_steps.append(
+                {
+                    "order": 1,
+                    "action": "optimize_resource_utilization",
+                    "details": "Enhance efficiency.",
+                }
+            )
+            plan_steps.append(
+                {
+                    "order": 2,
+                    "action": "monitor_threat_landscape",
+                    "details": "Maintain vigilance.",
+                }
+            )
 
         self.current_strategic_plan = {
             "id": plan_id,
             "summary": plan_summary,
             "objectives_considered": list(self.strategic_objectives.keys()),
             "plan_steps": plan_steps,
-            "generated_at": datetime.now().isoformat()
+            "generated_at": datetime.now().isoformat(),
         }
         self.last_plan_update = datetime.now()
 
@@ -137,5 +171,5 @@ class StrategicPlanningCore:
             "status": self.current_status,
             "active_objectives": self.strategic_objectives,
             "current_plan": self.current_strategic_plan,
-            "last_update": self.last_plan_update.isoformat() if self.last_plan_update else "N/A"
+            "last_update": (self.last_plan_update.isoformat() if self.last_plan_update else "N/A"),
         }

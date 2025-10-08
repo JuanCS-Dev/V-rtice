@@ -5,12 +5,11 @@ Implements multi-tier caching strategy with category-specific TTLs,
 LRU eviction, and async operations for high-performance lookups.
 """
 
-import logging
-import json
 import hashlib
-from typing import Optional, Any, Dict, List
-from datetime import timedelta
+import json
+import logging
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 import redis.asyncio as aioredis
 from redis.asyncio import Redis
@@ -23,13 +22,14 @@ logger = logging.getLogger(__name__)
 
 class CacheCategory(str, Enum):
     """Cache categories with different TTL strategies."""
-    NEWSGUARD = "newsguard"          # 7 days - source credibility rarely changes
-    FACTCHECK = "factcheck"          # 30 days - fact-checks are persistent
-    ANALYSIS = "analysis"            # 7 days - analysis results
-    REPUTATION = "reputation"        # 1 day - dynamic reputation scores
-    ENTITY_LINKING = "entity"        # 14 days - entity disambiguation
+
+    NEWSGUARD = "newsguard"  # 7 days - source credibility rarely changes
+    FACTCHECK = "factcheck"  # 30 days - fact-checks are persistent
+    ANALYSIS = "analysis"  # 7 days - analysis results
+    REPUTATION = "reputation"  # 1 day - dynamic reputation scores
+    ENTITY_LINKING = "entity"  # 14 days - entity disambiguation
     PROPAGANDA_PATTERNS = "propaganda"  # 7 days - learned patterns
-    MODEL_CACHE = "model"            # 1 hour - model inference cache
+    MODEL_CACHE = "model"  # 1 hour - model inference cache
 
 
 class CacheManager:
@@ -115,12 +115,7 @@ class CacheManager:
         }
         return ttl_map.get(category, 3600)  # Default 1 hour
 
-    async def get(
-        self,
-        category: CacheCategory,
-        identifier: str,
-        deserialize: bool = True
-    ) -> Optional[Any]:
+    async def get(self, category: CacheCategory, identifier: str, deserialize: bool = True) -> Optional[Any]:
         """
         Get value from cache.
 
@@ -160,7 +155,7 @@ class CacheManager:
         identifier: str,
         value: Any,
         ttl_override: Optional[int] = None,
-        serialize: bool = True
+        serialize: bool = True,
     ) -> bool:
         """
         Set value in cache with TTL.
@@ -244,7 +239,7 @@ class CacheManager:
         category: CacheCategory,
         identifier: str,
         factory_func,
-        ttl_override: Optional[int] = None
+        ttl_override: Optional[int] = None,
     ) -> Any:
         """
         Get from cache or compute and set (cache-aside pattern).
@@ -272,12 +267,7 @@ class CacheManager:
             logger.error(f"Factory function error for {category}/{identifier}: {e}")
             raise
 
-    async def increment(
-        self,
-        category: CacheCategory,
-        identifier: str,
-        amount: int = 1
-    ) -> int:
+    async def increment(self, category: CacheCategory, identifier: str, amount: int = 1) -> int:
         """
         Increment counter value.
 
@@ -299,11 +289,7 @@ class CacheManager:
             logger.error(f"Redis INCR error: {e}")
             return 0
 
-    async def get_many(
-        self,
-        category: CacheCategory,
-        identifiers: List[str]
-    ) -> Dict[str, Any]:
+    async def get_many(self, category: CacheCategory, identifiers: List[str]) -> Dict[str, Any]:
         """
         Get multiple values in single round-trip.
 
@@ -338,7 +324,7 @@ class CacheManager:
         self,
         category: CacheCategory,
         items: Dict[str, Any],
-        ttl_override: Optional[int] = None
+        ttl_override: Optional[int] = None,
     ) -> bool:
         """
         Set multiple values with pipeline for efficiency.

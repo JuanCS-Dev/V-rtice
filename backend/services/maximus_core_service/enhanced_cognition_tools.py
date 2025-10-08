@@ -6,9 +6,10 @@ and autonomous investigation capabilities.
 NO MOCKS - Production-ready cognitive enhancement.
 """
 
-from typing import Dict, Any, List, Optional
-import aiohttp
 import logging
+from typing import Any
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +39,8 @@ class EnhancedCognitionTools:
         text: str,
         analysis_type: str = "comprehensive",
         detect_bots: bool = True,
-        track_memes: bool = True
-    ) -> Dict[str, Any]:
+        track_memes: bool = True,
+    ) -> dict[str, Any]:
         """Analyze narrative for social engineering, propaganda, bots.
 
         Args:
@@ -52,23 +53,24 @@ class EnhancedCognitionTools:
             Analysis results with social graph, bot detection, propaganda attribution
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.narrative_url}/analyze/narrative",
                     json={
                         "text": text,
                         "analysis_type": analysis_type,
                         "detect_bots": detect_bots,
-                        "track_memes": track_memes
+                        "track_memes": track_memes,
                     },
-                    timeout=aiohttp.ClientTimeout(total=60)
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Narrative analysis failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                    timeout=aiohttp.ClientTimeout(total=60),
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Narrative analysis failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in analyze_narrative: {e}")
@@ -76,11 +78,11 @@ class EnhancedCognitionTools:
 
     async def predict_threats(
         self,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         time_horizon_hours: int = 24,
         min_confidence: float = 0.6,
-        include_vuln_forecast: bool = True
-    ) -> Dict[str, Any]:
+        include_vuln_forecast: bool = True,
+    ) -> dict[str, Any]:
         """Predict future threats using time-series analysis and Bayesian inference.
 
         Args:
@@ -93,23 +95,24 @@ class EnhancedCognitionTools:
             Predicted attacks, vulnerabilities, hunting recommendations
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.predictive_url}/predict/attacks",
                     json={
                         "context": context,
                         "time_horizon_hours": time_horizon_hours,
                         "min_confidence": min_confidence,
-                        "include_vulnerability_forecast": include_vuln_forecast
+                        "include_vulnerability_forecast": include_vuln_forecast,
                     },
-                    timeout=aiohttp.ClientTimeout(total=90)
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Threat prediction failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                    timeout=aiohttp.ClientTimeout(total=90),
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Threat prediction failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in predict_threats: {e}")
@@ -117,9 +120,9 @@ class EnhancedCognitionTools:
 
     async def hunt_proactively(
         self,
-        asset_inventory: Optional[List[str]] = None,
-        threat_intel: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        asset_inventory: list[str] | None = None,
+        threat_intel: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Generate proactive hunting recommendations.
 
         Args:
@@ -130,21 +133,22 @@ class EnhancedCognitionTools:
             Hunting recommendations (asset scans, log reviews, network monitoring)
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.predictive_url}/hunt/recommendations",
                     json={
                         "asset_inventory": asset_inventory or [],
-                        "threat_intel": threat_intel or {}
+                        "threat_intel": threat_intel or {},
                     },
-                    timeout=aiohttp.ClientTimeout(total=60)
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Proactive hunting failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                    timeout=aiohttp.ClientTimeout(total=60),
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Proactive hunting failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in hunt_proactively: {e}")
@@ -155,8 +159,8 @@ class EnhancedCognitionTools:
         incident_id: str,
         playbook: str = "standard",
         enable_actor_profiling: bool = True,
-        enable_campaign_correlation: bool = True
-    ) -> Dict[str, Any]:
+        enable_campaign_correlation: bool = True,
+    ) -> dict[str, Any]:
         """Launch autonomous investigation for incident.
 
         Args:
@@ -169,23 +173,24 @@ class EnhancedCognitionTools:
             Investigation results with evidence, attribution, recommendations
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.investigation_url}/investigate/start",
                     json={
                         "incident_id": incident_id,
                         "playbook": playbook,
                         "enable_actor_profiling": enable_actor_profiling,
-                        "enable_campaign_correlation": enable_campaign_correlation
+                        "enable_campaign_correlation": enable_campaign_correlation,
                     },
-                    timeout=aiohttp.ClientTimeout(total=120)
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Investigation failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                    timeout=aiohttp.ClientTimeout(total=120),
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Investigation failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in investigate_incident: {e}")
@@ -193,10 +198,10 @@ class EnhancedCognitionTools:
 
     async def correlate_campaigns(
         self,
-        incidents: List[str],
+        incidents: list[str],
         time_window_days: int = 30,
-        correlation_threshold: float = 0.6
-    ) -> Dict[str, Any]:
+        correlation_threshold: float = 0.6,
+    ) -> dict[str, Any]:
         """Correlate incidents into attack campaigns.
 
         Args:
@@ -208,28 +213,29 @@ class EnhancedCognitionTools:
             Identified campaigns with correlated incidents
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.investigation_url}/correlate/campaigns",
                     json={
                         "incidents": incidents,
                         "time_window_days": time_window_days,
-                        "correlation_threshold": correlation_threshold
+                        "correlation_threshold": correlation_threshold,
                     },
-                    timeout=aiohttp.ClientTimeout(total=90)
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Campaign correlation failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                    timeout=aiohttp.ClientTimeout(total=90),
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Campaign correlation failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in correlate_campaigns: {e}")
             return {"error": str(e)}
 
-    def list_available_tools(self) -> List[Dict[str, Any]]:
+    def list_available_tools(self) -> list[dict[str, Any]]:
         """List all available Enhanced Cognition tools.
 
         Returns:
@@ -244,8 +250,8 @@ class EnhancedCognitionTools:
                     "text": "Text or social media content to analyze",
                     "analysis_type": "Type of analysis (comprehensive, bots_only, propaganda_only, meme_tracking)",
                     "detect_bots": "Enable bot network detection (bool)",
-                    "track_memes": "Enable meme tracking (bool)"
-                }
+                    "track_memes": "Enable meme tracking (bool)",
+                },
             },
             {
                 "name": "predict_threats",
@@ -255,8 +261,8 @@ class EnhancedCognitionTools:
                     "context": "Context with historical events and current alerts",
                     "time_horizon_hours": "Prediction time horizon (default 24h)",
                     "min_confidence": "Minimum prediction confidence 0-1",
-                    "include_vuln_forecast": "Include vulnerability exploitation forecasting (bool)"
-                }
+                    "include_vuln_forecast": "Include vulnerability exploitation forecasting (bool)",
+                },
             },
             {
                 "name": "hunt_proactively",
@@ -264,8 +270,8 @@ class EnhancedCognitionTools:
                 "description": "Generate proactive threat hunting recommendations based on asset inventory and threat intel",
                 "parameters": {
                     "asset_inventory": "List of assets to focus hunting on",
-                    "threat_intel": "Current threat intelligence context"
-                }
+                    "threat_intel": "Current threat intelligence context",
+                },
             },
             {
                 "name": "investigate_incident",
@@ -275,8 +281,8 @@ class EnhancedCognitionTools:
                     "incident_id": "Incident identifier",
                     "playbook": "Investigation playbook (standard, apt, ransomware, insider)",
                     "enable_actor_profiling": "Enable threat actor profiling (bool)",
-                    "enable_campaign_correlation": "Enable campaign correlation (bool)"
-                }
+                    "enable_campaign_correlation": "Enable campaign correlation (bool)",
+                },
             },
             {
                 "name": "correlate_campaigns",
@@ -285,7 +291,7 @@ class EnhancedCognitionTools:
                 "parameters": {
                     "incidents": "List of incident IDs to correlate",
                     "time_window_days": "Temporal correlation window",
-                    "correlation_threshold": "Minimum similarity for correlation 0-1"
-                }
-            }
+                    "correlation_threshold": "Minimum similarity for correlation 0-1",
+                },
+            },
         ]

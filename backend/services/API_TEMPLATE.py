@@ -11,12 +11,12 @@ INSTRUCTIONS:
 6. Keep /health endpoint as-is
 """
 
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
 
 # TODO: Import your core module here
 # Example: from neutrophil_core import NeutrophilCore
@@ -24,7 +24,7 @@ from datetime import datetime
 app = FastAPI(
     title="Maximus {{SERVICE_NAME}} Service",
     version="1.0.0",
-    description="{{SERVICE_DESCRIPTION}}"
+    description="{{SERVICE_DESCRIPTION}}",
 )
 
 # TODO: Initialize your core component here
@@ -38,6 +38,7 @@ class AnalyzeRequest(BaseModel):
         data (Dict[str, Any]): Input data to analyze.
         context (Optional[Dict[str, Any]]): Optional context information.
     """
+
     data: Dict[str, Any]
     context: Optional[Dict[str, Any]] = None
 
@@ -45,17 +46,17 @@ class AnalyzeRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the service."""
-    print(f"🚀 Starting Maximus {{SERVICE_NAME}} Service...")
+    print("🚀 Starting Maximus {SERVICE_NAME} Service...")
     # TODO: Add any initialization logic here
-    print(f"✅ Maximus {{SERVICE_NAME}} Service started successfully.")
+    print("✅ Maximus {SERVICE_NAME} Service started successfully.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the service."""
-    print(f"👋 Shutting down Maximus {{SERVICE_NAME}} Service...")
+    print("👋 Shutting down Maximus {SERVICE_NAME} Service...")
     # TODO: Add any cleanup logic here
-    print(f"🛑 Maximus {{SERVICE_NAME}} Service shut down.")
+    print("🛑 Maximus {SERVICE_NAME} Service shut down.")
 
 
 @app.get("/health")
@@ -68,7 +69,7 @@ async def health_check() -> Dict[str, str]:
     return {
         "status": "healthy",
         "service": "{{SERVICE_NAME}}",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -85,7 +86,7 @@ async def get_status() -> Dict[str, Any]:
         "status": "operational",
         "uptime": "N/A",
         "metrics": {},
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -106,11 +107,8 @@ async def analyze(request: AnalyzeRequest) -> Dict[str, Any]:
         return {
             "status": "success",
             "service": "{{SERVICE_NAME}}",
-            "results": {
-                "processed": True,
-                "data": request.data
-            },
-            "timestamp": datetime.now().isoformat()
+            "results": {"processed": True, "data": request.data},
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

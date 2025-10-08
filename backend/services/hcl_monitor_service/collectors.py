@@ -14,10 +14,11 @@ Key components within this module are responsible for:
   system health information.
 """
 
-import psutil
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List
+
+import psutil
 
 
 class SystemMetricsCollector:
@@ -45,7 +46,8 @@ class SystemMetricsCollector:
 
     async def start_collection(self):
         """Starts the continuous metric collection loop."""
-        if self.is_collecting: return
+        if self.is_collecting:
+            return
         self.is_collecting = True
         print("[MetricsCollector] Starting metric collection...")
         while self.is_collecting:
@@ -68,8 +70,12 @@ class SystemMetricsCollector:
         memory_percent = memory_info.percent
 
         current_disk_io = psutil.disk_io_counters()
-        disk_read_rate = (current_disk_io.read_bytes - self.last_disk_io.read_bytes) / time_delta if time_delta > 0 else 0
-        disk_write_rate = (current_disk_io.write_bytes - self.last_disk_io.write_bytes) / time_delta if time_delta > 0 else 0
+        disk_read_rate = (
+            (current_disk_io.read_bytes - self.last_disk_io.read_bytes) / time_delta if time_delta > 0 else 0
+        )
+        disk_write_rate = (
+            (current_disk_io.write_bytes - self.last_disk_io.write_bytes) / time_delta if time_delta > 0 else 0
+        )
 
         current_net_io = psutil.net_io_counters()
         net_recv_rate = (current_net_io.bytes_recv - self.last_net_io.bytes_recv) / time_delta if time_delta > 0 else 0
@@ -83,7 +89,7 @@ class SystemMetricsCollector:
         service_status = {
             "maximus_core": "healthy",
             "chemical_sensing": "healthy",
-            "visual_cortex": "degraded" if cpu_percent > 80 else "healthy"
+            "visual_cortex": "degraded" if cpu_percent > 80 else "healthy",
         }
         avg_latency_ms = 50.0 + (cpu_percent / 2)
         error_rate = 0.01 + (cpu_percent / 1000)
@@ -98,7 +104,7 @@ class SystemMetricsCollector:
             "network_io_sent_rate": net_sent_rate,
             "avg_latency_ms": avg_latency_ms,
             "error_rate": error_rate,
-            "service_status": service_status
+            "service_status": service_status,
         }
 
         self.latest_metrics = metrics

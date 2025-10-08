@@ -16,10 +16,8 @@ operations, especially when dealing with websites that employ anti-scraping
 measures, ensuring continuous data collection and operational resilience.
 """
 
-import asyncio
-import random
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 
 class ProxyManager:
@@ -30,7 +28,11 @@ class ProxyManager:
     strategies, and handles proxy failures.
     """
 
-    def __init__(self, proxy_list: Optional[List[str]] = None, rotation_interval_seconds: int = 60):
+    def __init__(
+        self,
+        proxy_list: Optional[List[str]] = None,
+        rotation_interval_seconds: int = 60,
+    ):
         """Initializes the ProxyManager.
 
         Args:
@@ -49,7 +51,8 @@ class ProxyManager:
         Returns:
             Optional[str]: The URL of the active proxy, or None if no proxies are available.
         """
-        if not self.proxies: return None
+        if not self.proxies:
+            return None
 
         if (datetime.now() - self.last_rotation_time) > self.rotation_interval:
             self._rotate_proxy()
@@ -98,9 +101,12 @@ class ProxyManager:
             "total_proxies": len(self.proxies),
             "current_proxy_index": self.current_proxy_index,
             "last_rotation": self.last_rotation_time.isoformat(),
-            "proxy_details": [{
-                "url": p["url"],
-                "last_used": p["last_used"].isoformat() if p["last_used"] else "N/A",
-                "failures": p["failures"]
-            } for p in self.proxies]
+            "proxy_details": [
+                {
+                    "url": p["url"],
+                    "last_used": (p["last_used"].isoformat() if p["last_used"] else "N/A"),
+                    "failures": p["failures"],
+                }
+                for p in self.proxies
+            ],
         }

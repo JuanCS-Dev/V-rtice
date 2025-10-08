@@ -11,15 +11,16 @@ and performance of the Maximus AI system. This service is crucial for providing
 actionable insights to the HCL Planner Service, enabling adaptive self-management.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
 import asyncio
 from datetime import datetime
-import numpy as np
+from typing import Dict, List
 
-from models import SystemMetrics, AnalysisResult, Anomaly, AnomalyType
+import numpy as np
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
 
 app = FastAPI(title="Maximus HCL Analyzer Service", version="1.0.0")
 
@@ -36,6 +37,7 @@ class AnalyzeMetricsRequest(BaseModel):
     Attributes:
         current_metrics (SystemMetrics): The current snapshot of system metrics.
     """
+
     current_metrics: SystemMetrics
 
 
@@ -75,10 +77,10 @@ async def analyze_system_metrics(request: AnalyzeMetricsRequest) -> AnalysisResu
     """
     print(f"[API] Analyzing metrics from {request.current_metrics.timestamp}")
     historical_metrics.append(request.current_metrics)
-    if len(historical_metrics) > 100: # Keep a rolling window of 100 metrics
+    if len(historical_metrics) > 100:  # Keep a rolling window of 100 metrics
         historical_metrics.pop(0)
 
-    await asyncio.sleep(0.1) # Simulate analysis time
+    await asyncio.sleep(0.1)  # Simulate analysis time
 
     anomalies: List[Anomaly] = []
     recommendations: List[str] = []
@@ -91,19 +93,43 @@ async def analyze_system_metrics(request: AnalyzeMetricsRequest) -> AnalysisResu
         mean_cpu = np.mean(cpu_usages[:-1])
         std_cpu = np.std(cpu_usages[:-1])
         if request.current_metrics.cpu_usage > mean_cpu + 2 * std_cpu:
-            anomalies.append(Anomaly(type=AnomalyType.SPIKE, metric_name="cpu_usage", current_value=request.current_metrics.cpu_usage, severity=0.8, description="Sudden spike in CPU usage."))
+            anomalies.append(
+                Anomaly(
+                    type=AnomalyType.SPIKE,
+                    metric_name="cpu_usage",
+                    current_value=request.current_metrics.cpu_usage,
+                    severity=0.8,
+                    description="Sudden spike in CPU usage.",
+                )
+            )
             recommendations.append("Investigate high CPU processes.")
             requires_intervention = True
             overall_health_score -= 0.2
 
     if request.current_metrics.memory_usage > 90:
-        anomalies.append(Anomaly(type=AnomalyType.OUTLIER, metric_name="memory_usage", current_value=request.current_metrics.memory_usage, severity=0.9, description="Memory usage critically high."))
+        anomalies.append(
+            Anomaly(
+                type=AnomalyType.OUTLIER,
+                metric_name="memory_usage",
+                current_value=request.current_metrics.memory_usage,
+                severity=0.9,
+                description="Memory usage critically high.",
+            )
+        )
         recommendations.append("Optimize memory consumption or scale up memory resources.")
         requires_intervention = True
         overall_health_score -= 0.3
 
     if request.current_metrics.error_rate > 0.05:
-        anomalies.append(Anomaly(type=AnomalyType.TREND, metric_name="error_rate", current_value=request.current_metrics.error_rate, severity=0.7, description="Elevated error rate detected."))
+        anomalies.append(
+            Anomaly(
+                type=AnomalyType.TREND,
+                metric_name="error_rate",
+                current_value=request.current_metrics.error_rate,
+                severity=0.7,
+                description="Elevated error rate detected.",
+            )
+        )
         recommendations.append("Review recent logs for service errors.")
         requires_intervention = True
         overall_health_score -= 0.15
@@ -114,10 +140,10 @@ async def analyze_system_metrics(request: AnalyzeMetricsRequest) -> AnalysisResu
         anomalies=anomalies,
         trends={
             "cpu_trend": "stable" if not requires_intervention else "unstable",
-            "memory_trend": "stable" if not requires_intervention else "unstable"
-        }, # Simplified
+            "memory_trend": "stable" if not requires_intervention else "unstable",
+        },  # Simplified
         recommendations=recommendations,
-        requires_intervention=requires_intervention
+        requires_intervention=requires_intervention,
     )
 
 
@@ -132,7 +158,7 @@ async def get_analysis_history(limit: int = 10) -> List[AnalysisResult]:
         List[AnalysisResult]: A list of past analysis results.
     """
     # In a real system, this would query a persistent storage
-    return [] # Mocking empty history for now
+    return []  # Mocking empty history for now
 
 
 if __name__ == "__main__":

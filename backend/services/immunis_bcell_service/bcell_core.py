@@ -24,21 +24,20 @@ Like biological B-cells: Creates antibodies (signatures) and improves them over 
 NO MOCKS - Production-ready implementation.
 """
 
-import asyncio
 import hashlib
 import json
 import logging
 import re
 from collections import Counter
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Set
-import difflib
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 # Kafka for signature publication
 try:
     from kafka import KafkaProducer
+
     KAFKA_AVAILABLE = True
 except ImportError:
     KAFKA_AVAILABLE = False
@@ -57,7 +56,7 @@ class YARASignatureGenerator:
         self,
         malware_family: str,
         iocs: Dict[str, List[str]],
-        yara_base: Optional[str] = None
+        yara_base: Optional[str] = None,
     ) -> str:
         """Generate YARA rule from IOCs.
 
@@ -74,35 +73,35 @@ class YARASignatureGenerator:
         self.signature_versions[malware_family] = version
 
         rule_name = f"{malware_family}_v{version}_{datetime.now().strftime('%Y%m%d')}"
-        rule_name = re.sub(r'[^a-zA-Z0-9_]', '_', rule_name)  # Sanitize
+        rule_name = re.sub(r"[^a-zA-Z0-9_]", "_", rule_name)  # Sanitize
 
         # Build strings section
         strings_section = []
         string_count = 0
 
         # Add unique strings
-        for string in iocs.get('strings', [])[:30]:  # Max 30 strings
+        for string in iocs.get("strings", [])[:30]:  # Max 30 strings
             if len(string) >= 6:  # Minimum length
-                escaped = string.replace('\\', '\\\\').replace('"', '\\"')
+                escaped = string.replace("\\", "\\\\").replace('"', '\\"')
                 strings_section.append(f'        $str{string_count} = "{escaped}" ascii wide')
                 string_count += 1
 
         # Add file hashes
-        for i, file_hash in enumerate(iocs.get('file_hashes', [])[:5]):
+        for i, file_hash in enumerate(iocs.get("file_hashes", [])[:5]):
             if file_hash:
                 strings_section.append(f'        $hash{i} = "{file_hash}"')
 
         # Add mutexes
-        for i, mutex in enumerate(iocs.get('mutexes', [])[:5]):
+        for i, mutex in enumerate(iocs.get("mutexes", [])[:5]):
             if mutex:
-                escaped = mutex.replace('\\', '\\\\').replace('"', '\\"')
+                escaped = mutex.replace("\\", "\\\\").replace('"', '\\"')
                 strings_section.append(f'        $mutex{i} = "{escaped}" ascii wide')
 
         # Add registry keys (patterns)
-        for i, regkey in enumerate(iocs.get('registry_keys', [])[:5]):
+        for i, regkey in enumerate(iocs.get("registry_keys", [])[:5]):
             if regkey:
                 # Extract registry path pattern
-                escaped = regkey.replace('\\', '\\\\').replace('"', '\\"')
+                escaped = regkey.replace("\\", "\\\\").replace('"', '\\"')
                 strings_section.append(f'        $reg{i} = "{escaped}" ascii wide nocase')
 
         # Determine condition based on number of strings
@@ -114,7 +113,7 @@ class YARASignatureGenerator:
             condition = "false  // Insufficient indicators"
 
         # Build YARA rule
-        yara_rule = f'''rule {rule_name} {{
+        yara_rule = f"""rule {rule_name} {{
     meta:
         description = "Auto-evolved YARA signature for {malware_family}"
         author = "Maximus AI B-Cell Service"
@@ -124,21 +123,17 @@ class YARASignatureGenerator:
         affinity_matured = "false"
 
     strings:
-{chr(10).join(strings_section) if strings_section else '        // No strings extracted'}
+{chr(10).join(strings_section) if strings_section else "        // No strings extracted"}
 
     condition:
         {condition}
 }}
-'''
+"""
 
         self.generated_signatures[malware_family] = yara_rule
         return yara_rule
 
-    def refine_signature_from_variants(
-        self,
-        malware_family: str,
-        variant_iocs: List[Dict[str, List[str]]]
-    ) -> str:
+    def refine_signature_from_variants(self, malware_family: str, variant_iocs: List[Dict[str, List[str]]]) -> str:
         """Refine signature by combining multiple variants.
 
         Args:
@@ -156,9 +151,9 @@ class YARASignatureGenerator:
         all_registry_keys = []
 
         for iocs in variant_iocs:
-            all_strings.extend(iocs.get('strings', []))
-            all_mutexes.extend(iocs.get('mutexes', []))
-            all_registry_keys.extend(iocs.get('registry_keys', []))
+            all_strings.extend(iocs.get("strings", []))
+            all_mutexes.extend(iocs.get("mutexes", []))
+            all_registry_keys.extend(iocs.get("registry_keys", []))
 
         # Find common strings (appear in at least 50% of variants)
         string_counts = Counter(all_strings)
@@ -171,10 +166,10 @@ class YARASignatureGenerator:
 
         # Build refined IOCs
         refined_iocs = {
-            'strings': common_strings[:20],  # Top 20
-            'mutexes': common_mutexes[:5],
-            'registry_keys': list(set(all_registry_keys))[:5],
-            'file_hashes': []  # Exclude hashes from refined signature (too specific)
+            "strings": common_strings[:20],  # Top 20
+            "mutexes": common_mutexes[:5],
+            "registry_keys": list(set(all_registry_keys))[:5],
+            "file_hashes": [],  # Exclude hashes from refined signature (too specific)
         }
 
         # Generate refined YARA
@@ -183,7 +178,9 @@ class YARASignatureGenerator:
         # Mark as affinity matured
         yara_rule = yara_rule.replace('affinity_matured = "false"', 'affinity_matured = "true"')
 
-        logger.info(f"Refined signature generated: {len(common_strings)} common strings, {len(common_mutexes)} common mutexes")
+        logger.info(
+            f"Refined signature generated: {len(common_strings)} common strings, {len(common_mutexes)} common mutexes"
+        )
 
         return yara_rule
 
@@ -200,7 +197,7 @@ class AffinityMaturationEngine:
         malware_family: str,
         signature_version: int,
         detection_result: bool,
-        false_positive: bool = False
+        false_positive: bool = False,
     ):
         """Record detection feedback for signature.
 
@@ -214,10 +211,10 @@ class AffinityMaturationEngine:
             self.signature_feedback[malware_family] = []
 
         feedback = {
-            'timestamp': datetime.now().isoformat(),
-            'version': signature_version,
-            'detected': detection_result,
-            'false_positive': false_positive
+            "timestamp": datetime.now().isoformat(),
+            "version": signature_version,
+            "detected": detection_result,
+            "false_positive": false_positive,
         }
 
         self.signature_feedback[malware_family].append(feedback)
@@ -244,7 +241,7 @@ class AffinityMaturationEngine:
 
         # Check false positive rate
         recent_feedback = feedback_list[-min_feedback:]
-        false_positives = sum(1 for f in recent_feedback if f['false_positive'])
+        false_positives = sum(1 for f in recent_feedback if f["false_positive"])
         fp_rate = false_positives / len(recent_feedback)
 
         # Mature if FP rate > 10%
@@ -262,18 +259,18 @@ class AffinityMaturationEngine:
         feedback_list = self.signature_feedback.get(malware_family, [])
 
         if not feedback_list:
-            return {'total_feedback': 0}
+            return {"total_feedback": 0}
 
         total = len(feedback_list)
-        detections = sum(1 for f in feedback_list if f['detected'])
-        false_positives = sum(1 for f in feedback_list if f['false_positive'])
+        detections = sum(1 for f in feedback_list if f["detected"])
+        false_positives = sum(1 for f in feedback_list if f["false_positive"])
 
         return {
-            'total_feedback': total,
-            'detections': detections,
-            'false_positives': false_positives,
-            'detection_rate': detections / total if total > 0 else 0.0,
-            'fp_rate': false_positives / total if total > 0 else 0.0
+            "total_feedback": total,
+            "detections": detections,
+            "false_positives": false_positives,
+            "detection_rate": detections / total if total > 0 else 0.0,
+            "fp_rate": false_positives / total if total > 0 else 0.0,
         }
 
 
@@ -302,7 +299,7 @@ class BCellCore:
             try:
                 self.kafka_producer = KafkaProducer(
                     bootstrap_servers=kafka_bootstrap_servers,
-                    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+                    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
                 )
                 logger.info("Kafka producer initialized for signature publication")
             except Exception as e:
@@ -325,17 +322,17 @@ class BCellCore:
         """
         logger.info(f"B-Cell activated with antigen: {antigen.get('antigen_id', '')[:16]}")
 
-        malware_family = antigen.get('malware_family', 'unknown')
-        iocs = antigen.get('iocs', {})
-        yara_base = antigen.get('yara_signature')
-        correlated_events = antigen.get('correlated_events', [])
+        malware_family = antigen.get("malware_family", "unknown")
+        iocs = antigen.get("iocs", {})
+        yara_base = antigen.get("yara_signature")
+        correlated_events = antigen.get("correlated_events", [])
 
         activation_result = {
-            'timestamp': datetime.now().isoformat(),
-            'antigen_id': antigen.get('antigen_id'),
-            'malware_family': malware_family,
-            'signature_generated': False,
-            'affinity_matured': False
+            "timestamp": datetime.now().isoformat(),
+            "antigen_id": antigen.get("antigen_id"),
+            "malware_family": malware_family,
+            "signature_generated": False,
+            "affinity_matured": False,
         }
 
         # 1. Check if affinity maturation needed
@@ -349,30 +346,26 @@ class BCellCore:
                 variant_iocs.append({})  # Placeholder
 
             # Generate refined signature
-            yara_signature = self.yara_generator.refine_signature_from_variants(
-                malware_family, variant_iocs
-            )
+            yara_signature = self.yara_generator.refine_signature_from_variants(malware_family, variant_iocs)
 
-            activation_result['affinity_matured'] = True
+            activation_result["affinity_matured"] = True
 
         else:
             # 2. Generate new signature
-            yara_signature = self.yara_generator.generate_yara_from_iocs(
-                malware_family, iocs, yara_base
-            )
+            yara_signature = self.yara_generator.generate_yara_from_iocs(malware_family, iocs, yara_base)
 
-        activation_result['signature_generated'] = True
-        activation_result['yara_signature'] = yara_signature
-        activation_result['signature_version'] = self.yara_generator.signature_versions.get(malware_family, 1)
+        activation_result["signature_generated"] = True
+        activation_result["yara_signature"] = yara_signature
+        activation_result["signature_version"] = self.yara_generator.signature_versions.get(malware_family, 1)
 
         # 3. Store in memory
         memory_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'malware_family': malware_family,
-            'antigen_id': antigen.get('antigen_id'),
-            'signature_version': activation_result['signature_version'],
-            'yara_signature': yara_signature,
-            'affinity_matured': activation_result['affinity_matured']
+            "timestamp": datetime.now().isoformat(),
+            "malware_family": malware_family,
+            "antigen_id": antigen.get("antigen_id"),
+            "signature_version": activation_result["signature_version"],
+            "yara_signature": yara_signature,
+            "affinity_matured": activation_result["affinity_matured"],
         }
 
         self.signature_memory.append(memory_entry)
@@ -381,7 +374,7 @@ class BCellCore:
 
         # 4. Publish signature via Kafka
         publication_result = await self.publish_signature(memory_entry)
-        activation_result['publication'] = publication_result
+        activation_result["publication"] = publication_result
 
         logger.info(
             f"B-Cell activation complete: signature_v{activation_result['signature_version']}, "
@@ -399,47 +392,49 @@ class BCellCore:
         Returns:
             Publication result
         """
-        logger.info(f"Publishing signature: {signature_entry['malware_family']} v{signature_entry['signature_version']}")
+        logger.info(
+            f"Publishing signature: {signature_entry['malware_family']} v{signature_entry['signature_version']}"
+        )
 
         if not self.kafka_producer:
             logger.warning("Kafka unavailable - signature publication skipped")
-            return {'status': 'kafka_unavailable'}
+            return {"status": "kafka_unavailable"}
 
         try:
             publication_payload = {
-                'signature_id': hashlib.sha256(
-                    (signature_entry['malware_family'] + str(signature_entry['signature_version'])).encode()
+                "signature_id": hashlib.sha256(
+                    (signature_entry["malware_family"] + str(signature_entry["signature_version"])).encode()
                 ).hexdigest()[:16],
-                'timestamp': datetime.now().isoformat(),
-                'malware_family': signature_entry['malware_family'],
-                'version': signature_entry['signature_version'],
-                'yara_signature': signature_entry['yara_signature'],
-                'affinity_matured': signature_entry['affinity_matured'],
-                'source': 'bcell_service'
+                "timestamp": datetime.now().isoformat(),
+                "malware_family": signature_entry["malware_family"],
+                "version": signature_entry["signature_version"],
+                "yara_signature": signature_entry["yara_signature"],
+                "affinity_matured": signature_entry["affinity_matured"],
+                "source": "bcell_service",
             }
 
             # Send to Kafka topic 'signature.updates'
-            future = self.kafka_producer.send('signature.updates', value=publication_payload)
+            future = self.kafka_producer.send("signature.updates", value=publication_payload)
             result = future.get(timeout=10)
 
             logger.info(f"Signature published to Kafka: partition={result.partition}, offset={result.offset}")
 
             return {
-                'status': 'published',
-                'kafka_partition': result.partition,
-                'kafka_offset': result.offset
+                "status": "published",
+                "kafka_partition": result.partition,
+                "kafka_offset": result.offset,
             }
 
         except Exception as e:
             logger.error(f"Signature publication failed: {e}")
-            return {'status': 'failed', 'error': str(e)}
+            return {"status": "failed", "error": str(e)}
 
     async def record_detection_feedback(
         self,
         malware_family: str,
         signature_version: int,
         detected: bool,
-        false_positive: bool = False
+        false_positive: bool = False,
     ) -> Dict[str, Any]:
         """Record feedback for signature detection.
 
@@ -452,18 +447,16 @@ class BCellCore:
         Returns:
             Feedback confirmation
         """
-        self.affinity_engine.record_feedback(
-            malware_family, signature_version, detected, false_positive
-        )
+        self.affinity_engine.record_feedback(malware_family, signature_version, detected, false_positive)
 
         # Check if maturation needed
         should_mature = self.affinity_engine.should_mature(malware_family)
         stats = self.affinity_engine.get_maturation_stats(malware_family)
 
         return {
-            'feedback_recorded': True,
-            'should_mature': should_mature,
-            'stats': stats
+            "feedback_recorded": True,
+            "should_mature": should_mature,
+            "stats": stats,
         }
 
     async def get_signature(self, malware_family: str) -> Optional[Dict[str, Any]]:
@@ -477,7 +470,7 @@ class BCellCore:
         """
         # Search in reverse (latest first)
         for entry in reversed(self.signature_memory):
-            if entry['malware_family'] == malware_family:
+            if entry["malware_family"] == malware_family:
                 return entry
 
         return None
@@ -489,11 +482,11 @@ class BCellCore:
             Service status dictionary
         """
         return {
-            'status': 'operational',
-            'signatures_generated': len(self.signature_memory),
-            'activations_count': len(self.activation_history),
-            'unique_families': len(set(e['malware_family'] for e in self.signature_memory)),
-            'last_signature': self.last_signature_time.isoformat() if self.last_signature_time else 'N/A',
-            'kafka_enabled': self.kafka_producer is not None,
-            'affinity_maturation_enabled': True
+            "status": "operational",
+            "signatures_generated": len(self.signature_memory),
+            "activations_count": len(self.activation_history),
+            "unique_families": len(set(e["malware_family"] for e in self.signature_memory)),
+            "last_signature": (self.last_signature_time.isoformat() if self.last_signature_time else "N/A"),
+            "kafka_enabled": self.kafka_producer is not None,
+            "affinity_maturation_enabled": True,
         }

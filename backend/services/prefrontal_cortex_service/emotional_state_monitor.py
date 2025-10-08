@@ -17,8 +17,8 @@ decisions in complex, real-world scenarios.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class EmotionalStateMonitor:
@@ -36,7 +36,7 @@ class EmotionalStateMonitor:
             "curiosity": 0.5,
             "frustration": 0.0,
             "confidence": 0.7,
-            "mood": 0.5 # -1.0 (negative) to 1.0 (positive)
+            "mood": 0.5,  # -1.0 (negative) to 1.0 (positive)
         }
         self.last_update_time: Optional[datetime] = None
         self.current_status: str = "monitoring_emotions"
@@ -49,14 +49,14 @@ class EmotionalStateMonitor:
             context (Optional[Dict[str, Any]]): External contextual cues (e.g., threat level, task success).
         """
         print(f"[EmotionalStateMonitor] Updating emotional state based on telemetry: {telemetry}")
-        await asyncio.sleep(0.05) # Simulate processing
+        await asyncio.sleep(0.05)  # Simulate processing
 
         # Simulate emotional state changes based on telemetry and context
         if telemetry.get("error_rate", 0) > 0.1:
             self.current_emotional_state["stress"] = min(1.0, self.current_emotional_state["stress"] + 0.1)
             self.current_emotional_state["frustration"] = min(1.0, self.current_emotional_state["frustration"] + 0.05)
             self.current_emotional_state["mood"] = max(-1.0, self.current_emotional_state["mood"] - 0.1)
-        
+
         if context and context.get("threat_level") == "high":
             self.current_emotional_state["stress"] = min(1.0, self.current_emotional_state["stress"] + 0.2)
             self.current_emotional_state["mood"] = max(-1.0, self.current_emotional_state["mood"] - 0.2)
@@ -77,7 +77,7 @@ class EmotionalStateMonitor:
         return {
             "status": self.current_status,
             "emotional_state": self.current_emotional_state,
-            "last_update": self.last_update_time.isoformat() if self.last_update_time else "N/A"
+            "last_update": (self.last_update_time.isoformat() if self.last_update_time else "N/A"),
         }
 
     def adjust_emotional_parameter(self, parameter: str, value: float):
@@ -86,7 +86,7 @@ class EmotionalStateMonitor:
         Args:
             parameter (str): The emotional parameter to adjust (e.g., 'stress', 'confidence').
             value (float): The new value for the parameter.
-        
+
         Raises:
             ValueError: If the parameter is unknown or value is out of range.
         """

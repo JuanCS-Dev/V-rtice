@@ -15,7 +15,6 @@ Date: 2025-10-06
 from datetime import datetime, timedelta
 
 from .base import (
-    DecisionType,
     ERBMemberRole,
     GovernanceConfig,
     PolicySeverity,
@@ -23,7 +22,6 @@ from .base import (
     WhistleblowerReport,
 )
 from .ethics_review_board import ERBManager
-from .policies import PolicyRegistry
 from .policy_engine import PolicyEngine
 
 
@@ -55,7 +53,9 @@ def example_1_erb_meeting_decision():
     ]
 
     for name, email, role, expertise in members:
-        result = erb.add_member(name, email, role, "VÉRTICE" if role != ERBMemberRole.EXTERNAL_ADVISOR else "External", expertise)
+        result = erb.add_member(
+            name, email, role, "VÉRTICE" if role != ERBMemberRole.EXTERNAL_ADVISOR else "External", expertise
+        )
         print(f"   ✓ Added: {name} ({role.value})")
 
     # Step 2: Schedule meeting

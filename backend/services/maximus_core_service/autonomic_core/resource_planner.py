@@ -10,15 +10,16 @@ steps for the Resource Executor, ensuring the AI's operational efficiency and
 responsiveness.
 """
 
-import numpy as np
-from typing import Dict, Any, Optional, List
 from datetime import datetime
-from pydantic import BaseModel
 from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel
 
 
 class ActionType(str, Enum):
     """Enumeration for different types of resource management actions."""
+
     SCALE_UP = "scale_up"
     SCALE_DOWN = "scale_down"
     OPTIMIZE_MEMORY = "optimize_memory"
@@ -36,9 +37,10 @@ class ResourcePlan(BaseModel):
             aggressiveness of the plan.
         reasoning (str): A human-readable explanation of the plan's rationale.
     """
+
     timestamp: str
     target_mode: str
-    actions: List[ActionType]
+    actions: list[ActionType]
     action_intensity: float
     reasoning: str
 
@@ -54,7 +56,7 @@ class ResourcePlanner:
         """Initializes the ResourcePlanner and its fuzzy logic system."""
         pass
 
-    async def create_plan(self, current_state: Any, analysis: Any, current_mode: Any) -> Optional[ResourcePlan]:
+    async def create_plan(self, current_state: Any, analysis: Any, current_mode: Any) -> ResourcePlan | None:
         """Creates a resource plan based on current system state and analysis.
 
         Args:
@@ -72,6 +74,6 @@ class ResourcePlanner:
                 target_mode="BALANCED",
                 actions=[ActionType.SCALE_UP],
                 action_intensity=0.7,
-                reasoning="High CPU usage detected, scaling up workers."
+                reasoning="High CPU usage detected, scaling up workers.",
             )
         return None

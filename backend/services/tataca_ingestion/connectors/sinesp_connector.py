@@ -5,17 +5,13 @@ de Segurança Pública) service.
 """
 
 import logging
-from typing import List, Dict, Any, Optional
-import httpx
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from models import (
-    Veiculo,
-    Ocorrencia,
-    SinespVehicleResponse,
-    DataSource
-)
+import httpx
+
 from config import get_settings
+from models import DataSource, Ocorrencia, SinespVehicleResponse, Veiculo
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -41,10 +37,7 @@ class SinespConnector:
 
     async def __aenter__(self):
         """Async context manager entry."""
-        self._client = httpx.AsyncClient(
-            base_url=self.base_url,
-            timeout=self.timeout
-        )
+        self._client = httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -90,10 +83,7 @@ class SinespConnector:
             logger.error(f"Error fetching vehicle {placa}: {e}", exc_info=True)
             raise
 
-    async def fetch_vehicles_batch(
-        self,
-        placas: List[str]
-    ) -> List[Veiculo]:
+    async def fetch_vehicles_batch(self, placas: List[str]) -> List[Veiculo]:
         """
         Fetch multiple vehicles in batch.
 
@@ -117,10 +107,7 @@ class SinespConnector:
         logger.info(f"Fetched {len(veiculos)} vehicles out of {len(placas)} plates")
         return veiculos
 
-    async def fetch_occurrences(
-        self,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> List[Ocorrencia]:
+    async def fetch_occurrences(self, filters: Optional[Dict[str, Any]] = None) -> List[Ocorrencia]:
         """
         Fetch occurrences (criminal reports) from SINESP.
 
@@ -170,8 +157,8 @@ class SinespConnector:
                         status=item.get("status"),
                         metadata={
                             "source": DataSource.SINESP,
-                            "fetched_at": datetime.utcnow().isoformat()
-                        }
+                            "fetched_at": datetime.utcnow().isoformat(),
+                        },
                     )
                     ocorrencias.append(ocorrencia)
                 except Exception as e:

@@ -1,0 +1,5 @@
+[PASS] get pods
+[PASS] get pods (all-ns)
+[PASS] get pods (json)
+[FAIL] apply
+[FAIL] scale

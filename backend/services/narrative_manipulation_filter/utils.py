@@ -5,13 +5,13 @@ Collection of helper functions for text processing, hashing,
 URL parsing, similarity computation, and adversarial robustness.
 """
 
-import re
 import hashlib
 import logging
-from typing import List, Tuple, Dict, Optional, Set
-from urllib.parse import urlparse, urlunparse
-from datetime import datetime, timedelta
+import re
 import string
+from datetime import datetime
+from typing import List, Optional, Set, Tuple
+from urllib.parse import urlparse, urlunparse
 
 import numpy as np
 from scipy.spatial.distance import cosine
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # TEXT PROCESSING
 # ============================================================================
+
 
 def clean_text(text: str) -> str:
     """
@@ -34,14 +35,14 @@ def clean_text(text: str) -> str:
         Cleaned text
     """
     # Remove excessive whitespace
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
 
     # Remove zero-width characters (potential steganography)
-    text = re.sub(r'[\u200b-\u200f\u202a-\u202e\ufeff]', '', text)
+    text = re.sub(r"[\u200b-\u200f\u202a-\u202e\ufeff]", "", text)
 
     # Normalize quotes
-    text = text.replace('\u201c', '"').replace('\u201d', '"')
-    text = text.replace('\u2018', "'").replace('\u2019', "'")
+    text = text.replace("\u201c", '"').replace("\u201d", '"')
+    text = text.replace("\u2018", "'").replace("\u2019", "'")
 
     # Strip leading/trailing whitespace
     text = text.strip()
@@ -60,7 +61,7 @@ def extract_sentences(text: str) -> List[str]:
         List of sentences
     """
     # Simple sentence splitting (production should use spaCy/NLTK)
-    pattern = r'(?<=[.!?])\s+(?=[A-Z])'
+    pattern = r"(?<=[.!?])\s+(?=[A-Z])"
     sentences = re.split(pattern, text)
     return [s.strip() for s in sentences if s.strip()]
 
@@ -108,7 +109,9 @@ def extract_urls(text: str) -> List[str]:
     Returns:
         List of URLs
     """
-    url_pattern = r'https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&/=]*)'
+    url_pattern = (
+        r"https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&/=]*)"
+    )
     return re.findall(url_pattern, text)
 
 
@@ -126,7 +129,7 @@ def extract_domain(url: str) -> Optional[str]:
         parsed = urlparse(url)
         domain = parsed.netloc or parsed.path
         # Remove www. prefix
-        domain = re.sub(r'^www\.', '', domain)
+        domain = re.sub(r"^www\.", "", domain)
         return domain.lower()
     except Exception as e:
         logger.error(f"Failed to extract domain from {url}: {e}")
@@ -146,14 +149,16 @@ def normalize_url(url: str) -> str:
     try:
         parsed = urlparse(url)
         # Remove trailing slashes, fragments, and query params
-        normalized = urlunparse((
-            parsed.scheme.lower(),
-            parsed.netloc.lower(),
-            parsed.path.rstrip('/'),
-            '',  # params
-            '',  # query
-            ''   # fragment
-        ))
+        normalized = urlunparse(
+            (
+                parsed.scheme.lower(),
+                parsed.netloc.lower(),
+                parsed.path.rstrip("/"),
+                "",  # params
+                "",  # query
+                "",  # fragment
+            )
+        )
         return normalized
     except Exception:
         return url.lower()
@@ -163,7 +168,8 @@ def normalize_url(url: str) -> str:
 # HASHING & FINGERPRINTING
 # ============================================================================
 
-def hash_text(text: str, algorithm: str = 'sha256') -> str:
+
+def hash_text(text: str, algorithm: str = "sha256") -> str:
     """
     Generate cryptographic hash of text.
 
@@ -174,12 +180,12 @@ def hash_text(text: str, algorithm: str = 'sha256') -> str:
     Returns:
         Hex digest string
     """
-    if algorithm == 'sha256':
-        return hashlib.sha256(text.encode('utf-8')).hexdigest()
-    elif algorithm == 'md5':
-        return hashlib.md5(text.encode('utf-8')).hexdigest()
-    elif algorithm == 'sha1':
-        return hashlib.sha1(text.encode('utf-8')).hexdigest()
+    if algorithm == "sha256":
+        return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    elif algorithm == "md5":
+        return hashlib.md5(text.encode("utf-8")).hexdigest()
+    elif algorithm == "sha1":
+        return hashlib.sha1(text.encode("utf-8")).hexdigest()
     else:
         raise ValueError(f"Unsupported hash algorithm: {algorithm}")
 
@@ -202,7 +208,7 @@ def minhash_fingerprint(text: str, num_hashes: int = 128) -> List[int]:
 
     signature = []
     for i in range(num_hashes):
-        min_hash = float('inf')
+        min_hash = float("inf")
         for word in words:
             # Combine word with seed
             hash_val = int(hashlib.md5(f"{word}_{i}".encode()).hexdigest(), 16)
@@ -255,6 +261,7 @@ def minhash_jaccard_estimate(sig1: List[int], sig2: List[int]) -> float:
 # SIMILARITY & EMBEDDINGS
 # ============================================================================
 
+
 def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     """
     Calculate cosine similarity between two vectors.
@@ -280,9 +287,7 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
 
 
 def semantic_similarity_batch(
-    query_embedding: np.ndarray,
-    candidate_embeddings: np.ndarray,
-    top_k: int = 5
+    query_embedding: np.ndarray, candidate_embeddings: np.ndarray, top_k: int = 5
 ) -> List[Tuple[int, float]]:
     """
     Find top-k most similar embeddings using cosine similarity.
@@ -309,6 +314,7 @@ def semantic_similarity_batch(
 # ADVERSARIAL ROBUSTNESS
 # ============================================================================
 
+
 def detect_homoglyph_attack(text: str) -> Tuple[bool, List[str]]:
     """
     Detect potential homoglyph/lookalike character attacks.
@@ -324,12 +330,12 @@ def detect_homoglyph_attack(text: str) -> Tuple[bool, List[str]]:
 
     # Cyrillic lookalikes
     cyrillic_homoglyphs = {
-        '\u0430': 'a',  # Cyrillic 'a'
-        '\u0435': 'e',  # Cyrillic 'e'
-        '\u043e': 'o',  # Cyrillic 'o'
-        '\u0440': 'p',  # Cyrillic 'p'
-        '\u0441': 'c',  # Cyrillic 'c'
-        '\u0445': 'x',  # Cyrillic 'x'
+        "\u0430": "a",  # Cyrillic 'a'
+        "\u0435": "e",  # Cyrillic 'e'
+        "\u043e": "o",  # Cyrillic 'o'
+        "\u0440": "p",  # Cyrillic 'p'
+        "\u0441": "c",  # Cyrillic 'c'
+        "\u0445": "x",  # Cyrillic 'x'
     }
 
     for char in text:
@@ -337,18 +343,14 @@ def detect_homoglyph_attack(text: str) -> Tuple[bool, List[str]]:
             suspicious_chars.append(f"{char} (looks like {cyrillic_homoglyphs[char]})")
 
     # Check for mixed scripts (suspicious)
-    has_latin = any('\u0041' <= c <= '\u005A' or '\u0061' <= c <= '\u007A' for c in text)
-    has_cyrillic = any('\u0400' <= c <= '\u04FF' for c in text)
+    has_latin = any("\u0041" <= c <= "\u005a" or "\u0061" <= c <= "\u007a" for c in text)
+    has_cyrillic = any("\u0400" <= c <= "\u04ff" for c in text)
 
     is_suspicious = len(suspicious_chars) > 0 or (has_latin and has_cyrillic)
     return is_suspicious, suspicious_chars
 
 
-def add_adversarial_noise(
-    text: str,
-    perturbation_type: str = 'char_swap',
-    intensity: float = 0.05
-) -> str:
+def add_adversarial_noise(text: str, perturbation_type: str = "char_swap", intensity: float = 0.05) -> str:
     """
     Add adversarial perturbations for robustness testing.
 
@@ -371,21 +373,21 @@ def add_adversarial_noise(
 
         idx = random.randint(0, len(chars) - 1)
 
-        if perturbation_type == 'char_swap' and idx < len(chars) - 1:
+        if perturbation_type == "char_swap" and idx < len(chars) - 1:
             chars[idx], chars[idx + 1] = chars[idx + 1], chars[idx]
-        elif perturbation_type == 'char_delete':
+        elif perturbation_type == "char_delete":
             chars.pop(idx)
-        elif perturbation_type == 'char_insert':
+        elif perturbation_type == "char_insert":
             chars.insert(idx, random.choice(string.ascii_lowercase))
 
-    return ''.join(chars)
+    return "".join(chars)
 
 
 def randomized_smoothing_predict(
     base_text: str,
     prediction_func,
     num_samples: int = 100,
-    noise_intensity: float = 0.02
+    noise_intensity: float = 0.02,
 ) -> Tuple[str, float]:
     """
     Certified adversarial robustness via randomized smoothing.
@@ -402,12 +404,13 @@ def randomized_smoothing_predict(
     predictions = []
 
     for _ in range(num_samples):
-        noisy_text = add_adversarial_noise(base_text, 'char_swap', noise_intensity)
+        noisy_text = add_adversarial_noise(base_text, "char_swap", noise_intensity)
         pred = prediction_func(noisy_text)
         predictions.append(pred)
 
     # Majority vote
     from collections import Counter
+
     vote_counts = Counter(predictions)
     most_common = vote_counts.most_common(1)[0]
 
@@ -420,6 +423,7 @@ def randomized_smoothing_predict(
 # ============================================================================
 # TEMPORAL & STATISTICAL UTILS
 # ============================================================================
+
 
 def exponential_decay_weight(timestamp: datetime, half_life_days: int = 30) -> float:
     """
@@ -438,11 +442,7 @@ def exponential_decay_weight(timestamp: datetime, half_life_days: int = 30) -> f
     return weight
 
 
-def bayesian_update(
-    prior: float,
-    likelihood_true: float,
-    likelihood_false: float
-) -> float:
+def bayesian_update(prior: float, likelihood_true: float, likelihood_false: float) -> float:
     """
     Bayesian belief update.
 
@@ -473,11 +473,7 @@ def beta_distribution_credibility(alpha: float, beta: float) -> float:
     return alpha / (alpha + beta)
 
 
-def wilson_score_interval(
-    successes: int,
-    total: int,
-    confidence: float = 0.95
-) -> Tuple[float, float]:
+def wilson_score_interval(successes: int, total: int, confidence: float = 0.95) -> Tuple[float, float]:
     """
     Calculate Wilson score confidence interval.
 
@@ -513,6 +509,7 @@ def wilson_score_interval(
 # VALIDATION & SANITIZATION
 # ============================================================================
 
+
 def validate_url(url: str) -> bool:
     """
     Validate URL format.
@@ -541,14 +538,14 @@ def sanitize_for_sparql(text: str) -> str:
         Sanitized text
     """
     # Escape special SPARQL characters
-    text = text.replace('\\', '\\\\')
+    text = text.replace("\\", "\\\\")
     text = text.replace('"', '\\"')
-    text = text.replace('\n', '\\n')
-    text = text.replace('\r', '\\r')
+    text = text.replace("\n", "\\n")
+    text = text.replace("\r", "\\r")
     return text
 
 
-def truncate_text(text: str, max_length: int = 500, suffix: str = '...') -> str:
+def truncate_text(text: str, max_length: int = 500, suffix: str = "...") -> str:
     """
     Truncate text to maximum length.
 
@@ -562,12 +559,13 @@ def truncate_text(text: str, max_length: int = 500, suffix: str = '...') -> str:
     """
     if len(text) <= max_length:
         return text
-    return text[:max_length - len(suffix)] + suffix
+    return text[: max_length - len(suffix)] + suffix
 
 
 # ============================================================================
 # LOGGING & DEBUGGING
 # ============================================================================
+
 
 def log_execution_time(func):
     """
@@ -598,6 +596,7 @@ def log_execution_time(func):
         return result
 
     import asyncio
+
     if asyncio.iscoroutinefunction(func):
         return async_wrapper
     else:

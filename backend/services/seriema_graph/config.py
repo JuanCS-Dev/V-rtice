@@ -3,9 +3,8 @@
 Simple configuration module for the Seriema Graph service.
 """
 
-import os
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):

@@ -13,18 +13,13 @@ Key Features:
 
 import logging
 import time
-import numpy as np
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass
 import uuid
+from dataclasses import dataclass
+from typing import Any
 
-from .base import (
-    ExplainerBase,
-    ExplanationResult,
-    ExplanationType,
-    DetailLevel,
-    FeatureImportance
-)
+import numpy as np
+
+from .base import DetailLevel, ExplainerBase, ExplanationResult, ExplanationType, FeatureImportance
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +36,8 @@ class CounterfactualConfig:
         sparsity_weight: Weight for sparsity objective (prefer fewer changes)
         validity_weight: Weight for validity objective (valid cybersec values)
     """
-    desired_outcome: Optional[Any] = None
+
+    desired_outcome: Any | None = None
     max_iterations: int = 1000
     num_candidates: int = 10
     proximity_weight: float = 1.0
@@ -56,7 +52,7 @@ class CounterfactualGenerator(ExplainerBase):
     helping operators understand decision boundaries and actionable interventions.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize CounterfactualGenerator.
 
         Args:
@@ -64,14 +60,17 @@ class CounterfactualGenerator(ExplainerBase):
         """
         super().__init__(config)
 
+        # Use self.config from base class (guaranteed to be dict, not None)
+        cfg = self.config
+
         # Counterfactual configuration
         self.cf_config = CounterfactualConfig(
-            desired_outcome=config.get('desired_outcome', None),
-            max_iterations=config.get('max_iterations', 1000),
-            num_candidates=config.get('num_candidates', 10),
-            proximity_weight=config.get('proximity_weight', 1.0),
-            sparsity_weight=config.get('sparsity_weight', 0.5),
-            validity_weight=config.get('validity_weight', 0.3)
+            desired_outcome=cfg.get("desired_outcome", None),
+            max_iterations=cfg.get("max_iterations", 1000),
+            num_candidates=cfg.get("num_candidates", 10),
+            proximity_weight=cfg.get("proximity_weight", 1.0),
+            sparsity_weight=cfg.get("sparsity_weight", 0.5),
+            validity_weight=cfg.get("validity_weight", 0.3),
         )
 
         # Feature constraints (for cybersecurity domains)
@@ -80,11 +79,7 @@ class CounterfactualGenerator(ExplainerBase):
         logger.info(f"CounterfactualGenerator initialized with {self.cf_config.num_candidates} candidates")
 
     async def explain(
-        self,
-        model: Any,
-        instance: Dict[str, Any],
-        prediction: Any,
-        detail_level: DetailLevel = DetailLevel.DETAILED
+        self, model: Any, instance: dict[str, Any], prediction: Any, detail_level: DetailLevel = DetailLevel.DETAILED
     ) -> ExplanationResult:
         """Generate counterfactual explanation.
 
@@ -102,11 +97,11 @@ class CounterfactualGenerator(ExplainerBase):
         self.validate_instance(instance)
 
         # Validate model has prediction method
-        if not hasattr(model, 'predict') and not hasattr(model, 'predict_proba'):
+        if not hasattr(model, "predict") and not hasattr(model, "predict_proba"):
             raise ValueError("Model must have 'predict' or 'predict_proba' method")
 
         explanation_id = str(uuid.uuid4())
-        decision_id = instance.get('decision_id', str(uuid.uuid4()))
+        decision_id = instance.get("decision_id", str(uuid.uuid4()))
 
         # Determine desired outcome (flip prediction by default)
         desired_outcome = self._determine_desired_outcome(prediction)
@@ -119,48 +114,33 @@ class CounterfactualGenerator(ExplainerBase):
         # Generate counterfactual candidates
         logger.debug(f"Generating {self.cf_config.num_candidates} counterfactual candidates")
         candidates = self._generate_counterfactual_candidates(
-            model,
-            instance_array,
-            feature_names,
-            desired_outcome,
-            instance
+            model, instance_array, feature_names, desired_outcome, instance
         )
 
         if not candidates:
             logger.warning("No valid counterfactuals found")
             return self._create_no_counterfactual_result(
-                explanation_id,
-                decision_id,
-                prediction,
-                detail_level,
-                int((time.time() - explain_start) * 1000)
+                explanation_id, decision_id, prediction, detail_level, int((time.time() - explain_start) * 1000)
             )
 
         # Select best counterfactual (closest to original)
-        best_cf, cf_prediction, distance = self._select_best_counterfactual(
-            candidates,
-            instance_array,
-            model
-        )
+        best_cf, cf_prediction, distance = self._select_best_counterfactual(candidates, instance_array, model)
 
         # Identify changed features
-        changed_features = self._identify_changed_features(
-            instance,
-            best_cf,
-            feature_names,
-            instance_array[0]
-        )
+        changed_features = self._identify_changed_features(instance, best_cf, feature_names, instance_array[0])
 
         # Create FeatureImportance objects for changed features
         all_features = []
         for feature_info in changed_features:
-            all_features.append(FeatureImportance(
-                feature_name=feature_info['name'],
-                importance=feature_info['importance'],  # Change magnitude
-                value=feature_info['new_value'],
-                description=feature_info['description'],
-                contribution=feature_info['importance']
-            ))
+            all_features.append(
+                FeatureImportance(
+                    feature_name=feature_info["name"],
+                    importance=feature_info["importance"],  # Change magnitude
+                    value=feature_info["new_value"],
+                    description=feature_info["description"],
+                    contribution=feature_info["importance"],
+                )
+            )
 
         # Sort by importance (magnitude of change)
         all_features.sort(key=lambda x: abs(x.importance), reverse=True)
@@ -169,17 +149,14 @@ class CounterfactualGenerator(ExplainerBase):
         num_top_features = {
             DetailLevel.SUMMARY: 3,
             DetailLevel.DETAILED: len(all_features),
-            DetailLevel.TECHNICAL: len(all_features)
+            DetailLevel.TECHNICAL: len(all_features),
         }.get(detail_level, len(all_features))
 
         top_features = all_features[:num_top_features]
 
         # Generate counterfactual summary
         summary, counterfactual_text = self._generate_counterfactual_summary(
-            changed_features,
-            prediction,
-            cf_prediction,
-            detail_level
+            changed_features, prediction, cf_prediction, detail_level
         )
 
         # Calculate confidence based on distance and validity
@@ -187,10 +164,7 @@ class CounterfactualGenerator(ExplainerBase):
 
         # Visualization data
         visualization_data = self._generate_visualization_data(
-            changed_features,
-            prediction,
-            cf_prediction,
-            detail_level
+            changed_features, prediction, cf_prediction, detail_level
         )
 
         latency_ms = int((time.time() - explain_start) * 1000)
@@ -211,47 +185,47 @@ class CounterfactualGenerator(ExplainerBase):
             model_type=type(model).__name__,
             latency_ms=latency_ms,
             metadata={
-                'original_prediction': prediction,
-                'counterfactual_prediction': cf_prediction,
-                'distance': float(distance),
-                'num_changes': len(changed_features),
-                'num_candidates_tried': self.cf_config.num_candidates
-            }
+                "original_prediction": prediction,
+                "counterfactual_prediction": cf_prediction,
+                "distance": float(distance),
+                "num_changes": len(changed_features),
+                "num_candidates_tried": self.cf_config.num_candidates,
+            },
         )
 
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """Get list of supported model types.
 
         Returns:
             List of supported model types
         """
         return [
-            'sklearn',
-            'xgboost',
-            'lightgbm',
-            'pytorch',
-            'tensorflow',
-            'custom'  # Any model with predict() method
+            "sklearn",
+            "xgboost",
+            "lightgbm",
+            "pytorch",
+            "tensorflow",
+            "custom",  # Any model with predict() method
         ]
 
-    def _init_feature_constraints(self) -> Dict[str, Dict[str, Any]]:
+    def _init_feature_constraints(self) -> dict[str, dict[str, Any]]:
         """Initialize cybersecurity-specific feature constraints.
 
         Returns:
             Dictionary of feature constraints
         """
         return {
-            'port': {'min': 1, 'max': 65535, 'type': 'int'},
-            'src_port': {'min': 1, 'max': 65535, 'type': 'int'},
-            'dst_port': {'min': 1, 'max': 65535, 'type': 'int'},
-            'score': {'min': 0.0, 'max': 1.0, 'type': 'float'},
-            'threat_score': {'min': 0.0, 'max': 1.0, 'type': 'float'},
-            'anomaly_score': {'min': 0.0, 'max': 1.0, 'type': 'float'},
-            'confidence': {'min': 0.0, 'max': 1.0, 'type': 'float'},
-            'severity': {'min': 0.0, 'max': 1.0, 'type': 'float'},
-            'probability': {'min': 0.0, 'max': 1.0, 'type': 'float'},
-            'packet_size': {'min': 0, 'max': 65535, 'type': 'int'},
-            'payload_size': {'min': 0, 'max': 65535, 'type': 'int'}
+            "port": {"min": 1, "max": 65535, "type": "int"},
+            "src_port": {"min": 1, "max": 65535, "type": "int"},
+            "dst_port": {"min": 1, "max": 65535, "type": "int"},
+            "score": {"min": 0.0, "max": 1.0, "type": "float"},
+            "threat_score": {"min": 0.0, "max": 1.0, "type": "float"},
+            "anomaly_score": {"min": 0.0, "max": 1.0, "type": "float"},
+            "confidence": {"min": 0.0, "max": 1.0, "type": "float"},
+            "severity": {"min": 0.0, "max": 1.0, "type": "float"},
+            "probability": {"min": 0.0, "max": 1.0, "type": "float"},
+            "packet_size": {"min": 0, "max": 65535, "type": "int"},
+            "payload_size": {"min": 0, "max": 65535, "type": "int"},
         }
 
     def _determine_desired_outcome(self, current_prediction: Any) -> Any:
@@ -282,19 +256,19 @@ class CounterfactualGenerator(ExplainerBase):
         # For strings (BLOCK/ALLOW), flip
         if isinstance(current_prediction, str):
             flip_map = {
-                'BLOCK': 'ALLOW',
-                'ALLOW': 'BLOCK',
-                'REJECTED': 'APPROVED',
-                'APPROVED': 'REJECTED',
-                'HIGH': 'LOW',
-                'LOW': 'HIGH'
+                "BLOCK": "ALLOW",
+                "ALLOW": "BLOCK",
+                "REJECTED": "APPROVED",
+                "APPROVED": "REJECTED",
+                "HIGH": "LOW",
+                "LOW": "HIGH",
             }
-            return flip_map.get(current_prediction.upper(), 'OPPOSITE')
+            return flip_map.get(current_prediction.upper(), "OPPOSITE")
 
         # Default: return opposite
-        return 'OPPOSITE'
+        return "OPPOSITE"
 
-    def _dict_to_array(self, instance: Dict[str, Any]) -> Tuple[List[str], np.ndarray]:
+    def _dict_to_array(self, instance: dict[str, Any]) -> tuple[list[str], np.ndarray]:
         """Convert instance dict to numpy array.
 
         Args:
@@ -304,8 +278,8 @@ class CounterfactualGenerator(ExplainerBase):
             Tuple of (feature_names, feature_array)
         """
         # Exclude meta fields
-        meta_fields = {'decision_id', 'timestamp', 'analysis_id'}
-        feature_names = sorted([k for k in instance.keys() if k not in meta_fields])
+        meta_fields = {"decision_id", "timestamp", "analysis_id"}
+        feature_names = sorted([k for k in instance if k not in meta_fields])
 
         # Convert values to float array
         feature_values = []
@@ -313,9 +287,7 @@ class CounterfactualGenerator(ExplainerBase):
             value = instance.get(name, 0)
 
             # Handle different types
-            if isinstance(value, (int, float)):
-                feature_values.append(float(value))
-            elif isinstance(value, bool):
+            if isinstance(value, (int, float)) or isinstance(value, bool):
                 feature_values.append(float(value))
             elif isinstance(value, str):
                 # Hash string to number (simple encoding)
@@ -329,10 +301,10 @@ class CounterfactualGenerator(ExplainerBase):
         self,
         model: Any,
         instance: np.ndarray,
-        feature_names: List[str],
+        feature_names: list[str],
         desired_outcome: Any,
-        original_dict: Dict[str, Any]
-    ) -> List[np.ndarray]:
+        original_dict: dict[str, Any],
+    ) -> list[np.ndarray]:
         """Generate counterfactual candidates using genetic algorithm.
 
         Args:
@@ -352,11 +324,7 @@ class CounterfactualGenerator(ExplainerBase):
         num_random = self.cf_config.num_candidates // 2
 
         for _ in range(num_random):
-            candidate = self._generate_random_perturbation(
-                instance,
-                feature_names,
-                original_dict
-            )
+            candidate = self._generate_random_perturbation(instance, feature_names, original_dict)
 
             # Check if it achieves desired outcome
             pred = self._get_prediction(model, candidate)
@@ -365,16 +333,12 @@ class CounterfactualGenerator(ExplainerBase):
                 candidates.append(candidate[0])
 
         # Strategy 2: Gradient-based (if model supports)
-        if hasattr(model, 'predict_proba') and len(candidates) < self.cf_config.num_candidates:
+        if hasattr(model, "predict_proba") and len(candidates) < self.cf_config.num_candidates:
             num_gradient = self.cf_config.num_candidates - len(candidates)
 
             for _ in range(num_gradient):
                 candidate = self._generate_gradient_based_cf(
-                    model,
-                    instance,
-                    desired_outcome,
-                    feature_names,
-                    original_dict
+                    model, instance, desired_outcome, feature_names, original_dict
                 )
 
                 if candidate is not None:
@@ -385,10 +349,7 @@ class CounterfactualGenerator(ExplainerBase):
         return candidates
 
     def _generate_random_perturbation(
-        self,
-        instance: np.ndarray,
-        feature_names: List[str],
-        original_dict: Dict[str, Any]
+        self, instance: np.ndarray, feature_names: list[str], original_dict: dict[str, Any]
     ) -> np.ndarray:
         """Generate random perturbation of instance.
 
@@ -416,12 +377,7 @@ class CounterfactualGenerator(ExplainerBase):
 
         return perturbed
 
-    def _perturb_feature(
-        self,
-        feature_name: str,
-        original_value: float,
-        original_dict: Dict[str, Any]
-    ) -> float:
+    def _perturb_feature(self, feature_name: str, original_value: float, original_dict: dict[str, Any]) -> float:
         """Perturb a single feature while respecting constraints.
 
         Args:
@@ -441,20 +397,19 @@ class CounterfactualGenerator(ExplainerBase):
 
         if constraints:
             # Perturb within constraints
-            min_val = constraints['min']
-            max_val = constraints['max']
+            min_val = constraints["min"]
+            max_val = constraints["max"]
 
-            if constraints['type'] == 'int':
+            if constraints["type"] == "int":
                 return float(np.random.randint(min_val, max_val + 1))
-            else:
-                return np.random.uniform(min_val, max_val)
+            return np.random.uniform(min_val, max_val)
 
         # No constraints: add Gaussian noise
         std = max(abs(original_value) * 0.3, 0.2)
         perturbed = original_value + np.random.normal(0, std)
 
         # Keep non-negative for certain features
-        if any(keyword in feature_name.lower() for keyword in ['count', 'size', 'length', 'num_']):
+        if any(keyword in feature_name.lower() for keyword in ["count", "size", "length", "num_"]):
             perturbed = max(0, perturbed)
 
         return perturbed
@@ -464,9 +419,9 @@ class CounterfactualGenerator(ExplainerBase):
         model: Any,
         instance: np.ndarray,
         desired_outcome: Any,
-        feature_names: List[str],
-        original_dict: Dict[str, Any]
-    ) -> Optional[np.ndarray]:
+        feature_names: list[str],
+        original_dict: dict[str, Any],
+    ) -> np.ndarray | None:
         """Generate counterfactual using gradient descent.
 
         Args:
@@ -554,9 +509,9 @@ class CounterfactualGenerator(ExplainerBase):
         # Check feature constraints
         for pattern, constraint in self.feature_constraints.items():
             if pattern in feature_name.lower():
-                value = np.clip(value, constraint['min'], constraint['max'])
+                value = np.clip(value, constraint["min"], constraint["max"])
 
-                if constraint['type'] == 'int':
+                if constraint["type"] == "int":
                     value = round(value)
 
                 return value
@@ -573,18 +528,17 @@ class CounterfactualGenerator(ExplainerBase):
         Returns:
             Prediction value
         """
-        if hasattr(model, 'predict_proba'):
+        if hasattr(model, "predict_proba"):
             proba = model.predict_proba(instance)
             if proba.ndim == 2:
                 return float(proba[0, -1])
             return float(proba[0])
 
-        elif hasattr(model, 'predict'):
+        if hasattr(model, "predict"):
             pred = model.predict(instance)
             return float(pred[0])
 
-        else:
-            raise ValueError("Model must have 'predict' or 'predict_proba' method")
+        raise ValueError("Model must have 'predict' or 'predict_proba' method")
 
     def _matches_desired_outcome(self, prediction: float, desired_outcome: Any) -> bool:
         """Check if prediction matches desired outcome.
@@ -604,11 +558,8 @@ class CounterfactualGenerator(ExplainerBase):
         return prediction == desired_outcome
 
     def _select_best_counterfactual(
-        self,
-        candidates: List[np.ndarray],
-        original: np.ndarray,
-        model: Any
-    ) -> Tuple[np.ndarray, float, float]:
+        self, candidates: list[np.ndarray], original: np.ndarray, model: Any
+    ) -> tuple[np.ndarray, float, float]:
         """Select best counterfactual (closest to original).
 
         Args:
@@ -620,7 +571,7 @@ class CounterfactualGenerator(ExplainerBase):
             Tuple of (best_candidate, prediction, distance)
         """
         best_cf = candidates[0]
-        best_distance = float('inf')
+        best_distance = float("inf")
         best_prediction = self._get_prediction(model, best_cf.reshape(1, -1))
 
         for candidate in candidates:
@@ -636,11 +587,11 @@ class CounterfactualGenerator(ExplainerBase):
 
     def _identify_changed_features(
         self,
-        original_dict: Dict[str, Any],
+        original_dict: dict[str, Any],
         counterfactual: np.ndarray,
-        feature_names: List[str],
-        original_array: np.ndarray
-    ) -> List[Dict[str, Any]]:
+        feature_names: list[str],
+        original_array: np.ndarray,
+    ) -> list[dict[str, Any]]:
         """Identify which features changed in counterfactual.
 
         Args:
@@ -665,28 +616,21 @@ class CounterfactualGenerator(ExplainerBase):
                 # Get original dict value for description
                 dict_value = original_dict.get(feature_name, original_value)
 
-                changed_features.append({
-                    'name': feature_name,
-                    'original_value': original_value,
-                    'new_value': cf_value,
-                    'importance': abs(change_magnitude),
-                    'description': self._format_change_description(
-                        feature_name,
-                        dict_value,
-                        cf_value,
-                        change_magnitude
-                    )
-                })
+                changed_features.append(
+                    {
+                        "name": feature_name,
+                        "original_value": original_value,
+                        "new_value": cf_value,
+                        "importance": abs(change_magnitude),
+                        "description": self._format_change_description(
+                            feature_name, dict_value, cf_value, change_magnitude
+                        ),
+                    }
+                )
 
         return changed_features
 
-    def _format_change_description(
-        self,
-        feature_name: str,
-        original: Any,
-        new_value: float,
-        change: float
-    ) -> str:
+    def _format_change_description(self, feature_name: str, original: Any, new_value: float, change: float) -> str:
         """Format change description.
 
         Args:
@@ -702,12 +646,8 @@ class CounterfactualGenerator(ExplainerBase):
         return f"{feature_name}: {original:.2f} → {new_value:.2f} ({direction} of {abs(change):.2f})"
 
     def _generate_counterfactual_summary(
-        self,
-        changed_features: List[Dict[str, Any]],
-        original_pred: Any,
-        cf_pred: float,
-        detail_level: DetailLevel
-    ) -> Tuple[str, str]:
+        self, changed_features: list[dict[str, Any]], original_pred: Any, cf_pred: float, detail_level: DetailLevel
+    ) -> tuple[str, str]:
         """Generate counterfactual summary and text.
 
         Args:
@@ -726,8 +666,10 @@ class CounterfactualGenerator(ExplainerBase):
 
         if detail_level == DetailLevel.SUMMARY:
             top_change = changed_features[0]
-            summary = (f"If {top_change['name']} were changed from {top_change['original_value']:.2f} "
-                      f"to {top_change['new_value']:.2f}, prediction would be {cf_pred:.2f}.")
+            summary = (
+                f"If {top_change['name']} were changed from {top_change['original_value']:.2f} "
+                f"to {top_change['new_value']:.2f}, prediction would be {cf_pred:.2f}."
+            )
             cf_text = summary
 
         elif detail_level == DetailLevel.DETAILED:
@@ -750,7 +692,7 @@ class CounterfactualGenerator(ExplainerBase):
             cf_text = summary
 
         else:  # TECHNICAL
-            summary_parts = [f"Counterfactual Explanation"]
+            summary_parts = ["Counterfactual Explanation"]
             summary_parts.append(f"Original prediction: {original_pred}")
             summary_parts.append(f"Counterfactual prediction: {cf_pred}")
             summary_parts.append(f"\nRequired changes ({len(changed_features)} features):")
@@ -786,12 +728,8 @@ class CounterfactualGenerator(ExplainerBase):
         return max(0.0, min(1.0, confidence))
 
     def _generate_visualization_data(
-        self,
-        changed_features: List[Dict[str, Any]],
-        original_pred: Any,
-        cf_pred: float,
-        detail_level: DetailLevel
-    ) -> Dict[str, Any]:
+        self, changed_features: list[dict[str, Any]], original_pred: Any, cf_pred: float, detail_level: DetailLevel
+    ) -> dict[str, Any]:
         """Generate visualization data.
 
         Args:
@@ -804,27 +742,24 @@ class CounterfactualGenerator(ExplainerBase):
             Visualization data dict
         """
         return {
-            'type': 'counterfactual_comparison',
-            'original_prediction': float(original_pred) if isinstance(original_pred, (int, float, np.number)) else str(original_pred),
-            'counterfactual_prediction': float(cf_pred),
-            'changes': [
+            "type": "counterfactual_comparison",
+            "original_prediction": float(original_pred)
+            if isinstance(original_pred, (int, float, np.number))
+            else str(original_pred),
+            "counterfactual_prediction": float(cf_pred),
+            "changes": [
                 {
-                    'feature': change['name'],
-                    'original': float(change['original_value']),
-                    'counterfactual': float(change['new_value']),
-                    'delta': float(change['new_value'] - change['original_value'])
+                    "feature": change["name"],
+                    "original": float(change["original_value"]),
+                    "counterfactual": float(change["new_value"]),
+                    "delta": float(change["new_value"] - change["original_value"]),
                 }
                 for change in changed_features
-            ]
+            ],
         }
 
     def _create_no_counterfactual_result(
-        self,
-        explanation_id: str,
-        decision_id: str,
-        prediction: Any,
-        detail_level: DetailLevel,
-        latency_ms: int
+        self, explanation_id: str, decision_id: str, prediction: Any, detail_level: DetailLevel, latency_ms: int
     ) -> ExplanationResult:
         """Create result when no counterfactual is found.
 
@@ -844,7 +779,7 @@ class CounterfactualGenerator(ExplainerBase):
             importance=0.0,
             value=None,
             description="No counterfactual found within constraints",
-            contribution=0.0
+            contribution=0.0,
         )
 
         return ExplanationResult(
@@ -857,8 +792,8 @@ class CounterfactualGenerator(ExplainerBase):
             all_features=[dummy_feature],
             confidence=0.0,
             counterfactual="Unable to generate alternative scenario within constraints.",
-            visualization_data={'type': 'no_counterfactual'},
+            visualization_data={"type": "no_counterfactual"},
             model_type="unknown",
             latency_ms=latency_ms,
-            metadata={'original_prediction': prediction}
+            metadata={"original_prediction": prediction},
         )

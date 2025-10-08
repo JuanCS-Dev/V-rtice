@@ -15,8 +15,8 @@ Key functionalities include:
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class ImpulseInhibition:
@@ -37,7 +37,9 @@ class ImpulseInhibition:
         self.last_adjustment_time: Optional[datetime] = None
         self.current_status: str = "active"
 
-    async def apply_inhibition(self, potential_action: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def apply_inhibition(
+        self, potential_action: Dict[str, Any], context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Applies inhibitory control to a potential action.
 
         Args:
@@ -48,7 +50,7 @@ class ImpulseInhibition:
             Dict[str, Any]: A dictionary indicating whether the action is inhibited and the reason.
         """
         print(f"[ImpulseInhibition] Applying inhibition to potential action: {potential_action.get('type', 'N/A')}")
-        await asyncio.sleep(0.05) # Simulate processing
+        await asyncio.sleep(0.05)  # Simulate processing
 
         inhibit = False
         reason = "No inhibition applied."
@@ -67,7 +69,7 @@ class ImpulseInhibition:
             "timestamp": self.last_adjustment_time.isoformat(),
             "action_inhibited": inhibit,
             "reason": reason,
-            "inhibition_level": self.inhibition_level
+            "inhibition_level": self.inhibition_level,
         }
 
     def adjust_inhibition_level(self, new_level: float):
@@ -75,7 +77,7 @@ class ImpulseInhibition:
 
         Args:
             new_level (float): The new inhibition level (0.0 to 1.0).
-        
+
         Raises:
             ValueError: If new_level is outside the valid range [0.0, 1.0].
         """
@@ -102,5 +104,5 @@ class ImpulseInhibition:
         return {
             "status": self.current_status,
             "inhibition_level": self.inhibition_level,
-            "last_adjustment": self.last_adjustment_time.isoformat() if self.last_adjustment_time else "N/A"
+            "last_adjustment": (self.last_adjustment_time.isoformat() if self.last_adjustment_time else "N/A"),
         }

@@ -1,0 +1,244 @@
+syntax = "proto3";
+
+package vertice.governance.v1;
+
+option go_package = "github.com/verticedev/vcli-go/api/grpc/governance;governance";
+
+import "google/protobuf/timestamp.proto";
+
+// GovernanceService provides ethical AI decision review via Human-in-the-Loop
+service GovernanceService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+
+  // Session management
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+  rpc CloseSession(CloseSessionRequest) returns (CloseSessionResponse);
+
+  // Decision operations
+  rpc ListPendingDecisions(ListPendingDecisionsRequest) returns (ListPendingDecisionsResponse);
+  rpc GetDecision(GetDecisionRequest) returns (GetDecisionResponse);
+  rpc ApproveDecision(ApproveDecisionRequest) returns (ApproveDecisionResponse);
+  rpc RejectDecision(RejectDecisionRequest) returns (RejectDecisionResponse);
+  rpc EscalateDecision(EscalateDecisionRequest) returns (EscalateDecisionResponse);
+
+  // Metrics
+  rpc GetMetrics(GetMetricsRequest) returns (GetMetricsResponse);
+  rpc GetSessionStats(GetSessionStatsRequest) returns (GetSessionStatsResponse);
+
+  // Real-time decision stream (Server-side streaming)
+  rpc StreamDecisions(StreamDecisionsRequest) returns (stream DecisionEvent);
+
+  // Real-time events stream (Server-side streaming)
+  rpc StreamEvents(StreamEventsRequest) returns (stream GovernanceEvent);
+}
+
+// Health Check
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string status = 2;
+  int64 uptime_seconds = 3;
+}
+
+// Session Management
+message CreateSessionRequest {
+  string operator_id = 1;
+}
+
+message CreateSessionResponse {
+  string session_id = 1;
+  google.protobuf.Timestamp created_at = 2;
+}
+
+message CloseSessionRequest {
+  string session_id = 1;
+}
+
+message CloseSessionResponse {
+  bool success = 1;
+}
+
+// Decision Operations
+message ListPendingDecisionsRequest {
+  string session_id = 1;
+  int32 limit = 2;
+  string status = 3;  // PENDING, APPROVED, REJECTED, ESCALATED
+  string priority = 4; // CRITICAL, HIGH, MEDIUM, LOW
+}
+
+message ListPendingDecisionsResponse {
+  repeated Decision decisions = 1;
+  int32 total_count = 2;
+}
+
+message GetDecisionRequest {
+  string decision_id = 1;
+}
+
+message GetDecisionResponse {
+  Decision decision = 1;
+}
+
+message ApproveDecisionRequest {
+  string session_id = 1;
+  string decision_id = 2;
+  string comment = 3;
+  string reasoning = 4;
+}
+
+message ApproveDecisionResponse {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp processed_at = 3;
+}
+
+message RejectDecisionRequest {
+  string session_id = 1;
+  string decision_id = 2;
+  string comment = 3;
+  string reasoning = 4;
+}
+
+message RejectDecisionResponse {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp processed_at = 3;
+}
+
+message EscalateDecisionRequest {
+  string session_id = 1;
+  string decision_id = 2;
+  string reason = 3;
+  string escalation_target = 4;
+}
+
+message EscalateDecisionResponse {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp processed_at = 3;
+}
+
+// Metrics
+message GetMetricsRequest {
+  string session_id = 1;
+}
+
+message GetMetricsResponse {
+  DecisionMetrics metrics = 1;
+}
+
+message GetSessionStatsRequest {
+  string operator_id = 1;
+}
+
+message GetSessionStatsResponse {
+  int32 total_decisions = 1;
+  int32 approved = 2;
+  int32 rejected = 3;
+  int32 escalated = 4;
+  double avg_response_time_seconds = 5;
+  google.protobuf.Timestamp session_start = 6;
+}
+
+// Streaming
+message StreamDecisionsRequest {
+  string session_id = 1;
+}
+
+message DecisionEvent {
+  enum EventType {
+    NEW_DECISION = 0;
+    DECISION_UPDATED = 1;
+    DECISION_RESOLVED = 2;
+  }
+
+  EventType type = 1;
+  Decision decision = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message StreamEventsRequest {
+  string session_id = 1;
+}
+
+message GovernanceEvent {
+  enum EventType {
+    CONNECTION_ESTABLISHED = 0;
+    CONNECTION_LOST = 1;
+    METRICS_UPDATED = 2;
+    ERROR = 3;
+  }
+
+  EventType type = 1;
+  string message = 2;
+  DecisionMetrics metrics = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+// Data Models
+message Decision {
+  string decision_id = 1;
+  string operation_type = 2;
+  map<string, string> context = 3;
+  Risk risk_assessment = 4;
+  EthicalAssessment ethical_assessment = 5;
+  string status = 6; // PENDING, APPROVED, REJECTED, ESCALATED
+  string priority = 7; // CRITICAL, HIGH, MEDIUM, LOW
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp expires_at = 9;
+  int32 sla_seconds = 10;
+  string assigned_operator = 11;
+  repeated Action recommended_actions = 12;
+  DecisionHistory history = 13;
+}
+
+message Risk {
+  double score = 1; // 0.0 to 1.0
+  string level = 2; // CRITICAL, HIGH, MEDIUM, LOW
+  repeated string factors = 3;
+  map<string, string> details = 4;
+}
+
+message EthicalAssessment {
+  repeated EthicalPrinciple principles = 1;
+  repeated string concerns = 2;
+  double confidence = 3;
+  string reasoning = 4;
+}
+
+message EthicalPrinciple {
+  string name = 1;
+  bool violated = 2;
+  double severity = 3;
+  string explanation = 4;
+}
+
+message Action {
+  string action_type = 1;
+  string description = 2;
+  map<string, string> parameters = 3;
+  double confidence = 4;
+}
+
+message DecisionHistory {
+  google.protobuf.Timestamp submitted_at = 1;
+  google.protobuf.Timestamp reviewed_at = 2;
+  string reviewed_by = 3;
+  string outcome = 4;
+  string comment = 5;
+}
+
+message DecisionMetrics {
+  int32 pending_count = 1;
+  int32 total_decisions = 2;
+  int32 approved_count = 3;
+  int32 rejected_count = 4;
+  int32 escalated_count = 5;
+  int32 critical_count = 6;
+  int32 high_priority_count = 7;
+  double avg_response_time_seconds = 8;
+  double approval_rate = 9;
+  int32 sla_violations = 10;
+}

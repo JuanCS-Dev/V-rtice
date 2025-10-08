@@ -1,0 +1,341 @@
+---
+# Active Immune Core - Prometheus Recording Rules
+# PRODUCTION-READY recording rules for query optimization
+#
+# Recording rules pre-compute expensive queries and store them as new time series.
+# This improves dashboard performance and reduces query load on Prometheus.
+#
+# Authors: Juan & Claude
+# Version: 1.0.0
+
+groups:
+  # ==================== AGGREGATIONS ====================
+  - name: aggregations
+    interval: 30s
+    rules:
+      # System-wide aggregations
+      - record: immune_core:agents_alive:sum
+        expr: sum(immune_core_agents_alive)
+
+      - record: immune_core:agents_total:sum
+        expr: sum(immune_core_agents_total)
+
+      - record: immune_core:agents_alive:sum_by_type
+        expr: sum(immune_core_agents_alive) by (type)
+
+      - record: immune_core:agents_total:sum_by_type
+        expr: sum(immune_core_agents_total) by (type)
+
+      - record: immune_core:agent_health_score:avg
+        expr: avg(immune_core_agent_health_score)
+
+      - record: immune_core:agent_health_score:avg_by_type
+        expr: avg(immune_core_agent_health_score) by (type)
+
+      - record: immune_core:agent_load:avg
+        expr: avg(immune_core_agent_load)
+
+      - record: immune_core:agent_load:avg_by_type
+        expr: avg(immune_core_agent_load) by (type)
+
+  # ==================== RATES ====================
+  - name: rates
+    interval: 30s
+    rules:
+      # Task rates
+      - record: immune_core:tasks_submitted:rate5m
+        expr: rate(immune_core_tasks_submitted_total[5m])
+
+      - record: immune_core:tasks_assigned:rate5m
+        expr: rate(immune_core_tasks_assigned_total[5m])
+
+      - record: immune_core:tasks_completed:rate5m
+        expr: rate(immune_core_tasks_completed_total[5m])
+
+      - record: immune_core:tasks_failed:rate5m
+        expr: rate(immune_core_tasks_failed_total[5m])
+
+      - record: immune_core:tasks_completed:rate5m_by_type
+        expr: rate(immune_core_tasks_completed_total[5m]) by (task_type)
+
+      - record: immune_core:tasks_failed:rate5m_by_type
+        expr: rate(immune_core_tasks_failed_total[5m]) by (task_type)
+
+      # Agent task rates
+      - record: immune_core:agent_tasks_completed:rate5m_by_type
+        expr: sum(rate(immune_core_agent_tasks_completed_total[5m])) by (type)
+
+      - record: immune_core:agent_tasks_failed:rate5m_by_type
+        expr: sum(rate(immune_core_agent_tasks_failed_total[5m])) by (type)
+
+      # Coordination rates
+      - record: immune_core:elections:rate5m
+        expr: rate(immune_core_elections_total[5m])
+
+      - record: immune_core:leader_changes:rate5m
+        expr: rate(immune_core_leader_changes_total[5m])
+
+      - record: immune_core:proposals:rate5m_by_type
+        expr: rate(immune_core_proposals_total[5m]) by (proposal_type)
+
+      - record: immune_core:proposals_approved:rate5m_by_type
+        expr: rate(immune_core_proposals_approved_total[5m]) by (proposal_type)
+
+      - record: immune_core:proposals_rejected:rate5m_by_type
+        expr: rate(immune_core_proposals_rejected_total[5m]) by (proposal_type)
+
+      # Infrastructure rates
+      - record: immune_core:cytokines_sent:rate5m
+        expr: rate(immune_core_cytokines_sent_total[5m])
+
+      - record: immune_core:cytokines_received:rate5m
+        expr: rate(immune_core_cytokines_received_total[5m])
+
+      - record: immune_core:cytokines_sent:rate5m_by_type
+        expr: rate(immune_core_cytokines_sent_total[5m]) by (type)
+
+      - record: immune_core:cytokines_received:rate5m_by_type
+        expr: rate(immune_core_cytokines_received_total[5m]) by (type)
+
+      - record: immune_core:hormones_published:rate5m
+        expr: rate(immune_core_hormones_published_total[5m])
+
+      - record: immune_core:hormones_published:rate5m_by_type
+        expr: rate(immune_core_hormones_published_total[5m]) by (type)
+
+      # API rates
+      - record: immune_core:api_requests:rate5m_by_endpoint
+        expr: sum(rate(immune_core_api_requests_total[5m])) by (endpoint)
+
+      - record: immune_core:api_requests:rate5m_by_status
+        expr: sum(rate(immune_core_api_requests_total[5m])) by (status)
+
+      # Fault tolerance rates
+      - record: immune_core:failures_detected:rate5m
+        expr: rate(immune_core_failures_detected_total[5m])
+
+      - record: immune_core:recoveries_performed:rate5m
+        expr: rate(immune_core_recoveries_performed_total[5m])
+
+      - record: immune_core:heartbeat_timeouts:rate5m
+        expr: rate(immune_core_heartbeat_timeouts_total[5m])
+
+  # ==================== RATIOS & PERCENTAGES ====================
+  - name: ratios
+    interval: 30s
+    rules:
+      # Availability
+      - record: immune_core:availability:ratio
+        expr: |
+          sum(immune_core_agents_alive) /
+          sum(immune_core_agents_total)
+
+      - record: immune_core:availability:ratio_by_type
+        expr: |
+          sum(immune_core_agents_alive) by (type) /
+          sum(immune_core_agents_total) by (type)
+
+      # Task success rate
+      - record: immune_core:tasks_success_rate:ratio
+        expr: |
+          sum(rate(immune_core_tasks_completed_total[5m])) /
+          (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001)
+
+      - record: immune_core:tasks_success_rate:ratio_by_type
+        expr: |
+          sum(rate(immune_core_tasks_completed_total[5m])) by (task_type) /
+          (sum(rate(immune_core_tasks_completed_total[5m])) by (task_type) + sum(rate(immune_core_tasks_failed_total[5m])) by (task_type) + 0.001)
+
+      # Agent success rate
+      - record: immune_core:agent_success_rate:ratio_by_type
+        expr: |
+          sum(rate(immune_core_agent_tasks_completed_total[5m])) by (type) /
+          (sum(rate(immune_core_agent_tasks_completed_total[5m])) by (type) + sum(rate(immune_core_agent_tasks_failed_total[5m])) by (type) + 0.001)
+
+      # Task assignment lag
+      - record: immune_core:task_assignment_lag:ratio
+        expr: |
+          (sum(rate(immune_core_tasks_submitted_total[5m])) - sum(rate(immune_core_tasks_assigned_total[5m]))) /
+          sum(rate(immune_core_tasks_submitted_total[5m]))
+
+      # Proposal approval rate
+      - record: immune_core:proposal_approval_rate:ratio_by_type
+        expr: |
+          sum(rate(immune_core_proposals_approved_total[5m])) by (proposal_type) /
+          (sum(rate(immune_core_proposals_approved_total[5m])) by (proposal_type) + sum(rate(immune_core_proposals_rejected_total[5m])) by (proposal_type) + 0.001)
+
+      # API error rate
+      - record: immune_core:api_error_rate:ratio
+        expr: |
+          sum(rate(immune_core_api_requests_total{status=~"5.."}[5m])) /
+          sum(rate(immune_core_api_requests_total[5m]))
+
+      - record: immune_core:api_error_rate:ratio_by_endpoint
+        expr: |
+          sum(rate(immune_core_api_requests_total{status=~"5.."}[5m])) by (endpoint) /
+          sum(rate(immune_core_api_requests_total[5m])) by (endpoint)
+
+      # Cytokine flow balance
+      - record: immune_core:cytokine_flow_balance:ratio
+        expr: |
+          (sum(rate(immune_core_cytokines_sent_total[5m])) - sum(rate(immune_core_cytokines_received_total[5m]))) /
+          sum(rate(immune_core_cytokines_sent_total[5m]))
+
+      # Recovery success rate
+      - record: immune_core:recovery_success_rate:ratio
+        expr: |
+          sum(rate(immune_core_recoveries_performed_total[5m])) /
+          (sum(rate(immune_core_failures_detected_total[5m])) + 0.001)
+
+  # ==================== PERCENTILES ====================
+  - name: percentiles
+    interval: 30s
+    rules:
+      # Task duration percentiles
+      - record: immune_core:task_duration:p50
+        expr: histogram_quantile(0.50, rate(immune_core_task_duration_seconds_bucket[5m]))
+
+      - record: immune_core:task_duration:p95
+        expr: histogram_quantile(0.95, rate(immune_core_task_duration_seconds_bucket[5m]))
+
+      - record: immune_core:task_duration:p99
+        expr: histogram_quantile(0.99, rate(immune_core_task_duration_seconds_bucket[5m]))
+
+      - record: immune_core:task_duration:p50_by_type
+        expr: histogram_quantile(0.50, rate(immune_core_task_duration_seconds_bucket[5m])) by (task_type)
+
+      - record: immune_core:task_duration:p95_by_type
+        expr: histogram_quantile(0.95, rate(immune_core_task_duration_seconds_bucket[5m])) by (task_type)
+
+      - record: immune_core:task_duration:p99_by_type
+        expr: histogram_quantile(0.99, rate(immune_core_task_duration_seconds_bucket[5m])) by (task_type)
+
+      # Task retry percentiles
+      - record: immune_core:task_retries:p50
+        expr: histogram_quantile(0.50, rate(immune_core_task_retries_bucket[5m]))
+
+      - record: immune_core:task_retries:p95
+        expr: histogram_quantile(0.95, rate(immune_core_task_retries_bucket[5m]))
+
+      - record: immune_core:task_retries:p99
+        expr: histogram_quantile(0.99, rate(immune_core_task_retries_bucket[5m]))
+
+      # API latency percentiles
+      - record: immune_core:api_latency:p50
+        expr: histogram_quantile(0.50, rate(immune_core_api_latency_seconds_bucket[5m]))
+
+      - record: immune_core:api_latency:p95
+        expr: histogram_quantile(0.95, rate(immune_core_api_latency_seconds_bucket[5m]))
+
+      - record: immune_core:api_latency:p99
+        expr: histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m]))
+
+      - record: immune_core:api_latency:p50_by_endpoint
+        expr: histogram_quantile(0.50, rate(immune_core_api_latency_seconds_bucket[5m])) by (endpoint)
+
+      - record: immune_core:api_latency:p95_by_endpoint
+        expr: histogram_quantile(0.95, rate(immune_core_api_latency_seconds_bucket[5m])) by (endpoint)
+
+      - record: immune_core:api_latency:p99_by_endpoint
+        expr: histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m])) by (endpoint)
+
+  # ==================== SLO METRICS ====================
+  - name: slo_metrics
+    interval: 1m
+    rules:
+      # Availability SLO (99.9%)
+      - record: immune_core:slo:availability
+        expr: |
+          avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[24h:])
+
+      - record: immune_core:slo:availability_breached
+        expr: |
+          (sum(immune_core_agents_alive) / sum(immune_core_agents_total)) < 0.999
+
+      # API latency SLO (p99 < 500ms)
+      - record: immune_core:slo:api_latency_p99
+        expr: |
+          histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m]))
+
+      - record: immune_core:slo:api_latency_breached
+        expr: |
+          histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m])) > 0.5
+
+      # Task success rate SLO (> 95%)
+      - record: immune_core:slo:task_success_rate
+        expr: |
+          sum(rate(immune_core_tasks_completed_total[5m])) /
+          (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001)
+
+      - record: immune_core:slo:task_success_rate_breached
+        expr: |
+          (sum(rate(immune_core_tasks_completed_total[5m])) /
+          (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001)) < 0.95
+
+      # Error budget (based on 99.9% availability SLO)
+      - record: immune_core:slo:error_budget_remaining
+        expr: |
+          1 - ((1 - avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[24h:])) / (1 - 0.999))
+
+      - record: immune_core:slo:error_budget_burn_rate
+        expr: |
+          rate((1 - (sum(immune_core_agents_alive) / sum(immune_core_agents_total)))[1h:]) / (1 - 0.999)
+
+  # ==================== HEALTH SCORES ====================
+  - name: health_scores
+    interval: 1m
+    rules:
+      # Coordination health score
+      - record: immune_core:coordination_health:score
+        expr: |
+          (immune_core_has_leader) *
+          (1 - (immune_core_tasks_pending / 100)) *
+          (sum(rate(immune_core_tasks_completed_total[5m])) / (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001))
+
+      # Infrastructure health score
+      - record: immune_core:infrastructure_health:score
+        expr: |
+          min(
+            rate(immune_core_cytokines_sent_total[5m]) > 0,
+            rate(immune_core_cytokines_received_total[5m]) > 0,
+            rate(immune_core_hormones_published_total[5m]) > 0
+          )
+
+      # Overall system health score
+      - record: immune_core:system_health:score
+        expr: |
+          (
+            (sum(immune_core_agents_alive) / sum(immune_core_agents_total)) * 0.4 +
+            avg(immune_core_agent_health_score) * 0.3 +
+            (sum(rate(immune_core_tasks_completed_total[5m])) / (sum(rate(immune_core_tasks_completed_total[5m])) + sum(rate(immune_core_tasks_failed_total[5m])) + 0.001)) * 0.3
+          )
+
+  # ==================== AGENT TYPE METRICS ====================
+  - name: agent_types
+    interval: 30s
+    rules:
+      # Innate immune system
+      - record: immune_core:innate_agents:count
+        expr: |
+          sum(immune_core_agents_alive{type=~"neutrophil|macrophage|nk_cell|dendritic"})
+
+      - record: immune_core:innate_agents:health_avg
+        expr: |
+          avg(immune_core_agent_health_score{type=~"neutrophil|macrophage|nk_cell|dendritic"})
+
+      - record: immune_core:innate_agents:load_avg
+        expr: |
+          avg(immune_core_agent_load{type=~"neutrophil|macrophage|nk_cell|dendritic"})
+
+      # Adaptive immune system
+      - record: immune_core:adaptive_agents:count
+        expr: |
+          sum(immune_core_agents_alive{type=~"helper_t|cytotoxic_t|b_cell|t_reg"})
+
+      - record: immune_core:adaptive_agents:health_avg
+        expr: |
+          avg(immune_core_agent_health_score{type=~"helper_t|cytotoxic_t|b_cell|t_reg"})
+
+      - record: immune_core:adaptive_agents:load_avg
+        expr: |
+          avg(immune_core_agent_load{type=~"helper_t|cytotoxic_t|b_cell|t_reg"})

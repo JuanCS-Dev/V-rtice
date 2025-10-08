@@ -1,0 +1,28 @@
+{
+  "incident_id": "INCIDENT-1759920890",
+  "shutdown_reason": "threshold_violation",
+  "shutdown_timestamp": 1759920890.0133085,
+  "shutdown_timestamp_iso": "2025-10-08T07:54:50.013309",
+  "violations": [
+    {
+      "violation_id": "arousal-high-1759920889",
+      "violation_type": "arousal_runaway",
+      "threat_level": "critical",
+      "timestamp": 1759920889.8122199,
+      "timestamp_iso": "2025-10-08T07:54:49.812220",
+      "description": "Arousal 0.980 sustained for 20.0s (limit: 10.0s)",
+      "metrics": {
+        "arousal_level": 0.98,
+        "threshold": 0.95,
+        "duration_seconds": 20.000070571899414,
+        "threshold_duration": 10.0
+      },
+      "source_component": "ThresholdMonitor.check_arousal_sustained",
+      "automatic_action_taken": null
+    }
+  ],
+  "system_state_snapshot": {
+    "timestamp": 1759920890.013491,
+    "timestamp_iso": "2025-10-08T07:54:50.013492",
+    "pid": 249878,
+    "tig_nodes": 

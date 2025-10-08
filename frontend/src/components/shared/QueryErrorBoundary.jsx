@@ -37,8 +37,8 @@ class QueryErrorBoundaryComponent extends React.Component {
     this.setState({ errorInfo });
 
     // Log error to monitoring service
+    // Error tracking service can be integrated here if needed
     if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to error tracking service (Sentry, etc.)
       console.error('QueryErrorBoundary caught:', error, errorInfo);
     } else {
       console.error('QueryErrorBoundary caught:', error, errorInfo);

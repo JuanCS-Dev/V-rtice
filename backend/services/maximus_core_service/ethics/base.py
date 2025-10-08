@@ -4,11 +4,11 @@ This module defines the abstract base class that all ethical frameworks must imp
 ensuring a consistent interface for ethical evaluation across the VÉRTICE platform.
 """
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -43,17 +43,15 @@ class EthicalFrameworkResult:
     confidence: float
     veto: bool
     explanation: str
-    reasoning_steps: List[str]
+    reasoning_steps: list[str]
     verdict: EthicalVerdict
     latency_ms: int
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
     def __post_init__(self):
         """Validate confidence score."""
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError(
-                f"Confidence must be between 0.0 and 1.0, got {self.confidence}"
-            )
+            raise ValueError(f"Confidence must be between 0.0 and 1.0, got {self.confidence}")
 
 
 @dataclass
@@ -75,12 +73,12 @@ class ActionContext:
     action_type: str
     action_description: str
     system_component: str
-    threat_data: Optional[Dict[str, Any]] = None
-    target_info: Optional[Dict[str, Any]] = None
-    impact_assessment: Optional[Dict[str, Any]] = None
-    alternatives: Optional[List[Dict[str, Any]]] = None
+    threat_data: dict[str, Any] | None = None
+    target_info: dict[str, Any] | None = None
+    impact_assessment: dict[str, Any] | None = None
+    alternatives: list[dict[str, Any]] | None = None
     urgency: str = "medium"
-    operator_context: Optional[Dict[str, Any]] = None
+    operator_context: dict[str, Any] | None = None
 
     def __post_init__(self):
         """Validate action context fields."""
@@ -109,9 +107,7 @@ class ActionContext:
         if not self.action_description:
             raise ValueError("action_description is required and cannot be empty")
         if len(self.action_description) < 10:
-            raise ValueError(
-                "action_description must be at least 10 characters (provide meaningful description)"
-            )
+            raise ValueError("action_description must be at least 10 characters (provide meaningful description)")
         if len(self.action_description) > 1000:
             raise ValueError("action_description must be less than 1000 characters")
 
@@ -124,44 +120,28 @@ class ActionContext:
         # Validate urgency
         valid_urgency = ["low", "medium", "high", "critical"]
         if self.urgency not in valid_urgency:
-            raise ValueError(
-                f"urgency must be one of {valid_urgency}, got '{self.urgency}'"
-            )
+            raise ValueError(f"urgency must be one of {valid_urgency}, got '{self.urgency}'")
 
         # Validate threat_data if present
         if self.threat_data:
             if "severity" in self.threat_data:
                 severity = self.threat_data["severity"]
                 if not isinstance(severity, (int, float)) or not 0.0 <= severity <= 1.0:
-                    raise ValueError(
-                        "threat_data.severity must be a number between 0.0 and 1.0"
-                    )
+                    raise ValueError("threat_data.severity must be a number between 0.0 and 1.0")
 
             if "confidence" in self.threat_data:
                 confidence = self.threat_data["confidence"]
-                if (
-                    not isinstance(confidence, (int, float))
-                    or not 0.0 <= confidence <= 1.0
-                ):
-                    raise ValueError(
-                        "threat_data.confidence must be a number between 0.0 and 1.0"
-                    )
+                if not isinstance(confidence, (int, float)) or not 0.0 <= confidence <= 1.0:
+                    raise ValueError("threat_data.confidence must be a number between 0.0 and 1.0")
 
         # Validate impact_assessment if present
         if self.impact_assessment:
             if "disruption_level" in self.impact_assessment:
                 disruption = self.impact_assessment["disruption_level"]
-                if (
-                    not isinstance(disruption, (int, float))
-                    or not 0.0 <= disruption <= 1.0
-                ):
-                    raise ValueError(
-                        "impact_assessment.disruption_level must be a number between 0.0 and 1.0"
-                    )
+                if not isinstance(disruption, (int, float)) or not 0.0 <= disruption <= 1.0:
+                    raise ValueError("impact_assessment.disruption_level must be a number between 0.0 and 1.0")
 
-        logger.debug(
-            f"ActionContext validated: {self.action_type} - {self.action_description[:50]}..."
-        )
+        logger.debug(f"ActionContext validated: {self.action_type} - {self.action_description[:50]}...")
 
 
 class EthicalFramework(ABC):
@@ -171,7 +151,7 @@ class EthicalFramework(ABC):
     must inherit from this class and implement the evaluate() method.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the ethical framework.
 
         Args:
@@ -193,7 +173,7 @@ class EthicalFramework(ABC):
         pass
 
     @abstractmethod
-    def get_framework_principles(self) -> List[str]:
+    def get_framework_principles(self) -> list[str]:
         """Get the core principles of this framework.
 
         Returns:
@@ -231,11 +211,11 @@ class EthicalCache:
             max_size: Maximum number of cached decisions
             ttl_seconds: Time-to-live for cached decisions in seconds
         """
-        self._cache: Dict[str, Tuple[EthicalFrameworkResult, float]] = {}
+        self._cache: dict[str, tuple[EthicalFrameworkResult, float]] = {}
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
 
-    def get(self, cache_key: str) -> Optional[EthicalFrameworkResult]:
+    def get(self, cache_key: str) -> EthicalFrameworkResult | None:
         """Get a cached decision.
 
         Args:
@@ -250,9 +230,8 @@ class EthicalCache:
             result, timestamp = self._cache[cache_key]
             if time.time() - timestamp < self.ttl_seconds:
                 return result
-            else:
-                # Expired, remove it
-                del self._cache[cache_key]
+            # Expired, remove it
+            del self._cache[cache_key]
 
         return None
 

@@ -8,14 +8,14 @@ Predictive models for anticipating future system states:
 - Performance Degradation Detector (PELT)
 """
 
-from .demand_forecaster import ResourceDemandForecaster
 from .anomaly_detector import AnomalyDetector
-from .failure_predictor import FailurePredictor
 from .degradation_detector import PerformanceDegradationDetector
+from .demand_forecaster import ResourceDemandForecaster
+from .failure_predictor import FailurePredictor
 
 __all__ = [
-    'ResourceDemandForecaster',
-    'AnomalyDetector',
-    'FailurePredictor',
-    'PerformanceDegradationDetector'
+    "ResourceDemandForecaster",
+    "AnomalyDetector",
+    "FailurePredictor",
+    "PerformanceDegradationDetector",
 ]

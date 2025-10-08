@@ -12,6 +12,7 @@ ensuring adaptability across different environments.
 """
 
 import os
+
 from pydantic import BaseSettings
 
 
@@ -20,6 +21,7 @@ class Settings(BaseSettings):
 
     Settings are loaded from environment variables or a .env file.
     """
+
     app_name: str = "Maximus BAS Service"
     bas_api_key: str = os.getenv("BAS_API_KEY", "default_bas_key")
     simulation_timeout_seconds: int = os.getenv("SIMULATION_TIMEOUT_SECONDS", 300)
@@ -27,7 +29,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
 
 def get_settings() -> Settings:

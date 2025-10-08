@@ -1,14 +1,20 @@
 """
 Threat Hunting Commands - PRODUCTION READY
 Uses real threat_intel_service backend
+UI/UX Blueprint v1.2 - Gemini-style refinado
 """
 
 import typer
 from rich.console import Console
-from rich.table import Table
 from typing_extensions import Annotated
 from typing import Optional
-from ..utils.output import print_json, spinner_task, print_error
+from ..utils.output import (
+    print_json,
+    spinner_task,
+    print_error,
+    GeminiStyleTable,
+    PrimordialPanel,
+)
 from ..connectors.threat_intel import ThreatIntelConnector
 from ..utils.decorators import with_connector
 from vertice.utils import primoroso
@@ -58,32 +64,36 @@ async def search(
     if json_output:
         print_json(result)
     else:
-        primoroso.error("\n[bold green]✓ Threat Hunt Complete[/bold green]\n")
-
         if "threat_data" in result and result["threat_data"]:
             threat = result["threat_data"]
 
-            primoroso.info(f"IOC:[/cyan] {query}")
-            console.print(f"[cyan]Type:[/cyan] {threat.get('type', 'Unknown')}")
-            console.print(
-                f"[cyan]Reputation:[/cyan] {threat.get('reputation', 'Unknown')}"
-            )
+            # Métricas principais em painel primoroso
+            metrics = {
+                "IOC": query,
+                "Type": threat.get('type', 'Unknown'),
+                "Reputation": threat.get('reputation', 'Unknown'),
+            }
 
             if "risk_score" in threat:
                 risk = threat["risk_score"]
-                risk_color = (
-                    "red" if risk >= 70 else "yellow" if risk >= 40 else "green"
-                )
-                console.print(
-                    f"[cyan]Risk Score:[/cyan] [{risk_color}]{risk}/100[/{risk_color}]\n"
-                )
+                metrics["Risk Score"] = f"{risk}/100"
 
-            # Associated IOCs
+            PrimordialPanel.metrics_panel(
+                metrics,
+                title="🎯 Threat Hunt Results",
+                console=console
+            )
+
+            # Associated IOCs em tabela primorosa
             if "associated_iocs" in threat and threat["associated_iocs"]:
-                table = Table(title="Associated IOCs", show_header=True)
-                table.add_column("IOC", style="cyan")
-                table.add_column("Type", style="magenta")
-                table.add_column("Relation", style="white")
+                console.print()
+                table = GeminiStyleTable(
+                    title="Associated IOCs",
+                    console=console
+                )
+                table.add_column("IOC", width=40)
+                table.add_column("Type", alignment="center", width=15)
+                table.add_column("Relation", width=25)
 
                 for ioc in threat["associated_iocs"][:10]:  # Limit to 10
                     table.add_row(
@@ -92,16 +102,23 @@ async def search(
                         ioc.get("relation", "N/A"),
                     )
 
-                console.print(table)
+                table.render()
 
             # Threat sources
             if "sources" in threat and threat["sources"]:
-                primoroso.error("\n[bold]Threat Intelligence Sources:[/bold]")
-                for source in threat["sources"]:
-                    primoroso.error(f"• {source}")
+                console.print()
+                sources_text = "\n".join([f"• {source}" for source in threat["sources"]])
+                PrimordialPanel.info(
+                    sources_text,
+                    title="📊 Threat Intelligence Sources",
+                    console=console
+                )
 
         else:
-            primoroso.warning(f"No threat intelligence found for: {query}")
+            PrimordialPanel.warning(
+                f"No threat intelligence found for: {query}",
+                console=console
+            )
 
 
 @app.command()
@@ -141,38 +158,53 @@ async def timeline(
     if json_output:
         print_json(result)
     else:
-        primoroso.error("\n[bold green]✓ Timeline Generated[/bold green]\n")
-        primoroso.info(f"Incident ID:[/cyan] {incident_id}")
-        primoroso.info(f"Timeframe:[/cyan] Last {last}\n")
+        # Header com contexto
+        PrimordialPanel.success(
+            f"Incident: {incident_id}\nTimeframe: Last {last}",
+            title="✓ Timeline Generated",
+            console=console
+        )
 
         if "events" in result and result["events"]:
-            table = Table(title="Threat Activity Timeline", show_header=True)
-            table.add_column("Timestamp", style="cyan")
-            table.add_column("Event Type", style="yellow")
-            table.add_column("Description", style="white")
-            table.add_column("Severity", style="red", justify="center")
+            console.print()
+            table = GeminiStyleTable(
+                title="Threat Activity Timeline",
+                console=console
+            )
+            table.add_column("Timestamp", width=20)
+            table.add_column("Event Type", width=20)
+            table.add_column("Description", width=50)
+            table.add_column("Severity", alignment="center", width=12)
 
             for event in result["events"]:
-                severity = event.get("severity", "medium").upper()
-                sev_color = {
-                    "CRITICAL": "bold red",
-                    "HIGH": "red",
-                    "MEDIUM": "yellow",
-                    "LOW": "green",
-                }.get(severity, "white")
+                severity = event.get("severity", "medium").lower()
 
-                table.add_row(
+                # Mapeia severity para status do builder
+                status_map = {
+                    "critical": "error",
+                    "high": "error",
+                    "medium": "warning",
+                    "low": "info",
+                }
+
+                desc = event.get("description", "No description")
+                truncated_desc = desc[:50] + "..." if len(desc) > 50 else desc
+
+                table.add_row_with_status(
                     event.get("timestamp", "N/A"),
                     event.get("event_type", "Unknown"),
-                    event.get("description", "No description")[:50] + "...",
-                    f"[{sev_color}]{severity}[/{sev_color}]",
+                    truncated_desc,
+                    severity.upper(),
+                    status=status_map.get(severity, "info"),
                 )
 
-            console.print(table)
-            console.print(f"\n[bold]Total events:[/bold] {len(result['events'])}")
+            table.render()
+
+            console.print(f"\n[grey70]Total events: {len(result['events'])}[/grey70]")
         else:
-            console.print(
-                f"[yellow]No timeline data found for incident {incident_id}[/yellow]"
+            PrimordialPanel.warning(
+                f"No timeline data found for incident {incident_id}",
+                console=console
             )
 
 

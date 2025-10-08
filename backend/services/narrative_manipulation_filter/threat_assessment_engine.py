@@ -11,12 +11,12 @@ Method: Bayesian belief updating with weighted evidence
 """
 
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, Optional
 
-from models import VerificationStatus
 from config import get_settings
+from models import VerificationStatus
 
 logger = logging.getLogger(__name__)
 
@@ -86,12 +86,7 @@ class ThreatAssessmentEngine:
     """
 
     # Module weights (sum to 1.0)
-    WEIGHTS = {
-        "credibility": 0.25,
-        "emotional": 0.25,
-        "logical": 0.20,
-        "reality": 0.30
-    }
+    WEIGHTS = {"credibility": 0.25, "emotional": 0.25, "logical": 0.20, "reality": 0.30}
 
     # Verdict thresholds
     VERDICT_THRESHOLDS = {
@@ -118,7 +113,7 @@ class ThreatAssessmentEngine:
         emotional_result: Dict[str, Any],
         logical_result: Dict[str, Any],
         reality_result: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
     ) -> CognitiveDefenseReport:
         """
         Aggregate module outputs into final threat assessment.
@@ -165,10 +160,10 @@ class ThreatAssessmentEngine:
 
         # STEP 2: Weighted average
         manipulation_score = (
-            self.WEIGHTS["credibility"] * credibility_score +
-            self.WEIGHTS["emotional"] * emotional_score +
-            self.WEIGHTS["logical"] * fallacy_score +
-            self.WEIGHTS["reality"] * reality_score
+            self.WEIGHTS["credibility"] * credibility_score
+            + self.WEIGHTS["emotional"] * emotional_score
+            + self.WEIGHTS["logical"] * fallacy_score
+            + self.WEIGHTS["reality"] * reality_score
         )
 
         # Clamp to [0, 1]
@@ -179,7 +174,7 @@ class ThreatAssessmentEngine:
             credibility_confidence,
             emotional_confidence,
             logical_confidence,
-            reality_confidence
+            reality_confidence,
         )
 
         # STEP 4: Verdict determination
@@ -191,7 +186,7 @@ class ThreatAssessmentEngine:
             credibility_result=credibility_result,
             emotional_result=emotional_result,
             logical_result=logical_result,
-            reality_result=reality_result
+            reality_result=reality_result,
         )
 
         # Build ModuleResult objects
@@ -200,7 +195,7 @@ class ThreatAssessmentEngine:
             score=credibility_result.get("credibility_score", 0.5),
             confidence=credibility_confidence,
             assessment=credibility_result.get("assessment", "unknown"),
-            details=credibility_result
+            details=credibility_result,
         )
 
         emotional_module = ModuleResult(
@@ -208,7 +203,7 @@ class ThreatAssessmentEngine:
             score=emotional_score,
             confidence=emotional_confidence,
             assessment=emotional_result.get("assessment", "unknown"),
-            details=emotional_result
+            details=emotional_result,
         )
 
         logical_module = ModuleResult(
@@ -216,7 +211,7 @@ class ThreatAssessmentEngine:
             score=fallacy_score,
             confidence=logical_confidence,
             assessment=logical_result.get("assessment", "unknown"),
-            details=logical_result
+            details=logical_result,
         )
 
         reality_module = ModuleResult(
@@ -224,7 +219,7 @@ class ThreatAssessmentEngine:
             score=reality_score,
             confidence=reality_confidence,
             assessment=str(reality_result.get("verification_status", "unknown")),
-            details=reality_result
+            details=reality_result,
         )
 
         # Build final report
@@ -239,7 +234,7 @@ class ThreatAssessmentEngine:
             reality_assessment=reality_module,
             timestamp=datetime.utcnow(),
             source_domain=context.get("source_domain") if context else None,
-            content_hash=context.get("content_hash") if context else None
+            content_hash=context.get("content_hash") if context else None,
         )
 
         logger.info(
@@ -254,7 +249,7 @@ class ThreatAssessmentEngine:
         conf_credibility: float,
         conf_emotional: float,
         conf_logical: float,
-        conf_reality: float
+        conf_reality: float,
     ) -> float:
         """
         Calculate overall confidence using Bayesian uncertainty propagation.
@@ -271,12 +266,7 @@ class ThreatAssessmentEngine:
         Returns:
             Overall confidence (0-1)
         """
-        confidences = [
-            conf_credibility,
-            conf_emotional,
-            conf_logical,
-            conf_reality
-        ]
+        confidences = [conf_credibility, conf_emotional, conf_logical, conf_reality]
 
         # Filter out zero confidences
         confidences = [c for c in confidences if c > 0]
@@ -285,7 +275,7 @@ class ThreatAssessmentEngine:
             return 0.0
 
         # Harmonic mean
-        harmonic_mean = len(confidences) / sum(1/c for c in confidences)
+        harmonic_mean = len(confidences) / sum(1 / c for c in confidences)
 
         return harmonic_mean
 
@@ -320,7 +310,7 @@ class ThreatAssessmentEngine:
         credibility_result: Dict[str, Any],
         emotional_result: Dict[str, Any],
         logical_result: Dict[str, Any],
-        reality_result: Dict[str, Any]
+        reality_result: Dict[str, Any],
     ) -> str:
         """
         Generate natural language explanation.
@@ -346,28 +336,22 @@ class ThreatAssessmentEngine:
         # Build explanation
         parts = []
 
-        parts.append(
-            f"This content received a manipulation score of {manipulation_score:.2f}/1.00."
-        )
+        parts.append(f"This content received a manipulation score of {manipulation_score:.2f}/1.00.")
 
         # Source credibility
         if cred_score < 0.4:
             parts.append(
-                f"The source has low credibility (score: {cred_score:.2f}), "
-                "which raises concerns about reliability."
+                f"The source has low credibility (score: {cred_score:.2f}), which raises concerns about reliability."
             )
         elif cred_score > 0.7:
-            parts.append(
-                f"The source has good credibility (score: {cred_score:.2f})."
-            )
+            parts.append(f"The source has good credibility (score: {cred_score:.2f}).")
 
         # Emotional manipulation
         if emotional_score > 0.6:
             emotions = list(emotional_result.get("detected_emotions", {}).keys())
             emotions_str = ", ".join(emotions[:3])
             parts.append(
-                f"High emotional manipulation detected (score: {emotional_score:.2f}), "
-                f"with emotions: {emotions_str}."
+                f"High emotional manipulation detected (score: {emotional_score:.2f}), with emotions: {emotions_str}."
             )
 
         # Logical fallacies
@@ -380,24 +364,15 @@ class ThreatAssessmentEngine:
 
         # Reality distortion
         if verification_status == VerificationStatus.VERIFIED_FALSE.value:
-            parts.append(
-                "Claims in the content were fact-checked and found to be FALSE."
-            )
+            parts.append("Claims in the content were fact-checked and found to be FALSE.")
         elif verification_status == VerificationStatus.VERIFIED_TRUE.value:
-            parts.append(
-                "Claims in the content were fact-checked and verified as TRUE."
-            )
+            parts.append("Claims in the content were fact-checked and verified as TRUE.")
         elif verification_status == VerificationStatus.MIXED.value:
-            parts.append(
-                "Claims in the content show MIXED verification results."
-            )
+            parts.append("Claims in the content show MIXED verification results.")
 
         return " ".join(parts)
 
-    def generate_detailed_report(
-        self,
-        report: CognitiveDefenseReport
-    ) -> str:
+    def generate_detailed_report(self, report: CognitiveDefenseReport) -> str:
         """
         Generate detailed markdown report.
 
@@ -424,52 +399,60 @@ class ThreatAssessmentEngine:
             report.explanation,
             "",
             "## Module Breakdown",
-            ""
+            "",
         ]
 
         # Module 1: Source Credibility
-        lines.extend([
-            f"### 1. {report.credibility_assessment.module_name}",
-            "",
-            f"- **Score**: {report.credibility_assessment.score:.2f}/1.00",
-            f"- **Confidence**: {report.credibility_assessment.confidence:.2f}/1.00",
-            f"- **Assessment**: {report.credibility_assessment.assessment}",
-            f"- **Weight**: {self.WEIGHTS['credibility']:.0%}",
-            ""
-        ])
+        lines.extend(
+            [
+                f"### 1. {report.credibility_assessment.module_name}",
+                "",
+                f"- **Score**: {report.credibility_assessment.score:.2f}/1.00",
+                f"- **Confidence**: {report.credibility_assessment.confidence:.2f}/1.00",
+                f"- **Assessment**: {report.credibility_assessment.assessment}",
+                f"- **Weight**: {self.WEIGHTS['credibility']:.0%}",
+                "",
+            ]
+        )
 
         # Module 2: Emotional Manipulation
-        lines.extend([
-            f"### 2. {report.emotional_assessment.module_name}",
-            "",
-            f"- **Score**: {report.emotional_assessment.score:.2f}/1.00",
-            f"- **Confidence**: {report.emotional_assessment.confidence:.2f}/1.00",
-            f"- **Assessment**: {report.emotional_assessment.assessment}",
-            f"- **Weight**: {self.WEIGHTS['emotional']:.0%}",
-            ""
-        ])
+        lines.extend(
+            [
+                f"### 2. {report.emotional_assessment.module_name}",
+                "",
+                f"- **Score**: {report.emotional_assessment.score:.2f}/1.00",
+                f"- **Confidence**: {report.emotional_assessment.confidence:.2f}/1.00",
+                f"- **Assessment**: {report.emotional_assessment.assessment}",
+                f"- **Weight**: {self.WEIGHTS['emotional']:.0%}",
+                "",
+            ]
+        )
 
         # Module 3: Logical Fallacy
-        lines.extend([
-            f"### 3. {report.logical_assessment.module_name}",
-            "",
-            f"- **Score**: {report.logical_assessment.score:.2f}/1.00",
-            f"- **Confidence**: {report.logical_assessment.confidence:.2f}/1.00",
-            f"- **Assessment**: {report.logical_assessment.assessment}",
-            f"- **Weight**: {self.WEIGHTS['logical']:.0%}",
-            ""
-        ])
+        lines.extend(
+            [
+                f"### 3. {report.logical_assessment.module_name}",
+                "",
+                f"- **Score**: {report.logical_assessment.score:.2f}/1.00",
+                f"- **Confidence**: {report.logical_assessment.confidence:.2f}/1.00",
+                f"- **Assessment**: {report.logical_assessment.assessment}",
+                f"- **Weight**: {self.WEIGHTS['logical']:.0%}",
+                "",
+            ]
+        )
 
         # Module 4: Reality Distortion
-        lines.extend([
-            f"### 4. {report.reality_assessment.module_name}",
-            "",
-            f"- **Score**: {report.reality_assessment.score:.2f}/1.00",
-            f"- **Confidence**: {report.reality_assessment.confidence:.2f}/1.00",
-            f"- **Assessment**: {report.reality_assessment.assessment}",
-            f"- **Weight**: {self.WEIGHTS['reality']:.0%}",
-            ""
-        ])
+        lines.extend(
+            [
+                f"### 4. {report.reality_assessment.module_name}",
+                "",
+                f"- **Score**: {report.reality_assessment.score:.2f}/1.00",
+                f"- **Confidence**: {report.reality_assessment.confidence:.2f}/1.00",
+                f"- **Assessment**: {report.reality_assessment.assessment}",
+                f"- **Weight**: {self.WEIGHTS['reality']:.0%}",
+                "",
+            ]
+        )
 
         return "\n".join(lines)
 

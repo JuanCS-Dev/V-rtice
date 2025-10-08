@@ -1,0 +1,193 @@
+name: Dependabot Auto-Approve
+
+# This workflow automatically approves and merges Dependabot PRs
+# that meet all safety criteria defined in DEPENDENCY_POLICY.md
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate-and-approve:
+    name: Validate Dependabot PR
+    runs-on: ubuntu-latest
+
+    # Only run for Dependabot PRs
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Extract PR info
+        id: pr-info
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get PR title and body
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_AUTHOR="${{ github.actor }}"
+
+          # Extract PR body via GitHub CLI
+          PR_BODY=$(gh pr view ${{ github.event.pull_request.number }} --json body --jq .body)
+
+          # Export for next steps
+          echo "title=$PR_TITLE" >> $GITHUB_OUTPUT
+          echo "author=$PR_AUTHOR" >> $GITHUB_OUTPUT
+
+          # Save body to file (multiline)
+          echo "$PR_BODY" > /tmp/pr_body.txt
+
+      - name: Validate auto-merge eligibility
+        id: validate
+        working-directory: backend/services/active_immune_core
+        env:
+          PR_TITLE: ${{ steps.pr-info.outputs.title }}
+          PR_AUTHOR: ${{ steps.pr-info.outputs.author }}
+        run: |
+          # Run validation script
+          if bash scripts/validate-dependabot-pr.sh "$PR_TITLE" "$(cat /tmp/pr_body.txt)" "$PR_AUTHOR"; then
+            echo "eligible=true" >> $GITHUB_OUTPUT
+            echo "✅ PR is eligible for auto-merge"
+          else
+            EXIT_CODE=$?
+            echo "eligible=false" >> $GITHUB_OUTPUT
+
+            if [ $EXIT_CODE -eq 1 ]; then
+              echo "⚠️  Manual review required"
+            elif [ $EXIT_CODE -eq 2 ]; then
+              echo "❌ Validation error"
+              exit 1
+            fi
+          fi
+
+      - name: Wait for CI checks
+        if: steps.validate.outputs.eligible == 'true'
+        uses: fountainhead/action-wait-for-check@v1.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: "CI Test Suite"  # Adjust to your CI check name
+          ref: ${{ github.head_ref }}
+          timeoutSeconds: 600
+          intervalSeconds: 10
+
+      - name: Check if CI passed
+        if: steps.validate.outputs.eligible == 'true'
+        id: ci-status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get CI status
+          STATUS=$(gh pr checks ${{ github.event.pull_request.number }} --json state --jq '.[].state' | sort -u)
+
+          echo "CI Status: $STATUS"
+
+          if echo "$STATUS" | grep -q "FAILURE"; then
+            echo "ci_passed=false" >> $GITHUB_OUTPUT
+            echo "❌ CI checks failed"
+            exit 0
+          elif echo "$STATUS" | grep -q "PENDING"; then
+            echo "ci_passed=false" >> $GITHUB_OUTPUT
+            echo "⏳ CI checks still pending"
+            exit 0
+          else
+            echo "ci_passed=true" >> $GITHUB_OUTPUT
+            echo "✅ CI checks passed"
+          fi
+
+      - name: Auto-approve PR
+        if: steps.validate.outputs.eligible == 'true' && steps.ci-status.outputs.ci_passed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "✅ Auto-approving Dependabot PR..."
+          gh pr review ${{ github.event.pull_request.number }} --approve \
+            --body "✅ Auto-approved by Dependabot workflow
+
+          **Validation passed:**
+          - ✓ Patch update (x.y.Z)
+          - ✓ Not a critical package
+          - ✓ CVSS < 7.0
+          - ✓ CI checks passed
+
+          See: \`scripts/validate-dependabot-pr.sh\` for eligibility rules"
+
+      - name: Enable auto-merge
+        if: steps.validate.outputs.eligible == 'true' && steps.ci-status.outputs.ci_passed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔀 Enabling auto-merge with squash strategy..."
+          gh pr merge ${{ github.event.pull_request.number }} --auto --squash \
+            --subject "chore(deps): ${{ steps.pr-info.outputs.title }}" \
+            --body "Auto-merged by Dependabot workflow
+
+          Co-Authored-By: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>"
+
+      - name: Add labels
+        if: steps.validate.outputs.eligible == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🏷️  Adding auto-merge label..."
+          gh pr edit ${{ github.event.pull_request.number }} --add-label "auto-merged"
+
+      - name: Request manual review
+        if: steps.validate.outputs.eligible == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "👤 Requesting manual review..."
+
+          # Add label
+          gh pr edit ${{ github.event.pull_request.number }} --add-label "needs-manual-review"
+
+          # Request reviewers
+          gh pr edit ${{ github.event.pull_request.number }} --add-reviewer security-team,backend-leads || true
+
+          # Add comment
+          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️  **Manual review required**
+
+          This PR does not meet auto-merge criteria. Please review manually.
+
+          Common reasons:
+          - Minor or major version update
+          - Critical package (fastapi, sqlalchemy, etc.)
+          - High severity CVE (CVSS >= 7.0)
+
+          See [DEPENDENCY_POLICY.md](../blob/main/backend/services/active_immune_core/DEPENDENCY_POLICY.md) for governance rules."
+
+  # Notify on failure
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: validate-and-approve
+    if: failure()
+
+    steps:
+      - name: Create issue on failure
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "❌ Dependabot auto-approve workflow failed for PR #${{ github.event.pull_request.number }}" \
+            --body "The Dependabot auto-approve workflow failed.
+
+          **PR**: #${{ github.event.pull_request.number }}
+          **Title**: ${{ github.event.pull_request.title }}
+          **Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          Please investigate and merge manually if needed." \
+            --label "dependencies,workflow-failure"

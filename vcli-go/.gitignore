@@ -1,0 +1,92 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+coverage.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Build directories
+bin/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Air (live reload) temporary files
+tmp/
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+
+# BadgerDB
+badger/
+*.vlog
+*.sst
+
+# Configuration (may contain secrets)
+config.local.yaml
+secrets.yaml
+
+# Debugging
+debug
+__debug_bin
+
+# Profiling
+*.prof
+*.pprof
+cpu.prof
+mem.prof
+
+# golangci-lint cache
+.golangci-lint-cache/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini

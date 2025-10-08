@@ -17,8 +17,9 @@ effectiveness in real-time scenarios.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict
+
 import numpy as np
 
 
@@ -47,7 +48,7 @@ class FastML:
 
         Returns:
             Dict[str, Any]: A dictionary containing the prediction result and confidence.
-        
+
         Raises:
             RuntimeError: If ML models are not loaded.
             ValueError: If an unsupported prediction type is provided.
@@ -56,7 +57,7 @@ class FastML:
             raise RuntimeError("Fast ML models not loaded.")
 
         print(f"[FastML] Performing {prediction_type} prediction on data: {input_data.get('id', 'N/A')}")
-        await asyncio.sleep(0.01) # Simulate very low latency inference
+        await asyncio.sleep(0.01)  # Simulate very low latency inference
 
         prediction_value = 0.0
         confidence = 0.0
@@ -80,7 +81,7 @@ class FastML:
             "prediction_type": prediction_type,
             "prediction_value": prediction_value,
             "confidence": confidence,
-            "details": details
+            "details": details,
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -92,5 +93,5 @@ class FastML:
         return {
             "status": "active" if self.model_loaded else "initializing",
             "last_prediction": datetime.now().isoformat(),
-            "model_count": 1 # Mock
+            "model_count": 1,  # Mock
         }

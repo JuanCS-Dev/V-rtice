@@ -7,13 +7,13 @@ Integrates multiple fact-checking APIs:
 """
 
 import logging
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
-from cache_manager import cache_manager, CacheCategory
 from models import VerificationStatus
 from utils import hash_text
 
@@ -46,16 +46,13 @@ class GoogleFactCheckClient:
             await self.session.close()
             self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def search_claims(
         self,
         query: str,
         language_code: str = "pt",
         max_results: int = 10,
-        use_cache: bool = True
+        use_cache: bool = True,
     ) -> List[Dict[str, Any]]:
         """
         Search for fact-checked claims.
@@ -89,7 +86,7 @@ class GoogleFactCheckClient:
                 "key": self.api_key,
                 "query": query,
                 "languageCode": language_code,
-                "pageSize": max_results
+                "pageSize": max_results,
             }
 
             async with self.session.get(self.BASE_URL, params=params) as response:
@@ -101,19 +98,12 @@ class GoogleFactCheckClient:
                 claims = data.get("claims", [])
 
                 # Parse ClaimReview format
-                parsed_claims = [
-                    self._parse_claim_review(claim)
-                    for claim in claims
-                ]
+                parsed_claims = [self._parse_claim_review(claim) for claim in claims]
 
                 # Cache for 30 days
                 if use_cache and parsed_claims:
                     cache_key = f"google:{hash_text(query)}"
-                    await cache_manager.set(
-                        CacheCategory.FACTCHECK,
-                        cache_key,
-                        parsed_claims
-                    )
+                    await cache_manager.set(CacheCategory.FACTCHECK, cache_key, parsed_claims)
 
                 return parsed_claims
 
@@ -139,13 +129,15 @@ class GoogleFactCheckClient:
             url = review.get("url", "")
 
             all_ratings.append(rating_text.lower())
-            all_sources.append({
-                "publisher": publisher,
-                "rating": rating_text,
-                "rating_value": rating_value,
-                "url": url,
-                "date": review.get("reviewDate")
-            })
+            all_sources.append(
+                {
+                    "publisher": publisher,
+                    "rating": rating_text,
+                    "rating_value": rating_value,
+                    "url": url,
+                    "date": review.get("reviewDate"),
+                }
+            )
 
         # Determine consensus verification status
         status = self._determine_verification_status(all_ratings)
@@ -156,7 +148,7 @@ class GoogleFactCheckClient:
             "claim_date": claim_data.get("claimDate"),
             "verification_status": status.value,
             "fact_checkers": all_sources,
-            "consensus_confidence": self._calculate_consensus_confidence(all_ratings)
+            "consensus_confidence": self._calculate_consensus_confidence(all_ratings),
         }
 
     @staticmethod
@@ -199,6 +191,7 @@ class GoogleFactCheckClient:
 
         # Measure agreement using pairwise similarity
         from collections import Counter
+
         rating_counter = Counter(ratings)
         most_common_count = rating_counter.most_common(1)[0][1]
 
@@ -223,10 +216,7 @@ class ClaimBusterClient:
         """Initialize HTTP session."""
         if self.session is None:
             timeout = aiohttp.ClientTimeout(total=30)
-            self.session = aiohttp.ClientSession(
-                headers={"x-api-key": self.api_key},
-                timeout=timeout
-            )
+            self.session = aiohttp.ClientSession(headers={"x-api-key": self.api_key}, timeout=timeout)
             logger.info("✅ ClaimBuster client initialized")
 
     async def close(self) -> None:
@@ -235,15 +225,8 @@ class ClaimBusterClient:
             await self.session.close()
             self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
-    async def score_claim(
-        self,
-        text: str,
-        use_cache: bool = True
-    ) -> Dict[str, Any]:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+    async def score_claim(self, text: str, use_cache: bool = True) -> Dict[str, Any]:
         """
         Score check-worthiness of text.
 
@@ -283,10 +266,7 @@ class ClaimBusterClient:
                 # Extract check-worthy sentences
                 results = data.get("results", [])
                 claims = [
-                    {
-                        "text": result.get("text", ""),
-                        "score": result.get("score", 0.0)
-                    }
+                    {"text": result.get("text", ""), "score": result.get("score", 0.0)}
                     for result in results
                     if result.get("score", 0) >= settings.THRESHOLD_CHECK_WORTHINESS
                 ]
@@ -294,10 +274,7 @@ class ClaimBusterClient:
                 # Overall score (max of sentence scores)
                 overall_score = max([c["score"] for c in claims], default=0.0)
 
-                result = {
-                    "score": overall_score,
-                    "claims": claims
-                }
+                result = {"score": overall_score, "claims": claims}
 
                 # Cache
                 if use_cache:
@@ -310,15 +287,9 @@ class ClaimBusterClient:
             logger.error(f"ClaimBuster API error: {e}", exc_info=True)
             return {"score": 0.5, "claims": []}
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def match_claim(
-        self,
-        claim: str,
-        similarity_threshold: float = 0.85,
-        use_cache: bool = True
+        self, claim: str, similarity_threshold: float = 0.85, use_cache: bool = True
     ) -> Optional[Dict[str, Any]]:
         """
         Match claim against ClaimBuster's fact-checked database.
@@ -375,7 +346,7 @@ class ClaimBusterClient:
                     "source": best_match.get("source", ""),
                     "url": best_match.get("url", ""),
                     "fact_checker": best_match.get("fact_checker", "ClaimBuster"),
-                    "date": best_match.get("date")
+                    "date": best_match.get("date"),
                 }
 
                 # Cache for 30 days
@@ -408,11 +379,7 @@ class FactCheckAggregator:
         await self.google_client.close()
         await self.claimbuster_client.close()
 
-    async def verify_claim(
-        self,
-        claim_text: str,
-        check_worthiness_threshold: float = 0.5
-    ) -> Dict[str, Any]:
+    async def verify_claim(self, claim_text: str, check_worthiness_threshold: float = 0.5) -> Dict[str, Any]:
         """
         Comprehensive claim verification (Tier 1).
 
@@ -435,7 +402,7 @@ class FactCheckAggregator:
                 "sources": [],
                 "confidence": 0.0,
                 "tier_used": 1,
-                "matched_from": None
+                "matched_from": None,
             }
 
         # Step 2: Try ClaimBuster fact matching first (fast)
@@ -445,27 +412,26 @@ class FactCheckAggregator:
             verdict_map = {
                 "true": VerificationStatus.VERIFIED_TRUE,
                 "false": VerificationStatus.VERIFIED_FALSE,
-                "mixed": VerificationStatus.MIXED
+                "mixed": VerificationStatus.MIXED,
             }
 
-            status = verdict_map.get(
-                claimbuster_match["verdict"].lower(),
-                VerificationStatus.DISPUTED
-            )
+            status = verdict_map.get(claimbuster_match["verdict"].lower(), VerificationStatus.DISPUTED)
 
             return {
                 "claim_text": claim_text,
                 "check_worthiness": check_worthiness,
                 "verification_status": status.value,
-                "sources": [{
-                    "publisher": claimbuster_match["fact_checker"],
-                    "url": claimbuster_match["url"],
-                    "similarity": claimbuster_match["similarity"]
-                }],
+                "sources": [
+                    {
+                        "publisher": claimbuster_match["fact_checker"],
+                        "url": claimbuster_match["url"],
+                        "similarity": claimbuster_match["similarity"],
+                    }
+                ],
                 "confidence": claimbuster_match["similarity"],
                 "tier_used": 1,
                 "matched_from": "claimbuster",
-                "matched_claim": claimbuster_match["matched_claim"]
+                "matched_claim": claimbuster_match["matched_claim"],
             }
 
         # Step 3: Fallback to Google Fact Check
@@ -479,7 +445,7 @@ class FactCheckAggregator:
                 "sources": [],
                 "confidence": 0.0,
                 "tier_used": 1,
-                "matched_from": None
+                "matched_from": None,
             }
 
         # Step 4: Aggregate Google results
@@ -493,15 +459,13 @@ class FactCheckAggregator:
             "confidence": best_match["consensus_confidence"],
             "tier_used": 1,
             "matched_from": "google_factcheck",
-            "all_matches": google_results[:5]  # Top 5
+            "all_matches": google_results[:5],  # Top 5
         }
 
-    async def batch_verify(
-        self,
-        claims: List[str]
-    ) -> List[Dict[str, Any]]:
+    async def batch_verify(self, claims: List[str]) -> List[Dict[str, Any]]:
         """Verify multiple claims in parallel."""
         import asyncio
+
         tasks = [self.verify_claim(claim) for claim in claims]
         return await asyncio.gather(*tasks)
 

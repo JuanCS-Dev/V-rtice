@@ -1,0 +1,293 @@
+{
+  "dashboard": {
+    "title": "Active Immune Core - Agent Performance",
+    "tags": ["immune-core", "agents"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Agent Distribution by Type",
+        "type": "bargauge",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "immune_core_agents_total",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Alive vs Dead Agents",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(immune_core_agents_alive)",
+            "legendFormat": "Alive"
+          },
+          {
+            "expr": "sum(immune_core_agents_total) - sum(immune_core_agents_alive)",
+            "legendFormat": "Dead"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Agent Health Score Heatmap",
+        "type": "heatmap",
+        "gridPos": {"x": 0, "y": 6, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "immune_core_agent_health_score",
+            "format": "time_series"
+          }
+        ],
+        "options": {
+          "calculate": true,
+          "calculation": {},
+          "cellGap": 2,
+          "cellRadius": 0,
+          "color": {
+            "mode": "scheme",
+            "scheme": "RdYlGn",
+            "steps": 128
+          },
+          "yAxis": {
+            "decimals": 0,
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Agent Health Score by Type",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 14, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "avg(immune_core_agent_health_score) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Health Score",
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Agent Load by Type",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 14, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "avg(immune_core_agent_load) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Load",
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Tasks Completed per Agent Type",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 22, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_agent_tasks_completed_total[5m])) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Tasks/sec"}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Tasks Failed per Agent Type",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 22, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_agent_tasks_failed_total[5m])) by (type)",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Failures/sec"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Top 10 Agents by Health Score",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 30, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "topk(10, immune_core_agent_health_score)",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true},
+              "indexByName": {
+                "agent_id": 0,
+                "type": 1,
+                "Value": 2
+              },
+              "renameByName": {
+                "agent_id": "Agent ID",
+                "type": "Type",
+                "Value": "Health Score"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Bottom 10 Agents by Health Score",
+        "type": "table",
+        "gridPos": {"x": 12, "y": 30, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "bottomk(10, immune_core_agent_health_score)",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true},
+              "indexByName": {
+                "agent_id": 0,
+                "type": 1,
+                "Value": 2
+              },
+              "renameByName": {
+                "agent_id": "Agent ID",
+                "type": "Type",
+                "Value": "Health Score"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Agent Success Rate (Tasks Completed / Total)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 38, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(immune_core_agent_tasks_completed_total[5m])) by (type) / (sum(rate(immune_core_agent_tasks_completed_total[5m])) by (type) + sum(rate(immune_core_agent_tasks_failed_total[5m])) by (type))",
+            "legendFormat": "{{type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Success Rate",
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Heartbeat Timeouts by Agent",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 38, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "increase(immune_core_heartbeat_timeouts_total[5m])",
+            "legendFormat": "{{agent_id}}"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [5],
+                "type": "gt"
+              },
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Heartbeat Timeouts",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 12,
+        "title": "Innate vs Adaptive Agents",
+        "type": "piechart",
+        "gridPos": {"x": 0, "y": 46, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(immune_core_agents_alive{type=~\"neutrophil|macrophage|nk_cell|dendritic\"})",
+            "legendFormat": "Innate"
+          },
+          {
+            "expr": "sum(immune_core_agents_alive{type=~\"helper_t|cytotoxic_t|b_cell|t_reg\"})",
+            "legendFormat": "Adaptive"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Agent Load Distribution",
+        "type": "histogram",
+        "gridPos": {"x": 12, "y": 46, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "immune_core_agent_load",
+            "format": "time_series"
+          }
+        ]
+      }
+    ]
+  }
+}

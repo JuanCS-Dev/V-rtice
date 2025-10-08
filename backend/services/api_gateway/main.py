@@ -10,13 +10,14 @@ with the Maximus AI system, providing a unified interface and abstracting the
 complexity of the underlying microservices architecture.
 """
 
-from fastapi import FastAPI, Request, HTTPException, Depends
+import os
+from typing import Dict
+
+import httpx
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
-from typing import Dict, Any, Optional
-import httpx
-import os
-import uvicorn
 
 app = FastAPI(title="Maximus API Gateway", version="1.0.0")
 
@@ -166,7 +167,7 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
         try:
             # Reconstruct headers, excluding host and content-length which httpx handles
             headers = {k: v for k, v in request.headers.items() if k.lower() not in ["host", "content-length"]}
-            
+
             # Forward the request based on its method
             if request.method == "GET":
                 response = await client.get(url, params=request.query_params, headers=headers)
@@ -179,12 +180,15 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
             else:
                 raise HTTPException(status_code=405, detail="Method not allowed")
 
-            response.raise_for_status() # Raise an exception for 4xx/5xx responses
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
             return JSONResponse(content=response.json(), status_code=response.status_code)
         except httpx.RequestError as e:
             raise HTTPException(status_code=500, detail=f"Service communication error: {e}")
         except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail=f"Backend service error: {e.response.text}")
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=f"Backend service error: {e.response.text}",
+            )
 
 
 if __name__ == "__main__":

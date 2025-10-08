@@ -20,6 +20,7 @@ import { MaximusAI3Panel } from './MaximusAI3Panel';
 import { MaximusCore } from './MaximusCore';
 import { WorkflowsPanel } from './WorkflowsPanel';
 import MaximusTerminal from './MaximusTerminal';
+import { ConsciousnessPanel } from './ConsciousnessPanel';
 import { BackgroundEffect } from './BackgroundEffects';
 import SkipLink from '../shared/SkipLink';
 import useKeyboardNavigation from '../../hooks/useKeyboardNavigation';
@@ -48,7 +49,8 @@ export const MaximusDashboard = ({ setCurrentView }) => {
     { id: 'core', name: t('dashboard.maximus.panels.core'), icon: '🤖', description: t('dashboard.maximus.panelDescriptions.core') },
     { id: 'workflows', name: t('dashboard.maximus.panels.workflows'), icon: '🔄', description: t('dashboard.maximus.panelDescriptions.workflows') },
     { id: 'terminal', name: t('dashboard.maximus.panels.terminal'), icon: '⚡', description: t('dashboard.maximus.panelDescriptions.terminal') },
-    { id: 'insights', name: t('dashboard.maximus.panels.insights'), icon: '🧠', description: t('dashboard.maximus.panelDescriptions.insights') },
+    { id: 'consciousness', name: 'Consciousness', icon: '🧠', description: 'Real-time consciousness monitoring (TIG, ESGT, MCEA)' },
+    { id: 'insights', name: t('dashboard.maximus.panels.insights'), icon: '💡', description: t('dashboard.maximus.panelDescriptions.insights') },
     { id: 'ai3', name: t('dashboard.maximus.panels.ai3'), icon: '🧬', description: t('dashboard.maximus.panelDescriptions.ai3') },
     { id: 'oraculo', name: t('dashboard.maximus.panels.oracle'), icon: '🔮', description: t('dashboard.maximus.panelDescriptions.oracle') },
     { id: 'eureka', name: t('dashboard.maximus.panels.eureka'), icon: '🔬', description: t('dashboard.maximus.panelDescriptions.eureka') }
@@ -80,6 +82,8 @@ export const MaximusDashboard = ({ setCurrentView }) => {
         return <WorkflowsPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'terminal':
         return <MaximusTerminal />;
+      case 'consciousness':
+        return <ConsciousnessPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'ai3':
         return <MaximusAI3Panel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'oraculo':

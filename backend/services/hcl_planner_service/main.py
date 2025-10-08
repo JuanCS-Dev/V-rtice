@@ -12,12 +12,12 @@ for translating HCL analysis into actionable plans for the HCL Executor Service,
 ensuring Maximus AI's adaptive self-management.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
+from typing import Any, Dict, List
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from fuzzy_controller import FuzzyController
 from rl_agent import RLAgent
@@ -37,6 +37,7 @@ class PlanRequest(BaseModel):
         current_state (Dict[str, Any]): The current system state.
         operational_goals (Dict[str, Any]): Current operational goals (e.g., 'high_performance', 'cost_efficiency').
     """
+
     analysis_result: Dict[str, Any]
     current_state: Dict[str, Any]
     operational_goals: Dict[str, Any]
@@ -77,7 +78,7 @@ async def generate_resource_plan(request: PlanRequest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the generated resource plan.
     """
     print(f"[API] Generating plan based on analysis: {request.analysis_result.get('overall_health_score')}")
-    
+
     plan_id = f"plan-{datetime.now().strftime('%Y%m%d%H%M%S')}"
     actions: List[Dict[str, Any]] = []
     plan_details: str = ""
@@ -86,7 +87,7 @@ async def generate_resource_plan(request: PlanRequest) -> Dict[str, Any]:
     fuzzy_actions = fuzzy_controller.generate_actions(
         request.analysis_result.get("overall_health_score", 1.0),
         request.current_state.get("cpu_usage", 0.0),
-        request.operational_goals.get("performance_priority", 0.5)
+        request.operational_goals.get("performance_priority", 0.5),
     )
     actions.extend(fuzzy_actions)
     plan_details += "Fuzzy controller suggested actions. "
@@ -94,9 +95,7 @@ async def generate_resource_plan(request: PlanRequest) -> Dict[str, Any]:
     # Example: RL agent for more complex, adaptive decisions
     if request.analysis_result.get("requires_intervention", False):
         rl_recommendations = await rl_agent.recommend_actions(
-            request.current_state,
-            request.analysis_result,
-            request.operational_goals
+            request.current_state, request.analysis_result, request.operational_goals
         )
         actions.extend(rl_recommendations)
         plan_details += "RL agent recommended further actions due to intervention requirement."
@@ -107,7 +106,10 @@ async def generate_resource_plan(request: PlanRequest) -> Dict[str, Any]:
         "status": "generated",
         "plan_details": plan_details.strip(),
         "actions": actions,
-        "estimated_impact": {"performance_boost": 0.1, "cost_reduction": 0.05} # Placeholder
+        "estimated_impact": {
+            "performance_boost": 0.1,
+            "cost_reduction": 0.05,
+        },  # Placeholder
     }
 
 
@@ -121,7 +123,7 @@ async def get_planner_status() -> Dict[str, Any]:
     return {
         "status": "active",
         "fuzzy_controller_status": fuzzy_controller.get_status(),
-        "rl_agent_status": await rl_agent.get_status()
+        "rl_agent_status": await rl_agent.get_status(),
     }
 
 

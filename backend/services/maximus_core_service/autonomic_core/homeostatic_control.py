@@ -10,15 +10,14 @@ self-regulation and adaptive behavior.
 """
 
 import asyncio
-import time
-from typing import Dict, Any, Optional, List
-from datetime import datetime
-from pydantic import BaseModel
 from enum import Enum
+
+from pydantic import BaseModel
 
 
 class OperationalMode(str, Enum):
     """Enumeration for the different operational modes of the system."""
+
     HIGH_PERFORMANCE = "high_performance"
     BALANCED = "balanced"
     ENERGY_EFFICIENT = "energy_efficient"
@@ -35,6 +34,7 @@ class SystemState(BaseModel):
         avg_latency_ms (float): Average system latency in milliseconds.
         is_healthy (bool): True if the system is considered healthy.
     """
+
     timestamp: str
     mode: OperationalMode
     cpu_usage: float
@@ -56,7 +56,7 @@ class HomeostaticControlLoop:
         analyzer=None,
         planner=None,
         executor=None,
-        check_interval_seconds: float = 5.0
+        check_interval_seconds: float = 5.0,
     ):
         """Initializes the HomeostaticControlLoop.
 
@@ -70,7 +70,7 @@ class HomeostaticControlLoop:
         self.check_interval = check_interval_seconds
         self.is_running = False
         self.current_mode = OperationalMode.BALANCED
-        self.state_history: List[SystemState] = []
+        self.state_history: list[SystemState] = []
 
         # Actual components (passed from caller or None)
         self.monitor = monitor
@@ -80,7 +80,8 @@ class HomeostaticControlLoop:
 
     async def start(self):
         """Starts the homeostatic control loop."""
-        if self.is_running: return
+        if self.is_running:
+            return
         self.is_running = True
         print("🧠 [HCL] Homeostatic Control Loop started")
         # In a real implementation, this would start an asyncio task
@@ -97,6 +98,6 @@ class HomeostaticControlLoop:
             print("🧠 [HCL] Executing control loop...")
             await asyncio.sleep(self.check_interval)
 
-    def get_current_state(self) -> Optional[SystemState]:
+    def get_current_state(self) -> SystemState | None:
         """Returns the most recently recorded system state."""
         return self.state_history[-1] if self.state_history else None

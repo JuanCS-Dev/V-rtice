@@ -5,13 +5,11 @@ Uses real network_monitor_service backend
 
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.live import Live
-from rich.panel import Panel
 from typing_extensions import Annotated
 from typing import Optional
 import time
-from ..utils.output import print_json, spinner_task, print_error
+from ..utils.output import print_json, spinner_task, print_error, GeminiStyleTable, PrimordialPanel
 from ..connectors.network_monitor import NetworkMonitorConnector
 from ..utils.decorators import with_connector
 from vertice.utils import primoroso
@@ -175,15 +173,13 @@ async def events(
             primoroso.error("\n[bold green]✓ Network Events Retrieved[/bold green]\n")
 
             if "events" in result and result["events"]:
-                table = Table(
-                    title="Network Events", show_header=True, header_style="bold cyan"
-                )
-                table.add_column("Timestamp", style="dim")
-                table.add_column("Type", style="yellow")
-                table.add_column("Source", style="cyan")
-                table.add_column("Destination", style="magenta")
-                table.add_column("Protocol", style="green")
-                table.add_column("Details", style="white")
+                table = GeminiStyleTable(title="Network Events", console=console)
+                table.add_column("Timestamp")
+                table.add_column("Type")
+                table.add_column("Source")
+                table.add_column("Destination")
+                table.add_column("Protocol")
+                table.add_column("Details")
 
                 for event in result["events"]:
                     table.add_row(
@@ -195,7 +191,7 @@ async def events(
                         event.get("description", "")[:30] + "...",
                     )
 
-                console.print(table)
+                table.render()
                 console.print(f"\n[bold]Total events:[/bold] {len(result['events'])}")
             else:
                 primoroso.warning("No network events found.")
@@ -240,15 +236,14 @@ async def stats(
 [cyan]Blocked IPs:[/cyan] [red]{stats.get('blocked_ips', 0)}[/red]
 [cyan]Active Sessions:[/cyan] [green]{stats.get('active_sessions', 0)}[/green]
 """
-            console.print(
-                Panel(summary, title="Network Statistics", border_style="cyan")
-            )
+            panel = PrimordialPanel(summary, title="Network Statistics", console=console)
+            panel.with_status("info").render()
 
             if "top_talkers" in stats:
-                table = Table(title="Top Talkers", show_header=True)
-                table.add_column("IP Address", style="cyan")
-                table.add_column("Packets", style="yellow", justify="right")
-                table.add_column("Bytes", style="green", justify="right")
+                table = GeminiStyleTable(title="Top Talkers", console=console)
+                table.add_column("IP Address")
+                table.add_column("Packets", alignment="right")
+                table.add_column("Bytes", alignment="right")
 
                 for talker in stats["top_talkers"][:10]:
                     table.add_row(
@@ -257,7 +252,7 @@ async def stats(
                         str(talker.get("bytes", 0)),
                     )
 
-                console.print(table)
+                table.render()
 
 
 @app.command()
@@ -297,12 +292,12 @@ async def alerts(
         primoroso.error("\n[bold green]✓ Network Alerts Retrieved[/bold green]\n")
 
         if "alerts" in result and result["alerts"]:
-            table = Table(title="Network Security Alerts", show_header=True)
-            table.add_column("Timestamp", style="dim")
-            table.add_column("Severity", style="red", justify="center")
-            table.add_column("Alert Type", style="yellow")
-            table.add_column("Source", style="cyan")
-            table.add_column("Description", style="white")
+            table = GeminiStyleTable(title="Network Security Alerts", console=console)
+            table.add_column("Timestamp")
+            table.add_column("Severity", alignment="center")
+            table.add_column("Alert Type")
+            table.add_column("Source")
+            table.add_column("Description")
 
             for alert in result["alerts"]:
                 severity_val = alert.get("severity", "medium").upper()
@@ -321,7 +316,7 @@ async def alerts(
                     alert.get("description", "")[:40] + "...",
                 )
 
-            console.print(table)
+            table.render()
             console.print(f"\n[bold]Total alerts:[/bold] {len(result['alerts'])}")
         else:
             primoroso.success("✓ No alerts found. System is clean.")

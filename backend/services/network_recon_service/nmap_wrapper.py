@@ -12,7 +12,7 @@ understanding of the network attack surface.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict
 
 
 class NmapWrapper:
@@ -36,7 +36,7 @@ class NmapWrapper:
             Dict[str, Any]: A dictionary containing the scan results.
         """
         print(f"[NmapWrapper] Simulating Nmap full scan on {target}")
-        await asyncio.sleep(2) # Simulate scan time
+        await asyncio.sleep(2)  # Simulate scan time
 
         # Simulate Nmap output
         return {
@@ -49,12 +49,12 @@ class NmapWrapper:
                     "ports": [
                         {"port": 22, "state": "open", "service": "ssh"},
                         {"port": 80, "state": "open", "service": "http"},
-                        {"port": 443, "state": "open", "service": "https"}
+                        {"port": 443, "state": "open", "service": "https"},
                     ],
-                    "os": "Linux (mock)"
+                    "os": "Linux (mock)",
                 }
             ],
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     async def quick_scan(self, target: str) -> Dict[str, Any]:
@@ -67,7 +67,7 @@ class NmapWrapper:
             Dict[str, Any]: A dictionary containing the scan results.
         """
         print(f"[NmapWrapper] Simulating Nmap quick scan on {target}")
-        await asyncio.sleep(1) # Simulate scan time
+        await asyncio.sleep(1)  # Simulate scan time
 
         return {
             "scan_type": "nmap_quick_scan",
@@ -78,11 +78,11 @@ class NmapWrapper:
                     "status": "up",
                     "ports": [
                         {"port": 80, "state": "open"},
-                        {"port": 443, "state": "open"}
-                    ]
+                        {"port": 443, "state": "open"},
+                    ],
                 }
             ],
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     async def get_version(self) -> str:

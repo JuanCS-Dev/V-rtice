@@ -46,13 +46,13 @@ class WeberFechnerLaw:
 
         Returns:
             float: The calculated perceived intensity.
-        
+
         Raises:
             ValueError: If stimulus_magnitude or reference_stimulus is non-positive.
         """
         if stimulus_magnitude <= 0 or reference_stimulus <= 0:
             raise ValueError("Stimulus magnitudes must be positive for logarithmic calculation.")
-        
+
         # Weber-Fechner Law: P = k * log(S / S0)
         perceived_intensity = self.k_constant * math.log(stimulus_magnitude / reference_stimulus)
         return perceived_intensity
@@ -70,7 +70,7 @@ class WeberFechnerLaw:
 
         Args:
             new_k (float): The new Weber fraction to set.
-        
+
         Raises:
             ValueError: If new_k is non-positive.
         """

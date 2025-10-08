@@ -12,9 +12,8 @@ optimizing resource allocation, and enhancing the efficiency of perception
 and decision-making.
 """
 
-import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class SensoryGating:
@@ -36,7 +35,7 @@ class SensoryGating:
             "visual": 0.4,
             "auditory": 0.3,
             "chemical": 0.5,
-            "somatosensory": 0.2
+            "somatosensory": 0.2,
         }
         self.last_gating_decision: Optional[datetime] = None
         self.blocked_data_count: int = 0
@@ -52,15 +51,19 @@ class SensoryGating:
             bool: True if the data is allowed, False if it's gated (blocked).
         """
         threshold = self.gating_rules.get(sensor_type, self.default_threshold)
-        
+
         self.last_gating_decision = datetime.now()
 
         if data_intensity >= threshold:
-            print(f"[SensoryGating] Allowing {sensor_type} data (intensity: {data_intensity:.2f} >= threshold: {threshold:.2f})")
+            print(
+                f"[SensoryGating] Allowing {sensor_type} data (intensity: {data_intensity:.2f} >= threshold: {threshold:.2f})"
+            )
             return True
         else:
             self.blocked_data_count += 1
-            print(f"[SensoryGating] Blocking {sensor_type} data (intensity: {data_intensity:.2f} < threshold: {threshold:.2f})")
+            print(
+                f"[SensoryGating] Blocking {sensor_type} data (intensity: {data_intensity:.2f} < threshold: {threshold:.2f})"
+            )
             return False
 
     async def get_status(self) -> Dict[str, Any]:
@@ -73,8 +76,8 @@ class SensoryGating:
             "status": "active",
             "default_threshold": self.default_threshold,
             "gating_rules": self.gating_rules,
-            "last_gating_decision": self.last_gating_decision.isoformat() if self.last_gating_decision else "N/A",
-            "blocked_data_count_since_startup": self.blocked_data_count
+            "last_gating_decision": (self.last_gating_decision.isoformat() if self.last_gating_decision else "N/A"),
+            "blocked_data_count_since_startup": self.blocked_data_count,
         }
 
     def set_gating_threshold(self, sensor_type: str, threshold: float):
@@ -83,7 +86,7 @@ class SensoryGating:
         Args:
             sensor_type (str): The type of sensor.
             threshold (float): The new threshold (0.0 to 1.0).
-        
+
         Raises:
             ValueError: If threshold is outside the valid range [0.0, 1.0].
         """

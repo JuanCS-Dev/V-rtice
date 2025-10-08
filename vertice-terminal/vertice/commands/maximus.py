@@ -8,7 +8,7 @@ from typing_extensions import Annotated
 
 # Importa os componentes da nossa arquitetura
 from ..connectors.ai_agent import AIAgentConnector
-from ..utils.output import output_json, print_error, print_success
+from ..utils.output import output_json, print_error, print_success, PrimordialPanel
 from ..utils.auth import require_auth
 from vertice.utils import primoroso
 
@@ -48,7 +48,7 @@ async def _execute_maximus_command(
                 )
                 raise typer.Exit(code=1)
 
-            # 2. Executa o método do conector (ex: connector.query)
+            # 2. Executa função do conector
             response_data = await connector_method(prompt)
 
         # 3. Processa e exibe a resposta
@@ -61,13 +61,13 @@ async def _execute_maximus_command(
                     "response",
                     'A resposta da Maximus não continha um campo "response".',
                 )
-                console.print(
-                    Panel(
-                        response_text,
-                        title="[bold cyan]Maximus[/bold cyan]",
-                        border_style="cyan",
-                    )
+                # Usa PrimordialPanel com gradiente primoroso
+                panel = PrimordialPanel(
+                    response_text,
+                    title="🌌 Maximus AI Response",
+                    console=console
                 )
+                panel.with_gradient_border().render()
                 print_success("Análise concluída.")
         else:
             print_error(
@@ -162,9 +162,6 @@ def investigate(
             spinner_text="Maximus AI iniciando investigação...",
         )
     )
-
-
-# --- Placeholders do Blueprint ---
 
 
 @app.command()

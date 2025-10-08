@@ -12,26 +12,25 @@ Usage:
 NO MOCKS - Production-ready testing.
 """
 
-import asyncio
 import argparse
-import logging
-import sys
-from typing import Dict, Any
+import asyncio
 from datetime import datetime
 import json
-import aiohttp
+import logging
+import sys
+from typing import Any, Dict
 
+import aiohttp
 from test_framework import IntegrationTestFramework
 from test_scenarios import (
     APTSimulation,
-    RansomwareSimulation,
     DDoSSimulation,
-    ZeroDaySimulation
+    RansomwareSimulation,
+    ZeroDaySimulation,
 )
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -86,14 +85,14 @@ async def run_all_scenarios(framework: IntegrationTestFramework):
     report = framework.generate_test_report()
 
     # Save report to file
-    report_file = '/tmp/vertice_integration_test_report.json'
-    with open(report_file, 'w') as f:
+    report_file = "/tmp/vertice_integration_test_report.json"
+    with open(report_file, "w") as f:
         json.dump(report, f, indent=2)
 
     logger.info(f"Report saved to: {report_file}")
 
     # Return exit code based on pass rate
-    pass_rate = report['summary']['pass_rate']
+    pass_rate = report["summary"]["pass_rate"]
     return 0 if pass_rate == 1.0 else 1
 
 
@@ -107,10 +106,10 @@ async def run_single_scenario(framework: IntegrationTestFramework, scenario: str
     logger.info(f"Running single scenario: {scenario}")
 
     scenarios = {
-        'apt': (APTSimulation, "APT_Attack"),
-        'ransomware': (RansomwareSimulation, "Ransomware_Attack"),
-        'ddos': (DDoSSimulation, "DDoS_Attack"),
-        'zeroday': (ZeroDaySimulation, "ZeroDay_Exploit")
+        "apt": (APTSimulation, "APT_Attack"),
+        "ransomware": (RansomwareSimulation, "Ransomware_Attack"),
+        "ddos": (DDoSSimulation, "DDoS_Attack"),
+        "zeroday": (ZeroDaySimulation, "ZeroDay_Exploit"),
     }
 
     if scenario not in scenarios:
@@ -126,14 +125,13 @@ async def run_single_scenario(framework: IntegrationTestFramework, scenario: str
     framework.print_test_summary()
 
     report = framework.generate_test_report()
-    pass_rate = report['summary']['pass_rate']
+    pass_rate = report["summary"]["pass_rate"]
 
     return 0 if pass_rate == 1.0 else 1
 
 
 async def run_performance_test(
-    framework: IntegrationTestFramework,
-    target_events: int = 100000
+    framework: IntegrationTestFramework, target_events: int = 100000
 ):
     """Run performance test.
 
@@ -150,14 +148,14 @@ async def run_performance_test(
         """Generate single test event - REAL HTTP call to RTE."""
         # Create realistic network event
         event = {
-            'type': 'network_connection',
-            'src_ip': f'192.168.1.{(event_id % 254) + 1}',
-            'dst_ip': '10.0.0.10',
-            'dst_port': 443,
-            'protocol': 'tcp',
-            'payload_size': 1024,
-            'timestamp': datetime.now().isoformat(),
-            'event_id': event_id
+            "type": "network_connection",
+            "src_ip": f"192.168.1.{(event_id % 254) + 1}",
+            "dst_ip": "10.0.0.10",
+            "dst_port": 443,
+            "protocol": "tcp",
+            "payload_size": 1024,
+            "timestamp": datetime.now().isoformat(),
+            "event_id": event_id,
         }
 
         # REAL HTTP POST to RTE service
@@ -165,9 +163,7 @@ async def run_performance_test(
             async with aiohttp.ClientSession() as session:
                 url = f"{framework.services['rte']}/scan"
                 async with session.post(
-                    url,
-                    json=event,
-                    timeout=aiohttp.ClientTimeout(total=0.5)
+                    url, json=event, timeout=aiohttp.ClientTimeout(total=0.5)
                 ) as response:
                     # Await response to ensure real processing
                     _ = await response.json()
@@ -180,7 +176,7 @@ async def run_performance_test(
         test_name="Load_Test",
         event_generator=event_generator,
         target_events=target_events,
-        target_throughput=10000  # 10k events/s
+        target_throughput=10000,  # 10k events/s
     )
 
     # Print results
@@ -200,11 +196,15 @@ async def run_performance_test(
     success = True
 
     if metrics.latency_p99_ms > 50:
-        logger.error(f"FAIL: p99 latency {metrics.latency_p99_ms:.1f}ms exceeds 50ms target")
+        logger.error(
+            f"FAIL: p99 latency {metrics.latency_p99_ms:.1f}ms exceeds 50ms target"
+        )
         success = False
 
     if metrics.throughput_events_per_sec < 1000:
-        logger.error(f"FAIL: Throughput {metrics.throughput_events_per_sec:.0f} events/s below 1000 target")
+        logger.error(
+            f"FAIL: Throughput {metrics.throughput_events_per_sec:.0f} events/s below 1000 target"
+        )
         success = False
 
     if metrics.success_rate < 0.99:
@@ -221,35 +221,31 @@ async def run_performance_test(
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description='VÉRTICE Integration Tests - FASE 7'
-    )
+    parser = argparse.ArgumentParser(description="VÉRTICE Integration Tests - FASE 7")
 
     parser.add_argument(
-        '--scenario',
+        "--scenario",
         type=str,
-        choices=['apt', 'ransomware', 'ddos', 'zeroday'],
-        help='Run single scenario'
+        choices=["apt", "ransomware", "ddos", "zeroday"],
+        help="Run single scenario",
     )
 
     parser.add_argument(
-        '--performance',
-        action='store_true',
-        help='Run performance test'
+        "--performance", action="store_true", help="Run performance test"
     )
 
     parser.add_argument(
-        '--events',
+        "--events",
         type=int,
         default=10000,
-        help='Number of events for performance test (default: 10000)'
+        help="Number of events for performance test (default: 10000)",
     )
 
     parser.add_argument(
-        '--base-url',
+        "--base-url",
         type=str,
-        default='http://localhost',
-        help='Base URL for services (default: http://localhost)'
+        default="http://localhost",
+        help="Base URL for services (default: http://localhost)",
     )
 
     args = parser.parse_args()
@@ -268,5 +264,5 @@ def main():
     sys.exit(exit_code)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

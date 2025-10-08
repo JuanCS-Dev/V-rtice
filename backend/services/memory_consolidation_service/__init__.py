@@ -10,15 +10,15 @@ __version__ = "1.0.0"
 __author__ = "VÉRTICE Team"
 
 from .consolidation_core import (
-    MemoryImportance,
+    ConsolidationCycle,
     ConsolidationStatus,
+    ImportanceScorer,
+    LongTermMemory,
+    MemoryConsolidator,
+    MemoryImportance,
+    PatternExtractor,
     SecurityEvent,
     ShortTermMemory,
-    LongTermMemory,
-    ConsolidationCycle,
-    ImportanceScorer,
-    PatternExtractor,
-    MemoryConsolidator,
 )
 
 __all__ = [

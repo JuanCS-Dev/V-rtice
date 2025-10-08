@@ -6,25 +6,22 @@ Collects events locally and syncs to cloud brain.
 NO MOCKS - Production-ready edge deployment.
 """
 
-import asyncio
 import gzip
 import json
 import logging
-import time
 import uuid
 from collections import deque
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Any, Optional, Deque
-import hashlib
-
+from typing import Any, Deque, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class EventType(Enum):
     """Event types collected by edge agent."""
+
     FILE_EVENT = "file_event"
     NETWORK_EVENT = "network_event"
     PROCESS_EVENT = "process_event"
@@ -35,6 +32,7 @@ class EventType(Enum):
 
 class EdgeAgentStatus(Enum):
     """Edge agent operational status."""
+
     INITIALIZING = "initializing"
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
@@ -45,6 +43,7 @@ class EdgeAgentStatus(Enum):
 @dataclass
 class Event:
     """Edge-collected event."""
+
     event_id: str
     event_type: EventType
     timestamp: datetime
@@ -64,13 +63,14 @@ class Event:
             "tenant_id": self.tenant_id,
             "severity": self.severity,
             "data": self.data,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
 
 @dataclass
 class EventBatch:
     """Batch of events for efficient transmission."""
+
     batch_id: str
     events: List[Event]
     created_at: datetime
@@ -83,10 +83,10 @@ class EventBatch:
         data = {
             "batch_id": self.batch_id,
             "created_at": self.created_at.isoformat(),
-            "events": [e.to_dict() for e in self.events]
+            "events": [e.to_dict() for e in self.events],
         }
 
-        json_bytes = json.dumps(data).encode('utf-8')
+        json_bytes = json.dumps(data).encode("utf-8")
         compressed = gzip.compress(json_bytes, compresslevel=6)
 
         self.compressed = True
@@ -96,7 +96,7 @@ class EventBatch:
 
     def size_bytes(self) -> int:
         """Get batch size in bytes."""
-        data = json.dumps([e.to_dict() for e in self.events]).encode('utf-8')
+        data = json.dumps([e.to_dict() for e in self.events]).encode("utf-8")
         return len(data)
 
 
@@ -159,7 +159,7 @@ class LocalBuffer:
             "max_size": self.max_size,
             "utilization": len(self.buffer) / self.max_size,
             "overflow_count": self.overflow_count,
-            "total_buffered": self.total_buffered
+            "total_buffered": self.total_buffered,
         }
 
 
@@ -173,7 +173,7 @@ class BatchingStrategy:
         self,
         max_batch_size: int = 1000,
         max_batch_age_seconds: float = 5.0,
-        max_batch_bytes: int = 1_000_000  # 1MB
+        max_batch_bytes: int = 1_000_000,  # 1MB
     ):
         """Initialize batching strategy.
 
@@ -190,7 +190,7 @@ class BatchingStrategy:
         self,
         current_batch: List[Event],
         batch_created_at: datetime,
-        high_priority: bool = False
+        high_priority: bool = False,
     ) -> bool:
         """Determine if batch should be flushed.
 
@@ -216,7 +216,7 @@ class BatchingStrategy:
             return True
 
         # Byte size limit (estimate)
-        estimated_bytes = len(json.dumps([e.to_dict() for e in current_batch]).encode('utf-8'))
+        estimated_bytes = len(json.dumps([e.to_dict() for e in current_batch]).encode("utf-8"))
         if estimated_bytes >= self.max_batch_bytes:
             return True
 
@@ -289,9 +289,9 @@ class HeartbeatManager:
         """Get heartbeat status."""
         return {
             "is_connected": self.is_connected,
-            "last_heartbeat": self.last_heartbeat.isoformat() if self.last_heartbeat else None,
+            "last_heartbeat": (self.last_heartbeat.isoformat() if self.last_heartbeat else None),
             "last_ack": self.last_ack.isoformat() if self.last_ack else None,
-            "missed_heartbeats": self.missed_heartbeats
+            "missed_heartbeats": self.missed_heartbeats,
         }
 
 
@@ -306,7 +306,7 @@ class RetryLogic:
         max_retries: int = 5,
         base_delay: float = 1.0,
         max_delay: float = 60.0,
-        exponential_base: float = 2.0
+        exponential_base: float = 2.0,
     ):
         """Initialize retry logic.
 
@@ -337,7 +337,7 @@ class RetryLogic:
             return -1  # Max retries exceeded
 
         # Exponential backoff: base_delay * (exponential_base ^ attempts)
-        delay = self.base_delay * (self.exponential_base ** attempts)
+        delay = self.base_delay * (self.exponential_base**attempts)
         delay = min(delay, self.max_delay)
 
         return delay
@@ -380,7 +380,7 @@ class LocalMetrics:
         event_count: int,
         bytes_sent: int,
         compression_ratio: float,
-        latency: float
+        latency: float,
     ):
         """Record batch sent."""
         self.events_sent += event_count
@@ -410,7 +410,7 @@ class LocalMetrics:
             "batches_sent": self.batches_sent,
             "avg_compression_ratio": avg_compression,
             "avg_send_latency_ms": avg_latency * 1000,
-            "success_rate": self.events_sent / max(self.events_collected, 1)
+            "success_rate": self.events_sent / max(self.events_collected, 1),
         }
 
 
@@ -428,7 +428,7 @@ class EdgeAgentController:
         cloud_coordinator_url: str,
         buffer_size: int = 100000,
         batch_size: int = 1000,
-        batch_age_seconds: float = 5.0
+        batch_age_seconds: float = 5.0,
     ):
         """Initialize edge agent.
 
@@ -448,10 +448,7 @@ class EdgeAgentController:
 
         # Components
         self.buffer = LocalBuffer(max_size=buffer_size)
-        self.batching = BatchingStrategy(
-            max_batch_size=batch_size,
-            max_batch_age_seconds=batch_age_seconds
-        )
+        self.batching = BatchingStrategy(max_batch_size=batch_size, max_batch_age_seconds=batch_age_seconds)
         self.heartbeat = HeartbeatManager()
         self.retry = RetryLogic()
         self.metrics = LocalMetrics()
@@ -468,7 +465,7 @@ class EdgeAgentController:
         event_type: EventType,
         severity: float,
         data: Dict[str, Any],
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Collect edge event.
 
@@ -489,7 +486,7 @@ class EdgeAgentController:
             tenant_id=self.tenant_id,
             severity=severity,
             data=data,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         # Buffer event
@@ -516,16 +513,12 @@ class EdgeAgentController:
         # Check if should flush current batch
         high_priority = any(e.severity >= 0.8 for e in self.current_batch)
 
-        if self.current_batch and self.batching.should_flush(
-            self.current_batch,
-            self.batch_created_at,
-            high_priority
-        ):
+        if self.current_batch and self.batching.should_flush(self.current_batch, self.batch_created_at, high_priority):
             # Create batch
             batch = EventBatch(
                 batch_id=str(uuid.uuid4()),
                 events=self.current_batch.copy(),
-                created_at=self.batch_created_at
+                created_at=self.batch_created_at,
             )
 
             batches.append(batch)
@@ -554,5 +547,5 @@ class EdgeAgentController:
             "buffer": self.buffer.get_stats(),
             "heartbeat": self.heartbeat.get_status(),
             "metrics": self.metrics.get_stats(),
-            "current_batch_size": len(self.current_batch)
+            "current_batch_size": len(self.current_batch),
         }

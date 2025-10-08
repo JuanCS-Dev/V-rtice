@@ -1,0 +1,18 @@
+fastapi>=0.115.0  # Security fix
+uvicorn[standard]>=0.32.0  # Compatibility
+httpx>=0.27.0  # Security0
+python-multipart>=0.0.18  # CVE-2024-53981 fix
+Jinja2==3.1.2
+
+# Added for refactoring
+SQLAlchemy==2.0.23
+alembic==1.13.0
+python-dotenv==1.0.0
+pydantic-settings==2.1.0
+aiosqlite==0.19.0
+email-validator==2.1.1
+
+# Added for testing
+pytest==7.4.0
+pytest-asyncio==0.21.1
+anyio>=4.4.0  # Security fix for race condition

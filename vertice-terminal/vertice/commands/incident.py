@@ -15,14 +15,13 @@ Exemplos:
 
 import typer
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 from rich.tree import Tree
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
 import asyncio
 from vertice.utils import primoroso
+from vertice.utils.output import GeminiStyleTable, PrimordialPanel
 
 app = typer.Typer(
     name="incident",
@@ -120,13 +119,13 @@ def list(
         primoroso.warning("No incidents found")
         return
 
-    table = Table(title=f"🚨 Incidents ({len(incidents)})")
-    table.add_column("ID", style="cyan", no_wrap=True)
+    table = GeminiStyleTable(title=f"🚨 Incidents ({len(incidents)})", console=console)
+    table.add_column("ID", no_wrap=True)
     table.add_column("Title")
-    table.add_column("Severity", justify="center")
-    table.add_column("Status", justify="center")
+    table.add_column("Severity", alignment="center")
+    table.add_column("Status", alignment="center")
     table.add_column("Category")
-    table.add_column("Reported", style="dim")
+    table.add_column("Reported")
 
     for incident in incidents:
         sev_colors = {
@@ -146,7 +145,7 @@ def list(
             incident.reported_at.strftime("%m-%d %H:%M"),
         )
 
-    console.print(table)
+    table.render()
 
 
 @app.command()
@@ -275,7 +274,7 @@ def run(
     # Show results
     primoroso.error(f"\n[green]✅ Playbook execution completed: {execution.id}[/green]\n")
 
-    table = Table(title="Execution Summary")
+    table = GeminiStyleTable(title="Execution Summary", console=console)
     table.add_column("Metric")
     table.add_column("Value")
 
@@ -284,7 +283,7 @@ def run(
     table.add_row("Skipped", str(execution.skipped_count))
     table.add_row("Status", execution.status.value)
 
-    console.print(table)
+    table.render()
 
 
 # Case commands
@@ -357,12 +356,12 @@ def list(
         primoroso.warning("No cases found")
         return
 
-    table = Table(title=f"🔎 Cases ({len(cases)})")
-    table.add_column("ID", style="cyan")
+    table = GeminiStyleTable(title=f"🔎 Cases ({len(cases)})", console=console)
+    table.add_column("ID")
     table.add_column("Title")
-    table.add_column("Priority", justify="center")
+    table.add_column("Priority", alignment="center")
     table.add_column("Status")
-    table.add_column("Findings", justify="center")
+    table.add_column("Findings", alignment="center")
 
     for case in cases:
         table.add_row(
@@ -373,7 +372,7 @@ def list(
             str(len(case.findings)),
         )
 
-    console.print(table)
+    table.render()
 
 
 # Timeline commands
@@ -493,13 +492,13 @@ def list(
         primoroso.warning("No evidence found")
         return
 
-    table = Table(title=f"🔐 Evidence ({len(evidence_list)})")
-    table.add_column("ID", style="cyan")
+    table = GeminiStyleTable(title=f"🔐 Evidence ({len(evidence_list)})", console=console)
+    table.add_column("ID")
     table.add_column("Type")
     table.add_column("Source")
     table.add_column("Status")
     table.add_column("Collected")
-    table.add_column("SHA256", style="dim")
+    table.add_column("SHA256")
 
     for evidence in evidence_list:
         table.add_row(
@@ -511,7 +510,7 @@ def list(
             evidence.sha256_hash[:16] + "..." if evidence.sha256_hash else "—",
         )
 
-    console.print(table)
+    table.render()
 
 
 @evidence_app.command()
@@ -571,4 +570,7 @@ def _show_incident(incident):
 [dim]Updates:[/dim] {len(incident.updates)}
 """
 
-    console.print(Panel(content, title="🚨 Incident Details", border_style=color))
+    panel = PrimordialPanel(content, title="🚨 Incident Details", console=console)
+    # Map severity to status
+    status_map = {"sev0_critical": "error", "sev1_high": "warning", "sev2_medium": "info", "sev3_low": "info"}
+    panel.with_status(status_map.get(incident.severity.value, "info")).render()

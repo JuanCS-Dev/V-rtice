@@ -18,9 +18,10 @@ Date: 2025-10-06
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 from ethical_guardian import EthicalDecisionResult, EthicalDecisionType, EthicalGuardian
@@ -39,11 +40,11 @@ class ToolExecutionResult:
 
     # Tool execution
     output: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     execution_duration_ms: float = 0.0
 
     # Ethical validation
-    ethical_decision: Optional[EthicalDecisionResult] = None
+    ethical_decision: EthicalDecisionResult | None = None
     ethical_validation_duration_ms: float = 0.0
 
     # Total
@@ -51,9 +52,9 @@ class ToolExecutionResult:
 
     # Metadata
     actor: str = "maximus"
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for logging/API."""
         return {
             "execution_id": self.execution_id,
@@ -66,9 +67,7 @@ class ToolExecutionResult:
             "ethical_validation_duration_ms": self.ethical_validation_duration_ms,
             "total_duration_ms": self.total_duration_ms,
             "actor": self.actor,
-            "ethical_decision": (
-                self.ethical_decision.to_dict() if self.ethical_decision else None
-            ),
+            "ethical_decision": (self.ethical_decision.to_dict() if self.ethical_decision else None),
         }
 
     def get_summary(self) -> str:
@@ -80,10 +79,7 @@ class ToolExecutionResult:
         if self.ethical_decision:
             if self.ethical_decision.decision_type == EthicalDecisionType.APPROVED:
                 ethical_status = "✅ Approved"
-            elif (
-                self.ethical_decision.decision_type
-                == EthicalDecisionType.APPROVED_WITH_CONDITIONS
-            ):
+            elif self.ethical_decision.decision_type == EthicalDecisionType.APPROVED_WITH_CONDITIONS:
                 ethical_status = "⚠️  Approved with conditions"
             else:
                 ethical_status = f"❌ Rejected ({self.ethical_decision.decision_type.value})"
@@ -141,9 +137,9 @@ class EthicalToolWrapper:
         self,
         tool_name: str,
         tool_method: Callable,
-        tool_args: Dict[str, Any],
+        tool_args: dict[str, Any],
         actor: str = "maximus",
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> ToolExecutionResult:
         """
         Intercepta e valida execução de um tool.
@@ -166,9 +162,7 @@ class EthicalToolWrapper:
         """
         start_time = time.time()
 
-        result = ToolExecutionResult(
-            tool_name=tool_name, actor=actor, context=context or {}
-        )
+        result = ToolExecutionResult(tool_name=tool_name, actor=actor, context=context or {})
 
         try:
             # ================================================================
@@ -197,16 +191,13 @@ class EthicalToolWrapper:
                 )
 
                 result.ethical_decision = ethical_decision
-                result.ethical_validation_duration_ms = (
-                    time.time() - pre_check_start
-                ) * 1000
+                result.ethical_validation_duration_ms = (time.time() - pre_check_start) * 1000
 
                 # Check if approved
                 if not ethical_decision.is_approved:
                     result.success = False
                     result.error = (
-                        f"Tool execution blocked by ethical validation: "
-                        f"{ethical_decision.decision_type.value}"
+                        f"Tool execution blocked by ethical validation: {ethical_decision.decision_type.value}"
                     )
                     if ethical_decision.rejection_reasons:
                         result.error += f" - {', '.join(ethical_decision.rejection_reasons)}"
@@ -229,9 +220,7 @@ class EthicalToolWrapper:
             else:
                 # Run sync method in executor to avoid blocking
                 loop = asyncio.get_event_loop()
-                output = await loop.run_in_executor(
-                    None, lambda: tool_method(**tool_args)
-                )
+                output = await loop.run_in_executor(None, lambda: tool_method(**tool_args))
 
             result.output = output
             result.success = True
@@ -260,7 +249,7 @@ class EthicalToolWrapper:
 
         return result
 
-    def _assess_risk(self, tool_name: str, tool_args: Dict[str, Any]) -> float:
+    def _assess_risk(self, tool_name: str, tool_args: dict[str, Any]) -> float:
         """
         Assess risk score for a tool execution.
 
@@ -303,9 +292,7 @@ class EthicalToolWrapper:
 
         # Check target
         target = tool_args.get("target", "").lower()
-        if any(
-            keyword in target for keyword in ["production", "prod", "live", "critical"]
-        ):
+        if any(keyword in target for keyword in ["production", "prod", "live", "critical"]):
             risk_score = min(risk_score + 0.15, 1.0)
 
         # Check if has authorization
@@ -321,17 +308,13 @@ class EthicalToolWrapper:
                 self.avg_overhead_ms * (self.total_executions - 1) + overhead_ms
             ) / self.total_executions
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get wrapper statistics."""
         return {
             "total_executions": self.total_executions,
             "total_approved": self.total_approved,
             "total_blocked": self.total_blocked,
-            "block_rate": (
-                self.total_blocked / self.total_executions
-                if self.total_executions > 0
-                else 0.0
-            ),
+            "block_rate": (self.total_blocked / self.total_executions if self.total_executions > 0 else 0.0),
             "avg_overhead_ms": self.avg_overhead_ms,
             "guardian_stats": self.guardian.get_statistics(),
             "enabled_features": {

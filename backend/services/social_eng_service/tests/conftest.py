@@ -15,19 +15,17 @@ Social Engineering Service's API endpoints and business logic.
 """
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
 
-from main import app
 from database import Base, get_db
+from main import app
 
 # Use an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -37,21 +35,22 @@ def db_session_fixture():
 
     Ensures that tables are created before each test and dropped after.
     """
-    Base.metadata.create_all(bind=engine) # Create tables
+    Base.metadata.create_all(bind=engine)  # Create tables
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
-        Base.metadata.drop_all(bind=engine) # Drop tables after test
+        Base.metadata.drop_all(bind=engine)  # Drop tables after test
 
 
 @pytest.fixture(name="client")
-def client_fixture(db_session: Session): # Use the db_session fixture
+def client_fixture(db_session: Session):  # Use the db_session fixture
     """Provides a TestClient for making API requests.
 
     Overrides the get_db dependency to use the test database session.
     """
+
     def override_get_db():
         """Substitui a dependência get_db para usar a sessão de banco de dados de teste."""
         yield db_session
@@ -59,4 +58,4 @@ def client_fixture(db_session: Session): # Use the db_session fixture
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as client:
         yield client
-    app.dependency_overrides.clear() # Clean up overrides
+    app.dependency_overrides.clear()  # Clean up overrides

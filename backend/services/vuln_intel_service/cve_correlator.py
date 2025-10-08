@@ -18,8 +18,8 @@ defense strategies.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class CVECorrelator:
@@ -41,7 +41,7 @@ class CVECorrelator:
                 "affected_products": ["WebApp v1.0"],
                 "exploit_available": True,
                 "exploit_details": "Exploit-DB ID: 12345",
-                "last_updated": datetime.now().isoformat()
+                "last_updated": datetime.now().isoformat(),
             },
             "CVE-2023-5678": {
                 "id": "CVE-2023-5678",
@@ -49,8 +49,8 @@ class CVECorrelator:
                 "severity": "MEDIUM",
                 "affected_products": ["BlogEngine v2.0"],
                 "exploit_available": False,
-                "last_updated": datetime.now().isoformat()
-            }
+                "last_updated": datetime.now().isoformat(),
+            },
         }
         self.last_correlation_time: Optional[datetime] = None
         self.current_status: str = "active"
@@ -65,7 +65,7 @@ class CVECorrelator:
             Optional[Dict[str, Any]]: A dictionary containing CVE information, or None if not found.
         """
         print(f"[CVECorrelator] Retrieving info for CVE: {cve_id}")
-        await asyncio.sleep(0.05) # Simulate database lookup
+        await asyncio.sleep(0.05)  # Simulate database lookup
         return self.cve_database.get(cve_id)
 
     async def correlate_vulnerability(self, software_name: str, software_version: str) -> List[Dict[str, Any]]:
@@ -79,13 +79,13 @@ class CVECorrelator:
             List[Dict[str, Any]]: A list of dictionaries, each representing a correlated CVE.
         """
         print(f"[CVECorrelator] Correlating vulnerabilities for {software_name} {software_version}")
-        await asyncio.sleep(0.1) # Simulate correlation process
+        await asyncio.sleep(0.1)  # Simulate correlation process
 
         correlated_cves: List[Dict[str, Any]] = []
         for cve_id, cve_info in self.cve_database.items():
             if any(f"{software_name} v{software_version}" in p for p in cve_info.get("affected_products", [])):
                 correlated_cves.append(cve_info)
-        
+
         self.last_correlation_time = datetime.now()
         return correlated_cves
 
@@ -98,7 +98,8 @@ class CVECorrelator:
         print(f"[CVECorrelator] Updating CVE database with {len(new_cves)} new entries.")
         await asyncio.sleep(0.1)
         for cve in new_cves:
-            if "id" in cve: self.cve_database[cve["id"]] = cve
+            if "id" in cve:
+                self.cve_database[cve["id"]] = cve
         self.last_correlation_time = datetime.now()
 
     async def get_status(self) -> Dict[str, Any]:
@@ -110,5 +111,5 @@ class CVECorrelator:
         return {
             "status": self.current_status,
             "total_cves_in_db": len(self.cve_database),
-            "last_correlation": self.last_correlation_time.isoformat() if self.last_correlation_time else "N/A"
+            "last_correlation": (self.last_correlation_time.isoformat() if self.last_correlation_time else "N/A"),
         }

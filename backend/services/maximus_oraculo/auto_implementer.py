@@ -12,8 +12,8 @@ and enhancing the AI's self-modification and self-improvement capabilities.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class AutoImplementer:
@@ -30,7 +30,12 @@ class AutoImplementer:
         self.last_implementation_time: Optional[datetime] = None
         self.current_status: str = "ready_for_implementation"
 
-    async def implement_code(self, task_description: str, context: Optional[Dict[str, Any]] = None, target_language: str = "python") -> Dict[str, Any]:
+    async def implement_code(
+        self,
+        task_description: str,
+        context: Optional[Dict[str, Any]] = None,
+        target_language: str = "python",
+    ) -> Dict[str, Any]:
         """Generates and implements code based on a task description.
 
         Args:
@@ -42,22 +47,24 @@ class AutoImplementer:
             Dict[str, Any]: A dictionary containing the generated code and implementation details.
         """
         print(f"[AutoImplementer] Implementing code for task: {task_description} in {target_language}")
-        await asyncio.sleep(0.5) # Simulate code generation and implementation
+        await asyncio.sleep(0.5)  # Simulate code generation and implementation
 
         generated_code = f"# Auto-generated {target_language} code for: {task_description}\n\ndef {task_description.replace(' ', '_').lower()}():\n    # Your implementation logic here\n    print('Task completed!')\n"
         implementation_details = {
             "status": "success",
             "message": "Code generated and simulated implementation.",
             "language": target_language,
-            "context_used": context
+            "context_used": context,
         }
 
-        self.implementation_history.append({
-            "timestamp": datetime.now().isoformat(),
-            "task_description": task_description,
-            "generated_code_summary": generated_code[:100] + "...",
-            "details": implementation_details
-        })
+        self.implementation_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "task_description": task_description,
+                "generated_code_summary": generated_code[:100] + "...",
+                "details": implementation_details,
+            }
+        )
         self.last_implementation_time = datetime.now()
 
         return {"generated_code": generated_code, "details": implementation_details}
@@ -71,5 +78,7 @@ class AutoImplementer:
         return {
             "status": self.current_status,
             "total_implementations": len(self.implementation_history),
-            "last_implementation": self.last_implementation_time.isoformat() if self.last_implementation_time else "N/A"
+            "last_implementation": (
+                self.last_implementation_time.isoformat() if self.last_implementation_time else "N/A"
+            ),
         }

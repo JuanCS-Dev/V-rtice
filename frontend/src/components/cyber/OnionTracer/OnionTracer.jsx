@@ -246,11 +246,9 @@ export const OnionTracer = ({
       setStatusMessage(`❌ Trace failed: ${error.message}`);
       setIsTracing(false);
 
-      // Fallback para rota fake se serviços estiverem offline
-      console.warn('Falling back to simulated route...');
-      const route = generateOnionRoute();
-      setNodes(route);
-      // Continua com animação fake...
+      // REGRA DE OURO: No fallback to simulated route
+      // Clear nodes to show error state
+      setNodes([]);
     }
 
   }, [targetIp, onTraceComplete, generateOnionRoute]);

@@ -13,8 +13,8 @@ This module ensures that HCL plans are reliably and effectively implemented.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List
 
 from k8s_controller import KubernetesController
 
@@ -52,7 +52,11 @@ class ActionExecutor:
         for action in actions:
             action_type = action.get("type")
             action_params = action.get("parameters", {})
-            action_result = {"action_type": action_type, "status": "failed", "details": "Unknown action type"}
+            action_result = {
+                "action_type": action_type,
+                "status": "failed",
+                "details": "Unknown action type",
+            }
 
             try:
                 if action_type == "scale_deployment":
@@ -61,7 +65,11 @@ class ActionExecutor:
                     replicas = action_params.get("replicas")
                     if deployment_name and replicas is not None:
                         await self.k8s_controller.scale_deployment(deployment_name, namespace, replicas)
-                        action_result = {"action_type": action_type, "status": "success", "details": f"Scaled {deployment_name} to {replicas} replicas."}
+                        action_result = {
+                            "action_type": action_type,
+                            "status": "success",
+                            "details": f"Scaled {deployment_name} to {replicas} replicas.",
+                        }
                     else:
                         raise ValueError("Missing deployment_name or replicas for scale_deployment.")
                 elif action_type == "update_resource_limits":
@@ -70,8 +78,14 @@ class ActionExecutor:
                     cpu_limit = action_params.get("cpu_limit")
                     memory_limit = action_params.get("memory_limit")
                     if deployment_name and (cpu_limit or memory_limit):
-                        await self.k8s_controller.update_resource_limits(deployment_name, namespace, cpu_limit, memory_limit)
-                        action_result = {"action_type": action_type, "status": "success", "details": f"Updated resource limits for {deployment_name}."}
+                        await self.k8s_controller.update_resource_limits(
+                            deployment_name, namespace, cpu_limit, memory_limit
+                        )
+                        action_result = {
+                            "action_type": action_type,
+                            "status": "success",
+                            "details": f"Updated resource limits for {deployment_name}.",
+                        }
                     else:
                         raise ValueError("Missing deployment_name or resource limits for update_resource_limits.")
                 elif action_type == "restart_pod":
@@ -79,19 +93,31 @@ class ActionExecutor:
                     namespace = action_params.get("namespace", "default")
                     if pod_name:
                         await self.k8s_controller.restart_pod(pod_name, namespace)
-                        action_result = {"action_type": action_type, "status": "success", "details": f"Restarted pod {pod_name}."}
+                        action_result = {
+                            "action_type": action_type,
+                            "status": "success",
+                            "details": f"Restarted pod {pod_name}.",
+                        }
                     else:
                         raise ValueError("Missing pod_name for restart_pod.")
                 else:
                     print(f"[ActionExecutor] Unsupported action type: {action_type}")
-                    action_result = {"action_type": action_type, "status": "failed", "details": f"Unsupported action type: {action_type}"}
+                    action_result = {
+                        "action_type": action_type,
+                        "status": "failed",
+                        "details": f"Unsupported action type: {action_type}",
+                    }
 
             except Exception as e:
                 print(f"[ActionExecutor] Error executing action {action_type}: {e}")
-                action_result = {"action_type": action_type, "status": "failed", "details": str(e)}
-            
+                action_result = {
+                    "action_type": action_type,
+                    "status": "failed",
+                    "details": str(e),
+                }
+
             results.append(action_result)
-            await asyncio.sleep(0.05) # Simulate time between actions
+            await asyncio.sleep(0.05)  # Simulate time between actions
 
         return results
 

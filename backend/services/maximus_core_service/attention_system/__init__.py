@@ -17,30 +17,23 @@ Key Components:
 
 from .attention_core import (
     AttentionSystem,
-    PeripheralMonitor,
+    FovealAnalysis,
     FovealAnalyzer,
     PeripheralDetection,
-    FovealAnalysis
+    PeripheralMonitor,
 )
-
-from .salience_scorer import (
-    SalienceScorer,
-    SalienceScore,
-    SalienceLevel
-)
+from .salience_scorer import SalienceLevel, SalienceScore, SalienceScorer
 
 __all__ = [
     # Main components
-    'AttentionSystem',
-    'PeripheralMonitor',
-    'FovealAnalyzer',
-
+    "AttentionSystem",
+    "PeripheralMonitor",
+    "FovealAnalyzer",
     # Data structures
-    'PeripheralDetection',
-    'FovealAnalysis',
-
+    "PeripheralDetection",
+    "FovealAnalysis",
     # Salience scoring
-    'SalienceScorer',
-    'SalienceScore',
-    'SalienceLevel'
+    "SalienceScorer",
+    "SalienceScore",
+    "SalienceLevel",
 ]

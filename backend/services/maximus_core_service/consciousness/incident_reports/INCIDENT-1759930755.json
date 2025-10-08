@@ -1,0 +1,11 @@
+{
+  "incident_id": "INCIDENT-1759930755",
+  "shutdown_reason": "anomaly_detected",
+  "shutdown_timestamp": 1759930755.9815938,
+  "shutdown_timestamp_iso": "2025-10-08T10:39:15.981594",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1759930755.9817815,
+    "timestamp_iso": "2025-10-08T10:39:15.981783",
+    "pid": 1002101,
+    "tig_nodes": 

@@ -17,8 +17,8 @@ sustainably without being blocked or blacklisted by target services.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any, Dict
 
 
 class RateLimiter:
@@ -35,7 +35,7 @@ class RateLimiter:
             rate_limit_per_minute (int): The maximum number of requests allowed per minute.
             burst_size (int): The maximum number of requests allowed in a short burst.
         """
-        self.rate_limit = rate_limit_per_minute / 60.0 # requests per second
+        self.rate_limit = rate_limit_per_minute / 60.0  # requests per second
         self.burst_size = burst_size
         self.tokens = burst_size
         self.last_refill_time = datetime.now()
@@ -73,5 +73,5 @@ class RateLimiter:
             "rate_limit_per_minute": self.rate_limit * 60,
             "burst_size": self.burst_size,
             "current_tokens": self.tokens,
-            "last_refill": self.last_refill_time.isoformat()
+            "last_refill": self.last_refill_time.isoformat(),
         }

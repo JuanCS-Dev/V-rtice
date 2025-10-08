@@ -12,16 +12,14 @@ Date: 2025-10-06
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
-from uuid import uuid4
+from typing import Any
 
 from .base import (
     DecisionType,
     ERBDecision,
+    ERBMeeting,
     ERBMember,
     ERBMemberRole,
-    ERBMeeting,
-    GovernanceAction,
     GovernanceConfig,
     GovernanceResult,
     PolicyType,
@@ -41,9 +39,9 @@ class ERBManager:
     def __init__(self, config: GovernanceConfig):
         """Initialize ERB Manager."""
         self.config = config
-        self.members: Dict[str, ERBMember] = {}
-        self.meetings: Dict[str, ERBMeeting] = {}
-        self.decisions: Dict[str, ERBDecision] = {}
+        self.members: dict[str, ERBMember] = {}
+        self.meetings: dict[str, ERBMeeting] = {}
+        self.decisions: dict[str, ERBDecision] = {}
 
         # Track statistics
         self.stats = {
@@ -65,9 +63,9 @@ class ERBManager:
         email: str,
         role: ERBMemberRole,
         organization: str,
-        expertise: List[str],
+        expertise: list[str],
         is_internal: bool = True,
-        term_months: Optional[int] = None,
+        term_months: int | None = None,
         voting_rights: bool = True,
     ) -> GovernanceResult:
         """
@@ -179,19 +177,19 @@ class ERBManager:
             metadata={"reason": reason},
         )
 
-    def get_active_members(self) -> List[ERBMember]:
+    def get_active_members(self) -> list[ERBMember]:
         """Get all active ERB members."""
         return [m for m in self.members.values() if m.is_active]
 
-    def get_voting_members(self) -> List[ERBMember]:
+    def get_voting_members(self) -> list[ERBMember]:
         """Get all members with voting rights."""
         return [m for m in self.members.values() if m.is_voting_member()]
 
-    def get_member_by_role(self, role: ERBMemberRole) -> List[ERBMember]:
+    def get_member_by_role(self, role: ERBMemberRole) -> list[ERBMember]:
         """Get members by role."""
         return [m for m in self.members.values() if m.is_active and m.role == role]
 
-    def get_chair(self) -> Optional[ERBMember]:
+    def get_chair(self) -> ERBMember | None:
         """Get the ERB chair."""
         chairs = self.get_member_by_role(ERBMemberRole.CHAIR)
         return chairs[0] if chairs else None
@@ -203,7 +201,7 @@ class ERBManager:
     def schedule_meeting(
         self,
         scheduled_date: datetime,
-        agenda: List[str],
+        agenda: list[str],
         duration_minutes: int = 120,
         location: str = "Virtual",
     ) -> GovernanceResult:
@@ -251,8 +249,8 @@ class ERBManager:
     def record_attendance(
         self,
         meeting_id: str,
-        attendees: List[str],
-        absentees: Optional[List[str]] = None,
+        attendees: list[str],
+        absentees: list[str] | None = None,
     ) -> GovernanceResult:
         """
         Record meeting attendance.
@@ -362,10 +360,10 @@ class ERBManager:
         votes_against: int,
         votes_abstain: int = 0,
         rationale: str = "",
-        conditions: Optional[List[str]] = None,
-        related_policies: Optional[List[PolicyType]] = None,
+        conditions: list[str] | None = None,
+        related_policies: list[PolicyType] | None = None,
         follow_up_required: bool = False,
-        follow_up_days: Optional[int] = None,
+        follow_up_days: int | None = None,
     ) -> GovernanceResult:
         """
         Record an ERB decision.
@@ -471,45 +469,41 @@ class ERBManager:
             },
         )
 
-    def get_decision(self, decision_id: str) -> Optional[ERBDecision]:
+    def get_decision(self, decision_id: str) -> ERBDecision | None:
         """Get decision by ID."""
         return self.decisions.get(decision_id)
 
-    def get_decisions_by_meeting(self, meeting_id: str) -> List[ERBDecision]:
+    def get_decisions_by_meeting(self, meeting_id: str) -> list[ERBDecision]:
         """Get all decisions from a meeting."""
         return [d for d in self.decisions.values() if d.meeting_id == meeting_id]
 
-    def get_decisions_by_policy(self, policy_type: PolicyType) -> List[ERBDecision]:
+    def get_decisions_by_policy(self, policy_type: PolicyType) -> list[ERBDecision]:
         """Get decisions related to a policy type."""
         return [d for d in self.decisions.values() if policy_type in d.related_policies]
 
-    def get_pending_follow_ups(self) -> List[ERBDecision]:
+    def get_pending_follow_ups(self) -> list[ERBDecision]:
         """Get decisions with pending follow-ups."""
         now = datetime.utcnow()
         return [
             d
             for d in self.decisions.values()
-            if d.follow_up_required
-            and d.follow_up_deadline is not None
-            and d.follow_up_deadline > now
+            if d.follow_up_required and d.follow_up_deadline is not None and d.follow_up_deadline > now
         ]
 
-    def get_overdue_follow_ups(self) -> List[ERBDecision]:
+    def get_overdue_follow_ups(self) -> list[ERBDecision]:
         """Get decisions with overdue follow-ups."""
         now = datetime.utcnow()
         return [
             d
             for d in self.decisions.values()
-            if d.follow_up_required
-            and d.follow_up_deadline is not None
-            and d.follow_up_deadline <= now
+            if d.follow_up_required and d.follow_up_deadline is not None and d.follow_up_deadline <= now
         ]
 
     # ========================================================================
     # QUORUM & VOTING UTILITIES
     # ========================================================================
 
-    def check_quorum(self, attendee_ids: List[str]) -> Tuple[bool, Dict[str, int]]:
+    def check_quorum(self, attendee_ids: list[str]) -> tuple[bool, dict[str, int]]:
         """
         Check if quorum is met for a given list of attendees.
 
@@ -533,9 +527,7 @@ class ERBManager:
             "quorum_percentage": self.config.erb_quorum_percentage * 100,
         }
 
-    def calculate_approval(
-        self, votes_for: int, votes_against: int, votes_abstain: int
-    ) -> Tuple[bool, float]:
+    def calculate_approval(self, votes_for: int, votes_against: int, votes_abstain: int) -> tuple[bool, float]:
         """
         Calculate if a vote passes the approval threshold.
 
@@ -560,11 +552,11 @@ class ERBManager:
     # REPORTING & STATISTICS
     # ========================================================================
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """Get ERB statistics."""
         return self.stats.copy()
 
-    def get_member_participation(self) -> Dict[str, Dict[str, int]]:
+    def get_member_participation(self) -> dict[str, dict[str, int]]:
         """
         Get participation statistics for each member.
 
@@ -577,12 +569,8 @@ class ERBManager:
             if not member.is_active:
                 continue
 
-            meetings_attended = sum(
-                1 for m in self.meetings.values() if member_id in m.attendees
-            )
-            meetings_missed = sum(
-                1 for m in self.meetings.values() if member_id in m.absentees
-            )
+            meetings_attended = sum(1 for m in self.meetings.values() if member_id in m.attendees)
+            meetings_missed = sum(1 for m in self.meetings.values() if member_id in m.absentees)
             total_meetings = len([m for m in self.meetings.values() if m.status == "completed"])
 
             participation[member_id] = {
@@ -591,14 +579,12 @@ class ERBManager:
                 "meetings_attended": meetings_attended,
                 "meetings_missed": meetings_missed,
                 "total_meetings": total_meetings,
-                "attendance_rate": (
-                    (meetings_attended / total_meetings * 100) if total_meetings > 0 else 0
-                ),
+                "attendance_rate": ((meetings_attended / total_meetings * 100) if total_meetings > 0 else 0),
             }
 
         return participation
 
-    def generate_summary_report(self) -> Dict[str, Any]:
+    def generate_summary_report(self) -> dict[str, Any]:
         """
         Generate comprehensive ERB summary report.
 
@@ -611,9 +597,7 @@ class ERBManager:
 
         approval_rate = 0.0
         if self.stats["total_decisions"] > 0:
-            approval_rate = (
-                self.stats["decisions_approved"] / self.stats["total_decisions"] * 100
-            )
+            approval_rate = self.stats["decisions_approved"] / self.stats["total_decisions"] * 100
 
         return {
             "generated_at": datetime.utcnow().isoformat(),
@@ -623,9 +607,7 @@ class ERBManager:
                 "voting": len(voting_members),
                 "internal": len([m for m in active_members if m.is_internal]),
                 "external": len([m for m in active_members if not m.is_internal]),
-                "by_role": {
-                    role.value: len(self.get_member_by_role(role)) for role in ERBMemberRole
-                },
+                "by_role": {role.value: len(self.get_member_by_role(role)) for role in ERBMemberRole},
             },
             "meetings": {
                 "total": self.stats["total_meetings"],
@@ -638,9 +620,7 @@ class ERBManager:
                     ]
                 ),
                 "quorum_met_rate": (
-                    len([m for m in completed_meetings if m.quorum_met])
-                    / len(completed_meetings)
-                    * 100
+                    len([m for m in completed_meetings if m.quorum_met]) / len(completed_meetings) * 100
                     if completed_meetings
                     else 0
                 ),

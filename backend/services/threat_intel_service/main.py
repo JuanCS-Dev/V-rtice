@@ -12,14 +12,12 @@ service is crucial for enriching internal security events with relevant threat
 context and providing real-time threat intelligence to other Maximus AI services.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
-import httpx
-import os
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from offline_engine import OfflineThreatIntelEngine
 
@@ -37,6 +35,7 @@ class ThreatIntelQuery(BaseModel):
         indicator_type (str): The type of indicator (e.g., 'ip', 'domain', 'hash').
         context (Optional[Dict[str, Any]]): Additional context for the query.
     """
+
     indicator: str
     indicator_type: str
     context: Optional[Dict[str, Any]] = None
@@ -63,7 +62,10 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Threat Intelligence Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Threat Intelligence Service is operational.",
+    }
 
 
 @app.post("/query_threat_intel")
@@ -77,11 +79,15 @@ async def query_threat_intelligence(request: ThreatIntelQuery) -> Dict[str, Any]
         Dict[str, Any]: A dictionary containing the threat intelligence results.
     """
     print(f"[API] Querying threat intelligence for {request.indicator_type}: {request.indicator}")
-    
+
     # Simulate querying external TIPs or internal databases
     threat_intel_result = await offline_engine.get_threat_intel(request.indicator, request.indicator_type)
 
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "threat_intelligence": threat_intel_result}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "threat_intelligence": threat_intel_result,
+    }
 
 
 @app.get("/threat_intel_status")

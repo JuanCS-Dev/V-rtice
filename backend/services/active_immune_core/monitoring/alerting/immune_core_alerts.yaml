@@ -1,0 +1,464 @@
+---
+# Active Immune Core - Prometheus Alerting Rules
+# PRODUCTION-READY alerting for comprehensive system monitoring
+#
+# Severity Levels:
+#   - critical: Immediate action required, paging alerts
+#   - warning: Should be investigated, non-paging
+#   - info: Informational, for tracking
+#
+# Authors: Juan & Claude
+# Version: 1.0.0
+
+groups:
+  # ==================== SYSTEM AVAILABILITY ====================
+  - name: availability
+    interval: 30s
+    rules:
+      - alert: SystemAvailabilityBelowSLO
+        expr: |
+          (sum(immune_core_agents_alive) / sum(immune_core_agents_total)) < 0.999
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+          slo: availability
+        annotations:
+          summary: "System availability below 99.9% SLO"
+          description: |
+            System availability is {{ $value | humanizePercentage }}, below the 99.9% SLO threshold.
+            Current alive agents: {{ with query "sum(immune_core_agents_alive)" }}{{ . | first | value }}{{ end }}
+            Total agents: {{ with query "sum(immune_core_agents_total)" }}{{ . | first | value }}{{ end }}
+          runbook_url: "https://docs.example.com/runbooks/availability-slo-breach"
+
+      - alert: NoAgentsAlive
+        expr: |
+          sum(immune_core_agents_alive) == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: agents
+        annotations:
+          summary: "No agents are alive"
+          description: "All agents are dead. System is completely unavailable."
+          runbook_url: "https://docs.example.com/runbooks/no-agents-alive"
+
+      - alert: LowAgentCount
+        expr: |
+          sum(immune_core_agents_alive) < 5
+        for: 5m
+        labels:
+          severity: warning
+          component: agents
+        annotations:
+          summary: "Low number of alive agents"
+          description: "Only {{ $value }} agents are alive. Consider scaling up."
+
+  # ==================== AGENT HEALTH ====================
+  - name: agent_health
+    interval: 30s
+    rules:
+      - alert: LowAgentHealth
+        expr: |
+          avg(immune_core_agent_health_score) < 0.7
+        for: 10m
+        labels:
+          severity: warning
+          component: agents
+        annotations:
+          summary: "Average agent health is low"
+          description: "Average agent health score is {{ $value | humanizePercentage }}."
+
+      - alert: CriticalAgentHealth
+        expr: |
+          avg(immune_core_agent_health_score) < 0.5
+        for: 5m
+        labels:
+          severity: critical
+          component: agents
+        annotations:
+          summary: "Critical: Average agent health is very low"
+          description: "Average agent health score is {{ $value | humanizePercentage }}. Immediate action required."
+
+      - alert: HighAgentLoad
+        expr: |
+          avg(immune_core_agent_load) > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          component: agents
+        annotations:
+          summary: "Agent load is very high"
+          description: "Average agent load is {{ $value | humanizePercentage }}. Consider adding more agents."
+
+      - alert: AgentTypeImbalance
+        expr: |
+          (max(sum(immune_core_agents_alive) by (type)) / min(sum(immune_core_agents_alive) by (type))) > 10
+        for: 15m
+        labels:
+          severity: info
+          component: agents
+        annotations:
+          summary: "Agent type distribution is imbalanced"
+          description: "Some agent types have significantly more instances than others (ratio: {{ $value }})."
+
+      - alert: HighHeartbeatTimeouts
+        expr: |
+          rate(immune_core_heartbeat_timeouts_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: coordination
+        annotations:
+          summary: "High rate of heartbeat timeouts"
+          description: "Heartbeat timeouts are occurring at {{ $value }} per second."
+
+  # ==================== COORDINATION ====================
+  - name: coordination
+    interval: 30s
+    rules:
+      - alert: NoLeader
+        expr: |
+          immune_core_has_leader == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: coordination
+        annotations:
+          summary: "System has no leader"
+          description: "No leader elected. System coordination is impaired."
+          runbook_url: "https://docs.example.com/runbooks/no-leader"
+
+      - alert: HighElectionRate
+        expr: |
+          rate(immune_core_elections_total[5m]) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+          component: coordination
+        annotations:
+          summary: "High leader election rate"
+          description: "Leader elections are occurring at {{ $value }} per second. System may be unstable."
+
+      - alert: FrequentLeaderChanges
+        expr: |
+          rate(immune_core_leader_changes_total[10m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: coordination
+        annotations:
+          summary: "Frequent leader changes detected"
+          description: "Leader changes are occurring at {{ $value }} per second."
+
+      - alert: HighTaskBacklog
+        expr: |
+          immune_core_tasks_pending > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: coordination
+        annotations:
+          summary: "High task backlog"
+          description: "{{ $value }} tasks are pending. System may be overloaded."
+
+      - alert: CriticalTaskBacklog
+        expr: |
+          immune_core_tasks_pending > 500
+        for: 5m
+        labels:
+          severity: critical
+          component: coordination
+        annotations:
+          summary: "Critical task backlog"
+          description: "{{ $value }} tasks are pending. System is severely overloaded."
+
+      - alert: TaskAssignmentLag
+        expr: |
+          (rate(immune_core_tasks_submitted_total[5m]) - rate(immune_core_tasks_assigned_total[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+          component: coordination
+        annotations:
+          summary: "Tasks are not being assigned fast enough"
+          description: "Assignment lag is {{ $value }} tasks/sec."
+
+  # ==================== TASK EXECUTION ====================
+  - name: tasks
+    interval: 30s
+    rules:
+      - alert: HighTaskFailureRate
+        expr: |
+          (
+            rate(immune_core_tasks_failed_total[5m]) /
+            (rate(immune_core_tasks_completed_total[5m]) + rate(immune_core_tasks_failed_total[5m]))
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: tasks
+        annotations:
+          summary: "High task failure rate"
+          description: "Task failure rate is {{ $value | humanizePercentage }}."
+
+      - alert: TaskSuccessRateBelowSLO
+        expr: |
+          (
+            rate(immune_core_tasks_completed_total[5m]) /
+            (rate(immune_core_tasks_completed_total[5m]) + rate(immune_core_tasks_failed_total[5m]) + 0.001)
+          ) < 0.95
+        for: 5m
+        labels:
+          severity: critical
+          component: tasks
+          slo: task_success_rate
+        annotations:
+          summary: "Task success rate below 95% SLO"
+          description: "Task success rate is {{ $value | humanizePercentage }}, below 95% SLO."
+          runbook_url: "https://docs.example.com/runbooks/task-success-rate-slo"
+
+      - alert: HighTaskLatency
+        expr: |
+          histogram_quantile(0.95, rate(immune_core_task_duration_seconds_bucket[5m])) > 30
+        for: 10m
+        labels:
+          severity: warning
+          component: tasks
+        annotations:
+          summary: "High task latency (p95)"
+          description: "Task p95 latency is {{ $value }}s, exceeding 30s threshold."
+
+      - alert: CriticalTaskLatency
+        expr: |
+          histogram_quantile(0.95, rate(immune_core_task_duration_seconds_bucket[5m])) > 60
+        for: 5m
+        labels:
+          severity: critical
+          component: tasks
+        annotations:
+          summary: "Critical task latency (p95)"
+          description: "Task p95 latency is {{ $value }}s, exceeding 60s threshold."
+
+      - alert: HighTaskRetryRate
+        expr: |
+          histogram_quantile(0.95, rate(immune_core_task_retries_bucket[5m])) > 3
+        for: 10m
+        labels:
+          severity: warning
+          component: tasks
+        annotations:
+          summary: "High task retry rate"
+          description: "Task p95 retries is {{ $value }}, indicating frequent failures."
+
+  # ==================== API PERFORMANCE ====================
+  - name: api_performance
+    interval: 30s
+    rules:
+      - alert: HighAPILatency
+        expr: |
+          histogram_quantile(0.99, rate(immune_core_api_latency_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+          slo: api_latency
+        annotations:
+          summary: "API p99 latency above 500ms SLO"
+          description: "API p99 latency is {{ $value }}s, exceeding 500ms SLO."
+          runbook_url: "https://docs.example.com/runbooks/api-latency-slo"
+
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            rate(immune_core_api_requests_total{status=~"5.."}[5m]) /
+            rate(immune_core_api_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is {{ $value | humanizePercentage }}."
+
+      - alert: APIEndpointDown
+        expr: |
+          rate(immune_core_api_requests_total[5m]) == 0
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "API endpoint receiving no requests"
+          description: "API endpoint {{ $labels.endpoint }} has received no requests in 5 minutes."
+
+  # ==================== FAULT TOLERANCE ====================
+  - name: fault_tolerance
+    interval: 30s
+    rules:
+      - alert: HighFailureDetectionRate
+        expr: |
+          rate(immune_core_failures_detected_total[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: fault_tolerance
+        annotations:
+          summary: "High rate of failure detection"
+          description: "Failures are being detected at {{ $value }} per second."
+
+      - alert: RecoveryFailures
+        expr: |
+          rate(immune_core_failures_detected_total[10m]) > rate(immune_core_recoveries_performed_total[10m])
+        for: 10m
+        labels:
+          severity: critical
+          component: fault_tolerance
+        annotations:
+          summary: "Recovery rate lower than failure rate"
+          description: "System is detecting more failures than it can recover from."
+
+  # ==================== INFRASTRUCTURE ====================
+  - name: infrastructure
+    interval: 30s
+    rules:
+      - alert: LowCytokineTraffic
+        expr: |
+          rate(immune_core_cytokines_sent_total[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Low cytokine traffic"
+          description: "Cytokine send rate is {{ $value }}/sec, indicating low system activity."
+
+      - alert: CytokineFlowImbalance
+        expr: |
+          abs(
+            rate(immune_core_cytokines_sent_total[5m]) -
+            rate(immune_core_cytokines_received_total[5m])
+          ) / rate(immune_core_cytokines_sent_total[5m]) > 0.3
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "Cytokine flow imbalance"
+          description: "Send/receive rate difference is {{ $value | humanizePercentage }}."
+
+      - alert: NoHormonePublications
+        expr: |
+          rate(immune_core_hormones_published_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "No hormone publications"
+          description: "No hormones have been published in 10 minutes."
+
+  # ==================== SLO ERROR BUDGET ====================
+  - name: slo_budget
+    interval: 1m
+    rules:
+      - alert: ErrorBudgetBurnRateHigh
+        expr: |
+          (
+            rate((1 - (sum(immune_core_agents_alive) / sum(immune_core_agents_total)))[1h:]) /
+            (1 - 0.999)
+          ) > 1
+        for: 5m
+        labels:
+          severity: critical
+          component: slo
+        annotations:
+          summary: "Error budget burn rate is high"
+          description: "Error budget is burning {{ $value }}x faster than expected."
+          runbook_url: "https://docs.example.com/runbooks/error-budget-burn"
+
+      - alert: ErrorBudgetLow
+        expr: |
+          1 - ((1 - avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[24h:])) / (1 - 0.999)) < 0.2
+        for: 1h
+        labels:
+          severity: warning
+          component: slo
+        annotations:
+          summary: "Error budget is running low"
+          description: "Only {{ $value | humanizePercentage }} of error budget remains."
+
+      - alert: ErrorBudgetExhausted
+        expr: |
+          1 - ((1 - avg_over_time((sum(immune_core_agents_alive) / sum(immune_core_agents_total))[24h:])) / (1 - 0.999)) < 0
+        for: 1h
+        labels:
+          severity: critical
+          component: slo
+        annotations:
+          summary: "Error budget is exhausted"
+          description: "Error budget for availability SLO has been exhausted."
+
+  # ==================== CONSENSUS ====================
+  - name: consensus
+    interval: 30s
+    rules:
+      - alert: LowProposalApprovalRate
+        expr: |
+          (
+            rate(immune_core_proposals_approved_total[10m]) /
+            (rate(immune_core_proposals_approved_total[10m]) + rate(immune_core_proposals_rejected_total[10m]))
+          ) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: consensus
+        annotations:
+          summary: "Low proposal approval rate"
+          description: "Only {{ $value | humanizePercentage }} of proposals are being approved."
+
+      - alert: NoConsensusActivity
+        expr: |
+          rate(immune_core_proposals_total[10m]) == 0
+        for: 15m
+        labels:
+          severity: info
+          component: consensus
+        annotations:
+          summary: "No consensus activity"
+          description: "No consensus proposals have been made in 15 minutes."
+
+  # ==================== SYSTEM HEALTH ====================
+  - name: system_health
+    interval: 1m
+    rules:
+      - alert: SystemDegraded
+        expr: |
+          (
+            (immune_core_has_leader == 0) or
+            (avg(immune_core_agent_health_score) < 0.7) or
+            (rate(immune_core_tasks_failed_total[5m]) / (rate(immune_core_tasks_completed_total[5m]) + rate(immune_core_tasks_failed_total[5m])) > 0.1)
+          )
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "System is degraded"
+          description: "One or more system health indicators are below acceptable thresholds."
+
+      - alert: SystemUnhealthy
+        expr: |
+          (
+            (immune_core_has_leader == 0) and
+            (avg(immune_core_agent_health_score) < 0.5)
+          )
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "System is unhealthy"
+          description: "Multiple critical system health indicators are failing."
+          runbook_url: "https://docs.example.com/runbooks/system-unhealthy"

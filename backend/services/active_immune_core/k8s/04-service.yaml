@@ -1,0 +1,55 @@
+# Kubernetes Service for Active Immune Core
+# Load balancing and service discovery
+#
+# Apply: kubectl apply -f k8s/04-service.yaml -n active-immune
+# Test: kubectl get svc active-immune-core -n active-immune
+# Port-forward: kubectl port-forward svc/active-immune-core 8200:8200 -n active-immune
+#
+# NO MOCKS, NO PLACEHOLDERS, NO TODOS - Production-ready.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: active-immune-core
+  namespace: active-immune
+  labels:
+    app: active-immune-core
+    component: cyber-defense
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8200"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  selector:
+    app: active-immune-core
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8200
+      targetPort: http
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+
+---
+# Headless Service for StatefulSet (if needed later)
+apiVersion: v1
+kind: Service
+metadata:
+  name: active-immune-core-headless
+  namespace: active-immune
+  labels:
+    app: active-immune-core
+    component: cyber-defense
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: active-immune-core
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8200
+      targetPort: http

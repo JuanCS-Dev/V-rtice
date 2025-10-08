@@ -3,14 +3,16 @@
 # AI-Powered Web Security Testing: Burp Suite + OWASP ZAP
 # ============================================================================
 
-from pydantic import BaseModel, Field, HttpUrl, validator
-from typing import List, Optional, Dict, Any, Union
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class AttackEngine(str, Enum):
     """Attack engine type"""
+
     BURP_SUITE = "burp_suite"
     OWASP_ZAP = "owasp_zap"
     BOTH = "both"
@@ -18,6 +20,7 @@ class AttackEngine(str, Enum):
 
 class ScanType(str, Enum):
     """Web scan type"""
+
     PASSIVE = "passive"
     ACTIVE = "active"
     SPIDER = "spider"
@@ -28,6 +31,7 @@ class ScanType(str, Enum):
 
 class VulnerabilityType(str, Enum):
     """OWASP Top 10 vulnerability types"""
+
     SQLI = "sql_injection"
     XSS = "cross_site_scripting"
     BROKEN_AUTH = "broken_authentication"
@@ -50,6 +54,7 @@ class VulnerabilityType(str, Enum):
 
 class AIProvider(str, Enum):
     """AI provider for Co-Pilot"""
+
     GEMINI = "gemini"
     ANTHROPIC = "anthropic"
     AUTO = "auto"  # Fallback logic
@@ -57,6 +62,7 @@ class AIProvider(str, Enum):
 
 class Severity(str, Enum):
     """Finding severity"""
+
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -68,8 +74,10 @@ class Severity(str, Enum):
 # BURP SUITE MODELS
 # ============================================================================
 
+
 class BurpScanConfig(BaseModel):
     """Burp Suite scan configuration"""
+
     scan_type: ScanType = ScanType.ACTIVE
     crawl_depth: int = Field(default=3, ge=1, le=10)
     max_crawl_time: int = Field(default=600, description="Seconds")
@@ -80,7 +88,7 @@ class BurpScanConfig(BaseModel):
             VulnerabilityType.SQLI,
             VulnerabilityType.XSS,
             VulnerabilityType.SSRF,
-            VulnerabilityType.XXE
+            VulnerabilityType.XXE,
         ]
     )
 
@@ -91,6 +99,7 @@ class BurpScanConfig(BaseModel):
 
 class BurpScanRequest(BaseModel):
     """Burp Suite scan request"""
+
     target_url: HttpUrl
     config: BurpScanConfig = BurpScanConfig()
 
@@ -109,6 +118,7 @@ class BurpScanRequest(BaseModel):
 
 class BurpVulnerability(BaseModel):
     """Burp Suite vulnerability finding"""
+
     issue_type: str
     issue_name: str
     severity: Severity
@@ -134,6 +144,7 @@ class BurpVulnerability(BaseModel):
 
 class BurpScanResult(BaseModel):
     """Burp Suite scan result"""
+
     scan_id: str
     target_url: str
     scan_type: ScanType
@@ -153,8 +164,10 @@ class BurpScanResult(BaseModel):
 # OWASP ZAP MODELS
 # ============================================================================
 
+
 class ZAPScanPolicy(BaseModel):
     """ZAP scan policy"""
+
     policy_name: str = Field(default="API-Security", description="Scan policy name")
 
     # Attack strength
@@ -162,14 +175,12 @@ class ZAPScanPolicy(BaseModel):
     alert_threshold: str = Field(default="MEDIUM", description="OFF, LOW, MEDIUM, HIGH")
 
     # Scan rules
-    enabled_scanners: List[int] = Field(
-        default=[],
-        description="Scanner IDs (empty = all)"
-    )
+    enabled_scanners: List[int] = Field(default=[], description="Scanner IDs (empty = all)")
 
 
 class ZAPScanRequest(BaseModel):
     """OWASP ZAP scan request"""
+
     target_url: HttpUrl
     scan_type: ScanType = ScanType.ACTIVE
     policy: ZAPScanPolicy = ZAPScanPolicy()
@@ -193,6 +204,7 @@ class ZAPScanRequest(BaseModel):
 
 class ZAPAlert(BaseModel):
     """ZAP alert/vulnerability"""
+
     alert_id: int
     plugin_id: int
     alert_name: str
@@ -218,6 +230,7 @@ class ZAPAlert(BaseModel):
 
 class ZAPScanResult(BaseModel):
     """ZAP scan result"""
+
     scan_id: str
     target_url: str
     scan_type: ScanType
@@ -236,8 +249,10 @@ class ZAPScanResult(BaseModel):
 # AI CO-PILOT MODELS
 # ============================================================================
 
+
 class AICoPilotRequest(BaseModel):
     """AI Co-Pilot analysis request"""
+
     vulnerability_context: Dict[str, Any]
     request_structure: Dict[str, Any]
     attack_type: VulnerabilityType
@@ -250,6 +265,7 @@ class AICoPilotRequest(BaseModel):
 
 class AIGeneratedPayload(BaseModel):
     """AI-generated attack payload"""
+
     payload: str
     payload_type: VulnerabilityType
     explanation: str
@@ -262,6 +278,7 @@ class AIGeneratedPayload(BaseModel):
 
 class AICoPilotResponse(BaseModel):
     """AI Co-Pilot response"""
+
     analysis: str
     attack_vectors: List[AIGeneratedPayload]
     recommendations: List[str]
@@ -277,8 +294,10 @@ class AICoPilotResponse(BaseModel):
 # SMART FUZZING MODELS
 # ============================================================================
 
+
 class FuzzingTarget(BaseModel):
     """Fuzzing target specification"""
+
     url: HttpUrl
     method: str = Field(default="POST", description="GET, POST, PUT, DELETE, etc")
 
@@ -294,6 +313,7 @@ class FuzzingTarget(BaseModel):
 
 class FuzzingStrategy(str, Enum):
     """Fuzzing strategy"""
+
     MUTATION = "mutation"  # Mutate existing values
     GENERATION = "generation"  # Generate new values
     DICTIONARY = "dictionary"  # Use wordlists
@@ -302,6 +322,7 @@ class FuzzingStrategy(str, Enum):
 
 class FuzzingConfig(BaseModel):
     """Fuzzing configuration"""
+
     strategy: FuzzingStrategy = FuzzingStrategy.AI_POWERED
     max_iterations: int = Field(default=1000, ge=1, le=10000)
 
@@ -316,17 +337,17 @@ class FuzzingConfig(BaseModel):
 
 class FuzzingRequest(BaseModel):
     """Smart fuzzing request"""
+
     target: FuzzingTarget
     config: FuzzingConfig = FuzzingConfig()
 
     # Vulnerability focus
-    target_vulns: List[VulnerabilityType] = Field(
-        default=[VulnerabilityType.SQLI, VulnerabilityType.XSS]
-    )
+    target_vulns: List[VulnerabilityType] = Field(default=[VulnerabilityType.SQLI, VulnerabilityType.XSS])
 
 
 class FuzzingResult(BaseModel):
     """Fuzzing result"""
+
     fuzzing_id: str
     target_url: str
 
@@ -346,8 +367,10 @@ class FuzzingResult(BaseModel):
 # UNIFIED WEB ATTACK MODELS
 # ============================================================================
 
+
 class UnifiedWebAttackRequest(BaseModel):
     """Unified web application attack request"""
+
     target_url: HttpUrl
 
     # Engine selection
@@ -374,6 +397,7 @@ class UnifiedWebAttackRequest(BaseModel):
 
 class UnifiedVulnerability(BaseModel):
     """Unified vulnerability finding"""
+
     vuln_id: str
     source_engine: AttackEngine
 
@@ -404,6 +428,7 @@ class UnifiedVulnerability(BaseModel):
 
 class UnifiedWebAttackResult(BaseModel):
     """Unified web attack result"""
+
     scan_id: str
     target_url: str
     engines_used: List[AttackEngine]
@@ -431,8 +456,10 @@ class UnifiedWebAttackResult(BaseModel):
 # ASA INTEGRATION MODELS
 # ============================================================================
 
+
 class PrefrontalCortexRequest(BaseModel):
     """Prefrontal Cortex impulse inhibition request"""
+
     action: str = "web_attack"
     payload: Dict[str, Any]
     destructiveness_score: float
@@ -440,6 +467,7 @@ class PrefrontalCortexRequest(BaseModel):
 
 class PrefrontalCortexResponse(BaseModel):
     """Prefrontal Cortex response"""
+
     approved: bool
     reasoning: str
     alternative_action: Optional[str] = None
@@ -447,12 +475,14 @@ class PrefrontalCortexResponse(BaseModel):
 
 class AuditoryCortexRequest(BaseModel):
     """Auditory Cortex C2 beacon detection request"""
+
     http_traffic: Dict[str, Any]
     request_pattern: str
 
 
 class AuditoryCortexResponse(BaseModel):
     """Auditory Cortex response"""
+
     c2_detected: bool
     beacon_type: Optional[str] = None
     confidence: float

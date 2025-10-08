@@ -6,17 +6,17 @@ validation, cleansing, and enrichment.
 
 import logging
 import re
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 from models import (
-    Pessoa,
-    Veiculo,
-    Endereco,
-    Ocorrencia,
     DataSource,
+    Endereco,
     EntityType,
-    TransformResult
+    Ocorrencia,
+    Pessoa,
+    TransformResult,
+    Veiculo,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,15 +32,11 @@ class EntityTransformer:
 
     def __init__(self):
         """Initialize entity transformer."""
-        self._cpf_pattern = re.compile(r'^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$')
-        self._placa_pattern = re.compile(r'^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$')
-        self._cep_pattern = re.compile(r'^\d{5}-?\d{3}$')
+        self._cpf_pattern = re.compile(r"^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$")
+        self._placa_pattern = re.compile(r"^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$")
+        self._cep_pattern = re.compile(r"^\d{5}-?\d{3}$")
 
-    def transform_pessoa(
-        self,
-        raw_data: Dict[str, Any],
-        source: DataSource
-    ) -> TransformResult:
+    def transform_pessoa(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw person data into Pessoa entity.
 
@@ -60,7 +56,7 @@ class EntityTransformer:
                 return TransformResult(
                     success=False,
                     entity_type=EntityType.PESSOA,
-                    error_message="Nome is required"
+                    error_message="Nome is required",
                 )
 
             # Parse birth date
@@ -72,7 +68,7 @@ class EntityTransformer:
             metadata = {
                 "source": source.value,
                 "ingested_at": datetime.utcnow().isoformat(),
-                "raw_data_hash": self._compute_hash(raw_data)
+                "raw_data_hash": self._compute_hash(raw_data),
             }
 
             # Add optional raw fields to metadata
@@ -89,7 +85,7 @@ class EntityTransformer:
                 pai=self._normalize_name(raw_data.get("pai", "")),
                 rg=self._normalize_rg(raw_data.get("rg")),
                 telefone=self._normalize_phone(raw_data.get("telefone")),
-                metadata=metadata
+                metadata=metadata,
             )
 
             logger.info(f"Transformed Pessoa: {nome} (CPF: {cpf})")
@@ -98,22 +94,14 @@ class EntityTransformer:
                 success=True,
                 entity_type=EntityType.PESSOA,
                 entity_data=pessoa.model_dump(),
-                relationships=[]
+                relationships=[],
             )
 
         except Exception as e:
             logger.error(f"Error transforming Pessoa: {e}", exc_info=True)
-            return TransformResult(
-                success=False,
-                entity_type=EntityType.PESSOA,
-                error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.PESSOA, error_message=str(e))
 
-    def transform_veiculo(
-        self,
-        raw_data: Dict[str, Any],
-        source: DataSource
-    ) -> TransformResult:
+    def transform_veiculo(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw vehicle data into Veiculo entity.
 
@@ -132,7 +120,7 @@ class EntityTransformer:
                 return TransformResult(
                     success=False,
                     entity_type=EntityType.VEICULO,
-                    error_message="Placa is required"
+                    error_message="Placa is required",
                 )
 
             # Parse years
@@ -143,7 +131,7 @@ class EntityTransformer:
             metadata = {
                 "source": source.value,
                 "ingested_at": datetime.utcnow().isoformat(),
-                "raw_data_hash": self._compute_hash(raw_data)
+                "raw_data_hash": self._compute_hash(raw_data),
             }
 
             # Add optional fields
@@ -164,7 +152,7 @@ class EntityTransformer:
                 cor=self._normalize_text(raw_data.get("cor")),
                 situacao=self._normalize_text(raw_data.get("situacao")),
                 proprietario_cpf=self._normalize_cpf(raw_data.get("proprietario_cpf")),
-                metadata=metadata
+                metadata=metadata,
             )
 
             logger.info(f"Transformed Veiculo: {placa}")
@@ -173,22 +161,14 @@ class EntityTransformer:
                 success=True,
                 entity_type=EntityType.VEICULO,
                 entity_data=veiculo.model_dump(),
-                relationships=[]
+                relationships=[],
             )
 
         except Exception as e:
             logger.error(f"Error transforming Veiculo: {e}", exc_info=True)
-            return TransformResult(
-                success=False,
-                entity_type=EntityType.VEICULO,
-                error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.VEICULO, error_message=str(e))
 
-    def transform_endereco(
-        self,
-        raw_data: Dict[str, Any],
-        source: DataSource
-    ) -> TransformResult:
+    def transform_endereco(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw address data into Endereco entity.
 
@@ -208,7 +188,7 @@ class EntityTransformer:
                 return TransformResult(
                     success=False,
                     entity_type=EntityType.ENDERECO,
-                    error_message="Logradouro, cidade, and estado are required"
+                    error_message="Logradouro, cidade, and estado are required",
                 )
 
             # Parse coordinates
@@ -219,7 +199,7 @@ class EntityTransformer:
             metadata = {
                 "source": source.value,
                 "ingested_at": datetime.utcnow().isoformat(),
-                "raw_data_hash": self._compute_hash(raw_data)
+                "raw_data_hash": self._compute_hash(raw_data),
             }
 
             # Create Endereco entity
@@ -233,7 +213,7 @@ class EntityTransformer:
                 estado=estado,
                 latitude=latitude,
                 longitude=longitude,
-                metadata=metadata
+                metadata=metadata,
             )
 
             logger.info(f"Transformed Endereco: {logradouro}, {cidade}-{estado}")
@@ -242,22 +222,14 @@ class EntityTransformer:
                 success=True,
                 entity_type=EntityType.ENDERECO,
                 entity_data=endereco.model_dump(),
-                relationships=[]
+                relationships=[],
             )
 
         except Exception as e:
             logger.error(f"Error transforming Endereco: {e}", exc_info=True)
-            return TransformResult(
-                success=False,
-                entity_type=EntityType.ENDERECO,
-                error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.ENDERECO, error_message=str(e))
 
-    def transform_ocorrencia(
-        self,
-        raw_data: Dict[str, Any],
-        source: DataSource
-    ) -> TransformResult:
+    def transform_ocorrencia(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw occurrence data into Ocorrencia entity.
 
@@ -276,7 +248,7 @@ class EntityTransformer:
                 return TransformResult(
                     success=False,
                     entity_type=EntityType.OCORRENCIA,
-                    error_message="numero_bo and tipo are required"
+                    error_message="numero_bo and tipo are required",
                 )
 
             # Parse datetime
@@ -285,14 +257,14 @@ class EntityTransformer:
                 return TransformResult(
                     success=False,
                     entity_type=EntityType.OCORRENCIA,
-                    error_message="data_hora is required and must be valid"
+                    error_message="data_hora is required and must be valid",
                 )
 
             # Build metadata
             metadata = {
                 "source": source.value,
                 "ingested_at": datetime.utcnow().isoformat(),
-                "raw_data_hash": self._compute_hash(raw_data)
+                "raw_data_hash": self._compute_hash(raw_data),
             }
 
             # Add optional fields
@@ -309,10 +281,10 @@ class EntityTransformer:
                 local_logradouro=self._normalize_text(raw_data.get("local_logradouro")),
                 local_bairro=self._normalize_text(raw_data.get("local_bairro")),
                 local_cidade=self._normalize_text(raw_data.get("local_cidade")),
-                local_estado=raw_data.get("local_estado", "").upper() if raw_data.get("local_estado") else None,
+                local_estado=(raw_data.get("local_estado", "").upper() if raw_data.get("local_estado") else None),
                 delegacia=raw_data.get("delegacia"),
                 status=self._normalize_text(raw_data.get("status")),
-                metadata=metadata
+                metadata=metadata,
             )
 
             logger.info(f"Transformed Ocorrencia: {numero_bo} ({tipo})")
@@ -321,16 +293,12 @@ class EntityTransformer:
                 success=True,
                 entity_type=EntityType.OCORRENCIA,
                 entity_data=ocorrencia.model_dump(),
-                relationships=[]
+                relationships=[],
             )
 
         except Exception as e:
             logger.error(f"Error transforming Ocorrencia: {e}", exc_info=True)
-            return TransformResult(
-                success=False,
-                entity_type=EntityType.OCORRENCIA,
-                error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.OCORRENCIA, error_message=str(e))
 
     # Normalization helpers
 
@@ -340,7 +308,7 @@ class EntityTransformer:
             return None
 
         # Remove formatting
-        cpf_clean = re.sub(r'[^\d]', '', cpf)
+        cpf_clean = re.sub(r"[^\d]", "", cpf)
 
         # Validate length
         if len(cpf_clean) != 11:
@@ -357,7 +325,7 @@ class EntityTransformer:
         placa_clean = placa.upper().replace("-", "")
 
         # Validate pattern (old: ABC1234 or new: ABC1D23)
-        if not re.match(r'^[A-Z]{3}\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$', placa_clean):
+        if not re.match(r"^[A-Z]{3}\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$", placa_clean):
             return None
 
         return placa_clean
@@ -366,19 +334,19 @@ class EntityTransformer:
         """Normalize RG: remove formatting."""
         if not rg:
             return None
-        return re.sub(r'[^\dX]', '', rg.upper())
+        return re.sub(r"[^\dX]", "", rg.upper())
 
     def _normalize_phone(self, phone: Optional[str]) -> Optional[str]:
         """Normalize phone: remove formatting."""
         if not phone:
             return None
-        return re.sub(r'[^\d]', '', phone)
+        return re.sub(r"[^\d]", "", phone)
 
     def _normalize_cep(self, cep: Optional[str]) -> Optional[str]:
         """Normalize CEP: remove formatting."""
         if not cep:
             return None
-        cep_clean = re.sub(r'[^\d]', '', cep)
+        cep_clean = re.sub(r"[^\d]", "", cep)
         if len(cep_clean) != 8:
             return None
         return cep_clean
@@ -387,13 +355,13 @@ class EntityTransformer:
         """Normalize chassis: uppercase, no spaces."""
         if not chassi:
             return None
-        return re.sub(r'\s+', '', chassi.upper())
+        return re.sub(r"\s+", "", chassi.upper())
 
     def _normalize_name(self, name: Optional[str]) -> Optional[str]:
         """Normalize person name: title case, trim."""
         if not name:
             return None
-        return ' '.join(name.strip().title().split())
+        return " ".join(name.strip().title().split())
 
     def _normalize_text(self, text: Optional[str]) -> Optional[str]:
         """Normalize generic text: trim, title case."""
@@ -430,16 +398,16 @@ class EntityTransformer:
         if isinstance(dt_value, str):
             # Try ISO format first
             try:
-                return datetime.fromisoformat(dt_value.replace('Z', '+00:00'))
-            except:
-                pass
+                return datetime.fromisoformat(dt_value.replace("Z", "+00:00"))
+            except Exception as e:
+                logger.debug(f"Failed to parse datetime as ISO format '{dt_value}': {e}")
 
             # Try other formats
             for fmt in [
                 "%Y-%m-%d %H:%M:%S",
                 "%d/%m/%Y %H:%M:%S",
                 "%Y-%m-%dT%H:%M:%S",
-                "%Y-%m-%d"
+                "%Y-%m-%d",
             ]:
                 try:
                     return datetime.strptime(dt_value, fmt)

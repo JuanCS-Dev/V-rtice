@@ -13,15 +13,15 @@ This API allows other Maximus AI services or external applications to interact
 with the chemical sensing capabilities in a standardized and efficient manner.
 """
 
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
 
-from olfactory_system import OlfactorySystem
 from gustatory_system import GustatorySystem
+from olfactory_system import OlfactorySystem
 
 app = FastAPI(title="Maximus Chemical Sensing Service", version="1.0.0")
 
@@ -37,6 +37,7 @@ class ChemicalScanRequest(BaseModel):
         scan_type (str): The type of scan to perform (e.g., 'olfactory', 'gustatory', 'full').
         target_area (Optional[str]): The specific area to scan.
     """
+
     scan_type: str
     target_area: Optional[str] = None
 
@@ -81,7 +82,11 @@ async def trigger_chemical_scan(request: ChemicalScanRequest) -> Dict[str, Any]:
         HTTPException: If an invalid scan type is provided.
     """
     print(f"[API] Received chemical scan request: {request.scan_type} for {request.target_area}")
-    results = {"timestamp": datetime.now().isoformat(), "scan_type": request.scan_type, "target_area": request.target_area}
+    results = {
+        "timestamp": datetime.now().isoformat(),
+        "scan_type": request.scan_type,
+        "target_area": request.target_area,
+    }
 
     if request.scan_type == "olfactory":
         olfactory_results = await olfactory_system.perform_scan(request.target_area)

@@ -11,7 +11,7 @@ facilitating adaptive behavior in uncertain situations.
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Any
 
 
 class ConfidenceScoring:
@@ -25,7 +25,7 @@ class ConfidenceScoring:
         """Initializes the ConfidenceScoring module."""
         pass
 
-    async def score(self, response: Dict[str, Any], context: Dict[str, Any]) -> float:
+    async def score(self, response: dict[str, Any], context: dict[str, Any]) -> float:
         """Calculates a confidence score for the given response.
 
         Args:
@@ -36,7 +36,7 @@ class ConfidenceScoring:
             float: A confidence score between 0.0 and 1.0.
         """
         print("[ConfidenceScoring] Calculating confidence score...")
-        await asyncio.sleep(0.1) # Simulate scoring process
+        await asyncio.sleep(0.1)  # Simulate scoring process
 
         # Simplified scoring logic for demonstration
         # Factors could include:

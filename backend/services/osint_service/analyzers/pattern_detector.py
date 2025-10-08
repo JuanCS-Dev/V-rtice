@@ -13,9 +13,8 @@ patterns contribute to generating novel insights and supporting proactive threat
 intelligence.
 """
 
-import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class PatternDetector:
@@ -29,9 +28,19 @@ class PatternDetector:
     def __init__(self):
         """Initializes the PatternDetector with predefined patterns (mock)."""
         self.predefined_patterns: Dict[str, Any] = {
-            "unusual_login_time": {"type": "temporal", "description": "Login outside normal hours"},
-            "repeated_failed_logins": {"type": "behavioral", "threshold": 5, "time_window": 300},
-            "geospatial_anomaly": {"type": "spatial", "description": "User activity from two distant locations simultaneously"}
+            "unusual_login_time": {
+                "type": "temporal",
+                "description": "Login outside normal hours",
+            },
+            "repeated_failed_logins": {
+                "type": "behavioral",
+                "threshold": 5,
+                "time_window": 300,
+            },
+            "geospatial_anomaly": {
+                "type": "spatial",
+                "description": "User activity from two distant locations simultaneously",
+            },
         }
         self.detection_history: List[Dict[str, Any]] = []
         self.last_detection_time: Optional[datetime] = None
@@ -47,19 +56,29 @@ class PatternDetector:
             Dict[str, Any]: A dictionary containing the pattern detection results.
         """
         print(f"[PatternDetector] Detecting pattern '{pattern_type}' in data...")
-        
+
         detected_patterns: List[Dict[str, Any]] = []
         assessment = "No significant patterns detected."
 
         if pattern_type == "unusual_login_time":
             login_hour = data.get("login_hour")
-            if login_hour is not None and (login_hour < 6 or login_hour > 22): # Outside 6 AM - 10 PM
-                detected_patterns.append({"pattern": "unusual_login_time", "details": f"Login at {login_hour}:00"})
+            if login_hour is not None and (login_hour < 6 or login_hour > 22):  # Outside 6 AM - 10 PM
+                detected_patterns.append(
+                    {
+                        "pattern": "unusual_login_time",
+                        "details": f"Login at {login_hour}:00",
+                    }
+                )
         elif pattern_type == "repeated_failed_logins":
             failed_attempts = data.get("failed_login_attempts", 0)
             if failed_attempts >= self.predefined_patterns["repeated_failed_logins"]["threshold"]:
-                detected_patterns.append({"pattern": "repeated_failed_logins", "details": f"{failed_attempts} failed attempts"})
-        
+                detected_patterns.append(
+                    {
+                        "pattern": "repeated_failed_logins",
+                        "details": f"{failed_attempts} failed attempts",
+                    }
+                )
+
         if detected_patterns:
             assessment = f"{len(detected_patterns)} patterns detected."
 
@@ -67,7 +86,7 @@ class PatternDetector:
             "timestamp": datetime.now().isoformat(),
             "pattern_type": pattern_type,
             "detected_patterns": detected_patterns,
-            "assessment": assessment
+            "assessment": assessment,
         }
         self.detection_history.append(detection_result)
         self.last_detection_time = datetime.now()
@@ -83,6 +102,6 @@ class PatternDetector:
         return {
             "status": "active",
             "total_detections": len(self.detection_history),
-            "last_detection": self.last_detection_time.isoformat() if self.last_detection_time else "N/A",
-            "predefined_patterns_count": len(self.predefined_patterns)
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
+            "predefined_patterns_count": len(self.predefined_patterns),
         }

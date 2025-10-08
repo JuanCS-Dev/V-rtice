@@ -1,0 +1,26 @@
+# Prometheus configuration for Active Immune Core Service
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'immunis-dev'
+    service: 'active_immune_core'
+
+# Scrape configs
+scrape_configs:
+  # Active Immune Core Service metrics
+  - job_name: 'active_immune_core'
+    static_configs:
+      - targets: ['active_immune_core:8200']
+        labels:
+          service: 'active_immune_core'
+          env: 'dev'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

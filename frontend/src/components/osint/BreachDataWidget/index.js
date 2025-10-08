@@ -1,2 +1,2 @@
 export { BreachDataWidget } from './BreachDataWidget';
-export default BreachDataWidget;
+export { default } from './BreachDataWidget';

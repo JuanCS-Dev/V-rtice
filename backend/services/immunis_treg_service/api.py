@@ -5,28 +5,23 @@ REST API for false positive suppression and tolerance learning.
 NO MOCKS - Production-ready immune tolerance interface.
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from treg_core import (
-    TregController,
-    SecurityAlert,
     AlertSeverity,
-    ToleranceDecision,
+    SecurityAlert,
+    TregController,
 )
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instance
@@ -41,10 +36,7 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing Regulatory T-Cells (Treg) Service...")
 
     # Initialize Treg controller
-    treg_controller = TregController(
-        tolerance_threshold=0.7,
-        suppression_threshold=0.7
-    )
+    treg_controller = TregController(tolerance_threshold=0.7, suppression_threshold=0.7)
 
     logger.info("Treg controller initialized")
 
@@ -57,7 +49,7 @@ app = FastAPI(
     title="VÉRTICE Regulatory T-Cells (Treg) Service",
     description="False positive suppression and immune tolerance learning",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -65,8 +57,10 @@ app = FastAPI(
 # Request/Response Models
 # ============================================================================
 
+
 class SecurityAlertRequest(BaseModel):
     """Request to evaluate security alert."""
+
     alert_id: str = Field(..., description="Unique alert ID")
     timestamp: Optional[str] = Field(None, description="ISO timestamp (default: now)")
     alert_type: str = Field(..., description="Alert type (port_scan, malware, etc)")
@@ -80,6 +74,7 @@ class SecurityAlertRequest(BaseModel):
 
 class SuppressionDecisionResponse(BaseModel):
     """Response with suppression decision."""
+
     alert_id: str
     decision: str
     confidence: float
@@ -91,6 +86,7 @@ class SuppressionDecisionResponse(BaseModel):
 
 class EntityObservationRequest(BaseModel):
     """Request to observe entity behavior."""
+
     entity_id: str = Field(..., description="Entity identifier")
     entity_type: str = Field(..., description="Entity type (source_ip, user, asset)")
     behavioral_features: Dict[str, float] = Field(..., description="Behavioral features (numeric)")
@@ -98,16 +94,17 @@ class EntityObservationRequest(BaseModel):
 
 class FeedbackRequest(BaseModel):
     """Request to provide feedback on alert."""
+
     alert_id: str = Field(..., description="Alert identifier")
     was_false_positive: bool = Field(..., description="Whether alert was false positive")
     entities_involved: List[Dict[str, str]] = Field(
-        ...,
-        description="Entities involved (list of {entity_id, entity_type})"
+        ..., description="Entities involved (list of {entity_id, entity_type})"
     )
 
 
 class ToleranceProfileResponse(BaseModel):
     """Response with tolerance profile."""
+
     entity_id: str
     entity_type: str
     first_seen: str
@@ -122,6 +119,7 @@ class ToleranceProfileResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     """Service status response."""
+
     service: str
     status: str
     components: Dict[str, Any]
@@ -131,6 +129,7 @@ class StatusResponse(BaseModel):
 # ============================================================================
 # Alert Evaluation Endpoints
 # ============================================================================
+
 
 @app.post("/alert/evaluate", response_model=SuppressionDecisionResponse)
 async def evaluate_alert(request: SecurityAlertRequest):
@@ -150,10 +149,7 @@ async def evaluate_alert(request: SecurityAlertRequest):
         try:
             severity = AlertSeverity(request.severity.lower())
         except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid severity: {request.severity}"
-            )
+            raise HTTPException(status_code=400, detail=f"Invalid severity: {request.severity}")
 
         # Parse timestamp
         if request.timestamp:
@@ -171,7 +167,7 @@ async def evaluate_alert(request: SecurityAlertRequest):
             target_asset=request.target_asset,
             indicators=request.indicators,
             raw_score=request.raw_score,
-            metadata=request.metadata
+            metadata=request.metadata,
         )
 
         # Process through Treg
@@ -184,7 +180,7 @@ async def evaluate_alert(request: SecurityAlertRequest):
             suppression_score=decision.suppression_score,
             rationale=decision.rationale,
             tolerance_profiles_consulted=decision.tolerance_profiles_consulted,
-            timestamp=decision.timestamp.isoformat()
+            timestamp=decision.timestamp.isoformat(),
         )
 
     except HTTPException:
@@ -197,6 +193,7 @@ async def evaluate_alert(request: SecurityAlertRequest):
 # ============================================================================
 # Tolerance Learning Endpoints
 # ============================================================================
+
 
 @app.post("/tolerance/observe")
 async def observe_entity_behavior(request: EntityObservationRequest):
@@ -216,7 +213,7 @@ async def observe_entity_behavior(request: EntityObservationRequest):
         treg_controller.observe_entity(
             entity_id=request.entity_id,
             entity_type=request.entity_type,
-            behavioral_features=request.behavioral_features
+            behavioral_features=request.behavioral_features,
         )
 
         return {
@@ -224,7 +221,7 @@ async def observe_entity_behavior(request: EntityObservationRequest):
             "entity_id": request.entity_id,
             "entity_type": request.entity_type,
             "features_count": len(request.behavioral_features),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -248,10 +245,7 @@ async def get_tolerance_profile(entity_id: str):
     try:
         # Get profile
         if entity_id not in treg_controller.tolerance_learner.tolerance_profiles:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No tolerance profile for {entity_id}"
-            )
+            raise HTTPException(status_code=404, detail=f"No tolerance profile for {entity_id}")
 
         profile = treg_controller.tolerance_learner.tolerance_profiles[entity_id]
 
@@ -265,7 +259,7 @@ async def get_tolerance_profile(entity_id: str):
             false_positive_count=profile.false_positive_count,
             true_positive_count=profile.true_positive_count,
             tolerance_score=profile.tolerance_score,
-            updated_at=profile.updated_at.isoformat()
+            updated_at=profile.updated_at.isoformat(),
         )
 
     except HTTPException:
@@ -279,7 +273,7 @@ async def get_tolerance_profile(entity_id: str):
 async def list_tolerance_profiles(
     min_tolerance: Optional[float] = None,
     max_tolerance: Optional[float] = None,
-    limit: int = 100
+    limit: int = 100,
 ):
     """List tolerance profiles with optional filtering.
 
@@ -304,18 +298,20 @@ async def list_tolerance_profiles(
             if max_tolerance is not None and profile.tolerance_score > max_tolerance:
                 continue
 
-            profiles.append(ToleranceProfileResponse(
-                entity_id=profile.entity_id,
-                entity_type=profile.entity_type,
-                first_seen=profile.first_seen.isoformat(),
-                last_seen=profile.last_seen.isoformat(),
-                total_observations=profile.total_observations,
-                alert_history_count=len(profile.alert_history),
-                false_positive_count=profile.false_positive_count,
-                true_positive_count=profile.true_positive_count,
-                tolerance_score=profile.tolerance_score,
-                updated_at=profile.updated_at.isoformat()
-            ))
+            profiles.append(
+                ToleranceProfileResponse(
+                    entity_id=profile.entity_id,
+                    entity_type=profile.entity_type,
+                    first_seen=profile.first_seen.isoformat(),
+                    last_seen=profile.last_seen.isoformat(),
+                    total_observations=profile.total_observations,
+                    alert_history_count=len(profile.alert_history),
+                    false_positive_count=profile.false_positive_count,
+                    true_positive_count=profile.true_positive_count,
+                    tolerance_score=profile.tolerance_score,
+                    updated_at=profile.updated_at.isoformat(),
+                )
+            )
 
             if len(profiles) >= limit:
                 break
@@ -330,6 +326,7 @@ async def list_tolerance_profiles(
 # ============================================================================
 # Feedback Endpoints
 # ============================================================================
+
 
 @app.post("/feedback/provide")
 async def provide_feedback(request: FeedbackRequest):
@@ -346,16 +343,13 @@ async def provide_feedback(request: FeedbackRequest):
 
     try:
         # Convert entities to tuples
-        entities = [
-            (entity["entity_id"], entity["entity_type"])
-            for entity in request.entities_involved
-        ]
+        entities = [(entity["entity_id"], entity["entity_type"]) for entity in request.entities_involved]
 
         # Provide feedback
         treg_controller.provide_feedback(
             alert_id=request.alert_id,
             was_false_positive=request.was_false_positive,
-            entities_involved=entities
+            entities_involved=entities,
         )
 
         return {
@@ -363,7 +357,7 @@ async def provide_feedback(request: FeedbackRequest):
             "alert_id": request.alert_id,
             "was_false_positive": request.was_false_positive,
             "entities_updated": len(entities),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -375,13 +369,14 @@ async def provide_feedback(request: FeedbackRequest):
 # System Endpoints
 # ============================================================================
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "immunis_treg",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -402,7 +397,7 @@ async def get_status():
             service="immunis_treg",
             status="operational",
             components=status,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
     except Exception as e:
@@ -435,7 +430,7 @@ async def get_statistics():
             "low_tolerance_entities": learner["low_tolerance_entities"],
             "alerts_suppressed": suppressor["alerts_suppressed"],
             "alerts_allowed": suppressor["alerts_allowed"],
-            "suppression_rate": suppressor["suppression_rate"]
+            "suppression_rate": suppressor["suppression_rate"],
         }
 
     except Exception as e:
@@ -444,10 +439,4 @@ async def get_statistics():
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "api:app",
-        host="0.0.0.0",
-        port=8018,
-        log_level="info",
-        access_log=True
-    )
+    uvicorn.run("api:app", host="0.0.0.0", port=8018, log_level="info", access_log=True)

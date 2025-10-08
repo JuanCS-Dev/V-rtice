@@ -11,14 +11,16 @@ API request and response modeling. This is crucial for maintaining data integrit
 and enabling efficient data exchange within the HCL ecosystem.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field
 
 
 class HCLDataType(str, Enum):
     """Enumeration for different types of HCL data stored in the knowledge base."""
+
     METRICS = "metrics"
     ANALYSIS = "analysis"
     PLAN = "plan"
@@ -36,6 +38,7 @@ class HCLDataEntry(BaseModel):
         data (Dict[str, Any]): The actual data payload.
         metadata (Optional[Dict[str, Any]]): Optional metadata associated with the entry.
     """
+
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
     data_type: HCLDataType
     data: Dict[str, Any]

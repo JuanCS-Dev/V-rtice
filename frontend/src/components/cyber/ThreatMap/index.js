@@ -1,2 +1,2 @@
 export { ThreatMap } from './ThreatMap';
-export default ThreatMap;
+export { default } from './ThreatMap';

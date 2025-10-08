@@ -6,18 +6,18 @@ and dependency injection for FastAPI.
 """
 
 import logging
-from typing import AsyncGenerator, Optional
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Optional
 
+from sqlalchemy import event, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
     AsyncEngine,
     AsyncSession,
-    async_sessionmaker
+    async_sessionmaker,
+    create_async_engine,
 )
-from sqlalchemy.pool import NullPool, QueuePool
-from sqlalchemy import text, event
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.pool import QueuePool
 
 from config import get_settings
 from db_models import Base
@@ -205,6 +205,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 # LIFESPAN MANAGEMENT FOR FASTAPI
 # ============================================================================
 
+
 @asynccontextmanager
 async def lifespan_db(app):
     """
@@ -231,6 +232,7 @@ async def lifespan_db(app):
 # ============================================================================
 # UTILITY FUNCTIONS
 # ============================================================================
+
 
 async def execute_raw_query(query: str, params: Optional[dict] = None) -> list:
     """
@@ -279,6 +281,7 @@ async def vacuum_analyze() -> None:
 # ============================================================================
 # REPOSITORY PATTERN BASE CLASS (Optional)
 # ============================================================================
+
 
 class BaseRepository:
     """Base repository for data access patterns."""

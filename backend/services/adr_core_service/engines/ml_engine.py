@@ -12,7 +12,7 @@ identify subtle patterns indicative of malicious activity.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Any, Dict
 
 
 class MLEngine:
@@ -44,10 +44,10 @@ class MLEngine:
             raise RuntimeError("ML Engine not initialized or models not loaded.")
 
         print(f"[MLEngine] Predicting threat score for event: {event_data.get('event_id', 'N/A')}")
-        await asyncio.sleep(0.05) # Simulate prediction time
+        await asyncio.sleep(0.05)  # Simulate prediction time
 
         # Simplified ML prediction logic for demonstration
-        score = 0.1 # Base score
+        score = 0.1  # Base score
         if "malware" in str(event_data).lower():
             score += 0.7
         if "unusual_login" in str(event_data).lower():
@@ -55,7 +55,7 @@ class MLEngine:
         if event_data.get("severity") == "critical":
             score += 0.3
 
-        return min(1.0, score) # Cap score at 1.0
+        return min(1.0, score)  # Cap score at 1.0
 
     async def detect_anomaly(self, data_stream: Any) -> bool:
         """Detects anomalies in a data stream using unsupervised ML models.
@@ -70,7 +70,7 @@ class MLEngine:
             raise RuntimeError("ML Engine not initialized or models not loaded.")
 
         print("[MLEngine] Detecting anomalies in data stream...")
-        await asyncio.sleep(0.1) # Simulate anomaly detection time
+        await asyncio.sleep(0.1)  # Simulate anomaly detection time
 
         # Simplified anomaly detection logic
         if "spike" in str(data_stream).lower() or "outlier" in str(data_stream).lower():
@@ -87,6 +87,6 @@ class MLEngine:
             bool: True if retraining is successful, False otherwise.
         """
         print("[MLEngine] Retraining ML models with new data...")
-        await asyncio.sleep(2) # Simulate retraining time
+        await asyncio.sleep(2)  # Simulate retraining time
         print("[MLEngine] ML models retraining complete.")
         return True

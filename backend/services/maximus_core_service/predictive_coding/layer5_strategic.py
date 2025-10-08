@@ -10,11 +10,11 @@ Prediction error = unexpected threat landscape shifts (emerging APTs, zero-days)
 """
 
 import logging
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from typing import Dict, List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class StrategicTransformer(nn.Module):
         output_dim: int = 64,
         num_apt_groups: int = 50,
         num_cve_categories: int = 20,
-        dropout: float = 0.1
+        dropout: float = 0.1,
     ):
         """Initialize Strategic Transformer.
 
@@ -64,8 +64,8 @@ class StrategicTransformer(nn.Module):
             nhead=nhead,
             dim_feedforward=d_model * 4,
             dropout=dropout,
-            activation='gelu',
-            batch_first=True
+            activation="gelu",
+            batch_first=True,
         )
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
@@ -77,14 +77,14 @@ class StrategicTransformer(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-        logger.info(f"StrategicTransformer initialized: {input_dim}D → {output_dim}D "
-                   f"(d_model={d_model}, heads={nhead}, layers={num_layers})")
+        logger.info(
+            f"StrategicTransformer initialized: {input_dim}D → {output_dim}D "
+            f"(d_model={d_model}, heads={nhead}, layers={num_layers})"
+        )
 
     def forward(
-        self,
-        sequence: torch.Tensor,
-        mask: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        self, sequence: torch.Tensor, mask: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass.
 
         Args:
@@ -133,7 +133,7 @@ class PositionalEncoding(nn.Module):
         pe[0, :, 0::2] = torch.sin(position * div_term)
         pe[0, :, 1::2] = torch.cos(position * div_term)
 
-        self.register_buffer('pe', pe)
+        self.register_buffer("pe", pe)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Add positional encoding.
@@ -144,7 +144,7 @@ class PositionalEncoding(nn.Module):
         Returns:
             Tensor with positional encoding added
         """
-        x = x + self.pe[:, :x.size(1), :]
+        x = x + self.pe[:, : x.size(1), :]
         return self.dropout(x)
 
 
@@ -158,8 +158,8 @@ class StrategicLayer:
     def __init__(
         self,
         latent_dim: int = 64,
-        device: str = 'cpu',
-        prediction_horizon_weeks: int = 12
+        device: str = "cpu",
+        prediction_horizon_weeks: int = 12,
     ):
         """Initialize Strategic Layer.
 
@@ -181,15 +181,12 @@ class StrategicLayer:
             output_dim=latent_dim,
             num_apt_groups=50,
             num_cve_categories=20,
-            dropout=0.1
+            dropout=0.1,
         ).to(self.device)
 
         logger.info(f"StrategicLayer initialized (horizon={prediction_horizon_weeks} weeks)")
 
-    def predict(
-        self,
-        event_sequence: np.ndarray
-    ) -> Dict:
+    def predict(self, event_sequence: np.ndarray) -> dict:
         """Predict threat landscape evolution.
 
         Args:
@@ -214,32 +211,28 @@ class StrategicLayer:
             top_cves = torch.topk(cve_probs[0], k=5)
 
             return {
-                'threat_landscape_embedding': landscape_pred.cpu().numpy()[0],
-                'global_risk_score': risk_score.cpu().numpy()[0, 0],
-                'top_apt_groups': [
+                "threat_landscape_embedding": landscape_pred.cpu().numpy()[0],
+                "global_risk_score": risk_score.cpu().numpy()[0, 0],
+                "top_apt_groups": [
                     {
-                        'id': int(top_apts.indices[i]),
-                        'name': self._get_apt_name(int(top_apts.indices[i])),
-                        'probability': float(top_apts.values[i])
+                        "id": int(top_apts.indices[i]),
+                        "name": self._get_apt_name(int(top_apts.indices[i])),
+                        "probability": float(top_apts.values[i]),
                     }
                     for i in range(5)
                 ],
-                'top_cve_categories': [
+                "top_cve_categories": [
                     {
-                        'id': int(top_cves.indices[i]),
-                        'category': self._get_cve_category(int(top_cves.indices[i])),
-                        'probability': float(top_cves.values[i])
+                        "id": int(top_cves.indices[i]),
+                        "category": self._get_cve_category(int(top_cves.indices[i])),
+                        "probability": float(top_cves.values[i]),
                     }
                     for i in range(5)
                 ],
-                'prediction_horizon_weeks': self.prediction_horizon
+                "prediction_horizon_weeks": self.prediction_horizon,
             }
 
-    def assess_strategic_risk(
-        self,
-        event_sequence: np.ndarray,
-        risk_threshold: float = 0.75
-    ) -> Dict:
+    def assess_strategic_risk(self, event_sequence: np.ndarray, risk_threshold: float = 0.75) -> dict:
         """Assess strategic threat landscape risk.
 
         Args:
@@ -251,21 +244,21 @@ class StrategicLayer:
         """
         prediction = self.predict(event_sequence)
 
-        risk_score = prediction['global_risk_score']
+        risk_score = prediction["global_risk_score"]
         is_high_risk = risk_score > risk_threshold
 
         # Get top threats
-        top_apt = prediction['top_apt_groups'][0]['name']
-        top_cve = prediction['top_cve_categories'][0]['category']
+        top_apt = prediction["top_apt_groups"][0]["name"]
+        top_cve = prediction["top_cve_categories"][0]["category"]
 
         assessment = {
-            'strategic_risk': 'HIGH' if is_high_risk else 'MODERATE' if risk_score > 0.5 else 'LOW',
-            'risk_score': float(risk_score),
-            'emerging_apt_groups': [apt['name'] for apt in prediction['top_apt_groups'][:3]],
-            'emerging_vulnerabilities': [cve['category'] for cve in prediction['top_cve_categories'][:3]],
-            'primary_threat': top_apt,
-            'primary_vulnerability': top_cve,
-            'recommendation': self._generate_recommendation(is_high_risk, top_apt, top_cve)
+            "strategic_risk": ("HIGH" if is_high_risk else "MODERATE" if risk_score > 0.5 else "LOW"),
+            "risk_score": float(risk_score),
+            "emerging_apt_groups": [apt["name"] for apt in prediction["top_apt_groups"][:3]],
+            "emerging_vulnerabilities": [cve["category"] for cve in prediction["top_cve_categories"][:3]],
+            "primary_threat": top_apt,
+            "primary_vulnerability": top_cve,
+            "recommendation": self._generate_recommendation(is_high_risk, top_apt, top_cve),
         }
 
         return assessment
@@ -273,37 +266,96 @@ class StrategicLayer:
     def _get_apt_name(self, apt_id: int) -> str:
         """Map APT ID to group name."""
         apts = [
-            'APT1', 'APT3', 'APT28', 'APT29', 'APT32', 'APT33', 'APT34', 'APT37',
-            'APT38', 'APT39', 'APT41', 'CARBANAK', 'COBALT_GROUP', 'DARKHOTEL',
-            'EQUATION_GROUP', 'FIN4', 'FIN6', 'FIN7', 'FIN8', 'LAZARUS_GROUP',
-            'LEVIATHAN', 'MAGECARТ', 'MENUPASS', 'MUDDYWATER', 'OCEANLOTUS',
-            'SANDWORM', 'SOFACY', 'STRIDER', 'TURLA', 'WINNTI',
-            'DRAGONFLY', 'ENERGETIC_BEAR', 'PUTTER_PANDA', 'AXIOM', 'SHELL_CREW',
-            'DEEP_PANDA', 'BRONZE_BUTLER', 'THREAT_GROUP_3390', 'NAIKON', 'LOTUS_BLOSSOM',
-            'ELDERWOOD', 'NITRO', 'VOLATILE_CEDAR', 'CHARMING_KITTEN', 'CLEAVER',
-            'COPYKITTENS', 'DUST_STORM', 'IRON_TIGER', 'KE3CHANG', 'MOAFEE'
+            "APT1",
+            "APT3",
+            "APT28",
+            "APT29",
+            "APT32",
+            "APT33",
+            "APT34",
+            "APT37",
+            "APT38",
+            "APT39",
+            "APT41",
+            "CARBANAK",
+            "COBALT_GROUP",
+            "DARKHOTEL",
+            "EQUATION_GROUP",
+            "FIN4",
+            "FIN6",
+            "FIN7",
+            "FIN8",
+            "LAZARUS_GROUP",
+            "LEVIATHAN",
+            "MAGECARТ",
+            "MENUPASS",
+            "MUDDYWATER",
+            "OCEANLOTUS",
+            "SANDWORM",
+            "SOFACY",
+            "STRIDER",
+            "TURLA",
+            "WINNTI",
+            "DRAGONFLY",
+            "ENERGETIC_BEAR",
+            "PUTTER_PANDA",
+            "AXIOM",
+            "SHELL_CREW",
+            "DEEP_PANDA",
+            "BRONZE_BUTLER",
+            "THREAT_GROUP_3390",
+            "NAIKON",
+            "LOTUS_BLOSSOM",
+            "ELDERWOOD",
+            "NITRO",
+            "VOLATILE_CEDAR",
+            "CHARMING_KITTEN",
+            "CLEAVER",
+            "COPYKITTENS",
+            "DUST_STORM",
+            "IRON_TIGER",
+            "KE3CHANG",
+            "MOAFEE",
         ]
-        return apts[apt_id] if apt_id < len(apts) else f'APT_UNKNOWN_{apt_id}'
+        return apts[apt_id] if apt_id < len(apts) else f"APT_UNKNOWN_{apt_id}"
 
     def _get_cve_category(self, cve_id: int) -> str:
         """Map CVE ID to vulnerability category."""
         categories = [
-            'REMOTE_CODE_EXECUTION', 'PRIVILEGE_ESCALATION', 'AUTHENTICATION_BYPASS',
-            'SQL_INJECTION', 'XSS', 'CSRF', 'BUFFER_OVERFLOW', 'USE_AFTER_FREE',
-            'MEMORY_CORRUPTION', 'INFORMATION_DISCLOSURE', 'DENIAL_OF_SERVICE',
-            'DIRECTORY_TRAVERSAL', 'XXE', 'DESERIALIZATION', 'COMMAND_INJECTION',
-            'RACE_CONDITION', 'CRYPTO_WEAKNESS', 'SSRF', 'IDOR', 'ZERO_DAY_EXPLOIT'
+            "REMOTE_CODE_EXECUTION",
+            "PRIVILEGE_ESCALATION",
+            "AUTHENTICATION_BYPASS",
+            "SQL_INJECTION",
+            "XSS",
+            "CSRF",
+            "BUFFER_OVERFLOW",
+            "USE_AFTER_FREE",
+            "MEMORY_CORRUPTION",
+            "INFORMATION_DISCLOSURE",
+            "DENIAL_OF_SERVICE",
+            "DIRECTORY_TRAVERSAL",
+            "XXE",
+            "DESERIALIZATION",
+            "COMMAND_INJECTION",
+            "RACE_CONDITION",
+            "CRYPTO_WEAKNESS",
+            "SSRF",
+            "IDOR",
+            "ZERO_DAY_EXPLOIT",
         ]
-        return categories[cve_id] if cve_id < len(categories) else f'CVE_CAT_{cve_id}'
+        return categories[cve_id] if cve_id < len(categories) else f"CVE_CAT_{cve_id}"
 
     def _generate_recommendation(self, is_high_risk: bool, top_apt: str, top_cve: str) -> str:
         """Generate strategic recommendation."""
         if is_high_risk:
-            return (f"URGENT: Elevated threat from {top_apt}. Prioritize patching {top_cve} "
-                   f"vulnerabilities. Increase monitoring and threat hunting activities.")
-        else:
-            return (f"Monitor {top_apt} activity. Review defenses against {top_cve} exploits. "
-                   f"Maintain standard security posture.")
+            return (
+                f"URGENT: Elevated threat from {top_apt}. Prioritize patching {top_cve} "
+                f"vulnerabilities. Increase monitoring and threat hunting activities."
+            )
+        return (
+            f"Monitor {top_apt} activity. Review defenses against {top_cve} exploits. "
+            f"Maintain standard security posture."
+        )
 
     def train_step(
         self,
@@ -312,8 +364,8 @@ class StrategicLayer:
         target_apts: torch.Tensor,
         target_cves: torch.Tensor,
         target_risks: torch.Tensor,
-        optimizer: torch.optim.Optimizer
-    ) -> Dict[str, float]:
+        optimizer: torch.optim.Optimizer,
+    ) -> dict[str, float]:
         """Single training step."""
         self.transformer.train()
 
@@ -341,24 +393,27 @@ class StrategicLayer:
         optimizer.step()
 
         return {
-            'total_loss': total_loss.item(),
-            'prediction_loss': pred_loss.item(),
-            'apt_loss': apt_loss.item(),
-            'cve_loss': cve_loss.item(),
-            'risk_loss': risk_loss.item()
+            "total_loss": total_loss.item(),
+            "prediction_loss": pred_loss.item(),
+            "apt_loss": apt_loss.item(),
+            "cve_loss": cve_loss.item(),
+            "risk_loss": risk_loss.item(),
         }
 
     def save_model(self, path: str):
         """Save model checkpoint."""
-        torch.save({
-            'transformer_state_dict': self.transformer.state_dict(),
-            'latent_dim': self.latent_dim,
-            'prediction_horizon': self.prediction_horizon
-        }, path)
+        torch.save(
+            {
+                "transformer_state_dict": self.transformer.state_dict(),
+                "latent_dim": self.latent_dim,
+                "prediction_horizon": self.prediction_horizon,
+            },
+            path,
+        )
         logger.info(f"Model saved to {path}")
 
     def load_model(self, path: str):
         """Load model checkpoint."""
         checkpoint = torch.load(path, map_location=self.device)
-        self.transformer.load_state_dict(checkpoint['transformer_state_dict'])
+        self.transformer.load_state_dict(checkpoint["transformer_state_dict"])
         logger.info(f"Model saved to {path}")

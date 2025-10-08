@@ -15,10 +15,8 @@ Date: 2025-10-06
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List
 
 from .base import Policy, PolicySeverity, PolicyType
-
 
 # ============================================================================
 # POLICY DEFINITIONS
@@ -352,7 +350,7 @@ class PolicyRegistry:
 
     def __init__(self):
         """Initialize policy registry."""
-        self.policies: Dict[PolicyType, Policy] = {}
+        self.policies: dict[PolicyType, Policy] = {}
         self._load_default_policies()
 
     def _load_default_policies(self):
@@ -369,19 +367,19 @@ class PolicyRegistry:
             raise ValueError(f"Policy type {policy_type} not found in registry")
         return self.policies[policy_type]
 
-    def get_all_policies(self) -> List[Policy]:
+    def get_all_policies(self) -> list[Policy]:
         """Get all policies."""
         return list(self.policies.values())
 
-    def get_policies_by_scope(self, scope: str) -> List[Policy]:
+    def get_policies_by_scope(self, scope: str) -> list[Policy]:
         """Get policies applicable to a specific scope."""
         return [p for p in self.policies.values() if p.scope == "all" or scope in p.scope]
 
-    def get_policies_requiring_review(self) -> List[Policy]:
+    def get_policies_requiring_review(self) -> list[Policy]:
         """Get policies that are due for review."""
         return [p for p in self.policies.values() if p.is_due_for_review()]
 
-    def get_unapproved_policies(self) -> List[Policy]:
+    def get_unapproved_policies(self) -> list[Policy]:
         """Get policies pending ERB approval."""
         return [p for p in self.policies.values() if not p.approved_by_erb]
 
@@ -400,7 +398,7 @@ class PolicyRegistry:
         self,
         policy_type: PolicyType,
         new_version: str,
-        updated_rules: List[str],
+        updated_rules: list[str],
         description: str,
     ):
         """Update policy to new version."""
@@ -415,7 +413,7 @@ class PolicyRegistry:
         policy.next_review_date = datetime.utcnow() + timedelta(days=365)
         policy.approved_by_erb = False  # Requires re-approval
 
-    def get_policy_summary(self) -> Dict[str, any]:
+    def get_policy_summary(self) -> dict[str, any]:
         """Get summary of all policies."""
         return {
             "total_policies": len(self.policies),

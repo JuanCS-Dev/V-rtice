@@ -1,0 +1,2 @@
+maximus_core_service/validate_regra_de_ouro.py:- NO PLACEHOLDER: No TODO, FIXME, HACK, NotImplementedError, or pass statements
+maximus_core_service/validate_regra_de_ouro.py:            r"\bNotImplementedError\b",

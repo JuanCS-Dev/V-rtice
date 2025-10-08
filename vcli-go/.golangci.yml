@@ -1,0 +1,110 @@
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    # Default linters
+    - gofmt
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - structcheck
+    - varcheck
+    - ineffassign
+    - deadcode
+    - typecheck
+
+    # Additional linters
+    - gocyclo
+    - gocognit
+    - goconst
+    - gocritic
+    - goimports
+    - revive
+    - gosec
+    - misspell
+    - unconvert
+    - unparam
+    - nakedret
+    - prealloc
+    - exportloopref
+    - nilerr
+    - nolintlint
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+
+  gocognit:
+    min-complexity: 20
+
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+
+  goimports:
+    local-prefixes: github.com/verticedev/vcli-go
+
+  revive:
+    rules:
+      - name: var-naming
+        severity: warning
+      - name: package-comments
+        severity: warning
+      - name: exported
+        severity: warning
+
+  gosec:
+    excludes:
+      - G104 # Audit errors not checked
+      - G307 # Deferring unsafe method
+
+  misspell:
+    locale: US
+
+  nakedret:
+    max-func-lines: 30
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - gosec
+        - dupl
+        - goconst
+
+    # Exclude known linters from partially hard-vendored code
+    - path: internal/hmac/
+      linters:
+        - gosec
+
+  # Maximum issues count per one linter
+  max-issues-per-linter: 50
+
+  # Maximum count of issues with the same text
+  max-same-issues: 3
+
+  # Show only new issues
+  new: false
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+  uniq-by-line: true
+  sort-results: true

@@ -15,12 +15,12 @@ Vulnerability Intelligence Service's capabilities for risk assessment, patch
 management, and proactive defense, enhancing the overall cybersecurity posture.
 """
 
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
 
 from cve_correlator import CVECorrelator
 from nuclei_wrapper import NucleiWrapper
@@ -38,6 +38,7 @@ class CVEQuery(BaseModel):
     Attributes:
         cve_id (str): The CVE ID to query (e.g., 'CVE-2023-1234').
     """
+
     cve_id: str
 
 
@@ -48,6 +49,7 @@ class SoftwareVulnerabilityQuery(BaseModel):
         software_name (str): The name of the software.
         software_version (str): The version of the software.
     """
+
     software_name: str
     software_version: str
 
@@ -60,6 +62,7 @@ class NucleiScanRequest(BaseModel):
         template_path (Optional[str]): Path to a specific Nuclei template or template directory.
         options (Optional[List[str]]): Additional Nuclei command-line options.
     """
+
     target: str
     template_path: Optional[str] = None
     options: Optional[List[str]] = None
@@ -86,7 +89,10 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "Vulnerability Intelligence Service is operational."}
+    return {
+        "status": "healthy",
+        "message": "Vulnerability Intelligence Service is operational.",
+    }
 
 
 @app.post("/query_cve")
@@ -106,11 +112,17 @@ async def query_cve_info(request: CVEQuery) -> Dict[str, Any]:
     cve_info = await cve_correlator.get_cve_info(request.cve_id)
     if not cve_info:
         raise HTTPException(status_code=404, detail=f"CVE {request.cve_id} not found.")
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "cve_info": cve_info}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "cve_info": cve_info,
+    }
 
 
 @app.post("/correlate_software_vulns")
-async def correlate_software_vulnerabilities(request: SoftwareVulnerabilityQuery) -> Dict[str, Any]:
+async def correlate_software_vulnerabilities(
+    request: SoftwareVulnerabilityQuery,
+) -> Dict[str, Any]:
     """Correlates known vulnerabilities with a specific software and version.
 
     Args:
@@ -121,7 +133,11 @@ async def correlate_software_vulnerabilities(request: SoftwareVulnerabilityQuery
     """
     print(f"[API] Correlating vulnerabilities for {request.software_name} {request.software_version}")
     correlated_cves = await cve_correlator.correlate_vulnerability(request.software_name, request.software_version)
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "correlated_cves": correlated_cves}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "correlated_cves": correlated_cves,
+    }
 
 
 @app.post("/nuclei_scan")
@@ -136,7 +152,11 @@ async def initiate_nuclei_scan(request: NucleiScanRequest) -> Dict[str, Any]:
     """
     print(f"[API] Initiating Nuclei scan on {request.target}")
     scan_results = await nuclei_wrapper.run_scan(request.target, request.template_path, request.options)
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "nuclei_results": scan_results}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "nuclei_results": scan_results,
+    }
 
 
 if __name__ == "__main__":

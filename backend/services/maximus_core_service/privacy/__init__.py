@@ -22,7 +22,7 @@ Usage:
     >>> aggregator = DPAggregator(epsilon=1.0, delta=1e-5)
     >>>
     >>> # Execute private count query
-    >>> result = aggregator.count_by_group(data, group_column='region')
+    >>> result = aggregator.count_by_group(data, group_column="region")
     >>> print(f"Noisy count: {result.noisy_value}")
     >>> print(f"Privacy budget used: ε={result.epsilon_used}")
 
@@ -32,28 +32,25 @@ Version: 1.0
 """
 
 from .base import (
+    DPResult,
     PrivacyBudget,
     PrivacyLevel,
-    PrivacyParameters,
-    DPResult,
     PrivacyMechanism,
+    PrivacyParameters,
     SensitivityCalculator,
 )
-
-from .dp_mechanisms import (
-    LaplaceMechanism,
-    GaussianMechanism,
-    ExponentialMechanism,
-)
-
 from .dp_aggregator import (
     DPAggregator,
     DPQueryType,
 )
-
+from .dp_mechanisms import (
+    ExponentialMechanism,
+    GaussianMechanism,
+    LaplaceMechanism,
+)
 from .privacy_accountant import (
-    PrivacyAccountant,
     CompositionType,
+    PrivacyAccountant,
 )
 
 __all__ = [

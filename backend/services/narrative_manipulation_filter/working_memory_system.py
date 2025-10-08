@@ -13,22 +13,20 @@ Data stored:
 - Argumentation graphs
 """
 
-import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-import json
 import asyncio
+import logging
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select, update, func
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select, update
 
+from cache_manager import CacheCategory, cache_manager
+from config import get_settings
 from database import get_db_session
-from db_models import SourceProfile, AnalysisRecord, VerifiedClaim
-from cache_manager import cache_manager, CacheCategory
+from db_models import AnalysisRecord, SourceProfile
 from seriema_graph_client import seriema_graph_client
 from utils import hash_text
-from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -86,11 +84,7 @@ class WorkingMemorySystem:
         self._initialized = True
         logger.info("✅ Working memory system initialized")
 
-    async def load_context(
-        self,
-        content: str,
-        source_info: Dict[str, Any]
-    ) -> AnalysisContext:
+    async def load_context(self, content: str, source_info: Dict[str, Any]) -> AnalysisContext:
         """
         Load relevant context for current analysis.
 
@@ -118,7 +112,7 @@ class WorkingMemorySystem:
             self._load_source_reputation(source_domain),
             self._load_recent_analyses(source_domain),
             self._load_related_arguments(content),
-            return_exceptions=True
+            return_exceptions=True,
         )
 
         # Handle exceptions
@@ -139,7 +133,7 @@ class WorkingMemorySystem:
             source_reputation=reputation,
             recent_analyses=recent_analyses,
             related_arguments=related_args,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
         logger.info(
@@ -149,10 +143,7 @@ class WorkingMemorySystem:
 
         return context
 
-    async def store_analysis(
-        self,
-        report: Dict[str, Any]
-    ) -> None:
+    async def store_analysis(self, report: Dict[str, Any]) -> None:
         """
         Persist analysis results across all memory layers.
 
@@ -199,9 +190,7 @@ class WorkingMemorySystem:
             SourceReputation
         """
         async with get_db_session() as session:
-            result = await session.execute(
-                select(SourceProfile).where(SourceProfile.domain == domain)
-            )
+            result = await session.execute(select(SourceProfile).where(SourceProfile.domain == domain))
 
             profile = result.scalar_one_or_none()
 
@@ -212,7 +201,7 @@ class WorkingMemorySystem:
                     score=0.5,
                     analyses_count=0,
                     manipulation_flags=0,
-                    last_updated=None
+                    last_updated=None,
                 )
 
             return SourceReputation(
@@ -220,14 +209,10 @@ class WorkingMemorySystem:
                 score=profile.avg_credibility,
                 analyses_count=profile.total_analyses,
                 manipulation_flags=profile.manipulation_flags,
-                last_updated=profile.updated_at
+                last_updated=profile.updated_at,
             )
 
-    async def _load_recent_analyses(
-        self,
-        domain: str,
-        limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    async def _load_recent_analyses(self, domain: str, limit: int = 10) -> List[Dict[str, Any]]:
         """
         Load recent analyses from Redis cache.
 
@@ -270,26 +255,19 @@ class WorkingMemorySystem:
                     "emotional_score": r.emotional_score,
                     "fallacy_count": r.fallacy_count,
                     "verification_result": r.verification_result,
-                    "timestamp": r.timestamp.isoformat() if r.timestamp else None
+                    "timestamp": r.timestamp.isoformat() if r.timestamp else None,
                 }
                 for r in records
             ]
 
             # Cache the list for 1 hour
             if analyses:
-                await cache_manager.set(
-                    CacheCategory.ANALYSIS,
-                    cached_list_key,
-                    analyses
-                )
+                await cache_manager.set(CacheCategory.ANALYSIS, cached_list_key, analyses)
 
         return analyses
 
     async def _load_related_arguments(
-        self,
-        content: str,
-        similarity_threshold: float = 0.7,
-        limit: int = 5
+        self, content: str, similarity_threshold: float = 0.7, limit: int = 5
     ) -> List[Dict[str, Any]]:
         """
         Load semantically similar arguments from Seriema Graph.
@@ -312,28 +290,15 @@ class WorkingMemorySystem:
 
         return []
 
-    async def _cache_analysis(
-        self,
-        content_hash: str,
-        source_domain: str,
-        report: Dict[str, Any]
-    ) -> None:
+    async def _cache_analysis(self, content_hash: str, source_domain: str, report: Dict[str, Any]) -> None:
         """Cache analysis in Redis (L1)."""
         cache_key = f"analysis:{source_domain}:{content_hash}"
 
-        await cache_manager.set(
-            CacheCategory.ANALYSIS,
-            cache_key,
-            report
-        )
+        await cache_manager.set(CacheCategory.ANALYSIS, cache_key, report)
 
         logger.debug(f"Cached analysis: {cache_key}")
 
-    async def _store_analysis_record(
-        self,
-        content_hash: str,
-        report: Dict[str, Any]
-    ) -> None:
+    async def _store_analysis_record(self, content_hash: str, report: Dict[str, Any]) -> None:
         """Store analysis in PostgreSQL (L2)."""
         async with get_db_session() as session:
             record = AnalysisRecord(
@@ -345,7 +310,7 @@ class WorkingMemorySystem:
                 fallacy_count=len(report.get("fallacies", [])),
                 verification_result=report.get("verification_result", "unverified"),
                 full_report=report,
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
             )
 
             session.add(record)
@@ -353,10 +318,7 @@ class WorkingMemorySystem:
 
             logger.debug(f"Stored analysis record: {content_hash[:16]}...")
 
-    async def _store_argumentation_graph(
-        self,
-        report: Dict[str, Any]
-    ) -> None:
+    async def _store_argumentation_graph(self, report: Dict[str, Any]) -> None:
         """Store argumentation graph in Seriema (L3)."""
         # This would store argumentation frameworks in Seriema Graph
         # Implementation depends on Seriema Graph client capabilities
@@ -364,11 +326,7 @@ class WorkingMemorySystem:
         # For now, log intent
         logger.debug("Argumentation graph storage (Seriema integration pending)")
 
-    async def _update_source_profile(
-        self,
-        domain: str,
-        report: Dict[str, Any]
-    ) -> None:
+    async def _update_source_profile(self, domain: str, report: Dict[str, Any]) -> None:
         """
         Update source reputation profile.
 
@@ -378,9 +336,7 @@ class WorkingMemorySystem:
         """
         async with get_db_session() as session:
             # Get or create profile
-            result = await session.execute(
-                select(SourceProfile).where(SourceProfile.domain == domain)
-            )
+            result = await session.execute(select(SourceProfile).where(SourceProfile.domain == domain))
 
             profile = result.scalar_one_or_none()
 
@@ -396,7 +352,7 @@ class WorkingMemorySystem:
                     manipulation_flags=1 if manipulation_score > 0.7 else 0,
                     last_analysis=datetime.utcnow(),
                     created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
+                    updated_at=datetime.utcnow(),
                 )
 
                 session.add(profile)
@@ -406,9 +362,7 @@ class WorkingMemorySystem:
                 new_total = total + 1
 
                 # Running average for credibility
-                new_avg_cred = (
-                    (profile.avg_credibility * total + credibility_score) / new_total
-                )
+                new_avg_cred = (profile.avg_credibility * total + credibility_score) / new_total
 
                 # Increment manipulation flags if high score
                 new_manip_flags = profile.manipulation_flags
@@ -424,7 +378,7 @@ class WorkingMemorySystem:
                         total_analyses=new_total,
                         manipulation_flags=new_manip_flags,
                         last_analysis=datetime.utcnow(),
-                        updated_at=datetime.utcnow()
+                        updated_at=datetime.utcnow(),
                     )
                 )
 
@@ -457,10 +411,7 @@ class WorkingMemorySystem:
 
         return domain
 
-    async def get_source_statistics(
-        self,
-        domain: str
-    ) -> Dict[str, Any]:
+    async def get_source_statistics(self, domain: str) -> Dict[str, Any]:
         """
         Get comprehensive statistics for a source.
 
@@ -472,17 +423,12 @@ class WorkingMemorySystem:
         """
         async with get_db_session() as session:
             # Get profile
-            result = await session.execute(
-                select(SourceProfile).where(SourceProfile.domain == domain)
-            )
+            result = await session.execute(select(SourceProfile).where(SourceProfile.domain == domain))
 
             profile = result.scalar_one_or_none()
 
             if not profile:
-                return {
-                    "domain": domain,
-                    "found": False
-                }
+                return {"domain": domain, "found": False}
 
             # Get recent analysis stats
             result = await session.execute(
@@ -490,9 +436,8 @@ class WorkingMemorySystem:
                     func.avg(AnalysisRecord.manipulation_score).label("avg_manipulation"),
                     func.avg(AnalysisRecord.credibility_score).label("avg_credibility"),
                     func.avg(AnalysisRecord.emotional_score).label("avg_emotional"),
-                    func.count(AnalysisRecord.id).label("total_analyses")
-                )
-                .where(AnalysisRecord.source_domain == domain)
+                    func.count(AnalysisRecord.id).label("total_analyses"),
+                ).where(AnalysisRecord.source_domain == domain)
             )
 
             stats = result.one()
@@ -503,14 +448,14 @@ class WorkingMemorySystem:
                 "avg_credibility": float(profile.avg_credibility),
                 "total_analyses": profile.total_analyses,
                 "manipulation_flags": profile.manipulation_flags,
-                "last_analysis": profile.last_analysis.isoformat() if profile.last_analysis else None,
-                "created_at": profile.created_at.isoformat() if profile.created_at else None,
+                "last_analysis": (profile.last_analysis.isoformat() if profile.last_analysis else None),
+                "created_at": (profile.created_at.isoformat() if profile.created_at else None),
                 "recent_stats": {
                     "avg_manipulation": float(stats.avg_manipulation or 0),
                     "avg_credibility": float(stats.avg_credibility or 0),
                     "avg_emotional": float(stats.avg_emotional or 0),
-                    "total": int(stats.total_analyses or 0)
-                }
+                    "total": int(stats.total_analyses or 0),
+                },
             }
 
 

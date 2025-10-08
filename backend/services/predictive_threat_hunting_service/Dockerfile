@@ -1,44 +1,18 @@
-# FASE 8: Predictive Threat Hunting Service
-# Attack prediction and vulnerability forecasting for proactive defense
+FROM vertice/python311-uv:latest AS builder
+USER root
+WORKDIR /build
+COPY pyproject.toml requirements.txt ./
+RUN python -m venv /opt/venv && . /opt/venv/bin/activate && uv pip sync requirements.txt
 
 FROM python:3.11-slim
-
-LABEL maintainer="VÉRTICE Team"
-LABEL service="predictive_threat_hunting"
-LABEL phase="FASE_8"
-
-# Set working directory
+LABEL maintainer="Juan & Claude" version="2.0.0"
+RUN apt-get update && apt-get install -y --no-install-recommends curl libpq5 ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+RUN groupadd -r appuser && useradd -r -g appuser --uid 1000 appuser
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements first for better caching
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy service code
-COPY predictive_core.py .
-COPY api.py .
-COPY __init__.py .
-
-# Create non-root user for security
-RUN useradd -m -u 1000 vertice && \
-    chown -R vertice:vertice /app
-
-USER vertice
-
-# Expose service port
-EXPOSE 8016
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8016/health')" || exit 1
-
-# Run service
-CMD ["python", "api.py"]
+COPY --chown=appuser:appuser . .
+USER appuser
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8050/health || exit 1
+EXPOSE 8050
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8050"]

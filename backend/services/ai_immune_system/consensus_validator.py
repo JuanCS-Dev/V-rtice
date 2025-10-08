@@ -13,8 +13,8 @@ self-defense capabilities.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class ConsensusValidator:
@@ -46,7 +46,7 @@ class ConsensusValidator:
             bool: True if an anomaly is validated by consensus, False otherwise.
         """
         print(f"[ConsensusValidator] Validating telemetry from {service_id}...")
-        await asyncio.sleep(0.1) # Simulate validation process
+        await asyncio.sleep(0.1)  # Simulate validation process
 
         # Simplified consensus logic: check for high CPU or memory usage
         anomaly_score = 0.0
@@ -58,16 +58,20 @@ class ConsensusValidator:
             anomaly_score += 0.3
 
         # Record the validation event
-        self.validation_records.append({
-            "timestamp": datetime.now().isoformat(),
-            "service_id": service_id,
-            "metrics": metrics,
-            "anomaly_score": anomaly_score,
-            "consensus_reached": anomaly_score >= self.required_consensus_score
-        })
+        self.validation_records.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "service_id": service_id,
+                "metrics": metrics,
+                "anomaly_score": anomaly_score,
+                "consensus_reached": anomaly_score >= self.required_consensus_score,
+            }
+        )
 
         if anomaly_score >= self.required_consensus_score:
-            print(f"[ConsensusValidator] Consensus reached: Anomaly detected for {service_id} (score: {anomaly_score:.2f})")
+            print(
+                f"[ConsensusValidator] Consensus reached: Anomaly detected for {service_id} (score: {anomaly_score:.2f})"
+            )
             return True
         else:
             print(f"[ConsensusValidator] No consensus for anomaly on {service_id} (score: {anomaly_score:.2f})")
@@ -91,7 +95,7 @@ class ConsensusValidator:
 
         Args:
             new_score (float): The new score (0.0 to 1.0).
-        
+
         Raises:
             ValueError: If new_score is outside the valid range [0.0, 1.0].
         """

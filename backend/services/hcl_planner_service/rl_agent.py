@@ -13,8 +13,8 @@ of the Maximus AI system.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class RLAgent:
@@ -37,7 +37,12 @@ class RLAgent:
         self.last_training_time: Optional[datetime] = None
         self.training_episodes: int = 0
 
-    async def recommend_actions(self, current_state: Dict[str, Any], analysis_result: Dict[str, Any], operational_goals: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def recommend_actions(
+        self,
+        current_state: Dict[str, Any],
+        analysis_result: Dict[str, Any],
+        operational_goals: Dict[str, Any],
+    ) -> List[Dict[str, Any]]:
         """Recommends resource alignment actions based on the current state and learned policy.
 
         Args:
@@ -49,18 +54,24 @@ class RLAgent:
             List[Dict[str, Any]]: A list of recommended actions.
         """
         print("[RLAgent] Recommending actions based on RL policy.")
-        await asyncio.sleep(0.1) # Simulate decision making
+        await asyncio.sleep(0.1)  # Simulate decision making
 
         # Simplified state representation for Q-learning lookup
         state_key = self._get_state_key(current_state, analysis_result, operational_goals)
-        
+
         # In a real RL agent, this would involve an epsilon-greedy policy or similar
         # to choose actions based on the Q-table or a neural network.
         recommended_action = self._choose_action(state_key)
 
         return [recommended_action] if recommended_action else []
 
-    async def train(self, old_state: Dict[str, Any], action: Dict[str, Any], reward: float, new_state: Dict[str, Any]):
+    async def train(
+        self,
+        old_state: Dict[str, Any],
+        action: Dict[str, Any],
+        reward: float,
+        new_state: Dict[str, Any],
+    ):
         """Trains the RL agent based on an observed transition and reward.
 
         Args:
@@ -70,14 +81,16 @@ class RLAgent:
             new_state (Dict[str, Any]): The state after the action was taken.
         """
         print("[RLAgent] Training RL agent...")
-        await asyncio.sleep(0.05) # Simulate training step
+        await asyncio.sleep(0.05)  # Simulate training step
 
         old_state_key = self._get_state_key(old_state, {}, {})
         new_state_key = self._get_state_key(new_state, {}, {})
-        action_key = str(action) # Simple representation of action
+        action_key = str(action)  # Simple representation of action
 
-        if old_state_key not in self.q_table: self.q_table[old_state_key] = {}
-        if new_state_key not in self.q_table: self.q_table[new_state_key] = {}
+        if old_state_key not in self.q_table:
+            self.q_table[old_state_key] = {}
+        if new_state_key not in self.q_table:
+            self.q_table[new_state_key] = {}
 
         current_q = self.q_table[old_state_key].get(action_key, 0.0)
         max_future_q = max(self.q_table[new_state_key].values()) if self.q_table[new_state_key] else 0.0
@@ -89,7 +102,12 @@ class RLAgent:
         self.training_episodes += 1
         self.last_training_time = datetime.now()
 
-    def _get_state_key(self, current_state: Dict[str, Any], analysis_result: Dict[str, Any], operational_goals: Dict[str, Any]) -> str:
+    def _get_state_key(
+        self,
+        current_state: Dict[str, Any],
+        analysis_result: Dict[str, Any],
+        operational_goals: Dict[str, Any],
+    ) -> str:
         """Generates a simplified state key for Q-table lookup.
 
         Args:
@@ -120,12 +138,22 @@ class RLAgent:
             # Choose action with highest Q-value (exploitation)
             best_action_key = max(self.q_table[state_key], key=self.q_table[state_key].get)
             # Convert action_key back to action dict (simplified)
-            if "scale_up" in best_action_key: return {"type": "scale_deployment", "parameters": {"replicas": 1}}
-            if "optimize_memory" in best_action_key: return {"type": "update_resource_limits", "parameters": {"memory_limit": "optimized"}}
-        
+            if "scale_up" in best_action_key:
+                return {"type": "scale_deployment", "parameters": {"replicas": 1}}
+            if "optimize_memory" in best_action_key:
+                return {
+                    "type": "update_resource_limits",
+                    "parameters": {"memory_limit": "optimized"},
+                }
+
         # Default action if no learned policy or exploration
-        if "cpu:high" in state_key: return {"type": "scale_deployment", "parameters": {"replicas": 1}}
-        if "mem:high" in state_key: return {"type": "update_resource_limits", "parameters": {"memory_limit": "2Gi"}}
+        if "cpu:high" in state_key:
+            return {"type": "scale_deployment", "parameters": {"replicas": 1}}
+        if "mem:high" in state_key:
+            return {
+                "type": "update_resource_limits",
+                "parameters": {"memory_limit": "2Gi"},
+            }
         return None
 
     async def get_status(self) -> Dict[str, Any]:
@@ -138,7 +166,7 @@ class RLAgent:
             "status": "active",
             "learning_rate": self.learning_rate,
             "discount_factor": self.discount_factor,
-            "last_training": self.last_training_time.isoformat() if self.last_training_time else "N/A",
+            "last_training": (self.last_training_time.isoformat() if self.last_training_time else "N/A"),
             "training_episodes": self.training_episodes,
-            "q_table_size": sum(len(actions) for actions in self.q_table.values())
+            "q_table_size": sum(len(actions) for actions in self.q_table.values()),
         }

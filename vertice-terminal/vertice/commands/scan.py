@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 from datetime import datetime
 from rich.console import Console
-from rich.table import Table
 from typing_extensions import Annotated
 from typing import Optional
 from ..utils.output import (
@@ -17,6 +16,8 @@ from ..utils.output import (
     print_error,
     print_success,
     print_info,
+    GeminiStyleTable,
+    PrimordialPanel,
 )
 from ..utils.auth import require_auth
 from ..connectors.nmap import NmapConnector
@@ -134,13 +135,11 @@ def ports(
         console.print(f"[cyan]Status:[/cyan] {result.get('status', 'completed')}\n")
 
         if "open_ports" in result and result["open_ports"]:
-            table = Table(
-                title="Open Ports", show_header=True, header_style="bold magenta"
-            )
-            table.add_column("Port", style="cyan", justify="right")
-            table.add_column("State", style="green")
-            table.add_column("Service", style="yellow")
-            table.add_column("Version", style="dim")
+            table = GeminiStyleTable(title="Open Ports", console=console)
+            table.add_column("Port", alignment="right")
+            table.add_column("State")
+            table.add_column("Service")
+            table.add_column("Version")
 
             for port_info in result["open_ports"]:
                 if isinstance(port_info, dict):
@@ -153,7 +152,7 @@ def ports(
                 else:
                     table.add_row(str(port_info), "open", "unknown", "")
 
-            console.print(table)
+            table.render()
         else:
             primoroso.warning("No open ports found.")
 
@@ -292,11 +291,11 @@ def nmap(
                             console.print(f"      {host_data.get('os_version')}")
 
                     if host_data.get("ports"):
-                        table = Table(show_header=True, header_style="bold magenta")
-                        table.add_column("Port", style="cyan", justify="right")
-                        table.add_column("State", style="green")
-                        table.add_column("Service", style="yellow")
-                        table.add_column("Version", style="dim")
+                        table = GeminiStyleTable(title="", console=console)
+                        table.add_column("Port", alignment="right")
+                        table.add_column("State")
+                        table.add_column("Service")
+                        table.add_column("Version", max_width=50)
 
                         for port in host_data["ports"]:
                             table.add_row(
@@ -306,7 +305,7 @@ def nmap(
                                 port.get("version", "")[:50]
                             )
 
-                        console.print(table)
+                        table.render()
                     else:
                         primoroso.info("  No open ports detected")
 
@@ -460,11 +459,11 @@ def nuclei(
             )
 
             if parsed.get("vulnerabilities"):
-                table = Table(show_header=True, header_style="bold red")
-                table.add_column("Template ID", style="cyan", width=25)
-                table.add_column("Severity", style="red", justify="center", width=10)
-                table.add_column("Name", style="white", width=35)
-                table.add_column("Matched At", style="dim", width=40)
+                table = GeminiStyleTable(title="Vulnerabilities", console=console)
+                table.add_column("Template ID", width=25)
+                table.add_column("Severity", alignment="center", width=10)
+                table.add_column("Name", width=35)
+                table.add_column("Matched At", width=40)
 
                 for vuln in parsed["vulnerabilities"]:
                     severity_val = vuln.get("severity", "info").upper()
@@ -488,7 +487,7 @@ def nuclei(
                         matched_at
                     )
 
-                console.print(table)
+                table.render()
             else:
                 primoroso.success("✓ No vulnerabilities found")
 
@@ -638,11 +637,11 @@ def nikto(
             )
 
             if parsed.get("findings"):
-                table = Table(show_header=True, header_style="bold red")
-                table.add_column("Severity", style="red", justify="center", width=10)
-                table.add_column("Category", style="yellow", width=20)
-                table.add_column("Description", style="white", width=60)
-                table.add_column("URI", style="cyan", width=25)
+                table = GeminiStyleTable(title="Findings", console=console)
+                table.add_column("Severity", alignment="center", width=10)
+                table.add_column("Category", width=20)
+                table.add_column("Description", width=60)
+                table.add_column("URI", width=25)
 
                 for finding in parsed["findings"]:
                     severity_val = finding.get("severity", "low").upper()
@@ -665,7 +664,7 @@ def nikto(
                         uri if len(uri) < 25 else uri[:22] + "..."
                     )
 
-                console.print(table)
+                table.render()
             else:
                 primoroso.success("✓ No vulnerabilities found")
 
@@ -725,13 +724,11 @@ def vulns(
         console.print(f"[cyan]Status:[/cyan] {result.get('status', 'completed')}\n")
 
         if "vulnerabilities" in result and result["vulnerabilities"]:
-            table = Table(
-                title="Vulnerabilities Found", show_header=True, header_style="bold red"
-            )
-            table.add_column("CVE", style="cyan")
-            table.add_column("Severity", style="red", justify="center")
-            table.add_column("Description", style="white")
-            table.add_column("CVSS", style="yellow", justify="right")
+            table = GeminiStyleTable(title="Vulnerabilities Found", console=console)
+            table.add_column("CVE")
+            table.add_column("Severity", alignment="center")
+            table.add_column("Description")
+            table.add_column("CVSS", alignment="right")
 
             for vuln in result["vulnerabilities"]:
                 severity = vuln.get("severity", "unknown").upper()
@@ -749,7 +746,7 @@ def vulns(
                     str(vuln.get("cvss", "N/A")),
                 )
 
-            console.print(table)
+            table.render()
             console.print(
                 f"\n[bold]Total vulnerabilities found:[/bold] {len(result['vulnerabilities'])}"
             )
@@ -790,13 +787,11 @@ async def network(
         console.print(f"[cyan]Network:[/cyan] {result.get('network', network)}\n")
 
         if "hosts" in result and result["hosts"]:
-            table = Table(
-                title="Discovered Hosts", show_header=True, header_style="bold cyan"
-            )
-            table.add_column("IP Address", style="cyan")
-            table.add_column("Hostname", style="green")
-            table.add_column("Status", style="yellow")
-            table.add_column("MAC", style="dim")
+            table = GeminiStyleTable(title="Discovered Hosts", console=console)
+            table.add_column("IP Address")
+            table.add_column("Hostname")
+            table.add_column("Status")
+            table.add_column("MAC")
 
             for host in result["hosts"]:
                 table.add_row(
@@ -806,7 +801,7 @@ async def network(
                     host.get("mac", "N/A"),
                 )
 
-            console.print(table)
+            table.render()
             console.print(f"\n[bold]Total hosts found:[/bold] {len(result['hosts'])}")
         else:
             primoroso.warning("No hosts discovered.")

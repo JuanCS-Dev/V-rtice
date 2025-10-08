@@ -15,16 +15,16 @@ system, and higher-level cognitive services to receive pre-processed, prioritize
 sensory information for efficient decision-making.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
+from typing import Any, Dict
 
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+
+from attention_control import AttentionControl
 from sensory_gating import SensoryGating
 from signal_filtering import SignalFiltering
-from attention_control import AttentionControl
 
 app = FastAPI(title="Maximus Digital Thalamus Service", version="1.0.0")
 
@@ -44,6 +44,7 @@ class SensoryDataIngest(BaseModel):
         timestamp (str): ISO formatted timestamp of data collection.
         priority (int): Processing priority (1-10, 10 being highest).
     """
+
     sensor_id: str
     sensor_type: str
     data: Dict[str, Any]
@@ -86,10 +87,15 @@ async def ingest_sensory_data(request: SensoryDataIngest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary confirming ingestion and processing status.
     """
     print(f"[API] Ingesting {request.sensor_type} data from {request.sensor_id} (priority: {request.priority})")
-    
+
     # Apply sensory gating
-    if not sensory_gating.allow_data(request.sensor_type, request.priority):
-        return {"status": "rejected", "reason": "Sensory gating blocked data due to low priority or overload."}
+    # Normalize priority (1-10) to intensity (0.0-1.0)
+    data_intensity = request.priority / 10.0
+    if not sensory_gating.allow_data(request.sensor_type, data_intensity):
+        return {
+            "status": "rejected",
+            "reason": "Sensory gating blocked data due to low priority or overload.",
+        }
 
     # Apply signal filtering
     filtered_data = signal_filtering.apply_filters(request.data, request.sensor_type)
@@ -102,7 +108,10 @@ async def ingest_sensory_data(request: SensoryDataIngest) -> Dict[str, Any]:
         "sensor_id": request.sensor_id,
         "sensor_type": request.sensor_type,
         "status": "processed_and_routed",
-        "processed_payload_summary": {"keys": list(processed_data.keys()), "size": len(str(processed_data))}
+        "processed_payload_summary": {
+            "keys": list(processed_data.keys()),
+            "size": len(str(processed_data)),
+        },
     }
 
 
@@ -113,7 +122,7 @@ async def get_gating_status() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: The status of sensory gating.
     """
-    return sensory_gating.get_status()
+    return await sensory_gating.get_status()
 
 
 @app.get("/attention_status")
@@ -123,8 +132,8 @@ async def get_attention_status() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: The status of attention control.
     """
-    return attention_control.get_status()
+    return await attention_control.get_status()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8012)

@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { getEdgeStatus, getGlobalMetrics, getTopology } from '../../../api/maximusAI';
+import { getGlobalMetrics, getTopology } from '../../../api/maximusAI';
 import './DistributedTopologyWidget.css';
 
 export const DistributedTopologyWidget = () => {

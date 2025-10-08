@@ -7,26 +7,21 @@ NO MOCKS - Production-ready memory consolidation interface.
 
 import asyncio
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from consolidation_core import (
     MemoryConsolidator,
     SecurityEvent,
-    MemoryImportance,
-    ConsolidationStatus,
 )
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instance
@@ -42,11 +37,7 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing Memory Consolidation Service...")
 
     # Initialize consolidator
-    consolidator = MemoryConsolidator(
-        stm_capacity=10000,
-        consolidation_threshold=0.6,
-        pruning_threshold=0.3
-    )
+    consolidator = MemoryConsolidator(stm_capacity=10000, consolidation_threshold=0.6, pruning_threshold=0.3)
 
     # Start background consolidation task (circadian rhythm)
     consolidation_task = asyncio.create_task(run_consolidation_loop())
@@ -105,7 +96,7 @@ app = FastAPI(
     title="VÉRTICE Memory Consolidation Service",
     description="Long-term memory consolidation with circadian rhythm",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -113,8 +104,10 @@ app = FastAPI(
 # Request/Response Models
 # ============================================================================
 
+
 class SecurityEventRequest(BaseModel):
     """Request to ingest security event."""
+
     event_id: str = Field(..., description="Unique event ID")
     timestamp: Optional[str] = Field(None, description="ISO timestamp (default: now)")
     event_type: str = Field(..., description="Event type")
@@ -128,6 +121,7 @@ class SecurityEventRequest(BaseModel):
 
 class ShortTermMemoryResponse(BaseModel):
     """Response with short-term memory details."""
+
     event_id: str
     importance_score: float
     access_count: int
@@ -137,6 +131,7 @@ class ShortTermMemoryResponse(BaseModel):
 
 class LongTermMemoryResponse(BaseModel):
     """Response with long-term memory details."""
+
     memory_id: str
     pattern_type: str
     description: str
@@ -150,6 +145,7 @@ class LongTermMemoryResponse(BaseModel):
 
 class ConsolidationCycleResponse(BaseModel):
     """Response with consolidation cycle details."""
+
     cycle_id: str
     start_time: str
     end_time: Optional[str]
@@ -162,6 +158,7 @@ class ConsolidationCycleResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     """Service status response."""
+
     service: str
     status: str
     components: Dict[str, Any]
@@ -171,6 +168,7 @@ class StatusResponse(BaseModel):
 # ============================================================================
 # Event Ingestion Endpoints
 # ============================================================================
+
 
 @app.post("/event/ingest")
 async def ingest_event(request: SecurityEventRequest):
@@ -202,7 +200,7 @@ async def ingest_event(request: SecurityEventRequest):
             target=request.target,
             indicators=request.indicators,
             outcome=request.outcome,
-            metadata=request.metadata
+            metadata=request.metadata,
         )
 
         # Ingest into consolidator
@@ -220,7 +218,7 @@ async def ingest_event(request: SecurityEventRequest):
             "event_id": request.event_id,
             "importance_score": importance,
             "stm_size": len(consolidator.short_term_memory),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -261,7 +259,7 @@ async def batch_ingest_events(events: List[SecurityEventRequest]):
                 target=request.target,
                 indicators=request.indicators,
                 outcome=request.outcome,
-                metadata=request.metadata
+                metadata=request.metadata,
             )
 
             consolidator.ingest_event(event)
@@ -271,7 +269,7 @@ async def batch_ingest_events(events: List[SecurityEventRequest]):
             "status": "success",
             "events_ingested": ingested,
             "stm_size": len(consolidator.short_term_memory),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -283,11 +281,9 @@ async def batch_ingest_events(events: List[SecurityEventRequest]):
 # Memory Query Endpoints
 # ============================================================================
 
+
 @app.get("/memory/short_term", response_model=List[ShortTermMemoryResponse])
-async def list_short_term_memories(
-    min_importance: Optional[float] = None,
-    limit: int = 100
-):
+async def list_short_term_memories(min_importance: Optional[float] = None, limit: int = 100):
     """List short-term memories.
 
     Args:
@@ -308,13 +304,15 @@ async def list_short_term_memories(
             if min_importance is not None and stm.importance_score < min_importance:
                 continue
 
-            memories.append(ShortTermMemoryResponse(
-                event_id=stm.event.event_id,
-                importance_score=stm.importance_score,
-                access_count=stm.access_count,
-                created_at=stm.created_at.isoformat(),
-                status=stm.status.value
-            ))
+            memories.append(
+                ShortTermMemoryResponse(
+                    event_id=stm.event.event_id,
+                    importance_score=stm.importance_score,
+                    access_count=stm.access_count,
+                    created_at=stm.created_at.isoformat(),
+                    status=stm.status.value,
+                )
+            )
 
             if len(memories) >= limit:
                 break
@@ -330,7 +328,7 @@ async def list_short_term_memories(
 async def list_long_term_memories(
     pattern_type: Optional[str] = None,
     min_strength: Optional[float] = None,
-    limit: int = 100
+    limit: int = 100,
 ):
     """List long-term memories.
 
@@ -355,17 +353,19 @@ async def list_long_term_memories(
             if min_strength is not None and ltm.strength < min_strength:
                 continue
 
-            memories.append(LongTermMemoryResponse(
-                memory_id=ltm.memory_id,
-                pattern_type=ltm.pattern_type,
-                description=ltm.description,
-                consolidated_events_count=len(ltm.consolidated_events),
-                importance=ltm.importance.value,
-                created_at=ltm.created_at.isoformat(),
-                last_accessed=ltm.last_accessed.isoformat(),
-                access_count=ltm.access_count,
-                strength=ltm.strength
-            ))
+            memories.append(
+                LongTermMemoryResponse(
+                    memory_id=ltm.memory_id,
+                    pattern_type=ltm.pattern_type,
+                    description=ltm.description,
+                    consolidated_events_count=len(ltm.consolidated_events),
+                    importance=ltm.importance.value,
+                    created_at=ltm.created_at.isoformat(),
+                    last_accessed=ltm.last_accessed.isoformat(),
+                    access_count=ltm.access_count,
+                    strength=ltm.strength,
+                )
+            )
 
             if len(memories) >= limit:
                 break
@@ -395,10 +395,7 @@ async def get_long_term_memory(memory_id: str):
         ltm = consolidator.access_memory(memory_id)
 
         if ltm is None:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Memory {memory_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Memory {memory_id} not found")
 
         return LongTermMemoryResponse(
             memory_id=ltm.memory_id,
@@ -409,7 +406,7 @@ async def get_long_term_memory(memory_id: str):
             created_at=ltm.created_at.isoformat(),
             last_accessed=ltm.last_accessed.isoformat(),
             access_count=ltm.access_count,
-            strength=ltm.strength
+            strength=ltm.strength,
         )
 
     except HTTPException:
@@ -422,6 +419,7 @@ async def get_long_term_memory(memory_id: str):
 # ============================================================================
 # Consolidation Control Endpoints
 # ============================================================================
+
 
 @app.post("/consolidation/trigger", response_model=ConsolidationCycleResponse)
 async def trigger_consolidation():
@@ -447,7 +445,7 @@ async def trigger_consolidation():
             memories_consolidated=cycle.memories_consolidated,
             memories_pruned=cycle.memories_pruned,
             patterns_extracted=cycle.patterns_extracted,
-            status=cycle.status
+            status=cycle.status,
         )
 
     except Exception as e:
@@ -475,16 +473,18 @@ async def get_consolidation_history(limit: int = 10):
         recent_cycles = list(reversed(consolidator.consolidation_cycles[-limit:]))
 
         for cycle in recent_cycles:
-            cycles.append(ConsolidationCycleResponse(
-                cycle_id=cycle.cycle_id,
-                start_time=cycle.start_time.isoformat(),
-                end_time=cycle.end_time.isoformat() if cycle.end_time else None,
-                events_processed=cycle.events_processed,
-                memories_consolidated=cycle.memories_consolidated,
-                memories_pruned=cycle.memories_pruned,
-                patterns_extracted=cycle.patterns_extracted,
-                status=cycle.status
-            ))
+            cycles.append(
+                ConsolidationCycleResponse(
+                    cycle_id=cycle.cycle_id,
+                    start_time=cycle.start_time.isoformat(),
+                    end_time=cycle.end_time.isoformat() if cycle.end_time else None,
+                    events_processed=cycle.events_processed,
+                    memories_consolidated=cycle.memories_consolidated,
+                    memories_pruned=cycle.memories_pruned,
+                    patterns_extracted=cycle.patterns_extracted,
+                    status=cycle.status,
+                )
+            )
 
         return cycles
 
@@ -497,13 +497,14 @@ async def get_consolidation_history(limit: int = 10):
 # System Endpoints
 # ============================================================================
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "memory_consolidation",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -524,7 +525,7 @@ async def get_status():
             service="memory_consolidation",
             status="operational",
             components=status,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
     except Exception as e:
@@ -552,7 +553,7 @@ async def get_statistics():
             "stm_size": status["stm_size"],
             "ltm_size": status["ltm_size"],
             "consolidation_cycles": status["consolidation_cycles"],
-            "patterns_extracted": status["pattern_extractor"]["patterns_extracted"]
+            "patterns_extracted": status["pattern_extractor"]["patterns_extracted"],
         }
 
     except Exception as e:
@@ -561,10 +562,4 @@ async def get_statistics():
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "api:app",
-        host="0.0.0.0",
-        port=8019,
-        log_level="info",
-        access_log=True
-    )
+    uvicorn.run("api:app", host="0.0.0.0", port=8019, log_level="info", access_log=True)

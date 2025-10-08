@@ -12,13 +12,14 @@ and enabling efficient data exchange within the social engineering simulation
 ecosystem.
 """
 
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel
 
 
 class CampaignBase(BaseModel):
     """Base model for a social engineering campaign."""
+
     name: str
     description: str
     scenario: str
@@ -27,6 +28,7 @@ class CampaignBase(BaseModel):
 
 class CampaignCreate(CampaignBase):
     """Model for creating a new social engineering campaign."""
+
     pass
 
 
@@ -42,6 +44,7 @@ class Campaign(CampaignBase):
     Config:
         orm_mode = True
     """
+
     id: int
     start_time: str
     end_time: Optional[str]
@@ -49,19 +52,22 @@ class Campaign(CampaignBase):
 
     class Config:
         """Configuração para habilitar o modo ORM."""
+
         orm_mode = True
 
 
 class TargetBase(BaseModel):
     """Base model for a simulated human target."""
+
     name: str
     email: str
-    vulnerabilities: str # JSON string of vulnerabilities
+    vulnerabilities: str  # JSON string of vulnerabilities
     phishing_susceptibility: int
 
 
 class TargetCreate(TargetBase):
     """Model for creating a new simulated human target."""
+
     pass
 
 
@@ -74,21 +80,25 @@ class Target(TargetBase):
     Config:
         orm_mode = True
     """
+
     class Config:
         """Configuração para habilitar o modo ORM."""
+
         orm_mode = True
 
 
 class InteractionBase(BaseModel):
     """Base model for a simulated interaction with a target."""
+
     target_id: int
     action: str
-    details: str # JSON string of interaction details
+    details: str  # JSON string of interaction details
     successful: bool
 
 
 class InteractionCreate(InteractionBase):
     """Model for creating a new interaction record."""
+
     pass
 
 
@@ -103,10 +113,12 @@ class Interaction(InteractionBase):
     Config:
         orm_mode = True
     """
+
     id: int
     campaign_id: int
     timestamp: str
 
     class Config:
         """Configuração para habilitar o modo ORM."""
+
         orm_mode = True

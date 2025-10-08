@@ -13,8 +13,8 @@ and maintainability within the Maximus AI system.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class CodeScanner:
@@ -41,31 +41,59 @@ class CodeScanner:
 
         Returns:
             Dict[str, Any]: A dictionary containing the scan results.
-        
+
         Raises:
             ValueError: If an unsupported analysis type is provided.
         """
         print(f"[CodeScanner] Scanning {language} code for {analysis_type}...")
-        await asyncio.sleep(0.3) # Simulate scanning time
+        await asyncio.sleep(0.3)  # Simulate scanning time
 
         results = {
             "timestamp": datetime.now().isoformat(),
             "language": language,
             "analysis_type": analysis_type,
-            "findings": []
+            "findings": [],
         }
 
         if analysis_type == "vulnerability":
             if "eval(" in code or "exec(" in code:
-                results["findings"].append({"type": "vulnerability", "severity": "high", "description": "Potential code injection via eval/exec.", "line": code.find("eval(") or code.find("exec(")})
+                results["findings"].append(
+                    {
+                        "type": "vulnerability",
+                        "severity": "high",
+                        "description": "Potential code injection via eval/exec.",
+                        "line": code.find("eval(") or code.find("exec("),
+                    }
+                )
             if "password" in code.lower() and "=" in code:
-                results["findings"].append({"type": "vulnerability", "severity": "medium", "description": "Hardcoded password detected.", "line": code.lower().find("password")})
+                results["findings"].append(
+                    {
+                        "type": "vulnerability",
+                        "severity": "medium",
+                        "description": "Hardcoded password detected.",
+                        "line": code.lower().find("password"),
+                    }
+                )
         elif analysis_type == "performance":
             if "for i in range(1000000)" in code:
-                results["findings"].append({"type": "performance", "severity": "medium", "description": "Inefficient loop detected.", "line": code.find("range(1000000)")})
+                results["findings"].append(
+                    {
+                        "type": "performance",
+                        "severity": "medium",
+                        "description": "Inefficient loop detected.",
+                        "line": code.find("range(1000000)"),
+                    }
+                )
         elif analysis_type == "refactoring":
             if code.count("if") > 10:
-                results["findings"].append({"type": "refactoring", "severity": "low", "description": "High cyclomatic complexity, consider refactoring.", "line": 0})
+                results["findings"].append(
+                    {
+                        "type": "refactoring",
+                        "severity": "low",
+                        "description": "High cyclomatic complexity, consider refactoring.",
+                        "line": 0,
+                    }
+                )
         else:
             raise ValueError(f"Unsupported analysis type: {analysis_type}")
 
@@ -83,5 +111,5 @@ class CodeScanner:
         return {
             "status": self.current_status,
             "total_scans_performed": len(self.scan_history),
-            "last_scan": self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
+            "last_scan": (self.last_scan_time.isoformat() if self.last_scan_time else "N/A"),
         }

@@ -18,17 +18,16 @@ In cyber defense:
 NO MOCKS - Production-ready memory consolidation algorithms.
 """
 
+import hashlib
+import json
 import logging
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Set, Any, Optional, Tuple
 from enum import Enum
-from collections import defaultdict, deque
-import json
-import hashlib
+from typing import Any, Dict, List, Optional
 
 import numpy as np
-from scipy.spatial.distance import cosine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,17 +37,20 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # ============================================================================
 
+
 class MemoryImportance(Enum):
     """Memory importance levels."""
-    TRIVIAL = "trivial"          # Discard
-    LOW = "low"                  # Short-term only
-    MEDIUM = "medium"            # Consider for consolidation
-    HIGH = "high"                # Consolidate to long-term
-    CRITICAL = "critical"        # Permanent long-term memory
+
+    TRIVIAL = "trivial"  # Discard
+    LOW = "low"  # Short-term only
+    MEDIUM = "medium"  # Consider for consolidation
+    HIGH = "high"  # Consolidate to long-term
+    CRITICAL = "critical"  # Permanent long-term memory
 
 
 class ConsolidationStatus(Enum):
     """Memory consolidation status."""
+
     PENDING = "pending"
     CONSOLIDATING = "consolidating"
     CONSOLIDATED = "consolidated"
@@ -58,6 +60,7 @@ class ConsolidationStatus(Enum):
 @dataclass
 class SecurityEvent:
     """Security event for memory consolidation."""
+
     event_id: str
     timestamp: datetime
     event_type: str
@@ -72,6 +75,7 @@ class SecurityEvent:
 @dataclass
 class ShortTermMemory:
     """Short-term memory buffer (hippocampus analogue)."""
+
     event: SecurityEvent
     importance_score: float  # 0-1
     access_count: int  # How many times accessed
@@ -82,6 +86,7 @@ class ShortTermMemory:
 @dataclass
 class LongTermMemory:
     """Long-term memory (cortex analogue)."""
+
     memory_id: str
     pattern_type: str  # "attack_sequence", "threat_actor", "vulnerability"
     description: str
@@ -97,6 +102,7 @@ class LongTermMemory:
 @dataclass
 class ConsolidationCycle:
     """Consolidation cycle execution record."""
+
     cycle_id: str
     start_time: datetime
     end_time: Optional[datetime]
@@ -110,6 +116,7 @@ class ConsolidationCycle:
 # ============================================================================
 # Importance Scorer
 # ============================================================================
+
 
 class ImportanceScorer:
     """Scores importance of security events for consolidation.
@@ -152,12 +159,7 @@ class ImportanceScorer:
         indicator_score = min(len(event.indicators) / 10, 1.0)
 
         # Weighted combination
-        importance = (
-            0.30 * severity_score +
-            0.30 * uniqueness_score +
-            0.25 * outcome_score +
-            0.15 * indicator_score
-        )
+        importance = 0.30 * severity_score + 0.30 * uniqueness_score + 0.25 * outcome_score + 0.15 * indicator_score
 
         # Update statistics
         self.event_type_counts[event.event_type] += 1
@@ -178,11 +180,11 @@ class ImportanceScorer:
             return 0.5  # Unknown
 
         outcome_scores = {
-            "blocked": 0.6,      # Threat prevented
-            "allowed": 0.3,      # False positive or benign
+            "blocked": 0.6,  # Threat prevented
+            "allowed": 0.3,  # False positive or benign
             "quarantined": 0.7,  # Suspicious
             "compromised": 1.0,  # Successful attack
-            "mitigated": 0.8     # Threat partially successful
+            "mitigated": 0.8,  # Threat partially successful
         }
 
         return outcome_scores.get(outcome.lower(), 0.5)
@@ -197,13 +199,14 @@ class ImportanceScorer:
             "component": "importance_scorer",
             "total_events": self.total_events,
             "unique_event_types": len(self.event_type_counts),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 # ============================================================================
 # Pattern Extractor
 # ============================================================================
+
 
 class PatternExtractor:
     """Extracts patterns from event sequences for long-term memory.
@@ -217,11 +220,7 @@ class PatternExtractor:
     def __init__(self):
         self.patterns_extracted: int = 0
 
-    def extract_patterns(
-        self,
-        events: List[SecurityEvent],
-        min_pattern_size: int = 2
-    ) -> List[Dict[str, Any]]:
+    def extract_patterns(self, events: List[SecurityEvent], min_pattern_size: int = 2) -> List[Dict[str, Any]]:
         """Extract patterns from event sequence.
 
         Args:
@@ -249,11 +248,7 @@ class PatternExtractor:
 
         return patterns
 
-    def _extract_temporal_patterns(
-        self,
-        events: List[SecurityEvent],
-        min_size: int
-    ) -> List[Dict[str, Any]]:
+    def _extract_temporal_patterns(self, events: List[SecurityEvent], min_size: int) -> List[Dict[str, Any]]:
         """Extract patterns based on temporal proximity.
 
         Args:
@@ -291,7 +286,7 @@ class PatternExtractor:
                     "start_time": window_start.isoformat(),
                     "end_time": window_end.isoformat(),
                     "event_count": len(window_events),
-                    "fingerprint": self._compute_pattern_fingerprint(window_events)
+                    "fingerprint": self._compute_pattern_fingerprint(window_events),
                 }
                 patterns.append(pattern)
 
@@ -299,11 +294,7 @@ class PatternExtractor:
 
         return patterns
 
-    def _extract_relationship_patterns(
-        self,
-        events: List[SecurityEvent],
-        min_size: int
-    ) -> List[Dict[str, Any]]:
+    def _extract_relationship_patterns(self, events: List[SecurityEvent], min_size: int) -> List[Dict[str, Any]]:
         """Extract patterns based on source-target relationships.
 
         Args:
@@ -329,17 +320,13 @@ class PatternExtractor:
                     "event_ids": [e.event_id for e in source_events],
                     "event_count": len(source_events),
                     "targets": list(set(e.target for e in source_events)),
-                    "fingerprint": self._compute_pattern_fingerprint(source_events)
+                    "fingerprint": self._compute_pattern_fingerprint(source_events),
                 }
                 patterns.append(pattern)
 
         return patterns
 
-    def _extract_attack_chains(
-        self,
-        events: List[SecurityEvent],
-        min_size: int
-    ) -> List[Dict[str, Any]]:
+    def _extract_attack_chains(self, events: List[SecurityEvent], min_size: int) -> List[Dict[str, Any]]:
         """Extract attack kill chain patterns.
 
         Args:
@@ -359,7 +346,7 @@ class PatternExtractor:
             "exploitation": ["rce", "buffer_overflow", "sql_injection"],
             "installation": ["malware_install", "backdoor"],
             "command_control": ["c2_beacon", "c2_communication"],
-            "actions": ["data_exfil", "lateral_movement", "privilege_escalation"]
+            "actions": ["data_exfil", "lateral_movement", "privilege_escalation"],
         }
 
         # Map event types to stages
@@ -376,7 +363,7 @@ class PatternExtractor:
             stage_order = list(kill_chain_stages.keys())
 
             for i in range(len(event_stages) - min_size + 1):
-                chain_events = event_stages[i:i + min_size]
+                chain_events = event_stages[i : i + min_size]
 
                 # Verify sequence
                 current_stage_idx = stage_order.index(chain_events[0][0])
@@ -396,7 +383,7 @@ class PatternExtractor:
                         "event_ids": [e.event_id for e in chain_event_objs],
                         "stages": [e[0] for e in chain_events],
                         "event_count": len(chain_event_objs),
-                        "fingerprint": self._compute_pattern_fingerprint(chain_event_objs)
+                        "fingerprint": self._compute_pattern_fingerprint(chain_event_objs),
                     }
                     patterns.append(pattern)
 
@@ -423,7 +410,7 @@ class PatternExtractor:
             "unique_sources": len(set(sources)),
             "unique_targets": len(set(targets)),
             "event_types": list(set(types)),
-            "duration_minutes": (events[-1].timestamp - events[0].timestamp).total_seconds() / 60
+            "duration_minutes": (events[-1].timestamp - events[0].timestamp).total_seconds() / 60,
         }
 
         return fingerprint
@@ -437,13 +424,14 @@ class PatternExtractor:
         return {
             "component": "pattern_extractor",
             "patterns_extracted": self.patterns_extracted,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 # ============================================================================
 # Memory Consolidator
 # ============================================================================
+
 
 class MemoryConsolidator:
     """Main memory consolidation controller.
@@ -459,7 +447,7 @@ class MemoryConsolidator:
         self,
         stm_capacity: int = 10000,
         consolidation_threshold: float = 0.6,
-        pruning_threshold: float = 0.3
+        pruning_threshold: float = 0.3,
     ):
         self.short_term_memory: Dict[str, ShortTermMemory] = {}
         self.long_term_memory: Dict[str, LongTermMemory] = {}
@@ -487,7 +475,7 @@ class MemoryConsolidator:
             event=event,
             importance_score=importance,
             access_count=0,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
 
         # Add to STM
@@ -503,10 +491,7 @@ class MemoryConsolidator:
     def _evict_least_important_stm(self):
         """Evict least important STM entry."""
         # Find entry with lowest importance
-        min_entry = min(
-            self.short_term_memory.values(),
-            key=lambda e: e.importance_score
-        )
+        min_entry = min(self.short_term_memory.values(), key=lambda e: e.importance_score)
 
         # Mark as pruned and remove
         min_entry.status = ConsolidationStatus.PRUNED
@@ -531,16 +516,14 @@ class MemoryConsolidator:
             memories_consolidated=0,
             memories_pruned=0,
             patterns_extracted=0,
-            status="running"
+            status="running",
         )
 
         logger.info(f"Starting consolidation cycle: {cycle_id}")
 
         # Step 1: Identify events for consolidation
         events_to_consolidate = [
-            stm.event
-            for stm in self.short_term_memory.values()
-            if stm.importance_score >= self.consolidation_threshold
+            stm.event for stm in self.short_term_memory.values() if stm.importance_score >= self.consolidation_threshold
         ]
 
         cycle.events_processed = len(events_to_consolidate)
@@ -584,9 +567,7 @@ class MemoryConsolidator:
             pattern: Extracted pattern
         """
         # Generate memory ID
-        memory_id = hashlib.sha256(
-            json.dumps(pattern, sort_keys=True).encode()
-        ).hexdigest()[:16]
+        memory_id = hashlib.sha256(json.dumps(pattern, sort_keys=True).encode()).hexdigest()[:16]
 
         # Determine importance
         avg_severity = pattern["fingerprint"].get("avg_severity", 0.5)
@@ -608,7 +589,7 @@ class MemoryConsolidator:
             created_at=datetime.now(),
             last_accessed=datetime.now(),
             access_count=0,
-            strength=1.0  # Start at full strength
+            strength=1.0,  # Start at full strength
         )
 
         self.long_term_memory[memory_id] = ltm_entry
@@ -674,5 +655,5 @@ class MemoryConsolidator:
             "consolidation_cycles": len(self.consolidation_cycles),
             "importance_scorer": scorer_status,
             "pattern_extractor": extractor_status,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }

@@ -18,15 +18,15 @@ In cyber defense:
 NO MOCKS - Production-ready adaptive learning algorithms.
 """
 
-import logging
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Set, Any, Optional, Tuple
-from enum import Enum
-from collections import defaultdict
-import json
 import hashlib
+import json
+import logging
 import random
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -38,17 +38,20 @@ logger = logging.getLogger(__name__)
 # Data Structures
 # ============================================================================
 
+
 class AntibodyType(Enum):
     """Types of antibodies (detectors)."""
-    SIGNATURE_BASED = "signature"       # Pattern matching
-    BEHAVIORAL = "behavioral"           # Behavior analysis
-    STATISTICAL = "statistical"         # Statistical anomaly
-    HYBRID = "hybrid"                   # Combination
+
+    SIGNATURE_BASED = "signature"  # Pattern matching
+    BEHAVIORAL = "behavioral"  # Behavior analysis
+    STATISTICAL = "statistical"  # Statistical anomaly
+    HYBRID = "hybrid"  # Combination
 
 
 @dataclass
 class ThreatSample:
     """Threat sample for training antibodies."""
+
     sample_id: str
     threat_family: str
     features: Dict[str, float]  # Numerical features
@@ -64,6 +67,7 @@ class Antibody:
     Biological analogy: B-cell antibody
     Cyber: Threat detection signature
     """
+
     antibody_id: str
     antibody_type: AntibodyType
     target_family: str  # Threat family this detects
@@ -81,6 +85,7 @@ class Antibody:
 @dataclass
 class ClonalExpansion:
     """Record of clonal expansion event."""
+
     expansion_id: str
     parent_antibody_id: str
     clones_created: int
@@ -91,6 +96,7 @@ class ClonalExpansion:
 @dataclass
 class AffinityMaturationEvent:
     """Record of affinity maturation (mutation)."""
+
     event_id: str
     antibody_id: str
     mutation_type: str
@@ -103,6 +109,7 @@ class AffinityMaturationEvent:
 # Antibody Generator
 # ============================================================================
 
+
 class AntibodyGenerator:
     """Generates diverse antibody repertoire.
 
@@ -114,9 +121,7 @@ class AntibodyGenerator:
         self.antibodies_generated: int = 0
 
     def generate_initial_repertoire(
-        self,
-        threat_samples: List[ThreatSample],
-        repertoire_size: int = 100
+        self, threat_samples: List[ThreatSample], repertoire_size: int = 100
     ) -> List[Antibody]:
         """Generate initial antibody repertoire from threat samples.
 
@@ -154,7 +159,7 @@ class AntibodyGenerator:
         threat_family: str,
         samples: List[ThreatSample],
         generation: int,
-        parent_id: Optional[str] = None
+        parent_id: Optional[str] = None,
     ) -> Antibody:
         """Generate single antibody.
 
@@ -184,9 +189,7 @@ class AntibodyGenerator:
             pattern = self._generate_hybrid_pattern(feature_stats)
 
         # Generate ID
-        antibody_id = hashlib.sha256(
-            f"{threat_family}_{generation}_{random.random()}".encode()
-        ).hexdigest()[:16]
+        antibody_id = hashlib.sha256(f"{threat_family}_{generation}_{random.random()}".encode()).hexdigest()[:16]
 
         # Create antibody
         antibody = Antibody(
@@ -197,15 +200,12 @@ class AntibodyGenerator:
             affinity_score=0.5,  # Initial neutral affinity
             generation=generation,
             parent_id=parent_id,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
 
         return antibody
 
-    def _compute_feature_statistics(
-        self,
-        samples: List[ThreatSample]
-    ) -> Dict[str, Dict[str, float]]:
+    def _compute_feature_statistics(self, samples: List[ThreatSample]) -> Dict[str, Dict[str, float]]:
         """Compute statistical features from samples.
 
         Args:
@@ -230,15 +230,12 @@ class AntibodyGenerator:
                 "std": np.std(values),
                 "min": np.min(values),
                 "max": np.max(values),
-                "median": np.median(values)
+                "median": np.median(values),
             }
 
         return stats
 
-    def _generate_signature_pattern(
-        self,
-        feature_stats: Dict[str, Dict[str, float]]
-    ) -> Dict[str, Any]:
+    def _generate_signature_pattern(self, feature_stats: Dict[str, Dict[str, float]]) -> Dict[str, Any]:
         """Generate signature-based detection pattern.
 
         Args:
@@ -248,10 +245,7 @@ class AntibodyGenerator:
             Detection pattern
         """
         # Select random features
-        selected_features = random.sample(
-            list(feature_stats.keys()),
-            k=min(5, len(feature_stats))
-        )
+        selected_features = random.sample(list(feature_stats.keys()), k=min(5, len(feature_stats)))
 
         # Create thresholds
         thresholds = {}
@@ -266,15 +260,9 @@ class AntibodyGenerator:
             else:
                 thresholds[feature] = ("<=", mean - offset)
 
-        return {
-            "type": "signature",
-            "thresholds": thresholds
-        }
+        return {"type": "signature", "thresholds": thresholds}
 
-    def _generate_behavioral_pattern(
-        self,
-        feature_stats: Dict[str, Dict[str, float]]
-    ) -> Dict[str, Any]:
+    def _generate_behavioral_pattern(self, feature_stats: Dict[str, Dict[str, float]]) -> Dict[str, Any]:
         """Generate behavioral detection pattern.
 
         Args:
@@ -287,13 +275,10 @@ class AntibodyGenerator:
         return {
             "type": "behavioral",
             "sequence_features": list(feature_stats.keys())[:3],
-            "trend_threshold": 0.7
+            "trend_threshold": 0.7,
         }
 
-    def _generate_statistical_pattern(
-        self,
-        feature_stats: Dict[str, Dict[str, float]]
-    ) -> Dict[str, Any]:
+    def _generate_statistical_pattern(self, feature_stats: Dict[str, Dict[str, float]]) -> Dict[str, Any]:
         """Generate statistical detection pattern.
 
         Args:
@@ -306,19 +291,13 @@ class AntibodyGenerator:
         return {
             "type": "statistical",
             "distributions": {
-                feature: {
-                    "mean": stats["mean"],
-                    "std": stats["std"]
-                }
+                feature: {"mean": stats["mean"], "std": stats["std"]}
                 for feature, stats in list(feature_stats.items())[:5]
             },
-            "z_score_threshold": 3.0
+            "z_score_threshold": 3.0,
         }
 
-    def _generate_hybrid_pattern(
-        self,
-        feature_stats: Dict[str, Dict[str, float]]
-    ) -> Dict[str, Any]:
+    def _generate_hybrid_pattern(self, feature_stats: Dict[str, Dict[str, float]]) -> Dict[str, Any]:
         """Generate hybrid detection pattern.
 
         Args:
@@ -331,7 +310,7 @@ class AntibodyGenerator:
         return {
             "type": "hybrid",
             "signature": self._generate_signature_pattern(feature_stats),
-            "statistical": self._generate_statistical_pattern(feature_stats)
+            "statistical": self._generate_statistical_pattern(feature_stats),
         }
 
     def get_status(self) -> Dict[str, Any]:
@@ -343,13 +322,14 @@ class AntibodyGenerator:
         return {
             "component": "antibody_generator",
             "antibodies_generated": self.antibodies_generated,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 # ============================================================================
 # Affinity Maturation Engine
 # ============================================================================
+
 
 class AffinityMaturationEngine:
     """Refines antibodies through somatic hypermutation.
@@ -363,11 +343,7 @@ class AffinityMaturationEngine:
         self.maturation_events: List[AffinityMaturationEvent] = []
         self.generator = AntibodyGenerator()
 
-    def mature_antibody(
-        self,
-        antibody: Antibody,
-        feedback: Dict[str, bool]
-    ) -> List[Antibody]:
+    def mature_antibody(self, antibody: Antibody, feedback: Dict[str, bool]) -> List[Antibody]:
         """Mature antibody through mutation.
 
         Args:
@@ -400,14 +376,11 @@ class AffinityMaturationEngine:
                 antibody_id=antibody.antibody_id,
                 mutation_type="somatic_hypermutation",
                 affinity_before=current_affinity,
-                affinity_after=mutant.affinity_score
+                affinity_after=mutant.affinity_score,
             )
             self.maturation_events.append(event)
 
-        logger.debug(
-            f"Matured antibody {antibody.antibody_id}: "
-            f"generated {len(mutants)} mutants"
-        )
+        logger.debug(f"Matured antibody {antibody.antibody_id}: generated {len(mutants)} mutants")
 
         return mutants
 
@@ -447,9 +420,7 @@ class AffinityMaturationEngine:
             self._mutate_statistical_pattern(mutated_pattern)
 
         # Generate new ID
-        antibody_id = hashlib.sha256(
-            f"{parent.antibody_id}_{random.random()}".encode()
-        ).hexdigest()[:16]
+        antibody_id = hashlib.sha256(f"{parent.antibody_id}_{random.random()}".encode()).hexdigest()[:16]
 
         # Create mutant
         mutant = Antibody(
@@ -460,7 +431,7 @@ class AffinityMaturationEngine:
             affinity_score=parent.affinity_score,
             generation=parent.generation + 1,
             parent_id=parent.antibody_id,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
 
         return mutant
@@ -506,13 +477,14 @@ class AffinityMaturationEngine:
             "component": "affinity_maturation_engine",
             "maturation_events": len(self.maturation_events),
             "mutation_rate": self.mutation_rate,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 # ============================================================================
 # Clonal Selection Manager
 # ============================================================================
+
 
 class ClonalSelectionManager:
     """Manages clonal selection and expansion.
@@ -526,11 +498,7 @@ class ClonalSelectionManager:
         self.expansions: List[ClonalExpansion] = []
         self.generator = AntibodyGenerator()
 
-    def select_for_expansion(
-        self,
-        antibodies: List[Antibody],
-        max_expansions: int = 10
-    ) -> List[Antibody]:
+    def select_for_expansion(self, antibodies: List[Antibody], max_expansions: int = 10) -> List[Antibody]:
         """Select high-affinity antibodies for clonal expansion.
 
         Args:
@@ -541,10 +509,7 @@ class ClonalSelectionManager:
             Expanded antibody pool (includes clones)
         """
         # Find high-affinity antibodies
-        high_affinity = [
-            ab for ab in antibodies
-            if ab.affinity_score >= self.expansion_threshold
-        ]
+        high_affinity = [ab for ab in antibodies if ab.affinity_score >= self.expansion_threshold]
 
         # Sort by affinity
         high_affinity.sort(key=lambda ab: ab.affinity_score, reverse=True)
@@ -564,7 +529,7 @@ class ClonalSelectionManager:
                 expansion_id=f"exp_{int(datetime.now().timestamp())}",
                 parent_antibody_id=antibody.antibody_id,
                 clones_created=len(clones),
-                reason=f"High affinity: {antibody.affinity_score:.2f}"
+                reason=f"High affinity: {antibody.affinity_score:.2f}",
             )
             self.expansions.append(expansion)
 
@@ -602,7 +567,7 @@ class ClonalSelectionManager:
                 affinity_score=parent.affinity_score,
                 generation=parent.generation,
                 parent_id=parent.antibody_id,
-                created_at=datetime.now()
+                created_at=datetime.now(),
             )
 
             clones.append(clone)
@@ -622,13 +587,14 @@ class ClonalSelectionManager:
             "expansions_performed": len(self.expansions),
             "total_clones_created": total_clones,
             "expansion_threshold": self.expansion_threshold,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 # ============================================================================
 # Adaptive Immunity Controller
 # ============================================================================
+
 
 class AdaptiveImmunityController:
     """Main adaptive immunity controller.
@@ -643,7 +609,7 @@ class AdaptiveImmunityController:
         self,
         initial_repertoire_size: int = 100,
         mutation_rate: float = 0.1,
-        expansion_threshold: float = 0.8
+        expansion_threshold: float = 0.8,
     ):
         self.antibody_generator = AntibodyGenerator()
         self.affinity_maturation_engine = AffinityMaturationEngine(mutation_rate)
@@ -661,10 +627,7 @@ class AdaptiveImmunityController:
         logger.info(f"Initializing repertoire with {len(threat_samples)} samples")
 
         # Generate initial antibodies
-        antibodies = self.antibody_generator.generate_initial_repertoire(
-            threat_samples,
-            repertoire_size=100
-        )
+        antibodies = self.antibody_generator.generate_initial_repertoire(threat_samples, repertoire_size=100)
 
         # Add to pool
         for antibody in antibodies:
@@ -689,10 +652,7 @@ class AdaptiveImmunityController:
                 antibody = self.antibody_pool[antibody_id]
 
                 # Mature antibody
-                mutants = self.affinity_maturation_engine.mature_antibody(
-                    antibody,
-                    feedback
-                )
+                mutants = self.affinity_maturation_engine.mature_antibody(antibody, feedback)
 
                 new_antibodies.extend(mutants)
 
@@ -710,10 +670,7 @@ class AdaptiveImmunityController:
         current_antibodies = list(self.antibody_pool.values())
 
         # Select and expand
-        expanded_pool = self.clonal_selection_manager.select_for_expansion(
-            current_antibodies,
-            max_expansions=10
-        )
+        expanded_pool = self.clonal_selection_manager.select_for_expansion(current_antibodies, max_expansions=10)
 
         # Update pool
         self.antibody_pool = {ab.antibody_id: ab for ab in expanded_pool}
@@ -737,5 +694,5 @@ class AdaptiveImmunityController:
             "antibody_generator": generator_status,
             "affinity_maturation_engine": maturation_status,
             "clonal_selection_manager": selection_status,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }

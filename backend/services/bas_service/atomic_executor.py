@@ -12,8 +12,7 @@ and the target's defensive response.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
-from datetime import datetime
+from typing import Any, Dict, Optional
 
 from models import AttackTechnique
 
@@ -40,21 +39,24 @@ class AtomicExecutor:
             Dict[str, Any]: A dictionary containing the output and status of the executed technique.
         """
         print(f"[AtomicExecutor] Executing technique '{technique.id}' against {target_service}")
-        await asyncio.sleep(0.1) # Simulate execution time
+        await asyncio.sleep(0.1)  # Simulate execution time
 
         # Simulate different outcomes based on technique and target
-        output = {"status": "success", "message": f"Technique {technique.id} executed against {target_service}."}
-        if "T1059" in technique.id: # Example: Command and Scripting Interpreter
+        output = {
+            "status": "success",
+            "message": f"Technique {technique.id} executed against {target_service}.",
+        }
+        if "T1059" in technique.id:  # Example: Command and Scripting Interpreter
             output["details"] = "Simulated command execution attempt."
             if "critical_service" in target_service:
                 output["status"] = "malicious_activity_detected"
                 output["message"] = "Command execution detected on critical service."
-        elif "T1003" in technique.id: # Example: OS Credential Dumping
+        elif "T1003" in technique.id:  # Example: OS Credential Dumping
             output["details"] = "Simulated credential dumping attempt."
             if "auth_service" in target_service:
                 output["status"] = "malicious_activity_detected"
                 output["message"] = "Credential access attempt detected on auth service."
-        
+
         return output
 
     async def get_technique_details(self, technique_id: str) -> Optional[AttackTechnique]:
@@ -68,7 +70,15 @@ class AtomicExecutor:
         """
         # In a real scenario, this would query a database or a MITRE ATT&CK knowledge base
         if technique_id == "T1059":
-            return AttackTechnique(id="T1059", name="Command and Scripting Interpreter", description="Attacker executes commands.")
+            return AttackTechnique(
+                id="T1059",
+                name="Command and Scripting Interpreter",
+                description="Attacker executes commands.",
+            )
         elif technique_id == "T1003":
-            return AttackTechnique(id="T1003", name="OS Credential Dumping", description="Attacker attempts to dump credentials.")
+            return AttackTechnique(
+                id="T1003",
+                name="OS Credential Dumping",
+                description="Attacker attempts to dump credentials.",
+            )
         return None

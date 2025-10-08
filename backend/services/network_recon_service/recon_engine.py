@@ -14,15 +14,13 @@ Key functionalities include:
   threat assessment, vulnerability management, and offensive operations.
 """
 
-import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
-import uuid
+from typing import Any, Dict, List, Optional
 
-from nmap_wrapper import NmapWrapper
 from masscan_wrapper import MasscanWrapper
 from metrics import MetricsCollector
-from models import ReconTask, ReconResult, ReconStatus
+from models import ReconResult, ReconStatus, ReconTask
+from nmap_wrapper import NmapWrapper
 
 
 class ReconEngine:
@@ -73,7 +71,7 @@ class ReconEngine:
                 task_id=task.id,
                 status="success",
                 output=results_data,
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
             )
             print(f"[ReconEngine] Recon task {task.id} completed successfully.")
 
@@ -85,7 +83,7 @@ class ReconEngine:
                 task_id=task.id,
                 status="failed",
                 output={"error": str(e)},
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
             )
             print(f"[ReconEngine] Recon task {task.id} failed: {e}")
 

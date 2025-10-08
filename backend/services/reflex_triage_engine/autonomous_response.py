@@ -11,17 +11,17 @@ Safety: Dry-run mode enabled by default for 1 week.
 """
 
 import logging
-import asyncio
-from typing import Dict, List, Optional
 from dataclasses import dataclass
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class PlaybookAction(Enum):
     """Available autonomous actions."""
+
     BLOCK_IP = "block_ip"
     KILL_PROCESS = "kill_process"
     ISOLATE_HOST = "isolate_host"
@@ -32,6 +32,7 @@ class PlaybookAction(Enum):
 @dataclass
 class ActionResult:
     """Result from autonomous action."""
+
     action: PlaybookAction
     success: bool
     dry_run: bool
@@ -65,10 +66,7 @@ class AutonomousResponseEngine:
         logger.info(f"AutonomousResponseEngine initialized (dry_run={dry_run_mode})")
 
     async def execute_playbook(
-        self,
-        action: PlaybookAction,
-        target: str,
-        context: Optional[Dict] = None
+        self, action: PlaybookAction, target: str, context: Optional[Dict] = None
     ) -> ActionResult:
         """Execute autonomous response playbook.
 
@@ -99,7 +97,7 @@ class AutonomousResponseEngine:
                 dry_run=self.dry_run_mode,
                 message=f"Unknown action: {action}",
                 timestamp=datetime.now().isoformat(),
-                details={}
+                details={},
             )
 
         # Log action
@@ -128,7 +126,7 @@ class AutonomousResponseEngine:
                 dry_run=True,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'ip': ip}
+                details={"ip": ip},
             )
 
         try:
@@ -147,7 +145,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'ip': ip, 'rule': f'iptables -A INPUT -s {ip} -j DROP'}
+                details={"ip": ip, "rule": f"iptables -A INPUT -s {ip} -j DROP"},
             )
 
         except Exception as e:
@@ -159,7 +157,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=f"Error: {e}",
                 timestamp=datetime.now().isoformat(),
-                details={'ip': ip, 'error': str(e)}
+                details={"ip": ip, "error": str(e)},
             )
 
     async def _kill_process(self, process_identifier: str, context: Optional[Dict]) -> ActionResult:
@@ -182,7 +180,7 @@ class AutonomousResponseEngine:
                 dry_run=True,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'process': process_identifier, 'context': context}
+                details={"process": process_identifier, "context": context},
             )
 
         try:
@@ -198,7 +196,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'process': process_identifier, 'context': context}
+                details={"process": process_identifier, "context": context},
             )
 
         except Exception as e:
@@ -210,7 +208,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=f"Error: {e}",
                 timestamp=datetime.now().isoformat(),
-                details={'process': process_identifier, 'error': str(e)}
+                details={"process": process_identifier, "error": str(e)},
             )
 
     async def _isolate_host(self, hostname: str) -> ActionResult:
@@ -232,7 +230,7 @@ class AutonomousResponseEngine:
                 dry_run=True,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'host': hostname}
+                details={"host": hostname},
             )
 
         try:
@@ -248,7 +246,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'host': hostname, 'isolation_type': 'network_vlan'}
+                details={"host": hostname, "isolation_type": "network_vlan"},
             )
 
         except Exception as e:
@@ -260,7 +258,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=f"Error: {e}",
                 timestamp=datetime.now().isoformat(),
-                details={'host': hostname, 'error': str(e)}
+                details={"host": hostname, "error": str(e)},
             )
 
     async def _quarantine_file(self, file_path: str) -> ActionResult:
@@ -282,7 +280,7 @@ class AutonomousResponseEngine:
                 dry_run=True,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'file': file_path}
+                details={"file": file_path},
             )
 
         try:
@@ -300,7 +298,10 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'file': file_path, 'quarantine_path': f'/quarantine/{file_path.split("/")[-1]}'}
+                details={
+                    "file": file_path,
+                    "quarantine_path": f"/quarantine/{file_path.split('/')[-1]}",
+                },
             )
 
         except Exception as e:
@@ -312,7 +313,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=f"Error: {e}",
                 timestamp=datetime.now().isoformat(),
-                details={'file': file_path, 'error': str(e)}
+                details={"file": file_path, "error": str(e)},
             )
 
     async def _redirect_honeypot(self, ip: str, context: Optional[Dict]) -> ActionResult:
@@ -335,12 +336,12 @@ class AutonomousResponseEngine:
                 dry_run=True,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'ip': ip, 'context': context}
+                details={"ip": ip, "context": context},
             )
 
         try:
             # Real implementation would use NAT/routing rules
-            honeypot_ip = context.get('honeypot_ip', '10.0.0.100') if context else '10.0.0.100'
+            honeypot_ip = context.get("honeypot_ip", "10.0.0.100") if context else "10.0.0.100"
 
             message = f"Redirected {ip} to honeypot {honeypot_ip}"
             logger.info(message)
@@ -351,7 +352,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                details={'ip': ip, 'honeypot_ip': honeypot_ip, 'context': context}
+                details={"ip": ip, "honeypot_ip": honeypot_ip, "context": context},
             )
 
         except Exception as e:
@@ -363,7 +364,7 @@ class AutonomousResponseEngine:
                 dry_run=False,
                 message=f"Error: {e}",
                 timestamp=datetime.now().isoformat(),
-                details={'ip': ip, 'error': str(e)}
+                details={"ip": ip, "error": str(e)},
             )
 
     def get_action_history(self, limit: int = 100) -> List[ActionResult]:
@@ -380,15 +381,14 @@ class AutonomousResponseEngine:
     def get_statistics(self) -> Dict:
         """Get autonomous response statistics."""
         return {
-            'dry_run_mode': self.dry_run_mode,
-            'total_actions': len(self.action_history),
-            'blocked_ips': len(self.blocked_ips),
-            'isolated_hosts': len(self.isolated_hosts),
-            'quarantined_files': len(self.quarantined_files),
-            'action_breakdown': {
-                action.value: sum(1 for a in self.action_history if a.action == action)
-                for action in PlaybookAction
-            }
+            "dry_run_mode": self.dry_run_mode,
+            "total_actions": len(self.action_history),
+            "blocked_ips": len(self.blocked_ips),
+            "isolated_hosts": len(self.isolated_hosts),
+            "quarantined_files": len(self.quarantined_files),
+            "action_breakdown": {
+                action.value: sum(1 for a in self.action_history if a.action == action) for action in PlaybookAction
+            },
         }
 
     def enable_production_mode(self):

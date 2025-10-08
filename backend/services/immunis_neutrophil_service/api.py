@@ -15,13 +15,14 @@ Endpoints:
 - POST /self_destruct - Manual self-destruction
 """
 
+import logging
+import uuid
+from datetime import datetime
+from typing import Any, Dict
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-from datetime import datetime
-import uuid
-import logging
 
 from neutrophil_core import NeutrophilCore
 
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Immunis Neutrophil Service",
     version="1.0.0",
-    description="Bio-inspired rapid threat response service (ephemeral, first responder)"
+    description="Bio-inspired rapid threat response service (ephemeral, first responder)",
 )
 
 # Initialize Neutrophil core with unique ID
@@ -40,7 +41,7 @@ neutrophil_id = f"neutrophil-{uuid.uuid4().hex[:8]}"
 neutrophil_core = NeutrophilCore(
     neutrophil_id=neutrophil_id,
     ttl_hours=24,
-    rte_endpoint="http://vertice-rte:8026"  # Updated endpoint
+    rte_endpoint="http://vertice-rte:8026",  # Updated endpoint
 )
 
 
@@ -53,6 +54,7 @@ class ThreatRequest(BaseModel):
         severity (str): Threat severity (critical, high, medium, low)
         details (Dict[str, Any]): Threat details and metadata
     """
+
     threat_id: str
     threat_type: str
     severity: str
@@ -100,7 +102,7 @@ async def health_check() -> Dict[str, Any]:
         "is_alive": is_alive,
         "remaining_lifetime_hours": neutrophil_core.remaining_lifetime_seconds() / 3600,
         "threats_engaged": len(neutrophil_core.threats_engaged),
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -137,7 +139,7 @@ async def respond_to_threat(request: ThreatRequest) -> Dict[str, Any]:
         if not neutrophil_core.is_alive():
             raise HTTPException(
                 status_code=410,  # Gone
-                detail=f"Neutrophil {neutrophil_id} has expired (TTL exceeded)"
+                detail=f"Neutrophil {neutrophil_id} has expired (TTL exceeded)",
             )
 
         logger.info(f"Received threat response request: {request.threat_id}")
@@ -146,14 +148,14 @@ async def respond_to_threat(request: ThreatRequest) -> Dict[str, Any]:
             threat_id=request.threat_id,
             threat_type=request.threat_type,
             severity=request.severity,
-            details=request.details
+            details=request.details,
         )
 
         return {
             "status": "success",
             "neutrophil_id": neutrophil_id,
             "engagement": engagement,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -177,16 +179,13 @@ async def get_response_status(threat_id: str) -> Dict[str, Any]:
     status = await neutrophil_core.get_response_status(threat_id)
 
     if status is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No response found for threat {threat_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No response found for threat {threat_id}")
 
     return {
         "status": "success",
         "threat_id": threat_id,
         "response_data": status,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -213,7 +212,7 @@ async def trigger_self_destruct() -> Dict[str, Any]:
         "status": "success",
         "message": "Neutrophil self-destructed",
         "summary": summary,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -235,12 +234,13 @@ async def get_metrics() -> Dict[str, Any]:
             "total_threats_engaged": status["threats_engaged"],
             "total_actions_taken": status["actions_taken"],
             "average_response_time_ms": (
-                sum(e["response_time_ms"] for e in neutrophil_core.threats_engaged) /
-                len(neutrophil_core.threats_engaged)
-                if neutrophil_core.threats_engaged else 0
-            )
+                sum(e["response_time_ms"] for e in neutrophil_core.threats_engaged)
+                / len(neutrophil_core.threats_engaged)
+                if neutrophil_core.threats_engaged
+                else 0
+            ),
         },
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 

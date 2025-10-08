@@ -11,25 +11,24 @@ Key Features:
     - Drift detection
 """
 
+import asyncio
 import logging
 import time
-import asyncio
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+from typing import Any
 
 from .base import (
-    ExplanationResult,
-    ExplanationType,
     DetailLevel,
     ExplanationCache,
     ExplanationException,
-    ModelNotSupportedException,
-    ExplanationTimeoutException
+    ExplanationResult,
+    ExplanationTimeoutException,
+    ExplanationType,
 )
-from .lime_cybersec import CyberSecLIME
-from .shap_cybersec import CyberSecSHAP
 from .counterfactual import CounterfactualGenerator
 from .feature_tracker import FeatureImportanceTracker
+from .lime_cybersec import CyberSecLIME
+from .shap_cybersec import CyberSecSHAP
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +45,7 @@ class EngineConfig:
         timeout_seconds: Timeout for explanation generation
         auto_select_explainer: Auto-select best explainer for model
     """
+
     enable_cache: bool = True
     cache_ttl_seconds: int = 3600
     enable_tracking: bool = True
@@ -61,7 +61,7 @@ class ExplanationEngine:
     a simple interface for generating explanations across different models.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize ExplanationEngine.
 
         Args:
@@ -71,30 +71,33 @@ class ExplanationEngine:
 
         # Engine configuration
         self.config = EngineConfig(
-            enable_cache=config.get('enable_cache', True),
-            cache_ttl_seconds=config.get('cache_ttl_seconds', 3600),
-            enable_tracking=config.get('enable_tracking', True),
-            default_explanation_type=ExplanationType(config.get('default_explanation_type', 'lime')),
-            timeout_seconds=config.get('timeout_seconds', 30),
-            auto_select_explainer=config.get('auto_select_explainer', True)
+            enable_cache=config.get("enable_cache", True),
+            cache_ttl_seconds=config.get("cache_ttl_seconds", 3600),
+            enable_tracking=config.get("enable_tracking", True),
+            default_explanation_type=ExplanationType(config.get("default_explanation_type", "lime")),
+            timeout_seconds=config.get("timeout_seconds", 30),
+            auto_select_explainer=config.get("auto_select_explainer", True),
         )
 
         # Initialize explainers
         logger.info("Initializing XAI explainers...")
 
-        self.lime_explainer = CyberSecLIME(config.get('lime', {}))
-        self.shap_explainer = CyberSecSHAP(config.get('shap', {}))
-        self.counterfactual_generator = CounterfactualGenerator(config.get('counterfactual', {}))
+        self.lime_explainer = CyberSecLIME(config.get("lime", {}))
+        self.shap_explainer = CyberSecSHAP(config.get("shap", {}))
+        self.counterfactual_generator = CounterfactualGenerator(config.get("counterfactual", {}))
 
         # Cache and tracking
-        self.cache = ExplanationCache(
-            max_size=config.get('cache_max_size', 1000),
-            ttl_seconds=self.config.cache_ttl_seconds
-        ) if self.config.enable_cache else None
+        self.cache = (
+            ExplanationCache(max_size=config.get("cache_max_size", 1000), ttl_seconds=self.config.cache_ttl_seconds)
+            if self.config.enable_cache
+            else None
+        )
 
-        self.tracker = FeatureImportanceTracker(
-            max_history=config.get('tracker_max_history', 10000)
-        ) if self.config.enable_tracking else None
+        self.tracker = (
+            FeatureImportanceTracker(max_history=config.get("tracker_max_history", 10000))
+            if self.config.enable_tracking
+            else None
+        )
 
         # Statistics
         self.total_explanations_generated: int = 0
@@ -106,11 +109,11 @@ class ExplanationEngine:
     async def explain(
         self,
         model: Any,
-        instance: Dict[str, Any],
+        instance: dict[str, Any],
         prediction: Any,
-        explanation_type: Optional[ExplanationType] = None,
+        explanation_type: ExplanationType | None = None,
         detail_level: DetailLevel = DetailLevel.DETAILED,
-        use_cache: bool = True
+        use_cache: bool = True,
     ) -> ExplanationResult:
         """Generate explanation for a model's prediction.
 
@@ -141,12 +144,8 @@ class ExplanationEngine:
 
             # Check cache first
             if use_cache and self.cache:
-                decision_id = instance.get('decision_id', '')
-                cache_key = self.cache.generate_key(
-                    decision_id,
-                    explanation_type,
-                    detail_level
-                )
+                decision_id = instance.get("decision_id", "")
+                cache_key = self.cache.generate_key(decision_id, explanation_type, detail_level)
 
                 cached_result = self.cache.get(cache_key)
 
@@ -160,16 +159,10 @@ class ExplanationEngine:
             # Generate explanation with timeout
             try:
                 result = await asyncio.wait_for(
-                    self._generate_explanation(
-                        model,
-                        instance,
-                        prediction,
-                        explanation_type,
-                        detail_level
-                    ),
-                    timeout=self.config.timeout_seconds
+                    self._generate_explanation(model, instance, prediction, explanation_type, detail_level),
+                    timeout=self.config.timeout_seconds,
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 raise ExplanationTimeoutException(self.config.timeout_seconds)
 
             # Cache result
@@ -198,11 +191,11 @@ class ExplanationEngine:
     async def explain_multiple(
         self,
         model: Any,
-        instance: Dict[str, Any],
+        instance: dict[str, Any],
         prediction: Any,
-        explanation_types: List[ExplanationType],
-        detail_level: DetailLevel = DetailLevel.DETAILED
-    ) -> Dict[ExplanationType, ExplanationResult]:
+        explanation_types: list[ExplanationType],
+        detail_level: DetailLevel = DetailLevel.DETAILED,
+    ) -> dict[ExplanationType, ExplanationResult]:
         """Generate multiple explanation types for the same instance.
 
         Args:
@@ -225,7 +218,7 @@ class ExplanationEngine:
                 instance=instance,
                 prediction=prediction,
                 explanation_type=exp_type,
-                detail_level=detail_level
+                detail_level=detail_level,
             )
             tasks.append(task)
 
@@ -233,7 +226,7 @@ class ExplanationEngine:
 
         # Build results dict
         results_dict = {}
-        for exp_type, result in zip(explanation_types, results):
+        for exp_type, result in zip(explanation_types, results, strict=False):
             if isinstance(result, Exception):
                 logger.error(f"Failed to generate {exp_type.value}: {result}")
             else:
@@ -244,10 +237,10 @@ class ExplanationEngine:
     async def _generate_explanation(
         self,
         model: Any,
-        instance: Dict[str, Any],
+        instance: dict[str, Any],
         prediction: Any,
         explanation_type: ExplanationType,
-        detail_level: DetailLevel
+        detail_level: DetailLevel,
     ) -> ExplanationResult:
         """Generate explanation using specified explainer.
 
@@ -262,28 +255,19 @@ class ExplanationEngine:
             ExplanationResult
         """
         if explanation_type == ExplanationType.LIME:
-            return await self.lime_explainer.explain(
-                model, instance, prediction, detail_level
-            )
+            return await self.lime_explainer.explain(model, instance, prediction, detail_level)
 
-        elif explanation_type == ExplanationType.SHAP:
-            return await self.shap_explainer.explain(
-                model, instance, prediction, detail_level
-            )
+        if explanation_type == ExplanationType.SHAP:
+            return await self.shap_explainer.explain(model, instance, prediction, detail_level)
 
-        elif explanation_type == ExplanationType.COUNTERFACTUAL:
-            return await self.counterfactual_generator.explain(
-                model, instance, prediction, detail_level
-            )
+        if explanation_type == ExplanationType.COUNTERFACTUAL:
+            return await self.counterfactual_generator.explain(model, instance, prediction, detail_level)
 
-        elif explanation_type == ExplanationType.FEATURE_IMPORTANCE:
+        if explanation_type == ExplanationType.FEATURE_IMPORTANCE:
             # Use LIME for feature importance (fast and model-agnostic)
-            return await self.lime_explainer.explain(
-                model, instance, prediction, detail_level
-            )
+            return await self.lime_explainer.explain(model, instance, prediction, detail_level)
 
-        else:
-            raise ValueError(f"Unsupported explanation type: {explanation_type}")
+        raise ValueError(f"Unsupported explanation type: {explanation_type}")
 
     def _auto_select_explainer(self, model: Any) -> ExplanationType:
         """Auto-select best explainer based on model type.
@@ -298,54 +282,46 @@ class ExplanationEngine:
             return self.config.default_explanation_type
 
         model_class = type(model).__name__.lower()
-        model_module = type(model).__module__.lower() if hasattr(type(model), '__module__') else ''
+        model_module = type(model).__module__.lower() if hasattr(type(model), "__module__") else ""
 
         # Tree-based models → SHAP (TreeSHAP is fast and accurate)
-        if any(keyword in model_module + model_class for keyword in [
-            'xgb', 'lightgbm', 'randomforest', 'gradientboosting'
-        ]):
-            return ExplanationType.SHAP
-
-        # Linear models → SHAP (LinearSHAP is exact)
-        elif any(keyword in model_class for keyword in ['linear', 'logistic', 'svm']):
+        if any(
+            keyword in model_module + model_class for keyword in ["xgb", "lightgbm", "randomforest", "gradientboosting"]
+        ) or any(keyword in model_class for keyword in ["linear", "logistic", "svm"]):
             return ExplanationType.SHAP
 
         # Neural networks → LIME (more stable for complex models)
-        elif any(keyword in model_module for keyword in ['torch', 'tensorflow', 'keras']):
+        if any(keyword in model_module for keyword in ["torch", "tensorflow", "keras"]):
             return ExplanationType.LIME
 
         # Default: LIME (model-agnostic)
-        else:
-            return ExplanationType.LIME
+        return ExplanationType.LIME
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get engine statistics.
 
         Returns:
             Statistics dictionary
         """
         stats = {
-            'total_explanations': self.total_explanations_generated,
-            'cache_hits': self.cache_hits,
-            'cache_misses': self.cache_misses,
-            'cache_hit_rate': (self.cache_hits / (self.cache_hits + self.cache_misses))
-                              if (self.cache_hits + self.cache_misses) > 0 else 0.0
+            "total_explanations": self.total_explanations_generated,
+            "cache_hits": self.cache_hits,
+            "cache_misses": self.cache_misses,
+            "cache_hit_rate": (self.cache_hits / (self.cache_hits + self.cache_misses))
+            if (self.cache_hits + self.cache_misses) > 0
+            else 0.0,
         }
 
         if self.cache:
-            stats['cache_stats'] = self.cache.get_stats()
+            stats["cache_stats"] = self.cache.get_stats()
 
         if self.tracker:
-            stats['tracker_stats'] = self.tracker.get_statistics()
-            stats['top_features'] = self.tracker.get_top_features(n=10)
+            stats["tracker_stats"] = self.tracker.get_statistics()
+            stats["top_features"] = self.tracker.get_top_features(n=10)
 
         return stats
 
-    def get_top_features(
-        self,
-        n: int = 10,
-        time_window_hours: Optional[int] = None
-    ) -> List[Dict[str, Any]]:
+    def get_top_features(self, n: int = 10, time_window_hours: int | None = None) -> list[dict[str, Any]]:
         """Get top N most important features across all explanations.
 
         Args:
@@ -362,11 +338,8 @@ class ExplanationEngine:
         return self.tracker.get_top_features(n=n, time_window_hours=time_window_hours)
 
     def detect_drift(
-        self,
-        feature_name: Optional[str] = None,
-        window_size: int = 100,
-        threshold: float = 0.2
-    ) -> Dict[str, Any]:
+        self, feature_name: str | None = None, window_size: int = 100, threshold: float = 0.2
+    ) -> dict[str, Any]:
         """Detect feature importance drift.
 
         Args:
@@ -379,16 +352,11 @@ class ExplanationEngine:
         """
         if not self.tracker:
             logger.warning("Feature tracking is disabled")
-            return {'drift_detected': False, 'reason': 'Tracking disabled'}
+            return {"drift_detected": False, "reason": "Tracking disabled"}
 
         if feature_name:
             return self.tracker.detect_drift(feature_name, window_size, threshold)
-        else:
-            return self.tracker.detect_global_drift(
-                top_n=20,
-                window_size=window_size,
-                threshold=threshold
-            )
+        return self.tracker.detect_global_drift(top_n=20, window_size=window_size, threshold=threshold)
 
     def clear_cache(self):
         """Clear explanation cache."""
@@ -396,7 +364,7 @@ class ExplanationEngine:
             self.cache.clear()
             logger.info("Explanation cache cleared")
 
-    def export_tracker_data(self) -> Dict[str, Any]:
+    def export_tracker_data(self) -> dict[str, Any]:
         """Export feature tracker data.
 
         Returns:
@@ -407,76 +375,50 @@ class ExplanationEngine:
 
         return self.tracker.export_to_dict()
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform health check on XAI engine.
 
         Returns:
             Health check results
         """
-        health = {
-            'status': 'healthy',
-            'explainers': {},
-            'cache': {},
-            'tracker': {}
-        }
+        health = {"status": "healthy", "explainers": {}, "cache": {}, "tracker": {}}
 
         # Check explainers
         try:
             # Simple test with dummy data
-            dummy_instance = {'test_feature': 0.5}
+            dummy_instance = {"test_feature": 0.5}
             dummy_model = DummyModel()
             dummy_prediction = 0.5
 
             # Test LIME (quick check)
             lime_result = await self.lime_explainer.explain(
-                dummy_model,
-                dummy_instance,
-                dummy_prediction,
-                DetailLevel.SUMMARY
+                dummy_model, dummy_instance, dummy_prediction, DetailLevel.SUMMARY
             )
 
-            health['explainers']['lime'] = {
-                'status': 'ok',
-                'latency_ms': lime_result.latency_ms
-            }
+            health["explainers"]["lime"] = {"status": "ok", "latency_ms": lime_result.latency_ms}
 
         except Exception as e:
             logger.error(f"LIME health check failed: {e}")
-            health['explainers']['lime'] = {
-                'status': 'error',
-                'error': str(e)
-            }
-            health['status'] = 'degraded'
+            health["explainers"]["lime"] = {"status": "error", "error": str(e)}
+            health["status"] = "degraded"
 
         # Check cache
         if self.cache:
             try:
                 cache_stats = self.cache.get_stats()
-                health['cache'] = {
-                    'status': 'ok',
-                    'stats': cache_stats
-                }
+                health["cache"] = {"status": "ok", "stats": cache_stats}
             except Exception as e:
-                health['cache'] = {
-                    'status': 'error',
-                    'error': str(e)
-                }
-                health['status'] = 'degraded'
+                health["cache"] = {"status": "error", "error": str(e)}
+                health["status"] = "degraded"
 
         # Check tracker
         if self.tracker:
             try:
                 tracker_stats = self.tracker.get_statistics()
-                health['tracker'] = {
-                    'status': 'ok',
-                    'stats': tracker_stats
-                }
+                health["tracker"] = {"status": "ok", "stats": tracker_stats}
             except Exception as e:
-                health['tracker'] = {
-                    'status': 'error',
-                    'error': str(e)
-                }
-                health['status'] = 'degraded'
+                health["tracker"] = {"status": "error", "error": str(e)}
+                health["status"] = "degraded"
 
         return health
 
@@ -487,19 +429,21 @@ class DummyModel:
     def predict_proba(self, X):
         """Dummy predict_proba."""
         import numpy as np
+
         return np.array([[0.5, 0.5]])
 
     def predict(self, X):
         """Dummy predict."""
         import numpy as np
+
         return np.array([0.5])
 
 
 # Global singleton instance (optional)
-_global_engine: Optional[ExplanationEngine] = None
+_global_engine: ExplanationEngine | None = None
 
 
-def get_global_engine(config: Optional[Dict[str, Any]] = None) -> ExplanationEngine:
+def get_global_engine(config: dict[str, Any] | None = None) -> ExplanationEngine:
     """Get or create global ExplanationEngine instance.
 
     Args:

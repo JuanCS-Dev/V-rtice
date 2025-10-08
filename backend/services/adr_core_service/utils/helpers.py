@@ -9,8 +9,8 @@ Examples include data validation, string manipulation, time conversions,
 or other small, stateless functions that support the overall ADR workflow.
 """
 
-from typing import Any, Dict, List
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any, Dict
 
 
 def generate_unique_id(prefix: str = "id") -> str:
@@ -35,6 +35,7 @@ def is_valid_ip(ip_address: str) -> bool:
         bool: True if the string is a valid IP address, False otherwise.
     """
     import ipaddress
+
     try:
         ipaddress.ip_address(ip_address)
         return True
@@ -51,10 +52,10 @@ def calculate_time_difference(start_time_iso: str, end_time_iso: str) -> float:
 
     Returns:
         float: The time difference in seconds.
-    
+
     Raises:
         ValueError: If the time strings are not in valid ISO format.
-        """
+    """
     try:
         start = datetime.fromisoformat(start_time_iso)
         end = datetime.fromisoformat(end_time_iso)
@@ -63,7 +64,7 @@ def calculate_time_difference(start_time_iso: str, end_time_iso: str) -> float:
         raise ValueError(f"Invalid ISO time format: {e}")
 
 
-def flatten_dict(d: Dict[str, Any], parent_key: str = '', sep: str = '_') -> Dict[str, Any]:
+def flatten_dict(d: Dict[str, Any], parent_key: str = "", sep: str = "_") -> Dict[str, Any]:
     """Flattens a nested dictionary into a single-level dictionary.
 
     Args:

@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package kafka.v1;
+
+option go_package = "github.com/vertice/vcli-go/api/grpc/kafka";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// ============================================================
+// Kafka Proxy Service
+// ============================================================
+
+service KafkaProxy {
+  // Stream messages from a Kafka topic
+  rpc StreamTopic(StreamTopicRequest) returns (stream KafkaMessage);
+
+  // Stream messages from multiple topics
+  rpc StreamTopics(StreamTopicsRequest) returns (stream KafkaMessage);
+
+  // Publish a message to a Kafka topic
+  rpc PublishMessage(PublishMessageRequest) returns (PublishMessageResponse);
+
+  // Get topic metadata
+  rpc GetTopicInfo(GetTopicInfoRequest) returns (TopicInfo);
+
+  // List available topics
+  rpc ListTopics(ListTopicsRequest) returns (ListTopicsResponse);
+}
+
+// ============================================================
+// Streaming Messages
+// ============================================================
+
+message StreamTopicRequest {
+  string topic = 1;                         // Topic name
+  string consumer_group = 2;                // Consumer group ID (optional)
+  int64 offset = 3;                         // Start offset (-1 = latest, -2 = earliest)
+  int32 partition = 4;                      // Specific partition (-1 = all)
+
+  // Filters
+  repeated string event_types = 5;          // Filter by event type
+  int32 severity_min = 6;                   // Min severity level
+  map<string, string> field_filters = 7;    // Filter by field values
+}
+
+message StreamTopicsRequest {
+  repeated string topics = 1;               // Multiple topics
+  string consumer_group = 2;
+  int64 offset = 3;
+
+  // Filters (applied to all topics)
+  repeated string event_types = 4;
+  int32 severity_min = 5;
+  map<string, string> field_filters = 6;
+}
+
+message KafkaMessage {
+  // Message metadata
+  string topic = 1;
+  int32 partition = 2;
+  int64 offset = 3;
+  string key = 4;
+  google.protobuf.Timestamp timestamp = 5;
+
+  // Message content
+  string event_type = 6;                    // Event type (if structured)
+  int32 severity = 7;                       // Severity level (if applicable)
+  google.protobuf.Struct payload = 8;       // Message payload (JSON)
+  bytes raw_value = 9;                      // Raw message bytes
+
+  // Headers
+  map<string, string> headers = 10;
+}
+
+// ============================================================
+// Publishing Messages
+// ============================================================
+
+message PublishMessageRequest {
+  string topic = 1;
+  string key = 2;                           // Message key (for partitioning)
+  google.protobuf.Struct payload = 3;       // Message payload
+  map<string, string> headers = 4;          // Optional headers
+}
+
+message PublishMessageResponse {
+  bool success = 1;
+  int32 partition = 2;                      // Partition message was sent to
+  int64 offset = 3;                         // Offset of published message
+  string message = 4;
+}
+
+// ============================================================
+// Topic Metadata
+// ============================================================
+
+message GetTopicInfoRequest {
+  string topic = 1;
+}
+
+message TopicInfo {
+  string topic = 1;
+  int32 num_partitions = 2;
+  int32 replication_factor = 3;
+  map<string, string> config = 4;
+  repeated PartitionInfo partitions = 5;
+}
+
+message PartitionInfo {
+  int32 partition = 1;
+  string leader = 2;                        // Leader broker
+  repeated string replicas = 3;
+  repeated string isr = 4;                  // In-sync replicas
+  int64 earliest_offset = 5;
+  int64 latest_offset = 6;
+  int64 message_count = 7;
+}
+
+message ListTopicsRequest {
+  string pattern = 1;                       // Topic name pattern (regex)
+  bool include_internal = 2;                // Include internal topics
+}
+
+message ListTopicsResponse {
+  repeated string topics = 1;
+  int32 total_count = 2;
+}

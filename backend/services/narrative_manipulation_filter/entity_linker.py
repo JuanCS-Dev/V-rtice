@@ -7,19 +7,19 @@ Integrates:
 - Wikidata ID resolution for canonical identifiers
 """
 
-import logging
-from typing import List, Dict, Any, Optional, Set
-from dataclasses import dataclass
 import asyncio
+import logging
+from dataclasses import dataclass
+from typing import List, Optional, Set
 
 import spacy
 from spacy.language import Language
 
-from dbpedia_client import dbpedia_client
-from wikidata_client import wikidata_client
-from cache_manager import cache_manager, CacheCategory
-from utils import hash_text
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
+from dbpedia_client import dbpedia_client
+from utils import hash_text
+from wikidata_client import wikidata_client
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,9 @@ class EntityLinker:
                 try:
                     self.nlp = spacy.load("pt_core_news_sm")
                 except OSError:
-                    logger.error("No Portuguese spaCy model found. Please install: python -m spacy download pt_core_news_lg")
+                    logger.error(
+                        "No Portuguese spaCy model found. Please install: python -m spacy download pt_core_news_lg"
+                    )
                     raise
 
             # Optimize pipeline (disable unnecessary components)
@@ -135,7 +137,7 @@ class EntityLinker:
         text: str,
         min_confidence: float = 0.5,
         use_cache: bool = True,
-        enrich_with_metadata: bool = True
+        enrich_with_metadata: bool = True,
     ) -> List[Entity]:
         """
         Extract and link entities from text.
@@ -170,10 +172,7 @@ class EntityLinker:
         logger.info(f"Extracted {len(entities)} entities via spaCy NER")
 
         # STEP 2: DBpedia Spotlight disambiguation (parallel)
-        tasks = [
-            self._disambiguate_entity(entity, text)
-            for entity in entities
-        ]
+        tasks = [self._disambiguate_entity(entity, text) for entity in entities]
 
         disambiguated = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -187,10 +186,7 @@ class EntityLinker:
             if entity.confidence >= min_confidence:
                 linked_entities.append(entity)
 
-        logger.info(
-            f"Linked {len(linked_entities)}/{len(entities)} entities "
-            f"(threshold={min_confidence})"
-        )
+        logger.info(f"Linked {len(linked_entities)}/{len(entities)} entities (threshold={min_confidence})")
 
         # STEP 3: Enrich with Wikidata metadata (optional)
         if enrich_with_metadata and linked_entities:
@@ -210,7 +206,7 @@ class EntityLinker:
                     "wikidata_id": e.wikidata_id,
                     "confidence": e.confidence,
                     "description": e.description,
-                    "aliases": e.aliases
+                    "aliases": e.aliases,
                 }
                 for e in linked_entities
             ]
@@ -232,17 +228,13 @@ class EntityLinker:
                 label=ent.label_,
                 start=ent.start_char,
                 end=ent.end_char,
-                confidence=0.0  # Will be updated after disambiguation
+                confidence=0.0,  # Will be updated after disambiguation
             )
             entities.append(entity)
 
         return entities
 
-    async def _disambiguate_entity(
-        self,
-        entity: Entity,
-        full_text: str
-    ) -> Entity:
+    async def _disambiguate_entity(self, entity: Entity, full_text: str) -> Entity:
         """
         Disambiguate entity using DBpedia Spotlight.
 
@@ -258,7 +250,7 @@ class EntityLinker:
             annotations = await dbpedia_client.spotlight_annotate(
                 text=full_text,
                 confidence=0.3,  # Lower threshold, we filter later
-                support=20
+                support=20,
             )
 
             # Find annotation matching our entity
@@ -294,10 +286,7 @@ class EntityLinker:
                 entity.wikidata_id = wikidata_id
                 entity.confidence = confidence
 
-                logger.debug(
-                    f"Linked '{entity.text}' → {wikidata_id} "
-                    f"(confidence={confidence:.3f})"
-                )
+                logger.debug(f"Linked '{entity.text}' → {wikidata_id} (confidence={confidence:.3f})")
             else:
                 # Fallback: search Wikidata directly
                 wikidata_id = await self._search_wikidata(entity.text, entity.label)
@@ -305,9 +294,7 @@ class EntityLinker:
                 if wikidata_id:
                     entity.wikidata_id = wikidata_id
                     entity.confidence = 0.6  # Lower confidence for search-based
-                    logger.debug(
-                        f"Linked '{entity.text}' → {wikidata_id} via Wikidata search"
-                    )
+                    logger.debug(f"Linked '{entity.text}' → {wikidata_id} via Wikidata search")
 
         except Exception as e:
             logger.warning(f"Disambiguation failed for '{entity.text}': {e}")
@@ -358,11 +345,7 @@ class EntityLinker:
             logger.warning(f"Wikidata ID resolution failed for {dbpedia_uri}: {e}")
             return None
 
-    async def _search_wikidata(
-        self,
-        entity_text: str,
-        entity_type: str
-    ) -> Optional[str]:
+    async def _search_wikidata(self, entity_text: str, entity_type: str) -> Optional[str]:
         """
         Search Wikidata for entity (fallback when Spotlight fails).
 
@@ -374,11 +357,7 @@ class EntityLinker:
             Wikidata Q-ID or None
         """
         try:
-            results = await wikidata_client.search(
-                query=entity_text,
-                language="pt",
-                limit=5
-            )
+            results = await wikidata_client.search(query=entity_text, language="pt", limit=5)
 
             if not results:
                 return None
@@ -466,11 +445,7 @@ class EntityLinker:
 
         return entity
 
-    def get_entities_by_type(
-        self,
-        entities: List[Entity],
-        entity_types: List[str]
-    ) -> List[Entity]:
+    def get_entities_by_type(self, entities: List[Entity], entity_types: List[str]) -> List[Entity]:
         """
         Filter entities by type.
 

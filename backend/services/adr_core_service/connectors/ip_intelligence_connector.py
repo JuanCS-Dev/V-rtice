@@ -13,8 +13,8 @@ and geo-fencing security policies.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict
 
 from models.schemas import IpIntelligenceData
 from utils.logger import setup_logger
@@ -44,7 +44,7 @@ class IpIntelligenceConnector:
 
         Returns:
             IpIntelligenceData: A Pydantic model containing the IP intelligence information.
-        
+
         Raises:
             HTTPException: If the service is unavailable or the IP address is invalid.
         """
@@ -52,7 +52,7 @@ class IpIntelligenceConnector:
             raise HTTPException(status_code=503, detail="IP intelligence service is not available.")
 
         logger.info(f"[IpIntelligenceConnector] Querying IP intelligence for: {ip_address}")
-        await asyncio.sleep(0.1) # Simulate API call latency
+        await asyncio.sleep(0.1)  # Simulate API call latency
 
         # Simulate IP intelligence lookup
         if ip_address == "192.168.1.1":
@@ -63,7 +63,7 @@ class IpIntelligenceConnector:
                 isp="N/A",
                 reputation="Neutral",
                 threat_score=0.0,
-                last_checked=datetime.now().isoformat()
+                last_checked=datetime.now().isoformat(),
             )
         elif ip_address == "8.8.8.8":
             return IpIntelligenceData(
@@ -73,9 +73,9 @@ class IpIntelligenceConnector:
                 isp="Google LLC",
                 reputation="Clean",
                 threat_score=0.0,
-                last_checked=datetime.now().isoformat()
+                last_checked=datetime.now().isoformat(),
             )
-        elif ip_address == "1.2.3.4": # Example of a potentially malicious IP
+        elif ip_address == "1.2.3.4":  # Example of a potentially malicious IP
             return IpIntelligenceData(
                 ip_address=ip_address,
                 country="RU",
@@ -83,7 +83,7 @@ class IpIntelligenceConnector:
                 isp="EvilCorp Hosting",
                 reputation="Malicious",
                 threat_score=0.9,
-                last_checked=datetime.now().isoformat()
+                last_checked=datetime.now().isoformat(),
             )
         else:
             return IpIntelligenceData(
@@ -92,8 +92,8 @@ class IpIntelligenceConnector:
                 city="Unknown",
                 isp="Unknown",
                 reputation="Unknown",
-                threat_score=0.5, # Default to moderate for unknown
-                last_checked=datetime.now().isoformat()
+                threat_score=0.5,  # Default to moderate for unknown
+                last_checked=datetime.now().isoformat(),
             )
 
     async def refresh_cache(self) -> Dict[str, Any]:
@@ -103,5 +103,9 @@ class IpIntelligenceConnector:
             Dict[str, Any]: A dictionary with the refresh status.
         """
         logger.info("[IpIntelligenceConnector] Refreshing IP intelligence cache...")
-        await asyncio.sleep(0.5) # Simulate cache refresh
-        return {"status": "success", "message": "IP intelligence cache refreshed.", "last_refresh": datetime.now().isoformat()}
+        await asyncio.sleep(0.5)  # Simulate cache refresh
+        return {
+            "status": "success",
+            "message": "IP intelligence cache refreshed.",
+            "last_refresh": datetime.now().isoformat(),
+        }

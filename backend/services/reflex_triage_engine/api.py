@@ -10,29 +10,26 @@ Endpoints:
 """
 
 import logging
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from typing import Dict, List, Optional
-import uvicorn
 
-from hyperscan_engine import HyperscanEngine
-from fast_anomaly_detector import FastAnomalyDetector
-from reflex_fusion import ReflexFusionEngine, ThreatDecision
+import uvicorn
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from pydantic import BaseModel
+
 from autonomous_response import AutonomousResponseEngine, PlaybookAction
+from fast_anomaly_detector import FastAnomalyDetector
+from hyperscan_engine import HyperscanEngine
+from reflex_fusion import ReflexFusionEngine, ThreatDecision
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Initialize FastAPI
 app = FastAPI(
     title="Reflex Triage Engine",
     description="Ultra-fast threat detection and autonomous response <50ms",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Initialize engines (global state)
@@ -45,6 +42,7 @@ response_engine: Optional[AutonomousResponseEngine] = None
 # Pydantic models
 class ScanRequest(BaseModel):
     """Scan request model."""
+
     event_data: str  # Base64 encoded or hex string
     event_metadata: Dict
     auto_respond: bool = False
@@ -52,6 +50,7 @@ class ScanRequest(BaseModel):
 
 class ScanResponse(BaseModel):
     """Scan response model."""
+
     decision: str
     confidence: float
     threat_score: float
@@ -63,6 +62,7 @@ class ScanResponse(BaseModel):
 
 class ReloadRequest(BaseModel):
     """Reload signatures request."""
+
     signatures_path: str
 
 
@@ -78,7 +78,7 @@ async def startup_event():
 
     # Load default signatures if available
     try:
-        hyperscan_engine.load_signatures('/app/signatures/default_signatures.json')
+        hyperscan_engine.load_signatures("/app/signatures/default_signatures.json")
         hyperscan_engine.compile_database()
     except Exception as e:
         logger.warning(f"Could not load default signatures: {e}")
@@ -88,7 +88,7 @@ async def startup_event():
 
     # Try to load pre-trained model
     try:
-        anomaly_detector.load_model('/app/models/anomaly_detector.pkl')
+        anomaly_detector.load_model("/app/models/anomaly_detector.pkl")
     except Exception as e:
         logger.warning(f"Could not load anomaly model: {e}")
 
@@ -96,7 +96,7 @@ async def startup_event():
     fusion_engine = ReflexFusionEngine(
         hyperscan_engine=hyperscan_engine,
         anomaly_detector=anomaly_detector,
-        vae_layer=None  # Can integrate L1 VAE later
+        vae_layer=None,  # Can integrate L1 VAE later
     )
 
     # Initialize Response Engine (dry-run by default)
@@ -123,25 +123,21 @@ async def scan_event(request: ScanRequest):
         event_data = bytes.fromhex(request.event_data)
 
         # Perform triage
-        result = fusion_engine.triage(
-            event_data=event_data,
-            event_metadata=request.event_metadata
-        )
+        result = fusion_engine.triage(event_data=event_data, event_metadata=request.event_metadata)
 
         # Autonomous response if requested and BLOCK decision
         action_result = None
         if request.auto_respond and result.decision == ThreatDecision.BLOCK:
             # Determine action based on threat type
-            if 'ip' in request.event_metadata:
+            if "ip" in request.event_metadata:
                 action_result = await response_engine.execute_playbook(
-                    action=PlaybookAction.BLOCK_IP,
-                    target=request.event_metadata['ip']
+                    action=PlaybookAction.BLOCK_IP, target=request.event_metadata["ip"]
                 )
-            elif 'process_id' in request.event_metadata:
+            elif "process_id" in request.event_metadata:
                 action_result = await response_engine.execute_playbook(
                     action=PlaybookAction.KILL_PROCESS,
-                    target=str(request.event_metadata['process_id']),
-                    context=request.event_metadata
+                    target=str(request.event_metadata["process_id"]),
+                    context=request.event_metadata,
                 )
 
         return ScanResponse(
@@ -151,12 +147,16 @@ async def scan_event(request: ScanRequest):
             detections=result.detections,
             reasoning=result.reasoning,
             latency_ms=result.latency_ms,
-            action_taken={
-                'action': action_result.action.value,
-                'success': action_result.success,
-                'dry_run': action_result.dry_run,
-                'message': action_result.message
-            } if action_result else None
+            action_taken=(
+                {
+                    "action": action_result.action.value,
+                    "success": action_result.success,
+                    "dry_run": action_result.dry_run,
+                    "message": action_result.message,
+                }
+                if action_result
+                else None
+            ),
         )
 
     except Exception as e:
@@ -183,25 +183,22 @@ async def scan_file(file: UploadFile = File(...)):
 
         # Create metadata
         metadata = {
-            'filename': file.filename,
-            'file_size': len(content),
-            'content_type': file.content_type
+            "filename": file.filename,
+            "file_size": len(content),
+            "content_type": file.content_type,
         }
 
         # Scan
-        result = fusion_engine.triage(
-            event_data=content,
-            event_metadata=metadata
-        )
+        result = fusion_engine.triage(event_data=content, event_metadata=metadata)
 
         return {
-            'filename': file.filename,
-            'decision': result.decision.value,
-            'confidence': result.confidence,
-            'threat_score': result.threat_score,
-            'detections': result.detections,
-            'reasoning': result.reasoning,
-            'latency_ms': result.latency_ms
+            "filename": file.filename,
+            "decision": result.decision.value,
+            "confidence": result.confidence,
+            "threat_score": result.threat_score,
+            "detections": result.detections,
+            "reasoning": result.reasoning,
+            "latency_ms": result.latency_ms,
         }
 
     except Exception as e:
@@ -226,9 +223,9 @@ async def reload_signatures(request: ReloadRequest):
         hyperscan_engine.reload_signatures(request.signatures_path)
 
         return {
-            'status': 'success',
-            'message': f'Signatures reloaded from {request.signatures_path}',
-            'signatures_count': len(hyperscan_engine.signatures)
+            "status": "success",
+            "message": f"Signatures reloaded from {request.signatures_path}",
+            "signatures_count": len(hyperscan_engine.signatures),
         }
 
     except Exception as e:
@@ -247,10 +244,10 @@ async def get_statistics():
         raise HTTPException(status_code=503, detail="Engines not initialized")
 
     return {
-        'hyperscan': hyperscan_engine.get_statistics(),
-        'anomaly_detector': anomaly_detector.get_statistics(),
-        'fusion_engine': fusion_engine.get_statistics(),
-        'autonomous_response': response_engine.get_statistics()
+        "hyperscan": hyperscan_engine.get_statistics(),
+        "anomaly_detector": anomaly_detector.get_statistics(),
+        "fusion_engine": fusion_engine.get_statistics(),
+        "autonomous_response": response_engine.get_statistics(),
     }
 
 
@@ -269,9 +266,9 @@ async def enable_production_mode():
     response_engine.enable_production_mode()
 
     return {
-        'status': 'warning',
-        'message': '⚠️ PRODUCTION MODE ENABLED - Real autonomous actions will be executed!',
-        'dry_run_mode': response_engine.dry_run_mode
+        "status": "warning",
+        "message": "⚠️ PRODUCTION MODE ENABLED - Real autonomous actions will be executed!",
+        "dry_run_mode": response_engine.dry_run_mode,
     }
 
 
@@ -279,22 +276,11 @@ async def enable_production_mode():
 async def health_check():
     """Health check endpoint."""
     return {
-        'status': 'healthy',
-        'service': 'reflex_triage_engine',
-        'engines_initialized': all([
-            hyperscan_engine,
-            anomaly_detector,
-            fusion_engine,
-            response_engine
-        ])
+        "status": "healthy",
+        "service": "reflex_triage_engine",
+        "engines_initialized": all([hyperscan_engine, anomaly_detector, fusion_engine, response_engine]),
     }
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8003,
-        log_level="info",
-        reload=False
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8003, log_level="info", reload=False)

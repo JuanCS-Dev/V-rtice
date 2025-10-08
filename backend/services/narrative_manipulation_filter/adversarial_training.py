@@ -10,13 +10,12 @@ Certified robustness: ±2 character edits
 """
 
 import logging
-from typing import List, Dict, Any, Tuple
 import random
-import re
 from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple
 
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer
 
 from config import get_settings
 
@@ -52,22 +51,42 @@ class AdversarialGenerator:
 
     # Homoglyph mappings (visually similar characters)
     HOMOGLYPHS = {
-        'a': ['а', 'à', 'á', 'ã', 'â'],  # Latin a variants
-        'e': ['е', 'è', 'é', 'ê'],
-        'i': ['і', 'ì', 'í', 'î'],
-        'o': ['о', 'ò', 'ó', 'õ', 'ô'],
-        'c': ['с', 'ç'],
-        'n': ['ñ'],
+        "a": ["а", "à", "á", "ã", "â"],  # Latin a variants
+        "e": ["е", "è", "é", "ê"],
+        "i": ["і", "ì", "í", "î"],
+        "o": ["о", "ò", "ó", "õ", "ô"],
+        "c": ["с", "ç"],
+        "n": ["ñ"],
     }
 
     # Common typo patterns
     ADJACENT_KEYS = {
-        'a': 'sq', 'b': 'vn', 'c': 'xv', 'd': 'sf', 'e': 'wr',
-        'f': 'dg', 'g': 'fh', 'h': 'gj', 'i': 'uo', 'j': 'hk',
-        'k': 'jl', 'l': 'k', 'm': 'n', 'n': 'bm', 'o': 'ip',
-        'p': 'o', 'q': 'wa', 'r': 'et', 's': 'ad', 't': 'ry',
-        'u': 'yi', 'v': 'cb', 'w': 'qe', 'x': 'zc', 'y': 'tu',
-        'z': 'x'
+        "a": "sq",
+        "b": "vn",
+        "c": "xv",
+        "d": "sf",
+        "e": "wr",
+        "f": "dg",
+        "g": "fh",
+        "h": "gj",
+        "i": "uo",
+        "j": "hk",
+        "k": "jl",
+        "l": "k",
+        "m": "n",
+        "n": "bm",
+        "o": "ip",
+        "p": "o",
+        "q": "wa",
+        "r": "et",
+        "s": "ad",
+        "t": "ry",
+        "u": "yi",
+        "v": "cb",
+        "w": "qe",
+        "x": "zc",
+        "y": "tu",
+        "z": "x",
     }
 
     def __init__(self, max_edit_distance: int = 2):
@@ -106,9 +125,9 @@ class AdversarialGenerator:
         chars = list(word)
         chars[char_idx], chars[char_idx + 1] = chars[char_idx + 1], chars[char_idx]
 
-        words[word_idx] = ''.join(chars)
+        words[word_idx] = "".join(chars)
 
-        return ' '.join(words)
+        return " ".join(words)
 
     def generate_homoglyph(self, text: str) -> str:
         """
@@ -133,7 +152,7 @@ class AdversarialGenerator:
 
         chars[idx] = replacement
 
-        return ''.join(chars)
+        return "".join(chars)
 
     def generate_char_insertion(self, text: str) -> str:
         """
@@ -149,7 +168,7 @@ class AdversarialGenerator:
             return text
 
         idx = random.randint(0, len(text))
-        char = random.choice('abcdefghijklmnopqrstuvwxyz ')
+        char = random.choice("abcdefghijklmnopqrstuvwxyz ")
 
         return text[:idx] + char + text[idx:]
 
@@ -168,7 +187,7 @@ class AdversarialGenerator:
 
         idx = random.randint(0, len(text) - 1)
 
-        return text[:idx] + text[idx + 1:]
+        return text[:idx] + text[idx + 1 :]
 
     def generate_whitespace_attack(self, text: str) -> str:
         """
@@ -188,8 +207,8 @@ class AdversarialGenerator:
         # Strategy 1: Double space
         if random.random() < 0.5:
             idx = random.randint(0, len(words) - 1)
-            words.insert(idx, '')
-            return ' '.join(words)
+            words.insert(idx, "")
+            return " ".join(words)
 
         # Strategy 2: Remove space (concatenate words)
         if len(words) > 1:
@@ -197,7 +216,7 @@ class AdversarialGenerator:
             words[idx] = words[idx] + words[idx + 1]
             words.pop(idx + 1)
 
-        return ' '.join(words)
+        return " ".join(words)
 
     def generate_case_attack(self, text: str) -> str:
         """
@@ -221,13 +240,9 @@ class AdversarialGenerator:
                 word = word.upper() if random.random() < 0.5 else word.lower()
             perturbed_words.append(word)
 
-        return ' '.join(perturbed_words)
+        return " ".join(perturbed_words)
 
-    def generate_adversarial_examples(
-        self,
-        texts: List[str],
-        num_per_text: int = 3
-    ) -> List[Tuple[str, str, str]]:
+    def generate_adversarial_examples(self, texts: List[str], num_per_text: int = 3) -> List[Tuple[str, str, str]]:
         """
         Generate multiple adversarial examples per text.
 
@@ -246,7 +261,7 @@ class AdversarialGenerator:
             ("char_insertion", self.generate_char_insertion),
             ("char_deletion", self.generate_char_deletion),
             ("whitespace", self.generate_whitespace_attack),
-            ("case", self.generate_case_attack)
+            ("case", self.generate_case_attack),
         ]
 
         for text in texts:
@@ -301,12 +316,7 @@ class AdversarialTrainer:
     Method: Augment training data with adversarial examples
     """
 
-    def __init__(
-        self,
-        model: torch.nn.Module,
-        tokenizer: AutoTokenizer,
-        device: str = "cpu"
-    ):
+    def __init__(self, model: torch.nn.Module, tokenizer: AutoTokenizer, device: str = "cpu"):
         """
         Initialize adversarial trainer.
 
@@ -320,11 +330,7 @@ class AdversarialTrainer:
         self.device = device
         self.generator = AdversarialGenerator()
 
-    async def evaluate_robustness(
-        self,
-        texts: List[str],
-        labels: List[int]
-    ) -> Dict[str, Any]:
+    async def evaluate_robustness(self, texts: List[str], labels: List[int]) -> Dict[str, Any]:
         """
         Evaluate model robustness to adversarial attacks.
 
@@ -336,10 +342,7 @@ class AdversarialTrainer:
             Robustness metrics
         """
         # Generate adversarial examples
-        adversarial_examples = self.generator.generate_adversarial_examples(
-            texts=texts,
-            num_per_text=5
-        )
+        adversarial_examples = self.generator.generate_adversarial_examples(texts=texts, num_per_text=5)
 
         robust_count = 0
         total_count = len(adversarial_examples)
@@ -352,7 +355,7 @@ class AdversarialTrainer:
             perturbed_pred = self._predict(perturbed)
 
             # Check robustness (prediction unchanged)
-            is_robust = (original_pred == perturbed_pred)
+            is_robust = original_pred == perturbed_pred
 
             if is_robust:
                 robust_count += 1
@@ -366,33 +369,25 @@ class AdversarialTrainer:
                 edit_distance=edit_dist,
                 original_prediction=int(original_pred),
                 perturbed_prediction=int(perturbed_pred),
-                is_robust=is_robust
+                is_robust=is_robust,
             )
 
             examples_data.append(example)
 
         robustness_rate = robust_count / total_count if total_count > 0 else 0
 
-        logger.info(
-            f"Robustness evaluation: {robust_count}/{total_count} "
-            f"({robustness_rate:.1%}) robust"
-        )
+        logger.info(f"Robustness evaluation: {robust_count}/{total_count} ({robustness_rate:.1%}) robust")
 
         return {
             "total_examples": total_count,
             "robust_examples": robust_count,
             "robustness_rate": robustness_rate,
-            "examples": examples_data
+            "examples": examples_data,
         }
 
     def _predict(self, text: str) -> int:
         """Get model prediction for text."""
-        inputs = self.tokenizer(
-            text,
-            return_tensors="pt",
-            truncation=True,
-            max_length=512
-        )
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
 
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
@@ -413,7 +408,7 @@ class AdversarialTrainer:
         train_texts: List[str],
         train_labels: List[int],
         epochs: int = 3,
-        learning_rate: float = 2e-5
+        learning_rate: float = 2e-5,
     ) -> Dict[str, Any]:
         """
         Train model with adversarial examples.
@@ -430,10 +425,7 @@ class AdversarialTrainer:
         logger.info(f"Starting adversarial training for {epochs} epochs...")
 
         # Generate adversarial augmentation
-        adversarial_examples = self.generator.generate_adversarial_examples(
-            texts=train_texts,
-            num_per_text=2
-        )
+        adversarial_examples = self.generator.generate_adversarial_examples(texts=train_texts, num_per_text=2)
 
         # Augment training data
         augmented_texts = train_texts.copy()
@@ -445,9 +437,7 @@ class AdversarialTrainer:
             augmented_texts.append(perturbed)
             augmented_labels.append(train_labels[original_idx])
 
-        logger.info(
-            f"Augmented dataset: {len(train_texts)} → {len(augmented_texts)} examples"
-        )
+        logger.info(f"Augmented dataset: {len(train_texts)} → {len(augmented_texts)} examples")
 
         # Train model (simplified - in production use Trainer)
         optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate)
@@ -462,8 +452,8 @@ class AdversarialTrainer:
             batch_size = 8
 
             for i in range(0, len(augmented_texts), batch_size):
-                batch_texts = augmented_texts[i:i+batch_size]
-                batch_labels = augmented_labels[i:i+batch_size]
+                batch_texts = augmented_texts[i : i + batch_size]
+                batch_labels = augmented_labels[i : i + batch_size]
 
                 # Tokenize
                 inputs = self.tokenizer(
@@ -471,7 +461,7 @@ class AdversarialTrainer:
                     return_tensors="pt",
                     padding=True,
                     truncation=True,
-                    max_length=512
+                    max_length=512,
                 )
 
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
@@ -492,7 +482,7 @@ class AdversarialTrainer:
 
             avg_loss = total_loss / (len(augmented_texts) / batch_size)
 
-            logger.info(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
+            logger.info(f"Epoch {epoch + 1}/{epochs}, Loss: {avg_loss:.4f}")
 
         logger.info("✅ Adversarial training complete")
 
@@ -500,7 +490,7 @@ class AdversarialTrainer:
             "epochs": epochs,
             "original_size": len(train_texts),
             "augmented_size": len(augmented_texts),
-            "final_loss": avg_loss
+            "final_loss": avg_loss,
         }
 
 

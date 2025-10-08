@@ -5,29 +5,25 @@ REST API for threat actor profiling, campaign correlation, and autonomous invest
 NO MOCKS - Production-ready investigation interface.
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from investigation_core import (
-    ThreatActorProfiler,
-    CampaignCorrelator,
-    AutonomousInvestigator,
-    SecurityIncident,
     TTP,
+    AutonomousInvestigator,
+    CampaignCorrelator,
+    SecurityIncident,
+    ThreatActorProfiler,
 )
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instances
@@ -71,13 +67,10 @@ def _register_known_threat_actors():
             TTP.PHISHING,
             TTP.EXPLOIT_PUBLIC_FACING,
             TTP.CREDENTIAL_DUMPING,
-            TTP.LATERAL_MOVEMENT
+            TTP.LATERAL_MOVEMENT,
         ],
-        known_infrastructure=[
-            "185.86.148.0/24",
-            "fancy-bear.com"
-        ],
-        sophistication_score=0.9
+        known_infrastructure=["185.86.148.0/24", "fancy-bear.com"],
+        sophistication_score=0.9,
     )
 
     # Lazarus Group
@@ -88,12 +81,10 @@ def _register_known_threat_actors():
             TTP.PHISHING,
             TTP.COMMAND_SCRIPTING,
             TTP.CREDENTIAL_DUMPING,
-            TTP.EXFILTRATION_C2
+            TTP.EXFILTRATION_C2,
         ],
-        known_infrastructure=[
-            "175.45.178.0/24"
-        ],
-        sophistication_score=0.95
+        known_infrastructure=["175.45.178.0/24"],
+        sophistication_score=0.95,
     )
 
     # APT29 (Cozy Bear)
@@ -104,12 +95,10 @@ def _register_known_threat_actors():
             TTP.EXPLOIT_PUBLIC_FACING,
             TTP.OBFUSCATED_FILES,
             TTP.CREDENTIAL_DUMPING,
-            TTP.DATA_STAGED
+            TTP.DATA_STAGED,
         ],
-        known_infrastructure=[
-            "176.113.0.0/16"
-        ],
-        sophistication_score=0.95
+        known_infrastructure=["176.113.0.0/16"],
+        sophistication_score=0.95,
     )
 
     logger.info("Pre-registered 3 known threat actors")
@@ -119,7 +108,7 @@ app = FastAPI(
     title="VÉRTICE Autonomous Investigation Service",
     description="Threat actor profiling and campaign correlation for attribution",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 
@@ -127,8 +116,10 @@ app = FastAPI(
 # Request/Response Models
 # ============================================================================
 
+
 class ThreatActorRegistrationRequest(BaseModel):
     """Request to register threat actor."""
+
     actor_id: str = Field(..., description="Unique actor ID")
     actor_name: str = Field(..., description="Actor name")
     known_ttps: List[str] = Field(..., description="Known TTP codes (T1566, etc)")
@@ -138,6 +129,7 @@ class ThreatActorRegistrationRequest(BaseModel):
 
 class SecurityIncidentRequest(BaseModel):
     """Request to ingest security incident."""
+
     incident_id: str = Field(..., description="Unique incident ID")
     timestamp: Optional[str] = Field(None, description="ISO timestamp (default: now)")
     incident_type: str = Field(..., description="Incident type")
@@ -150,6 +142,7 @@ class SecurityIncidentRequest(BaseModel):
 
 class AttributionResponse(BaseModel):
     """Response with attribution result."""
+
     incident_id: str
     attributed_actor_id: Optional[str]
     attributed_actor_name: Optional[str]
@@ -160,6 +153,7 @@ class AttributionResponse(BaseModel):
 
 class CampaignResponse(BaseModel):
     """Response with campaign information."""
+
     campaign_id: str
     campaign_name: str
     incidents: List[str]
@@ -175,6 +169,7 @@ class CampaignResponse(BaseModel):
 
 class InvestigationResponse(BaseModel):
     """Response with investigation results."""
+
     investigation_id: str
     incident_id: str
     status: str
@@ -190,6 +185,7 @@ class InvestigationResponse(BaseModel):
 
 class ThreatActorProfileResponse(BaseModel):
     """Response with threat actor profile."""
+
     actor_id: str
     actor_name: str
     ttps: List[str]
@@ -203,6 +199,7 @@ class ThreatActorProfileResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     """Service status response."""
+
     service: str
     status: str
     components: Dict[str, Dict[str, Any]]
@@ -212,6 +209,7 @@ class StatusResponse(BaseModel):
 # ============================================================================
 # Threat Actor Profiling Endpoints
 # ============================================================================
+
 
 @app.post("/actor/register")
 async def register_threat_actor(request: ThreatActorRegistrationRequest):
@@ -242,7 +240,7 @@ async def register_threat_actor(request: ThreatActorRegistrationRequest):
             actor_name=request.actor_name,
             known_ttps=ttps,
             known_infrastructure=request.known_infrastructure,
-            sophistication_score=request.sophistication_score
+            sophistication_score=request.sophistication_score,
         )
 
         return {
@@ -250,7 +248,7 @@ async def register_threat_actor(request: ThreatActorRegistrationRequest):
             "actor_id": request.actor_id,
             "actor_name": request.actor_name,
             "ttps_count": len(ttps),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     except Exception as e:
@@ -286,7 +284,7 @@ async def get_threat_actor_profile(actor_id: str):
             targets=list(profile.targets),
             sophistication_score=profile.sophistication_score,
             activity_count=len(profile.activity_timeline),
-            attribution_confidence=profile.attribution_confidence
+            attribution_confidence=profile.attribution_confidence,
         )
 
     except HTTPException:
@@ -310,17 +308,19 @@ async def list_threat_actors():
         profiles = []
 
         for actor_id, profile in actor_profiler.actor_database.items():
-            profiles.append(ThreatActorProfileResponse(
-                actor_id=profile.actor_id,
-                actor_name=profile.actor_name,
-                ttps=[ttp.value for ttp in profile.ttps],
-                infrastructure=list(profile.infrastructure),
-                malware_families=list(profile.malware_families),
-                targets=list(profile.targets),
-                sophistication_score=profile.sophistication_score,
-                activity_count=len(profile.activity_timeline),
-                attribution_confidence=profile.attribution_confidence
-            ))
+            profiles.append(
+                ThreatActorProfileResponse(
+                    actor_id=profile.actor_id,
+                    actor_name=profile.actor_name,
+                    ttps=[ttp.value for ttp in profile.ttps],
+                    infrastructure=list(profile.infrastructure),
+                    malware_families=list(profile.malware_families),
+                    targets=list(profile.targets),
+                    sophistication_score=profile.sophistication_score,
+                    activity_count=len(profile.activity_timeline),
+                    attribution_confidence=profile.attribution_confidence,
+                )
+            )
 
         return profiles
 
@@ -332,6 +332,7 @@ async def list_threat_actors():
 # ============================================================================
 # Incident Attribution Endpoints
 # ============================================================================
+
 
 @app.post("/incident/ingest")
 async def ingest_incident(request: SecurityIncidentRequest):
@@ -371,7 +372,7 @@ async def ingest_incident(request: SecurityIncidentRequest):
             iocs=request.iocs,
             ttps_observed=ttps,
             severity=request.severity,
-            raw_evidence=request.raw_evidence
+            raw_evidence=request.raw_evidence,
         )
 
         # Ingest into correlator
@@ -382,7 +383,7 @@ async def ingest_incident(request: SecurityIncidentRequest):
             "incident_id": request.incident_id,
             "ttps_count": len(ttps),
             "iocs_count": len(request.iocs),
-            "timestamp": timestamp.isoformat()
+            "timestamp": timestamp.isoformat(),
         }
 
     except Exception as e:
@@ -426,10 +427,7 @@ async def attribute_incident(incident_id: str):
             if profile:
                 actor_name = profile.actor_name
                 # Find matching TTPs
-                matching_ttps = [
-                    ttp.value for ttp in incident.ttps_observed
-                    if ttp in profile.ttps
-                ]
+                matching_ttps = [ttp.value for ttp in incident.ttps_observed if ttp in profile.ttps]
 
         return AttributionResponse(
             incident_id=incident_id,
@@ -437,7 +435,7 @@ async def attribute_incident(incident_id: str):
             attributed_actor_name=actor_name,
             confidence_score=confidence,
             matching_ttps=matching_ttps,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
     except HTTPException:
@@ -450,6 +448,7 @@ async def attribute_incident(incident_id: str):
 # ============================================================================
 # Campaign Correlation Endpoints
 # ============================================================================
+
 
 @app.post("/campaign/correlate", response_model=List[CampaignResponse])
 async def correlate_campaigns(time_window_days: int = 30):
@@ -466,9 +465,7 @@ async def correlate_campaigns(time_window_days: int = 30):
 
     try:
         # Correlate campaigns
-        campaigns = campaign_correlator.correlate_campaigns(
-            time_window_days=time_window_days
-        )
+        campaigns = campaign_correlator.correlate_campaigns(time_window_days=time_window_days)
 
         # Convert to response models
         responses = [
@@ -483,7 +480,7 @@ async def correlate_campaigns(time_window_days: int = 30):
                 targets=list(campaign.targets),
                 confidence_score=campaign.confidence_score,
                 campaign_pattern=campaign.campaign_pattern,
-                timestamp=campaign.timestamp.isoformat()
+                timestamp=campaign.timestamp.isoformat(),
             )
             for campaign in campaigns
         ]
@@ -525,7 +522,7 @@ async def get_campaign(campaign_id: str):
             targets=list(campaign.targets),
             confidence_score=campaign.confidence_score,
             campaign_pattern=campaign.campaign_pattern,
-            timestamp=campaign.timestamp.isoformat()
+            timestamp=campaign.timestamp.isoformat(),
         )
 
     except HTTPException:
@@ -549,19 +546,21 @@ async def list_campaigns():
         campaigns = []
 
         for campaign in campaign_correlator.campaigns.values():
-            campaigns.append(CampaignResponse(
-                campaign_id=campaign.campaign_id,
-                campaign_name=campaign.campaign_name,
-                incidents=campaign.incidents,
-                attributed_actor=campaign.attributed_actor,
-                start_date=campaign.start_date.isoformat(),
-                last_activity=campaign.last_activity.isoformat(),
-                ttps=[ttp.value for ttp in campaign.ttps],
-                targets=list(campaign.targets),
-                confidence_score=campaign.confidence_score,
-                campaign_pattern=campaign.campaign_pattern,
-                timestamp=campaign.timestamp.isoformat()
-            ))
+            campaigns.append(
+                CampaignResponse(
+                    campaign_id=campaign.campaign_id,
+                    campaign_name=campaign.campaign_name,
+                    incidents=campaign.incidents,
+                    attributed_actor=campaign.attributed_actor,
+                    start_date=campaign.start_date.isoformat(),
+                    last_activity=campaign.last_activity.isoformat(),
+                    ttps=[ttp.value for ttp in campaign.ttps],
+                    targets=list(campaign.targets),
+                    confidence_score=campaign.confidence_score,
+                    campaign_pattern=campaign.campaign_pattern,
+                    timestamp=campaign.timestamp.isoformat(),
+                )
+            )
 
         return campaigns
 
@@ -574,11 +573,9 @@ async def list_campaigns():
 # Autonomous Investigation Endpoints
 # ============================================================================
 
+
 @app.post("/investigation/initiate", response_model=InvestigationResponse)
-async def initiate_investigation(
-    incident_id: str,
-    playbook: str = "standard"
-):
+async def initiate_investigation(incident_id: str, playbook: str = "standard"):
     """Initiate autonomous investigation.
 
     Args:
@@ -621,7 +618,7 @@ async def initiate_investigation(
             confidence_score=investigation.confidence_score,
             playbook_used=investigation.playbook_used,
             duration_seconds=duration,
-            recommendations=investigation.recommendations
+            recommendations=investigation.recommendations,
         )
 
     except HTTPException:
@@ -648,10 +645,7 @@ async def get_investigation(investigation_id: str):
         investigation = investigator.get_investigation(investigation_id)
 
         if investigation is None:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Investigation {investigation_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Investigation {investigation_id} not found")
 
         # Calculate duration
         duration = None
@@ -669,7 +663,7 @@ async def get_investigation(investigation_id: str):
             confidence_score=investigation.confidence_score,
             playbook_used=investigation.playbook_used,
             duration_seconds=duration,
-            recommendations=investigation.recommendations
+            recommendations=investigation.recommendations,
         )
 
     except HTTPException:
@@ -683,13 +677,14 @@ async def get_investigation(investigation_id: str):
 # System Endpoints
 # ============================================================================
 
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
         "service": "autonomous_investigation",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -718,7 +713,7 @@ async def get_status():
         service="autonomous_investigation",
         status="operational",
         components=components,
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
     )
 
 
@@ -732,7 +727,7 @@ async def get_statistics():
     stats = {
         "service": "autonomous_investigation",
         "timestamp": datetime.now().isoformat(),
-        "components": {}
+        "components": {},
     }
 
     # Gather stats from all components
@@ -741,7 +736,7 @@ async def get_statistics():
         stats["components"]["threat_actor_profiler"] = {
             "actors_tracked": status["actors_tracked"],
             "attributions_made": status["attributions_made"],
-            "accuracy": status["accuracy"]
+            "accuracy": status["accuracy"],
         }
 
     if campaign_correlator is not None:
@@ -749,24 +744,18 @@ async def get_statistics():
         stats["components"]["campaign_correlator"] = {
             "incidents_ingested": status["incidents_ingested"],
             "campaigns_identified": status["campaigns_identified"],
-            "active_campaigns": status["active_campaigns"]
+            "active_campaigns": status["active_campaigns"],
         }
 
     if investigator is not None:
         status = investigator.get_status()
         stats["components"]["autonomous_investigator"] = {
             "investigations_completed": status["investigations_completed"],
-            "active_investigations": status["active_investigations"]
+            "active_investigations": status["active_investigations"],
         }
 
     return stats
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "api:app",
-        host="0.0.0.0",
-        port=8017,
-        log_level="info",
-        access_log=True
-    )
+    uvicorn.run("api:app", host="0.0.0.0", port=8017, log_level="info", access_log=True)

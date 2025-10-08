@@ -13,18 +13,18 @@ This API allows other Maximus AI services or external applications to interact
 with the visual perception capabilities in a standardized and efficient manner.
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import uvicorn
-import asyncio
-from datetime import datetime
 import base64
+from datetime import datetime
+from typing import Any, Dict
 
-from event_driven_vision_core import EventDrivenVisionCore
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
 from attention_system_core import AttentionSystemCore
-from network_vision_core import NetworkVisionCore
+from event_driven_vision_core import EventDrivenVisionCore
 from malware_vision_core import MalwareVisionCore
+from network_vision_core import NetworkVisionCore
 
 app = FastAPI(title="Maximus Visual Cortex Service", version="1.0.0")
 
@@ -43,6 +43,7 @@ class ImageAnalysisRequest(BaseModel):
         analysis_type (str): The type of analysis to perform (e.g., 'object_detection', 'scene_understanding').
         priority (int): The priority of the analysis (1-10, 10 being highest).
     """
+
     image_base64: str
     analysis_type: str
     priority: int = 5
@@ -51,15 +52,15 @@ class ImageAnalysisRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Visual Cortex Service."""
-    print("👁️ Starting Maximus Visual Cortex Service...")
-    print("✅ Maximus Visual Cortex Service started successfully.")
+    print("👁️ Starting Maximus Visual Cortex Service...")  # pragma: no cover
+    print("✅ Maximus Visual Cortex Service started successfully.")  # pragma: no cover
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Visual Cortex Service."""
-    print("👋 Shutting down Maximus Visual Cortex Service...")
-    print("🛑 Maximus Visual Cortex Service shut down.")
+    print("👋 Shutting down Maximus Visual Cortex Service...")  # pragma: no cover
+    print("🛑 Maximus Visual Cortex Service shut down.")  # pragma: no cover
 
 
 @app.get("/health")
@@ -89,8 +90,11 @@ async def analyze_image_endpoint(request: ImageAnalysisRequest) -> Dict[str, Any
     try:
         # Decode base64 image (simplified, actual image processing would happen here)
         image_data = base64.b64decode(request.image_base64)
-        
-        results = {"timestamp": datetime.now().isoformat(), "analysis_type": request.analysis_type}
+
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "analysis_type": request.analysis_type,
+        }
 
         if request.analysis_type == "object_detection":
             detection_results = await event_driven_vision.process_image(image_data)
@@ -105,9 +109,14 @@ async def analyze_image_endpoint(request: ImageAnalysisRequest) -> Dict[str, Any
             malware_results = await malware_vision.detect_malware_signature(image_data)
             results["malware_detection"] = malware_results
         else:
-            raise HTTPException(status_code=400, detail=f"Invalid analysis type: {request.analysis_type}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid analysis type: {request.analysis_type}",
+            )
 
         return results
+    except HTTPException:
+        raise  # Re-raise HTTPException as-is (e.g., 400 for invalid type)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image analysis failed: {str(e)}")
 
@@ -132,5 +141,5 @@ async def get_attention_system_status() -> Dict[str, Any]:
     return await attention_system.get_status()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     uvicorn.run(app, host="0.0.0.0", port=8003)

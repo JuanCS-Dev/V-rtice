@@ -22,9 +22,10 @@ NO MOCKS - Production-ready implementation.
 
 import logging
 import math
-from datetime import datetime
-from typing import Dict, Any, Optional, List
 from collections import deque
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,7 @@ class AcetylcholineCore:
         base_attention_gain: float = 1.0,
         min_gain: float = 0.1,
         max_gain: float = 10.0,
-        prediction_error_window: int = 100
+        prediction_error_window: int = 100,
     ):
         """Initialize Acetylcholine Core.
 
@@ -64,17 +65,9 @@ class AcetylcholineCore:
         self.last_modulation_time: Optional[datetime] = None
         self.modulation_count = 0
 
-        logger.info(
-            f"AcetylcholineCore initialized (base_gain={base_attention_gain}, "
-            f"range=[{min_gain}, {max_gain}])"
-        )
+        logger.info(f"AcetylcholineCore initialized (base_gain={base_attention_gain}, range=[{min_gain}, {max_gain}])")
 
-    def compute_prediction_error_from_hpc(
-        self,
-        predicted: np.ndarray,
-        actual: np.ndarray,
-        layer: str = "L1"
-    ) -> float:
+    def compute_prediction_error_from_hpc(self, predicted: np.ndarray, actual: np.ndarray, layer: str = "L1") -> float:
         """Compute prediction error from hierarchical Predictive Coding.
 
         In hPC, prediction error flows bottom-up:
@@ -97,24 +90,20 @@ class AcetylcholineCore:
         normalized_pe = pe_magnitude / (input_magnitude + 1e-8)
 
         # Store in history
-        self.prediction_error_history.append({
-            'timestamp': datetime.now().isoformat(),
-            'layer': layer,
-            'pe_magnitude': pe_magnitude,
-            'normalized_pe': normalized_pe
-        })
-
-        logger.debug(
-            f"Prediction error computed (layer={layer}): {normalized_pe:.4f}"
+        self.prediction_error_history.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "layer": layer,
+                "pe_magnitude": pe_magnitude,
+                "normalized_pe": normalized_pe,
+            }
         )
+
+        logger.debug(f"Prediction error computed (layer={layer}): {normalized_pe:.4f}")
 
         return normalized_pe
 
-    def compute_attention_gain(
-        self,
-        prediction_error: float,
-        context_confidence: float = 0.5
-    ) -> float:
+    def compute_attention_gain(self, prediction_error: float, context_confidence: float = 0.5) -> float:
         """Compute attention gain based on prediction error.
 
         Strategy:
@@ -140,9 +129,10 @@ class AcetylcholineCore:
         # Low confidence → more sensitive to prediction errors
         sensitivity = 1.0 - 0.5 * context_confidence
 
-        log_gain = math.log(self.base_gain) + \
-                   (math.log(self.max_gain) - math.log(self.base_gain)) * \
-                   normalized_pe * sensitivity
+        log_gain = (
+            math.log(self.base_gain)
+            + (math.log(self.max_gain) - math.log(self.base_gain)) * normalized_pe * sensitivity
+        )
 
         gain = math.exp(log_gain)
         gain = max(self.min_gain, min(self.max_gain, gain))
@@ -152,8 +142,7 @@ class AcetylcholineCore:
         self.modulation_count += 1
 
         logger.info(
-            f"Attention gain computed: {gain:.2f} (PE={prediction_error:.4f}, "
-            f"confidence={context_confidence:.2f})"
+            f"Attention gain computed: {gain:.2f} (PE={prediction_error:.4f}, confidence={context_confidence:.2f})"
         )
 
         return gain
@@ -167,7 +156,7 @@ class AcetylcholineCore:
         if len(self.prediction_error_history) < 2:
             return 1.0
 
-        pe_values = [entry['normalized_pe'] for entry in self.prediction_error_history]
+        pe_values = [entry["normalized_pe"] for entry in self.prediction_error_history]
         mean_pe = sum(pe_values) / len(pe_values)
         variance = sum((x - mean_pe) ** 2 for x in pe_values) / len(pe_values)
 
@@ -177,7 +166,7 @@ class AcetylcholineCore:
         self,
         attention_scores: np.ndarray,
         prediction_errors: Optional[np.ndarray] = None,
-        stimulus_ids: Optional[List[str]] = None
+        stimulus_ids: Optional[List[str]] = None,
     ) -> np.ndarray:
         """Modulate Transformer attention weights based on prediction errors.
 
@@ -193,9 +182,7 @@ class AcetylcholineCore:
             return attention_scores
 
         # Compute attention gains for each token
-        gains = np.array([
-            self.compute_attention_gain(pe) for pe in prediction_errors
-        ])
+        gains = np.array([self.compute_attention_gain(pe) for pe in prediction_errors])
 
         # Apply gains to attention scores (broadcast)
         # High PE tokens receive more attention
@@ -206,16 +193,12 @@ class AcetylcholineCore:
             for i, stimulus_id in enumerate(stimulus_ids):
                 self.attention_allocation[stimulus_id] = float(gains[i])
 
-        logger.debug(
-            f"Transformer attention modulated: gain_range=[{gains.min():.2f}, {gains.max():.2f}]"
-        )
+        logger.debug(f"Transformer attention modulated: gain_range=[{gains.min():.2f}, {gains.max():.2f}]")
 
         return modulated_scores
 
     def allocate_attention_to_stimuli(
-        self,
-        stimuli: Dict[str, np.ndarray],
-        predictions: Dict[str, np.ndarray]
+        self, stimuli: Dict[str, np.ndarray], predictions: Dict[str, np.ndarray]
     ) -> Dict[str, float]:
         """Allocate attention across multiple stimuli based on prediction errors.
 
@@ -231,10 +214,7 @@ class AcetylcholineCore:
         # Compute prediction error for each stimulus
         for stimulus_id in stimuli:
             if stimulus_id in predictions:
-                pe = self.compute_prediction_error_from_hpc(
-                    predictions[stimulus_id],
-                    stimuli[stimulus_id]
-                )
+                pe = self.compute_prediction_error_from_hpc(predictions[stimulus_id], stimuli[stimulus_id])
                 gain = self.compute_attention_gain(pe)
                 attention_weights[stimulus_id] = gain
             else:
@@ -244,21 +224,14 @@ class AcetylcholineCore:
         # Normalize to sum to 1.0 (softmax-like)
         total_weight = sum(attention_weights.values())
         if total_weight > 0:
-            normalized_weights = {
-                k: v / total_weight for k, v in attention_weights.items()
-            }
+            normalized_weights = {k: v / total_weight for k, v in attention_weights.items()}
         else:
             # Uniform distribution
-            normalized_weights = {
-                k: 1.0 / len(attention_weights) for k in attention_weights
-            }
+            normalized_weights = {k: 1.0 / len(attention_weights) for k in attention_weights}
 
         self.attention_allocation = normalized_weights
 
-        logger.info(
-            f"Attention allocated across {len(stimuli)} stimuli: "
-            f"max={max(normalized_weights.values()):.3f}"
-        )
+        logger.info(f"Attention allocated across {len(stimuli)} stimuli: max={max(normalized_weights.values()):.3f}")
 
         return normalized_weights
 
@@ -272,19 +245,19 @@ class AcetylcholineCore:
             Prediction error statistics
         """
         if not self.prediction_error_history:
-            return {'count': 0}
+            return {"count": 0}
 
         recent = list(self.prediction_error_history)[-window:]
 
-        pe_values = [entry['normalized_pe'] for entry in recent]
+        pe_values = [entry["normalized_pe"] for entry in recent]
         mean_pe = sum(pe_values) / len(pe_values)
 
         return {
-            'count': len(recent),
-            'mean_pe': mean_pe,
-            'std_pe': self._compute_pe_std(),
-            'min_pe': min(pe_values),
-            'max_pe': max(pe_values)
+            "count": len(recent),
+            "mean_pe": mean_pe,
+            "std_pe": self._compute_pe_std(),
+            "min_pe": min(pe_values),
+            "max_pe": max(pe_values),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -296,12 +269,12 @@ class AcetylcholineCore:
         stats = self.get_prediction_error_statistics()
 
         return {
-            'status': 'operational',
-            'current_gain': self.current_gain,
-            'base_gain': self.base_gain,
-            'gain_range': [self.min_gain, self.max_gain],
-            'modulation_count': self.modulation_count,
-            'last_modulation': self.last_modulation_time.isoformat() if self.last_modulation_time else 'N/A',
-            'attention_allocation': self.attention_allocation,
-            'prediction_error_statistics': stats
+            "status": "operational",
+            "current_gain": self.current_gain,
+            "base_gain": self.base_gain,
+            "gain_range": [self.min_gain, self.max_gain],
+            "modulation_count": self.modulation_count,
+            "last_modulation": (self.last_modulation_time.isoformat() if self.last_modulation_time else "N/A"),
+            "attention_allocation": self.attention_allocation,
+            "prediction_error_statistics": stats,
         }

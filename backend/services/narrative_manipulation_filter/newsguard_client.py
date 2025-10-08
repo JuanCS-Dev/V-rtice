@@ -6,13 +6,14 @@ covering 35,000+ domains with 9-criteria "Nutrition Label" ratings.
 """
 
 import logging
-from typing import Optional, Dict, Any, List
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
-from cache_manager import cache_manager, CacheCategory
 from models import CredibilityRating
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class NewsGuardClient:
         "website_discloses_ownership": 7.5,
         "clearly_labels_advertising": 7.5,
         "reveals_whos_in_charge": 5,
-        "provides_names_of_content_creators": 5
+        "provides_names_of_content_creators": 5,
     }
 
     def __init__(self):
@@ -52,9 +53,9 @@ class NewsGuardClient:
             self.session = aiohttp.ClientSession(
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
-                    "User-Agent": f"CognitiveDefense/{settings.VERSION}"
+                    "User-Agent": f"CognitiveDefense/{settings.VERSION}",
                 },
-                timeout=timeout
+                timeout=timeout,
             )
             logger.info("✅ NewsGuard client initialized")
 
@@ -65,15 +66,8 @@ class NewsGuardClient:
             self.session = None
             logger.info("✅ NewsGuard client closed")
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
-    async def get_domain_rating(
-        self,
-        domain: str,
-        use_cache: bool = True
-    ) -> Optional[Dict[str, Any]]:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+    async def get_domain_rating(self, domain: str, use_cache: bool = True) -> Optional[Dict[str, Any]]:
         """
         Get NewsGuard rating for a domain.
 
@@ -120,11 +114,7 @@ class NewsGuardClient:
                 # Cache for 7 days
                 if use_cache:
                     cache_key = f"domain:{domain}"
-                    await cache_manager.set(
-                        CacheCategory.NEWSGUARD,
-                        cache_key,
-                        nutrition_label
-                    )
+                    await cache_manager.set(CacheCategory.NEWSGUARD, cache_key, nutrition_label)
 
                 return nutrition_label
 
@@ -153,10 +143,7 @@ class NewsGuardClient:
             criteria_scores[criterion] = raw_score / max_points if max_points > 0 else 0.0
 
         # Calculate overall score (weighted sum)
-        overall_score = sum(
-            criteria_scores[k] * w
-            for k, w in self.CRITERIA_WEIGHTS.items()
-        )
+        overall_score = sum(criteria_scores[k] * w for k, w in self.CRITERIA_WEIGHTS.items())
 
         # Determine rating
         if overall_score >= 80:
@@ -176,7 +163,7 @@ class NewsGuardClient:
             "rating": rating.value,
             "criteria_scores": criteria_scores,
             "last_updated": api_response.get("last_updated", datetime.utcnow().isoformat()),
-            "full_response": api_response
+            "full_response": api_response,
         }
 
     async def _fallback_rating(self, domain: str) -> Dict[str, Any]:
@@ -193,15 +180,33 @@ class NewsGuardClient:
         """
         # Known trusted domains
         TRUSTED_DOMAINS = {
-            "wikipedia.org", "gov", "edu", "reuters.com", "apnews.com",
-            "bbc.com", "bbc.co.uk", "nytimes.com", "washingtonpost.com",
-            "theguardian.com", "ft.com", "wsj.com", "bloomberg.com"
+            "wikipedia.org",
+            "gov",
+            "edu",
+            "reuters.com",
+            "apnews.com",
+            "bbc.com",
+            "bbc.co.uk",
+            "nytimes.com",
+            "washingtonpost.com",
+            "theguardian.com",
+            "ft.com",
+            "wsj.com",
+            "bloomberg.com",
         }
 
         # Known unreliable patterns
         UNRELIABLE_PATTERNS = [
-            "fake", "news", "conspiracy", "truth", "expose", "leaked",
-            "shocking", "urgent", "breaking", "alert"
+            "fake",
+            "news",
+            "conspiracy",
+            "truth",
+            "expose",
+            "leaked",
+            "shocking",
+            "urgent",
+            "breaking",
+            "alert",
         ]
 
         domain_lower = domain.lower()
@@ -220,10 +225,7 @@ class NewsGuardClient:
             rating = CredibilityRating.PROCEED_WITH_CAUTION
 
         # Equal distribution across criteria
-        criteria_scores = {
-            criterion: score / 100.0
-            for criterion in self.CRITERIA_WEIGHTS.keys()
-        }
+        criteria_scores = {criterion: score / 100.0 for criterion in self.CRITERIA_WEIGHTS.keys()}
 
         return {
             "domain": domain,
@@ -232,14 +234,10 @@ class NewsGuardClient:
             "criteria_scores": criteria_scores,
             "last_updated": datetime.utcnow().isoformat(),
             "full_response": None,
-            "fallback": True
+            "fallback": True,
         }
 
-    async def bulk_get_ratings(
-        self,
-        domains: List[str],
-        use_cache: bool = True
-    ) -> Dict[str, Dict[str, Any]]:
+    async def bulk_get_ratings(self, domains: List[str], use_cache: bool = True) -> Dict[str, Dict[str, Any]]:
         """
         Get ratings for multiple domains efficiently.
 
@@ -255,10 +253,7 @@ class NewsGuardClient:
         # Check cache first
         if use_cache:
             cache_keys = {domain: f"domain:{domain}" for domain in domains}
-            cached_results = await cache_manager.get_many(
-                CacheCategory.NEWSGUARD,
-                list(cache_keys.values())
-            )
+            cached_results = await cache_manager.get_many(CacheCategory.NEWSGUARD, list(cache_keys.values()))
 
             # Map back to domains
             for domain, cache_key in cache_keys.items():
@@ -271,10 +266,8 @@ class NewsGuardClient:
         if uncached_domains:
             # Parallel requests (with rate limiting)
             import asyncio
-            tasks = [
-                self.get_domain_rating(domain, use_cache=False)
-                for domain in uncached_domains
-            ]
+
+            tasks = [self.get_domain_rating(domain, use_cache=False) for domain in uncached_domains]
             ratings = await asyncio.gather(*tasks, return_exceptions=True)
 
             for domain, rating in zip(uncached_domains, ratings):

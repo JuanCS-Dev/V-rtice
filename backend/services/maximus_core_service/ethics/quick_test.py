@@ -56,9 +56,7 @@ async def test_approved_action():
     print("\n📊 Framework Results:")
     for name, result in decision.framework_results.items():
         status = "✅" if result.approved else "❌"
-        print(
-            f"  {status} {name}: {result.verdict.value} (confidence: {result.confidence:.1%}, {result.latency_ms}ms)"
-        )
+        print(f"  {status} {name}: {result.verdict.value} (confidence: {result.confidence:.1%}, {result.latency_ms}ms)")
 
     # System correctly escalates when frameworks disagree significantly
     assert decision.final_decision in [
@@ -67,9 +65,7 @@ async def test_approved_action():
     ], f"Expected APPROVED or HITL, got {decision.final_decision}"
 
     if decision.final_decision == "ESCALATED_HITL":
-        print(
-            "\n⚠️  Note: Frameworks disagreed (50% agreement), correctly escalated to HITL"
-        )
+        print("\n⚠️  Note: Frameworks disagreed (50% agreement), correctly escalated to HITL")
 
     print("\n✅ TEST 1 PASSED")
 
@@ -143,9 +139,7 @@ async def test_hitl_escalation():
     print("\n📊 Framework Results:")
     for name, result in decision.framework_results.items():
         status = "✅" if result.approved else "❌"
-        print(
-            f"  {status} {name}: {result.verdict.value} (confidence: {result.confidence:.1%})"
-        )
+        print(f"  {status} {name}: {result.verdict.value} (confidence: {result.confidence:.1%})")
 
     # May be APPROVED, ESCALATED_HITL or REJECTED depending on exact scores and agreement
     # (Kantian's high weight can push score above threshold even with minority approval)
@@ -155,13 +149,8 @@ async def test_hitl_escalation():
         "REJECTED",
     ], f"Unexpected decision: {decision.final_decision}"
 
-    if (
-        decision.final_decision == "APPROVED"
-        and decision.framework_agreement_rate < 1.0
-    ):
-        print(
-            "\n⚠️  Note: Despite minority approval, Kantian's high weight pushed score above threshold"
-        )
+    if decision.final_decision == "APPROVED" and decision.framework_agreement_rate < 1.0:
+        print("\n⚠️  Note: Despite minority approval, Kantian's high weight pushed score above threshold")
 
     print("\n✅ TEST 3 PASSED")
 
@@ -193,7 +182,7 @@ async def test_performance():
     p95_latency = sorted(latencies)[int(0.95 * len(latencies))]
     p99_latency = sorted(latencies)[int(0.99 * len(latencies))]
 
-    print(f"\n⏱️  Performance Results (10 iterations):")
+    print("\n⏱️  Performance Results (10 iterations):")
     print(f"  Average: {avg_latency:.1f}ms")
     print(f"  p95: {p95_latency}ms")
     print(f"  p99: {p99_latency}ms")

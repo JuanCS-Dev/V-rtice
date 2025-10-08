@@ -9,15 +9,14 @@ Automatically generates SPARQL queries from natural language claims:
 """
 
 import logging
-from typing import Optional, Dict, List, Tuple, Any
 from dataclasses import dataclass
-import re
+from typing import Any, Optional
 
 import spacy
 from spacy.tokens import Token
 
-from entity_linker import entity_linker, Entity
 from config import get_settings
+from entity_linker import Entity, entity_linker
 
 logger = logging.getLogger(__name__)
 
@@ -89,11 +88,9 @@ class SPARQLQueryGenerator:
         "morre": "wdt:P20",
         "falecer": "wdt:P20",
         "faleceu": "wdt:P20",
-
         # Dates
         "nascer_data": "wdt:P569",  # date of birth
         "morrer_data": "wdt:P570",  # date of death
-
         # Relations
         "casar": "wdt:P26",  # spouse
         "casou": "wdt:P26",
@@ -103,7 +100,6 @@ class SPARQLQueryGenerator:
         "filha": "wdt:P40",
         "pai": "wdt:P22",  # father
         "mãe": "wdt:P25",  # mother
-
         # Occupation/Position
         "ser": "wdt:P106",  # occupation
         "é": "wdt:P106",
@@ -113,7 +109,6 @@ class SPARQLQueryGenerator:
         "presidente": "wdt:P39",  # position held
         "governador": "wdt:P39",
         "ministro": "wdt:P39",
-
         # Geographic
         "capital": "wdt:P36",  # capital
         "localizar": "wdt:P131",  # located in
@@ -121,7 +116,6 @@ class SPARQLQueryGenerator:
         "situar": "wdt:P131",
         "país": "wdt:P17",  # country
         "continente": "wdt:P30",  # continent
-
         # Attributes
         "população": "wdt:P1082",  # population
         "área": "wdt:P2046",  # area
@@ -129,27 +123,23 @@ class SPARQLQueryGenerator:
         "fundação": "wdt:P571",  # inception
         "fundado": "wdt:P571",
         "fundar": "wdt:P571",
-
         # Education
         "estudar": "wdt:P69",  # educated at
         "estudou": "wdt:P69",
         "formar": "wdt:P69",
         "formou": "wdt:P69",
-
         # Authorship
         "escrever": "wdt:P50",  # author
         "escreveu": "wdt:P50",
         "autor": "wdt:P50",
         "criar": "wdt:P170",  # creator
         "criou": "wdt:P170",
-
         # Awards
         "ganhar": "wdt:P166",  # award received
         "ganhou": "wdt:P166",
         "receber": "wdt:P166",
         "recebeu": "wdt:P166",
         "prêmio": "wdt:P166",
-
         # Membership
         "membro": "wdt:P463",  # member of
         "pertencer": "wdt:P463",
@@ -176,11 +166,7 @@ class SPARQLQueryGenerator:
         self._initialized = True
         logger.info("✅ SPARQL query generator initialized")
 
-    async def generate_from_claim(
-        self,
-        claim: str,
-        query_type: str = "ask"
-    ) -> Optional[SPARQLQuery]:
+    async def generate_from_claim(self, claim: str, query_type: str = "ask") -> Optional[SPARQLQuery]:
         """
         Generate SPARQL query from natural language claim.
 
@@ -215,7 +201,7 @@ class SPARQLQueryGenerator:
             triple_pattern=triple,
             original_claim=claim,
             query_type=query_type,
-            expected_result=triple.object
+            expected_result=triple.object,
         )
 
         logger.info(f"Generated SPARQL query:\n{query}")
@@ -242,10 +228,7 @@ class SPARQLQueryGenerator:
 
         # Extract entities from claim
         entities = await entity_linker.extract_and_link(
-            text=claim,
-            min_confidence=0.4,
-            use_cache=True,
-            enrich_with_metadata=False
+            text=claim, min_confidence=0.4, use_cache=True, enrich_with_metadata=False
         )
 
         # Build entity lookup by position
@@ -328,8 +311,8 @@ class SPARQLQueryGenerator:
             object_literal=object_literal,
             confidence=min(
                 subject_entity.confidence if subject_entity else 0.5,
-                object_entity.confidence if object_entity else 0.5
-            )
+                object_entity.confidence if object_entity else 0.5,
+            ),
         )
 
         logger.debug(

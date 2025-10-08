@@ -38,6 +38,6 @@ Recommendations:
 # You can define more prompt templates here for other LLM tasks
 # For example:
 # SINESP_REPORT_GENERATION_PROMPT = """
-# Generate a formal report based on the Sinesp vehicle analysis. 
+# Generate a formal report based on the Sinesp vehicle analysis.
 # ...
 # """

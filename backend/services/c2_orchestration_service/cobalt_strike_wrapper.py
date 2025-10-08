@@ -13,8 +13,8 @@ within the Maximus AI system.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List
 
 
 class CobaltStrikeWrapper:
@@ -42,7 +42,7 @@ class CobaltStrikeWrapper:
             bool: True if connection is successful, False otherwise.
         """
         print(f"[CobaltStrikeWrapper] Simulating connection to Cobalt Strike at {host}:{port}")
-        await asyncio.sleep(0.5) # Simulate connection time
+        await asyncio.sleep(0.5)  # Simulate connection time
         self.connected = True
         return True
 
@@ -54,7 +54,7 @@ class CobaltStrikeWrapper:
 
         Returns:
             Dict[str, Any]: A dictionary containing the task results.
-        
+
         Raises:
             RuntimeError: If not connected to Cobalt Strike.
             ValueError: If required task parameters are missing.
@@ -69,16 +69,24 @@ class CobaltStrikeWrapper:
             raise ValueError("Beacon ID and task command are required.")
 
         print(f"[CobaltStrikeWrapper] Simulating execution of task '{task_command}' on beacon {beacon_id}")
-        await asyncio.sleep(1.5) # Simulate task execution time
+        await asyncio.sleep(1.5)  # Simulate task execution time
 
         # Simulate task outcome
         if "screenshot" in task_command.lower():
-            result = {"status": "success", "output": "Screenshot taken successfully.", "image_data": "base64_encoded_image"}
+            result = {
+                "status": "success",
+                "output": "Screenshot taken successfully.",
+                "image_data": "base64_encoded_image",
+            }
         elif "shell" in task_command.lower():
-            result = {"status": "success", "output": "Command executed in shell.", "command_output": "ls -la"}
+            result = {
+                "status": "success",
+                "output": "Command executed in shell.",
+                "command_output": "ls -la",
+            }
         else:
             result = {"status": "failed", "output": "Task failed or not recognized."}
-        
+
         return result
 
     async def get_beacons(self) -> List[Dict[str, Any]]:
@@ -92,8 +100,18 @@ class CobaltStrikeWrapper:
         print("[CobaltStrikeWrapper] Simulating retrieving active beacons.")
         await asyncio.sleep(0.3)
         return [
-            {"id": "beacon_1", "ip": "192.168.1.10", "user": "victim_user", "last_checkin": datetime.now().isoformat()},
-            {"id": "beacon_2", "ip": "192.168.1.11", "user": "admin", "last_checkin": datetime.now().isoformat()}
+            {
+                "id": "beacon_1",
+                "ip": "192.168.1.10",
+                "user": "victim_user",
+                "last_checkin": datetime.now().isoformat(),
+            },
+            {
+                "id": "beacon_2",
+                "ip": "192.168.1.11",
+                "user": "admin",
+                "last_checkin": datetime.now().isoformat(),
+            },
         ]
 
     async def disconnect(self) -> bool:

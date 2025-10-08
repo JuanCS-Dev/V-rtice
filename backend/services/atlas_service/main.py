@@ -10,12 +10,13 @@ models, and provides interfaces for other Maximus AI services to query and
 understand the operational environment.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
-import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Atlas Service", version="1.0.0")
 
@@ -34,6 +35,7 @@ class EnvironmentUpdateRequest(BaseModel):
         data_source (str): The source of the sensor data.
         timestamp (str): ISO formatted timestamp of the data collection.
     """
+
     sensor_data: Dict[str, Any]
     data_source: str
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
@@ -46,6 +48,7 @@ class QueryEnvironmentRequest(BaseModel):
         query (str): A natural language query about the environment (e.g., 'find nearest exit', 'identify threats in sector 7').
         context (Optional[Dict[str, Any]]): Additional context for the query (e.g., current location).
     """
+
     query: str
     context: Optional[Dict[str, Any]] = None
 
@@ -88,16 +91,16 @@ async def update_environment(request: EnvironmentUpdateRequest) -> Dict[str, Any
     """
     print(f"[API] Received environment update from {request.data_source} at {request.timestamp}")
     # In a real system, this would process sensor_data to update the internal environmental model
-    await asyncio.sleep(0.1) # Simulate processing
+    await asyncio.sleep(0.1)  # Simulate processing
 
     # Simulate some basic processing result
-    new_features_detected = len(request.sensor_data.keys()) # Placeholder
+    new_features_detected = len(request.sensor_data.keys())  # Placeholder
 
     return {
         "timestamp": datetime.now().isoformat(),
         "status": "updated",
         "new_features_integrated": new_features_detected,
-        "environmental_model_version": "1.0.1" # Placeholder
+        "environmental_model_version": "1.0.1",  # Placeholder
     }
 
 
@@ -113,20 +116,29 @@ async def query_environment(request: QueryEnvironmentRequest) -> Dict[str, Any]:
     """
     print(f"[API] Received environment query: {request.query}")
     # In a real system, this would use spatial reasoning and situational awareness engines
-    await asyncio.sleep(0.2) # Simulate query processing
+    await asyncio.sleep(0.2)  # Simulate query processing
 
     # Simulate query results
     if "threats" in request.query.lower():
-        result = {"answer": "Threats detected in Sector 7: 2 unknown entities moving rapidly.", "threat_level": "high"}
+        result = {
+            "answer": "Threats detected in Sector 7: 2 unknown entities moving rapidly.",
+            "threat_level": "high",
+        }
     elif "exit" in request.query.lower():
-        result = {"answer": "Nearest exit is 50 meters North-East.", "path": "[current_location -> exit_path]"}
+        result = {
+            "answer": "Nearest exit is 50 meters North-East.",
+            "path": "[current_location -> exit_path]",
+        }
     else:
-        result = {"answer": f"Information for '{request.query}' is being processed.", "status": "pending"}
+        result = {
+            "answer": f"Information for '{request.query}' is being processed.",
+            "status": "pending",
+        }
 
     return {
         "timestamp": datetime.now().isoformat(),
         "query_result": result,
-        "situational_awareness_level": "high" # Placeholder
+        "situational_awareness_level": "high",  # Placeholder
     }
 
 
@@ -141,7 +153,7 @@ async def get_map_status() -> Dict[str, Any]:
         "status": "online",
         "last_update": datetime.now().isoformat(),
         "coverage_percentage": 95.5,
-        "model_complexity": "high"
+        "model_complexity": "high",
     }
 
 

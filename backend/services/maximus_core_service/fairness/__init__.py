@@ -23,15 +23,9 @@ Target Metrics:
 __version__ = "1.0.0"
 __author__ = "VÉRTICE Platform Team"
 
-from .base import (
-    ProtectedAttribute,
-    FairnessMetric,
-    FairnessResult,
-    BiasDetectionResult,
-    MitigationResult
-)
-from .constraints import FairnessConstraints
+from .base import BiasDetectionResult, FairnessMetric, FairnessResult, MitigationResult, ProtectedAttribute
 from .bias_detector import BiasDetector
+from .constraints import FairnessConstraints
 from .mitigation import MitigationEngine
 from .monitor import FairnessMonitor
 
@@ -44,5 +38,5 @@ __all__ = [
     "FairnessConstraints",
     "BiasDetector",
     "MitigationEngine",
-    "FairnessMonitor"
+    "FairnessMonitor",
 ]

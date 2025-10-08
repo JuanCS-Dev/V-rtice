@@ -1,0 +1,73 @@
+# Kubernetes ConfigMap for Active Immune Core
+# Non-sensitive configuration
+#
+# Apply: kubectl apply -f k8s/01-configmap.yaml -n active-immune
+#
+# NO MOCKS, NO PLACEHOLDERS, NO TODOS - Production-ready.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: active-immune-config
+  namespace: active-immune
+  labels:
+    app: active-immune-core
+    component: configuration
+data:
+  # Service Configuration
+  ACTIVE_IMMUNE_SERVICE_NAME: "active_immune_core"
+  ACTIVE_IMMUNE_SERVICE_PORT: "8200"
+  ACTIVE_IMMUNE_HOST: "0.0.0.0"
+  ACTIVE_IMMUNE_LOG_LEVEL: "INFO"
+  ACTIVE_IMMUNE_DEBUG: "false"
+
+  # Kafka Configuration
+  ACTIVE_IMMUNE_KAFKA_BOOTSTRAP_SERVERS: "kafka-service.kafka.svc.cluster.local:9092"
+  ACTIVE_IMMUNE_KAFKA_CYTOKINE_TOPIC_PREFIX: "immunis.cytokines"
+  ACTIVE_IMMUNE_KAFKA_CONSUMER_GROUP_PREFIX: "active_immune"
+  ACTIVE_IMMUNE_KAFKA_ACKS: "all"
+  ACTIVE_IMMUNE_KAFKA_COMPRESSION: "gzip"
+  ACTIVE_IMMUNE_KAFKA_MAX_BATCH_SIZE: "16384"
+
+  # Redis Configuration
+  ACTIVE_IMMUNE_REDIS_URL: "redis://redis-service.redis.svc.cluster.local:6379"
+  ACTIVE_IMMUNE_REDIS_AGENT_STATE_TTL: "60"
+  ACTIVE_IMMUNE_REDIS_MAX_CONNECTIONS: "50"
+
+  # PostgreSQL Configuration
+  ACTIVE_IMMUNE_POSTGRES_HOST: "postgres-service.postgres.svc.cluster.local"
+  ACTIVE_IMMUNE_POSTGRES_PORT: "5432"
+  ACTIVE_IMMUNE_POSTGRES_DB: "immunis_memory"
+  ACTIVE_IMMUNE_POSTGRES_USER: "immunis"
+  ACTIVE_IMMUNE_POSTGRES_POOL_SIZE: "10"
+
+  # External Services (adjust to your cluster DNS)
+  ACTIVE_IMMUNE_TREG_SERVICE_URL: "http://treg-service.vertice.svc.cluster.local:8018"
+  ACTIVE_IMMUNE_MEMORY_SERVICE_URL: "http://memory-service.vertice.svc.cluster.local:8019"
+  ACTIVE_IMMUNE_ADAPTIVE_IMMUNITY_URL: "http://adaptive-service.vertice.svc.cluster.local:8020"
+  ACTIVE_IMMUNE_IP_INTEL_SERVICE_URL: "http://ip-intel-service.vertice.svc.cluster.local:8022"
+  ACTIVE_IMMUNE_GOVERNANCE_URL: "http://governance-service.vertice.svc.cluster.local:8002"
+  ACTIVE_IMMUNE_EXTERNAL_SERVICE_TIMEOUT: "30"
+
+  # Homeostasis Parameters
+  ACTIVE_IMMUNE_BASELINE_ACTIVE_PERCENTAGE: "0.15"
+  ACTIVE_IMMUNE_MAX_AGENT_LIFESPAN_HOURS: "24"
+  ACTIVE_IMMUNE_ENERGY_DECAY_RATE_PER_MINUTE: "0.5"
+  ACTIVE_IMMUNE_TEMP_REPOUSO: "37.0"
+  ACTIVE_IMMUNE_TEMP_VIGILANCIA: "37.5"
+  ACTIVE_IMMUNE_TEMP_ATENCAO: "38.0"
+  ACTIVE_IMMUNE_TEMP_INFLAMACAO: "39.0"
+
+  # Cloning Parameters
+  ACTIVE_IMMUNE_MAX_CLONES_PER_THREAT: "50"
+  ACTIVE_IMMUNE_CLONE_MUTATION_RATE: "0.05"
+  ACTIVE_IMMUNE_MIN_DETECTIONS_FOR_CLONING: "5"
+
+  # Agent Limits
+  ACTIVE_IMMUNE_MAX_TOTAL_AGENTS: "1000"
+  ACTIVE_IMMUNE_MAX_AGENTS_PER_LYMPHNODE: "200"
+
+  # Observability
+  ACTIVE_IMMUNE_METRICS_ENABLED: "true"
+  ACTIVE_IMMUNE_STRUCTURED_LOGGING: "true"
+  ACTIVE_IMMUNE_TRACING_ENABLED: "false"

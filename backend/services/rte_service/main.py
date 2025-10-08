@@ -13,15 +13,15 @@ operational requirements, enabling immediate reactions to dynamic environmental
 changes or emerging threats.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
-import uvicorn
-import asyncio
 from datetime import datetime
+from typing import Any, Dict
 
-from fusion_engine import FusionEngine
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
 from fast_ml import FastML
+from fusion_engine import FusionEngine
 from hyperscan_matcher import HyperscanMatcher
 from playbooks import RealTimePlaybookExecutor
 
@@ -42,6 +42,7 @@ class RealTimeCommand(BaseModel):
         parameters (Dict[str, Any]): Parameters for the command.
         priority (int): The priority of the command (1-10, 10 being highest).
     """
+
     command_name: str
     parameters: Dict[str, Any]
     priority: int = 5
@@ -55,6 +56,7 @@ class DataStreamIngest(BaseModel):
         data (Dict[str, Any]): The data payload from the stream.
         data_type (str): The type of data (e.g., 'network_packet', 'log_entry', 'sensor_reading').
     """
+
     stream_id: str
     data: Dict[str, Any]
     data_type: str
@@ -97,11 +99,15 @@ async def execute_realtime_command_endpoint(request: RealTimeCommand) -> Dict[st
         Dict[str, Any]: A dictionary containing the execution results.
     """
     print(f"[API] Executing real-time command: {request.command_name} (priority: {request.priority})")
-    
+
     # Simulate execution via playbook executor
     execution_result = await real_time_playbook_executor.execute_command(request.command_name, request.parameters)
 
-    return {"status": "success", "timestamp": datetime.now().isoformat(), "execution_result": execution_result}
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "execution_result": execution_result,
+    }
 
 
 @app.post("/ingest_data_stream")
@@ -115,7 +121,7 @@ async def ingest_data_stream_endpoint(request: DataStreamIngest) -> Dict[str, An
         Dict[str, Any]: A dictionary containing the processing and analysis results.
     """
     print(f"[API] Ingesting {request.data_type} data from stream {request.stream_id}.")
-    
+
     # 1. Fuse data (if multiple sources were involved, here just one)
     fused_data = await fusion_engine.fuse_data([request.data])
 
@@ -123,12 +129,15 @@ async def ingest_data_stream_endpoint(request: DataStreamIngest) -> Dict[str, An
     ml_prediction = await fast_ml.predict(fused_data, "threat_score")
 
     # 3. Perform Hyperscan pattern matching
-    hyperscan_matches = await hyperscan_matcher.scan_data(str(request.data).encode('utf-8'))
+    hyperscan_matches = await hyperscan_matcher.scan_data(str(request.data).encode("utf-8"))
 
     # 4. Trigger playbook if critical conditions met
     if ml_prediction.get("prediction_value", 0) > 0.7 or hyperscan_matches:
         print("[API] Critical condition detected, triggering real-time playbook.")
-        playbook_result = await real_time_playbook_executor.execute_command("critical_threat_response", {"threat_data": request.data, "ml_prediction": ml_prediction})
+        playbook_result = await real_time_playbook_executor.execute_command(
+            "critical_threat_response",
+            {"threat_data": request.data, "ml_prediction": ml_prediction},
+        )
     else:
         playbook_result = {"status": "no_action_needed"}
 
@@ -138,7 +147,7 @@ async def ingest_data_stream_endpoint(request: DataStreamIngest) -> Dict[str, An
         "fused_data_summary": fused_data,
         "ml_prediction": ml_prediction,
         "hyperscan_matches": hyperscan_matches,
-        "playbook_action": playbook_result
+        "playbook_action": playbook_result,
     }
 
 

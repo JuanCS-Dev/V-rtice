@@ -18,8 +18,8 @@ high-stakes situations.
 """
 
 import asyncio
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from fast_ml import FastML
 from hyperscan_matcher import HyperscanMatcher
@@ -54,18 +54,18 @@ class RealTimePlaybookExecutor:
 
         Returns:
             Dict[str, Any]: A dictionary containing the execution results.
-        
+
         Raises:
             ValueError: If an unsupported command name is provided.
         """
         print(f"[RealTimePlaybookExecutor] Executing real-time command: {command_name}")
-        await asyncio.sleep(0.02) # Simulate very fast initial processing
+        await asyncio.sleep(0.02)  # Simulate very fast initial processing
 
         execution_result = {
             "timestamp": datetime.now().isoformat(),
             "command_name": command_name,
             "status": "failed",
-            "details": "Unsupported command."
+            "details": "Unsupported command.",
         }
 
         if command_name == "block_ip":
@@ -113,5 +113,5 @@ class RealTimePlaybookExecutor:
         return {
             "status": self.current_status,
             "total_playbooks_executed": len(self.playbook_history),
-            "last_execution": self.last_execution_time.isoformat() if self.last_execution_time else "N/A"
+            "last_execution": (self.last_execution_time.isoformat() if self.last_execution_time else "N/A"),
         }
