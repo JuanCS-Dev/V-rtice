@@ -4,6 +4,12 @@ import "strings"
 
 // CommandIcon maps command patterns to emoji icons
 var CommandIcon = map[string]string{
+	// Workflow aliases
+	"wf1": "🔍",
+	"wf2": "🚨",
+	"wf3": "🔒",
+	"wf4": "✅",
+
 	// K8s resources
 	"k8s get pods":        "📦",
 	"k8s get deployments": "📦",
@@ -36,9 +42,15 @@ var CommandIcon = map[string]string{
 	"immune scan":   "🔍",
 
 	// MAXIMUS
-	"maximus ask":          "🧠",
-	"maximus analyze":      "🤖",
-	"maximus consciousness": "🌟",
+	"maximus ask":                       "🧠",
+	"maximus analyze":                   "🤖",
+	"maximus consciousness":             "🌟",
+	"maximus consciousness state":       "🌟",
+	"maximus consciousness esgt":        "⚡",
+	"maximus consciousness esgt events": "⚡",
+	"maximus consciousness esgt trigger": "⚡",
+	"maximus consciousness arousal":     "📊",
+	"maximus consciousness metrics":     "📈",
 
 	// Metrics
 	"metrics": "📊",

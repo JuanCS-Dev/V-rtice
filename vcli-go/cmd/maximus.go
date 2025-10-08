@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/grpc"
 	"github.com/verticedev/vcli-go/internal/maximus"
+	"github.com/verticedev/vcli-go/internal/visual"
 	pb "github.com/verticedev/vcli-go/api/grpc/maximus"
 )
 
@@ -808,6 +809,263 @@ func runPredictHealth(cmd *cobra.Command, args []string) error {
 }
 
 // ============================================================================
+// CONSCIOUSNESS COMMANDS
+// ============================================================================
+
+var (
+	consciousnessEndpoint string
+	esgtLimit             int
+	esgtNovelty           float64
+	esgtRelevance         float64
+	esgtUrgency           float64
+	arousalDelta          float64
+	arousalDuration       float64
+)
+
+var maximusConsciousnessCmd = &cobra.Command{
+	Use:   "consciousness",
+	Short: "Interact with MAXIMUS Consciousness System",
+	Long: `Monitor and control the MAXIMUS Consciousness System.
+
+The consciousness system consists of:
+  - TIG (Topological Information Graph) - Information fabric
+  - ESGT (Event-Salience Global Triggers) - Attention mechanism
+  - Arousal Controller - System activation level
+
+Examples:
+  # Get consciousness state
+  vcli maximus consciousness state
+
+  # Get recent ESGT events
+  vcli maximus consciousness esgt events --limit 20
+
+  # Trigger ESGT ignition manually
+  vcli maximus consciousness esgt trigger --novelty 0.9 --relevance 0.8 --urgency 0.7
+
+  # Get arousal state
+  vcli maximus consciousness arousal
+
+  # Adjust arousal level
+  vcli maximus consciousness arousal adjust --delta 0.2 --duration 5
+
+  # Get system metrics
+  vcli maximus consciousness metrics`,
+}
+
+// State command
+var consciousnessStateCmd = &cobra.Command{
+	Use:   "state",
+	Short: "Get current consciousness state",
+	Long:  `Retrieve the complete consciousness system state including ESGT status, arousal level, and TIG metrics.`,
+	RunE:  runConsciousnessState,
+}
+
+func runConsciousnessState(cmd *cobra.Command, args []string) error {
+	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+
+	state, err := client.GetState()
+	if err != nil {
+		return fmt.Errorf("failed to get consciousness state: %w", err)
+	}
+
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(state, "", "  ")
+		fmt.Println(string(data))
+		return nil
+	}
+
+	fmt.Println(maximus.FormatConsciousnessState(state))
+	return nil
+}
+
+// ESGT parent command
+var consciousnessESGTCmd = &cobra.Command{
+	Use:   "esgt",
+	Short: "ESGT (Event-Salience Global Triggers) commands",
+	Long:  `Commands for interacting with the ESGT attention mechanism.`,
+}
+
+// ESGT events command
+var consciousnessESGTEventsCmd = &cobra.Command{
+	Use:   "events",
+	Short: "Get recent ESGT ignition events",
+	Long:  `Retrieve recent ESGT events with configurable limit (1-100).`,
+	RunE:  runConsciousnessESGTEvents,
+}
+
+func runConsciousnessESGTEvents(cmd *cobra.Command, args []string) error {
+	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+
+	events, err := client.GetESGTEvents(esgtLimit)
+	if err != nil {
+		return fmt.Errorf("failed to get ESGT events: %w", err)
+	}
+
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(events, "", "  ")
+		fmt.Println(string(data))
+		return nil
+	}
+
+	fmt.Println(maximus.FormatESGTEvents(events))
+	return nil
+}
+
+// ESGT trigger command
+var consciousnessESGTTriggerCmd = &cobra.Command{
+	Use:   "trigger",
+	Short: "Manually trigger ESGT ignition",
+	Long: `Trigger ESGT ignition with custom salience scores.
+
+Salience components (all 0-1):
+  --novelty    How novel/unexpected the stimulus is
+  --relevance  How relevant to current goals
+  --urgency    How urgent/time-sensitive
+
+Example:
+  vcli maximus consciousness esgt trigger --novelty 0.9 --relevance 0.8 --urgency 0.7`,
+	RunE: runConsciousnessESGTTrigger,
+}
+
+func runConsciousnessESGTTrigger(cmd *cobra.Command, args []string) error {
+	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+
+	salience := maximus.SalienceInput{
+		Novelty:   esgtNovelty,
+		Relevance: esgtRelevance,
+		Urgency:   esgtUrgency,
+		Context:   map[string]interface{}{"source": "vcli-manual"},
+	}
+
+	event, err := client.TriggerESGT(salience)
+	if err != nil {
+		return fmt.Errorf("failed to trigger ESGT: %w", err)
+	}
+
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(event, "", "  ")
+		fmt.Println(string(data))
+		return nil
+	}
+
+	// Pretty print event result
+	styles := visual.DefaultStyles()
+	if event.Success {
+		fmt.Printf("%s ESGT ignition successful!\n", styles.Success.Render("✅"))
+		fmt.Printf("Event ID: %s\n", styles.Info.Render(event.EventID))
+		if event.Coherence != nil {
+			fmt.Printf("Coherence: %.3f\n", *event.Coherence)
+		}
+		if event.DurationMs != nil {
+			fmt.Printf("Duration: %.1fms\n", *event.DurationMs)
+		}
+		fmt.Printf("Nodes: %d\n", event.NodesParticipating)
+	} else {
+		fmt.Printf("%s ESGT ignition failed\n", styles.Error.Render("❌"))
+		if event.Reason != nil {
+			fmt.Printf("Reason: %s\n", styles.Error.Render(*event.Reason))
+		}
+	}
+
+	return nil
+}
+
+// Arousal parent command
+var consciousnessArousalCmd = &cobra.Command{
+	Use:   "arousal",
+	Short: "Arousal controller commands",
+	Long:  `Commands for monitoring and adjusting system arousal level.`,
+	RunE:  runConsciousnessArousal,
+}
+
+func runConsciousnessArousal(cmd *cobra.Command, args []string) error {
+	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+
+	arousal, err := client.GetArousal()
+	if err != nil {
+		return fmt.Errorf("failed to get arousal state: %w", err)
+	}
+
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(arousal, "", "  ")
+		fmt.Println(string(data))
+		return nil
+	}
+
+	fmt.Println(maximus.FormatArousalState(arousal))
+	return nil
+}
+
+// Arousal adjust command
+var consciousnessArousalAdjustCmd = &cobra.Command{
+	Use:   "adjust",
+	Short: "Adjust arousal level",
+	Long: `Temporarily adjust the system arousal level.
+
+Example:
+  # Increase arousal by 0.2 for 5 seconds
+  vcli maximus consciousness arousal adjust --delta 0.2 --duration 5
+
+  # Decrease arousal by 0.1 for 10 seconds
+  vcli maximus consciousness arousal adjust --delta -0.1 --duration 10`,
+	RunE: runConsciousnessArousalAdjust,
+}
+
+func runConsciousnessArousalAdjust(cmd *cobra.Command, args []string) error {
+	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+
+	adjustment := maximus.ArousalAdjustment{
+		Delta:           arousalDelta,
+		DurationSeconds: arousalDuration,
+		Source:          "vcli",
+	}
+
+	arousal, err := client.AdjustArousal(adjustment)
+	if err != nil {
+		return fmt.Errorf("failed to adjust arousal: %w", err)
+	}
+
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(arousal, "", "  ")
+		fmt.Println(string(data))
+		return nil
+	}
+
+	styles := visual.DefaultStyles()
+	fmt.Printf("%s Arousal adjusted successfully\n", styles.Success.Render("✅"))
+	fmt.Printf("New arousal: %.3f (%s)\n", arousal.Arousal, arousal.Level)
+	fmt.Printf("Delta: %+.3f for %.1fs\n", arousalDelta, arousalDuration)
+
+	return nil
+}
+
+// Metrics command
+var consciousnessMetricsCmd = &cobra.Command{
+	Use:   "metrics",
+	Short: "Get consciousness system metrics",
+	Long:  `Retrieve TIG topology metrics and ESGT statistics.`,
+	RunE:  runConsciousnessMetrics,
+}
+
+func runConsciousnessMetrics(cmd *cobra.Command, args []string) error {
+	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+
+	metrics, err := client.GetMetrics()
+	if err != nil {
+		return fmt.Errorf("failed to get metrics: %w", err)
+	}
+
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(metrics, "", "  ")
+		fmt.Println(string(data))
+		return nil
+	}
+
+	fmt.Println(maximus.FormatMetrics(metrics))
+	return nil
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -855,6 +1113,7 @@ func init() {
 	maximusCmd.AddCommand(maximusEurekaCmd)
 	maximusCmd.AddCommand(maximusOraculoCmd)
 	maximusCmd.AddCommand(maximusPredictCmd)
+	maximusCmd.AddCommand(maximusConsciousnessCmd)
 
 	// Eureka subcommands
 	maximusEurekaCmd.AddCommand(eurekaGenerateInsightCmd)
@@ -871,6 +1130,19 @@ func init() {
 	// Predict subcommands
 	maximusPredictCmd.AddCommand(predictGenerateCmd)
 	maximusPredictCmd.AddCommand(predictHealthCmd)
+
+	// Consciousness subcommands
+	maximusConsciousnessCmd.AddCommand(consciousnessStateCmd)
+	maximusConsciousnessCmd.AddCommand(consciousnessESGTCmd)
+	maximusConsciousnessCmd.AddCommand(consciousnessArousalCmd)
+	maximusConsciousnessCmd.AddCommand(consciousnessMetricsCmd)
+
+	// ESGT subcommands
+	consciousnessESGTCmd.AddCommand(consciousnessESGTEventsCmd)
+	consciousnessESGTCmd.AddCommand(consciousnessESGTTriggerCmd)
+
+	// Arousal subcommands
+	consciousnessArousalCmd.AddCommand(consciousnessArousalAdjustCmd)
 
 	// Global flags
 	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "localhost:50051", "MAXIMUS server address")
@@ -935,4 +1207,17 @@ func init() {
 	predictGenerateCmd.Flags().StringVar(&dataFile, "data-file", "", "Data file (JSON)")
 	predictGenerateCmd.Flags().StringVar(&predictionType, "prediction-type", "", "Prediction type (resource_demand, threat_likelihood)")
 	predictGenerateCmd.Flags().StringVar(&timeHorizon, "time-horizon", "", "Time horizon (1h, 24h, optional)")
+
+	// Consciousness flags
+	maximusConsciousnessCmd.PersistentFlags().StringVar(&consciousnessEndpoint, "consciousness-endpoint", "http://localhost:8022", "Consciousness API endpoint")
+
+	// ESGT flags
+	consciousnessESGTEventsCmd.Flags().IntVar(&esgtLimit, "limit", 20, "Maximum number of events (1-100)")
+	consciousnessESGTTriggerCmd.Flags().Float64Var(&esgtNovelty, "novelty", 0.8, "Novelty score (0-1)")
+	consciousnessESGTTriggerCmd.Flags().Float64Var(&esgtRelevance, "relevance", 0.8, "Relevance score (0-1)")
+	consciousnessESGTTriggerCmd.Flags().Float64Var(&esgtUrgency, "urgency", 0.8, "Urgency score (0-1)")
+
+	// Arousal flags
+	consciousnessArousalAdjustCmd.Flags().Float64Var(&arousalDelta, "delta", 0.1, "Arousal delta (-0.5 to 0.5)")
+	consciousnessArousalAdjustCmd.Flags().Float64Var(&arousalDuration, "duration", 5.0, "Duration in seconds (0.1-60)")
 }
