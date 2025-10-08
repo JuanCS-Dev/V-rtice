@@ -24,10 +24,10 @@ NO MOCKS - Production-ready implementation.
 """
 
 import asyncio
-from datetime import datetime, timedelta
 import hashlib
 import json
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -101,9 +101,7 @@ class AntigenConsumer:
                 for topic_partition, records in messages.items():
                     for record in records:
                         antigen = record.value
-                        logger.info(
-                            f"Received antigen: {antigen.get('antigen_id', 'unknown')[:16]}"
-                        )
+                        logger.info(f"Received antigen: {antigen.get('antigen_id', 'unknown')[:16]}")
 
                         try:
                             await callback(antigen)
@@ -163,9 +161,7 @@ class EventCorrelationEngine:
                 # Create collection
                 self.qdrant_client.create_collection(
                     collection_name=self.collection_name,
-                    vectors_config=VectorParams(
-                        size=self.vector_size, distance=Distance.COSINE
-                    ),
+                    vectors_config=VectorParams(size=self.vector_size, distance=Distance.COSINE),
                 )
                 logger.info(f"Created Qdrant collection: {self.collection_name}")
 
@@ -193,9 +189,7 @@ class EventCorrelationEngine:
         # Malware family hash (pseudo-embedding)
         family = threat.get("malware_family", "unknown")
         family_hash = hashlib.md5(family.encode()).hexdigest()
-        family_vector = [
-            int(family_hash[i : i + 2], 16) / 255.0 for i in range(0, 32, 2)
-        ]
+        family_vector = [int(family_hash[i : i + 2], 16) / 255.0 for i in range(0, 32, 2)]
         features.extend(family_vector[:16])
 
         # IOC counts (normalized)
@@ -211,18 +205,14 @@ class EventCorrelationEngine:
         features.extend(ioc_counts)
 
         # Temporal features (hour of day, day of week)
-        timestamp = datetime.fromisoformat(
-            threat.get("timestamp", datetime.now().isoformat())
-        )
+        timestamp = datetime.fromisoformat(threat.get("timestamp", datetime.now().isoformat()))
         hour_vector = [1.0 if i == timestamp.hour else 0.0 for i in range(24)]
         features.extend(hour_vector)
 
         # Source features
         source = threat.get("source", "unknown")
         source_hash = hashlib.md5(source.encode()).hexdigest()
-        source_vector = [
-            int(source_hash[i : i + 2], 16) / 255.0 for i in range(0, 32, 2)
-        ]
+        source_vector = [int(source_hash[i : i + 2], 16) / 255.0 for i in range(0, 32, 2)]
         features.extend(source_vector[:16])
 
         # Pad or truncate to 128 dimensions
@@ -252,9 +242,7 @@ class EventCorrelationEngine:
 
             # Generate unique ID
             point_id = hashlib.sha256(
-                (
-                    threat.get("antigen_id", "") + str(datetime.now().timestamp())
-                ).encode()
+                (threat.get("antigen_id", "") + str(datetime.now().timestamp())).encode()
             ).hexdigest()[:16]
 
             # Create point
@@ -271,13 +259,9 @@ class EventCorrelationEngine:
             )
 
             # Upsert to Qdrant
-            self.qdrant_client.upsert(
-                collection_name=self.collection_name, points=[point]
-            )
+            self.qdrant_client.upsert(collection_name=self.collection_name, points=[point])
 
-            logger.info(
-                f"Stored threat event: {threat.get('antigen_id', 'unknown')[:16]}"
-            )
+            logger.info(f"Stored threat event: {threat.get('antigen_id', 'unknown')[:16]}")
             return True
 
         except Exception as e:
@@ -318,9 +302,7 @@ class EventCorrelationEngine:
                 event_time = datetime.fromisoformat(hit.payload["timestamp"])
                 current_time = datetime.now()
 
-                if (
-                    current_time - event_time
-                ).total_seconds() / 3600 <= time_window_hours:
+                if (current_time - event_time).total_seconds() / 3600 <= time_window_hours:
                     correlated.append(
                         {
                             "threat_id": hit.payload["threat_id"],
@@ -332,9 +314,7 @@ class EventCorrelationEngine:
                         }
                     )
 
-            logger.info(
-                f"Found {len(correlated)} correlated events for threat {threat.get('antigen_id', '')[:16]}"
-            )
+            logger.info(f"Found {len(correlated)} correlated events for threat {threat.get('antigen_id', '')[:16]}")
             return correlated
 
         except Exception as e:
@@ -411,9 +391,7 @@ class DendriticCore:
         await self.correlation_engine.store_event(enriched)
 
         # 3. Correlate with historical events
-        correlated_events = await self.correlation_engine.correlate_events(
-            enriched, time_window_hours=24, top_k=10
-        )
+        correlated_events = await self.correlation_engine.correlate_events(enriched, time_window_hours=24, top_k=10)
 
         enriched["correlated_events"] = correlated_events
         enriched["correlation_count"] = len(correlated_events)
@@ -426,8 +404,7 @@ class DendriticCore:
         self.last_processing_time = datetime.now()
 
         logger.info(
-            f"Antigen processed: activation_required={activation_required}, "
-            f"correlated_events={len(correlated_events)}"
+            f"Antigen processed: activation_required={activation_required}, correlated_events={len(correlated_events)}"
         )
 
         return enriched
@@ -519,9 +496,7 @@ class DendriticCore:
         Returns:
             Presentation results
         """
-        logger.info(
-            f"Presenting threat to T-Cells: {threat.get('antigen_id', '')[:16]}"
-        )
+        logger.info(f"Presenting threat to T-Cells: {threat.get('antigen_id', '')[:16]}")
 
         results = {}
 
@@ -586,9 +561,7 @@ class DendriticCore:
             logger.error(f"T-Cell presentation error: {e}")
             return {"status": "error", "error": str(e)}
 
-    async def activate_adaptive_immunity(
-        self, threat: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def activate_adaptive_immunity(self, threat: Dict[str, Any]) -> Dict[str, Any]:
         """Activate B-cells and T-cells for adaptive immune response.
 
         Args:
@@ -597,9 +570,7 @@ class DendriticCore:
         Returns:
             Activation summary
         """
-        logger.info(
-            f"Activating adaptive immunity for threat: {threat.get('antigen_id', '')[:16]}"
-        )
+        logger.info(f"Activating adaptive immunity for threat: {threat.get('antigen_id', '')[:16]}")
 
         activation_result = {
             "timestamp": datetime.now().isoformat(),
@@ -661,11 +632,7 @@ class DendriticCore:
             "status": "operational",
             "processed_antigens_count": len(self.processed_antigens),
             "activations_count": len(self.activations),
-            "last_processing": (
-                self.last_processing_time.isoformat()
-                if self.last_processing_time
-                else "N/A"
-            ),
+            "last_processing": (self.last_processing_time.isoformat() if self.last_processing_time else "N/A"),
             "kafka_enabled": self.antigen_consumer.consumer is not None,
             "qdrant_enabled": self.correlation_engine.qdrant_client is not None,
             "antigen_consumer_running": self.antigen_consumer.running,

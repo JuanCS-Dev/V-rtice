@@ -16,17 +16,14 @@ In cyber defense, Treg:
 NO MOCKS - Production-ready statistical learning algorithms.
 """
 
+import logging
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-import hashlib
-import json
-import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
-from scipy import stats
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -121,14 +118,10 @@ class ToleranceLearner:
         self.tolerance_profiles: Dict[str, ToleranceProfile] = {}
         self.tolerance_threshold = tolerance_threshold
         self.observations_window = 1000  # Keep last N observations for stats
-        self.entity_observations: Dict[str, deque] = defaultdict(
-            lambda: deque(maxlen=1000)
-        )
+        self.entity_observations: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
         self.total_profiles_created: int = 0
 
-    def observe_entity_behavior(
-        self, entity_id: str, entity_type: str, behavioral_features: Dict[str, float]
-    ):
+    def observe_entity_behavior(self, entity_id: str, entity_type: str, behavioral_features: Dict[str, float]):
         """Observe entity behavior for tolerance learning.
 
         Args:
@@ -151,9 +144,7 @@ class ToleranceLearner:
         # Update behavioral fingerprint (running statistics)
         self._update_behavioral_fingerprint(profile, behavioral_features)
 
-        logger.debug(
-            f"Observed behavior for {entity_id}: {len(behavioral_features)} features"
-        )
+        logger.debug(f"Observed behavior for {entity_id}: {len(behavioral_features)} features")
 
     def _create_tolerance_profile(self, entity_id: str, entity_type: str):
         """Create new tolerance profile for entity.
@@ -180,9 +171,7 @@ class ToleranceLearner:
 
         logger.info(f"Created tolerance profile for {entity_id} ({entity_type})")
 
-    def _update_behavioral_fingerprint(
-        self, profile: ToleranceProfile, features: Dict[str, float]
-    ):
+    def _update_behavioral_fingerprint(self, profile: ToleranceProfile, features: Dict[str, float]):
         """Update behavioral fingerprint with running statistics.
 
         Uses exponential moving average for online learning.
@@ -263,14 +252,10 @@ class ToleranceLearner:
         """
         # Count by tolerance level
         high_tolerance = sum(
-            1
-            for p in self.tolerance_profiles.values()
-            if p.tolerance_score > self.tolerance_threshold
+            1 for p in self.tolerance_profiles.values() if p.tolerance_score > self.tolerance_threshold
         )
 
-        low_tolerance = sum(
-            1 for p in self.tolerance_profiles.values() if p.tolerance_score < 0.3
-        )
+        low_tolerance = sum(1 for p in self.tolerance_profiles.values() if p.tolerance_score < 0.3)
 
         return {
             "component": "tolerance_learner",
@@ -338,14 +323,10 @@ class FalsePositiveSuppressor:
 
             if tolerance_score > 0.7:
                 suppression_signals.append(0.8)
-                rationale.append(
-                    f"Source {alert.source_ip} has high tolerance score ({tolerance_score:.2f})"
-                )
+                rationale.append(f"Source {alert.source_ip} has high tolerance score ({tolerance_score:.2f})")
             elif tolerance_score < 0.3:
                 suppression_signals.append(0.1)
-                rationale.append(
-                    f"Source {alert.source_ip} has low tolerance (known threat)"
-                )
+                rationale.append(f"Source {alert.source_ip} has low tolerance (known threat)")
             else:
                 suppression_signals.append(tolerance_score)
 
@@ -355,23 +336,18 @@ class FalsePositiveSuppressor:
         if anomaly_score < 2.0:  # Within 2 standard deviations
             suppression_signals.append(0.7)
             rationale.append(
-                f"Alert score within normal range for {alert.alert_type} "
-                f"(anomaly score: {anomaly_score:.2f})"
+                f"Alert score within normal range for {alert.alert_type} (anomaly score: {anomaly_score:.2f})"
             )
         else:
             suppression_signals.append(0.2)
-            rationale.append(
-                f"Alert score highly anomalous ({anomaly_score:.2f} std devs)"
-            )
+            rationale.append(f"Alert score highly anomalous ({anomaly_score:.2f} std devs)")
 
         # Signal 3: Alert frequency (too many of same type = possible FP)
         recent_similar = self._count_recent_similar_alerts(alert)
 
         if recent_similar > 10:
             suppression_signals.append(0.8)
-            rationale.append(
-                f"High frequency of {alert.alert_type} alerts ({recent_similar} in last hour)"
-            )
+            rationale.append(f"High frequency of {alert.alert_type} alerts ({recent_similar} in last hour)")
         else:
             suppression_signals.append(0.3)
 
@@ -461,11 +437,7 @@ class FalsePositiveSuppressor:
         """
         one_hour_ago = datetime.now() - timedelta(hours=1)
 
-        count = sum(
-            1
-            for decision in self.suppression_history
-            if decision.timestamp >= one_hour_ago
-        )
+        count = sum(1 for decision in self.suppression_history if decision.timestamp >= one_hour_ago)
 
         return count
 
@@ -488,9 +460,9 @@ class FalsePositiveSuppressor:
             return
 
         # Check if we made correct decision
-        correct = (
-            was_false_positive and decision.decision == ToleranceDecision.SUPPRESS
-        ) or (not was_false_positive and decision.decision == ToleranceDecision.ALLOW)
+        correct = (was_false_positive and decision.decision == ToleranceDecision.SUPPRESS) or (
+            not was_false_positive and decision.decision == ToleranceDecision.ALLOW
+        )
 
         logger.info(
             f"Ground truth for {alert_id}: FP={was_false_positive}, "
@@ -505,9 +477,7 @@ class FalsePositiveSuppressor:
         """
         total_decisions = self.alerts_suppressed + self.alerts_allowed
 
-        suppression_rate = (
-            self.alerts_suppressed / total_decisions if total_decisions > 0 else 0.0
-        )
+        suppression_rate = self.alerts_suppressed / total_decisions if total_decisions > 0 else 0.0
 
         return {
             "component": "false_positive_suppressor",
@@ -534,9 +504,7 @@ class TregController:
     3. Adaptive thresholds (adjust based on feedback)
     """
 
-    def __init__(
-        self, tolerance_threshold: float = 0.7, suppression_threshold: float = 0.7
-    ):
+    def __init__(self, tolerance_threshold: float = 0.7, suppression_threshold: float = 0.7):
         self.tolerance_learner = ToleranceLearner(tolerance_threshold)
         self.fp_suppressor = FalsePositiveSuppressor(suppression_threshold)
         self.alerts_processed: int = 0
@@ -562,18 +530,14 @@ class TregController:
         tolerance_profiles = {}
         for entity_id, entity_type in entities:
             if entity_id in self.tolerance_learner.tolerance_profiles:
-                tolerance_profiles[entity_id] = (
-                    self.tolerance_learner.tolerance_profiles[entity_id]
-                )
+                tolerance_profiles[entity_id] = self.tolerance_learner.tolerance_profiles[entity_id]
 
         # Evaluate alert
         decision = self.fp_suppressor.evaluate_alert(alert, tolerance_profiles)
 
         return decision
 
-    def observe_entity(
-        self, entity_id: str, entity_type: str, behavioral_features: Dict[str, float]
-    ):
+    def observe_entity(self, entity_id: str, entity_type: str, behavioral_features: Dict[str, float]):
         """Observe entity behavior for tolerance learning.
 
         Args:
@@ -581,9 +545,7 @@ class TregController:
             entity_type: Entity type
             behavioral_features: Behavioral features
         """
-        self.tolerance_learner.observe_entity_behavior(
-            entity_id, entity_type, behavioral_features
-        )
+        self.tolerance_learner.observe_entity_behavior(entity_id, entity_type, behavioral_features)
 
     def provide_feedback(
         self,

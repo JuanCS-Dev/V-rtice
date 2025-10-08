@@ -5,26 +5,23 @@ REST API for false positive suppression and tolerance learning.
 NO MOCKS - Production-ready immune tolerance interface.
 """
 
-import asyncio
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+import uvicorn
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+
 from treg_core import (
     AlertSeverity,
     SecurityAlert,
-    ToleranceDecision,
     TregController,
 )
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instance
@@ -67,16 +64,12 @@ class SecurityAlertRequest(BaseModel):
     alert_id: str = Field(..., description="Unique alert ID")
     timestamp: Optional[str] = Field(None, description="ISO timestamp (default: now)")
     alert_type: str = Field(..., description="Alert type (port_scan, malware, etc)")
-    severity: str = Field(
-        ..., description="Severity level (low, medium, high, critical)"
-    )
+    severity: str = Field(..., description="Severity level (low, medium, high, critical)")
     source_ip: str = Field(..., description="Source IP address")
     target_asset: str = Field(..., description="Target asset identifier")
     indicators: List[str] = Field(..., description="Threat indicators")
     raw_score: float = Field(..., ge=0.0, le=1.0, description="Detection score (0-1)")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class SuppressionDecisionResponse(BaseModel):
@@ -96,18 +89,14 @@ class EntityObservationRequest(BaseModel):
 
     entity_id: str = Field(..., description="Entity identifier")
     entity_type: str = Field(..., description="Entity type (source_ip, user, asset)")
-    behavioral_features: Dict[str, float] = Field(
-        ..., description="Behavioral features (numeric)"
-    )
+    behavioral_features: Dict[str, float] = Field(..., description="Behavioral features (numeric)")
 
 
 class FeedbackRequest(BaseModel):
     """Request to provide feedback on alert."""
 
     alert_id: str = Field(..., description="Alert identifier")
-    was_false_positive: bool = Field(
-        ..., description="Whether alert was false positive"
-    )
+    was_false_positive: bool = Field(..., description="Whether alert was false positive")
     entities_involved: List[Dict[str, str]] = Field(
         ..., description="Entities involved (list of {entity_id, entity_type})"
     )
@@ -160,9 +149,7 @@ async def evaluate_alert(request: SecurityAlertRequest):
         try:
             severity = AlertSeverity(request.severity.lower())
         except ValueError:
-            raise HTTPException(
-                status_code=400, detail=f"Invalid severity: {request.severity}"
-            )
+            raise HTTPException(status_code=400, detail=f"Invalid severity: {request.severity}")
 
         # Parse timestamp
         if request.timestamp:
@@ -258,9 +245,7 @@ async def get_tolerance_profile(entity_id: str):
     try:
         # Get profile
         if entity_id not in treg_controller.tolerance_learner.tolerance_profiles:
-            raise HTTPException(
-                status_code=404, detail=f"No tolerance profile for {entity_id}"
-            )
+            raise HTTPException(status_code=404, detail=f"No tolerance profile for {entity_id}")
 
         profile = treg_controller.tolerance_learner.tolerance_profiles[entity_id]
 
@@ -358,10 +343,7 @@ async def provide_feedback(request: FeedbackRequest):
 
     try:
         # Convert entities to tuples
-        entities = [
-            (entity["entity_id"], entity["entity_type"])
-            for entity in request.entities_involved
-        ]
+        entities = [(entity["entity_id"], entity["entity_type"]) for entity in request.entities_involved]
 
         # Provide feedback
         treg_controller.provide_feedback(

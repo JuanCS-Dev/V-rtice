@@ -1,0 +1,45 @@
+[project]
+name = "immunis_nk_cell_service"
+version = "1.0.0"
+description = "MAXIMUS Immunis Service - Artificial Immune Cell"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]==0.24.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings==2.1.0",
+    "httpx>=0.27.0",
+    "python-json-logger==2.0.7",
+    "prometheus-client==0.19.0",
+    "python-dotenv==1.0.0",
+    "anyio>=4.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.13.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["S101", "ANN001", "D103"]
+"__init__.py" = ["F401", "D104"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_*.py"]
+addopts = ["--verbose", "--tb=short"]
+asyncio_mode = "auto"

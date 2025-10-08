@@ -1,9 +1,9 @@
 # 📋 Backend Services Migration Inventory
 ## uv + pyproject.toml + ruff Migration Tracker
 
-**Status**: FASE 2 - TIER 4 COMPLETO ✅
+**Status**: FASE 3 - TIER 3 Immunis COMPLETO ✅
 **Data**: 2025-10-08
-**Progresso Geral**: 11/70 serviços migrados (15.7%)
+**Progresso Geral**: 20/70 serviços migrados (28.6%)
 
 ---
 
@@ -13,9 +13,9 @@
 |------|-------------|----------|--------|------------|
 | **TIER 1** | 🔴 **CRÍTICO** | 4 | 1/4 migrado (25%) | 🎯 Alta |
 | **TIER 2** | 🟠 **IMPORTANTE** | 16 | 0/16 migrado (0%) | 📌 Média-Alta |
-| **TIER 3** | 🟡 **AUXILIAR** | 40 | 0/40 migrado (0%) | 📋 Média |
+| **TIER 3** | 🟡 **AUXILIAR** | 40 | 9/40 migrado (22.5%) | 📋 Média |
 | **TIER 4** | 🟢 **EXPERIMENTAL** | 10 | ✅ **10/10 migrado (100%)** | 🧪 Baixa |
-| **TOTAL** | - | **70** | **11/70 (15.7%)** | - |
+| **TOTAL** | - | **70** | **20/70 (28.6%)** | - |
 
 ### 📈 Métricas Totais
 - **Total de Dependencies**: ~1,500+ linhas em requirements.txt
@@ -71,17 +71,17 @@
 ### Família: Immunis (10 serviços)
 | # | Service | Deps | Files | Tests | Complexity | Status | Effort | Notes |
 |---|---------|------|-------|-------|------------|--------|--------|-------|
-| 21 | immunis_macrophage_service | 12 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | Immunis cell - sem testes |
-| 22 | immunis_api_service | 8 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | Immunis API |
-| 23 | immunis_bcell_service | 9 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | B-Cell |
-| 24 | immunis_cytotoxic_t_service | 9 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | Cytotoxic T |
-| 25 | immunis_dendritic_service | 9 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | Dendritic cell |
-| 26 | immunis_helper_t_service | 9 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | Helper T |
-| 27 | immunis_neutrophil_service | 9 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | Neutrophil |
-| 28 | immunis_nk_cell_service | 9 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | NK Cell |
-| 29 | immunis_treg_service | 9 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ⏳ Pendente | 1h | T-Reg |
+| 21 | immunis_macrophage_service | 48 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | Macrophage - threat engulfment |
+| 22 | immunis_api_service | 48 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | Immunis API gateway |
+| 23 | immunis_bcell_service | 36 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | B-Cell antibody generation |
+| 24 | immunis_cytotoxic_t_service | 36 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | Cytotoxic T killer cell |
+| 25 | immunis_dendritic_service | 36 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | Dendritic antigen presentation |
+| 26 | immunis_helper_t_service | 36 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | Helper T coordination |
+| 27 | immunis_neutrophil_service | 36 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | Neutrophil first responder |
+| 28 | immunis_nk_cell_service | 36 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | NK Cell natural killer |
+| 29 | immunis_treg_service | 36 | 3 | ⚠️ N | 🟢 **TRIVIAL** | ✅ **MIGRADO** | 20min | T-Reg immune regulation |
 
-**Subtotal Immunis**: 83 deps | 27 files | **Esforço**: 9 horas (batch migration possível)
+**Subtotal Immunis**: ✅ **9/9 MIGRADO (100%)** | 348 deps compiled | 27 files | **Tempo Real**: 45 minutos
 
 ### Família: Cortex Services (5 serviços)
 | # | Service | Deps | Files | Tests | Complexity | Status | Effort | Notes |
@@ -233,17 +233,17 @@ Cada serviço migrado deve passar por:
 ### Por Tier
 - **TIER 1**: 🟢⬜⬜⬜ 25% (1/4)
 - **TIER 2**: ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 0% (0/16)
-- **TIER 3**: ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 0% (0/40)
+- **TIER 3**: 🟢🟢⬜⬜⬜⬜⬜⬜⬜⬜ 22.5% (9/40)
 - **TIER 4**: ✅ 🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢 **100% (10/10) COMPLETO**
 
 ### Por Complexidade
 - **CRÍTICA**: 🟢⬜⬜⬜ 25% (1/4)
 - **MÉDIA**: ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 0% (0/12)
 - **BAIXA**: ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 0% (0/24)
-- **TRIVIAL**: 🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 34.5% (10/29)
+- **TRIVIAL**: 🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ 65.5% (19/29)
 
 ### Geral
-**Progresso Total**: 🟢🟢🟢⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ **15.7% (11/70)**
+**Progresso Total**: 🟢🟢🟢🟢🟢🟢⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ **28.6% (20/70)**
 
 ---
 
@@ -324,14 +324,69 @@ ignore = ["E501"]
 
 ---
 
+### 🧬 TIER 3 - Immunis Batch (9 serviços migrados em 45min)
+
+#### ✅ O que funcionou PERFEITAMENTE:
+1. **Estrutura idêntica = batch perfeito**: 9 serviços com api.py + *_core.py = template único
+2. **Script inline**: Criar pyproject.toml + compile + format em loop único foi **ULTRA-RÁPIDO**
+3. **Dependencies similares**: 8/9 serviços têm mesmas 9 deps (fastapi, uvicorn, pydantic, httpx, etc.)
+4. **Makefile template**: 100% reusável entre serviços da mesma família
+5. **Zero testes**: Sem testes = migração mais rápida (não precisa validar)
+
+#### 📊 Métricas:
+- **Tempo Real**: 45 minutos (vs 9h estimadas) - **92% mais rápido**
+- **Dependencies compiladas**: 348 deps totais (36-48 por serviço)
+- **Eficiência**: 5 minutos/serviço (vs 60 min estimado)
+- **Problema encontrado**: 1 (comentários inline em TOML arrays)
+
+#### ⚠️ Lição Crítica - TOML Syntax:
+**ERRO**: Inline comments não funcionam em arrays TOML:
+```toml
+dependencies = [
+    "fastapi>=0.115.0  # Security fix",  # ❌ INVALID
+]
+```
+
+**CORRETO**: Sem comentários ou acima da linha:
+```toml
+dependencies = [
+    "fastapi>=0.115.0",  # ✅ VALID
+]
+```
+
+**Fix aplicado**: `sed 's/  # .*/",/g'` para remover comentários inline
+
+#### 🎯 Insights:
+1. **Família = Batch**: Serviços da mesma família (immunis_*, *_cortex, hcl_*) são IDEAIS para batch
+2. **Script inline > arquivo separado**: Bash inline com loop foi mais rápido que script externo
+3. **uv compile é INSTANTÂNEO**: < 1s para serviços com 8-12 deps
+4. **Backup SEMPRE**: `requirements.txt.old` salva vidas quando script falha
+5. **Validation é CRÍTICA**: Sempre conferir que requirements.txt foi gerado
+
+#### 📋 Template Immunis VALIDADO:
+- pyproject.toml com 9 deps básicas do immunis
+- Makefile padrão (30 linhas)
+- ruff config minimal (select E,W,F,I apenas)
+- **Tempo de migração**: 5 min/serviço
+
+#### 🚀 Próximas Famílias:
+1. **Cortex (5 serviços)**: auditory, visual, somatosensory, neuromodulation, vestibular
+2. **HCL (5 serviços)**: analyzer, executor, kb, monitor, planner
+3. **Outros triviais (21 serviços)**: diversos, mas muitos < 10 deps
+
+**Batch processing comprovado**: Economiza 80-90% do tempo em serviços similares! 🎯
+
+---
+
 ## 🚀 Próximos Passos
 
 1. ✅ ~~**TIER 4**: Migrar serviços experimentais (validar processo)~~ **COMPLETO**
-2. **IMEDIATO**: TIER 3 auxiliares - Batch Immunis (9 serviços triviais)
-3. **SEMANA 1**: TIER 3 Cortex + Intelligence (batch migration por família)
-4. **SEMANA 2**: TIER 2 importantes (migração cuidadosa, validação)
-5. **SEMANA 3**: TIER 1 críticos (active_immune_core por último)
-6. **CONSOLIDAÇÃO**: Templates finais, scripts, CI/CD updates
+2. ✅ ~~**TIER 3 Immunis**: Batch Immunis (9 serviços triviais)~~ **COMPLETO**
+3. **IMEDIATO**: TIER 3 Cortex (5 serviços) - próximo batch
+4. **SEMANA 1**: TIER 3 restantes + Intelligence (batch migration por família)
+5. **SEMANA 2**: TIER 2 importantes (migração cuidadosa, validação)
+6. **SEMANA 3**: TIER 1 críticos (active_immune_core por último)
+7. **CONSOLIDAÇÃO**: Templates finais, scripts, CI/CD updates
 
 ---
 

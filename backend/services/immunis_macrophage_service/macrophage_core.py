@@ -10,15 +10,13 @@ NO MOCKS - Production-ready implementation.
 """
 
 import asyncio
-from datetime import datetime
 import hashlib
 import json
 import logging
-from pathlib import Path
 import re
+from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-import yara
 
 logger = logging.getLogger(__name__)
 
@@ -78,16 +76,12 @@ class CuckooSandboxClient:
                 for _ in range(60):  # Max 5 min wait
                     await asyncio.sleep(5)
 
-                    status_resp = await client.get(
-                        f"{self.cuckoo_url}/tasks/view/{task_id}"
-                    )
+                    status_resp = await client.get(f"{self.cuckoo_url}/tasks/view/{task_id}")
                     status = status_resp.json()["task"]["status"]
 
                     if status == "reported":
                         # Get report
-                        report_resp = await client.get(
-                            f"{self.cuckoo_url}/tasks/report/{task_id}"
-                        )
+                        report_resp = await client.get(f"{self.cuckoo_url}/tasks/report/{task_id}")
                         return report_resp.json()
 
                 logger.warning(f"Cuckoo analysis timeout for task {task_id}")
@@ -123,9 +117,7 @@ class YARAGenerator:
         """Initialize YARA generator."""
         pass
 
-    def extract_iocs(
-        self, sample_data: bytes, analysis_report: Dict
-    ) -> Dict[str, List[str]]:
+    def extract_iocs(self, sample_data: bytes, analysis_report: Dict) -> Dict[str, List[str]]:
         """Extract Indicators of Compromise from sample and analysis.
 
         Args:
@@ -179,10 +171,7 @@ class YARAGenerator:
         # Mutexes
         for proc in analysis_report.get("behavior", {}).get("processes", []):
             for call in proc.get("calls", []):
-                if (
-                    call.get("api") == "CreateMutexA"
-                    or call.get("api") == "CreateMutexW"
-                ):
+                if call.get("api") == "CreateMutexA" or call.get("api") == "CreateMutexW":
                     if "arguments" in call and "mutex_name" in call["arguments"]:
                         iocs["mutexes"].append(call["arguments"]["mutex_name"])
 
@@ -194,21 +183,15 @@ class YARAGenerator:
 
     def _extract_strings(self, data: bytes, min_length: int = 4) -> List[str]:
         """Extract printable strings from binary data."""
-        ascii_strings = re.findall(
-            rb"[\x20-\x7E]{" + str(min_length).encode() + rb",}", data
-        )
-        unicode_strings = re.findall(
-            rb"(?:[\x20-\x7E]\x00){" + str(min_length).encode() + rb",}", data
-        )
+        ascii_strings = re.findall(rb"[\x20-\x7E]{" + str(min_length).encode() + rb",}", data)
+        unicode_strings = re.findall(rb"(?:[\x20-\x7E]\x00){" + str(min_length).encode() + rb",}", data)
 
         strings = [s.decode("ascii", errors="ignore") for s in ascii_strings]
         strings += [s.decode("utf-16le", errors="ignore") for s in unicode_strings]
 
         return list(set(strings))[:100]  # Limit and deduplicate
 
-    def generate_yara_rule(
-        self, iocs: Dict[str, List[str]], malware_family: str = "unknown"
-    ) -> str:
+    def generate_yara_rule(self, iocs: Dict[str, List[str]], malware_family: str = "unknown") -> str:
         """Generate YARA rule from IOCs.
 
         Args:
@@ -239,10 +222,10 @@ class YARAGenerator:
         author = "Maximus AI Macrophage Service"
         date = "{datetime.now().isoformat()}"
         family = "{malware_family}"
-        md5 = "{iocs.get('file_hashes', [''])[0]}"
+        md5 = "{iocs.get("file_hashes", [""])[0]}"
 
     strings:
-{chr(10).join(strings_section) if strings_section else '        // No strings extracted'}
+{chr(10).join(strings_section) if strings_section else "        // No strings extracted"}
 
     condition:
         {condition}
@@ -291,9 +274,7 @@ class MacrophageCore:
 
         logger.info("MacrophageCore initialized (production-ready)")
 
-    async def phagocytose(
-        self, sample_path: str, malware_family: str = "unknown"
-    ) -> Dict[str, Any]:
+    async def phagocytose(self, sample_path: str, malware_family: str = "unknown") -> Dict[str, Any]:
         """Phagocytose (engulf and analyze) malicious sample.
 
         Args:
@@ -329,11 +310,8 @@ class MacrophageCore:
             "file_size": len(sample_data),
             "analysis": {
                 "cuckoo_task_id": analysis_report.get("info", {}).get("id"),
-                "signatures_matched": [
-                    sig["name"] for sig in analysis_report.get("signatures", [])
-                ],
-                "severity": analysis_report.get("info", {}).get("score", 0)
-                / 10.0,  # 0-1 scale
+                "signatures_matched": [sig["name"] for sig in analysis_report.get("signatures", [])],
+                "severity": analysis_report.get("info", {}).get("score", 0) / 10.0,  # 0-1 scale
                 "fallback": analysis_report.get("fallback", False),
             },
             "iocs": iocs,
@@ -377,9 +355,7 @@ class MacrophageCore:
 
                 artifact["antigen_status"] = "presented"
 
-                logger.info(
-                    f"Antigen presented to Kafka: partition={result.partition}, offset={result.offset}"
-                )
+                logger.info(f"Antigen presented to Kafka: partition={result.partition}, offset={result.offset}")
 
                 return {
                     "status": "antigen_presented",
@@ -436,9 +412,7 @@ class MacrophageCore:
             "status": "operational",
             "processed_artifacts_count": len(self.processed_artifacts),
             "generated_signatures_count": len(self.generated_signatures),
-            "last_cleanup": (
-                self.last_cleanup_time.isoformat() if self.last_cleanup_time else "N/A"
-            ),
+            "last_cleanup": (self.last_cleanup_time.isoformat() if self.last_cleanup_time else "N/A"),
             "cuckoo_enabled": self.cuckoo.enabled,
             "kafka_enabled": self.kafka_producer is not None,
         }

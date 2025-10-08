@@ -10,11 +10,10 @@ Like biological neutrophils: First to arrive, short-lived, disposable.
 NO MOCKS - Production-ready implementation.
 """
 
-import asyncio
-from datetime import datetime, timedelta
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +50,7 @@ class NeutrophilCore:
         self.actions_taken = []
         self.status = "active"
 
-        logger.info(
-            f"Neutrophil {neutrophil_id} born (TTL: {ttl_hours}h, death at {self.death_time})"
-        )
+        logger.info(f"Neutrophil {neutrophil_id} born (TTL: {ttl_hours}h, death at {self.death_time})")
 
     async def initiate_rapid_response(
         self, threat_id: str, threat_type: str, severity: str, details: Dict[str, Any]
@@ -104,9 +101,7 @@ class NeutrophilCore:
 
         return engagement
 
-    def _determine_action(
-        self, threat_type: str, severity: str, details: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _determine_action(self, threat_type: str, severity: str, details: Dict[str, Any]) -> Dict[str, Any]:
         """Determine appropriate rapid response action.
 
         Args:
@@ -141,9 +136,7 @@ class NeutrophilCore:
                 "duration": "30m",
             }
 
-    async def _execute_via_rte(
-        self, action: Dict[str, Any], threat_id: str, details: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _execute_via_rte(self, action: Dict[str, Any], threat_id: str, details: Dict[str, Any]) -> Dict[str, Any]:
         """Execute action via RTE autonomous response.
 
         Args:
@@ -159,11 +152,7 @@ class NeutrophilCore:
 
             # Prepare RTE request
             rte_request = {
-                "event_data": (
-                    details.get("data", "").encode().hex()
-                    if isinstance(details.get("data"), str)
-                    else ""
-                ),
+                "event_data": (details.get("data", "").encode().hex() if isinstance(details.get("data"), str) else ""),
                 "event_metadata": {
                     "threat_id": threat_id,
                     "ip": details.get("ip_address"),
@@ -174,9 +163,7 @@ class NeutrophilCore:
             }
 
             async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{self.rte_endpoint}/rte/scan", json=rte_request, timeout=5.0
-                )
+                response = await client.post(f"{self.rte_endpoint}/rte/scan", json=rte_request, timeout=5.0)
 
                 if response.status_code == 200:
                     rte_result = response.json()
@@ -232,10 +219,7 @@ class NeutrophilCore:
             "lifetime_hours": (datetime.now() - self.birth_time).total_seconds() / 3600,
             "threats_engaged": len(self.threats_engaged),
             "actions_taken": len(self.actions_taken),
-            "action_breakdown": {
-                action: self.actions_taken.count(action)
-                for action in set(self.actions_taken)
-            },
+            "action_breakdown": {action: self.actions_taken.count(action) for action in set(self.actions_taken)},
         }
 
         # Clear memory

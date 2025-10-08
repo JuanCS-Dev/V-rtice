@@ -23,15 +23,12 @@ Like biological NK cells: Kills targets missing MHC-I (self-markers).
 NO MOCKS - Production-ready implementation.
 """
 
-import asyncio
-from datetime import datetime, timedelta
-import hashlib
 import json
 import logging
 import os
-from pathlib import Path
 import platform
 import re
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
@@ -64,9 +61,7 @@ class ProcessWhitelist:
         """
         try:
             if not os.path.exists(self.whitelist_path):
-                logger.warning(
-                    f"Whitelist file not found: {self.whitelist_path}, using defaults"
-                )
+                logger.warning(f"Whitelist file not found: {self.whitelist_path}, using defaults")
                 self._load_default_whitelist()
                 return {
                     "status": "default_loaded",
@@ -215,9 +210,7 @@ class MissingSelfDetector:
         cmdline = process_info.get("cmdline", "")
 
         # 1. Check whitelist
-        whitelist_result = self.whitelist.is_whitelisted(
-            process_name, process_path, process_hash
-        )
+        whitelist_result = self.whitelist.is_whitelisted(process_name, process_path, process_hash)
 
         if not whitelist_result["whitelisted"]:
             missing_self_indicators.append("not_in_whitelist")
@@ -389,16 +382,12 @@ class DLLHijackDetector:
                 severity_score += 0.4
 
             # 2. DLL not in system path
-            if not any(
-                lib_path.startswith(sys_path) for sys_path in self.system_dll_paths
-            ):
+            if not any(lib_path.startswith(sys_path) for sys_path in self.system_dll_paths):
                 # Check if it's in application directory (legitimate)
                 app_dir = os.path.dirname(process_info.get("path", ""))
                 if not lib_path.startswith(app_dir):
                     hijacking_indicators.append("dll_outside_expected_paths")
-                    suspicious_dlls.append(
-                        {"name": lib_name, "reason": "unexpected_path"}
-                    )
+                    suspicious_dlls.append({"name": lib_name, "reason": "unexpected_path"})
                     severity_score += 0.3
 
             # 3. Known DLL hijacking targets
@@ -408,10 +397,7 @@ class DLLHijackDetector:
                 severity_score += 0.5
 
             # 4. DLL in temp/suspicious directory
-            if any(
-                susp in lib_path
-                for susp in ["/tmp/", "Temp\\", "AppData\\Local\\Temp\\"]
-            ):
+            if any(susp in lib_path for susp in ["/tmp/", "Temp\\", "AppData\\Local\\Temp\\"]):
                 hijacking_indicators.append("dll_in_temp_directory")
                 suspicious_dlls.append({"name": lib_name, "reason": "temp_path"})
                 severity_score += 0.6
@@ -489,23 +475,17 @@ class NKCellCore:
         Returns:
             Scan result with detection findings
         """
-        logger.info(
-            f"Scanning process: {process_info.get('name')} (PID: {process_info.get('pid')})"
-        )
+        logger.info(f"Scanning process: {process_info.get('name')} (PID: {process_info.get('pid')})")
 
         scan_start = datetime.now()
 
         # 1. Missing-self detection
-        missing_self_result = await self.missing_self_detector.detect_missing_self(
-            process_info
-        )
+        missing_self_result = await self.missing_self_detector.detect_missing_self(process_info)
 
         # 2. DLL hijacking detection (if libraries provided)
         dll_hijack_result = None
         if loaded_libraries:
-            dll_hijack_result = await self.dll_hijack_detector.detect_dll_hijacking(
-                process_info, loaded_libraries
-            )
+            dll_hijack_result = await self.dll_hijack_detector.detect_dll_hijacking(process_info, loaded_libraries)
 
         # 3. Aggregate threat assessment
         threat_detected = missing_self_result["missing_self_detected"] or (
@@ -515,9 +495,7 @@ class NKCellCore:
         # Calculate combined severity
         combined_severity = missing_self_result["severity_score"]
         if dll_hijack_result:
-            combined_severity = max(
-                combined_severity, dll_hijack_result["severity_score"]
-            )
+            combined_severity = max(combined_severity, dll_hijack_result["severity_score"])
 
         scan_result = {
             "timestamp": datetime.now().isoformat(),
@@ -541,9 +519,7 @@ class NKCellCore:
 
         return scan_result
 
-    async def eliminate_entity(
-        self, entity_id: str, entity_type: str, reason: str, severity: float
-    ) -> Dict[str, Any]:
+    async def eliminate_entity(self, entity_id: str, entity_type: str, reason: str, severity: float) -> Dict[str, Any]:
         """Eliminate compromised entity.
 
         Args:
@@ -555,10 +531,7 @@ class NKCellCore:
         Returns:
             Elimination result
         """
-        logger.warning(
-            f"Eliminating entity {entity_id} (type={entity_type}, "
-            f"severity={severity:.2f}): {reason}"
-        )
+        logger.warning(f"Eliminating entity {entity_id} (type={entity_type}, severity={severity:.2f}): {reason}")
 
         if self.dry_run:
             elimination_result = {
@@ -593,11 +566,7 @@ class NKCellCore:
                     "severity": severity,
                     "dry_run": False,
                     "status": "success" if success else "failed",
-                    "message": (
-                        f"Eliminated {entity_type} {entity_id}"
-                        if success
-                        else "Elimination failed"
-                    ),
+                    "message": (f"Eliminated {entity_type} {entity_id}" if success else "Elimination failed"),
                 }
 
             except Exception as e:
@@ -648,16 +617,12 @@ class NKCellCore:
         try:
             import subprocess
 
-            result = subprocess.run(
-                ["docker", "stop", container_id], capture_output=True, timeout=10
-            )
+            result = subprocess.run(["docker", "stop", container_id], capture_output=True, timeout=10)
             success = result.returncode == 0
             if success:
                 logger.info(f"Container {container_id} stopped successfully")
             else:
-                logger.error(
-                    f"Failed to stop container {container_id}: {result.stderr}"
-                )
+                logger.error(f"Failed to stop container {container_id}: {result.stderr}")
             return success
         except Exception as e:
             logger.error(f"Failed to stop container {container_id}: {e}")
@@ -683,15 +648,9 @@ class NKCellCore:
             "dry_run_mode": self.dry_run,
             "detections_count": len(self.detections),
             "eliminations_count": len(self.eliminations),
-            "last_scan": (
-                self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
-            ),
+            "last_scan": (self.last_scan_time.isoformat() if self.last_scan_time else "N/A"),
             "whitelist_status": {
-                "last_reload": (
-                    self.whitelist.last_reload.isoformat()
-                    if self.whitelist.last_reload
-                    else "N/A"
-                ),
+                "last_reload": (self.whitelist.last_reload.isoformat() if self.whitelist.last_reload else "N/A"),
                 "hashes_count": len(self.whitelist.whitelisted_hashes),
                 "paths_count": len(self.whitelist.whitelisted_paths),
                 "names_count": len(self.whitelist.whitelisted_names),

@@ -10,13 +10,13 @@ Endpoints:
 - POST /process - Main processing endpoint
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -66,17 +66,13 @@ class ProcessRequest(BaseModel):
 async def startup_event():
     """Performs startup tasks."""
     logger.info("🦠 Starting Immunis Cytotoxic T-Cell - Threat Elimination Service...")
-    logger.info(
-        "✅ Cytotoxic T-Cell - Threat Elimination Service started successfully!"
-    )
+    logger.info("✅ Cytotoxic T-Cell - Threat Elimination Service started successfully!")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks."""
-    logger.info(
-        "👋 Shutting down Immunis Cytotoxic T-Cell - Threat Elimination Service..."
-    )
+    logger.info("👋 Shutting down Immunis Cytotoxic T-Cell - Threat Elimination Service...")
     logger.info("🛑 Cytotoxic T-Cell - Threat Elimination Service shut down.")
 
 
@@ -130,9 +126,7 @@ async def process_data(request: ProcessRequest) -> Dict[str, Any]:
         HTTPException: If processing fails
     """
     if not core:
-        raise HTTPException(
-            status_code=503, detail="Core not available - service in limited mode"
-        )
+        raise HTTPException(status_code=503, detail="Core not available - service in limited mode")
 
     try:
         # Call core processing method if available

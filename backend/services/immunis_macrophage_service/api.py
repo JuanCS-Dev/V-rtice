@@ -18,16 +18,17 @@ Endpoints:
 - GET /signatures - List generated YARA signatures
 """
 
-from datetime import datetime
 import logging
 import os
 import tempfile
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Dict
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from macrophage_core import MacrophageCore
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from pydantic import BaseModel
+
+from macrophage_core import MacrophageCore
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,9 +44,7 @@ app = FastAPI(
 cuckoo_url = os.getenv("CUCKOO_API_URL", "http://localhost:8090")
 kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
-macrophage_core = MacrophageCore(
-    cuckoo_url=cuckoo_url, kafka_bootstrap_servers=kafka_servers
-)
+macrophage_core = MacrophageCore(cuckoo_url=cuckoo_url, kafka_bootstrap_servers=kafka_servers)
 
 
 class PhagocytoseRequest(BaseModel):
@@ -122,9 +121,7 @@ async def get_status() -> Dict[str, Any]:
 
 
 @app.post("/phagocytose")
-async def phagocytose_sample(
-    file: UploadFile = File(...), malware_family: str = "unknown"
-) -> Dict[str, Any]:
+async def phagocytose_sample(file: UploadFile = File(...), malware_family: str = "unknown") -> Dict[str, Any]:
     """Phagocytose (engulf and analyze) malware sample.
 
     This is the primary endpoint for malware analysis. The Macrophage will:
@@ -147,9 +144,7 @@ async def phagocytose_sample(
         logger.info(f"Received phagocytose request: {file.filename}")
 
         # Save uploaded file to temporary location
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=f"_{file.filename}"
-        ) as tmp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as tmp_file:
             content = await file.read()
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
@@ -157,9 +152,7 @@ async def phagocytose_sample(
         logger.info(f"Sample saved to: {tmp_file_path}")
 
         # Phagocytose sample
-        artifact = await macrophage_core.phagocytose(
-            sample_path=tmp_file_path, malware_family=malware_family
-        )
+        artifact = await macrophage_core.phagocytose(sample_path=tmp_file_path, malware_family=malware_family)
 
         # Cleanup temporary file
         try:
@@ -193,9 +186,7 @@ async def present_antigen(request: PresentAntigenRequest) -> Dict[str, Any]:
         HTTPException: If presentation fails
     """
     try:
-        logger.info(
-            f"Presenting antigen: {request.artifact.get('sample_hash', 'unknown')[:16]}..."
-        )
+        logger.info(f"Presenting antigen: {request.artifact.get('sample_hash', 'unknown')[:16]}...")
 
         result = await macrophage_core.present_antigen(request.artifact)
 

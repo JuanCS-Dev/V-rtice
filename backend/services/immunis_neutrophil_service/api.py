@@ -15,15 +15,16 @@ Endpoints:
 - POST /self_destruct - Manual self-destruction
 """
 
-from datetime import datetime
 import logging
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Any, Dict
 
-from fastapi import FastAPI, HTTPException
-from neutrophil_core import NeutrophilCore
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+from neutrophil_core import NeutrophilCore
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -66,12 +67,8 @@ async def startup_event():
     logger.info(f"🦠 Starting Immunis Neutrophil Service (ID: {neutrophil_id})...")
     logger.info(f"   Birth time: {neutrophil_core.birth_time.isoformat()}")
     logger.info(f"   Death time: {neutrophil_core.death_time.isoformat()}")
-    logger.info(
-        f"   TTL: {neutrophil_core.remaining_lifetime_seconds() / 3600:.1f} hours"
-    )
-    logger.info(
-        "✅ Neutrophil Service started successfully - Ready for rapid response!"
-    )
+    logger.info(f"   TTL: {neutrophil_core.remaining_lifetime_seconds() / 3600:.1f} hours")
+    logger.info("✅ Neutrophil Service started successfully - Ready for rapid response!")
 
 
 @app.on_event("shutdown")
@@ -182,9 +179,7 @@ async def get_response_status(threat_id: str) -> Dict[str, Any]:
     status = await neutrophil_core.get_response_status(threat_id)
 
     if status is None:
-        raise HTTPException(
-            status_code=404, detail=f"No response found for threat {threat_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No response found for threat {threat_id}")
 
     return {
         "status": "success",

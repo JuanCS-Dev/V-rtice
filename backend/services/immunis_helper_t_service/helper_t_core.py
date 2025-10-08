@@ -25,10 +25,9 @@ Like biological Helper T-cells: Orchestrates adaptive immunity.
 NO MOCKS - Production-ready implementation.
 """
 
-import asyncio
+import logging
 from datetime import datetime, timedelta
 from enum import Enum
-import logging
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -91,9 +90,7 @@ class HelperTCellCore:
         Returns:
             Orchestration result
         """
-        logger.info(
-            f"Helper T-Cell activated with antigen: {antigen.get('antigen_id', '')[:16]}"
-        )
+        logger.info(f"Helper T-Cell activated with antigen: {antigen.get('antigen_id', '')[:16]}")
 
         antigen_id = antigen.get("antigen_id")
         malware_family = antigen.get("malware_family", "unknown")
@@ -107,9 +104,7 @@ class HelperTCellCore:
         intensity = self._calculate_response_intensity(severity, correlation_count)
 
         # 3. Coordinate immune cells
-        coordination_result = await self._coordinate_immune_response(
-            antigen, strategy, intensity
-        )
+        coordination_result = await self._coordinate_immune_response(antigen, strategy, intensity)
 
         # 4. Store threat intelligence
         self.threat_intelligence[antigen_id] = {
@@ -123,10 +118,7 @@ class HelperTCellCore:
 
         self.last_coordination_time = datetime.now()
 
-        logger.info(
-            f"Helper T-Cell orchestration: strategy={strategy.value}, "
-            f"intensity={intensity.value}"
-        )
+        logger.info(f"Helper T-Cell orchestration: strategy={strategy.value}, intensity={intensity.value}")
 
         return {
             "timestamp": datetime.now().isoformat(),
@@ -165,9 +157,7 @@ class HelperTCellCore:
         # Aggressive malware families
         aggressive_families = ["ransomware", "worm", "rootkit", "apt"]
         if any(family in malware_family.lower() for family in aggressive_families):
-            logger.info(
-                f"Th1 strategy selected: Aggressive malware family ({malware_family})"
-            )
+            logger.info(f"Th1 strategy selected: Aggressive malware family ({malware_family})")
             return ImmuneStrategy.TH1
 
         # Th2 strategy (humoral, defensive):
@@ -183,9 +173,7 @@ class HelperTCellCore:
         logger.info("Balanced strategy selected: Mixed threat characteristics")
         return ImmuneStrategy.BALANCED
 
-    def _calculate_response_intensity(
-        self, severity: float, correlation_count: int
-    ) -> ResponseIntensity:
+    def _calculate_response_intensity(self, severity: float, correlation_count: int) -> ResponseIntensity:
         """Calculate proportionate response intensity.
 
         Args:
@@ -245,11 +233,7 @@ class HelperTCellCore:
             directive = {
                 "cell_type": "b_cell",
                 "action": "generate_signature",
-                "priority": (
-                    "high"
-                    if intensity in [ResponseIntensity.HIGH, ResponseIntensity.CRITICAL]
-                    else "medium"
-                ),
+                "priority": ("high" if intensity in [ResponseIntensity.HIGH, ResponseIntensity.CRITICAL] else "medium"),
                 "antigen": antigen,
             }
             coordination["directives"].append(directive)
@@ -263,9 +247,7 @@ class HelperTCellCore:
             directive = {
                 "cell_type": "cytotoxic_t",
                 "action": "active_defense",
-                "priority": (
-                    "critical" if intensity == ResponseIntensity.CRITICAL else "high"
-                ),
+                "priority": ("critical" if intensity == ResponseIntensity.CRITICAL else "high"),
                 "antigen": antigen,
             }
             coordination["directives"].append(directive)
@@ -310,16 +292,14 @@ class HelperTCellCore:
         self.response_outcomes.append(outcome_record)
 
         logger.info(
-            f"Response outcome recorded: {outcome}, " f"ttc={time_to_containment:.1f}s"
+            f"Response outcome recorded: {outcome}, ttc={time_to_containment:.1f}s"
             if time_to_containment
-            else f"ttc=N/A"
+            else "ttc=N/A"
         )
 
         return outcome_record
 
-    async def get_effectiveness_metrics(
-        self, time_window_hours: int = 24
-    ) -> Dict[str, Any]:
+    async def get_effectiveness_metrics(self, time_window_hours: int = 24) -> Dict[str, Any]:
         """Get effectiveness metrics for immune responses.
 
         Args:
@@ -331,11 +311,7 @@ class HelperTCellCore:
         cutoff_time = datetime.now() - timedelta(hours=time_window_hours)
 
         # Filter recent outcomes
-        recent_outcomes = [
-            o
-            for o in self.response_outcomes
-            if datetime.fromisoformat(o["timestamp"]) >= cutoff_time
-        ]
+        recent_outcomes = [o for o in self.response_outcomes if datetime.fromisoformat(o["timestamp"]) >= cutoff_time]
 
         if not recent_outcomes:
             return {"time_window_hours": time_window_hours, "total_responses": 0}
@@ -345,11 +321,7 @@ class HelperTCellCore:
         false_positives = sum(1 for o in recent_outcomes if o["false_positive"])
 
         # Calculate average time-to-containment
-        ttc_values = [
-            o["time_to_containment"]
-            for o in recent_outcomes
-            if o["time_to_containment"] is not None
-        ]
+        ttc_values = [o["time_to_containment"] for o in recent_outcomes if o["time_to_containment"] is not None]
         avg_ttc = sum(ttc_values) / len(ttc_values) if ttc_values else None
 
         return {
@@ -374,9 +346,5 @@ class HelperTCellCore:
             "threat_intel_count": len(self.threat_intelligence),
             "directives_issued": len(self.response_directives),
             "outcomes_recorded": len(self.response_outcomes),
-            "last_coordination": (
-                self.last_coordination_time.isoformat()
-                if self.last_coordination_time
-                else "N/A"
-            ),
+            "last_coordination": (self.last_coordination_time.isoformat() if self.last_coordination_time else "N/A"),
         }

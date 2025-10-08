@@ -26,12 +26,11 @@ Like biological Cytotoxic T-cells: Kills infected cells directly.
 NO MOCKS - Production-ready implementation.
 """
 
-import asyncio
-from datetime import datetime, timedelta
-from enum import Enum
 import logging
 import os
 import signal
+from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -69,10 +68,7 @@ class MemoryTCell:
         """Activate memory cell (faster response to known threat)."""
         self.last_activated = datetime.now()
         self.activation_count += 1
-        logger.info(
-            f"Memory T-Cell activated: {self.malware_family} "
-            f"(activations={self.activation_count})"
-        )
+        logger.info(f"Memory T-Cell activated: {self.malware_family} (activations={self.activation_count})")
 
     def is_expired(self, ttl_days: int = 90) -> bool:
         """Check if memory cell is expired.
@@ -90,9 +86,7 @@ class MemoryTCell:
 class DepletionTracker:
     """Tracks Cytotoxic T-Cell depletion to prevent exhaustion."""
 
-    def __init__(
-        self, max_actions_per_hour: int = 100, max_actions_per_day: int = 1000
-    ):
+    def __init__(self, max_actions_per_hour: int = 100, max_actions_per_day: int = 1000):
         """Initialize depletion tracker.
 
         Args:
@@ -119,23 +113,17 @@ class DepletionTracker:
         ]
 
         # Check hourly limit
-        hourly_actions = sum(
-            1 for t in self.action_history if (now - t).total_seconds() < 3600
-        )
+        hourly_actions = sum(1 for t in self.action_history if (now - t).total_seconds() < 3600)
 
         if hourly_actions >= self.max_actions_per_hour:
-            logger.warning(
-                f"T-cell depleted (hourly): {hourly_actions}/{self.max_actions_per_hour}"
-            )
+            logger.warning(f"T-cell depleted (hourly): {hourly_actions}/{self.max_actions_per_hour}")
             return False
 
         # Check daily limit
         daily_actions = len(self.action_history)
 
         if daily_actions >= self.max_actions_per_day:
-            logger.warning(
-                f"T-cell depleted (daily): {daily_actions}/{self.max_actions_per_day}"
-            )
+            logger.warning(f"T-cell depleted (daily): {daily_actions}/{self.max_actions_per_day}")
             return False
 
         return True
@@ -152,21 +140,17 @@ class DepletionTracker:
         """
         now = datetime.now()
 
-        hourly_actions = sum(
-            1 for t in self.action_history if (now - t).total_seconds() < 3600
-        )
+        hourly_actions = sum(1 for t in self.action_history if (now - t).total_seconds() < 3600)
 
         daily_actions = len(self.action_history)
 
         return {
             "hourly_actions": hourly_actions,
             "hourly_limit": self.max_actions_per_hour,
-            "hourly_capacity": (self.max_actions_per_hour - hourly_actions)
-            / self.max_actions_per_hour,
+            "hourly_capacity": (self.max_actions_per_hour - hourly_actions) / self.max_actions_per_hour,
             "daily_actions": daily_actions,
             "daily_limit": self.max_actions_per_day,
-            "daily_capacity": (self.max_actions_per_day - daily_actions)
-            / self.max_actions_per_day,
+            "daily_capacity": (self.max_actions_per_day - daily_actions) / self.max_actions_per_day,
             "depleted": not self.can_act(),
         }
 
@@ -218,9 +202,7 @@ class CytotoxicTCellCore:
         Returns:
             Activation result
         """
-        logger.info(
-            f"Cytotoxic T-Cell activated with antigen: {antigen.get('antigen_id', '')[:16]}"
-        )
+        logger.info(f"Cytotoxic T-Cell activated with antigen: {antigen.get('antigen_id', '')[:16]}")
 
         antigen_id = antigen.get("antigen_id")
         malware_family = antigen.get("malware_family", "unknown")
@@ -264,15 +246,11 @@ class CytotoxicTCellCore:
 
         self.last_action_time = datetime.now()
 
-        logger.info(
-            f"Cytotoxic T-Cell activation complete: {len(activation_result['actions_executed'])} actions"
-        )
+        logger.info(f"Cytotoxic T-Cell activation complete: {len(activation_result['actions_executed'])} actions")
 
         return activation_result
 
-    def _determine_defense_actions(
-        self, antigen: Dict[str, Any], iocs: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _determine_defense_actions(self, antigen: Dict[str, Any], iocs: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Determine active defense actions to take.
 
         Args:
@@ -287,9 +265,7 @@ class CytotoxicTCellCore:
 
         # Block malicious IPs
         for ip in iocs.get("ips", [])[:10]:  # Max 10 IPs
-            actions.append(
-                {"action": DefenseAction.BLOCK_IP, "target": ip, "severity": severity}
-            )
+            actions.append({"action": DefenseAction.BLOCK_IP, "target": ip, "severity": severity})
 
         # Kill malicious processes (if process IDs available)
         for pid in iocs.get("process_ids", [])[:5]:  # Max 5 processes
@@ -325,9 +301,7 @@ class CytotoxicTCellCore:
 
         return actions
 
-    async def _execute_defense_action(
-        self, action_spec: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _execute_defense_action(self, action_spec: Dict[str, Any]) -> Dict[str, Any]:
         """Execute active defense action.
 
         Args:
@@ -340,10 +314,7 @@ class CytotoxicTCellCore:
         target = action_spec["target"]
         severity = action_spec.get("severity", 0.5)
 
-        logger.warning(
-            f"Executing defense action: {action_type.value} on {target} "
-            f"(severity={severity:.2f})"
-        )
+        logger.warning(f"Executing defense action: {action_type.value} on {target} (severity={severity:.2f})")
 
         action_result = {
             "timestamp": datetime.now().isoformat(),
@@ -356,9 +327,7 @@ class CytotoxicTCellCore:
 
         if self.dry_run:
             action_result["status"] = "simulated"
-            action_result["message"] = (
-                f"DRY-RUN: Would execute {action_type.value} on {target}"
-            )
+            action_result["message"] = f"DRY-RUN: Would execute {action_type.value} on {target}"
             logger.info(f"DRY-RUN: {action_type.value} on {target}")
         else:
             # Production execution
@@ -478,9 +447,7 @@ class CytotoxicTCellCore:
 
             # Move file to quarantine
             filename = os.path.basename(file_path)
-            quarantine_path = os.path.join(
-                quarantine_dir, f"{datetime.now().timestamp()}_{filename}"
-            )
+            quarantine_path = os.path.join(quarantine_dir, f"{datetime.now().timestamp()}_{filename}")
             shutil.move(file_path, quarantine_path)
 
             logger.info(f"File {file_path} quarantined to {quarantine_path}")
@@ -512,11 +479,7 @@ class CytotoxicTCellCore:
         Args:
             ttl_days: Memory cell TTL in days
         """
-        expired = [
-            family
-            for family, cell in self.memory_cells.items()
-            if cell.is_expired(ttl_days)
-        ]
+        expired = [family for family, cell in self.memory_cells.items() if cell.is_expired(ttl_days)]
 
         for family in expired:
             del self.memory_cells[family]
@@ -536,15 +499,11 @@ class CytotoxicTCellCore:
             "active_targets_count": len(self.active_targets),
             "neutralization_records": len(self.neutralization_history),
             "memory_cells_count": len(self.memory_cells),
-            "last_action": (
-                self.last_action_time.isoformat() if self.last_action_time else "N/A"
-            ),
+            "last_action": (self.last_action_time.isoformat() if self.last_action_time else "N/A"),
             "depletion": depletion_stats,
         }
 
     def enable_production_mode(self):
         """Enable production mode (DISABLES dry-run)."""
-        logger.warning(
-            "⚠️  PRODUCTION MODE ENABLED - Real defensive actions will occur!"
-        )
+        logger.warning("⚠️  PRODUCTION MODE ENABLED - Real defensive actions will occur!")
         self.dry_run = False
