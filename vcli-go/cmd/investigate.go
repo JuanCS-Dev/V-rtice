@@ -218,7 +218,6 @@ var (
 	actorFile           string
 	incidentFile        string
 	investigateTarget   string
-	investigateScope    string
 	filterFile          string
 	thresholdFloat      float64
 	timeWindowStr       string
@@ -281,10 +280,8 @@ func init() {
 	autonomousCorrelateCampaignsCmd.Flags().Float64Var(&thresholdFloat, "threshold", 0.7, "Correlation threshold (0.0-1.0)")
 	autonomousCorrelateCampaignsCmd.Flags().StringVar(&timeWindowStr, "time-window", "30d", "Time window for correlation")
 
-	autonomousInitiateCmd.Flags().StringVar(&investigateTarget, "target", "", "Investigation target")
-	autonomousInitiateCmd.Flags().StringVar(&investigateScope, "scope", "", "Investigation scope")
-	autonomousInitiateCmd.MarkFlagRequired("target")
-	autonomousInitiateCmd.MarkFlagRequired("scope")
+	autonomousInitiateCmd.Flags().StringVar(&investigateTarget, "incident-id", "", "Incident ID to investigate")
+	autonomousInitiateCmd.MarkFlagRequired("incident-id")
 
 	// Network Recon flags
 	reconStartCmd.Flags().StringVar(&reconTarget, "target", "", "Target for reconnaissance (IP, CIDR, domain)")
@@ -312,24 +309,24 @@ func init() {
 // ============================================================================
 
 func runAutonomousRegisterActor(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	actorData, err := readJSONFile(actorFile)
 	if err != nil {
 		return fmt.Errorf("failed to read actor file: %w", err)
 	}
 
-	// Convert map to ThreatActorProfile struct
-	var profile investigation.ThreatActorProfile
+	// Convert map to ThreatActorRegistrationRequest struct
+	var req investigation.ThreatActorRegistrationRequest
 	jsonBytes, err := json.Marshal(actorData)
 	if err != nil {
 		return fmt.Errorf("failed to marshal actor data: %w", err)
 	}
-	if err := json.Unmarshal(jsonBytes, &profile); err != nil {
-		return fmt.Errorf("failed to unmarshal actor profile: %w", err)
+	if err := json.Unmarshal(jsonBytes, &req); err != nil {
+		return fmt.Errorf("failed to unmarshal actor registration request: %w", err)
 	}
 
-	result, err := client.RegisterActor(profile)
+	result, err := client.RegisterThreatActor(req)
 	if err != nil {
 		return fmt.Errorf("failed to register actor: %w", err)
 	}
@@ -339,9 +336,9 @@ func runAutonomousRegisterActor(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousGetActor(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
-	result, err := client.GetActor(args[0])
+	result, err := client.GetActorProfile(args[0])
 	if err != nil {
 		return fmt.Errorf("failed to get actor: %w", err)
 	}
@@ -351,9 +348,9 @@ func runAutonomousGetActor(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousListActors(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
-	result, err := client.ListActors()
+	result, err := client.ListThreatActors()
 	if err != nil {
 		return fmt.Errorf("failed to list actors: %w", err)
 	}
@@ -363,14 +360,24 @@ func runAutonomousListActors(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousIngestIncident(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	incidentData, err := readJSONFile(incidentFile)
 	if err != nil {
 		return fmt.Errorf("failed to read incident file: %w", err)
 	}
 
-	result, err := client.IngestIncident(incidentData)
+	// Convert map to SecurityIncidentRequest struct
+	var req investigation.SecurityIncidentRequest
+	jsonBytes, err := json.Marshal(incidentData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal incident data: %w", err)
+	}
+	if err := json.Unmarshal(jsonBytes, &req); err != nil {
+		return fmt.Errorf("failed to unmarshal incident request: %w", err)
+	}
+
+	result, err := client.IngestIncident(req)
 	if err != nil {
 		return fmt.Errorf("failed to ingest incident: %w", err)
 	}
@@ -380,7 +387,7 @@ func runAutonomousIngestIncident(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousAttributeIncident(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	result, err := client.AttributeIncident(args[0])
 	if err != nil {
@@ -392,7 +399,7 @@ func runAutonomousAttributeIncident(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousCorrelateCampaigns(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	result, err := client.CorrelateCampaigns()
 	if err != nil {
@@ -404,7 +411,7 @@ func runAutonomousCorrelateCampaigns(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousGetCampaign(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	result, err := client.GetCampaign(args[0])
 	if err != nil {
@@ -416,7 +423,7 @@ func runAutonomousGetCampaign(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousListCampaigns(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	result, err := client.ListCampaigns()
 	if err != nil {
@@ -428,9 +435,9 @@ func runAutonomousListCampaigns(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousInitiate(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
-	result, err := client.InitiateInvestigation(investigateTarget, investigateScope)
+	result, err := client.InitiateInvestigation(investigateTarget)
 	if err != nil {
 		return fmt.Errorf("failed to initiate investigation: %w", err)
 	}
@@ -440,7 +447,7 @@ func runAutonomousInitiate(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousGetInvestigation(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	result, err := client.GetInvestigation(args[0])
 	if err != nil {
@@ -452,7 +459,7 @@ func runAutonomousGetInvestigation(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousStatus(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
 	result, err := client.GetStatus()
 	if err != nil {
@@ -464,14 +471,14 @@ func runAutonomousStatus(cmd *cobra.Command, args []string) error {
 }
 
 func runAutonomousHealth(cmd *cobra.Command, args []string) error {
-	client := investigation.NewAutonomousClient(autonomousEndpoint, investigateToken)
+	client := investigation.NewInvestigationClient( investigateToken)
 
-	result, err := client.Health()
+	err := client.Health()
 	if err != nil {
-		return fmt.Errorf("failed to check health: %w", err)
+		return fmt.Errorf("investigation service unhealthy: %w", err)
 	}
 
-	printJSON(result)
+	fmt.Println("Investigation service is healthy")
 	return nil
 }
 

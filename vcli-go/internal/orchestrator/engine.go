@@ -37,7 +37,7 @@ type OrchestrationEngine struct {
 	CytotoxicTClient     *immunis.CytotoxicTClient
 
 	// Investigation & Recon (3 services)
-	AutonomousInvestigation *investigation.AutonomousClient
+	AutonomousInvestigation *investigation.InvestigationClient
 	NetworkRecon            *investigation.ReconClient
 	OSINT                   *investigation.OSINTClient
 
@@ -133,7 +133,7 @@ func NewOrchestrationEngine(config EngineConfig) *OrchestrationEngine {
 		HelperTClient:    immunis.NewHelperTClient(config.HelperTEndpoint, config.AuthToken),
 		CytotoxicTClient: immunis.NewCytotoxicTClient(config.CytotoxicTEndpoint, config.AuthToken),
 
-		AutonomousInvestigation: investigation.NewAutonomousClient(config.AutonomousInvestEndpoint, config.AuthToken),
+		AutonomousInvestigation: investigation.NewInvestigationClient(config.AutonomousInvestEndpoint),
 		NetworkRecon:            investigation.NewReconClient(config.ReconEndpoint, config.AuthToken),
 		OSINT:                   investigation.NewOSINTClient(config.OSINTEndpoint, config.AuthToken),
 
