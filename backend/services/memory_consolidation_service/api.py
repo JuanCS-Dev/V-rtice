@@ -6,25 +6,22 @@ NO MOCKS - Production-ready memory consolidation interface.
 """
 
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
 
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
 from consolidation_core import (
-    ConsolidationStatus,
     MemoryConsolidator,
-    MemoryImportance,
     SecurityEvent,
 )
-from fastapi import BackgroundTasks, FastAPI, HTTPException
-from pydantic import BaseModel, Field
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instance
@@ -40,9 +37,7 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing Memory Consolidation Service...")
 
     # Initialize consolidator
-    consolidator = MemoryConsolidator(
-        stm_capacity=10000, consolidation_threshold=0.6, pruning_threshold=0.3
-    )
+    consolidator = MemoryConsolidator(stm_capacity=10000, consolidation_threshold=0.6, pruning_threshold=0.3)
 
     # Start background consolidation task (circadian rhythm)
     consolidation_task = asyncio.create_task(run_consolidation_loop())
@@ -71,9 +66,7 @@ async def run_consolidation_loop():
 
     consolidation_interval_hours = 6
 
-    logger.info(
-        f"Consolidation loop started (interval: {consolidation_interval_hours}h)"
-    )
+    logger.info(f"Consolidation loop started (interval: {consolidation_interval_hours}h)")
 
     while True:
         try:
@@ -122,12 +115,8 @@ class SecurityEventRequest(BaseModel):
     source: str = Field(..., description="Source IP or entity")
     target: str = Field(..., description="Target asset")
     indicators: List[str] = Field(..., description="Threat indicators")
-    outcome: Optional[str] = Field(
-        None, description="Event outcome (blocked, allowed, etc)"
-    )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    outcome: Optional[str] = Field(None, description="Event outcome (blocked, allowed, etc)")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class ShortTermMemoryResponse(BaseModel):
@@ -294,9 +283,7 @@ async def batch_ingest_events(events: List[SecurityEventRequest]):
 
 
 @app.get("/memory/short_term", response_model=List[ShortTermMemoryResponse])
-async def list_short_term_memories(
-    min_importance: Optional[float] = None, limit: int = 100
-):
+async def list_short_term_memories(min_importance: Optional[float] = None, limit: int = 100):
     """List short-term memories.
 
     Args:

@@ -5,26 +5,23 @@ REST API for adaptive immunity with antibody diversification and affinity matura
 NO MOCKS - Production-ready adaptive learning interface.
 """
 
-import asyncio
 import base64
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from adaptive_core import (
     AdaptiveImmunityController,
-    AntibodyType,
     ThreatSample,
 )
-from fastapi import BackgroundTasks, FastAPI, HTTPException
-from pydantic import BaseModel, Field
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instance
@@ -114,9 +111,7 @@ class FeedbackRequest(BaseModel):
     """Request to provide detection feedback."""
 
     antibody_id: str = Field(..., description="Antibody that made detection")
-    detections: Dict[str, bool] = Field(
-        ..., description="Sample ID -> was_correct (true if correct detection)"
-    )
+    detections: Dict[str, bool] = Field(..., description="Sample ID -> was_correct (true if correct detection)")
 
 
 class StatusResponse(BaseModel):
@@ -155,9 +150,7 @@ async def initialize_repertoire(samples: List[ThreatSampleRequest]):
             try:
                 raw_data = base64.b64decode(request.raw_data)
             except Exception as e:
-                logger.warning(
-                    f"Failed to decode raw_data for {request.sample_id}: {e}"
-                )
+                logger.warning(f"Failed to decode raw_data for {request.sample_id}: {e}")
                 raw_data = b""
 
             # Parse timestamp
@@ -288,9 +281,7 @@ async def get_antibody(antibody_id: str):
 
     try:
         if antibody_id not in immunity_controller.antibody_pool:
-            raise HTTPException(
-                status_code=404, detail=f"Antibody {antibody_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Antibody {antibody_id} not found")
 
         antibody = immunity_controller.antibody_pool[antibody_id]
 
@@ -459,13 +450,7 @@ async def get_maturation_history(limit: int = 50):
         events = []
 
         # Get recent events (newest first)
-        recent_events = list(
-            reversed(
-                immunity_controller.affinity_maturation_engine.maturation_events[
-                    -limit:
-                ]
-            )
-        )
+        recent_events = list(reversed(immunity_controller.affinity_maturation_engine.maturation_events[-limit:]))
 
         for event in recent_events:
             events.append(
@@ -503,9 +488,7 @@ async def get_expansion_history(limit: int = 50):
         expansions = []
 
         # Get recent expansions (newest first)
-        recent_expansions = list(
-            reversed(immunity_controller.clonal_selection_manager.expansions[-limit:])
-        )
+        recent_expansions = list(reversed(immunity_controller.clonal_selection_manager.expansions[-limit:]))
 
         for expansion in recent_expansions:
             expansions.append(
@@ -579,17 +562,11 @@ async def get_statistics():
         status = immunity_controller.get_status()
 
         # Compute aggregate stats
-        total_matches = sum(
-            ab.match_count for ab in immunity_controller.antibody_pool.values()
-        )
+        total_matches = sum(ab.match_count for ab in immunity_controller.antibody_pool.values())
 
-        total_tp = sum(
-            ab.true_positive_count for ab in immunity_controller.antibody_pool.values()
-        )
+        total_tp = sum(ab.true_positive_count for ab in immunity_controller.antibody_pool.values())
 
-        total_fp = sum(
-            ab.false_positive_count for ab in immunity_controller.antibody_pool.values()
-        )
+        total_fp = sum(ab.false_positive_count for ab in immunity_controller.antibody_pool.values())
 
         accuracy = total_tp / max(total_matches, 1)
 
@@ -602,12 +579,8 @@ async def get_statistics():
             "true_positives": total_tp,
             "false_positives": total_fp,
             "accuracy": accuracy,
-            "maturation_events": status["affinity_maturation_engine"][
-                "maturation_events"
-            ],
-            "clonal_expansions": status["clonal_selection_manager"][
-                "expansions_performed"
-            ],
+            "maturation_events": status["affinity_maturation_engine"]["maturation_events"],
+            "clonal_expansions": status["clonal_selection_manager"]["expansions_performed"],
         }
 
     except Exception as e:

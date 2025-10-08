@@ -13,14 +13,14 @@ to other Maximus AI services.
 """
 
 import asyncio
-from datetime import datetime, timedelta
 import socket
 import ssl
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta
+from typing import Any, Dict
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus SSL Monitor Service", version="1.0.0")
 
@@ -106,9 +106,7 @@ async def get_domain_status(domain_port: str) -> Dict[str, Any]:
     """
     status = monitored_domains.get(domain_port)
     if not status:
-        raise HTTPException(
-            status_code=404, detail="Domain not found in monitoring list."
-        )
+        raise HTTPException(status_code=404, detail="Domain not found in monitoring list.")
     return status
 
 
@@ -129,12 +127,8 @@ async def check_ssl_certificate(domain: str, port: int) -> Dict[str, Any]:
                 cert = ssock.getpeercert()
 
                 # Extract relevant info
-                not_before = datetime.strptime(
-                    cert["notBefore"][0:-4], "%b %d %H:%M:%S %Y"
-                )
-                not_after = datetime.strptime(
-                    cert["notAfter"][0:-4], "%b %d %H:%M:%S %Y"
-                )
+                not_before = datetime.strptime(cert["notBefore"][0:-4], "%b %d %H:%M:%S %Y")
+                not_after = datetime.strptime(cert["notAfter"][0:-4], "%b %d %H:%M:%S %Y")
                 issuer = dict(x[0] for x in cert["issuer"])
                 subject = dict(x[0] for x in cert["subject"])
 
@@ -170,19 +164,13 @@ async def continuous_monitoring():
             last_checked = info["last_checked"]
             check_interval = timedelta(seconds=info["check_interval_seconds"])
 
-            if (
-                last_checked is None
-                or (current_time - datetime.fromisoformat(last_checked))
-                > check_interval
-            ):
+            if last_checked is None or (current_time - datetime.fromisoformat(last_checked)) > check_interval:
                 print(f"[SSLMonitor] Checking SSL for {info['domain']}:{info['port']}")
                 cert_info = await check_ssl_certificate(info["domain"], info["port"])
                 monitored_domains[domain_key]["last_checked"] = current_time.isoformat()
                 monitored_domains[domain_key]["status"] = cert_info["status"]
                 monitored_domains[domain_key]["certificate_info"] = cert_info
-                print(
-                    f"[SSLMonitor] {info['domain']}:{info['port']} status: {cert_info['status']}"
-                )
+                print(f"[SSLMonitor] {info['domain']}:{info['port']} status: {cert_info['status']}")
 
 
 if __name__ == "__main__":

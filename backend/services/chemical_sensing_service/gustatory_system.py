@@ -37,9 +37,7 @@ class GustatorySystem:
             Dict[str, Any]: A dictionary containing the analysis results.
         """
         self.current_status = "analyzing"
-        print(
-            f"[GustatorySystem] Performing gustatory analysis for sample: {sample_id or 'unknown'}"
-        )
+        print(f"[GustatorySystem] Performing gustatory analysis for sample: {sample_id or 'unknown'}")
         await asyncio.sleep(1.5)  # Simulate analysis time
 
         # Simulate detection of various tastes and properties
@@ -69,9 +67,5 @@ class GustatorySystem:
         """
         return {
             "status": self.current_status,
-            "last_analysis": (
-                self.last_analysis_time.isoformat()
-                if self.last_analysis_time
-                else "N/A"
-            ),
+            "last_analysis": (self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"),
         }

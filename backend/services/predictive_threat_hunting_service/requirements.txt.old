@@ -1,0 +1,18 @@
+# FASE 8: Predictive Threat Hunting Service Dependencies
+
+# Web framework
+fastapi>=0.115.0  # Security fix
+uvicorn[standard]==0.24.0
+pydantic>=2.9.0  # Security patches
+
+# Numerical computing & statistics
+numpy==1.26.2
+scipy==1.11.4
+
+# HTTP client (for testing)
+aiohttp>=3.10.0  # Security1
+httpx>=0.27.0  # Security2
+
+# Utilities
+python-multipart>=0.0.18  # CVE-2024-53981 fix
+anyio>=4.4.0  # Security fix for race condition

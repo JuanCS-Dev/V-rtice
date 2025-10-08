@@ -4,11 +4,11 @@ Lightweight ML-based anomaly detection optimized for speed.
 Uses pre-trained Isolation Forest for real-time detection.
 """
 
-from dataclasses import dataclass
 import logging
-from pathlib import Path
 import pickle
 import time
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np

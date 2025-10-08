@@ -6,17 +6,14 @@ Bio-inspired investigative intelligence for attribution and incident response.
 NO MOCKS - Production-ready investigation algorithms.
 """
 
-from collections import defaultdict
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
 import hashlib
-import json
 import logging
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
-from scipy.spatial.distance import cosine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -180,9 +177,7 @@ class ThreatActorProfiler:
         self.actor_database[actor_id] = profile
         logger.info(f"Registered threat actor: {actor_name} ({actor_id})")
 
-    def attribute_incident(
-        self, incident: SecurityIncident
-    ) -> Tuple[Optional[str], float]:
+    def attribute_incident(self, incident: SecurityIncident) -> Tuple[Optional[str], float]:
         """Attribute incident to threat actor.
 
         Algorithm:
@@ -214,9 +209,7 @@ class ThreatActorProfiler:
             ttp_similarity = self._compute_ttp_similarity(incident_ttps, profile.ttps)
 
             # Infrastructure overlap
-            infra_similarity = self._compute_infrastructure_similarity(
-                incident_iocs, profile.infrastructure
-            )
+            infra_similarity = self._compute_infrastructure_similarity(incident_iocs, profile.infrastructure)
 
             # Weighted combination
             # TTPs are more important than infrastructure (IPs can change)
@@ -232,9 +225,7 @@ class ThreatActorProfiler:
 
             # Update actor profile with new activity
             if best_match_actor:
-                self.actor_database[best_match_actor].activity_timeline.append(
-                    incident.timestamp
-                )
+                self.actor_database[best_match_actor].activity_timeline.append(incident.timestamp)
                 self.actor_database[best_match_actor].ttps.update(incident_ttps)
 
             return best_match_actor, best_match_score
@@ -262,9 +253,7 @@ class ThreatActorProfiler:
 
         return intersection / union if union > 0 else 0.0
 
-    def _compute_infrastructure_similarity(
-        self, iocs1: Set[str], iocs2: Set[str]
-    ) -> float:
+    def _compute_infrastructure_similarity(self, iocs1: Set[str], iocs2: Set[str]) -> float:
         """Compute infrastructure overlap.
 
         Args:
@@ -337,11 +326,7 @@ class ThreatActorProfiler:
         Returns:
             Status dictionary
         """
-        accuracy = (
-            self.correct_attributions / self.attributions_made
-            if self.attributions_made > 0
-            else 0.0
-        )
+        accuracy = self.correct_attributions / self.attributions_made if self.attributions_made > 0 else 0.0
 
         return {
             "component": "threat_actor_profiler",
@@ -402,9 +387,7 @@ class CampaignCorrelator:
 
         for i in range(n):
             for j in range(i + 1, n):
-                similarity = self._compute_incident_similarity(
-                    self.incidents[i], self.incidents[j], time_window_days
-                )
+                similarity = self._compute_incident_similarity(self.incidents[i], self.incidents[j], time_window_days)
                 similarity_matrix[i, j] = similarity
                 similarity_matrix[j, i] = similarity
 
@@ -454,18 +437,14 @@ class CampaignCorrelator:
         ioc_sim = self._jaccard_similarity(set(inc1.iocs), set(inc2.iocs))
 
         # Target similarity
-        target_sim = self._jaccard_similarity(
-            set(inc1.affected_assets), set(inc2.affected_assets)
-        )
+        target_sim = self._jaccard_similarity(set(inc1.affected_assets), set(inc2.affected_assets))
 
         # Temporal proximity (closer in time = higher score)
         time_diff_days = abs((inc1.timestamp - inc2.timestamp).days)
         temporal_sim = max(0, 1 - (time_diff_days / time_window_days))
 
         # Weighted combination
-        similarity = (
-            0.4 * ttp_sim + 0.3 * ioc_sim + 0.2 * target_sim + 0.1 * temporal_sim
-        )
+        similarity = 0.4 * ttp_sim + 0.3 * ioc_sim + 0.2 * target_sim + 0.1 * temporal_sim
 
         return similarity
 
@@ -490,9 +469,7 @@ class CampaignCorrelator:
 
         return intersection / union if union > 0 else 0.0
 
-    def _agglomerative_clustering(
-        self, similarity_matrix: np.ndarray, threshold: float
-    ) -> List[List[int]]:
+    def _agglomerative_clustering(self, similarity_matrix: np.ndarray, threshold: float) -> List[List[int]]:
         """Simple agglomerative clustering.
 
         Args:
@@ -579,9 +556,7 @@ class CampaignCorrelator:
         most_common_ttp = (
             max(
                 all_ttps,
-                key=lambda ttp: sum(
-                    1 for inc in incidents_in_cluster if ttp in inc.ttps_observed
-                ),
+                key=lambda ttp: sum(1 for inc in incidents_in_cluster if ttp in inc.ttps_observed),
             )
             if all_ttps
             else None
@@ -641,11 +616,7 @@ class CampaignCorrelator:
             "incidents_ingested": len(self.incidents),
             "campaigns_identified": self.campaigns_identified,
             "active_campaigns": len(
-                [
-                    c
-                    for c in self.campaigns.values()
-                    if (datetime.now() - c.last_activity).days <= 30
-                ]
+                [c for c in self.campaigns.values() if (datetime.now() - c.last_activity).days <= 30]
             ),
             "timestamp": datetime.now().isoformat(),
         }
@@ -668,9 +639,7 @@ class AutonomousInvestigator:
         self.investigations: Dict[str, Investigation] = {}
         self.investigations_completed: int = 0
 
-    def initiate_investigation(
-        self, incident: SecurityIncident, playbook: str = "standard"
-    ) -> Investigation:
+    def initiate_investigation(self, incident: SecurityIncident, playbook: str = "standard") -> Investigation:
         """Initiate autonomous investigation.
 
         Args:
@@ -680,9 +649,7 @@ class AutonomousInvestigator:
         Returns:
             Investigation instance
         """
-        investigation_id = (
-            f"inv_{incident.incident_id}_{int(datetime.now().timestamp())}"
-        )
+        investigation_id = f"inv_{incident.incident_id}_{int(datetime.now().timestamp())}"
 
         investigation = Investigation(
             investigation_id=investigation_id,
@@ -706,9 +673,7 @@ class AutonomousInvestigator:
 
         return investigation
 
-    def _execute_playbook(
-        self, investigation: Investigation, incident: SecurityIncident, playbook: str
-    ):
+    def _execute_playbook(self, investigation: Investigation, incident: SecurityIncident, playbook: str):
         """Execute investigation playbook.
 
         Playbook steps:
@@ -730,9 +695,7 @@ class AutonomousInvestigator:
         campaign_id = self.correlator.get_incident_campaign(incident.incident_id)
         if campaign_id:
             investigation.related_campaigns.append(campaign_id)
-            investigation.findings.append(
-                f"Incident correlated to campaign: {campaign_id}"
-            )
+            investigation.findings.append(f"Incident correlated to campaign: {campaign_id}")
 
         # STEP 3: Attribute to threat actor
         investigation.status = InvestigationStatus.EVIDENCE_COLLECTED
@@ -746,14 +709,11 @@ class AutonomousInvestigator:
             actor_profile = self.profiler.get_actor_profile(actor_id)
             if actor_profile:
                 investigation.findings.append(
-                    f"Attributed to threat actor: {actor_profile.actor_name} "
-                    f"(confidence: {confidence:.2%})"
+                    f"Attributed to threat actor: {actor_profile.actor_name} (confidence: {confidence:.2%})"
                 )
 
         # STEP 4: Generate recommendations
-        investigation.recommendations = self._generate_recommendations(
-            incident, actor_id
-        )
+        investigation.recommendations = self._generate_recommendations(incident, actor_id)
 
         # Complete investigation
         investigation.status = InvestigationStatus.COMPLETED
@@ -762,9 +722,7 @@ class AutonomousInvestigator:
 
         logger.info(f"Completed investigation: {investigation.investigation_id}")
 
-    def _collect_evidence(
-        self, investigation: Investigation, incident: SecurityIncident
-    ):
+    def _collect_evidence(self, investigation: Investigation, incident: SecurityIncident):
         """Collect and chain evidence.
 
         Args:
@@ -805,13 +763,9 @@ class AutonomousInvestigator:
             }
             investigation.evidence_chain.append(evidence)
 
-        investigation.findings.append(
-            f"Documented {len(incident.affected_assets)} affected assets"
-        )
+        investigation.findings.append(f"Documented {len(incident.affected_assets)} affected assets")
 
-    def _generate_recommendations(
-        self, incident: SecurityIncident, actor_id: Optional[str]
-    ) -> List[str]:
+    def _generate_recommendations(self, incident: SecurityIncident, actor_id: Optional[str]) -> List[str]:
         """Generate investigation recommendations.
 
         Args:
@@ -844,9 +798,7 @@ class AutonomousInvestigator:
         if actor_id:
             actor_profile = self.profiler.get_actor_profile(actor_id)
             if actor_profile and actor_profile.sophistication_score > 0.7:
-                recommendations.append(
-                    "Engage incident response team (sophisticated actor)"
-                )
+                recommendations.append("Engage incident response team (sophisticated actor)")
                 recommendations.append("Consider external threat intelligence support")
 
         # General recommendations
@@ -873,11 +825,7 @@ class AutonomousInvestigator:
             Status dictionary
         """
         active_investigations = len(
-            [
-                inv
-                for inv in self.investigations.values()
-                if inv.status != InvestigationStatus.COMPLETED
-            ]
+            [inv for inv in self.investigations.values() if inv.status != InvestigationStatus.COMPLETED]
         )
 
         return {

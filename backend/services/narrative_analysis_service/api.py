@@ -6,27 +6,24 @@ propaganda attribution, and meme tracking.
 NO MOCKS - Production-ready HTTP interface.
 """
 
-import asyncio
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
 
+import uvicorn
 from fastapi import BackgroundTasks, FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
 from narrative_core import (
     BotDetector,
     MemeTracker,
-    NarrativeEntity,
     PropagandaAttributor,
     SocialGraphAnalyzer,
 )
-from pydantic import BaseModel, Field
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instances
@@ -74,9 +71,7 @@ class SocialRelationRequest(BaseModel):
 
     source_id: str = Field(..., description="Source account ID")
     target_id: str = Field(..., description="Target account ID")
-    relation_type: str = Field(
-        ..., description="Relationship type (follows, retweets, mentions)"
-    )
+    relation_type: str = Field(..., description="Relationship type (follows, retweets, mentions)")
     timestamp: Optional[str] = Field(None, description="ISO timestamp")
 
 
@@ -100,9 +95,7 @@ class BotAnalysisRequest(BaseModel):
 
     account_id: str = Field(..., description="Account ID to analyze")
     posts: List[Dict[str, Any]] = Field(..., description="Recent posts from account")
-    account_metadata: Dict[str, Any] = Field(
-        ..., description="Account metadata (created_at, followers, etc)"
-    )
+    account_metadata: Dict[str, Any] = Field(..., description="Account metadata (created_at, followers, etc)")
 
 
 class BotScoreResponse(BaseModel):
@@ -138,9 +131,7 @@ class MemeTrackingRequest(BaseModel):
 
     meme_id: str = Field(..., description="Meme ID")
     image_data: str = Field(..., description="Base64-encoded image data")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class MemeLineageResponse(BaseModel):
@@ -180,9 +171,7 @@ async def add_social_relation(request: SocialRelationRequest):
         Success confirmation
     """
     if social_graph is None:
-        raise HTTPException(
-            status_code=503, detail="Social graph analyzer not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Social graph analyzer not initialized")
 
     try:
         # Parse timestamp if provided
@@ -218,16 +207,12 @@ async def get_influence_scores():
         Influence scores for all accounts
     """
     if social_graph is None:
-        raise HTTPException(
-            status_code=503, detail="Social graph analyzer not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Social graph analyzer not initialized")
 
     try:
         scores = social_graph.compute_influence_scores()
 
-        return InfluenceScoresResponse(
-            scores=scores, algorithm="pagerank", timestamp=datetime.now().isoformat()
-        )
+        return InfluenceScoresResponse(scores=scores, algorithm="pagerank", timestamp=datetime.now().isoformat())
 
     except Exception as e:
         logger.error(f"Error computing influence scores: {e}")
@@ -245,9 +230,7 @@ async def detect_coordinated_behavior(request: CoordinationDetectionRequest):
         Detected coordination clusters
     """
     if social_graph is None:
-        raise HTTPException(
-            status_code=503, detail="Social graph analyzer not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Social graph analyzer not initialized")
 
     try:
         clusters = social_graph.detect_coordinated_behavior(
@@ -257,8 +240,7 @@ async def detect_coordinated_behavior(request: CoordinationDetectionRequest):
 
         # Convert sets to lists for JSON serialization
         clusters_list = [
-            {"cluster_id": idx, "accounts": list(cluster), "size": len(cluster)}
-            for idx, cluster in enumerate(clusters)
+            {"cluster_id": idx, "accounts": list(cluster), "size": len(cluster)} for idx, cluster in enumerate(clusters)
         ]
 
         return {
@@ -285,9 +267,7 @@ async def detect_communities(resolution: float = 1.0):
         Detected communities
     """
     if social_graph is None:
-        raise HTTPException(
-            status_code=503, detail="Social graph analyzer not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Social graph analyzer not initialized")
 
     try:
         communities = social_graph.detect_communities(resolution=resolution)
@@ -350,9 +330,7 @@ async def analyze_account_for_bots(request: BotAnalysisRequest):
 
 
 @app.post("/bot/batch_analyze")
-async def batch_analyze_accounts(
-    accounts: List[BotAnalysisRequest], background_tasks: BackgroundTasks
-):
+async def batch_analyze_accounts(accounts: List[BotAnalysisRequest], background_tasks: BackgroundTasks):
     """Batch analyze multiple accounts.
 
     Args:
@@ -412,15 +390,11 @@ async def analyze_propaganda(request: PropagandaAnalysisRequest):
         Attribution result with source and confidence
     """
     if propaganda_attributor is None:
-        raise HTTPException(
-            status_code=503, detail="Propaganda attributor not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Propaganda attributor not initialized")
 
     try:
         # Analyze narrative
-        attribution = propaganda_attributor.attribute_narrative(
-            narrative_id=request.narrative_id, text=request.text
-        )
+        attribution = propaganda_attributor.attribute_narrative(narrative_id=request.narrative_id, text=request.text)
 
         return PropagandaAttributionResponse(
             narrative_id=attribution.narrative_id,
@@ -448,9 +422,7 @@ async def register_propaganda_source(source_id: str, texts: List[str]):
         Registration confirmation
     """
     if propaganda_attributor is None:
-        raise HTTPException(
-            status_code=503, detail="Propaganda attributor not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Propaganda attributor not initialized")
 
     try:
         # Register source
@@ -493,9 +465,7 @@ async def track_meme(request: MemeTrackingRequest):
         image_data = base64.b64decode(request.image_data)
 
         # Track meme
-        lineage = meme_tracker.track_meme(
-            meme_id=request.meme_id, image_data=image_data, metadata=request.metadata
-        )
+        lineage = meme_tracker.track_meme(meme_id=request.meme_id, image_data=image_data, metadata=request.metadata)
 
         return MemeLineageResponse(
             meme_id=lineage.meme_id,

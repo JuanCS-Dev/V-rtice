@@ -16,16 +16,17 @@ ethical hacking guidelines and legal frameworks.
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
 from metrics import MetricsCollector
 from models import CommandResult, CommandStatus, OffensiveCommand
 from orchestrator import OffensiveOrchestrator
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus Offensive Gateway Service", version="1.0.0")
 
@@ -100,9 +101,7 @@ async def execute_offensive_command_endpoint(
         status=CommandStatus.PENDING,
         created_at=datetime.now().isoformat(),
     )
-    asyncio.create_task(
-        offensive_orchestrator.execute_offensive_command(command)
-    )  # Run in background
+    asyncio.create_task(offensive_orchestrator.execute_offensive_command(command))  # Run in background
 
     return command
 

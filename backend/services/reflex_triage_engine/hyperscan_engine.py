@@ -6,12 +6,11 @@ Supports YARA rules, Snort signatures, custom patterns.
 Performance: 10-50ms for 50k+ signatures (hardware-accelerated regex).
 """
 
-from dataclasses import dataclass
 import json
 import logging
-from pathlib import Path
 import time
-from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +63,7 @@ class HyperscanEngine:
         if signatures_path:
             self.load_signatures(signatures_path)
 
-        logger.info(
-            f"HyperscanEngine initialized (hyperscan={'available' if HYPERSCAN_AVAILABLE else 'FALLBACK'})"
-        )
+        logger.info(f"HyperscanEngine initialized (hyperscan={'available' if HYPERSCAN_AVAILABLE else 'FALLBACK'})")
 
     def load_signatures(self, path: str):
         """Load signatures from JSON file.
@@ -96,11 +93,7 @@ class HyperscanEngine:
                     {
                         "id": sig_id,
                         "pattern": sig["pattern"],
-                        "flags": (
-                            hyperscan.HS_FLAG_CASELESS | hyperscan.HS_FLAG_DOTALL
-                            if HYPERSCAN_AVAILABLE
-                            else 0
-                        ),
+                        "flags": (hyperscan.HS_FLAG_CASELESS | hyperscan.HS_FLAG_DOTALL if HYPERSCAN_AVAILABLE else 0),
                     }
                 )
                 self.signature_map[sig_id] = {
@@ -146,9 +139,7 @@ class HyperscanEngine:
                 self.compiled = True
 
                 compile_time = (time.time() - compile_start) * 1000
-                logger.info(
-                    f"Hyperscan database compiled: {len(patterns)} patterns in {compile_time:.1f}ms"
-                )
+                logger.info(f"Hyperscan database compiled: {len(patterns)} patterns in {compile_time:.1f}ms")
 
             except Exception as e:
                 logger.error(f"Hyperscan compilation failed: {e}")
@@ -194,9 +185,7 @@ class HyperscanEngine:
                     return 1  # Stop scanning
 
                 sig_meta = self.signature_map.get(id, {})
-                match_data = data[from_offset:to_offset].decode(
-                    "utf-8", errors="ignore"
-                )
+                match_data = data[from_offset:to_offset].decode("utf-8", errors="ignore")
 
                 matches.append(
                     SignatureMatch(
@@ -214,9 +203,7 @@ class HyperscanEngine:
                 return 0  # Continue scanning
 
             try:
-                self.database.scan(
-                    data, match_event_handler=on_match, scratch=self.scratch
-                )
+                self.database.scan(data, match_event_handler=on_match, scratch=self.scratch)
             except Exception as e:
                 logger.error(f"Hyperscan scan error: {e}")
 

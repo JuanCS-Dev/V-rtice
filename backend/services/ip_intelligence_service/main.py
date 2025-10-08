@@ -14,14 +14,14 @@ geo-fencing security policies within the Maximus AI system.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
 
 from config import get_settings
 from database import get_ip_data, update_ip_data
-from fastapi import Depends, FastAPI, HTTPException
 from models import IPInfo, IPQuery
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus IP Intelligence Service", version="1.0.0")
 
@@ -70,9 +70,7 @@ async def query_ip_intelligence(query: IPQuery) -> IPInfo:
     ip_info = await get_ip_data(query.ip_address)
     if not ip_info:
         # Simulate fetching from external source if not in local DB
-        print(
-            f"[API] IP {query.ip_address} not in local cache, simulating external lookup."
-        )
+        print(f"[API] IP {query.ip_address} not in local cache, simulating external lookup.")
         await asyncio.sleep(0.5)  # Simulate external API call
         # Mock external lookup result
         if query.ip_address == "8.8.8.8":

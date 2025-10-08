@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+requests
+pydantic
+httpx
+
+# Added for refactoring
+SQLAlchemy
+aiosqlite
+pydantic-settings
+alembic

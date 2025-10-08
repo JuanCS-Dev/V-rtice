@@ -81,9 +81,7 @@ class OffensiveOrchestrator:
         """
         self.metrics_collector = metrics_collector
         self.metasploit_wrapper = MockMetasploitWrapper()  # Replace with actual wrapper
-        self.cobalt_strike_wrapper = (
-            MockCobaltStrikeWrapper()
-        )  # Replace with actual wrapper
+        self.cobalt_strike_wrapper = MockCobaltStrikeWrapper()  # Replace with actual wrapper
         self.active_commands: Dict[str, OffensiveCommand] = {}
         self.command_results: Dict[str, CommandResult] = {}
         print("[OffensiveOrchestrator] Initialized Offensive Orchestrator.")
@@ -97,20 +95,14 @@ class OffensiveOrchestrator:
         self.active_commands[command.id] = command
         command.status = CommandStatus.RUNNING
         self.metrics_collector.record_metric("offensive_commands_started")
-        print(
-            f"[OffensiveOrchestrator] Executing command {command.id}: {command.name} using {command.tool}"
-        )
+        print(f"[OffensiveOrchestrator] Executing command {command.id}: {command.name} using {command.tool}")
 
         try:
             results_data: Dict[str, Any] = {}
             if command.tool == "metasploit":
-                results_data = await self.metasploit_wrapper.execute_exploit(
-                    command.parameters
-                )
+                results_data = await self.metasploit_wrapper.execute_exploit(command.parameters)
             elif command.tool == "cobalt_strike":
-                results_data = await self.cobalt_strike_wrapper.execute_task(
-                    command.parameters
-                )
+                results_data = await self.cobalt_strike_wrapper.execute_task(command.parameters)
             else:
                 raise ValueError(f"Unsupported offensive tool: {command.tool}")
 
@@ -123,9 +115,7 @@ class OffensiveOrchestrator:
                 output=results_data,
                 timestamp=datetime.now().isoformat(),
             )
-            print(
-                f"[OffensiveOrchestrator] Offensive command {command.id} completed successfully."
-            )
+            print(f"[OffensiveOrchestrator] Offensive command {command.id} completed successfully.")
 
         except Exception as e:
             command.status = CommandStatus.FAILED
@@ -167,8 +157,4 @@ class OffensiveOrchestrator:
         Returns:
             List[OffensiveCommand]: A list of active OffensiveCommand objects.
         """
-        return [
-            cmd
-            for cmd in self.active_commands.values()
-            if cmd.status == CommandStatus.RUNNING
-        ]
+        return [cmd for cmd in self.active_commands.values() if cmd.status == CommandStatus.RUNNING]

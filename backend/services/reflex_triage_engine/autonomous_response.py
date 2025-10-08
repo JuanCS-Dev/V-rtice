@@ -10,11 +10,10 @@
 Safety: Dry-run mode enabled by default for 1 week.
 """
 
-import asyncio
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-import logging
 from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -79,9 +78,7 @@ class AutonomousResponseEngine:
         Returns:
             ActionResult with execution outcome
         """
-        logger.info(
-            f"Executing playbook: {action.value} on {target} (dry_run={self.dry_run_mode})"
-        )
+        logger.info(f"Executing playbook: {action.value} on {target} (dry_run={self.dry_run_mode})")
 
         if action == PlaybookAction.BLOCK_IP:
             result = await self._block_ip(target)
@@ -163,9 +160,7 @@ class AutonomousResponseEngine:
                 details={"ip": ip, "error": str(e)},
             )
 
-    async def _kill_process(
-        self, process_identifier: str, context: Optional[Dict]
-    ) -> ActionResult:
+    async def _kill_process(self, process_identifier: str, context: Optional[Dict]) -> ActionResult:
         """Terminate malicious process.
 
         Args:
@@ -305,7 +300,7 @@ class AutonomousResponseEngine:
                 timestamp=datetime.now().isoformat(),
                 details={
                     "file": file_path,
-                    "quarantine_path": f'/quarantine/{file_path.split("/")[-1]}',
+                    "quarantine_path": f"/quarantine/{file_path.split('/')[-1]}",
                 },
             )
 
@@ -321,9 +316,7 @@ class AutonomousResponseEngine:
                 details={"file": file_path, "error": str(e)},
             )
 
-    async def _redirect_honeypot(
-        self, ip: str, context: Optional[Dict]
-    ) -> ActionResult:
+    async def _redirect_honeypot(self, ip: str, context: Optional[Dict]) -> ActionResult:
         """Redirect attacker to honeypot.
 
         Args:
@@ -348,9 +341,7 @@ class AutonomousResponseEngine:
 
         try:
             # Real implementation would use NAT/routing rules
-            honeypot_ip = (
-                context.get("honeypot_ip", "10.0.0.100") if context else "10.0.0.100"
-            )
+            honeypot_ip = context.get("honeypot_ip", "10.0.0.100") if context else "10.0.0.100"
 
             message = f"Redirected {ip} to honeypot {honeypot_ip}"
             logger.info(message)
@@ -396,8 +387,7 @@ class AutonomousResponseEngine:
             "isolated_hosts": len(self.isolated_hosts),
             "quarantined_files": len(self.quarantined_files),
             "action_breakdown": {
-                action.value: sum(1 for a in self.action_history if a.action == action)
-                for action in PlaybookAction
+                action.value: sum(1 for a in self.action_history if a.action == action) for action in PlaybookAction
             },
         }
 

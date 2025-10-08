@@ -15,7 +15,7 @@ Key functionalities include:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 
@@ -40,9 +40,7 @@ class MockLongTermMemoryClient:
         await asyncio.sleep(0.01)
         return f"ltm_id_{len(content)}"
 
-    async def retrieve_similar_knowledge(
-        self, query: str, top_k: int = 1
-    ) -> List[Dict[str, Any]]:
+    async def retrieve_similar_knowledge(self, query: str, top_k: int = 1) -> List[Dict[str, Any]]:
         """Simula a recuperação de conhecimento similar do banco de dados de longo prazo.
 
         Args:
@@ -121,9 +119,7 @@ class MemoryConsolidationCore:
             "ingested_at": datetime.now().isoformat(),
         }
         self.short_term_memories.append(memory_entry)
-        print(
-            f"[MemoryConsolidationCore] Ingested short-term memory from {source_service} ({memory_type})."
-        )
+        print(f"[MemoryConsolidationCore] Ingested short-term memory from {source_service} ({memory_type}).")
 
     async def consolidate_memories(self):
         """Processes short-term memories and consolidates them into long-term knowledge."""
@@ -148,12 +144,8 @@ class MemoryConsolidationCore:
                 "memory_type": memory["memory_type"],
                 "original_timestamp": memory["timestamp"],
             }
-            await self.long_term_memory_client.store_knowledge(
-                processed_content, metadata
-            )
-            print(
-                f"[MemoryConsolidationCore] Consolidated memory from {memory['source_service']}."
-            )
+            await self.long_term_memory_client.store_knowledge(processed_content, metadata)
+            print(f"[MemoryConsolidationCore] Consolidated memory from {memory['source_service']}.")
 
         self.last_consolidation_time = datetime.now()
         self.current_status = "idle"
@@ -186,9 +178,5 @@ class MemoryConsolidationCore:
             "consolidation_loop_running": self.is_running,
             "short_term_memories_count": len(self.short_term_memories),
             "consolidation_cycles_run": self.consolidation_cycles_run,
-            "last_consolidation": (
-                self.last_consolidation_time.isoformat()
-                if self.last_consolidation_time
-                else "N/A"
-            ),
+            "last_consolidation": (self.last_consolidation_time.isoformat() if self.last_consolidation_time else "N/A"),
         }

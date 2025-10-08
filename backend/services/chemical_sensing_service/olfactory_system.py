@@ -38,9 +38,7 @@ class OlfactorySystem:
             Dict[str, Any]: A dictionary containing the scan results.
         """
         self.current_status = "scanning"
-        print(
-            f"[OlfactorySystem] Performing olfactory scan in area: {area or 'general'}"
-        )
+        print(f"[OlfactorySystem] Performing olfactory scan in area: {area or 'general'}")
         await asyncio.sleep(2)  # Simulate scan duration
 
         # Simulate detection of various chemical compounds
@@ -81,9 +79,7 @@ class OlfactorySystem:
             "anomalies_detected": True if area == "industrial_zone" else False,
         }
         # Filter out None values from detected_compounds
-        results["detected_compounds"] = [
-            c for c in results["detected_compounds"] if c is not None
-        ]
+        results["detected_compounds"] = [c for c in results["detected_compounds"] if c is not None]
 
         self.last_scan_time = datetime.now()
         self.current_status = "complete"
@@ -97,7 +93,5 @@ class OlfactorySystem:
         """
         return {
             "status": self.current_status,
-            "last_scan": (
-                self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
-            ),
+            "last_scan": (self.last_scan_time.isoformat() if self.last_scan_time else "N/A"),
         }

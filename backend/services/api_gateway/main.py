@@ -11,32 +11,22 @@ complexity of the underlying microservices architecture.
 """
 
 import os
-from typing import Any, Dict, Optional
+from typing import Dict
 
+import httpx
+import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
-import httpx
-import uvicorn
 
 app = FastAPI(title="Maximus API Gateway", version="1.0.0")
 
 # Configuration for backend services
-MAXIMUS_CORE_SERVICE_URL = os.getenv(
-    "MAXIMUS_CORE_SERVICE_URL", "http://localhost:8000"
-)
-CHEMICAL_SENSING_SERVICE_URL = os.getenv(
-    "CHEMICAL_SENSING_SERVICE_URL", "http://localhost:8001"
-)
-SOMATOSENSORY_SERVICE_URL = os.getenv(
-    "SOMATOSENSORY_SERVICE_URL", "http://localhost:8002"
-)
-VISUAL_CORTEX_SERVICE_URL = os.getenv(
-    "VISUAL_CORTEX_SERVICE_URL", "http://localhost:8003"
-)
-AUDITORY_CORTEX_SERVICE_URL = os.getenv(
-    "AUDITORY_CORTEX_SERVICE_URL", "http://localhost:8004"
-)
+MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8000")
+CHEMICAL_SENSING_SERVICE_URL = os.getenv("CHEMICAL_SENSING_SERVICE_URL", "http://localhost:8001")
+SOMATOSENSORY_SERVICE_URL = os.getenv("SOMATOSENSORY_SERVICE_URL", "http://localhost:8002")
+VISUAL_CORTEX_SERVICE_URL = os.getenv("VISUAL_CORTEX_SERVICE_URL", "http://localhost:8003")
+AUDITORY_CORTEX_SERVICE_URL = os.getenv("AUDITORY_CORTEX_SERVICE_URL", "http://localhost:8004")
 
 # API Key for authentication (simple example)
 API_KEY_NAME = "X-API-Key"
@@ -84,9 +74,7 @@ async def health_check() -> Dict[str, str]:
 
 
 @app.api_route("/core/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def route_core_service(
-    path: str, request: Request, api_key: str = Depends(verify_api_key)
-):
+async def route_core_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
     """Routes requests to the Maximus Core Service.
 
     Args:
@@ -101,9 +89,7 @@ async def route_core_service(
 
 
 @app.api_route("/chemical/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def route_chemical_sensing_service(
-    path: str, request: Request, api_key: str = Depends(verify_api_key)
-):
+async def route_chemical_sensing_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
     """Routes requests to the Chemical Sensing Service.
 
     Args:
@@ -118,9 +104,7 @@ async def route_chemical_sensing_service(
 
 
 @app.api_route("/somatosensory/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def route_somatosensory_service(
-    path: str, request: Request, api_key: str = Depends(verify_api_key)
-):
+async def route_somatosensory_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
     """Routes requests to the Somatosensory Service.
 
     Args:
@@ -135,9 +119,7 @@ async def route_somatosensory_service(
 
 
 @app.api_route("/visual/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def route_visual_cortex_service(
-    path: str, request: Request, api_key: str = Depends(verify_api_key)
-):
+async def route_visual_cortex_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
     """Routes requests to the Visual Cortex Service.
 
     Args:
@@ -152,9 +134,7 @@ async def route_visual_cortex_service(
 
 
 @app.api_route("/auditory/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def route_auditory_cortex_service(
-    path: str, request: Request, api_key: str = Depends(verify_api_key)
-):
+async def route_auditory_cortex_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
     """Routes requests to the Auditory Cortex Service.
 
     Args:
@@ -186,38 +166,24 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
     async with httpx.AsyncClient() as client:
         try:
             # Reconstruct headers, excluding host and content-length which httpx handles
-            headers = {
-                k: v
-                for k, v in request.headers.items()
-                if k.lower() not in ["host", "content-length"]
-            }
+            headers = {k: v for k, v in request.headers.items() if k.lower() not in ["host", "content-length"]}
 
             # Forward the request based on its method
             if request.method == "GET":
-                response = await client.get(
-                    url, params=request.query_params, headers=headers
-                )
+                response = await client.get(url, params=request.query_params, headers=headers)
             elif request.method == "POST":
-                response = await client.post(
-                    url, content=await request.body(), headers=headers
-                )
+                response = await client.post(url, content=await request.body(), headers=headers)
             elif request.method == "PUT":
-                response = await client.put(
-                    url, content=await request.body(), headers=headers
-                )
+                response = await client.put(url, content=await request.body(), headers=headers)
             elif request.method == "DELETE":
                 response = await client.delete(url, headers=headers)
             else:
                 raise HTTPException(status_code=405, detail="Method not allowed")
 
             response.raise_for_status()  # Raise an exception for 4xx/5xx responses
-            return JSONResponse(
-                content=response.json(), status_code=response.status_code
-            )
+            return JSONResponse(content=response.json(), status_code=response.status_code)
         except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Service communication error: {e}"
-            )
+            raise HTTPException(status_code=500, detail=f"Service communication error: {e}")
         except httpx.HTTPStatusError as e:
             raise HTTPException(
                 status_code=e.response.status_code,

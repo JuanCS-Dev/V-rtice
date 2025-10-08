@@ -26,11 +26,11 @@ Implements real graph algorithms (NetworkX), NLP (spaCy), and computer vision (O
 NO MOCKS - Production-ready implementation.
 """
 
-from collections import defaultdict, deque
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 import hashlib
 import logging
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
@@ -181,9 +181,7 @@ class SocialGraphAnalyzer:
         try:
             import networkx.algorithms.community as nx_comm
 
-            communities = nx_comm.louvain_communities(
-                undirected, resolution=resolution, seed=42
-            )
+            communities = nx_comm.louvain_communities(undirected, resolution=resolution, seed=42)
 
             # Convert to dict
             community_map = {}
@@ -265,9 +263,7 @@ class SocialGraphAnalyzer:
             "graph_edges": self.graph.number_of_edges() if self.graph else 0,
             "communities_detected": len(self.communities),
             "top_influencers": (
-                sorted(self.influence_scores.items(), key=lambda x: x[1], reverse=True)[
-                    :10
-                ]
+                sorted(self.influence_scores.items(), key=lambda x: x[1], reverse=True)[:10]
                 if self.influence_scores
                 else []
             ),
@@ -315,10 +311,7 @@ class BotDetector:
         if len(posts) > 1:
             timestamps = [p["timestamp"] for p in posts if "timestamp" in p]
             if timestamps:
-                intervals = [
-                    (timestamps[i + 1] - timestamps[i]).total_seconds()
-                    for i in range(len(timestamps) - 1)
-                ]
+                intervals = [(timestamps[i + 1] - timestamps[i]).total_seconds() for i in range(len(timestamps) - 1)]
 
                 if intervals:
                     # Bot signal: low variance in posting intervals
@@ -327,9 +320,7 @@ class BotDetector:
                     coefficient_of_variation = std_interval / max(mean_interval, 1)
 
                     # Low CV = regular posting = bot-like
-                    indicators["posting_regularity"] = 1.0 - min(
-                        1.0, coefficient_of_variation
-                    )
+                    indicators["posting_regularity"] = 1.0 - min(1.0, coefficient_of_variation)
 
         # Signal 2: Content diversity
         if len(posts) > 5:
@@ -347,9 +338,7 @@ class BotDetector:
                 hour_distribution = np.bincount(hours, minlength=24)
                 # Uniform distribution = bot-like
                 expected_uniform = len(hours) / 24
-                chi_square = np.sum(
-                    (hour_distribution - expected_uniform) ** 2 / expected_uniform
-                )
+                chi_square = np.sum((hour_distribution - expected_uniform) ** 2 / expected_uniform)
 
                 # Low chi-square = uniform = bot-like
                 indicators["temporal_uniformity"] = 1.0 / (1.0 + chi_square / 100)
@@ -367,9 +356,7 @@ class BotDetector:
         # Aggregate bot probability
         if indicators:
             bot_probability = np.mean(list(indicators.values()))
-            confidence = 1.0 - (
-                np.std(list(indicators.values())) if len(indicators) > 1 else 0.0
-            )
+            confidence = 1.0 - (np.std(list(indicators.values())) if len(indicators) > 1 else 0.0)
         else:
             bot_probability = 0.5
             confidence = 0.0
@@ -384,10 +371,7 @@ class BotDetector:
 
         self.bot_scores[account_id] = bot_score
 
-        logger.info(
-            f"Bot analysis for {account_id}: "
-            f"prob={bot_probability:.2f}, confidence={confidence:.2f}"
-        )
+        logger.info(f"Bot analysis for {account_id}: prob={bot_probability:.2f}, confidence={confidence:.2f}")
 
         return bot_score
 
@@ -397,9 +381,7 @@ class BotDetector:
         Returns:
             Status dictionary
         """
-        bot_count = sum(
-            1 for score in self.bot_scores.values() if score.bot_probability > 0.7
-        )
+        bot_count = sum(1 for score in self.bot_scores.values() if score.bot_probability > 0.7)
 
         return {
             "status": "operational",
@@ -451,22 +433,18 @@ class PropagandaAttributor:
         for trigram in char_trigrams:
             char_trigram_freq[trigram] = char_trigram_freq.get(trigram, 0) + 1
 
-        top_trigrams = sorted(
-            char_trigram_freq.items(), key=lambda x: x[1], reverse=True
-        )[:20]
+        top_trigrams = sorted(char_trigram_freq.items(), key=lambda x: x[1], reverse=True)[:20]
 
         fingerprint["char_trigrams"] = dict(top_trigrams)
 
         # Feature 2: Word bi-grams (top 10)
-        word_bigrams = [f"{words[i]}_{words[i+1]}" for i in range(len(words) - 1)]
+        word_bigrams = [f"{words[i]}_{words[i + 1]}" for i in range(len(words) - 1)]
 
         word_bigram_freq = {}
         for bigram in word_bigrams:
             word_bigram_freq[bigram] = word_bigram_freq.get(bigram, 0) + 1
 
-        top_bigrams = sorted(
-            word_bigram_freq.items(), key=lambda x: x[1], reverse=True
-        )[:10]
+        top_bigrams = sorted(word_bigram_freq.items(), key=lambda x: x[1], reverse=True)[:10]
 
         fingerprint["word_bigrams"] = dict(top_bigrams)
 
@@ -478,13 +456,9 @@ class PropagandaAttributor:
         fingerprint["punctuation_pattern"] = punctuation_str[:50]  # First 50
 
         # Feature 4: Capitalization patterns
-        caps_pattern = "".join(
-            ["C" if c.isupper() else "l" for c in text if c.isalpha()]
-        )
+        caps_pattern = "".join(["C" if c.isupper() else "l" for c in text if c.isalpha()])
 
-        fingerprint["caps_density"] = sum(1 for c in text if c.isupper()) / max(
-            len(text), 1
-        )
+        fingerprint["caps_density"] = sum(1 for c in text if c.isupper()) / max(len(text), 1)
         fingerprint["caps_pattern"] = caps_pattern[:50]
 
         # Feature 5: Vocabulary richness (TTR - Type-Token Ratio)
@@ -492,15 +466,11 @@ class PropagandaAttributor:
         total_words = len(words)
 
         fingerprint["vocabulary_richness"] = unique_words / max(total_words, 1)
-        fingerprint["avg_word_length"] = (
-            np.mean([len(w) for w in words]) if words else 0
-        )
+        fingerprint["avg_word_length"] = np.mean([len(w) for w in words]) if words else 0
 
         return fingerprint
 
-    def compute_fingerprint_similarity(
-        self, fp1: Dict[str, Any], fp2: Dict[str, Any]
-    ) -> float:
+    def compute_fingerprint_similarity(self, fp1: Dict[str, Any], fp2: Dict[str, Any]) -> float:
         """Compute similarity between two linguistic fingerprints.
 
         Uses weighted combination of feature similarities.
@@ -531,9 +501,7 @@ class PropagandaAttributor:
             similarities.append(("bigrams", jaccard, 0.25))
 
         # Punctuation similarity
-        punct_diff = abs(
-            fp1.get("punctuation_density", 0) - fp2.get("punctuation_density", 0)
-        )
+        punct_diff = abs(fp1.get("punctuation_density", 0) - fp2.get("punctuation_density", 0))
         punct_sim = 1.0 - min(1.0, punct_diff * 10)
         similarities.append(("punctuation", punct_sim, 0.15))
 
@@ -543,18 +511,14 @@ class PropagandaAttributor:
         similarities.append(("capitalization", caps_sim, 0.15))
 
         # Vocabulary richness similarity
-        vocab_diff = abs(
-            fp1.get("vocabulary_richness", 0) - fp2.get("vocabulary_richness", 0)
-        )
+        vocab_diff = abs(fp1.get("vocabulary_richness", 0) - fp2.get("vocabulary_richness", 0))
         vocab_sim = 1.0 - min(1.0, vocab_diff * 2)
         similarities.append(("vocabulary", vocab_sim, 0.15))
 
         # Weighted average
         if similarities:
             total_weight = sum(weight for _, _, weight in similarities)
-            weighted_sim = (
-                sum(sim * weight for _, sim, weight in similarities) / total_weight
-            )
+            weighted_sim = sum(sim * weight for _, sim, weight in similarities) / total_weight
 
             return float(weighted_sim)
 
@@ -588,9 +552,7 @@ class PropagandaAttributor:
                 continue
 
             # Compute fingerprint for source (aggregate)
-            source_fp = self._aggregate_fingerprints(
-                [self.extract_linguistic_fingerprint(text) for text in texts]
-            )
+            source_fp = self._aggregate_fingerprints([self.extract_linguistic_fingerprint(text) for text in texts])
 
             # Compute similarity
             similarity = self.compute_fingerprint_similarity(narrative_fp, source_fp)
@@ -612,8 +574,7 @@ class PropagandaAttributor:
         self.attributions.append(attribution)
 
         logger.info(
-            f"Narrative attributed to {attribution.attributed_source} "
-            f"(confidence={attribution.confidence:.2f})"
+            f"Narrative attributed to {attribution.attributed_source} (confidence={attribution.confidence:.2f})"
         )
 
         return attribution
@@ -636,9 +597,7 @@ class PropagandaAttributor:
             for trigram, count in fp.get("char_trigrams", {}).items():
                 all_trigrams[trigram] += count
 
-        top_trigrams = dict(
-            sorted(all_trigrams.items(), key=lambda x: x[1], reverse=True)[:20]
-        )
+        top_trigrams = dict(sorted(all_trigrams.items(), key=lambda x: x[1], reverse=True)[:20])
 
         # Aggregate bigrams
         all_bigrams = defaultdict(int)
@@ -646,18 +605,12 @@ class PropagandaAttributor:
             for bigram, count in fp.get("word_bigrams", {}).items():
                 all_bigrams[bigram] += count
 
-        top_bigrams = dict(
-            sorted(all_bigrams.items(), key=lambda x: x[1], reverse=True)[:10]
-        )
+        top_bigrams = dict(sorted(all_bigrams.items(), key=lambda x: x[1], reverse=True)[:10])
 
         # Average numeric features
-        punct_density = np.mean(
-            [fp.get("punctuation_density", 0) for fp in fingerprints]
-        )
+        punct_density = np.mean([fp.get("punctuation_density", 0) for fp in fingerprints])
         caps_density = np.mean([fp.get("caps_density", 0) for fp in fingerprints])
-        vocab_richness = np.mean(
-            [fp.get("vocabulary_richness", 0) for fp in fingerprints]
-        )
+        vocab_richness = np.mean([fp.get("vocabulary_richness", 0) for fp in fingerprints])
 
         return {
             "char_trigrams": top_trigrams,
@@ -677,11 +630,7 @@ class PropagandaAttributor:
             "status": "operational",
             "narratives_analyzed": len(self.attributions),
             "source_fingerprints": len(self.source_fingerprints),
-            "avg_confidence": (
-                np.mean([a.confidence for a in self.attributions])
-                if self.attributions
-                else 0.0
-            ),
+            "avg_confidence": (np.mean([a.confidence for a in self.attributions]) if self.attributions else 0.0),
         }
 
 
@@ -740,9 +689,7 @@ class MemeTracker:
 
         return distance
 
-    def track_meme(
-        self, meme_id: str, image_data: bytes, metadata: Dict[str, Any]
-    ) -> MemeLineage:
+    def track_meme(self, meme_id: str, image_data: bytes, metadata: Dict[str, Any]) -> MemeLineage:
         """Track meme and identify lineage.
 
         Args:
@@ -782,10 +729,7 @@ class MemeTracker:
         self.meme_database[meme_id] = lineage
         self.hash_to_meme[phash] = meme_id
 
-        logger.info(
-            f"Meme {meme_id} tracked "
-            f"(parent={parent_meme_id}, distance={min_distance})"
-        )
+        logger.info(f"Meme {meme_id} tracked (parent={parent_meme_id}, distance={min_distance})")
 
         return lineage
 
@@ -828,9 +772,7 @@ class MemeTracker:
         Returns:
             Status dictionary
         """
-        total_propagation = sum(
-            m.propagation_count for m in self.meme_database.values()
-        )
+        total_propagation = sum(m.propagation_count for m in self.meme_database.values())
 
         return {
             "status": "operational",

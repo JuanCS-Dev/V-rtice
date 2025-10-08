@@ -58,9 +58,7 @@ class OfflineThreatIntelEngine:
         self.last_db_update: Optional[datetime] = datetime.now()
         self.query_count: int = 0
 
-    async def get_threat_intel(
-        self, indicator: str, indicator_type: str
-    ) -> Dict[str, Any]:
+    async def get_threat_intel(self, indicator: str, indicator_type: str) -> Dict[str, Any]:
         """Retrieves threat intelligence for a given indicator from the offline database.
 
         Args:
@@ -70,9 +68,7 @@ class OfflineThreatIntelEngine:
         Returns:
             Dict[str, Any]: A dictionary containing the threat intelligence information.
         """
-        print(
-            f"[OfflineThreatIntelEngine] Querying offline DB for {indicator_type}: {indicator}"
-        )
+        print(f"[OfflineThreatIntelEngine] Querying offline DB for {indicator_type}: {indicator}")
         await asyncio.sleep(0.05)  # Simulate fast lookup
 
         key = f"{indicator_type}:{indicator}"
@@ -95,9 +91,7 @@ class OfflineThreatIntelEngine:
         Args:
             new_intel (List[Dict[str, Any]]): A list of new threat intelligence entries.
         """
-        print(
-            f"[OfflineThreatIntelEngine] Updating offline DB with {len(new_intel)} new entries."
-        )
+        print(f"[OfflineThreatIntelEngine] Updating offline DB with {len(new_intel)} new entries.")
         await asyncio.sleep(0.1)  # Simulate update time
         for entry in new_intel:
             key = f"{entry['type']}:{entry['indicator']}"
@@ -113,8 +107,6 @@ class OfflineThreatIntelEngine:
         return {
             "status": "active",
             "total_indicators_in_db": len(self.threat_intel_db),
-            "last_db_update": (
-                self.last_db_update.isoformat() if self.last_db_update else "N/A"
-            ),
+            "last_db_update": (self.last_db_update.isoformat() if self.last_db_update else "N/A"),
             "total_queries": self.query_count,
         }

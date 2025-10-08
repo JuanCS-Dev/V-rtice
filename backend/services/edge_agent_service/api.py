@@ -6,25 +6,24 @@ NO MOCKS - Production-ready edge API.
 """
 
 import asyncio
-from contextlib import asynccontextmanager
-from datetime import datetime
 import logging
 import socket
+from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Any, Dict, List, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from edge_agent_core import (
     EdgeAgentController,
     EdgeAgentStatus,
     EventType,
 )
-from fastapi import BackgroundTasks, FastAPI, HTTPException
-from pydantic import BaseModel, Field
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global agent instance
@@ -43,9 +42,7 @@ async def lifespan(app: FastAPI):
 
     agent_id = os.getenv("EDGE_AGENT_ID", socket.gethostname())
     tenant_id = os.getenv("TENANT_ID", "default")
-    cloud_url = os.getenv(
-        "CLOUD_COORDINATOR_URL", "http://cloud_coordinator_service:8021"
-    )
+    cloud_url = os.getenv("CLOUD_COORDINATOR_URL", "http://cloud_coordinator_service:8021")
 
     # Initialize edge agent
     edge_agent = EdgeAgentController(
@@ -205,9 +202,7 @@ async def collect_event(event: EventRequest):
         try:
             event_type = EventType(event.event_type)
         except ValueError:
-            raise HTTPException(
-                status_code=400, detail=f"Invalid event type: {event.event_type}"
-            )
+            raise HTTPException(status_code=400, detail=f"Invalid event type: {event.event_type}")
 
         # Collect event
         event_id = edge_agent.collect_event(

@@ -6,18 +6,15 @@ Collects events locally and syncs to cloud brain.
 NO MOCKS - Production-ready edge deployment.
 """
 
-import asyncio
-from collections import deque
-from dataclasses import asdict, dataclass, field
-from datetime import datetime
-from enum import Enum
 import gzip
-import hashlib
 import json
 import logging
-import time
-from typing import Any, Deque, Dict, List, Optional
 import uuid
+from collections import deque
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Deque, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -219,9 +216,7 @@ class BatchingStrategy:
             return True
 
         # Byte size limit (estimate)
-        estimated_bytes = len(
-            json.dumps([e.to_dict() for e in current_batch]).encode("utf-8")
-        )
+        estimated_bytes = len(json.dumps([e.to_dict() for e in current_batch]).encode("utf-8"))
         if estimated_bytes >= self.max_batch_bytes:
             return True
 
@@ -294,9 +289,7 @@ class HeartbeatManager:
         """Get heartbeat status."""
         return {
             "is_connected": self.is_connected,
-            "last_heartbeat": (
-                self.last_heartbeat.isoformat() if self.last_heartbeat else None
-            ),
+            "last_heartbeat": (self.last_heartbeat.isoformat() if self.last_heartbeat else None),
             "last_ack": self.last_ack.isoformat() if self.last_ack else None,
             "missed_heartbeats": self.missed_heartbeats,
         }
@@ -404,9 +397,7 @@ class LocalMetrics:
         """Get metrics statistics."""
         uptime = (datetime.now() - self.start_time).total_seconds()
 
-        avg_compression = sum(self.compression_ratios) / max(
-            len(self.compression_ratios), 1
-        )
+        avg_compression = sum(self.compression_ratios) / max(len(self.compression_ratios), 1)
         avg_latency = sum(self.send_latencies) / max(len(self.send_latencies), 1)
 
         return {
@@ -457,9 +448,7 @@ class EdgeAgentController:
 
         # Components
         self.buffer = LocalBuffer(max_size=buffer_size)
-        self.batching = BatchingStrategy(
-            max_batch_size=batch_size, max_batch_age_seconds=batch_age_seconds
-        )
+        self.batching = BatchingStrategy(max_batch_size=batch_size, max_batch_age_seconds=batch_age_seconds)
         self.heartbeat = HeartbeatManager()
         self.retry = RetryLogic()
         self.metrics = LocalMetrics()
@@ -524,9 +513,7 @@ class EdgeAgentController:
         # Check if should flush current batch
         high_priority = any(e.severity >= 0.8 for e in self.current_batch)
 
-        if self.current_batch and self.batching.should_flush(
-            self.current_batch, self.batch_created_at, high_priority
-        ):
+        if self.current_batch and self.batching.should_flush(self.current_batch, self.batch_created_at, high_priority):
             # Create batch
             batch = EventBatch(
                 batch_id=str(uuid.uuid4()),

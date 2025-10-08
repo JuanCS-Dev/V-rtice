@@ -15,14 +15,14 @@ Strategic Planning Service's capabilities, enabling Maximus to make coherent,
 goal-oriented decisions, and align its actions with overarching missions.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from strategic_planning_core import StrategicPlanningCore
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from strategic_planning_core import StrategicPlanningCore
 
 app = FastAPI(title="Maximus Strategic Planning Service", version="1.0.0")
 

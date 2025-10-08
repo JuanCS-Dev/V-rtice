@@ -18,17 +18,16 @@ In cyber defense:
 NO MOCKS - Production-ready memory consolidation algorithms.
 """
 
-from collections import defaultdict, deque
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
 import hashlib
 import json
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 import numpy as np
-from scipy.spatial.distance import cosine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -160,12 +159,7 @@ class ImportanceScorer:
         indicator_score = min(len(event.indicators) / 10, 1.0)
 
         # Weighted combination
-        importance = (
-            0.30 * severity_score
-            + 0.30 * uniqueness_score
-            + 0.25 * outcome_score
-            + 0.15 * indicator_score
-        )
+        importance = 0.30 * severity_score + 0.30 * uniqueness_score + 0.25 * outcome_score + 0.15 * indicator_score
 
         # Update statistics
         self.event_type_counts[event.event_type] += 1
@@ -226,9 +220,7 @@ class PatternExtractor:
     def __init__(self):
         self.patterns_extracted: int = 0
 
-    def extract_patterns(
-        self, events: List[SecurityEvent], min_pattern_size: int = 2
-    ) -> List[Dict[str, Any]]:
+    def extract_patterns(self, events: List[SecurityEvent], min_pattern_size: int = 2) -> List[Dict[str, Any]]:
         """Extract patterns from event sequence.
 
         Args:
@@ -245,9 +237,7 @@ class PatternExtractor:
         patterns.extend(temporal_patterns)
 
         # Pattern 2: Source-target patterns (same attacker/victim)
-        relationship_patterns = self._extract_relationship_patterns(
-            events, min_pattern_size
-        )
+        relationship_patterns = self._extract_relationship_patterns(events, min_pattern_size)
         patterns.extend(relationship_patterns)
 
         # Pattern 3: Type-based sequences (attack kill chain)
@@ -258,9 +248,7 @@ class PatternExtractor:
 
         return patterns
 
-    def _extract_temporal_patterns(
-        self, events: List[SecurityEvent], min_size: int
-    ) -> List[Dict[str, Any]]:
+    def _extract_temporal_patterns(self, events: List[SecurityEvent], min_size: int) -> List[Dict[str, Any]]:
         """Extract patterns based on temporal proximity.
 
         Args:
@@ -306,9 +294,7 @@ class PatternExtractor:
 
         return patterns
 
-    def _extract_relationship_patterns(
-        self, events: List[SecurityEvent], min_size: int
-    ) -> List[Dict[str, Any]]:
+    def _extract_relationship_patterns(self, events: List[SecurityEvent], min_size: int) -> List[Dict[str, Any]]:
         """Extract patterns based on source-target relationships.
 
         Args:
@@ -340,9 +326,7 @@ class PatternExtractor:
 
         return patterns
 
-    def _extract_attack_chains(
-        self, events: List[SecurityEvent], min_size: int
-    ) -> List[Dict[str, Any]]:
+    def _extract_attack_chains(self, events: List[SecurityEvent], min_size: int) -> List[Dict[str, Any]]:
         """Extract attack kill chain patterns.
 
         Args:
@@ -399,17 +383,13 @@ class PatternExtractor:
                         "event_ids": [e.event_id for e in chain_event_objs],
                         "stages": [e[0] for e in chain_events],
                         "event_count": len(chain_event_objs),
-                        "fingerprint": self._compute_pattern_fingerprint(
-                            chain_event_objs
-                        ),
+                        "fingerprint": self._compute_pattern_fingerprint(chain_event_objs),
                     }
                     patterns.append(pattern)
 
         return patterns
 
-    def _compute_pattern_fingerprint(
-        self, events: List[SecurityEvent]
-    ) -> Dict[str, Any]:
+    def _compute_pattern_fingerprint(self, events: List[SecurityEvent]) -> Dict[str, Any]:
         """Compute fingerprint of pattern.
 
         Args:
@@ -430,10 +410,7 @@ class PatternExtractor:
             "unique_sources": len(set(sources)),
             "unique_targets": len(set(targets)),
             "event_types": list(set(types)),
-            "duration_minutes": (
-                events[-1].timestamp - events[0].timestamp
-            ).total_seconds()
-            / 60,
+            "duration_minutes": (events[-1].timestamp - events[0].timestamp).total_seconds() / 60,
         }
 
         return fingerprint
@@ -514,9 +491,7 @@ class MemoryConsolidator:
     def _evict_least_important_stm(self):
         """Evict least important STM entry."""
         # Find entry with lowest importance
-        min_entry = min(
-            self.short_term_memory.values(), key=lambda e: e.importance_score
-        )
+        min_entry = min(self.short_term_memory.values(), key=lambda e: e.importance_score)
 
         # Mark as pruned and remove
         min_entry.status = ConsolidationStatus.PRUNED
@@ -548,9 +523,7 @@ class MemoryConsolidator:
 
         # Step 1: Identify events for consolidation
         events_to_consolidate = [
-            stm.event
-            for stm in self.short_term_memory.values()
-            if stm.importance_score >= self.consolidation_threshold
+            stm.event for stm in self.short_term_memory.values() if stm.importance_score >= self.consolidation_threshold
         ]
 
         cycle.events_processed = len(events_to_consolidate)
@@ -594,9 +567,7 @@ class MemoryConsolidator:
             pattern: Extracted pattern
         """
         # Generate memory ID
-        memory_id = hashlib.sha256(
-            json.dumps(pattern, sort_keys=True).encode()
-        ).hexdigest()[:16]
+        memory_id = hashlib.sha256(json.dumps(pattern, sort_keys=True).encode()).hexdigest()[:16]
 
         # Determine importance
         avg_severity = pattern["fingerprint"].get("avg_severity", 0.5)

@@ -97,18 +97,12 @@ class StrategicPlanningCore:
             "potential_outcomes": potential_outcomes,
             "key_risk_factors_evaluated": risk_factors,
             "recommendations": [
-                (
-                    "Prioritize defensive measures."
-                    if risk_score > 0.5
-                    else "Maintain current operational posture."
-                )
+                ("Prioritize defensive measures." if risk_score > 0.5 else "Maintain current operational posture.")
             ],
         }
         return analysis_result
 
-    async def generate_strategic_plan(
-        self, analysis_result: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def generate_strategic_plan(self, analysis_result: Dict[str, Any]) -> Dict[str, Any]:
         """Generates a strategic plan based on scenario analysis and current objectives.
 
         Args:
@@ -177,7 +171,5 @@ class StrategicPlanningCore:
             "status": self.current_status,
             "active_objectives": self.strategic_objectives,
             "current_plan": self.current_strategic_plan,
-            "last_update": (
-                self.last_plan_update.isoformat() if self.last_plan_update else "N/A"
-            ),
+            "last_update": (self.last_plan_update.isoformat() if self.last_plan_update else "N/A"),
         }

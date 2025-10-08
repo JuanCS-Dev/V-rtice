@@ -12,16 +12,14 @@ service is crucial for enriching internal security events with relevant threat
 context and providing real-time threat intelligence to other Maximus AI services.
 """
 
-import asyncio
 from datetime import datetime
-import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
-import httpx
-from offline_engine import OfflineThreatIntelEngine
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from offline_engine import OfflineThreatIntelEngine
 
 app = FastAPI(title="Maximus Threat Intelligence Service", version="1.0.0")
 
@@ -80,14 +78,10 @@ async def query_threat_intelligence(request: ThreatIntelQuery) -> Dict[str, Any]
     Returns:
         Dict[str, Any]: A dictionary containing the threat intelligence results.
     """
-    print(
-        f"[API] Querying threat intelligence for {request.indicator_type}: {request.indicator}"
-    )
+    print(f"[API] Querying threat intelligence for {request.indicator_type}: {request.indicator}")
 
     # Simulate querying external TIPs or internal databases
-    threat_intel_result = await offline_engine.get_threat_intel(
-        request.indicator, request.indicator_type
-    )
+    threat_intel_result = await offline_engine.get_threat_intel(request.indicator, request.indicator_type)
 
     return {
         "status": "success",

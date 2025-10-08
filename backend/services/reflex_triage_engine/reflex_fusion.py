@@ -8,10 +8,10 @@ Hybrid detection combining:
 Decision tree: BLOCK / INVESTIGATE / ALLOW
 """
 
-from dataclasses import dataclass
-from enum import Enum
 import logging
 import time
+from dataclasses import dataclass
+from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
 from fast_anomaly_detector import AnomalyResult, FastAnomalyDetector
@@ -118,9 +118,7 @@ class ReflexFusionEngine:
             decision = ThreatDecision.BLOCK
             confidence = 0.99
             threat_score = 1.0
-            reasoning.append(
-                f"CRITICAL signature detected: {critical_sigs[0].signature_name}"
-            )
+            reasoning.append(f"CRITICAL signature detected: {critical_sigs[0].signature_name}")
 
             latency = (time.time() - triage_start) * 1000
 
@@ -182,9 +180,7 @@ class ReflexFusionEngine:
                 "MEDIUM": 0.5,
                 "LOW": 0.25,
             }
-            sig_score = max(
-                severity_weights.get(m.severity, 0.25) for m in signature_matches
-            )
+            sig_score = max(severity_weights.get(m.severity, 0.25) for m in signature_matches)
             reasoning.append(f"{len(signature_matches)} signature(s) matched")
 
         # Combined score
@@ -195,9 +191,7 @@ class ReflexFusionEngine:
         )
 
         # 5. Make decision
-        decision, confidence = self._make_decision(
-            threat_score, signature_matches, anomaly_result, reasoning
-        )
+        decision, confidence = self._make_decision(threat_score, signature_matches, anomaly_result, reasoning)
 
         latency = (time.time() - triage_start) * 1000
 
@@ -205,9 +199,7 @@ class ReflexFusionEngine:
         if latency > 50:
             logger.warning(f"Reflex triage exceeded 50ms: {latency:.1f}ms")
 
-        logger.debug(
-            f"Triage: {decision.value} (score={threat_score:.2f}, latency={latency:.1f}ms)"
-        )
+        logger.debug(f"Triage: {decision.value} (score={threat_score:.2f}, latency={latency:.1f}ms)")
 
         return ReflexResult(
             decision=decision,
@@ -253,16 +245,13 @@ class ReflexFusionEngine:
             return ThreatDecision.INVESTIGATE, 0.70
 
         # Rule 4: Anomaly alone (medium) → INVESTIGATE
-        if (
-            anomaly.is_anomaly
-            and anomaly.anomaly_score > self.thresholds["anomaly_medium"]
-        ):
+        if anomaly.is_anomaly and anomaly.anomaly_score > self.thresholds["anomaly_medium"]:
             reasoning.append(f"Anomaly detected ({anomaly.anomaly_score:.2f})")
             return ThreatDecision.INVESTIGATE, 0.65
 
         # Rule 5: Signature alone (MEDIUM/LOW) → INVESTIGATE
         if signatures:
-            reasoning.append(f"Signature match (low severity)")
+            reasoning.append("Signature match (low severity)")
             return ThreatDecision.INVESTIGATE, 0.60
 
         # Default: ALLOW

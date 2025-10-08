@@ -11,10 +11,9 @@ API request and response modeling. This is crucial for maintaining data integrit
 and enabling efficient data exchange within the IP intelligence ecosystem.
 """
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class IPInfo(BaseModel):

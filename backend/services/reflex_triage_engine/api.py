@@ -12,19 +12,17 @@ Endpoints:
 import logging
 from typing import Dict, List, Optional
 
+import uvicorn
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from pydantic import BaseModel
+
 from autonomous_response import AutonomousResponseEngine, PlaybookAction
 from fast_anomaly_detector import FastAnomalyDetector
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
 from hyperscan_engine import HyperscanEngine
-from pydantic import BaseModel
 from reflex_fusion import ReflexFusionEngine, ThreatDecision
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Initialize FastAPI
@@ -125,9 +123,7 @@ async def scan_event(request: ScanRequest):
         event_data = bytes.fromhex(request.event_data)
 
         # Perform triage
-        result = fusion_engine.triage(
-            event_data=event_data, event_metadata=request.event_metadata
-        )
+        result = fusion_engine.triage(event_data=event_data, event_metadata=request.event_metadata)
 
         # Autonomous response if requested and BLOCK decision
         action_result = None
@@ -282,9 +278,7 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "reflex_triage_engine",
-        "engines_initialized": all(
-            [hyperscan_engine, anomaly_detector, fusion_engine, response_engine]
-        ),
+        "engines_initialized": all([hyperscan_engine, anomaly_detector, fusion_engine, response_engine]),
     }
 
 

@@ -5,28 +5,25 @@ REST API for attack prediction, vulnerability forecasting, and hunting recommend
 NO MOCKS - Production-ready predictive intelligence interface.
 """
 
-import asyncio
-from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
 import logging
+from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
 from predictive_core import (
     AttackPredictor,
-    ConfidenceLevel,
     ProactiveHunter,
     ThreatEvent,
     ThreatType,
     VulnerabilityForecaster,
 )
-from pydantic import BaseModel, Field
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instances
@@ -71,28 +68,20 @@ class ThreatEventRequest(BaseModel):
     """Request to ingest threat event."""
 
     event_id: str = Field(..., description="Unique event ID")
-    threat_type: str = Field(
-        ..., description="Threat type (reconnaissance, exploitation, etc)"
-    )
+    threat_type: str = Field(..., description="Threat type (reconnaissance, exploitation, etc)")
     timestamp: Optional[str] = Field(None, description="ISO timestamp (default: now)")
     source_ip: str = Field(..., description="Source IP address")
     target_asset: str = Field(..., description="Target asset identifier")
     severity: float = Field(..., ge=0.0, le=1.0, description="Severity score (0-1)")
     indicators: List[str] = Field(default_factory=list, description="Threat indicators")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class PredictAttacksRequest(BaseModel):
     """Request for attack predictions."""
 
-    time_horizon_hours: int = Field(
-        24, ge=1, le=168, description="Prediction window (1-168 hours)"
-    )
-    min_confidence: float = Field(
-        0.6, ge=0.0, le=1.0, description="Minimum confidence threshold"
-    )
+    time_horizon_hours: int = Field(24, ge=1, le=168, description="Prediction window (1-168 hours)")
+    min_confidence: float = Field(0.6, ge=0.0, le=1.0, description="Minimum confidence threshold")
 
 
 class AttackPredictionResponse(BaseModel):
@@ -124,23 +113,15 @@ class TrendingScoreUpdate(BaseModel):
     """Request to update trending score."""
 
     cve_id: str = Field(..., description="CVE identifier")
-    mentions: int = Field(
-        0, ge=0, description="Exploit-DB/forum mentions (last 7 days)"
-    )
-    dark_web_chatter: int = Field(
-        0, ge=0, description="Dark web discussions (last 7 days)"
-    )
+    mentions: int = Field(0, ge=0, description="Exploit-DB/forum mentions (last 7 days)")
+    dark_web_chatter: int = Field(0, ge=0, description="Dark web discussions (last 7 days)")
 
 
 class ForecastVulnerabilitiesRequest(BaseModel):
     """Request for vulnerability forecasts."""
 
-    time_horizon_days: int = Field(
-        30, ge=1, le=365, description="Forecast window (1-365 days)"
-    )
-    min_probability: float = Field(
-        0.5, ge=0.0, le=1.0, description="Minimum probability threshold"
-    )
+    time_horizon_days: int = Field(30, ge=1, le=365, description="Forecast window (1-365 days)")
+    min_probability: float = Field(0.5, ge=0.0, le=1.0, description="Minimum probability threshold")
 
 
 class VulnerabilityForecastResponse(BaseModel):
@@ -210,9 +191,7 @@ async def ingest_threat_event(request: ThreatEventRequest):
         try:
             threat_type = ThreatType(request.threat_type.lower())
         except ValueError:
-            raise HTTPException(
-                status_code=400, detail=f"Invalid threat type: {request.threat_type}"
-            )
+            raise HTTPException(status_code=400, detail=f"Invalid threat type: {request.threat_type}")
 
         # Parse timestamp
         if request.timestamp:
@@ -337,9 +316,7 @@ async def register_vulnerability(request: VulnerabilityRegistrationRequest):
         Registration confirmation
     """
     if vuln_forecaster is None:
-        raise HTTPException(
-            status_code=503, detail="Vulnerability forecaster not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Vulnerability forecaster not initialized")
 
     try:
         # Parse publication date
@@ -379,9 +356,7 @@ async def update_trending_score(request: TrendingScoreUpdate):
         Update confirmation
     """
     if vuln_forecaster is None:
-        raise HTTPException(
-            status_code=503, detail="Vulnerability forecaster not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Vulnerability forecaster not initialized")
 
     try:
         vuln_forecaster.update_trending_score(
@@ -414,9 +389,7 @@ async def forecast_vulnerabilities(request: ForecastVulnerabilitiesRequest):
         List of vulnerability forecasts
     """
     if vuln_forecaster is None:
-        raise HTTPException(
-            status_code=503, detail="Vulnerability forecaster not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Vulnerability forecaster not initialized")
 
     try:
         # Generate forecasts
@@ -465,14 +438,10 @@ async def generate_hunting_recommendations():
 
     try:
         # Get current predictions
-        predictions = attack_predictor.predict_attacks(
-            time_horizon_hours=24, min_confidence=0.6
-        )
+        predictions = attack_predictor.predict_attacks(time_horizon_hours=24, min_confidence=0.6)
 
         # Get current forecasts
-        forecasts = vuln_forecaster.forecast_exploitations(
-            time_horizon_days=30, min_probability=0.5
-        )
+        forecasts = vuln_forecaster.forecast_exploitations(time_horizon_days=30, min_probability=0.5)
 
         # Generate recommendations
         recommendations = proactive_hunter.generate_hunting_recommendations(

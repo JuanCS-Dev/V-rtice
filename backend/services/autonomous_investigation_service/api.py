@@ -5,27 +5,25 @@ REST API for threat actor profiling, campaign correlation, and autonomous invest
 NO MOCKS - Production-ready investigation interface.
 """
 
-import asyncio
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
 from investigation_core import (
+    TTP,
     AutonomousInvestigator,
     CampaignCorrelator,
     SecurityIncident,
     ThreatActorProfiler,
-    TTP,
 )
-from pydantic import BaseModel, Field
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global service instances
@@ -125,12 +123,8 @@ class ThreatActorRegistrationRequest(BaseModel):
     actor_id: str = Field(..., description="Unique actor ID")
     actor_name: str = Field(..., description="Actor name")
     known_ttps: List[str] = Field(..., description="Known TTP codes (T1566, etc)")
-    known_infrastructure: List[str] = Field(
-        default_factory=list, description="Known IPs/domains"
-    )
-    sophistication_score: float = Field(
-        0.5, ge=0.0, le=1.0, description="Sophistication (0-1)"
-    )
+    known_infrastructure: List[str] = Field(default_factory=list, description="Known IPs/domains")
+    sophistication_score: float = Field(0.5, ge=0.0, le=1.0, description="Sophistication (0-1)")
 
 
 class SecurityIncidentRequest(BaseModel):
@@ -143,9 +137,7 @@ class SecurityIncidentRequest(BaseModel):
     iocs: List[str] = Field(..., description="Indicators of Compromise")
     ttps_observed: List[str] = Field(..., description="Observed TTP codes")
     severity: float = Field(..., ge=0.0, le=1.0, description="Severity (0-1)")
-    raw_evidence: Dict[str, Any] = Field(
-        default_factory=dict, description="Raw evidence"
-    )
+    raw_evidence: Dict[str, Any] = Field(default_factory=dict, description="Raw evidence")
 
 
 class AttributionResponse(BaseModel):
@@ -353,9 +345,7 @@ async def ingest_incident(request: SecurityIncidentRequest):
         Ingestion confirmation
     """
     if campaign_correlator is None:
-        raise HTTPException(
-            status_code=503, detail="Campaign correlator not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Campaign correlator not initialized")
 
     try:
         # Parse TTPs
@@ -423,9 +413,7 @@ async def attribute_incident(incident_id: str):
                 break
 
         if incident is None:
-            raise HTTPException(
-                status_code=404, detail=f"Incident {incident_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Incident {incident_id} not found")
 
         # Attribute incident
         actor_id, confidence = actor_profiler.attribute_incident(incident)
@@ -439,9 +427,7 @@ async def attribute_incident(incident_id: str):
             if profile:
                 actor_name = profile.actor_name
                 # Find matching TTPs
-                matching_ttps = [
-                    ttp.value for ttp in incident.ttps_observed if ttp in profile.ttps
-                ]
+                matching_ttps = [ttp.value for ttp in incident.ttps_observed if ttp in profile.ttps]
 
         return AttributionResponse(
             incident_id=incident_id,
@@ -475,15 +461,11 @@ async def correlate_campaigns(time_window_days: int = 30):
         List of identified campaigns
     """
     if campaign_correlator is None:
-        raise HTTPException(
-            status_code=503, detail="Campaign correlator not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Campaign correlator not initialized")
 
     try:
         # Correlate campaigns
-        campaigns = campaign_correlator.correlate_campaigns(
-            time_window_days=time_window_days
-        )
+        campaigns = campaign_correlator.correlate_campaigns(time_window_days=time_window_days)
 
         # Convert to response models
         responses = [
@@ -521,17 +503,13 @@ async def get_campaign(campaign_id: str):
         Campaign details
     """
     if campaign_correlator is None:
-        raise HTTPException(
-            status_code=503, detail="Campaign correlator not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Campaign correlator not initialized")
 
     try:
         campaign = campaign_correlator.get_campaign(campaign_id)
 
         if campaign is None:
-            raise HTTPException(
-                status_code=404, detail=f"Campaign {campaign_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Campaign {campaign_id} not found")
 
         return CampaignResponse(
             campaign_id=campaign.campaign_id,
@@ -562,9 +540,7 @@ async def list_campaigns():
         List of campaigns
     """
     if campaign_correlator is None:
-        raise HTTPException(
-            status_code=503, detail="Campaign correlator not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Campaign correlator not initialized")
 
     try:
         campaigns = []
@@ -621,9 +597,7 @@ async def initiate_investigation(incident_id: str, playbook: str = "standard"):
                 break
 
         if incident is None:
-            raise HTTPException(
-                status_code=404, detail=f"Incident {incident_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Incident {incident_id} not found")
 
         # Initiate investigation
         investigation = investigator.initiate_investigation(incident, playbook)
@@ -631,9 +605,7 @@ async def initiate_investigation(incident_id: str, playbook: str = "standard"):
         # Calculate duration
         duration = None
         if investigation.end_time:
-            duration = (
-                investigation.end_time - investigation.start_time
-            ).total_seconds()
+            duration = (investigation.end_time - investigation.start_time).total_seconds()
 
         return InvestigationResponse(
             investigation_id=investigation.investigation_id,
@@ -673,16 +645,12 @@ async def get_investigation(investigation_id: str):
         investigation = investigator.get_investigation(investigation_id)
 
         if investigation is None:
-            raise HTTPException(
-                status_code=404, detail=f"Investigation {investigation_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Investigation {investigation_id} not found")
 
         # Calculate duration
         duration = None
         if investigation.end_time:
-            duration = (
-                investigation.end_time - investigation.start_time
-            ).total_seconds()
+            duration = (investigation.end_time - investigation.start_time).total_seconds()
 
         return InvestigationResponse(
             investigation_id=investigation.investigation_id,
