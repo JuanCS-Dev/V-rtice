@@ -15,15 +15,15 @@ physically, and maintain stability with a robust sense of its own motion and
 spatial position.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException
-from otolith_organs import OtolithOrgans
-from pydantic import BaseModel, Field
-from semicircular_canals import SemicircularCanals
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+
+from otolith_organs import OtolithOrgans
+from semicircular_canals import SemicircularCanals
 
 app = FastAPI(title="Maximus Vestibular Service", version="1.0.0")
 
@@ -84,9 +84,7 @@ async def ingest_motion_data(request: MotionDataIngest) -> Dict[str, Any]:
     """
     print(f"[API] Ingesting motion data from {request.sensor_id}.")
 
-    linear_motion = otolith_organs.process_accelerometer_data(
-        request.accelerometer_data
-    )
+    linear_motion = otolith_organs.process_accelerometer_data(request.accelerometer_data)
     angular_motion = semicircular_canals.process_gyroscope_data(request.gyroscope_data)
 
     # Simulate integration of both for overall orientation

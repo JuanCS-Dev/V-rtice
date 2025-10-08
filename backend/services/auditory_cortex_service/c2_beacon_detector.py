@@ -40,9 +40,7 @@ class C2BeaconDetector:
             Dict[str, Any]: A dictionary containing C2 beacon detection results.
         """
         self.current_status = "detecting_c2_beacon"
-        print(
-            f"[C2BeaconDetector] Analyzing audio data (size: {len(audio_data)} bytes) for C2 beacons."
-        )
+        print(f"[C2BeaconDetector] Analyzing audio data (size: {len(audio_data)} bytes) for C2 beacons.")
         await asyncio.sleep(0.6)  # Simulate analysis
 
         # Simulate C2 beacon detection based on audio content
@@ -50,9 +48,7 @@ class C2BeaconDetector:
         beacon_type = "N/A"
         confidence = 0.0
 
-        if (
-            b"c2_signature_pattern_a" in audio_data
-        ):  # Placeholder for actual audio analysis
+        if b"c2_signature_pattern_a" in audio_data:  # Placeholder for actual audio analysis
             beacon_detected = True
             beacon_type = "DNS Tunneling C2"
             confidence = 0.98
@@ -86,10 +82,6 @@ class C2BeaconDetector:
         """
         return {
             "status": self.current_status,
-            "last_detection": (
-                self.last_detection_time.isoformat()
-                if self.last_detection_time
-                else "N/A"
-            ),
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
             "total_c2_beacons_detected": self.c2_beacons_detected,
         }

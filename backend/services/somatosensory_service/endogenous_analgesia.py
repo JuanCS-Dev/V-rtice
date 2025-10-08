@@ -12,7 +12,6 @@ and maintain operational stability even when experiencing adverse physical
 stimuli, mimicking a crucial biological self-preservation mechanism.
 """
 
-import asyncio
 from typing import Any, Dict
 
 
@@ -31,9 +30,7 @@ class EndogenousAnalgesia:
         """
         self.modulation_factor = modulation_factor
 
-    def modulate_pain(
-        self, raw_pain_level: float, internal_state: Dict[str, Any] = None
-    ) -> float:
+    def modulate_pain(self, raw_pain_level: float, internal_state: Dict[str, Any] = None) -> float:
         """Calculates the reduction in perceived pain based on the raw pain level and internal state.
 
         Args:

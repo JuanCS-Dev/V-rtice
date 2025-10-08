@@ -14,7 +14,6 @@ Key functionalities include:
   especially during dynamic movements.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -64,9 +63,7 @@ class SemicircularCanals:
         self.current_angular_velocity = gyroscope_data
 
         # Simulate angular changes (simplified: directly map angular velocity to changes)
-        self.current_orientation_change["pitch_change"] = (
-            gyroscope_data[0] * 0.1
-        )  # Example scaling
+        self.current_orientation_change["pitch_change"] = gyroscope_data[0] * 0.1  # Example scaling
         self.current_orientation_change["roll_change"] = gyroscope_data[1] * 0.1
         self.current_orientation_change["yaw_change"] = gyroscope_data[2] * 0.1
 
@@ -78,8 +75,7 @@ class SemicircularCanals:
             "pitch_change": self.current_orientation_change["pitch_change"],
             "roll_change": self.current_orientation_change["roll_change"],
             "yaw_change": self.current_orientation_change["yaw_change"],
-            "rotation_detected": np.linalg.norm(np.array(gyroscope_data))
-            > 0.05,  # Simple rotation detection
+            "rotation_detected": np.linalg.norm(np.array(gyroscope_data)) > 0.05,  # Simple rotation detection
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -90,11 +86,7 @@ class SemicircularCanals:
         """
         return {
             "status": self.current_status,
-            "last_processed": (
-                self.last_processed_time.isoformat()
-                if self.last_processed_time
-                else "N/A"
-            ),
+            "last_processed": (self.last_processed_time.isoformat() if self.last_processed_time else "N/A"),
             "current_angular_velocity": self.current_angular_velocity,
             "current_orientation_change": self.current_orientation_change,
         }

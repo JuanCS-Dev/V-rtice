@@ -19,20 +19,21 @@ Test Structure:
 """
 
 import base64
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
-from datetime import datetime
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 # Import FastAPI app and core components
 from api import app
 from binaural_correlation import BinauralCorrelation
+from c2_beacon_detector import C2BeaconDetector
 from cocktail_party_triage import CocktailPartyTriage
 from ttp_signature_recognition import TTPSignatureRecognition
-from c2_beacon_detector import C2BeaconDetector
-
 
 # ==================== Fixtures ====================
+
 
 @pytest_asyncio.fixture
 async def client():
@@ -68,6 +69,7 @@ def c2_detector():
 
 # ==================== Test Helper Functions ====================
 
+
 def create_audio_data(content: bytes = b"test_audio_data") -> str:
     """Creates a base64-encoded audio string for testing.
 
@@ -99,6 +101,7 @@ def create_audio_request(analysis_type: str, audio_content: bytes = b"test", lan
 
 
 # ==================== Test Classes ====================
+
 
 @pytest.mark.asyncio
 class TestHealthEndpoint:
@@ -134,9 +137,7 @@ class TestAnalyzeAudioEndpoint:
     async def test_analyze_speech_to_text_with_speech(self, client):
         """Test speech-to-text analysis with human speech - REAL transcription logic."""
         payload = create_audio_request(
-            analysis_type="speech_to_text",
-            audio_content=b"human_speech_signature",
-            language="en-US"
+            analysis_type="speech_to_text", audio_content=b"human_speech_signature", language="en-US"
         )
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
@@ -151,9 +152,7 @@ class TestAnalyzeAudioEndpoint:
     async def test_analyze_speech_to_text_with_background_chatter(self, client):
         """Test speech-to-text with background chatter - low clarity."""
         payload = create_audio_request(
-            analysis_type="speech_to_text",
-            audio_content=b"background_chatter",
-            language="en-US"
+            analysis_type="speech_to_text", audio_content=b"background_chatter", language="en-US"
         )
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
@@ -166,9 +165,7 @@ class TestAnalyzeAudioEndpoint:
     async def test_analyze_sound_event_detection_multiple_events(self, client):
         """Test sound event detection with multiple spatial signatures - REAL localization."""
         payload = create_audio_request(
-            analysis_type="sound_event_detection",
-            audio_content=b"loud_noise_left whisper_right",
-            language="en-US"
+            analysis_type="sound_event_detection", audio_content=b"loud_noise_left whisper_right", language="en-US"
         )
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
@@ -184,9 +181,7 @@ class TestAnalyzeAudioEndpoint:
     async def test_analyze_ttp_recognition_c2_communication(self, client):
         """Test TTP recognition with C2 communication signature - HIGH confidence."""
         payload = create_audio_request(
-            analysis_type="ttp_recognition",
-            audio_content=b"malicious_protocol_signature",
-            language="en-US"
+            analysis_type="ttp_recognition", audio_content=b"malicious_protocol_signature", language="en-US"
         )
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
@@ -201,9 +196,7 @@ class TestAnalyzeAudioEndpoint:
     async def test_analyze_ttp_recognition_data_exfiltration(self, client):
         """Test TTP recognition with data exfiltration signature."""
         payload = create_audio_request(
-            analysis_type="ttp_recognition",
-            audio_content=b"unusual_device_emission",
-            language="en-US"
+            analysis_type="ttp_recognition", audio_content=b"unusual_device_emission", language="en-US"
         )
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
@@ -216,9 +209,7 @@ class TestAnalyzeAudioEndpoint:
     async def test_analyze_c2_beacon_detection_dns_tunneling(self, client):
         """Test C2 beacon detection with DNS tunneling signature - CRITICAL threat."""
         payload = create_audio_request(
-            analysis_type="c2_beacon_detection",
-            audio_content=b"c2_signature_pattern_a",
-            language="en-US"
+            analysis_type="c2_beacon_detection", audio_content=b"c2_signature_pattern_a", language="en-US"
         )
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
@@ -233,9 +224,7 @@ class TestAnalyzeAudioEndpoint:
     async def test_analyze_c2_beacon_detection_https(self, client):
         """Test C2 beacon detection with HTTP/S signature."""
         payload = create_audio_request(
-            analysis_type="c2_beacon_detection",
-            audio_content=b"c2_signature_pattern_b",
-            language="en-US"
+            analysis_type="c2_beacon_detection", audio_content=b"c2_signature_pattern_b", language="en-US"
         )
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
@@ -247,10 +236,7 @@ class TestAnalyzeAudioEndpoint:
 
     async def test_analyze_invalid_analysis_type(self, client):
         """Test that invalid analysis type returns 400 error."""
-        payload = create_audio_request(
-            analysis_type="invalid_type",
-            audio_content=b"test"
-        )
+        payload = create_audio_request(analysis_type="invalid_type", audio_content=b"test")
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 400
         assert "Invalid analysis type" in response.json()["detail"]
@@ -259,9 +245,7 @@ class TestAnalyzeAudioEndpoint:
         """Test speech-to-text with different language codes."""
         for language in ["en-US", "es-ES", "fr-FR"]:
             payload = create_audio_request(
-                analysis_type="speech_to_text",
-                audio_content=b"human_speech_signature",
-                language=language
+                analysis_type="speech_to_text", audio_content=b"human_speech_signature", language=language
             )
             response = await client.post("/analyze_audio", json=payload)
             assert response.status_code == 200
@@ -269,10 +253,7 @@ class TestAnalyzeAudioEndpoint:
 
     async def test_analyze_preserves_timestamp(self, client):
         """Test that analysis includes timestamp in response."""
-        payload = create_audio_request(
-            analysis_type="sound_event_detection",
-            audio_content=b"test"
-        )
+        payload = create_audio_request(analysis_type="sound_event_detection", audio_content=b"test")
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
         data = response.json()
@@ -499,39 +480,22 @@ class TestEdgeCases:
 
     async def test_analyze_empty_audio_data(self, client):
         """Test analysis with empty audio data."""
-        payload = create_audio_request(
-            analysis_type="sound_event_detection",
-            audio_content=b"",
-            language="en-US"
-        )
+        payload = create_audio_request(analysis_type="sound_event_detection", audio_content=b"", language="en-US")
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 200
 
     async def test_analyze_malformed_base64(self, client):
         """Test that malformed base64 triggers generic exception handler."""
-        payload = {
-            "audio_base64": "!!!invalid_base64!!!",
-            "analysis_type": "speech_to_text",
-            "language": "en-US"
-        }
+        payload = {"audio_base64": "!!!invalid_base64!!!", "analysis_type": "speech_to_text", "language": "en-US"}
         response = await client.post("/analyze_audio", json=payload)
         assert response.status_code == 500
         assert "Audio analysis failed" in response.json()["detail"]
 
     async def test_all_analysis_types_sequentially(self, client):
         """Test all analysis types in sequence."""
-        analysis_types = [
-            "speech_to_text",
-            "sound_event_detection",
-            "ttp_recognition",
-            "c2_beacon_detection"
-        ]
+        analysis_types = ["speech_to_text", "sound_event_detection", "ttp_recognition", "c2_beacon_detection"]
         for analysis_type in analysis_types:
-            payload = create_audio_request(
-                analysis_type=analysis_type,
-                audio_content=b"test_data",
-                language="en-US"
-            )
+            payload = create_audio_request(analysis_type=analysis_type, audio_content=b"test_data", language="en-US")
             response = await client.post("/analyze_audio", json=payload)
             assert response.status_code == 200
             assert response.json()["analysis_type"] == analysis_type
@@ -540,9 +504,7 @@ class TestEdgeCases:
         """Test multiple sequential audio analyses."""
         for i in range(3):
             payload = create_audio_request(
-                analysis_type="sound_event_detection",
-                audio_content=f"test_audio_{i}".encode(),
-                language="en-US"
+                analysis_type="sound_event_detection", audio_content=f"test_audio_{i}".encode(), language="en-US"
             )
             response = await client.post("/analyze_audio", json=payload)
             assert response.status_code == 200

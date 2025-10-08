@@ -13,7 +13,6 @@ Key functionalities include:
   Maximus AI services for navigation, balance control, and spatial awareness.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -39,9 +38,7 @@ class OtolithOrgans:
         ]  # Assuming Z is up
         self.current_status: str = "monitoring_linear_motion"
 
-    def process_accelerometer_data(
-        self, accelerometer_data: List[float]
-    ) -> Dict[str, Any]:
+    def process_accelerometer_data(self, accelerometer_data: List[float]) -> Dict[str, Any]:
         """Processes simulated accelerometer data to determine linear motion and orientation.
 
         Args:
@@ -82,9 +79,7 @@ class OtolithOrgans:
             ]
             norm = np.linalg.norm(self.current_orientation_gravity)
             if norm > 0:
-                self.current_orientation_gravity = (
-                    self.current_orientation_gravity / norm
-                ).tolist()
+                self.current_orientation_gravity = (self.current_orientation_gravity / norm).tolist()
 
         self.last_processed_time = datetime.now()
 
@@ -92,8 +87,7 @@ class OtolithOrgans:
             "timestamp": self.last_processed_time.isoformat(),
             "linear_acceleration": self.current_linear_acceleration,
             "orientation_relative_to_gravity": self.current_orientation_gravity,
-            "motion_detected": np.linalg.norm(np.array(accelerometer_data))
-            > 0.1,  # Simple motion detection
+            "motion_detected": np.linalg.norm(np.array(accelerometer_data)) > 0.1,  # Simple motion detection
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -104,11 +98,7 @@ class OtolithOrgans:
         """
         return {
             "status": self.current_status,
-            "last_processed": (
-                self.last_processed_time.isoformat()
-                if self.last_processed_time
-                else "N/A"
-            ),
+            "last_processed": (self.last_processed_time.isoformat() if self.last_processed_time else "N/A"),
             "current_linear_acceleration": self.current_linear_acceleration,
             "current_orientation_gravity": self.current_orientation_gravity,
         }

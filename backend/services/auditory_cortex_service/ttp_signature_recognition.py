@@ -40,9 +40,7 @@ class TTPSignatureRecognition:
             Dict[str, Any]: A dictionary containing TTP detection results.
         """
         self.current_status = "recognizing_ttp"
-        print(
-            f"[TTPSignatureRecognition] Analyzing audio data (size: {len(audio_data)} bytes) for TTP signatures."
-        )
+        print(f"[TTPSignatureRecognition] Analyzing audio data (size: {len(audio_data)} bytes) for TTP signatures.")
         await asyncio.sleep(0.4)  # Simulate analysis
 
         # Simulate TTP detection based on audio content
@@ -50,9 +48,7 @@ class TTPSignatureRecognition:
         ttp_type = "N/A"
         confidence = 0.0
 
-        if (
-            b"malicious_protocol_signature" in audio_data
-        ):  # Placeholder for actual audio analysis
+        if b"malicious_protocol_signature" in audio_data:  # Placeholder for actual audio analysis
             ttp_detected = True
             ttp_type = "Command and Control (C2) Communication"
             confidence = 0.95
@@ -86,10 +82,6 @@ class TTPSignatureRecognition:
         """
         return {
             "status": self.current_status,
-            "last_detection": (
-                self.last_detection_time.isoformat()
-                if self.last_detection_time
-                else "N/A"
-            ),
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
             "total_ttp_incidents_detected": self.ttp_incidents_detected,
         }

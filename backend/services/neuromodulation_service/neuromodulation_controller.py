@@ -17,9 +17,8 @@ internal processing, learning, and decision-making to various tasks and
 environmental conditions, enhancing its flexibility and effectiveness.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from acetylcholine_core import AcetylcholineCore
 from dopamine_core import DopamineCore
@@ -107,9 +106,7 @@ class NeuromodulationController:
                 raise ValueError(f"Unsupported noradrenaline parameter: {parameter}")
         elif modulator_type == "acetylcholine":
             if parameter == "attention_level":
-                result = await self.acetylcholine_core.modulate_attention(
-                    context.get("target_focus", "general"), value
-                )
+                result = await self.acetylcholine_core.modulate_attention(context.get("target_focus", "general"), value)
             elif parameter == "learning_rate_modifier":
                 result = await self.acetylcholine_core.adjust_learning_rate(value)
             elif parameter == "memory_consolidation_boost":
@@ -134,11 +131,7 @@ class NeuromodulationController:
 
         return {
             "controller_status": "active",
-            "last_control_action": (
-                self.last_control_action.isoformat()
-                if self.last_control_action
-                else "N/A"
-            ),
+            "last_control_action": (self.last_control_action.isoformat() if self.last_control_action else "N/A"),
             "dopamine_core": dopamine_status,
             "serotonin_core": serotonin_status,
             "noradrenaline_core": noradrenaline_status,

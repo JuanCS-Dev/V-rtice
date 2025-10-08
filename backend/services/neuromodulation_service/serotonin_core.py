@@ -20,12 +20,11 @@ Like biological serotonin: Regulates mood and risk-taking based on outcomes.
 NO MOCKS - Production-ready implementation.
 """
 
-from collections import deque
-from datetime import datetime, timedelta
-from enum import Enum
 import logging
-import math
-from typing import Any, Dict, List, Optional
+from collections import deque
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -77,10 +76,7 @@ class SerotoninCore:
         self.last_modulation_time: Optional[datetime] = None
         self.modulation_count = 0
 
-        logger.info(
-            f"SerotoninCore initialized (base_epsilon={base_epsilon}, "
-            f"range=[{min_epsilon}, {max_epsilon}])"
-        )
+        logger.info(f"SerotoninCore initialized (base_epsilon={base_epsilon}, range=[{min_epsilon}, {max_epsilon}])")
 
     def record_outcome(
         self,
@@ -107,15 +103,12 @@ class SerotoninCore:
         # Update failure streak
         if outcome == ActionOutcome.FAILURE:
             self.current_failure_streak += 1
-            self.max_failure_streak = max(
-                self.max_failure_streak, self.current_failure_streak
-            )
+            self.max_failure_streak = max(self.max_failure_streak, self.current_failure_streak)
         else:
             self.current_failure_streak = 0
 
         logger.debug(
-            f"Outcome recorded: {outcome.value} (reward={reward:.2f}, "
-            f"failure_streak={self.current_failure_streak})"
+            f"Outcome recorded: {outcome.value} (reward={reward:.2f}, failure_streak={self.current_failure_streak})"
         )
 
     def modulate_epsilon(self, mood_stability: float = 0.7) -> float:
@@ -140,10 +133,7 @@ class SerotoninCore:
 
         # Check for failure streak (triggers exploration)
         if self.current_failure_streak >= self.failure_streak_threshold:
-            logger.warning(
-                f"Failure streak detected ({self.current_failure_streak}), "
-                "forcing exploration"
-            )
+            logger.warning(f"Failure streak detected ({self.current_failure_streak}), forcing exploration")
             epsilon = self.max_epsilon
         else:
             # Inverse relationship: low success → high epsilon
@@ -185,12 +175,8 @@ class SerotoninCore:
         if window:
             outcomes = outcomes[-window:]
 
-        successes = sum(
-            1 for o in outcomes if o["outcome"] == ActionOutcome.SUCCESS.value
-        )
-        partials = sum(
-            1 for o in outcomes if o["outcome"] == ActionOutcome.PARTIAL.value
-        )
+        successes = sum(1 for o in outcomes if o["outcome"] == ActionOutcome.SUCCESS.value)
+        partials = sum(1 for o in outcomes if o["outcome"] == ActionOutcome.PARTIAL.value)
 
         # Count partials as 0.5 success
         success_score = successes + 0.5 * partials
@@ -248,15 +234,9 @@ class SerotoninCore:
 
         recent_outcomes = list(self.outcome_history)[-window:]
 
-        successes = sum(
-            1 for o in recent_outcomes if o["outcome"] == ActionOutcome.SUCCESS.value
-        )
-        failures = sum(
-            1 for o in recent_outcomes if o["outcome"] == ActionOutcome.FAILURE.value
-        )
-        partials = sum(
-            1 for o in recent_outcomes if o["outcome"] == ActionOutcome.PARTIAL.value
-        )
+        successes = sum(1 for o in recent_outcomes if o["outcome"] == ActionOutcome.SUCCESS.value)
+        failures = sum(1 for o in recent_outcomes if o["outcome"] == ActionOutcome.FAILURE.value)
+        partials = sum(1 for o in recent_outcomes if o["outcome"] == ActionOutcome.PARTIAL.value)
 
         total = len(recent_outcomes)
 
@@ -287,10 +267,6 @@ class SerotoninCore:
             "epsilon_range": [self.min_epsilon, self.max_epsilon],
             "mood_assessment": mood,
             "modulation_count": self.modulation_count,
-            "last_modulation": (
-                self.last_modulation_time.isoformat()
-                if self.last_modulation_time
-                else "N/A"
-            ),
+            "last_modulation": (self.last_modulation_time.isoformat() if self.last_modulation_time else "N/A"),
             "outcome_statistics": stats,
         }

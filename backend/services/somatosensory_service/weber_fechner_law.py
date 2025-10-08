@@ -31,9 +31,7 @@ class WeberFechnerLaw:
         """
         self.k_constant = k_constant
 
-    def calculate_perceived_intensity(
-        self, stimulus_magnitude: float, reference_stimulus: float = 1.0
-    ) -> float:
+    def calculate_perceived_intensity(self, stimulus_magnitude: float, reference_stimulus: float = 1.0) -> float:
         """Calculates the perceived intensity of a stimulus based on the Weber-Fechner Law.
 
         The formula used is P = k * log(S / S0), where:
@@ -53,14 +51,10 @@ class WeberFechnerLaw:
             ValueError: If stimulus_magnitude or reference_stimulus is non-positive.
         """
         if stimulus_magnitude <= 0 or reference_stimulus <= 0:
-            raise ValueError(
-                "Stimulus magnitudes must be positive for logarithmic calculation."
-            )
+            raise ValueError("Stimulus magnitudes must be positive for logarithmic calculation.")
 
         # Weber-Fechner Law: P = k * log(S / S0)
-        perceived_intensity = self.k_constant * math.log(
-            stimulus_magnitude / reference_stimulus
-        )
+        perceived_intensity = self.k_constant * math.log(stimulus_magnitude / reference_stimulus)
         return perceived_intensity
 
     def get_k_constant(self) -> float:

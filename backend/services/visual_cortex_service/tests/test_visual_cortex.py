@@ -19,20 +19,21 @@ Test Structure:
 """
 
 import base64
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
-from datetime import datetime
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 # Import FastAPI app and core components
 from api import app
-from event_driven_vision_core import EventDrivenVisionCore
 from attention_system_core import AttentionSystemCore
-from network_vision_core import NetworkVisionCore
+from event_driven_vision_core import EventDrivenVisionCore
 from malware_vision_core import MalwareVisionCore
-
+from network_vision_core import NetworkVisionCore
 
 # ==================== Fixtures ====================
+
 
 @pytest_asyncio.fixture
 async def client():
@@ -68,6 +69,7 @@ def malware_vision():
 
 # ==================== Test Helper Functions ====================
 
+
 def create_image_data(content: bytes = b"test_image_data") -> str:
     """Creates a base64-encoded image string for testing.
 
@@ -99,6 +101,7 @@ def create_image_request(analysis_type: str, image_content: bytes = b"test", pri
 
 
 # ==================== Test Classes ====================
+
 
 @pytest.mark.asyncio
 class TestHealthEndpoint:
@@ -139,9 +142,7 @@ class TestAnalyzeImageEndpoint:
     async def test_analyze_object_detection_success(self, client):
         """Test object detection analysis with event signatures - REAL detection logic."""
         payload = create_image_request(
-            analysis_type="object_detection",
-            image_content=b"red_object_signature",
-            priority=8
+            analysis_type="object_detection", image_content=b"red_object_signature", priority=8
         )
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
@@ -156,11 +157,7 @@ class TestAnalyzeImageEndpoint:
 
     async def test_analyze_scene_understanding_with_face(self, client):
         """Test scene understanding with face signature - REAL attention logic."""
-        payload = create_image_request(
-            analysis_type="scene_understanding",
-            image_content=b"face_signature",
-            priority=7
-        )
+        payload = create_image_request(analysis_type="scene_understanding", image_content=b"face_signature", priority=7)
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
         data = response.json()
@@ -174,9 +171,7 @@ class TestAnalyzeImageEndpoint:
     async def test_analyze_scene_understanding_with_weapon(self, client):
         """Test scene understanding with weapon signature - HIGH priority focus."""
         payload = create_image_request(
-            analysis_type="scene_understanding",
-            image_content=b"weapon_signature",
-            priority=9
+            analysis_type="scene_understanding", image_content=b"weapon_signature", priority=9
         )
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
@@ -191,9 +186,7 @@ class TestAnalyzeImageEndpoint:
     async def test_analyze_network_traffic_visualization(self, client):
         """Test network traffic visualization analysis - REAL network pattern detection."""
         payload = create_image_request(
-            analysis_type="network_traffic_visualization",
-            image_content=b"spike_in_traffic_pattern",
-            priority=6
+            analysis_type="network_traffic_visualization", image_content=b"spike_in_traffic_pattern", priority=6
         )
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
@@ -208,9 +201,7 @@ class TestAnalyzeImageEndpoint:
     async def test_analyze_malware_signature_detection_critical(self, client):
         """Test malware signature detection with critical threat - REAL malware detection."""
         payload = create_image_request(
-            analysis_type="malware_signature_detection",
-            image_content=b"malicious_code_pattern",
-            priority=10
+            analysis_type="malware_signature_detection", image_content=b"malicious_code_pattern", priority=10
         )
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
@@ -227,7 +218,7 @@ class TestAnalyzeImageEndpoint:
         payload = create_image_request(
             analysis_type="malware_signature_detection",
             image_content=b"suspicious_network_activity_pattern",
-            priority=8
+            priority=8,
         )
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
@@ -239,20 +230,14 @@ class TestAnalyzeImageEndpoint:
 
     async def test_analyze_invalid_analysis_type(self, client):
         """Test that invalid analysis type returns 400 error."""
-        payload = create_image_request(
-            analysis_type="invalid_analysis_type",
-            image_content=b"test_data"
-        )
+        payload = create_image_request(analysis_type="invalid_analysis_type", image_content=b"test_data")
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 400
         assert "Invalid analysis type" in response.json()["detail"]
 
     async def test_analyze_preserves_timestamp(self, client):
         """Test that analysis includes timestamp in response."""
-        payload = create_image_request(
-            analysis_type="object_detection",
-            image_content=b"test_data"
-        )
+        payload = create_image_request(analysis_type="object_detection", image_content=b"test_data")
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
         data = response.json()
@@ -263,11 +248,7 @@ class TestAnalyzeImageEndpoint:
     async def test_analyze_different_priorities(self, client):
         """Test that different priority levels are accepted."""
         for priority in [1, 5, 10]:
-            payload = create_image_request(
-                analysis_type="object_detection",
-                image_content=b"test",
-                priority=priority
-            )
+            payload = create_image_request(analysis_type="object_detection", image_content=b"test", priority=priority)
             response = await client.post("/analyze_image", json=payload)
             assert response.status_code == 200
 
@@ -494,27 +475,21 @@ class TestEdgeCases:
         payload = create_image_request(
             analysis_type="object_detection",
             image_content=b"",  # Empty
-            priority=5
+            priority=5,
         )
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200  # Should handle gracefully
 
     async def test_analyze_minimum_priority(self, client):
         """Test analysis with minimum priority (1)."""
-        payload = create_image_request(
-            analysis_type="object_detection",
-            image_content=b"test",
-            priority=1
-        )
+        payload = create_image_request(analysis_type="object_detection", image_content=b"test", priority=1)
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
 
     async def test_analyze_maximum_priority(self, client):
         """Test analysis with maximum priority (10)."""
         payload = create_image_request(
-            analysis_type="malware_signature_detection",
-            image_content=b"malicious_code_pattern",
-            priority=10
+            analysis_type="malware_signature_detection", image_content=b"malicious_code_pattern", priority=10
         )
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 200
@@ -523,9 +498,7 @@ class TestEdgeCases:
         """Test multiple sequential image analyses."""
         for i in range(3):
             payload = create_image_request(
-                analysis_type="object_detection",
-                image_content=f"test_image_{i}".encode(),
-                priority=5
+                analysis_type="object_detection", image_content=f"test_image_{i}".encode(), priority=5
             )
             response = await client.post("/analyze_image", json=payload)
             assert response.status_code == 200
@@ -536,14 +509,10 @@ class TestEdgeCases:
             "object_detection",
             "scene_understanding",
             "network_traffic_visualization",
-            "malware_signature_detection"
+            "malware_signature_detection",
         ]
         for analysis_type in analysis_types:
-            payload = create_image_request(
-                analysis_type=analysis_type,
-                image_content=b"test_data",
-                priority=5
-            )
+            payload = create_image_request(analysis_type=analysis_type, image_content=b"test_data", priority=5)
             response = await client.post("/analyze_image", json=payload)
             assert response.status_code == 200
             assert response.json()["analysis_type"] == analysis_type
@@ -563,7 +532,7 @@ class TestEdgeCases:
         payload = {
             "image_base64": "!!!invalid_base64!!!",  # Invalid base64
             "analysis_type": "object_detection",
-            "priority": 5
+            "priority": 5,
         }
         response = await client.post("/analyze_image", json=payload)
         assert response.status_code == 500

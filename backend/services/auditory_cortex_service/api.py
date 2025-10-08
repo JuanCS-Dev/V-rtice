@@ -13,18 +13,18 @@ This API allows other Maximus AI services or external applications to interact
 with the auditory perception capabilities in a standardized and efficient manner.
 """
 
-import asyncio
 import base64
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from binaural_correlation import BinauralCorrelation
 from c2_beacon_detector import C2BeaconDetector
 from cocktail_party_triage import CocktailPartyTriage
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from pydantic import BaseModel
 from ttp_signature_recognition import TTPSignatureRecognition
-import uvicorn
 
 app = FastAPI(title="Maximus Auditory Cortex Service", version="1.0.0")
 
@@ -86,9 +86,7 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
     Raises:
         HTTPException: If the audio processing fails or an invalid analysis type is provided.
     """
-    print(
-        f"[API] Received audio analysis request (type: {request.analysis_type}, language: {request.language})"
-    )
+    print(f"[API] Received audio analysis request (type: {request.analysis_type}, language: {request.language})")
     try:
         # Decode base64 audio (simplified, actual audio processing would happen here)
         audio_data = base64.b64decode(request.audio_base64)
@@ -99,9 +97,7 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
         }
 
         if request.analysis_type == "speech_to_text":
-            transcript = await cocktail_party_triage.process_audio_for_speech(
-                audio_data, request.language
-            )
+            transcript = await cocktail_party_triage.process_audio_for_speech(audio_data, request.language)
             results["transcript"] = transcript
         elif request.analysis_type == "sound_event_detection":
             events = await binaural_correlation.detect_sound_events(audio_data)

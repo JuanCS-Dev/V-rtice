@@ -14,7 +14,7 @@ cybersecurity analysis.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 class NetworkVisionCore:
@@ -40,18 +40,14 @@ class NetworkVisionCore:
             Dict[str, Any]: A dictionary containing identified network patterns, anomalies, and insights.
         """
         self.current_status = "analyzing_network_image"
-        print(
-            f"[NetworkVision] Analyzing network traffic image (size: {len(image_data)} bytes)."
-        )
+        print(f"[NetworkVision] Analyzing network traffic image (size: {len(image_data)} bytes).")
         await asyncio.sleep(0.3)  # Simulate analysis
 
         # Simulate detection of network patterns/anomalies based on image content
         identified_patterns = []
         anomalies = []
 
-        if (
-            b"spike_in_traffic_pattern" in image_data
-        ):  # Placeholder for actual visual analysis
+        if b"spike_in_traffic_pattern" in image_data:  # Placeholder for actual visual analysis
             identified_patterns.append(
                 {
                     "type": "traffic_spike",
@@ -89,8 +85,7 @@ class NetworkVisionCore:
             "timestamp": self.last_analysis_time.isoformat(),
             "identified_patterns": identified_patterns,
             "detected_anomalies": anomalies,
-            "network_health_score": 1.0
-            - (self.network_anomalies_detected * 0.1),  # Simplified score
+            "network_health_score": 1.0 - (self.network_anomalies_detected * 0.1),  # Simplified score
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -101,10 +96,6 @@ class NetworkVisionCore:
         """
         return {
             "status": self.current_status,
-            "last_analysis": (
-                self.last_analysis_time.isoformat()
-                if self.last_analysis_time
-                else "N/A"
-            ),
+            "last_analysis": (self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"),
             "total_network_anomalies_detected": self.network_anomalies_detected,
         }

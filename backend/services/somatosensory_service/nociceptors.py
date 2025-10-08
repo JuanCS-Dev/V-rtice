@@ -47,18 +47,14 @@ class Nociceptors:
         Returns:
             Dict[str, Any]: A dictionary containing the nociceptor response, including pain level.
         """
-        print(
-            f"[Nociceptors] Processing stimulus: Pressure={pressure}, Temp={temperature}, Location={location}"
-        )
+        print(f"[Nociceptors] Processing stimulus: Pressure={pressure}, Temp={temperature}, Location={location}")
         await asyncio.sleep(0.1)  # Simulate processing time
 
         pain_level = 0.0
         stimulus_type = []
 
         if pressure > self.threshold_pressure:
-            pain_level += (
-                pressure - self.threshold_pressure
-            ) * 5  # Scale pain with intensity
+            pain_level += (pressure - self.threshold_pressure) * 5  # Scale pain with intensity
             stimulus_type.append("high_pressure")
 
         if temperature is not None:
@@ -78,8 +74,7 @@ class Nociceptors:
             "stimulus_detected": bool(stimulus_type),
             "stimulus_type": stimulus_type,
             "raw_pain_level": self.current_pain_level,
-            "requires_attention": self.current_pain_level
-            > 0.3,  # Threshold for requiring attention
+            "requires_attention": self.current_pain_level > 0.3,  # Threshold for requiring attention
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -91,9 +86,5 @@ class Nociceptors:
         return {
             "status": "active",
             "current_pain_level": self.current_pain_level,
-            "last_stimulus": (
-                self.last_stimulus_time.isoformat()
-                if self.last_stimulus_time
-                else "N/A"
-            ),
+            "last_stimulus": (self.last_stimulus_time.isoformat() if self.last_stimulus_time else "N/A"),
         }

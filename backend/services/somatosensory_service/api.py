@@ -14,16 +14,16 @@ This API allows other Maximus AI services or external applications to interact
 with the somatosensory capabilities in a standardized and efficient manner.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from endogenous_analgesia import EndogenousAnalgesia
-from fastapi import FastAPI, HTTPException
 from mechanoreceptors import Mechanoreceptors
 from nociceptors import Nociceptors
-from pydantic import BaseModel
-import uvicorn
 from weber_fechner_law import WeberFechnerLaw
 
 app = FastAPI(title="Maximus Somatosensory Service", version="1.0.0")
@@ -89,17 +89,11 @@ async def simulate_touch_event(request: TouchEventRequest) -> Dict[str, Any]:
         f"[API] Simulating touch event: Pressure={request.pressure}, Duration={request.duration}, Location={request.location}"
     )
 
-    mechanoreceptor_data = await mechanoreceptors.process_touch(
-        request.pressure, request.duration, request.location
-    )
-    nociceptor_data = await nociceptors.process_stimulus(
-        request.pressure, request.temperature, request.location
-    )
+    mechanoreceptor_data = await mechanoreceptors.process_touch(request.pressure, request.duration, request.location)
+    nociceptor_data = await nociceptors.process_stimulus(request.pressure, request.temperature, request.location)
 
     # Apply Weber-Fechner Law for perceived intensity
-    perceived_pressure = weber_fechner_law.calculate_perceived_intensity(
-        request.pressure
-    )
+    perceived_pressure = weber_fechner_law.calculate_perceived_intensity(request.pressure)
 
     # Simulate endogenous analgesia if pain is detected
     pain_level = nociceptor_data.get("pain_level", 0.0)

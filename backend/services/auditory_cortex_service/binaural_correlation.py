@@ -14,7 +14,7 @@ and interact with its surroundings based on auditory cues.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 
 class BinauralCorrelation:
@@ -41,9 +41,7 @@ class BinauralCorrelation:
             List[Dict[str, Any]]: A list of dictionaries, each describing a localized sound event.
         """
         self.current_status = "localizing_sounds"
-        print(
-            f"[BinauralCorrelation] Detecting and localizing sound events in audio (size: {len(audio_data)} bytes)."
-        )
+        print(f"[BinauralCorrelation] Detecting and localizing sound events in audio (size: {len(audio_data)} bytes).")
         await asyncio.sleep(0.3)  # Simulate processing time
 
         localized_events = []
@@ -95,10 +93,6 @@ class BinauralCorrelation:
         """
         return {
             "status": self.current_status,
-            "last_localization": (
-                self.last_localization_time.isoformat()
-                if self.last_localization_time
-                else "N/A"
-            ),
+            "last_localization": (self.last_localization_time.isoformat() if self.last_localization_time else "N/A"),
             "total_sounds_localized": self.localized_sounds,
         }

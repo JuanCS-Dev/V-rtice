@@ -20,10 +20,10 @@ Like biological norepinephrine: Modulates arousal and urgency-driven behavior.
 NO MOCKS - Production-ready implementation.
 """
 
-from collections import deque
-from datetime import datetime, timedelta
 import logging
 import math
+from collections import deque
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 import numpy as np
@@ -70,9 +70,7 @@ class NoradrenalineCore:
             f"range=[{min_temperature}, {max_temperature}])"
         )
 
-    def compute_urgency(
-        self, threat_severity: float, time_pressure: float, stakes: float = 0.5
-    ) -> float:
+    def compute_urgency(self, threat_severity: float, time_pressure: float, stakes: float = 0.5) -> float:
         """Compute urgency signal from threat and time pressure.
 
         Urgency = f(severity, time_pressure, stakes)
@@ -110,9 +108,7 @@ class NoradrenalineCore:
 
         return urgency
 
-    def modulate_temperature(
-        self, urgency: Optional[float] = None, confidence: float = 0.5
-    ) -> float:
+    def modulate_temperature(self, urgency: Optional[float] = None, confidence: float = 0.5) -> float:
         """Modulate policy temperature based on urgency.
 
         Strategy:
@@ -141,9 +137,7 @@ class NoradrenalineCore:
         log_max = math.log(self.max_temperature)
         log_base = math.log(self.base_temperature)
 
-        log_temp = (
-            log_base + (log_max - log_base) * temperature_factor * confidence_modulation
-        )
+        log_temp = log_base + (log_max - log_base) * temperature_factor * confidence_modulation
 
         temperature = math.exp(log_temp)
         temperature = max(self.min_temperature, min(self.max_temperature, temperature))
@@ -152,16 +146,11 @@ class NoradrenalineCore:
         self.last_modulation_time = datetime.now()
         self.modulation_count += 1
 
-        logger.info(
-            f"Temperature modulated: {temperature:.3f} (urgency={urgency:.2f}, "
-            f"confidence={confidence:.2f})"
-        )
+        logger.info(f"Temperature modulated: {temperature:.3f} (urgency={urgency:.2f}, confidence={confidence:.2f})")
 
         return temperature
 
-    def apply_softmax_temperature(
-        self, logits: np.ndarray, temperature: Optional[float] = None
-    ) -> np.ndarray:
+    def apply_softmax_temperature(self, logits: np.ndarray, temperature: Optional[float] = None) -> np.ndarray:
         """Apply temperature-modulated softmax to policy logits.
 
         Args:
@@ -184,10 +173,7 @@ class NoradrenalineCore:
         exp_logits = np.exp(scaled_logits - np.max(scaled_logits))
         probabilities = exp_logits / np.sum(exp_logits)
 
-        logger.debug(
-            f"Softmax applied with temp={temperature:.3f}: "
-            f"entropy={self._compute_entropy(probabilities):.3f}"
-        )
+        logger.debug(f"Softmax applied with temp={temperature:.3f}: entropy={self._compute_entropy(probabilities):.3f}")
 
         return probabilities
 
@@ -204,9 +190,7 @@ class NoradrenalineCore:
         probs = np.clip(probabilities, 1e-10, 1.0)
         return -np.sum(probs * np.log(probs))
 
-    def modulate_policy_boldness(
-        self, action_values: np.ndarray, urgency: Optional[float] = None
-    ) -> int:
+    def modulate_policy_boldness(self, action_values: np.ndarray, urgency: Optional[float] = None) -> int:
         """Select action with urgency-modulated policy.
 
         High urgency = greedy (argmax)
@@ -278,10 +262,6 @@ class NoradrenalineCore:
             "temperature_range": [self.min_temperature, self.max_temperature],
             "current_urgency": self.current_urgency,
             "modulation_count": self.modulation_count,
-            "last_modulation": (
-                self.last_modulation_time.isoformat()
-                if self.last_modulation_time
-                else "N/A"
-            ),
+            "last_modulation": (self.last_modulation_time.isoformat() if self.last_modulation_time else "N/A"),
             "urgency_statistics": stats,
         }

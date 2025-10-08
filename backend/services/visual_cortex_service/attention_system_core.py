@@ -13,7 +13,7 @@ interpretation of complex visual information, especially in dynamic environments
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 class AttentionSystemCore:
@@ -39,9 +39,7 @@ class AttentionSystemCore:
             Dict[str, Any]: A dictionary containing the identified areas of interest and scene summary.
         """
         self.current_status = "analyzing_scene"
-        print(
-            f"[AttentionSystem] Analyzing scene (size: {len(image_data)} bytes) for areas of interest."
-        )
+        print(f"[AttentionSystem] Analyzing scene (size: {len(image_data)} bytes) for areas of interest.")
         await asyncio.sleep(0.2)  # Simulate scene analysis
 
         # Simulate attention allocation based on image content
@@ -69,9 +67,7 @@ class AttentionSystemCore:
             scene_summary += "Potential threat detected. "
             self.current_focus_area = "potential weapon"
         else:
-            areas_of_interest.append(
-                {"region": "(0,0,W,H)", "saliency": 0.5, "description": "general scene"}
-            )
+            areas_of_interest.append({"region": "(0,0,W,H)", "saliency": 0.5, "description": "general scene"})
             scene_summary += "General environmental scan. "
             self.current_focus_area = "general scene"
 
@@ -93,8 +89,6 @@ class AttentionSystemCore:
         """
         return {
             "status": self.current_status,
-            "last_focus": (
-                self.last_focus_time.isoformat() if self.last_focus_time else "N/A"
-            ),
+            "last_focus": (self.last_focus_time.isoformat() if self.last_focus_time else "N/A"),
             "current_focus_area": self.current_focus_area,
         }

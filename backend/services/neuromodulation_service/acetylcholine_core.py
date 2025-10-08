@@ -20,10 +20,10 @@ Like biological acetylcholine: Modulates attention and learning based on surpris
 NO MOCKS - Production-ready implementation.
 """
 
-from collections import deque
-from datetime import datetime
 import logging
 import math
+from collections import deque
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -60,21 +60,14 @@ class AcetylcholineCore:
 
         self.current_gain = base_attention_gain
         self.prediction_error_history: deque = deque(maxlen=prediction_error_window)
-        self.attention_allocation: Dict[str, float] = (
-            {}
-        )  # stimulus_id -> attention weight
+        self.attention_allocation: Dict[str, float] = {}  # stimulus_id -> attention weight
 
         self.last_modulation_time: Optional[datetime] = None
         self.modulation_count = 0
 
-        logger.info(
-            f"AcetylcholineCore initialized (base_gain={base_attention_gain}, "
-            f"range=[{min_gain}, {max_gain}])"
-        )
+        logger.info(f"AcetylcholineCore initialized (base_gain={base_attention_gain}, range=[{min_gain}, {max_gain}])")
 
-    def compute_prediction_error_from_hpc(
-        self, predicted: np.ndarray, actual: np.ndarray, layer: str = "L1"
-    ) -> float:
+    def compute_prediction_error_from_hpc(self, predicted: np.ndarray, actual: np.ndarray, layer: str = "L1") -> float:
         """Compute prediction error from hierarchical Predictive Coding.
 
         In hPC, prediction error flows bottom-up:
@@ -110,9 +103,7 @@ class AcetylcholineCore:
 
         return normalized_pe
 
-    def compute_attention_gain(
-        self, prediction_error: float, context_confidence: float = 0.5
-    ) -> float:
+    def compute_attention_gain(self, prediction_error: float, context_confidence: float = 0.5) -> float:
         """Compute attention gain based on prediction error.
 
         Strategy:
@@ -140,9 +131,7 @@ class AcetylcholineCore:
 
         log_gain = (
             math.log(self.base_gain)
-            + (math.log(self.max_gain) - math.log(self.base_gain))
-            * normalized_pe
-            * sensitivity
+            + (math.log(self.max_gain) - math.log(self.base_gain)) * normalized_pe * sensitivity
         )
 
         gain = math.exp(log_gain)
@@ -153,8 +142,7 @@ class AcetylcholineCore:
         self.modulation_count += 1
 
         logger.info(
-            f"Attention gain computed: {gain:.2f} (PE={prediction_error:.4f}, "
-            f"confidence={context_confidence:.2f})"
+            f"Attention gain computed: {gain:.2f} (PE={prediction_error:.4f}, confidence={context_confidence:.2f})"
         )
 
         return gain
@@ -205,9 +193,7 @@ class AcetylcholineCore:
             for i, stimulus_id in enumerate(stimulus_ids):
                 self.attention_allocation[stimulus_id] = float(gains[i])
 
-        logger.debug(
-            f"Transformer attention modulated: gain_range=[{gains.min():.2f}, {gains.max():.2f}]"
-        )
+        logger.debug(f"Transformer attention modulated: gain_range=[{gains.min():.2f}, {gains.max():.2f}]")
 
         return modulated_scores
 
@@ -228,9 +214,7 @@ class AcetylcholineCore:
         # Compute prediction error for each stimulus
         for stimulus_id in stimuli:
             if stimulus_id in predictions:
-                pe = self.compute_prediction_error_from_hpc(
-                    predictions[stimulus_id], stimuli[stimulus_id]
-                )
+                pe = self.compute_prediction_error_from_hpc(predictions[stimulus_id], stimuli[stimulus_id])
                 gain = self.compute_attention_gain(pe)
                 attention_weights[stimulus_id] = gain
             else:
@@ -240,21 +224,14 @@ class AcetylcholineCore:
         # Normalize to sum to 1.0 (softmax-like)
         total_weight = sum(attention_weights.values())
         if total_weight > 0:
-            normalized_weights = {
-                k: v / total_weight for k, v in attention_weights.items()
-            }
+            normalized_weights = {k: v / total_weight for k, v in attention_weights.items()}
         else:
             # Uniform distribution
-            normalized_weights = {
-                k: 1.0 / len(attention_weights) for k in attention_weights
-            }
+            normalized_weights = {k: 1.0 / len(attention_weights) for k in attention_weights}
 
         self.attention_allocation = normalized_weights
 
-        logger.info(
-            f"Attention allocated across {len(stimuli)} stimuli: "
-            f"max={max(normalized_weights.values()):.3f}"
-        )
+        logger.info(f"Attention allocated across {len(stimuli)} stimuli: max={max(normalized_weights.values()):.3f}")
 
         return normalized_weights
 
@@ -297,11 +274,7 @@ class AcetylcholineCore:
             "base_gain": self.base_gain,
             "gain_range": [self.min_gain, self.max_gain],
             "modulation_count": self.modulation_count,
-            "last_modulation": (
-                self.last_modulation_time.isoformat()
-                if self.last_modulation_time
-                else "N/A"
-            ),
+            "last_modulation": (self.last_modulation_time.isoformat() if self.last_modulation_time else "N/A"),
             "attention_allocation": self.attention_allocation,
             "prediction_error_statistics": stats,
         }

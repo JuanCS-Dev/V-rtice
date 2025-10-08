@@ -20,11 +20,11 @@ Like biological dopamine: Signals reward prediction errors and modulates learnin
 NO MOCKS - Production-ready implementation.
 """
 
-from collections import deque
-from datetime import datetime, timedelta
 import logging
 import math
-from typing import Any, Dict, List, Optional
+from collections import deque
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +64,7 @@ class DopamineCore:
         self.last_modulation_time: Optional[datetime] = None
         self.modulation_count = 0
 
-        logger.info(
-            f"DopamineCore initialized (base_lr={base_learning_rate}, "
-            f"range=[{min_lr}, {max_lr}])"
-        )
+        logger.info(f"DopamineCore initialized (base_lr={base_learning_rate}, range=[{min_lr}, {max_lr}])")
 
     def compute_rpe(
         self,
@@ -97,10 +94,7 @@ class DopamineCore:
         self.reward_history.append(actual_reward)
         self.expected_reward_history.append(expected_reward)
 
-        logger.debug(
-            f"RPE computed: {rpe:.4f} (actual={actual_reward:.4f}, "
-            f"expected={expected_reward:.4f})"
-        )
+        logger.debug(f"RPE computed: {rpe:.4f} (actual={actual_reward:.4f}, expected={expected_reward:.4f})")
 
         return rpe
 
@@ -147,10 +141,7 @@ class DopamineCore:
         self.last_modulation_time = datetime.now()
         self.modulation_count += 1
 
-        logger.info(
-            f"LR modulated: {new_lr:.6f} (RPE={rpe:.4f}, "
-            f"surprise={normalized_rpe:.2f}, urgency={urgency:.2f})"
-        )
+        logger.info(f"LR modulated: {new_lr:.6f} (RPE={rpe:.4f}, surprise={normalized_rpe:.2f}, urgency={urgency:.2f})")
 
         return new_lr
 
@@ -169,9 +160,7 @@ class DopamineCore:
 
         return math.sqrt(variance)
 
-    def integrate_with_pytorch_optimizer(
-        self, optimizer, rpe: float, urgency: float = 0.5
-    ):
+    def integrate_with_pytorch_optimizer(self, optimizer, rpe: float, urgency: float = 0.5):
         """Integrate with PyTorch optimizer (modify LR in-place).
 
         Args:
@@ -214,9 +203,7 @@ class DopamineCore:
             "std_rpe": self._compute_rpe_std(),
             "positive_count": len(positive_rpe),
             "negative_count": len(negative_rpe),
-            "positive_ratio": (
-                len(positive_rpe) / len(recent_rpe) if recent_rpe else 0.0
-            ),
+            "positive_ratio": (len(positive_rpe) / len(recent_rpe) if recent_rpe else 0.0),
         }
 
     async def get_status(self) -> Dict[str, Any]:
@@ -233,10 +220,6 @@ class DopamineCore:
             "base_lr": self.base_lr,
             "lr_range": [self.min_lr, self.max_lr],
             "modulation_count": self.modulation_count,
-            "last_modulation": (
-                self.last_modulation_time.isoformat()
-                if self.last_modulation_time
-                else "N/A"
-            ),
+            "last_modulation": (self.last_modulation_time.isoformat() if self.last_modulation_time else "N/A"),
             "rpe_statistics": stats,
         }

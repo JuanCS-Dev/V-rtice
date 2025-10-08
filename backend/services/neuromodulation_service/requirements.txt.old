@@ -1,0 +1,15 @@
+# Neuromodulation Service - Dependencies
+
+# Scientific computing
+numpy==1.26.3
+scipy==1.12.0
+
+# Kafka (cytokine signaling)
+aiokafka==0.10.0
+
+# Optional: API service
+fastapi>=0.115.0  # Security fix
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+httpx==0.26.0
+anyio>=4.4.0  # Security fix for race condition
