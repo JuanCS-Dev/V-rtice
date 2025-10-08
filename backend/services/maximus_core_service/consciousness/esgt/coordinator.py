@@ -74,21 +74,58 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
-from consciousness.tig.fabric import TIGFabric, TIGNode
-from consciousness.tig.sync import PTPCluster
 from consciousness.esgt.kuramoto import (
     KuramotoNetwork,
-    PhaseCoherence,
     OscillatorConfig,
 )
+from consciousness.tig.fabric import TIGFabric
+from consciousness.tig.sync import PTPCluster
+
+
+class FrequencyLimiter:
+    """
+    Hard frequency limiter using token bucket algorithm.
+
+    FASE VII (Safety Hardening):
+    Prevents ESGT runaway by enforcing strict frequency bounds.
+    """
+
+    def __init__(self, max_frequency_hz: float):
+        self.max_frequency = max_frequency_hz
+        self.tokens = max_frequency_hz
+        self.last_update = time.time()
+        self.lock = asyncio.Lock()
+
+    async def allow(self) -> bool:
+        """
+        Check if operation is allowed (token available).
+
+        Returns:
+            True if allowed, False if rate limit exceeded
+        """
+        async with self.lock:
+            now = time.time()
+
+            # Refill tokens based on time elapsed
+            elapsed = now - self.last_update
+            self.tokens = min(self.max_frequency, self.tokens + elapsed * self.max_frequency)
+            self.last_update = now
+
+            # Check if token available
+            if self.tokens >= 1.0:
+                self.tokens -= 1.0
+                return True
+
+            return False
 
 
 class ESGTPhase(Enum):
     """Phases of ESGT ignition protocol."""
+
     IDLE = "idle"
     PREPARE = "prepare"
     SYNCHRONIZE = "synchronize"
@@ -101,6 +138,7 @@ class ESGTPhase(Enum):
 
 class SalienceLevel(Enum):
     """Classification of information salience."""
+
     MINIMAL = "minimal"  # <0.25 - background noise
     LOW = "low"  # 0.25-0.50 - peripheral awareness
     MEDIUM = "medium"  # 0.50-0.75 - candidate for consciousness
@@ -118,6 +156,7 @@ class SalienceScore:
     Where coefficients sum to 1.0 and are dynamically adjusted based
     on arousal state (MCEA) and attention parameters (acetylcholine).
     """
+
     novelty: float = 0.0  # 0-1, how unexpected
     relevance: float = 0.0  # 0-1, goal-alignment
     urgency: float = 0.0  # 0-1, time-criticality
@@ -132,10 +171,10 @@ class SalienceScore:
     def compute_total(self) -> float:
         """Compute weighted salience score."""
         return (
-            self.alpha * self.novelty +
-            self.beta * self.relevance +
-            self.gamma * self.urgency +
-            self.delta * self.confidence
+            self.alpha * self.novelty
+            + self.beta * self.relevance
+            + self.gamma * self.urgency
+            + self.delta * self.confidence
         )
 
     def get_level(self) -> SalienceLevel:
@@ -162,6 +201,7 @@ class TriggerConditions:
     pathological synchronization and ensures computational resources
     are available.
     """
+
     # Salience threshold
     min_salience: float = 0.60  # Typical threshold for consciousness
 
@@ -181,24 +221,16 @@ class TriggerConditions:
         """Check if salience exceeds threshold."""
         return score.compute_total() >= self.min_salience
 
-    def check_resources(
-        self,
-        tig_latency_ms: float,
-        available_nodes: int,
-        cpu_capacity: float
-    ) -> bool:
+    def check_resources(self, tig_latency_ms: float, available_nodes: int, cpu_capacity: float) -> bool:
         """Check if computational resources are adequate."""
         return (
-            tig_latency_ms <= self.max_tig_latency_ms and
-            available_nodes >= self.min_available_nodes and
-            cpu_capacity >= self.min_cpu_capacity
+            tig_latency_ms <= self.max_tig_latency_ms
+            and available_nodes >= self.min_available_nodes
+            and cpu_capacity >= self.min_cpu_capacity
         )
 
     def check_temporal_gating(
-        self,
-        time_since_last_esgt: float,
-        recent_esgt_count: int,
-        time_window: float = 1.0
+        self, time_since_last_esgt: float, recent_esgt_count: int, time_window: float = 1.0
     ) -> bool:
         """Check if temporal constraints are satisfied."""
         # Refractory period
@@ -226,6 +258,7 @@ class ESGTEvent:
     episode where distributed information becomes unified, globally
     accessible, and reportable.
     """
+
     event_id: str
     timestamp_start: float
     timestamp_end: Optional[float] = None
@@ -326,6 +359,12 @@ class ESGTCoordinator:
     "The coordinator is the gatekeeper of consciousness."
     """
 
+    # FASE VII (Safety Hardening): Hard limits
+    MAX_FREQUENCY_HZ = 10.0
+    MAX_CONCURRENT_EVENTS = 3
+    MIN_COHERENCE_THRESHOLD = 0.50
+    DEGRADED_MODE_THRESHOLD = 0.65
+
     def __init__(
         self,
         tig_fabric: TIGFabric,
@@ -355,6 +394,25 @@ class ESGTCoordinator:
         # Performance tracking
         self.total_events: int = 0
         self.successful_events: int = 0
+
+        # FASE VII (Safety Hardening): Frequency tracking
+        from collections import deque
+
+        self.ignition_timestamps: deque = deque(maxlen=100)
+        self.frequency_limiter = FrequencyLimiter(self.MAX_FREQUENCY_HZ)
+
+        # FASE VII (Safety Hardening): Concurrent event tracking
+        self.active_events: Set[str] = set()
+        self.max_concurrent = self.MAX_CONCURRENT_EVENTS
+
+        # FASE VII (Safety Hardening): Coherence monitoring
+        self.coherence_history: deque = deque(maxlen=10)
+        self.degraded_mode = False
+
+        # FASE VII (Safety Hardening): Circuit breaker for ignition
+        from consciousness.tig.fabric import CircuitBreaker
+
+        self.ignition_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=10.0)
 
     async def start(self) -> None:
         """Start ESGT coordinator."""
@@ -389,6 +447,10 @@ class ESGTCoordinator:
         This is the core method that transforms unconscious processing
         into conscious experience through the 5-phase protocol.
 
+        FASE VII (Safety Hardening):
+        Now includes frequency limiting, concurrent event checks, circuit breaker,
+        and degraded mode support to prevent ESGT runaway.
+
         Args:
             salience: Multi-factor salience score (determines if ignition occurs)
             content: Information to make conscious
@@ -397,8 +459,67 @@ class ESGTCoordinator:
             target_coherence: Minimum coherence (0.70 for consciousness)
 
         Returns:
-            ESGTEvent with full metrics and outcome
+            ESGTEvent with full metrics and outcome (or None if blocked)
         """
+        # FASE VII: Check 1 - Frequency limiter (HARD LIMIT)
+        if not await self.frequency_limiter.allow():
+            print("🛑 ESGT: Ignition BLOCKED by frequency limiter")
+            # Create failed event for tracking
+            event = ESGTEvent(
+                event_id=f"esgt-blocked-{int(time.time() * 1000):016d}",
+                timestamp_start=time.time(),
+                content={},
+                content_source=content_source,
+                target_coherence=target_coherence,
+            )
+            event.transition_phase(ESGTPhase.FAILED)
+            event.finalize(success=False, reason="frequency_limit_exceeded")
+            return event
+
+        # FASE VII: Check 2 - Concurrent event limit (HARD LIMIT)
+        if len(self.active_events) >= self.max_concurrent:
+            print(f"🛑 ESGT: Ignition BLOCKED - {len(self.active_events)} concurrent events")
+            event = ESGTEvent(
+                event_id=f"esgt-blocked-{int(time.time() * 1000):016d}",
+                timestamp_start=time.time(),
+                content={},
+                content_source=content_source,
+                target_coherence=target_coherence,
+            )
+            event.transition_phase(ESGTPhase.FAILED)
+            event.finalize(success=False, reason="max_concurrent_events")
+            return event
+
+        # FASE VII: Check 3 - Circuit breaker
+        if self.ignition_breaker.is_open():
+            print("🛑 ESGT: Ignition BLOCKED by circuit breaker")
+            event = ESGTEvent(
+                event_id=f"esgt-blocked-{int(time.time() * 1000):016d}",
+                timestamp_start=time.time(),
+                content={},
+                content_source=content_source,
+                target_coherence=target_coherence,
+            )
+            event.transition_phase(ESGTPhase.FAILED)
+            event.finalize(success=False, reason="circuit_breaker_open")
+            return event
+
+        # FASE VII: Check 4 - Degraded mode (higher salience threshold)
+        if self.degraded_mode:
+            total_salience = salience.compute_total()
+            if total_salience < 0.85:  # Higher threshold in degraded mode
+                print(f"⚠️  ESGT: Low salience {total_salience:.2f} in degraded mode")
+                event = ESGTEvent(
+                    event_id=f"esgt-blocked-{int(time.time() * 1000):016d}",
+                    timestamp_start=time.time(),
+                    content={},
+                    content_source=content_source,
+                    target_coherence=target_coherence,
+                )
+                event.transition_phase(ESGTPhase.FAILED)
+                event.finalize(success=False, reason="degraded_mode_low_salience")
+                return event
+
         event = ESGTEvent(
             event_id=f"esgt-{int(time.time() * 1000):016d}",
             timestamp_start=time.time(),
@@ -445,7 +566,7 @@ class ESGTCoordinator:
                 topology=topology,
                 duration_ms=300.0,  # Max 300ms to achieve sync (allows time for simulation)
                 target_coherence=target_coherence,
-                dt=0.005
+                dt=0.005,
             )
 
             event.sync_latency_ms = (time.time() - sync_start) * 1000
@@ -454,7 +575,9 @@ class ESGTCoordinator:
             # Check if synchronization achieved
             coherence = self.kuramoto.get_coherence()
             if not coherence or not coherence.is_conscious_level():
-                event.finalize(success=False, reason=f"Sync failed: coherence={coherence.order_parameter if coherence else 0:.3f}")
+                event.finalize(
+                    success=False, reason=f"Sync failed: coherence={coherence.order_parameter if coherence else 0:.3f}"
+                )
                 return event
 
             # Record peak coherence achieved during sync
@@ -476,7 +599,7 @@ class ESGTCoordinator:
                 "timestamp": event.timestamp_start,
             }
 
-            nodes_reached = await self.tig.broadcast_global(message, priority=10)
+            await self.tig.broadcast_global(message, priority=10)
 
             event.broadcast_latency_ms = (time.time() - broadcast_start) * 1000
 
@@ -507,8 +630,10 @@ class ESGTCoordinator:
             if event.was_successful():
                 self.successful_events += 1
 
-            print(f"✅ ESGT {event.event_id}: coherence={event.achieved_coherence:.3f}, "
-                  f"duration={event.total_duration_ms:.1f}ms, nodes={event.node_count}")
+            print(
+                f"✅ ESGT {event.event_id}: coherence={event.achieved_coherence:.3f}, "
+                f"duration={event.total_duration_ms:.1f}ms, nodes={event.node_count}"
+            )
 
             return event
 
@@ -528,20 +653,23 @@ class ESGTCoordinator:
         # Resource check
         tig_metrics = self.tig.get_metrics()
         tig_latency = tig_metrics.avg_latency_us / 1000.0  # Convert to ms
-        available_nodes = sum(1 for node in self.tig.nodes.values()
-                             if node.node_state.value in ["active", "esgt_mode"])
+        available_nodes = sum(1 for node in self.tig.nodes.values() if node.node_state.value in ["active", "esgt_mode"])
         cpu_capacity = 0.60  # Simulated - would query actual metrics
 
-        if not self.triggers.check_resources(tig_latency_ms=tig_latency, available_nodes=available_nodes, cpu_capacity=cpu_capacity):
+        if not self.triggers.check_resources(
+            tig_latency_ms=tig_latency, available_nodes=available_nodes, cpu_capacity=cpu_capacity
+        ):
             return False, f"Insufficient resources (nodes={available_nodes}, latency={tig_latency:.1f}ms)"
 
         # Temporal gating
-        time_since_last = time.time() - self.last_esgt_time if self.last_esgt_time > 0 else float('inf')
-        recent_count = sum(1 for e in self.event_history[-10:]
-                          if time.time() - e.timestamp_start < 1.0)
+        time_since_last = time.time() - self.last_esgt_time if self.last_esgt_time > 0 else float("inf")
+        recent_count = sum(1 for e in self.event_history[-10:] if time.time() - e.timestamp_start < 1.0)
 
         if not self.triggers.check_temporal_gating(time_since_last, recent_count):
-            return False, f"Refractory period violation (time_since_last={time_since_last*1000:.1f}ms < {self.triggers.refractory_period_ms:.1f}ms)"
+            return (
+                False,
+                f"Refractory period violation (time_since_last={time_since_last * 1000:.1f}ms < {self.triggers.refractory_period_ms:.1f}ms)",
+            )
 
         # Arousal check (simulated - would query MCEA)
         arousal = 0.70  # Simulated
@@ -577,18 +705,16 @@ class ESGTCoordinator:
             node = self.tig.nodes.get(node_id)
             if node:
                 # Get neighbors that are also participating
-                neighbors = [conn.remote_node_id for conn in node.connections.values()
-                            if conn.active and conn.remote_node_id in node_ids]
+                neighbors = [
+                    conn.remote_node_id
+                    for conn in node.connections.values()
+                    if conn.active and conn.remote_node_id in node_ids
+                ]
                 topology[node_id] = neighbors
 
         return topology
 
-    async def _sustain_coherence(
-        self,
-        event: ESGTEvent,
-        duration_ms: float,
-        topology: Dict[str, List[str]]
-    ) -> None:
+    async def _sustain_coherence(self, event: ESGTEvent, duration_ms: float, topology: Dict[str, List[str]]) -> None:
         """
         Sustain synchronization for target duration.
 
@@ -640,8 +766,71 @@ class ESGTCoordinator:
         coherences = [e.achieved_coherence for e in recent if e.success]
         return np.mean(coherences) if coherences else 0.0
 
+    def _enter_degraded_mode(self) -> None:
+        """
+        Enter degraded mode - reduce ignition rate.
+
+        FASE VII (Safety Hardening):
+        Response to sustained low coherence.
+        """
+        self.degraded_mode = True
+        self.max_concurrent = 1  # Only 1 event at a time
+
+        print("⚠️  ESGT: Entering DEGRADED MODE - reducing ignition rate due to low coherence")
+
+    def _exit_degraded_mode(self) -> None:
+        """
+        Exit degraded mode - restore normal operation.
+
+        FASE VII (Safety Hardening):
+        Recovery when coherence improves.
+        """
+        self.degraded_mode = False
+        self.max_concurrent = self.MAX_CONCURRENT_EVENTS
+
+        print("✓ ESGT: Exiting DEGRADED MODE - coherence restored")
+
+    def get_health_metrics(self) -> Dict[str, Any]:
+        """
+        Get ESGT health metrics for Safety Core integration.
+
+        FASE VII (Safety Hardening):
+        Exposes health status for consciousness safety monitoring.
+
+        Returns:
+            Dict with health metrics:
+            - frequency_hz: Current ignition frequency
+            - active_events: Number of concurrent events
+            - degraded_mode: Whether in degraded mode
+            - average_coherence: Recent coherence average
+            - circuit_breaker_state: Circuit breaker status
+        """
+        # Compute current frequency
+        now = time.time()
+        recent_ignitions = [
+            t
+            for t in self.ignition_timestamps
+            if now - t < 1.0  # Last second
+        ]
+        current_frequency = len(recent_ignitions)
+
+        # Compute average coherence
+        avg_coherence = sum(self.coherence_history) / len(self.coherence_history) if self.coherence_history else 0.0
+
+        return {
+            "frequency_hz": current_frequency,
+            "active_events": len(self.active_events),
+            "degraded_mode": self.degraded_mode,
+            "average_coherence": avg_coherence,
+            "circuit_breaker_state": self.ignition_breaker.state,
+            "total_events": self.total_events,
+            "successful_events": self.successful_events,
+        }
+
     def __repr__(self) -> str:
-        return (f"ESGTCoordinator(id={self.coordinator_id}, "
-                f"events={self.total_events}, "
-                f"success_rate={self.get_success_rate():.1%}, "
-                f"running={self._running})")
+        return (
+            f"ESGTCoordinator(id={self.coordinator_id}, "
+            f"events={self.total_events}, "
+            f"success_rate={self.get_success_rate():.1%}, "
+            f"running={self._running})"
+        )

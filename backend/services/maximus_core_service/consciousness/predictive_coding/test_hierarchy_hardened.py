@@ -19,17 +19,17 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
 import asyncio
+
 import numpy as np
+import pytest
 
 from consciousness.predictive_coding.hierarchy_hardened import (
-    PredictiveCodingHierarchy,
     HierarchyConfig,
     HierarchyState,
+    PredictiveCodingHierarchy,
 )
 from consciousness.predictive_coding.layer_base_hardened import LayerConfig
-
 
 # ============================================================================
 # Tests: Initialization
@@ -52,8 +52,7 @@ def test_hierarchy_initialization_default_config():
 def test_hierarchy_initialization_custom_config():
     """Test hierarchy accepts custom config."""
     config = HierarchyConfig(
-        layer1_config=LayerConfig(layer_id=1, input_dim=1000, hidden_dim=100),
-        max_hierarchy_cycle_time_ms=1000.0
+        layer1_config=LayerConfig(layer_id=1, input_dim=1000, hidden_dim=100), max_hierarchy_cycle_time_ms=1000.0
     )
     hierarchy = PredictiveCodingHierarchy(config)
 
@@ -173,7 +172,6 @@ async def test_layer_failure_doesnt_crash_hierarchy():
     hierarchy = PredictiveCodingHierarchy()
 
     # Force Layer 2 to fail
-    original_impl = hierarchy.layer2._predict_impl
 
     async def failing_impl(input_data):
         raise RuntimeError("Forced failure")
@@ -197,7 +195,7 @@ async def test_layer_timeout_stops_propagation():
             layer_id=2,
             input_dim=64,
             hidden_dim=32,
-            max_computation_time_ms=10.0  # Very short timeout
+            max_computation_time_ms=10.0,  # Very short timeout
         )
     )
     hierarchy = PredictiveCodingHierarchy(config)
@@ -294,7 +292,6 @@ async def test_hierarchy_timeout_protection():
 
     # Force all layers to be slow
     for layer in hierarchy._layers:
-        original_impl = layer._predict_impl
 
         async def slow_impl(input_data):
             await asyncio.sleep(0.1)  # 100ms each = 500ms total (will timeout)
@@ -400,7 +397,6 @@ async def test_get_health_metrics_aggregates_all_layers():
     # Should contain metrics from all 5 layers
     # (Note: Due to shape mismatches in current implementation, only Layer 1 may process successfully)
     # This is expected behavior - layer isolation prevents cascading failures
-    layer_prefixes = ["layer1_sensory", "layer2_behavioral", "layer3_operational", "layer4_tactical", "layer5_strategic"]
 
     # At least Layer 1 should have processed
     assert any("layer1_sensory" in key.lower() or "layer1sensory" in key.lower() for key in metrics.keys())

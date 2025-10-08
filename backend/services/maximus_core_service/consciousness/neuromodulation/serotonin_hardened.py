@@ -32,10 +32,11 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-from typing import Optional, Callable
+from typing import Callable, Optional
+
 from consciousness.neuromodulation.modulator_base import (
-    NeuromodulatorBase,
     ModulatorConfig,
+    NeuromodulatorBase,
 )
 
 
@@ -56,9 +57,7 @@ class SerotoninModulator(NeuromodulatorBase):
     """
 
     def __init__(
-        self,
-        config: Optional[ModulatorConfig] = None,
-        kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: Optional[ModulatorConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
     ):
         """Initialize serotonin modulator with biological defaults.
 
@@ -75,7 +74,7 @@ class SerotoninModulator(NeuromodulatorBase):
                 desensitization_threshold=0.8,
                 desensitization_factor=0.5,
                 smoothing_factor=0.2,
-                max_change_per_step=0.1
+                max_change_per_step=0.1,
             )
 
         super().__init__(config, kill_switch_callback)

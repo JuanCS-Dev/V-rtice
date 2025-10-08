@@ -2,9 +2,12 @@
 Quick validation script for TIG metrics
 No pytest overhead - just direct fabric initialization and metrics check
 """
+
 import asyncio
 import sys
+
 from tig.fabric import TIGFabric, TopologyConfig
+
 
 async def validate_tig_metrics():
     print("=" * 60)
@@ -51,6 +54,7 @@ async def validate_tig_metrics():
         print(f"Clustering: {'✅' if metrics.avg_clustering_coefficient >= 0.70 else '❌'}")
         print(f"ECI:        {'✅' if metrics.effective_connectivity_index >= 0.85 else '❌'}")
         return 1
+
 
 if __name__ == "__main__":
     exit_code = asyncio.run(validate_tig_metrics())

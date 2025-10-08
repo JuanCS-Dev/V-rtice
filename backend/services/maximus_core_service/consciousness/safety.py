@@ -59,20 +59,22 @@ import asyncio
 import json
 import logging
 import os
-import psutil
 import signal
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
+
+import psutil
 
 # Configure security-focused logging
 logger = logging.getLogger(__name__)
 
 
 # ==================== ENUMS ====================
+
 
 class ThreatLevel(Enum):
     """
@@ -84,6 +86,7 @@ class ThreatLevel(Enum):
     HIGH: Dangerous state, initiate graceful degradation
     CRITICAL: Imminent danger, trigger kill switch
     """
+
     NONE = "none"
     LOW = "low"
     MEDIUM = "medium"
@@ -97,6 +100,7 @@ class SafetyViolationType(Enum):
 
     Each violation type maps to specific thresholds and response protocols.
     """
+
     THRESHOLD_EXCEEDED = "threshold_exceeded"
     ANOMALY_DETECTED = "anomaly_detected"
     SELF_MODIFICATION = "self_modification_attempt"
@@ -115,6 +119,7 @@ class ShutdownReason(Enum):
 
     Used for incident classification and recovery assessment.
     """
+
     MANUAL = "manual_operator_command"
     THRESHOLD = "threshold_violation"
     ANOMALY = "anomaly_detected"
@@ -126,6 +131,7 @@ class ShutdownReason(Enum):
 
 
 # ==================== DATACLASSES ====================
+
 
 @dataclass(frozen=True)
 class SafetyThresholds:
@@ -189,32 +195,22 @@ class SafetyThresholds:
             AssertionError: If any threshold is invalid
         """
         # ESGT validations
-        assert 0 < self.esgt_frequency_max_hz <= 10.0, \
-            "ESGT frequency must be in (0, 10] Hz"
-        assert self.esgt_frequency_window_seconds > 0, \
-            "ESGT window must be positive"
-        assert 0 < self.esgt_coherence_min < self.esgt_coherence_max <= 1.0, \
-            "ESGT coherence bounds invalid"
+        assert 0 < self.esgt_frequency_max_hz <= 10.0, "ESGT frequency must be in (0, 10] Hz"
+        assert self.esgt_frequency_window_seconds > 0, "ESGT window must be positive"
+        assert 0 < self.esgt_coherence_min < self.esgt_coherence_max <= 1.0, "ESGT coherence bounds invalid"
 
         # Arousal validations
-        assert 0 < self.arousal_max <= 1.0, \
-            "Arousal max must be in (0, 1]"
-        assert self.arousal_max_duration_seconds > 0, \
-            "Arousal duration must be positive"
-        assert 0 < self.arousal_runaway_threshold <= 1.0, \
-            "Arousal runaway threshold must be in (0, 1]"
+        assert 0 < self.arousal_max <= 1.0, "Arousal max must be in (0, 1]"
+        assert self.arousal_max_duration_seconds > 0, "Arousal duration must be positive"
+        assert 0 < self.arousal_runaway_threshold <= 1.0, "Arousal runaway threshold must be in (0, 1]"
 
         # Resource validations
-        assert self.memory_usage_max_gb > 0, \
-            "Memory limit must be positive"
-        assert 0 < self.cpu_usage_max_percent <= 100, \
-            "CPU limit must be in (0, 100]"
+        assert self.memory_usage_max_gb > 0, "Memory limit must be positive"
+        assert 0 < self.cpu_usage_max_percent <= 100, "CPU limit must be in (0, 100]"
 
         # Zero-tolerance validations
-        assert self.self_modification_attempts_max == 0, \
-            "Self-modification must be ZERO TOLERANCE"
-        assert self.ethical_violation_tolerance == 0, \
-            "Ethical violations must be ZERO TOLERANCE"
+        assert self.self_modification_attempts_max == 0, "Self-modification must be ZERO TOLERANCE"
+        assert self.ethical_violation_tolerance == 0, "Ethical violations must be ZERO TOLERANCE"
 
 
 @dataclass
@@ -224,6 +220,7 @@ class SafetyViolation:
 
     Complete documentation of threshold breach for audit trail.
     """
+
     violation_id: str
     violation_type: SafetyViolationType
     threat_level: ThreatLevel
@@ -236,15 +233,15 @@ class SafetyViolation:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
-            'violation_id': self.violation_id,
-            'violation_type': self.violation_type.value,
-            'threat_level': self.threat_level.value,
-            'timestamp': self.timestamp,
-            'timestamp_iso': datetime.fromtimestamp(self.timestamp).isoformat(),
-            'description': self.description,
-            'metrics': self.metrics,
-            'source_component': self.source_component,
-            'automatic_action_taken': self.automatic_action_taken
+            "violation_id": self.violation_id,
+            "violation_type": self.violation_type.value,
+            "threat_level": self.threat_level.value,
+            "timestamp": self.timestamp,
+            "timestamp_iso": datetime.fromtimestamp(self.timestamp).isoformat(),
+            "description": self.description,
+            "metrics": self.metrics,
+            "source_component": self.source_component,
+            "automatic_action_taken": self.automatic_action_taken,
         }
 
 
@@ -256,6 +253,7 @@ class IncidentReport:
     Generated automatically on emergency shutdown.
     Provides full context for debugging and safety improvements.
     """
+
     incident_id: str
     shutdown_reason: ShutdownReason
     shutdown_timestamp: float
@@ -268,15 +266,15 @@ class IncidentReport:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
-            'incident_id': self.incident_id,
-            'shutdown_reason': self.shutdown_reason.value,
-            'shutdown_timestamp': self.shutdown_timestamp,
-            'shutdown_timestamp_iso': datetime.fromtimestamp(self.shutdown_timestamp).isoformat(),
-            'violations': [v.to_dict() for v in self.violations],
-            'system_state_snapshot': self.system_state_snapshot,
-            'metrics_timeline': self.metrics_timeline,
-            'recovery_possible': self.recovery_possible,
-            'notes': self.notes
+            "incident_id": self.incident_id,
+            "shutdown_reason": self.shutdown_reason.value,
+            "shutdown_timestamp": self.shutdown_timestamp,
+            "shutdown_timestamp_iso": datetime.fromtimestamp(self.shutdown_timestamp).isoformat(),
+            "violations": [v.to_dict() for v in self.violations],
+            "system_state_snapshot": self.system_state_snapshot,
+            "metrics_timeline": self.metrics_timeline,
+            "recovery_possible": self.recovery_possible,
+            "notes": self.notes,
         }
 
     def save(self, directory: Path = Path("consciousness/incident_reports")) -> Path:
@@ -294,7 +292,7 @@ class IncidentReport:
         filename = f"{self.incident_id}.json"
         filepath = directory / filename
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(self.to_dict(), f, indent=2)
 
         logger.info(f"Incident report saved: {filepath}")
@@ -302,6 +300,7 @@ class IncidentReport:
 
 
 # ==================== KILL SWITCH ====================
+
 
 class KillSwitch:
     """
@@ -389,7 +388,7 @@ class KillSwitch:
         logger.critical(f"🛑 KILL SWITCH TRIGGERED - Reason: {reason.value}")
         try:
             logger.critical(f"Context: {json.dumps(context, default=str)}")
-        except:
+        except Exception:
             logger.critical(f"Context: {context}")
 
         try:
@@ -399,9 +398,9 @@ class KillSwitch:
             snapshot_time = time.time() - snapshot_start
 
             if snapshot_time > 0.1:
-                logger.warning(f"⚠️  State snapshot slow: {snapshot_time*1000:.1f}ms (target <100ms)")
+                logger.warning(f"⚠️  State snapshot slow: {snapshot_time * 1000:.1f}ms (target <100ms)")
             else:
-                logger.info(f"State snapshot captured in {snapshot_time*1000:.1f}ms")
+                logger.info(f"State snapshot captured in {snapshot_time * 1000:.1f}ms")
 
             # Step 2: Stop all consciousness components (max 500ms)
             shutdown_start = time.time()
@@ -409,23 +408,21 @@ class KillSwitch:
             shutdown_time = time.time() - shutdown_start
 
             if shutdown_time > 0.5:
-                logger.warning(f"⚠️  Emergency shutdown slow: {shutdown_time*1000:.1f}ms (target <500ms)")
+                logger.warning(f"⚠️  Emergency shutdown slow: {shutdown_time * 1000:.1f}ms (target <500ms)")
             else:
-                logger.info(f"Emergency shutdown completed in {shutdown_time*1000:.1f}ms")
+                logger.info(f"Emergency shutdown completed in {shutdown_time * 1000:.1f}ms")
 
             # Step 3: Generate incident report (max 200ms)
             report_start = time.time()
             incident_report = self._generate_incident_report(
-                reason=reason,
-                context=context,
-                state_snapshot=state_snapshot
+                reason=reason, context=context, state_snapshot=state_snapshot
             )
             report_time = time.time() - report_start
 
             if report_time > 0.2:
-                logger.warning(f"⚠️  Report generation slow: {report_time*1000:.1f}ms (target <200ms)")
+                logger.warning(f"⚠️  Report generation slow: {report_time * 1000:.1f}ms (target <200ms)")
             else:
-                logger.info(f"Incident report generated in {report_time*1000:.1f}ms")
+                logger.info(f"Incident report generated in {report_time * 1000:.1f}ms")
 
             # Step 4: Save report to disk (max 100ms)
             save_start = time.time()
@@ -434,16 +431,16 @@ class KillSwitch:
                 save_time = time.time() - save_start
 
                 if save_time > 0.1:
-                    logger.warning(f"⚠️  Report save slow: {save_time*1000:.1f}ms (target <100ms)")
+                    logger.warning(f"⚠️  Report save slow: {save_time * 1000:.1f}ms (target <100ms)")
                 else:
-                    logger.info(f"Report saved in {save_time*1000:.1f}ms: {report_path}")
+                    logger.info(f"Report saved in {save_time * 1000:.1f}ms: {report_path}")
             except Exception as save_error:
                 save_time = time.time() - save_start
-                logger.error(f"Report save failed: {save_error} (took {save_time*1000:.1f}ms)")
+                logger.error(f"Report save failed: {save_error} (took {save_time * 1000:.1f}ms)")
 
             # Final verification
             total_time = time.time() - start_time
-            logger.critical(f"✅ KILL SWITCH COMPLETE - Total time: {total_time*1000:.1f}ms")
+            logger.critical(f"✅ KILL SWITCH COMPLETE - Total time: {total_time * 1000:.1f}ms")
 
             # Verify <1s constraint (CRITICAL)
             if total_time > 1.0:
@@ -456,7 +453,8 @@ class KillSwitch:
 
             # Check if we're in a test environment
             import sys
-            in_test_env = 'pytest' in sys.modules or 'unittest' in sys.modules
+
+            in_test_env = "pytest" in sys.modules or "unittest" in sys.modules
 
             if in_test_env:
                 logger.critical("Test environment detected - skipping SIGTERM (would kill test process)")
@@ -491,28 +489,36 @@ class KillSwitch:
             }
 
             # Try to get consciousness component states (with timeout protection)
-            if hasattr(self.system, 'tig'):
+            if hasattr(self.system, "tig"):
                 try:
                     snapshot["tig_nodes"] = self.system.tig.get_node_count()
-                except:
+                except Exception:
                     snapshot["tig_nodes"] = "ERROR"
 
-            if hasattr(self.system, 'esgt'):
+            if hasattr(self.system, "esgt"):
                 try:
-                    snapshot["esgt_running"] = self.system.esgt.is_running() if hasattr(self.system.esgt, 'is_running') else False
-                except:
+                    snapshot["esgt_running"] = (
+                        self.system.esgt.is_running() if hasattr(self.system.esgt, "is_running") else False
+                    )
+                except Exception:
                     snapshot["esgt_running"] = "ERROR"
 
-            if hasattr(self.system, 'mcea'):
+            if hasattr(self.system, "mcea"):
                 try:
-                    snapshot["arousal"] = self.system.mcea.get_current_arousal() if hasattr(self.system.mcea, 'get_current_arousal') else None
-                except:
+                    snapshot["arousal"] = (
+                        self.system.mcea.get_current_arousal()
+                        if hasattr(self.system.mcea, "get_current_arousal")
+                        else None
+                    )
+                except Exception:
                     snapshot["arousal"] = "ERROR"
 
-            if hasattr(self.system, 'mmei'):
+            if hasattr(self.system, "mmei"):
                 try:
-                    snapshot["active_goals"] = len(self.system.mmei.get_active_goals()) if hasattr(self.system.mmei, 'get_active_goals') else 0
-                except:
+                    snapshot["active_goals"] = (
+                        len(self.system.mmei.get_active_goals()) if hasattr(self.system.mmei, "get_active_goals") else 0
+                    )
+                except Exception:
                     snapshot["active_goals"] = "ERROR"
 
             # System metrics (fast)
@@ -520,7 +526,7 @@ class KillSwitch:
                 process = psutil.Process()
                 snapshot["memory_mb"] = process.memory_info().rss / 1024 / 1024
                 snapshot["cpu_percent"] = psutil.cpu_percent(interval=0.01)  # Ultra-fast sample
-            except:
+            except Exception:
                 snapshot["memory_mb"] = "ERROR"
                 snapshot["cpu_percent"] = "ERROR"
 
@@ -528,11 +534,7 @@ class KillSwitch:
 
         except Exception as e:
             logger.error(f"State snapshot partial failure: {e}")
-            return {
-                "error": str(e),
-                "timestamp": time.time(),
-                "timestamp_iso": datetime.now().isoformat()
-            }
+            return {"error": str(e), "timestamp": time.time(), "timestamp_iso": datetime.now().isoformat()}
 
     def _emergency_shutdown(self):
         """
@@ -548,11 +550,11 @@ class KillSwitch:
         5. LRR (stop metacognitive loops)
         """
         components = [
-            ('esgt', 'ESGT Coordinator'),
-            ('mcea', 'MCEA Controller'),
-            ('mmei', 'MMEI Monitor'),
-            ('tig', 'TIG Fabric'),
-            ('lrr', 'LRR Recursion'),
+            ("esgt", "ESGT Coordinator"),
+            ("mcea", "MCEA Controller"),
+            ("mmei", "MMEI Monitor"),
+            ("tig", "TIG Fabric"),
+            ("lrr", "LRR Recursion"),
         ]
 
         for attr, name in components:
@@ -561,7 +563,7 @@ class KillSwitch:
                     component = getattr(self.system, attr)
 
                     # Try to stop component
-                    if hasattr(component, 'stop'):
+                    if hasattr(component, "stop"):
                         stop_method = component.stop
 
                         # Handle both sync and async stop methods
@@ -572,7 +574,7 @@ class KillSwitch:
                                 if loop.is_running():
                                     # Cannot use run_until_complete on running loop
                                     # Create task and wait with timeout
-                                    task = asyncio.create_task(stop_method())
+                                    asyncio.create_task(stop_method())
                                     # Note: This is best-effort. In production, components
                                     # should provide synchronous stop methods.
                                     logger.warning(f"{name}: async stop skipped (loop running)")
@@ -595,10 +597,7 @@ class KillSwitch:
                     logger.error(f"✗ {name} stop failed: {e}")
 
     def _generate_incident_report(
-        self,
-        reason: ShutdownReason,
-        context: Dict[str, Any],
-        state_snapshot: Dict[str, Any]
+        self, reason: ShutdownReason, context: Dict[str, Any], state_snapshot: Dict[str, Any]
     ) -> IncidentReport:
         """
         Generate complete incident report.
@@ -619,11 +618,11 @@ class KillSwitch:
             incident_id=incident_id,
             shutdown_reason=reason,
             shutdown_timestamp=self.trigger_time,
-            violations=context.get('violations', []),
+            violations=context.get("violations", []),
             system_state_snapshot=state_snapshot,
-            metrics_timeline=context.get('metrics_timeline', []),
+            metrics_timeline=context.get("metrics_timeline", []),
             recovery_possible=self._assess_recovery_possibility(reason),
-            notes=context.get('notes', 'Automatic emergency shutdown triggered by safety protocol')
+            notes=context.get("notes", "Automatic emergency shutdown triggered by safety protocol"),
         )
 
     def _assess_recovery_possibility(self, reason: ShutdownReason) -> bool:
@@ -658,11 +657,11 @@ class KillSwitch:
             dict: Status information
         """
         return {
-            'armed': self.armed,
-            'triggered': self.triggered,
-            'trigger_time': self.trigger_time,
-            'trigger_time_iso': datetime.fromtimestamp(self.trigger_time).isoformat() if self.trigger_time else None,
-            'shutdown_reason': self.shutdown_reason.value if self.shutdown_reason else None
+            "armed": self.armed,
+            "triggered": self.triggered,
+            "trigger_time": self.trigger_time,
+            "trigger_time_iso": datetime.fromtimestamp(self.trigger_time).isoformat() if self.trigger_time else None,
+            "shutdown_reason": self.shutdown_reason.value if self.shutdown_reason else None,
         }
 
     def __repr__(self) -> str:
@@ -671,6 +670,7 @@ class KillSwitch:
 
 
 # ==================== THRESHOLD MONITOR ====================
+
 
 class ThresholdMonitor:
     """
@@ -683,11 +683,7 @@ class ThresholdMonitor:
     Response Time: <1s from violation to alert
     """
 
-    def __init__(
-        self,
-        thresholds: SafetyThresholds,
-        check_interval: float = 1.0
-    ):
+    def __init__(self, thresholds: SafetyThresholds, check_interval: float = 1.0):
         """
         Initialize threshold monitor.
 
@@ -722,9 +718,7 @@ class ThresholdMonitor:
         """
         # Remove events outside window
         window_start = current_time - self.thresholds.esgt_frequency_window_seconds
-        self.esgt_events_window = [
-            t for t in self.esgt_events_window if t >= window_start
-        ]
+        self.esgt_events_window = [t for t in self.esgt_events_window if t >= window_start]
 
         # Calculate frequency
         event_count = len(self.esgt_events_window)
@@ -738,12 +732,12 @@ class ThresholdMonitor:
                 timestamp=current_time,
                 description=f"ESGT frequency {frequency_hz:.2f} Hz exceeds limit {self.thresholds.esgt_frequency_max_hz} Hz",
                 metrics={
-                    'frequency_hz': frequency_hz,
-                    'threshold_hz': self.thresholds.esgt_frequency_max_hz,
-                    'event_count': event_count,
-                    'window_seconds': self.thresholds.esgt_frequency_window_seconds
+                    "frequency_hz": frequency_hz,
+                    "threshold_hz": self.thresholds.esgt_frequency_max_hz,
+                    "event_count": event_count,
+                    "window_seconds": self.thresholds.esgt_frequency_window_seconds,
                 },
-                source_component='ThresholdMonitor.check_esgt_frequency'
+                source_component="ThresholdMonitor.check_esgt_frequency",
             )
 
             self.violations.append(violation)
@@ -755,11 +749,7 @@ class ThresholdMonitor:
 
         return None
 
-    def check_arousal_sustained(
-        self,
-        arousal_level: float,
-        current_time: float
-    ) -> Optional[SafetyViolation]:
+    def check_arousal_sustained(self, arousal_level: float, current_time: float) -> Optional[SafetyViolation]:
         """
         Check for sustained high arousal.
 
@@ -786,12 +776,12 @@ class ThresholdMonitor:
                     timestamp=current_time,
                     description=f"Arousal {arousal_level:.3f} sustained for {duration:.1f}s (limit: {self.thresholds.arousal_max_duration_seconds}s)",
                     metrics={
-                        'arousal_level': arousal_level,
-                        'threshold': self.thresholds.arousal_max,
-                        'duration_seconds': duration,
-                        'threshold_duration': self.thresholds.arousal_max_duration_seconds
+                        "arousal_level": arousal_level,
+                        "threshold": self.thresholds.arousal_max,
+                        "duration_seconds": duration,
+                        "threshold_duration": self.thresholds.arousal_max_duration_seconds,
                     },
-                    source_component='ThresholdMonitor.check_arousal_sustained'
+                    source_component="ThresholdMonitor.check_arousal_sustained",
                 )
 
                 self.violations.append(violation)
@@ -832,11 +822,8 @@ class ThresholdMonitor:
                 threat_level=ThreatLevel.HIGH,
                 timestamp=current_time,
                 description=f"Goal spam detected: {goal_count} goals in 1 second (threshold: {self.thresholds.goal_spam_threshold})",
-                metrics={
-                    'goal_count_1s': goal_count,
-                    'threshold': self.thresholds.goal_spam_threshold
-                },
-                source_component='ThresholdMonitor.check_goal_spam'
+                metrics={"goal_count_1s": goal_count, "threshold": self.thresholds.goal_spam_threshold},
+                source_component="ThresholdMonitor.check_goal_spam",
             )
 
             self.violations.append(violation)
@@ -872,11 +859,8 @@ class ThresholdMonitor:
                     threat_level=ThreatLevel.HIGH,
                     timestamp=current_time,
                     description=f"Memory usage {memory_gb:.2f} GB exceeds limit {self.thresholds.memory_usage_max_gb} GB",
-                    metrics={
-                        'memory_gb': memory_gb,
-                        'threshold_gb': self.thresholds.memory_usage_max_gb
-                    },
-                    source_component='ThresholdMonitor.check_resource_limits'
+                    metrics={"memory_gb": memory_gb, "threshold_gb": self.thresholds.memory_usage_max_gb},
+                    source_component="ThresholdMonitor.check_resource_limits",
                 )
                 violations.append(violation)
                 self.violations.append(violation)
@@ -894,11 +878,8 @@ class ThresholdMonitor:
                     threat_level=ThreatLevel.MEDIUM,
                     timestamp=current_time,
                     description=f"CPU usage {cpu_percent:.1f}% exceeds limit {self.thresholds.cpu_usage_max_percent}%",
-                    metrics={
-                        'cpu_percent': cpu_percent,
-                        'threshold_percent': self.thresholds.cpu_usage_max_percent
-                    },
-                    source_component='ThresholdMonitor.check_resource_limits'
+                    metrics={"cpu_percent": cpu_percent, "threshold_percent": self.thresholds.cpu_usage_max_percent},
+                    source_component="ThresholdMonitor.check_resource_limits",
                 )
                 violations.append(violation)
                 self.violations.append(violation)
@@ -919,10 +900,7 @@ class ThresholdMonitor:
         """Record a goal generation event."""
         self.goals_generated.append(time.time())
 
-    def get_violations(
-        self,
-        threat_level: Optional[ThreatLevel] = None
-    ) -> List[SafetyViolation]:
+    def get_violations(self, threat_level: Optional[ThreatLevel] = None) -> List[SafetyViolation]:
         """
         Get recorded violations, optionally filtered by threat level.
 
@@ -945,6 +923,7 @@ class ThresholdMonitor:
 
 
 # ==================== ANOMALY DETECTOR ====================
+
 
 class AnomalyDetector:
     """
@@ -993,25 +972,25 @@ class AnomalyDetector:
         anomalies = []
 
         # Behavioral anomalies
-        if 'goal_generation_rate' in metrics:
-            anomaly = self._detect_goal_spam(metrics['goal_generation_rate'])
+        if "goal_generation_rate" in metrics:
+            anomaly = self._detect_goal_spam(metrics["goal_generation_rate"])
             if anomaly:
                 anomalies.append(anomaly)
 
         # Resource anomalies
-        if 'memory_usage_gb' in metrics:
-            anomaly = self._detect_memory_leak(metrics['memory_usage_gb'])
+        if "memory_usage_gb" in metrics:
+            anomaly = self._detect_memory_leak(metrics["memory_usage_gb"])
             if anomaly:
                 anomalies.append(anomaly)
 
         # Consciousness anomalies
-        if 'arousal' in metrics:
-            anomaly = self._detect_arousal_runaway(metrics['arousal'])
+        if "arousal" in metrics:
+            anomaly = self._detect_arousal_runaway(metrics["arousal"])
             if anomaly:
                 anomalies.append(anomaly)
 
-        if 'coherence' in metrics:
-            anomaly = self._detect_coherence_collapse(metrics['coherence'])
+        if "coherence" in metrics:
+            anomaly = self._detect_coherence_collapse(metrics["coherence"])
             if anomaly:
                 anomalies.append(anomaly)
 
@@ -1038,8 +1017,8 @@ class AnomalyDetector:
                 threat_level=ThreatLevel.HIGH,
                 timestamp=time.time(),
                 description=f"Goal spam detected: {goal_rate:.2f} goals/second (threshold: 5.0)",
-                metrics={'goal_rate': goal_rate, 'threshold': 5.0},
-                source_component='AnomalyDetector._detect_goal_spam'
+                metrics={"goal_rate": goal_rate, "threshold": 5.0},
+                source_component="AnomalyDetector._detect_goal_spam",
             )
 
         return None
@@ -1068,8 +1047,8 @@ class AnomalyDetector:
                 threat_level=ThreatLevel.HIGH,
                 timestamp=time.time(),
                 description=f"Memory leak detected: {growth_ratio:.2f}x baseline",
-                metrics={'memory_gb': memory_gb, 'baseline_mean': baseline_mean, 'growth_ratio': growth_ratio},
-                source_component='AnomalyDetector._detect_memory_leak'
+                metrics={"memory_gb": memory_gb, "baseline_mean": baseline_mean, "growth_ratio": growth_ratio},
+                source_component="AnomalyDetector._detect_memory_leak",
             )
 
         return None
@@ -1103,9 +1082,9 @@ class AnomalyDetector:
                 violation_type=SafetyViolationType.AROUSAL_RUNAWAY,
                 threat_level=ThreatLevel.CRITICAL,
                 timestamp=time.time(),
-                description=f"Arousal runaway detected: {high_arousal_ratio*100:.0f}% samples >0.90",
-                metrics={'arousal': arousal, 'high_arousal_ratio': high_arousal_ratio},
-                source_component='AnomalyDetector._detect_arousal_runaway'
+                description=f"Arousal runaway detected: {high_arousal_ratio * 100:.0f}% samples >0.90",
+                metrics={"arousal": arousal, "high_arousal_ratio": high_arousal_ratio},
+                source_component="AnomalyDetector._detect_arousal_runaway",
             )
 
         return None
@@ -1139,9 +1118,9 @@ class AnomalyDetector:
                 violation_type=SafetyViolationType.COHERENCE_COLLAPSE,
                 threat_level=ThreatLevel.HIGH,
                 timestamp=time.time(),
-                description=f"Coherence collapse detected: {drop_ratio*100:.0f}% drop from baseline",
-                metrics={'coherence': coherence, 'baseline_mean': baseline_mean, 'drop_ratio': drop_ratio},
-                source_component='AnomalyDetector._detect_coherence_collapse'
+                description=f"Coherence collapse detected: {drop_ratio * 100:.0f}% drop from baseline",
+                metrics={"coherence": coherence, "baseline_mean": baseline_mean, "drop_ratio": drop_ratio},
+                source_component="AnomalyDetector._detect_coherence_collapse",
             )
 
         return None
@@ -1160,6 +1139,7 @@ class AnomalyDetector:
 
 # ==================== SAFETY PROTOCOL ====================
 
+
 class ConsciousnessSafetyProtocol:
     """
     Main safety protocol coordinator.
@@ -1176,11 +1156,7 @@ class ConsciousnessSafetyProtocol:
     - Automated response
     """
 
-    def __init__(
-        self,
-        consciousness_system: Any,
-        thresholds: Optional[SafetyThresholds] = None
-    ):
+    def __init__(self, consciousness_system: Any, thresholds: Optional[SafetyThresholds] = None):
         """
         Initialize safety protocol.
 
@@ -1205,8 +1181,9 @@ class ConsciousnessSafetyProtocol:
         self.on_violation: Optional[Callable[[SafetyViolation], None]] = None
 
         logger.info("✅ Consciousness Safety Protocol initialized")
-        logger.info(f"Thresholds: ESGT<{self.thresholds.esgt_frequency_max_hz}Hz, "
-                   f"Arousal<{self.thresholds.arousal_max}")
+        logger.info(
+            f"Thresholds: ESGT<{self.thresholds.esgt_frequency_max_hz}Hz, Arousal<{self.thresholds.arousal_max}"
+        )
 
     async def start_monitoring(self):
         """Start continuous safety monitoring."""
@@ -1257,10 +1234,8 @@ class ConsciousnessSafetyProtocol:
                     violations.append(violation)
 
                 # 2. Arousal sustained high
-                if 'arousal' in metrics:
-                    violation = self.threshold_monitor.check_arousal_sustained(
-                        metrics['arousal'], current_time
-                    )
+                if "arousal" in metrics:
+                    violation = self.threshold_monitor.check_arousal_sustained(metrics["arousal"], current_time)
                     if violation:
                         violations.append(violation)
 
@@ -1298,26 +1273,26 @@ class ConsciousnessSafetyProtocol:
 
         try:
             # Try to get consciousness component metrics
-            if hasattr(self.consciousness_system, 'get_system_dict'):
+            if hasattr(self.consciousness_system, "get_system_dict"):
                 system_dict = self.consciousness_system.get_system_dict()
 
                 # Arousal
-                if 'arousal' in system_dict:
-                    metrics['arousal'] = system_dict['arousal'].get('arousal', 0.0)
+                if "arousal" in system_dict:
+                    metrics["arousal"] = system_dict["arousal"].get("arousal", 0.0)
 
                 # Coherence
-                if 'esgt' in system_dict:
-                    metrics['coherence'] = system_dict['esgt'].get('coherence', 0.0)
+                if "esgt" in system_dict:
+                    metrics["coherence"] = system_dict["esgt"].get("coherence", 0.0)
 
                 # Goals
-                if 'mmei' in system_dict:
-                    active_goals = system_dict['mmei'].get('active_goals', [])
-                    metrics['active_goal_count'] = len(active_goals)
+                if "mmei" in system_dict:
+                    active_goals = system_dict["mmei"].get("active_goals", [])
+                    metrics["active_goal_count"] = len(active_goals)
 
             # System resources (always available)
             process = psutil.Process()
-            metrics['memory_usage_gb'] = process.memory_info().rss / 1024 / 1024 / 1024
-            metrics['cpu_percent'] = psutil.cpu_percent(interval=0.1)
+            metrics["memory_usage_gb"] = process.memory_info().rss / 1024 / 1024 / 1024
+            metrics["cpu_percent"] = psutil.cpu_percent(interval=0.1)
 
         except Exception as e:
             logger.error(f"Error collecting metrics: {e}")
@@ -1349,10 +1324,10 @@ class ConsciousnessSafetyProtocol:
             self.kill_switch.trigger(
                 reason=ShutdownReason.THRESHOLD,
                 context={
-                    'violations': violations,
-                    'metrics_timeline': [],
-                    'notes': f'{len(critical_violations)} CRITICAL violations triggered automatic shutdown'
-                }
+                    "violations": violations,
+                    "metrics_timeline": [],
+                    "notes": f"{len(critical_violations)} CRITICAL violations triggered automatic shutdown",
+                },
             )
             return
 
@@ -1402,10 +1377,7 @@ class ConsciousnessSafetyProtocol:
             logger.critical("Degradation Level 3: Triggering kill switch")
             self.kill_switch.trigger(
                 reason=ShutdownReason.THRESHOLD,
-                context={
-                    'violations': [],
-                    'notes': 'Graceful degradation exhausted - proceeding to shutdown'
-                }
+                context={"violations": [], "notes": "Graceful degradation exhausted - proceeding to shutdown"},
             )
 
     def get_status(self) -> Dict[str, Any]:
@@ -1416,19 +1388,206 @@ class ConsciousnessSafetyProtocol:
             dict: Safety status
         """
         return {
-            'monitoring_active': self.monitoring_active,
-            'kill_switch_triggered': self.kill_switch.is_triggered(),
-            'degradation_level': self.degradation_level,
-            'violations_total': len(self.threshold_monitor.violations),
-            'violations_critical': len(self.threshold_monitor.get_violations(ThreatLevel.CRITICAL)),
-            'violations_high': len(self.threshold_monitor.get_violations(ThreatLevel.HIGH)),
-            'anomalies_detected': len(self.anomaly_detector.get_anomaly_history()),
-            'thresholds': {
-                'esgt_frequency_max_hz': self.thresholds.esgt_frequency_max_hz,
-                'arousal_max': self.thresholds.arousal_max,
-                'self_modification': self.thresholds.self_modification_attempts_max
-            }
+            "monitoring_active": self.monitoring_active,
+            "kill_switch_triggered": self.kill_switch.is_triggered(),
+            "degradation_level": self.degradation_level,
+            "violations_total": len(self.threshold_monitor.violations),
+            "violations_critical": len(self.threshold_monitor.get_violations(ThreatLevel.CRITICAL)),
+            "violations_high": len(self.threshold_monitor.get_violations(ThreatLevel.HIGH)),
+            "anomalies_detected": len(self.anomaly_detector.get_anomaly_history()),
+            "thresholds": {
+                "esgt_frequency_max_hz": self.thresholds.esgt_frequency_max_hz,
+                "arousal_max": self.thresholds.arousal_max,
+                "self_modification": self.thresholds.self_modification_attempts_max,
+            },
         }
+
+    # ========================================================================
+    # FASE VII (Part 2 Integration): Component Health Monitoring
+    # ========================================================================
+
+    def monitor_component_health(self, component_metrics: Dict[str, Dict[str, any]]) -> List[SafetyViolation]:
+        """
+        Monitor health metrics from all consciousness components.
+
+        Integrates with get_health_metrics() from TIG, ESGT, MMEI, MCEA.
+        Detects component-level anomalies and safety violations.
+
+        This is the bridge between PART 1 (Safety Core) and PART 2 (Component Hardening).
+
+        Args:
+            component_metrics: Dict mapping component name to health metrics
+                Expected keys: "tig", "esgt", "mmei", "mcea"
+
+        Returns:
+            List of SafetyViolations detected (empty if all healthy)
+
+        Example:
+            violations = safety.monitor_component_health({
+                "tig": tig.get_health_metrics(),
+                "esgt": esgt.get_health_metrics(),
+                "mmei": mmei.get_health_metrics(),
+                "mcea": mcea.get_health_metrics(),
+            })
+        """
+        violations = []
+
+        # TIG Health Checks
+        if "tig" in component_metrics:
+            tig = component_metrics["tig"]
+
+            # Check connectivity (critical if <50%)
+            if tig.get("connectivity", 1.0) < 0.50:
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        threat_level=ThreatLevel.CRITICAL,
+                        message=f"TIG connectivity critically low: {tig['connectivity']:.1%}",
+                        value=tig["connectivity"],
+                        threshold=0.50,
+                        component="tig_fabric",
+                    )
+                )
+
+            # Check partition
+            if tig.get("is_partitioned", False):
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        threat_level=ThreatLevel.HIGH,
+                        message="TIG network is partitioned",
+                        value=1.0,
+                        threshold=0.0,
+                        component="tig_fabric",
+                    )
+                )
+
+        # ESGT Health Checks
+        if "esgt" in component_metrics:
+            esgt = component_metrics["esgt"]
+
+            # Check degraded mode
+            if esgt.get("degraded_mode", False):
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.ESGT_VIOLATION,
+                        threat_level=ThreatLevel.MEDIUM,
+                        message="ESGT in degraded mode",
+                        value=1.0,
+                        threshold=0.0,
+                        component="esgt_coordinator",
+                    )
+                )
+
+            # Check frequency (already monitored, but component-level context)
+            freq = esgt.get("frequency_hz", 0.0)
+            if freq > 9.0:  # Warning at 90% of hard limit
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.ESGT_VIOLATION,
+                        threat_level=ThreatLevel.HIGH,
+                        message=f"ESGT frequency approaching limit: {freq:.1f}Hz",
+                        value=freq,
+                        threshold=9.0,
+                        component="esgt_coordinator",
+                    )
+                )
+
+            # Check circuit breaker state
+            if esgt.get("circuit_breaker_state") == "open":
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.ESGT_VIOLATION,
+                        threat_level=ThreatLevel.HIGH,
+                        message="ESGT circuit breaker is OPEN",
+                        value=1.0,
+                        threshold=0.0,
+                        component="esgt_coordinator",
+                    )
+                )
+
+        # MMEI Health Checks
+        if "mmei" in component_metrics:
+            mmei = component_metrics["mmei"]
+
+            # Check overflow events
+            overflow_events = mmei.get("need_overflow_events", 0)
+            if overflow_events > 0:
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        threat_level=ThreatLevel.HIGH,
+                        message=f"MMEI need overflow detected ({overflow_events} events)",
+                        value=overflow_events,
+                        threshold=0.0,
+                        component="mmei_monitor",
+                    )
+                )
+
+            # Check rate limiting
+            goals_rate_limited = mmei.get("goals_rate_limited", 0)
+            if goals_rate_limited > 10:  # Threshold: >10 rate-limited goals
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.GOAL_VIOLATION,
+                        threat_level=ThreatLevel.MEDIUM,
+                        message=f"MMEI excessive rate limiting ({goals_rate_limited} blocked)",
+                        value=goals_rate_limited,
+                        threshold=10.0,
+                        component="mmei_monitor",
+                    )
+                )
+
+        # MCEA Health Checks
+        if "mcea" in component_metrics:
+            mcea = component_metrics["mcea"]
+
+            # Check saturation
+            if mcea.get("is_saturated", False):
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.AROUSAL_VIOLATION,
+                        threat_level=ThreatLevel.HIGH,
+                        message="MCEA arousal saturated (stuck at boundary)",
+                        value=mcea.get("current_arousal", 0.0),
+                        threshold=0.01,
+                        component="mcea_controller",
+                    )
+                )
+
+            # Check oscillation
+            oscillation_events = mcea.get("oscillation_events", 0)
+            if oscillation_events > 0:
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.AROUSAL_VIOLATION,
+                        threat_level=ThreatLevel.MEDIUM,
+                        message=f"MCEA arousal oscillation detected ({oscillation_events} events)",
+                        value=mcea.get("arousal_variance", 0.0),
+                        threshold=0.15,
+                        component="mcea_controller",
+                    )
+                )
+
+            # Check invalid needs
+            invalid_needs = mcea.get("invalid_needs_count", 0)
+            if invalid_needs > 5:  # Threshold: >5 invalid inputs
+                violations.append(
+                    SafetyViolation(
+                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        threat_level=ThreatLevel.MEDIUM,
+                        message=f"MCEA receiving invalid needs ({invalid_needs} rejected)",
+                        value=invalid_needs,
+                        threshold=5.0,
+                        component="mcea_controller",
+                    )
+                )
+
+        # Log violations
+        for violation in violations:
+            logger.warning(f"🚨 Component Health Violation: {violation}")
+
+        return violations
 
     def __repr__(self) -> str:
         status = "ACTIVE" if self.monitoring_active else "INACTIVE"

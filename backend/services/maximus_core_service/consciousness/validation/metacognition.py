@@ -24,6 +24,7 @@ from dataclasses import dataclass
 @dataclass
 class SelfModelMetrics:
     """Placeholder for self-model stability metrics."""
+
     stability_score: float = 0.0
     contradiction_rate: float = 0.0
     semantic_similarity: float = 0.0

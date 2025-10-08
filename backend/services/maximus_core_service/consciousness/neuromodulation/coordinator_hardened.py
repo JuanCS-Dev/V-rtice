@@ -31,13 +31,13 @@ Date: 2025-10-08
 
 import logging
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable, Tuple
+from typing import Callable, Dict, List, Optional
 
-from consciousness.neuromodulation.dopamine_hardened import DopamineModulator
-from consciousness.neuromodulation.serotonin_hardened import SerotoninModulator
 from consciousness.neuromodulation.acetylcholine_hardened import AcetylcholineModulator
-from consciousness.neuromodulation.norepinephrine_hardened import NorepinephrineModulator
+from consciousness.neuromodulation.dopamine_hardened import DopamineModulator
 from consciousness.neuromodulation.modulator_base import NeuromodulatorBase
+from consciousness.neuromodulation.norepinephrine_hardened import NorepinephrineModulator
+from consciousness.neuromodulation.serotonin_hardened import SerotoninModulator
 
 logger = logging.getLogger(__name__)
 
@@ -108,9 +108,7 @@ class NeuromodulationCoordinator:
     """
 
     def __init__(
-        self,
-        config: Optional[CoordinatorConfig] = None,
-        kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: Optional[CoordinatorConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
     ):
         """Initialize neuromodulation coordinator.
 
@@ -148,10 +146,7 @@ class NeuromodulationCoordinator:
             f"NE (baseline={self.norepinephrine.config.baseline})"
         )
 
-    def coordinate_modulation(
-        self,
-        requests: List[ModulationRequest]
-    ) -> Dict[str, float]:
+    def coordinate_modulation(self, requests: List[ModulationRequest]) -> Dict[str, float]:
         """
         Coordinate modulations across multiple neuromodulators.
 
@@ -173,8 +168,7 @@ class NeuromodulationCoordinator:
         # Validate request count
         if len(requests) > self.config.max_simultaneous_modulations:
             error_msg = (
-                f"Too many simultaneous modulations: {len(requests)} > "
-                f"max {self.config.max_simultaneous_modulations}"
+                f"Too many simultaneous modulations: {len(requests)} > max {self.config.max_simultaneous_modulations}"
             )
             logger.error(f"🔴 {error_msg}")
             raise ValueError(error_msg)
@@ -195,8 +189,7 @@ class NeuromodulationCoordinator:
         if conflict_score > self.config.conflict_threshold:
             self.conflicts_detected += 1
             logger.warning(
-                f"⚠️ Conflict detected (score={conflict_score:.2f} > "
-                f"threshold={self.config.conflict_threshold})"
+                f"⚠️ Conflict detected (score={conflict_score:.2f} > threshold={self.config.conflict_threshold})"
             )
 
             # Resolve conflicts
@@ -219,8 +212,7 @@ class NeuromodulationCoordinator:
                 results[req.modulator] = actual_change
 
                 logger.debug(
-                    f"Coordinated modulation: {req.modulator} delta={req.delta:.3f} → "
-                    f"actual={actual_change:.3f}"
+                    f"Coordinated modulation: {req.modulator} delta={req.delta:.3f} → actual={actual_change:.3f}"
                 )
 
             except RuntimeError as e:
@@ -254,10 +246,7 @@ class NeuromodulationCoordinator:
         else:
             return 0.0
 
-    def _resolve_conflicts(
-        self,
-        requests: List[ModulationRequest]
-    ) -> List[ModulationRequest]:
+    def _resolve_conflicts(self, requests: List[ModulationRequest]) -> List[ModulationRequest]:
         """
         Resolve conflicts by reducing magnitude of conflicting requests.
 
@@ -276,16 +265,11 @@ class NeuromodulationCoordinator:
                 # Reduce magnitude
                 new_delta = req.delta * self.config.conflict_reduction_factor
 
-                logger.info(
-                    f"Conflict resolution: {req.modulator} delta "
-                    f"{req.delta:.3f} → {new_delta:.3f}"
-                )
+                logger.info(f"Conflict resolution: {req.modulator} delta {req.delta:.3f} → {new_delta:.3f}")
 
                 resolved.append(
                     ModulationRequest(
-                        modulator=req.modulator,
-                        delta=new_delta,
-                        source=f"{req.source}_conflict_resolved"
+                        modulator=req.modulator, delta=new_delta, source=f"{req.source}_conflict_resolved"
                     )
                 )
             else:
@@ -293,10 +277,7 @@ class NeuromodulationCoordinator:
 
         return resolved
 
-    def _apply_interactions(
-        self,
-        requests: List[ModulationRequest]
-    ) -> List[ModulationRequest]:
+    def _apply_interactions(self, requests: List[ModulationRequest]) -> List[ModulationRequest]:
         """
         Apply non-linear interactions between neuromodulators.
 
@@ -351,9 +332,7 @@ class NeuromodulationCoordinator:
         for req in requests:
             modified.append(
                 ModulationRequest(
-                    modulator=req.modulator,
-                    delta=deltas[req.modulator],
-                    source=f"{req.source}_interacted"
+                    modulator=req.modulator, delta=deltas[req.modulator], source=f"{req.source}_interacted"
                 )
             )
 
@@ -368,10 +347,7 @@ class NeuromodulationCoordinator:
         Returns:
             True if aggregate breaker should be open
         """
-        open_count = sum(
-            1 for mod in self._modulators.values()
-            if mod._circuit_breaker_open
-        )
+        open_count = sum(1 for mod in self._modulators.values() if mod._circuit_breaker_open)
 
         return open_count >= 3
 
@@ -405,15 +381,15 @@ class NeuromodulationCoordinator:
             metrics.update(modulator.get_health_metrics())
 
         # Add coordination-specific metrics
-        metrics.update({
-            "neuromod_total_coordinations": self.total_coordinations,
-            "neuromod_conflicts_detected": self.conflicts_detected,
-            "neuromod_conflicts_resolved": self.conflicts_resolved,
-            "neuromod_conflict_rate": (
-                self.conflicts_detected / max(1, self.total_coordinations)
-            ),
-            "neuromod_aggregate_circuit_breaker_open": self._is_aggregate_circuit_breaker_open(),
-        })
+        metrics.update(
+            {
+                "neuromod_total_coordinations": self.total_coordinations,
+                "neuromod_conflicts_detected": self.conflicts_detected,
+                "neuromod_conflicts_resolved": self.conflicts_resolved,
+                "neuromod_conflict_rate": (self.conflicts_detected / max(1, self.total_coordinations)),
+                "neuromod_aggregate_circuit_breaker_open": self._is_aggregate_circuit_breaker_open(),
+            }
+        )
 
         return metrics
 

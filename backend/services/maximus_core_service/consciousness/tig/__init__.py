@@ -75,17 +75,16 @@ experience in biological brains.
 """
 
 from consciousness.tig.fabric import (
+    FabricMetrics,
+    TIGConnection,
     TIGFabric,
     TIGNode,
-    TIGConnection,
     TopologyConfig,
-    FabricMetrics,
 )
-
 from consciousness.tig.sync import (
+    ClockOffset,
     PTPSynchronizer,
     SyncResult,
-    ClockOffset,
 )
 
 __all__ = [

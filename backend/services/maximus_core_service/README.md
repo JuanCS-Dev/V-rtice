@@ -86,6 +86,85 @@ See [QUICK_START.md](QUICK_START.md) for detailed guide.
 
 ---
 
+## 🛠️ Development Setup
+
+### Prerequisites
+
+- **Python 3.11+**
+- **uv** (modern package manager - 10-100x faster than pip)
+- **ruff** (linter/formatter - included in dev dependencies)
+
+### Installation
+
+1. **Install uv** (if not installed):
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+2. **Install dependencies**:
+```bash
+# Production dependencies
+make install
+
+# Development dependencies (includes pytest, ruff, mypy)
+make dev
+```
+
+### Development Commands
+
+```bash
+# Run tests
+make test                 # All tests
+make test-fast           # Skip slow tests
+make test-coverage       # With coverage report
+make test-biomimetic     # Only biomimetic tests
+
+# Code quality
+make lint                # Check code (ruff)
+make format              # Format code (ruff)
+make fix                 # Auto-fix issues
+make check               # CI-ready check (lint + format)
+
+# Maintenance
+make clean               # Clean cache/build artifacts
+make update              # Update requirements.txt from pyproject.toml
+make upgrade             # Upgrade all dependencies
+
+# Validation
+make validate            # Check Padrão Pagani compliance
+```
+
+### Dependency Management (Modern)
+
+```bash
+# Add new dependency
+echo "new-package>=1.0.0" >> pyproject.toml  # Edit [project.dependencies]
+make update  # Generate new requirements.txt
+make dev     # Install
+
+# Update dependencies
+make upgrade  # Upgrade all to latest compatible versions
+make install  # Sync to exact versions
+
+# Security audit
+make audit  # Run pip-audit
+```
+
+**Why uv?**
+- ⚡ 10-100x faster than pip
+- 🔒 Better dependency resolution
+- 💾 Global cache (saves disk space)
+- 🎯 Full pip compatibility
+
+**Why ruff?**
+- 🚀 10-100x faster than flake8+black+isort combined
+- 🛡️ More security rules (bandit integrated)
+- 🔧 Auto-fix for most issues
+- 📦 Single tool replaces 5+ tools
+
+---
+
 ## 📊 Architecture
 
 ```

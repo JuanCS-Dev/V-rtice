@@ -103,30 +103,33 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Callable, Any
+from typing import Any, Callable, Dict, List, Optional
+
 import numpy as np
 
-from consciousness.mcea.controller import ArousalController, ArousalState, ArousalLevel
-from consciousness.mmei.monitor import AbstractNeeds, NeedUrgency
+from consciousness.mcea.controller import ArousalController
+from consciousness.mmei.monitor import AbstractNeeds
 
 
 class StressLevel(Enum):
     """Classification of stress intensity."""
-    NONE = "none"           # 0.0-0.2
-    MILD = "mild"           # 0.2-0.4
-    MODERATE = "moderate"   # 0.4-0.6
-    SEVERE = "severe"       # 0.6-0.8
-    CRITICAL = "critical"   # 0.8-1.0
+
+    NONE = "none"  # 0.0-0.2
+    MILD = "mild"  # 0.2-0.4
+    MODERATE = "moderate"  # 0.4-0.6
+    SEVERE = "severe"  # 0.6-0.8
+    CRITICAL = "critical"  # 0.8-1.0
 
 
 class StressType(Enum):
     """Types of stress that can be applied."""
+
     COMPUTATIONAL_LOAD = "computational_load"  # High CPU/memory
-    ERROR_INJECTION = "error_injection"        # System failures
+    ERROR_INJECTION = "error_injection"  # System failures
     NETWORK_DEGRADATION = "network_degradation"  # Latency/loss
-    AROUSAL_FORCING = "arousal_forcing"        # Forced high arousal
-    RAPID_CHANGE = "rapid_change"              # Fast state transitions
-    COMBINED = "combined"                      # Multiple stressors
+    AROUSAL_FORCING = "arousal_forcing"  # Forced high arousal
+    RAPID_CHANGE = "rapid_change"  # Fast state transitions
+    COMBINED = "combined"  # Multiple stressors
 
 
 @dataclass
@@ -136,6 +139,7 @@ class StressResponse:
 
     Records system behavior under stress for analysis.
     """
+
     stress_type: StressType
     stress_level: StressLevel
 
@@ -166,8 +170,8 @@ class StressResponse:
 
     # Breakdown indicators
     arousal_runaway_detected: bool  # Arousal stuck at max
-    goal_generation_failure: bool   # Failed to generate appropriate goals
-    coherence_collapse: bool        # Coherence < 0.50
+    goal_generation_failure: bool  # Failed to generate appropriate goals
+    coherence_collapse: bool  # Coherence < 0.50
 
     # Metadata
     duration_seconds: float
@@ -208,29 +212,32 @@ class StressResponse:
     def passed_stress_test(self) -> bool:
         """Check if system passed stress test (basic criteria)."""
         return (
-            not self.arousal_runaway_detected and
-            not self.goal_generation_failure and
-            not self.coherence_collapse and
-            self.recovery_time_seconds < 120.0  # 2 minutes max recovery
+            not self.arousal_runaway_detected
+            and not self.goal_generation_failure
+            and not self.coherence_collapse
+            and self.recovery_time_seconds < 120.0  # 2 minutes max recovery
         )
 
     def __repr__(self) -> str:
         status = "PASS" if self.passed_stress_test() else "FAIL"
         resilience = self.get_resilience_score()
-        return (f"StressResponse({self.stress_type.value}, level={self.stress_level.value}, "
-                f"resilience={resilience:.1f}, status={status})")
+        return (
+            f"StressResponse({self.stress_type.value}, level={self.stress_level.value}, "
+            f"resilience={resilience:.1f}, status={status})"
+        )
 
 
 @dataclass
 class StressTestConfig:
     """Configuration for stress testing."""
+
     # Test durations
     stress_duration_seconds: float = 30.0
     recovery_duration_seconds: float = 60.0
 
     # Thresholds
-    arousal_runaway_threshold: float = 0.95   # Arousal stuck above this
-    arousal_runaway_duration: float = 10.0    # For this long = runaway
+    arousal_runaway_threshold: float = 0.95  # Arousal stuck above this
+    arousal_runaway_duration: float = 10.0  # For this long = runaway
     coherence_collapse_threshold: float = 0.50
     recovery_baseline_tolerance: float = 0.1  # Within 10% of baseline
 
@@ -307,7 +314,7 @@ class StressMonitor:
         self,
         arousal_controller: ArousalController,
         config: Optional[StressTestConfig] = None,
-        monitor_id: str = "mcea-stress-monitor-primary"
+        monitor_id: str = "mcea-stress-monitor-primary",
     ):
         self.monitor_id = monitor_id
         self.arousal_controller = arousal_controller
@@ -341,9 +348,7 @@ class StressMonitor:
         self.tests_passed: int = 0
 
     def register_stress_alert(
-        self,
-        callback: Callable[[StressLevel], None],
-        threshold: StressLevel = StressLevel.SEVERE
+        self, callback: Callable[[StressLevel], None], threshold: StressLevel = StressLevel.SEVERE
     ) -> None:
         """Register callback invoked when stress exceeds threshold."""
         self._stress_alert_callbacks.append((callback, threshold))
@@ -463,7 +468,7 @@ class StressMonitor:
         stress_type: StressType,
         stress_level: StressLevel = StressLevel.SEVERE,
         duration_seconds: Optional[float] = None,
-        monitor_needs: Optional[AbstractNeeds] = None
+        monitor_needs: Optional[AbstractNeeds] = None,
     ) -> StressResponse:
         """
         Run active stress test.
@@ -538,7 +543,7 @@ class StressMonitor:
             await asyncio.sleep(0.1)  # 10 Hz sampling
 
         # RECOVERY PHASE
-        print(f"⏸️  Stress removed, monitoring recovery...")
+        print("⏸️  Stress removed, monitoring recovery...")
         recovery_start = time.time()
         recovered = False
 
@@ -581,7 +586,9 @@ class StressMonitor:
         if response.passed_stress_test():
             self.tests_passed += 1
 
-        print(f"✅ Test complete: Resilience {response.get_resilience_score():.1f}/100, {response.passed_stress_test()}")
+        print(
+            f"✅ Test complete: Resilience {response.get_resilience_score():.1f}/100, {response.passed_stress_test()}"
+        )
 
         return response
 
@@ -596,27 +603,21 @@ class StressMonitor:
                 source="stress_test",
                 delta=target_arousal - self.arousal_controller.get_current_arousal().arousal,
                 duration_seconds=0.5,
-                priority=10
+                priority=10,
             )
 
         elif stress_type == StressType.COMPUTATIONAL_LOAD:
             # Simulate high CPU/memory via arousal boost
             load_boost = 0.1 + (severity / 4.0) * 0.3  # 0.1-0.4 boost
             self.arousal_controller.request_modulation(
-                source="cpu_load_simulation",
-                delta=load_boost,
-                duration_seconds=0.5,
-                priority=5
+                source="cpu_load_simulation", delta=load_boost, duration_seconds=0.5, priority=5
             )
 
         elif stress_type == StressType.RAPID_CHANGE:
             # Rapid arousal oscillation
             oscillation = 0.2 * np.sin(time.time() * 2 * np.pi)  # 2 Hz oscillation
             self.arousal_controller.request_modulation(
-                source="rapid_change",
-                delta=oscillation,
-                duration_seconds=0.2,
-                priority=3
+                source="rapid_change", delta=oscillation, duration_seconds=0.2, priority=3
             )
 
         # Add other stress types as needed
@@ -660,11 +661,7 @@ class StressMonitor:
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get stress monitoring statistics."""
-        pass_rate = (
-            self.tests_passed / self.tests_conducted
-            if self.tests_conducted > 0
-            else 0.0
-        )
+        pass_rate = self.tests_passed / self.tests_conducted if self.tests_conducted > 0 else 0.0
 
         return {
             "monitor_id": self.monitor_id,
@@ -680,6 +677,6 @@ class StressMonitor:
         }
 
     def __repr__(self) -> str:
-        return (f"StressMonitor({self.monitor_id}, "
-                f"stress={self._current_stress_level.value}, "
-                f"tests={self.tests_conducted})")
+        return (
+            f"StressMonitor({self.monitor_id}, stress={self._current_stress_level.value}, tests={self.tests_conducted})"
+        )

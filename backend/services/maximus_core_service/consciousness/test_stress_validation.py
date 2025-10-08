@@ -15,10 +15,10 @@ Focus on MCEA core consciousness component.
 """
 
 import asyncio
-import time
-import pytest
-from consciousness.mcea.controller import ArousalController
 
+import pytest
+
+from consciousness.mcea.controller import ArousalController
 
 # =================================================================
 # Load Tests - MCEA
@@ -34,10 +34,7 @@ async def test_mcea_rapid_modulation():
     # Inject 50 modulation requests rapidly
     for i in range(50):
         controller.request_modulation(
-            source=f"stress_test_{i}",
-            delta=0.1 * (1 if i % 2 == 0 else -1),
-            duration_seconds=0.5,
-            priority=5
+            source=f"stress_test_{i}", delta=0.1 * (1 if i % 2 == 0 else -1), duration_seconds=0.5, priority=5
         )
         await asyncio.sleep(0.02)  # 50 requests/s
 
@@ -56,6 +53,7 @@ async def test_mcea_rapid_modulation():
 # Latency Tests - MCEA
 # =================================================================
 
+
 @pytest.mark.asyncio
 async def test_arousal_modulation_response_time():
     """Test arousal modulation response time."""
@@ -63,12 +61,7 @@ async def test_arousal_modulation_response_time():
     await controller.start()
 
     # Request modulation
-    controller.request_modulation(
-        source="latency_test",
-        delta=0.3,
-        duration_seconds=1.0,
-        priority=10
-    )
+    controller.request_modulation(source="latency_test", delta=0.3, duration_seconds=1.0, priority=10)
 
     # Wait for processing
     await asyncio.sleep(0.5)
@@ -79,12 +72,13 @@ async def test_arousal_modulation_response_time():
     await controller.stop()
 
     assert 0.0 <= state.arousal <= 1.0, "Arousal out of bounds"
-    print(f"✅ Arousal modulation: completed successfully")
+    print("✅ Arousal modulation: completed successfully")
 
 
 # =================================================================
 # Recovery Tests - MCEA
 # =================================================================
+
 
 @pytest.mark.asyncio
 async def test_mcea_stress_recovery():
@@ -97,7 +91,7 @@ async def test_mcea_stress_recovery():
         source="extreme_stress",
         delta=0.5,  # Push higher
         duration_seconds=0.5,
-        priority=10
+        priority=10,
     )
 
     await asyncio.sleep(1.0)
@@ -115,6 +109,7 @@ async def test_mcea_stress_recovery():
 # Concurrency Tests - MCEA
 # =================================================================
 
+
 @pytest.mark.asyncio
 async def test_parallel_arousal_requests():
     """Test multiple concurrent arousal modulation requests."""
@@ -124,10 +119,7 @@ async def test_parallel_arousal_requests():
     # Submit 30 concurrent requests
     for i in range(30):
         controller.request_modulation(
-            source=f"parallel_{i}",
-            delta=0.05 * (1 if i % 2 == 0 else -1),
-            duration_seconds=0.3,
-            priority=i % 10
+            source=f"parallel_{i}", delta=0.05 * (1 if i % 2 == 0 else -1), duration_seconds=0.3, priority=i % 10
         )
 
     # Wait for processing
@@ -145,20 +137,16 @@ async def test_parallel_arousal_requests():
 # Performance Benchmarks
 # =================================================================
 
+
 def test_stress_test_count():
     """Meta-test: Verify stress test coverage."""
-    import inspect
 
-    test_functions = [
-        name for name, obj in globals().items()
-        if name.startswith("test_") and callable(obj)
-    ]
+    test_functions = [name for name, obj in globals().items() if name.startswith("test_") and callable(obj)]
 
     # Exclude meta-test
     test_functions = [t for t in test_functions if t != "test_stress_test_count"]
 
-    assert len(test_functions) >= 4, \
-        f"Expected at least 4 MCEA stress tests, found {len(test_functions)}"
+    assert len(test_functions) >= 4, f"Expected at least 4 MCEA stress tests, found {len(test_functions)}"
 
     print(f"\n✅ FASE IV Stress Testing (MCEA): {len(test_functions)} tests")
     print("\nCategories:")

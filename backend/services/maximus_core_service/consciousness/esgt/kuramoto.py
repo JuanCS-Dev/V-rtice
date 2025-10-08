@@ -64,6 +64,7 @@ import numpy as np
 
 class OscillatorState(Enum):
     """State of an oscillator during synchronization."""
+
     IDLE = "idle"
     COUPLING = "coupling"
     SYNCHRONIZED = "synchronized"
@@ -73,6 +74,7 @@ class OscillatorState(Enum):
 @dataclass
 class OscillatorConfig:
     """Configuration for a Kuramoto oscillator."""
+
     natural_frequency: float = 40.0  # Hz (gamma-band analog)
     coupling_strength: float = 14.0  # K parameter (high value compensates for k_i normalization)
     phase_noise: float = 0.01  # Additive phase noise
@@ -92,6 +94,7 @@ class PhaseCoherence:
     - r ≥ 0.70: Conscious state (high coherence) ✅
     - r > 0.90: Deep coherence (exceptional binding)
     """
+
     order_parameter: float  # r(t) ∈ [0, 1]
     mean_phase: float  # Average phase angle (radians)
     phase_variance: float  # Spread of phases
@@ -127,6 +130,7 @@ class SynchronizationDynamics:
     This provides historical context for ESGT events, showing how
     coherence builds up, plateaus, and dissolves.
     """
+
     coherence_history: List[float] = field(default_factory=list)
     time_to_sync: Optional[float] = None  # Time to reach r ≥ 0.70
     max_coherence: float = 0.0
@@ -141,9 +145,8 @@ class SynchronizationDynamics:
         if coherence > self.max_coherence:
             self.max_coherence = coherence
 
-        # Detect time to synchronization
-        if self.time_to_sync is None and coherence >= 0.70:
-            self.time_to_sync = timestamp
+        # Note: time_to_sync is set in synchronize() method with correct elapsed time
+        # Don't set it here as timestamp may be absolute time.time() not elapsed
 
     def compute_dissolution_rate(self) -> float:
         """
@@ -206,12 +209,7 @@ class KuramotoOscillator:
         self.phase_history: List[float] = [self.phase]
         self.frequency_history: List[float] = [self.frequency]
 
-    def update(
-        self,
-        neighbor_phases: Dict[str, float],
-        coupling_weights: Dict[str, float],
-        dt: float = 0.005
-    ) -> float:
+    def update(self, neighbor_phases: Dict[str, float], coupling_weights: Dict[str, float], dt: float = 0.005) -> float:
         """
         Update oscillator phase based on Kuramoto dynamics.
 
@@ -285,9 +283,11 @@ class KuramotoOscillator:
         self.phase_history = [self.phase]
 
     def __repr__(self) -> str:
-        return (f"KuramotoOscillator(node={self.node_id}, "
-                f"phase={self.phase:.3f}, freq={self.frequency:.1f}Hz, "
-                f"state={self.state.value})")
+        return (
+            f"KuramotoOscillator(node={self.node_id}, "
+            f"phase={self.phase:.3f}, freq={self.frequency:.1f}Hz, "
+            f"state={self.state.value})"
+        )
 
 
 class KuramotoNetwork:
@@ -351,7 +351,7 @@ class KuramotoNetwork:
         self,
         topology: Dict[str, List[str]],
         coupling_weights: Optional[Dict[Tuple[str, str], float]] = None,
-        dt: float = 0.005
+        dt: float = 0.005,
     ) -> None:
         """
         Update all oscillators in parallel based on network topology.
@@ -362,8 +362,7 @@ class KuramotoNetwork:
             dt: Time step (seconds, default 5ms)
         """
         # Collect current phases
-        current_phases = {node_id: osc.get_phase()
-                         for node_id, osc in self.oscillators.items()}
+        current_phases = {node_id: osc.get_phase() for node_id, osc in self.oscillators.items()}
 
         # Update all oscillators simultaneously
         new_phases = {}
@@ -372,9 +371,7 @@ class KuramotoNetwork:
             neighbors = topology.get(node_id, [])
 
             # Get neighbor phases
-            neighbor_phases = {n: current_phases[n]
-                              for n in neighbors
-                              if n in current_phases}
+            neighbor_phases = {n: current_phases[n] for n in neighbors if n in current_phases}
 
             # Get coupling weights
             weights = {}
@@ -424,7 +421,7 @@ class KuramotoNetwork:
             mean_phase=mean_phase,
             phase_variance=phase_variance,
             coherence_quality=quality,
-            timestamp=timestamp
+            timestamp=timestamp,
         )
 
         # Update cache
@@ -452,7 +449,7 @@ class KuramotoNetwork:
         topology: Dict[str, List[str]],
         duration_ms: float = 200.0,
         target_coherence: float = 0.70,
-        dt: float = 0.005
+        dt: float = 0.005,
     ) -> SynchronizationDynamics:
         """
         Run synchronization protocol for specified duration.
@@ -497,5 +494,4 @@ class KuramotoNetwork:
 
     def __repr__(self) -> str:
         coherence = self.get_order_parameter()
-        return (f"KuramotoNetwork(oscillators={len(self.oscillators)}, "
-                f"coherence={coherence:.3f})")
+        return f"KuramotoNetwork(oscillators={len(self.oscillators)}, coherence={coherence:.3f})"

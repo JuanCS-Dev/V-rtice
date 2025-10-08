@@ -20,17 +20,15 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
-import asyncio
 import numpy as np
+import pytest
 
-from consciousness.predictive_coding.layer_base_hardened import LayerConfig
 from consciousness.predictive_coding.layer1_sensory_hardened import Layer1Sensory
 from consciousness.predictive_coding.layer2_behavioral_hardened import Layer2Behavioral
 from consciousness.predictive_coding.layer3_operational_hardened import Layer3Operational
 from consciousness.predictive_coding.layer4_tactical_hardened import Layer4Tactical
 from consciousness.predictive_coding.layer5_strategic_hardened import Layer5Strategic
-
+from consciousness.predictive_coding.layer_base_hardened import LayerConfig
 
 # ============================================================================
 # Parametrized Layer Fixtures
@@ -56,11 +54,7 @@ def layer_class(request):
 def layer_instance(layer_class):
     """Parametrized fixture providing layer instances."""
     LayerClass, layer_id, layer_name, input_dim, hidden_dim = layer_class
-    config = LayerConfig(
-        layer_id=layer_id,
-        input_dim=input_dim,
-        hidden_dim=hidden_dim
-    )
+    config = LayerConfig(layer_id=layer_id, input_dim=input_dim, hidden_dim=hidden_dim)
     return LayerClass(config)
 
 
@@ -73,11 +67,7 @@ def test_layer_initialization(layer_class):
     """Test each layer initializes correctly with appropriate config."""
     LayerClass, layer_id, layer_name, input_dim, hidden_dim = layer_class
 
-    config = LayerConfig(
-        layer_id=layer_id,
-        input_dim=input_dim,
-        hidden_dim=hidden_dim
-    )
+    config = LayerConfig(layer_id=layer_id, input_dim=input_dim, hidden_dim=hidden_dim)
     layer = LayerClass(config)
 
     assert layer.config.layer_id == layer_id
@@ -95,11 +85,7 @@ def test_layer_rejects_wrong_layer_id(layer_class):
     if wrong_id == layer_id:
         wrong_id = (layer_id + 1) % 5 + 1
 
-    config = LayerConfig(
-        layer_id=wrong_id,
-        input_dim=input_dim,
-        hidden_dim=hidden_dim
-    )
+    config = LayerConfig(layer_id=wrong_id, input_dim=input_dim, hidden_dim=hidden_dim)
 
     with pytest.raises(AssertionError):
         LayerClass(config)
@@ -207,16 +193,10 @@ async def test_circuit_breaker_protection(layer_class):
     """Test circuit breaker opens after consecutive errors."""
     LayerClass, layer_id, layer_name, input_dim, hidden_dim = layer_class
 
-    config = LayerConfig(
-        layer_id=layer_id,
-        input_dim=input_dim,
-        hidden_dim=hidden_dim,
-        max_consecutive_errors=3
-    )
+    config = LayerConfig(layer_id=layer_id, input_dim=input_dim, hidden_dim=hidden_dim, max_consecutive_errors=3)
     layer = LayerClass(config)
 
     # Monkey-patch to force failures
-    original_impl = layer._predict_impl
 
     async def failing_impl(input_data):
         raise RuntimeError("Forced failure")
@@ -279,14 +259,14 @@ async def test_layer2_hidden_state_persistence():
     input2 = np.random.randn(64).astype(np.float32)
 
     # First prediction initializes hidden state
-    pred1 = await layer.predict(input1)
+    await layer.predict(input1)
 
     # Hidden state should be non-zero after first prediction
     assert np.any(layer._hidden_state != 0.0)
 
     # Second prediction should use updated hidden state
     hidden_before = layer._hidden_state.copy()
-    pred2 = await layer.predict(input2)
+    await layer.predict(input2)
     hidden_after = layer._hidden_state
 
     # Hidden state should have changed

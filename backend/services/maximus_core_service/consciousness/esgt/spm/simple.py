@@ -27,16 +27,16 @@ ignition mechanism work correctly before investing in perceptual/cognitive SPMs.
 
 import asyncio
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
-from consciousness.esgt.spm.base import (
-    SpecializedProcessingModule,
-    SPMType,
-    SPMOutput,
-    ProcessingPriority,
-)
 from consciousness.esgt.coordinator import SalienceScore
+from consciousness.esgt.spm.base import (
+    ProcessingPriority,
+    SpecializedProcessingModule,
+    SPMOutput,
+    SPMType,
+)
 
 
 @dataclass
@@ -195,26 +195,27 @@ class SimpleSPM(SpecializedProcessingModule):
         # Compute salience (base + noise)
         import random
 
-        novelty = max(0.0, min(1.0,
-            self.config.base_novelty + random.uniform(
-                -self.config.salience_noise,
-                self.config.salience_noise
-            )
-        ))
+        novelty = max(
+            0.0,
+            min(
+                1.0, self.config.base_novelty + random.uniform(-self.config.salience_noise, self.config.salience_noise)
+            ),
+        )
 
-        relevance = max(0.0, min(1.0,
-            self.config.base_relevance + random.uniform(
-                -self.config.salience_noise,
-                self.config.salience_noise
-            )
-        ))
+        relevance = max(
+            0.0,
+            min(
+                1.0,
+                self.config.base_relevance + random.uniform(-self.config.salience_noise, self.config.salience_noise),
+            ),
+        )
 
-        urgency = max(0.0, min(1.0,
-            self.config.base_urgency + random.uniform(
-                -self.config.salience_noise,
-                self.config.salience_noise
-            )
-        ))
+        urgency = max(
+            0.0,
+            min(
+                1.0, self.config.base_urgency + random.uniform(-self.config.salience_noise, self.config.salience_noise)
+            ),
+        )
 
         salience = SalienceScore(
             novelty=novelty,
@@ -311,26 +312,27 @@ class SimpleSPM(SpecializedProcessingModule):
         """
         import random
 
-        novelty = max(0.0, min(1.0,
-            self.config.base_novelty + random.uniform(
-                -self.config.salience_noise,
-                self.config.salience_noise
-            )
-        ))
+        novelty = max(
+            0.0,
+            min(
+                1.0, self.config.base_novelty + random.uniform(-self.config.salience_noise, self.config.salience_noise)
+            ),
+        )
 
-        relevance = max(0.0, min(1.0,
-            self.config.base_relevance + random.uniform(
-                -self.config.salience_noise,
-                self.config.salience_noise
-            )
-        ))
+        relevance = max(
+            0.0,
+            min(
+                1.0,
+                self.config.base_relevance + random.uniform(-self.config.salience_noise, self.config.salience_noise),
+            ),
+        )
 
-        urgency = max(0.0, min(1.0,
-            self.config.base_urgency + random.uniform(
-                -self.config.salience_noise,
-                self.config.salience_noise
-            )
-        ))
+        urgency = max(
+            0.0,
+            min(
+                1.0, self.config.base_urgency + random.uniform(-self.config.salience_noise, self.config.salience_noise)
+            ),
+        )
 
         return SalienceScore(
             novelty=novelty,
@@ -342,18 +344,12 @@ class SimpleSPM(SpecializedProcessingModule):
     # SimpleSPM-Specific Methods
     # =========================================================================
 
-    def register_output_callback(
-        self,
-        callback: Callable[[SPMOutput], None]
-    ) -> None:
+    def register_output_callback(self, callback: Callable[[SPMOutput], None]) -> None:
         """Register callback for output events."""
         if callback not in self._output_callbacks:
             self._output_callbacks.append(callback)
 
-    def unregister_output_callback(
-        self,
-        callback: Callable[[SPMOutput], None]
-    ) -> None:
+    def unregister_output_callback(self, callback: Callable[[SPMOutput], None]) -> None:
         """Unregister callback."""
         if callback in self._output_callbacks:
             self._output_callbacks.remove(callback)
@@ -399,7 +395,9 @@ class SimpleSPM(SpecializedProcessingModule):
         return self._running
 
     def __repr__(self) -> str:
-        return (f"SimpleSPM(id={self.spm_id}, "
-                f"type={self.spm_type.value}, "
-                f"outputs={self._total_outputs_generated}, "
-                f"running={self._running})")
+        return (
+            f"SimpleSPM(id={self.spm_id}, "
+            f"type={self.spm_type.value}, "
+            f"outputs={self._total_outputs_generated}, "
+            f"running={self._running})"
+        )

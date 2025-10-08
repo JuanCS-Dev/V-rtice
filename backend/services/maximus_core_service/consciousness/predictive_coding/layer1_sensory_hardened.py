@@ -26,11 +26,12 @@ Date: 2025-10-08
 """
 
 from typing import Any
+
 import numpy as np
 
 from consciousness.predictive_coding.layer_base_hardened import (
-    PredictiveCodingLayerBase,
     LayerConfig,
+    PredictiveCodingLayerBase,
 )
 
 
@@ -127,7 +128,6 @@ class Layer1Sensory(PredictiveCodingLayerBase):
         """
         # Simple projection (in production: VAE encoder forward pass)
         # Ensure correct dimensions
-        input_dim = self.config.input_dim
         hidden_dim = self.config.hidden_dim
 
         # Random projection (placeholder for trained weights)

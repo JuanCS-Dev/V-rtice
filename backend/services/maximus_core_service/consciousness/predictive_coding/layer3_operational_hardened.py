@@ -26,11 +26,12 @@ Date: 2025-10-08
 """
 
 from typing import Any, List
+
 import numpy as np
 
 from consciousness.predictive_coding.layer_base_hardened import (
-    PredictiveCodingLayerBase,
     LayerConfig,
+    PredictiveCodingLayerBase,
 )
 
 

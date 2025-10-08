@@ -25,15 +25,15 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
 import time
 from unittest.mock import MagicMock
 
-from consciousness.neuromodulation.serotonin_hardened import SerotoninModulator
-from consciousness.neuromodulation.acetylcholine_hardened import AcetylcholineModulator
-from consciousness.neuromodulation.norepinephrine_hardened import NorepinephrineModulator
-from consciousness.neuromodulation.modulator_base import ModulatorConfig, ModulatorState
+import pytest
 
+from consciousness.neuromodulation.acetylcholine_hardened import AcetylcholineModulator
+from consciousness.neuromodulation.modulator_base import ModulatorConfig, ModulatorState
+from consciousness.neuromodulation.norepinephrine_hardened import NorepinephrineModulator
+from consciousness.neuromodulation.serotonin_hardened import SerotoninModulator
 
 # Parametrize all tests across 3 modulators
 ALL_MODULATORS = [
@@ -52,6 +52,7 @@ def modulator_class(request):
 # ======================
 # BOUNDED BEHAVIOR TESTS (10 tests × 3 modulators = 30 tests)
 # ======================
+
 
 def test_initialization_at_baseline(modulator_class):
     """Modulator initializes at configured baseline."""
@@ -219,6 +220,7 @@ def test_level_property_applies_decay(modulator_class):
 # DESENSITIZATION TESTS (5 tests × 3 = 15 tests)
 # ======================
 
+
 def test_desensitization_above_threshold(modulator_class):
     """Desensitization activates when level exceeds threshold."""
     ModClass, name, baseline, decay_rate = modulator_class
@@ -232,10 +234,7 @@ def test_desensitization_reduces_effect(modulator_class):
     """Desensitization reduces modulation effect by desensitization_factor."""
     ModClass, name, baseline, decay_rate = modulator_class
     config = ModulatorConfig(
-        baseline=0.85,
-        desensitization_threshold=0.8,
-        desensitization_factor=0.5,
-        smoothing_factor=0.2
+        baseline=0.85, desensitization_threshold=0.8, desensitization_factor=0.5, smoothing_factor=0.2
     )
     modulator = ModClass(config)
 
@@ -279,6 +278,7 @@ def test_desensitization_boundary_condition(modulator_class):
 # ======================
 # HOMEOSTATIC DECAY TESTS (5 tests × 3 = 15 tests)
 # ======================
+
 
 def test_decay_toward_baseline_above(modulator_class):
     """Decay pulls level toward baseline when above."""
@@ -376,6 +376,7 @@ def test_decay_time_based(modulator_class):
 # TEMPORAL SMOOTHING TESTS (3 tests × 3 = 9 tests)
 # ======================
 
+
 def test_smoothing_factor_applied(modulator_class):
     """Smoothing factor reduces immediate change."""
     ModClass, name, baseline, decay_rate = modulator_class
@@ -417,6 +418,7 @@ def test_smoothing_with_large_delta(modulator_class):
 # ======================
 # CIRCUIT BREAKER TESTS (5 tests × 3 = 15 tests)
 # ======================
+
 
 def test_circuit_breaker_opens_on_anomalies(modulator_class):
     """Circuit breaker opens after MAX_CONSECUTIVE_ANOMALIES."""
@@ -498,6 +500,7 @@ def test_anomaly_counter_resets_on_success(modulator_class):
 # KILL SWITCH TESTS (3 tests × 3 = 9 tests)
 # ======================
 
+
 def test_emergency_stop_opens_breaker(modulator_class):
     """emergency_stop() opens circuit breaker."""
     ModClass, name, baseline, decay_rate = modulator_class
@@ -541,6 +544,7 @@ def test_kill_switch_callback_invoked(modulator_class):
 # ======================
 # OBSERVABILITY TESTS (5 tests × 3 = 15 tests)
 # ======================
+
 
 def test_get_state(modulator_class):
     """get_state() returns complete ModulatorState."""

@@ -4,13 +4,12 @@ MCEA Client - HTTP client for ArousalController
 Fetches current arousal state from MCEA for immune system modulation.
 """
 
-import asyncio
 import logging
 from typing import Optional
 
 import httpx
 
-from consciousness.mcea.controller import ArousalState, ArousalLevel
+from consciousness.mcea.controller import ArousalLevel, ArousalState
 
 logger = logging.getLogger(__name__)
 
@@ -76,9 +75,7 @@ class MCEAClient:
                 return arousal_state
 
             else:
-                logger.warning(
-                    f"MCEA service returned {response.status_code}, using cached arousal"
-                )
+                logger.warning(f"MCEA service returned {response.status_code}, using cached arousal")
                 self._consecutive_failures += 1
                 return self._fallback_arousal()
 

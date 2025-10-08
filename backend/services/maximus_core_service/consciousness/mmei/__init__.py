@@ -56,18 +56,17 @@ consciousness - consciência enraizada em um corpo (ainda que computacional).
 "To be conscious is to feel one's own existence."
 """
 
-from consciousness.mmei.monitor import (
-    InternalStateMonitor,
-    PhysicalMetrics,
-    AbstractNeeds,
-    NeedUrgency,
-)
-
 from consciousness.mmei.goals import (
     AutonomousGoalGenerator,
     Goal,
-    GoalType,
     GoalPriority,
+    GoalType,
+)
+from consciousness.mmei.monitor import (
+    AbstractNeeds,
+    InternalStateMonitor,
+    NeedUrgency,
+    PhysicalMetrics,
 )
 
 __all__ = [

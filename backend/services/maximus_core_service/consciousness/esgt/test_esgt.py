@@ -30,44 +30,36 @@ necessary for phenomenal experience.
 """
 
 import asyncio
-import time
-from typing import Dict, Any, List
 
 import pytest
 import pytest_asyncio
 
-from consciousness.tig.fabric import TIGFabric, TopologyConfig
-from consciousness.tig.sync import PTPCluster
 from consciousness.esgt.coordinator import (
     ESGTCoordinator,
-    ESGTEvent,
     ESGTPhase,
-    TriggerConditions,
     SalienceScore,
+    TriggerConditions,
 )
 from consciousness.esgt.kuramoto import (
     KuramotoNetwork,
-    KuramotoOscillator,
-    PhaseCoherence,
     OscillatorConfig,
+    PhaseCoherence,
 )
 from consciousness.esgt.spm import (
+    MetricsMonitorConfig,
+    MetricsSPM,
+    SalienceDetectorConfig,
+    SalienceSPM,
     SimpleSPM,
     SimpleSPMConfig,
-    SalienceSPM,
-    SalienceDetectorConfig,
-    MetricsSPM,
-    MetricsMonitorConfig,
 )
-from consciousness.validation.coherence import (
-    CoherenceValidator,
-    ESGTCoherenceMetrics,
-)
-
+from consciousness.tig.fabric import TIGFabric, TopologyConfig
+from consciousness.tig.sync import PTPCluster
 
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest_asyncio.fixture(scope="function")
 async def tig_fabric():
@@ -178,6 +170,7 @@ async def metrics_spm():
 # =============================================================================
 # 1. ESGTCoordinator Tests (10 tests)
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_coordinator_initialization(tig_fabric):
@@ -355,25 +348,26 @@ async def test_event_history_tracking(esgt_coordinator):
         await asyncio.sleep(0.35)  # 350ms: refractory (100ms) + event duration (~200ms) + margin
 
     # Check that all events were recorded
-    assert esgt_coordinator.total_events == initial_count + 3, \
+    assert esgt_coordinator.total_events == initial_count + 3, (
         f"Expected {initial_count + 3} total events, got {esgt_coordinator.total_events}"
+    )
 
     # Check that history grew (all events, including failures, should be recorded)
     # Note: Some events may fail due to timing/resources, so check for growth, not exact count
-    assert len(esgt_coordinator.event_history) >= initial_history_len + 1, \
+    assert len(esgt_coordinator.event_history) >= initial_history_len + 1, (
         f"Event history should have grown from {initial_history_len}, got {len(esgt_coordinator.event_history)}"
+    )
 
     # At least one event should have completed successfully
     successful_events = [e for e in events if e.was_successful()]
-    assert len(successful_events) >= 1, \
-        f"At least one event should succeed, got {len(successful_events)}/3"
+    assert len(successful_events) >= 1, f"At least one event should succeed, got {len(successful_events)}/3"
 
 
 @pytest.mark.asyncio
 async def test_success_rate_calculation(esgt_coordinator):
     """Test success rate metric calculation."""
     # Should start at 0%
-    initial_rate = esgt_coordinator.get_success_rate()
+    esgt_coordinator.get_success_rate()
 
     # Run successful event
     salience = SalienceScore(novelty=0.8, relevance=0.85, urgency=0.7)
@@ -387,6 +381,7 @@ async def test_success_rate_calculation(esgt_coordinator):
 # =============================================================================
 # 2. KuramotoNetwork Tests (7 tests)
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_kuramoto_network_initialization():
@@ -414,8 +409,7 @@ async def test_phase_synchronization(kuramoto_network):
     """Test phase synchronization dynamics."""
     # Create topology (fully connected small network)
     node_ids = list(kuramoto_network.oscillators.keys())
-    topology = {node_id: [n for n in node_ids if n != node_id]
-                for node_id in node_ids}
+    topology = {node_id: [n for n in node_ids if n != node_id] for node_id in node_ids}
 
     # Run synchronization for 100 steps
     for _ in range(100):
@@ -443,8 +437,7 @@ async def test_coherence_computation(kuramoto_network):
 async def test_coherence_threshold_0_70(kuramoto_network):
     """Test that coherence ≥ 0.70 achieves conscious-level quality."""
     node_ids = list(kuramoto_network.oscillators.keys())
-    topology = {node_id: [n for n in node_ids if n != node_id]
-                for node_id in node_ids}
+    topology = {node_id: [n for n in node_ids if n != node_id] for node_id in node_ids}
 
     # Strong coupling should achieve high coherence
     for osc in kuramoto_network.oscillators.values():
@@ -466,8 +459,7 @@ async def test_coherence_threshold_0_70(kuramoto_network):
 async def test_synchronization_dynamics(kuramoto_network):
     """Test synchronization dynamics over time."""
     node_ids = list(kuramoto_network.oscillators.keys())
-    topology = {node_id: [n for n in node_ids if n != node_id]
-                for node_id in node_ids}
+    topology = {node_id: [n for n in node_ids if n != node_id] for node_id in node_ids}
 
     coherences = []
 
@@ -486,8 +478,7 @@ async def test_synchronization_dynamics(kuramoto_network):
 async def test_desynchronization(kuramoto_network):
     """Test desynchronization when coupling weakened."""
     node_ids = list(kuramoto_network.oscillators.keys())
-    topology = {node_id: [n for n in node_ids if n != node_id]
-                for node_id in node_ids}
+    topology = {node_id: [n for n in node_ids if n != node_id] for node_id in node_ids}
 
     # First achieve synchronization
     for osc in kuramoto_network.oscillators.values():
@@ -518,8 +509,7 @@ async def test_reset_all_oscillators(kuramoto_network):
     """Test resetting all oscillators."""
     # Advance phases
     node_ids = list(kuramoto_network.oscillators.keys())
-    topology = {node_id: [n for n in node_ids if n != node_id]
-                for node_id in node_ids}
+    topology = {node_id: [n for n in node_ids if n != node_id] for node_id in node_ids}
 
     for _ in range(50):
         kuramoto_network.update_network(topology, dt=0.002)
@@ -536,6 +526,7 @@ async def test_reset_all_oscillators(kuramoto_network):
 # =============================================================================
 # 3. SPM Tests (6 tests)
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_simple_spm_output_generation(simple_spm):
@@ -651,6 +642,7 @@ async def test_metrics_spm_high_salience_on_critical(metrics_spm):
 # =============================================================================
 # 4. Integration Tests (4 tests)
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_esgt_full_pipeline(tig_fabric):

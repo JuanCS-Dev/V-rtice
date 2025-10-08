@@ -90,32 +90,34 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any, Callable
+from typing import Any, Callable, Dict, List, Optional
 
 from consciousness.mmei.monitor import AbstractNeeds, NeedUrgency
 
 
 class GoalType(Enum):
     """Classification of goal types."""
+
     # Homeostatic (deficit-reduction)
-    REST = "rest"                 # Reduce computational load
-    REPAIR = "repair"             # Fix errors, restore integrity
-    OPTIMIZE = "optimize"         # Improve efficiency
-    RESTORE = "restore"           # Restore connectivity/communication
+    REST = "rest"  # Reduce computational load
+    REPAIR = "repair"  # Fix errors, restore integrity
+    OPTIMIZE = "optimize"  # Improve efficiency
+    RESTORE = "restore"  # Restore connectivity/communication
 
     # Growth (exploration/expansion)
-    EXPLORE = "explore"           # Explore new capabilities
-    LEARN = "learn"               # Acquire new patterns
-    CREATE = "create"             # Generate novel outputs
+    EXPLORE = "explore"  # Explore new capabilities
+    LEARN = "learn"  # Acquire new patterns
+    CREATE = "create"  # Generate novel outputs
 
 
 class GoalPriority(Enum):
     """Goal priority levels (maps to NeedUrgency)."""
-    BACKGROUND = 0    # Optional, non-urgent
-    LOW = 1           # Should do eventually
-    MODERATE = 2      # Should do soon
-    HIGH = 3          # Important, do quickly
-    CRITICAL = 4      # Urgent, do immediately
+
+    BACKGROUND = 0  # Optional, non-urgent
+    LOW = 1  # Should do eventually
+    MODERATE = 2  # Should do soon
+    HIGH = 3  # Important, do quickly
+    CRITICAL = 4  # Urgent, do immediately
 
 
 @dataclass
@@ -126,6 +128,7 @@ class Goal:
     Goals represent internally-motivated intentions to act.
     They persist until satisfied or timeout.
     """
+
     goal_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     goal_type: GoalType = GoalType.REST
     priority: GoalPriority = GoalPriority.LOW
@@ -135,8 +138,8 @@ class Goal:
     target_component: Optional[str] = None  # Which system to act on
 
     # Motivation
-    source_need: str = ""           # Which need generated this goal
-    need_value: float = 0.0         # Value of need when goal created
+    source_need: str = ""  # Which need generated this goal
+    need_value: float = 0.0  # Value of need when goal created
 
     # Success criteria
     target_need_value: float = 0.3  # Goal satisfied when need drops below this
@@ -193,20 +196,22 @@ class Goal:
 
     def __repr__(self) -> str:
         status = "ACTIVE" if self.is_active else "SATISFIED"
-        return (f"Goal({self.goal_type.value}, priority={self.priority.value}, "
-                f"status={status}, need={self.need_value:.2f})")
+        return (
+            f"Goal({self.goal_type.value}, priority={self.priority.value}, status={status}, need={self.need_value:.2f})"
+        )
 
 
 @dataclass
 class GoalGenerationConfig:
     """Configuration for autonomous goal generation."""
+
     # Generation thresholds (when to generate goals)
-    rest_threshold: float = 0.60         # CPU/memory fatigue
-    repair_threshold: float = 0.40       # Error detection (lower = more sensitive)
-    efficiency_threshold: float = 0.50   # Resource optimization
-    connectivity_threshold: float = 0.50 # Network issues
-    curiosity_threshold: float = 0.60    # Exploration drive
-    learning_threshold: float = 0.50     # Learning opportunities
+    rest_threshold: float = 0.60  # CPU/memory fatigue
+    repair_threshold: float = 0.40  # Error detection (lower = more sensitive)
+    efficiency_threshold: float = 0.50  # Resource optimization
+    connectivity_threshold: float = 0.50  # Network issues
+    curiosity_threshold: float = 0.60  # Exploration drive
+    learning_threshold: float = 0.50  # Learning opportunities
 
     # Satisfaction thresholds (when goals complete)
     rest_satisfied: float = 0.30
@@ -215,9 +220,9 @@ class GoalGenerationConfig:
     connectivity_satisfied: float = 0.30
 
     # Goal timeouts (seconds)
-    default_timeout: float = 300.0       # 5 minutes
-    critical_timeout: float = 600.0      # 10 minutes for critical goals
-    exploration_timeout: float = 120.0   # 2 minutes for exploration
+    default_timeout: float = 300.0  # 5 minutes
+    critical_timeout: float = 600.0  # 10 minutes for critical goals
+    exploration_timeout: float = 120.0  # 2 minutes for exploration
 
     # Generation limits
     max_concurrent_goals: int = 10
@@ -277,9 +282,7 @@ class AutonomousGoalGenerator:
     """
 
     def __init__(
-        self,
-        config: Optional[GoalGenerationConfig] = None,
-        generator_id: str = "mmei-goal-generator-primary"
+        self, config: Optional[GoalGenerationConfig] = None, generator_id: str = "mmei-goal-generator-primary"
     ):
         self.generator_id = generator_id
         self.config = config or GoalGenerationConfig()
@@ -302,10 +305,7 @@ class AutonomousGoalGenerator:
         self.total_goals_satisfied: int = 0
         self.total_goals_expired: int = 0
 
-    def register_goal_consumer(
-        self,
-        consumer: Callable[[Goal], None]
-    ) -> None:
+    def register_goal_consumer(self, consumer: Callable[[Goal], None]) -> None:
         """
         Register callback to receive generated goals.
 
@@ -472,13 +472,12 @@ class AutonomousGoalGenerator:
             need_value=need_value,
             target_need_value=self.config.rest_satisfied,
             timeout_seconds=(
-                self.config.critical_timeout if priority == GoalPriority.CRITICAL
-                else self.config.default_timeout
+                self.config.critical_timeout if priority == GoalPriority.CRITICAL else self.config.default_timeout
             ),
             metadata={
                 "actions": ["reduce_thread_count", "defer_background_tasks", "enter_low_power_mode"],
                 "expected_benefit": "Decrease CPU/memory usage by 20-40%",
-            }
+            },
         )
 
     def _create_repair_goal(self, need_value: float) -> Goal:
@@ -497,7 +496,7 @@ class AutonomousGoalGenerator:
             metadata={
                 "actions": ["run_diagnostics", "apply_fixes", "verify_integrity"],
                 "expected_benefit": "Reduce error rate to <1 per minute",
-            }
+            },
         )
 
     def _create_efficiency_goal(self, need_value: float) -> Goal:
@@ -516,7 +515,7 @@ class AutonomousGoalGenerator:
             metadata={
                 "actions": ["enable_thermal_throttling", "optimize_power_profile", "cache_warming"],
                 "expected_benefit": "Reduce temperature by 5-10°C, power by 10-20W",
-            }
+            },
         )
 
     def _create_connectivity_goal(self, need_value: float) -> Goal:
@@ -535,7 +534,7 @@ class AutonomousGoalGenerator:
             metadata={
                 "actions": ["check_network_health", "reconnect_dropped_links", "optimize_routing"],
                 "expected_benefit": "Reduce latency to <50ms, packet loss to <1%",
-            }
+            },
         )
 
     def _create_exploration_goal(self, need_value: float) -> Goal:
@@ -552,7 +551,7 @@ class AutonomousGoalGenerator:
             metadata={
                 "actions": ["run_benchmarks", "test_new_algorithms", "profile_performance"],
                 "expected_benefit": "Discover optimization opportunities",
-            }
+            },
         )
 
     def _create_learning_goal(self, need_value: float) -> Goal:
@@ -569,7 +568,7 @@ class AutonomousGoalGenerator:
             metadata={
                 "actions": ["analyze_recent_data", "update_models", "identify_patterns"],
                 "expected_benefit": "Improve prediction accuracy by 5-10%",
-            }
+            },
         )
 
     def _notify_consumers(self, goal: Goal) -> None:
@@ -593,11 +592,7 @@ class AutonomousGoalGenerator:
             List of active goals
         """
         if sort_by_priority:
-            return sorted(
-                self._active_goals,
-                key=lambda g: g.get_priority_score(),
-                reverse=True
-            )
+            return sorted(self._active_goals, key=lambda g: g.get_priority_score(), reverse=True)
         return self._active_goals.copy()
 
     def get_critical_goals(self) -> List[Goal]:
@@ -611,9 +606,7 @@ class AutonomousGoalGenerator:
     def get_statistics(self) -> Dict[str, Any]:
         """Get goal generation statistics."""
         satisfaction_rate = (
-            self.total_goals_satisfied / self.total_goals_generated
-            if self.total_goals_generated > 0
-            else 0.0
+            self.total_goals_satisfied / self.total_goals_generated if self.total_goals_generated > 0 else 0.0
         )
 
         return {
@@ -626,6 +619,8 @@ class AutonomousGoalGenerator:
         }
 
     def __repr__(self) -> str:
-        return (f"AutonomousGoalGenerator({self.generator_id}, "
-                f"active={len(self._active_goals)}, "
-                f"generated={self.total_goals_generated})")
+        return (
+            f"AutonomousGoalGenerator({self.generator_id}, "
+            f"active={len(self._active_goals)}, "
+            f"generated={self.total_goals_generated})"
+        )

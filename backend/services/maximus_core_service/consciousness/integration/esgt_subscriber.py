@@ -6,9 +6,9 @@ Subscribes to ESGT coordinator ignition events for immune system coordination.
 
 import asyncio
 import logging
-from typing import Callable, List, Optional, Awaitable
+from typing import Awaitable, Callable, List
 
-from consciousness.esgt.coordinator import ESGTEvent, SalienceScore
+from consciousness.esgt.coordinator import ESGTEvent
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +83,7 @@ class ESGTSubscriber:
 async def example_immune_handler(event: ESGTEvent):
     """Example handler that logs ESGT ignition."""
     salience = event.salience.compute_total()
-    logger.info(
-        f"🧠 ESGT Ignition detected: salience={salience:.2f}, "
-        f"event_id={event.event_id}"
-    )
+    logger.info(f"🧠 ESGT Ignition detected: salience={salience:.2f}, event_id={event.event_id}")
 
     if salience > 0.8:
         logger.warning("⚠️  High salience event - triggering immune activation!")

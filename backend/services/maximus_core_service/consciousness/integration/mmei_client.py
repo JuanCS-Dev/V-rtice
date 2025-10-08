@@ -4,7 +4,6 @@ MMEI Client - HTTP client for InternalStateMonitor
 Fetches current needs from MMEI interoception monitor for immune system integration.
 """
 
-import asyncio
 import logging
 from typing import Optional
 
@@ -78,9 +77,7 @@ class MMEIClient:
                 return needs
 
             else:
-                logger.warning(
-                    f"MMEI service returned {response.status_code}, using cached needs"
-                )
+                logger.warning(f"MMEI service returned {response.status_code}, using cached needs")
                 self._consecutive_failures += 1
                 return self._fallback_needs()
 

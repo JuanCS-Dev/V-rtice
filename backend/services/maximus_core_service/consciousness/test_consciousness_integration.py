@@ -32,48 +32,43 @@ REGRA DE OURO: NO MOCK, NO PLACEHOLDER, NO TODO
 """
 
 import asyncio
+import time
+
 import pytest
 import pytest_asyncio
-import time
-from typing import List
 
-# MMEI imports
-from consciousness.mmei.monitor import (
-    InternalStateMonitor,
-    PhysicalMetrics,
-    AbstractNeeds,
-    InteroceptionConfig,
-)
-from consciousness.mmei.goals import (
-    AutonomousGoalGenerator,
-    Goal,
-    GoalType,
-)
-
-# MCEA imports
-from consciousness.mcea.controller import (
-    ArousalController,
-    ArousalState,
-    ArousalLevel,
-    ArousalConfig,
+from consciousness.esgt.arousal_integration import (
+    ArousalModulationConfig,
+    ESGTArousalBridge,
 )
 
 # ESGT imports
 from consciousness.esgt.coordinator import (
     ESGTCoordinator,
-    TriggerConditions,
     SalienceScore,
+    TriggerConditions,
 )
-from consciousness.esgt.arousal_integration import (
-    ESGTArousalBridge,
-    ArousalModulationConfig,
+
+# MCEA imports
+from consciousness.mcea.controller import (
+    ArousalConfig,
+    ArousalController,
+    ArousalLevel,
+)
+
+# MMEI imports
+from consciousness.mmei.monitor import (
+    AbstractNeeds,
+    InternalStateMonitor,
+    InteroceptionConfig,
+    PhysicalMetrics,
 )
 from consciousness.tig.fabric import TIGFabric
-
 
 # ============================================================================
 # Test Fixtures
 # ============================================================================
+
 
 @pytest_asyncio.fixture
 async def mmei_monitor():
@@ -158,6 +153,7 @@ async def arousal_bridge(mcea_controller, esgt_coordinator):
 # Integration Pipeline Tests
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_mmei_to_mcea_pipeline(mmei_monitor, mcea_controller):
     """Test that MMEI needs propagate to MCEA arousal modulation."""
@@ -186,9 +182,7 @@ async def test_mmei_to_mcea_pipeline(mmei_monitor, mcea_controller):
     arousal_state = mcea_controller.get_current_arousal()
 
     # High rest_need should DECREASE arousal (fatigue)
-    assert arousal_state.arousal < 0.55, (
-        f"High rest_need should decrease arousal, got {arousal_state.arousal}"
-    )
+    assert arousal_state.arousal < 0.55, f"High rest_need should decrease arousal, got {arousal_state.arousal}"
 
 
 @pytest.mark.asyncio
@@ -220,9 +214,7 @@ async def test_mcea_to_esgt_threshold_modulation(arousal_bridge):
     new_threshold = new_mapping["esgt_threshold"]
 
     # Verify arousal increased
-    assert new_arousal > initial_arousal, (
-        f"Arousal should increase: {initial_arousal} → {new_arousal}"
-    )
+    assert new_arousal > initial_arousal, f"Arousal should increase: {initial_arousal} → {new_arousal}"
 
     # Verify threshold DECREASED (inverse relationship)
     assert new_threshold < initial_threshold, (
@@ -270,9 +262,7 @@ async def test_end_to_end_high_load_scenario(mmei_monitor, mcea_controller, arou
     # Verify ESGT threshold INCREASED (harder to ignite when fatigued)
     # Should be higher than a reasonable baseline
     threshold = arousal_bridge.get_current_threshold()
-    assert threshold > 0.50, (
-        f"Low arousal should raise threshold (fatigue), got {threshold}"
-    )
+    assert threshold > 0.50, f"Low arousal should raise threshold (fatigue), got {threshold}"
 
     # Verify arousal level classification
     assert arousal_state.level in [ArousalLevel.DROWSY, ArousalLevel.RELAXED], (
@@ -311,9 +301,7 @@ async def test_end_to_end_error_burst_scenario(mmei_monitor, mcea_controller, ar
     # Verify arousal moved from baseline (response to threat)
     arousal_state = mcea_controller.get_current_arousal()
     # Arousal should change, though the magnitude depends on weights
-    assert arousal_state.arousal != 0.5, (
-        f"High repair_need should change arousal, got {arousal_state.arousal}"
-    )
+    assert arousal_state.arousal != 0.5, f"High repair_need should change arousal, got {arousal_state.arousal}"
 
     # Wait for threshold update via bridge
     await asyncio.sleep(0.2)
@@ -321,9 +309,7 @@ async def test_end_to_end_error_burst_scenario(mmei_monitor, mcea_controller, ar
     # Verify ESGT threshold DECREASED (easy to ignite when alert)
     threshold = arousal_bridge.get_current_threshold()
     # Should be lower than fatigue threshold tested earlier
-    assert threshold < 0.70, (
-        f"High arousal should lower threshold (alert), got {threshold}"
-    )
+    assert threshold < 0.70, f"High arousal should lower threshold (alert), got {threshold}"
 
     # Arousal level may vary based on exact timing and weights
     # Just verify it's in valid range
@@ -369,18 +355,14 @@ async def test_end_to_end_idle_curiosity_scenario(mmei_monitor, mcea_controller,
 
     # Verify arousal in reasonable range
     arousal_state = mcea_controller.get_current_arousal()
-    assert 0.3 <= arousal_state.arousal <= 0.8, (
-        f"Arousal should be in reasonable range, got {arousal_state.arousal}"
-    )
+    assert 0.3 <= arousal_state.arousal <= 0.8, f"Arousal should be in reasonable range, got {arousal_state.arousal}"
 
     # Wait for threshold update via bridge
     await asyncio.sleep(0.2)
 
     # Verify ESGT threshold in reasonable range
     threshold = arousal_bridge.get_current_threshold()
-    assert 0.3 <= threshold <= 0.9, (
-        f"Threshold should be in reasonable range, got {threshold}"
-    )
+    assert 0.3 <= threshold <= 0.9, f"Threshold should be in reasonable range, got {threshold}"
 
 
 @pytest.mark.asyncio
@@ -427,12 +409,10 @@ async def test_refractory_arousal_feedback(arousal_bridge, esgt_coordinator):
         )
 
         # Verify refractory signal was sent
-        assert arousal_bridge.total_refractory_signals >= 0, (
-            "Refractory tracking should be operational"
-        )
+        assert arousal_bridge.total_refractory_signals >= 0, "Refractory tracking should be operational"
     else:
         # ESGT may not ignite if conditions not met - test is exploratory
-        print(f"ℹ️  ESGT ignition failed (conditions not met) - skipping refractory test")
+        print("ℹ️  ESGT ignition failed (conditions not met) - skipping refractory test")
 
 
 @pytest.mark.asyncio
@@ -459,10 +439,12 @@ async def test_arousal_threshold_inverse_relationship(arousal_bridge):
 
         # Measure
         mapping = arousal_bridge.get_arousal_threshold_mapping()
-        measurements.append({
-            "arousal": mapping["arousal"],
-            "threshold": mapping["esgt_threshold"],
-        })
+        measurements.append(
+            {
+                "arousal": mapping["arousal"],
+                "threshold": mapping["esgt_threshold"],
+            }
+        )
 
     # Verify inverse relationship
     for i in range(len(measurements) - 1):
@@ -482,6 +464,7 @@ async def test_arousal_threshold_inverse_relationship(arousal_bridge):
 # ============================================================================
 # Performance Tests
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_integration_end_to_end_latency(mmei_monitor, mcea_controller, arousal_bridge):
@@ -514,7 +497,7 @@ async def test_integration_end_to_end_latency(mmei_monitor, mcea_controller, aro
         await asyncio.sleep(0.01)
 
         # Get threshold (bridge updates automatically)
-        threshold = arousal_bridge.get_current_threshold()
+        arousal_bridge.get_current_threshold()
 
         # End timing
         end = time.time()
@@ -529,13 +512,9 @@ async def test_integration_end_to_end_latency(mmei_monitor, mcea_controller, aro
     max_latency = max(latencies)
 
     # Verify real-time performance
-    assert avg_latency < 50.0, (
-        f"Average end-to-end latency too high: {avg_latency:.1f}ms > 50ms"
-    )
+    assert avg_latency < 50.0, f"Average end-to-end latency too high: {avg_latency:.1f}ms > 50ms"
 
-    assert max_latency < 100.0, (
-        f"Max end-to-end latency too high: {max_latency:.1f}ms > 100ms"
-    )
+    assert max_latency < 100.0, f"Max end-to-end latency too high: {max_latency:.1f}ms > 100ms"
 
 
 @pytest.mark.asyncio
@@ -552,7 +531,7 @@ async def test_integration_sustained_operation(mmei_monitor, mcea_controller, ar
     for i in range(cycles):
         # Vary metrics
         cpu = 50.0 + (i % 20) * 2  # 50-90% range
-        memory = 40.0 + (i % 30)   # 40-70% range
+        memory = 40.0 + (i % 30)  # 40-70% range
 
         metrics = PhysicalMetrics(
             timestamp=time.time(),
@@ -596,6 +575,7 @@ async def test_integration_metrics_collection():
             cpu_usage_percent=50.0,
             memory_usage_percent=60.0,
         )
+
     mmei.set_metrics_collector(dummy_collector)
 
     mcea = ArousalController()
@@ -643,6 +623,7 @@ async def test_integration_metrics_collection():
 # Edge Cases & Robustness
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_integration_concurrent_updates(mcea_controller, arousal_bridge):
     """Test that concurrent needs updates don't cause race conditions."""
@@ -660,10 +641,7 @@ async def test_integration_concurrent_updates(mcea_controller, arousal_bridge):
             await asyncio.sleep(0.01)
 
     # Run multiple concurrent updaters
-    tasks = [
-        asyncio.create_task(update_needs_repeatedly())
-        for _ in range(3)
-    ]
+    tasks = [asyncio.create_task(update_needs_repeatedly()) for _ in range(3)]
 
     await asyncio.gather(*tasks)
 
@@ -752,24 +730,19 @@ async def test_integration_recovery_from_extreme_stress(mcea_controller, arousal
 # Test Summary
 # ============================================================================
 
+
 def test_integration_test_count():
     """Meta-test: Verify we have comprehensive coverage."""
 
     # Count tests in this module
-    import inspect
 
-    test_functions = [
-        name for name, obj in globals().items()
-        if name.startswith("test_") and callable(obj)
-    ]
+    test_functions = [name for name, obj in globals().items() if name.startswith("test_") and callable(obj)]
 
     # Exclude this meta-test
     test_functions = [t for t in test_functions if t != "test_integration_test_count"]
 
     # Verify comprehensive coverage
-    assert len(test_functions) >= 13, (
-        f"Expected at least 13 integration tests, found {len(test_functions)}"
-    )
+    assert len(test_functions) >= 13, f"Expected at least 13 integration tests, found {len(test_functions)}"
 
     print(f"\n✅ FASE 10 Integration Test Suite: {len(test_functions)} tests")
     print("\nTest Categories:")

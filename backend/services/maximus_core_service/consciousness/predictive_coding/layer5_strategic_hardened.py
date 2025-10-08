@@ -26,11 +26,12 @@ Date: 2025-10-08
 """
 
 from typing import Any, Dict, List, Tuple
+
 import numpy as np
 
 from consciousness.predictive_coding.layer_base_hardened import (
-    PredictiveCodingLayerBase,
     LayerConfig,
+    PredictiveCodingLayerBase,
 )
 
 
@@ -257,7 +258,7 @@ class Layer5Strategic(PredictiveCodingLayerBase):
             vector: [input_dim]
         """
         # Get top goal
-        top_goal = max(goal_posteriors.items(), key=lambda x: x[1])[0] if goal_posteriors else "data_exfiltration"
+        max(goal_posteriors.items(), key=lambda x: x[1])[0] if goal_posteriors else "data_exfiltration"
 
         # Map to vector space (placeholder)
         # In production: self.goal_embedding[top_goal]

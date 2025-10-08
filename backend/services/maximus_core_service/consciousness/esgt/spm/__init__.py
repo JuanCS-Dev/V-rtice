@@ -34,30 +34,27 @@ A competição entre SPMs determina qual informação se torna consciente.
 """
 
 from consciousness.esgt.spm.base import (
-    SpecializedProcessingModule,
-    SPMType,
     ProcessingPriority,
+    SpecializedProcessingModule,
     SPMOutput,
+    SPMType,
 )
-
-from consciousness.esgt.spm.simple import (
-    SimpleSPM,
-    SimpleSPMConfig,
+from consciousness.esgt.spm.metrics_monitor import (
+    MetricCategory,
+    MetricsMonitorConfig,
+    MetricsSnapshot,
+    MetricsSPM,
 )
-
 from consciousness.esgt.spm.salience_detector import (
-    SalienceSPM,
     SalienceDetectorConfig,
     SalienceEvent,
     SalienceMode,
+    SalienceSPM,
     SalienceThresholds,
 )
-
-from consciousness.esgt.spm.metrics_monitor import (
-    MetricsSPM,
-    MetricsMonitorConfig,
-    MetricsSnapshot,
-    MetricCategory,
+from consciousness.esgt.spm.simple import (
+    SimpleSPM,
+    SimpleSPMConfig,
 )
 
 __all__ = [

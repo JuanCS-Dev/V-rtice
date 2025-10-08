@@ -49,10 +49,10 @@ Same stimulus can be:
 import asyncio
 import time
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Optional
 
+from consciousness.esgt.coordinator import ESGTCoordinator
 from consciousness.mcea.controller import ArousalController, ArousalState
-from consciousness.esgt.coordinator import ESGTCoordinator, TriggerConditions, ESGTEvent
 
 
 @dataclass
@@ -201,18 +201,20 @@ class ESGTArousalBridge:
                 self.total_modulations += 1
 
                 # Track history
-                self._threshold_history.append({
-                    "timestamp": time.time(),
-                    "arousal": arousal_state.arousal,
-                    "threshold": threshold,
-                })
+                self._threshold_history.append(
+                    {
+                        "timestamp": time.time(),
+                        "arousal": arousal_state.arousal,
+                        "threshold": threshold,
+                    }
+                )
 
                 if len(self._threshold_history) > 100:
                     self._threshold_history.pop(0)
 
                 # Check for ESGT events (refractory signaling)
                 if self.config.enable_refractory_arousal_drop:
-                    current_time = time.time()
+                    time.time()
 
                     # Check if ESGT just occurred
                     if self.esgt_coordinator.last_esgt_time > last_esgt_time:
@@ -240,7 +242,6 @@ class ESGTArousalBridge:
         Arousal 0.8 (ALERT)      → threshold 0.45
         Arousal 1.0 (HYPERALERT) → threshold 0.30 (very easy to ignite)
         """
-        arousal = arousal_state.arousal
 
         # Inverse relationship: high arousal → low threshold
         # Use arousal_state.get_arousal_factor() which ranges 0.5-2.0
@@ -253,7 +254,7 @@ class ESGTArousalBridge:
         # When arousal factor is low (0.5 at arousal 0.0):
         #   threshold = baseline / 0.5 = 0.70 / 0.5 = 1.4 → clamp to max
 
-        threshold = self.config.baseline_threshold / (factor ** self.config.threshold_sensitivity)
+        threshold = self.config.baseline_threshold / (factor**self.config.threshold_sensitivity)
 
         # Clamp to valid range
         threshold = max(self.config.min_threshold, min(self.config.max_threshold, threshold))
@@ -316,7 +317,9 @@ class ESGTArousalBridge:
         }
 
     def __repr__(self) -> str:
-        return (f"ESGTArousalBridge(id={self.bridge_id}, "
-                f"modulations={self.total_modulations}, "
-                f"refractory_signals={self.total_refractory_signals}, "
-                f"running={self._running})")
+        return (
+            f"ESGTArousalBridge(id={self.bridge_id}, "
+            f"modulations={self.total_modulations}, "
+            f"refractory_signals={self.total_refractory_signals}, "
+            f"running={self._running})"
+        )

@@ -11,28 +11,30 @@ REGRA DE OURO: NO MOCK, NO PLACEHOLDER, NO TODO
 Target: 100% PASS RATE
 """
 
-import asyncio
+import time
+from dataclasses import dataclass
+
 import pytest
 import pytest_asyncio
 
-# Consciousness imports
-from consciousness.mmei.monitor import AbstractNeeds
-from consciousness.mcea.controller import ArousalState, ArousalLevel
-from consciousness.esgt.coordinator import ESGTEvent, SalienceScore
+from consciousness.esgt.coordinator import SalienceScore
 
 # Integration clients
-from consciousness.integration import MMEIClient, MCEAClient, ESGTSubscriber
-from dataclasses import dataclass
-import time
+from consciousness.integration import ESGTSubscriber, MCEAClient, MMEIClient
+from consciousness.mcea.controller import ArousalLevel, ArousalState
 
+# Consciousness imports
+from consciousness.mmei.monitor import AbstractNeeds
 
 # ============================================================================
 # Test Helper Classes
 # ============================================================================
 
+
 @dataclass
 class MockESGTEvent:
     """Mock ESGT event with salience for testing (avoids pytest collection)."""
+
     event_id: str
     salience: SalienceScore
     content: dict
@@ -47,6 +49,7 @@ class MockESGTEvent:
 # ============================================================================
 # Mock Clients for Testing (lightweight, no external dependencies)
 # ============================================================================
+
 
 class MockMMEIService:
     """Mock MMEI service for testing (returns configurable needs)."""
@@ -98,6 +101,7 @@ class MockMCEAService:
 # Test Fixtures
 # ============================================================================
 
+
 @pytest_asyncio.fixture
 async def mmei_service():
     """Create mock MMEI service."""
@@ -137,6 +141,7 @@ async def esgt_subscriber():
 # ============================================================================
 # Integration Tests - MMEI → HomeostaticController
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_mmei_client_can_fetch_needs(mmei_client, mmei_service):
@@ -208,6 +213,7 @@ async def test_mmei_high_efficiency_need_detected(mmei_service, mmei_client):
 # Integration Tests - MCEA → ClonalSelectionEngine
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_mcea_client_can_fetch_arousal(mcea_client, mcea_service):
     """Test MCEA client can fetch arousal (basic connectivity)."""
@@ -272,6 +278,7 @@ async def test_mcea_arousal_mutation_rate_mapping(mcea_service, mcea_client):
 # ============================================================================
 # Integration Tests - ESGT → LinfonodoDigital
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_esgt_subscriber_can_register_handler(esgt_subscriber):
@@ -364,22 +371,29 @@ async def test_esgt_medium_salience_detection(esgt_subscriber):
 # End-to-End Integration Tests
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_end_to_end_needs_to_action_mapping(mmei_service, mmei_client):
     """Test end-to-end: Physical needs → Controller decisions."""
     scenarios = [
         # (needs, expected_issue)
         (
-            AbstractNeeds(rest_need=0.85, repair_need=0.3, efficiency_need=0.3, connectivity_need=0.2, curiosity_drive=0.2),
-            "high_rest_need_fatigue"
+            AbstractNeeds(
+                rest_need=0.85, repair_need=0.3, efficiency_need=0.3, connectivity_need=0.2, curiosity_drive=0.2
+            ),
+            "high_rest_need_fatigue",
         ),
         (
-            AbstractNeeds(rest_need=0.3, repair_need=0.85, efficiency_need=0.3, connectivity_need=0.2, curiosity_drive=0.2),
-            "high_repair_need_alert"
+            AbstractNeeds(
+                rest_need=0.3, repair_need=0.85, efficiency_need=0.3, connectivity_need=0.2, curiosity_drive=0.2
+            ),
+            "high_repair_need_alert",
         ),
         (
-            AbstractNeeds(rest_need=0.3, repair_need=0.3, efficiency_need=0.75, connectivity_need=0.2, curiosity_drive=0.2),
-            "efficiency_optimization_needed"
+            AbstractNeeds(
+                rest_need=0.3, repair_need=0.3, efficiency_need=0.75, connectivity_need=0.2, curiosity_drive=0.2
+            ),
+            "efficiency_optimization_needed",
         ),
     ]
 
@@ -417,8 +431,7 @@ async def test_end_to_end_arousal_to_selection_modulation(mcea_service, mcea_cli
 
     # Verify inverse relationship: arousal ↑ → pressure ↓
     for i in range(len(pressures) - 1):
-        assert pressures[i] > pressures[i + 1], \
-            "Selection pressure should decrease as arousal increases"
+        assert pressures[i] > pressures[i + 1], "Selection pressure should decrease as arousal increases"
 
 
 @pytest.mark.asyncio
@@ -442,25 +455,31 @@ async def test_end_to_end_esgt_to_immune_response(esgt_subscriber):
     esgt_subscriber.on_ignition(immune_response_handler)
 
     # Trigger high salience
-    await esgt_subscriber.notify(MockESGTEvent(
-        event_id="high",
-        salience=SalienceScore(novelty=0.9, relevance=0.9, urgency=0.85),
-        content={},
-    ))
+    await esgt_subscriber.notify(
+        MockESGTEvent(
+            event_id="high",
+            salience=SalienceScore(novelty=0.9, relevance=0.9, urgency=0.85),
+            content={},
+        )
+    )
 
     # Trigger medium salience
-    await esgt_subscriber.notify(MockESGTEvent(
-        event_id="medium",
-        salience=SalienceScore(novelty=0.7, relevance=0.65, urgency=0.6),
-        content={},
-    ))
+    await esgt_subscriber.notify(
+        MockESGTEvent(
+            event_id="medium",
+            salience=SalienceScore(novelty=0.7, relevance=0.65, urgency=0.6),
+            content={},
+        )
+    )
 
     # Trigger low salience
-    await esgt_subscriber.notify(MockESGTEvent(
-        event_id="low",
-        salience=SalienceScore(novelty=0.4, relevance=0.3, urgency=0.2),
-        content={},
-    ))
+    await esgt_subscriber.notify(
+        MockESGTEvent(
+            event_id="low",
+            salience=SalienceScore(novelty=0.4, relevance=0.3, urgency=0.2),
+            content={},
+        )
+    )
 
     assert immune_responses["high_salience"], "High salience should trigger response"
     assert immune_responses["medium_salience"], "Medium salience should trigger response"
@@ -471,20 +490,16 @@ async def test_end_to_end_esgt_to_immune_response(esgt_subscriber):
 # Test Summary
 # ============================================================================
 
+
 def test_integration_test_count():
     """Meta-test: Verify comprehensive coverage."""
-    import inspect
 
-    test_functions = [
-        name for name, obj in globals().items()
-        if name.startswith("test_") and callable(obj)
-    ]
+    test_functions = [name for name, obj in globals().items() if name.startswith("test_") and callable(obj)]
 
     # Exclude meta-test
     test_functions = [t for t in test_functions if t != "test_integration_test_count"]
 
-    assert len(test_functions) >= 14, \
-        f"Expected at least 14 integration tests, found {len(test_functions)}"
+    assert len(test_functions) >= 14, f"Expected at least 14 integration tests, found {len(test_functions)}"
 
     print(f"\n✅ Immune-Consciousness Integration: {len(test_functions)} tests")
     print("\nTest Categories:")

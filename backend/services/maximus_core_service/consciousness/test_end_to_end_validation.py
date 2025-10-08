@@ -15,15 +15,12 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
-import asyncio
 import numpy as np
+import pytest
 
 from consciousness.biomimetic_safety_bridge import (
     BiomimeticSafetyBridge,
-    BridgeConfig,
 )
-from consciousness.neuromodulation.coordinator_hardened import ModulationRequest
 
 
 @pytest.mark.asyncio
@@ -66,8 +63,10 @@ async def test_end_to_end_complete_system():
     assert 0.0 <= initial_levels["serotonin"] <= 1.0
     assert 0.0 <= initial_levels["acetylcholine"] <= 1.0
     assert 0.0 <= initial_levels["norepinephrine"] <= 1.0
-    print(f"   ✅ DA={initial_levels['dopamine']:.3f}, 5HT={initial_levels['serotonin']:.3f}, "
-          f"ACh={initial_levels['acetylcholine']:.3f}, NE={initial_levels['norepinephrine']:.3f}")
+    print(
+        f"   ✅ DA={initial_levels['dopamine']:.3f}, 5HT={initial_levels['serotonin']:.3f}, "
+        f"ACh={initial_levels['acetylcholine']:.3f}, NE={initial_levels['norepinephrine']:.3f}"
+    )
 
     # 4. Process realistic security event (simulated)
     print("\n4. Processing realistic security event through entire system...")
@@ -96,9 +95,11 @@ async def test_end_to_end_complete_system():
         print("   ✅ Neuromodulation processed successfully")
         if "neuromod_levels" in result:
             levels = result["neuromod_levels"]
-            print(f"      Current levels: DA={levels['dopamine']:.3f}, "
-                  f"5HT={levels['serotonin']:.3f}, ACh={levels['acetylcholine']:.3f}, "
-                  f"NE={levels['norepinephrine']:.3f}")
+            print(
+                f"      Current levels: DA={levels['dopamine']:.3f}, "
+                f"5HT={levels['serotonin']:.3f}, ACh={levels['acetylcholine']:.3f}, "
+                f"NE={levels['norepinephrine']:.3f}"
+            )
 
     # 6. Verify metrics aggregation
     print("\n6. Verifying metrics aggregation...")
@@ -125,8 +126,10 @@ async def test_end_to_end_complete_system():
     for i in range(5):
         event = np.random.randn(10000).astype(np.float32) * 0.1 * (i % 3 + 1)
         result = await bridge.coordinate_processing(event)
-        print(f"   Event {i+1}: {result.get('predictive_coding_success', False)=}, "
-              f"{result.get('neuromodulation_success', False)=}")
+        print(
+            f"   Event {i + 1}: {result.get('predictive_coding_success', False)=}, "
+            f"{result.get('neuromodulation_success', False)=}"
+        )
 
     final_state = bridge.get_state()
     assert final_state.total_coordination_cycles >= 6  # Initial + 5 more
@@ -191,8 +194,10 @@ async def test_end_to_end_system_isolation():
     print("1. Normal operation baseline...")
     event = np.random.randn(10000).astype(np.float32) * 0.1
     result1 = await bridge.coordinate_processing(event)
-    print(f"   ✅ Both systems working: PC={result1.get('predictive_coding_success')}, "
-          f"NM={result1.get('neuromodulation_success')}")
+    print(
+        f"   ✅ Both systems working: PC={result1.get('predictive_coding_success')}, "
+        f"NM={result1.get('neuromodulation_success')}"
+    )
 
     # 2. Force neuromodulation to fail
     print("\n2. Forcing neuromodulation system to fail...")
@@ -209,9 +214,9 @@ async def test_end_to_end_system_isolation():
 
     # At least Layer 1 of predictive coding should have worked
     if "prediction_errors" in result2:
-        print(f"   ✅ System isolation working - predictive coding continued despite neuromod failure")
+        print("   ✅ System isolation working - predictive coding continued despite neuromod failure")
     else:
-        print(f"   ⚠️  Predictive coding also affected (expected in some cases)")
+        print("   ⚠️  Predictive coding also affected (expected in some cases)")
 
     print("\n=== SYSTEM ISOLATION VALIDATION COMPLETE ✅ ===\n")
 
@@ -244,7 +249,7 @@ async def test_end_to_end_cross_system_anomaly():
     if anomaly:
         print(f"   ✅ Cross-system anomaly detected: {anomaly}")
     else:
-        print(f"   ⚠️  No anomaly detected (threshold may need adjustment)")
+        print("   ⚠️  No anomaly detected (threshold may need adjustment)")
 
     print("\n=== CROSS-SYSTEM ANOMALY DETECTION COMPLETE ✅ ===\n")
 

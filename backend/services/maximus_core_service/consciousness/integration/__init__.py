@@ -5,9 +5,9 @@ HTTP clients for integrating consciousness components (MMEI/MCEA/ESGT)
 with Active Immune Core.
 """
 
-from .mmei_client import MMEIClient
-from .mcea_client import MCEAClient
 from .esgt_subscriber import ESGTSubscriber
+from .mcea_client import MCEAClient
+from .mmei_client import MMEIClient
 
 __all__ = [
     "MMEIClient",

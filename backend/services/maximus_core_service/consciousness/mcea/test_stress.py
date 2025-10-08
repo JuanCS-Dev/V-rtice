@@ -18,14 +18,11 @@ Date: 2025-10-07
 """
 
 import asyncio
-import time
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import Mock
 
-import numpy as np
 import pytest
-import pytest_asyncio
 
-from consciousness.mcea.controller import ArousalController, ArousalLevel, ArousalState
+from consciousness.mcea.controller import ArousalController
 from consciousness.mcea.stress import (
     StressLevel,
     StressMonitor,
@@ -33,7 +30,6 @@ from consciousness.mcea.stress import (
     StressTestConfig,
     StressType,
 )
-from consciousness.mmei.monitor import AbstractNeeds, NeedUrgency
 
 # ==================== ENUM TESTS ====================
 
@@ -59,6 +55,7 @@ class TestEnums:
         assert StressType.AROUSAL_FORCING.value == "arousal_forcing"
         assert StressType.RAPID_CHANGE.value == "rapid_change"
         assert StressType.COMBINED.value == "combined"
+
 
 # ==================== STRESS RESPONSE TESTS ====================
 
@@ -585,6 +582,7 @@ class TestStressResponse:
         # ASSERT: Shows FAIL
         assert "FAIL" in repr_str
 
+
 # ==================== STRESS TEST CONFIG TESTS ====================
 
 
@@ -612,9 +610,7 @@ class TestStressTestConfig:
         """Test StressTestConfig with custom values."""
         # ACT: Create config with custom values
         config = StressTestConfig(
-            stress_duration_seconds=60.0,
-            recovery_duration_seconds=120.0,
-            arousal_runaway_threshold=0.98
+            stress_duration_seconds=60.0, recovery_duration_seconds=120.0, arousal_runaway_threshold=0.98
         )
 
         # ASSERT: Custom values applied
@@ -624,6 +620,7 @@ class TestStressTestConfig:
 
         # Others still default
         assert config.coherence_collapse_threshold == 0.50
+
 
 # ==================== STRESS MONITOR INIT TESTS ====================
 
@@ -637,9 +634,7 @@ class TestStressMonitorInit:
         controller = ArousalController()
 
         # ACT: Create monitor (lines 306-341)
-        monitor = StressMonitor(
-            arousal_controller=controller
-        )
+        monitor = StressMonitor(arousal_controller=controller)
 
         # ASSERT: Init values (lines 312-341)
         assert monitor.monitor_id == "mcea-stress-monitor-primary"
@@ -666,11 +661,7 @@ class TestStressMonitorInit:
         config = StressTestConfig(stress_duration_seconds=60.0)
 
         # ACT: Create monitor
-        monitor = StressMonitor(
-            arousal_controller=controller,
-            config=config,
-            monitor_id="test-monitor-01"
-        )
+        monitor = StressMonitor(arousal_controller=controller, config=config, monitor_id="test-monitor-01")
 
         # ASSERT: Custom values
         assert monitor.monitor_id == "test-monitor-01"
@@ -823,6 +814,7 @@ class TestStressMonitorInit:
 
         # ASSERT: Monitoring didn't crash (exception handled, lines 400-402)
         # If we get here, test passes
+
 
 # ==================== ASSESS STRESS LEVEL TESTS ====================
 

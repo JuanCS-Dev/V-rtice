@@ -1,0 +1,47 @@
+fastapi>=0.115.0  # Updated for starlette >=0.47.2 security fixes
+uvicorn[standard]>=0.32.0  # Updated for compatibility
+httpx>=0.27.0  # Security updates
+aiohttp>=3.10.0  # Security updates
+pydantic>=2.9.0  # Latest security patches
+python-dotenv==1.0.0
+websockets==12.0
+redis==5.0.0
+asyncpg>=0.29.0
+anthropic>=0.7.0
+openai>=1.3.0
+
+# System 1 - Autonomic Core (REAL implementations)
+psutil>=5.9.0  # System monitoring
+GPUtil>=1.4.0  # GPU monitoring
+docker>=6.1.0  # Docker SDK for container control
+kubernetes>=28.1.0  # K8s API for pod scaling
+
+# Statistical Analysis (REAL)
+numpy>=1.24.0
+scipy>=1.11.0  # Z-score, linear regression
+statsmodels>=0.14.0  # ARIMA time series prediction
+
+# Machine Learning (REAL)
+torch>=2.0.0  # PyTorch for Predictive Coding Network
+transformers>=4.30.0  # Hugging Face for Attention System
+scikit-learn>=1.3.0  # Isolation Forest, preprocessing
+xgboost>=2.0.0  # Gradient boosting for failure prediction
+ruptures>=1.1.8  # Change point detection (PELT)
+stable-baselines3>=2.1.0  # RL algorithms (SAC)
+
+# Optional dependencies for advanced features
+scikit-fuzzy>=0.4.2  # Fuzzy logic controller (optional, has fallback)
+
+# Monitoring and Metrics
+prometheus-client>=0.18.0  # Prometheus metrics
+kafka-python>=2.0.2  # Kafka streaming
+
+# Database
+asyncpg>=0.29.0  # PostgreSQL async driver
+psycopg2-binary>=2.9.9  # PostgreSQL sync driver (for VACUUM)
+
+# Async Redis
+redis[hiredis]>=5.0.0  # Redis with hiredis for better performance
+
+# Google Gemini
+google-generativeai>=0.3.0

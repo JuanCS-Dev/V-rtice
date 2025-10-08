@@ -63,12 +63,12 @@ whether MAXIMUS achieves the structural prerequisites for phenomenal emergence.
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List
 
 import networkx as nx
 import numpy as np
 
-from consciousness.tig.fabric import TIGFabric, FabricMetrics
+from consciousness.tig.fabric import FabricMetrics, TIGFabric
 
 
 @dataclass
@@ -79,6 +79,7 @@ class PhiProxyMetrics:
     These metrics serve as evidence (not proof) that the substrate
     has the structural properties necessary for consciousness.
     """
+
     # Primary Φ proxy
     effective_connectivity_index: float = 0.0  # ECI - key correlation with Φ
 
@@ -115,6 +116,7 @@ class StructuralCompliance:
     Indicates whether the network satisfies all necessary structural
     conditions for consciousness according to IIT.
     """
+
     is_compliant: bool = False
     compliance_score: float = 0.0  # 0-100
     violations: List[str] = field(default_factory=list)
@@ -267,8 +269,8 @@ class PhiProxyValidator:
         # Optimal Φ requires balance between integration (low L) and differentiation (high C)
         # Balance = C / (1 + L)  [higher is better]
         if metrics.avg_path_length > 0:
-            metrics.integration_differentiation_balance = (
-                metrics.clustering_coefficient / (1.0 + metrics.avg_path_length)
+            metrics.integration_differentiation_balance = metrics.clustering_coefficient / (
+                1.0 + metrics.avg_path_length
             )
 
         # Φ proxy estimate (weighted combination of metrics)
@@ -298,11 +300,11 @@ class PhiProxyValidator:
         p = 2 * m / (n * (n - 1))  # Edge probability
 
         c_random = p  # Expected clustering for random graph
-        l_random = np.log(n) / np.log(n * p) if p > 0 else float('inf')
+        l_random = np.log(n) / np.log(n * p) if p > 0 else float("inf")
 
         # Avoid division by zero
         c_ratio = metrics.clustering_coefficient / c_random if c_random > 0 else 0
-        l_ratio = metrics.avg_path_length / l_random if l_random > 0 and l_random < float('inf') else 0
+        l_ratio = metrics.avg_path_length / l_random if l_random > 0 and l_random < float("inf") else 0
 
         sigma = c_ratio / l_ratio if l_ratio > 0 else 0
 
@@ -338,11 +340,11 @@ class PhiProxyValidator:
 
         # Weighted combination
         phi_estimate = (
-            0.4 * eci_norm +
-            0.2 * clustering_norm +
-            0.15 * path_length_norm +
-            0.15 * alg_conn_norm +
-            0.1 * redundancy_norm
+            0.4 * eci_norm
+            + 0.2 * clustering_norm
+            + 0.15 * path_length_norm
+            + 0.15 * alg_conn_norm
+            + 0.1 * redundancy_norm
         )
 
         # Bottleneck penalty (severe)
@@ -421,14 +423,16 @@ class PhiProxyValidator:
         compliance.redundancy_pass = phi_metrics.min_path_redundancy >= self.min_redundancy
 
         # Overall compliance (all criteria must pass)
-        compliance.is_compliant = all([
-            compliance.eci_pass,
-            compliance.clustering_pass,
-            compliance.path_length_pass,
-            compliance.algebraic_connectivity_pass,
-            compliance.bottleneck_pass,
-            compliance.redundancy_pass,
-        ])
+        compliance.is_compliant = all(
+            [
+                compliance.eci_pass,
+                compliance.clustering_pass,
+                compliance.path_length_pass,
+                compliance.algebraic_connectivity_pass,
+                compliance.bottleneck_pass,
+                compliance.redundancy_pass,
+            ]
+        )
 
         # Compliance score
         compliance.compliance_score = phi_metrics.iit_compliance_score
@@ -455,9 +459,7 @@ class PhiProxyValidator:
             )
 
         if not compliance.bottleneck_pass:
-            compliance.violations.append(
-                f"Feed-forward bottlenecks detected: {phi_metrics.bottleneck_locations}"
-            )
+            compliance.violations.append(f"Feed-forward bottlenecks detected: {phi_metrics.bottleneck_locations}")
 
         if not compliance.redundancy_pass:
             compliance.violations.append(
@@ -466,9 +468,7 @@ class PhiProxyValidator:
 
         # Collect warnings (non-critical but noteworthy)
         if phi_metrics.small_world_sigma < 1.0:
-            compliance.warnings.append(
-                f"Not a small-world network: σ={phi_metrics.small_world_sigma:.2f} < 1.0"
-            )
+            compliance.warnings.append(f"Not a small-world network: σ={phi_metrics.small_world_sigma:.2f} < 1.0")
 
         if phi_metrics.integration_differentiation_balance < 0.3:
             compliance.warnings.append(

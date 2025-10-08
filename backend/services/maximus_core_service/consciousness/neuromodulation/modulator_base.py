@@ -28,11 +28,11 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import time
 import logging
-from dataclasses import dataclass
-from typing import Optional, Callable
+import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +68,9 @@ class ModulatorConfig:
         assert self.min_level < self.max_level, f"Min {self.min_level} must be < max {self.max_level}"
         assert 0.0 < self.decay_rate <= 1.0, f"Decay rate {self.decay_rate} must be in (0, 1]"
         assert 0.0 < self.smoothing_factor <= 1.0, f"Smoothing {self.smoothing_factor} must be in (0, 1]"
-        assert 0.0 < self.desensitization_threshold <= 1.0, f"Desensitization threshold must be in (0, 1]"
-        assert 0.0 < self.desensitization_factor <= 1.0, f"Desensitization factor must be in (0, 1]"
-        assert 0.0 < self.max_change_per_step <= 1.0, f"Max change per step must be in (0, 1]"
+        assert 0.0 < self.desensitization_threshold <= 1.0, "Desensitization threshold must be in (0, 1]"
+        assert 0.0 < self.desensitization_factor <= 1.0, "Desensitization factor must be in (0, 1]"
+        assert 0.0 < self.max_change_per_step <= 1.0, "Max change per step must be in (0, 1]"
 
 
 @dataclass
@@ -127,9 +127,7 @@ class NeuromodulatorBase(ABC):
     MAX_CONSECUTIVE_ANOMALIES = 5  # Consecutive bound violations before opening
 
     def __init__(
-        self,
-        config: Optional[ModulatorConfig] = None,
-        kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: Optional[ModulatorConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
     ):
         """Initialize neuromodulator.
 
@@ -192,7 +190,7 @@ class NeuromodulatorBase(ABC):
             last_update_time=self._last_update,
             total_modulations=self._total_modulations,
             bounded_corrections=self._bounded_corrections,
-            desensitization_events=self._desensitization_events
+            desensitization_events=self._desensitization_events,
         )
 
     def modulate(self, delta: float, source: str = "unknown") -> float:
@@ -224,8 +222,7 @@ class NeuromodulatorBase(ABC):
         # Circuit breaker check (CRITICAL)
         if self._circuit_breaker_open:
             error_msg = (
-                f"{modulator_name.capitalize()}Modulator circuit breaker OPEN - "
-                f"modulation rejected (source={source})"
+                f"{modulator_name.capitalize()}Modulator circuit breaker OPEN - modulation rejected (source={source})"
             )
             logger.error(f"🔴 {error_msg}")
 
@@ -249,10 +246,7 @@ class NeuromodulatorBase(ABC):
             )
 
         # Apply max change limit (HARD CONSTRAINT)
-        delta = max(
-            -self.config.max_change_per_step,
-            min(self.config.max_change_per_step, delta)
-        )
+        delta = max(-self.config.max_change_per_step, min(self.config.max_change_per_step, delta))
 
         # Apply temporal smoothing (exponential moving average)
         smoothed_delta = delta * self.config.smoothing_factor
@@ -262,10 +256,7 @@ class NeuromodulatorBase(ABC):
         new_level = self._level + smoothed_delta
 
         # HARD CLAMP to bounds [min_level, max_level]
-        clamped_level = max(
-            self.config.min_level,
-            min(self.config.max_level, new_level)
-        )
+        clamped_level = max(self.config.min_level, min(self.config.max_level, new_level))
 
         # Track if we hit bounds (anomaly detection)
         if clamped_level != new_level:
@@ -325,10 +316,7 @@ class NeuromodulatorBase(ABC):
         self._level += (self.config.baseline - self._level) * decay_factor
 
         # HARD CLAMP (should not be needed, but paranoid safety)
-        self._level = max(
-            self.config.min_level,
-            min(self.config.max_level, self._level)
-        )
+        self._level = max(self.config.min_level, min(self.config.max_level, self._level))
 
         self._last_update = now
 
@@ -384,9 +372,7 @@ class NeuromodulatorBase(ABC):
             f"{prefix}_circuit_breaker_open": self._circuit_breaker_open,
             f"{prefix}_total_modulations": self._total_modulations,
             f"{prefix}_bounded_corrections": self._bounded_corrections,
-            f"{prefix}_bound_hit_rate": (
-                self._bounded_corrections / max(1, self._total_modulations)
-            ),
+            f"{prefix}_bound_hit_rate": (self._bounded_corrections / max(1, self._total_modulations)),
             f"{prefix}_desensitization_events": self._desensitization_events,
             f"{prefix}_consecutive_anomalies": self._consecutive_anomalies,
         }

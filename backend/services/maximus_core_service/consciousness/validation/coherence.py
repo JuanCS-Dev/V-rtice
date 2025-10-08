@@ -46,15 +46,16 @@ properties necessary for phenomenal experience.
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import numpy as np
 
-from consciousness.esgt.coordinator import ESGTEvent, ESGTPhase
+from consciousness.esgt.coordinator import ESGTEvent
 
 
 class CoherenceQuality(Enum):
     """Classification of ESGT coherence quality."""
+
     POOR = "poor"  # r < 0.30 - unconscious
     MODERATE = "moderate"  # 0.30 ≤ r < 0.70 - preconscious
     GOOD = "good"  # 0.70 ≤ r < 0.90 - conscious
@@ -69,6 +70,7 @@ class ESGTCoherenceMetrics:
     These metrics quantify whether an ESGT event achieved the
     dynamic properties necessary for conscious-level processing.
     """
+
     # Primary coherence metric (Kuramoto order parameter)
     mean_coherence: float = 0.0  # Average r during event
     peak_coherence: float = 0.0  # Maximum r achieved
@@ -112,6 +114,7 @@ class GWDCompliance:
     Indicates whether ESGT event satisfies all GWD requirements
     for conscious-level processing.
     """
+
     is_compliant: bool = False
     compliance_score: float = 0.0  # 0-100
 
@@ -230,7 +233,9 @@ class CoherenceValidator:
             metrics.peak_coherence = float(np.max(coherences))
             metrics.final_coherence = float(coherences[-1]) if len(coherences) > 0 else 0.0
             metrics.coherence_std = float(np.std(coherences))
-            metrics.coherence_cv = metrics.coherence_std / metrics.mean_coherence if metrics.mean_coherence > 0 else float('inf')
+            metrics.coherence_cv = (
+                metrics.coherence_std / metrics.mean_coherence if metrics.mean_coherence > 0 else float("inf")
+            )
             metrics.coherence_samples = len(coherences)
         else:
             metrics.mean_coherence = event.achieved_coherence
@@ -293,9 +298,7 @@ class CoherenceValidator:
             )
 
         # Duration check
-        compliance.duration_pass = (
-            self.min_duration <= metrics.total_duration_ms <= self.max_duration
-        )
+        compliance.duration_pass = self.min_duration <= metrics.total_duration_ms <= self.max_duration
         if not compliance.duration_pass:
             if metrics.total_duration_ms < self.min_duration:
                 compliance.violations.append(
@@ -315,27 +318,25 @@ class CoherenceValidator:
             )
 
         # Overall compliance
-        compliance.is_compliant = all([
-            compliance.coherence_pass,
-            compliance.latency_pass,
-            compliance.coverage_pass,
-            compliance.duration_pass,
-            compliance.stability_pass,
-        ])
+        compliance.is_compliant = all(
+            [
+                compliance.coherence_pass,
+                compliance.latency_pass,
+                compliance.coverage_pass,
+                compliance.duration_pass,
+                compliance.stability_pass,
+            ]
+        )
 
         # Compliance score
         compliance.compliance_score = self._compute_compliance_score(metrics)
 
         # Additional warnings
         if metrics.peak_coherence < 0.80:
-            compliance.warnings.append(
-                f"Peak coherence moderate: {metrics.peak_coherence:.3f} < 0.80"
-            )
+            compliance.warnings.append(f"Peak coherence moderate: {metrics.peak_coherence:.3f} < 0.80")
 
         if metrics.time_to_coherence_ms and metrics.time_to_coherence_ms > 30:
-            compliance.warnings.append(
-                f"Slow synchronization: {metrics.time_to_coherence_ms:.1f}ms to reach threshold"
-            )
+            compliance.warnings.append(f"Slow synchronization: {metrics.time_to_coherence_ms:.1f}ms to reach threshold")
 
         return compliance
 
@@ -355,11 +356,11 @@ class CoherenceValidator:
         initiation_latency = metrics.prepare_latency_ms + metrics.sync_latency_ms
 
         return (
-            metrics.mean_coherence >= self.coherence_threshold and
-            initiation_latency <= self.latency_threshold and
-            metrics.broadcast_coverage >= self.coverage_threshold and
-            self.min_duration <= metrics.total_duration_ms <= self.max_duration and
-            metrics.coherence_cv < self.stability_threshold
+            metrics.mean_coherence >= self.coherence_threshold
+            and initiation_latency <= self.latency_threshold
+            and metrics.broadcast_coverage >= self.coverage_threshold
+            and self.min_duration <= metrics.total_duration_ms <= self.max_duration
+            and metrics.coherence_cv < self.stability_threshold
         )
 
     def _compute_compliance_score(self, metrics: ESGTCoherenceMetrics) -> float:

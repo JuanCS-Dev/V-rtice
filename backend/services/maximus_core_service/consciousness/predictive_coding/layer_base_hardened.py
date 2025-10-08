@@ -34,13 +34,11 @@ Date: 2025-10-08
 """
 
 import asyncio
-import time
 import logging
-from dataclasses import dataclass
-from typing import Optional, Callable, Any, Dict
+import time
 from abc import ABC, abstractmethod
-
-import numpy as np
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -110,11 +108,7 @@ class PredictiveCodingLayerBase(ABC):
     Thread Safety: NOT thread-safe. Use external locking for async/parallel calls.
     """
 
-    def __init__(
-        self,
-        config: LayerConfig,
-        kill_switch_callback: Optional[Callable[[str], None]] = None
-    ):
+    def __init__(self, config: LayerConfig, kill_switch_callback: Optional[Callable[[str], None]] = None):
         """Initialize predictive coding layer.
 
         Args:
@@ -211,8 +205,7 @@ class PredictiveCodingLayerBase(ABC):
         # Attention gating check
         if self._predictions_this_cycle >= self.config.max_predictions_per_cycle:
             logger.warning(
-                f"{layer_name} attention gate BLOCKED - "
-                f"{self._predictions_this_cycle} predictions this cycle"
+                f"{layer_name} attention gate BLOCKED - {self._predictions_this_cycle} predictions this cycle"
             )
             return None
 
@@ -239,8 +232,7 @@ class PredictiveCodingLayerBase(ABC):
             self._consecutive_timeouts = 0
 
             logger.debug(
-                f"{layer_name} prediction: {computation_time_ms:.2f}ms, "
-                f"cycle_count={self._predictions_this_cycle}"
+                f"{layer_name} prediction: {computation_time_ms:.2f}ms, cycle_count={self._predictions_this_cycle}"
             )
 
             return prediction
@@ -265,9 +257,7 @@ class PredictiveCodingLayerBase(ABC):
             self._total_errors += 1
             self._consecutive_errors += 1
 
-            logger.error(
-                f"⚠️ {layer_name} ERROR: {e} - consecutive={self._consecutive_errors}"
-            )
+            logger.error(f"⚠️ {layer_name} ERROR: {e} - consecutive={self._consecutive_errors}")
 
             if self._consecutive_errors >= self.config.max_consecutive_errors:
                 self._open_circuit_breaker(reason="consecutive_errors")
@@ -297,9 +287,7 @@ class PredictiveCodingLayerBase(ABC):
             # Track if we clipped
             if abs(raw_error) > self.config.max_prediction_error:
                 self._bounded_errors += 1
-                logger.warning(
-                    f"⚠️ {layer_name} ERROR CLIPPED: {raw_error:.3f} → {clipped_error:.3f}"
-                )
+                logger.warning(f"⚠️ {layer_name} ERROR CLIPPED: {raw_error:.3f} → {clipped_error:.3f}")
 
             # Track for averaging
             self._prediction_errors.append(clipped_error)
@@ -339,14 +327,8 @@ class PredictiveCodingLayerBase(ABC):
 
     def get_state(self) -> LayerState:
         """Get observable layer state."""
-        avg_error = (
-            sum(self._prediction_errors) / len(self._prediction_errors)
-            if self._prediction_errors else 0.0
-        )
-        avg_time = (
-            sum(self._computation_times) / len(self._computation_times)
-            if self._computation_times else 0.0
-        )
+        avg_error = sum(self._prediction_errors) / len(self._prediction_errors) if self._prediction_errors else 0.0
+        avg_time = sum(self._computation_times) / len(self._computation_times) if self._computation_times else 0.0
 
         return LayerState(
             layer_id=self.config.layer_id,
@@ -359,7 +341,7 @@ class PredictiveCodingLayerBase(ABC):
             consecutive_timeouts=self._consecutive_timeouts,
             circuit_breaker_open=self._circuit_breaker_open,
             average_prediction_error=avg_error,
-            average_computation_time_ms=avg_time
+            average_computation_time_ms=avg_time,
         )
 
     def get_health_metrics(self) -> Dict[str, Any]:
@@ -374,12 +356,8 @@ class PredictiveCodingLayerBase(ABC):
             f"{layer_name}_total_errors": state.total_errors,
             f"{layer_name}_total_timeouts": state.total_timeouts,
             f"{layer_name}_bounded_errors": state.bounded_errors,
-            f"{layer_name}_error_rate": (
-                state.total_errors / max(1, state.total_predictions)
-            ),
-            f"{layer_name}_timeout_rate": (
-                state.total_timeouts / max(1, state.total_predictions)
-            ),
+            f"{layer_name}_error_rate": (state.total_errors / max(1, state.total_predictions)),
+            f"{layer_name}_timeout_rate": (state.total_timeouts / max(1, state.total_predictions)),
             f"{layer_name}_avg_prediction_error": state.average_prediction_error,
             f"{layer_name}_avg_computation_time_ms": state.average_computation_time_ms,
         }

@@ -17,16 +17,15 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
 import asyncio
+
 import numpy as np
+import pytest
 
 from consciousness.predictive_coding.layer_base_hardened import (
-    PredictiveCodingLayerBase,
     LayerConfig,
-    LayerState,
+    PredictiveCodingLayerBase,
 )
-
 
 # ============================================================================
 # Test Implementation of Base Class
@@ -119,7 +118,7 @@ async def test_bounded_prediction_errors_clipping():
         layer_id=1,
         input_dim=10,
         hidden_dim=5,
-        max_prediction_error=1.0  # HARD CLIP at 1.0
+        max_prediction_error=1.0,  # HARD CLIP at 1.0
     )
     layer = TestLayer(config)
 
@@ -142,7 +141,7 @@ async def test_bounded_errors_tracking():
         layer_id=1,
         input_dim=10,
         hidden_dim=5,
-        max_prediction_error=0.1  # Very low clip threshold
+        max_prediction_error=0.1,  # Very low clip threshold
     )
     layer = TestLayer(config)
 
@@ -170,7 +169,7 @@ async def test_timeout_protection_triggers():
         layer_id=1,
         input_dim=10,
         hidden_dim=5,
-        max_computation_time_ms=50.0  # 50ms timeout
+        max_computation_time_ms=50.0,  # 50ms timeout
     )
     # Layer with 200ms delay (will timeout)
     layer = TestLayer(config, delay_ms=200)
@@ -189,11 +188,7 @@ async def test_timeout_protection_triggers():
 async def test_timeout_protection_increments_consecutive_counter():
     """Test consecutive timeouts increment counter."""
     config = LayerConfig(
-        layer_id=1,
-        input_dim=10,
-        hidden_dim=5,
-        max_computation_time_ms=20.0,
-        max_consecutive_timeouts=3
+        layer_id=1, input_dim=10, hidden_dim=5, max_computation_time_ms=20.0, max_consecutive_timeouts=3
     )
     layer = TestLayer(config, delay_ms=50)  # Will timeout
 
@@ -211,11 +206,7 @@ async def test_timeout_protection_increments_consecutive_counter():
 async def test_timeout_opens_circuit_breaker():
     """Test consecutive timeouts open circuit breaker."""
     config = LayerConfig(
-        layer_id=1,
-        input_dim=10,
-        hidden_dim=5,
-        max_computation_time_ms=20.0,
-        max_consecutive_timeouts=3
+        layer_id=1, input_dim=10, hidden_dim=5, max_computation_time_ms=20.0, max_consecutive_timeouts=3
     )
     layer = TestLayer(config, delay_ms=50)  # Will timeout
 
@@ -241,7 +232,7 @@ async def test_attention_gating_blocks_excess_predictions():
         layer_id=1,
         input_dim=10,
         hidden_dim=5,
-        max_predictions_per_cycle=3  # Max 3 per cycle
+        max_predictions_per_cycle=3,  # Max 3 per cycle
     )
     layer = TestLayer(config)
 
@@ -264,12 +255,7 @@ async def test_attention_gating_blocks_excess_predictions():
 @pytest.mark.asyncio
 async def test_attention_gate_resets_on_reset_cycle():
     """Test reset_cycle() resets attention gate counter."""
-    config = LayerConfig(
-        layer_id=1,
-        input_dim=10,
-        hidden_dim=5,
-        max_predictions_per_cycle=2
-    )
+    config = LayerConfig(layer_id=1, input_dim=10, hidden_dim=5, max_predictions_per_cycle=2)
     layer = TestLayer(config)
 
     input_data = np.ones(10)
@@ -298,12 +284,7 @@ async def test_attention_gate_resets_on_reset_cycle():
 @pytest.mark.asyncio
 async def test_circuit_breaker_opens_on_consecutive_errors():
     """Test circuit breaker opens after consecutive errors."""
-    config = LayerConfig(
-        layer_id=1,
-        input_dim=10,
-        hidden_dim=5,
-        max_consecutive_errors=3
-    )
+    config = LayerConfig(layer_id=1, input_dim=10, hidden_dim=5, max_consecutive_errors=3)
     layer = TestLayer(config, should_fail=True)  # Will always fail
 
     input_data = np.ones(10)
@@ -319,12 +300,7 @@ async def test_circuit_breaker_opens_on_consecutive_errors():
 @pytest.mark.asyncio
 async def test_circuit_breaker_rejects_predictions():
     """Test circuit breaker rejects predictions when open."""
-    config = LayerConfig(
-        layer_id=1,
-        input_dim=10,
-        hidden_dim=5,
-        max_consecutive_errors=2
-    )
+    config = LayerConfig(layer_id=1, input_dim=10, hidden_dim=5, max_consecutive_errors=2)
     layer = TestLayer(config, should_fail=True)
 
     input_data = np.ones(10)
@@ -346,12 +322,7 @@ async def test_circuit_breaker_calls_kill_switch():
     def mock_kill_switch(reason: str):
         kill_switch_calls.append(reason)
 
-    config = LayerConfig(
-        layer_id=1,
-        input_dim=10,
-        hidden_dim=5,
-        max_consecutive_errors=2
-    )
+    config = LayerConfig(layer_id=1, input_dim=10, hidden_dim=5, max_consecutive_errors=2)
     layer = TestLayer(config, kill_switch_callback=mock_kill_switch, should_fail=True)
 
     input_data = np.ones(10)
@@ -368,14 +339,9 @@ async def test_circuit_breaker_calls_kill_switch():
 @pytest.mark.asyncio
 async def test_consecutive_errors_reset_on_success():
     """Test consecutive error counter resets after successful prediction."""
-    config = LayerConfig(
-        layer_id=1,
-        input_dim=10,
-        hidden_dim=5,
-        max_consecutive_errors=3
-    )
+    config = LayerConfig(layer_id=1, input_dim=10, hidden_dim=5, max_consecutive_errors=3)
     layer_fail = TestLayer(config, should_fail=True)
-    layer_success = TestLayer(config, should_fail=False)
+    TestLayer(config, should_fail=False)
 
     input_data = np.ones(10)
 

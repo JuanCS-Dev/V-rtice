@@ -45,6 +45,7 @@ from consciousness.esgt.coordinator import SalienceScore
 
 class SPMType(Enum):
     """Classification of SPM functional domain."""
+
     PERCEPTUAL = "perceptual"  # Sensory processing
     COGNITIVE = "cognitive"  # Executive, memory, planning
     EMOTIONAL = "emotional"  # Affect and motivation
@@ -54,6 +55,7 @@ class SPMType(Enum):
 
 class ProcessingPriority(Enum):
     """Processing priority levels."""
+
     BACKGROUND = 0  # Low priority, unconscious
     PERIPHERAL = 1  # Peripheral awareness
     FOCAL = 2  # Focal attention candidate
@@ -68,6 +70,7 @@ class SPMOutput:
     Contains processed information plus metadata for salience
     evaluation and ESGT competition.
     """
+
     spm_id: str
     spm_type: SPMType
     content: Dict[str, Any]
@@ -103,12 +106,7 @@ class SpecializedProcessingModule(ABC):
     - compute_salience(): Domain-specific salience
     """
 
-    def __init__(
-        self,
-        spm_id: str,
-        spm_type: SPMType,
-        processing_interval_ms: float = 50.0
-    ):
+    def __init__(self, spm_id: str, spm_type: SPMType, processing_interval_ms: float = 50.0):
         self.spm_id = spm_id
         self.spm_type = spm_type
         self.processing_interval = processing_interval_ms / 1000.0
@@ -231,11 +229,7 @@ class SpecializedProcessingModule(ABC):
         Returns:
             List of SPMOutputs sorted by salience (descending)
         """
-        sorted_outputs = sorted(
-            self.output_queue,
-            key=lambda o: o.salience.compute_total(),
-            reverse=True
-        )
+        sorted_outputs = sorted(self.output_queue, key=lambda o: o.salience.compute_total(), reverse=True)
         return sorted_outputs[:n]
 
     def get_success_rate(self) -> float:
@@ -245,12 +239,15 @@ class SpecializedProcessingModule(ABC):
         return self.broadcasts_won / self.broadcasts_total
 
     def __repr__(self) -> str:
-        return (f"SPM({self.spm_id}, type={self.spm_type.value}, "
-                f"processed={self.total_processed}, "
-                f"queue={len(self.output_queue)})")
+        return (
+            f"SPM({self.spm_id}, type={self.spm_type.value}, "
+            f"processed={self.total_processed}, "
+            f"queue={len(self.output_queue)})"
+        )
 
 
 # Example concrete SPM implementations
+
 
 class ThreatDetectionSPM(SpecializedProcessingModule):
     """
@@ -266,7 +263,7 @@ class ThreatDetectionSPM(SpecializedProcessingModule):
         super().__init__(
             spm_id=spm_id,
             spm_type=SPMType.PERCEPTUAL,
-            processing_interval_ms=100.0  # 10 Hz
+            processing_interval_ms=100.0,  # 10 Hz
         )
         self.threat_baseline: float = 0.1
         self.recent_threats: List[float] = []
@@ -303,10 +300,7 @@ class ThreatDetectionSPM(SpecializedProcessingModule):
             return None
 
         # Build salience
-        salience = self.compute_salience({
-            "threat_score": threat_score,
-            "novelty": novelty
-        })
+        salience = self.compute_salience({"threat_score": threat_score, "novelty": novelty})
 
         # Determine priority
         if threat_score > 0.8:
@@ -327,7 +321,7 @@ class ThreatDetectionSPM(SpecializedProcessingModule):
             },
             salience=salience,
             priority=priority,
-            confidence=min(threat_score, 1.0)
+            confidence=min(threat_score, 1.0),
         )
 
     def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:
@@ -361,7 +355,7 @@ class MemoryRetrievalSPM(SpecializedProcessingModule):
         super().__init__(
             spm_id=spm_id,
             spm_type=SPMType.COGNITIVE,
-            processing_interval_ms=200.0  # 5 Hz
+            processing_interval_ms=200.0,  # 5 Hz
         )
         self.memory_store: Dict[str, Any] = {}  # Simplified memory
 
@@ -381,9 +375,11 @@ class MemoryRetrievalSPM(SpecializedProcessingModule):
         # Simulate retrieved memory
         memory_strength = np.random.beta(2, 5)  # Skewed toward weaker memories
 
-        salience = self.compute_salience({
-            "memory_strength": memory_strength,
-        })
+        salience = self.compute_salience(
+            {
+                "memory_strength": memory_strength,
+            }
+        )
 
         return SPMOutput(
             spm_id=self.spm_id,
@@ -395,7 +391,7 @@ class MemoryRetrievalSPM(SpecializedProcessingModule):
             },
             salience=salience,
             priority=ProcessingPriority.PERIPHERAL,
-            confidence=memory_strength
+            confidence=memory_strength,
         )
 
     def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:

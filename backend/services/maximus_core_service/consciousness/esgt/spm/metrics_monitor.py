@@ -50,22 +50,23 @@ but phenomenal experience of internal state.
 
 import asyncio
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
-from consciousness.esgt.spm.base import (
-    SpecializedProcessingModule,
-    SPMType,
-    SPMOutput,
-    ProcessingPriority,
-)
 from consciousness.esgt.coordinator import SalienceScore
-from consciousness.mmei.monitor import InternalStateMonitor, AbstractNeeds
+from consciousness.esgt.spm.base import (
+    ProcessingPriority,
+    SpecializedProcessingModule,
+    SPMOutput,
+    SPMType,
+)
+from consciousness.mmei.monitor import AbstractNeeds, InternalStateMonitor
 
 
 class MetricCategory(Enum):
     """Categories of metrics monitored."""
+
     COMPUTATIONAL = "computational"  # CPU, memory, threads
     INTEROCEPTIVE = "interoceptive"  # Needs from MMEI
     PERFORMANCE = "performance"  # Latency, throughput
@@ -100,6 +101,7 @@ class MetricsMonitorConfig:
 @dataclass
 class MetricsSnapshot:
     """Snapshot of system metrics at a point in time."""
+
     timestamp: float
 
     # Computational
@@ -282,6 +284,7 @@ class MetricsSPM(SpecializedProcessingModule):
         # Computational metrics (simulated - would use psutil in production)
         try:
             import psutil
+
             snapshot.cpu_usage_percent = psutil.cpu_percent(interval=None)
             snapshot.memory_usage_percent = psutil.virtual_memory().percent
             snapshot.thread_count = len(psutil.Process().threads())
@@ -481,10 +484,7 @@ class MetricsSPM(SpecializedProcessingModule):
     # MetricsSPM-Specific Methods
     # =========================================================================
 
-    def register_output_callback(
-        self,
-        callback: Callable[[SPMOutput], None]
-    ) -> None:
+    def register_output_callback(self, callback: Callable[[SPMOutput], None]) -> None:
         """Register callback for output events."""
         if callback not in self._output_callbacks:
             self._output_callbacks.append(callback)
@@ -504,7 +504,9 @@ class MetricsSPM(SpecializedProcessingModule):
         }
 
     def __repr__(self) -> str:
-        return (f"MetricsSPM(id={self.spm_id}, "
-                f"snapshots={self.total_snapshots}, "
-                f"high_salience={self.high_salience_reports}, "
-                f"running={self._running})")
+        return (
+            f"MetricsSPM(id={self.spm_id}, "
+            f"snapshots={self.total_snapshots}, "
+            f"high_salience={self.high_salience_reports}, "
+            f"running={self._running})"
+        )

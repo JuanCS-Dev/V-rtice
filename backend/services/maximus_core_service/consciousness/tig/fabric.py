@@ -29,11 +29,9 @@ from peer-reviewed research (Tononi & Koch 2015, Oizumi et al. 2014).
 
 import asyncio
 import time
-import uuid
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
@@ -41,6 +39,7 @@ import numpy as np
 
 class NodeState(Enum):
     """Operational state of a TIG node."""
+
     INITIALIZING = "initializing"
     ACTIVE = "active"
     ESGT_MODE = "esgt_mode"  # High-coherence mode during global sync events
@@ -56,6 +55,7 @@ class TIGConnection:
     This connection model mirrors synaptic connections in biological neural
     networks, with dynamic weights representing connection strength/importance.
     """
+
     remote_node_id: str
     bandwidth_bps: int = 10_000_000_000  # 10 Gbps default
     latency_us: float = 1.0  # microseconds
@@ -83,6 +83,88 @@ class TIGConnection:
 
 
 @dataclass
+class NodeHealth:
+    """
+    Health status tracking for a TIG node.
+
+    This enables fault tolerance by monitoring node failures and
+    triggering isolation/recovery as needed.
+
+    FASE VII (Safety Hardening):
+    Added for production-grade fault tolerance and graceful degradation.
+    """
+
+    node_id: str
+    last_seen: float = field(default_factory=time.time)
+    failures: int = 0
+    isolated: bool = False
+    degraded: bool = False
+
+    def is_healthy(self) -> bool:
+        """Check if node is considered healthy."""
+        return not self.isolated and not self.degraded and self.failures < 3
+
+
+class CircuitBreaker:
+    """
+    Circuit breaker for TIG node communication.
+
+    Implements the circuit breaker pattern to prevent cascading failures:
+    - CLOSED: Normal operation, requests pass through
+    - OPEN: Failure threshold exceeded, requests blocked
+    - HALF_OPEN: Recovery attempt, limited requests allowed
+
+    FASE VII (Safety Hardening):
+    Critical component for fault isolation and system stability.
+    """
+
+    def __init__(self, failure_threshold: int = 3, recovery_timeout: float = 30.0):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+
+        self.state = "closed"  # closed, open, half_open
+        self.failures = 0
+        self.last_failure_time: Optional[float] = None
+
+    def is_open(self) -> bool:
+        """
+        Check if circuit breaker is open (blocking calls).
+
+        Returns:
+            True if open and blocking, False otherwise
+        """
+        if self.state == "open":
+            # Check if recovery timeout elapsed
+            if self.last_failure_time and time.time() - self.last_failure_time > self.recovery_timeout:
+                self.state = "half_open"
+                return False
+            return True
+        return False
+
+    def record_success(self):
+        """Record successful operation."""
+        if self.state == "half_open":
+            # Recovery successful - close the breaker
+            self.state = "closed"
+            self.failures = 0
+
+    def record_failure(self):
+        """Record failed operation."""
+        self.failures += 1
+        self.last_failure_time = time.time()
+
+        if self.failures >= self.failure_threshold:
+            self.open()
+
+    def open(self):
+        """Open circuit breaker (block calls)."""
+        self.state = "open"
+
+    def __repr__(self) -> str:
+        return f"CircuitBreaker(state={self.state}, failures={self.failures})"
+
+
+@dataclass
 class ProcessingState:
     """
     Encapsulates the current computational state of a TIG node.
@@ -92,6 +174,7 @@ class ProcessingState:
     - Load metrics: computational capacity and utilization
     - Phase sync: oscillatory synchronization for ESGT coherence
     """
+
     active_modules: List[str] = field(default_factory=list)
     attention_level: float = 0.5  # 0.0-1.0, modulated by acetylcholine
     cpu_utilization: float = 0.0
@@ -121,6 +204,7 @@ class TIGNode:
     processors that maintain local function while participating in global
     conscious states through transient synchronization.
     """
+
     id: str
     connections: Dict[str, TIGConnection] = field(default_factory=dict)
     state: ProcessingState = field(default_factory=ProcessingState)
@@ -135,7 +219,7 @@ class TIGNode:
         """Number of active connections (node degree in graph theory)."""
         return sum(1 for conn in self.connections.values() if conn.active)
 
-    def get_clustering_coefficient(self, fabric: 'TIGFabric') -> float:
+    def get_clustering_coefficient(self, fabric: "TIGFabric") -> float:
         """
         Compute local clustering coefficient for this node.
 
@@ -229,6 +313,7 @@ class TopologyConfig:
       * Hub probability: 0.75→0.60
       * Target: C≥0.75, ECI≥0.85, Density ~30-40% (realistic network)
     """
+
     node_count: int = 16
     min_degree: int = 5  # Balanced base connectivity
     target_density: float = 0.20  # 20% connectivity for better integration
@@ -246,6 +331,7 @@ class FabricMetrics:
     These metrics serve as Φ proxies - computable approximations of
     integrated information that validate structural compliance with IIT.
     """
+
     # Graph structure metrics
     node_count: int = 0
     edge_count: int = 0
@@ -286,7 +372,7 @@ class FabricMetrics:
             violations.append(f"Clustering too low: {self.avg_clustering_coefficient:.3f} < 0.75")
 
         if self.avg_path_length > np.log(self.node_count) * 2:
-            violations.append(f"Path length too high: {self.avg_path_length:.2f} > {np.log(self.node_count)*2:.2f}")
+            violations.append(f"Path length too high: {self.avg_path_length:.2f} > {np.log(self.node_count) * 2:.2f}")
 
         if self.algebraic_connectivity < 0.3:
             violations.append(f"Algebraic connectivity too low: {self.algebraic_connectivity:.3f} < 0.3")
@@ -342,6 +428,16 @@ class TIGFabric:
         self.metrics = FabricMetrics()
         self._initialized = False
 
+        # FASE VII (Safety Hardening): Fault tolerance components
+        self.node_health: Dict[str, NodeHealth] = {}
+        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self.dead_node_timeout = 5.0  # seconds
+        self.max_failures_before_isolation = 3
+
+        # Health monitoring task
+        self._health_monitor_task: Optional[asyncio.Task] = None
+        self._running = False
+
     async def initialize(self) -> None:
         """
         Initialize the TIG fabric with IIT-compliant topology.
@@ -376,21 +472,31 @@ class TIGFabric:
         is_valid, violations = self.metrics.validate_iit_compliance()
 
         if is_valid:
-            print(f"✅ TIG Fabric initialized successfully")
+            print("✅ TIG Fabric initialized successfully")
             print(f"   ECI: {self.metrics.effective_connectivity_index:.3f}")
             print(f"   Clustering: {self.metrics.avg_clustering_coefficient:.3f}")
             print(f"   Path Length: {self.metrics.avg_path_length:.2f}")
             print(f"   Algebraic Connectivity: {self.metrics.algebraic_connectivity:.3f}")
         else:
-            print(f"⚠️  TIG Fabric initialized with IIT violations:")
+            print("⚠️  TIG Fabric initialized with IIT violations:")
             for v in violations:
                 print(f"   - {v}")
 
-        # Step 6: Activate all nodes now that fabric is ready
+        # Step 6: Initialize health monitoring (FASE VII)
+        for node_id in self.nodes.keys():
+            self.node_health[node_id] = NodeHealth(node_id=node_id)
+            self.circuit_breakers[node_id] = CircuitBreaker()
+
+        # Step 7: Activate all nodes now that fabric is ready
         for node in self.nodes.values():
             node.node_state = NodeState.ACTIVE
 
+        # Step 8: Start health monitoring loop (FASE VII)
+        self._running = True
+        self._health_monitor_task = asyncio.create_task(self._health_monitoring_loop())
+
         self._initialized = True
+        print("🛡️  Health monitoring active")
 
     def _generate_scale_free_base(self) -> None:
         """Generate scale-free network using Barabási-Albert preferential attachment."""
@@ -466,15 +572,12 @@ class TIGFabric:
     def _instantiate_nodes(self) -> None:
         """Create TIGNode instances for each node in the graph."""
         for node_id in self.graph.nodes():
-            node = TIGNode(
-                id=f"tig-node-{node_id:03d}",
-                node_state=NodeState.INITIALIZING
-            )
+            node = TIGNode(id=f"tig-node-{node_id:03d}", node_state=NodeState.INITIALIZING)
             self.nodes[node.id] = node
 
     def _establish_connections(self) -> None:
         """Establish bidirectional connections based on graph topology."""
-        node_ids = list(self.nodes.keys())
+        list(self.nodes.keys())
 
         for edge in self.graph.edges():
             node_a_id = f"tig-node-{edge[0]:03d}"
@@ -599,14 +702,16 @@ class TIGFabric:
             node_list = list(self.nodes.keys())
 
             for i, node_a_id in enumerate(node_list[:10]):  # Sample first 10 for efficiency
-                for node_b_id in node_list[i+1:i+11]:
+                for node_b_id in node_list[i + 1 : i + 11]:
                     try:
-                        paths = list(nx.all_simple_paths(
-                            self.graph,
-                            source=int(node_a_id.split('-')[-1]),
-                            target=int(node_b_id.split('-')[-1]),
-                            cutoff=4
-                        ))
+                        paths = list(
+                            nx.all_simple_paths(
+                                self.graph,
+                                source=int(node_a_id.split("-")[-1]),
+                                target=int(node_b_id.split("-")[-1]),
+                                cutoff=4,
+                            )
+                        )
                         redundancies.append(len(paths))
                     except nx.NetworkXNoPath:
                         redundancies.append(0)
@@ -648,6 +753,237 @@ class TIGFabric:
         """Retrieve specific node by ID."""
         return self.nodes.get(node_id)
 
+    async def _health_monitoring_loop(self) -> None:
+        """
+        Monitor health of all nodes continuously.
+
+        FASE VII (Safety Hardening):
+        Detects dead nodes, triggers isolation, and monitors for recovery.
+        """
+        while self._running:
+            try:
+                current_time = time.time()
+
+                for node_id, health in self.node_health.items():
+                    # Check if node is dead (not seen within timeout)
+                    if current_time - health.last_seen > self.dead_node_timeout:
+                        if not health.isolated:
+                            await self._isolate_dead_node(node_id)
+
+                    # Check if isolated node should be reintegrated
+                    elif health.isolated and health.failures == 0:
+                        await self._reintegrate_node(node_id)
+
+                await asyncio.sleep(1.0)  # Check every second
+
+            except Exception as e:
+                print(f"⚠️  Health monitoring error: {e}")
+                # Continue monitoring despite errors
+
+    async def _isolate_dead_node(self, node_id: str) -> None:
+        """
+        Isolate a dead or problematic node.
+
+        FASE VII (Safety Hardening):
+        Removes node from active topology and triggers repair.
+        """
+        print(f"🔴 TIG: Isolating dead node {node_id}")
+
+        # Mark as isolated
+        self.node_health[node_id].isolated = True
+        node = self.nodes.get(node_id)
+        if node:
+            node.node_state = NodeState.OFFLINE
+
+        # Trigger topology repair
+        await self._repair_topology_around_dead_node(node_id)
+
+    async def _reintegrate_node(self, node_id: str) -> None:
+        """
+        Reintegrate a recovered node back into active topology.
+
+        FASE VII (Safety Hardening):
+        Brings node back online after recovery.
+        """
+        print(f"✅ TIG: Reintegrating recovered node {node_id}")
+
+        # Mark as active
+        self.node_health[node_id].isolated = False
+        node = self.nodes.get(node_id)
+        if node:
+            node.node_state = NodeState.ACTIVE
+
+        # Reset health tracking
+        self.node_health[node_id].last_seen = time.time()
+
+    async def _repair_topology_around_dead_node(self, dead_node_id: str) -> None:
+        """
+        Repair topology to maintain connectivity after node death.
+
+        FASE VII (Safety Hardening):
+        Creates bypass connections between neighbors of dead node.
+        """
+        dead_node = self.nodes.get(dead_node_id)
+        if not dead_node:
+            return
+
+        # Find neighbors of dead node
+        neighbors = list(dead_node.connections.keys())
+
+        if len(neighbors) < 2:
+            return  # No bypass needed
+
+        # Create bypass connections (connect neighbors to each other)
+        bypasses_created = 0
+        for i, n1_id in enumerate(neighbors):
+            for n2_id in neighbors[i + 1 :]:
+                n1 = self.nodes.get(n1_id)
+                n2 = self.nodes.get(n2_id)
+
+                if n1 and n2 and n2_id not in n1.connections:
+                    # Create bidirectional bypass connection
+                    latency = np.random.uniform(0.5, 2.0)
+                    bandwidth = 10_000_000_000
+
+                    n1.connections[n2_id] = TIGConnection(
+                        remote_node_id=n2_id, latency_us=latency, bandwidth_bps=bandwidth
+                    )
+
+                    n2.connections[n1_id] = TIGConnection(
+                        remote_node_id=n1_id, latency_us=latency, bandwidth_bps=bandwidth
+                    )
+
+                    bypasses_created += 1
+
+        if bypasses_created > 0:
+            print(f"  ✓ Created {bypasses_created} bypass connections")
+
+    async def send_to_node(self, node_id: str, data: Any, timeout: float = 1.0) -> bool:
+        """
+        Send data to node with circuit breaker and timeout.
+
+        FASE VII (Safety Hardening):
+        Production-grade communication with fault tolerance.
+
+        Args:
+            node_id: Target node ID
+            data: Data to send
+            timeout: Timeout in seconds
+
+        Returns:
+            True if send successful, False otherwise
+        """
+        # Check if node is isolated
+        health = self.node_health.get(node_id)
+        if health and health.isolated:
+            return False
+
+        # Check circuit breaker
+        breaker = self.circuit_breakers.get(node_id)
+        if breaker and breaker.is_open():
+            return False
+
+        try:
+            # Send with timeout
+            async with asyncio.timeout(timeout):
+                # In production, would send via actual network
+                # For now, simulate network operation
+                node = self.nodes.get(node_id)
+                if not node:
+                    raise RuntimeError(f"Node {node_id} not found")
+
+                # Simulate successful send
+                await asyncio.sleep(0.001)  # 1ms simulated latency
+
+            # Update health (success)
+            if health:
+                health.last_seen = time.time()
+            if breaker:
+                breaker.record_success()
+
+            return True
+
+        except asyncio.TimeoutError:
+            print(f"⚠️  TIG: Send timeout to node {node_id}")
+            return self._handle_send_failure(node_id, "timeout")
+
+        except Exception as e:
+            print(f"⚠️  TIG: Send error to node {node_id}: {e}")
+            return self._handle_send_failure(node_id, str(e))
+
+    def _handle_send_failure(self, node_id: str, reason: str) -> bool:
+        """
+        Handle node communication failure.
+
+        FASE VII (Safety Hardening):
+        Updates health tracking and opens circuit breaker if needed.
+        """
+        health = self.node_health.get(node_id)
+        if health:
+            health.failures += 1
+
+            # Open circuit breaker if too many failures
+            if health.failures >= self.max_failures_before_isolation:
+                breaker = self.circuit_breakers.get(node_id)
+                if breaker:
+                    breaker.open()
+                    print(f"⚠️  TIG: Circuit breaker OPEN for node {node_id} ({health.failures} failures)")
+
+        return False
+
+    def get_health_metrics(self) -> Dict[str, Any]:
+        """
+        Get TIG health metrics for Safety Core integration.
+
+        FASE VII (Safety Hardening):
+        Exposes health status for consciousness safety monitoring.
+
+        Returns:
+            Dict with health metrics:
+            - total_nodes: Total node count
+            - healthy_nodes: Active, non-isolated nodes
+            - isolated_nodes: Nodes currently isolated
+            - degraded_nodes: Nodes in degraded state
+            - connectivity: Average connectivity ratio
+        """
+        total_nodes = len(self.node_health)
+        isolated_nodes = sum(1 for h in self.node_health.values() if h.isolated)
+        degraded_nodes = sum(1 for h in self.node_health.values() if h.degraded)
+        healthy_nodes = total_nodes - isolated_nodes - degraded_nodes
+
+        # Compute connectivity ratio
+        if total_nodes > 0:
+            connectivity = healthy_nodes / total_nodes
+        else:
+            connectivity = 0.0
+
+        return {
+            "total_nodes": total_nodes,
+            "healthy_nodes": healthy_nodes,
+            "isolated_nodes": isolated_nodes,
+            "degraded_nodes": degraded_nodes,
+            "connectivity": connectivity,
+            "is_partitioned": False,  # TODO: Implement partition detection
+        }
+
+    async def stop(self) -> None:
+        """
+        Stop the TIG fabric and cleanup resources.
+
+        FASE VII (Safety Hardening):
+        Graceful shutdown with health monitoring cleanup.
+        """
+        self._running = False
+
+        if self._health_monitor_task:
+            self._health_monitor_task.cancel()
+            try:
+                await self._health_monitor_task
+            except asyncio.CancelledError:
+                pass
+
+        print("👋 TIG Fabric stopped")
+
     async def enter_esgt_mode(self) -> None:
         """
         Transition fabric to ESGT mode - high-coherence conscious state.
@@ -672,7 +1008,9 @@ class TIGFabric:
                 conn.weight = max(conn.weight / 1.5, 1.0)
 
     def __repr__(self) -> str:
-        return (f"TIGFabric(nodes={self.metrics.node_count}, "
-                f"ECI={self.metrics.effective_connectivity_index:.3f}, "
-                f"C={self.metrics.avg_clustering_coefficient:.3f}, "
-                f"L={self.metrics.avg_path_length:.2f})")
+        return (
+            f"TIGFabric(nodes={self.metrics.node_count}, "
+            f"ECI={self.metrics.effective_connectivity_index:.3f}, "
+            f"C={self.metrics.avg_clustering_coefficient:.3f}, "
+            f"L={self.metrics.avg_path_length:.2f})"
+        )

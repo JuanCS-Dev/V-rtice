@@ -31,34 +31,32 @@ Validates MPE (Minimal Phenomenal Experience) implementation.
 "Tests validate that wakefulness precedes content."
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
 import time
-from typing import List
+
+import pytest
+import pytest_asyncio
 
 from consciousness.mcea.controller import (
+    ArousalConfig,
     ArousalController,
-    ArousalState,
     ArousalLevel,
     ArousalModulation,
-    ArousalConfig,
+    ArousalState,
 )
-
 from consciousness.mcea.stress import (
-    StressMonitor,
     StressLevel,
-    StressType,
+    StressMonitor,
     StressResponse,
     StressTestConfig,
+    StressType,
 )
-
 from consciousness.mmei.monitor import AbstractNeeds
-
 
 # =============================================================================
 # Test Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def default_arousal_config():
@@ -95,10 +93,7 @@ async def arousal_controller(default_arousal_config):
 @pytest_asyncio.fixture(scope="function")
 async def stress_monitor(arousal_controller, stress_test_config):
     """Create stress monitor."""
-    monitor = StressMonitor(
-        arousal_controller=arousal_controller,
-        config=stress_test_config
-    )
+    monitor = StressMonitor(arousal_controller=arousal_controller, config=stress_test_config)
     yield monitor
 
     # Cleanup
@@ -109,6 +104,7 @@ async def stress_monitor(arousal_controller, stress_test_config):
 # =============================================================================
 # Arousal State Tests
 # =============================================================================
+
 
 def test_arousal_state_initialization():
     """Test arousal state initializes with correct defaults."""
@@ -176,6 +172,7 @@ def test_effective_threshold_modulation():
 # Arousal Controller Tests
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_controller_start_stop(arousal_controller):
     """Test controller starts and stops cleanly."""
@@ -219,6 +216,7 @@ async def test_baseline_arousal_maintenance(default_arousal_config):
 # =============================================================================
 # Need-Based Arousal Modulation Tests
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_high_repair_need_increases_arousal(arousal_controller):
@@ -269,14 +267,10 @@ async def test_high_rest_need_decreases_arousal(arousal_controller):
 # External Modulation Tests
 # =============================================================================
 
+
 def test_arousal_modulation_creation():
     """Test arousal modulation object creation."""
-    mod = ArousalModulation(
-        source="threat_detector",
-        delta=0.3,
-        duration_seconds=5.0,
-        priority=10
-    )
+    mod = ArousalModulation(source="threat_detector", delta=0.3, duration_seconds=5.0, priority=10)
 
     assert not mod.is_expired()
     assert mod.get_current_delta() == pytest.approx(0.3, abs=0.001)
@@ -288,7 +282,7 @@ def test_arousal_modulation_expiration():
         source="test",
         delta=0.2,
         duration_seconds=0.1,  # 100ms
-        priority=1
+        priority=1,
     )
 
     assert not mod.is_expired()
@@ -300,12 +294,7 @@ def test_arousal_modulation_expiration():
 
 def test_arousal_modulation_decay():
     """Test modulation delta decays over time."""
-    mod = ArousalModulation(
-        source="test",
-        delta=0.4,
-        duration_seconds=1.0,
-        priority=1
-    )
+    mod = ArousalModulation(source="test", delta=0.4, duration_seconds=1.0, priority=1)
 
     initial_delta = mod.get_current_delta()
     assert initial_delta == pytest.approx(0.4, abs=0.001)
@@ -324,12 +313,7 @@ async def test_external_modulation_request(arousal_controller):
     initial = arousal_controller.get_current_arousal().arousal
 
     # Request arousal boost (e.g., threat detected)
-    arousal_controller.request_modulation(
-        source="threat_detector",
-        delta=0.3,
-        duration_seconds=1.0,
-        priority=10
-    )
+    arousal_controller.request_modulation(source="threat_detector", delta=0.3, duration_seconds=1.0, priority=10)
 
     await asyncio.sleep(0.3)
 
@@ -363,6 +347,7 @@ async def test_multiple_modulations_combined(arousal_controller):
 # =============================================================================
 # Stress Buildup and Recovery Tests
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_stress_buildup_under_high_arousal(arousal_controller):
@@ -413,6 +398,7 @@ def test_stress_reset(arousal_controller):
 # ESGT Refractory Period Tests
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_esgt_refractory_reduces_arousal(arousal_controller):
     """Test ESGT refractory period temporarily reduces arousal."""
@@ -451,6 +437,7 @@ async def test_refractory_expires(arousal_controller):
 # Arousal Callbacks Tests
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_arousal_callback_invocation(arousal_controller):
     """Test callbacks invoked on arousal state changes."""
@@ -472,6 +459,7 @@ async def test_arousal_callback_invocation(arousal_controller):
 # =============================================================================
 # Stress Monitor Tests
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_stress_monitor_start_stop(stress_monitor):
@@ -513,8 +501,9 @@ async def test_stress_level_assessment(arousal_controller, stress_monitor):
     await arousal_controller.stop()
 
     # After 9s with sustained high arousal modulation, should reach MODERATE or higher
-    assert current_stress in [StressLevel.MODERATE, StressLevel.SEVERE, StressLevel.CRITICAL], \
+    assert current_stress in [StressLevel.MODERATE, StressLevel.SEVERE, StressLevel.CRITICAL], (
         f"Expected MODERATE or higher stress after 9s high arousal, got {current_stress}"
+    )
 
 
 @pytest.mark.asyncio
@@ -542,6 +531,7 @@ async def test_stress_alert_callback(stress_monitor):
 # =============================================================================
 # Active Stress Testing Tests
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_arousal_forcing_stress_test(arousal_controller, stress_monitor):
@@ -581,10 +571,7 @@ async def test_computational_load_stress_test(arousal_controller, stress_monitor
 @pytest.mark.asyncio
 async def test_stress_recovery_measurement(arousal_controller, stress_test_config):
     """Test stress recovery time measurement."""
-    monitor = StressMonitor(
-        arousal_controller=arousal_controller,
-        config=stress_test_config
-    )
+    monitor = StressMonitor(arousal_controller=arousal_controller, config=stress_test_config)
 
     await arousal_controller.start()
 
@@ -603,6 +590,7 @@ async def test_stress_recovery_measurement(arousal_controller, stress_test_confi
 # =============================================================================
 # Resilience Assessment Tests
 # =============================================================================
+
 
 def test_resilience_score_computation():
     """Test resilience score computation."""
@@ -724,6 +712,7 @@ def test_stress_test_pass_fail():
 # Statistics Tests
 # =============================================================================
 
+
 def test_controller_statistics(arousal_controller):
     """Test controller statistics collection."""
     stats = arousal_controller.get_statistics()
@@ -768,6 +757,7 @@ async def test_average_resilience_computation(arousal_controller, stress_monitor
 # =============================================================================
 # Edge Case Tests
 # =============================================================================
+
 
 def test_arousal_clamping(arousal_controller):
     """Test arousal is clamped to [0, 1] range."""
@@ -818,6 +808,7 @@ async def test_hyperalert_state_behavior(arousal_controller):
 # =============================================================================
 # Integration Test
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_mcea_mmei_integration(default_arousal_config):

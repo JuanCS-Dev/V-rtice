@@ -20,8 +20,6 @@ Date: 2025-10-07
 import time
 from unittest.mock import Mock
 
-import pytest
-
 from consciousness.mmei.goals import (
     AutonomousGoalGenerator,
     Goal,
@@ -75,7 +73,7 @@ class TestGoal:
             target_need_value=0.20,
             timeout_seconds=600.0,
             is_active=True,
-            metadata=metadata
+            metadata=metadata,
         )
 
         # ASSERT: All fields set correctly
@@ -221,7 +219,7 @@ class TestGoal:
         goal = Goal(
             priority=GoalPriority.CRITICAL,  # value=4
             need_value=0.9,
-            timeout_seconds=300.0
+            timeout_seconds=300.0,
         )
         goal.created_at = time.time()  # Fresh goal
 
@@ -241,7 +239,7 @@ class TestGoal:
         goal = Goal(
             priority=GoalPriority.LOW,  # value=1
             need_value=0.3,
-            timeout_seconds=100.0
+            timeout_seconds=100.0,
         )
         goal.created_at = time.time() - 90.0  # 90s old, near timeout
 
@@ -262,7 +260,7 @@ class TestGoal:
         goal.created_at = time.time() - 50.0  # 50s old, timeout=10s
 
         # ACT: Calculate score
-        score = goal.get_priority_score()
+        goal.get_priority_score()
 
         # ASSERT: Age penalty capped at 20.0 (line 190)
         # min(50/10, 1.0) * 20 = 1.0 * 20 = 20.0 max penalty
@@ -270,12 +268,7 @@ class TestGoal:
     def test_repr_active(self):
         """Test __repr__ for active goal (lines 194-197)."""
         # ARRANGE: Active goal
-        goal = Goal(
-            goal_type=GoalType.REPAIR,
-            priority=GoalPriority.HIGH,
-            need_value=0.75,
-            is_active=True
-        )
+        goal = Goal(goal_type=GoalType.REPAIR, priority=GoalPriority.HIGH, need_value=0.75, is_active=True)
 
         # ACT: Get string representation (lines 194-197)
         repr_str = repr(goal)
@@ -297,6 +290,7 @@ class TestGoal:
 
         # ASSERT: Shows satisfied status
         assert "SATISFIED" in repr_str
+
 
 # ==================== GOAL GENERATION CONFIG TESTS ====================
 
@@ -333,10 +327,7 @@ class TestGoalGenerationConfig:
         """Test GoalGenerationConfig with custom values."""
         # ACT: Create config with custom values
         config = GoalGenerationConfig(
-            rest_threshold=0.70,
-            repair_threshold=0.30,
-            max_concurrent_goals=20,
-            default_timeout=600.0
+            rest_threshold=0.70, repair_threshold=0.30, max_concurrent_goals=20, default_timeout=600.0
         )
 
         # ASSERT: Custom values applied
@@ -347,6 +338,7 @@ class TestGoalGenerationConfig:
 
         # Others still default
         assert config.efficiency_threshold == 0.50
+
 
 # ==================== AUTONOMOUS GOAL GENERATOR INIT TESTS ====================
 
@@ -377,10 +369,7 @@ class TestAutonomousGoalGeneratorInit:
         config = GoalGenerationConfig(rest_threshold=0.70)
 
         # ACT: Create generator
-        generator = AutonomousGoalGenerator(
-            config=config,
-            generator_id="test-generator-01"
-        )
+        generator = AutonomousGoalGenerator(config=config, generator_id="test-generator-01")
 
         # ASSERT: Custom values applied
         assert generator.generator_id == "test-generator-01"
@@ -423,6 +412,7 @@ class TestAutonomousGoalGeneratorInit:
         assert consumer2 in generator._goal_consumers
         assert consumer3 in generator._goal_consumers
 
+
 # ==================== GENERATE GOALS TESTS ====================
 
 
@@ -434,12 +424,12 @@ class TestGenerateGoals:
         # ARRANGE: Generator and low needs
         generator = AutonomousGoalGenerator()
         needs = AbstractNeeds(
-            rest_need=0.1,     # < 0.60 threshold
-            repair_need=0.1,   # < 0.40 threshold
+            rest_need=0.1,  # < 0.60 threshold
+            repair_need=0.1,  # < 0.40 threshold
             efficiency_need=0.1,  # < 0.50 threshold
             connectivity_need=0.1,  # < 0.50 threshold
             curiosity_drive=0.1,  # < 0.60 threshold
-            learning_drive=0.1   # < 0.50 threshold
+            learning_drive=0.1,  # < 0.50 threshold
         )
 
         # ACT: Generate goals (lines 320-393)
@@ -541,10 +531,10 @@ class TestGenerateGoals:
         # ARRANGE: Multiple high needs
         generator = AutonomousGoalGenerator()
         needs = AbstractNeeds(
-            rest_need=0.70,       # High
-            repair_need=0.60,     # High
+            rest_need=0.70,  # High
+            repair_need=0.60,  # High
             efficiency_need=0.60,  # High
-            connectivity_need=0.65  # High
+            connectivity_need=0.65,  # High
         )
 
         # ACT: Generate goals
@@ -564,17 +554,13 @@ class TestGenerateGoals:
         config = GoalGenerationConfig(max_concurrent_goals=2)
         generator = AutonomousGoalGenerator(config=config)
 
-        # Add 2 existing active goals with valid source_need to prevent auto-satisfaction
-        goal1 = Goal(goal_type=GoalType.REST, source_need="rest_need", need_value=0.80, target_need_value=0.30)
-        goal2 = Goal(goal_type=GoalType.REPAIR, source_need="repair_need", need_value=0.80, target_need_value=0.20)
+        # Add 2 existing active goals
+        goal1 = Goal(goal_type=GoalType.REST)
+        goal2 = Goal(goal_type=GoalType.REPAIR)
         generator._active_goals = [goal1, goal2]
 
-        # High needs (keeps existing goals unsatisfied)
-        needs = AbstractNeeds(
-            rest_need=0.80,
-            repair_need=0.80,
-            efficiency_need=0.80
-        )
+        # High needs
+        needs = AbstractNeeds(rest_need=0.80, repair_need=0.80, efficiency_need=0.80)
 
         # ACT: Try to generate more goals (should be blocked)
         new_goals = generator.generate_goals(needs)
@@ -630,7 +616,7 @@ class TestGenerateGoals:
         needs = AbstractNeeds(rest_need=0.80)
 
         # ACT: Generate goal (should notify consumer)
-        new_goals = generator.generate_goals(needs)
+        generator.generate_goals(needs)
 
         # ASSERT: Consumer called (line 391)
         assert mock_consumer.called
@@ -659,10 +645,11 @@ class TestGenerateGoals:
 
         # ACT: Generate 2 goals
         needs = AbstractNeeds(rest_need=0.80, repair_need=0.60)
-        new_goals = generator.generate_goals(needs)
+        generator.generate_goals(needs)
 
         # ASSERT: Counter incremented (line 387)
         assert generator.total_goals_generated == 2
+
 
 # ==================== UPDATE ACTIVE GOALS TESTS ====================
 
@@ -676,11 +663,7 @@ class TestUpdateActiveGoals:
         generator = AutonomousGoalGenerator()
 
         # Create goal with high need
-        goal = Goal(
-            source_need="rest_need",
-            need_value=0.80,
-            target_need_value=0.30
-        )
+        goal = Goal(source_need="rest_need", need_value=0.80, target_need_value=0.30)
         generator._active_goals = [goal]
         assert generator.total_goals_satisfied == 0
 
@@ -721,18 +704,9 @@ class TestUpdateActiveGoals:
         """Test goals remain active when not satisfied/expired (lines 424-427)."""
         # ARRANGE: Fresh unsatisfied goal
         generator = AutonomousGoalGenerator()
-        goal = Goal(
-            goal_type=GoalType.REST,
-            source_need="rest_need",
-            need_value=0.80,
-            target_need_value=0.30,
-            timeout_seconds=300.0
-        )
+        goal = Goal(source_need="rest_need", need_value=0.80, target_need_value=0.30, timeout_seconds=300.0)
         goal.created_at = time.time()
         generator._active_goals = [goal]
-
-        # Record last generation to prevent duplicate goal generation
-        generator._last_generation["rest_need"] = time.time()
 
         # Still high need
         needs = AbstractNeeds(rest_need=0.70)  # > 0.30 target
@@ -744,6 +718,7 @@ class TestUpdateActiveGoals:
         assert len(generator._active_goals) == 1
         assert generator._active_goals[0] == goal
         assert goal.is_active is True
+
 
 # ==================== GOAL CREATION METHODS TESTS ====================
 
@@ -916,6 +891,7 @@ class TestGoalCreationMethods:
         assert generator._classify_urgency(0.40) == NeedUrgency.MODERATE  # 0.40-0.60
         assert generator._classify_urgency(0.60) == NeedUrgency.HIGH  # 0.60-0.80
         assert generator._classify_urgency(0.80) == NeedUrgency.CRITICAL  # >= 0.80
+
 
 # ==================== QUERY METHODS TESTS ====================
 

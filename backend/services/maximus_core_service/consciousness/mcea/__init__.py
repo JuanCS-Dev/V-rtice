@@ -90,14 +90,13 @@ MPE como fundação - "estar desperto" precede "estar consciente de algo".
 
 from consciousness.mcea.controller import (
     ArousalController,
-    ArousalState,
     ArousalLevel,
     ArousalModulation,
+    ArousalState,
 )
-
 from consciousness.mcea.stress import (
-    StressMonitor,
     StressLevel,
+    StressMonitor,
     StressResponse,
 )
 

@@ -20,9 +20,10 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
 import asyncio
+
 import numpy as np
+import pytest
 
 from consciousness.biomimetic_safety_bridge import (
     BiomimeticSafetyBridge,
@@ -30,7 +31,6 @@ from consciousness.biomimetic_safety_bridge import (
     BridgeState,
 )
 from consciousness.neuromodulation.coordinator_hardened import ModulationRequest
-
 
 # ============================================================================
 # Tests: Initialization
@@ -49,10 +49,7 @@ def test_bridge_initialization_default_config():
 
 def test_bridge_initialization_custom_config():
     """Test bridge accepts custom config."""
-    config = BridgeConfig(
-        max_coordination_cycles_per_second=5,
-        max_coordination_time_ms=500.0
-    )
+    config = BridgeConfig(max_coordination_cycles_per_second=5, max_coordination_time_ms=500.0)
     bridge = BiomimeticSafetyBridge(config)
 
     assert bridge.config.max_coordination_cycles_per_second == 5
@@ -261,13 +258,12 @@ async def test_aggregate_circuit_breaker_opens_on_consecutive_failures():
     """Test aggregate breaker opens after consecutive coordination failures."""
     config = BridgeConfig(
         max_consecutive_coordination_failures=3,
-        max_coordination_time_ms=10.0  # Very short timeout (will fail)
+        max_coordination_time_ms=10.0,  # Very short timeout (will fail)
     )
     bridge = BiomimeticSafetyBridge(config)
 
     # Force timeouts by making systems slow
     for layer in bridge.predictive_coding._layers:
-        original_impl = layer._predict_impl
 
         async def slow_impl(input_data):
             await asyncio.sleep(0.1)  # 100ms (will timeout)
@@ -490,7 +486,7 @@ async def test_scenario_one_system_fails_other_continues():
 
     # Normal operation
     raw_input = np.random.randn(10000).astype(np.float32) * 0.1
-    result1 = await bridge.coordinate_processing(raw_input)
+    await bridge.coordinate_processing(raw_input)
 
     # Force neuromodulation to fail
     bridge.neuromodulation.dopamine._circuit_breaker_open = True

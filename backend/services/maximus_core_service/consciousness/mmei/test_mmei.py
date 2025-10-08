@@ -31,32 +31,31 @@ Validates that "feeling" computation works correctly.
 "Tests prove theory. Theory guides implementation."
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
 import time
-from typing import List
 
-from consciousness.mmei.monitor import (
-    InternalStateMonitor,
-    PhysicalMetrics,
-    AbstractNeeds,
-    NeedUrgency,
-    InteroceptionConfig,
-)
+import pytest
+import pytest_asyncio
 
 from consciousness.mmei.goals import (
     AutonomousGoalGenerator,
     Goal,
-    GoalType,
-    GoalPriority,
     GoalGenerationConfig,
+    GoalPriority,
+    GoalType,
 )
-
+from consciousness.mmei.monitor import (
+    AbstractNeeds,
+    InternalStateMonitor,
+    InteroceptionConfig,
+    NeedUrgency,
+    PhysicalMetrics,
+)
 
 # =============================================================================
 # Test Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def default_config():
@@ -109,6 +108,7 @@ def goal_generator(goal_gen_config):
 # =============================================================================
 # Physical → Abstract Translation Tests
 # =============================================================================
+
 
 def test_physical_metrics_normalization():
     """Test that percentage values are normalized to [0, 1]."""
@@ -217,6 +217,7 @@ def test_idle_to_curiosity_translation(default_config):
 # Monitoring Loop Tests
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_monitor_start_stop(monitor):
     """Test monitor starts and stops cleanly."""
@@ -279,6 +280,7 @@ async def test_monitor_callback_invocation(monitor):
 # Need Trend Analysis Tests
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_needs_trend_tracking(default_config):
     """Test trend analysis for specific needs."""
@@ -321,6 +323,7 @@ async def test_moving_average_computation(monitor):
 # =============================================================================
 # Goal Generation Tests
 # =============================================================================
+
 
 def test_goal_creation_from_high_rest_need(goal_generator):
     """Test goal generated when rest_need exceeds threshold."""
@@ -410,6 +413,7 @@ def test_goal_priority_classification(goal_gen_config):
 # Goal Lifecycle Tests
 # =============================================================================
 
+
 def test_goal_satisfaction_detection():
     """Test goal satisfaction when need drops."""
     goal = Goal(
@@ -457,7 +461,7 @@ def test_goal_priority_score():
 def test_active_goals_update(goal_generator):
     """Test active goals list updates on satisfaction."""
     needs_high = AbstractNeeds(rest_need=0.80)
-    goals = goal_generator.generate_goals(needs_high)
+    goal_generator.generate_goals(needs_high)
 
     assert len(goal_generator.get_active_goals()) == 1
 
@@ -490,12 +494,13 @@ def test_goal_consumer_notification(goal_generator):
 # Query and Statistics Tests
 # =============================================================================
 
+
 def test_get_active_goals_sorted(goal_generator):
     """Test active goals returned sorted by priority."""
     needs = AbstractNeeds(
-        rest_need=0.65,       # Moderate priority
-        repair_need=0.90,     # Critical priority
-        efficiency_need=0.55, # Moderate priority
+        rest_need=0.65,  # Moderate priority
+        repair_need=0.90,  # Critical priority
+        efficiency_need=0.55,  # Moderate priority
     )
 
     goal_generator.generate_goals(needs)
@@ -567,6 +572,7 @@ def test_goal_generator_statistics(goal_generator):
 # Performance and Stress Tests
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_monitoring_performance(default_config):
     """Test monitor performance under continuous operation."""
@@ -615,13 +621,15 @@ def test_goal_generation_at_scale(goal_gen_config):
     # Note: Can slightly exceed max because multiple goals generated per call
     # (up to 6 types: rest, repair, efficiency, connectivity, curiosity, learning)
     active = generator.get_active_goals()
-    assert len(active) <= config.max_concurrent_goals + 6, \
+    assert len(active) <= config.max_concurrent_goals + 6, (
         f"Generated {len(active)} goals, max is {config.max_concurrent_goals} + batch tolerance"
+    )
 
 
 # =============================================================================
 # Edge Case Tests
 # =============================================================================
+
 
 def test_zero_needs_no_goals(goal_generator):
     """Test that zero needs generate no goals."""
@@ -675,6 +683,7 @@ async def test_monitor_with_failing_collector(default_config):
 # =============================================================================
 # Integration Test (Conceptual - HCL not fully integrated yet)
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_mmei_full_pipeline(default_config, goal_gen_config):

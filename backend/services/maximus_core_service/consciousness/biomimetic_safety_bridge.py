@@ -34,21 +34,23 @@ Date: 2025-10-08
 """
 
 import asyncio
-import time
 import logging
+import time
 from dataclasses import dataclass
-from typing import Optional, Callable, Dict, Any, List
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 
 from consciousness.neuromodulation.coordinator_hardened import (
-    NeuromodulationCoordinator,
     CoordinatorConfig as NeuromodConfig,
+)
+from consciousness.neuromodulation.coordinator_hardened import (
     ModulationRequest,
+    NeuromodulationCoordinator,
 )
 from consciousness.predictive_coding.hierarchy_hardened import (
-    PredictiveCodingHierarchy,
     HierarchyConfig,
+    PredictiveCodingHierarchy,
 )
 
 logger = logging.getLogger(__name__)
@@ -118,9 +120,7 @@ class BiomimeticSafetyBridge:
     """
 
     def __init__(
-        self,
-        config: Optional[BridgeConfig] = None,
-        kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: Optional[BridgeConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
     ):
         """Initialize biomimetic safety bridge.
 
@@ -134,15 +134,13 @@ class BiomimeticSafetyBridge:
         # Initialize neuromodulation system
         neuromod_config = self.config.neuromod_config or NeuromodConfig()
         self.neuromodulation = NeuromodulationCoordinator(
-            neuromod_config,
-            kill_switch_callback=self._on_neuromod_failure
+            neuromod_config, kill_switch_callback=self._on_neuromod_failure
         )
 
         # Initialize predictive coding system
         hierarchy_config = self.config.hierarchy_config or HierarchyConfig()
         self.predictive_coding = PredictiveCodingHierarchy(
-            hierarchy_config,
-            kill_switch_callback=self._on_predictive_coding_failure
+            hierarchy_config, kill_switch_callback=self._on_predictive_coding_failure
         )
 
         # Bridge state
@@ -170,9 +168,7 @@ class BiomimeticSafetyBridge:
         )
 
     async def coordinate_processing(
-        self,
-        raw_input: np.ndarray,
-        modulation_requests: Optional[List[ModulationRequest]] = None
+        self, raw_input: np.ndarray, modulation_requests: Optional[List[ModulationRequest]] = None
     ) -> Dict[str, Any]:
         """
         Coordinate processing through both biomimetic systems.
@@ -258,9 +254,7 @@ class BiomimeticSafetyBridge:
             self.total_coordination_failures += 1
             self.consecutive_coordination_failures += 1
 
-            logger.error(
-                f"⚠️ Coordination ERROR: {e} - consecutive={self.consecutive_coordination_failures}"
-            )
+            logger.error(f"⚠️ Coordination ERROR: {e} - consecutive={self.consecutive_coordination_failures}")
 
             if self.consecutive_coordination_failures >= self.config.max_consecutive_coordination_failures:
                 self._open_aggregate_circuit_breaker("consecutive_errors")
@@ -268,9 +262,7 @@ class BiomimeticSafetyBridge:
             raise
 
     async def _coordinate_impl(
-        self,
-        raw_input: np.ndarray,
-        modulation_requests: Optional[List[ModulationRequest]]
+        self, raw_input: np.ndarray, modulation_requests: Optional[List[ModulationRequest]]
     ) -> Dict[str, Any]:
         """
         Core coordination implementation (isolated failures).
@@ -325,10 +317,7 @@ class BiomimeticSafetyBridge:
 
         return result
 
-    def _generate_modulation_requests(
-        self,
-        prediction_errors: Dict[str, float]
-    ) -> List[ModulationRequest]:
+    def _generate_modulation_requests(self, prediction_errors: Dict[str, float]) -> List[ModulationRequest]:
         """
         Generate neuromodulation requests based on prediction errors.
 
@@ -367,9 +356,7 @@ class BiomimeticSafetyBridge:
         return requests
 
     def _detect_cross_system_anomaly(
-        self,
-        prediction_errors: Dict[str, float],
-        neuromod_results: Dict[str, float]
+        self, prediction_errors: Dict[str, float], neuromod_results: Dict[str, float]
     ) -> Optional[str]:
         """
         Detect anomalies that involve BOTH systems simultaneously.
@@ -386,19 +373,17 @@ class BiomimeticSafetyBridge:
             avg_error = sum(prediction_errors.values()) / len(prediction_errors)
             conflict_rate = self.neuromodulation.conflicts_detected / max(1, self.neuromodulation.total_coordinations)
 
-            if (avg_error > self.config.anomaly_threshold_prediction_error and
-                conflict_rate > self.config.anomaly_threshold_neuromod_conflict_rate):
+            if (
+                avg_error > self.config.anomaly_threshold_prediction_error
+                and conflict_rate > self.config.anomaly_threshold_neuromod_conflict_rate
+            ):
                 return f"High prediction error ({avg_error:.2f}) + High conflict rate ({conflict_rate:.2f})"
 
         # Anomaly 2: Both systems circuit breakers approaching open
         neuromod_breaker_count = sum(
-            1 for mod in self.neuromodulation._modulators.values()
-            if mod._circuit_breaker_open
+            1 for mod in self.neuromodulation._modulators.values() if mod._circuit_breaker_open
         )
-        predictive_breaker_count = sum(
-            1 for layer in self.predictive_coding._layers
-            if layer._circuit_breaker_open
-        )
+        predictive_breaker_count = sum(1 for layer in self.predictive_coding._layers if layer._circuit_breaker_open)
 
         if neuromod_breaker_count >= 2 and predictive_breaker_count >= 2:
             return f"Multiple breakers open: {neuromod_breaker_count} neuromod, {predictive_breaker_count} predictive"
@@ -427,8 +412,7 @@ class BiomimeticSafetyBridge:
     def get_state(self) -> BridgeState:
         """Get observable bridge state."""
         avg_coordination_time = (
-            sum(self._coordination_times) / len(self._coordination_times)
-            if self._coordination_times else 0.0
+            sum(self._coordination_times) / len(self._coordination_times) if self._coordination_times else 0.0
         )
 
         return BridgeState(
@@ -439,7 +423,7 @@ class BiomimeticSafetyBridge:
             predictive_coding_active=not self.predictive_coding._is_aggregate_circuit_breaker_open(),
             aggregate_circuit_breaker_open=self._aggregate_circuit_breaker_open,
             cross_system_anomalies_detected=self.cross_system_anomalies_detected,
-            average_coordination_time_ms=avg_coordination_time
+            average_coordination_time_ms=avg_coordination_time,
         )
 
     def get_health_metrics(self) -> Dict[str, Any]:
@@ -464,22 +448,24 @@ class BiomimeticSafetyBridge:
 
         # Bridge-specific metrics
         state = self.get_state()
-        metrics.update({
-            "bridge_total_coordination_cycles": state.total_coordination_cycles,
-            "bridge_total_coordination_failures": state.total_coordination_failures,
-            "bridge_consecutive_coordination_failures": state.consecutive_coordination_failures,
-            "bridge_coordination_failure_rate": (
-                state.total_coordination_failures / max(1, state.total_coordination_cycles)
-            ),
-            "bridge_neuromodulation_active": state.neuromodulation_active,
-            "bridge_predictive_coding_active": state.predictive_coding_active,
-            "bridge_aggregate_circuit_breaker_open": state.aggregate_circuit_breaker_open,
-            "bridge_cross_system_anomalies_detected": state.cross_system_anomalies_detected,
-            "bridge_cross_system_anomaly_rate": (
-                state.cross_system_anomalies_detected / max(1, state.total_coordination_cycles)
-            ),
-            "bridge_average_coordination_time_ms": state.average_coordination_time_ms,
-        })
+        metrics.update(
+            {
+                "bridge_total_coordination_cycles": state.total_coordination_cycles,
+                "bridge_total_coordination_failures": state.total_coordination_failures,
+                "bridge_consecutive_coordination_failures": state.consecutive_coordination_failures,
+                "bridge_coordination_failure_rate": (
+                    state.total_coordination_failures / max(1, state.total_coordination_cycles)
+                ),
+                "bridge_neuromodulation_active": state.neuromodulation_active,
+                "bridge_predictive_coding_active": state.predictive_coding_active,
+                "bridge_aggregate_circuit_breaker_open": state.aggregate_circuit_breaker_open,
+                "bridge_cross_system_anomalies_detected": state.cross_system_anomalies_detected,
+                "bridge_cross_system_anomaly_rate": (
+                    state.cross_system_anomalies_detected / max(1, state.total_coordination_cycles)
+                ),
+                "bridge_average_coordination_time_ms": state.average_coordination_time_ms,
+            }
+        )
 
         return metrics
 

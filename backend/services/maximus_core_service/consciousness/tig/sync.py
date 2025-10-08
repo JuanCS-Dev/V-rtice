@@ -44,13 +44,14 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
 
 class ClockRole(Enum):
     """Role of a node in PTP clock hierarchy."""
+
     GRAND_MASTER = "grand_master"  # Primary time source
     MASTER = "master"  # Backup time source
     SLAVE = "slave"  # Synchronized to master
@@ -59,6 +60,7 @@ class ClockRole(Enum):
 
 class SyncState(Enum):
     """Synchronization state of a node."""
+
     PASSIVE = "passive"  # Inactive/stopped
     INITIALIZING = "initializing"
     LISTENING = "listening"
@@ -77,6 +79,7 @@ class ClockOffset:
     they cannot participate in coherent ESGT events. This would be like
     cortical regions oscillating out of phase - no unified experience emerges.
     """
+
     offset_ns: float  # Nanoseconds offset from master
     jitter_ns: float  # Clock jitter (variation)
     drift_ppm: float  # Drift in parts-per-million
@@ -106,6 +109,7 @@ class ClockOffset:
 @dataclass
 class SyncResult:
     """Result of a synchronization operation."""
+
     success: bool
     offset_ns: float = 0.0
     jitter_ns: float = 0.0
@@ -267,10 +271,7 @@ class PTPSynchronizer:
             SyncResult with offset and quality metrics
         """
         if self.role == ClockRole.GRAND_MASTER:
-            return SyncResult(
-                success=False,
-                message="Grand Master does not sync to other clocks"
-            )
+            return SyncResult(success=False, message="Grand Master does not sync to other clocks")
 
         self.master_id = master_id
         self.state = SyncState.UNCALIBRATED
@@ -368,21 +369,20 @@ class PTPSynchronizer:
                 success=True,
                 offset_ns=filtered_offset,
                 jitter_ns=avg_jitter,
-                message=f"Synced to {master_id}: offset={filtered_offset:.1f}ns, jitter={avg_jitter:.1f}ns"
+                message=f"Synced to {master_id}: offset={filtered_offset:.1f}ns, jitter={avg_jitter:.1f}ns",
             )
 
             # Log significant events
             if self.state == SyncState.SLAVE_SYNC and avg_jitter < self.target_jitter_ns:
-                print(f"✅ {self.node_id}: Achieved ESGT-quality sync (jitter={avg_jitter:.1f}ns < {self.target_jitter_ns}ns)")
+                print(
+                    f"✅ {self.node_id}: Achieved ESGT-quality sync (jitter={avg_jitter:.1f}ns < {self.target_jitter_ns}ns)"
+                )
 
             return result
 
         except Exception as e:
             self.state = SyncState.FAULT
-            return SyncResult(
-                success=False,
-                message=f"Sync failed: {str(e)}"
-            )
+            return SyncResult(success=False, message=f"Sync failed: {str(e)}")
 
     def _calculate_quality(self, jitter_ns: float, delay_ns: float) -> float:
         """
@@ -444,7 +444,7 @@ class PTPSynchronizer:
             jitter_ns=avg_jitter,
             drift_ppm=self.drift_ppm,
             last_sync=self.last_sync_time,
-            quality=quality
+            quality=quality,
         )
 
     def is_ready_for_esgt(self) -> bool:
@@ -480,9 +480,11 @@ class PTPSynchronizer:
 
     def __repr__(self) -> str:
         offset = self.get_offset()
-        return (f"PTPSynchronizer(node={self.node_id}, role={self.role.value}, "
-                f"state={self.state.value}, jitter={offset.jitter_ns:.1f}ns, "
-                f"esgt_ready={self.is_ready_for_esgt()})")
+        return (
+            f"PTPSynchronizer(node={self.node_id}, role={self.role.value}, "
+            f"state={self.state.value}, jitter={offset.jitter_ns:.1f}ns, "
+            f"esgt_ready={self.is_ready_for_esgt()})"
+        )
 
 
 class PTPCluster:
@@ -592,6 +594,8 @@ class PTPCluster:
 
     def __repr__(self) -> str:
         metrics = self.get_cluster_metrics()
-        return (f"PTPCluster(nodes={metrics['node_count']}, "
-                f"esgt_ready={metrics['esgt_ready_count']}/{metrics['slave_count']}, "
-                f"avg_jitter={metrics['avg_jitter_ns']:.1f}ns)")
+        return (
+            f"PTPCluster(nodes={metrics['node_count']}, "
+            f"esgt_ready={metrics['esgt_ready_count']}/{metrics['slave_count']}, "
+            f"avg_jitter={metrics['avg_jitter_ns']:.1f}ns)"
+        )

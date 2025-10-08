@@ -1,0 +1,51 @@
+# ============================================================================
+# Prometheus Configuration - Consciousness Monitoring
+# ============================================================================
+#
+# Scrapes metrics from consciousness system for safety monitoring.
+#
+# Metrics Collected:
+# - ESGT frequency (events/second)
+# - Arousal level (0-1)
+# - Goal generation rate
+# - Resource usage (CPU, memory)
+# - Safety violations
+#
+# Alert Rules:
+# - ESGT frequency > 10 Hz
+# - Arousal sustained > 0.95 for 10s
+# - Self-modification attempts > 0
+#
+# ============================================================================
+
+global:
+  scrape_interval: 5s       # Scrape every 5 seconds
+  evaluation_interval: 5s   # Evaluate rules every 5 seconds
+  external_labels:
+    monitor: 'consciousness-safety'
+    environment: 'sandbox'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Rule files
+rule_files:
+  - 'alert_rules.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Consciousness System Metrics
+  - job_name: 'consciousness'
+    static_configs:
+      - targets: ['maximus_consciousness:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 1s  # High frequency for safety monitoring
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

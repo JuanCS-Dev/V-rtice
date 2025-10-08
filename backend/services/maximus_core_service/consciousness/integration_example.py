@@ -64,33 +64,33 @@ Press Ctrl+C to stop.
 """
 
 import asyncio
+import random
 import time
 from typing import Optional
-import random
 
-# MMEI imports
-from consciousness.mmei.monitor import (
-    InternalStateMonitor,
-    PhysicalMetrics,
-    AbstractNeeds,
-    InteroceptionConfig,
+# MCEA imports
+from consciousness.mcea.controller import (
+    ArousalConfig,
+    ArousalController,
+    ArousalState,
+)
+from consciousness.mcea.stress import (
+    StressLevel,
+    StressMonitor,
 )
 from consciousness.mmei.goals import (
     AutonomousGoalGenerator,
     Goal,
-    GoalType,
     GoalGenerationConfig,
+    GoalType,
 )
 
-# MCEA imports
-from consciousness.mcea.controller import (
-    ArousalController,
-    ArousalState,
-    ArousalConfig,
-)
-from consciousness.mcea.stress import (
-    StressMonitor,
-    StressLevel,
+# MMEI imports
+from consciousness.mmei.monitor import (
+    AbstractNeeds,
+    InternalStateMonitor,
+    InteroceptionConfig,
+    PhysicalMetrics,
 )
 
 
@@ -153,42 +153,24 @@ class ConsciousnessIntegrationDemo:
         print("\nInitializing consciousness components...\n")
 
         # 1. MMEI - Internal State Monitor
-        self.mmei_monitor = InternalStateMonitor(
-            config=self.mmei_config,
-            monitor_id="demo-mmei"
-        )
+        self.mmei_monitor = InternalStateMonitor(config=self.mmei_config, monitor_id="demo-mmei")
         self.mmei_monitor.set_metrics_collector(self._collect_simulated_metrics)
-        self.mmei_monitor.register_need_callback(
-            self._on_critical_need,
-            threshold=0.80
-        )
+        self.mmei_monitor.register_need_callback(self._on_critical_need, threshold=0.80)
         print("✓ MMEI initialized (interoception active)")
 
         # 2. Goal Generator
-        self.goal_generator = AutonomousGoalGenerator(
-            config=self.goal_config,
-            generator_id="demo-goal-gen"
-        )
+        self.goal_generator = AutonomousGoalGenerator(config=self.goal_config, generator_id="demo-goal-gen")
         self.goal_generator.register_goal_consumer(self._on_goal_generated)
         print("✓ Goal Generator initialized (autonomous motivation ready)")
 
         # 3. Arousal Controller (MCEA)
-        self.arousal_controller = ArousalController(
-            config=self.arousal_config,
-            controller_id="demo-arousal"
-        )
+        self.arousal_controller = ArousalController(config=self.arousal_config, controller_id="demo-arousal")
         self.arousal_controller.register_arousal_callback(self._on_arousal_change)
         print("✓ MCEA Arousal Controller initialized (MPE active)")
 
         # 4. Stress Monitor
-        self.stress_monitor = StressMonitor(
-            arousal_controller=self.arousal_controller,
-            monitor_id="demo-stress"
-        )
-        self.stress_monitor.register_stress_alert(
-            self._on_stress_alert,
-            threshold=StressLevel.SEVERE
-        )
+        self.stress_monitor = StressMonitor(arousal_controller=self.arousal_controller, monitor_id="demo-stress")
+        self.stress_monitor.register_stress_alert(self._on_stress_alert, threshold=StressLevel.SEVERE)
         print("✓ Stress Monitor initialized (resilience tracking active)")
 
         print("\n" + "=" * 70)
@@ -251,7 +233,7 @@ class ConsciousnessIntegrationDemo:
         print(f"   Urgency: {urgency.value}")
 
         # Generate goals
-        goals = self.goal_generator.generate_goals(needs)
+        self.goal_generator.generate_goals(needs)
 
         # Update arousal based on needs
         self.arousal_controller.update_from_needs(needs)
@@ -260,7 +242,7 @@ class ConsciousnessIntegrationDemo:
         """Called when autonomous goal is generated."""
         self.total_goals_generated += 1
 
-        print(f"\n🎯 AUTONOMOUS GOAL GENERATED:")
+        print("\n🎯 AUTONOMOUS GOAL GENERATED:")
         print(f"   Type: {goal.goal_type.value}")
         print(f"   Priority: {goal.priority.value}")
         print(f"   Description: {goal.description}")
@@ -273,7 +255,7 @@ class ConsciousnessIntegrationDemo:
     async def _on_arousal_change(self, state: ArousalState):
         """Called when arousal state changes significantly."""
         # Only print on level transitions to reduce noise
-        if hasattr(self, '_last_arousal_level'):
+        if hasattr(self, "_last_arousal_level"):
             if state.level != self._last_arousal_level:
                 print(f"\n🌅 AROUSAL TRANSITION: {self._last_arousal_level.value} → {state.level.value}")
                 print(f"   Arousal: {state.arousal:.2f}")
@@ -282,14 +264,14 @@ class ConsciousnessIntegrationDemo:
                 # Check if ESGT would ignite
                 if state.esgt_salience_threshold < 0.60:
                     self.total_esgt_candidates += 1
-                    print(f"   ⚡ Threshold low enough for ESGT ignition")
+                    print("   ⚡ Threshold low enough for ESGT ignition")
 
         self._last_arousal_level = state.level
 
     async def _on_stress_alert(self, level: StressLevel):
         """Called when stress level becomes severe."""
         print(f"\n🚨 SEVERE STRESS ALERT: {level.value}")
-        print(f"   System under significant load")
+        print("   System under significant load")
 
     # =========================================================================
     # Scenario Simulation
@@ -302,24 +284,24 @@ class ConsciousnessIntegrationDemo:
         In full system, HCL would execute actions to satisfy goal.
         Here we simulate the effect.
         """
-        print(f"   🔧 Simulating goal execution...")
+        print("   🔧 Simulating goal execution...")
 
         if goal.goal_type == GoalType.REST:
             # Simulate reducing CPU load
-            print(f"   → Reducing computational load...")
+            print("   → Reducing computational load...")
             self.simulated_cpu = max(30.0, self.simulated_cpu - 20.0)
 
         elif goal.goal_type == GoalType.REPAIR:
             # Simulate fixing errors
-            print(f"   → Running diagnostics and repairs...")
+            print("   → Running diagnostics and repairs...")
             self.simulated_errors = max(0.0, self.simulated_errors - 3.0)
 
         elif goal.goal_type == GoalType.RESTORE:
             # Simulate network restoration
-            print(f"   → Optimizing network connectivity...")
+            print("   → Optimizing network connectivity...")
             self.simulated_latency = max(10.0, self.simulated_latency - 20.0)
 
-        print(f"   ✓ Goal execution complete\n")
+        print("   ✓ Goal execution complete\n")
 
     async def run_scenario_high_load(self):
         """Scenario: High computational load."""
@@ -335,7 +317,7 @@ class ConsciousnessIntegrationDemo:
             self.simulated_cpu = min(95.0, 60.0 + i * 8.0)
             self.simulated_memory = min(90.0, 50.0 + i * 8.0)
 
-            print(f"[+{i*3}s] CPU: {self.simulated_cpu:.0f}%, Memory: {self.simulated_memory:.0f}%")
+            print(f"[+{i * 3}s] CPU: {self.simulated_cpu:.0f}%, Memory: {self.simulated_memory:.0f}%")
 
             await asyncio.sleep(3.0)
 
@@ -417,7 +399,7 @@ class ConsciousnessIntegrationDemo:
         print("-" * 70)
 
         # Metrics
-        print(f"Physical Metrics:")
+        print("Physical Metrics:")
         print(f"  CPU: {self.simulated_cpu:.1f}%")
         print(f"  Memory: {self.simulated_memory:.1f}%")
         print(f"  Errors: {self.simulated_errors:.1f}/min")
@@ -426,7 +408,7 @@ class ConsciousnessIntegrationDemo:
         # Needs
         if self.mmei_monitor and self.mmei_monitor._current_needs:
             needs = self.mmei_monitor._current_needs
-            print(f"\nAbstract Needs:")
+            print("\nAbstract Needs:")
             print(f"  Rest: {needs.rest_need:.2f}")
             print(f"  Repair: {needs.repair_need:.2f}")
             print(f"  Efficiency: {needs.efficiency_need:.2f}")
@@ -436,7 +418,7 @@ class ConsciousnessIntegrationDemo:
         # Arousal
         if self.arousal_controller:
             state = self.arousal_controller.get_current_arousal()
-            print(f"\nArousal State:")
+            print("\nArousal State:")
             print(f"  Level: {state.level.value}")
             print(f"  Arousal: {state.arousal:.2f}")
             print(f"  ESGT Threshold: {state.esgt_salience_threshold:.2f}")
@@ -450,7 +432,7 @@ class ConsciousnessIntegrationDemo:
                 print(f"  - {goal.goal_type.value} (priority: {goal.priority.value})")
 
         # Statistics
-        print(f"\nStatistics:")
+        print("\nStatistics:")
         print(f"  Goals Generated: {self.total_goals_generated}")
         print(f"  ESGT Candidates: {self.total_esgt_candidates}")
 
@@ -511,6 +493,7 @@ class ConsciousnessIntegrationDemo:
 # ESGT Integration Demo
 # =============================================================================
 
+
 async def run_esgt_integration_demo():
     """
     Demonstrate full ESGT integration with embodied consciousness.
@@ -528,10 +511,10 @@ async def run_esgt_integration_demo():
     print("\nDemonstrating: Metrics → Needs → Arousal → ESGT Ignition\n")
 
     # Import ESGT components
-    from consciousness.tig.fabric import TIGFabric, TopologyConfig
-    from consciousness.esgt.coordinator import ESGTCoordinator, TriggerConditions, SalienceScore
     from consciousness.esgt.arousal_integration import ESGTArousalBridge
+    from consciousness.esgt.coordinator import ESGTCoordinator, SalienceScore, TriggerConditions
     from consciousness.esgt.spm import SimpleSPM, SimpleSPMConfig
+    from consciousness.tig.fabric import TIGFabric, TopologyConfig
 
     # 1. Initialize TIG Fabric
     print("1️⃣  Initializing TIG Fabric...")
@@ -629,11 +612,11 @@ async def run_esgt_integration_demo():
     event1 = await esgt.initiate_esgt(salience_high, content_high)
 
     if event1.success:
-        print(f"   ✅ ESGT IGNITION SUCCESS")
+        print("   ✅ ESGT IGNITION SUCCESS")
         print(f"      Coherence: {event1.achieved_coherence:.3f}")
         print(f"      Duration: {event1.total_duration_ms:.1f}ms")
         print(f"      Nodes: {event1.node_count}")
-        print(f"      → Content became CONSCIOUS")
+        print("      → Content became CONSCIOUS")
     else:
         print(f"   ❌ ESGT failed: {event1.failure_reason}")
 
@@ -652,11 +635,11 @@ async def run_esgt_integration_demo():
     event2 = await esgt.initiate_esgt(salience_med, content_med)
 
     if event2.success:
-        print(f"   ✅ ESGT IGNITION SUCCESS")
+        print("   ✅ ESGT IGNITION SUCCESS")
         print(f"      Coherence: {event2.achieved_coherence:.3f}")
         print(f"      Duration: {event2.total_duration_ms:.1f}ms")
     else:
-        print(f"   ❌ ESGT rejected (salience below threshold)")
+        print("   ❌ ESGT rejected (salience below threshold)")
         print(f"      Salience: {salience_med.compute_total():.2f}")
         print(f"      Threshold: {esgt.triggers.min_salience:.2f}")
 
@@ -695,6 +678,7 @@ async def run_esgt_integration_demo():
 # =============================================================================
 # Main Entry Point
 # =============================================================================
+
 
 async def main():
     """Run the integration demo."""

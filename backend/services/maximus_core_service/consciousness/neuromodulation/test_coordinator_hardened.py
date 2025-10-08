@@ -27,20 +27,20 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
+
 from consciousness.neuromodulation.coordinator_hardened import (
-    NeuromodulationCoordinator,
     CoordinatorConfig,
     ModulationRequest,
+    NeuromodulationCoordinator,
 )
-from consciousness.neuromodulation.modulator_base import ModulatorConfig
-
 
 # ======================
 # CONFLICT DETECTION TESTS (10 tests)
 # ======================
+
 
 def test_no_conflict_single_modulator():
     """Single modulator request has no conflict."""
@@ -121,7 +121,7 @@ def test_conflict_threshold_triggers_resolution():
     assert conflict_score > config.conflict_threshold
 
     # Should trigger resolution during coordinate_modulation
-    results = coordinator.coordinate_modulation(requests)
+    coordinator.coordinate_modulation(requests)
     assert coordinator.conflicts_detected > 0
     assert coordinator.conflicts_resolved > 0
 
@@ -140,7 +140,7 @@ def test_no_conflict_resolution_below_threshold():
     conflict_score = coordinator._compute_conflict_score(requests)
     assert conflict_score < config.conflict_threshold
 
-    results = coordinator.coordinate_modulation(requests)
+    coordinator.coordinate_modulation(requests)
     assert coordinator.conflicts_detected == 0
 
 
@@ -199,6 +199,7 @@ def test_conflict_metrics_tracked():
 # ======================
 # CONFLICT RESOLUTION TESTS (10 tests)
 # ======================
+
 
 def test_conflict_resolution_reduces_magnitude():
     """Conflict resolution reduces delta magnitude."""
@@ -356,6 +357,7 @@ def test_resolution_preserves_request_count():
 # NON-LINEAR INTERACTIONS TESTS (10 tests)
 # ======================
 
+
 def test_da_5ht_antagonism_opposite_directions():
     """DA-5HT antagonism applies when deltas have opposite directions."""
     config = CoordinatorConfig(da_5ht_antagonism=-0.3)
@@ -498,10 +500,7 @@ def test_interactions_with_all_four_modulators():
 
 def test_interaction_weights_configurable():
     """Interaction weights are configurable."""
-    config = CoordinatorConfig(
-        da_5ht_antagonism=-0.5,
-        ach_ne_synergy=0.5
-    )
+    config = CoordinatorConfig(da_5ht_antagonism=-0.5, ach_ne_synergy=0.5)
     coordinator = NeuromodulationCoordinator(config)
 
     assert coordinator.config.da_5ht_antagonism == -0.5
@@ -532,6 +531,7 @@ def test_interactions_bounded_output():
 # ======================
 # AGGREGATE CIRCUIT BREAKER TESTS (5 tests)
 # ======================
+
 
 def test_aggregate_breaker_closed_initially():
     """Aggregate circuit breaker is closed initially."""
@@ -600,6 +600,7 @@ def test_aggregate_breaker_triggers_kill_switch():
 # ======================
 # OBSERVABILITY & KILL SWITCH TESTS (5 tests)
 # ======================
+
 
 def test_get_levels():
     """get_levels() returns all 4 modulator levels."""

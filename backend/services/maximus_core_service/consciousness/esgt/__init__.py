@@ -71,23 +71,21 @@ o mecanismo que permite experiência fenomenológica unificada.
 "Ignition transforma bits distribuídos em experiência unificada."
 """
 
+from consciousness.esgt.arousal_integration import (
+    ArousalModulationConfig,
+    ESGTArousalBridge,
+)
 from consciousness.esgt.coordinator import (
     ESGTCoordinator,
     ESGTEvent,
     ESGTPhase,
-    TriggerConditions,
     SalienceScore,
+    TriggerConditions,
 )
-
 from consciousness.esgt.kuramoto import (
     KuramotoOscillator,
     PhaseCoherence,
     SynchronizationDynamics,
-)
-
-from consciousness.esgt.arousal_integration import (
-    ESGTArousalBridge,
-    ArousalModulationConfig,
 )
 
 __all__ = [

@@ -26,11 +26,12 @@ Date: 2025-10-08
 """
 
 from typing import Any
+
 import numpy as np
 
 from consciousness.predictive_coding.layer_base_hardened import (
-    PredictiveCodingLayerBase,
     LayerConfig,
+    PredictiveCodingLayerBase,
 )
 
 
@@ -134,7 +135,9 @@ class Layer2Behavioral(PredictiveCodingLayerBase):
 
         # For now: Simple exponential moving average
         alpha = 0.7  # Weight of new input
-        new_hidden = alpha * self._hidden_state + (1 - alpha) * np.random.randn(self.config.hidden_dim).astype(np.float32) * 0.1
+        new_hidden = (
+            alpha * self._hidden_state + (1 - alpha) * np.random.randn(self.config.hidden_dim).astype(np.float32) * 0.1
+        )
 
         return new_hidden
 

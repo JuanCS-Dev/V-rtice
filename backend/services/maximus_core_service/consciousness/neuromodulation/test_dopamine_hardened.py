@@ -36,9 +36,10 @@ Version: 1.0.1 - Systemic Refactor
 Date: 2025-10-08
 """
 
-import pytest
 import time
 from unittest.mock import MagicMock
+
+import pytest
 
 from consciousness.neuromodulation.dopamine_hardened import (
     DopamineModulator,
@@ -46,10 +47,10 @@ from consciousness.neuromodulation.dopamine_hardened import (
     ModulatorState,
 )
 
-
 # ======================
 # BOUNDED BEHAVIOR TESTS (10 tests)
 # ======================
+
 
 def test_initialization_at_baseline():
     """Modulator initializes at configured baseline."""
@@ -210,12 +211,10 @@ def test_level_property_applies_decay():
 # DESENSITIZATION TESTS (5 tests)
 # ======================
 
+
 def test_desensitization_above_threshold():
     """Desensitization activates when level exceeds threshold."""
-    config = ModulatorConfig(
-        baseline=0.85,
-        desensitization_threshold=0.8
-    )
+    config = ModulatorConfig(baseline=0.85, desensitization_threshold=0.8)
     modulator = DopamineModulator(config)
 
     assert modulator._is_desensitized() is True
@@ -224,10 +223,7 @@ def test_desensitization_above_threshold():
 def test_desensitization_reduces_effect():
     """Desensitization reduces modulation effect by desensitization_factor."""
     config = ModulatorConfig(
-        baseline=0.85,
-        desensitization_threshold=0.8,
-        desensitization_factor=0.5,
-        smoothing_factor=0.2
+        baseline=0.85, desensitization_threshold=0.8, desensitization_factor=0.5, smoothing_factor=0.2
     )
     modulator = DopamineModulator(config)
 
@@ -242,10 +238,7 @@ def test_desensitization_reduces_effect():
 
 def test_desensitization_events_tracked():
     """Desensitization events are tracked in counter."""
-    config = ModulatorConfig(
-        baseline=0.85,
-        desensitization_threshold=0.8
-    )
+    config = ModulatorConfig(baseline=0.85, desensitization_threshold=0.8)
     modulator = DopamineModulator(config)
 
     initial_events = modulator._desensitization_events
@@ -258,10 +251,7 @@ def test_desensitization_events_tracked():
 
 def test_no_desensitization_below_threshold():
     """Desensitization does NOT activate below threshold."""
-    config = ModulatorConfig(
-        baseline=0.5,
-        desensitization_threshold=0.8
-    )
+    config = ModulatorConfig(baseline=0.5, desensitization_threshold=0.8)
     modulator = DopamineModulator(config)
 
     assert modulator._is_desensitized() is False
@@ -269,10 +259,7 @@ def test_no_desensitization_below_threshold():
 
 def test_desensitization_boundary_condition():
     """Desensitization boundary at exact threshold."""
-    config = ModulatorConfig(
-        baseline=0.8,
-        desensitization_threshold=0.8
-    )
+    config = ModulatorConfig(baseline=0.8, desensitization_threshold=0.8)
     modulator = DopamineModulator(config)
 
     # At exact threshold, should be desensitized
@@ -282,6 +269,7 @@ def test_desensitization_boundary_condition():
 # ======================
 # HOMEOSTATIC DECAY TESTS (5 tests)
 # ======================
+
 
 def test_decay_toward_baseline_above():
     """Decay pulls level toward baseline when above."""
@@ -392,6 +380,7 @@ def test_decay_time_based():
 # TEMPORAL SMOOTHING TESTS (3 tests)
 # ======================
 
+
 def test_smoothing_factor_applied():
     """Smoothing factor reduces immediate change."""
     config = ModulatorConfig(smoothing_factor=0.2)
@@ -410,7 +399,6 @@ def test_smoothing_prevents_jumps():
     config = ModulatorConfig(smoothing_factor=0.1)  # Heavy smoothing
     modulator = DopamineModulator(config)
 
-    initial_level = modulator.level
     changes = []
 
     # Apply same modulation 5 times
@@ -424,10 +412,7 @@ def test_smoothing_prevents_jumps():
 
 def test_smoothing_with_large_delta():
     """Smoothing works even with large requested delta."""
-    config = ModulatorConfig(
-        smoothing_factor=0.1,
-        max_change_per_step=0.2
-    )
+    config = ModulatorConfig(smoothing_factor=0.1, max_change_per_step=0.2)
     modulator = DopamineModulator(config)
 
     # Request huge change (clamped to max_change_per_step, then smoothed)
@@ -441,6 +426,7 @@ def test_smoothing_with_large_delta():
 # ======================
 # CIRCUIT BREAKER TESTS (5 tests)
 # ======================
+
 
 def test_circuit_breaker_opens_on_anomalies():
     """Circuit breaker opens after MAX_CONSECUTIVE_ANOMALIES."""
@@ -523,6 +509,7 @@ def test_anomaly_counter_resets_on_success():
 # KILL SWITCH TESTS (3 tests)
 # ======================
 
+
 def test_emergency_stop_opens_breaker():
     """emergency_stop() opens circuit breaker."""
     modulator = DopamineModulator()
@@ -567,6 +554,7 @@ def test_kill_switch_callback_invoked():
 # ======================
 # OBSERVABILITY TESTS (5 tests)
 # ======================
+
 
 def test_get_state():
     """get_state() returns complete ModulatorState."""
@@ -656,6 +644,7 @@ def test_repr():
 # ======================
 # CONFIGURATION VALIDATION TESTS (bonus)
 # ======================
+
 
 def test_config_validation_baseline_bounds():
     """ModulatorConfig validates baseline in [0, 1]."""

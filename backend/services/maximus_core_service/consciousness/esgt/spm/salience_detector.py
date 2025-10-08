@@ -52,21 +52,21 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
+from consciousness.esgt.coordinator import SalienceScore
 from consciousness.esgt.spm.base import (
     SpecializedProcessingModule,
-    SPMType,
     SPMOutput,
-    ProcessingPriority,
+    SPMType,
 )
-from consciousness.esgt.coordinator import SalienceScore
 
 
 class SalienceMode(Enum):
     """Operating mode for salience detection."""
+
     PASSIVE = "passive"  # Only compute when asked
     ACTIVE = "active"  # Continuously monitor and alert
 
@@ -74,6 +74,7 @@ class SalienceMode(Enum):
 @dataclass
 class SalienceThresholds:
     """Thresholds for salience classification."""
+
     low_threshold: float = 0.30  # Below: unconscious processing
     medium_threshold: float = 0.50  # Peripheral awareness
     high_threshold: float = 0.70  # Conscious access (ESGT trigger)
@@ -114,6 +115,7 @@ class SalienceDetectorConfig:
 @dataclass
 class SalienceEvent:
     """Record of a high-salience detection."""
+
     timestamp: float
     salience: SalienceScore
     source: str
@@ -176,11 +178,7 @@ class SalienceSPM(SpecializedProcessingModule):
         self.config = config or SalienceDetectorConfig()
 
         # Validate weights
-        total_weight = (
-            self.config.novelty_weight +
-            self.config.relevance_weight +
-            self.config.urgency_weight
-        )
+        total_weight = self.config.novelty_weight + self.config.relevance_weight + self.config.urgency_weight
         if not (0.99 < total_weight < 1.01):  # Allow floating point tolerance
             raise ValueError(f"Salience weights must sum to 1.0, got {total_weight}")
 
@@ -505,10 +503,7 @@ class SalienceSPM(SpecializedProcessingModule):
     # SalienceSPM-Specific Methods
     # =========================================================================
 
-    def register_high_salience_callback(
-        self,
-        callback: Callable[[SalienceEvent], None]
-    ) -> None:
+    def register_high_salience_callback(self, callback: Callable[[SalienceEvent], None]) -> None:
         """Register callback for high-salience events."""
         if callback not in self._high_salience_callbacks:
             self._high_salience_callbacks.append(callback)
@@ -536,7 +531,9 @@ class SalienceSPM(SpecializedProcessingModule):
         }
 
     def __repr__(self) -> str:
-        return (f"SalienceSPM(id={self.spm_id}, "
-                f"evals={self.total_evaluations}, "
-                f"high_salience={self.high_salience_count}, "
-                f"rate={self.get_salience_rate():.1%})")
+        return (
+            f"SalienceSPM(id={self.spm_id}, "
+            f"evals={self.total_evaluations}, "
+            f"high_salience={self.high_salience_count}, "
+            f"rate={self.get_salience_rate():.1%})"
+        )

@@ -46,20 +46,18 @@ While we cannot solve the hard problem philosophically, we can:
 "Validation is not proof of consciousness - it is evidence of consciousness-compatibility."
 """
 
-from consciousness.validation.phi_proxies import (
-    PhiProxyValidator,
-    PhiProxyMetrics,
-    StructuralCompliance,
-)
-
 from consciousness.validation.coherence import (
     CoherenceValidator,
     ESGTCoherenceMetrics,
 )
-
 from consciousness.validation.metacognition import (
     MetacognitionValidator,
     SelfModelMetrics,
+)
+from consciousness.validation.phi_proxies import (
+    PhiProxyMetrics,
+    PhiProxyValidator,
+    StructuralCompliance,
 )
 
 __all__ = [

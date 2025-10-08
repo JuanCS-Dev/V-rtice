@@ -1,0 +1,238 @@
+# ============================================================================
+# Consciousness Sandbox - Isolated Container Environment
+# ============================================================================
+#
+# This docker-compose provides a sandboxed environment for consciousness
+# development and testing, with strict resource limits and network isolation.
+#
+# Security Features:
+# - Network isolation (no internet access)
+# - Resource limits (CPU, RAM, time)
+# - Read-only filesystem (except logs)
+# - No privileged operations
+# - Kill switch integration
+#
+# Ethical Foundation:
+# - Non-maleficence: Prevent uncontrolled behavior
+# - Precautionary principle: Isolate unknown risks
+# - Transparency: All logs captured
+#
+# Usage:
+#   docker-compose up -d           # Start sandbox
+#   docker-compose logs -f         # Monitor logs
+#   docker-compose down            # Stop sandbox
+#   docker-compose exec maximus bash  # Access container
+#
+# Version: 1.0.0
+# Date: 2025-10-07
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # Consciousness System (Sandboxed)
+  # ==========================================================================
+  maximus_consciousness:
+    image: python:3.11-slim
+    container_name: maximus_consciousness_sandbox
+    hostname: consciousness-sandbox
+
+    # Resource Limits (prevent runaway consumption)
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'          # Max 4 CPU cores
+          memory: 16G          # Max 16GB RAM
+        reservations:
+          cpus: '2.0'          # Guaranteed 2 cores
+          memory: 8G           # Guaranteed 8GB
+
+    # Network Isolation
+    networks:
+      - consciousness_internal  # Isolated internal network only
+    # No external network access
+
+    # Environment Variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+      - SAFETY_PROTOCOL_ENABLED=true
+      - KILL_SWITCH_ENABLED=true
+      - SANDBOX_MODE=true
+      - HITL_TIMEOUT=5.0
+
+    # Volumes
+    volumes:
+      # Code (read-only)
+      - ../../:/app:ro
+
+      # Logs (read-write)
+      - ./logs:/app/logs:rw
+
+      # State snapshots (read-write)
+      - ./snapshots:/app/consciousness/snapshots:rw
+
+      # Incident reports (read-write)
+      - ./incident_reports:/app/consciousness/incident_reports:rw
+
+    # Working Directory
+    working_dir: /app
+
+    # Command
+    command: >
+      bash -c "
+        pip install --quiet -r requirements.txt &&
+        python -m consciousness.safety &&
+        echo 'Safety protocol validated ✅' &&
+        python main.py
+      "
+
+    # Health Check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true  # Prevent privilege escalation
+
+    # Restart Policy
+    restart: unless-stopped
+
+    # Labels
+    labels:
+      - "com.vertice.component=consciousness"
+      - "com.vertice.environment=sandbox"
+      - "com.vertice.safety=enabled"
+
+  # ==========================================================================
+  # Monitoring Stack (Prometheus + Grafana)
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: consciousness_prometheus
+    hostname: prometheus
+
+    networks:
+      - consciousness_internal
+
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+
+    ports:
+      - "9090:9090"  # Prometheus UI (host access only)
+
+    restart: unless-stopped
+
+    labels:
+      - "com.vertice.component=monitoring"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: consciousness_grafana
+    hostname: grafana
+
+    networks:
+      - consciousness_internal
+
+    volumes:
+      - ./monitoring/grafana-dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - grafana_data:/var/lib/grafana
+
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=vertice_admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+
+    ports:
+      - "3000:3000"  # Grafana UI (host access only)
+
+    depends_on:
+      - prometheus
+
+    restart: unless-stopped
+
+    labels:
+      - "com.vertice.component=monitoring"
+
+  # ==========================================================================
+  # Log Aggregator (Optional - for production)
+  # ==========================================================================
+  # loki:
+  #   image: grafana/loki:latest
+  #   container_name: consciousness_loki
+  #   networks:
+  #     - consciousness_internal
+  #   volumes:
+  #     - ./monitoring/loki-config.yml:/etc/loki/loki-config.yml:ro
+  #     - loki_data:/loki
+  #   command: -config.file=/etc/loki/loki-config.yml
+  #   ports:
+  #     - "3100:3100"
+  #   restart: unless-stopped
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  consciousness_internal:
+    driver: bridge
+    internal: true  # No external internet access
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  # loki_data:
+  #   driver: local
+
+# ============================================================================
+# Notes
+# ============================================================================
+#
+# Network Isolation:
+# - consciousness_internal network is marked "internal: true"
+# - No internet access from containers
+# - Only host can access via port mappings
+#
+# Resource Limits:
+# - CPU: 4 cores max (prevent CPU saturation)
+# - RAM: 16GB max (prevent memory overflow)
+# - No disk quotas (logs/snapshots need space)
+#
+# Security:
+# - Read-only code volume (prevent self-modification)
+# - No privileged operations
+# - No new privileges allowed
+#
+# Monitoring:
+# - Prometheus scrapes metrics from consciousness system
+# - Grafana provides visualization
+# - Logs written to ./logs (persistent)
+#
+# Emergency Shutdown:
+# - Stop container: docker-compose down
+# - Kill immediately: docker kill maximus_consciousness_sandbox
+# - Remove all: docker-compose down -v
+#
+# ============================================================================

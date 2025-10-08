@@ -38,16 +38,16 @@ Date: 2025-10-08
 import asyncio
 import logging
 from dataclasses import dataclass
-from typing import Optional, Callable, Dict, List, Any
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 
-from consciousness.predictive_coding.layer_base_hardened import LayerConfig
 from consciousness.predictive_coding.layer1_sensory_hardened import Layer1Sensory
 from consciousness.predictive_coding.layer2_behavioral_hardened import Layer2Behavioral
 from consciousness.predictive_coding.layer3_operational_hardened import Layer3Operational
 from consciousness.predictive_coding.layer4_tactical_hardened import Layer4Tactical
 from consciousness.predictive_coding.layer5_strategic_hardened import Layer5Strategic
+from consciousness.predictive_coding.layer_base_hardened import LayerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -124,9 +124,7 @@ class PredictiveCodingHierarchy:
     """
 
     def __init__(
-        self,
-        config: Optional[HierarchyConfig] = None,
-        kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: Optional[HierarchyConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
     ):
         """Initialize predictive coding hierarchy.
 
@@ -224,18 +222,13 @@ class PredictiveCodingHierarchy:
             if len(self._prediction_errors) > 100:
                 self._prediction_errors.pop(0)
 
-            logger.debug(
-                f"Hierarchy cycle complete: {cycle_time_ms:.2f}ms, "
-                f"avg_error={avg_error:.3f}"
-            )
+            logger.debug(f"Hierarchy cycle complete: {cycle_time_ms:.2f}ms, avg_error={avg_error:.3f}")
 
             return errors
 
         except asyncio.TimeoutError:
             self.total_timeouts += 1
-            logger.error(
-                f"⚠️ Hierarchy TIMEOUT ({self.config.max_hierarchy_cycle_time_ms}ms exceeded)"
-            )
+            logger.error(f"⚠️ Hierarchy TIMEOUT ({self.config.max_hierarchy_cycle_time_ms}ms exceeded)")
 
             if self.total_timeouts >= 5:
                 logger.critical("🔴 Too many hierarchy timeouts - triggering kill switch")
@@ -362,11 +355,7 @@ class PredictiveCodingHierarchy:
 
         return errors
 
-    def _prepare_next_layer_input(
-        self,
-        prediction: np.ndarray,
-        error: float
-    ) -> np.ndarray:
+    def _prepare_next_layer_input(self, prediction: np.ndarray, error: float) -> np.ndarray:
         """
         Prepare input for next layer by combining prediction + error signal.
 
@@ -401,23 +390,14 @@ class PredictiveCodingHierarchy:
         Returns:
             True if aggregate breaker should be open
         """
-        open_count = sum(
-            1 for layer in self._layers
-            if layer._circuit_breaker_open
-        )
+        open_count = sum(1 for layer in self._layers if layer._circuit_breaker_open)
 
         return open_count >= 3
 
     def get_state(self) -> HierarchyState:
         """Get observable hierarchy state."""
-        avg_cycle_time = (
-            sum(self._cycle_times) / len(self._cycle_times)
-            if self._cycle_times else 0.0
-        )
-        avg_error = (
-            sum(self._prediction_errors) / len(self._prediction_errors)
-            if self._prediction_errors else 0.0
-        )
+        avg_cycle_time = sum(self._cycle_times) / len(self._cycle_times) if self._cycle_times else 0.0
+        avg_error = sum(self._prediction_errors) / len(self._prediction_errors) if self._prediction_errors else 0.0
 
         return HierarchyState(
             total_cycles=self.total_cycles,
@@ -426,7 +406,7 @@ class PredictiveCodingHierarchy:
             layers_active=[layer._is_active for layer in self._layers],
             aggregate_circuit_breaker_open=self._is_aggregate_circuit_breaker_open(),
             average_cycle_time_ms=avg_cycle_time,
-            average_prediction_error=avg_error
+            average_prediction_error=avg_error,
         )
 
     def get_health_metrics(self) -> Dict[str, Any]:
@@ -447,21 +427,19 @@ class PredictiveCodingHierarchy:
         # Add hierarchy-specific metrics
         state = self.get_state()
 
-        metrics.update({
-            "hierarchy_total_cycles": state.total_cycles,
-            "hierarchy_total_errors": state.total_errors,
-            "hierarchy_total_timeouts": state.total_timeouts,
-            "hierarchy_error_rate": (
-                state.total_errors / max(1, state.total_cycles)
-            ),
-            "hierarchy_timeout_rate": (
-                state.total_timeouts / max(1, state.total_cycles)
-            ),
-            "hierarchy_aggregate_circuit_breaker_open": state.aggregate_circuit_breaker_open,
-            "hierarchy_avg_cycle_time_ms": state.average_cycle_time_ms,
-            "hierarchy_avg_prediction_error": state.average_prediction_error,
-            "hierarchy_layers_active_count": sum(state.layers_active),
-        })
+        metrics.update(
+            {
+                "hierarchy_total_cycles": state.total_cycles,
+                "hierarchy_total_errors": state.total_errors,
+                "hierarchy_total_timeouts": state.total_timeouts,
+                "hierarchy_error_rate": (state.total_errors / max(1, state.total_cycles)),
+                "hierarchy_timeout_rate": (state.total_timeouts / max(1, state.total_cycles)),
+                "hierarchy_aggregate_circuit_breaker_open": state.aggregate_circuit_breaker_open,
+                "hierarchy_avg_cycle_time_ms": state.average_cycle_time_ms,
+                "hierarchy_avg_prediction_error": state.average_prediction_error,
+                "hierarchy_layers_active_count": sum(state.layers_active),
+            }
+        )
 
         return metrics
 

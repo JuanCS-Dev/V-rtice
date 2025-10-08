@@ -19,15 +19,15 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-import pytest
 import asyncio
+
 import numpy as np
+import pytest
 
 from consciousness.predictive_coding.hierarchy_hardened import (
-    PredictiveCodingHierarchy,
     HierarchyConfig,
+    PredictiveCodingHierarchy,
 )
-from consciousness.predictive_coding.layer_base_hardened import LayerConfig
 
 
 def test_smoke_create_hierarchy():
@@ -120,7 +120,6 @@ async def test_smoke_layer_isolation_protection():
     hierarchy = PredictiveCodingHierarchy()
 
     # Force Layer 3 to fail
-    original_impl = hierarchy.layer3._predict_impl
 
     async def failing_impl(input_data):
         raise RuntimeError("Simulated Layer 3 failure")
@@ -217,7 +216,6 @@ async def test_smoke_timeout_protection():
 
     # Force layers to be slow
     for layer in hierarchy._layers:
-        original_impl = layer._predict_impl
 
         async def slow_impl(input_data):
             await asyncio.sleep(0.1)  # 100ms each = 500ms total (will timeout)
@@ -238,9 +236,7 @@ async def test_smoke_timeout_protection():
 @pytest.mark.asyncio
 async def test_smoke_full_lifecycle():
     """Smoke test: Full lifecycle - create, process, monitor, shutdown."""
-    config = HierarchyConfig(
-        max_hierarchy_cycle_time_ms=1000.0
-    )
+    config = HierarchyConfig(max_hierarchy_cycle_time_ms=1000.0)
 
     kill_switch_calls = []
 

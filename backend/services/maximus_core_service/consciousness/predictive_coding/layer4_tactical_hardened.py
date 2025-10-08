@@ -26,11 +26,12 @@ Date: 2025-10-08
 """
 
 from typing import Any, Dict, Set
+
 import numpy as np
 
 from consciousness.predictive_coding.layer_base_hardened import (
-    PredictiveCodingLayerBase,
     LayerConfig,
+    PredictiveCodingLayerBase,
 )
 
 
@@ -169,9 +170,11 @@ class Layer4Tactical(PredictiveCodingLayerBase):
 
             # Get neighbors (entities with relations)
             neighbors = [
-                other_id for (e1, e2), rel_type in self._relations.items()
+                other_id
+                for (e1, e2), rel_type in self._relations.items()
                 if e1 == entity_id or e2 == entity_id
-                for other_id in [e1, e2] if other_id != entity_id
+                for other_id in [e1, e2]
+                if other_id != entity_id
             ]
 
             if not neighbors:
@@ -179,7 +182,10 @@ class Layer4Tactical(PredictiveCodingLayerBase):
                 new_embeddings[entity_id] = self._entity_embeddings[entity_id]
             else:
                 # Average neighbor embeddings (simplified message passing)
-                neighbor_embeddings = [self._entity_embeddings.get(n, np.zeros(self.config.hidden_dim, dtype=np.float32)) for n in neighbors]
+                neighbor_embeddings = [
+                    self._entity_embeddings.get(n, np.zeros(self.config.hidden_dim, dtype=np.float32))
+                    for n in neighbors
+                ]
                 avg_neighbor = np.mean(neighbor_embeddings, axis=0)
 
                 # Update: mix self + neighbors
@@ -203,7 +209,7 @@ class Layer4Tactical(PredictiveCodingLayerBase):
 
         # Mean pooling over all entity embeddings
         all_embeddings = list(self._entity_embeddings.values())
-        aggregated = np.mean(all_embeddings, axis=0)
+        np.mean(all_embeddings, axis=0)
 
         # Project to output space (placeholder)
         # In production: self.output_layer(aggregated)

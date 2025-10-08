@@ -29,27 +29,23 @@ import numpy as np
 import pytest
 
 from consciousness.tig.fabric import (
-    TIGFabric,
-    TIGNode,
-    TopologyConfig,
     NodeState,
+    TIGFabric,
+    TopologyConfig,
 )
 from consciousness.tig.sync import (
-    PTPSynchronizer,
-    PTPCluster,
     ClockRole,
-    SyncState,
+    PTPCluster,
+    PTPSynchronizer,
 )
 from consciousness.validation.phi_proxies import (
     PhiProxyValidator,
-    PhiProxyMetrics,
-    StructuralCompliance,
 )
-
 
 # =============================================================================
 # TOPOLOGY TESTS
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_fabric_initialization():
@@ -103,7 +99,7 @@ async def test_small_world_properties():
     config = TopologyConfig(
         node_count=16,  # Reduced from 32
         clustering_target=0.75,
-        enable_small_world_rewiring=True
+        enable_small_world_rewiring=True,
     )
     fabric = TIGFabric(config)
 
@@ -113,13 +109,13 @@ async def test_small_world_properties():
 
     # Small-world properties:
     # 1. High clustering coefficient (C ≥ 0.75)
-    assert metrics.avg_clustering_coefficient >= 0.70, \
-        f"Clustering too low: {metrics.avg_clustering_coefficient:.3f}"
+    assert metrics.avg_clustering_coefficient >= 0.70, f"Clustering too low: {metrics.avg_clustering_coefficient:.3f}"
 
     # 2. Low average path length (L ≤ log(N))
     ideal_path_length = np.log(32) * 2  # With some tolerance
-    assert metrics.avg_path_length <= ideal_path_length, \
+    assert metrics.avg_path_length <= ideal_path_length, (
         f"Path length too high: {metrics.avg_path_length:.2f} > {ideal_path_length:.2f}"
+    )
 
 
 @pytest.mark.asyncio
@@ -131,17 +127,18 @@ async def test_no_isolated_nodes():
     await fabric.initialize()
 
     # Check connectivity
-    assert all(node.get_degree() >= 3 for node in fabric.nodes.values()), \
-        "All nodes should have minimum degree"
+    assert all(node.get_degree() >= 3 for node in fabric.nodes.values()), "All nodes should have minimum degree"
 
     # Graph should be connected
     import networkx as nx
+
     assert nx.is_connected(fabric.graph), "Graph should be fully connected"
 
 
 # =============================================================================
 # IIT COMPLIANCE TESTS
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_iit_structural_compliance():
@@ -177,8 +174,7 @@ async def test_effective_connectivity_index():
     metrics = fabric.get_metrics()
 
     # ECI should be high (>0.85 for consciousness)
-    assert metrics.effective_connectivity_index >= 0.80, \
-        f"ECI too low: {metrics.effective_connectivity_index:.3f}"
+    assert metrics.effective_connectivity_index >= 0.80, f"ECI too low: {metrics.effective_connectivity_index:.3f}"
 
     # ECI should increase with density
     config_sparse = TopologyConfig(node_count=16, target_density=0.10)  # Reduced for performance
@@ -187,8 +183,9 @@ async def test_effective_connectivity_index():
 
     metrics_sparse = fabric_sparse.get_metrics()
     # Higher density should increase or maintain ECI (>= allows for small graphs where both are dense)
-    assert metrics.effective_connectivity_index >= metrics_sparse.effective_connectivity_index, \
+    assert metrics.effective_connectivity_index >= metrics_sparse.effective_connectivity_index, (
         f"Higher density should not decrease ECI: {metrics.effective_connectivity_index:.3f} vs {metrics_sparse.effective_connectivity_index:.3f}"
+    )
 
 
 @pytest.mark.asyncio
@@ -203,8 +200,7 @@ async def test_bottleneck_detection():
     metrics = fabric.get_metrics()
 
     # High connectivity should prevent bottlenecks
-    assert not metrics.has_feed_forward_bottlenecks, \
-        f"Should have no bottlenecks with high connectivity"
+    assert not metrics.has_feed_forward_bottlenecks, "Should have no bottlenecks with high connectivity"
 
 
 @pytest.mark.asyncio
@@ -218,13 +214,13 @@ async def test_path_redundancy():
     metrics = fabric.get_metrics()
 
     # Should have multiple alternative paths
-    assert metrics.min_path_redundancy >= 2, \
-        f"Insufficient redundancy: {metrics.min_path_redundancy}"
+    assert metrics.min_path_redundancy >= 2, f"Insufficient redundancy: {metrics.min_path_redundancy}"
 
 
 # =============================================================================
 # PERFORMANCE TESTS
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_broadcast_performance():
@@ -280,6 +276,7 @@ async def test_esgt_mode_transition():
 # =============================================================================
 # PTP SYNCHRONIZATION TESTS
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_ptp_basic_sync():
@@ -358,17 +355,16 @@ async def test_ptp_cluster_sync():
     # Check cluster ESGT readiness
     metrics = cluster.get_cluster_metrics()
 
-    print(f"\nCluster Metrics:")
+    print("\nCluster Metrics:")
     print(f"  ESGT Ready: {metrics['esgt_ready_count']}/{metrics['slave_count']}")
     print(f"  Avg Jitter: {metrics['avg_jitter_ns']:.1f}ns")
     print(f"  Max Jitter: {metrics['max_jitter_ns']:.1f}ns")
 
     # In simulation, at least one slave readiness validates PTP sync mechanism
     # (Full majority readiness requires hardware timing precision)
-    esgt_ready_count = metrics['esgt_ready_count']
-    slave_count = metrics['slave_count']
-    assert esgt_ready_count >= 1, \
-        f"At least one slave should be ESGT ready: {esgt_ready_count}/{slave_count}"
+    esgt_ready_count = metrics["esgt_ready_count"]
+    slave_count = metrics["slave_count"]
+    assert esgt_ready_count >= 1, f"At least one slave should be ESGT ready: {esgt_ready_count}/{slave_count}"
 
     await cluster.stop_all()
 
@@ -376,6 +372,7 @@ async def test_ptp_cluster_sync():
 # =============================================================================
 # PHI PROXY VALIDATION TESTS
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_phi_proxy_computation():
@@ -413,8 +410,7 @@ async def test_phi_proxy_correlation_with_density():
     phi_high = validator.get_phi_estimate(fabric_high)
 
     # Higher density should yield higher or equal Φ proxy (>= allows for small graphs)
-    assert phi_high >= phi_low, \
-        f"Higher density should not decrease Φ: {phi_high:.3f} vs {phi_low:.3f}"
+    assert phi_high >= phi_low, f"Higher density should not decrease Φ: {phi_high:.3f} vs {phi_low:.3f}"
 
 
 @pytest.mark.asyncio
@@ -429,17 +425,16 @@ async def test_compliance_score():
     compliance = validator.validate_fabric(fabric)
 
     # Compliance score should be 0-100
-    assert 0 <= compliance.compliance_score <= 100, \
-        f"Invalid compliance score: {compliance.compliance_score}"
+    assert 0 <= compliance.compliance_score <= 100, f"Invalid compliance score: {compliance.compliance_score}"
 
     # For well-configured fabric, should be high
-    assert compliance.compliance_score >= 70, \
-        f"Compliance score too low: {compliance.compliance_score:.1f}"
+    assert compliance.compliance_score >= 70, f"Compliance score too low: {compliance.compliance_score:.1f}"
 
 
 # =============================================================================
 # INTEGRATION TESTS
 # =============================================================================
+
 
 @pytest.mark.asyncio
 async def test_full_consciousness_substrate():
@@ -449,9 +444,9 @@ async def test_full_consciousness_substrate():
     This test validates that the complete substrate satisfies all
     requirements for consciousness emergence.
     """
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print(" CONSCIOUSNESS SUBSTRATE VALIDATION")
-    print("="*70)
+    print("=" * 70)
 
     # Step 1: Initialize TIG Fabric
     print("\n1. Initializing TIG Fabric...")
@@ -486,7 +481,7 @@ async def test_full_consciousness_substrate():
     assert cluster.is_esgt_ready(), "Cluster must achieve ESGT-quality sync"
 
     metrics = cluster.get_cluster_metrics()
-    print(f"\n   Sync Quality:")
+    print("\n   Sync Quality:")
     print(f"   - ESGT Ready: {metrics['esgt_ready_count']}/{metrics['slave_count']}")
     print(f"   - Avg Jitter: {metrics['avg_jitter_ns']:.1f}ns (target: <100ns)")
     print(f"   - Max Offset: {metrics['max_offset_ns']:.1f}ns")
@@ -509,14 +504,14 @@ async def test_full_consciousness_substrate():
     await fabric.exit_esgt_mode()
 
     # Final validation
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print(" ✅ CONSCIOUSNESS SUBSTRATE VALIDATED")
-    print("="*70)
+    print("=" * 70)
     print(f"\n   Φ Proxy: {validator.get_phi_estimate(fabric):.3f}")
     print(f"   IIT Compliance: {compliance.compliance_score:.1f}/100")
     print(f"   Temporal Coherence: {metrics['esgt_ready_percentage']:.1f}% ready")
-    print(f"\n   Status: READY FOR CONSCIOUSNESS EMERGENCE")
-    print("="*70 + "\n")
+    print("\n   Status: READY FOR CONSCIOUSNESS EMERGENCE")
+    print("=" * 70 + "\n")
 
     await cluster.stop_all()
 

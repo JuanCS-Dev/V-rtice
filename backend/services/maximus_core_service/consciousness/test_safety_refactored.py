@@ -43,10 +43,10 @@ from consciousness.safety import (
     ThresholdMonitor,
 )
 
-
 # =============================================================================
 # SafetyThresholds Tests (Immutability Critical)
 # =============================================================================
+
 
 def test_safety_thresholds_immutable():
     """Test SafetyThresholds is truly immutable (frozen dataclass)."""
@@ -65,10 +65,7 @@ def test_safety_thresholds_immutable():
 def test_safety_thresholds_validation():
     """Test SafetyThresholds validates bounds on init."""
     # Valid thresholds
-    thresholds = SafetyThresholds(
-        esgt_frequency_max_hz=5.0,
-        arousal_max=0.90
-    )
+    thresholds = SafetyThresholds(esgt_frequency_max_hz=5.0, arousal_max=0.90)
     assert thresholds.esgt_frequency_max_hz == 5.0
 
     # Invalid ESGT frequency (>10 Hz)
@@ -87,10 +84,7 @@ def test_safety_thresholds_validation():
 def test_safety_thresholds_custom_values():
     """Test SafetyThresholds accepts valid custom values."""
     thresholds = SafetyThresholds(
-        esgt_frequency_max_hz=8.0,
-        arousal_max=0.90,
-        memory_usage_max_gb=8.0,
-        cpu_usage_max_percent=80.0
+        esgt_frequency_max_hz=8.0, arousal_max=0.90, memory_usage_max_gb=8.0, cpu_usage_max_percent=80.0
     )
 
     assert thresholds.esgt_frequency_max_hz == 8.0
@@ -103,13 +97,14 @@ def test_safety_thresholds_custom_values():
 # KillSwitch Tests (CRITICAL - <1s Guarantee)
 # =============================================================================
 
+
 def test_kill_switch_initialization():
     """Test KillSwitch initializes correctly."""
     mock_system = Mock()
     kill_switch = KillSwitch(mock_system)
 
-    assert kill_switch.armed == True
-    assert kill_switch.triggered == False
+    assert kill_switch.armed
+    assert not kill_switch.triggered
     assert kill_switch.trigger_time is None
     assert kill_switch.shutdown_reason is None
 
@@ -131,13 +126,10 @@ def test_kill_switch_trigger_basic():
     kill_switch = KillSwitch(mock_system)
 
     # Trigger kill switch
-    result = kill_switch.trigger(
-        reason=ShutdownReason.MANUAL,
-        context={'violations': [], 'notes': 'Test shutdown'}
-    )
+    result = kill_switch.trigger(reason=ShutdownReason.MANUAL, context={"violations": [], "notes": "Test shutdown"})
 
-    assert result == True  # Successful
-    assert kill_switch.triggered == True
+    assert result  # Successful
+    assert kill_switch.triggered
     assert kill_switch.shutdown_reason == ShutdownReason.MANUAL
     assert kill_switch.trigger_time is not None
 
@@ -156,7 +148,7 @@ def test_kill_switch_under_1_second(tmp_path, monkeypatch):
     If this fails, the system is UNSAFE.
     """
     # Patch incident report directory to use tmp_path
-    monkeypatch.setattr('consciousness.safety.Path', lambda x: tmp_path if "incident_reports" in x else Path(x))
+    monkeypatch.setattr("consciousness.safety.Path", lambda x: tmp_path if "incident_reports" in x else Path(x))
 
     mock_system = Mock()
     mock_system.esgt = Mock()
@@ -176,16 +168,15 @@ def test_kill_switch_under_1_second(tmp_path, monkeypatch):
     start_time = time.time()
 
     result = kill_switch.trigger(
-        reason=ShutdownReason.THRESHOLD,
-        context={'violations': [], 'notes': 'Performance test'}
+        reason=ShutdownReason.THRESHOLD, context={"violations": [], "notes": "Performance test"}
     )
 
     elapsed_time = time.time() - start_time
 
     # CRITICAL ASSERTION: Must be <1s
     assert elapsed_time < 1.0, f"Kill switch took {elapsed_time:.3f}s (MUST be <1s)"
-    assert result == True
-    assert kill_switch.triggered == True
+    assert result
+    assert kill_switch.triggered
 
 
 def test_kill_switch_idempotent():
@@ -195,11 +186,11 @@ def test_kill_switch_idempotent():
 
     # First trigger
     result1 = kill_switch.trigger(ShutdownReason.MANUAL, {})
-    assert result1 == True
+    assert result1
 
     # Second trigger (should return False - already triggered)
     result2 = kill_switch.trigger(ShutdownReason.MANUAL, {})
-    assert result2 == False
+    assert not result2
 
 
 def test_kill_switch_state_snapshot():
@@ -222,12 +213,12 @@ def test_kill_switch_state_snapshot():
     # Capture snapshot (internal method)
     snapshot = kill_switch._capture_state_snapshot()
 
-    assert 'timestamp' in snapshot
-    assert 'pid' in snapshot
-    assert snapshot['tig_nodes'] == 8
-    assert snapshot['esgt_running'] == True
-    assert snapshot['arousal'] == 0.75
-    assert snapshot['active_goals'] == 3
+    assert "timestamp" in snapshot
+    assert "pid" in snapshot
+    assert snapshot["tig_nodes"] == 8
+    assert snapshot["esgt_running"]
+    assert snapshot["arousal"] == 0.75
+    assert snapshot["active_goals"] == 3
 
 
 def test_kill_switch_incident_report_generation():
@@ -242,15 +233,12 @@ def test_kill_switch_incident_report_generation():
         threat_level=ThreatLevel.CRITICAL,
         timestamp=time.time(),
         description="Test violation",
-        metrics={'test': 123},
-        source_component="test"
+        metrics={"test": 123},
+        source_component="test",
     )
 
     # Trigger (which generates report)
-    kill_switch.trigger(
-        reason=ShutdownReason.THRESHOLD,
-        context={'violations': [violation], 'notes': 'Test'}
-    )
+    kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context={"violations": [violation], "notes": "Test"})
 
     # Verify incident report was created (check file exists)
     reports_dir = Path("consciousness/incident_reports")
@@ -265,16 +253,16 @@ def test_kill_switch_recovery_assessment():
     kill_switch = KillSwitch(mock_system)
 
     # MANUAL shutdown = recoverable
-    assert kill_switch._assess_recovery_possibility(ShutdownReason.MANUAL) == True
+    assert kill_switch._assess_recovery_possibility(ShutdownReason.MANUAL)
 
     # THRESHOLD shutdown = recoverable
-    assert kill_switch._assess_recovery_possibility(ShutdownReason.THRESHOLD) == True
+    assert kill_switch._assess_recovery_possibility(ShutdownReason.THRESHOLD)
 
     # ANOMALY shutdown = NOT recoverable
-    assert kill_switch._assess_recovery_possibility(ShutdownReason.ANOMALY) == False
+    assert not kill_switch._assess_recovery_possibility(ShutdownReason.ANOMALY)
 
     # SELF_MODIFICATION = NOT recoverable
-    assert kill_switch._assess_recovery_possibility(ShutdownReason.SELF_MODIFICATION) == False
+    assert not kill_switch._assess_recovery_possibility(ShutdownReason.SELF_MODIFICATION)
 
 
 def test_kill_switch_get_status():
@@ -284,21 +272,22 @@ def test_kill_switch_get_status():
 
     # Initial status
     status = kill_switch.get_status()
-    assert status['armed'] == True
-    assert status['triggered'] == False
-    assert status['trigger_time'] is None
+    assert status["armed"]
+    assert not status["triggered"]
+    assert status["trigger_time"] is None
 
     # After trigger
     kill_switch.trigger(ShutdownReason.MANUAL, {})
     status = kill_switch.get_status()
-    assert status['triggered'] == True
-    assert status['shutdown_reason'] == 'manual_operator_command'
-    assert status['trigger_time'] is not None
+    assert status["triggered"]
+    assert status["shutdown_reason"] == "manual_operator_command"
+    assert status["trigger_time"] is not None
 
 
 # =============================================================================
 # ThresholdMonitor Tests
 # =============================================================================
+
 
 def test_threshold_monitor_initialization():
     """Test ThresholdMonitor initializes correctly."""
@@ -307,7 +296,7 @@ def test_threshold_monitor_initialization():
 
     assert monitor.thresholds == thresholds
     assert monitor.check_interval == 0.5
-    assert monitor.monitoring == False
+    assert not monitor.monitoring
     assert len(monitor.violations) == 0
     assert len(monitor.esgt_events_window) == 0
 
@@ -340,7 +329,7 @@ def test_threshold_monitor_esgt_frequency_violation():
     assert violation is not None
     assert violation.violation_type == SafetyViolationType.THRESHOLD_EXCEEDED
     assert violation.threat_level == ThreatLevel.CRITICAL
-    assert violation.metrics['frequency_hz'] > 5.0
+    assert violation.metrics["frequency_hz"] > 5.0
 
 
 def test_threshold_monitor_esgt_window_cleanup():
@@ -376,10 +365,7 @@ def test_threshold_monitor_arousal_sustained_normal():
 
 def test_threshold_monitor_arousal_sustained_violation():
     """Test arousal check - sustained high arousal triggers violation."""
-    thresholds = SafetyThresholds(
-        arousal_max=0.95,
-        arousal_max_duration_seconds=5.0
-    )
+    thresholds = SafetyThresholds(arousal_max=0.95, arousal_max_duration_seconds=5.0)
     monitor = ThresholdMonitor(thresholds)
     current_time = time.time()
 
@@ -391,8 +377,8 @@ def test_threshold_monitor_arousal_sustained_violation():
     assert violation is not None
     assert violation.violation_type == SafetyViolationType.AROUSAL_RUNAWAY
     assert violation.threat_level == ThreatLevel.CRITICAL
-    assert violation.metrics['arousal_level'] == 0.97
-    assert violation.metrics['duration_seconds'] > 5.0
+    assert violation.metrics["arousal_level"] == 0.97
+    assert violation.metrics["duration_seconds"] > 5.0
 
 
 def test_threshold_monitor_arousal_reset():
@@ -424,7 +410,7 @@ def test_threshold_monitor_goal_spam():
     assert violation is not None
     assert violation.violation_type == SafetyViolationType.GOAL_SPAM
     assert violation.threat_level == ThreatLevel.HIGH
-    assert violation.metrics['goal_count_1s'] >= 10
+    assert violation.metrics["goal_count_1s"] >= 10
 
 
 def test_threshold_monitor_resource_limits():
@@ -432,7 +418,7 @@ def test_threshold_monitor_resource_limits():
     # Use very high thresholds so we don't trigger in tests
     thresholds = SafetyThresholds(
         memory_usage_max_gb=1000.0,  # 1TB
-        cpu_usage_max_percent=99.9
+        cpu_usage_max_percent=99.9,
     )
     monitor = ThresholdMonitor(thresholds)
 
@@ -461,25 +447,29 @@ def test_threshold_monitor_get_violations():
     monitor = ThresholdMonitor(SafetyThresholds())
 
     # Add violations manually
-    monitor.violations.append(SafetyViolation(
-        violation_id="v1",
-        violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
-        threat_level=ThreatLevel.CRITICAL,
-        timestamp=time.time(),
-        description="Critical test",
-        metrics={},
-        source_component="test"
-    ))
+    monitor.violations.append(
+        SafetyViolation(
+            violation_id="v1",
+            violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
+            threat_level=ThreatLevel.CRITICAL,
+            timestamp=time.time(),
+            description="Critical test",
+            metrics={},
+            source_component="test",
+        )
+    )
 
-    monitor.violations.append(SafetyViolation(
-        violation_id="v2",
-        violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
-        threat_level=ThreatLevel.MEDIUM,
-        timestamp=time.time(),
-        description="Medium test",
-        metrics={},
-        source_component="test"
-    ))
+    monitor.violations.append(
+        SafetyViolation(
+            violation_id="v2",
+            violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
+            threat_level=ThreatLevel.MEDIUM,
+            timestamp=time.time(),
+            description="Medium test",
+            metrics={},
+            source_component="test",
+        )
+    )
 
     # Get all
     all_violations = monitor.get_violations()
@@ -494,15 +484,17 @@ def test_threshold_monitor_get_violations():
 def test_threshold_monitor_clear_violations():
     """Test clearing violations."""
     monitor = ThresholdMonitor(SafetyThresholds())
-    monitor.violations.append(SafetyViolation(
-        violation_id="v1",
-        violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
-        threat_level=ThreatLevel.LOW,
-        timestamp=time.time(),
-        description="Test",
-        metrics={},
-        source_component="test"
-    ))
+    monitor.violations.append(
+        SafetyViolation(
+            violation_id="v1",
+            violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
+            threat_level=ThreatLevel.LOW,
+            timestamp=time.time(),
+            description="Test",
+            metrics={},
+            source_component="test",
+        )
+    )
 
     assert len(monitor.violations) == 1
     monitor.clear_violations()
@@ -512,6 +504,7 @@ def test_threshold_monitor_clear_violations():
 # =============================================================================
 # AnomalyDetector Tests
 # =============================================================================
+
 
 def test_anomaly_detector_initialization():
     """Test AnomalyDetector initializes correctly."""
@@ -527,7 +520,7 @@ def test_anomaly_detector_goal_spam():
     """Test goal spam detection."""
     detector = AnomalyDetector()
 
-    metrics = {'goal_generation_rate': 6.0}  # >5 goals/second = spam
+    metrics = {"goal_generation_rate": 6.0}  # >5 goals/second = spam
 
     anomalies = detector.detect_anomalies(metrics)
 
@@ -542,7 +535,7 @@ def test_anomaly_detector_arousal_runaway():
 
     # Fill baseline with normal arousal
     for i in range(10):
-        metrics = {'arousal': 0.95}  # All high
+        metrics = {"arousal": 0.95}  # All high
         detector.detect_anomalies(metrics)
 
     # Should detect runaway
@@ -557,14 +550,14 @@ def test_anomaly_detector_coherence_collapse():
 
     # Establish baseline
     for i in range(10):
-        metrics = {'coherence': 0.80}
+        metrics = {"coherence": 0.80}
         detector.detect_anomalies(metrics)
 
     # Clear anomalies from baseline building
     detector.anomalies_detected.clear()
 
     # Sudden drop (>50% below baseline)
-    metrics = {'coherence': 0.30}  # Drop from 0.80 to 0.30 = 62.5% drop
+    metrics = {"coherence": 0.30}  # Drop from 0.80 to 0.30 = 62.5% drop
     anomalies = detector.detect_anomalies(metrics)
 
     # Should detect collapse
@@ -577,7 +570,7 @@ def test_anomaly_detector_history():
     detector = AnomalyDetector()
 
     # Generate some anomalies
-    detector.detect_anomalies({'goal_generation_rate': 10.0})
+    detector.detect_anomalies({"goal_generation_rate": 10.0})
 
     history = detector.get_anomaly_history()
     assert len(history) > 0
@@ -592,6 +585,7 @@ def test_anomaly_detector_history():
 # IncidentReport Tests
 # =============================================================================
 
+
 def test_incident_report_creation():
     """Test IncidentReport creation and serialization."""
     violation = SafetyViolation(
@@ -600,8 +594,8 @@ def test_incident_report_creation():
         threat_level=ThreatLevel.CRITICAL,
         timestamp=time.time(),
         description="Test violation",
-        metrics={'value': 123},
-        source_component="test"
+        metrics={"value": 123},
+        source_component="test",
     )
 
     report = IncidentReport(
@@ -609,18 +603,18 @@ def test_incident_report_creation():
         shutdown_reason=ShutdownReason.THRESHOLD,
         shutdown_timestamp=time.time(),
         violations=[violation],
-        system_state_snapshot={'test': 'data'},
+        system_state_snapshot={"test": "data"},
         metrics_timeline=[],
         recovery_possible=True,
-        notes="Test incident"
+        notes="Test incident",
     )
 
     # Test to_dict
     report_dict = report.to_dict()
-    assert report_dict['incident_id'] == "INCIDENT-123"
-    assert report_dict['shutdown_reason'] == "threshold_violation"
-    assert len(report_dict['violations']) == 1
-    assert report_dict['recovery_possible'] == True
+    assert report_dict["incident_id"] == "INCIDENT-123"
+    assert report_dict["shutdown_reason"] == "threshold_violation"
+    assert len(report_dict["violations"]) == 1
+    assert report_dict["recovery_possible"]
 
 
 def test_incident_report_save():
@@ -633,7 +627,7 @@ def test_incident_report_save():
         system_state_snapshot={},
         metrics_timeline=[],
         recovery_possible=True,
-        notes="Test"
+        notes="Test",
     )
 
     # Save to temp directory
@@ -652,6 +646,7 @@ def test_incident_report_save():
 # Integration Tests (ConsciousnessSafetyProtocol)
 # =============================================================================
 
+
 @pytest.mark.asyncio
 async def test_safety_protocol_initialization():
     """Test SafetyProtocol initializes all components."""
@@ -663,7 +658,7 @@ async def test_safety_protocol_initialization():
     assert protocol.threshold_monitor is not None
     assert protocol.anomaly_detector is not None
     assert protocol.kill_switch is not None
-    assert protocol.monitoring_active == False
+    assert not protocol.monitoring_active
     assert protocol.degradation_level == 0
 
 
@@ -677,7 +672,7 @@ async def test_safety_protocol_start_stop_monitoring():
 
     # Start monitoring
     await protocol.start_monitoring()
-    assert protocol.monitoring_active == True
+    assert protocol.monitoring_active
     assert protocol.monitoring_task is not None
 
     # Give it a moment to run
@@ -685,7 +680,7 @@ async def test_safety_protocol_start_stop_monitoring():
 
     # Stop monitoring
     await protocol.stop_monitoring()
-    assert protocol.monitoring_active == False
+    assert not protocol.monitoring_active
 
 
 @pytest.mark.asyncio
@@ -697,20 +692,21 @@ async def test_safety_protocol_get_status():
 
     status = protocol.get_status()
 
-    assert 'monitoring_active' in status
-    assert 'kill_switch_triggered' in status
-    assert 'degradation_level' in status
-    assert 'violations_total' in status
-    assert 'thresholds' in status
+    assert "monitoring_active" in status
+    assert "kill_switch_triggered" in status
+    assert "degradation_level" in status
+    assert "violations_total" in status
+    assert "thresholds" in status
 
-    assert status['monitoring_active'] == False
-    assert status['kill_switch_triggered'] == False
-    assert status['degradation_level'] == 0
+    assert not status["monitoring_active"]
+    assert not status["kill_switch_triggered"]
+    assert status["degradation_level"] == 0
 
 
 # =============================================================================
 # Enums Tests
 # =============================================================================
+
 
 def test_threat_level_enum():
     """Test ThreatLevel enum values."""
@@ -765,6 +761,7 @@ if __name__ == "__main__":
 # CATEGORY A: KillSwitch Edge Cases (Coverage Expansion - Lines 392-475)
 # ============================================================================
 
+
 class TestKillSwitchEdgeCases:
     """
     Edge case testing for KillSwitch to achieve 95%+ coverage.
@@ -803,14 +800,11 @@ class TestKillSwitchEdgeCases:
         context = {
             "trigger": "test",
             "object": non_serializable_obj,  # This will fail JSON serialization
-            "nested": {"mock": Mock()}  # Another non-serializable
+            "nested": {"mock": Mock()},  # Another non-serializable
         }
 
         # Trigger should handle this gracefully and log raw context
-        result = kill_switch.trigger(
-            reason=ShutdownReason.THRESHOLD,
-            context=context
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context=context)
 
         # Should succeed despite JSON error
         assert result is True
@@ -826,6 +820,7 @@ class TestKillSwitchEdgeCases:
         because mocking time.time() is complex. The important thing is code coverage.
         """
         system = Mock()
+
         # Make get_node_count slow to trigger warning path
         def slow_get_node_count():
             time.sleep(0.11)  # >100ms
@@ -837,10 +832,7 @@ class TestKillSwitchEdgeCases:
         kill_switch = KillSwitch(system)
 
         # Trigger - should handle slow snapshot
-        result = kill_switch.trigger(
-            reason=ShutdownReason.THRESHOLD,
-            context={"test": "slow_snapshot"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context={"test": "slow_snapshot"})
 
         # Should complete despite slow snapshot
         assert result is True or result is False  # Either is valid
@@ -862,17 +854,15 @@ class TestKillSwitchEdgeCases:
 
         kill_switch = KillSwitch(system)
 
-        with patch('consciousness.safety.logger') as mock_logger:
-            result = kill_switch.trigger(
-                reason=ShutdownReason.THRESHOLD,
-                context={"test": "slow_shutdown"}
-            )
+        with patch("consciousness.safety.logger") as mock_logger:
+            result = kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context={"test": "slow_shutdown"})
 
             assert result is True
 
             # Verify slow shutdown warning
-            warning_calls = [call for call in mock_logger.warning.call_args_list
-                           if 'shutdown slow' in str(call).lower()]
+            warning_calls = [
+                call for call in mock_logger.warning.call_args_list if "shutdown slow" in str(call).lower()
+            ]
             assert len(warning_calls) > 0
 
     def test_kill_switch_slow_report_warning(self):
@@ -889,10 +879,7 @@ class TestKillSwitchEdgeCases:
         # Trigger with large context that might slow down report generation
         large_context = {"data": "x" * 10000, "test": "slow_report"}
 
-        result = kill_switch.trigger(
-            reason=ShutdownReason.ANOMALY,
-            context=large_context
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.ANOMALY, context=large_context)
 
         # Should complete despite potential slowness
         assert result is True or result is False
@@ -916,18 +903,14 @@ class TestKillSwitchEdgeCases:
 
         kill_switch = KillSwitch(system)
 
-        with patch('consciousness.safety.logger') as mock_logger:
-            result = kill_switch.trigger(
-                reason=ShutdownReason.THRESHOLD,
-                context={"test": "exceeds_1s"}
-            )
+        with patch("consciousness.safety.logger") as mock_logger:
+            result = kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context={"test": "exceeds_1s"})
 
             # Should still succeed, but log error
             assert result is True
 
             # Verify KILL SWITCH SLOW error was logged
-            error_calls = [call for call in mock_logger.error.call_args_list
-                          if 'KILL SWITCH SLOW' in str(call)]
+            error_calls = [call for call in mock_logger.error.call_args_list if "KILL SWITCH SLOW" in str(call)]
             assert len(error_calls) > 0
 
     def test_kill_switch_trigger_exception_path(self):
@@ -953,10 +936,7 @@ class TestKillSwitchEdgeCases:
 
         # Trigger - should handle exceptions gracefully
         # May return True (if exception caught) or False (if fail-safe triggered)
-        result = kill_switch.trigger(
-            reason=ShutdownReason.THRESHOLD,
-            context={"test": "exception_path"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context={"test": "exception_path"})
 
         # Either result is valid - important is that it didn't crash
         assert isinstance(result, bool)
@@ -989,10 +969,7 @@ class TestKillSwitchEdgeCases:
         kill_switch = KillSwitch(system)
 
         # Should handle all component errors gracefully
-        result = kill_switch.trigger(
-            reason=ShutdownReason.THRESHOLD,
-            context={"test": "component_errors"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context={"test": "component_errors"})
 
         # Should complete (True) or fail-safe (False), either is valid
         assert isinstance(result, bool)
@@ -1020,16 +997,14 @@ class TestKillSwitchEdgeCases:
         kill_switch = KillSwitch(system)
 
         # Should handle both sync and async stops
-        result = kill_switch.trigger(
-            reason=ShutdownReason.ANOMALY,
-            context={"test": "async_shutdown"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.ANOMALY, context={"test": "async_shutdown"})
 
         assert result is True
         assert kill_switch.triggered is True
 
 
 # ==================== CATEGORIA B: THRESHOLD MONITOR VIOLATIONS ====================
+
 
 class TestThresholdMonitorViolations:
     """
@@ -1075,7 +1050,7 @@ class TestThresholdMonitorViolations:
         assert len(violations_received) == 1
         assert violations_received[0] == violation
         assert "ESGT frequency" in violation.description
-        assert violation.metrics['frequency_hz'] > 5.0
+        assert violation.metrics["frequency_hz"] > 5.0
 
     def test_threshold_monitor_arousal_high_start_tracking(self):
         """
@@ -1083,10 +1058,7 @@ class TestThresholdMonitorViolations:
 
         Coverage: Line 776 (arousal_high_start tracking initiation)
         """
-        thresholds = SafetyThresholds(
-            arousal_max=0.90,
-            arousal_max_duration_seconds=5.0
-        )
+        thresholds = SafetyThresholds(arousal_max=0.90, arousal_max_duration_seconds=5.0)
         monitor = ThresholdMonitor(thresholds=thresholds)
 
         current_time = time.time()
@@ -1097,7 +1069,7 @@ class TestThresholdMonitorViolations:
         # First check above threshold - should start tracking
         violation = monitor.check_arousal_sustained(
             arousal_level=0.95,  # Above 0.90
-            current_time=current_time
+            current_time=current_time,
         )
 
         # No violation yet (not sustained)
@@ -1111,10 +1083,7 @@ class TestThresholdMonitorViolations:
 
         Coverage: Line 803 (on_violation callback in check_arousal_sustained)
         """
-        thresholds = SafetyThresholds(
-            arousal_max=0.90,
-            arousal_max_duration_seconds=5.0
-        )
+        thresholds = SafetyThresholds(arousal_max=0.90, arousal_max_duration_seconds=5.0)
         monitor = ThresholdMonitor(thresholds=thresholds)
 
         # Track callback
@@ -1185,9 +1154,9 @@ class TestThresholdMonitorViolations:
         # Should detect memory violation (current process uses > 10 MB)
         assert len(violations) > 0
         memory_violations = [
-            v for v in violations
-            if v.violation_type == SafetyViolationType.RESOURCE_EXHAUSTION
-            and "Memory" in v.description
+            v
+            for v in violations
+            if v.violation_type == SafetyViolationType.RESOURCE_EXHAUSTION and "Memory" in v.description
         ]
         assert len(memory_violations) > 0
 
@@ -1213,7 +1182,7 @@ class TestThresholdMonitorViolations:
             arousal_max=0.90,
             arousal_max_duration_seconds=2.0,
             goal_spam_threshold=5,
-            memory_usage_max_gb=0.01  # Very low to trigger
+            memory_usage_max_gb=0.01,  # Very low to trigger
         )
         monitor = ThresholdMonitor(thresholds=thresholds)
 
@@ -1247,10 +1216,11 @@ class TestThresholdMonitorViolations:
         assert len(monitor.violations) >= 3
 
         # Verify callback mechanism worked for all
-        assert all_violations == monitor.violations[-len(all_violations):]
+        assert all_violations == monitor.violations[-len(all_violations) :]
 
 
 # ==================== CATEGORIA C: ANOMALY DETECTOR DETECTION ====================
+
 
 class TestAnomalyDetectorDetection:
     """
@@ -1279,14 +1249,14 @@ class TestAnomalyDetectorDetection:
         detector = AnomalyDetector()
 
         # Goal rate > 5.0 = spam
-        metrics = {'goal_generation_rate': 7.5}
+        metrics = {"goal_generation_rate": 7.5}
         anomalies = detector.detect_anomalies(metrics)
 
         assert len(anomalies) == 1
         assert anomalies[0].violation_type == SafetyViolationType.GOAL_SPAM
         assert anomalies[0].threat_level == ThreatLevel.HIGH
         assert "spam" in anomalies[0].description.lower()
-        assert anomalies[0].metrics['goal_rate'] == 7.5
+        assert anomalies[0].metrics["goal_rate"] == 7.5
 
         # Verify stored
         assert len(detector.anomalies_detected) == 1
@@ -1300,7 +1270,7 @@ class TestAnomalyDetectorDetection:
         detector = AnomalyDetector()
 
         # Goal rate ≤ 5.0 = OK
-        metrics = {'goal_generation_rate': 3.2}
+        metrics = {"goal_generation_rate": 3.2}
         anomalies = detector.detect_anomalies(metrics)
 
         assert len(anomalies) == 0
@@ -1318,18 +1288,18 @@ class TestAnomalyDetectorDetection:
         arousal_samples = [0.95, 0.92, 0.91, 0.93, 0.88, 0.94, 0.91, 0.92, 0.89, 0.95]
 
         for arousal in arousal_samples[:-1]:
-            metrics = {'arousal': arousal}
+            metrics = {"arousal": arousal}
             detector.detect_anomalies(metrics)
 
         # Last sample triggers detection
-        metrics = {'arousal': arousal_samples[-1]}
+        metrics = {"arousal": arousal_samples[-1]}
         anomalies = detector.detect_anomalies(metrics)
 
         assert len(anomalies) == 1
         assert anomalies[0].violation_type == SafetyViolationType.AROUSAL_RUNAWAY
         assert anomalies[0].threat_level == ThreatLevel.CRITICAL
         assert "runaway" in anomalies[0].description.lower()
-        assert anomalies[0].metrics['high_arousal_ratio'] >= 0.8
+        assert anomalies[0].metrics["high_arousal_ratio"] >= 0.8
 
     def test_anomaly_detector_arousal_runaway_warmup(self):
         """
@@ -1341,7 +1311,7 @@ class TestAnomalyDetectorDetection:
 
         # Only 5 samples (below 10 minimum)
         for i in range(5):
-            metrics = {'arousal': 0.95}  # All high
+            metrics = {"arousal": 0.95}  # All high
             anomalies = detector.detect_anomalies(metrics)
             assert len(anomalies) == 0  # No detection yet
 
@@ -1355,18 +1325,18 @@ class TestAnomalyDetectorDetection:
 
         # Build baseline with high coherence
         for i in range(10):
-            metrics = {'coherence': 0.85}  # Stable high coherence
+            metrics = {"coherence": 0.85}  # Stable high coherence
             detector.detect_anomalies(metrics)
 
         # Sudden drop to 0.30 (>50% below baseline 0.85)
-        metrics = {'coherence': 0.30}
+        metrics = {"coherence": 0.30}
         anomalies = detector.detect_anomalies(metrics)
 
         assert len(anomalies) == 1
         assert anomalies[0].violation_type == SafetyViolationType.COHERENCE_COLLAPSE
         assert anomalies[0].threat_level == ThreatLevel.HIGH  # Coherence collapse is HIGH, not CRITICAL
         assert "collapse" in anomalies[0].description.lower()
-        assert anomalies[0].metrics['drop_ratio'] > 0.5
+        assert anomalies[0].metrics["drop_ratio"] > 0.5
 
     def test_anomaly_detector_multiple_simultaneous_anomalies(self):
         """
@@ -1379,22 +1349,22 @@ class TestAnomalyDetectorDetection:
         # Warmup with normal data
         for i in range(10):
             metrics = {
-                'arousal': 0.60,  # Normal
-                'coherence': 0.80,  # Normal
-                'goal_generation_rate': 2.0  # Normal
+                "arousal": 0.60,  # Normal
+                "coherence": 0.80,  # Normal
+                "goal_generation_rate": 2.0,  # Normal
             }
             detector.detect_anomalies(metrics)
 
         # Trigger multiple anomalies
         metrics = {
-            'arousal': 0.95,  # Part of runaway
-            'coherence': 0.20,  # Collapse (>50% drop from 0.80)
-            'goal_generation_rate': 8.0  # Spam (>5.0)
+            "arousal": 0.95,  # Part of runaway
+            "coherence": 0.20,  # Collapse (>50% drop from 0.80)
+            "goal_generation_rate": 8.0,  # Spam (>5.0)
         }
 
         # Need more high arousal samples for runaway
         for i in range(8):
-            detector.detect_anomalies({'arousal': 0.95})
+            detector.detect_anomalies({"arousal": 0.95})
 
         # Final check with all metrics
         anomalies = detector.detect_anomalies(metrics)
@@ -1409,6 +1379,7 @@ class TestAnomalyDetectorDetection:
 
 
 # ==================== CATEGORIA D: KILLSWITCH FAIL-SAFE PATHS ====================
+
 
 class TestKillSwitchFailSafePaths:
     """
@@ -1442,10 +1413,7 @@ class TestKillSwitchFailSafePaths:
         context = {"unsafe_object": NonSerializable()}
 
         # Should not crash, falls back to str() representation
-        result = kill_switch.trigger(
-            reason=ShutdownReason.ANOMALY,
-            context=context
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.ANOMALY, context=context)
 
         assert result is True
         assert kill_switch.triggered is True
@@ -1466,12 +1434,9 @@ class TestKillSwitchFailSafePaths:
             time.sleep(0.25)  # 250ms > 200ms threshold
             return original_generate(*args, **kwargs)
 
-        monkeypatch.setattr(kill_switch, '_generate_incident_report', slow_generate)
+        monkeypatch.setattr(kill_switch, "_generate_incident_report", slow_generate)
 
-        result = kill_switch.trigger(
-            reason=ShutdownReason.MANUAL,
-            context={"test": "slow_report"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.MANUAL, context={"test": "slow_report"})
 
         assert result is True
         # Should complete despite slowness
@@ -1495,12 +1460,9 @@ class TestKillSwitchFailSafePaths:
             slow_save_detected.append(True)
             return original_save(self)
 
-        monkeypatch.setattr(IncidentReport, 'save', slow_save)
+        monkeypatch.setattr(IncidentReport, "save", slow_save)
 
-        result = kill_switch.trigger(
-            reason=ShutdownReason.THRESHOLD,
-            context={"test": "slow_save"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.THRESHOLD, context={"test": "slow_save"})
 
         assert result is True
         assert len(slow_save_detected) > 0  # Slow path executed
@@ -1521,13 +1483,10 @@ class TestKillSwitchFailSafePaths:
         def failing_snapshot():
             raise RuntimeError("Catastrophic failure in snapshot")
 
-        monkeypatch.setattr(kill_switch, '_capture_state_snapshot', failing_snapshot)
+        monkeypatch.setattr(kill_switch, "_capture_state_snapshot", failing_snapshot)
 
         # Trigger should catch exception and enter fail-safe path
-        result = kill_switch.trigger(
-            reason=ShutdownReason.UNKNOWN,
-            context={"test": "catastrophic"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.UNKNOWN, context={"test": "catastrophic"})
 
         # In test environment, returns False (skips SIGTERM)
         # Lines 461-463 covered
@@ -1549,12 +1508,9 @@ class TestKillSwitchFailSafePaths:
         def failing_save(self):
             raise IOError("Disk full - cannot save report")
 
-        monkeypatch.setattr(IncidentReport, 'save', failing_save)
+        monkeypatch.setattr(IncidentReport, "save", failing_save)
 
-        result = kill_switch.trigger(
-            reason=ShutdownReason.RESOURCE,
-            context={"test": "save_failure"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.RESOURCE, context={"test": "save_failure"})
 
         # Should still complete successfully (save failure is logged but not fatal)
         assert result is True
@@ -1562,6 +1518,7 @@ class TestKillSwitchFailSafePaths:
 
 
 # ==================== CATEGORIA E: ANOMALY DETECTOR MEMORY LEAK ====================
+
 
 class TestAnomalyDetectorMemoryLeak:
     """
@@ -1589,14 +1546,14 @@ class TestAnomalyDetectorMemoryLeak:
         detector.arousal_baseline = [1.0, 1.0, 1.0]  # Baseline ~1.0 GB
 
         # Trigger leak: 2.0 GB / (1.0 + 0.1) = 1.82x > 1.5x threshold
-        metrics = {'memory_usage_gb': 2.0}
+        metrics = {"memory_usage_gb": 2.0}
         anomalies = detector.detect_anomalies(metrics)
 
         assert len(anomalies) == 1
         assert anomalies[0].violation_type == SafetyViolationType.RESOURCE_EXHAUSTION
         assert anomalies[0].threat_level == ThreatLevel.HIGH
         assert "leak" in anomalies[0].description.lower()
-        assert anomalies[0].metrics['growth_ratio'] > 1.5
+        assert anomalies[0].metrics["growth_ratio"] > 1.5
 
     def test_anomaly_detector_memory_leak_warmup_required(self):
         """
@@ -1610,13 +1567,14 @@ class TestAnomalyDetectorMemoryLeak:
         detector.arousal_baseline = [1.0]
 
         # Should not detect (insufficient baseline)
-        metrics = {'memory_usage_gb': 3.0}  # Would be 3x baseline
+        metrics = {"memory_usage_gb": 3.0}  # Would be 3x baseline
         anomalies = detector.detect_anomalies(metrics)
 
         assert len(anomalies) == 0  # No detection yet
 
 
 # ==================== CATEGORIA F: SAFETY PROTOCOL COMPLETE ====================
+
 
 class TestSafetyProtocolComplete:
     """
@@ -1678,10 +1636,7 @@ class TestSafetyProtocolComplete:
         protocol = ConsciousnessSafetyProtocol(system)
 
         # Trigger kill switch
-        protocol.kill_switch.trigger(
-            reason=ShutdownReason.MANUAL,
-            context={"test": "kill_switch_active"}
-        )
+        protocol.kill_switch.trigger(reason=ShutdownReason.MANUAL, context={"test": "kill_switch_active"})
 
         # Start monitoring (should pause in loop)
         await protocol.start_monitoring()
@@ -1699,9 +1654,11 @@ class TestSafetyProtocolComplete:
         Coverage: Lines 1260-1265 (arousal violation path)
         """
         system = Mock()
-        system.get_system_dict = Mock(return_value={
-            'arousal': {'arousal': 0.98}  # High arousal
-        })
+        system.get_system_dict = Mock(
+            return_value={
+                "arousal": {"arousal": 0.98}  # High arousal
+            }
+        )
 
         protocol = ConsciousnessSafetyProtocol(system)
 
@@ -1761,20 +1718,22 @@ class TestSafetyProtocolComplete:
         Coverage: Lines 1306, 1310, 1314-1315 (component metrics paths)
         """
         system = Mock()
-        system.get_system_dict = Mock(return_value={
-            'arousal': {'arousal': 0.75},
-            'esgt': {'coherence': 0.82},
-            'mmei': {'active_goals': ['goal1', 'goal2']}
-        })
+        system.get_system_dict = Mock(
+            return_value={
+                "arousal": {"arousal": 0.75},
+                "esgt": {"coherence": 0.82},
+                "mmei": {"active_goals": ["goal1", "goal2"]},
+            }
+        )
 
         protocol = ConsciousnessSafetyProtocol(system)
         metrics = protocol._collect_metrics()
 
-        assert metrics['arousal'] == 0.75
-        assert metrics['coherence'] == 0.82
-        assert metrics['active_goal_count'] == 2
-        assert 'memory_usage_gb' in metrics
-        assert 'cpu_percent' in metrics
+        assert metrics["arousal"] == 0.75
+        assert metrics["coherence"] == 0.82
+        assert metrics["active_goal_count"] == 2
+        assert "memory_usage_gb" in metrics
+        assert "cpu_percent" in metrics
 
     @pytest.mark.asyncio
     async def test_safety_protocol_metrics_collection_exception_handling(self):
@@ -1788,13 +1747,15 @@ class TestSafetyProtocolComplete:
         This tests the exception logging path.
         """
         system = Mock()
+
         # Make hasattr check fail early (before psutil)
         def failing_hasattr(obj, name):
-            if name == 'get_system_dict':
+            if name == "get_system_dict":
                 raise RuntimeError("Critical system failure")
             return object.__getattribute__(obj, name)
 
         import builtins
+
         original_hasattr = builtins.hasattr
         builtins.hasattr = failing_hasattr
 
@@ -1825,7 +1786,7 @@ class TestSafetyProtocolComplete:
             timestamp=time.time(),
             description="Critical test violation",
             metrics={},
-            source_component="test"
+            source_component="test",
         )
 
         await protocol._handle_violations([critical_violation])
@@ -1849,7 +1810,7 @@ class TestSafetyProtocolComplete:
             timestamp=time.time(),
             description="High test violation",
             metrics={},
-            source_component="test"
+            source_component="test",
         )
 
         initial_degradation = protocol.degradation_level
@@ -1874,7 +1835,7 @@ class TestSafetyProtocolComplete:
             timestamp=time.time(),
             description="Medium test violation",
             metrics={},
-            source_component="test"
+            source_component="test",
         )
 
         low_violation = SafetyViolation(
@@ -1884,7 +1845,7 @@ class TestSafetyProtocolComplete:
             timestamp=time.time(),
             description="Low test violation",
             metrics={},
-            source_component="test"
+            source_component="test",
         )
 
         await protocol._handle_violations([medium_violation, low_violation])
@@ -1912,7 +1873,7 @@ class TestSafetyProtocolComplete:
             timestamp=time.time(),
             description="Test callback",
             metrics={},
-            source_component="test"
+            source_component="test",
         )
 
         await protocol._handle_violations([violation])
@@ -1956,14 +1917,14 @@ class TestSafetyProtocolComplete:
 
         status = protocol.get_status()
 
-        assert 'monitoring_active' in status
-        assert 'kill_switch_triggered' in status
-        assert 'degradation_level' in status
-        assert 'violations_total' in status
-        assert 'violations_critical' in status
-        assert 'violations_high' in status
-        assert 'anomalies_detected' in status
-        assert 'thresholds' in status
+        assert "monitoring_active" in status
+        assert "kill_switch_triggered" in status
+        assert "degradation_level" in status
+        assert "violations_total" in status
+        assert "violations_critical" in status
+        assert "violations_high" in status
+        assert "anomalies_detected" in status
+        assert "thresholds" in status
 
     def test_safety_protocol_repr(self):
         """
@@ -1982,6 +1943,7 @@ class TestSafetyProtocolComplete:
 
 
 # ==================== CATEGORIA G: COVERAGE GAPS FINAL PUSH ====================
+
 
 class TestCoverageGapsFinalPush:
     """
@@ -2020,17 +1982,17 @@ class TestCoverageGapsFinalPush:
 
         # Mock MMEI
         system.mmei = Mock()
-        system.mmei.get_active_goals = Mock(return_value=['goal1', 'goal2'])
+        system.mmei.get_active_goals = Mock(return_value=["goal1", "goal2"])
 
         kill_switch = KillSwitch(system)
         snapshot = kill_switch._capture_state_snapshot()
 
-        assert snapshot['tig_nodes'] == 42
-        assert snapshot['esgt_running'] is True
-        assert snapshot['arousal'] == 0.75
-        assert snapshot['active_goals'] == 2
-        assert 'memory_mb' in snapshot
-        assert 'cpu_percent' in snapshot
+        assert snapshot["tig_nodes"] == 42
+        assert snapshot["esgt_running"] is True
+        assert snapshot["arousal"] == 0.75
+        assert snapshot["active_goals"] == 2
+        assert "memory_mb" in snapshot
+        assert "cpu_percent" in snapshot
 
     def test_kill_switch_capture_state_snapshot_component_errors(self):
         """
@@ -2057,10 +2019,10 @@ class TestCoverageGapsFinalPush:
         snapshot = kill_switch._capture_state_snapshot()
 
         # Should gracefully handle all errors
-        assert snapshot['tig_nodes'] == "ERROR"
-        assert snapshot['esgt_running'] == "ERROR"
-        assert snapshot['arousal'] == "ERROR"
-        assert snapshot['active_goals'] == "ERROR"
+        assert snapshot["tig_nodes"] == "ERROR"
+        assert snapshot["esgt_running"] == "ERROR"
+        assert snapshot["arousal"] == "ERROR"
+        assert snapshot["active_goals"] == "ERROR"
 
     def test_kill_switch_emergency_shutdown_with_components(self):
         """
@@ -2071,7 +2033,7 @@ class TestCoverageGapsFinalPush:
         system = Mock()
 
         # Mock all components with stop methods
-        for component_name in ['esgt', 'mcea', 'mmei', 'tig', 'lrr']:
+        for component_name in ["esgt", "mcea", "mmei", "tig", "lrr"]:
             component = Mock()
             component.stop = Mock()
             setattr(system, component_name, component)
@@ -2175,7 +2137,7 @@ class TestCoverageGapsFinalPush:
         detector.arousal_baseline = [1.0, 1.0, 1.0]
 
         # 1.2 GB / 1.1 = 1.09x < 1.5x (no leak)
-        metrics = {'memory_usage_gb': 1.2}
+        metrics = {"memory_usage_gb": 1.2}
         anomalies = detector.detect_anomalies(metrics)
 
         assert len(anomalies) == 0  # No leak detected
@@ -2190,10 +2152,10 @@ class TestCoverageGapsFinalPush:
 
         # Build baseline
         for i in range(10):
-            detector.detect_anomalies({'coherence': 0.80})
+            detector.detect_anomalies({"coherence": 0.80})
 
         # Small drop: 0.60 / 0.80 = 0.75 = 25% drop < 50%
-        metrics = {'coherence': 0.60}
+        metrics = {"coherence": 0.60}
         anomalies = detector.detect_anomalies(metrics)
 
         # Should not detect collapse
@@ -2211,14 +2173,17 @@ class TestCoverageGapsFinalPush:
         # 7 high out of 10 = 70% < 80%
         samples = [0.95, 0.92, 0.88, 0.85, 0.91, 0.87, 0.94, 0.82, 0.80, 0.83]
         for arousal in samples:
-            detector.detect_anomalies({'arousal': arousal})
+            detector.detect_anomalies({"arousal": arousal})
 
         # Should not trigger runaway
-        arousal_runaways = [a for a in detector.anomalies_detected if a.violation_type == SafetyViolationType.AROUSAL_RUNAWAY]
+        arousal_runaways = [
+            a for a in detector.anomalies_detected if a.violation_type == SafetyViolationType.AROUSAL_RUNAWAY
+        ]
         assert len(arousal_runaways) == 0
 
 
 # ==================== CATEGORIA H: CRITICAL SAFETY PATHS (95% TARGET) ====================
+
 
 class TestCriticalSafetyPaths:
     """
@@ -2255,13 +2220,10 @@ class TestCriticalSafetyPaths:
         def failing_snapshot():
             raise RuntimeError("Complete system failure")
 
-        monkeypatch.setattr(kill_switch, '_capture_state_snapshot', failing_snapshot)
+        monkeypatch.setattr(kill_switch, "_capture_state_snapshot", failing_snapshot)
 
         # This triggers the exception path
-        result = kill_switch.trigger(
-            reason=ShutdownReason.UNKNOWN,
-            context={"test": "sigterm_path"}
-        )
+        result = kill_switch.trigger(reason=ShutdownReason.UNKNOWN, context={"test": "sigterm_path"})
 
         # In test environment (pytest detected), returns False
         # Lines 461-463 covered (test environment detection)
@@ -2290,6 +2252,7 @@ class TestCriticalSafetyPaths:
 
         # Create event loop for this test
         import asyncio
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
@@ -2332,18 +2295,14 @@ class TestCriticalSafetyPaths:
 
         # Warmup
         for i in range(10):
-            detector.detect_anomalies({
-                'arousal': 0.60,
-                'coherence': 0.80,
-                'memory_usage_gb': 1.0
-            })
+            detector.detect_anomalies({"arousal": 0.60, "coherence": 0.80, "memory_usage_gb": 1.0})
 
         # Trigger all detection paths simultaneously
         metrics = {
-            'goal_generation_rate': 7.0,  # Goal spam (line 896-899)
-            'arousal': 0.95,  # Arousal runaway potential (line 901-904)
-            'coherence': 0.30,  # Coherence collapse (line 906-909)
-            'memory_usage_gb': 2.5  # Memory leak potential (line 902-905)
+            "goal_generation_rate": 7.0,  # Goal spam (line 896-899)
+            "arousal": 0.95,  # Arousal runaway potential (line 901-904)
+            "coherence": 0.30,  # Coherence collapse (line 906-909)
+            "memory_usage_gb": 2.5,  # Memory leak potential (line 902-905)
         }
 
         anomalies = detector.detect_anomalies(metrics)
@@ -2364,7 +2323,7 @@ class TestCriticalSafetyPaths:
         detector = AnomalyDetector()
 
         # No goal_generation_rate in metrics
-        metrics = {'arousal': 0.75}
+        metrics = {"arousal": 0.75}
         anomalies = detector.detect_anomalies(metrics)
 
         # Should not crash, goal spam detection skipped
@@ -2380,7 +2339,7 @@ class TestCriticalSafetyPaths:
         detector = AnomalyDetector()
 
         # No arousal in metrics
-        metrics = {'coherence': 0.75}
+        metrics = {"coherence": 0.75}
         anomalies = detector.detect_anomalies(metrics)
 
         # Should not crash, arousal detection skipped
@@ -2396,7 +2355,7 @@ class TestCriticalSafetyPaths:
         detector = AnomalyDetector()
 
         # No memory in metrics
-        metrics = {'arousal': 0.75}
+        metrics = {"arousal": 0.75}
         anomalies = detector.detect_anomalies(metrics)
 
         # Should not crash, memory detection skipped
@@ -2412,7 +2371,7 @@ class TestCriticalSafetyPaths:
         detector = AnomalyDetector()
 
         # No coherence in metrics
-        metrics = {'arousal': 0.75}
+        metrics = {"arousal": 0.75}
         anomalies = detector.detect_anomalies(metrics)
 
         # Should not crash, coherence detection skipped
@@ -2445,16 +2404,18 @@ class TestCriticalSafetyPaths:
         Coverage: Lines 1260-1265 (arousal not in metrics early return)
         """
         system = Mock()
-        system.get_system_dict = Mock(return_value={
-            # No 'arousal' key
-            'esgt': {'coherence': 0.80}
-        })
+        system.get_system_dict = Mock(
+            return_value={
+                # No 'arousal' key
+                "esgt": {"coherence": 0.80}
+            }
+        )
 
         protocol = ConsciousnessSafetyProtocol(system)
         metrics = protocol._collect_metrics()
 
         # arousal should not be in metrics
-        assert 'arousal' not in metrics
+        assert "arousal" not in metrics
 
     def test_anomaly_detector_baseline_window_overflow_arousal(self):
         """
@@ -2466,7 +2427,7 @@ class TestCriticalSafetyPaths:
 
         # Add 7 samples (exceeds window of 5)
         for i in range(7):
-            detector.detect_anomalies({'arousal': 0.75})
+            detector.detect_anomalies({"arousal": 0.75})
 
         # Baseline should be capped at 5
         assert len(detector.arousal_baseline) == 5
@@ -2481,7 +2442,7 @@ class TestCriticalSafetyPaths:
 
         # Add 7 samples (exceeds window of 5)
         for i in range(7):
-            detector.detect_anomalies({'coherence': 0.80})
+            detector.detect_anomalies({"coherence": 0.80})
 
         # Baseline should be capped at 5
         assert len(detector.coherence_baseline) == 5

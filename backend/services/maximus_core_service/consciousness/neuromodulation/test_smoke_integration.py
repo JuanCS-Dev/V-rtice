@@ -18,10 +18,11 @@ Date: 2025-10-08
 """
 
 import pytest
+
 from consciousness.neuromodulation.coordinator_hardened import (
-    NeuromodulationCoordinator,
     CoordinatorConfig,
     ModulationRequest,
+    NeuromodulationCoordinator,
 )
 
 
@@ -134,7 +135,7 @@ def test_smoke_interactions():
     initial_ach = coordinator.acetylcholine.level
     initial_ne = coordinator.norepinephrine.level
 
-    results = coordinator.coordinate_modulation(requests)
+    coordinator.coordinate_modulation(requests)
 
     final_ach = coordinator.acetylcholine.level
     final_ne = coordinator.norepinephrine.level

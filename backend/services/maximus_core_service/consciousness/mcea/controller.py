@@ -92,21 +92,113 @@ Enables MPE - the foundational "wakefulness" that precedes content.
 
 import asyncio
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
+
 import numpy as np
 
 from consciousness.mmei.monitor import AbstractNeeds
 
 
+# ============================================================================
+# FASE VII (Safety Hardening): Arousal Rate Limiting & Bounds Enforcement
+# ============================================================================
+
+
+class ArousalRateLimiter:
+    """
+    Enforces maximum rate of change for arousal value.
+
+    Prevents arousal from changing too rapidly (physiologically implausible).
+    Biological arousal systems have finite bandwidth - neuromodulators take
+    time to diffuse and act.
+
+    HARD LIMIT: Arousal can change at most ±0.20 per second.
+    """
+
+    def __init__(self, max_delta_per_second: float = 0.20):
+        """
+        Args:
+            max_delta_per_second: Maximum absolute change per second
+        """
+        self.max_delta_per_second = max_delta_per_second
+        self.last_arousal: Optional[float] = None
+        self.last_update_time: Optional[float] = None
+
+    def limit(self, new_arousal: float, current_time: float) -> float:
+        """
+        Apply rate limiting to new arousal value.
+
+        Args:
+            new_arousal: Proposed new arousal value
+            current_time: Current timestamp
+
+        Returns:
+            Rate-limited arousal value
+        """
+        if self.last_arousal is None or self.last_update_time is None:
+            # First call - no limiting
+            self.last_arousal = new_arousal
+            self.last_update_time = current_time
+            return new_arousal
+
+        # Compute elapsed time
+        elapsed = current_time - self.last_update_time
+
+        if elapsed <= 0:
+            # No time passed, return last value
+            return self.last_arousal
+
+        # Compute maximum allowed change
+        max_change = self.max_delta_per_second * elapsed
+
+        # Compute actual change requested
+        requested_change = new_arousal - self.last_arousal
+
+        # Clamp to maximum
+        if abs(requested_change) > max_change:
+            limited_change = max_change if requested_change > 0 else -max_change
+            limited_arousal = self.last_arousal + limited_change
+        else:
+            limited_arousal = new_arousal
+
+        # Update state
+        self.last_arousal = limited_arousal
+        self.last_update_time = current_time
+
+        return limited_arousal
+
+
+class ArousalBoundEnforcer:
+    """
+    Enforces hard bounds [0.0, 1.0] on arousal value.
+
+    HARD LIMIT: Arousal must always be in [0.0, 1.0].
+    """
+
+    @staticmethod
+    def enforce(arousal: float) -> float:
+        """Clamp arousal to [0.0, 1.0]."""
+        return float(np.clip(arousal, 0.0, 1.0))
+
+
+# FASE VII: Hard limits for MCEA safety
+MAX_AROUSAL_DELTA_PER_SECOND = 0.20  # Hard limit on arousal rate of change
+AROUSAL_SATURATION_THRESHOLD_SECONDS = 10.0  # Time at 0.0 or 1.0 = saturation
+AROUSAL_OSCILLATION_WINDOW = 20  # Track last 20 arousal values
+AROUSAL_OSCILLATION_THRESHOLD = 0.15  # StdDev >0.15 = unstable oscillation
+
+
 class ArousalLevel(Enum):
     """Classification of arousal states."""
-    SLEEP = "sleep"              # 0.0-0.2: Minimal/no consciousness
-    DROWSY = "drowsy"            # 0.2-0.4: Reduced awareness
-    RELAXED = "relaxed"          # 0.4-0.6: Normal baseline
-    ALERT = "alert"              # 0.6-0.8: Heightened awareness
-    HYPERALERT = "hyperalert"    # 0.8-1.0: Stress/panic state
+
+    SLEEP = "sleep"  # 0.0-0.2: Minimal/no consciousness
+    DROWSY = "drowsy"  # 0.2-0.4: Reduced awareness
+    RELAXED = "relaxed"  # 0.4-0.6: Normal baseline
+    ALERT = "alert"  # 0.6-0.8: Heightened awareness
+    HYPERALERT = "hyperalert"  # 0.8-1.0: Stress/panic state
 
 
 @dataclass
@@ -116,6 +208,7 @@ class ArousalState:
 
     Represents the global excitability/wakefulness level.
     """
+
     # Core arousal value (0.0 - 1.0)
     arousal: float = 0.6  # Default: RELAXED
 
@@ -124,9 +217,9 @@ class ArousalState:
 
     # Contributing factors (for transparency)
     baseline_arousal: float = 0.6
-    need_contribution: float = 0.0      # From MMEI needs
-    external_contribution: float = 0.0   # From threats/tasks
-    temporal_contribution: float = 0.0   # From stress buildup
+    need_contribution: float = 0.0  # From MMEI needs
+    external_contribution: float = 0.0  # From threats/tasks
+    temporal_contribution: float = 0.0  # From stress buildup
     circadian_contribution: float = 0.0  # From time-of-day
 
     # ESGT threshold (computed from arousal)
@@ -185,8 +278,10 @@ class ArousalState:
         return base_threshold / factor
 
     def __repr__(self) -> str:
-        return (f"ArousalState(arousal={self.arousal:.2f}, level={self.level.value}, "
-                f"threshold={self.esgt_salience_threshold:.2f})")
+        return (
+            f"ArousalState(arousal={self.arousal:.2f}, level={self.level.value}, "
+            f"threshold={self.esgt_salience_threshold:.2f})"
+        )
 
 
 @dataclass
@@ -196,10 +291,11 @@ class ArousalModulation:
 
     External systems can request arousal changes (e.g., threat detection).
     """
-    source: str                  # What requested modulation
-    delta: float                 # Change in arousal (-1.0 to +1.0)
+
+    source: str  # What requested modulation
+    delta: float  # Change in arousal (-1.0 to +1.0)
     duration_seconds: float = 0.0  # How long effect lasts (0 = instant)
-    priority: int = 1            # Higher priority overrides
+    priority: int = 1  # Higher priority overrides
 
     timestamp: float = field(default_factory=time.time)
 
@@ -226,6 +322,7 @@ class ArousalModulation:
 @dataclass
 class ArousalConfig:
     """Configuration for arousal controller."""
+
     # Baseline arousal (resting state)
     baseline_arousal: float = 0.6  # RELAXED default
 
@@ -237,13 +334,13 @@ class ArousalConfig:
     arousal_decrease_rate: float = 0.02  # Per second when decreasing (slower)
 
     # Need influence (how much MMEI needs affect arousal)
-    repair_need_weight: float = 0.3      # Errors increase arousal
-    rest_need_weight: float = -0.2       # Fatigue decreases arousal
+    repair_need_weight: float = 0.3  # Errors increase arousal
+    rest_need_weight: float = -0.2  # Fatigue decreases arousal
     efficiency_need_weight: float = 0.1
     connectivity_need_weight: float = 0.15
 
     # Stress buildup
-    stress_buildup_rate: float = 0.01    # Per second under high load
+    stress_buildup_rate: float = 0.01  # Per second under high load
     stress_recovery_rate: float = 0.005  # Per second when relaxed
 
     # ESGT refractory period
@@ -256,7 +353,7 @@ class ArousalConfig:
 
     # Circadian rhythm (optional)
     enable_circadian: bool = False
-    circadian_amplitude: float = 0.1     # ±0.1 arousal variation
+    circadian_amplitude: float = 0.1  # ±0.1 arousal variation
 
 
 class ArousalController:
@@ -325,11 +422,7 @@ class ArousalController:
     "Wakefulness is the stage upon which consciousness performs."
     """
 
-    def __init__(
-        self,
-        config: Optional[ArousalConfig] = None,
-        controller_id: str = "mcea-arousal-controller-primary"
-    ):
+    def __init__(self, config: Optional[ArousalConfig] = None, controller_id: str = "mcea-arousal-controller-primary"):
         self.controller_id = controller_id
         self.config = config or ArousalConfig()
 
@@ -367,10 +460,15 @@ class ArousalController:
         self.total_modulations: int = 0
         self.esgt_refractories_applied: int = 0
 
-    def register_arousal_callback(
-        self,
-        callback: Callable[[ArousalState], None]
-    ) -> None:
+        # FASE VII (Safety Hardening): Rate limiting, bounds, and monitoring
+        self.rate_limiter = ArousalRateLimiter(max_delta_per_second=MAX_AROUSAL_DELTA_PER_SECOND)
+        self.arousal_history: deque = deque(maxlen=AROUSAL_OSCILLATION_WINDOW)  # For oscillation detection
+        self.arousal_saturation_start: Optional[float] = None  # When saturation began
+        self.saturation_events: int = 0  # Count of saturation detections
+        self.oscillation_events: int = 0  # Count of oscillation detections
+        self.invalid_needs_count: int = 0  # Count of invalid AbstractNeeds received
+
+    def register_arousal_callback(self, callback: Callable[[ArousalState], None]) -> None:
         """Register callback invoked on arousal state changes."""
         self._arousal_callbacks.append(callback)
 
@@ -422,13 +520,7 @@ class ArousalController:
         circadian_contrib = self._compute_circadian_contribution()
 
         # Compute target arousal
-        target = (
-            self.config.baseline_arousal +
-            need_contrib +
-            external_contrib +
-            temporal_contrib +
-            circadian_contrib
-        )
+        target = self.config.baseline_arousal + need_contrib + external_contrib + temporal_contrib + circadian_contrib
 
         # Apply ESGT refractory
         if self._refractory_until and time.time() < self._refractory_until:
@@ -449,6 +541,21 @@ class ArousalController:
             delta = self.config.arousal_decrease_rate * dt
             new_arousal = max(current - delta, target)
 
+        # FASE VII: Apply rate limiting (HARD LIMIT)
+        new_arousal = self.rate_limiter.limit(new_arousal, time.time())
+
+        # FASE VII: Enforce hard bounds [0.0, 1.0] (HARD LIMIT)
+        new_arousal = ArousalBoundEnforcer.enforce(new_arousal)
+
+        # FASE VII: Track arousal history for oscillation detection
+        self.arousal_history.append(new_arousal)
+
+        # FASE VII: Detect saturation (arousal stuck at 0.0 or 1.0)
+        self._detect_saturation(new_arousal)
+
+        # FASE VII: Detect oscillation (arousal variance too high)
+        self._detect_oscillation()
+
         # Update state
         self._current_state.arousal = new_arousal
         self._current_state.level = self._classify_arousal(new_arousal)
@@ -456,9 +563,7 @@ class ArousalController:
         self._current_state.external_contribution = external_contrib
         self._current_state.temporal_contribution = temporal_contrib
         self._current_state.circadian_contribution = circadian_contrib
-        self._current_state.esgt_salience_threshold = (
-            self._current_state.compute_effective_threshold()
-        )
+        self._current_state.esgt_salience_threshold = self._current_state.compute_effective_threshold()
         self._current_state.timestamp = time.time()
 
         # Track level transitions
@@ -466,9 +571,7 @@ class ArousalController:
             self._level_transition_time = time.time()
             self._last_level = self._current_state.level
         else:
-            self._current_state.time_in_current_level_seconds = (
-                time.time() - self._level_transition_time
-            )
+            self._current_state.time_in_current_level_seconds = time.time() - self._level_transition_time
 
         # Invoke callbacks
         await self._invoke_callbacks()
@@ -476,9 +579,7 @@ class ArousalController:
     def _compute_external_contribution(self) -> float:
         """Compute arousal contribution from external modulations."""
         # Remove expired modulations
-        self._active_modulations = [
-            m for m in self._active_modulations if not m.is_expired()
-        ]
+        self._active_modulations = [m for m in self._active_modulations if not m.is_expired()]
 
         if not self._active_modulations:
             return 0.0
@@ -522,7 +623,7 @@ class ArousalController:
         # Simple sinusoidal circadian (peak at noon, trough at midnight)
         hour = time.localtime().tm_hour
         phase = (hour / 24.0) * 2 * np.pi  # 0 to 2π over 24 hours
-        return self.config.circadian_amplitude * np.sin(phase - np.pi/2)
+        return self.config.circadian_amplitude * np.sin(phase - np.pi / 2)
 
     def _classify_arousal(self, arousal: float) -> ArousalLevel:
         """
@@ -567,13 +668,7 @@ class ArousalController:
         """Get current effective ESGT salience threshold."""
         return self._current_state.esgt_salience_threshold
 
-    def request_modulation(
-        self,
-        source: str,
-        delta: float,
-        duration_seconds: float = 0.0,
-        priority: int = 1
-    ) -> None:
+    def request_modulation(self, source: str, delta: float, duration_seconds: float = 0.0, priority: int = 1) -> None:
         """
         Request arousal modulation from external source.
 
@@ -583,12 +678,7 @@ class ArousalController:
             duration_seconds: How long effect lasts (0 = instant)
             priority: Priority (higher overrides lower)
         """
-        modulation = ArousalModulation(
-            source=source,
-            delta=delta,
-            duration_seconds=duration_seconds,
-            priority=priority
-        )
+        modulation = ArousalModulation(source=source, delta=delta, duration_seconds=duration_seconds, priority=priority)
 
         self._active_modulations.append(modulation)
         self.total_modulations += 1
@@ -602,11 +692,16 @@ class ArousalController:
         Args:
             needs: Current AbstractNeeds
         """
+        # FASE VII: Validate AbstractNeeds input
+        if not self._validate_needs(needs):
+            self.invalid_needs_count += 1
+            return  # Skip invalid needs
+
         contribution = (
-            self.config.repair_need_weight * needs.repair_need +
-            self.config.rest_need_weight * needs.rest_need +
-            self.config.efficiency_need_weight * needs.efficiency_need +
-            self.config.connectivity_need_weight * needs.connectivity_need
+            self.config.repair_need_weight * needs.repair_need
+            + self.config.rest_need_weight * needs.rest_need
+            + self.config.efficiency_need_weight * needs.efficiency_need
+            + self.config.connectivity_need_weight * needs.connectivity_need
         )
 
         self._current_state.need_contribution = contribution
@@ -643,7 +738,135 @@ class ArousalController:
             "esgt_refractories": self.esgt_refractories_applied,
         }
 
+    # ========================================================================
+    # FASE VII (Safety Hardening): Validation & Anomaly Detection
+    # ========================================================================
+
+    def _validate_needs(self, needs: AbstractNeeds) -> bool:
+        """
+        Validate AbstractNeeds input.
+
+        Checks that all need values are in valid range [0.0, 1.0].
+
+        Args:
+            needs: AbstractNeeds to validate
+
+        Returns:
+            True if valid, False otherwise
+        """
+        if needs is None:
+            return False
+
+        # Check all need values are in [0.0, 1.0]
+        need_values = [
+            needs.rest_need,
+            needs.repair_need,
+            needs.efficiency_need,
+            needs.connectivity_need,
+            needs.curiosity_drive,
+            needs.learning_drive,
+        ]
+
+        for value in need_values:
+            if not isinstance(value, (int, float)):
+                return False
+            if value < 0.0 or value > 1.0:
+                return False
+
+        return True
+
+    def _detect_saturation(self, arousal: float) -> None:
+        """
+        Detect arousal saturation (stuck at 0.0 or 1.0).
+
+        Saturation indicates loss of dynamic range - arousal can't adapt.
+        This is a pathological state that should be monitored.
+
+        Args:
+            arousal: Current arousal value
+        """
+        # Check if at boundary
+        at_boundary = arousal <= 0.01 or arousal >= 0.99
+
+        if at_boundary:
+            if self.arousal_saturation_start is None:
+                # Start tracking saturation
+                self.arousal_saturation_start = time.time()
+            else:
+                # Check duration
+                duration = time.time() - self.arousal_saturation_start
+                if duration >= AROUSAL_SATURATION_THRESHOLD_SECONDS:
+                    # Saturation event
+                    self.saturation_events += 1
+                    print(f"⚠️  MCEA SATURATION: Arousal stuck at {arousal:.2f} for {duration:.1f}s")
+                    # Reset to avoid repeated alerts
+                    self.arousal_saturation_start = time.time()
+        else:
+            # Not at boundary, reset
+            self.arousal_saturation_start = None
+
+    def _detect_oscillation(self) -> None:
+        """
+        Detect arousal oscillation (high variance).
+
+        Oscillation indicates instability - arousal is fluctuating rapidly
+        instead of smoothly tracking needs. This suggests tuning issues
+        or external interference.
+        """
+        if len(self.arousal_history) < AROUSAL_OSCILLATION_WINDOW:
+            return  # Not enough data
+
+        # Compute standard deviation
+        stddev = float(np.std(self.arousal_history))
+
+        # Check threshold
+        if stddev > AROUSAL_OSCILLATION_THRESHOLD:
+            self.oscillation_events += 1
+            print(f"⚠️  MCEA OSCILLATION: Arousal variance = {stddev:.3f} (threshold={AROUSAL_OSCILLATION_THRESHOLD})")
+
+    def get_health_metrics(self) -> Dict[str, any]:
+        """
+        Get MCEA health metrics for Safety Core integration.
+
+        Returns metrics about arousal state, anomalies (saturation, oscillation),
+        and input validation. Used by Safety Core for monitoring.
+
+        Returns:
+            Dict with health metrics
+        """
+        # Compute current arousal variance
+        arousal_variance = float(np.std(self.arousal_history)) if len(self.arousal_history) >= 2 else 0.0
+
+        # Check if currently saturated
+        is_saturated = False
+        if self.arousal_saturation_start:
+            saturation_duration = time.time() - self.arousal_saturation_start
+            is_saturated = saturation_duration >= AROUSAL_SATURATION_THRESHOLD_SECONDS
+
+        return {
+            "controller_id": self.controller_id,
+            "running": self._running,
+            # Current state
+            "current_arousal": self._current_state.arousal,
+            "current_level": self._current_state.level.value,
+            "esgt_threshold": self._current_state.esgt_salience_threshold,
+            "accumulated_stress": self._accumulated_stress,
+            # Update metrics
+            "total_updates": self.total_updates,
+            "total_modulations": self.total_modulations,
+            "esgt_refractories": self.esgt_refractories_applied,
+            # Safety metrics
+            "saturation_events": self.saturation_events,
+            "oscillation_events": self.oscillation_events,
+            "invalid_needs_count": self.invalid_needs_count,
+            "is_saturated": is_saturated,
+            "arousal_variance": arousal_variance,
+            "arousal_history_size": len(self.arousal_history),
+        }
+
     def __repr__(self) -> str:
-        return (f"ArousalController({self.controller_id}, "
-                f"arousal={self._current_state.arousal:.2f}, "
-                f"level={self._current_state.level.value})")
+        return (
+            f"ArousalController({self.controller_id}, "
+            f"arousal={self._current_state.arousal:.2f}, "
+            f"level={self._current_state.level.value})"
+        )

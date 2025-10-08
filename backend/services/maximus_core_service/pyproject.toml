@@ -1,0 +1,308 @@
+[project]
+name = "maximus-core-service"
+version = "3.0.0"
+description = "MAXIMUS AGI - Sistema de Consciência Artificial com Biomimética Avançada"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Proprietary"}
+authors = [
+    {name = "Juan CS", email = "juan@vertice.dev"},
+]
+keywords = ["agi", "consciousness", "biomimetic", "ai-safety", "neuromodulation", "predictive-coding"]
+
+dependencies = [
+    # Web Framework
+    "fastapi>=0.115.0",  # Updated for starlette >=0.47.2 security fixes
+    "uvicorn[standard]>=0.32.0",  # Updated for compatibility
+    "httpx>=0.27.0",  # Security updates
+    "aiohttp>=3.10.0",  # Security updates
+    "pydantic>=2.9.0",  # Latest security patches
+    "python-dotenv==1.0.0",
+    "websockets==12.0",
+
+    # Data & Infrastructure
+    "redis==5.0.0",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.9",  # PostgreSQL sync driver (for VACUUM)
+
+    # AI Providers
+    "anthropic>=0.7.0",
+    "openai>=1.3.0",
+    "google-generativeai>=0.3.0",
+
+    # System Monitoring (REAL implementations)
+    "psutil>=5.9.0",  # System monitoring
+    "GPUtil>=1.4.0",  # GPU monitoring
+    "docker>=6.1.0",  # Docker SDK for container control
+    "kubernetes>=28.1.0",  # K8s API for pod scaling
+
+    # Statistical Analysis (REAL)
+    "numpy>=1.24.0",
+    "scipy>=1.11.0",  # Z-score, linear regression
+    "statsmodels>=0.14.0",  # ARIMA time series prediction
+
+    # Machine Learning (REAL)
+    "torch>=2.0.0",  # PyTorch for Predictive Coding Network
+    "transformers>=4.30.0",  # Hugging Face for Attention System
+    "scikit-learn>=1.3.0",  # Isolation Forest, preprocessing
+    "xgboost>=2.0.0",  # Gradient boosting for failure prediction
+    "ruptures>=1.1.8",  # Change point detection (PELT)
+    "stable-baselines3>=2.1.0",  # RL algorithms (SAC)
+
+    # Optional dependencies with fallback
+    "scikit-fuzzy>=0.4.2",  # Fuzzy logic controller (optional, has fallback)
+
+    # Monitoring and Metrics
+    "prometheus-client>=0.18.0",  # Prometheus metrics
+    "kafka-python>=2.0.2",  # Kafka streaming
+
+    # Async Redis with performance
+    "redis[hiredis]>=5.0.0",  # Redis with hiredis for better performance
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.2.0",
+    "pytest-xdist>=3.5.0",  # Parallel testing
+
+    # Linting & Formatting
+    "ruff>=0.13.0",
+
+    # Type Checking
+    "mypy>=1.8.0",
+    "types-redis",
+    "types-psutil",
+]
+
+test = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.2.0",
+]
+
+# ============================================================================
+# Build System
+# ============================================================================
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# ============================================================================
+# UV Configuration
+# ============================================================================
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.2.0",
+    "ruff>=0.13.0",
+]
+
+# ============================================================================
+# Ruff Configuration (Linter + Formatter)
+# ============================================================================
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+exclude = [
+    ".git",
+    "__pycache__",
+    "venv",
+    "env",
+    ".venv",
+    "*.egg-info",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "htmlcov",
+    "dist",
+    "build",
+]
+
+[tool.ruff.lint]
+# Regras ativas (equivalente a flake8 + isort + alguns pylint + bandit)
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort (import sorting)
+    "N",    # pep8-naming
+    "B",    # flake8-bugbear (common bugs)
+    "C90",  # mccabe complexity
+    "UP",   # pyupgrade (modernize Python code)
+    "ANN",  # type annotations
+    "S",    # bandit security checks
+    "T20",  # print statements (discourage in production)
+    "RET",  # return statements
+    "SIM",  # simplify code
+    "TCH",  # type-checking blocks
+]
+
+ignore = [
+    "E501",   # Line too long (let ruff format handle it)
+    "ANN101", # Missing type annotation for self in method
+    "ANN102", # Missing type annotation for cls in classmethod
+    "ANN401", # Dynamically typed expressions (Any) allowed in some cases
+    "S101",   # Use of assert detected (OK in tests)
+    "S311",   # Standard pseudo-random generators (OK for non-crypto)
+    "B008",   # Do not perform function call in argument defaults (FastAPI uses this)
+    "RET504", # Unnecessary variable assignment before return
+    "SIM108", # Use ternary operator (sometimes clearer without)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Relaxar regras em testes
+"tests/*" = ["S101", "ANN", "T20"]
+"**/test_*.py" = ["S101", "ANN", "T20"]
+"consciousness/test_*.py" = ["S101", "ANN", "T20"]
+"consciousness/*/test_*.py" = ["S101", "ANN", "T20"]
+
+# Relaxar em arquivos de exemplo/docs
+"example_*.py" = ["T20", "S"]
+"**/examples/*.py" = ["T20", "S"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["consciousness", "governance", "privacy", "fairness", "xai", "federated_learning"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15  # Complexidade máxima permitida
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true  # Format code in docstrings
+
+# ============================================================================
+# Pytest Configuration
+# ============================================================================
+[tool.pytest.ini_options]
+# Test discovery
+testpaths = ["tests", "consciousness"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+# Output and reporting
+addopts = [
+    "--verbose",
+    "--tb=short",
+    "--cov=.",
+    "--cov-report=html:htmlcov",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-fail-under=70",
+    "-ra",
+    "--color=yes",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*",
+    "*/.venv/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# Markers for test categorization
+markers = [
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (medium speed, component interaction)",
+    "e2e: End-to-end tests (slow, full workflow)",
+    "slow: Slow tests (skip with -m 'not slow')",
+    "benchmark: Performance benchmarks (biological plausibility validation)",
+    "requires_torch: Tests requiring PyTorch",
+    "requires_gpu: Tests requiring GPU",
+    "requires_onnx: Tests requiring ONNX runtime",
+    "requires_cuda: Tests requiring CUDA",
+]
+
+# Console output styling
+console_output_style = "progress"
+
+# Timeout (10 minutes for slow tests)
+timeout = 600
+
+# Warnings
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+# Logging
+log_cli = false
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+# ============================================================================
+# MyPy Configuration (Type Checking)
+# ============================================================================
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Gradual typing
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "torch.*",
+    "transformers.*",
+    "stable_baselines3.*",
+    "ruptures.*",
+    "statsmodels.*",
+    "xgboost.*",
+    "GPUtil.*",
+    "kubernetes.*",
+]
+ignore_missing_imports = true
+
+# ============================================================================
+# Hatchling Build Configuration
+# ============================================================================
+[tool.hatch.build.targets.wheel]
+packages = [
+    "consciousness",
+    "governance",
+    "privacy",
+    "fairness",
+    "xai",
+    "federated_learning",
+]
