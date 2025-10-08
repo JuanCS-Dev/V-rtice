@@ -17,8 +17,7 @@ containerized environment.
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 # Mocking Kubernetes client for demonstration purposes
@@ -51,9 +50,7 @@ class MockKubernetesClient:
             },
         }
 
-    async def get_deployment(
-        self, name: str, namespace: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_deployment(self, name: str, namespace: str) -> Optional[Dict[str, Any]]:
         await asyncio.sleep(0.01)
         return self.deployments.get(f"{namespace}/{name}")
 
@@ -115,9 +112,7 @@ class KubernetesController:
         self.k8s_client = MockKubernetesClient()  # Replace with actual k8s client
         print("[KubernetesController] Initialized Kubernetes Controller (mock mode).")
 
-    async def scale_deployment(
-        self, deployment_name: str, namespace: str, replicas: int
-    ) -> bool:
+    async def scale_deployment(self, deployment_name: str, namespace: str, replicas: int) -> bool:
         """Scales a Kubernetes deployment to the specified number of replicas.
 
         Args:
@@ -128,12 +123,8 @@ class KubernetesController:
         Returns:
             bool: True if scaling was successful, False otherwise.
         """
-        print(
-            f"[KubernetesController] Scaling deployment {deployment_name} in {namespace} to {replicas} replicas."
-        )
-        return await self.k8s_client.scale_deployment(
-            deployment_name, namespace, replicas
-        )
+        print(f"[KubernetesController] Scaling deployment {deployment_name} in {namespace} to {replicas} replicas.")
+        return await self.k8s_client.scale_deployment(deployment_name, namespace, replicas)
 
     async def update_resource_limits(
         self,
@@ -153,12 +144,8 @@ class KubernetesController:
         Returns:
             bool: True if limits were updated successfully, False otherwise.
         """
-        print(
-            f"[KubernetesController] Updating resource limits for {deployment_name} in {namespace}."
-        )
-        return await self.k8s_client.update_resource_limits(
-            deployment_name, namespace, cpu_limit, memory_limit
-        )
+        print(f"[KubernetesController] Updating resource limits for {deployment_name} in {namespace}.")
+        return await self.k8s_client.update_resource_limits(deployment_name, namespace, cpu_limit, memory_limit)
 
     async def restart_pod(self, pod_name: str, namespace: str) -> bool:
         """Restarts a specific Kubernetes pod.

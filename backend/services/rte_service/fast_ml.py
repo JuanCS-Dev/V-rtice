@@ -18,7 +18,7 @@ effectiveness in real-time scenarios.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import numpy as np
 
@@ -39,9 +39,7 @@ class FastML:
         self.model_loaded = True
         print("[FastML] Fast ML Engine initialized and models loaded.")
 
-    async def predict(
-        self, input_data: Dict[str, Any], prediction_type: str
-    ) -> Dict[str, Any]:
+    async def predict(self, input_data: Dict[str, Any], prediction_type: str) -> Dict[str, Any]:
         """Performs a rapid ML prediction based on input data.
 
         Args:
@@ -58,9 +56,7 @@ class FastML:
         if not self.model_loaded:
             raise RuntimeError("Fast ML models not loaded.")
 
-        print(
-            f"[FastML] Performing {prediction_type} prediction on data: {input_data.get('id', 'N/A')}"
-        )
+        print(f"[FastML] Performing {prediction_type} prediction on data: {input_data.get('id', 'N/A')}")
         await asyncio.sleep(0.01)  # Simulate very low latency inference
 
         prediction_value = 0.0
@@ -68,17 +64,12 @@ class FastML:
         details = ""
 
         if prediction_type == "threat_score":
-            score = (
-                input_data.get("features", {}).get("malicious_indicators", 0) * 0.8
-                + np.random.rand() * 0.1
-            )
+            score = input_data.get("features", {}).get("malicious_indicators", 0) * 0.8 + np.random.rand() * 0.1
             prediction_value = min(1.0, score)
             confidence = 0.9
             details = "Threat score based on real-time indicators."
         elif prediction_type == "anomaly_detection":
-            is_anomaly = (
-                input_data.get("features", {}).get("deviation_from_baseline", 0) > 0.5
-            )
+            is_anomaly = input_data.get("features", {}).get("deviation_from_baseline", 0) > 0.5
             prediction_value = 1.0 if is_anomaly else 0.0
             confidence = 0.8
             details = "Anomaly detected based on behavioral patterns."

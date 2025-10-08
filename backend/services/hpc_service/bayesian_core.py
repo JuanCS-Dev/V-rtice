@@ -126,9 +126,7 @@ class BayesianCore:
             entropy=self._calculate_entropy(self.prior_covariance),
             timestamp=datetime.now().isoformat(),
         )
-        print(
-            f"[BayesianCore] Prior learned from {len(normal_observations)} observations."
-        )
+        print(f"[BayesianCore] Prior learned from {len(normal_observations)} observations.")
 
     def predict(self) -> Dict[str, Any]:
         """Generates a top-down prediction based on the current belief state.
@@ -152,9 +150,7 @@ class BayesianCore:
             "timestamp": datetime.now().isoformat(),
         }
 
-    def compute_prediction_error(
-        self, observation: Observation, prediction: Dict[str, Any]
-    ) -> PredictionError:
+    def compute_prediction_error(self, observation: Observation, prediction: Dict[str, Any]) -> PredictionError:
         """Computes the prediction error between an observation and a prediction.
 
         Args:
@@ -169,24 +165,18 @@ class BayesianCore:
         """
         predicted_state = prediction["predicted_state"]
         if observation.features.shape != predicted_state.shape:
-            raise ValueError(
-                "Observation features and prediction dimensions do not match."
-            )
+            raise ValueError("Observation features and prediction dimensions do not match.")
 
         error_vector = observation.features - predicted_state
         magnitude = np.linalg.norm(error_vector)
-        print(
-            f"[BayesianCore] Computed prediction error with magnitude: {magnitude:.4f}"
-        )
+        print(f"[BayesianCore] Computed prediction error with magnitude: {magnitude:.4f}")
         return PredictionError(
             error_vector=error_vector,
             magnitude=magnitude,
             timestamp=datetime.now().isoformat(),
         )
 
-    def update_beliefs(
-        self, observation: Observation, prediction_error: PredictionError
-    ) -> BeliefState:
+    def update_beliefs(self, observation: Observation, prediction_error: PredictionError) -> BeliefState:
         """Updates the belief state based on the prediction error (Bayesian inference).
 
         Args:
@@ -208,13 +198,10 @@ class BayesianCore:
 
         # Update mean towards the observation, weighted by uncertainty
         kalman_gain = self.belief_state.covariance @ np.linalg.inv(
-            self.belief_state.covariance
-            + np.eye(self.num_features) * self.initial_uncertainty
+            self.belief_state.covariance + np.eye(self.num_features) * self.initial_uncertainty
         )
         new_mean = self.belief_state.mean + kalman_gain @ prediction_error.error_vector
-        new_covariance = (
-            np.eye(self.num_features) - kalman_gain
-        ) @ self.belief_state.covariance
+        new_covariance = (np.eye(self.num_features) - kalman_gain) @ self.belief_state.covariance
 
         self.belief_state = BeliefState(
             mean=new_mean,
@@ -222,9 +209,7 @@ class BayesianCore:
             entropy=self._calculate_entropy(new_covariance),
             timestamp=datetime.now().isoformat(),
         )
-        print(
-            f"[BayesianCore] Beliefs updated. New entropy: {self.belief_state.entropy:.4f}"
-        )
+        print(f"[BayesianCore] Beliefs updated. New entropy: {self.belief_state.entropy:.4f}")
         return self.belief_state
 
     def _calculate_entropy(self, covariance_matrix: np.ndarray) -> float:

@@ -10,16 +10,15 @@ secure access to all Maximus AI services. This service is critical for maintaini
 the security and integrity of the entire Maximus AI ecosystem.
 """
 
-import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import bcrypt  # bcrypt
+import jwt  # PyJWT
+import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-import jwt  # PyJWT
 from pydantic import BaseModel
-import uvicorn
 
 # Configuration for JWT
 SECRET_KEY = "your-super-secret-key"  # In production, use a strong, environment-variable-based key
@@ -34,16 +33,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 users_db = {
     "maximus_admin": {
         "username": "maximus_admin",
-        "hashed_password": bcrypt.hashpw(
-            "adminpass".encode("utf-8"), bcrypt.gensalt()
-        ).decode("utf-8"),
+        "hashed_password": bcrypt.hashpw("adminpass".encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
         "roles": ["admin", "user"],
     },
     "maximus_user": {
         "username": "maximus_user",
-        "hashed_password": bcrypt.hashpw(
-            "userpass".encode("utf-8"), bcrypt.gensalt()
-        ).decode("utf-8"),
+        "hashed_password": bcrypt.hashpw("userpass".encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
         "roles": ["user"],
     },
 }
@@ -83,9 +78,7 @@ class UserInDB(User):
     hashed_password: str
 
 
-def create_access_token(
-    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
-):
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None):
     """Creates a JWT access token.
 
     Args:
@@ -133,9 +126,7 @@ async def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
     user = await get_user(username)
     if not user:
         return None
-    if not bcrypt.checkpw(
-        password.encode("utf-8"), user.hashed_password.encode("utf-8")
-    ):
+    if not bcrypt.checkpw(password.encode("utf-8"), user.hashed_password.encode("utf-8")):
         return None
     return user
 
@@ -267,9 +258,7 @@ async def read_admin_resource(current_user: User = Depends(get_current_active_us
         HTTPException: If the user does not have the 'admin' role.
     """
     if "admin" not in current_user.roles:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
     return {"message": "Welcome, admin! This is a highly sensitive resource."}
 
 

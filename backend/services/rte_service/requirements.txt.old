@@ -1,0 +1,22 @@
+# RTE Service Dependencies
+
+# Web framework
+fastapi>=0.115.0  # Security fix
+uvicorn[standard]>=0.32.0  # Compatibility
+pydantic==2.5.3
+
+# Intel Hyperscan Python bindings
+hyperscan==0.7.7
+
+# ML frameworks
+scikit-learn==1.4.0
+torch==2.1.2
+numpy==1.26.3
+pandas==2.1.4
+
+# Data processing
+joblib==1.3.2
+
+# Utilities
+python-multipart>=0.0.18  # CVE-2024-53981 fix
+anyio>=4.4.0  # Security fix for race condition

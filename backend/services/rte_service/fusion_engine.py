@@ -72,9 +72,7 @@ class FusionEngine:
             fused_result["fused_data"].update(source_data)  # Simple merge
 
         if len(all_ips) > 1 and len(all_users) > 1 and len(all_events) > 0:
-            fused_result["correlation_insights"].append(
-                "Multiple IPs and users involved in recent events."
-            )
+            fused_result["correlation_insights"].append("Multiple IPs and users involved in recent events.")
 
         self.fused_data_store.append(fused_result)
         self.last_fusion_time = datetime.now()
@@ -89,8 +87,6 @@ class FusionEngine:
         """
         return {
             "status": self.current_status,
-            "last_fusion": (
-                self.last_fusion_time.isoformat() if self.last_fusion_time else "N/A"
-            ),
+            "last_fusion": (self.last_fusion_time.isoformat() if self.last_fusion_time else "N/A"),
             "fused_data_records": len(self.fused_data_store),
         }

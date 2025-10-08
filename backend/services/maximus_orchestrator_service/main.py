@@ -13,34 +13,23 @@ providing a unified interface for controlling and observing its operations.
 """
 
 import asyncio
-from datetime import datetime
 import os
-from typing import Any, Dict, List, Optional
 import uuid
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
 import httpx
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Orchestrator Service", version="1.0.0")
 
 # Configuration for Maximus sub-services (mock URLs)
-MAXIMUS_CORE_SERVICE_URL = os.getenv(
-    "MAXIMUS_CORE_SERVICE_URL", "http://localhost:8000"
-)
-MAXIMUS_ATLAS_SERVICE_URL = os.getenv(
-    "MAXIMUS_ATLAS_SERVICE_URL", "http://localhost:8007"
-)
-MAXIMUS_ORACULO_SERVICE_URL = os.getenv(
-    "MAXIMUS_ORACULO_SERVICE_URL", "http://localhost:8026"
-)
-MAXIMUS_IMMUNIS_API_SERVICE_URL = os.getenv(
-    "MAXIMUS_IMMUNIS_API_SERVICE_URL", "http://localhost:8021"
-)
-MAXIMUS_ADR_CORE_SERVICE_URL = os.getenv(
-    "MAXIMUS_ADR_CORE_SERVICE_URL", "http://localhost:8005"
-)
+MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8000")
+MAXIMUS_ATLAS_SERVICE_URL = os.getenv("MAXIMUS_ATLAS_SERVICE_URL", "http://localhost:8007")
+MAXIMUS_ORACULO_SERVICE_URL = os.getenv("MAXIMUS_ORACULO_SERVICE_URL", "http://localhost:8026")
+MAXIMUS_IMMUNIS_API_SERVICE_URL = os.getenv("MAXIMUS_IMMUNIS_API_SERVICE_URL", "http://localhost:8021")
+MAXIMUS_ADR_CORE_SERVICE_URL = os.getenv("MAXIMUS_ADR_CORE_SERVICE_URL", "http://localhost:8005")
 
 
 class OrchestrationRequest(BaseModel):
@@ -127,9 +116,7 @@ async def orchestrate_workflow(request: OrchestrationRequest) -> WorkflowStatus:
     active_workflows[workflow_id] = initial_status
 
     # Start the workflow in a background task
-    asyncio.create_task(
-        run_workflow(workflow_id, request.workflow_name, request.parameters)
-    )
+    asyncio.create_task(run_workflow(workflow_id, request.workflow_name, request.parameters))
 
     return initial_status
 
@@ -153,9 +140,7 @@ async def get_workflow_status(workflow_id: str) -> WorkflowStatus:
     return workflow
 
 
-async def run_workflow(
-    workflow_id: str, workflow_name: str, parameters: Optional[Dict[str, Any]]
-):
+async def run_workflow(workflow_id: str, workflow_name: str, parameters: Optional[Dict[str, Any]]):
     """Simulates the execution of a multi-step workflow.
 
     Args:
@@ -176,9 +161,7 @@ async def run_workflow(
             workflow_status.status = "completed"
             workflow_status.progress = 1.0
             workflow_status.current_step = "Finished"
-            workflow_status.results = {
-                "message": f"Workflow {workflow_name} completed successfully."
-            }
+            workflow_status.results = {"message": f"Workflow {workflow_name} completed successfully."}
 
         except Exception as e:
             workflow_status.status = "failed"
@@ -265,9 +248,7 @@ async def _system_optimization_workflow(
     """
     status.current_step = "Starting System Optimization"
     status.progress = 0.1
-    print(
-        f"[Orchestrator] Workflow {status.workflow_id}: Starting System Optimization."
-    )
+    print(f"[Orchestrator] Workflow {status.workflow_id}: Starting System Optimization.")
     await asyncio.sleep(1)
 
     # Step 1: Get current system metrics from Maximus Core
@@ -292,9 +273,7 @@ async def _system_optimization_workflow(
         },
     )
     oraculo_optimization_response.raise_for_status()
-    print(
-        f"[Orchestrator] Oraculo optimization suggestions: {oraculo_optimization_response.json()}"
-    )
+    print(f"[Orchestrator] Oraculo optimization suggestions: {oraculo_optimization_response.json()}")
     await asyncio.sleep(1)
 
     # Step 3: Apply suggestions via ADR Core Service (simulated)

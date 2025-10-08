@@ -16,14 +16,15 @@ overall Maximus AI.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from adaptive_learning import AdaptiveLearning
 from circuit_breaker import CircuitBreaker
 from consensus_validator import ConsensusValidator
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus AI Immune System", version="1.0.0")
 
@@ -98,9 +99,7 @@ async def submit_telemetry(data: TelemetryData) -> Dict[str, Any]:
     print(f"[API] Received telemetry from {data.service_id} (event: {data.event_type})")
 
     # Simulate anomaly detection
-    is_anomalous = await consensus_validator.validate_telemetry(
-        data.service_id, data.metrics
-    )
+    is_anomalous = await consensus_validator.validate_telemetry(data.service_id, data.metrics)
 
     # Simulate circuit breaker logic
     if is_anomalous:
@@ -125,9 +124,7 @@ async def trigger_immune_response(request: ImmuneResponseRequest) -> Dict[str, A
     Returns:
         Dict[str, Any]: A dictionary containing the result of the immune response.
     """
-    print(
-        f"[API] Triggering immune response '{request.response_type}' for threat {request.threat_id}"
-    )
+    print(f"[API] Triggering immune response '{request.response_type}' for threat {request.threat_id}")
     await asyncio.sleep(0.5)  # Simulate response execution
 
     # Simulate adaptive learning based on response outcome

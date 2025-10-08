@@ -60,9 +60,7 @@ class MockHyperscan:
             callback (Any): Uma função de callback a ser chamada para cada correspondência.
             context (Any): Contexto a ser passado para a função de callback.
         """
-        print(
-            f"[MockHyperscan] Scanning data (size: {len(data)} bytes) with {len(self.patterns)} patterns."
-        )
+        print(f"[MockHyperscan] Scanning data (size: {len(data)} bytes) with {len(self.patterns)} patterns.")
         matches = []
         for pattern_idx, pattern_str in enumerate(self.patterns):
             if pattern_str.encode("utf-8") in data:
@@ -135,9 +133,7 @@ class HyperscanMatcher:
         if not self.compiled_database:
             raise RuntimeError("Patterns not compiled. Call compile_patterns first.")
 
-        print(
-            f"[HyperscanMatcher] Scanning data (size: {len(data)} bytes) for patterns..."
-        )
+        print(f"[HyperscanMatcher] Scanning data (size: {len(data)} bytes) for patterns...")
         matches: List[Dict[str, Any]] = []
 
         def on_match(id, start, end, flags, context):
@@ -165,7 +161,5 @@ class HyperscanMatcher:
         return {
             "status": self.current_status,
             "patterns_loaded": len(self.patterns),
-            "last_scan": (
-                self.last_scan_time.isoformat() if self.last_scan_time else "N/A"
-            ),
+            "last_scan": (self.last_scan_time.isoformat() if self.last_scan_time else "N/A"),
         }

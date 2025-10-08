@@ -12,16 +12,15 @@ is crucial for supporting investigations, situational awareness, and law
 enforcement support within the Maximus AI system.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
+
 from intelligence_agent import IntelligenceAgent
 from llm_client import LLMClient
 from models import SinespQuery, VehicleInfo
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus Sinesp Service", version="1.0.0")
 
@@ -74,9 +73,7 @@ async def query_vehicle_info(query: SinespQuery) -> VehicleInfo:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to query Sinesp API: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to query Sinesp API: {str(e)}")
 
 
 @app.post("/analyze_vehicle", response_model=Dict[str, Any])

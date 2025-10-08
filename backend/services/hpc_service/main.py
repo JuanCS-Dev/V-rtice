@@ -10,23 +10,22 @@ endpoints for the core functionalities of the Bayesian network:
 -   **/train**: Train the model's prior beliefs on a dataset of normal traffic.
 """
 
-from contextlib import asynccontextmanager
 import logging
-from typing import Any, Dict, List, Optional
+from contextlib import asynccontextmanager
+from typing import Any, Dict, List
+
+import numpy as np
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 from active_inference import ActiveInferenceEngine
 from bayesian_core import BayesianCore, Observation
-from fastapi import FastAPI, HTTPException
-import numpy as np
-from pydantic import BaseModel, Field
 
 # ============================================================================
 # Configuration and Initialization
 # ============================================================================
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 NUM_FEATURES = 30
@@ -87,9 +86,7 @@ async def train(request: TrainingRequest):
     core: BayesianCore = state["bayesian_core"]
     try:
         observations = [
-            Observation(
-                timestamp=0, features=np.array(obs.features), source_id=obs.source_id
-            )
+            Observation(timestamp=0, features=np.array(obs.features), source_id=obs.source_id)
             for obs in request.observations
         ]
         core.learn_prior(observations)

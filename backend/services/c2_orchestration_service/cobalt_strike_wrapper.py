@@ -14,7 +14,7 @@ within the Maximus AI system.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 class CobaltStrikeWrapper:
@@ -30,9 +30,7 @@ class CobaltStrikeWrapper:
         self.connected = False
         print("[CobaltStrikeWrapper] Initialized Cobalt Strike Wrapper (mock mode).")
 
-    async def connect(
-        self, host: str = "127.0.0.1", port: int = 50050, password: str = "password"
-    ) -> bool:
+    async def connect(self, host: str = "127.0.0.1", port: int = 50050, password: str = "password") -> bool:
         """Connects to the Cobalt Strike team server (simulated).
 
         Args:
@@ -43,9 +41,7 @@ class CobaltStrikeWrapper:
         Returns:
             bool: True if connection is successful, False otherwise.
         """
-        print(
-            f"[CobaltStrikeWrapper] Simulating connection to Cobalt Strike at {host}:{port}"
-        )
+        print(f"[CobaltStrikeWrapper] Simulating connection to Cobalt Strike at {host}:{port}")
         await asyncio.sleep(0.5)  # Simulate connection time
         self.connected = True
         return True
@@ -72,9 +68,7 @@ class CobaltStrikeWrapper:
         if not beacon_id or not task_command:
             raise ValueError("Beacon ID and task command are required.")
 
-        print(
-            f"[CobaltStrikeWrapper] Simulating execution of task '{task_command}' on beacon {beacon_id}"
-        )
+        print(f"[CobaltStrikeWrapper] Simulating execution of task '{task_command}' on beacon {beacon_id}")
         await asyncio.sleep(1.5)  # Simulate task execution time
 
         # Simulate task outcome

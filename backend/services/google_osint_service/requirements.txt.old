@@ -1,0 +1,13 @@
+# GOOGLE OSINT SERVICE - SECURITY UPDATED
+fastapi>=0.115.0  # Security fixes for starlette
+uvicorn[standard]>=0.32.0  # Compatibility with updated fastapi
+pydantic>=2.9.0  # Latest security patches
+redis>=5.0.1  # Keep current
+aiohttp>=3.10.0  # Security updates
+python-multipart>=0.0.18  # CVE-2024-53981 fix
+python-dotenv>=1.0.0  # Keep current
+beautifulsoup4>=4.12.2  # Keep current
+lxml>=4.9.3  # Keep current
+fake-useragent>=1.4.0  # Keep current
+asyncio-throttle>=1.0.2  # Keep current
+anyio>=4.4.0  # Security fix for race condition

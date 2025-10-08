@@ -12,7 +12,7 @@ It is crucial for offensive security operations within the Maximus AI system.
 """
 
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class MetasploitWrapper:
@@ -45,9 +45,7 @@ class MetasploitWrapper:
         Returns:
             bool: True if connection is successful, False otherwise.
         """
-        print(
-            f"[MetasploitWrapper] Simulating connection to Metasploit RPC at {host}:{port}"
-        )
+        print(f"[MetasploitWrapper] Simulating connection to Metasploit RPC at {host}:{port}")
         await asyncio.sleep(0.5)  # Simulate connection time
         self.connected = True
         return True
@@ -74,9 +72,7 @@ class MetasploitWrapper:
         if not exploit_name or not target_ip:
             raise ValueError("Exploit name and target IP are required.")
 
-        print(
-            f"[MetasploitWrapper] Simulating execution of exploit '{exploit_name}' against {target_ip}"
-        )
+        print(f"[MetasploitWrapper] Simulating execution of exploit '{exploit_name}' against {target_ip}")
         await asyncio.sleep(2)  # Simulate exploit execution time
 
         # Simulate exploit outcome
@@ -94,9 +90,7 @@ class MetasploitWrapper:
 
         return result
 
-    async def run_module(
-        self, module_type: str, module_name: str, options: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def run_module(self, module_type: str, module_name: str, options: Dict[str, Any]) -> Dict[str, Any]:
         """Runs a generic Metasploit module (e.g., auxiliary, post) (simulated).
 
         Args:
@@ -109,9 +103,7 @@ class MetasploitWrapper:
         """
         if not self.connected:
             raise RuntimeError("Not connected to Metasploit RPC.")
-        print(
-            f"[MetasploitWrapper] Simulating running {module_type}/{module_name} with options: {options}"
-        )
+        print(f"[MetasploitWrapper] Simulating running {module_type}/{module_name} with options: {options}")
         await asyncio.sleep(1)  # Simulate module execution
         return {
             "status": "completed",

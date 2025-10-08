@@ -11,9 +11,9 @@ between database models and API models.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ScanTaskBase(BaseModel):

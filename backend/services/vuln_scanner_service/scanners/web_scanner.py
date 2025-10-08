@@ -20,7 +20,7 @@ the Maximus AI system.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 class WebScanner:
@@ -36,9 +36,7 @@ class WebScanner:
         """Initializes the WebScanner."""
         print("[WebScanner] Initialized Web Scanner (mock mode).")
 
-    async def scan_web_application(
-        self, target_url: str, depth: int = 1
-    ) -> Dict[str, Any]:
+    async def scan_web_application(self, target_url: str, depth: int = 1) -> Dict[str, Any]:
         """Performs a simulated web application scan on the target URL.
 
         Args:
@@ -48,9 +46,7 @@ class WebScanner:
         Returns:
             Dict[str, Any]: A dictionary containing the simulated web scan results.
         """
-        print(
-            f"[WebScanner] Simulating web application scan on {target_url} with depth {depth}"
-        )
+        print(f"[WebScanner] Simulating web application scan on {target_url} with depth {depth}")
         await asyncio.sleep(3)  # Simulate scan duration
 
         # Simulate web scan output

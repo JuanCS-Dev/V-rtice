@@ -15,18 +15,19 @@ Note: httpx.AsyncClient is mocked (external HTTP dependency per PAGANI).
 All workflow logic, status management, and orchestration is REAL.
 """
 
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient, Response
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
 import asyncio
-import respx
 
 # Import the FastAPI app
 import sys
-sys.path.insert(0, "/home/juan/vertice-dev/backend/services/maximus_orchestrator_service")
-from main import app, active_workflows, startup_event, shutdown_event
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+import pytest
+import pytest_asyncio
+import respx
+from httpx import AsyncClient, Response
+
+sys.path.insert(0, "/home/juan/vertice-dev/backend/services/maximus_orchestrator_service")
+from main import active_workflows, app, shutdown_event, startup_event
 
 # ==================== FIXTURES ====================
 
@@ -49,48 +50,42 @@ def mock_httpx_client():
     # Default mock responses for various services
     # Atlas service mock
     atlas_response = MagicMock(spec=Response)
-    atlas_response.json = Mock(return_value={
-        "status": "success",
-        "environment_context": {"network_segments": ["10.0.0.0/24", "192.168.1.0/24"]}
-    })
+    atlas_response.json = Mock(
+        return_value={
+            "status": "success",
+            "environment_context": {"network_segments": ["10.0.0.0/24", "192.168.1.0/24"]},
+        }
+    )
     atlas_response.raise_for_status = Mock()
 
     # Oraculo service mock
     oraculo_response = MagicMock(spec=Response)
-    oraculo_response.json = Mock(return_value={
-        "status": "success",
-        "prediction": {
-            "risk_assessment": "low",
-            "threat_level": 0.3,
-            "suggestions": []
+    oraculo_response.json = Mock(
+        return_value={
+            "status": "success",
+            "prediction": {"risk_assessment": "low", "threat_level": 0.3, "suggestions": []},
         }
-    })
+    )
     oraculo_response.raise_for_status = Mock()
 
     # Immunis service mock
     immunis_response = MagicMock(spec=Response)
-    immunis_response.json = Mock(return_value={
-        "status": "success",
-        "response_id": "immunis-001"
-    })
+    immunis_response.json = Mock(return_value={"status": "success", "response_id": "immunis-001"})
     immunis_response.raise_for_status = Mock()
 
     # Core service mock
     core_response = MagicMock(spec=Response)
-    core_response.json = Mock(return_value={
-        "status": "healthy",
-        "metrics": {"cpu": 50, "memory": 60}
-    })
+    core_response.json = Mock(return_value={"status": "healthy", "metrics": {"cpu": 50, "memory": 60}})
     core_response.raise_for_status = Mock()
 
     # Configure mock client to return appropriate responses
     async def mock_post(*args, **kwargs):
-        url = args[0] if args else kwargs.get('url', '')
-        if 'atlas' in url.lower():
+        url = args[0] if args else kwargs.get("url", "")
+        if "atlas" in url.lower():
             return atlas_response
-        elif 'oraculo' in url.lower():
+        elif "oraculo" in url.lower():
             return oraculo_response
-        elif 'immunis' in url.lower():
+        elif "immunis" in url.lower():
             return immunis_response
         return Mock()
 
@@ -109,11 +104,7 @@ def create_orchestration_request(workflow_name="threat_hunting", priority=5, par
     """Helper to create OrchestrationRequest payload."""
     if parameters is None:
         parameters = {"target": "network_segment_1"}
-    return {
-        "workflow_name": workflow_name,
-        "parameters": parameters,
-        "priority": priority
-    }
+    return {"workflow_name": workflow_name, "parameters": parameters, "priority": priority}
 
 
 # ==================== HEALTH CHECK TESTS ====================
@@ -162,7 +153,7 @@ class TestOrchestrateEndpoint:
 
     async def test_orchestrate_workflow_initiates_successfully(self, client, mock_httpx_client):
         """Test initiating workflow returns immediate response - REAL workflow creation."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = create_orchestration_request()
             response = await client.post("/orchestrate", json=payload)
 
@@ -181,7 +172,7 @@ class TestOrchestrateEndpoint:
         """Test initiating different workflow types."""
         workflows = ["threat_hunting", "system_optimization"]
 
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             for workflow_name in workflows:
                 payload = create_orchestration_request(workflow_name=workflow_name)
                 response = await client.post("/orchestrate", json=payload)
@@ -194,7 +185,7 @@ class TestOrchestrateEndpoint:
         """Test orchestrating workflows with different priority levels."""
         priorities = [1, 5, 10]
 
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             for priority in priorities:
                 payload = create_orchestration_request(priority=priority)
                 response = await client.post("/orchestrate", json=payload)
@@ -202,7 +193,7 @@ class TestOrchestrateEndpoint:
 
     async def test_orchestrate_with_custom_parameters(self, client, mock_httpx_client):
         """Test orchestrating workflow with custom parameters."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = create_orchestration_request(
                 parameters={"target": "custom_target", "depth": "deep", "options": {"verbose": True}}
             )
@@ -214,7 +205,7 @@ class TestOrchestrateEndpoint:
 
     async def test_orchestrate_generates_unique_workflow_id(self, client, mock_httpx_client):
         """Test that each orchestration generates unique workflow ID - REAL UUID generation."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = create_orchestration_request()
 
             response1 = await client.post("/orchestrate", json=payload)
@@ -227,7 +218,7 @@ class TestOrchestrateEndpoint:
 
     async def test_orchestrate_starts_background_task(self, client, mock_httpx_client):
         """Test that orchestration starts workflow in background - REAL asyncio.create_task."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = create_orchestration_request(workflow_name="threat_hunting")
             response = await client.post("/orchestrate", json=payload)
 
@@ -249,7 +240,7 @@ class TestGetWorkflowStatusEndpoint:
 
     async def test_get_workflow_status_found(self, client, mock_httpx_client):
         """Test getting status of existing workflow - REAL status retrieval."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             # First, create a workflow
             payload = create_orchestration_request()
             create_response = await client.post("/orchestrate", json=payload)
@@ -273,7 +264,7 @@ class TestGetWorkflowStatusEndpoint:
 
     async def test_get_workflow_status_tracks_progress(self, client, mock_httpx_client):
         """Test that workflow status reflects progress - REAL progress tracking."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = create_orchestration_request(workflow_name="threat_hunting")
             create_response = await client.post("/orchestrate", json=payload)
             workflow_id = create_response.json()["workflow_id"]
@@ -387,22 +378,20 @@ class TestWorkflowCompletion:
         """Test threat hunting workflow completes successfully with low risk - covers lines 176-179, 249-250."""
         # Mock Atlas response
         respx.post("http://localhost:8007/query_environment").mock(
-            return_value=Response(200, json={
-                "status": "success",
-                "environment_context": {"network_segments": ["10.0.0.0/24"]}
-            })
+            return_value=Response(
+                200, json={"status": "success", "environment_context": {"network_segments": ["10.0.0.0/24"]}}
+            )
         )
 
         # Mock Oraculo response with LOW risk (else branch)
         respx.post("http://localhost:8026/predict").mock(
-            return_value=Response(200, json={
-                "status": "success",
-                "prediction": {
-                    "risk_assessment": "low",
-                    "threat_level": 0.3,
-                    "suggestions": []
-                }
-            })
+            return_value=Response(
+                200,
+                json={
+                    "status": "success",
+                    "prediction": {"risk_assessment": "low", "threat_level": 0.3, "suggestions": []},
+                },
+            )
         )
 
         payload = create_orchestration_request(workflow_name="threat_hunting")
@@ -426,30 +415,25 @@ class TestWorkflowCompletion:
         """Test threat hunting triggers Immunis on high risk - covers lines 236-248."""
         # Mock Atlas response
         respx.post("http://localhost:8007/query_environment").mock(
-            return_value=Response(200, json={
-                "status": "success",
-                "environment_context": {"network_segments": ["10.0.0.0/24"]}
-            })
+            return_value=Response(
+                200, json={"status": "success", "environment_context": {"network_segments": ["10.0.0.0/24"]}}
+            )
         )
 
         # Mock Oraculo response with HIGH risk (if branch)
         respx.post("http://localhost:8026/predict").mock(
-            return_value=Response(200, json={
-                "status": "success",
-                "prediction": {
-                    "risk_assessment": "high",
-                    "threat_level": 0.95,
-                    "suggestions": []
-                }
-            })
+            return_value=Response(
+                200,
+                json={
+                    "status": "success",
+                    "prediction": {"risk_assessment": "high", "threat_level": 0.95, "suggestions": []},
+                },
+            )
         )
 
         # Mock Immunis response
         respx.post("http://localhost:8021/threat_alert").mock(
-            return_value=Response(200, json={
-                "status": "success",
-                "response_id": "immunis-123"
-            })
+            return_value=Response(200, json={"status": "success", "response_id": "immunis-123"})
         )
 
         payload = create_orchestration_request(workflow_name="threat_hunting")
@@ -471,23 +455,23 @@ class TestWorkflowCompletion:
         """Test system optimization processes suggestions - covers lines 303-313."""
         # Mock Core metrics
         respx.get("http://localhost:8000/health").mock(
-            return_value=Response(200, json={
-                "status": "healthy",
-                "metrics": {"cpu": 80, "memory": 90}
-            })
+            return_value=Response(200, json={"status": "healthy", "metrics": {"cpu": 80, "memory": 90}})
         )
 
         # Mock Oraculo response with suggestions
         respx.post("http://localhost:8026/predict").mock(
-            return_value=Response(200, json={
-                "status": "success",
-                "prediction": {
-                    "suggestions": [
-                        {"type": "scale_up", "target": "web_service"},
-                        {"type": "optimize_database", "target": "postgres_main"}
-                    ]
-                }
-            })
+            return_value=Response(
+                200,
+                json={
+                    "status": "success",
+                    "prediction": {
+                        "suggestions": [
+                            {"type": "scale_up", "target": "web_service"},
+                            {"type": "optimize_database", "target": "postgres_main"},
+                        ]
+                    },
+                },
+            )
         )
 
         payload = create_orchestration_request(workflow_name="system_optimization")
@@ -510,20 +494,12 @@ class TestWorkflowCompletion:
         """Test system optimization with empty suggestions."""
         # Mock Core metrics
         respx.get("http://localhost:8000/health").mock(
-            return_value=Response(200, json={
-                "status": "healthy",
-                "metrics": {"cpu": 50, "memory": 60}
-            })
+            return_value=Response(200, json={"status": "healthy", "metrics": {"cpu": 50, "memory": 60}})
         )
 
         # Mock Oraculo response with NO suggestions (else branch of if suggestions)
         respx.post("http://localhost:8026/predict").mock(
-            return_value=Response(200, json={
-                "status": "success",
-                "prediction": {
-                    "suggestions": []
-                }
-            })
+            return_value=Response(200, json={"status": "success", "prediction": {"suggestions": []}})
         )
 
         payload = create_orchestration_request(workflow_name="system_optimization")
@@ -550,7 +526,7 @@ class TestWorkflowErrorHandling:
 
     async def test_unknown_workflow_fails_gracefully(self, client, mock_httpx_client):
         """Test that unknown workflow name fails gracefully."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = create_orchestration_request(workflow_name="unknown_workflow")
             response = await client.post("/orchestrate", json=payload)
             workflow_id = response.json()["workflow_id"]
@@ -579,7 +555,7 @@ class TestWorkflowErrorHandling:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=None)
 
-        with patch('main.httpx.AsyncClient', return_value=mock_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_client):
             payload = create_orchestration_request(workflow_name="threat_hunting")
             response = await client.post("/orchestrate", json=payload)
             workflow_id = response.json()["workflow_id"]
@@ -615,7 +591,7 @@ class TestRequestValidation:
         """Test orchestration with invalid priority type."""
         payload = {
             "workflow_name": "threat_hunting",
-            "priority": "high"  # Should be int
+            "priority": "high",  # Should be int
         }
 
         response = await client.post("/orchestrate", json=payload)
@@ -631,7 +607,7 @@ class TestEdgeCases:
 
     async def test_orchestrate_default_priority(self, client, mock_httpx_client):
         """Test orchestration uses default priority (5) when not specified."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = {
                 "workflow_name": "threat_hunting"
                 # No priority specified (should default to 5)
@@ -642,21 +618,18 @@ class TestEdgeCases:
 
     async def test_orchestrate_null_parameters(self, client, mock_httpx_client):
         """Test orchestration with null parameters."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             payload = create_orchestration_request(parameters=None)
             response = await client.post("/orchestrate", json=payload)
             assert response.status_code == 200
 
     async def test_workflow_status_multiple_workflows(self, client, mock_httpx_client):
         """Test getting status for multiple concurrent workflows."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             # Create multiple workflows
             workflow_ids = []
             for i in range(3):
-                payload = create_orchestration_request(
-                    workflow_name="threat_hunting",
-                    parameters={"id": i}
-                )
+                payload = create_orchestration_request(workflow_name="threat_hunting", parameters={"id": i})
                 response = await client.post("/orchestrate", json=payload)
                 workflow_ids.append(response.json()["workflow_id"])
 
@@ -667,7 +640,7 @@ class TestEdgeCases:
 
     async def test_workflow_preserves_parameters(self, client, mock_httpx_client):
         """Test that workflow parameters are preserved throughout execution."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             custom_params = {"target": "network_1", "depth": 5, "options": {"fast": True}}
             payload = create_orchestration_request(parameters=custom_params)
 
@@ -676,7 +649,7 @@ class TestEdgeCases:
 
     async def test_workflow_priority_boundaries(self, client, mock_httpx_client):
         """Test workflow with priority boundary values."""
-        with patch('main.httpx.AsyncClient', return_value=mock_httpx_client):
+        with patch("main.httpx.AsyncClient", return_value=mock_httpx_client):
             # Priority 1 (lowest)
             payload1 = create_orchestration_request(priority=1)
             response1 = await client.post("/orchestrate", json=payload1)

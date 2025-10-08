@@ -14,8 +14,9 @@ API request and response modeling.
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from models.enums import DetectionType, IncidentSeverity, ResponseActionType
 from pydantic import BaseModel, Field
+
+from models.enums import DetectionType, IncidentSeverity, ResponseActionType
 
 
 class DetectionResult(BaseModel):

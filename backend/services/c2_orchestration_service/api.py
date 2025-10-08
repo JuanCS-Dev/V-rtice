@@ -16,16 +16,17 @@ AI ecosystem.
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from c2_engine import C2Engine
-from fastapi import FastAPI, HTTPException
 from metrics import MetricsCollector
 from models import Command, CommandResult, CommandStatus
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus C2 Orchestration Service", version="1.0.0")
 
@@ -82,9 +83,7 @@ async def execute_command_endpoint(request: ExecuteCommandRequest) -> Command:
     Returns:
         Command: The details of the initiated command, including its ID and status.
     """
-    print(
-        f"[API] Received command: {request.command_name} (target: {request.target_service})"
-    )
+    print(f"[API] Received command: {request.command_name} (target: {request.target_service})")
     command_id = str(uuid.uuid4())
     command = Command(
         id=command_id,
@@ -132,9 +131,7 @@ async def get_command_results(command_id: str) -> CommandResult:
     """
     results = c2_engine.get_command_results(command_id)
     if not results:
-        raise HTTPException(
-            status_code=404, detail="Command results not found or not yet available."
-        )
+        raise HTTPException(status_code=404, detail="Command results not found or not yet available.")
     return results
 
 

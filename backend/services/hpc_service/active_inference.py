@@ -18,8 +18,9 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from bayesian_core import BayesianCore, Observation
 import numpy as np
+
+from bayesian_core import BayesianCore, Observation
 
 
 class ActiveInferenceEngine:
@@ -56,9 +57,7 @@ class ActiveInferenceEngine:
 
         # 1. Predict (from Bayesian Core)
         prediction = self.bayesian_core.predict()
-        print(
-            f"[ActiveInferenceEngine] Prediction: {prediction.get('predicted_state', 'N/A')}"
-        )
+        print(f"[ActiveInferenceEngine] Prediction: {prediction.get('predicted_state', 'N/A')}")
 
         # 2. Select Action (to minimize expected free energy / prediction error)
         action = self._select_action(prediction)
@@ -153,10 +152,6 @@ class ActiveInferenceEngine:
         return {
             "status": self.current_status,
             "exploration_rate": self.exploration_rate,
-            "last_inference": (
-                self.last_inference_time.isoformat()
-                if self.last_inference_time
-                else "N/A"
-            ),
+            "last_inference": (self.last_inference_time.isoformat() if self.last_inference_time else "N/A"),
             "inference_cycles_run": self.inference_cycles,
         }

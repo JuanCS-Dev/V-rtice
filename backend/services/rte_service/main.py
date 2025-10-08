@@ -13,17 +13,17 @@ operational requirements, enabling immediate reactions to dynamic environmental
 changes or emerging threats.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from fast_ml import FastML
-from fastapi import FastAPI, HTTPException
 from fusion_engine import FusionEngine
 from hyperscan_matcher import HyperscanMatcher
 from playbooks import RealTimePlaybookExecutor
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus RTE Service", version="1.0.0")
 
@@ -67,9 +67,7 @@ async def startup_event():
     """Performs startup tasks for the RTE Service."""
     print("⚡ Starting Maximus RTE Service...")
     # Compile Hyperscan patterns on startup
-    await hyperscan_matcher.compile_patterns(
-        ["malicious_pattern_1", "exploit_signature_A"]
-    )
+    await hyperscan_matcher.compile_patterns(["malicious_pattern_1", "exploit_signature_A"])
     print("✅ Maximus RTE Service started successfully.")
 
 
@@ -100,14 +98,10 @@ async def execute_realtime_command_endpoint(request: RealTimeCommand) -> Dict[st
     Returns:
         Dict[str, Any]: A dictionary containing the execution results.
     """
-    print(
-        f"[API] Executing real-time command: {request.command_name} (priority: {request.priority})"
-    )
+    print(f"[API] Executing real-time command: {request.command_name} (priority: {request.priority})")
 
     # Simulate execution via playbook executor
-    execution_result = await real_time_playbook_executor.execute_command(
-        request.command_name, request.parameters
-    )
+    execution_result = await real_time_playbook_executor.execute_command(request.command_name, request.parameters)
 
     return {
         "status": "success",
@@ -135,9 +129,7 @@ async def ingest_data_stream_endpoint(request: DataStreamIngest) -> Dict[str, An
     ml_prediction = await fast_ml.predict(fused_data, "threat_score")
 
     # 3. Perform Hyperscan pattern matching
-    hyperscan_matches = await hyperscan_matcher.scan_data(
-        str(request.data).encode("utf-8")
-    )
+    hyperscan_matches = await hyperscan_matcher.scan_data(str(request.data).encode("utf-8"))
 
     # 4. Trigger playbook if critical conditions met
     if ml_prediction.get("prediction_value", 0) > 0.7 or hyperscan_matches:

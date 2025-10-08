@@ -12,9 +12,8 @@ service has recovered. This pattern enhances the overall resilience and stabilit
 of the Maximus AI system.
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class CircuitBreaker:
@@ -106,9 +105,9 @@ class CircuitBreaker:
         if state["state"] == "closed":
             return True
         elif state["state"] == "open":
-            if state["last_trip_time"] and (
-                current_time - state["last_trip_time"]
-            ) > timedelta(seconds=self.cooldown_seconds):
+            if state["last_trip_time"] and (current_time - state["last_trip_time"]) > timedelta(
+                seconds=self.cooldown_seconds
+            ):
                 self.half_open(service_id)
                 return True  # Allow one test request
             return False
@@ -133,12 +132,6 @@ class CircuitBreaker:
             "service_id": service_id,
             "state": state["state"],
             "failures": state["failures"],
-            "last_failure_time": (
-                state["last_failure_time"].isoformat()
-                if state["last_failure_time"]
-                else None
-            ),
-            "last_trip_time": (
-                state["last_trip_time"].isoformat() if state["last_trip_time"] else None
-            ),
+            "last_failure_time": (state["last_failure_time"].isoformat() if state["last_failure_time"] else None),
+            "last_trip_time": (state["last_trip_time"].isoformat() if state["last_trip_time"] else None),
         }

@@ -16,15 +16,14 @@ to dynamic environmental changes or emerging threats, maintaining its responsive
 and effectiveness in real-time scenarios.
 """
 
-import asyncio
 from datetime import datetime
-from unittest.mock import MagicMock
+
+import pytest
 
 from fast_ml import FastML
 from fusion_engine import FusionEngine
 from hyperscan_matcher import HyperscanMatcher
 from playbooks import RealTimePlaybookExecutor
-import pytest
 
 
 @pytest.fixture
@@ -55,9 +54,7 @@ def rt_playbook_executor(fast_ml_instance, hyperscan_matcher_instance):
 async def test_fast_ml_latency(fast_ml_instance):
     """Tests the latency of a FastML prediction."""
     start_time = datetime.now()
-    await fast_ml_instance.predict(
-        {"features": {"malicious_indicators": 0.5}}, "threat_score"
-    )
+    await fast_ml_instance.predict({"features": {"malicious_indicators": 0.5}}, "threat_score")
     end_time = datetime.now()
     latency_ms = (end_time - start_time).total_seconds() * 1000
     assert latency_ms < 50  # Expect prediction to be very fast, e.g., under 50ms
@@ -80,9 +77,7 @@ async def test_fusion_engine_latency(fusion_engine_instance):
 @pytest.mark.asyncio
 async def test_hyperscan_matcher_latency(hyperscan_matcher_instance):
     """Tests the latency of Hyperscan pattern matching."""
-    await hyperscan_matcher_instance.compile_patterns(
-        ["test_pattern", "another_pattern"]
-    )
+    await hyperscan_matcher_instance.compile_patterns(["test_pattern", "another_pattern"])
     data = b"some data with a test_pattern inside"
     start_time = datetime.now()
     await hyperscan_matcher_instance.scan_data(data)

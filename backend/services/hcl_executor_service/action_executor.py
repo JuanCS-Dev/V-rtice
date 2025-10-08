@@ -14,7 +14,7 @@ This module ensures that HCL plans are reliably and effectively implemented.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from k8s_controller import KubernetesController
 
@@ -36,9 +36,7 @@ class ActionExecutor:
         self.k8s_controller = k8s_controller
         print("[ActionExecutor] Initialized Action Executor.")
 
-    async def execute_actions(
-        self, plan_id: str, actions: List[Dict[str, Any]], priority: int
-    ) -> List[Dict[str, Any]]:
+    async def execute_actions(self, plan_id: str, actions: List[Dict[str, Any]], priority: int) -> List[Dict[str, Any]]:
         """Executes a list of actions as part of a resource alignment plan.
 
         Args:
@@ -49,9 +47,7 @@ class ActionExecutor:
         Returns:
             List[Dict[str, Any]]: A list of dictionaries, each containing the result of an action execution.
         """
-        print(
-            f"[ActionExecutor] Executing {len(actions)} actions for plan {plan_id} with priority {priority}"
-        )
+        print(f"[ActionExecutor] Executing {len(actions)} actions for plan {plan_id} with priority {priority}")
         results = []
         for action in actions:
             action_type = action.get("type")
@@ -68,18 +64,14 @@ class ActionExecutor:
                     namespace = action_params.get("namespace", "default")
                     replicas = action_params.get("replicas")
                     if deployment_name and replicas is not None:
-                        await self.k8s_controller.scale_deployment(
-                            deployment_name, namespace, replicas
-                        )
+                        await self.k8s_controller.scale_deployment(deployment_name, namespace, replicas)
                         action_result = {
                             "action_type": action_type,
                             "status": "success",
                             "details": f"Scaled {deployment_name} to {replicas} replicas.",
                         }
                     else:
-                        raise ValueError(
-                            "Missing deployment_name or replicas for scale_deployment."
-                        )
+                        raise ValueError("Missing deployment_name or replicas for scale_deployment.")
                 elif action_type == "update_resource_limits":
                     deployment_name = action_params.get("deployment_name")
                     namespace = action_params.get("namespace", "default")
@@ -95,9 +87,7 @@ class ActionExecutor:
                             "details": f"Updated resource limits for {deployment_name}.",
                         }
                     else:
-                        raise ValueError(
-                            "Missing deployment_name or resource limits for update_resource_limits."
-                        )
+                        raise ValueError("Missing deployment_name or resource limits for update_resource_limits.")
                 elif action_type == "restart_pod":
                     pod_name = action_params.get("pod_name")
                     namespace = action_params.get("namespace", "default")

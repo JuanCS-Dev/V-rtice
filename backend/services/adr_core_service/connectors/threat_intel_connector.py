@@ -13,7 +13,7 @@ the overall security posture.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from models.schemas import ThreatIntelData
 from utils.logger import setup_logger
@@ -30,9 +30,7 @@ class ThreatIntelConnector:
 
     def __init__(self):
         """Initializes the ThreatIntelConnector."""
-        logger.info(
-            "[ThreatIntelConnector] Initializing Threat Intelligence Connector..."
-        )
+        logger.info("[ThreatIntelConnector] Initializing Threat Intelligence Connector...")
         # In a real scenario, establish connection to a TIP API (e.g., VirusTotal, AlienVault OTX)
         self.service_available = True
         logger.info("[ThreatIntelConnector] Threat Intelligence Connector initialized.")
@@ -50,13 +48,9 @@ class ThreatIntelConnector:
             HTTPException: If the service is unavailable or the indicator is not found.
         """
         if not self.service_available:
-            raise HTTPException(
-                status_code=503, detail="Threat intelligence service is not available."
-            )
+            raise HTTPException(status_code=503, detail="Threat intelligence service is not available.")
 
-        logger.info(
-            f"[ThreatIntelConnector] Querying threat intelligence for indicator: {indicator}"
-        )
+        logger.info(f"[ThreatIntelConnector] Querying threat intelligence for indicator: {indicator}")
         await asyncio.sleep(0.2)  # Simulate API call latency
 
         # Simulate threat intelligence lookup

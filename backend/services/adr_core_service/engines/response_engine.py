@@ -54,23 +54,17 @@ class ResponseEngine:
         Raises:
             ValueError: If the action type is unsupported.
         """
-        logger.info(
-            f"[ResponseEngine] Executing action '{action_type.value}' for incident {incident_id}"
-        )
+        logger.info(f"[ResponseEngine] Executing action '{action_type.value}' for incident {incident_id}")
         await asyncio.sleep(0.1)  # Simulate action execution time
 
         status = "failed"
         details = f"Action '{action_type.value}' not yet implemented."
 
         if action_type == ResponseActionType.ISOLATE_HOST:
-            details = (
-                f"Host for incident {incident_id} isolated. Parameters: {parameters}"
-            )
+            details = f"Host for incident {incident_id} isolated. Parameters: {parameters}"
             status = "success"
         elif action_type == ResponseActionType.BLOCK_IP:
-            details = (
-                f"IP {parameters.get('ip_address')} blocked. Parameters: {parameters}"
-            )
+            details = f"IP {parameters.get('ip_address')} blocked. Parameters: {parameters}"
             status = "success"
         elif action_type == ResponseActionType.TERMINATE_PROCESS:
             details = f"Process {parameters.get('process_id')} terminated on host for incident {incident_id}. Parameters: {parameters}"
@@ -79,9 +73,7 @@ class ResponseEngine:
             details = f"Forensic data collection initiated for incident {incident_id}. Parameters: {parameters}"
             status = "success"
         else:
-            logger.warning(
-                f"[ResponseEngine] Unsupported response action type: {action_type.value}"
-            )
+            logger.warning(f"[ResponseEngine] Unsupported response action type: {action_type.value}")
             raise ValueError(f"Unsupported response action type: {action_type.value}")
 
         logger.info(

@@ -14,7 +14,7 @@ and geo-fencing security policies.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from models.schemas import IpIntelligenceData
 from utils.logger import setup_logger
@@ -31,9 +31,7 @@ class IpIntelligenceConnector:
 
     def __init__(self):
         """Initializes the IpIntelligenceConnector."""
-        logger.info(
-            "[IpIntelligenceConnector] Initializing IP Intelligence Connector..."
-        )
+        logger.info("[IpIntelligenceConnector] Initializing IP Intelligence Connector...")
         # In a real scenario, establish connection to an IP intelligence service API
         self.service_available = True
         logger.info("[IpIntelligenceConnector] IP Intelligence Connector initialized.")
@@ -51,13 +49,9 @@ class IpIntelligenceConnector:
             HTTPException: If the service is unavailable or the IP address is invalid.
         """
         if not self.service_available:
-            raise HTTPException(
-                status_code=503, detail="IP intelligence service is not available."
-            )
+            raise HTTPException(status_code=503, detail="IP intelligence service is not available.")
 
-        logger.info(
-            f"[IpIntelligenceConnector] Querying IP intelligence for: {ip_address}"
-        )
+        logger.info(f"[IpIntelligenceConnector] Querying IP intelligence for: {ip_address}")
         await asyncio.sleep(0.1)  # Simulate API call latency
 
         # Simulate IP intelligence lookup

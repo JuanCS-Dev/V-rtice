@@ -45,9 +45,7 @@ class RealTimePlaybookExecutor:
         self.last_execution_time: Optional[datetime] = None
         self.current_status: str = "ready_for_playbooks"
 
-    async def execute_command(
-        self, command_name: str, parameters: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def execute_command(self, command_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Executes a real-time command by triggering a predefined playbook.
 
         Args:
@@ -93,15 +91,11 @@ class RealTimePlaybookExecutor:
 
             if ml_prediction.get("prediction_value", 0) > 0.8:
                 execution_result["status"] = "success"
-                execution_result["details"] = (
-                    "Critical threat confirmed by ML, initiating full containment."
-                )
+                execution_result["details"] = "Critical threat confirmed by ML, initiating full containment."
                 # Further actions like blocking IPs, terminating processes would be here
             else:
                 execution_result["status"] = "failed"
-                execution_result["details"] = (
-                    "ML prediction not critical enough for full response."
-                )
+                execution_result["details"] = "ML prediction not critical enough for full response."
         else:
             raise ValueError(f"Unsupported real-time command: {command_name}")
 
@@ -119,9 +113,5 @@ class RealTimePlaybookExecutor:
         return {
             "status": self.current_status,
             "total_playbooks_executed": len(self.playbook_history),
-            "last_execution": (
-                self.last_execution_time.isoformat()
-                if self.last_execution_time
-                else "N/A"
-            ),
+            "last_execution": (self.last_execution_time.isoformat() if self.last_execution_time else "N/A"),
         }

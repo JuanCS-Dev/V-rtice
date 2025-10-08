@@ -12,15 +12,15 @@ for translating HCL decisions into real-world system changes, maintaining
 Maximus AI's stability and performance.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 from action_executor import ActionExecutor
-from fastapi import FastAPI, HTTPException
 from k8s_controller import KubernetesController
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus HCL Executor Service", version="1.0.0")
 
@@ -77,21 +77,15 @@ async def execute_resource_plan(request: ExecutePlanRequest) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary containing the execution results.
     """
-    print(
-        f"[API] Received plan {request.plan_id} for execution with {len(request.actions)} actions."
-    )
+    print(f"[API] Received plan {request.plan_id} for execution with {len(request.actions)} actions.")
 
-    execution_results = await action_executor.execute_actions(
-        request.plan_id, request.actions, request.priority
-    )
+    execution_results = await action_executor.execute_actions(request.plan_id, request.actions, request.priority)
 
     return {
         "timestamp": datetime.now().isoformat(),
         "plan_id": request.plan_id,
         "status": (
-            "completed"
-            if all(res.get("status") == "success" for res in execution_results)
-            else "completed_with_errors"
+            "completed" if all(res.get("status") == "success" for res in execution_results) else "completed_with_errors"
         ),
         "action_results": execution_results,
     }

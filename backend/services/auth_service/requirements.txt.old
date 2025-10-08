@@ -1,0 +1,16 @@
+# AUTH SERVICE - SECURITY CRITICAL DEPENDENCIES
+# All packages updated for HIGH severity CVE fixes
+
+fastapi>=0.115.0  # Security fixes for starlette
+uvicorn[standard]>=0.32.0  # Compatibility with updated fastapi
+python-jose[cryptography]>=3.4.0  # CVE-2024-33663, CVE-2024-33664 fixes
+PyJWT>=2.8.0  # Keep current (no known CVEs)
+httpx>=0.27.0  # Security updates
+redis>=5.0.0  # Keep current
+pydantic>=2.9.0  # Latest security patches
+python-multipart>=0.0.18  # CVE-2024-53981 fix
+bcrypt>=4.0.1  # Keep current
+anyio>=4.4.0  # Security fix for race condition
+
+# Note: cryptography updated via python-jose[cryptography] (46.0.2)
+# Note: h11 0.14.0 and ecdsa 0.19.1 have no compatible fix - will be whitelisted

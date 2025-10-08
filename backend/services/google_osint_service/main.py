@@ -12,11 +12,11 @@ relevant to cybersecurity, threat intelligence, and situational awareness.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
 
 # In a real scenario, you would import a Google Search API client or similar
 
@@ -74,9 +74,7 @@ async def query_osint(request: OsintQueryRequest) -> Dict[str, Any]:
     Raises:
         HTTPException: If an invalid search type is provided.
     """
-    print(
-        f"[API] Performing OSINT query: '{request.query}' (type: {request.search_type}, limit: {request.limit})"
-    )
+    print(f"[API] Performing OSINT query: '{request.query}' (type: {request.search_type}, limit: {request.limit})")
     await asyncio.sleep(0.5)  # Simulate search time
 
     results = {
@@ -119,9 +117,7 @@ async def query_osint(request: OsintQueryRequest) -> Dict[str, Any]:
             }
         )
     else:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid search type: {request.search_type}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid search type: {request.search_type}")
 
     return results
 

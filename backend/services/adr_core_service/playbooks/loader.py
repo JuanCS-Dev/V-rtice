@@ -12,11 +12,12 @@ adaptation to evolving threat landscapes.
 """
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
-from models.schemas import IncidentSeverity, Playbook, PlaybookStep, ResponseActionType
-from utils.logger import setup_logger
 import yaml  # Assuming PyYAML is installed for YAML parsing
+
+from models.schemas import Playbook
+from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
@@ -48,11 +49,7 @@ class PlaybookLoader:
 
         logger.info(f"[PlaybookLoader] Loading playbooks from: {directory_path}")
         for filename in os.listdir(directory_path):
-            if (
-                filename.endswith(".yaml")
-                or filename.endswith(".yml")
-                or filename.endswith(".json")
-            ):
+            if filename.endswith(".yaml") or filename.endswith(".yml") or filename.endswith(".json"):
                 filepath = os.path.join(directory_path, filename)
                 try:
                     with open(filepath, "r") as f:
@@ -67,15 +64,9 @@ class PlaybookLoader:
                     self.playbooks[playbook.id] = playbook
                     logger.info(f"[PlaybookLoader] Loaded playbook: {playbook.id}")
                 except Exception as e:
-                    logger.error(
-                        f"[PlaybookLoader] Error loading playbook {filename}: {e}"
-                    )
-                    raise ValueError(
-                        f"Malformed or invalid playbook file: {filename} - {e}"
-                    )
-        logger.info(
-            f"[PlaybookLoader] Finished loading {len(self.playbooks)} playbooks."
-        )
+                    logger.error(f"[PlaybookLoader] Error loading playbook {filename}: {e}")
+                    raise ValueError(f"Malformed or invalid playbook file: {filename} - {e}")
+        logger.info(f"[PlaybookLoader] Finished loading {len(self.playbooks)} playbooks.")
 
     def get_playbook(self, playbook_id: str) -> Optional[Playbook]:
         """Retrieves a specific playbook by its ID.
@@ -99,9 +90,7 @@ class PlaybookLoader:
         """
         # Simplified logic: In a real system, this would involve matching incident
         # characteristics (type, severity, affected assets) to playbook triggers.
-        logger.info(
-            f"[PlaybookLoader] Attempting to find playbook for incident: {incident_id}"
-        )
+        logger.info(f"[PlaybookLoader] Attempting to find playbook for incident: {incident_id}")
         for playbook in self.playbooks.values():
             # Example: if playbook name contains a keyword from incident_id
             if "malware" in incident_id.lower() and "malware" in playbook.id.lower():

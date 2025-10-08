@@ -17,8 +17,9 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from config import get_settings
 import httpx
+
+from config import get_settings
 from llm_client import LLMClient
 from models import SinespQuery, VehicleInfo
 from prompt_templates import SINESP_ANALYSIS_PROMPT
@@ -63,9 +64,7 @@ class IntelligenceAgent:
         if not self.api_key or self.api_key == "your_sinesp_api_key":
             raise ValueError("Sinesp API key is not configured.")
 
-        print(
-            f"[IntelligenceAgent] Querying Sinesp for {query.query_type}: {query.identifier}"
-        )
+        print(f"[IntelligenceAgent] Querying Sinesp for {query.query_type}: {query.identifier}")
 
         # Simulate API call to Sinesp
         async with httpx.AsyncClient() as client:
@@ -121,15 +120,11 @@ class IntelligenceAgent:
                 return vehicle_info
 
             except httpx.HTTPStatusError as e:
-                print(
-                    f"[IntelligenceAgent] Sinesp API returned error: {e.response.status_code} - {e.response.text}"
-                )
+                print(f"[IntelligenceAgent] Sinesp API returned error: {e.response.status_code} - {e.response.text}")
                 raise
             except httpx.RequestError as e:
                 print(f"[IntelligenceAgent] Network error during Sinesp API call: {e}")
-                raise HTTPException(
-                    status_code=503, detail=f"Could not connect to Sinesp API: {e}"
-                )
+                raise HTTPException(status_code=503, detail=f"Could not connect to Sinesp API: {e}")
 
     async def analyze_vehicle_info(self, vehicle_info: VehicleInfo) -> Dict[str, Any]:
         """Analyzes vehicle information using an LLM to extract insights.
@@ -140,9 +135,7 @@ class IntelligenceAgent:
         Returns:
             Dict[str, Any]: A dictionary containing AI-generated insights.
         """
-        print(
-            f"[IntelligenceAgent] Analyzing vehicle info for {vehicle_info.plate} with LLM."
-        )
+        print(f"[IntelligenceAgent] Analyzing vehicle info for {vehicle_info.plate} with LLM.")
 
         prompt = SINESP_ANALYSIS_PROMPT.format(vehicle_info=vehicle_info.json())
         llm_response = await self.llm_client.generate_text(prompt)
@@ -157,9 +150,7 @@ class IntelligenceAgent:
             insights["potential_risks"].append("Vehicle reported stolen.")
             insights["recommendations"].append("Alert authorities immediately.")
         if vehicle_info.year < 2010:
-            insights["recommendations"].append(
-                "Check for older vehicle vulnerabilities."
-            )
+            insights["recommendations"].append("Check for older vehicle vulnerabilities.")
 
         return insights
 
@@ -172,7 +163,5 @@ class IntelligenceAgent:
         return {
             "status": self.current_status,
             "total_queries": len(self.query_history),
-            "last_query": (
-                self.last_query_time.isoformat() if self.last_query_time else "N/A"
-            ),
+            "last_query": (self.last_query_time.isoformat() if self.last_query_time else "N/A"),
         }

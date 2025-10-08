@@ -14,18 +14,18 @@ Note: ALL cryptographic operations (bcrypt, JWT) are REAL - no mocking.
 Only external dependencies (if any) would be mocked per PAGANI standard.
 """
 
+# Import the FastAPI app
+import sys
+from datetime import datetime, timedelta
+
+import bcrypt
+import jwt
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from datetime import datetime, timedelta
-import jwt
-import bcrypt
 
-# Import the FastAPI app
-import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/auth_service")
-from main import app, SECRET_KEY, ALGORITHM, users_db, create_access_token
-
+from main import ALGORITHM, SECRET_KEY, app, create_access_token
 
 # ==================== FIXTURES ====================
 
@@ -40,22 +40,14 @@ async def client():
 @pytest_asyncio.fixture
 def valid_admin_token():
     """Generate a valid JWT token for admin user."""
-    token_data = {
-        "sub": "maximus_admin",
-        "roles": ["admin", "user"],
-        "exp": datetime.utcnow() + timedelta(minutes=30)
-    }
+    token_data = {"sub": "maximus_admin", "roles": ["admin", "user"], "exp": datetime.utcnow() + timedelta(minutes=30)}
     return jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
 
 @pytest_asyncio.fixture
 def valid_user_token():
     """Generate a valid JWT token for regular user."""
-    token_data = {
-        "sub": "maximus_user",
-        "roles": ["user"],
-        "exp": datetime.utcnow() + timedelta(minutes=30)
-    }
+    token_data = {"sub": "maximus_user", "roles": ["user"], "exp": datetime.utcnow() + timedelta(minutes=30)}
     return jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -65,7 +57,7 @@ def expired_token():
     token_data = {
         "sub": "maximus_admin",
         "roles": ["admin", "user"],
-        "exp": datetime.utcnow() - timedelta(minutes=10)  # Expired 10 minutes ago
+        "exp": datetime.utcnow() - timedelta(minutes=10),  # Expired 10 minutes ago
     }
     return jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -96,10 +88,7 @@ class TestTokenEndpoint:
 
     async def test_login_with_correct_credentials_admin(self, client):
         """Test login with correct admin credentials - REAL bcrypt validation."""
-        form_data = {
-            "username": "maximus_admin",
-            "password": "adminpass"
-        }
+        form_data = {"username": "maximus_admin", "password": "adminpass"}
 
         response = await client.post("/token", data=form_data)
 
@@ -117,10 +106,7 @@ class TestTokenEndpoint:
 
     async def test_login_with_correct_credentials_user(self, client):
         """Test login with correct regular user credentials - REAL bcrypt validation."""
-        form_data = {
-            "username": "maximus_user",
-            "password": "userpass"
-        }
+        form_data = {"username": "maximus_user", "password": "userpass"}
 
         response = await client.post("/token", data=form_data)
 
@@ -136,10 +122,7 @@ class TestTokenEndpoint:
 
     async def test_login_with_incorrect_password(self, client):
         """Test login with incorrect password - REAL bcrypt rejection."""
-        form_data = {
-            "username": "maximus_admin",
-            "password": "wrongpassword"
-        }
+        form_data = {"username": "maximus_admin", "password": "wrongpassword"}
 
         response = await client.post("/token", data=form_data)
 
@@ -149,10 +132,7 @@ class TestTokenEndpoint:
 
     async def test_login_with_nonexistent_user(self, client):
         """Test login with non-existent username."""
-        form_data = {
-            "username": "nonexistent_user",
-            "password": "somepassword"
-        }
+        form_data = {"username": "nonexistent_user", "password": "somepassword"}
 
         response = await client.post("/token", data=form_data)
 
@@ -162,10 +142,7 @@ class TestTokenEndpoint:
 
     async def test_login_token_has_expiration(self, client):
         """Test that generated token has expiration claim."""
-        form_data = {
-            "username": "maximus_admin",
-            "password": "adminpass"
-        }
+        form_data = {"username": "maximus_admin", "password": "adminpass"}
 
         response = await client.post("/token", data=form_data)
         token = response.json()["access_token"]
@@ -178,10 +155,7 @@ class TestTokenEndpoint:
 
     async def test_login_token_expires_in_30_minutes(self, client):
         """Test that token expiration is set to 30 minutes."""
-        form_data = {
-            "username": "maximus_admin",
-            "password": "adminpass"
-        }
+        form_data = {"username": "maximus_admin", "password": "adminpass"}
 
         response = await client.post("/token", data=form_data)
 
@@ -254,11 +228,7 @@ class TestUsersMeEndpoint:
     async def test_get_user_profile_with_token_for_nonexistent_user(self, client):
         """Test getting user profile with token for user that doesn't exist in DB."""
         # Create token for non-existent user
-        token_data = {
-            "sub": "deleted_user",
-            "roles": ["user"],
-            "exp": datetime.utcnow() + timedelta(minutes=30)
-        }
+        token_data = {"sub": "deleted_user", "roles": ["user"], "exp": datetime.utcnow() + timedelta(minutes=30)}
         fake_token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
         headers = {"Authorization": f"Bearer {fake_token}"}
@@ -386,10 +356,7 @@ class TestRequestValidation:
 
     async def test_login_empty_username(self, client):
         """Test login with empty username string."""
-        form_data = {
-            "username": "",
-            "password": "somepassword"
-        }
+        form_data = {"username": "", "password": "somepassword"}
 
         response = await client.post("/token", data=form_data)
         # FastAPI OAuth2PasswordRequestForm validates and returns 422 for empty username
@@ -397,10 +364,7 @@ class TestRequestValidation:
 
     async def test_login_empty_password(self, client):
         """Test login with empty password string."""
-        form_data = {
-            "username": "maximus_admin",
-            "password": ""
-        }
+        form_data = {"username": "maximus_admin", "password": ""}
 
         response = await client.post("/token", data=form_data)
         # FastAPI OAuth2PasswordRequestForm validates and returns 422 for empty password
@@ -419,7 +383,7 @@ class TestEdgeCases:
         # Create token without 'sub'
         token_data = {
             "roles": ["user"],
-            "exp": datetime.utcnow() + timedelta(minutes=30)
+            "exp": datetime.utcnow() + timedelta(minutes=30),
             # Missing 'sub'
         }
         bad_token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
@@ -432,11 +396,7 @@ class TestEdgeCases:
     async def test_token_with_wrong_secret_key(self, client):
         """Test token signed with different secret key - REAL JWT verification."""
         wrong_key = "wrong-secret-key"
-        token_data = {
-            "sub": "maximus_admin",
-            "roles": ["admin"],
-            "exp": datetime.utcnow() + timedelta(minutes=30)
-        }
+        token_data = {"sub": "maximus_admin", "roles": ["admin"], "exp": datetime.utcnow() + timedelta(minutes=30)}
         bad_token = jwt.encode(token_data, wrong_key, algorithm=ALGORITHM)
 
         headers = {"Authorization": f"Bearer {bad_token}"}
@@ -448,7 +408,7 @@ class TestEdgeCases:
         """Test that username is case-sensitive."""
         form_data = {
             "username": "MAXIMUS_ADMIN",  # Uppercase
-            "password": "adminpass"
+            "password": "adminpass",
         }
 
         response = await client.post("/token", data=form_data)
@@ -457,10 +417,7 @@ class TestEdgeCases:
 
     async def test_multiple_login_tokens_are_valid(self, client):
         """Test that multiple login requests generate valid tokens."""
-        form_data = {
-            "username": "maximus_admin",
-            "password": "adminpass"
-        }
+        form_data = {"username": "maximus_admin", "password": "adminpass"}
 
         # Login twice
         response1 = await client.post("/token", data=form_data)
@@ -478,11 +435,7 @@ class TestEdgeCases:
 
     async def test_authorization_header_format(self, client):
         """Test different Authorization header formats."""
-        token_data = {
-            "sub": "maximus_admin",
-            "roles": ["admin"],
-            "exp": datetime.utcnow() + timedelta(minutes=30)
-        }
+        token_data = {"sub": "maximus_admin", "roles": ["admin"], "exp": datetime.utcnow() + timedelta(minutes=30)}
         valid_token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
         # Correct format: "Bearer <token>"
@@ -497,10 +450,7 @@ class TestEdgeCases:
 
     async def test_login_preserves_all_roles(self, client):
         """Test that login token includes all user roles."""
-        form_data = {
-            "username": "maximus_admin",
-            "password": "adminpass"
-        }
+        form_data = {"username": "maximus_admin", "password": "adminpass"}
 
         response = await client.post("/token", data=form_data)
         token = response.json()["access_token"]
@@ -515,10 +465,7 @@ class TestEdgeCases:
         """Test login with password containing special characters (future-proofing)."""
         # Note: Current test users don't have special char passwords,
         # but we test that special chars don't break the flow
-        form_data = {
-            "username": "maximus_admin",
-            "password": "admin!@#$%^&*()"
-        }
+        form_data = {"username": "maximus_admin", "password": "admin!@#$%^&*()"}
 
         response = await client.post("/token", data=form_data)
         # Will fail authentication, but shouldn't error

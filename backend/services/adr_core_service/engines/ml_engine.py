@@ -12,7 +12,7 @@ identify subtle patterns indicative of malicious activity.
 """
 
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class MLEngine:
@@ -43,9 +43,7 @@ class MLEngine:
         if not self.model_loaded:
             raise RuntimeError("ML Engine not initialized or models not loaded.")
 
-        print(
-            f"[MLEngine] Predicting threat score for event: {event_data.get('event_id', 'N/A')}"
-        )
+        print(f"[MLEngine] Predicting threat score for event: {event_data.get('event_id', 'N/A')}")
         await asyncio.sleep(0.05)  # Simulate prediction time
 
         # Simplified ML prediction logic for demonstration

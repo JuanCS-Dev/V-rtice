@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+httpx
+pydantic
+pydantic-settings
+python-dotenv
+google-generativeai
+tenacity
+fastapi-cache2-fork[redis]
+redis

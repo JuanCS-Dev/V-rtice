@@ -12,9 +12,9 @@ and effectively, providing a unified control plane for the entire Maximus AI sys
 """
 
 import asyncio
+import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import uuid
 
 from cobalt_strike_wrapper import CobaltStrikeWrapper
 from metasploit_wrapper import MetasploitWrapper
@@ -61,13 +61,9 @@ class C2Engine:
             elif command.name == "deploy_agent":
                 result_data = await self._execute_deploy_agent(command.parameters)
             elif command.name == "metasploit_exploit":
-                result_data = await self.metasploit_wrapper.execute_exploit(
-                    command.parameters
-                )
+                result_data = await self.metasploit_wrapper.execute_exploit(command.parameters)
             elif command.name == "cobalt_strike_task":
-                result_data = await self.cobalt_strike_wrapper.execute_task(
-                    command.parameters
-                )
+                result_data = await self.cobalt_strike_wrapper.execute_task(command.parameters)
             else:
                 raise ValueError(f"Unsupported command: {command.name}")
 
@@ -160,8 +156,4 @@ class C2Engine:
         Returns:
             List[Command]: A list of active Command objects.
         """
-        return [
-            cmd
-            for cmd in self.active_commands.values()
-            if cmd.status == CommandStatus.RUNNING
-        ]
+        return [cmd for cmd in self.active_commands.values() if cmd.status == CommandStatus.RUNNING]
