@@ -7,7 +7,6 @@ Follows DEBUG_GUIDE best practices:
 - No mocks, no placeholders
 """
 
-import os
 from pathlib import Path
 
 SERVICES = [
@@ -176,9 +175,7 @@ if __name__ == "__main__":
 
 def create_api_file(service_id, port, service_title):
     """Create api.py file for a service."""
-    service_dir = Path(
-        f"/home/juan/vertice-dev/backend/services/immunis_{service_id}_service"
-    )
+    service_dir = Path(f"/home/juan/vertice-dev/backend/services/immunis_{service_id}_service")
 
     if not service_dir.exists():
         print(f"❌ Directory not found: {service_dir}")

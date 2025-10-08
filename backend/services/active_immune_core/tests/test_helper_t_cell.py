@@ -12,9 +12,6 @@ Tests cover actual production implementation of Helper T Cell:
 - Metrics & repr
 """
 
-import asyncio
-from datetime import datetime
-
 import pytest
 import pytest_asyncio
 
@@ -24,7 +21,6 @@ from active_immune_core.agents.helper_t_cell import (
     HelperTState,
 )
 from active_immune_core.agents.models import AgentStatus
-
 
 # ==================== FIXTURES ====================
 
@@ -193,9 +189,7 @@ class TestAntigenRecognition:
         assert helper_t.differentiation_state != HelperTState.NAIVE
 
     @pytest.mark.asyncio
-    async def test_activation_threshold_not_met(
-        self, helper_t: LinfocitoTAuxiliar
-    ):
+    async def test_activation_threshold_not_met(self, helper_t: LinfocitoTAuxiliar):
         """Test no activation when confidence below threshold"""
         await helper_t._handle_antigen_presentation(
             {
@@ -213,17 +207,14 @@ class TestAntigenRecognition:
 
     @pytest.mark.asyncio
     async def test_multiple_antigen_presentations(
-        self, helper_t: LinfocitoTAuxiliar,
+        self,
+        helper_t: LinfocitoTAuxiliar,
         sample_antigen_virus: AntigenPresentation,
         sample_antigen_parasite: AntigenPresentation,
     ):
         """Test handling multiple antigen presentations"""
-        await helper_t._handle_antigen_presentation(
-            sample_antigen_virus.model_dump()
-        )
-        await helper_t._handle_antigen_presentation(
-            sample_antigen_parasite.model_dump()
-        )
+        await helper_t._handle_antigen_presentation(sample_antigen_virus.model_dump())
+        await helper_t._handle_antigen_presentation(sample_antigen_parasite.model_dump())
 
         assert len(helper_t.recognized_antigens) == 2
 
@@ -241,9 +232,7 @@ class TestDifferentiation:
         assert cell.differentiation_state == HelperTState.NAIVE
 
     @pytest.mark.asyncio
-    async def test_differentiate_to_th1(
-        self, helper_t: LinfocitoTAuxiliar, sample_antigen_virus: AntigenPresentation
-    ):
+    async def test_differentiate_to_th1(self, helper_t: LinfocitoTAuxiliar, sample_antigen_virus: AntigenPresentation):
         """Test differentiation to Th1 (virus/intracellular)"""
         await helper_t._determine_differentiation(sample_antigen_virus)
 
@@ -450,9 +439,7 @@ class TestCytokineSecretion:
     """Test multi-cytokine secretion"""
 
     @pytest.mark.asyncio
-    async def test_il2_secretion(
-        self, helper_t: LinfocitoTAuxiliar, sample_antigen_virus: AntigenPresentation
-    ):
+    async def test_il2_secretion(self, helper_t: LinfocitoTAuxiliar, sample_antigen_virus: AntigenPresentation):
         """Test IL2 secretion for Cytotoxic T activation"""
         await helper_t.iniciar()
 
@@ -463,9 +450,7 @@ class TestCytokineSecretion:
         await helper_t.parar()
 
     @pytest.mark.asyncio
-    async def test_il4_secretion(
-        self, helper_t: LinfocitoTAuxiliar, sample_antigen_parasite: AntigenPresentation
-    ):
+    async def test_il4_secretion(self, helper_t: LinfocitoTAuxiliar, sample_antigen_parasite: AntigenPresentation):
         """Test IL4 secretion for B cell activation"""
         await helper_t.iniciar()
 
@@ -476,9 +461,7 @@ class TestCytokineSecretion:
         await helper_t.parar()
 
     @pytest.mark.asyncio
-    async def test_il5_secretion(
-        self, helper_t: LinfocitoTAuxiliar, sample_antigen_parasite: AntigenPresentation
-    ):
+    async def test_il5_secretion(self, helper_t: LinfocitoTAuxiliar, sample_antigen_parasite: AntigenPresentation):
         """Test IL5 secretion for B cell proliferation"""
         await helper_t.iniciar()
 
@@ -489,9 +472,7 @@ class TestCytokineSecretion:
         await helper_t.parar()
 
     @pytest.mark.asyncio
-    async def test_ifn_gamma_secretion(
-        self, helper_t: LinfocitoTAuxiliar, sample_antigen_virus: AntigenPresentation
-    ):
+    async def test_ifn_gamma_secretion(self, helper_t: LinfocitoTAuxiliar, sample_antigen_virus: AntigenPresentation):
         """Test IFN-gamma secretion for enhanced killing"""
         await helper_t.iniciar()
 
@@ -509,9 +490,7 @@ class TestInvestigationNeutralization:
     """Test Helper T Cell investigation and neutralization"""
 
     @pytest.mark.asyncio
-    async def test_investigation_returns_coordination_only(
-        self, helper_t: LinfocitoTAuxiliar
-    ):
+    async def test_investigation_returns_coordination_only(self, helper_t: LinfocitoTAuxiliar):
         """Test Helper T doesn't investigate, only coordinates"""
         result = await helper_t.executar_investigacao({"ip": "192.0.2.100"})
 
@@ -520,13 +499,9 @@ class TestInvestigationNeutralization:
         assert "coordination" in result["metodo"]
 
     @pytest.mark.asyncio
-    async def test_neutralization_creates_activation_signal(
-        self, helper_t: LinfocitoTAuxiliar
-    ):
+    async def test_neutralization_creates_activation_signal(self, helper_t: LinfocitoTAuxiliar):
         """Test neutralization creates activation signal for effectors"""
-        result = await helper_t.executar_neutralizacao(
-            {"target_cell_type": "cytotoxic_t"}, metodo="delegate"
-        )
+        result = await helper_t.executar_neutralizacao({"target_cell_type": "cytotoxic_t"}, metodo="delegate")
 
         assert result is True
         assert len(helper_t.activation_signals) == 1
@@ -558,7 +533,8 @@ class TestHelperTMetrics:
 
     @pytest.mark.asyncio
     async def test_metrics_with_activations(
-        self, helper_t: LinfocitoTAuxiliar,
+        self,
+        helper_t: LinfocitoTAuxiliar,
         sample_antigen_virus: AntigenPresentation,
         sample_antigen_parasite: AntigenPresentation,
     ):
@@ -593,9 +569,7 @@ class TestHelperTEdgeCases:
     """Test Helper T Cell edge cases"""
 
     @pytest.mark.asyncio
-    async def test_activation_with_invalid_antigen_data(
-        self, helper_t: LinfocitoTAuxiliar
-    ):
+    async def test_activation_with_invalid_antigen_data(self, helper_t: LinfocitoTAuxiliar):
         """Test handling invalid antigen data"""
         # Should not crash with missing fields
         await helper_t._handle_antigen_presentation({})
@@ -603,9 +577,7 @@ class TestHelperTEdgeCases:
         assert len(helper_t.recognized_antigens) == 1  # Stored with defaults
 
     @pytest.mark.asyncio
-    async def test_differentiation_with_unknown_antigen_type(
-        self, helper_t: LinfocitoTAuxiliar
-    ):
+    async def test_differentiation_with_unknown_antigen_type(self, helper_t: LinfocitoTAuxiliar):
         """Test differentiation with unknown antigen type"""
         unknown_antigen = AntigenPresentation(
             presentation_id="ag_unknown_001",

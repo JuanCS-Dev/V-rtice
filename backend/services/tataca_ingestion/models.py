@@ -62,9 +62,7 @@ class Pessoa(BaseModel):
     pai: Optional[str] = Field(None, description="Father's name")
     rg: Optional[str] = Field(None, description="RG number")
     telefone: Optional[str] = Field(None, description="Phone number")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class Veiculo(BaseModel):
@@ -80,9 +78,7 @@ class Veiculo(BaseModel):
     cor: Optional[str] = Field(None, description="Color")
     situacao: Optional[str] = Field(None, description="Status (regular, roubado, etc)")
     proprietario_cpf: Optional[str] = Field(None, description="Owner's CPF")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class Endereco(BaseModel):
@@ -97,9 +93,7 @@ class Endereco(BaseModel):
     estado: str = Field(..., description="State")
     latitude: Optional[float] = Field(None, description="Latitude")
     longitude: Optional[float] = Field(None, description="Longitude")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class Ocorrencia(BaseModel):
@@ -115,9 +109,7 @@ class Ocorrencia(BaseModel):
     local_estado: Optional[str] = Field(None, description="Location state")
     delegacia: Optional[str] = Field(None, description="Police station")
     status: Optional[str] = Field(None, description="Status")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 # ETL Models
@@ -177,9 +169,7 @@ class EntityRelationship(BaseModel):
     target_type: EntityType = Field(..., description="Target entity type")
     target_id: str = Field(..., description="Target entity ID")
     relation_type: RelationType = Field(..., description="Relationship type")
-    properties: Dict[str, Any] = Field(
-        default_factory=dict, description="Relation properties"
-    )
+    properties: Dict[str, Any] = Field(default_factory=dict, description="Relation properties")
 
 
 # Connector Response Models
@@ -216,12 +206,8 @@ class TransformResult(BaseModel):
 
     success: bool = Field(..., description="Whether transformation succeeded")
     entity_type: EntityType = Field(..., description="Entity type")
-    entity_data: Optional[Dict[str, Any]] = Field(
-        None, description="Transformed entity data"
-    )
-    relationships: List[EntityRelationship] = Field(
-        default_factory=list, description="Related entities"
-    )
+    entity_data: Optional[Dict[str, Any]] = Field(None, description="Transformed entity data")
+    relationships: List[EntityRelationship] = Field(default_factory=list, description="Related entities")
     error_message: Optional[str] = Field(None, description="Error if failed")
 
 

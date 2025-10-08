@@ -15,15 +15,12 @@ Version: 2.0.0
 
 import asyncio
 import sys
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
-from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-import pytest_asyncio
 
 from active_immune_core.agents.base import AgenteImunologicoBase
-from active_immune_core.agents.models import AgentStatus, AgentType
-
+from active_immune_core.agents.models import AgentStatus
 
 # ==================== TEST AGENT ====================
 
@@ -66,7 +63,7 @@ class TestPrometheusMetricsInicialization:
         mock_main.agents_total = mock_agents_total
 
         # Inject mock into sys.modules
-        sys.modules['main'] = mock_main
+        sys.modules["main"] = mock_main
 
         try:
             # Create agent
@@ -85,14 +82,12 @@ class TestPrometheusMetricsInicialization:
             agent._hormone_messenger.is_running = Mock(return_value=True)
 
             # Mock HTTP session
-            with patch('aiohttp.ClientSession', return_value=AsyncMock()):
+            with patch("aiohttp.ClientSession", return_value=AsyncMock()):
                 # ACT: Start agent
                 await agent.iniciar()
 
                 # ASSERT: Prometheus metrics incremented (lines 162-163)
-                mock_agents_active.labels.assert_called_with(
-                    type=agent.state.tipo, status="patrulhando"
-                )
+                mock_agents_active.labels.assert_called_with(type=agent.state.tipo, status="patrulhando")
                 mock_agents_total.labels.assert_called_with(type=agent.state.tipo)
 
                 # Verify inc() was called
@@ -104,8 +99,8 @@ class TestPrometheusMetricsInicialization:
 
         finally:
             # Remove mock from sys.modules
-            if 'main' in sys.modules:
-                del sys.modules['main']
+            if "main" in sys.modules:
+                del sys.modules["main"]
 
 
 class TestPrometheusMetricsParar:
@@ -122,7 +117,7 @@ class TestPrometheusMetricsParar:
         mock_main = MagicMock()
         mock_main.agents_active = mock_agents_active
 
-        sys.modules['main'] = mock_main
+        sys.modules["main"] = mock_main
 
         try:
             # Create agent and manually set to running
@@ -148,14 +143,12 @@ class TestPrometheusMetricsParar:
 
             # ASSERT: Prometheus metric decremented (line 219)
             # Line 219 always uses status="patrulhando" (hardcoded)
-            mock_agents_active.labels.assert_called_with(
-                type=agent.state.tipo, status="patrulhando"
-            )
+            mock_agents_active.labels.assert_called_with(type=agent.state.tipo, status="patrulhando")
             assert mock_agents_active.labels().dec.called
 
         finally:
-            if 'main' in sys.modules:
-                del sys.modules['main']
+            if "main" in sys.modules:
+                del sys.modules["main"]
 
 
 class TestPrometheusMetricsApoptose:
@@ -171,7 +164,7 @@ class TestPrometheusMetricsApoptose:
         mock_main = MagicMock()
         mock_main.agent_apoptosis_total = mock_agent_apoptosis_total
 
-        sys.modules['main'] = mock_main
+        sys.modules["main"] = mock_main
 
         try:
             # Create agent
@@ -202,8 +195,8 @@ class TestPrometheusMetricsApoptose:
             assert mock_agent_apoptosis_total.labels().inc.called
 
         finally:
-            if 'main' in sys.modules:
-                del sys.modules['main']
+            if "main" in sys.modules:
+                del sys.modules["main"]
 
 
 class TestPrometheusMetricsInvestigar:
@@ -219,7 +212,7 @@ class TestPrometheusMetricsInvestigar:
         mock_main = MagicMock()
         mock_main.threats_detected_total = mock_threats_detected_total
 
-        sys.modules['main'] = mock_main
+        sys.modules["main"] = mock_main
 
         try:
             # Create agent
@@ -243,8 +236,8 @@ class TestPrometheusMetricsInvestigar:
             assert mock_threats_detected_total.labels().inc.called
 
         finally:
-            if 'main' in sys.modules:
-                del sys.modules['main']
+            if "main" in sys.modules:
+                del sys.modules["main"]
 
 
 class TestPrometheusMetricsNeutralizar:
@@ -260,7 +253,7 @@ class TestPrometheusMetricsNeutralizar:
         mock_main = MagicMock()
         mock_main.threats_neutralized_total = mock_threats_neutralized_total
 
-        sys.modules['main'] = mock_main
+        sys.modules["main"] = mock_main
 
         try:
             # Create agent
@@ -277,22 +270,17 @@ class TestPrometheusMetricsNeutralizar:
             agent._cytokine_messenger.send_cytokine = AsyncMock()
 
             # ACT: Neutralize target
-            result = await agent.neutralizar(
-                {"ip": "192.168.1.100", "threat_level": 3},
-                metodo="quarantine"
-            )
+            result = await agent.neutralizar({"ip": "192.168.1.100", "threat_level": 3}, metodo="quarantine")
 
             # ASSERT: Prometheus threats neutralized incremented (line 468)
             assert result is True
             # Lines 468-470 use agent_type and method
-            mock_threats_neutralized_total.labels.assert_called_with(
-                agent_type=agent.state.tipo, method="quarantine"
-            )
+            mock_threats_neutralized_total.labels.assert_called_with(agent_type=agent.state.tipo, method="quarantine")
             assert mock_threats_neutralized_total.labels().inc.called
 
         finally:
-            if 'main' in sys.modules:
-                del sys.modules['main']
+            if "main" in sys.modules:
+                del sys.modules["main"]
 
 
 # ==================== ENERGY DECAY STATUS-BASED TESTS ====================
@@ -427,10 +415,7 @@ class TestValidateEthicalEdgeCases:
         agent._http_session.post = Mock(return_value=mock_cm)
 
         # ACT: Validate ethical (should handle exception)
-        result = await agent._validate_ethical(
-            {"ip": "192.168.1.100"},
-            "neutralize"
-        )
+        result = await agent._validate_ethical({"ip": "192.168.1.100"}, "neutralize")
 
         # ASSERT: Returns False (fail-safe), lines 686-687 covered
         assert result is False
@@ -451,10 +436,7 @@ class TestValidateEthicalEdgeCases:
         agent._http_session.post = Mock(return_value=mock_cm)
 
         # ACT: Validate ethical (should handle timeout)
-        result = await agent._validate_ethical(
-            {"ip": "192.168.1.100"},
-            "neutralize"
-        )
+        result = await agent._validate_ethical({"ip": "192.168.1.100"}, "neutralize")
 
         # ASSERT: Returns False (fail-safe), lines 690-691 covered
         assert result is False

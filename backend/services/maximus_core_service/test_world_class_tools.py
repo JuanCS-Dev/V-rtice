@@ -59,9 +59,7 @@ async def test_execute_tool_missing_args(world_class_tools):
     tool_name = "search_web"
     tool_args = {}  # Missing 'query'
 
-    with pytest.raises(
-        ValueError, match="Missing required argument 'query' for tool 'search_web'"
-    ):
+    with pytest.raises(ValueError, match="Missing required argument 'query' for tool 'search_web'"):
         await world_class_tools.execute_tool(tool_name, tool_args)
 
 

@@ -16,8 +16,8 @@ PRODUCTION-READY: Real HTTP, no mocks, graceful degradation.
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Dict, List
 
 import aiohttp
 
@@ -85,10 +85,7 @@ class CelulaNKDigital(AgenteImunologicoBase):
         self.hosts_isolados: List[str] = []  # Track killed hosts
         self.mhc_violations: int = 0  # Missing self detections
 
-        logger.info(
-            f"NK Cell initialized: {self.state.id[:8]} "
-            f"(zone={area_patrulha}, threshold={anomaly_threshold})"
-        )
+        logger.info(f"NK Cell initialized: {self.state.id[:8]} (zone={area_patrulha}, threshold={anomaly_threshold})")
 
     # ==================== PATROL ====================
 
@@ -120,10 +117,7 @@ class CelulaNKDigital(AgenteImunologicoBase):
         hosts_anomalos = await self._detectar_anomalias_comportamentais()
 
         for host, anomaly_score in hosts_anomalos:
-            logger.warning(
-                f"Behavioral anomaly detected: {host.get('id', 'unknown')} "
-                f"(score={anomaly_score:.2f})"
-            )
+            logger.warning(f"Behavioral anomaly detected: {host.get('id', 'unknown')} (score={anomaly_score:.2f})")
             self.anomalias_detectadas += 1
 
             # Investigate and neutralize if confirmed
@@ -156,15 +150,10 @@ class CelulaNKDigital(AgenteImunologicoBase):
                     data = await response.json()
 
                     # Filter hosts with disabled logging
-                    hosts_suspeitos = [
-                        host
-                        for host in data.get("hosts", [])
-                        if not host.get("audit_enabled", True)
-                    ]
+                    hosts_suspeitos = [host for host in data.get("hosts", []) if not host.get("audit_enabled", True)]
 
                     logger.debug(
-                        f"MHC-I scan: {len(hosts_suspeitos)} violations "
-                        f"out of {len(data.get('hosts', []))} hosts"
+                        f"MHC-I scan: {len(hosts_suspeitos)} violations out of {len(data.get('hosts', []))} hosts"
                     )
 
                     return hosts_suspeitos
@@ -402,8 +391,7 @@ class CelulaNKDigital(AgenteImunologicoBase):
         anomaly_score = self._calcular_anomalia(host_id, metricas_atuais)
 
         logger.info(
-            f"NK investigation: {host_id} - anomaly_score={anomaly_score:.2f} "
-            f"(threshold={self.anomaly_threshold})"
+            f"NK investigation: {host_id} - anomaly_score={anomaly_score:.2f} (threshold={self.anomaly_threshold})"
         )
 
         return {
@@ -531,9 +519,7 @@ class CelulaNKDigital(AgenteImunologicoBase):
             "mhc_violations": self.mhc_violations,
             "baseline_hosts": len(self.baseline_behavior),
             "eficiencia_deteccao": (
-                self.state.neutralizacoes_total / self.anomalias_detectadas
-                if self.anomalias_detectadas > 0
-                else 0.0
+                self.state.neutralizacoes_total / self.anomalias_detectadas if self.anomalias_detectadas > 0 else 0.0
             ),
         }
 

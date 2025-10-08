@@ -8,13 +8,7 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
-import json
 from fastapi.testclient import TestClient
-from typing import Dict
-
-from api.websocket.events import WSEventType
-
 
 # ==================== CONNECTION ====================
 
@@ -69,10 +63,7 @@ def test_websocket_join_room_success(client: TestClient):
         websocket.receive_json()
 
         # Join room
-        websocket.send_json({
-            "action": "join",
-            "room": "agents"
-        })
+        websocket.send_json({"action": "join", "room": "agents"})
 
         response = websocket.receive_json()
 
@@ -118,12 +109,7 @@ def test_websocket_subscribe_success(client: TestClient):
     with client.websocket_connect("/ws") as websocket:
         websocket.receive_json()
 
-        websocket.send_json({
-            "action": "subscribe",
-            "data": {
-                "event_types": ["agent_created", "agent_updated"]
-            }
-        })
+        websocket.send_json({"action": "subscribe", "data": {"event_types": ["agent_created", "agent_updated"]}})
 
         response = websocket.receive_json()
 
@@ -136,12 +122,7 @@ def test_websocket_subscribe_invalid_event_type(client: TestClient):
     with client.websocket_connect("/ws") as websocket:
         websocket.receive_json()
 
-        websocket.send_json({
-            "action": "subscribe",
-            "data": {
-                "event_types": ["invalid_event_type"]
-            }
-        })
+        websocket.send_json({"action": "subscribe", "data": {"event_types": ["invalid_event_type"]}})
 
         response = websocket.receive_json()
 
@@ -155,17 +136,11 @@ def test_websocket_unsubscribe_success(client: TestClient):
         websocket.receive_json()
 
         # Subscribe first
-        websocket.send_json({
-            "action": "subscribe",
-            "data": {"event_types": ["agent_created"]}
-        })
+        websocket.send_json({"action": "subscribe", "data": {"event_types": ["agent_created"]}})
         websocket.receive_json()
 
         # Unsubscribe
-        websocket.send_json({
-            "action": "unsubscribe",
-            "data": {"event_types": ["agent_created"]}
-        })
+        websocket.send_json({"action": "unsubscribe", "data": {"event_types": ["agent_created"]}})
 
         response = websocket.receive_json()
 
@@ -184,10 +159,7 @@ def test_websocket_get_connection_info(client: TestClient):
         websocket.send_json({"action": "join", "room": "agents"})
         websocket.receive_json()
 
-        websocket.send_json({
-            "action": "subscribe",
-            "data": {"event_types": ["agent_created"]}
-        })
+        websocket.send_json({"action": "subscribe", "data": {"event_types": ["agent_created"]}})
         websocket.receive_json()
 
         # Get info
@@ -311,10 +283,7 @@ def test_websocket_receives_task_created_event(client: TestClient):
         websocket.receive_json()
 
         # Create task
-        client.post("/coordination/tasks", json={
-            "task_type": "detection",
-            "priority": 5
-        })
+        client.post("/coordination/tasks", json={"task_type": "detection", "priority": 5})
 
         # Receive event
         event = websocket.receive_json()
@@ -360,10 +329,7 @@ def test_websocket_subscription_filters_events(client: TestClient):
         websocket.receive_json()
 
         # Subscribe ONLY to agent_deleted
-        websocket.send_json({
-            "action": "subscribe",
-            "data": {"event_types": ["agent_deleted"]}
-        })
+        websocket.send_json({"action": "subscribe", "data": {"event_types": ["agent_deleted"]}})
         websocket.receive_json()
 
         # Update agent (should NOT receive this)
@@ -405,13 +371,14 @@ def test_broadcast_event_via_rest(client: TestClient):
         websocket.receive_json()
 
         # Broadcast via REST
-        response = client.post("/ws/broadcast", params={
-            "event_type": "alert_triggered",
-            "room": "system"
-        }, json={
-            "level": "warning",
-            "message": "Test alert",
-        })
+        response = client.post(
+            "/ws/broadcast",
+            params={"event_type": "alert_triggered", "room": "system"},
+            json={
+                "level": "warning",
+                "message": "Test alert",
+            },
+        )
 
         assert response.status_code == 200
         assert response.json()["success"] is True
@@ -425,9 +392,7 @@ def test_broadcast_event_via_rest(client: TestClient):
 
 def test_broadcast_event_invalid_type(client: TestClient):
     """Test broadcasting with invalid event type"""
-    response = client.post("/ws/broadcast", params={
-        "event_type": "invalid_event_type"
-    }, json={"test": "data"})
+    response = client.post("/ws/broadcast", params={"event_type": "invalid_event_type"}, json={"test": "data"})
 
     assert response.status_code == 400
     assert "invalid" in response.json()["message"].lower()

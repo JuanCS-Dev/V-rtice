@@ -63,7 +63,6 @@ whether MAXIMUS achieves the structural prerequisites for phenomenal emergence.
 
 import time
 from dataclasses import dataclass, field
-from typing import List
 
 import networkx as nx
 import numpy as np
@@ -91,7 +90,7 @@ class PhiProxyMetrics:
     # Non-degeneracy validation
     has_bottlenecks: bool = True
     bottleneck_count: int = 0
-    bottleneck_locations: List[str] = field(default_factory=list)
+    bottleneck_locations: list[str] = field(default_factory=list)
     min_path_redundancy: int = 0  # Alternative paths
 
     # Derived metrics
@@ -119,8 +118,8 @@ class StructuralCompliance:
 
     is_compliant: bool = False
     compliance_score: float = 0.0  # 0-100
-    violations: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    violations: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     # Individual criterion checks
     eci_pass: bool = False

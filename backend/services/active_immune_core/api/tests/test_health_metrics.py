@@ -8,9 +8,7 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
 from fastapi.testclient import TestClient
-
 
 # ==================== ROOT ENDPOINT ====================
 
@@ -163,10 +161,7 @@ def test_validation_error(client: TestClient):
 
 def test_cors_headers_present(client: TestClient):
     """Test that CORS headers are present"""
-    response = client.options(
-        "/",
-        headers={"Origin": "http://localhost:3000"}
-    )
+    response = client.options("/", headers={"Origin": "http://localhost:3000"})
 
     # Should have CORS headers
     assert "access-control-allow-origin" in response.headers

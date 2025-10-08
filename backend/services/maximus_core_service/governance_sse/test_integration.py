@@ -13,39 +13,37 @@ Date: 2025-10-06
 Quality: Production-ready, REGRA DE OURO compliant
 """
 
-import pytest
 import asyncio
-import httpx
-from datetime import datetime, timezone, timedelta
-from typing import AsyncGenerator
+from datetime import UTC, datetime, timedelta
 
-# HITL imports
-from hitl import (
-    HITLDecision,
-    DecisionContext,
-    DecisionQueue,
-    OperatorInterface,
-    SLAConfig,
-    ActionType,
-    RiskLevel,
-    DecisionStatus,
-    AutomationLevel,
-)
-from hitl.decision_framework import HITLDecisionFramework
-
-# Governance SSE imports
-from .sse_server import GovernanceSSEServer, SSEEvent, decision_to_sse_data
-from .event_broadcaster import EventBroadcaster
-from .api_routes import create_governance_api
+import pytest
+from fastapi import FastAPI
 
 # FastAPI test client
 from fastapi.testclient import TestClient
-from fastapi import FastAPI
 
+# HITL imports
+from hitl import (
+    ActionType,
+    AutomationLevel,
+    DecisionContext,
+    DecisionQueue,
+    HITLDecision,
+    OperatorInterface,
+    RiskLevel,
+    SLAConfig,
+)
+from hitl.decision_framework import HITLDecisionFramework
+
+from .api_routes import create_governance_api
+
+# Governance SSE imports
+from .sse_server import GovernanceSSEServer, SSEEvent
 
 # ============================================================================
 # Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def sla_config():
@@ -126,14 +124,15 @@ def test_decision():
         context=context,
         risk_level=RiskLevel.HIGH,
         automation_level=AutomationLevel.SUPERVISED,
-        created_at=datetime.now(timezone.utc),
-        sla_deadline=datetime.now(timezone.utc) + timedelta(minutes=10),
+        created_at=datetime.now(UTC),
+        sla_deadline=datetime.now(UTC) + timedelta(minutes=10),
     )
 
 
 # ============================================================================
 # TEST 1: SSE Stream Connects
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_sse_stream_connects(sse_server, operator_interface):
@@ -155,7 +154,7 @@ async def test_sse_stream_connects(sse_server, operator_interface):
     events_received = []
 
     # Connect to SSE stream
-    start_time = datetime.now(timezone.utc)
+    start_time = datetime.now(UTC)
 
     async def collect_events():
         count = 0
@@ -168,10 +167,10 @@ async def test_sse_stream_connects(sse_server, operator_interface):
     # Run with timeout
     try:
         await asyncio.wait_for(collect_events(), timeout=3.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         pytest.fail("SSE stream did not connect within 3 seconds")
 
-    connection_time = (datetime.now(timezone.utc) - start_time).total_seconds()
+    connection_time = (datetime.now(UTC) - start_time).total_seconds()
 
     # Assertions
     assert connection_time < 2.0, f"Connection took {connection_time}s, expected < 2s"
@@ -196,6 +195,7 @@ async def test_sse_stream_connects(sse_server, operator_interface):
 # ============================================================================
 # TEST 2: Pending Decision Broadcast
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_pending_decision_broadcast(sse_server, decision_queue, operator_interface, test_decision):
@@ -222,7 +222,7 @@ async def test_pending_decision_broadcast(sse_server, decision_queue, operator_i
         async for event in sse_server.stream_decisions("test_op_002", session.session_id):
             if event.event_type == "decision_pending":
                 decision_event_received = event
-                event_received_time = datetime.now(timezone.utc)
+                event_received_time = datetime.now(UTC)
                 break
 
     # Start listening
@@ -232,13 +232,13 @@ async def test_pending_decision_broadcast(sse_server, decision_queue, operator_i
     await asyncio.sleep(0.5)
 
     # Enqueue decision
-    enqueue_time = datetime.now(timezone.utc)
+    enqueue_time = datetime.now(UTC)
     decision_queue.enqueue(test_decision)
 
     # Wait for event (timeout 2s)
     try:
         await asyncio.wait_for(listen_task, timeout=2.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         pytest.fail("Decision event not received within 2 seconds")
 
     # Calculate latency
@@ -259,12 +259,13 @@ async def test_pending_decision_broadcast(sse_server, decision_queue, operator_i
     assert data["target"] == test_decision.context.action_params["target"]
     assert data["confidence"] == test_decision.context.confidence
 
-    print(f"✅ TEST 2 PASS: Decision broadcast latency {latency*1000:.1f}ms")
+    print(f"✅ TEST 2 PASS: Decision broadcast latency {latency * 1000:.1f}ms")
 
 
 # ============================================================================
 # TEST 3: Approve Decision E2E
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_approve_decision_e2e(governance_app, decision_queue, operator_interface, test_decision):
@@ -319,6 +320,7 @@ async def test_approve_decision_e2e(governance_app, decision_queue, operator_int
 # TEST 4: Multiple Operators Broadcast
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_multiple_operators_broadcast(sse_server, operator_interface):
     """
@@ -354,9 +356,7 @@ async def test_multiple_operators_broadcast(sse_server, operator_interface):
 
     # Start listeners
     for i, session in enumerate(sessions, 1):
-        task = asyncio.create_task(
-            listen_operator(i, f"test_op_multi_{i}", session.session_id)
-        )
+        task = asyncio.create_task(listen_operator(i, f"test_op_multi_{i}", session.session_id))
         tasks.append(task)
 
     # Wait for connections
@@ -367,7 +367,7 @@ async def test_multiple_operators_broadcast(sse_server, operator_interface):
         SSEEvent(
             event_type="test_broadcast",
             event_id="test_evt_1",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             data={"message": "Test broadcast 1"},
         )
     )
@@ -375,9 +375,7 @@ async def test_multiple_operators_broadcast(sse_server, operator_interface):
     await asyncio.sleep(0.3)
 
     # Disconnect operator 2
-    await sse_server.connection_manager.remove_connection(
-        f"test_op_multi_2", sessions[1].session_id
-    )
+    await sse_server.connection_manager.remove_connection("test_op_multi_2", sessions[1].session_id)
 
     await asyncio.sleep(0.2)
 
@@ -386,7 +384,7 @@ async def test_multiple_operators_broadcast(sse_server, operator_interface):
         SSEEvent(
             event_type="test_broadcast",
             event_id="test_evt_2",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             data={"message": "Test broadcast 2"},
         )
     )
@@ -414,6 +412,7 @@ async def test_multiple_operators_broadcast(sse_server, operator_interface):
 # ============================================================================
 # TEST 5: Graceful Degradation
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_graceful_degradation(sse_server, operator_interface):
@@ -485,7 +484,7 @@ async def test_graceful_degradation(sse_server, operator_interface):
 
     try:
         await asyncio.wait_for(reconnect_task, timeout=2.0)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         pytest.fail("New operator failed to connect after graceful degradation")
 
     assert connected, "New operator did not receive events"

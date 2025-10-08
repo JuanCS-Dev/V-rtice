@@ -18,19 +18,18 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
-import asyncio
 import logging
-from datetime import datetime
 
-from .core_manager import CoreManager, CoreNotInitializedError
+import pytest
+
+from ..models.agents import AgentAction, AgentUpdate
 from .agent_service import (
+    AgentNotFoundError,
     AgentService,
     AgentServiceError,
-    AgentNotFoundError,
     CoreUnavailableError,
 )
-from ..models.agents import AgentCreate, AgentUpdate, AgentAction
+from .core_manager import CoreManager
 
 logger = logging.getLogger(__name__)
 
@@ -121,10 +120,7 @@ async def test_check_core_unavailable_degraded():
 
     # Should work (Core available despite degradation)
     # AgentFactory doesn't require Kafka/Redis to create agents
-    agent = await service.create_agent(
-        agent_type="macrofago",
-        config={"area_patrulha": "test_area"}
-    )
+    agent = await service.create_agent(agent_type="macrofago", config={"area_patrulha": "test_area"})
 
     assert agent is not None
     assert agent.agent_id is not None
@@ -143,10 +139,7 @@ async def test_create_agent_macrofago():
     service = await setup_agent_service()
 
     # Create agent
-    response = await service.create_agent(
-        agent_type="macrofago",
-        config={"area_patrulha": "subnet_10_0_1_0"}
-    )
+    response = await service.create_agent(agent_type="macrofago", config={"area_patrulha": "subnet_10_0_1_0"})
 
     # Validate response
     assert response.agent_id is not None
@@ -163,10 +156,7 @@ async def test_create_agent_nk_cell():
     """Test creating NK Cell agent (REAL)"""
     service = await setup_agent_service()
 
-    response = await service.create_agent(
-        agent_type="nk_cell",
-        config={"area_patrulha": "subnet_10_0_2_0"}
-    )
+    response = await service.create_agent(agent_type="nk_cell", config={"area_patrulha": "subnet_10_0_2_0"})
 
     assert response.agent_id is not None
     assert response.agent_type in ["NK_CELL", "nk_cell"]
@@ -177,10 +167,7 @@ async def test_create_agent_neutrofilo():
     """Test creating Neutrofilo agent (REAL)"""
     service = await setup_agent_service()
 
-    response = await service.create_agent(
-        agent_type="neutrofilo",
-        config={"area_patrulha": "subnet_10_0_3_0"}
-    )
+    response = await service.create_agent(agent_type="neutrofilo", config={"area_patrulha": "subnet_10_0_3_0"})
 
     assert response.agent_id is not None
     assert response.agent_type in ["NEUTROFILO", "neutrofilo"]
@@ -192,10 +179,7 @@ async def test_create_agent_invalid_type():
     service = await setup_agent_service()
 
     with pytest.raises(AgentServiceError, match="Invalid agent type"):
-        await service.create_agent(
-            agent_type="invalid_type",
-            config={"area_patrulha": "test"}
-        )
+        await service.create_agent(agent_type="invalid_type", config={"area_patrulha": "test"})
 
 
 @pytest.mark.asyncio
@@ -205,7 +189,7 @@ async def test_create_agent_type_aliases():
 
     response = await service.create_agent(
         agent_type="macrophage",  # Alias
-        config={"area_patrulha": "test"}
+        config={"area_patrulha": "test"},
     )
 
     assert response.agent_type in ["MACROFAGO", "macrofago"]
@@ -510,10 +494,7 @@ async def test_full_agent_lifecycle():
     service = await setup_agent_service()
 
     # 1. Create agent
-    created = await service.create_agent(
-        agent_type="macrofago",
-        config={"area_patrulha": "test_lifecycle"}
-    )
+    created = await service.create_agent(agent_type="macrofago", config={"area_patrulha": "test_lifecycle"})
     assert created.agent_id is not None
     agent_id = created.agent_id
 

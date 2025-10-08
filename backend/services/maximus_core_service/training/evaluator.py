@@ -14,12 +14,12 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
-from datetime import datetime
 import json
 import logging
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -35,23 +35,23 @@ class EvaluationMetrics:
     precision: float
     recall: float
     f1_score: float
-    roc_auc: Optional[float] = None
-    pr_auc: Optional[float] = None
+    roc_auc: float | None = None
+    pr_auc: float | None = None
 
     # Confusion matrix
-    confusion_matrix: Optional[np.ndarray] = None
+    confusion_matrix: np.ndarray | None = None
 
     # Per-class metrics
-    per_class_metrics: Optional[Dict[int, Dict[str, float]]] = None
+    per_class_metrics: dict[int, dict[str, float]] | None = None
 
     # Performance
-    avg_inference_time_ms: Optional[float] = None
-    throughput_samples_per_sec: Optional[float] = None
+    avg_inference_time_ms: float | None = None
+    throughput_samples_per_sec: float | None = None
 
     # Additional metrics
-    additional_metrics: Optional[Dict[str, float]] = None
+    additional_metrics: dict[str, float] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary.
 
         Returns:
@@ -61,7 +61,7 @@ class EvaluationMetrics:
             "accuracy": float(self.accuracy),
             "precision": float(self.precision),
             "recall": float(self.recall),
-            "f1_score": float(self.f1_score)
+            "f1_score": float(self.f1_score),
         }
 
         if self.roc_auc is not None:
@@ -99,11 +99,7 @@ class ModelEvaluator:
 
     Example:
         ```python
-        evaluator = ModelEvaluator(
-            model=trained_model,
-            test_features=test_features,
-            test_labels=test_labels
-        )
+        evaluator = ModelEvaluator(model=trained_model, test_features=test_features, test_labels=test_labels)
 
         # Evaluate
         metrics = evaluator.evaluate()
@@ -117,11 +113,7 @@ class ModelEvaluator:
     """
 
     def __init__(
-        self,
-        model: Any,
-        test_features: np.ndarray,
-        test_labels: np.ndarray,
-        class_names: Optional[List[str]] = None
+        self, model: Any, test_features: np.ndarray, test_labels: np.ndarray, class_names: list[str] | None = None
     ):
         """Initialize evaluator.
 
@@ -147,10 +139,7 @@ class ModelEvaluator:
         logger.info(f"ModelEvaluator initialized: {self.n_samples} samples, {self.n_classes} classes")
 
     def evaluate(
-        self,
-        compute_roc_auc: bool = True,
-        compute_pr_auc: bool = True,
-        benchmark_latency: bool = True
+        self, compute_roc_auc: bool = True, compute_pr_auc: bool = True, benchmark_latency: bool = True
     ) -> EvaluationMetrics:
         """Evaluate model on test data.
 
@@ -202,14 +191,14 @@ class ModelEvaluator:
             confusion_matrix=confusion_matrix,
             per_class_metrics=per_class_metrics,
             avg_inference_time_ms=avg_latency,
-            throughput_samples_per_sec=throughput
+            throughput_samples_per_sec=throughput,
         )
 
         logger.info(f"Evaluation complete: accuracy={accuracy:.4f}, f1={f1:.4f}")
 
         return metrics
 
-    def _get_predictions(self) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def _get_predictions(self) -> tuple[np.ndarray, np.ndarray | None]:
         """Get model predictions.
 
         Returns:
@@ -346,12 +335,12 @@ class ModelEvaluator:
         """
         cm = np.zeros((self.n_classes, self.n_classes), dtype=int)
 
-        for true_label, pred_label in zip(self.test_labels, predictions):
+        for true_label, pred_label in zip(self.test_labels, predictions, strict=False):
             cm[true_label, pred_label] += 1
 
         return cm
 
-    def _compute_per_class_metrics(self, predictions: np.ndarray) -> Dict[int, Dict[str, float]]:
+    def _compute_per_class_metrics(self, predictions: np.ndarray) -> dict[int, dict[str, float]]:
         """Compute per-class metrics.
 
         Args:
@@ -376,7 +365,7 @@ class ModelEvaluator:
                 "precision": float(precision),
                 "recall": float(recall),
                 "f1_score": float(f1),
-                "support": int(tp + fn)
+                "support": int(tp + fn),
             }
 
         return per_class
@@ -431,7 +420,7 @@ class ModelEvaluator:
             logger.warning("sklearn not available for PR-AUC computation")
             return 0.0
 
-    def _benchmark_latency(self, n_iterations: int = 100) -> Tuple[float, float]:
+    def _benchmark_latency(self, n_iterations: int = 100) -> tuple[float, float]:
         """Benchmark inference latency.
 
         Args:
@@ -471,7 +460,7 @@ class ModelEvaluator:
         print("MODEL EVALUATION REPORT")
         print("=" * 80)
 
-        print(f"\nOverall Metrics:")
+        print("\nOverall Metrics:")
         print(f"  Accuracy:  {metrics.accuracy:.4f}")
         print(f"  Precision: {metrics.precision:.4f}")
         print(f"  Recall:    {metrics.recall:.4f}")
@@ -483,7 +472,7 @@ class ModelEvaluator:
             print(f"  PR-AUC:    {metrics.pr_auc:.4f}")
 
         if metrics.per_class_metrics:
-            print(f"\nPer-Class Metrics:")
+            print("\nPer-Class Metrics:")
             for class_id, class_metrics in metrics.per_class_metrics.items():
                 class_name = self.class_names[class_id] if self.class_names else f"Class {class_id}"
                 print(f"  {class_name}:")
@@ -493,7 +482,7 @@ class ModelEvaluator:
                 print(f"    Support:   {class_metrics['support']}")
 
         if metrics.avg_inference_time_ms:
-            print(f"\nPerformance:")
+            print("\nPerformance:")
             print(f"  Avg Inference Time: {metrics.avg_inference_time_ms:.2f} ms")
             print(f"  Throughput:         {metrics.throughput_samples_per_sec:.0f} samples/sec")
 
@@ -510,7 +499,7 @@ class ModelEvaluator:
             "timestamp": datetime.utcnow().isoformat(),
             "n_samples": self.n_samples,
             "n_classes": self.n_classes,
-            "metrics": metrics.to_dict()
+            "metrics": metrics.to_dict(),
         }
 
         with open(output_path, "w") as f:

@@ -10,7 +10,6 @@ Date: 2025-10-06
 """
 
 from datetime import datetime
-from typing import Dict, Optional
 from uuid import uuid4
 
 from .governance_engine import DecisionStatus, GovernanceEngine
@@ -32,8 +31,8 @@ class HITLInterface:
             governance_engine: The governance engine managing decisions
         """
         self.governance_engine = governance_engine
-        self.sessions: Dict[str, Dict] = {}
-        self.operator_stats: Dict[str, Dict] = {}
+        self.sessions: dict[str, dict] = {}
+        self.operator_stats: dict[str, dict] = {}
 
     def create_session(self, operator_id: str) -> str:
         """
@@ -85,13 +84,7 @@ class HITLInterface:
             return True
         return False
 
-    def approve_decision(
-        self,
-        decision_id: str,
-        operator_id: str,
-        comment: str = "",
-        reasoning: str = ""
-    ) -> bool:
+    def approve_decision(self, decision_id: str, operator_id: str, comment: str = "", reasoning: str = "") -> bool:
         """
         Approve a governance decision.
 
@@ -109,7 +102,7 @@ class HITLInterface:
             status=DecisionStatus.APPROVED,
             operator_id=operator_id,
             comment=comment,
-            reasoning=reasoning
+            reasoning=reasoning,
         )
 
         if success:
@@ -127,13 +120,7 @@ class HITLInterface:
 
         return success
 
-    def reject_decision(
-        self,
-        decision_id: str,
-        operator_id: str,
-        comment: str = "",
-        reasoning: str = ""
-    ) -> bool:
+    def reject_decision(self, decision_id: str, operator_id: str, comment: str = "", reasoning: str = "") -> bool:
         """
         Reject a governance decision.
 
@@ -151,7 +138,7 @@ class HITLInterface:
             status=DecisionStatus.REJECTED,
             operator_id=operator_id,
             comment=comment,
-            reasoning=reasoning
+            reasoning=reasoning,
         )
 
         if success:
@@ -169,13 +156,7 @@ class HITLInterface:
 
         return success
 
-    def escalate_decision(
-        self,
-        decision_id: str,
-        operator_id: str,
-        reason: str,
-        escalation_target: str
-    ) -> bool:
+    def escalate_decision(self, decision_id: str, operator_id: str, reason: str, escalation_target: str) -> bool:
         """
         Escalate a decision to higher authority.
 
@@ -193,7 +174,7 @@ class HITLInterface:
             status=DecisionStatus.ESCALATED,
             operator_id=operator_id,
             comment=f"Escalated to: {escalation_target}",
-            reasoning=reason
+            reasoning=reason,
         )
 
         if success:
@@ -211,7 +192,7 @@ class HITLInterface:
 
         return success
 
-    def get_operator_stats(self, operator_id: str) -> Dict:
+    def get_operator_stats(self, operator_id: str) -> dict:
         """
         Get statistics for an operator.
 
@@ -247,7 +228,7 @@ class HITLInterface:
             "session_start": stats["session_start"],
         }
 
-    def get_session_info(self, session_id: str) -> Optional[Dict]:
+    def get_session_info(self, session_id: str) -> dict | None:
         """
         Get information about a session.
 

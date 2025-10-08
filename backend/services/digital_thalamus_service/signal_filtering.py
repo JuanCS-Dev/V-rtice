@@ -12,7 +12,6 @@ for improving the accuracy and efficiency of subsequent perception and reasoning
 tasks, preventing the AI from being overwhelmed by noisy or irrelevant data.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -30,9 +29,7 @@ class SignalFiltering:
         self.processed_data_count: int = 0
         self.current_status: str = "idle"
 
-    def apply_filters(
-        self, raw_data: Dict[str, Any], sensor_type: str
-    ) -> Dict[str, Any]:
+    def apply_filters(self, raw_data: Dict[str, Any], sensor_type: str) -> Dict[str, Any]:
         """Applies filtering and pre-processing to raw sensory data.
 
         Args:
@@ -49,15 +46,11 @@ class SignalFiltering:
 
         if sensor_type == "visual":
             # Example: simple noise reduction or edge enhancement
-            filtered_data["visual_noise_reduced"] = (
-                filtered_data.get("noise_level", 0.5) * 0.5
-            )
+            filtered_data["visual_noise_reduced"] = filtered_data.get("noise_level", 0.5) * 0.5
             filtered_data["visual_edges_enhanced"] = True
         elif sensor_type == "auditory":
             # Example: background noise suppression
-            filtered_data["auditory_noise_suppressed"] = (
-                filtered_data.get("background_noise", 0.7) * 0.3
-            )
+            filtered_data["auditory_noise_suppressed"] = filtered_data.get("background_noise", 0.7) * 0.3
             filtered_data["speech_clarity_enhanced"] = True
         elif sensor_type == "chemical":
             # Example: baseline correction
@@ -80,8 +73,6 @@ class SignalFiltering:
         """
         return {
             "status": self.current_status,
-            "last_filter": (
-                self.last_filter_time.isoformat() if self.last_filter_time else "N/A"
-            ),
+            "last_filter": (self.last_filter_time.isoformat() if self.last_filter_time else "N/A"),
             "total_data_processed": self.processed_data_count,
         }

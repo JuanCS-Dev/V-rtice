@@ -12,9 +12,8 @@ responsiveness.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-import numpy as np
 from pydantic import BaseModel
 
 
@@ -41,7 +40,7 @@ class ResourcePlan(BaseModel):
 
     timestamp: str
     target_mode: str
-    actions: List[ActionType]
+    actions: list[ActionType]
     action_intensity: float
     reasoning: str
 
@@ -57,9 +56,7 @@ class ResourcePlanner:
         """Initializes the ResourcePlanner and its fuzzy logic system."""
         pass
 
-    async def create_plan(
-        self, current_state: Any, analysis: Any, current_mode: Any
-    ) -> Optional[ResourcePlan]:
+    async def create_plan(self, current_state: Any, analysis: Any, current_mode: Any) -> ResourcePlan | None:
         """Creates a resource plan based on current system state and analysis.
 
         Args:

@@ -36,7 +36,7 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -73,7 +73,7 @@ class SPMOutput:
 
     spm_id: str
     spm_type: SPMType
-    content: Dict[str, Any]
+    content: dict[str, Any]
     salience: SalienceScore
     priority: ProcessingPriority
     timestamp: float = field(default_factory=time.time)
@@ -113,10 +113,10 @@ class SpecializedProcessingModule(ABC):
 
         # Processing state
         self._running: bool = False
-        self._processing_task: Optional[asyncio.Task] = None
+        self._processing_task: asyncio.Task | None = None
 
         # Output queue
-        self.output_queue: List[SPMOutput] = []
+        self.output_queue: list[SPMOutput] = []
         self.max_queue_size: int = 100
 
         # Performance metrics
@@ -173,7 +173,7 @@ class SpecializedProcessingModule(ABC):
                 await asyncio.sleep(self.processing_interval)
 
     @abstractmethod
-    async def process(self) -> Optional[SPMOutput]:
+    async def process(self) -> SPMOutput | None:
         """
         Process information and generate output.
 
@@ -186,7 +186,7 @@ class SpecializedProcessingModule(ABC):
         pass
 
     @abstractmethod
-    def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:
+    def compute_salience(self, data: dict[str, Any]) -> SalienceScore:
         """
         Compute salience score for information.
 
@@ -200,7 +200,7 @@ class SpecializedProcessingModule(ABC):
         """
         pass
 
-    async def broadcast_callback(self, esgt_event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def broadcast_callback(self, esgt_event: dict[str, Any]) -> dict[str, Any] | None:
         """
         Called when this SPM's content is broadcast during ESGT.
 
@@ -217,7 +217,7 @@ class SpecializedProcessingModule(ABC):
         # Default: no enrichment (subclasses can override)
         return None
 
-    def get_most_salient(self, n: int = 1) -> List[SPMOutput]:
+    def get_most_salient(self, n: int = 1) -> list[SPMOutput]:
         """
         Get n most salient outputs from queue.
 
@@ -266,9 +266,9 @@ class ThreatDetectionSPM(SpecializedProcessingModule):
             processing_interval_ms=100.0,  # 10 Hz
         )
         self.threat_baseline: float = 0.1
-        self.recent_threats: List[float] = []
+        self.recent_threats: list[float] = []
 
-    async def process(self) -> Optional[SPMOutput]:
+    async def process(self) -> SPMOutput | None:
         """
         Simulate threat detection processing.
 
@@ -324,7 +324,7 @@ class ThreatDetectionSPM(SpecializedProcessingModule):
             confidence=min(threat_score, 1.0),
         )
 
-    def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:
+    def compute_salience(self, data: dict[str, Any]) -> SalienceScore:
         """Threat-specific salience: high urgency bias."""
         threat_score = data.get("threat_score", 0.0)
         novelty = data.get("novelty", 0.0)
@@ -357,9 +357,9 @@ class MemoryRetrievalSPM(SpecializedProcessingModule):
             spm_type=SPMType.COGNITIVE,
             processing_interval_ms=200.0,  # 5 Hz
         )
-        self.memory_store: Dict[str, Any] = {}  # Simplified memory
+        self.memory_store: dict[str, Any] = {}  # Simplified memory
 
-    async def process(self) -> Optional[SPMOutput]:
+    async def process(self) -> SPMOutput | None:
         """
         Simulate memory retrieval.
 
@@ -394,7 +394,7 @@ class MemoryRetrievalSPM(SpecializedProcessingModule):
             confidence=memory_strength,
         )
 
-    def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:
+    def compute_salience(self, data: dict[str, Any]) -> SalienceScore:
         """Memory-specific salience: high relevance bias."""
         strength = data.get("memory_strength", 0.0)
 

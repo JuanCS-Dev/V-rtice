@@ -51,9 +51,7 @@ class AttentionControl:
             Dict[str, Any]: The processed and routed sensory data, potentially with added metadata.
         """
         self.current_status = "prioritizing_and_routing"
-        print(
-            f"[AttentionControl] Prioritizing {sensor_type} data with initial priority {priority}"
-        )
+        print(f"[AttentionControl] Prioritizing {sensor_type} data with initial priority {priority}")
         await asyncio.sleep(0.05)  # Simulate processing
 
         # Calculate effective priority based on initial priority and type-specific weights
@@ -71,9 +69,7 @@ class AttentionControl:
         processed_data = sensory_data.copy()
         processed_data["effective_priority"] = effective_priority
         processed_data["routing_destination"] = routing_destination
-        processed_data["attention_notes"] = (
-            f"Routed to {routing_destination} based on effective priority."
-        )
+        processed_data["attention_notes"] = f"Routed to {routing_destination} based on effective priority."
 
         return processed_data
 
@@ -86,9 +82,7 @@ class AttentionControl:
         return {
             "status": self.current_status,
             "last_prioritization": (
-                self.last_prioritization_time.isoformat()
-                if self.last_prioritization_time
-                else "N/A"
+                self.last_prioritization_time.isoformat() if self.last_prioritization_time else "N/A"
             ),
             "current_focus": self.current_focus,
             "priority_weights": self.priority_weights,

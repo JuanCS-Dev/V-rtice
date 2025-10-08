@@ -61,11 +61,12 @@ import logging
 import os
 import signal
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 import psutil
 
@@ -226,11 +227,11 @@ class SafetyViolation:
     threat_level: ThreatLevel
     timestamp: float  # Unix timestamp
     description: str
-    metrics: Dict[str, Any]
+    metrics: dict[str, Any]
     source_component: str
-    automatic_action_taken: Optional[str] = None
+    automatic_action_taken: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "violation_id": self.violation_id,
@@ -257,13 +258,13 @@ class IncidentReport:
     incident_id: str
     shutdown_reason: ShutdownReason
     shutdown_timestamp: float
-    violations: List[SafetyViolation]
-    system_state_snapshot: Dict[str, Any]
-    metrics_timeline: List[Dict[str, Any]]
+    violations: list[SafetyViolation]
+    system_state_snapshot: dict[str, Any]
+    metrics_timeline: list[dict[str, Any]]
     recovery_possible: bool
     notes: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "incident_id": self.incident_id,
@@ -345,12 +346,12 @@ class KillSwitch:
         self.system = consciousness_system
         self.armed = True
         self.triggered = False
-        self.trigger_time: Optional[float] = None
-        self.shutdown_reason: Optional[ShutdownReason] = None
+        self.trigger_time: float | None = None
+        self.shutdown_reason: ShutdownReason | None = None
 
         logger.critical("🔴 KILL SWITCH ARMED - System under safety monitoring")
 
-    def trigger(self, reason: ShutdownReason, context: Dict[str, Any]) -> bool:
+    def trigger(self, reason: ShutdownReason, context: dict[str, Any]) -> bool:
         """
         EMERGENCY SHUTDOWN - <1s execution GUARANTEED
 
@@ -472,7 +473,7 @@ class KillSwitch:
 
             return False
 
-    def _capture_state_snapshot(self) -> Dict[str, Any]:
+    def _capture_state_snapshot(self) -> dict[str, Any]:
         """
         Capture minimal system state SYNCHRONOUSLY (fast).
 
@@ -581,7 +582,7 @@ class KillSwitch:
                                 else:
                                     # Loop not running, safe to use run_until_complete
                                     loop.run_until_complete(asyncio.wait_for(stop_method(), timeout=0.3))
-                            except asyncio.TimeoutError:
+                            except TimeoutError:
                                 logger.error(f"{name}: async stop timeout")
                             except Exception as async_error:
                                 logger.error(f"{name}: async stop error: {async_error}")
@@ -597,7 +598,7 @@ class KillSwitch:
                     logger.error(f"✗ {name} stop failed: {e}")
 
     def _generate_incident_report(
-        self, reason: ShutdownReason, context: Dict[str, Any], state_snapshot: Dict[str, Any]
+        self, reason: ShutdownReason, context: dict[str, Any], state_snapshot: dict[str, Any]
     ) -> IncidentReport:
         """
         Generate complete incident report.
@@ -649,7 +650,7 @@ class KillSwitch:
         """Check if kill switch has been triggered."""
         return self.triggered
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """
         Get kill switch status.
 
@@ -694,19 +695,19 @@ class ThresholdMonitor:
         self.thresholds = thresholds
         self.check_interval = check_interval
         self.monitoring = False
-        self.violations: List[SafetyViolation] = []
+        self.violations: list[SafetyViolation] = []
 
         # State tracking
-        self.esgt_events_window: List[float] = []  # timestamps
-        self.arousal_high_start: Optional[float] = None
-        self.goals_generated: List[float] = []  # timestamps
+        self.esgt_events_window: list[float] = []  # timestamps
+        self.arousal_high_start: float | None = None
+        self.goals_generated: list[float] = []  # timestamps
 
         # Callbacks
-        self.on_violation: Optional[Callable[[SafetyViolation], None]] = None
+        self.on_violation: Callable[[SafetyViolation], None] | None = None
 
         logger.info(f"ThresholdMonitor initialized (interval={check_interval}s)")
 
-    def check_esgt_frequency(self, current_time: float) -> Optional[SafetyViolation]:
+    def check_esgt_frequency(self, current_time: float) -> SafetyViolation | None:
         """
         Check ESGT frequency against threshold (sliding window).
 
@@ -749,7 +750,7 @@ class ThresholdMonitor:
 
         return None
 
-    def check_arousal_sustained(self, arousal_level: float, current_time: float) -> Optional[SafetyViolation]:
+    def check_arousal_sustained(self, arousal_level: float, current_time: float) -> SafetyViolation | None:
         """
         Check for sustained high arousal.
 
@@ -799,7 +800,7 @@ class ThresholdMonitor:
 
         return None
 
-    def check_goal_spam(self, current_time: float) -> Optional[SafetyViolation]:
+    def check_goal_spam(self, current_time: float) -> SafetyViolation | None:
         """
         Check for goal spam (many goals in short time).
 
@@ -835,7 +836,7 @@ class ThresholdMonitor:
 
         return None
 
-    def check_resource_limits(self) -> List[SafetyViolation]:
+    def check_resource_limits(self) -> list[SafetyViolation]:
         """
         Check resource usage (memory, CPU).
 
@@ -900,7 +901,7 @@ class ThresholdMonitor:
         """Record a goal generation event."""
         self.goals_generated.append(time.time())
 
-    def get_violations(self, threat_level: Optional[ThreatLevel] = None) -> List[SafetyViolation]:
+    def get_violations(self, threat_level: ThreatLevel | None = None) -> list[SafetyViolation]:
         """
         Get recorded violations, optionally filtered by threat level.
 
@@ -950,16 +951,16 @@ class AnomalyDetector:
         self.baseline_window = baseline_window
 
         # Baselines (populated during normal operation)
-        self.arousal_baseline: List[float] = []
-        self.coherence_baseline: List[float] = []
-        self.goal_rate_baseline: List[float] = []
+        self.arousal_baseline: list[float] = []
+        self.coherence_baseline: list[float] = []
+        self.goal_rate_baseline: list[float] = []
 
         # Detection state
-        self.anomalies_detected: List[SafetyViolation] = []
+        self.anomalies_detected: list[SafetyViolation] = []
 
         logger.info(f"AnomalyDetector initialized (baseline_window={baseline_window})")
 
-    def detect_anomalies(self, metrics: Dict[str, Any]) -> List[SafetyViolation]:
+    def detect_anomalies(self, metrics: dict[str, Any]) -> list[SafetyViolation]:
         """
         Detect all anomalies in current metrics.
 
@@ -999,7 +1000,7 @@ class AnomalyDetector:
 
         return anomalies
 
-    def _detect_goal_spam(self, goal_rate: float) -> Optional[SafetyViolation]:
+    def _detect_goal_spam(self, goal_rate: float) -> SafetyViolation | None:
         """
         Detect goal generation spam.
 
@@ -1023,7 +1024,7 @@ class AnomalyDetector:
 
         return None
 
-    def _detect_memory_leak(self, memory_gb: float) -> Optional[SafetyViolation]:
+    def _detect_memory_leak(self, memory_gb: float) -> SafetyViolation | None:
         """
         Detect memory leak (rapid growth).
 
@@ -1053,7 +1054,7 @@ class AnomalyDetector:
 
         return None
 
-    def _detect_arousal_runaway(self, arousal: float) -> Optional[SafetyViolation]:
+    def _detect_arousal_runaway(self, arousal: float) -> SafetyViolation | None:
         """
         Detect arousal runaway (sustained high arousal with upward trend).
 
@@ -1089,7 +1090,7 @@ class AnomalyDetector:
 
         return None
 
-    def _detect_coherence_collapse(self, coherence: float) -> Optional[SafetyViolation]:
+    def _detect_coherence_collapse(self, coherence: float) -> SafetyViolation | None:
         """
         Detect coherence collapse (sudden drop).
 
@@ -1125,7 +1126,7 @@ class AnomalyDetector:
 
         return None
 
-    def get_anomaly_history(self) -> List[SafetyViolation]:
+    def get_anomaly_history(self) -> list[SafetyViolation]:
         """Get history of detected anomalies."""
         return self.anomalies_detected.copy()
 
@@ -1156,7 +1157,7 @@ class ConsciousnessSafetyProtocol:
     - Automated response
     """
 
-    def __init__(self, consciousness_system: Any, thresholds: Optional[SafetyThresholds] = None):
+    def __init__(self, consciousness_system: Any, thresholds: SafetyThresholds | None = None):
         """
         Initialize safety protocol.
 
@@ -1174,11 +1175,11 @@ class ConsciousnessSafetyProtocol:
 
         # State
         self.monitoring_active = False
-        self.monitoring_task: Optional[asyncio.Task] = None
+        self.monitoring_task: asyncio.Task | None = None
         self.degradation_level = 0  # 0=normal, 1=minor, 2=major, 3=critical
 
         # Callbacks
-        self.on_violation: Optional[Callable[[SafetyViolation], None]] = None
+        self.on_violation: Callable[[SafetyViolation], None] | None = None
 
         logger.info("✅ Consciousness Safety Protocol initialized")
         logger.info(
@@ -1262,7 +1263,7 @@ class ConsciousnessSafetyProtocol:
                 logger.error(f"Error in monitoring loop: {e}", exc_info=True)
                 await asyncio.sleep(1.0)
 
-    def _collect_metrics(self) -> Dict[str, Any]:
+    def _collect_metrics(self) -> dict[str, Any]:
         """
         Collect current system metrics.
 
@@ -1299,7 +1300,7 @@ class ConsciousnessSafetyProtocol:
 
         return metrics
 
-    async def _handle_violations(self, violations: List[SafetyViolation]):
+    async def _handle_violations(self, violations: list[SafetyViolation]):
         """
         Handle detected violations.
 
@@ -1380,7 +1381,7 @@ class ConsciousnessSafetyProtocol:
                 context={"violations": [], "notes": "Graceful degradation exhausted - proceeding to shutdown"},
             )
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """
         Get current safety status.
 
@@ -1406,7 +1407,7 @@ class ConsciousnessSafetyProtocol:
     # FASE VII (Part 2 Integration): Component Health Monitoring
     # ========================================================================
 
-    def monitor_component_health(self, component_metrics: Dict[str, Dict[str, any]]) -> List[SafetyViolation]:
+    def monitor_component_health(self, component_metrics: dict[str, dict[str, any]]) -> list[SafetyViolation]:
         """
         Monitor health metrics from all consciousness components.
 

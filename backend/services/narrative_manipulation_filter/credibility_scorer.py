@@ -5,15 +5,15 @@ Implements dynamic credibility updates using Beta-Binomial conjugate priors,
 exponential temporal decay, and Wilson score confidence intervals.
 """
 
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
-from models import CredibilityRating
 import numpy as np
 from scipy.stats import beta as beta_dist
+
+from models import CredibilityRating
 from utils import (
-    bayesian_update,
     beta_distribution_credibility,
     exponential_decay_weight,
     wilson_score_interval,
@@ -117,9 +117,7 @@ class BayesianCredibilityScorer:
 
         return alpha_new, beta_new
 
-    def batch_update(
-        self, alpha: float, beta: float, observations: List[Dict[str, Any]]
-    ) -> Tuple[float, float]:
+    def batch_update(self, alpha: float, beta: float, observations: List[Dict[str, Any]]) -> Tuple[float, float]:
         """
         Update with batch of observations.
 
@@ -145,9 +143,7 @@ class BayesianCredibilityScorer:
 
         return alpha_current, beta_current
 
-    def get_credibility_score(
-        self, alpha: float, beta: float, method: str = "mean"
-    ) -> float:
+    def get_credibility_score(self, alpha: float, beta: float, method: str = "mean") -> float:
         """
         Calculate credibility score from Beta parameters.
 
@@ -178,9 +174,7 @@ class BayesianCredibilityScorer:
         else:
             raise ValueError(f"Unknown method: {method}")
 
-    def get_confidence_interval(
-        self, alpha: float, beta: float, confidence: float = 0.95
-    ) -> Tuple[float, float]:
+    def get_confidence_interval(self, alpha: float, beta: float, confidence: float = 0.95) -> Tuple[float, float]:
         """
         Calculate credibility confidence interval.
 
@@ -210,9 +204,7 @@ class BayesianCredibilityScorer:
         """
         return (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1))
 
-    def categorize_credibility(
-        self, score: float, uncertainty: float = 0.0
-    ) -> CredibilityRating:
+    def categorize_credibility(self, score: float, uncertainty: float = 0.0) -> CredibilityRating:
         """
         Convert score to categorical rating.
 
@@ -243,9 +235,7 @@ class BayesianCredibilityScorer:
         else:
             return CredibilityRating.HIGHLY_UNRELIABLE
 
-    def wilson_score_lower_bound(
-        self, true_count: int, total_count: int, confidence: float = 0.95
-    ) -> float:
+    def wilson_score_lower_bound(self, true_count: int, total_count: int, confidence: float = 0.95) -> float:
         """
         Calculate Wilson score lower bound.
 
@@ -316,9 +306,7 @@ class BayesianCredibilityScorer:
         decayed = current_score * decay_factor + 0.5 * (1 - decay_factor)
         return decayed
 
-    def simulate_future_credibility(
-        self, alpha: float, beta: float, num_simulations: int = 1000
-    ) -> Dict[str, Any]:
+    def simulate_future_credibility(self, alpha: float, beta: float, num_simulations: int = 1000) -> Dict[str, Any]:
         """
         Monte Carlo simulation of future credibility.
 
@@ -380,14 +368,10 @@ class CredibilityAggregator:
 
         # Adjust weights based on historical confidence
         # Low confidence -> rely more on NewsGuard
-        adjusted_ng_weight = (
-            newsguard_weight + (1 - historical_confidence) * history_weight / 2
-        )
+        adjusted_ng_weight = newsguard_weight + (1 - historical_confidence) * history_weight / 2
         adjusted_hist_weight = 1 - adjusted_ng_weight
 
-        combined = (
-            ng_normalized * adjusted_ng_weight + historical_score * adjusted_hist_weight
-        )
+        combined = ng_normalized * adjusted_ng_weight + historical_score * adjusted_hist_weight
 
         return np.clip(combined, 0.0, 1.0)
 
@@ -420,9 +404,7 @@ class CredibilityAggregator:
         return max(penalized, 0.0)
 
     @staticmethod
-    def boost_for_corrections(
-        base_score: float, correction_rate: float, boost_factor: float = 0.1
-    ) -> float:
+    def boost_for_corrections(base_score: float, correction_rate: float, boost_factor: float = 0.1) -> float:
         """
         Boost score for transparent error corrections.
 

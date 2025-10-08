@@ -11,7 +11,7 @@ informed decisions about resource allocation and system adjustments.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 from pydantic import BaseModel
@@ -53,8 +53,8 @@ class ResourceAnalysis(BaseModel):
 
     timestamp: str
     requires_action: bool
-    anomalies: List[Anomaly]
-    recommended_actions: List[str]
+    anomalies: list[Anomaly]
+    recommended_actions: list[str]
 
 
 class ResourceAnalyzer:
@@ -73,9 +73,7 @@ class ResourceAnalyzer:
         """
         self.anomaly_threshold = anomaly_threshold_sigma
 
-    async def analyze_state(
-        self, current_state: Any, history: List[Any]
-    ) -> ResourceAnalysis:
+    async def analyze_state(self, current_state: Any, history: list[Any]) -> ResourceAnalysis:
         """Analyzes the current system state against historical data to detect issues.
 
         Args:
@@ -100,9 +98,7 @@ class ResourceAnalyzer:
 
         # Simplified anomaly detection for demonstration
         cpu_values = [s.cpu_usage for s in history]
-        if current_state.cpu_usage > np.mean(
-            cpu_values
-        ) + self.anomaly_threshold * np.std(cpu_values):
+        if current_state.cpu_usage > np.mean(cpu_values) + self.anomaly_threshold * np.std(cpu_values):
             anomalies.append(
                 Anomaly(
                     type=AnomalyType.SPIKE,

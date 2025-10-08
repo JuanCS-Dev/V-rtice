@@ -16,14 +16,14 @@ the HSAS, promoting transparent, ethical, and beneficial AI behavior within the
 overall Maximus AI system.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
-from hsas_core import HSASCore
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from hsas_core import HSASCore
 
 app = FastAPI(title="Maximus HSAS Service", version="1.0.0")
 
@@ -93,9 +93,7 @@ async def submit_human_feedback(request: HumanFeedback) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary confirming the feedback submission.
     """
-    print(
-        f"[API] Received human feedback (type: {request.feedback_type}, rating: {request.rating})"
-    )
+    print(f"[API] Received human feedback (type: {request.feedback_type}, rating: {request.rating})")
     await hsas_core.process_human_feedback(
         request.feedback_type, request.context, request.feedback_details, request.rating
     )
@@ -117,9 +115,7 @@ async def request_ai_explanation(request: ExplanationRequest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the AI's explanation.
     """
     print(f"[API] Requesting explanation for decision ID: {request.decision_id}")
-    explanation = await hsas_core.generate_explanation(
-        request.decision_id, request.context
-    )
+    explanation = await hsas_core.generate_explanation(request.decision_id, request.context)
     return {
         "status": "success",
         "decision_id": request.decision_id,

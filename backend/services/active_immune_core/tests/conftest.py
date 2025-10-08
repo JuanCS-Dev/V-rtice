@@ -8,7 +8,6 @@ from fastapi.testclient import TestClient
 
 from active_immune_core.main import app
 
-
 # ==================== ASYNC HELPERS ====================
 
 
@@ -16,7 +15,7 @@ async def assert_eventually(
     condition: Callable[[], bool],
     timeout: float = 2.0,
     interval: float = 0.05,
-    error_msg: str = "Condition not met within timeout"
+    error_msg: str = "Condition not met within timeout",
 ) -> None:
     """
     Assert that a condition becomes true within a timeout.
@@ -61,9 +60,7 @@ async def assert_eventually(
 
     # Timeout expired - condition never became True
     if last_exception:
-        raise AssertionError(
-            f"{error_msg} (last exception: {last_exception})"
-        )
+        raise AssertionError(f"{error_msg} (last exception: {last_exception})")
     else:
         raise AssertionError(error_msg)
 

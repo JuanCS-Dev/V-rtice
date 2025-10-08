@@ -27,7 +27,6 @@ from models import (
     RiskLevel,
 )
 
-
 # ============================================================================
 # HEALTH & STATUS TESTS
 # ============================================================================
@@ -50,10 +49,12 @@ class TestHealthAndStatus:
     async def test_status_endpoint_with_database(self, authenticated_client, mock_db):
         """Test /status returns detailed information when database connected."""
         # Setup mock data
-        mock_db.pool.connection.add_decision({
-            "id": uuid.uuid4(),
-            "timestamp": datetime.utcnow(),
-        })
+        mock_db.pool.connection.add_decision(
+            {
+                "id": uuid.uuid4(),
+                "timestamp": datetime.utcnow(),
+            }
+        )
 
         response = await authenticated_client.get("/status")
         assert response.status_code == 200
@@ -68,17 +69,16 @@ class TestHealthAndStatus:
     async def test_status_endpoint_without_database_fails(self, client):
         """Test /status returns 503 when database not connected."""
         # Override to simulate no database
-        from api import app
+        import api
 
-        original_db = app.state.__dict__.get("db")
-        app.state.__dict__["db"] = None
+        original_db = api.db
+        api.db = None
 
         response = await client.get("/status")
         assert response.status_code == 503
 
         # Restore
-        if original_db:
-            app.state.__dict__["db"] = original_db
+        api.db = original_db
 
 
 # ============================================================================
@@ -93,6 +93,7 @@ class TestDecisionLogging:
     async def test_log_decision_success(self, authenticated_client, create_test_decision_log):
         """Test successfully logging an ethical decision."""
         import json
+
         decision_log = create_test_decision_log()
         # Serialize to JSON string then parse to ensure UUID/datetime are properly serialized
         payload = json.loads(decision_log.json())
@@ -105,11 +106,10 @@ class TestDecisionLogging:
         assert "status" in data
         assert data["status"] == "success"
 
-    async def test_log_decision_with_all_frameworks(
-        self, authenticated_client, create_test_decision_log
-    ):
+    async def test_log_decision_with_all_frameworks(self, authenticated_client, create_test_decision_log):
         """Test logging decision with all 4 ethical frameworks."""
         import json
+
         decision = create_test_decision_log(
             kantian_result={
                 "approved": True,
@@ -145,16 +145,14 @@ class TestDecisionLogging:
         )
 
         response = await authenticated_client.post(
-            "/audit/decision",
-            json={"decision_log": json.loads(decision.json())}
+            "/audit/decision", json={"decision_log": json.loads(decision.json())}
         )
         assert response.status_code == 200
 
-    async def test_log_decision_different_types(
-        self, authenticated_client, create_test_decision_log
-    ):
+    async def test_log_decision_different_types(self, authenticated_client, create_test_decision_log):
         """Test logging decisions of different types."""
         import json
+
         decision_types = [
             DecisionType.OFFENSIVE_ACTION,
             DecisionType.AUTO_RESPONSE,
@@ -167,16 +165,14 @@ class TestDecisionLogging:
         for decision_type in decision_types:
             decision = create_test_decision_log(decision_type=decision_type)
             response = await authenticated_client.post(
-                "/audit/decision",
-                json={"decision_log": json.loads(decision.json())}
+                "/audit/decision", json={"decision_log": json.loads(decision.json())}
             )
             assert response.status_code == 200
 
-    async def test_log_decision_different_risk_levels(
-        self, authenticated_client, create_test_decision_log
-    ):
+    async def test_log_decision_different_risk_levels(self, authenticated_client, create_test_decision_log):
         """Test logging decisions with different risk levels."""
         import json
+
         risk_levels = [
             RiskLevel.LOW,
             RiskLevel.MEDIUM,
@@ -187,26 +183,21 @@ class TestDecisionLogging:
         for risk_level in risk_levels:
             decision = create_test_decision_log(risk_level=risk_level)
             response = await authenticated_client.post(
-                "/audit/decision",
-                json={"decision_log": json.loads(decision.json())}
+                "/audit/decision", json={"decision_log": json.loads(decision.json())}
             )
             assert response.status_code == 200
 
-    async def test_log_decision_rate_limit(
-        self, authenticated_client, create_test_decision_log
-    ):
+    async def test_log_decision_rate_limit(self, authenticated_client, create_test_decision_log):
         """Test that rate limiting is applied to decision logging."""
         import json
+
         # Note: Rate limit is 100/minute, but in testing we just verify the endpoint
         # accepts requests. Full rate limit testing would require time manipulation.
         decision = create_test_decision_log()
         payload = {"decision_log": json.loads(decision.json())}
 
         for _ in range(5):  # Test a few requests
-            response = await authenticated_client.post(
-                "/audit/decision",
-                json=payload
-            )
+            response = await authenticated_client.post("/audit/decision", json=payload)
             assert response.status_code in [200, 429]  # 429 if rate limited
 
 
@@ -223,16 +214,18 @@ class TestDecisionRetrieval:
         """Test retrieving a decision by ID."""
         # Setup mock decision
         decision_id = uuid.uuid4()
-        mock_db.pool.connection.add_decision({
-            "id": decision_id,
-            "timestamp": datetime.utcnow(),
-            "decision_type": DecisionType.OFFENSIVE_ACTION.value,
-            "action_description": "Test action",
-            "system_component": "test_component",
-            "final_decision": FinalDecision.APPROVED.value,
-            "final_confidence": 0.85,
-            "risk_level": RiskLevel.MEDIUM.value,
-        })
+        mock_db.pool.connection.add_decision(
+            {
+                "id": decision_id,
+                "timestamp": datetime.utcnow(),
+                "decision_type": DecisionType.OFFENSIVE_ACTION.value,
+                "action_description": "Test action",
+                "system_component": "test_component",
+                "final_decision": FinalDecision.APPROVED.value,
+                "final_confidence": 0.85,
+                "risk_level": RiskLevel.MEDIUM.value,
+            }
+        )
 
         response = await authenticated_client.get(f"/audit/decision/{decision_id}")
         assert response.status_code == 200
@@ -241,8 +234,11 @@ class TestDecisionRetrieval:
         assert "id" in data
         assert data["id"] == str(decision_id)
 
-    async def test_get_decision_not_found(self, authenticated_client):
+    async def test_get_decision_not_found(self, authenticated_client, mock_db):
         """Test retrieving non-existent decision returns 404."""
+        # Add a different decision to the store so mock returns None for non-existent ones
+        mock_db.pool.connection.add_decision({"id": uuid.uuid4(), "timestamp": datetime.utcnow()})
+
         fake_id = uuid.uuid4()
         response = await authenticated_client.get(f"/audit/decision/{fake_id}")
         assert response.status_code == 404
@@ -318,9 +314,7 @@ class TestDecisionHistory:
 class TestHumanOverrides:
     """Tests for human override logging."""
 
-    async def test_log_override_success(
-        self, authenticated_client, create_test_override_request
-    ):
+    async def test_log_override_success(self, authenticated_client, create_test_override_request):
         """Test successfully logging a human override."""
         override_request = create_test_override_request()
         response = await authenticated_client.post("/audit/override", json={"override": override_request})
@@ -331,9 +325,7 @@ class TestHumanOverrides:
         assert "timestamp" in data
         assert data["operator_id"] == "test_operator"
 
-    async def test_log_override_different_reasons(
-        self, authenticated_client, create_test_override_request
-    ):
+    async def test_log_override_different_reasons(self, authenticated_client, create_test_override_request):
         """Test logging overrides with different reasons."""
         from models import OverrideReason
 
@@ -355,12 +347,14 @@ class TestHumanOverrides:
         decision_id = uuid.uuid4()
 
         # Setup mock overrides
-        mock_db.pool.connection.add_override({
-            "id": uuid.uuid4(),
-            "decision_id": decision_id,
-            "operator_id": "test_operator",
-            "timestamp": datetime.utcnow(),
-        })
+        mock_db.pool.connection.add_override(
+            {
+                "id": uuid.uuid4(),
+                "decision_id": decision_id,
+                "operator_id": "test_operator",
+                "timestamp": datetime.utcnow(),
+            }
+        )
 
         response = await authenticated_client.get(f"/audit/overrides/{decision_id}")
         assert response.status_code == 200
@@ -377,12 +371,11 @@ class TestHumanOverrides:
 class TestComplianceLogging:
     """Tests for compliance check logging."""
 
-    async def test_log_compliance_check_success(
-        self, authenticated_client, create_test_compliance_request
-    ):
+    async def test_log_compliance_check_success(self, authenticated_client, create_test_compliance_request):
         """Test successfully logging a compliance check."""
         compliance_request = create_test_compliance_request()
-        response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
+        # Send directly without envelope - FastAPI unwraps single Pydantic body params
+        response = await authenticated_client.post("/audit/compliance", json=compliance_request)
         assert response.status_code == 200
         data = response.json()
         assert "compliance_id" in data
@@ -390,9 +383,7 @@ class TestComplianceLogging:
         assert "regulation" in data
         assert data["check_result"] == ComplianceResult.COMPLIANT.value
 
-    async def test_log_compliance_different_regulations(
-        self, authenticated_client, create_test_compliance_request
-    ):
+    async def test_log_compliance_different_regulations(self, authenticated_client, create_test_compliance_request):
         """Test logging compliance for different regulations."""
         regulations = [
             Regulation.EU_AI_ACT,
@@ -405,12 +396,10 @@ class TestComplianceLogging:
 
         for regulation in regulations:
             compliance_request = create_test_compliance_request(regulation=regulation)
-            response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
+            response = await authenticated_client.post("/audit/compliance", json=compliance_request)
             assert response.status_code == 200
 
-    async def test_log_compliance_different_results(
-        self, authenticated_client, create_test_compliance_request
-    ):
+    async def test_log_compliance_different_results(self, authenticated_client, create_test_compliance_request):
         """Test logging compliance with different results."""
         results = [
             ComplianceResult.COMPLIANT,
@@ -421,12 +410,10 @@ class TestComplianceLogging:
 
         for result in results:
             compliance_request = create_test_compliance_request(check_result=result.value)
-            response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
+            response = await authenticated_client.post("/audit/compliance", json=compliance_request)
             assert response.status_code == 200
 
-    async def test_log_compliance_with_remediation(
-        self, authenticated_client, create_test_compliance_request
-    ):
+    async def test_log_compliance_with_remediation(self, authenticated_client, create_test_compliance_request):
         """Test logging compliance check requiring remediation."""
         compliance_request = create_test_compliance_request(
             check_result=ComplianceResult.NON_COMPLIANT.value,
@@ -434,7 +421,7 @@ class TestComplianceLogging:
             remediation_plan="Implement additional safeguards",
             remediation_deadline=(datetime.utcnow() + timedelta(days=30)).isoformat(),
         )
-        response = await authenticated_client.post("/audit/compliance", json={"check": compliance_request})
+        response = await authenticated_client.post("/audit/compliance", json=compliance_request)
         assert response.status_code == 200
         data = response.json()
         assert data["remediation_required"] is True

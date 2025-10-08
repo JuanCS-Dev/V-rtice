@@ -11,7 +11,6 @@ import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from datasketch import MinHash, MinHashLSH
-from utils import minhash_jaccard_estimate
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +63,7 @@ class DomainFingerprinter:
         domain_clean = domain.lower().strip()
 
         # Remove TLD for better similarity
-        domain_no_tld = re.sub(
-            r"\.(com|org|net|info|biz|co|io|tv|me)$", "", domain_clean
-        )
+        domain_no_tld = re.sub(r"\.(com|org|net|info|biz|co|io|tv|me)$", "", domain_clean)
 
         # Extract character shingles
         shingles = set()
@@ -137,9 +134,7 @@ class DomainFingerprinter:
 
         return features
 
-    def create_fingerprint(
-        self, domain: str, metadata: Optional[Dict[str, Any]] = None
-    ) -> MinHash:
+    def create_fingerprint(self, domain: str, metadata: Optional[Dict[str, Any]] = None) -> MinHash:
         """
         Create MinHash fingerprint for domain.
 
@@ -164,9 +159,7 @@ class DomainFingerprinter:
 
         return minhash
 
-    def fingerprint_domain(
-        self, domain: str, metadata: Optional[Dict[str, Any]] = None
-    ) -> str:
+    def fingerprint_domain(self, domain: str, metadata: Optional[Dict[str, Any]] = None) -> str:
         """
         Generate and store domain fingerprint.
 
@@ -194,15 +187,11 @@ class DomainFingerprinter:
             pass
 
         # Generate fingerprint hash for storage
-        fingerprint_hash = hashlib.sha256(
-            "".join(map(str, minhash.hashvalues)).encode()
-        ).hexdigest()[:32]
+        fingerprint_hash = hashlib.sha256("".join(map(str, minhash.hashvalues)).encode()).hexdigest()[:32]
 
         return fingerprint_hash
 
-    def find_similar_domains(
-        self, domain: str, min_similarity: float = 0.7
-    ) -> List[Tuple[str, float]]:
+    def find_similar_domains(self, domain: str, min_similarity: float = 0.7) -> List[Tuple[str, float]]:
         """
         Find domains similar to the given domain.
 
@@ -240,9 +229,7 @@ class DomainFingerprinter:
 
         return results
 
-    def detect_domain_hopping(
-        self, domain: str, cluster_threshold: float = 0.75
-    ) -> Dict[str, Any]:
+    def detect_domain_hopping(self, domain: str, cluster_threshold: float = 0.75) -> Dict[str, Any]:
         """
         Detect if domain is part of a domain hopping network.
 
@@ -263,19 +250,12 @@ class DomainFingerprinter:
             intra_cluster_similarities = []
             for i, (dom1, _) in enumerate(similar_domains):
                 for dom2, _ in similar_domains[i + 1 :]:
-                    if (
-                        dom1 in self.domain_fingerprints
-                        and dom2 in self.domain_fingerprints
-                    ):
-                        sim = self.domain_fingerprints[dom1].jaccard(
-                            self.domain_fingerprints[dom2]
-                        )
+                    if dom1 in self.domain_fingerprints and dom2 in self.domain_fingerprints:
+                        sim = self.domain_fingerprints[dom1].jaccard(self.domain_fingerprints[dom2])
                         intra_cluster_similarities.append(sim)
 
             cluster_density = (
-                sum(intra_cluster_similarities) / len(intra_cluster_similarities)
-                if intra_cluster_similarities
-                else 0.0
+                sum(intra_cluster_similarities) / len(intra_cluster_similarities) if intra_cluster_similarities else 0.0
             )
         else:
             cluster_density = 1.0 if len(similar_domains) == 1 else 0.0
@@ -306,17 +286,13 @@ class DomainFingerprinter:
             "cluster_id": self._generate_cluster_id(domain, similar_domains),
         }
 
-    def _generate_cluster_id(
-        self, domain: str, similar_domains: List[Tuple[str, float]]
-    ) -> str:
+    def _generate_cluster_id(self, domain: str, similar_domains: List[Tuple[str, float]]) -> str:
         """Generate stable cluster ID from domain set."""
         all_domains = sorted([domain] + [d for d, _ in similar_domains])
         cluster_str = "|".join(all_domains)
         return hashlib.sha256(cluster_str.encode()).hexdigest()[:16]
 
-    def typosquatting_detection(
-        self, domain: str, trusted_domains: List[str]
-    ) -> Dict[str, Any]:
+    def typosquatting_detection(self, domain: str, trusted_domains: List[str]) -> Dict[str, Any]:
         """
         Detect typosquatting attempts.
 
@@ -358,13 +334,8 @@ class DomainFingerprinter:
                 results["techniques"].append("missing_character")
 
             # Calculate similarity
-            if (
-                domain in self.domain_fingerprints
-                and trusted in self.domain_fingerprints
-            ):
-                sim = self.domain_fingerprints[domain].jaccard(
-                    self.domain_fingerprints[trusted]
-                )
+            if domain in self.domain_fingerprints and trusted in self.domain_fingerprints:
+                sim = self.domain_fingerprints[domain].jaccard(self.domain_fingerprints[trusted])
                 if sim > results["similarity"]:
                     results["similarity"] = sim
 

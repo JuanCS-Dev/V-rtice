@@ -6,15 +6,15 @@ Integrates multiple fact-checking APIs:
 - ClaimBuster API (check-worthiness + fact matching)
 """
 
-from datetime import datetime, timedelta
 import logging
 from typing import Any, Dict, List, Optional
 
 import aiohttp
-from cache_manager import cache_manager, CacheCategory
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
 from models import VerificationStatus
-from tenacity import retry, stop_after_attempt, wait_exponential
 from utils import hash_text
 
 logger = logging.getLogger(__name__)
@@ -46,9 +46,7 @@ class GoogleFactCheckClient:
             await self.session.close()
             self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def search_claims(
         self,
         query: str,
@@ -93,9 +91,7 @@ class GoogleFactCheckClient:
 
             async with self.session.get(self.BASE_URL, params=params) as response:
                 if response.status != 200:
-                    logger.error(
-                        f"Google Fact Check API error {response.status}: {await response.text()}"
-                    )
+                    logger.error(f"Google Fact Check API error {response.status}: {await response.text()}")
                     return []
 
                 data = await response.json()
@@ -107,9 +103,7 @@ class GoogleFactCheckClient:
                 # Cache for 30 days
                 if use_cache and parsed_claims:
                     cache_key = f"google:{hash_text(query)}"
-                    await cache_manager.set(
-                        CacheCategory.FACTCHECK, cache_key, parsed_claims
-                    )
+                    await cache_manager.set(CacheCategory.FACTCHECK, cache_key, parsed_claims)
 
                 return parsed_claims
 
@@ -216,17 +210,13 @@ class ClaimBusterClient:
         """Initialize ClaimBuster client."""
         self.api_key = settings.CLAIMBUSTER_API_KEY
         self.session: Optional[aiohttp.ClientSession] = None
-        self._enabled = bool(
-            self.api_key and self.api_key != "your_claimbuster_key_here"
-        )
+        self._enabled = bool(self.api_key and self.api_key != "your_claimbuster_key_here")
 
     async def initialize(self) -> None:
         """Initialize HTTP session."""
         if self.session is None:
             timeout = aiohttp.ClientTimeout(total=30)
-            self.session = aiohttp.ClientSession(
-                headers={"x-api-key": self.api_key}, timeout=timeout
-            )
+            self.session = aiohttp.ClientSession(headers={"x-api-key": self.api_key}, timeout=timeout)
             logger.info("✅ ClaimBuster client initialized")
 
     async def close(self) -> None:
@@ -235,9 +225,7 @@ class ClaimBusterClient:
             await self.session.close()
             self.session = None
 
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def score_claim(self, text: str, use_cache: bool = True) -> Dict[str, Any]:
         """
         Score check-worthiness of text.
@@ -299,9 +287,7 @@ class ClaimBusterClient:
             logger.error(f"ClaimBuster API error: {e}", exc_info=True)
             return {"score": 0.5, "claims": []}
 
-    @retry(
-        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
-    )
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def match_claim(
         self, claim: str, similarity_threshold: float = 0.85, use_cache: bool = True
     ) -> Optional[Dict[str, Any]]:
@@ -337,9 +323,7 @@ class ClaimBusterClient:
 
             async with self.session.post(url, json=payload) as response:
                 if response.status != 200:
-                    logger.warning(
-                        f"ClaimBuster fact_matcher API error {response.status}"
-                    )
+                    logger.warning(f"ClaimBuster fact_matcher API error {response.status}")
                     return None
 
                 data = await response.json()
@@ -358,9 +342,7 @@ class ClaimBusterClient:
                     "original_claim": claim,
                     "matched_claim": best_match.get("claim", ""),
                     "similarity": best_match.get("similarity", 0.0),
-                    "verdict": best_match.get(
-                        "verdict", "unverified"
-                    ),  # true/false/mixed
+                    "verdict": best_match.get("verdict", "unverified"),  # true/false/mixed
                     "source": best_match.get("source", ""),
                     "url": best_match.get("url", ""),
                     "fact_checker": best_match.get("fact_checker", "ClaimBuster"),
@@ -397,9 +379,7 @@ class FactCheckAggregator:
         await self.google_client.close()
         await self.claimbuster_client.close()
 
-    async def verify_claim(
-        self, claim_text: str, check_worthiness_threshold: float = 0.5
-    ) -> Dict[str, Any]:
+    async def verify_claim(self, claim_text: str, check_worthiness_threshold: float = 0.5) -> Dict[str, Any]:
         """
         Comprehensive claim verification (Tier 1).
 
@@ -435,9 +415,7 @@ class FactCheckAggregator:
                 "mixed": VerificationStatus.MIXED,
             }
 
-            status = verdict_map.get(
-                claimbuster_match["verdict"].lower(), VerificationStatus.DISPUTED
-            )
+            status = verdict_map.get(claimbuster_match["verdict"].lower(), VerificationStatus.DISPUTED)
 
             return {
                 "claim_text": claim_text,

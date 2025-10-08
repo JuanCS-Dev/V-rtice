@@ -16,8 +16,8 @@ tracking communication patterns, and enriching threat intelligence related to
 phishing campaigns or credential harvesting.
 """
 
-from datetime import datetime
 import re
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 
@@ -30,9 +30,7 @@ class EmailAnalyzer:
 
     def __init__(self):
         """Initializes the EmailAnalyzer with an email regex pattern."""
-        self.email_pattern = re.compile(
-            r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-        )
+        self.email_pattern = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
         self.analysis_history: List[Dict[str, Any]] = []
         self.last_analysis_time: Optional[datetime] = None
 
@@ -45,9 +43,7 @@ class EmailAnalyzer:
         Returns:
             Dict[str, Any]: A dictionary containing the extracted emails and their analysis.
         """
-        print(
-            f"[EmailAnalyzer] Analyzing text for email addresses (length: {len(text)})..."
-        )
+        print(f"[EmailAnalyzer] Analyzing text for email addresses (length: {len(text)})...")
         extracted_emails = self.email_pattern.findall(text)
 
         domains: Dict[str, int] = {}
@@ -60,9 +56,7 @@ class EmailAnalyzer:
             "extracted_emails": list(set(extracted_emails)),  # Unique emails
             "email_count": len(extracted_emails),
             "domains_found": domains,
-            "potential_phishing_indicators": (
-                True if any("phish" in email for email in extracted_emails) else False
-            ),
+            "potential_phishing_indicators": (True if any("phish" in email for email in extracted_emails) else False),
         }
         self.analysis_history.append(analysis_result)
         self.last_analysis_time = datetime.now()
@@ -89,9 +83,5 @@ class EmailAnalyzer:
         return {
             "status": "active",
             "total_analyses": len(self.analysis_history),
-            "last_analysis": (
-                self.last_analysis_time.isoformat()
-                if self.last_analysis_time
-                else "N/A"
-            ),
+            "last_analysis": (self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"),
         }

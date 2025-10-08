@@ -8,10 +8,12 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
 import time
-from datetime import datetime, timedelta
 from collections import deque
+from datetime import datetime, timedelta
+
+import pytest
+
 from monitoring.metrics_collector import MetricsCollector
 
 
@@ -219,6 +221,7 @@ class TestDistributedCoordinatorCollection:
 
     def test_collect_coordinator_handles_errors(self, collector):
         """Test error handling during coordinator collection"""
+
         class BrokenCoordinator:
             def get_coordinator_metrics(self):
                 raise ValueError("Test error")
@@ -251,6 +254,7 @@ class TestSwarmCoordinatorCollection:
 
     def test_collect_swarm_handles_errors(self, collector):
         """Test error handling during swarm collection"""
+
         class BrokenCoordinator:
             def get_swarm_metrics(self):
                 raise ValueError("Test error")
@@ -302,6 +306,7 @@ class TestAgentsCollection:
 
     def test_collect_from_agents_handles_errors(self, collector):
         """Test error handling during agent collection"""
+
         class BrokenAgent:
             @property
             def state(self):
@@ -327,6 +332,7 @@ class TestLymphNodeCollection:
 
     def test_collect_lymphnode_handles_errors(self, collector):
         """Test error handling during lymph node collection"""
+
         class BrokenLymphNode:
             def get_lymphnode_metrics(self):
                 raise ValueError("Test error")

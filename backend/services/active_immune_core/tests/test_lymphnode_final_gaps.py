@@ -10,13 +10,12 @@ Focus: SURGICAL PRECISION to reach 85%+ coverage
 """
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pytest_asyncio
 
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -70,12 +69,9 @@ class TestESGTIgnitionHistory:
         await lymphnode._handle_esgt_ignition(mock_event)
 
         # ASSERT: Should have popped oldest
-        assert len(lymphnode.recent_ignitions) == 10, \
-            "Should maintain max history size"
-        assert "event_0" not in lymphnode.recent_ignitions, \
-            "Should have popped oldest event"
-        assert mock_event in lymphnode.recent_ignitions, \
-            "Should have added new event"
+        assert len(lymphnode.recent_ignitions) == 10, "Should maintain max history size"
+        assert "event_0" not in lymphnode.recent_ignitions, "Should have popped oldest event"
+        assert mock_event in lymphnode.recent_ignitions, "Should have added new event"
 
 
 # ==================== HORMONE BROADCAST EXCEPTIONS ====================
@@ -99,18 +95,13 @@ class TestHormoneBroadcastExceptions:
 
             # ACT: Try to broadcast (should not crash)
             try:
-                await lymphnode._broadcast_hormone(
-                    hormone_type="adrenaline",
-                    level=0.9,
-                    source="panic_response"
-                )
+                await lymphnode._broadcast_hormone(hormone_type="adrenaline", level=0.9, source="panic_response")
                 handled_gracefully = True
             except Exception:
                 handled_gracefully = False
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle Redis publish failure gracefully"
+        assert handled_gracefully, "Should handle Redis publish failure gracefully"
 
 
 # ==================== ESCALATION EXCEPTIONS ====================
@@ -146,8 +137,7 @@ class TestEscalationExceptions:
                 handled_gracefully = False
 
         # ASSERT: Should log error but not crash
-        assert handled_gracefully, \
-            "Should handle escalation failure gracefully"
+        assert handled_gracefully, "Should handle escalation failure gracefully"
 
 
 # ==================== THREAT TRACKING ====================
@@ -208,8 +198,7 @@ class TestPatternDetectionEdgeCases:
             handled_gracefully = False
 
         # ASSERT
-        assert handled_gracefully, \
-            "Should handle empty threat_detections gracefully"
+        assert handled_gracefully, "Should handle empty threat_detections gracefully"
 
     @pytest.mark.asyncio
     async def test_detect_coordinated_attacks_with_empty_buffer(self, lymphnode):
@@ -229,8 +218,7 @@ class TestPatternDetectionEdgeCases:
             handled_gracefully = False
 
         # ASSERT
-        assert handled_gracefully, \
-            "Should handle empty cytokine list gracefully"
+        assert handled_gracefully, "Should handle empty cytokine list gracefully"
 
 
 # ==================== SUMMARY ====================

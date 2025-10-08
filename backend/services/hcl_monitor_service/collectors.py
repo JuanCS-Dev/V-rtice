@@ -16,7 +16,7 @@ Key components within this module are responsible for:
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import psutil
 
@@ -71,27 +71,15 @@ class SystemMetricsCollector:
 
         current_disk_io = psutil.disk_io_counters()
         disk_read_rate = (
-            (current_disk_io.read_bytes - self.last_disk_io.read_bytes) / time_delta
-            if time_delta > 0
-            else 0
+            (current_disk_io.read_bytes - self.last_disk_io.read_bytes) / time_delta if time_delta > 0 else 0
         )
         disk_write_rate = (
-            (current_disk_io.write_bytes - self.last_disk_io.write_bytes) / time_delta
-            if time_delta > 0
-            else 0
+            (current_disk_io.write_bytes - self.last_disk_io.write_bytes) / time_delta if time_delta > 0 else 0
         )
 
         current_net_io = psutil.net_io_counters()
-        net_recv_rate = (
-            (current_net_io.bytes_recv - self.last_net_io.bytes_recv) / time_delta
-            if time_delta > 0
-            else 0
-        )
-        net_sent_rate = (
-            (current_net_io.bytes_sent - self.last_net_io.bytes_sent) / time_delta
-            if time_delta > 0
-            else 0
-        )
+        net_recv_rate = (current_net_io.bytes_recv - self.last_net_io.bytes_recv) / time_delta if time_delta > 0 else 0
+        net_sent_rate = (current_net_io.bytes_sent - self.last_net_io.bytes_sent) / time_delta if time_delta > 0 else 0
 
         self.last_disk_io = current_disk_io
         self.last_net_io = current_net_io
@@ -123,9 +111,7 @@ class SystemMetricsCollector:
         self.metrics_history.append(metrics)
         if len(self.metrics_history) > self.history_max_size:
             self.metrics_history.pop(0)
-        print(
-            f"[MetricsCollector] Collected metrics: CPU={cpu_percent:.1f}%, Mem={memory_percent:.1f}%"
-        )
+        print(f"[MetricsCollector] Collected metrics: CPU={cpu_percent:.1f}%, Mem={memory_percent:.1f}%")
 
     def get_latest_metrics(self) -> Dict[str, Any]:
         """Returns the most recently collected system metrics.

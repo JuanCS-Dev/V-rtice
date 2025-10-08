@@ -8,16 +8,13 @@ Missing lines: 110-117, 123-130, 156-170, 177-190, 210-240, etc.
 """
 
 import asyncio
-from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import aiohttp
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents import AgentStatus, AgentType
 from active_immune_core.agents.nk_cell import CelulaNKDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -98,9 +95,7 @@ class TestNKCellMHCDetection:
     """Tests for Missing MHC-I detection path (Lines 110-117, 156-170)"""
 
     @pytest.mark.asyncio
-    async def test_patrol_detects_missing_mhc_and_neutralizes(
-        self, nk_cell, sample_host_without_mhc
-    ):
+    async def test_patrol_detects_missing_mhc_and_neutralizes(self, nk_cell, sample_host_without_mhc):
         """
         Test complete patrol flow with MHC-I violation.
 
@@ -171,9 +166,7 @@ class TestNKCellMHCDetection:
 
         # ASSERT: MHC violation detected and neutralization triggered
         assert nk_cell.mhc_violations >= 1, "Should detect MHC-I violation"
-        assert sample_host_without_mhc["id"] in nk_cell.hosts_isolados, (
-            "Compromised host should be isolated"
-        )
+        assert sample_host_without_mhc["id"] in nk_cell.hosts_isolados, "Compromised host should be isolated"
 
     @pytest.mark.asyncio
     async def test_detect_mhc_filters_audit_disabled_hosts(
@@ -210,9 +203,7 @@ class TestNKCellMHCDetection:
 
         # ASSERT
         assert len(hosts_sem_mhc) == 2, "Should find 2 MHC violations"
-        assert all(
-            not h.get("audit_enabled") for h in hosts_sem_mhc
-        ), "All should have audit disabled"
+        assert all(not h.get("audit_enabled") for h in hosts_sem_mhc), "All should have audit disabled"
         assert sample_host_without_mhc in hosts_sem_mhc
 
     @pytest.mark.asyncio
@@ -336,9 +327,7 @@ class TestNKCellAnomalyDetection:
         # Mock RTE responses
         mock_hosts_list = AsyncMock()
         mock_hosts_list.status = 200
-        mock_hosts_list.json = AsyncMock(
-            return_value={"hosts": [sample_host_with_mhc]}
-        )
+        mock_hosts_list.json = AsyncMock(return_value={"hosts": [sample_host_with_mhc]})
 
         mock_metrics_response = AsyncMock()
         mock_metrics_response.status = 200
@@ -393,9 +382,7 @@ class TestNKCellAnomalyDetection:
         # Mock responses
         mock_hosts_list = AsyncMock()
         mock_hosts_list.status = 200
-        mock_hosts_list.json = AsyncMock(
-            return_value={"hosts": [sample_host_with_mhc]}
-        )
+        mock_hosts_list.json = AsyncMock(return_value={"hosts": [sample_host_with_mhc]})
 
         mock_metrics = AsyncMock()
         mock_metrics.status = 200
@@ -420,18 +407,14 @@ class TestNKCellAnomalyDetection:
         # ASSERT
         assert len(anomalias) >= 1, "Should detect at least one anomaly"
         host, score = anomalias[0]
-        assert score > nk_cell.anomaly_threshold, (
-            f"Score {score} should exceed threshold {nk_cell.anomaly_threshold}"
-        )
+        assert score > nk_cell.anomaly_threshold, f"Score {score} should exceed threshold {nk_cell.anomaly_threshold}"
 
 
 class TestNKCellNeutralization:
     """Tests for neutralization (Lines 451-461, 472-485)"""
 
     @pytest.mark.asyncio
-    async def test_neutralization_success_triggers_ifn_gamma(
-        self, nk_cell, sample_host_without_mhc
-    ):
+    async def test_neutralization_success_triggers_ifn_gamma(self, nk_cell, sample_host_without_mhc):
         """
         Test successful neutralization triggers cytokine secretion.
 
@@ -452,12 +435,8 @@ class TestNKCellNeutralization:
         with patch.object(nk_cell._http_session, "post") as mock_post:
             mock_post.return_value.__aenter__.return_value = mock_response
 
-            with patch.object(
-                nk_cell, "_secretar_ifn_gamma", new_callable=AsyncMock
-            ) as mock_cytokine:
-                result = await nk_cell.executar_neutralizacao(
-                    sample_host_without_mhc, metodo="isolate"
-                )
+            with patch.object(nk_cell, "_secretar_ifn_gamma", new_callable=AsyncMock) as mock_cytokine:
+                result = await nk_cell.executar_neutralizacao(sample_host_without_mhc, metodo="isolate")
 
         # ASSERT
         assert result is True, "Neutralization should succeed"
@@ -465,9 +444,7 @@ class TestNKCellNeutralization:
         mock_cytokine.assert_called_once_with(sample_host_without_mhc)
 
     @pytest.mark.asyncio
-    async def test_neutralization_connection_error_graceful_degradation(
-        self, nk_cell, sample_host_without_mhc
-    ):
+    async def test_neutralization_connection_error_graceful_degradation(self, nk_cell, sample_host_without_mhc):
         """
         Test graceful degradation on connection error.
 
@@ -486,20 +463,14 @@ class TestNKCellNeutralization:
             )
 
             # ACT
-            result = await nk_cell.executar_neutralizacao(
-                sample_host_without_mhc, metodo="isolate"
-            )
+            result = await nk_cell.executar_neutralizacao(sample_host_without_mhc, metodo="isolate")
 
         # ASSERT
         assert result is True, "Should succeed with graceful degradation"
-        assert sample_host_without_mhc["id"] in nk_cell.hosts_isolados, (
-            "Should track locally even if RTE unavailable"
-        )
+        assert sample_host_without_mhc["id"] in nk_cell.hosts_isolados, "Should track locally even if RTE unavailable"
 
     @pytest.mark.asyncio
-    async def test_neutralization_generic_exception_fails(
-        self, nk_cell, sample_host_without_mhc
-    ):
+    async def test_neutralization_generic_exception_fails(self, nk_cell, sample_host_without_mhc):
         """
         Test generic exception handling in neutralization.
 
@@ -515,9 +486,7 @@ class TestNKCellNeutralization:
             mock_post.side_effect = ValueError("Unexpected error")
 
             # ACT
-            result = await nk_cell.executar_neutralizacao(
-                sample_host_without_mhc, metodo="isolate"
-            )
+            result = await nk_cell.executar_neutralizacao(sample_host_without_mhc, metodo="isolate")
 
         # ASSERT
         assert result is False, "Should fail on generic exception"
@@ -527,9 +496,7 @@ class TestNKCellInvestigation:
     """Tests for investigation path (Lines 402-409)"""
 
     @pytest.mark.asyncio
-    async def test_investigation_no_metrics_returns_not_threat(
-        self, nk_cell, sample_host_with_mhc
-    ):
+    async def test_investigation_no_metrics_returns_not_threat(self, nk_cell, sample_host_with_mhc):
         """
         Test investigation when metrics unavailable.
 

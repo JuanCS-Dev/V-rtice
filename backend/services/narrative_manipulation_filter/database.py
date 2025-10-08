@@ -5,21 +5,22 @@ Provides async PostgreSQL connection pooling, session management,
 and dependency injection for FastAPI.
 """
 
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
-from config import get_settings
-from db_models import Base
 from sqlalchemy import event, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
-    async_sessionmaker,
     AsyncEngine,
     AsyncSession,
+    async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import QueuePool
+
+from config import get_settings
+from db_models import Base
 
 logger = logging.getLogger(__name__)
 

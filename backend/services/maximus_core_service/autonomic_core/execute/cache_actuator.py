@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import redis.asyncio as redis
 
@@ -12,30 +12,24 @@ logger = logging.getLogger(__name__)
 class CacheActuator:
     """Manage Redis cache operations and optimization."""
 
-    def __init__(
-        self, redis_url: str = "redis://localhost:6379/0", dry_run_mode: bool = True
-    ):
+    def __init__(self, redis_url: str = "redis://localhost:6379/0", dry_run_mode: bool = True):
         self.redis_url = redis_url
         self.dry_run_mode = dry_run_mode
         self.action_log = []
-        self.client: Optional[redis.Redis] = None
+        self.client: redis.Redis | None = None
 
     async def connect(self):
         """Establish Redis connection."""
         if not self.client:
             try:
-                self.client = await redis.from_url(
-                    self.redis_url, encoding="utf-8", decode_responses=True
-                )
+                self.client = await redis.from_url(self.redis_url, encoding="utf-8", decode_responses=True)
                 await self.client.ping()
                 logger.info("Redis client connected successfully")
             except Exception as e:
                 logger.error(f"Redis connection failed: {e}")
                 self.client = None
 
-    async def flush_cache(
-        self, pattern: Optional[str] = None, database: int = 0
-    ) -> Dict:
+    async def flush_cache(self, pattern: str | None = None, database: int = 0) -> dict:
         """Flush cache entries matching pattern.
 
         Args:
@@ -49,9 +43,7 @@ class CacheActuator:
             return {"success": False, "error": "Redis client unavailable"}
 
         if self.dry_run_mode:
-            logger.info(
-                f"DRY-RUN: Flush cache db={database} pattern={pattern or 'ALL'}"
-            )
+            logger.info(f"DRY-RUN: Flush cache db={database} pattern={pattern or 'ALL'}")
             self.action_log.append(
                 {
                     "action": "flush_cache",
@@ -108,9 +100,7 @@ class CacheActuator:
             logger.error(f"Cache flush error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def warm_cache(
-        self, key_value_pairs: List[Dict[str, Any]], ttl_seconds: int = 3600
-    ) -> Dict:
+    async def warm_cache(self, key_value_pairs: list[dict[str, Any]], ttl_seconds: int = 3600) -> dict:
         """Preload cache with key-value pairs.
 
         Args:
@@ -123,9 +113,7 @@ class CacheActuator:
             return {"success": False, "error": "Redis client unavailable"}
 
         if self.dry_run_mode:
-            logger.info(
-                f"DRY-RUN: Warm cache with {len(key_value_pairs)} entries (TTL={ttl_seconds}s)"
-            )
+            logger.info(f"DRY-RUN: Warm cache with {len(key_value_pairs)} entries (TTL={ttl_seconds}s)")
             self.action_log.append(
                 {
                     "action": "warm_cache",
@@ -174,9 +162,7 @@ class CacheActuator:
             logger.error(f"Cache warming error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def adjust_maxmemory(
-        self, maxmemory_mb: int, policy: str = "allkeys-lru"
-    ) -> Dict:
+    async def adjust_maxmemory(self, maxmemory_mb: int, policy: str = "allkeys-lru") -> dict:
         """Adjust Redis maxmemory and eviction policy.
 
         Args:
@@ -231,7 +217,7 @@ class CacheActuator:
             logger.error(f"Maxmemory adjustment error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def get_cache_stats(self) -> Dict:
+    async def get_cache_stats(self) -> dict:
         """Get Redis cache statistics."""
         await self.connect()
 
@@ -252,9 +238,7 @@ class CacheActuator:
             keyspace_hits = stats.get("keyspace_hits", 0)
             keyspace_misses = stats.get("keyspace_misses", 0)
             total_requests = keyspace_hits + keyspace_misses
-            hit_ratio = (
-                (keyspace_hits / total_requests * 100) if total_requests > 0 else 0
-            )
+            hit_ratio = (keyspace_hits / total_requests * 100) if total_requests > 0 else 0
 
             # Key count
             db0_keys = 0
@@ -287,7 +271,7 @@ class CacheActuator:
             logger.error(f"Stats retrieval error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def set_cache_strategy(self, strategy: str) -> Dict:
+    async def set_cache_strategy(self, strategy: str) -> dict:
         """Change cache strategy (aggressive, balanced, conservative).
 
         Args:
@@ -329,14 +313,13 @@ class CacheActuator:
                 "policy": config["policy"],
                 "default_ttl_seconds": config["ttl_seconds"],
             }
-        else:
-            return result
+        return result
 
     async def close(self):
         """Close Redis connection."""
         if self.client:
             await self.client.close()
 
-    def get_action_log(self) -> List[Dict]:
+    def get_action_log(self) -> list[dict]:
         """Return action history for audit."""
         return self.action_log

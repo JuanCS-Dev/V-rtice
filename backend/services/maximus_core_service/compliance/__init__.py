@@ -60,70 +60,62 @@ License: Proprietary - VÉRTICE Platform
 """
 
 from .base import (
-    # Core data structures
-    Regulation,
-    Control,
-    Evidence,
-    ComplianceResult,
-    ComplianceViolation,
-    GapAnalysisResult,
-
-    # Enums
-    RegulationType,
-    ControlCategory,
-    ComplianceStatus,
-    ViolationSeverity,
-    EvidenceType,
-
     # Configuration
     ComplianceConfig,
+    ComplianceResult,
+    ComplianceStatus,
+    ComplianceViolation,
+    Control,
+    ControlCategory,
+    Evidence,
+    EvidenceType,
+    GapAnalysisResult,
+    # Core data structures
+    Regulation,
+    # Enums
+    RegulationType,
+    ViolationSeverity,
 )
 
-from .regulations import (
-    # Regulation definitions
-    EU_AI_ACT,
-    GDPR,
-    NIST_AI_RMF,
-    US_EO_14110,
-    BRAZIL_LGPD,
-    ISO_27001,
-    SOC2_TYPE_II,
-    IEEE_7000,
-
-    # Regulation registry
-    REGULATION_REGISTRY,
-    get_regulation,
+# Certification modules
+from .certifications import (
+    CertificationResult,
+    IEEE7000Checker,
+    ISO27001Checker,
+    SOC2Checker,
 )
-
 from .compliance_engine import (
-    ComplianceEngine,
     ComplianceCheckResult,
+    ComplianceEngine,
 )
-
 from .evidence_collector import (
     EvidenceCollector,
     EvidenceItem,
     EvidencePackage,
 )
-
 from .gap_analyzer import (
-    GapAnalyzer,
     Gap,
+    GapAnalyzer,
     RemediationPlan,
 )
-
 from .monitoring import (
-    ComplianceMonitor,
     ComplianceAlert,
+    ComplianceMonitor,
     MonitoringMetrics,
 )
-
-# Certification modules
-from .certifications import (
-    ISO27001Checker,
-    SOC2Checker,
-    IEEE7000Checker,
-    CertificationResult,
+from .regulations import (
+    BRAZIL_LGPD,
+    # Regulation definitions
+    EU_AI_ACT,
+    GDPR,
+    IEEE_7000,
+    ISO_27001,
+    NIST_AI_RMF,
+    # Regulation registry
+    REGULATION_REGISTRY,
+    SOC2_TYPE_II,
+    US_EO_14110,
+    get_regulation,
 )
 
 # Version information
@@ -143,7 +135,6 @@ __all__ = [
     "ViolationSeverity",
     "EvidenceType",
     "ComplianceConfig",
-
     # Regulations
     "EU_AI_ACT",
     "GDPR",
@@ -155,26 +146,21 @@ __all__ = [
     "IEEE_7000",
     "REGULATION_REGISTRY",
     "get_regulation",
-
     # Compliance engine
     "ComplianceEngine",
     "ComplianceCheckResult",
-
     # Evidence collection
     "EvidenceCollector",
     "EvidenceItem",
     "EvidencePackage",
-
     # Gap analysis
     "GapAnalyzer",
     "Gap",
     "RemediationPlan",
-
     # Monitoring
     "ComplianceMonitor",
     "ComplianceAlert",
     "MonitoringMetrics",
-
     # Certifications
     "ISO27001Checker",
     "SOC2Checker",

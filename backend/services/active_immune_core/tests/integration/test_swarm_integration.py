@@ -8,7 +8,6 @@ import pytest
 
 from active_immune_core.agents import SwarmCoordinator
 
-
 # ==================== FIXTURES ====================
 
 

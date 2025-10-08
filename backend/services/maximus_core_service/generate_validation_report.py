@@ -11,16 +11,15 @@ Quality: REGRA DE OURO compliant - NO MOCK, NO PLACEHOLDER, NO TODO
 """
 
 import asyncio
-import subprocess
 import time
-from datetime import datetime, timezone
-from typing import List, Dict
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 
 @dataclass
 class TestSuiteResult:
     """Result from a test suite execution."""
+
     name: str
     passed: bool
     output: str
@@ -37,7 +36,7 @@ class ValidationReportGenerator:
 
     def __init__(self):
         """Initialize report generator."""
-        self.results: List[TestSuiteResult] = []
+        self.results: list[TestSuiteResult] = []
         self.start_time = time.time()
 
     async def run_test_suite(self, name: str, script: str) -> TestSuiteResult:
@@ -51,17 +50,15 @@ class ValidationReportGenerator:
         Returns:
             Test suite result
         """
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print(f"🧪 Running: {name}")
-        print(f"{'='*80}\n")
+        print(f"{'=' * 80}\n")
 
         start = time.time()
 
         try:
             process = await asyncio.create_subprocess_exec(
-                "python", script,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT
+                "python", script, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT
             )
 
             stdout, _ = await process.communicate()
@@ -73,11 +70,7 @@ class ValidationReportGenerator:
             print(output)
 
             return TestSuiteResult(
-                name=name,
-                passed=exit_code == 0,
-                output=output,
-                exit_code=exit_code,
-                duration=duration
+                name=name, passed=exit_code == 0, output=output, exit_code=exit_code, duration=duration
             )
 
         except Exception as e:
@@ -86,13 +79,7 @@ class ValidationReportGenerator:
 
             print(f"❌ {error_output}")
 
-            return TestSuiteResult(
-                name=name,
-                passed=False,
-                output=error_output,
-                exit_code=-1,
-                duration=duration
-            )
+            return TestSuiteResult(name=name, passed=False, output=error_output, exit_code=-1, duration=duration)
 
     def generate_markdown_report(self) -> str:
         """
@@ -108,7 +95,7 @@ class ValidationReportGenerator:
         report = []
         report.append("# 🏛️ Governance Workspace - Validation Report")
         report.append("")
-        report.append(f"**Generated:** {datetime.now(timezone.utc).isoformat()}")
+        report.append(f"**Generated:** {datetime.now(UTC).isoformat()}")
         report.append(f"**Total Duration:** {total_duration:.2f}s")
         report.append("")
         report.append("---")
@@ -129,7 +116,7 @@ class ValidationReportGenerator:
         report.append(f"- **Total Test Suites:** {len(self.results)}")
         report.append(f"- **✅ Passed:** {passed_count}")
         report.append(f"- **❌ Failed:** {failed_count}")
-        report.append(f"- **Success Rate:** {(passed_count/len(self.results)*100):.1f}%")
+        report.append(f"- **Success Rate:** {(passed_count / len(self.results) * 100):.1f}%")
         report.append("")
 
         # Test Results Table
@@ -140,9 +127,7 @@ class ValidationReportGenerator:
 
         for result in self.results:
             status = "✅ PASS" if result.passed else "❌ FAIL"
-            report.append(
-                f"| {result.name} | {status} | {result.duration:.2f}s | {result.exit_code} |"
-            )
+            report.append(f"| {result.name} | {status} | {result.duration:.2f}s | {result.exit_code} |")
 
         report.append("")
 
@@ -161,7 +146,7 @@ class ValidationReportGenerator:
             # Extract summary from output
             if "Summary" in result.output:
                 summary_start = result.output.find("Summary")
-                summary_section = result.output[summary_start:summary_start+500]
+                summary_section = result.output[summary_start : summary_start + 500]
                 report.append("<details>")
                 report.append("<summary>View Summary</summary>")
                 report.append("")
@@ -170,7 +155,7 @@ class ValidationReportGenerator:
                 report.append("```")
                 report.append("</details>")
             else:
-                report.append(f"*No summary available*")
+                report.append("*No summary available*")
 
             report.append("")
 
@@ -210,19 +195,19 @@ class ValidationReportGenerator:
         report.append("---")
         report.append("")
         report.append("**Report Generator:** `generate_validation_report.py`")
-        report.append(f"**Environment:** Production Server (port 8002)")
-        report.append(f"**REGRA DE OURO Compliance:** ✅ 100%")
+        report.append("**Environment:** Production Server (port 8002)")
+        report.append("**REGRA DE OURO Compliance:** ✅ 100%")
         report.append("")
 
         return "\n".join(report)
 
     async def run_all_validations(self):
         """Run all validation test suites."""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Governance Workspace - Complete Validation Suite")
-        print("="*80)
-        print(f"Started: {datetime.now(timezone.utc).isoformat()}")
-        print("="*80)
+        print("=" * 80)
+        print(f"Started: {datetime.now(UTC).isoformat()}")
+        print("=" * 80)
         print()
 
         # Define test suites
@@ -240,9 +225,9 @@ class ValidationReportGenerator:
             self.results.append(result)
 
         # Generate report
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 Generating Validation Report")
-        print("="*80)
+        print("=" * 80)
         print()
 
         report_content = self.generate_markdown_report()
@@ -259,14 +244,14 @@ class ValidationReportGenerator:
         passed = sum(1 for r in self.results if r.passed)
         total = len(self.results)
 
-        print("="*80)
+        print("=" * 80)
         print("🎯 Final Summary")
-        print("="*80)
+        print("=" * 80)
         print(f"Total Test Suites: {total}")
         print(f"✅ Passed: {passed}")
         print(f"❌ Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
-        print("="*80)
+        print(f"Success Rate: {(passed / total) * 100:.1f}%")
+        print("=" * 80)
         print()
 
         if passed == total:

@@ -138,10 +138,7 @@ class SwarmCoordinator:
         # Swarm target (threat location)
         self._target: Optional[Position] = None
 
-        logger.info(
-            f"SwarmCoordinator initialized "
-            f"(perception={perception_radius}, separation={separation_radius})"
-        )
+        logger.info(f"SwarmCoordinator initialized (perception={perception_radius}, separation={separation_radius})")
 
     # ==================== BOID MANAGEMENT ====================
 

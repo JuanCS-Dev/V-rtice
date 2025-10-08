@@ -9,15 +9,15 @@ Generates adversarial examples and retrains models for robustness:
 Certified robustness: ±2 character edits
 """
 
-from dataclasses import dataclass
 import logging
 import random
-import re
+from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
-from config import get_settings
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import AutoTokenizer
+
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -242,9 +242,7 @@ class AdversarialGenerator:
 
         return " ".join(perturbed_words)
 
-    def generate_adversarial_examples(
-        self, texts: List[str], num_per_text: int = 3
-    ) -> List[Tuple[str, str, str]]:
+    def generate_adversarial_examples(self, texts: List[str], num_per_text: int = 3) -> List[Tuple[str, str, str]]:
         """
         Generate multiple adversarial examples per text.
 
@@ -318,9 +316,7 @@ class AdversarialTrainer:
     Method: Augment training data with adversarial examples
     """
 
-    def __init__(
-        self, model: torch.nn.Module, tokenizer: AutoTokenizer, device: str = "cpu"
-    ):
+    def __init__(self, model: torch.nn.Module, tokenizer: AutoTokenizer, device: str = "cpu"):
         """
         Initialize adversarial trainer.
 
@@ -334,9 +330,7 @@ class AdversarialTrainer:
         self.device = device
         self.generator = AdversarialGenerator()
 
-    async def evaluate_robustness(
-        self, texts: List[str], labels: List[int]
-    ) -> Dict[str, Any]:
+    async def evaluate_robustness(self, texts: List[str], labels: List[int]) -> Dict[str, Any]:
         """
         Evaluate model robustness to adversarial attacks.
 
@@ -348,9 +342,7 @@ class AdversarialTrainer:
             Robustness metrics
         """
         # Generate adversarial examples
-        adversarial_examples = self.generator.generate_adversarial_examples(
-            texts=texts, num_per_text=5
-        )
+        adversarial_examples = self.generator.generate_adversarial_examples(texts=texts, num_per_text=5)
 
         robust_count = 0
         total_count = len(adversarial_examples)
@@ -384,10 +376,7 @@ class AdversarialTrainer:
 
         robustness_rate = robust_count / total_count if total_count > 0 else 0
 
-        logger.info(
-            f"Robustness evaluation: {robust_count}/{total_count} "
-            f"({robustness_rate:.1%}) robust"
-        )
+        logger.info(f"Robustness evaluation: {robust_count}/{total_count} ({robustness_rate:.1%}) robust")
 
         return {
             "total_examples": total_count,
@@ -398,9 +387,7 @@ class AdversarialTrainer:
 
     def _predict(self, text: str) -> int:
         """Get model prediction for text."""
-        inputs = self.tokenizer(
-            text, return_tensors="pt", truncation=True, max_length=512
-        )
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
 
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
@@ -438,9 +425,7 @@ class AdversarialTrainer:
         logger.info(f"Starting adversarial training for {epochs} epochs...")
 
         # Generate adversarial augmentation
-        adversarial_examples = self.generator.generate_adversarial_examples(
-            texts=train_texts, num_per_text=2
-        )
+        adversarial_examples = self.generator.generate_adversarial_examples(texts=train_texts, num_per_text=2)
 
         # Augment training data
         augmented_texts = train_texts.copy()
@@ -452,9 +437,7 @@ class AdversarialTrainer:
             augmented_texts.append(perturbed)
             augmented_labels.append(train_labels[original_idx])
 
-        logger.info(
-            f"Augmented dataset: {len(train_texts)} → {len(augmented_texts)} examples"
-        )
+        logger.info(f"Augmented dataset: {len(train_texts)} → {len(augmented_texts)} examples")
 
         # Train model (simplified - in production use Trainer)
         optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate)
@@ -499,7 +482,7 @@ class AdversarialTrainer:
 
             avg_loss = total_loss / (len(augmented_texts) / batch_size)
 
-            logger.info(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.4f}")
+            logger.info(f"Epoch {epoch + 1}/{epochs}, Loss: {avg_loss:.4f}")
 
         logger.info("✅ Adversarial training complete")
 

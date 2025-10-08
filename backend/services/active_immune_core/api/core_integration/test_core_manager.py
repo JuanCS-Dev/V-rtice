@@ -15,14 +15,12 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
-import asyncio
 import logging
-from datetime import datetime
+
+import pytest
 
 from .core_manager import (
     CoreManager,
-    CoreManagerError,
     CoreNotInitializedError,
 )
 

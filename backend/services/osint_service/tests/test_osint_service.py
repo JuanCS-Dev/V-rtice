@@ -13,17 +13,16 @@ Note: AIOrchestrator is mocked in tests to isolate API logic
 (test infrastructure mocking, not production code).
 """
 
+# Import the FastAPI app
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
 
-# Import the FastAPI app
-import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/osint_service")
 from api import app
-
 
 # ==================== FIXTURES ====================
 
@@ -38,36 +37,34 @@ async def client():
 @pytest_asyncio.fixture
 async def mock_ai_orchestrator():
     """Mock AIOrchestrator for testing."""
-    with patch('api.ai_orchestrator') as mock_orchestrator:
+    with patch("api.ai_orchestrator") as mock_orchestrator:
         # Default: start_investigation returns investigation ID
-        mock_orchestrator.start_investigation = AsyncMock(return_value={
-            "investigation_id": "inv-001",
-            "status": "started",
-            "query": "test@example.com",
-            "investigation_type": "person_recon"
-        })
+        mock_orchestrator.start_investigation = AsyncMock(
+            return_value={
+                "investigation_id": "inv-001",
+                "status": "started",
+                "query": "test@example.com",
+                "investigation_type": "person_recon",
+            }
+        )
 
         # Default: get_investigation_status returns status
-        mock_orchestrator.get_investigation_status = MagicMock(return_value={
-            "investigation_id": "inv-001",
-            "status": "in_progress",
-            "query": "test@example.com",
-            "investigation_type": "person_recon",
-            "progress": 50
-        })
+        mock_orchestrator.get_investigation_status = MagicMock(
+            return_value={
+                "investigation_id": "inv-001",
+                "status": "in_progress",
+                "query": "test@example.com",
+                "investigation_type": "person_recon",
+                "progress": 50,
+            }
+        )
 
         yield mock_orchestrator
 
 
-def create_start_investigation_request(query="test@example.com",
-                                       investigation_type="person_recon",
-                                       parameters=None):
+def create_start_investigation_request(query="test@example.com", investigation_type="person_recon", parameters=None):
     """Helper to create StartInvestigationRequest payload."""
-    return {
-        "query": query,
-        "investigation_type": investigation_type,
-        "parameters": parameters
-    }
+    return {"query": query, "investigation_type": investigation_type, "parameters": parameters}
 
 
 # ==================== HEALTH CHECK TESTS ====================
@@ -106,17 +103,11 @@ class TestStartInvestigationEndpoint:
         assert data["query"] == "test@example.com"
 
         # Verify orchestrator was called
-        mock_ai_orchestrator.start_investigation.assert_called_once_with(
-            "test@example.com",
-            "person_recon",
-            None
-        )
+        mock_ai_orchestrator.start_investigation.assert_called_once_with("test@example.com", "person_recon", None)
 
     async def test_start_investigation_with_parameters(self, client, mock_ai_orchestrator):
         """Test starting investigation with custom parameters."""
-        payload = create_start_investigation_request(
-            parameters={"depth": "deep", "sources": ["linkedin", "github"]}
-        )
+        payload = create_start_investigation_request(parameters={"depth": "deep", "sources": ["linkedin", "github"]})
         response = await client.post("/start_investigation", json=payload)
 
         assert response.status_code == 200
@@ -127,12 +118,7 @@ class TestStartInvestigationEndpoint:
 
     async def test_start_investigation_different_types(self, client, mock_ai_orchestrator):
         """Test starting different investigation types."""
-        investigation_types = [
-            "person_recon",
-            "domain_analysis",
-            "company_intel",
-            "threat_intel"
-        ]
+        investigation_types = ["person_recon", "domain_analysis", "company_intel", "threat_intel"]
 
         for inv_type in investigation_types:
             payload = create_start_investigation_request(investigation_type=inv_type)
@@ -142,11 +128,11 @@ class TestStartInvestigationEndpoint:
     async def test_start_investigation_different_query_types(self, client, mock_ai_orchestrator):
         """Test starting investigation with different query formats."""
         queries = [
-            "test@example.com",           # Email
-            "example.com",                # Domain
-            "@username",                  # Social handle
-            "192.168.1.1",               # IP address
-            "John Doe"                    # Name
+            "test@example.com",  # Email
+            "example.com",  # Domain
+            "@username",  # Social handle
+            "192.168.1.1",  # IP address
+            "John Doe",  # Name
         ]
 
         for query in queries:
@@ -158,7 +144,7 @@ class TestStartInvestigationEndpoint:
         """Test that investigation ID is returned."""
         mock_ai_orchestrator.start_investigation.return_value = {
             "investigation_id": "inv-unique-12345",
-            "status": "started"
+            "status": "started",
         }
 
         payload = create_start_investigation_request()
@@ -205,7 +191,7 @@ class TestGetInvestigationStatusEndpoint:
         for state in states:
             mock_ai_orchestrator.get_investigation_status.return_value = {
                 "investigation_id": "inv-001",
-                "status": state
+                "status": state,
             }
 
             response = await client.get("/investigation/inv-001/status")
@@ -221,7 +207,7 @@ class TestGetInvestigationStatusEndpoint:
             "progress": 75,
             "current_step": "analyzing_data",
             "steps_completed": 3,
-            "total_steps": 4
+            "total_steps": 4,
         }
 
         response = await client.get("/investigation/inv-001/status")
@@ -234,7 +220,7 @@ class TestGetInvestigationStatusEndpoint:
         unique_id = "inv-test-12345"
         mock_ai_orchestrator.get_investigation_status.return_value = {
             "investigation_id": unique_id,
-            "status": "completed"
+            "status": "completed",
         }
 
         response = await client.get(f"/investigation/{unique_id}/status")
@@ -254,11 +240,7 @@ class TestGetInvestigationReportEndpoint:
         mock_ai_orchestrator.get_investigation_status.return_value = {
             "investigation_id": "inv-001",
             "status": "completed",
-            "results": {
-                "summary": "Investigation complete",
-                "findings": ["Finding 1", "Finding 2"],
-                "risk_score": 7.5
-            }
+            "results": {"summary": "Investigation complete", "findings": ["Finding 1", "Finding 2"], "risk_score": 7.5},
         }
 
         response = await client.get("/investigation/inv-001/report")
@@ -284,7 +266,7 @@ class TestGetInvestigationReportEndpoint:
         mock_ai_orchestrator.get_investigation_status.return_value = {
             "investigation_id": "inv-001",
             "status": "in_progress",
-            "results": None
+            "results": None,
         }
 
         response = await client.get("/investigation/inv-001/report")
@@ -301,7 +283,7 @@ class TestGetInvestigationReportEndpoint:
             mock_ai_orchestrator.get_investigation_status.return_value = {
                 "investigation_id": "inv-001",
                 "status": state,
-                "results": {}
+                "results": {},
             }
 
             response = await client.get("/investigation/inv-001/report")
@@ -314,28 +296,18 @@ class TestGetInvestigationReportEndpoint:
             "status": "completed",
             "results": {
                 "summary": "Comprehensive investigation",
-                "target": {
-                    "email": "test@example.com",
-                    "name": "John Doe",
-                    "aliases": ["johnd", "jdoe"]
-                },
+                "target": {"email": "test@example.com", "name": "John Doe", "aliases": ["johnd", "jdoe"]},
                 "findings": [
-                    {
-                        "source": "linkedin",
-                        "data": {"job_title": "Engineer", "company": "TechCorp"}
-                    },
-                    {
-                        "source": "github",
-                        "data": {"username": "johndoe", "repos": 42}
-                    }
+                    {"source": "linkedin", "data": {"job_title": "Engineer", "company": "TechCorp"}},
+                    {"source": "github", "data": {"username": "johndoe", "repos": 42}},
                 ],
                 "risk_assessment": {
                     "overall_risk": "medium",
                     "score": 5.5,
-                    "factors": ["public_exposure", "data_leaks"]
+                    "factors": ["public_exposure", "data_leaks"],
                 },
-                "timestamp": "2024-01-01T12:00:00"
-            }
+                "timestamp": "2024-01-01T12:00:00",
+            },
         }
 
         response = await client.get("/investigation/inv-001/report")
@@ -405,13 +377,13 @@ class TestEdgeCases:
             "INV_UPPERCASE",
             "inv.with.dots",
             "inv_underscore",
-            "123456789"  # Numeric
+            "123456789",  # Numeric
         ]
 
         for inv_id in special_ids:
             mock_ai_orchestrator.get_investigation_status.return_value = {
                 "investigation_id": inv_id,
-                "status": "completed"
+                "status": "completed",
             }
 
             response = await client.get(f"/investigation/{inv_id}/status")
@@ -425,7 +397,7 @@ class TestEdgeCases:
             mock_ai_orchestrator.get_investigation_status.return_value = {
                 "investigation_id": inv_id,
                 "status": "completed",
-                "results": {"summary": "test"}
+                "results": {"summary": "test"},
             }
 
             response = await client.get(f"/investigation/{inv_id}/report")
@@ -452,15 +424,9 @@ class TestEdgeCases:
                 "options": {
                     "include_related": True,
                     "max_results": 100,
-                    "filters": {
-                        "date_range": "2020-2024",
-                        "categories": ["professional", "social"]
-                    }
+                    "filters": {"date_range": "2020-2024", "categories": ["professional", "social"]},
                 },
-                "ai_settings": {
-                    "model": "gpt-4",
-                    "temperature": 0.7
-                }
+                "ai_settings": {"model": "gpt-4", "temperature": 0.7},
             }
         )
 
@@ -473,7 +439,7 @@ class TestEdgeCases:
         mock_ai_orchestrator.get_investigation_status.return_value = {
             "investigation_id": "inv-001",
             "status": "completed",
-            "results": {"summary": "test"}
+            "results": {"summary": "test"},
         }
         response = await client.get("/investigation/inv-001/report")
         assert response.status_code == 200
@@ -482,7 +448,7 @@ class TestEdgeCases:
         mock_ai_orchestrator.get_investigation_status.return_value = {
             "investigation_id": "inv-001",
             "status": "Completed",
-            "results": {"summary": "test"}
+            "results": {"summary": "test"},
         }
         response = await client.get("/investigation/inv-001/report")
         assert response.status_code == 409
@@ -494,7 +460,7 @@ class TestEdgeCases:
         async def check_status(inv_id):
             mock_ai_orchestrator.get_investigation_status.return_value = {
                 "investigation_id": inv_id,
-                "status": "in_progress"
+                "status": "in_progress",
             }
             response = await client.get(f"/investigation/{inv_id}/status")
             return response.status_code

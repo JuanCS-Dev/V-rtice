@@ -37,8 +37,9 @@ import asyncio
 import logging
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +109,7 @@ class PredictiveCodingLayerBase(ABC):
     Thread Safety: NOT thread-safe. Use external locking for async/parallel calls.
     """
 
-    def __init__(self, config: LayerConfig, kill_switch_callback: Optional[Callable[[str], None]] = None):
+    def __init__(self, config: LayerConfig, kill_switch_callback: Callable[[str], None] | None = None):
         """Initialize predictive coding layer.
 
         Args:
@@ -177,7 +178,7 @@ class PredictiveCodingLayerBase(ABC):
         """
         pass
 
-    async def predict(self, input_data: Any) -> Optional[Any]:
+    async def predict(self, input_data: Any) -> Any | None:
         """
         Make prediction with SAFETY BOUNDS and timeout protection.
 
@@ -237,7 +238,7 @@ class PredictiveCodingLayerBase(ABC):
 
             return prediction
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # Timeout - track and potentially open circuit breaker
             self._total_timeouts += 1
             self._consecutive_timeouts += 1
@@ -344,7 +345,7 @@ class PredictiveCodingLayerBase(ABC):
             average_computation_time_ms=avg_time,
         )
 
-    def get_health_metrics(self) -> Dict[str, Any]:
+    def get_health_metrics(self) -> dict[str, Any]:
         """Export health metrics for Safety Core monitoring."""
         layer_name = self.get_layer_name().lower().replace(" ", "_")
         state = self.get_state()

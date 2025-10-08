@@ -10,10 +10,10 @@ Aggregates signals from 4 detection modules into final manipulation score:
 Method: Bayesian belief updating with weighted evidence
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from config import get_settings
 from models import VerificationStatus
@@ -336,15 +336,12 @@ class ThreatAssessmentEngine:
         # Build explanation
         parts = []
 
-        parts.append(
-            f"This content received a manipulation score of {manipulation_score:.2f}/1.00."
-        )
+        parts.append(f"This content received a manipulation score of {manipulation_score:.2f}/1.00.")
 
         # Source credibility
         if cred_score < 0.4:
             parts.append(
-                f"The source has low credibility (score: {cred_score:.2f}), "
-                "which raises concerns about reliability."
+                f"The source has low credibility (score: {cred_score:.2f}), which raises concerns about reliability."
             )
         elif cred_score > 0.7:
             parts.append(f"The source has good credibility (score: {cred_score:.2f}).")
@@ -354,16 +351,12 @@ class ThreatAssessmentEngine:
             emotions = list(emotional_result.get("detected_emotions", {}).keys())
             emotions_str = ", ".join(emotions[:3])
             parts.append(
-                f"High emotional manipulation detected (score: {emotional_score:.2f}), "
-                f"with emotions: {emotions_str}."
+                f"High emotional manipulation detected (score: {emotional_score:.2f}), with emotions: {emotions_str}."
             )
 
         # Logical fallacies
         if fallacy_count > 0:
-            fallacy_types = [
-                f.get("fallacy_type", "unknown")
-                for f in logical_result.get("fallacies", [])
-            ]
+            fallacy_types = [f.get("fallacy_type", "unknown") for f in logical_result.get("fallacies", [])]
             fallacy_types_str = ", ".join(set(fallacy_types[:3]))
             parts.append(
                 f"{fallacy_count} logical fallac{'y' if fallacy_count == 1 else 'ies'} detected: {fallacy_types_str}."
@@ -371,13 +364,9 @@ class ThreatAssessmentEngine:
 
         # Reality distortion
         if verification_status == VerificationStatus.VERIFIED_FALSE.value:
-            parts.append(
-                "Claims in the content were fact-checked and found to be FALSE."
-            )
+            parts.append("Claims in the content were fact-checked and found to be FALSE.")
         elif verification_status == VerificationStatus.VERIFIED_TRUE.value:
-            parts.append(
-                "Claims in the content were fact-checked and verified as TRUE."
-            )
+            parts.append("Claims in the content were fact-checked and verified as TRUE.")
         elif verification_status == VerificationStatus.MIXED.value:
             parts.append("Claims in the content show MIXED verification results.")
 

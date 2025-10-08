@@ -25,7 +25,7 @@ Version: 1.0.0 - Production Hardened
 Date: 2025-10-08
 """
 
-from typing import Any, List
+from typing import Any
 
 import numpy as np
 
@@ -67,7 +67,7 @@ class Layer3Operational(PredictiveCodingLayerBase):
         super().__init__(config, kill_switch_callback)
 
         # Attention context window (for transformer)
-        self._context_window: List[np.ndarray] = []
+        self._context_window: list[np.ndarray] = []
         self._max_context_length = 10  # Last 10 behavioral patterns
 
     def get_layer_name(self) -> str:
@@ -122,7 +122,7 @@ class Layer3Operational(PredictiveCodingLayerBase):
 
         return float(mse)
 
-    def _self_attention(self, context: List[np.ndarray]) -> np.ndarray:
+    def _self_attention(self, context: list[np.ndarray]) -> np.ndarray:
         """
         Apply self-attention over context window.
 

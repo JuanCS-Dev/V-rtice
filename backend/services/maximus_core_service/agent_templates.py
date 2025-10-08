@@ -10,7 +10,7 @@ match the requirements of a given situation, ensuring more appropriate and
 effective responses. This allows for flexible and context-aware AI behavior.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class AgentTemplates:
@@ -22,7 +22,7 @@ class AgentTemplates:
 
     def __init__(self):
         """Initializes the AgentTemplates with a set of predefined templates."""
-        self.templates: Dict[str, Dict[str, Any]] = {
+        self.templates: dict[str, dict[str, Any]] = {
             "default_assistant": {
                 "name": "Default Assistant",
                 "description": "A general-purpose helpful AI assistant.",
@@ -46,7 +46,7 @@ class AgentTemplates:
             },
         }
 
-    def get_template(self, template_name: str) -> Optional[Dict[str, Any]]:
+    def get_template(self, template_name: str) -> dict[str, Any] | None:
         """Retrieves an agent template by its name.
 
         Args:
@@ -57,7 +57,7 @@ class AgentTemplates:
         """
         return self.templates.get(template_name)
 
-    def list_templates(self) -> List[Dict[str, Any]]:
+    def list_templates(self) -> list[dict[str, Any]]:
         """Lists all available agent templates.
 
         Returns:
@@ -65,7 +65,7 @@ class AgentTemplates:
         """
         return list(self.templates.values())
 
-    def add_template(self, template_name: str, template_data: Dict[str, Any]):
+    def add_template(self, template_name: str, template_data: dict[str, Any]):
         """Adds a new agent template to the repository.
 
         Args:
@@ -79,7 +79,7 @@ class AgentTemplates:
             raise ValueError(f"Template '{template_name}' already exists.")
         self.templates[template_name] = template_data
 
-    def update_template(self, template_name: str, template_data: Dict[str, Any]):
+    def update_template(self, template_name: str, template_data: dict[str, Any]):
         """Updates an existing agent template.
 
         Args:

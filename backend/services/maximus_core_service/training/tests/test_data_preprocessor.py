@@ -11,17 +11,9 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from pathlib import Path
-
 import numpy as np
-import pytest
 
-from training.data_preprocessor import (
-    DataPreprocessor,
-    LayerPreprocessor,
-    LayerType,
-    PreprocessedSample
-)
+from training.data_preprocessor import DataPreprocessor, LayerType, PreprocessedSample
 
 
 def test_layer1_preprocessing(temp_dir, synthetic_events):
@@ -51,8 +43,7 @@ def test_layer1_preprocessing(temp_dir, synthetic_events):
 
     # Check Layer 1 features
     assert first_sample.layer == LayerType.LAYER1_SENSORY
-    assert first_sample.features.shape == (128,), \
-        f"Expected (128,) features, got {first_sample.features.shape}"
+    assert first_sample.features.shape == (128,), f"Expected (128,) features, got {first_sample.features.shape}"
 
     # Verify normalization (should be in [0, 1] range)
     assert np.all(first_sample.features >= 0.0), "Features contain negative values"
@@ -66,8 +57,7 @@ def test_layer1_preprocessing(temp_dir, synthetic_events):
 
     # Verify all samples have consistent dimensions
     for sample in samples:
-        assert sample.features.shape == (128,), \
-            f"Inconsistent feature dimensions: {sample.features.shape}"
+        assert sample.features.shape == (128,), f"Inconsistent feature dimensions: {sample.features.shape}"
 
 
 def test_layer2_preprocessing(temp_dir, synthetic_events):
@@ -139,23 +129,22 @@ def test_preprocessing_consistency(temp_dir, synthetic_events):
     # Verify consistency
     assert len(samples_first) == len(samples_second)
 
-    for i, (sample1, sample2) in enumerate(zip(samples_first, samples_second)):
+    for i, (sample1, sample2) in enumerate(zip(samples_first, samples_second, strict=False)):
         # Same sample ID (should contain same event ID)
         # Sample IDs may have layer prefix, so just check they're the same
-        assert sample1.sample_id == sample2.sample_id, \
+        assert sample1.sample_id == sample2.sample_id, (
             f"Sample ID mismatch at index {i}: {sample1.sample_id} != {sample2.sample_id}"
+        )
 
         # Same label
-        assert sample1.label == sample2.label, \
-            f"Label mismatch at index {i}"
+        assert sample1.label == sample2.label, f"Label mismatch at index {i}"
 
         # Same feature dimensions
-        assert sample1.features.shape == sample2.features.shape, \
+        assert sample1.features.shape == sample2.features.shape, (
             f"Feature dimension mismatch at index {i}: {sample1.features.shape} != {sample2.features.shape}"
+        )
 
         # Features should be identical (deterministic preprocessing)
         np.testing.assert_allclose(
-            sample1.features, sample2.features,
-            rtol=1e-5, atol=1e-5,
-            err_msg=f"Feature values differ at index {i}"
+            sample1.features, sample2.features, rtol=1e-5, atol=1e-5, err_msg=f"Feature values differ at index {i}"
         )

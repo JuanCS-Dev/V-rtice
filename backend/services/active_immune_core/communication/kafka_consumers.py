@@ -21,9 +21,8 @@ Version: 1.0.0
 import asyncio
 import json
 import logging
-from datetime import datetime
-from typing import Dict, Any, Optional, Callable, List
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import KafkaConnectionError, KafkaError
@@ -95,9 +94,7 @@ class KafkaEventConsumer:
         self._kafka_available = False
 
         # Event handlers
-        self._handlers: Dict[ExternalTopic, List[EventHandler]] = {
-            topic: [] for topic in ExternalTopic
-        }
+        self._handlers: Dict[ExternalTopic, List[EventHandler]] = {topic: [] for topic in ExternalTopic}
 
         # Background task
         self._consumer_task: Optional[asyncio.Task] = None
@@ -106,13 +103,9 @@ class KafkaEventConsumer:
         self.total_events_consumed = 0
         self.total_events_processed = 0
         self.total_events_failed = 0
-        self.events_by_topic: Dict[str, int] = {
-            topic.value: 0 for topic in ExternalTopic
-        }
+        self.events_by_topic: Dict[str, int] = {topic.value: 0 for topic in ExternalTopic}
 
-        logger.info(
-            f"KafkaEventConsumer initialized (group_id={group_id})"
-        )
+        logger.info(f"KafkaEventConsumer initialized (group_id={group_id})")
 
     # ==================== LIFECYCLE ====================
 
@@ -147,22 +140,15 @@ class KafkaEventConsumer:
             self._running = True
 
             # Start background consumption task
-            self._consumer_task = asyncio.create_task(
-                self._consume_events(),
-                name="kafka_consumer_task"
-            )
+            self._consumer_task = asyncio.create_task(self._consume_events(), name="kafka_consumer_task")
 
-            logger.info(
-                f"✓ KafkaEventConsumer started (subscribed to {len(topics)} topics)"
-            )
+            logger.info(f"✓ KafkaEventConsumer started (subscribed to {len(topics)} topics)")
 
         except (KafkaConnectionError, KafkaError) as e:
             if self.enable_degraded_mode:
                 self._running = True
                 self._kafka_available = False
-                logger.warning(
-                    f"Kafka unavailable - running in degraded mode: {e}"
-                )
+                logger.warning(f"Kafka unavailable - running in degraded mode: {e}")
             else:
                 raise
 
@@ -211,10 +197,7 @@ class KafkaEventConsumer:
             handler: Async callable that processes event
         """
         self._handlers[topic].append(handler)
-        logger.info(
-            f"Registered handler for {topic.value} "
-            f"(total={len(self._handlers[topic])})"
-        )
+        logger.info(f"Registered handler for {topic.value} (total={len(self._handlers[topic])})")
 
     def unregister_handler(
         self,
@@ -263,10 +246,7 @@ class KafkaEventConsumer:
                     self.total_events_consumed += 1
                     self.events_by_topic[topic_str] += 1
 
-                    logger.debug(
-                        f"Consumed event from {topic_str}: "
-                        f"{event_data.get('event_type', 'unknown')}"
-                    )
+                    logger.debug(f"Consumed event from {topic_str}: {event_data.get('event_type', 'unknown')}")
 
                     # Route to handlers
                     await self._route_event(topic, event_data)
@@ -274,10 +254,7 @@ class KafkaEventConsumer:
                 except ValueError:
                     logger.warning(f"Unknown topic: {msg.topic}")
                 except Exception as e:
-                    logger.error(
-                        f"Error processing event from {msg.topic}: {e}",
-                        exc_info=True
-                    )
+                    logger.error(f"Error processing event from {msg.topic}: {e}", exc_info=True)
                     self.total_events_failed += 1
 
         except asyncio.CancelledError:
@@ -313,16 +290,9 @@ class KafkaEventConsumer:
                     tasks.append(handler(event_data))
                 else:
                     # Wrap sync handler in async
-                    tasks.append(
-                        asyncio.get_event_loop().run_in_executor(
-                            None, handler, event_data
-                        )
-                    )
+                    tasks.append(asyncio.get_event_loop().run_in_executor(None, handler, event_data))
             except Exception as e:
-                logger.error(
-                    f"Error invoking handler for {topic.value}: {e}",
-                    exc_info=True
-                )
+                logger.error(f"Error invoking handler for {topic.value}: {e}", exc_info=True)
 
         # Wait for all handlers to complete
         if tasks:
@@ -331,9 +301,7 @@ class KafkaEventConsumer:
             # Check for errors
             for result in results:
                 if isinstance(result, Exception):
-                    logger.error(
-                        f"Handler error for {topic.value}: {result}"
-                    )
+                    logger.error(f"Handler error for {topic.value}: {result}")
                     self.total_events_failed += 1
                 else:
                     self.total_events_processed += 1
@@ -371,10 +339,7 @@ class KafkaEventConsumer:
         # 3. Pre-generate antibodies for known threats
         # 4. Alert Neutrophils to patrol for IoCs
 
-        logger.debug(
-            f"Threat intel integrated: {threat_type} "
-            f"(signature={threat_signature}, iocs={len(iocs)})"
-        )
+        logger.debug(f"Threat intel integrated: {threat_type} (signature={threat_signature}, iocs={len(iocs)})")
 
     @staticmethod
     async def handle_network_event(event_data: Dict[str, Any]) -> None:
@@ -408,10 +373,7 @@ class KafkaEventConsumer:
         # 3. Update network topology map
         # 4. Correlate with threat intel
 
-        logger.debug(
-            f"Network event integrated: {event_type} "
-            f"({source_ip} → {dest_ip}, anomaly={anomaly_score})"
-        )
+        logger.debug(f"Network event integrated: {event_type} ({source_ip} → {dest_ip}, anomaly={anomaly_score})")
 
     @staticmethod
     async def handle_endpoint_event(event_data: Dict[str, Any]) -> None:
@@ -467,10 +429,7 @@ class KafkaEventConsumer:
             "total_events_processed": self.total_events_processed,
             "total_events_failed": self.total_events_failed,
             "events_by_topic": self.events_by_topic.copy(),
-            "registered_handlers": {
-                topic.value: len(handlers)
-                for topic, handlers in self._handlers.items()
-            },
+            "registered_handlers": {topic.value: len(handlers) for topic, handlers in self._handlers.items()},
         }
 
     def __repr__(self) -> str:

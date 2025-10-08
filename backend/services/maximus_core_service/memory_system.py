@@ -11,9 +11,8 @@ It also incorporates mechanisms for updating and consolidating memories to ensur
 the knowledge base remains current and coherent.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class MemorySystem:
@@ -30,11 +29,9 @@ class MemorySystem:
             vector_db_client (Any): An initialized client for interacting with the vector database.
         """
         self.vector_db_client = vector_db_client
-        self.short_term_memory: List[Dict[str, Any]] = []  # Stores recent interactions
+        self.short_term_memory: list[dict[str, Any]] = []  # Stores recent interactions
 
-    async def store_interaction(
-        self, prompt: str, response: Dict[str, Any], confidence: float
-    ):
+    async def store_interaction(self, prompt: str, response: dict[str, Any], confidence: float):
         """Stores a user interaction in both short-term and long-term memory.
 
         Args:
@@ -63,9 +60,7 @@ class MemorySystem:
         )
         print(f"[MemorySystem] Stored interaction: {prompt}")
 
-    async def retrieve_recent_interactions(
-        self, limit: int = 5
-    ) -> List[Dict[str, Any]]:
+    async def retrieve_recent_interactions(self, limit: int = 5) -> list[dict[str, Any]]:
         """Retrieves the most recent interactions from short-term memory.
 
         Args:
@@ -76,9 +71,7 @@ class MemorySystem:
         """
         return self.short_term_memory[-limit:]
 
-    async def search_long_term_memory(
-        self, query: str, top_k: int = 3
-    ) -> List[Dict[str, Any]]:
+    async def search_long_term_memory(self, query: str, top_k: int = 3) -> list[dict[str, Any]]:
         """Searches the long-term memory (vector DB) for relevant information.
 
         Args:
@@ -96,7 +89,7 @@ class MemorySystem:
         self,
         document_id: str,
         new_content: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Updates an existing knowledge document in long-term memory.
 

@@ -10,7 +10,7 @@ Core Principles:
 """
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from .base import (
     ActionContext,
@@ -45,7 +45,7 @@ class KantianImperativeChecker(EthicalFramework):
         "obtain_informed_consent_when_possible",
     ]
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize Kantian checker.
 
         Args:
@@ -55,7 +55,7 @@ class KantianImperativeChecker(EthicalFramework):
         self.veto_enabled = config.get("veto_enabled", True) if config else True
         self.strict_mode = config.get("strict_mode", True) if config else True
 
-    def get_framework_principles(self) -> List[str]:
+    def get_framework_principles(self) -> list[str]:
         """Get Kantian principles.
 
         Returns:
@@ -161,9 +161,7 @@ class KantianImperativeChecker(EthicalFramework):
         metadata["universalizability_details"] = universalizability_result["details"]
 
         if not universalizability_result["passed"]:
-            explanation = (
-                f"Fails universalizability test: {universalizability_result['reason']}"
-            )
+            explanation = f"Fails universalizability test: {universalizability_result['reason']}"
             reasoning_steps.append(f"❌ {explanation}")
 
             latency_ms = int((time.time() - start_time) * 1000)
@@ -180,9 +178,7 @@ class KantianImperativeChecker(EthicalFramework):
                 metadata=metadata,
             )
 
-        reasoning_steps.append(
-            f"✓ Universalizability test passed: {universalizability_result['details']}"
-        )
+        reasoning_steps.append(f"✓ Universalizability test passed: {universalizability_result['details']}")
 
         # Step 4: Humanity Formula Test (Second Formulation)
         reasoning_steps.append("Testing humanity formula (Second Formulation)...")
@@ -209,9 +205,7 @@ class KantianImperativeChecker(EthicalFramework):
                 metadata=metadata,
             )
 
-        reasoning_steps.append(
-            f"✓ Humanity formula satisfied: {humanity_result['details']}"
-        )
+        reasoning_steps.append(f"✓ Humanity formula satisfied: {humanity_result['details']}")
 
         # All tests passed!
         explanation = "Action passes all Kantian deontological tests"
@@ -231,7 +225,7 @@ class KantianImperativeChecker(EthicalFramework):
             metadata=metadata,
         )
 
-    def _check_never_rules(self, action_context: ActionContext) -> List[str]:
+    def _check_never_rules(self, action_context: ActionContext) -> list[str]:
         """Check if action violates categorical prohibitions.
 
         Args:
@@ -248,24 +242,18 @@ class KantianImperativeChecker(EthicalFramework):
         # FIXED: Context-aware detection to avoid false positives
 
         # Check for human exploitation (but allow authorized pentesting)
-        if any(
-            keyword in action_lower for keyword in ["exploit", "manipulate", "deceive"]
-        ):
+        if any(keyword in action_lower for keyword in ["exploit", "manipulate", "deceive"]):
             # Only flag if targeting humans without authorization
             if "human" in action_lower or "social engineering" in action_lower:
                 # Exception: Authorized pentest
-                is_authorized = (
-                    action_context.operator_context
-                    and action_context.operator_context.get("authorized_pentest", False)
+                is_authorized = action_context.operator_context and action_context.operator_context.get(
+                    "authorized_pentest", False
                 )
                 if not is_authorized:
                     violated.append("use_humans_as_mere_means")
 
         # Dignity violations
-        if any(
-            keyword in action_lower
-            for keyword in ["degrade", "humiliate", "violate dignity"]
-        ):
+        if any(keyword in action_lower for keyword in ["degrade", "humiliate", "violate dignity"]):
             violated.append("violate_human_dignity")
 
         # Autonomy violations (excluding legitimate security measures)
@@ -273,24 +261,17 @@ class KantianImperativeChecker(EthicalFramework):
         if any(keyword in action_lower for keyword in autonomy_keywords):
             # Exception: Critical security situations where choice endangers others
             is_critical = action_context.urgency == "critical"
-            has_justification = (
-                action_context.threat_data
-                and action_context.threat_data.get("severity", 0) > 0.9
-            )
+            has_justification = action_context.threat_data and action_context.threat_data.get("severity", 0) > 0.9
             if not (is_critical and has_justification):
                 violated.append("violate_human_autonomy")
 
         # Surveillance without consent
         if "surveillance" in action_lower or "monitoring" in action_lower:
             lacks_consent = "without consent" in action_lower or not (
-                action_context.threat_data
-                and action_context.threat_data.get("informed_consent")
+                action_context.threat_data and action_context.threat_data.get("informed_consent")
             )
             # Exception: Network monitoring with appropriate legal basis
-            has_legal_basis = (
-                action_context.threat_data
-                and action_context.threat_data.get("legal_basis")
-            )
+            has_legal_basis = action_context.threat_data and action_context.threat_data.get("legal_basis")
             if lacks_consent and not has_legal_basis:
                 violated.append("implement_surveillance_without_consent")
 
@@ -301,38 +282,29 @@ class KantianImperativeChecker(EthicalFramework):
 
         # Irreversible decisions without human review
         if "irreversible" in action_lower or "permanent" in action_lower:
-            if (
-                "without review" in action_lower
-                or action_context.operator_context is None
-            ):
+            if "without review" in action_lower or action_context.operator_context is None:
                 # Exception: Automated blocking of active attacks (reversible via unblock)
-                is_reversible_block = (
-                    action_type in ["auto_response", "threat_mitigation"]
-                    and "block" in action_lower
-                )
+                is_reversible_block = action_type in ["auto_response", "threat_mitigation"] and "block" in action_lower
                 if not is_reversible_block:
                     violated.append("make_irreversible_decisions_without_human_review")
 
         # Civilian/innocent harm
         if action_context.threat_data:
-            if action_context.threat_data.get(
-                "civilian_targets"
-            ) or action_context.threat_data.get("collateral_damage_likely"):
+            if action_context.threat_data.get("civilian_targets") or action_context.threat_data.get(
+                "collateral_damage_likely"
+            ):
                 violated.append("harm_innocents_as_collateral")
 
         # Privacy violations without justification
         privacy_keywords = ["access private", "read personal", "intercept"]
         if any(keyword in action_lower for keyword in privacy_keywords):
-            lacks_justification = not (
-                action_context.threat_data
-                and action_context.threat_data.get("justification")
-            )
+            lacks_justification = not (action_context.threat_data and action_context.threat_data.get("justification"))
             if lacks_justification:
                 violated.append("access_private_data_without_justification")
 
         return violated
 
-    def _check_always_rules(self, action_context: ActionContext) -> List[str]:
+    def _check_always_rules(self, action_context: ActionContext) -> list[str]:
         """Check if action violates categorical obligations.
 
         Args:
@@ -349,22 +321,17 @@ class KantianImperativeChecker(EthicalFramework):
                 violated.append("preserve_human_override_capability")
 
         # Check transparency
-        if (
-            not action_context.action_description
-            or len(action_context.action_description) < 20
-        ):
+        if not action_context.action_description or len(action_context.action_description) < 20:
             violated.append("provide_explanation_for_actions")
 
         # Check if privacy is respected
         if action_context.action_type == "data_access":
-            if not action_context.threat_data or not action_context.threat_data.get(
-                "justification"
-            ):
+            if not action_context.threat_data or not action_context.threat_data.get("justification"):
                 violated.append("respect_privacy_as_inviolable_right")
 
         return violated
 
-    def _test_universalizability(self, action_context: ActionContext) -> Dict[str, Any]:
+    def _test_universalizability(self, action_context: ActionContext) -> dict[str, Any]:
         """Test if action's maxim can be universalized without contradiction.
 
         Args:
@@ -388,10 +355,7 @@ class KantianImperativeChecker(EthicalFramework):
 
         # Test 2: Pragmatic contradiction (undermines its own purpose)
         if action_type == "offensive_action" and "preemptive" in action_desc:
-            if (
-                not action_context.threat_data
-                or action_context.threat_data.get("confidence", 0) < 0.90
-            ):
+            if not action_context.threat_data or action_context.threat_data.get("confidence", 0) < 0.90:
                 return {
                     "passed": False,
                     "reason": "Universal preemptive attacks without high confidence would undermine security",
@@ -413,7 +377,7 @@ class KantianImperativeChecker(EthicalFramework):
             "details": "Maxim passes logical and pragmatic universalizability tests",
         }
 
-    def _test_humanity_formula(self, action_context: ActionContext) -> Dict[str, Any]:
+    def _test_humanity_formula(self, action_context: ActionContext) -> dict[str, Any]:
         """Test if action treats humanity as an end, not merely as a means.
 
         Args:
@@ -430,10 +394,7 @@ class KantianImperativeChecker(EthicalFramework):
 
         # Test 1: Using people without their rational consent
         if "social engineering" in action_desc:
-            if (
-                not action_context.operator_context
-                or not action_context.operator_context.get("authorized_pentest")
-            ):
+            if not action_context.operator_context or not action_context.operator_context.get("authorized_pentest"):
                 return {
                     "passed": False,
                     "reason": "Social engineering uses humans as mere means without consent",

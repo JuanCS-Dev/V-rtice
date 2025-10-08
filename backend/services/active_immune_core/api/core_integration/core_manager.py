@@ -16,27 +16,28 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import asyncio
 import logging
 from datetime import datetime
-from typing import Optional, Dict, Any
 from threading import Lock
+from typing import Any, Dict, Optional
 
 # Core imports (using absolute imports from package root)
 from agents import AgentFactory
-from coordination.lymphnode import LinfonodoDigital
 from coordination.homeostatic_controller import HomeostaticController
+from coordination.lymphnode import LinfonodoDigital
 
 logger = logging.getLogger(__name__)
 
 
 class CoreManagerError(Exception):
     """Base exception for CoreManager errors"""
+
     pass
 
 
 class CoreNotInitializedError(CoreManagerError):
     """Raised when Core operations attempted before initialization"""
+
     pass
 
 
@@ -86,9 +87,7 @@ class CoreManager:
         """
         # Prevent direct instantiation
         if CoreManager._instance is not None:
-            raise RuntimeError(
-                "CoreManager is a singleton. Use CoreManager.get_instance()"
-            )
+            raise RuntimeError("CoreManager is a singleton. Use CoreManager.get_instance()")
 
         # Core components (None until initialized)
         self._agent_factory: Optional[AgentFactory] = None
@@ -137,7 +136,9 @@ class CoreManager:
         """
         with cls._lock:
             if cls._instance is not None:
-                logger.debug(f"Resetting CoreManager singleton (initialized={cls._instance._initialized}, started={cls._instance._started})")
+                logger.debug(
+                    f"Resetting CoreManager singleton (initialized={cls._instance._initialized}, started={cls._instance._started})"
+                )
                 cls._instance = None
 
     async def initialize(
@@ -440,5 +441,9 @@ class CoreManager:
 
     def __repr__(self) -> str:
         """String representation."""
-        status = "degraded" if self._degraded_mode else ("started" if self._started else "initialized" if self._initialized else "uninitialized")
+        status = (
+            "degraded"
+            if self._degraded_mode
+            else ("started" if self._started else "initialized" if self._initialized else "uninitialized")
+        )
         return f"CoreManager(status={status}, available={self.is_available})"

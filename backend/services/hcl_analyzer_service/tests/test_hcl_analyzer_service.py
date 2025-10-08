@@ -12,17 +12,17 @@ Tests cover actual production implementation:
 - Edge cases and boundary conditions
 """
 
+# Import the FastAPI app
+import sys
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from datetime import datetime
 
-# Import the FastAPI app
-import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/hcl_analyzer_service")
 from main import app, historical_metrics
-from models import AnomalyType, Anomaly, AnalysisResult, SystemMetrics
-
+from models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
 
 # ==================== FIXTURES ====================
 
@@ -46,7 +46,7 @@ def create_metrics(cpu=50.0, memory=50.0, error_rate=0.01):
         "network_io_rate": 2000.0,
         "avg_latency_ms": 50.0,
         "error_rate": error_rate,
-        "service_status": {"api": "healthy", "db": "healthy"}
+        "service_status": {"api": "healthy", "db": "healthy"},
     }
 
 
@@ -76,9 +76,7 @@ class TestAnalyzeMetricsEndpoint:
 
     async def test_analyze_healthy_system(self, client):
         """Test analysis of healthy system with no anomalies."""
-        payload = {
-            "current_metrics": create_metrics(cpu=50.0, memory=50.0, error_rate=0.01)
-        }
+        payload = {"current_metrics": create_metrics(cpu=50.0, memory=50.0, error_rate=0.01)}
 
         response = await client.post("/analyze_metrics", json=payload)
 
@@ -162,7 +160,7 @@ class TestAnalyzeMetricsEndpoint:
             "current_metrics": create_metrics(
                 cpu=50.0,
                 memory=95.0,  # Critical
-                error_rate=0.10  # High
+                error_rate=0.10,  # High
             )
         }
         response = await client.post("/analyze_metrics", json=payload)
@@ -201,13 +199,7 @@ class TestAnalyzeMetricsEndpoint:
     async def test_analyze_health_score_clamped_to_zero(self, client):
         """Test that health score cannot go below 0."""
         # All possible anomalies
-        payload = {
-            "current_metrics": create_metrics(
-                cpu=50.0,
-                memory=95.0,
-                error_rate=0.10
-            )
-        }
+        payload = {"current_metrics": create_metrics(cpu=50.0, memory=95.0, error_rate=0.10)}
         response = await client.post("/analyze_metrics", json=payload)
 
         data = response.json()
@@ -312,7 +304,7 @@ class TestModels:
             metric_name="cpu_usage",
             current_value=95.0,
             severity=0.8,
-            description="CPU spike detected"
+            description="CPU spike detected",
         )
 
         assert anomaly.type == AnomalyType.SPIKE
@@ -331,7 +323,7 @@ class TestModels:
             network_io_rate=2000.0,
             avg_latency_ms=50.0,
             error_rate=0.01,
-            service_status={"api": "healthy", "db": "healthy"}
+            service_status={"api": "healthy", "db": "healthy"},
         )
 
         assert metrics.cpu_usage == 50.0
@@ -346,7 +338,7 @@ class TestModels:
             anomalies=[],
             trends={"cpu_trend": "stable"},
             recommendations=["Monitor CPU usage"],
-            requires_intervention=False
+            requires_intervention=False,
         )
 
         assert result.overall_health_score == 0.85
@@ -358,11 +350,7 @@ class TestModels:
     def test_analysis_result_default_timestamp(self):
         """Test AnalysisResult generates default timestamp."""
         result = AnalysisResult(
-            overall_health_score=1.0,
-            anomalies=[],
-            trends={},
-            recommendations=[],
-            requires_intervention=False
+            overall_health_score=1.0, anomalies=[], trends={}, recommendations=[], requires_intervention=False
         )
 
         # Should have generated timestamp
@@ -379,9 +367,7 @@ class TestEdgeCases:
 
     async def test_analyze_with_zero_values(self, client):
         """Test analysis with zero values."""
-        payload = {
-            "current_metrics": create_metrics(cpu=0.0, memory=0.0, error_rate=0.0)
-        }
+        payload = {"current_metrics": create_metrics(cpu=0.0, memory=0.0, error_rate=0.0)}
 
         response = await client.post("/analyze_metrics", json=payload)
 
@@ -392,9 +378,7 @@ class TestEdgeCases:
 
     async def test_analyze_with_boundary_values(self, client):
         """Test analysis with boundary values (100%, 0%)."""
-        payload = {
-            "current_metrics": create_metrics(cpu=100.0, memory=100.0, error_rate=1.0)
-        }
+        payload = {"current_metrics": create_metrics(cpu=100.0, memory=100.0, error_rate=1.0)}
 
         response = await client.post("/analyze_metrics", json=payload)
 
@@ -459,9 +443,7 @@ class TestEdgeCases:
 
     async def test_analyze_with_negative_values_returns_422(self, client):
         """Test analysis with negative values (invalid)."""
-        payload = {
-            "current_metrics": create_metrics(cpu=-10.0)
-        }
+        payload = {"current_metrics": create_metrics(cpu=-10.0)}
 
         response = await client.post("/analyze_metrics", json=payload)
 

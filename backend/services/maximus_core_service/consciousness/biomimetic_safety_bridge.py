@@ -36,8 +36,9 @@ Date: 2025-10-08
 import asyncio
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -72,10 +73,10 @@ class BridgeConfig:
     max_consecutive_coordination_failures: int = 5  # Failures before kill switch
 
     # Neuromodulation config (optional override)
-    neuromod_config: Optional[NeuromodConfig] = None
+    neuromod_config: NeuromodConfig | None = None
 
     # Predictive coding config (optional override)
-    hierarchy_config: Optional[HierarchyConfig] = None
+    hierarchy_config: HierarchyConfig | None = None
 
 
 @dataclass
@@ -119,9 +120,7 @@ class BiomimeticSafetyBridge:
     Thread Safety: NOT thread-safe. Use external locking for async/parallel calls.
     """
 
-    def __init__(
-        self, config: Optional[BridgeConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
-    ):
+    def __init__(self, config: BridgeConfig | None = None, kill_switch_callback: Callable[[str], None] | None = None):
         """Initialize biomimetic safety bridge.
 
         Args:
@@ -153,7 +152,7 @@ class BiomimeticSafetyBridge:
         self._aggregate_circuit_breaker_open = False
 
         # Performance tracking
-        self._coordination_times: List[float] = []
+        self._coordination_times: list[float] = []
 
         # Rate limiting
         self._last_coordination_time = 0.0
@@ -168,8 +167,8 @@ class BiomimeticSafetyBridge:
         )
 
     async def coordinate_processing(
-        self, raw_input: np.ndarray, modulation_requests: Optional[List[ModulationRequest]] = None
-    ) -> Dict[str, Any]:
+        self, raw_input: np.ndarray, modulation_requests: list[ModulationRequest] | None = None
+    ) -> dict[str, Any]:
         """
         Coordinate processing through both biomimetic systems.
 
@@ -236,7 +235,7 @@ class BiomimeticSafetyBridge:
 
             return result
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.total_coordination_failures += 1
             self.consecutive_coordination_failures += 1
 
@@ -262,8 +261,8 @@ class BiomimeticSafetyBridge:
             raise
 
     async def _coordinate_impl(
-        self, raw_input: np.ndarray, modulation_requests: Optional[List[ModulationRequest]]
-    ) -> Dict[str, Any]:
+        self, raw_input: np.ndarray, modulation_requests: list[ModulationRequest] | None
+    ) -> dict[str, Any]:
         """
         Core coordination implementation (isolated failures).
 
@@ -317,7 +316,7 @@ class BiomimeticSafetyBridge:
 
         return result
 
-    def _generate_modulation_requests(self, prediction_errors: Dict[str, float]) -> List[ModulationRequest]:
+    def _generate_modulation_requests(self, prediction_errors: dict[str, float]) -> list[ModulationRequest]:
         """
         Generate neuromodulation requests based on prediction errors.
 
@@ -356,8 +355,8 @@ class BiomimeticSafetyBridge:
         return requests
 
     def _detect_cross_system_anomaly(
-        self, prediction_errors: Dict[str, float], neuromod_results: Dict[str, float]
-    ) -> Optional[str]:
+        self, prediction_errors: dict[str, float], neuromod_results: dict[str, float]
+    ) -> str | None:
         """
         Detect anomalies that involve BOTH systems simultaneously.
 
@@ -426,7 +425,7 @@ class BiomimeticSafetyBridge:
             average_coordination_time_ms=avg_coordination_time,
         )
 
-    def get_health_metrics(self) -> Dict[str, Any]:
+    def get_health_metrics(self) -> dict[str, Any]:
         """
         Export aggregate health metrics for Safety Core.
 

@@ -57,7 +57,6 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -116,10 +115,9 @@ class PhaseCoherence:
         """
         if self.order_parameter < 0.3:
             return self.order_parameter / 0.3 * 0.25
-        elif self.order_parameter < 0.7:
+        if self.order_parameter < 0.7:
             return 0.25 + (self.order_parameter - 0.3) / 0.4 * 0.5
-        else:
-            return 0.75 + (self.order_parameter - 0.7) / 0.3 * 0.25
+        return 0.75 + (self.order_parameter - 0.7) / 0.3 * 0.25
 
 
 @dataclass
@@ -131,8 +129,8 @@ class SynchronizationDynamics:
     coherence builds up, plateaus, and dissolves.
     """
 
-    coherence_history: List[float] = field(default_factory=list)
-    time_to_sync: Optional[float] = None  # Time to reach r ≥ 0.70
+    coherence_history: list[float] = field(default_factory=list)
+    time_to_sync: float | None = None  # Time to reach r ≥ 0.70
     max_coherence: float = 0.0
     sustained_duration: float = 0.0  # Time spent at r ≥ 0.70
     dissolution_rate: float = 0.0  # How fast coherence decays
@@ -196,7 +194,7 @@ class KuramotoOscillator:
         )
     """
 
-    def __init__(self, node_id: str, config: Optional[OscillatorConfig] = None):
+    def __init__(self, node_id: str, config: OscillatorConfig | None = None):
         self.node_id = node_id
         self.config = config or OscillatorConfig()
 
@@ -206,10 +204,10 @@ class KuramotoOscillator:
         self.state: OscillatorState = OscillatorState.IDLE
 
         # Phase history for analysis
-        self.phase_history: List[float] = [self.phase]
-        self.frequency_history: List[float] = [self.frequency]
+        self.phase_history: list[float] = [self.phase]
+        self.frequency_history: list[float] = [self.frequency]
 
-    def update(self, neighbor_phases: Dict[str, float], coupling_weights: Dict[str, float], dt: float = 0.005) -> float:
+    def update(self, neighbor_phases: dict[str, float], coupling_weights: dict[str, float], dt: float = 0.005) -> float:
         """
         Update oscillator phase based on Kuramoto dynamics.
 
@@ -323,14 +321,14 @@ class KuramotoNetwork:
             print("🧠 Conscious-level phase coherence achieved")
     """
 
-    def __init__(self, config: Optional[OscillatorConfig] = None):
+    def __init__(self, config: OscillatorConfig | None = None):
         self.default_config = config or OscillatorConfig()
-        self.oscillators: Dict[str, KuramotoOscillator] = {}
+        self.oscillators: dict[str, KuramotoOscillator] = {}
         self.dynamics = SynchronizationDynamics()
-        self._coherence_cache: Optional[PhaseCoherence] = None
+        self._coherence_cache: PhaseCoherence | None = None
         self._last_coherence_time: float = 0.0
 
-    def add_oscillator(self, node_id: str, config: Optional[OscillatorConfig] = None) -> None:
+    def add_oscillator(self, node_id: str, config: OscillatorConfig | None = None) -> None:
         """Add oscillator for a TIG node."""
         osc_config = config or self.default_config
         self.oscillators[node_id] = KuramotoOscillator(node_id, osc_config)
@@ -349,8 +347,8 @@ class KuramotoNetwork:
 
     def update_network(
         self,
-        topology: Dict[str, List[str]],
-        coupling_weights: Optional[Dict[Tuple[str, str], float]] = None,
+        topology: dict[str, list[str]],
+        coupling_weights: dict[tuple[str, str], float] | None = None,
         dt: float = 0.005,
     ) -> None:
         """
@@ -431,7 +429,7 @@ class KuramotoNetwork:
         # Record in dynamics
         self.dynamics.add_coherence_sample(r, timestamp)
 
-    def get_coherence(self) -> Optional[PhaseCoherence]:
+    def get_coherence(self) -> PhaseCoherence | None:
         """Get latest phase coherence measurement."""
         if self._coherence_cache is None and self.oscillators:
             # Compute initial coherence if not yet cached
@@ -446,7 +444,7 @@ class KuramotoNetwork:
 
     async def synchronize(
         self,
-        topology: Dict[str, List[str]],
+        topology: dict[str, list[str]],
         duration_ms: float = 200.0,
         target_coherence: float = 0.70,
         dt: float = 0.005,

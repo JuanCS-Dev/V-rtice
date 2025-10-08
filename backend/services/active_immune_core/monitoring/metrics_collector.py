@@ -15,7 +15,6 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import asyncio
 import logging
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
@@ -63,9 +62,7 @@ class MetricsCollector:
         self.aggregation_interval = aggregation_interval
 
         # Time-series data (metric_name -> deque of (timestamp, value))
-        self._time_series: Dict[str, Deque[tuple]] = defaultdict(
-            lambda: deque(maxlen=history_size)
-        )
+        self._time_series: Dict[str, Deque[tuple]] = defaultdict(lambda: deque(maxlen=history_size))
 
         # Counters (cumulative)
         self._counters: Dict[str, int] = defaultdict(int)
@@ -84,10 +81,7 @@ class MetricsCollector:
         self._first_collection: Optional[datetime] = None
         self._last_collection_time: Optional[datetime] = None
 
-        logger.info(
-            f"MetricsCollector initialized (history={history_size}, "
-            f"interval={aggregation_interval}s)"
-        )
+        logger.info(f"MetricsCollector initialized (history={history_size}, interval={aggregation_interval}s)")
 
     # ==================== DATA COLLECTION ====================
 
@@ -129,9 +123,7 @@ class MetricsCollector:
 
     # ==================== COMPONENT COLLECTION ====================
 
-    def collect_from_distributed_coordinator(
-        self, coordinator
-    ) -> Dict[str, Any]:
+    def collect_from_distributed_coordinator(self, coordinator) -> Dict[str, Any]:
         """
         Collect metrics from Distributed Coordinator.
 
@@ -258,13 +250,11 @@ class MetricsCollector:
             # Record counters (incremental)
             self.increment_counter(
                 "agents_detections_total",
-                agent_metrics["total_detections"]
-                - self._counters["agents_detections_total"],
+                agent_metrics["total_detections"] - self._counters["agents_detections_total"],
             )
             self.increment_counter(
                 "agents_neutralizations_total",
-                agent_metrics["total_neutralizations"]
-                - self._counters["agents_neutralizations_total"],
+                agent_metrics["total_neutralizations"] - self._counters["agents_neutralizations_total"],
             )
 
             self._last_collection["agents"] = datetime.now()
@@ -290,9 +280,7 @@ class MetricsCollector:
 
             # Record gauges
             self.set_gauge("lymphnode_agents", metrics.get("agents_total", 0))
-            self.set_gauge(
-                "lymphnode_active_agents", metrics.get("agents_active", 0)
-            )
+            self.set_gauge("lymphnode_active_agents", metrics.get("agents_active", 0))
 
             self._last_collection["lymphnode"] = datetime.now()
 
@@ -363,9 +351,7 @@ class MetricsCollector:
             "counters": dict(self._counters),
             "gauges": dict(self._gauges),
             "time_series_aggregations": {},
-            "last_collections": {
-                k: v.isoformat() for k, v in self._last_collection.items()
-            },
+            "last_collections": {k: v.isoformat() for k, v in self._last_collection.items()},
         }
 
         # Aggregate key metrics
@@ -379,9 +365,7 @@ class MetricsCollector:
 
         for metric in key_metrics:
             if metric in self._time_series:
-                stats["time_series_aggregations"][metric] = self.aggregate_time_series(
-                    metric, window
-                )
+                stats["time_series_aggregations"][metric] = self.aggregate_time_series(metric, window)
 
         return stats
 
@@ -506,8 +490,4 @@ class MetricsCollector:
 
     def __repr__(self) -> str:
         """String representation"""
-        return (
-            f"<MetricsCollector "
-            f"metrics={len(self.get_metric_names())} "
-            f"collections={self._collection_count}>"
-        )
+        return f"<MetricsCollector metrics={len(self.get_metric_names())} collections={self._collection_count}>"

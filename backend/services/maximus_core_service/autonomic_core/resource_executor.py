@@ -13,7 +13,7 @@ performance.
 import asyncio
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -39,8 +39,8 @@ class ExecutionResult(BaseModel):
 
     timestamp: str
     success: bool
-    actions_executed: List[str]
-    errors: List[str]
+    actions_executed: list[str]
+    errors: list[str]
 
 
 class ResourceExecutor:

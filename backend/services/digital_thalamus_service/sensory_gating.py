@@ -12,7 +12,6 @@ optimizing resource allocation, and enhancing the efficiency of perception
 and decision-making.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -77,11 +76,7 @@ class SensoryGating:
             "status": "active",
             "default_threshold": self.default_threshold,
             "gating_rules": self.gating_rules,
-            "last_gating_decision": (
-                self.last_gating_decision.isoformat()
-                if self.last_gating_decision
-                else "N/A"
-            ),
+            "last_gating_decision": (self.last_gating_decision.isoformat() if self.last_gating_decision else "N/A"),
             "blocked_data_count_since_startup": self.blocked_data_count,
         }
 

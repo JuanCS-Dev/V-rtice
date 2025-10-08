@@ -32,13 +32,13 @@ Version: 1.0.0
 Date: 2025-10-07
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime
-from enum import Enum
-from typing import Any, Dict, List, Optional
 import logging
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, Optional
 
 from pydantic import ValidationError
+
 from coordination.validators import validate_cytokine
 
 logger = logging.getLogger(__name__)
@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 
 class CytokineType(str, Enum):
     """Cytokine types recognized by the system."""
+
     IL1 = "IL1"  # Pro-inflammatory
     IL6 = "IL6"  # Pro-inflammatory
     IL8 = "IL8"  # Pro-inflammatory (chemokine)
@@ -58,6 +59,7 @@ class CytokineType(str, Enum):
 
 class EventType(str, Enum):
     """Event types extracted from cytokine payload."""
+
     THREAT_DETECTED = "ameaca_detectada"
     NEUTRALIZATION_SUCCESS = "neutralizacao_sucesso"
     NK_CYTOTOXICITY = "nk_cytotoxicity"
@@ -76,6 +78,7 @@ class ProcessingResult:
         should_escalate: Whether this cytokine should be escalated to global
         metadata: Additional processing metadata
     """
+
     temperature_delta: float = 0.0
     threat_detected: bool = False
     threat_id: Optional[str] = None
@@ -221,11 +224,7 @@ class CytokineAggregator:
             self._total_threats += 1
 
             # Extract threat ID from various possible locations
-            threat_id = (
-                payload.get("alvo", {}).get("id") or
-                payload.get("host_id") or
-                payload.get("threat_id")
-            )
+            threat_id = payload.get("alvo", {}).get("id") or payload.get("host_id") or payload.get("threat_id")
             result.threat_id = threat_id
 
         # Check for neutralization events
@@ -238,9 +237,7 @@ class CytokineAggregator:
             self._total_neutralizations += 1
 
         # Determine if should escalate to global
-        result.should_escalate = await self._should_escalate_to_global(
-            cytokine, prioridade
-        )
+        result.should_escalate = await self._should_escalate_to_global(cytokine, prioridade)
 
         if result.should_escalate:
             self._total_escalated += 1
@@ -322,16 +319,8 @@ class CytokineAggregator:
             "total_neutralizations": self._total_neutralizations,
             "total_escalated": self._total_escalated,
             "total_validation_errors": self._total_validation_errors,
-            "threat_rate": (
-                self._total_threats / self._total_processed
-                if self._total_processed > 0
-                else 0.0
-            ),
-            "escalation_rate": (
-                self._total_escalated / self._total_processed
-                if self._total_processed > 0
-                else 0.0
-            ),
+            "threat_rate": (self._total_threats / self._total_processed if self._total_processed > 0 else 0.0),
+            "escalation_rate": (self._total_escalated / self._total_processed if self._total_processed > 0 else 0.0),
         }
 
     def reset_stats(self) -> None:

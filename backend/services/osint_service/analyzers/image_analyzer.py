@@ -35,9 +35,7 @@ class ImageAnalyzer:
         self.analysis_history: List[Dict[str, Any]] = []
         self.last_analysis_time: Optional[datetime] = None
 
-    async def analyze_image(
-        self, image_base64: str, analysis_types: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+    async def analyze_image(self, image_base64: str, analysis_types: Optional[List[str]] = None) -> Dict[str, Any]:
         """Analyzes an image (provided as base64) for specified analysis types.
 
         Args:
@@ -160,9 +158,5 @@ class ImageAnalyzer:
         return {
             "status": "active",
             "total_analyses": len(self.analysis_history),
-            "last_analysis": (
-                self.last_analysis_time.isoformat()
-                if self.last_analysis_time
-                else "N/A"
-            ),
+            "last_analysis": (self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"),
         }

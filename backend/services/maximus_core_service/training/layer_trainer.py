@@ -15,13 +15,12 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Callable
-
-import numpy as np
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +41,8 @@ class TrainingConfig:
 
     # Optimization
     optimizer: str = "adam"  # "adam", "sgd", "adamw"
-    lr_scheduler: Optional[str] = "reduce_on_plateau"  # "step", "cosine", "reduce_on_plateau"
-    gradient_clip_value: Optional[float] = 1.0
+    lr_scheduler: str | None = "reduce_on_plateau"  # "step", "cosine", "reduce_on_plateau"
+    gradient_clip_value: float | None = 1.0
 
     # Early stopping
     early_stopping_patience: int = 10
@@ -78,15 +77,17 @@ class TrainingMetrics:
 
     epoch: int
     train_loss: float
-    val_loss: Optional[float] = None
-    train_metrics: Optional[Dict[str, float]] = None
-    val_metrics: Optional[Dict[str, float]] = None
+    val_loss: float | None = None
+    train_metrics: dict[str, float] | None = None
+    val_metrics: dict[str, float] | None = None
     learning_rate: float = 0.0
     epoch_time: float = 0.0
 
     def __repr__(self) -> str:
-        return (f"Epoch {self.epoch}: train_loss={self.train_loss:.4f}, "
-                f"val_loss={self.val_loss:.4f if self.val_loss else 'N/A'}")
+        return (
+            f"Epoch {self.epoch}: train_loss={self.train_loss:.4f}, "
+            f"val_loss={self.val_loss:.4f if self.val_loss else 'N/A'}"
+        )
 
 
 class EarlyStopping:
@@ -95,12 +96,7 @@ class EarlyStopping:
     Stops training when validation loss stops improving.
     """
 
-    def __init__(
-        self,
-        patience: int = 10,
-        min_delta: float = 1e-4,
-        mode: str = "min"
-    ):
+    def __init__(self, patience: int = 10, min_delta: float = 1e-4, mode: str = "min"):
         """Initialize early stopping.
 
         Args:
@@ -157,6 +153,7 @@ class LayerTrainer:
         # Define model (PyTorch nn.Module)
         model = Layer1VAE(input_dim=128, latent_dim=64)
 
+
         # Define loss function
         def loss_fn(model, batch):
             inputs, labels = batch
@@ -165,19 +162,11 @@ class LayerTrainer:
             kl_loss = model.get_kl_loss()
             return reconstruction_loss + kl_loss
 
-        # Create trainer
-        config = TrainingConfig(
-            model_name="layer1_vae",
-            layer_name="layer1",
-            batch_size=32,
-            num_epochs=100
-        )
 
-        trainer = LayerTrainer(
-            model=model,
-            loss_fn=loss_fn,
-            config=config
-        )
+        # Create trainer
+        config = TrainingConfig(model_name="layer1_vae", layer_name="layer1", batch_size=32, num_epochs=100)
+
+        trainer = LayerTrainer(model=model, loss_fn=loss_fn, config=config)
 
         # Train
         history = trainer.train(train_loader, val_loader)
@@ -189,7 +178,7 @@ class LayerTrainer:
         model: Any,  # torch.nn.Module in production
         loss_fn: Callable,
         config: TrainingConfig,
-        metric_fns: Optional[Dict[str, Callable]] = None
+        metric_fns: dict[str, Callable] | None = None,
     ):
         """Initialize trainer.
 
@@ -233,20 +222,19 @@ class LayerTrainer:
 
             # Early stopping
             self.early_stopping = EarlyStopping(
-                patience=config.early_stopping_patience,
-                min_delta=config.early_stopping_min_delta,
-                mode="min"
+                patience=config.early_stopping_patience, min_delta=config.early_stopping_min_delta, mode="min"
             )
 
-            logger.info(f"LayerTrainer initialized: device={self.device}, "
-                        f"optimizer={config.optimizer}, amp={config.use_amp}")
+            logger.info(
+                f"LayerTrainer initialized: device={self.device}, optimizer={config.optimizer}, amp={config.use_amp}"
+            )
 
         except ImportError:
             logger.warning("PyTorch not available, trainer will run in simulation mode")
             self.torch_available = False
 
         # Training history
-        self.history: List[TrainingMetrics] = []
+        self.history: list[TrainingMetrics] = []
         self.best_val_loss = float("inf")
         self.best_epoch = 0
 
@@ -258,27 +246,22 @@ class LayerTrainer:
         """
         if self.config.optimizer == "adam":
             return self.torch.optim.Adam(
-                self.model.parameters(),
-                lr=self.config.learning_rate,
-                weight_decay=self.config.weight_decay
+                self.model.parameters(), lr=self.config.learning_rate, weight_decay=self.config.weight_decay
             )
-        elif self.config.optimizer == "adamw":
+        if self.config.optimizer == "adamw":
             return self.torch.optim.AdamW(
-                self.model.parameters(),
-                lr=self.config.learning_rate,
-                weight_decay=self.config.weight_decay
+                self.model.parameters(), lr=self.config.learning_rate, weight_decay=self.config.weight_decay
             )
-        elif self.config.optimizer == "sgd":
+        if self.config.optimizer == "sgd":
             return self.torch.optim.SGD(
                 self.model.parameters(),
                 lr=self.config.learning_rate,
                 momentum=0.9,
-                weight_decay=self.config.weight_decay
+                weight_decay=self.config.weight_decay,
             )
-        else:
-            raise ValueError(f"Unsupported optimizer: {self.config.optimizer}")
+        raise ValueError(f"Unsupported optimizer: {self.config.optimizer}")
 
-    def _create_scheduler(self) -> Optional[Any]:
+    def _create_scheduler(self) -> Any | None:
         """Create learning rate scheduler.
 
         Returns:
@@ -288,32 +271,20 @@ class LayerTrainer:
             return None
 
         if self.config.lr_scheduler == "step":
-            return self.torch.optim.lr_scheduler.StepLR(
-                self.optimizer,
-                step_size=30,
-                gamma=0.1
-            )
-        elif self.config.lr_scheduler == "cosine":
-            return self.torch.optim.lr_scheduler.CosineAnnealingLR(
-                self.optimizer,
-                T_max=self.config.num_epochs
-            )
-        elif self.config.lr_scheduler == "reduce_on_plateau":
+            return self.torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.1)
+        if self.config.lr_scheduler == "cosine":
+            return self.torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=self.config.num_epochs)
+        if self.config.lr_scheduler == "reduce_on_plateau":
             return self.torch.optim.lr_scheduler.ReduceLROnPlateau(
-                self.optimizer,
-                mode="min",
-                factor=0.5,
-                patience=5,
-                verbose=True
+                self.optimizer, mode="min", factor=0.5, patience=5, verbose=True
             )
-        else:
-            raise ValueError(f"Unsupported scheduler: {self.config.lr_scheduler}")
+        raise ValueError(f"Unsupported scheduler: {self.config.lr_scheduler}")
 
     def train(
         self,
         train_loader: Any,  # torch.utils.data.DataLoader
-        val_loader: Optional[Any] = None
-    ) -> List[TrainingMetrics]:
+        val_loader: Any | None = None,
+    ) -> list[TrainingMetrics]:
         """Train model.
 
         Args:
@@ -362,16 +333,18 @@ class LayerTrainer:
                 train_metrics=train_metrics,
                 val_metrics=val_metrics,
                 learning_rate=current_lr,
-                epoch_time=epoch_time
+                epoch_time=epoch_time,
             )
 
             self.history.append(metrics)
 
             # Log
-            logger.info(f"Epoch {epoch}/{self.config.num_epochs}: "
-                        f"train_loss={train_loss:.4f}, "
-                        f"val_loss={val_loss:.4f if val_loss else 'N/A'}, "
-                        f"lr={current_lr:.6f}, time={epoch_time:.1f}s")
+            logger.info(
+                f"Epoch {epoch}/{self.config.num_epochs}: "
+                f"train_loss={train_loss:.4f}, "
+                f"val_loss={val_loss:.4f if val_loss else 'N/A'}, "
+                f"lr={current_lr:.6f}, time={epoch_time:.1f}s"
+            )
 
             # TensorBoard
             self.writer.add_scalar("Loss/train", train_loss, epoch)
@@ -395,18 +368,13 @@ class LayerTrainer:
                     logger.info(f"Early stopping at epoch {epoch}")
                     break
 
-        logger.info(f"Training complete: best_val_loss={self.best_val_loss:.4f} "
-                    f"at epoch {self.best_epoch}")
+        logger.info(f"Training complete: best_val_loss={self.best_val_loss:.4f} at epoch {self.best_epoch}")
 
         self.writer.close()
 
         return self.history
 
-    def _train_epoch(
-        self,
-        train_loader: Any,
-        epoch: int
-    ) -> Tuple[float, Dict[str, float]]:
+    def _train_epoch(self, train_loader: Any, epoch: int) -> tuple[float, dict[str, float]]:
         """Train one epoch.
 
         Args:
@@ -442,10 +410,7 @@ class LayerTrainer:
                 # Gradient clipping
                 if self.config.gradient_clip_value is not None:
                     self.scaler.unscale_(self.optimizer)
-                    self.torch.nn.utils.clip_grad_norm_(
-                        self.model.parameters(),
-                        self.config.gradient_clip_value
-                    )
+                    self.torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.gradient_clip_value)
 
                 # Optimizer step
                 self.scaler.step(self.optimizer)
@@ -459,10 +424,7 @@ class LayerTrainer:
 
                 # Gradient clipping
                 if self.config.gradient_clip_value is not None:
-                    self.torch.nn.utils.clip_grad_norm_(
-                        self.model.parameters(),
-                        self.config.gradient_clip_value
-                    )
+                    self.torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.gradient_clip_value)
 
                 self.optimizer.step()
 
@@ -478,8 +440,7 @@ class LayerTrainer:
 
             # Log batch
             if batch_idx % self.config.log_frequency == 0:
-                logger.debug(f"Epoch {epoch}, Batch {batch_idx}/{len(train_loader)}: "
-                             f"loss={loss.item():.4f}")
+                logger.debug(f"Epoch {epoch}, Batch {batch_idx}/{len(train_loader)}: loss={loss.item():.4f}")
 
         # Average
         avg_loss = total_loss / n_batches
@@ -487,11 +448,7 @@ class LayerTrainer:
 
         return avg_loss, avg_metrics
 
-    def _validate_epoch(
-        self,
-        val_loader: Any,
-        epoch: int
-    ) -> Tuple[float, Dict[str, float]]:
+    def _validate_epoch(self, val_loader: Any, epoch: int) -> tuple[float, dict[str, float]]:
         """Validate one epoch.
 
         Args:
@@ -546,7 +503,7 @@ class LayerTrainer:
             "optimizer_state_dict": self.optimizer.state_dict(),
             "config": self.config,
             "history": self.history,
-            "best_val_loss": self.best_val_loss
+            "best_val_loss": self.best_val_loss,
         }
 
         if self.scheduler is not None:

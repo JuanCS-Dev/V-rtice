@@ -25,7 +25,7 @@ Version: 1.0.0 - Production Hardened
 Date: 2025-10-08
 """
 
-from typing import Any, Dict, Set
+from typing import Any
 
 import numpy as np
 
@@ -68,9 +68,9 @@ class Layer4Tactical(PredictiveCodingLayerBase):
 
         # Relational graph state (for GNN)
         # Maps entity ID → embedding vector
-        self._entity_embeddings: Dict[str, np.ndarray] = {}
+        self._entity_embeddings: dict[str, np.ndarray] = {}
         # Maps (entity_A, entity_B) → relation type
-        self._relations: Dict[tuple, str] = {}
+        self._relations: dict[tuple, str] = {}
 
     def get_layer_name(self) -> str:
         """Return layer name for logging."""
@@ -122,7 +122,7 @@ class Layer4Tactical(PredictiveCodingLayerBase):
 
         return float(mse)
 
-    def _extract_entities(self, input_data: np.ndarray) -> Set[str]:
+    def _extract_entities(self, input_data: np.ndarray) -> set[str]:
         """
         Extract entity IDs from operational sequence.
 
@@ -149,7 +149,7 @@ class Layer4Tactical(PredictiveCodingLayerBase):
 
         return entities
 
-    def _message_passing_step(self, active_entities: Set[str]):
+    def _message_passing_step(self, active_entities: set[str]):
         """
         Perform one step of GNN message passing.
 

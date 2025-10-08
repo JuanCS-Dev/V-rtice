@@ -15,16 +15,16 @@ Web Attack Service's capabilities for automated penetration testing, red teaming
 and proactive cybersecurity defense, focusing on web-specific attack surfaces.
 """
 
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
-from typing import Dict, List
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from ai_copilot import AICoPilot
 from burp_wrapper import BurpSuiteWrapper
 from config import get_settings
-from fastapi import BackgroundTasks, FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from models import *
 from zap_wrapper import ZAPWrapper
 
@@ -63,15 +63,11 @@ async def lifespan(app: FastAPI):
 
     # Initialize Burp Suite
     if settings.BURP_API_URL:
-        burp_wrapper = BurpSuiteWrapper(
-            burp_api_url=settings.BURP_API_URL, burp_api_key=settings.BURP_API_KEY
-        )
+        burp_wrapper = BurpSuiteWrapper(burp_api_url=settings.BURP_API_URL, burp_api_key=settings.BURP_API_KEY)
 
     # Initialize ZAP
     if settings.ZAP_API_URL:
-        zap_wrapper = ZAPWrapper(
-            zap_api_url=settings.ZAP_API_URL, zap_api_key=settings.ZAP_API_KEY
-        )
+        zap_wrapper = ZAPWrapper(zap_api_url=settings.ZAP_API_URL, zap_api_key=settings.ZAP_API_KEY)
 
     yield
 

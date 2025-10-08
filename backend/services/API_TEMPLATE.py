@@ -11,13 +11,12 @@ INSTRUCTIONS:
 6. Keep /health endpoint as-is
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
 
 # TODO: Import your core module here
 # Example: from neutrophil_core import NeutrophilCore
@@ -47,17 +46,17 @@ class AnalyzeRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the service."""
-    print(f"🚀 Starting Maximus {{SERVICE_NAME}} Service...")
+    print("🚀 Starting Maximus {SERVICE_NAME} Service...")
     # TODO: Add any initialization logic here
-    print(f"✅ Maximus {{SERVICE_NAME}} Service started successfully.")
+    print("✅ Maximus {SERVICE_NAME} Service started successfully.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the service."""
-    print(f"👋 Shutting down Maximus {{SERVICE_NAME}} Service...")
+    print("👋 Shutting down Maximus {SERVICE_NAME} Service...")
     # TODO: Add any cleanup logic here
-    print(f"🛑 Maximus {{SERVICE_NAME}} Service shut down.")
+    print("🛑 Maximus {SERVICE_NAME} Service shut down.")
 
 
 @app.get("/health")

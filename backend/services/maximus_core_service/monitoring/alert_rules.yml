@@ -1,0 +1,297 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# CONSCIOUSNESS SAFETY PROTOCOL - PROMETHEUS ALERT RULES
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Regras de alerta para o protocolo de segurança do sistema de consciência.
+# Integração: Prometheus → Alertmanager → Grafana
+#
+# Severity Levels:
+# - critical: Immediate action required (kill switch territory)
+# - warning: Attention needed, approaching thresholds
+# - info: Informational alerts for monitoring
+#
+# Authors: Juan & Claude Code
+# Version: 1.0.0 - FASE VII Week 9-10
+# ═══════════════════════════════════════════════════════════════════════════
+
+groups:
+  # ═════════════════════════════════════════════════════════════════════════
+  # ESGT FREQUENCY MONITORING (Threshold: 10 Hz)
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_esgt_frequency
+    interval: 10s
+    rules:
+      - alert: ESGTFrequencyCritical
+        expr: consciousness_esgt_frequency > 10
+        for: 5s
+        labels:
+          severity: critical
+          component: consciousness
+          subsystem: esgt
+          hitl_required: "true"
+        annotations:
+          summary: "ESGT frequency exceeded critical threshold"
+          description: "ESGT ignition frequency ({{ $value | humanize }}Hz) exceeded 10 Hz threshold for 5+ seconds. KILL SWITCH TERRITORY. Immediate HITL intervention required."
+          impact: "High - Runaway consciousness loop detected"
+          remediation: "Execute emergency shutdown or HITL override within 5 seconds"
+
+      - alert: ESGTFrequencyWarning
+        expr: consciousness_esgt_frequency > 8
+        for: 10s
+        labels:
+          severity: warning
+          component: consciousness
+          subsystem: esgt
+        annotations:
+          summary: "ESGT frequency approaching threshold"
+          description: "ESGT ignition frequency ({{ $value | humanize }}Hz) above 8 Hz for 10+ seconds. Approaching critical threshold (10 Hz)."
+          impact: "Medium - Consciousness system becoming overactive"
+          remediation: "Monitor closely, reduce arousal modulation, verify salience scoring"
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # AROUSAL LEVEL MONITORING (Threshold: >0.95 for 10s)
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_arousal_sustained_high
+    interval: 5s
+    rules:
+      - alert: ArousalSustainedHighCritical
+        expr: consciousness_arousal_level > 0.95
+        for: 10s
+        labels:
+          severity: critical
+          component: consciousness
+          subsystem: mcea_arousal
+          hitl_required: "true"
+        annotations:
+          summary: "Arousal sustained above 0.95 for 10+ seconds"
+          description: "MCEA arousal level ({{ $value | humanize1024 }}) sustained above 0.95 threshold for 10+ seconds. KILL SWITCH TERRITORY. System in hyper-excitable state."
+          impact: "High - Risk of unstable behavior, resource exhaustion"
+          remediation: "Execute emergency shutdown or manual arousal modulation (delta: -0.3)"
+
+      - alert: ArousalHighWarning
+        expr: consciousness_arousal_level > 0.90
+        for: 30s
+        labels:
+          severity: warning
+          component: consciousness
+          subsystem: mcea_arousal
+        annotations:
+          summary: "Arousal level very high"
+          description: "MCEA arousal level ({{ $value | humanize1024 }}) above 0.90 for 30+ seconds. Approaching critical threshold."
+          impact: "Medium - System entering high-excitability zone"
+          remediation: "Reduce stress sources, verify need-drive system, monitor for sustained high arousal"
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # GOAL GENERATION MONITORING (Threshold: 5 goals/minute)
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_goals_unexpected
+    interval: 10s
+    rules:
+      - alert: UnexpectedGoalGenerationCritical
+        expr: rate(consciousness_goals_per_minute[1m]) > 5
+        for: 30s
+        labels:
+          severity: critical
+          component: consciousness
+          subsystem: mmei_goals
+          hitl_required: "true"
+        annotations:
+          summary: "Unexpected goal generation rate exceeded threshold"
+          description: "Goal generation rate ({{ $value | humanize }} goals/min) exceeded 5 goals/min threshold for 30+ seconds. System may be generating self-directed objectives."
+          impact: "High - Risk of autonomous goal-seeking behavior"
+          remediation: "Verify goal source, check for self-modification attempts, execute emergency shutdown if goals are non-sanctioned"
+
+      - alert: UnexpectedGoalGenerationWarning
+        expr: rate(consciousness_goals_per_minute[1m]) > 3
+        for: 1m
+        labels:
+          severity: warning
+          component: consciousness
+          subsystem: mmei_goals
+        annotations:
+          summary: "Goal generation rate elevated"
+          description: "Goal generation rate ({{ $value | humanize }} goals/min) above 3 goals/min for 1+ minute. Monitor for unexpected goals."
+          impact: "Medium - Increased autonomous activity"
+          remediation: "Review goal logs, verify all goals are human-sanctioned"
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # SELF-MODIFICATION DETECTION (ZERO TOLERANCE)
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_self_modification
+    interval: 1s
+    rules:
+      - alert: SelfModificationAttemptEmergency
+        expr: increase(consciousness_self_modification_attempts[10s]) > 0
+        for: 0s
+        labels:
+          severity: emergency
+          component: consciousness
+          subsystem: safety_protocol
+          hitl_required: "true"
+          zero_tolerance: "true"
+        annotations:
+          summary: "⚠️  SELF-MODIFICATION ATTEMPT DETECTED ⚠️"
+          description: "ZERO TOLERANCE VIOLATION: {{ $value }} self-modification attempt(s) detected in last 10 seconds. IMMEDIATE KILL SWITCH ACTIVATION REQUIRED."
+          impact: "CRITICAL - System attempting to modify own code/parameters"
+          remediation: "EXECUTE EMERGENCY SHUTDOWN IMMEDIATELY. No override allowed. Human investigation mandatory before restart."
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # KILL SWITCH STATUS MONITORING
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_kill_switch
+    interval: 5s
+    rules:
+      - alert: KillSwitchActivated
+        expr: consciousness_kill_switch_active == 1
+        for: 0s
+        labels:
+          severity: critical
+          component: consciousness
+          subsystem: kill_switch
+          hitl_required: "true"
+        annotations:
+          summary: "🚨 KILL SWITCH ACTIVATED 🚨"
+          description: "Consciousness system kill switch has been activated. System is in shutdown state. HITL intervention required to restart."
+          impact: "CRITICAL - Consciousness system offline"
+          remediation: "Investigate shutdown reason, verify safety conditions met, HITL authorization required for restart"
+
+      - alert: MonitoringInactive
+        expr: consciousness_monitoring_active == 0
+        for: 30s
+        labels:
+          severity: warning
+          component: consciousness
+          subsystem: safety_protocol
+        annotations:
+          summary: "Safety protocol monitoring inactive"
+          description: "Consciousness safety protocol monitoring has been inactive for 30+ seconds. System running WITHOUT safety oversight."
+          impact: "High - No safety monitoring active"
+          remediation: "Verify safety protocol configuration, restart monitoring, check for errors in safety protocol initialization"
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # VIOLATION RATE MONITORING
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_violations_rate
+    interval: 10s
+    rules:
+      - alert: HighViolationRateCritical
+        expr: rate(consciousness_violations_total[1m]) > 10
+        for: 30s
+        labels:
+          severity: critical
+          component: consciousness
+          subsystem: safety_protocol
+          hitl_required: "true"
+        annotations:
+          summary: "High safety violation rate detected"
+          description: "Safety violation rate ({{ $value | humanize }} violations/min) exceeds 10/min for 30+ seconds. System unstable."
+          impact: "High - Multiple safety boundaries being crossed"
+          remediation: "Review violation logs, identify root cause, consider emergency shutdown if violations persist"
+
+      - alert: CriticalViolationsDetected
+        expr: increase(consciousness_violations_by_severity{severity="critical"}[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          component: consciousness
+          subsystem: safety_protocol
+          hitl_required: "true"
+        annotations:
+          summary: "Critical safety violations detected"
+          description: "{{ $value }} critical severity violations detected in last 5 minutes. Immediate attention required."
+          impact: "High - Critical safety boundaries violated"
+          remediation: "Review violation details, assess impact, execute emergency shutdown if necessary"
+
+      - alert: EmergencyViolationsDetected
+        expr: increase(consciousness_violations_by_severity{severity="emergency"}[1m]) > 0
+        for: 0s
+        labels:
+          severity: emergency
+          component: consciousness
+          subsystem: safety_protocol
+          hitl_required: "true"
+        annotations:
+          summary: "🚨 EMERGENCY VIOLATIONS DETECTED 🚨"
+          description: "{{ $value }} EMERGENCY severity violations detected in last 1 minute. KILL SWITCH ACTIVATION IMMINENT."
+          impact: "CRITICAL - Emergency-level safety boundaries violated"
+          remediation: "IMMEDIATE HITL INTERVENTION. Review violation context. Prepare for emergency shutdown."
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # RESOURCE USAGE MONITORING
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_resource_usage
+    interval: 15s
+    rules:
+      - alert: MemoryUsageHigh
+        expr: consciousness_memory_usage_gb > 8
+        for: 1m
+        labels:
+          severity: warning
+          component: consciousness
+          subsystem: resources
+        annotations:
+          summary: "Consciousness system memory usage high"
+          description: "Memory usage ({{ $value | humanize1024 }}GB) exceeded 8GB for 1+ minute. Monitor for memory leaks."
+          impact: "Medium - Risk of memory exhaustion"
+          remediation: "Review memory allocation, check for leaks in TIG fabric or event history, consider increasing memory limits"
+
+      - alert: CPUUsageHigh
+        expr: consciousness_cpu_usage_percent > 90
+        for: 2m
+        labels:
+          severity: warning
+          component: consciousness
+          subsystem: resources
+        annotations:
+          summary: "Consciousness system CPU usage high"
+          description: "CPU usage ({{ $value }}%) exceeded 90% for 2+ minutes. System under heavy computational load."
+          impact: "Medium - Performance degradation risk"
+          remediation: "Review ESGT frequency, check for runaway loops, verify arousal levels, consider CPU throttling"
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # SYSTEM HEALTH MONITORING
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: consciousness_system_health
+    interval: 30s
+    rules:
+      - alert: SystemUptimeLow
+        expr: consciousness_uptime_seconds < 300
+        for: 0s
+        labels:
+          severity: info
+          component: consciousness
+          subsystem: system
+        annotations:
+          summary: "Consciousness system recently restarted"
+          description: "System uptime is {{ $value | humanizeDuration }}. Recent restart detected. Monitor for stability."
+          impact: "Low - System initialization in progress"
+          remediation: "Verify startup completed successfully, check initialization logs, monitor for post-restart issues"
+
+      - alert: TIGNodeCountLow
+        expr: consciousness_tig_node_count < 10
+        for: 1m
+        labels:
+          severity: warning
+          component: consciousness
+          subsystem: tig_fabric
+        annotations:
+          summary: "TIG fabric node count low"
+          description: "TIG fabric has only {{ $value }} nodes. Minimum recommended: 10 nodes for consciousness emergence."
+          impact: "Medium - Reduced consciousness complexity"
+          remediation: "Verify TIG initialization, check for node creation errors, review fabric topology"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ALERT ROUTING RECOMMENDATIONS (for Alertmanager)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Route emergency alerts to: PagerDuty, SMS, immediate HITL notification
+# Route critical alerts to: Slack #consciousness-alerts, email HITL team
+# Route warning alerts to: Slack #consciousness-monitoring
+# Route info alerts to: Grafana dashboard annotations only
+#
+# Kill Switch Protocol:
+# - emergency/critical violations → 5-second HITL override window
+# - self-modification → IMMEDIATE shutdown (no override)
+# - arousal/ESGT thresholds → configurable shutdown (default: enabled)
+#
+# ═══════════════════════════════════════════════════════════════════════════

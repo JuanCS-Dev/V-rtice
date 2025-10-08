@@ -14,11 +14,9 @@ Quality: Production-ready, REGRA DE OURO compliant
 """
 
 import ast
-import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 
 @dataclass
@@ -30,33 +28,27 @@ class ValidationResult:
     lines_of_code: int
 
     # REGRA DE OURO violations
-    todo_violations: List[Tuple[int, str]] = field(default_factory=list)
-    mock_violations: List[Tuple[int, str]] = field(default_factory=list)
-    placeholder_violations: List[Tuple[int, str]] = field(default_factory=list)
+    todo_violations: list[tuple[int, str]] = field(default_factory=list)
+    mock_violations: list[tuple[int, str]] = field(default_factory=list)
+    placeholder_violations: list[tuple[int, str]] = field(default_factory=list)
 
     # Quality metrics
     has_module_docstring: bool = False
-    functions_without_docstring: List[str] = field(default_factory=list)
-    functions_without_type_hints: List[str] = field(default_factory=list)
-    classes_without_docstring: List[str] = field(default_factory=list)
+    functions_without_docstring: list[str] = field(default_factory=list)
+    functions_without_type_hints: list[str] = field(default_factory=list)
+    classes_without_docstring: list[str] = field(default_factory=list)
 
     @property
     def is_compliant(self) -> bool:
         """Check if file is fully compliant."""
         return (
-            len(self.todo_violations) == 0
-            and len(self.mock_violations) == 0
-            and len(self.placeholder_violations) == 0
+            len(self.todo_violations) == 0 and len(self.mock_violations) == 0 and len(self.placeholder_violations) == 0
         )
 
     @property
     def total_violations(self) -> int:
         """Total REGRA DE OURO violations."""
-        return (
-            len(self.todo_violations)
-            + len(self.mock_violations)
-            + len(self.placeholder_violations)
-        )
+        return len(self.todo_violations) + len(self.mock_violations) + len(self.placeholder_violations)
 
     @property
     def quality_score(self) -> float:
@@ -86,7 +78,7 @@ class RegraDeOuroValidator:
             project_root: Root directory of project to validate
         """
         self.project_root = Path(project_root)
-        self.results: List[ValidationResult] = []
+        self.results: list[ValidationResult] = []
 
         # Patterns to detect violations
         self.todo_patterns = [
@@ -128,7 +120,7 @@ class RegraDeOuroValidator:
         )
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
                 lines = content.split("\n")
 
@@ -191,9 +183,7 @@ class RegraDeOuroValidator:
 
         return result
 
-    def validate_directory(
-        self, directory: Path, exclude_patterns: Set[str] = None
-    ) -> List[ValidationResult]:
+    def validate_directory(self, directory: Path, exclude_patterns: set[str] = None) -> list[ValidationResult]:
         """
         Validate all Python files in directory.
 
@@ -225,7 +215,7 @@ class RegraDeOuroValidator:
 
         return results
 
-    def generate_report(self, results: List[ValidationResult]) -> str:
+    def generate_report(self, results: list[ValidationResult]) -> str:
         """
         Generate comprehensive validation report.
 
@@ -245,9 +235,7 @@ class RegraDeOuroValidator:
         mock_violations = sum(len(r.mock_violations) for r in results)
         placeholder_violations = sum(len(r.placeholder_violations) for r in results)
 
-        avg_quality_score = (
-            sum(r.quality_score for r in results) / total_files if total_files > 0 else 0
-        )
+        avg_quality_score = sum(r.quality_score for r in results) / total_files if total_files > 0 else 0
 
         # Generate report
         report = []
@@ -265,7 +253,7 @@ class RegraDeOuroValidator:
         report.append(f"**Total Files Analyzed:** {total_files}")
         report.append(f"**Total Lines of Code:** {total_loc:,}")
         report.append(
-            f"**Compliant Files:** {compliant_files}/{total_files} ({compliant_files/total_files*100:.1f}%)"
+            f"**Compliant Files:** {compliant_files}/{total_files} ({compliant_files / total_files * 100:.1f}%)"
         )
         report.append(f"**Total Violations:** {total_violations}")
         report.append(f"**Average Quality Score:** {avg_quality_score:.1%}")
@@ -275,9 +263,7 @@ class RegraDeOuroValidator:
         if total_violations == 0:
             report.append("### ✅ REGRA DE OURO: 100% COMPLIANT")
             report.append("")
-            report.append(
-                "Zero violations found. All code adheres to NO MOCK, NO PLACEHOLDER, NO TODO principles."
-            )
+            report.append("Zero violations found. All code adheres to NO MOCK, NO PLACEHOLDER, NO TODO principles.")
         else:
             report.append("### ⚠️ REGRA DE OURO: VIOLATIONS DETECTED")
             report.append("")
@@ -295,15 +281,11 @@ class RegraDeOuroValidator:
 
         status_todo = "✅ PASS" if todo_violations == 0 else f"❌ {todo_violations} violations"
         status_mock = "✅ PASS" if mock_violations == 0 else f"❌ {mock_violations} violations"
-        status_placeholder = (
-            "✅ PASS" if placeholder_violations == 0 else f"❌ {placeholder_violations} violations"
-        )
+        status_placeholder = "✅ PASS" if placeholder_violations == 0 else f"❌ {placeholder_violations} violations"
 
         report.append(f"| **NO TODO** (TODO/FIXME/HACK) | {todo_violations} | {status_todo} |")
         report.append(f"| **NO MOCK** (unittest.mock) | {mock_violations} | {status_mock} |")
-        report.append(
-            f"| **NO PLACEHOLDER** (pass/NotImplemented) | {placeholder_violations} | {status_placeholder} |"
-        )
+        report.append(f"| **NO PLACEHOLDER** (pass/NotImplemented) | {placeholder_violations} | {status_placeholder} |")
 
         report.append("")
         report.append("---")
@@ -314,17 +296,11 @@ class RegraDeOuroValidator:
         report.append("")
 
         files_with_module_docstring = sum(1 for r in results if r.has_module_docstring)
-        total_functions_without_docstring = sum(
-            len(r.functions_without_docstring) for r in results
-        )
-        total_functions_without_type_hints = sum(
-            len(r.functions_without_type_hints) for r in results
-        )
+        total_functions_without_docstring = sum(len(r.functions_without_docstring) for r in results)
+        total_functions_without_type_hints = sum(len(r.functions_without_type_hints) for r in results)
         total_classes_without_docstring = sum(len(r.classes_without_docstring) for r in results)
 
-        docstring_coverage = (
-            files_with_module_docstring / total_files * 100 if total_files > 0 else 0
-        )
+        docstring_coverage = files_with_module_docstring / total_files * 100 if total_files > 0 else 0
 
         report.append("| Metric | Value | Target | Status |")
         report.append("|--------|-------|--------|--------|")
@@ -488,7 +464,7 @@ def main():
 
     print("📊 Summary:")
     print(f"   Total Files: {total_files}")
-    print(f"   Compliant: {compliant_files}/{total_files} ({compliant_files/total_files*100:.1f}%)")
+    print(f"   Compliant: {compliant_files}/{total_files} ({compliant_files / total_files * 100:.1f}%)")
     print(f"   Total Violations: {total_violations}")
     print()
 

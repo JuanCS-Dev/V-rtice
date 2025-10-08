@@ -16,19 +16,19 @@ Date: 2025-10-06
 
 from datetime import datetime, timedelta
 
+from .audit_trail import AuditQuery, AuditTrail
 from .base import (
-    HITLConfig,
-    DecisionContext,
-    OperatorAction,
     ActionType,
-    RiskLevel,
     AutomationLevel,
+    DecisionContext,
+    HITLConfig,
+    OperatorAction,
+    RiskLevel,
 )
 from .decision_framework import HITLDecisionFramework
 from .decision_queue import DecisionQueue
 from .escalation_manager import EscalationManager
 from .operator_interface import OperatorInterface
-from .audit_trail import AuditTrail, AuditQuery
 from .risk_assessor import RiskAssessor
 
 
@@ -117,13 +117,11 @@ def example_1_basic_hitl_workflow():
     )
     print(f"   ✓ Operator session created: {session.operator_name}")
 
-    pending = operator_interface.get_pending_decisions(
-        session_id=session.session_id, limit=10
-    )
+    pending = operator_interface.get_pending_decisions(session_id=session.session_id, limit=10)
     print(f"   ✓ Pending decisions: {len(pending)}")
 
     decision = pending[0]
-    print(f"\n   📋 Decision Details:")
+    print("\n   📋 Decision Details:")
     print(f"      Action: {decision.context.action_type.value}")
     print(f"      Target: {decision.context.action_params['ip_address']}")
     print(f"      AI Reasoning: {decision.context.ai_reasoning}")
@@ -140,7 +138,7 @@ def example_1_basic_hitl_workflow():
         comment="Verified malicious IP in multiple threat intel feeds",
     )
 
-    print(f"\n   ✓ Decision approved and executed")
+    print("\n   ✓ Decision approved and executed")
     print(f"      Result: {approval_result['result']}")
 
     # Step 4: Review audit trail
@@ -227,7 +225,7 @@ def example_2_high_risk_escalation():
     print(f"\n   ✓ Decision created: {result.decision.decision_id}")
     print(f"   ✓ Risk Level: {result.decision.risk_level.value.upper()}")
     print(f"   ✓ Automation Level: {result.decision.automation_level.value.upper()}")
-    print(f"   ⚠️  CRITICAL RISK - Executive approval required!")
+    print("   ⚠️  CRITICAL RISK - Executive approval required!")
 
     # Step 2: Automatic escalation
     print("\n⬆️  STEP 2: Automatic Escalation")
@@ -254,9 +252,9 @@ def example_2_high_risk_escalation():
     )
     print(f"   ✓ CISO session created: {ciso_session.operator_name}")
 
-    print(f"\n   📋 Reviewing Critical Decision:")
-    print(f"      Threat: Active Ransomware")
-    print(f"      Action: DELETE /production/fileserver/infected")
+    print("\n   📋 Reviewing Critical Decision:")
+    print("      Threat: Active Ransomware")
+    print("      Action: DELETE /production/fileserver/infected")
     print(f"      Impact: {decision.context.business_impact}")
 
     # Step 4: CISO modifies and approves
@@ -273,7 +271,7 @@ def example_2_high_risk_escalation():
         comment="Approved with backup safeguard. Verified ransomware with security team.",
     )
 
-    print(f"\n   ✓ Decision executed with modifications")
+    print("\n   ✓ Decision executed with modifications")
     print(f"      Result: {modified_result['result']}")
     print(f"      Backup created: {modified_result['result'].get('backup_created')}")
 
@@ -312,13 +310,11 @@ def example_3_compliance_reporting():
         ("SEND_ALERT", 0.97, 0.3, RiskLevel.LOW),
         ("SEND_ALERT", 0.96, 0.4, RiskLevel.LOW),
         ("COLLECT_LOGS", 0.95, 0.5, RiskLevel.MEDIUM),
-
         # Operator reviewed
         ("BLOCK_IP", 0.85, 0.7, RiskLevel.MEDIUM),
         ("ISOLATE_HOST", 0.82, 0.75, RiskLevel.HIGH),
         ("QUARANTINE_FILE", 0.88, 0.68, RiskLevel.MEDIUM),
         ("KILL_PROCESS", 0.81, 0.72, RiskLevel.HIGH),
-
         # Critical (escalated)
         ("DELETE_DATA", 0.90, 0.95, RiskLevel.CRITICAL),
     ]
@@ -368,13 +364,13 @@ def example_3_compliance_reporting():
     report = audit.generate_compliance_report(start_time, end_time)
 
     # Display report
-    print(f"\n" + "=" * 60)
-    print(f"  SOC 2 COMPLIANCE REPORT")
+    print("\n" + "=" * 60)
+    print("  SOC 2 COMPLIANCE REPORT")
     print(f"  Report ID: {report.report_id}")
     print(f"  Period: {start_time.strftime('%Y-%m-%d')} to {end_time.strftime('%Y-%m-%d')}")
     print("=" * 60)
 
-    print(f"\n📊 Summary Statistics:")
+    print("\n📊 Summary Statistics:")
     print(f"   Total Decisions: {report.total_decisions}")
     print(f"   Auto-Executed: {report.auto_executed}")
     print(f"   Human Reviewed: {report.human_reviewed}")
@@ -382,24 +378,24 @@ def example_3_compliance_reporting():
     print(f"   Rejected: {report.rejected}")
     print(f"   Escalated: {report.escalated}")
 
-    print(f"\n🎯 Risk Distribution:")
+    print("\n🎯 Risk Distribution:")
     print(f"   CRITICAL: {report.critical_decisions}")
     print(f"   HIGH:     {report.high_risk_decisions}")
     print(f"   MEDIUM:   {report.medium_risk_decisions}")
     print(f"   LOW:      {report.low_risk_decisions}")
 
-    print(f"\n📈 Compliance Metrics:")
+    print("\n📈 Compliance Metrics:")
     print(f"   Automation Rate:       {report.automation_rate:.1%}")
     print(f"   Human Oversight Rate:  {report.human_oversight_rate:.1%}")
     print(f"   SLA Compliance Rate:   {report.sla_compliance_rate:.1%}")
 
-    print(f"\n👥 Operator Statistics:")
+    print("\n👥 Operator Statistics:")
     print(f"   Unique Operators: {report.unique_operators}")
 
-    print(f"\n✅ Compliance Status: PASS")
-    print(f"   ✓ Human oversight implemented for medium/high risk")
-    print(f"   ✓ Critical decisions escalated appropriately")
-    print(f"   ✓ Complete audit trail maintained")
+    print("\n✅ Compliance Status: PASS")
+    print("   ✓ Human oversight implemented for medium/high risk")
+    print("   ✓ Critical decisions escalated appropriately")
+    print("   ✓ Complete audit trail maintained")
     print(f"   ✓ SLA compliance: {report.sla_compliance_rate:.1%}")
 
     print("\n✅ Example 3 Complete - Compliance report generated!\n")

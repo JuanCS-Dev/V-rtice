@@ -31,14 +31,15 @@ Like biological motor skill learning: Combines habits and planning for optimal p
 NO MOCKS - Production-ready implementation.
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
 
 # Import HSAS components
 from actor_critic_core import ActorCriticCore
 from arbitrator_core import ArbitratorCore, ControlMode, DynaIntegration
-import numpy as np
 from skill_primitives import SkillPrimitivesLibrary
 from world_model_core import WorldModelCore
 
@@ -86,9 +87,7 @@ class HSASCore:
             gamma=gamma,
         )
 
-        self.world_model = WorldModelCore(
-            state_dim=state_dim, action_dim=action_dim, hidden_dim=hidden_dim
-        )
+        self.world_model = WorldModelCore(state_dim=state_dim, action_dim=action_dim, hidden_dim=hidden_dim)
 
         self.arbitrator = ArbitratorCore(uncertainty_threshold=0.3)
 
@@ -108,10 +107,7 @@ class HSASCore:
         self.total_reward = 0.0
         self.last_action_time: Optional[datetime] = None
 
-        logger.info(
-            f"HSASCore initialized (state={state_dim}, action={action_dim}, "
-            f"dry_run={dry_run})"
-        )
+        logger.info(f"HSASCore initialized (state={state_dim}, action={action_dim}, dry_run={dry_run})")
 
     def encode_state(self, observation: Dict[str, Any]) -> np.ndarray:
         """Encode observation into state vector.
@@ -147,9 +143,7 @@ class HSASCore:
         uncertainty = self.world_model.get_uncertainty(state)
 
         # Arbitrate between model-free and model-based
-        selected_mode = self.arbitrator.arbitrate(
-            uncertainty=uncertainty, urgency=self.urgency, mode=mode
-        )
+        selected_mode = self.arbitrator.arbitrate(uncertainty=uncertainty, urgency=self.urgency, mode=mode)
 
         metadata = {
             "mode": selected_mode.value,
@@ -180,16 +174,11 @@ class HSASCore:
 
         self.last_action_time = datetime.now()
 
-        logger.info(
-            f"Action selected: {action} (mode={selected_mode.value}, "
-            f"uncertainty={uncertainty:.3f})"
-        )
+        logger.info(f"Action selected: {action} (mode={selected_mode.value}, uncertainty={uncertainty:.3f})")
 
         return action, metadata
 
-    async def execute_skill(
-        self, action_index: int, parameters: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def execute_skill(self, action_index: int, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute skill primitive.
 
         Args:
@@ -211,17 +200,13 @@ class HSASCore:
         primitive_name = primitive_names[action_index]
 
         # Execute primitive
-        result = await self.skill_primitives.execute_primitive(
-            primitive_name, **parameters
-        )
+        result = await self.skill_primitives.execute_primitive(primitive_name, **parameters)
 
         logger.info(f"Skill executed: {primitive_name} -> {result['status']}")
 
         return result
 
-    async def step(
-        self, observation: Dict[str, Any], mode: ControlMode = ControlMode.HYBRID
-    ) -> Dict[str, Any]:
+    async def step(self, observation: Dict[str, Any], mode: ControlMode = ControlMode.HYBRID) -> Dict[str, Any]:
         """Perform one HSAS step (observe → select → execute).
 
         Args:
@@ -240,9 +225,7 @@ class HSASCore:
         # 3. Execute skill (if parameters provided)
         execution_result = None
         if "action_parameters" in observation:
-            execution_result = await self.execute_skill(
-                action, observation["action_parameters"]
-            )
+            execution_result = await self.execute_skill(action, observation["action_parameters"])
 
         return {
             "state": state.tolist(),
@@ -280,15 +263,11 @@ class HSASCore:
         self.world_model.store_transition(state, action, reward, next_state, done)
 
         # 4. Store in Dyna integration (real experience)
-        self.dyna_integration.store_real_experience(
-            state, action, reward, next_state, done
-        )
+        self.dyna_integration.store_real_experience(state, action, reward, next_state, done)
 
         # 5. Generate imaginary experience (model-based)
         for _ in range(5):  # 5 imaginary rollouts per real step
-            predicted_next_state, uncertainty = self.world_model.predict_next_state(
-                state, action
-            )
+            predicted_next_state, uncertainty = self.world_model.predict_next_state(state, action)
             predicted_reward = self.world_model.predict_reward(state, action)
 
             self.dyna_integration.store_imaginary_experience(
@@ -410,9 +389,7 @@ class HSASCore:
             "action_dim": self.action_dim,
             "episode_count": self.episode_count,
             "total_reward": self.total_reward,
-            "last_action": (
-                self.last_action_time.isoformat() if self.last_action_time else "N/A"
-            ),
+            "last_action": (self.last_action_time.isoformat() if self.last_action_time else "N/A"),
             "neuromodulation": {
                 "dopamine_lr": self.dopamine_lr,
                 "serotonin_epsilon": self.serotonin_epsilon,
@@ -474,10 +451,7 @@ class ImitationLearning:
 
         self.demonstration_buffer.append(demonstration)
 
-        logger.info(
-            f"Demonstration recorded: {incident_id} ({len(actions)} actions, "
-            f"outcome={outcome})"
-        )
+        logger.info(f"Demonstration recorded: {incident_id} ({len(actions)} actions, outcome={outcome})")
 
     async def train_from_demonstrations(self, batch_size: int = 16):
         """Train actor from demonstrations (Behavioral Cloning).
@@ -492,9 +466,7 @@ class ImitationLearning:
         # Sample batch of demonstrations
         import random
 
-        batch = random.sample(
-            self.demonstration_buffer, min(batch_size, len(self.demonstration_buffer))
-        )
+        batch = random.sample(self.demonstration_buffer, min(batch_size, len(self.demonstration_buffer)))
 
         # Create state-action pairs
         training_data = []
@@ -509,8 +481,7 @@ class ImitationLearning:
         self.training_count += 1
 
         logger.info(
-            f"Imitation learning training: {len(training_data)} state-action pairs "
-            f"(count={self.training_count})"
+            f"Imitation learning training: {len(training_data)} state-action pairs (count={self.training_count})"
         )
 
     async def get_status(self) -> Dict[str, Any]:

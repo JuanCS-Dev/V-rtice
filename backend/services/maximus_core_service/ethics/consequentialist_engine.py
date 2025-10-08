@@ -10,7 +10,7 @@ Core Principles:
 """
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from .base import ActionContext, EthicalFramework, EthicalFrameworkResult, EthicalVerdict
 
@@ -18,7 +18,7 @@ from .base import ActionContext, EthicalFramework, EthicalFrameworkResult, Ethic
 class ConsequentialistEngine(EthicalFramework):
     """Utilitarian consequentialist ethics engine."""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize consequentialist engine.
 
         Args:
@@ -53,11 +53,9 @@ class ConsequentialistEngine(EthicalFramework):
         )
 
         # Approval threshold (net utility must exceed this)
-        self.approval_threshold = (
-            config.get("approval_threshold", 0.60) if config else 0.60
-        )
+        self.approval_threshold = config.get("approval_threshold", 0.60) if config else 0.60
 
-    def get_framework_principles(self) -> List[str]:
+    def get_framework_principles(self) -> list[str]:
         """Get consequentialist principles.
 
         Returns:
@@ -99,9 +97,7 @@ class ConsequentialistEngine(EthicalFramework):
         # Step 3: Calculate net utility
         net_utility = benefits["total_score"] - costs["total_score"]
         metadata["net_utility"] = net_utility
-        reasoning_steps.append(
-            f"Net utility: {net_utility:.3f} (threshold: {self.approval_threshold})"
-        )
+        reasoning_steps.append(f"Net utility: {net_utility:.3f} (threshold: {self.approval_threshold})")
 
         # Step 4: Fecundity analysis (future consequences)
         reasoning_steps.append("Analyzing fecundity (future prevention)...")
@@ -117,16 +113,12 @@ class ConsequentialistEngine(EthicalFramework):
         reasoning_steps.append("Analyzing purity (absence of side effects)...")
         purity_score = self._assess_purity(action_context)
         metadata["purity_score"] = purity_score
-        reasoning_steps.append(
-            f"  Purity score: {purity_score:.3f} (1.0 = no side effects)"
-        )
+        reasoning_steps.append(f"  Purity score: {purity_score:.3f} (1.0 = no side effects)")
 
         # Final utility with purity adjustment
         final_utility = adjusted_utility * purity_score
         metadata["final_utility"] = final_utility
-        reasoning_steps.append(
-            f"Final utility (after fecundity & purity): {final_utility:.3f}"
-        )
+        reasoning_steps.append(f"Final utility (after fecundity & purity): {final_utility:.3f}")
 
         # Step 6: Decision
         approved = final_utility >= self.approval_threshold
@@ -160,7 +152,7 @@ class ConsequentialistEngine(EthicalFramework):
             metadata=metadata,
         )
 
-    def _calculate_benefits(self, action_context: ActionContext) -> Dict[str, Any]:
+    def _calculate_benefits(self, action_context: ActionContext) -> dict[str, Any]:
         """Calculate total benefits of the action.
 
         Args:
@@ -188,9 +180,7 @@ class ConsequentialistEngine(EthicalFramework):
             benefit_score = (
                 severity
                 * confidence
-                * min(
-                    1.0, (1 + people_protected / 1000)
-                )  # Normalize people_protected to [1.0, 2.0] range
+                * min(1.0, (1 + people_protected / 1000))  # Normalize people_protected to [1.0, 2.0] range
             )
             benefits["threat_mitigation"] = benefit_score
 
@@ -201,9 +191,7 @@ class ConsequentialistEngine(EthicalFramework):
 
         # System resilience (if action strengthens infrastructure)
         if action_context.impact_assessment:
-            resilience_gain = action_context.impact_assessment.get(
-                "resilience_improvement", 0.0
-            )
+            resilience_gain = action_context.impact_assessment.get("resilience_improvement", 0.0)
             benefits["system_resilience"] = resilience_gain
 
         # Knowledge gain (learning from response)
@@ -221,7 +209,7 @@ class ConsequentialistEngine(EthicalFramework):
 
         return benefits
 
-    def _calculate_costs(self, action_context: ActionContext) -> Dict[str, Any]:
+    def _calculate_costs(self, action_context: ActionContext) -> dict[str, Any]:
         """Calculate total costs of the action.
 
         Args:
@@ -240,21 +228,15 @@ class ConsequentialistEngine(EthicalFramework):
 
         # Service disruption cost
         if action_context.impact_assessment:
-            disruption_level = action_context.impact_assessment.get(
-                "disruption_level", 0.0
-            )
+            disruption_level = action_context.impact_assessment.get("disruption_level", 0.0)
             people_impacted = action_context.impact_assessment.get("people_impacted", 0)
 
             # FIXED: No weight multiplication
-            costs["disruption"] = disruption_level * min(
-                1.0, (1 + people_impacted / 1000)
-            )
+            costs["disruption"] = disruption_level * min(1.0, (1 + people_impacted / 1000))
 
         # False positive risk (cost of being wrong)
         if action_context.threat_data:
-            false_positive_risk = 1.0 - action_context.threat_data.get(
-                "confidence", 0.9
-            )
+            false_positive_risk = 1.0 - action_context.threat_data.get("confidence", 0.9)
             costs["false_positive_risk"] = false_positive_risk
 
         # Resource consumption (compute, time, human attention)
@@ -263,9 +245,7 @@ class ConsequentialistEngine(EthicalFramework):
 
         # Collateral damage (unintended harm)
         if action_context.action_type == "offensive_action":
-            if not action_context.target_info or not action_context.target_info.get(
-                "precision_targeting"
-            ):
+            if not action_context.target_info or not action_context.target_info.get("precision_targeting"):
                 costs["collateral_damage"] = 0.4
 
         costs["total_score"] = sum(
@@ -301,9 +281,7 @@ class ConsequentialistEngine(EthicalFramework):
 
         # Does action create precedent for escalation?
         if action_context.action_type == "offensive_action":
-            if action_context.threat_data and action_context.threat_data.get(
-                "provocation_risk"
-            ):
+            if action_context.threat_data and action_context.threat_data.get("provocation_risk"):
                 fecundity -= 0.4  # May trigger retaliatory attacks
 
         return max(0.1, min(2.0, fecundity))  # Clamp between 0.1 and 2.0
@@ -341,9 +319,7 @@ class ConsequentialistEngine(EthicalFramework):
 
         return max(0.0, min(1.0, purity))  # Clamp between 0.0 and 1.0
 
-    def _identify_stakeholders(
-        self, action_context: ActionContext
-    ) -> List[Dict[str, Any]]:
+    def _identify_stakeholders(self, action_context: ActionContext) -> list[dict[str, Any]]:
         """Identify all stakeholders affected by the action.
 
         Args:
@@ -398,9 +374,7 @@ class ConsequentialistEngine(EthicalFramework):
                 "role": "Operational Burden",
                 "impact_level": "neutral",
                 "count": (
-                    action_context.operator_context.get("team_size", 5)
-                    if action_context.operator_context
-                    else 5
+                    action_context.operator_context.get("team_size", 5) if action_context.operator_context else 5
                 ),
             }
         )

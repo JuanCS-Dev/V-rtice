@@ -15,10 +15,11 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
 import logging
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -42,7 +43,7 @@ try:
 except ImportError:
     TORCH_AVAILABLE = False
 
-from training.layer_trainer import LayerTrainer, TrainingConfig
+from training.layer_trainer import TrainingConfig
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,7 +57,7 @@ class TuningConfig:
     study_name: str
     direction: str = "minimize"  # "minimize" or "maximize"
     n_trials: int = 50
-    timeout: Optional[int] = None  # Timeout in seconds
+    timeout: int | None = None  # Timeout in seconds
 
     # Sampler
     sampler: str = "tpe"  # "tpe", "random", "grid"
@@ -67,7 +68,7 @@ class TuningConfig:
     pruner_n_warmup_steps: int = 10
 
     # Storage (for distributed tuning)
-    storage_url: Optional[str] = None  # e.g., "sqlite:///tuning.db"
+    storage_url: str | None = None  # e.g., "sqlite:///tuning.db"
 
     # Output
     output_dir: Path = Path("training/tuning")
@@ -97,22 +98,15 @@ class HyperparameterTuner:
             dropout = trial.suggest_float("dropout", 0.1, 0.5)
 
             # Train model
-            config = TrainingConfig(
-                learning_rate=lr,
-                batch_size=batch_size
-            )
+            config = TrainingConfig(learning_rate=lr, batch_size=batch_size)
             model, results = train_model(config)
 
             # Return metric to optimize
             return results["best_val_loss"]
 
+
         # Create tuner
-        tuner = HyperparameterTuner(
-            config=TuningConfig(
-                study_name="layer1_vae_tuning",
-                n_trials=50
-            )
-        )
+        tuner = HyperparameterTuner(config=TuningConfig(study_name="layer1_vae_tuning", n_trials=50))
 
         # Run tuning
         best_params = tuner.tune(objective)
@@ -141,23 +135,22 @@ class HyperparameterTuner:
         # Create pruner
         if config.use_pruner:
             self.pruner = MedianPruner(
-                n_startup_trials=config.pruner_n_startup_trials,
-                n_warmup_steps=config.pruner_n_warmup_steps
+                n_startup_trials=config.pruner_n_startup_trials, n_warmup_steps=config.pruner_n_warmup_steps
             )
         else:
             self.pruner = None
 
         # Study will be created in tune()
-        self.study: Optional[optuna.Study] = None
+        self.study: optuna.Study | None = None
 
-        logger.info(f"HyperparameterTuner initialized: sampler={config.sampler}, "
-                    f"pruner={'enabled' if config.use_pruner else 'disabled'}")
+        logger.info(
+            f"HyperparameterTuner initialized: sampler={config.sampler}, "
+            f"pruner={'enabled' if config.use_pruner else 'disabled'}"
+        )
 
     def tune(
-        self,
-        objective: Callable[[optuna.Trial], float],
-        callbacks: Optional[List[Callable]] = None
-    ) -> Dict[str, Any]:
+        self, objective: Callable[[optuna.Trial], float], callbacks: list[Callable] | None = None
+    ) -> dict[str, Any]:
         """Run hyperparameter tuning.
 
         Args:
@@ -174,7 +167,7 @@ class HyperparameterTuner:
             sampler=self.sampler,
             pruner=self.pruner,
             storage=self.config.storage_url,
-            load_if_exists=True
+            load_if_exists=True,
         )
 
         logger.info(f"Starting optimization: {self.config.n_trials} trials")
@@ -185,7 +178,7 @@ class HyperparameterTuner:
             n_trials=self.config.n_trials,
             timeout=self.config.timeout,
             callbacks=callbacks,
-            show_progress_bar=True
+            show_progress_bar=True,
         )
 
         # Get results
@@ -193,7 +186,7 @@ class HyperparameterTuner:
         best_params = best_trial.params
         best_value = best_trial.value
 
-        logger.info(f"Optimization complete!")
+        logger.info("Optimization complete!")
         logger.info(f"Best trial: {best_trial.number}")
         logger.info(f"Best value: {best_value:.4f}")
         logger.info(f"Best parameters: {best_params}")
@@ -206,7 +199,7 @@ class HyperparameterTuner:
             "best_value": best_value,
             "best_trial_number": best_trial.number,
             "n_trials": len(self.study.trials),
-            "study": self.study
+            "study": self.study,
         }
 
     def _save_results(self):
@@ -265,10 +258,7 @@ class HyperparameterTuner:
 
 
 def create_layer1_vae_objective(
-    train_features: np.ndarray,
-    train_labels: np.ndarray,
-    val_features: np.ndarray,
-    val_labels: np.ndarray
+    train_features: np.ndarray, train_labels: np.ndarray, val_features: np.ndarray, val_labels: np.ndarray
 ) -> Callable[[optuna.Trial], float]:
     """Create objective function for Layer 1 VAE tuning.
 
@@ -313,7 +303,7 @@ def create_layer1_vae_objective(
             learning_rate=learning_rate,
             early_stopping_patience=5,
             checkpoint_dir=Path(f"training/tuning/checkpoints/trial{trial.number}"),
-            log_dir=Path(f"training/tuning/logs/trial{trial.number}")
+            log_dir=Path(f"training/tuning/logs/trial{trial.number}"),
         )
 
         # Train model
@@ -324,7 +314,7 @@ def create_layer1_vae_objective(
                 val_features=val_features,
                 val_labels=val_labels,
                 config=config,
-                beta=beta
+                beta=beta,
             )
 
             # Get best validation loss
@@ -349,11 +339,8 @@ def create_layer1_vae_objective(
 
 
 def tune_layer1_vae(
-    train_data_path: str,
-    val_data_path: str,
-    n_trials: int = 50,
-    study_name: str = "layer1_vae_tuning"
-) -> Dict[str, Any]:
+    train_data_path: str, val_data_path: str, n_trials: int = 50, study_name: str = "layer1_vae_tuning"
+) -> dict[str, Any]:
     """Tune hyperparameters for Layer 1 VAE.
 
     Args:
@@ -378,19 +365,11 @@ def tune_layer1_vae(
 
     # Create objective
     objective = create_layer1_vae_objective(
-        train_features=train_features,
-        train_labels=train_labels,
-        val_features=val_features,
-        val_labels=val_labels
+        train_features=train_features, train_labels=train_labels, val_features=val_features, val_labels=val_labels
     )
 
     # Create tuner
-    tuning_config = TuningConfig(
-        study_name=study_name,
-        direction="minimize",
-        n_trials=n_trials,
-        use_pruner=True
-    )
+    tuning_config = TuningConfig(study_name=study_name, direction="minimize", n_trials=n_trials, use_pruner=True)
 
     tuner = HyperparameterTuner(config=tuning_config)
 
@@ -406,6 +385,7 @@ def tune_layer1_vae(
 # =============================================================================
 # CLI
 # =============================================================================
+
 
 def main():
     """Main tuning script."""
@@ -426,10 +406,7 @@ def main():
 
     # Run tuning
     results = tune_layer1_vae(
-        train_data_path=args.train_data,
-        val_data_path=args.val_data,
-        n_trials=args.n_trials,
-        study_name=args.study_name
+        train_data_path=args.train_data, val_data_path=args.val_data, n_trials=args.n_trials, study_name=args.study_name
     )
 
     logger.info("Tuning complete!")

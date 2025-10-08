@@ -12,7 +12,6 @@ crucial for providing robust and flexible planning capabilities in complex and
 dynamic operational environments.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -111,15 +110,11 @@ class FuzzyController:
         for rule in self.fuzzy_rules:
             antecedent_strength = 1.0
             for var, term in rule["IF"].items():
-                antecedent_strength = min(
-                    antecedent_strength, fuzzified_inputs.get(var, {}).get(term, 0.0)
-                )
+                antecedent_strength = min(antecedent_strength, fuzzified_inputs.get(var, {}).get(term, 0.0))
 
             for action, intensity_term in rule["THEN"].items():
                 # For simplicity, we'll just take the max strength for each action
-                inferred_actions[action] = max(
-                    inferred_actions[action], antecedent_strength
-                )
+                inferred_actions[action] = max(inferred_actions[action], antecedent_strength)
         return inferred_actions
 
     def _defuzzify(self, inferred_actions: Dict[str, float]) -> List[Dict[str, Any]]:
@@ -162,9 +157,7 @@ class FuzzyController:
                         crisp_actions.append(
                             {
                                 "type": "log_status",
-                                "parameters": {
-                                    "message": "System stable, no action needed."
-                                },
+                                "parameters": {"message": "System stable, no action needed."},
                             }
                         )
         return crisp_actions
@@ -188,9 +181,7 @@ class FuzzyController:
         fuzzified_inputs = {
             "cpu_usage": self._fuzzify("cpu_usage", cpu_usage),
             "health_score": self._fuzzify("health_score", health_score),
-            "performance_priority": self._fuzzify(
-                "performance_priority", performance_priority
-            ),
+            "performance_priority": self._fuzzify("performance_priority", performance_priority),
         }
 
         inferred_actions = self._infer(fuzzified_inputs)
@@ -206,11 +197,7 @@ class FuzzyController:
         """
         return {
             "status": "active",
-            "last_decision": (
-                self.last_decision_time.isoformat()
-                if self.last_decision_time
-                else "N/A"
-            ),
+            "last_decision": (self.last_decision_time.isoformat() if self.last_decision_time else "N/A"),
             "fuzzy_sets_count": len(self.fuzzy_sets),
             "fuzzy_rules_count": len(self.fuzzy_rules),
         }

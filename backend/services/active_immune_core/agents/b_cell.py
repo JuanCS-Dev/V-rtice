@@ -16,17 +16,15 @@ Unlike innate immunity (Neutrophils, NK Cells, Macrophages), B Cells:
 PRODUCTION-READY: Real PostgreSQL, Kafka, no mocks, graceful degradation.
 """
 
-import asyncio
-import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import aiohttp
 from pydantic import BaseModel, Field
 
 from .base import AgenteImunologicoBase
-from .models import AgentStatus, AgentType
+from .models import AgentType
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +132,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         self._db_pool: Optional[Any] = None
 
         logger.info(
-            f"B Cell initialized: {self.state.id[:8]} "
-            f"(zone={area_patrulha}, affinity_threshold={affinity_threshold})"
+            f"B Cell initialized: {self.state.id[:8]} (zone={area_patrulha}, affinity_threshold={affinity_threshold})"
         )
 
     # ==================== LIFECYCLE ====================
@@ -147,9 +144,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         # Load existing memories from database
         try:
             await self._load_memory_patterns()
-            logger.info(
-                f"B Cell {self.state.id[:8]} loaded {len(self.antibody_patterns)} patterns"
-            )
+            logger.info(f"B Cell {self.state.id[:8]} loaded {len(self.antibody_patterns)} patterns")
         except Exception as e:
             logger.warning(f"Failed to load memory patterns: {e}. Starting fresh.")
 
@@ -158,9 +153,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         # Save memories before stopping
         try:
             await self._persist_memory_patterns()
-            logger.info(
-                f"B Cell {self.state.id[:8]} persisted {len(self.antibody_patterns)} patterns"
-            )
+            logger.info(f"B Cell {self.state.id[:8]} persisted {len(self.antibody_patterns)} patterns")
         except Exception as e:
             logger.error(f"Failed to persist memory patterns: {e}")
 
@@ -215,8 +208,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
 
             if affinity >= self.affinity_threshold:
                 logger.info(
-                    f"B Cell {self.state.id[:8]} pattern match! "
-                    f"(pattern={pattern_id[:8]}, affinity={affinity:.2f})"
+                    f"B Cell {self.state.id[:8]} pattern match! (pattern={pattern_id[:8]}, affinity={affinity:.2f})"
                 )
 
                 # Pattern matched - activate
@@ -242,9 +234,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
             "pattern_type": event.get("type", "unknown"),
         }
 
-    def _calculate_affinity(
-        self, signature: Dict[str, Any], pattern: Dict[str, Any]
-    ) -> float:
+    def _calculate_affinity(self, signature: Dict[str, Any], pattern: Dict[str, Any]) -> float:
         """
         Calculate antibody-antigen affinity (pattern match score).
 
@@ -315,9 +305,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         Returns:
             Investigation result (minimal)
         """
-        logger.debug(
-            f"B Cell {self.state.id[:8]} doesn't investigate unknown threats"
-        )
+        logger.debug(f"B Cell {self.state.id[:8]} doesn't investigate unknown threats")
 
         return {
             "is_threat": False,
@@ -342,17 +330,13 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         pattern_id = alvo.get("pattern_id")
 
         if not pattern_id or pattern_id not in self.antibody_patterns:
-            logger.warning(
-                f"B Cell {self.state.id[:8]} no antibody for pattern {pattern_id}"
-            )
+            logger.warning(f"B Cell {self.state.id[:8]} no antibody for pattern {pattern_id}")
             return False
 
         antibody = self.antibody_patterns[pattern_id]
         return await self._neutralizar_com_anticorpo(antibody, alvo)
 
-    async def _neutralizar_com_anticorpo(
-        self, antibody: AntibodyPattern, alvo: Dict[str, Any]
-    ) -> bool:
+    async def _neutralizar_com_anticorpo(self, antibody: AntibodyPattern, alvo: Dict[str, Any]) -> bool:
         """
         Neutralize threat using specific antibody pattern.
 
@@ -368,10 +352,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         if not dst_ip:
             return False
 
-        logger.info(
-            f"B Cell {self.state.id[:8]} neutralizing {dst_ip} "
-            f"with antibody {antibody.pattern_id[:8]}"
-        )
+        logger.info(f"B Cell {self.state.id[:8]} neutralizing {dst_ip} with antibody {antibody.pattern_id[:8]}")
 
         # Automated block using learned pattern
         try:
@@ -425,10 +406,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         # Persist to database
         try:
             await self._persist_memory_cell(memory)
-            logger.info(
-                f"B Cell {self.state.id[:8]} formed memory cell "
-                f"(pattern={antibody.pattern_id[:8]})"
-            )
+            logger.info(f"B Cell {self.state.id[:8]} formed memory cell (pattern={antibody.pattern_id[:8]})")
         except Exception as e:
             logger.warning(f"Failed to persist memory cell: {e}")
 
@@ -463,10 +441,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         self.antibody_patterns[pattern_id] = antibody
         self.state.padroes_aprendidos.append(pattern_id)
 
-        logger.info(
-            f"B Cell {self.state.id[:8]} learned pattern "
-            f"(type={pattern_type}, confidence={confidence:.2f})"
-        )
+        logger.info(f"B Cell {self.state.id[:8]} learned pattern (type={pattern_type}, confidence={confidence:.2f})")
 
         return antibody
 
@@ -477,10 +452,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
         self.plasma_cell_active = True
         self.differentiation_state = BCellState.PLASMA
 
-        logger.info(
-            f"B Cell {self.state.id[:8]} differentiated to plasma cell "
-            "(high-affinity antibody secretion)"
-        )
+        logger.info(f"B Cell {self.state.id[:8]} differentiated to plasma cell (high-affinity antibody secretion)")
 
     async def _trigger_clonal_expansion(self, antibody: AntibodyPattern) -> None:
         """
@@ -502,9 +474,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
 
     # ==================== CYTOKINE SECRETION ====================
 
-    async def _secretar_il4(
-        self, antibody: AntibodyPattern, evento: Dict[str, Any]
-    ) -> None:
+    async def _secretar_il4(self, antibody: AntibodyPattern, evento: Dict[str, Any]) -> None:
         """
         Secrete IL4 cytokine to activate other B cells.
 
@@ -533,10 +503,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
 
             self.il4_secretions += 1
 
-            logger.debug(
-                f"B Cell {self.state.id[:8]} secreted IL4 "
-                f"(pattern={antibody.pattern_id[:8]})"
-            )
+            logger.debug(f"B Cell {self.state.id[:8]} secreted IL4 (pattern={antibody.pattern_id[:8]})")
 
         except Exception as e:
             logger.error(f"Failed to secrete IL4: {e}")
@@ -560,9 +527,7 @@ class LinfocitoBDigital(AgenteImunologicoBase):
 
         # GRACEFUL DEGRADATION: PostgreSQL persistence optional
         # Patterns persist in-memory during session, DB writes when available
-        logger.debug(
-            f"Memory patterns persisted ({len(self.antibody_patterns)} patterns, DB optional)"
-        )
+        logger.debug(f"Memory patterns persisted ({len(self.antibody_patterns)} patterns, DB optional)")
 
     async def _persist_memory_cell(self, memory: MemoryBCell) -> None:
         """Persist memory cell to database - GRACEFUL DEGRADATION"""
@@ -603,12 +568,9 @@ class LinfocitoBDigital(AgenteImunologicoBase):
             "pattern_matches": self.pattern_matches,
             "il4_secretions": self.il4_secretions,
             "clonal_expansions": self.clonal_expansions,
-            "total_detections": sum(
-                ab.detections for ab in self.antibody_patterns.values()
-            ),
+            "total_detections": sum(ab.detections for ab in self.antibody_patterns.values()),
             "avg_pattern_confidence": (
-                sum(ab.confidence for ab in self.antibody_patterns.values())
-                / len(self.antibody_patterns)
+                sum(ab.confidence for ab in self.antibody_patterns.values()) / len(self.antibody_patterns)
                 if self.antibody_patterns
                 else 0.0
             ),

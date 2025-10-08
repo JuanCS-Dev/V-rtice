@@ -13,42 +13,36 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
-import pytest
 import os
 import tempfile
 from datetime import datetime, timedelta
-from pathlib import Path
+
+import pytest
 
 from .base import (
-    Regulation,
-    Control,
-    Evidence,
-    ComplianceResult,
-    ComplianceViolation,
-    ComplianceStatus,
-    RegulationType,
-    ControlCategory,
-    EvidenceType,
-    ViolationSeverity,
     ComplianceConfig,
+    ComplianceStatus,
+    Control,
+    ControlCategory,
+    Evidence,
+    EvidenceType,
     Gap,
+    Regulation,
+    RegulationType,
+    ViolationSeverity,
 )
-from .regulations import (
-    EU_AI_ACT,
-    GDPR,
-    ISO_27001,
-    get_regulation,
+from .certifications import (
+    IEEE7000Checker,
+    ISO27001Checker,
+    SOC2Checker,
 )
 from .compliance_engine import ComplianceEngine
 from .evidence_collector import EvidenceCollector
 from .gap_analyzer import GapAnalyzer
-from .monitoring import ComplianceMonitor, ComplianceAlert
-from .certifications import (
-    ISO27001Checker,
-    SOC2Checker,
-    IEEE7000Checker,
+from .monitoring import ComplianceAlert, ComplianceMonitor
+from .regulations import (
+    get_regulation,
 )
-
 
 # ==============================================================================
 # BASE CLASSES TESTS
@@ -191,9 +185,7 @@ def test_check_compliance():
 
 def test_run_all_checks():
     """Test running compliance checks for all regulations."""
-    config = ComplianceConfig(
-        enabled_regulations=[RegulationType.ISO_27001, RegulationType.GDPR]
-    )
+    config = ComplianceConfig(enabled_regulations=[RegulationType.ISO_27001, RegulationType.GDPR])
     engine = ComplianceEngine(config)
 
     snapshot = engine.run_all_checks()

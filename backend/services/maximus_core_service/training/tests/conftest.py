@@ -12,11 +12,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from datetime import datetime, timedelta
 import json
-from pathlib import Path
 import tempfile
-from typing import Dict, List
+from datetime import datetime, timedelta
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -34,7 +33,7 @@ def temp_dir():
 
 
 @pytest.fixture
-def synthetic_events() -> List[Dict]:
+def synthetic_events() -> list[dict]:
     """Generate synthetic security events for testing.
 
     Returns:
@@ -53,7 +52,6 @@ def synthetic_events() -> List[Dict]:
             "event_type": event_types[i % len(event_types)],
             "severity": severities[i % len(severities)],
             "source": "test_sensor",
-
             # Network features
             "source_ip": f"192.168.1.{(i % 254) + 1}",
             "dest_ip": f"10.0.0.{(i % 254) + 1}",
@@ -62,7 +60,6 @@ def synthetic_events() -> List[Dict]:
             "protocol": ["tcp", "udp", "icmp"][i % 3],
             "bytes_sent": 1024 * (i % 100),
             "bytes_received": 512 * (i % 50),
-
             # Process features
             "process_name": f"process_{i % 10}",
             "process_id": 1000 + i,
@@ -70,23 +67,19 @@ def synthetic_events() -> List[Dict]:
             "parent_process_id": 1000 + (i // 2),
             "parent_process_name": f"parent_{i % 5}",
             "command_line": f"process_{i % 10} --arg{i}",
-
             # File features
             "file_path": f"/var/log/file_{i % 20}.log",
             "file_hash": f"{'a' * 32}{i:04d}",
             "file_size": 1024 * (i % 1000),
             "file_extension": [".log", ".txt", ".exe", ".dll"][i % 4],
-
             # User features
             "user_name": f"user_{i % 10}",
             "user_id": 1000 + (i % 10),
             "user_domain": "test.local",
-
             # Label (for supervised learning)
             "label": i % 3,  # 3 classes: 0=benign, 1=suspicious, 2=malicious
-
             # Raw data
-            "raw": f"Raw event data {i}"
+            "raw": f"Raw event data {i}",
         }
 
         events.append(event)
@@ -151,18 +144,13 @@ def synthetic_dataset(synthetic_features, synthetic_labels, temp_dir) -> Path:
 
     sample_ids = [f"sample_{i:04d}" for i in range(len(synthetic_features))]
 
-    np.savez(
-        dataset_path,
-        features=synthetic_features,
-        labels=synthetic_labels,
-        sample_ids=np.array(sample_ids)
-    )
+    np.savez(dataset_path, features=synthetic_features, labels=synthetic_labels, sample_ids=np.array(sample_ids))
 
     return dataset_path
 
 
 @pytest.fixture
-def train_val_test_splits(synthetic_features, synthetic_labels, temp_dir) -> Dict[str, Path]:
+def train_val_test_splits(synthetic_features, synthetic_labels, temp_dir) -> dict[str, Path]:
     """Create train/val/test split files.
 
     Args:
@@ -183,16 +171,12 @@ def train_val_test_splits(synthetic_features, synthetic_labels, temp_dir) -> Dic
     n_val = int(0.15 * n_samples)
 
     train_indices = indices[:n_train]
-    val_indices = indices[n_train:n_train + n_val]
-    test_indices = indices[n_train + n_val:]
+    val_indices = indices[n_train : n_train + n_val]
+    test_indices = indices[n_train + n_val :]
 
     splits = {}
 
-    for split_name, split_indices in [
-        ("train", train_indices),
-        ("val", val_indices),
-        ("test", test_indices)
-    ]:
+    for split_name, split_indices in [("train", train_indices), ("val", val_indices), ("test", test_indices)]:
         split_path = temp_dir / f"{split_name}.npz"
 
         sample_ids = [f"sample_{i:04d}" for i in split_indices]
@@ -201,7 +185,7 @@ def train_val_test_splits(synthetic_features, synthetic_labels, temp_dir) -> Dic
             split_path,
             features=synthetic_features[split_indices],
             labels=synthetic_labels[split_indices],
-            sample_ids=np.array(sample_ids)
+            sample_ids=np.array(sample_ids),
         )
 
         splits[split_name] = split_path
@@ -226,9 +210,7 @@ def simple_pytorch_model():
             def __init__(self, input_dim=128, hidden_dim=64, output_dim=3):
                 super().__init__()
                 self.layers = nn.Sequential(
-                    nn.Linear(input_dim, hidden_dim),
-                    nn.ReLU(),
-                    nn.Linear(hidden_dim, output_dim)
+                    nn.Linear(input_dim, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, output_dim)
                 )
 
             def forward(self, x):

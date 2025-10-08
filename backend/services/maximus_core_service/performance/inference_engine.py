@@ -15,14 +15,14 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
-from collections import OrderedDict
 import hashlib
 import logging
-from pathlib import Path
 import threading
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from collections import OrderedDict
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -30,6 +30,7 @@ import numpy as np
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -83,7 +84,7 @@ class LRUCache:
         self.misses = 0
         self.lock = threading.Lock()
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Get value from cache.
 
         Args:
@@ -130,7 +131,7 @@ class LRUCache:
             self.hits = 0
             self.misses = 0
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics.
 
         Returns:
@@ -144,7 +145,7 @@ class LRUCache:
             "misses": self.misses,
             "hit_rate": hit_rate,
             "size": len(self.cache),
-            "max_size": self.max_size
+            "max_size": self.max_size,
         }
 
 
@@ -163,12 +164,7 @@ class InferenceEngine:
     Example:
         ```python
         # PyTorch model
-        config = InferenceConfig(
-            backend="pytorch",
-            device="cuda",
-            enable_cache=True,
-            use_amp=True
-        )
+        config = InferenceConfig(backend="pytorch", device="cuda", enable_cache=True, use_amp=True)
 
         engine = InferenceEngine(model=model, config=config)
 
@@ -184,11 +180,7 @@ class InferenceEngine:
         ```
     """
 
-    def __init__(
-        self,
-        model: Any,
-        config: InferenceConfig = InferenceConfig()
-    ):
+    def __init__(self, model: Any, config: InferenceConfig = InferenceConfig()):
         """Initialize inference engine.
 
         Args:
@@ -210,8 +202,7 @@ class InferenceEngine:
         if config.num_warmup_runs > 0:
             self._warmup()
 
-        logger.info(f"InferenceEngine initialized: backend={config.backend}, "
-                   f"device={config.device}")
+        logger.info(f"InferenceEngine initialized: backend={config.backend}, device={config.device}")
 
     def predict(self, input_data: Any) -> Any:
         """Run inference on single input.
@@ -250,7 +241,7 @@ class InferenceEngine:
 
         return output
 
-    def predict_batch(self, inputs: List[Any]) -> List[Any]:
+    def predict_batch(self, inputs: list[Any]) -> list[Any]:
         """Run inference on batch of inputs.
 
         Args:
@@ -267,14 +258,11 @@ class InferenceEngine:
         batch_size = self.config.max_batch_size
 
         for i in range(0, len(inputs), batch_size):
-            batch = inputs[i:i + batch_size]
+            batch = inputs[i : i + batch_size]
 
             # Stack batch
             if self.config.backend == "pytorch" and TORCH_AVAILABLE:
-                batch_tensor = torch.stack([
-                    x if isinstance(x, torch.Tensor) else torch.tensor(x)
-                    for x in batch
-                ])
+                batch_tensor = torch.stack([x if isinstance(x, torch.Tensor) else torch.tensor(x) for x in batch])
             else:
                 batch_tensor = np.stack(batch)
 
@@ -301,14 +289,13 @@ class InferenceEngine:
         if self.config.backend == "pytorch":
             return self._setup_pytorch_model(model)
 
-        elif self.config.backend == "onnx":
+        if self.config.backend == "onnx":
             return self._setup_onnx_model(model)
 
-        elif self.config.backend == "tensorrt":
+        if self.config.backend == "tensorrt":
             return self._setup_tensorrt_model(model)
 
-        else:
-            raise ValueError(f"Unknown backend: {self.config.backend}")
+        raise ValueError(f"Unknown backend: {self.config.backend}")
 
     def _setup_pytorch_model(self, model: nn.Module) -> nn.Module:
         """Setup PyTorch model.
@@ -339,7 +326,7 @@ class InferenceEngine:
 
         return model
 
-    def _setup_onnx_model(self, model_path: Union[str, Path]) -> Any:
+    def _setup_onnx_model(self, model_path: str | Path) -> Any:
         """Setup ONNX model.
 
         Args:
@@ -353,15 +340,12 @@ class InferenceEngine:
 
             # Setup providers
             if self.config.device == "cuda":
-                providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+                providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
             else:
-                providers = ['CPUExecutionProvider']
+                providers = ["CPUExecutionProvider"]
 
             # Create session
-            session = ort.InferenceSession(
-                str(model_path),
-                providers=providers
-            )
+            session = ort.InferenceSession(str(model_path), providers=providers)
 
             logger.info(f"ONNX model loaded with providers: {providers}")
 
@@ -370,7 +354,7 @@ class InferenceEngine:
         except ImportError:
             raise ImportError("onnxruntime not available. Install with: pip install onnxruntime")
 
-    def _setup_tensorrt_model(self, model_path: Union[str, Path]) -> Any:
+    def _setup_tensorrt_model(self, model_path: str | Path) -> Any:
         """Setup TensorRT model.
 
         Args:
@@ -380,9 +364,9 @@ class InferenceEngine:
             TensorRT context
         """
         try:
-            import tensorrt as trt
-            import pycuda.driver as cuda
             import pycuda.autoinit
+            import pycuda.driver as cuda
+            import tensorrt as trt
 
             # Load engine
             with open(model_path, "rb") as f:
@@ -411,14 +395,13 @@ class InferenceEngine:
         if self.config.backend == "pytorch":
             return self._run_pytorch_inference(input_data)
 
-        elif self.config.backend == "onnx":
+        if self.config.backend == "onnx":
             return self._run_onnx_inference(input_data)
 
-        elif self.config.backend == "tensorrt":
+        if self.config.backend == "tensorrt":
             return self._run_tensorrt_inference(input_data)
 
-        else:
-            raise ValueError(f"Unknown backend: {self.config.backend}")
+        raise ValueError(f"Unknown backend: {self.config.backend}")
 
     def _run_pytorch_inference(self, input_data: Any) -> Any:
         """Run PyTorch inference.
@@ -531,7 +514,7 @@ class InferenceEngine:
         # Compute hash
         return hashlib.md5(data_bytes).hexdigest()
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get engine statistics.
 
         Returns:
@@ -541,7 +524,7 @@ class InferenceEngine:
             "total_inferences": self.total_inferences,
             "avg_latency_ms": self.total_latency_ms / self.total_inferences if self.total_inferences > 0 else 0.0,
             "backend": self.config.backend,
-            "device": self.config.device
+            "device": self.config.device,
         }
 
         # Add cache stats
@@ -573,6 +556,7 @@ class InferenceEngine:
 # CLI
 # =============================================================================
 
+
 def main():
     """Main inference script."""
     import argparse
@@ -580,9 +564,9 @@ def main():
     parser = argparse.ArgumentParser(description="MAXIMUS Inference Engine")
 
     parser.add_argument("--model_path", type=str, required=True, help="Path to model")
-    parser.add_argument("--backend", type=str, default="pytorch",
-                       choices=["pytorch", "onnx", "tensorrt"],
-                       help="Inference backend")
+    parser.add_argument(
+        "--backend", type=str, default="pytorch", choices=["pytorch", "onnx", "tensorrt"], help="Inference backend"
+    )
     parser.add_argument("--device", type=str, default="cuda", help="Device (cuda/cpu)")
     parser.add_argument("--batch_size", type=int, default=32, help="Max batch size")
     parser.add_argument("--enable_cache", action="store_true", help="Enable result caching")
@@ -602,7 +586,7 @@ def main():
         device=args.device,
         max_batch_size=args.batch_size,
         enable_cache=args.enable_cache,
-        num_warmup_runs=args.num_warmup
+        num_warmup_runs=args.num_warmup,
     )
 
     engine = InferenceEngine(model=model, config=config)
@@ -618,7 +602,7 @@ def main():
 
     # Print stats
     stats = engine.get_stats()
-    print(f"\nInference Stats:")
+    print("\nInference Stats:")
     print(f"  Total inferences: {stats['total_inferences']}")
     print(f"  Avg latency: {stats['avg_latency_ms']:.2f} ms")
 

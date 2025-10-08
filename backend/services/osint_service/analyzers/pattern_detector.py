@@ -13,7 +13,6 @@ patterns contribute to generating novel insights and supporting proactive threat
 intelligence.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -63,9 +62,7 @@ class PatternDetector:
 
         if pattern_type == "unusual_login_time":
             login_hour = data.get("login_hour")
-            if login_hour is not None and (
-                login_hour < 6 or login_hour > 22
-            ):  # Outside 6 AM - 10 PM
+            if login_hour is not None and (login_hour < 6 or login_hour > 22):  # Outside 6 AM - 10 PM
                 detected_patterns.append(
                     {
                         "pattern": "unusual_login_time",
@@ -74,10 +71,7 @@ class PatternDetector:
                 )
         elif pattern_type == "repeated_failed_logins":
             failed_attempts = data.get("failed_login_attempts", 0)
-            if (
-                failed_attempts
-                >= self.predefined_patterns["repeated_failed_logins"]["threshold"]
-            ):
+            if failed_attempts >= self.predefined_patterns["repeated_failed_logins"]["threshold"]:
                 detected_patterns.append(
                     {
                         "pattern": "repeated_failed_logins",
@@ -108,10 +102,6 @@ class PatternDetector:
         return {
             "status": "active",
             "total_detections": len(self.detection_history),
-            "last_detection": (
-                self.last_detection_time.isoformat()
-                if self.last_detection_time
-                else "N/A"
-            ),
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
             "predefined_patterns_count": len(self.predefined_patterns),
         }

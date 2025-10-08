@@ -27,8 +27,9 @@ ignition mechanism work correctly before investing in perceptual/cognitive SPMs.
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from consciousness.esgt.coordinator import SalienceScore
 from consciousness.esgt.spm.base import (
@@ -103,7 +104,7 @@ class SimpleSPM(SpecializedProcessingModule):
     def __init__(
         self,
         spm_id: str,
-        config: Optional[SimpleSPMConfig] = None,
+        config: SimpleSPMConfig | None = None,
         spm_type: SPMType = SPMType.COGNITIVE,
     ):
         """
@@ -120,15 +121,15 @@ class SimpleSPM(SpecializedProcessingModule):
 
         # State
         self._running: bool = False
-        self._processing_task: Optional[asyncio.Task] = None
+        self._processing_task: asyncio.Task | None = None
         self._output_counter: int = 0
         self._total_outputs_generated: int = 0
 
         # Callbacks
-        self._output_callbacks: List[Callable[[SPMOutput], None]] = []
+        self._output_callbacks: list[Callable[[SPMOutput], None]] = []
 
         # Metrics
-        self._generation_latencies_ms: List[float] = []
+        self._generation_latencies_ms: list[float] = []
         self._last_generation_time: float = 0.0
 
     async def start(self) -> None:
@@ -250,16 +251,16 @@ class SimpleSPM(SpecializedProcessingModule):
 
         return output
 
-    def _generate_burst(self) -> List[SPMOutput]:
+    def _generate_burst(self) -> list[SPMOutput]:
         """Generate multiple outputs in burst mode."""
         outputs = []
         for _ in range(self.config.burst_count):
             outputs.append(self._generate_single_output())
         return outputs
 
-    def _generate_content(self) -> Dict[str, Any]:
+    def _generate_content(self) -> dict[str, Any]:
         """Generate synthetic content."""
-        content: Dict[str, Any] = {
+        content: dict[str, Any] = {
             "type": "simple_spm_output",
             "source": self.spm_id,
         }
@@ -294,7 +295,7 @@ class SimpleSPM(SpecializedProcessingModule):
     # Abstract Method Implementations
     # =========================================================================
 
-    async def process(self) -> Optional[SPMOutput]:
+    async def process(self) -> SPMOutput | None:
         """
         Process and generate output (required by base class).
 
@@ -303,7 +304,7 @@ class SimpleSPM(SpecializedProcessingModule):
         """
         return self._generate_single_output()
 
-    def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:
+    def compute_salience(self, data: dict[str, Any]) -> SalienceScore:
         """
         Compute salience for given data (required by base class).
 
@@ -356,9 +357,9 @@ class SimpleSPM(SpecializedProcessingModule):
 
     def configure_salience(
         self,
-        novelty: Optional[float] = None,
-        relevance: Optional[float] = None,
-        urgency: Optional[float] = None,
+        novelty: float | None = None,
+        relevance: float | None = None,
+        urgency: float | None = None,
     ) -> None:
         """
         Dynamically adjust base salience values.
@@ -374,7 +375,7 @@ class SimpleSPM(SpecializedProcessingModule):
         if urgency is not None:
             self.config.base_urgency = max(0.0, min(1.0, urgency))
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get SPM performance metrics."""
         if not self._generation_latencies_ms:
             avg_latency = 0.0

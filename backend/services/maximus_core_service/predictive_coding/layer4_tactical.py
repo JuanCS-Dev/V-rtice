@@ -10,7 +10,6 @@ Prediction error = unexpected campaign evolution (novel TTPs).
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -70,15 +69,14 @@ class TacticalLSTM(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         logger.info(
-            f"TacticalLSTM initialized: {input_dim}D → {output_dim}D "
-            f"(hidden={hidden_dim}, layers={num_layers})"
+            f"TacticalLSTM initialized: {input_dim}D → {output_dim}D (hidden={hidden_dim}, layers={num_layers})"
         )
 
     def forward(
         self,
         sequence: torch.Tensor,
-        hidden: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, Tuple]:
+        hidden: tuple[torch.Tensor, torch.Tensor] | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, tuple]:
         """Forward pass.
 
         Args:
@@ -143,11 +141,9 @@ class TacticalLayer:
             dropout=0.3,
         ).to(self.device)
 
-        logger.info(
-            f"TacticalLayer initialized (horizon={prediction_horizon_days} days)"
-        )
+        logger.info(f"TacticalLayer initialized (horizon={prediction_horizon_days} days)")
 
-    def predict(self, event_sequence: np.ndarray) -> Dict:
+    def predict(self, event_sequence: np.ndarray) -> dict:
         """Predict campaign evolution from event sequence.
 
         Args:
@@ -161,9 +157,7 @@ class TacticalLayer:
         with torch.no_grad():
             sequence = torch.FloatTensor(event_sequence).unsqueeze(0).to(self.device)
 
-            campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(
-                sequence
-            )
+            campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(sequence)
 
             # Campaign type
             campaign_probs = F.softmax(campaign_class, dim=1)
@@ -183,9 +177,7 @@ class TacticalLayer:
                 "prediction_horizon_days": self.prediction_horizon,
             }
 
-    def detect_apt_indicators(
-        self, event_sequence: np.ndarray, persistence_threshold: float = 0.7
-    ) -> Dict:
+    def detect_apt_indicators(self, event_sequence: np.ndarray, persistence_threshold: float = 0.7) -> dict:
         """Detect APT campaign indicators.
 
         Args:
@@ -205,9 +197,7 @@ class TacticalLayer:
             "campaign_type": campaign_name,
             "persistence_score": prediction["persistence_score"],
             "confidence": prediction["campaign_confidence"],
-            "ttps": [
-                self._get_ttp_name(ttp_id) for ttp_id in prediction["top_ttp_ids"]
-            ],
+            "ttps": [self._get_ttp_name(ttp_id) for ttp_id in prediction["top_ttp_ids"]],
             "severity": "CRITICAL" if is_apt else "MEDIUM",
         }
 
@@ -237,11 +227,7 @@ class TacticalLayer:
             "PHOSPHORUS",
             "THALLIUM",
         ]
-        return (
-            campaigns[campaign_id]
-            if campaign_id < len(campaigns)
-            else f"UNKNOWN_{campaign_id}"
-        )
+        return campaigns[campaign_id] if campaign_id < len(campaigns) else f"UNKNOWN_{campaign_id}"
 
     def _get_ttp_name(self, ttp_id: int) -> str:
         """Map TTP ID to MITRE ATT&CK tactic."""
@@ -271,7 +257,7 @@ class TacticalLayer:
         target_ttps: torch.Tensor,
         target_persistence: torch.Tensor,
         optimizer: torch.optim.Optimizer,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Single training step."""
         self.lstm.train()
 
@@ -282,9 +268,7 @@ class TacticalLayer:
         target_persistence = target_persistence.to(self.device)
 
         # Forward
-        campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(
-            sequence_batch
-        )
+        campaign_pred, campaign_class, ttp_scores, persistence, _ = self.lstm(sequence_batch)
 
         # Losses
         pred_loss = F.mse_loss(campaign_pred, target_campaigns)

@@ -10,7 +10,6 @@ Prediction error = reconstruction error (events that don't fit learned patterns)
 """
 
 import logging
-from typing import Dict, Optional, Tuple
 
 import numpy as np
 import torch
@@ -90,7 +89,7 @@ class EventVAE(nn.Module):
 
         logger.info(f"EventVAE initialized: {input_dim}D → {latent_dim}D latent")
 
-    def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def encode(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Encode input to latent distribution parameters.
 
         Args:
@@ -131,9 +130,7 @@ class EventVAE(nn.Module):
         """
         return self.decoder(z)
 
-    def forward(
-        self, x: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass through VAE.
 
         Args:
@@ -157,9 +154,7 @@ class EventVAE(nn.Module):
         x_reconstructed = self.decode(z)
 
         # Compute prediction error (reconstruction error)
-        prediction_error = F.binary_cross_entropy(
-            x_reconstructed, x, reduction="none"
-        ).sum(
+        prediction_error = F.binary_cross_entropy(x_reconstructed, x, reduction="none").sum(
             dim=1
         )  # Sum over features, keep batch dimension
 
@@ -172,7 +167,7 @@ class EventVAE(nn.Module):
         mu: torch.Tensor,
         logvar: torch.Tensor,
         beta: float = 1.0,
-    ) -> Tuple[torch.Tensor, Dict[str, float]]:
+    ) -> tuple[torch.Tensor, dict[str, float]]:
         """Compute VAE loss (ELBO).
 
         Loss = Reconstruction Loss + β * KL Divergence
@@ -234,9 +229,7 @@ class SensoryLayer:
         self.anomaly_threshold = anomaly_threshold
 
         # VAE model
-        self.vae = EventVAE(
-            input_dim=input_dim, hidden_dims=[1024, 256], latent_dim=latent_dim
-        ).to(self.device)
+        self.vae = EventVAE(input_dim=input_dim, hidden_dims=[1024, 256], latent_dim=latent_dim).to(self.device)
 
         # Prediction error statistics (for anomaly detection)
         self.error_mean = 0.0
@@ -245,7 +238,7 @@ class SensoryLayer:
 
         logger.info(f"SensoryLayer initialized on {device}")
 
-    def predict(self, event: np.ndarray) -> Dict:
+    def predict(self, event: np.ndarray) -> dict:
         """Predict event representation and detect anomalies.
 
         Args:
@@ -299,7 +292,7 @@ class SensoryLayer:
         events_batch: np.ndarray,
         optimizer: torch.optim.Optimizer,
         beta: float = 1.0,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Single training step.
 
         Args:

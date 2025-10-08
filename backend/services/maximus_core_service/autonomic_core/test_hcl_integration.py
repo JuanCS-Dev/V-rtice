@@ -8,9 +8,7 @@ import logging
 
 from hcl_orchestrator import HomeostaticControlLoop
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
 async def test_hcl_single_cycle():
@@ -37,7 +35,6 @@ async def test_hcl_single_cycle():
         hcl.running = True
 
         # Manually execute one cycle
-        import time
 
         # Monitor
         print("\n3. MONITOR - Collecting metrics...")
@@ -53,27 +50,19 @@ async def test_hcl_single_cycle():
         analysis = await hcl._analyze_metrics(metrics)
         print(f"✓ Analysis complete: {analysis.get('summary', 'N/A')}")
         print(f"  Anomaly: {analysis.get('anomaly', {}).get('is_anomaly', False)}")
-        print(
-            f"  Degradation: {analysis.get('degradation', {}).get('is_degraded', False)}"
-        )
+        print(f"  Degradation: {analysis.get('degradation', {}).get('is_degraded', False)}")
 
         # Plan
         print("\n5. PLAN - Generating actions...")
         plan = await hcl._plan_actions(metrics, analysis)
-        print(
-            f"✓ Plan created: Mode={plan['operational_mode']}, "
-            f"Actions={len(plan['actions'])}"
-        )
+        print(f"✓ Plan created: Mode={plan['operational_mode']}, Actions={len(plan['actions'])}")
         if plan["actions"]:
             print(f"  First action: {plan['actions'][0]}")
 
         # Execute
         print("\n6. EXECUTE - Applying actions (dry-run)...")
         execution = await hcl._execute_plan(plan, metrics)
-        print(
-            f"✓ Execution complete: Success={execution['success']}, "
-            f"Applied={execution['applied_count']}"
-        )
+        print(f"✓ Execution complete: Success={execution['success']}, Applied={execution['applied_count']}")
 
         # Knowledge
         print("\n7. KNOWLEDGE - Storing decision...")
@@ -129,9 +118,7 @@ async def test_hcl_components():
         "disk_io_degradation": False,
     }
     result = predictor.predict(features)
-    print(
-        f"✓ FailurePredictor OK - Probability: {result.get('failure_probability', 0):.2%}"
-    )
+    print(f"✓ FailurePredictor OK - Probability: {result.get('failure_probability', 0):.2%}")
 
     # Test Planners
     print("\n4. Testing FuzzyLogicController...")

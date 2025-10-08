@@ -10,7 +10,9 @@ Version: 1.0.0
 
 import logging
 from typing import Optional, Set
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+
+from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+
 from api.core_integration import EventBridge
 
 logger = logging.getLogger(__name__)
@@ -82,13 +84,15 @@ async def websocket_events_endpoint(
                 await bridge.update_subscriptions(websocket, new_subscription_set)
 
                 # Send confirmation
-                await websocket.send_json({
-                    "event": "subscription_updated",
-                    "data": {
-                        "subscriptions": list(new_subscription_set),
-                        "message": "Subscriptions updated successfully",
-                    },
-                })
+                await websocket.send_json(
+                    {
+                        "event": "subscription_updated",
+                        "data": {
+                            "subscriptions": list(new_subscription_set),
+                            "message": "Subscriptions updated successfully",
+                        },
+                    }
+                )
 
     except WebSocketDisconnect:
         # Client disconnected

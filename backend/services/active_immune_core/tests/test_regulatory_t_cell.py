@@ -13,7 +13,6 @@ Tests cover actual production implementation of Regulatory T Cell (MOST ADVANCED
 - Advanced metrics
 """
 
-import asyncio
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -21,13 +20,12 @@ import pytest
 import pytest_asyncio
 
 from active_immune_core.agents import LinfocitoTRegulador
+from active_immune_core.agents.models import AgentStatus
 from active_immune_core.agents.regulatory_t_cell import (
     AutoimmunityRiskScore,
     RegulatoryTState,
     SuppressionLevel,
 )
-from active_immune_core.agents.models import AgentStatus
-
 
 # ==================== FIXTURES ====================
 
@@ -79,12 +77,14 @@ def excessive_response_activities() -> list:
     """Activities showing excessive response"""
     activities = []
     for i in range(15):
-        activities.append({
-            "agent_id": "agent_002",
-            "cytokine": "IFN_GAMMA" if i % 2 == 0 else "IL1",
-            "payload": {"alvo": {"ip": f"192.0.2.{i}", "porta": 22}},
-            "timestamp": datetime.now() - timedelta(seconds=i),
-        })
+        activities.append(
+            {
+                "agent_id": "agent_002",
+                "cytokine": "IFN_GAMMA" if i % 2 == 0 else "IL1",
+                "payload": {"alvo": {"ip": f"192.0.2.{i}", "porta": 22}},
+                "timestamp": datetime.now() - timedelta(seconds=i),
+            }
+        )
     return activities
 
 
@@ -177,9 +177,7 @@ class TestMultiCriteriaScoring:
     """Test multi-criteria autoimmunity scoring"""
 
     @pytest.mark.asyncio
-    async def test_friendly_fire_scoring(
-        self, regulatory_t: LinfocitoTRegulador, friendly_fire_activities: list
-    ):
+    async def test_friendly_fire_scoring(self, regulatory_t: LinfocitoTRegulador, friendly_fire_activities: list):
         """Test friendly fire criterion scoring"""
         score = regulatory_t._score_friendly_fire(friendly_fire_activities)
 
@@ -197,9 +195,7 @@ class TestMultiCriteriaScoring:
         assert score > 0.5
 
     @pytest.mark.asyncio
-    async def test_temporal_pattern_scoring(
-        self, regulatory_t: LinfocitoTRegulador, rapid_fire_activities: list
-    ):
+    async def test_temporal_pattern_scoring(self, regulatory_t: LinfocitoTRegulador, rapid_fire_activities: list):
         """Test temporal pattern criterion scoring"""
         score = regulatory_t._score_temporal_pattern(rapid_fire_activities)
 
@@ -244,9 +240,7 @@ class TestMultiCriteriaScoring:
         self, regulatory_t: LinfocitoTRegulador, friendly_fire_activities: list
     ):
         """Test complete multi-criteria risk score"""
-        risk_score = await regulatory_t._calculate_autoimmunity_risk(
-            "agent_001", friendly_fire_activities
-        )
+        risk_score = await regulatory_t._calculate_autoimmunity_risk("agent_001", friendly_fire_activities)
 
         assert isinstance(risk_score, AutoimmunityRiskScore)
         assert 0.0 <= risk_score.total_score <= 1.0
@@ -380,9 +374,7 @@ class TestGraduatedSuppression:
         """Test suppression decision creation"""
         regulatory_t.monitored_agents["agent_001"] = friendly_fire_activities
 
-        risk_score = await regulatory_t._calculate_autoimmunity_risk(
-            "agent_001", friendly_fire_activities
-        )
+        risk_score = await regulatory_t._calculate_autoimmunity_risk("agent_001", friendly_fire_activities)
 
         await regulatory_t._make_suppression_decision("agent_001", risk_score)
 
@@ -398,9 +390,7 @@ class TestCytokineSecretion:
     """Test IL10 and TGF-β secretion"""
 
     @pytest.mark.asyncio
-    async def test_il10_secretion_without_messenger(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_il10_secretion_without_messenger(self, regulatory_t: LinfocitoTRegulador):
         """Test IL10 secretion without messenger doesn't crash"""
         risk_score = AutoimmunityRiskScore(
             total_score=0.8,
@@ -432,9 +422,7 @@ class TestCytokineSecretion:
         assert regulatory_t.il10_secretions == 0
 
     @pytest.mark.asyncio
-    async def test_il10_secretion_increments_counter(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_il10_secretion_increments_counter(self, regulatory_t: LinfocitoTRegulador):
         """Test IL10 secretion increments counter"""
         await regulatory_t.iniciar()
 
@@ -469,9 +457,7 @@ class TestCytokineSecretion:
         await regulatory_t.parar()
 
     @pytest.mark.asyncio
-    async def test_tgf_beta_secretion_moderate_level(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_tgf_beta_secretion_moderate_level(self, regulatory_t: LinfocitoTRegulador):
         """Test TGF-β secretion at moderate suppression"""
         await regulatory_t.iniciar()
 
@@ -512,9 +498,7 @@ class TestMonitoring:
     """Test monitoring and detection"""
 
     @pytest.mark.asyncio
-    async def test_monitor_immune_activity(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_monitor_immune_activity(self, regulatory_t: LinfocitoTRegulador):
         """Test monitoring immune activity"""
         cytokine_data = {
             "emissor_id": "agent_monitor",
@@ -549,7 +533,9 @@ class TestMonitoring:
         await regulatory_t._monitor_for_autoimmunity()
 
         # Should detect and suppress (combined friendly fire + excessive response)
-        assert len(regulatory_t.suppression_decisions) >= 1 or regulatory_t.regulatory_state == RegulatoryTState.ANALYZING
+        assert (
+            len(regulatory_t.suppression_decisions) >= 1 or regulatory_t.regulatory_state == RegulatoryTState.ANALYZING
+        )
 
 
 # ==================== SELF-MONITORING TESTS ====================
@@ -559,9 +545,7 @@ class TestSelfMonitoring:
     """Test self-monitoring and auto-correction"""
 
     @pytest.mark.asyncio
-    async def test_suppression_effectiveness_tracking(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_suppression_effectiveness_tracking(self, regulatory_t: LinfocitoTRegulador):
         """Test suppression effectiveness is tracked"""
         risk_score = AutoimmunityRiskScore(
             total_score=0.8,
@@ -633,9 +617,7 @@ class TestInvestigationNeutralization:
         assert "multi_criteria" in result["metodo"]
 
     @pytest.mark.asyncio
-    async def test_investigation_insufficient_data(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_investigation_insufficient_data(self, regulatory_t: LinfocitoTRegulador):
         """Test investigation with insufficient data"""
         result = await regulatory_t.executar_investigacao({"agent_id": "unknown_agent"})
 
@@ -643,13 +625,9 @@ class TestInvestigationNeutralization:
         assert "insufficient_data" in result["metodo"]
 
     @pytest.mark.asyncio
-    async def test_neutralization_triggers_suppression(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_neutralization_triggers_suppression(self, regulatory_t: LinfocitoTRegulador):
         """Test neutralization triggers suppression"""
-        result = await regulatory_t.executar_neutralizacao(
-            {"agent_id": "agent_suppress"}, metodo="suppress"
-        )
+        result = await regulatory_t.executar_neutralizacao({"agent_id": "agent_suppress"}, metodo="suppress")
 
         assert result is True
         assert len(regulatory_t.suppression_decisions) == 1
@@ -711,9 +689,7 @@ class TestRegulatoryTEdgeCases:
     """Test Regulatory T Cell edge cases"""
 
     @pytest.mark.asyncio
-    async def test_empty_activities_risk_score(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_empty_activities_risk_score(self, regulatory_t: LinfocitoTRegulador):
         """Test risk scoring with empty activities"""
         risk_score = await regulatory_t._calculate_autoimmunity_risk("agent_empty", [])
 
@@ -721,9 +697,7 @@ class TestRegulatoryTEdgeCases:
         assert risk_score.total_score == 0.0
 
     @pytest.mark.asyncio
-    async def test_suppression_with_max_q_values(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_suppression_with_max_q_values(self, regulatory_t: LinfocitoTRegulador):
         """Test suppression with all Q-values equal"""
         # Set all Q-values to same value
         for level in SuppressionLevel:
@@ -735,17 +709,17 @@ class TestRegulatoryTEdgeCases:
         assert isinstance(action, SuppressionLevel)
 
     @pytest.mark.asyncio
-    async def test_activity_history_limit(
-        self, regulatory_t: LinfocitoTRegulador
-    ):
+    async def test_activity_history_limit(self, regulatory_t: LinfocitoTRegulador):
         """Test activity history is limited per agent"""
         # Add 100 activities
         for i in range(100):
-            await regulatory_t._monitor_immune_activity({
-                "emissor_id": "agent_history",
-                "tipo": "IL1",
-                "payload": {},
-            })
+            await regulatory_t._monitor_immune_activity(
+                {
+                    "emissor_id": "agent_history",
+                    "tipo": "IL1",
+                    "payload": {},
+                }
+            )
 
         # Should be limited to 50
         assert len(regulatory_t.monitored_agents["agent_history"]) == 50

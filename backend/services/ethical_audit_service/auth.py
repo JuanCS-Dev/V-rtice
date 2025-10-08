@@ -3,15 +3,15 @@
 Implements JWT-based authentication and RBAC (Role-Based Access Control).
 """
 
-from datetime import datetime, timedelta
-from enum import Enum
 import logging
 import os
+from datetime import datetime, timedelta
+from enum import Enum
 from typing import List, Optional
 
+import jwt
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-import jwt
 from pydantic import BaseModel
 
 # Configure logging
@@ -95,9 +95,7 @@ def decode_token(token: str) -> TokenData:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        logger.debug(
-            f"Token decoded successfully for user: {username} (roles: {roles})"
-        )
+        logger.debug(f"Token decoded successfully for user: {username} (roles: {roles})")
         return TokenData(user_id=user_id, username=username, roles=roles)
 
     except jwt.ExpiredSignatureError:
@@ -168,8 +166,7 @@ def require_role(required_roles: List[UserRole]):
         # Check if user has any of the required roles
         if not user_roles.intersection(required_role_names):
             logger.warning(
-                f"Access denied for user {current_user.username}: "
-                f"required {required_role_names}, has {user_roles}"
+                f"Access denied for user {current_user.username}: required {required_role_names}, has {user_roles}"
             )
             raise HTTPException(
                 status_code=403,

@@ -30,17 +30,18 @@ Version: 1.0.0
 Date: 2025-10-07
 """
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class PatternType(str, Enum):
     """Types of detected threat patterns."""
+
     PERSISTENT = "persistent"  # Same threat, multiple detections
     COORDINATED = "coordinated"  # Multiple threats, short timeframe
     APT_INDICATOR = "apt"  # Low-and-slow pattern (future implementation)
@@ -61,6 +62,7 @@ class ThreatPattern:
         confidence: Confidence score (0.0-1.0) for this pattern
         metadata: Additional pattern-specific metadata
     """
+
     pattern_type: PatternType
     threat_ids: List[str]
     areas_affected: List[str]
@@ -224,20 +226,17 @@ class PatternDetector:
                     payload = citocina.get("payload", {})
 
                     # Check if it's a threat event
-                    is_threat = (
-                        payload.get("evento") == "ameaca_detectada" or
-                        payload.get("is_threat")
-                    )
+                    is_threat = payload.get("evento") == "ameaca_detectada" or payload.get("is_threat")
 
                     if is_threat:
                         recent_threats.append(citocina)
 
                         # Extract threat ID if available
                         threat_id = (
-                            payload.get("alvo", {}).get("id") or
-                            payload.get("host_id") or
-                            payload.get("threat_id") or
-                            f"unknown_{len(threat_ids)}"
+                            payload.get("alvo", {}).get("id")
+                            or payload.get("host_id")
+                            or payload.get("threat_id")
+                            or f"unknown_{len(threat_ids)}"
                         )
                         threat_ids.append(threat_id)
 
@@ -363,14 +362,8 @@ class PatternDetector:
         Returns:
             Dict with detector stats
         """
-        persistent_count = sum(
-            1 for p in self._pattern_history
-            if p.pattern_type == PatternType.PERSISTENT
-        )
-        coordinated_count = sum(
-            1 for p in self._pattern_history
-            if p.pattern_type == PatternType.COORDINATED
-        )
+        persistent_count = sum(1 for p in self._pattern_history if p.pattern_type == PatternType.PERSISTENT)
+        coordinated_count = sum(1 for p in self._pattern_history if p.pattern_type == PatternType.COORDINATED)
 
         return {
             "persistent_threshold": self.persistent_threshold,

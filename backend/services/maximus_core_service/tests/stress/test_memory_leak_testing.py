@@ -8,14 +8,10 @@ Authors: Juan & Claude Code
 Version: 1.0.0 - FASE IV Sprint 2
 """
 
-import asyncio
 import gc
-import sys
-import pytest
-import pytest_asyncio
 
-from consciousness.esgt.coordinator import ESGTCoordinator
-from consciousness.esgt.spm.salience_detector import SalienceScore
+import pytest
+
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
 
 
@@ -38,7 +34,7 @@ async def test_repeated_fabric_creation_no_leak():
     growth = final_objects - initial_objects
     growth_pct = (growth / initial_objects) * 100
 
-    print(f"\n💾 Memory leak test:")
+    print("\n💾 Memory leak test:")
     print(f"   Initial objects: {initial_objects}")
     print(f"   Final objects: {final_objects}")
     print(f"   Growth: {growth} ({growth_pct:.2f}%)")

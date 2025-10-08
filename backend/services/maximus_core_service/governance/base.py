@@ -11,11 +11,10 @@ Date: 2025-10-06
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Set
+from typing import Any
 from uuid import uuid4
-
 
 # ============================================================================
 # ENUMS
@@ -138,21 +137,23 @@ class ERBMember:
     email: str = ""
     role: ERBMemberRole = ERBMemberRole.TECHNICAL_MEMBER
     organization: str = ""  # Internal or external organization
-    expertise: List[str] = field(default_factory=list)  # e.g., ["AI ethics", "Legal"]
+    expertise: list[str] = field(default_factory=list)  # e.g., ["AI ethics", "Legal"]
     is_internal: bool = True
     is_active: bool = True
     appointed_date: datetime = field(default_factory=datetime.utcnow)
-    term_end_date: Optional[datetime] = None
+    term_end_date: datetime | None = None
     voting_rights: bool = True
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_voting_member(self) -> bool:
         """Check if member has voting rights and is active."""
-        return self.is_active and self.voting_rights and (
-            self.term_end_date is None or self.term_end_date > datetime.utcnow()
+        return (
+            self.is_active
+            and self.voting_rights
+            and (self.term_end_date is None or self.term_end_date > datetime.utcnow())
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "member_id": self.member_id,
@@ -176,19 +177,19 @@ class ERBMeeting:
 
     meeting_id: str = field(default_factory=lambda: str(uuid4()))
     scheduled_date: datetime = field(default_factory=datetime.utcnow)
-    actual_date: Optional[datetime] = None
+    actual_date: datetime | None = None
     duration_minutes: int = 120
     location: str = "Virtual"  # Virtual or physical location
-    agenda: List[str] = field(default_factory=list)
-    attendees: List[str] = field(default_factory=list)  # member_ids
-    absentees: List[str] = field(default_factory=list)  # member_ids
+    agenda: list[str] = field(default_factory=list)
+    attendees: list[str] = field(default_factory=list)  # member_ids
+    absentees: list[str] = field(default_factory=list)  # member_ids
     minutes: str = ""  # Meeting minutes
-    decisions: List[str] = field(default_factory=list)  # decision_ids
+    decisions: list[str] = field(default_factory=list)  # decision_ids
     quorum_met: bool = False
     status: str = "scheduled"  # scheduled, completed, cancelled
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "meeting_id": self.meeting_id,
@@ -220,13 +221,13 @@ class ERBDecision:
     votes_against: int = 0
     votes_abstain: int = 0
     rationale: str = ""
-    conditions: List[str] = field(default_factory=list)  # If conditional approval
+    conditions: list[str] = field(default_factory=list)  # If conditional approval
     follow_up_required: bool = False
-    follow_up_deadline: Optional[datetime] = None
+    follow_up_deadline: datetime | None = None
     created_date: datetime = field(default_factory=datetime.utcnow)
     created_by: str = ""  # member_id of chair
-    related_policies: List[PolicyType] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    related_policies: list[PolicyType] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_approved(self) -> bool:
         """Check if decision is approved (fully or conditionally)."""
@@ -239,7 +240,7 @@ class ERBDecision:
             return 0.0
         return (self.votes_for / total_votes) * 100.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "decision_id": self.decision_id,
@@ -277,17 +278,17 @@ class Policy:
     version: str = "1.0"
     title: str = ""
     description: str = ""
-    rules: List[str] = field(default_factory=list)
+    rules: list[str] = field(default_factory=list)
     scope: str = "all"  # all, maximus, immunis, rte, specific_service
     enforcement_level: PolicySeverity = PolicySeverity.MEDIUM
     auto_enforce: bool = True
     created_date: datetime = field(default_factory=datetime.utcnow)
-    last_review_date: Optional[datetime] = None
-    next_review_date: Optional[datetime] = None
+    last_review_date: datetime | None = None
+    next_review_date: datetime | None = None
     approved_by_erb: bool = False
-    erb_decision_id: Optional[str] = None
-    stakeholders: List[str] = field(default_factory=list)  # Affected teams/systems
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    erb_decision_id: str | None = None
+    stakeholders: list[str] = field(default_factory=list)  # Affected teams/systems
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_due_for_review(self) -> bool:
         """Check if policy is due for review."""
@@ -302,7 +303,7 @@ class Policy:
         delta = self.next_review_date - datetime.utcnow()
         return max(0, delta.days)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "policy_id": self.policy_id,
@@ -341,17 +342,17 @@ class PolicyViolation:
     detected_by: str = "system"  # system, user_id, or "anonymous"
     detected_date: datetime = field(default_factory=datetime.utcnow)
     affected_system: str = ""  # maximus, immunis, rte, or specific service
-    affected_users: List[str] = field(default_factory=list)
-    context: Dict[str, Any] = field(default_factory=dict)
+    affected_users: list[str] = field(default_factory=list)
+    context: dict[str, Any] = field(default_factory=dict)
     remediation_required: bool = True
     remediation_status: str = "pending"  # pending, in_progress, completed, dismissed
-    remediation_deadline: Optional[datetime] = None
-    assigned_to: Optional[str] = None  # User responsible for remediation
+    remediation_deadline: datetime | None = None
+    assigned_to: str | None = None  # User responsible for remediation
     resolution_notes: str = ""
-    resolved_date: Optional[datetime] = None
+    resolved_date: datetime | None = None
     escalated_to_erb: bool = False
-    erb_decision_id: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    erb_decision_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_overdue(self) -> bool:
         """Check if remediation is overdue."""
@@ -366,7 +367,7 @@ class PolicyViolation:
         delta = self.remediation_deadline - datetime.utcnow()
         return delta.days
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "violation_id": self.violation_id,
@@ -413,14 +414,14 @@ class AuditLog:
     target_entity_type: str = ""  # policy, erb_member, meeting, decision
     target_entity_id: str = ""
     description: str = ""
-    details: Dict[str, Any] = field(default_factory=dict)
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    session_id: Optional[str] = None
-    correlation_id: Optional[str] = None  # For tracking related events
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
+    ip_address: str | None = None
+    user_agent: str | None = None
+    session_id: str | None = None
+    correlation_id: str | None = None  # For tracking related events
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "log_id": self.log_id,
@@ -446,24 +447,24 @@ class WhistleblowerReport:
 
     report_id: str = field(default_factory=lambda: str(uuid4()))
     submission_date: datetime = field(default_factory=datetime.utcnow)
-    reporter_id: Optional[str] = None  # None if anonymous
+    reporter_id: str | None = None  # None if anonymous
     is_anonymous: bool = True
     title: str = ""
     description: str = ""
     alleged_violation_type: PolicyType = PolicyType.ETHICAL_USE
     severity: PolicySeverity = PolicySeverity.MEDIUM
-    affected_systems: List[str] = field(default_factory=list)
-    evidence: List[str] = field(default_factory=list)  # File paths or references
+    affected_systems: list[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)  # File paths or references
     status: str = "submitted"  # submitted, under_review, investigated, resolved, dismissed
-    assigned_investigator: Optional[str] = None
+    assigned_investigator: str | None = None
     investigation_notes: str = ""
     resolution: str = ""
-    resolution_date: Optional[datetime] = None
+    resolution_date: datetime | None = None
     escalated_to_erb: bool = False
-    erb_decision_id: Optional[str] = None
+    erb_decision_id: str | None = None
     retaliation_concerns: bool = False
-    protection_measures: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    protection_measures: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_under_investigation(self) -> bool:
         """Check if report is currently under investigation."""
@@ -473,7 +474,7 @@ class WhistleblowerReport:
         """Check if report is resolved."""
         return self.status in ["resolved", "dismissed"]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary (redact sensitive info if anonymous)."""
         data = {
             "report_id": self.report_id,
@@ -515,13 +516,13 @@ class GovernanceResult:
 
     success: bool = True
     message: str = ""
-    entity_id: Optional[str] = None  # ID of created/updated entity
+    entity_id: str | None = None  # ID of created/updated entity
     entity_type: str = ""  # policy, member, meeting, etc.
-    warnings: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "success": self.success,
@@ -544,10 +545,10 @@ class PolicyEnforcementResult:
     checked_rules: int = 0
     passed_rules: int = 0
     failed_rules: int = 0
-    violations: List[PolicyViolation] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    violations: list[PolicyViolation] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     timestamp: datetime = field(default_factory=datetime.utcnow)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def compliance_percentage(self) -> float:
         """Calculate compliance percentage."""
@@ -555,7 +556,7 @@ class PolicyEnforcementResult:
             return 100.0
         return (self.passed_rules / self.checked_rules) * 100.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "is_compliant": self.is_compliant,

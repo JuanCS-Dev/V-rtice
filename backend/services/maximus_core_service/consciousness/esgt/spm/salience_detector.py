@@ -50,9 +50,10 @@ This SPM is the "attention controller" - it decides what MAXIMUS becomes aware o
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -119,7 +120,7 @@ class SalienceEvent:
     timestamp: float
     salience: SalienceScore
     source: str
-    content: Dict[str, Any]
+    content: dict[str, Any]
     threshold_exceeded: float
 
 
@@ -164,7 +165,7 @@ class SalienceSPM(SpecializedProcessingModule):
     def __init__(
         self,
         spm_id: str,
-        config: Optional[SalienceDetectorConfig] = None,
+        config: SalienceDetectorConfig | None = None,
     ):
         """
         Initialize SalienceSPM.
@@ -184,20 +185,20 @@ class SalienceSPM(SpecializedProcessingModule):
 
         # State
         self._running: bool = False
-        self._monitoring_task: Optional[asyncio.Task] = None
+        self._monitoring_task: asyncio.Task | None = None
 
         # Novelty tracking (for change detection)
-        self._metric_history: Dict[str, List[float]] = {}
-        self._baseline_values: Dict[str, float] = {}
+        self._metric_history: dict[str, list[float]] = {}
+        self._baseline_values: dict[str, float] = {}
 
         # Urgency tracking (decays over time)
-        self._urgency_sources: Dict[str, Tuple[float, float]] = {}  # source: (urgency, timestamp)
+        self._urgency_sources: dict[str, tuple[float, float]] = {}  # source: (urgency, timestamp)
 
         # Event history
-        self._high_salience_events: List[SalienceEvent] = []
+        self._high_salience_events: list[SalienceEvent] = []
 
         # Callbacks
-        self._high_salience_callbacks: List[Callable[[SalienceEvent], None]] = []
+        self._high_salience_callbacks: list[Callable[[SalienceEvent], None]] = []
 
         # Metrics
         self.total_evaluations: int = 0
@@ -250,8 +251,8 @@ class SalienceSPM(SpecializedProcessingModule):
     def evaluate_event(
         self,
         source: str,
-        content: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None,
+        content: dict[str, Any],
+        context: dict[str, Any] | None = None,
     ) -> SalienceScore:
         """
         Evaluate salience of an event.
@@ -298,7 +299,7 @@ class SalienceSPM(SpecializedProcessingModule):
 
         return salience
 
-    def _compute_novelty(self, source: str, content: Dict[str, Any]) -> float:
+    def _compute_novelty(self, source: str, content: dict[str, Any]) -> float:
         """
         Compute novelty via change detection.
 
@@ -342,7 +343,7 @@ class SalienceSPM(SpecializedProcessingModule):
 
         return novelty
 
-    def _extract_tracking_value(self, content: Dict[str, Any]) -> Optional[float]:
+    def _extract_tracking_value(self, content: dict[str, Any]) -> float | None:
         """Extract a numeric value to track for novelty detection."""
         # Try common keys
         for key in ["value", "metric", "score", "level", "magnitude"]:
@@ -360,8 +361,8 @@ class SalienceSPM(SpecializedProcessingModule):
 
     def _compute_relevance(
         self,
-        content: Dict[str, Any],
-        context: Optional[Dict[str, Any]],
+        content: dict[str, Any],
+        context: dict[str, Any] | None,
     ) -> float:
         """
         Compute relevance to current goals/context.
@@ -447,7 +448,7 @@ class SalienceSPM(SpecializedProcessingModule):
     def _handle_high_salience(
         self,
         source: str,
-        content: Dict[str, Any],
+        content: dict[str, Any],
         salience: SalienceScore,
     ) -> None:
         """Handle high-salience detection."""
@@ -478,7 +479,7 @@ class SalienceSPM(SpecializedProcessingModule):
     # Abstract Method Implementations
     # =========================================================================
 
-    async def process(self) -> Optional[SPMOutput]:
+    async def process(self) -> SPMOutput | None:
         """
         Process and generate output (required by base class).
 
@@ -487,7 +488,7 @@ class SalienceSPM(SpecializedProcessingModule):
         """
         return None
 
-    def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:
+    def compute_salience(self, data: dict[str, Any]) -> SalienceScore:
         """
         Compute salience for given data (required by base class).
 
@@ -508,7 +509,7 @@ class SalienceSPM(SpecializedProcessingModule):
         if callback not in self._high_salience_callbacks:
             self._high_salience_callbacks.append(callback)
 
-    def get_recent_high_salience_events(self, count: int = 10) -> List[SalienceEvent]:
+    def get_recent_high_salience_events(self, count: int = 10) -> list[SalienceEvent]:
         """Get recent high-salience events."""
         return self._high_salience_events[-count:]
 
@@ -518,7 +519,7 @@ class SalienceSPM(SpecializedProcessingModule):
             return 0.0
         return self.high_salience_count / self.total_evaluations
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get detector performance metrics."""
         return {
             "spm_id": self.spm_id,

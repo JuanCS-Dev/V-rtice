@@ -13,16 +13,16 @@ Note: FuzzyController and RLAgent are mocked in tests to isolate
 planner service logic (test infrastructure mocking, not production code).
 """
 
+# Import the FastAPI app
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, MagicMock, patch
 
-# Import the FastAPI app
-import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/hcl_planner_service")
 from main import app
-
 
 # ==================== FIXTURES ====================
 
@@ -37,10 +37,8 @@ async def client():
 @pytest_asyncio.fixture
 async def mock_fuzzy_controller():
     """Mock FuzzyController for testing."""
-    with patch('main.fuzzy_controller') as mock_fc:
-        mock_fc.generate_actions = MagicMock(return_value=[
-            {"type": "scale_up", "target": "service_a", "replicas": 3}
-        ])
+    with patch("main.fuzzy_controller") as mock_fc:
+        mock_fc.generate_actions = MagicMock(return_value=[{"type": "scale_up", "target": "service_a", "replicas": 3}])
         mock_fc.get_status = MagicMock(return_value="operational")
         yield mock_fc
 
@@ -48,10 +46,8 @@ async def mock_fuzzy_controller():
 @pytest_asyncio.fixture
 async def mock_rl_agent():
     """Mock RLAgent for testing."""
-    with patch('main.rl_agent') as mock_rl:
-        mock_rl.recommend_actions = AsyncMock(return_value=[
-            {"type": "restart", "target": "service_b"}
-        ])
+    with patch("main.rl_agent") as mock_rl:
+        mock_rl.recommend_actions = AsyncMock(return_value=[{"type": "restart", "target": "service_b"}])
         mock_rl.get_status = AsyncMock(return_value="ready")
         yield mock_rl
 
@@ -62,16 +58,10 @@ def create_plan_request(health_score=1.0, cpu_usage=50.0, requires_intervention=
         "analysis_result": {
             "overall_health_score": health_score,
             "requires_intervention": requires_intervention,
-            "anomalies": []
+            "anomalies": [],
         },
-        "current_state": {
-            "cpu_usage": cpu_usage,
-            "memory_usage": 50.0
-        },
-        "operational_goals": {
-            "performance_priority": 0.5,
-            "cost_efficiency": 0.5
-        }
+        "current_state": {"cpu_usage": cpu_usage, "memory_usage": 50.0},
+        "operational_goals": {"performance_priority": 0.5, "cost_efficiency": 0.5},
     }
 
 
@@ -125,10 +115,7 @@ class TestGeneratePlanEndpoint:
 
     async def test_generate_plan_with_intervention(self, client, mock_fuzzy_controller, mock_rl_agent):
         """Test generating plan when intervention is required."""
-        payload = create_plan_request(
-            health_score=0.5,
-            requires_intervention=True
-        )
+        payload = create_plan_request(health_score=0.5, requires_intervention=True)
 
         response = await client.post("/generate_plan", json=payload)
 
@@ -145,12 +132,8 @@ class TestGeneratePlanEndpoint:
 
     async def test_generate_plan_actions_aggregated(self, client, mock_fuzzy_controller, mock_rl_agent):
         """Test that actions from fuzzy and RL are aggregated."""
-        mock_fuzzy_controller.generate_actions.return_value = [
-            {"type": "scale_up", "target": "service_a"}
-        ]
-        mock_rl_agent.recommend_actions.return_value = [
-            {"type": "restart", "target": "service_b"}
-        ]
+        mock_fuzzy_controller.generate_actions.return_value = [{"type": "scale_up", "target": "service_a"}]
+        mock_rl_agent.recommend_actions.return_value = [{"type": "restart", "target": "service_b"}]
 
         payload = create_plan_request(requires_intervention=True)
         response = await client.post("/generate_plan", json=payload)
@@ -162,10 +145,7 @@ class TestGeneratePlanEndpoint:
 
     async def test_generate_plan_fuzzy_called_with_correct_params(self, client, mock_fuzzy_controller, mock_rl_agent):
         """Test that fuzzy controller is called with correct parameters."""
-        payload = create_plan_request(
-            health_score=0.75,
-            cpu_usage=80.0
-        )
+        payload = create_plan_request(health_score=0.75, cpu_usage=80.0)
         payload["operational_goals"]["performance_priority"] = 0.8
 
         await client.post("/generate_plan", json=payload)
@@ -174,7 +154,7 @@ class TestGeneratePlanEndpoint:
         mock_fuzzy_controller.generate_actions.assert_called_once_with(
             0.75,  # health_score
             80.0,  # cpu_usage
-            0.8    # performance_priority
+            0.8,  # performance_priority
         )
 
     async def test_generate_plan_rl_called_with_state_and_analysis(self, client, mock_fuzzy_controller, mock_rl_agent):
@@ -264,11 +244,7 @@ class TestRequestValidation:
 
     async def test_generate_plan_empty_analysis_result(self, client, mock_fuzzy_controller, mock_rl_agent):
         """Test plan generation with empty analysis_result."""
-        payload = {
-            "analysis_result": {},
-            "current_state": {},
-            "operational_goals": {}
-        }
+        payload = {"analysis_result": {}, "current_state": {}, "operational_goals": {}}
 
         response = await client.post("/generate_plan", json=payload)
 
@@ -338,8 +314,8 @@ class TestEdgeCases:
         """Test plan generation when nested keys are missing (uses defaults)."""
         payload = {
             "analysis_result": {},  # No overall_health_score
-            "current_state": {},    # No cpu_usage
-            "operational_goals": {} # No performance_priority
+            "current_state": {},  # No cpu_usage
+            "operational_goals": {},  # No performance_priority
         }
 
         response = await client.post("/generate_plan", json=payload)
@@ -355,22 +331,19 @@ class TestEdgeCases:
             "analysis_result": {
                 "overall_health_score": 0.75,
                 "requires_intervention": True,
-                "anomalies": [
-                    {"type": "spike", "metric": "cpu"},
-                    {"type": "trend", "metric": "memory"}
-                ],
-                "trends": {"cpu": "increasing", "memory": "stable"}
+                "anomalies": [{"type": "spike", "metric": "cpu"}, {"type": "trend", "metric": "memory"}],
+                "trends": {"cpu": "increasing", "memory": "stable"},
             },
             "current_state": {
                 "cpu_usage": 85.0,
                 "memory_usage": 60.0,
-                "services": {"api": "healthy", "db": "degraded"}
+                "services": {"api": "healthy", "db": "degraded"},
             },
             "operational_goals": {
                 "performance_priority": 0.8,
                 "cost_efficiency": 0.2,
-                "constraints": ["max_cost_100", "min_latency_50ms"]
-            }
+                "constraints": ["max_cost_100", "min_latency_50ms"],
+            },
         }
 
         response = await client.post("/generate_plan", json=payload)

@@ -11,14 +11,15 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import logging
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Any
-from abc import ABC, abstractmethod
-import numpy as np
-import logging
+from typing import Any
 
-from .base import ModelUpdate, AggregationStrategy
+import numpy as np
+
+from .base import AggregationStrategy, ModelUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -37,19 +38,20 @@ class AggregationResult:
         privacy_cost: Privacy budget consumed (if DP applied)
         metadata: Additional metadata about aggregation
     """
-    aggregated_weights: Dict[str, np.ndarray]
+
+    aggregated_weights: dict[str, np.ndarray]
     num_clients: int
     total_samples: int
     aggregation_time: float
     strategy: AggregationStrategy
     privacy_cost: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def get_total_parameters(self) -> int:
         """Get total number of parameters."""
         return sum(w.size for w in self.aggregated_weights.values())
 
-    def to_dict(self, include_weights: bool = False) -> Dict[str, Any]:
+    def to_dict(self, include_weights: bool = False) -> dict[str, Any]:
         """Convert result to dictionary."""
         result = {
             "num_clients": self.num_clients,
@@ -62,10 +64,7 @@ class AggregationResult:
         }
 
         if include_weights:
-            result["weights"] = {
-                layer: weights.tolist()
-                for layer, weights in self.aggregated_weights.items()
-            }
+            result["weights"] = {layer: weights.tolist() for layer, weights in self.aggregated_weights.items()}
         else:
             result["weight_layers"] = list(self.aggregated_weights.keys())
 
@@ -76,7 +75,7 @@ class BaseAggregator(ABC):
     """Base class for aggregation strategies."""
 
     @abstractmethod
-    def aggregate(self, updates: List[ModelUpdate]) -> AggregationResult:
+    def aggregate(self, updates: list[ModelUpdate]) -> AggregationResult:
         """
         Aggregate model updates from multiple clients.
 
@@ -88,7 +87,7 @@ class BaseAggregator(ABC):
         """
         pass
 
-    def _validate_updates(self, updates: List[ModelUpdate]) -> None:
+    def _validate_updates(self, updates: list[ModelUpdate]) -> None:
         """Validate that all updates have compatible structure."""
         if not updates:
             raise ValueError("Cannot aggregate empty list of updates")
@@ -98,9 +97,7 @@ class BaseAggregator(ABC):
         for update in updates[1:]:
             layer_names = set(update.weights.keys())
             if layer_names != layer_names_ref:
-                raise ValueError(
-                    f"Incompatible layer names: {layer_names} != {layer_names_ref}"
-                )
+                raise ValueError(f"Incompatible layer names: {layer_names} != {layer_names_ref}")
 
         # Check that all layers have same shapes
         for layer_name in layer_names_ref:
@@ -108,10 +105,7 @@ class BaseAggregator(ABC):
             for update in updates[1:]:
                 shape = update.weights[layer_name].shape
                 if shape != shape_ref:
-                    raise ValueError(
-                        f"Incompatible shape for layer {layer_name}: "
-                        f"{shape} != {shape_ref}"
-                    )
+                    raise ValueError(f"Incompatible shape for layer {layer_name}: {shape} != {shape_ref}")
 
 
 class FedAvgAggregator(BaseAggregator):
@@ -135,7 +129,7 @@ class FedAvgAggregator(BaseAggregator):
         """Initialize FedAvg aggregator."""
         self.strategy = AggregationStrategy.FEDAVG
 
-    def aggregate(self, updates: List[ModelUpdate]) -> AggregationResult:
+    def aggregate(self, updates: list[ModelUpdate]) -> AggregationResult:
         """
         Aggregate updates using weighted average based on sample counts.
 
@@ -155,10 +149,7 @@ class FedAvgAggregator(BaseAggregator):
         if total_samples == 0:
             raise ValueError("Total samples cannot be zero")
 
-        logger.info(
-            f"Aggregating {len(updates)} updates using FedAvg "
-            f"({total_samples} total samples)"
-        )
+        logger.info(f"Aggregating {len(updates)} updates using FedAvg ({total_samples} total samples)")
 
         # Initialize aggregated weights
         layer_names = list(updates[0].weights.keys())
@@ -167,13 +158,11 @@ class FedAvgAggregator(BaseAggregator):
         # Weighted average for each layer
         for layer_name in layer_names:
             # Collect weights for this layer from all clients
-            layer_weights = [
-                update.weights[layer_name] for update in updates
-            ]
+            layer_weights = [update.weights[layer_name] for update in updates]
 
             # Compute weighted average
             weighted_sum = np.zeros_like(layer_weights[0])
-            for update, weights in zip(updates, layer_weights):
+            for update, weights in zip(updates, layer_weights, strict=False):
                 weight_factor = update.num_samples / total_samples
                 weighted_sum += weight_factor * weights
 
@@ -185,10 +174,7 @@ class FedAvgAggregator(BaseAggregator):
         # Build metadata
         metadata = {
             "client_ids": [update.client_id for update in updates],
-            "sample_distribution": {
-                update.client_id: update.num_samples
-                for update in updates
-            },
+            "sample_distribution": {update.client_id: update.num_samples for update in updates},
             "average_client_metrics": self._average_metrics(updates, total_samples),
         }
 
@@ -203,9 +189,7 @@ class FedAvgAggregator(BaseAggregator):
             metadata=metadata,
         )
 
-    def _average_metrics(
-        self, updates: List[ModelUpdate], total_samples: int
-    ) -> Dict[str, float]:
+    def _average_metrics(self, updates: list[ModelUpdate], total_samples: int) -> dict[str, float]:
         """Calculate weighted average of client metrics."""
         if not updates:
             return {}
@@ -216,10 +200,7 @@ class FedAvgAggregator(BaseAggregator):
 
         avg_metrics = {}
         for metric_name in metric_names:
-            weighted_sum = sum(
-                update.metrics.get(metric_name, 0.0) * update.num_samples
-                for update in updates
-            )
+            weighted_sum = sum(update.metrics.get(metric_name, 0.0) * update.num_samples for update in updates)
             avg_metrics[metric_name] = weighted_sum / total_samples
 
         return avg_metrics
@@ -249,7 +230,7 @@ class SecureAggregator(BaseAggregator):
         self.strategy = AggregationStrategy.SECURE
         self.threshold = threshold
 
-    def aggregate(self, updates: List[ModelUpdate]) -> AggregationResult:
+    def aggregate(self, updates: list[ModelUpdate]) -> AggregationResult:
         """
         Aggregate updates using secret sharing.
 
@@ -265,15 +246,9 @@ class SecureAggregator(BaseAggregator):
         self._validate_updates(updates)
 
         if len(updates) < self.threshold:
-            raise ValueError(
-                f"Need at least {self.threshold} clients for secure aggregation, "
-                f"got {len(updates)}"
-            )
+            raise ValueError(f"Need at least {self.threshold} clients for secure aggregation, got {len(updates)}")
 
-        logger.info(
-            f"Securely aggregating {len(updates)} updates "
-            f"(threshold={self.threshold})"
-        )
+        logger.info(f"Securely aggregating {len(updates)} updates (threshold={self.threshold})")
 
         # In a real implementation, clients would add pairwise masks that
         # cancel out during aggregation. Here we simulate the outcome:
@@ -292,10 +267,7 @@ class SecureAggregator(BaseAggregator):
         aggregation_time = (datetime.utcnow() - start_time).total_seconds()
         result.aggregation_time = aggregation_time
 
-        logger.info(
-            f"Secure aggregation completed in {aggregation_time:.2f}s "
-            f"(individual updates protected)"
-        )
+        logger.info(f"Secure aggregation completed in {aggregation_time:.2f}s (individual updates protected)")
 
         return result
 
@@ -340,7 +312,7 @@ class DPAggregator(BaseAggregator):
         if clip_norm <= 0:
             raise ValueError("clip_norm must be positive")
 
-    def aggregate(self, updates: List[ModelUpdate]) -> AggregationResult:
+    def aggregate(self, updates: list[ModelUpdate]) -> AggregationResult:
         """
         Aggregate updates with differential privacy.
 
@@ -361,8 +333,7 @@ class DPAggregator(BaseAggregator):
         self._validate_updates(updates)
 
         logger.info(
-            f"DP-FedAvg aggregating {len(updates)} updates "
-            f"(ε={self.epsilon}, δ={self.delta}, clip={self.clip_norm})"
+            f"DP-FedAvg aggregating {len(updates)} updates (ε={self.epsilon}, δ={self.delta}, clip={self.clip_norm})"
         )
 
         # Step 1: Clip updates to bounded L2 norm
@@ -373,9 +344,7 @@ class DPAggregator(BaseAggregator):
         agg_result = fedavg.aggregate(clipped_updates)
 
         # Step 3: Add Gaussian noise for DP
-        noisy_weights = self._add_dp_noise(
-            agg_result.aggregated_weights, len(updates)
-        )
+        noisy_weights = self._add_dp_noise(agg_result.aggregated_weights, len(updates))
 
         # Update result with DP information
         agg_result.aggregated_weights = noisy_weights
@@ -385,21 +354,16 @@ class DPAggregator(BaseAggregator):
         agg_result.metadata["epsilon"] = self.epsilon
         agg_result.metadata["delta"] = self.delta
         agg_result.metadata["clip_norm"] = self.clip_norm
-        agg_result.metadata["num_clipped_updates"] = sum(
-            1 for u in updates if self._needs_clipping(u)
-        )
+        agg_result.metadata["num_clipped_updates"] = sum(1 for u in updates if self._needs_clipping(u))
 
         aggregation_time = (datetime.utcnow() - start_time).total_seconds()
         agg_result.aggregation_time = aggregation_time
 
-        logger.info(
-            f"DP-FedAvg completed in {aggregation_time:.2f}s "
-            f"(privacy cost: ε={self.epsilon})"
-        )
+        logger.info(f"DP-FedAvg completed in {aggregation_time:.2f}s (privacy cost: ε={self.epsilon})")
 
         return agg_result
 
-    def _clip_updates(self, updates: List[ModelUpdate]) -> List[ModelUpdate]:
+    def _clip_updates(self, updates: list[ModelUpdate]) -> list[ModelUpdate]:
         """
         Clip each update to bounded L2 norm.
 
@@ -418,10 +382,7 @@ class DPAggregator(BaseAggregator):
             if l2_norm > self.clip_norm:
                 # Clip: scale all weights by clip_norm / l2_norm
                 scaling_factor = self.clip_norm / l2_norm
-                clipped_weights = {
-                    layer: weights * scaling_factor
-                    for layer, weights in update.weights.items()
-                }
+                clipped_weights = {layer: weights * scaling_factor for layer, weights in update.weights.items()}
 
                 # Create new update with clipped weights
                 clipped_update = ModelUpdate(
@@ -445,16 +406,12 @@ class DPAggregator(BaseAggregator):
         l2_norm = self._compute_l2_norm(update.weights)
         return l2_norm > self.clip_norm
 
-    def _compute_l2_norm(self, weights: Dict[str, np.ndarray]) -> float:
+    def _compute_l2_norm(self, weights: dict[str, np.ndarray]) -> float:
         """Compute L2 norm of all weights."""
-        squared_sum = sum(
-            np.sum(w ** 2) for w in weights.values()
-        )
+        squared_sum = sum(np.sum(w**2) for w in weights.values())
         return np.sqrt(squared_sum)
 
-    def _add_dp_noise(
-        self, weights: Dict[str, np.ndarray], num_clients: int
-    ) -> Dict[str, np.ndarray]:
+    def _add_dp_noise(self, weights: dict[str, np.ndarray], num_clients: int) -> dict[str, np.ndarray]:
         """
         Add Gaussian noise calibrated to (ε, δ)-DP.
 
@@ -471,9 +428,7 @@ class DPAggregator(BaseAggregator):
         """
         # Calculate noise scale (Gaussian mechanism for (ε, δ)-DP)
         sensitivity = 2 * self.clip_norm  # L2 sensitivity of sum
-        noise_scale = (
-            sensitivity * np.sqrt(2 * np.log(1.25 / self.delta))
-        ) / (self.epsilon * num_clients)
+        noise_scale = (sensitivity * np.sqrt(2 * np.log(1.25 / self.delta))) / (self.epsilon * num_clients)
 
         logger.debug(f"Adding Gaussian noise with scale σ={noise_scale:.4f}")
 

@@ -17,11 +17,13 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
+
 # Lazy imports to avoid circular import issues
 def __getattr__(name):
     """Lazy attribute access for app and create_app."""
     if name in ("app", "create_app"):
         from .main import app, create_app
+
         return app if name == "app" else create_app
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

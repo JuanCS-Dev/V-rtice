@@ -19,15 +19,15 @@ Version: 1.0.0
 import asyncio
 import logging
 import time
-from typing import Dict, Any, Tuple, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import asyncpg
 import redis.asyncio as aioredis
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import KafkaConnectionError, KafkaError
 
-from monitoring.health_checker import HealthStatus
 from config import settings
+from monitoring.health_checker import HealthStatus
 
 logger = logging.getLogger(__name__)
 
@@ -85,8 +85,7 @@ class DependencyHealthChecker:
 
                 # Extract broker info
                 brokers = [
-                    {"id": broker.nodeId, "host": broker.host, "port": broker.port}
-                    for broker in metadata.brokers
+                    {"id": broker.nodeId, "host": broker.host, "port": broker.port} for broker in metadata.brokers
                 ]
 
                 # Check latency
@@ -394,7 +393,6 @@ class DependencyHealthChecker:
         return {
             "overall_status": overall_status,
             "dependencies": {
-                name: {"status": status, "details": details}
-                for name, (status, details) in results.items()
+                name: {"status": status, "details": details} for name, (status, details) in results.items()
             },
         }

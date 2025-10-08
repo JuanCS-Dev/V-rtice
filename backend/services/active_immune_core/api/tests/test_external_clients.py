@@ -11,17 +11,15 @@ Version: 1.0.0
 
 import pytest
 import pytest_asyncio
-import asyncio
 
 from api.clients import (
-    TregClient,
-    MemoryClient,
     AdaptiveImmunityClient,
     GovernanceClient,
     IPIntelClient,
+    MemoryClient,
+    TregClient,
 )
 from api.clients.governance_client import RiskLevel
-
 
 # ==================== FIXTURES ====================
 
@@ -85,10 +83,7 @@ async def test_treg_client_initialization(treg_client):
 async def test_treg_request_suppression(treg_client):
     """Test suppression request (real service or degraded)."""
     result = await treg_client.request_suppression(
-        agent_id="test_agent_001",
-        threat_level=0.5,
-        current_load=0.8,
-        reason="test_suppression"
+        agent_id="test_agent_001", threat_level=0.5, current_load=0.8, reason="test_suppression"
     )
 
     assert result is not None
@@ -138,10 +133,7 @@ async def test_memory_consolidate(memory_client):
 @pytest.mark.asyncio
 async def test_memory_recall(memory_client):
     """Test memory recall."""
-    result = await memory_client.recall_memory(
-        threat_signature="test_threat_abc123",
-        similarity_threshold=0.8
-    )
+    result = await memory_client.recall_memory(threat_signature="test_threat_abc123", similarity_threshold=0.8)
 
     assert result is not None
 
@@ -149,10 +141,7 @@ async def test_memory_recall(memory_client):
 @pytest.mark.asyncio
 async def test_memory_search(memory_client):
     """Test memory search."""
-    result = await memory_client.search_memories(
-        query="test",
-        limit=10
-    )
+    result = await memory_client.search_memories(query="test", limit=10)
 
     assert result is not None
 
@@ -170,10 +159,7 @@ async def test_adaptive_client_initialization(adaptive_client):
 @pytest.mark.asyncio
 async def test_adaptive_analyze_threat(adaptive_client):
     """Test threat analysis."""
-    result = await adaptive_client.analyze_threat(
-        threat_data={"payload": "test_payload"},
-        threat_type="network_attack"
-    )
+    result = await adaptive_client.analyze_threat(threat_data={"payload": "test_payload"}, threat_type="network_attack")
 
     assert result is not None
     assert "status" in result or "threat_type" in result
@@ -183,9 +169,7 @@ async def test_adaptive_analyze_threat(adaptive_client):
 async def test_adaptive_optimize_response(adaptive_client):
     """Test response optimization."""
     result = await adaptive_client.optimize_response(
-        threat_signature="test_signature",
-        current_antibody={"config": "v1"},
-        success_rate=0.75
+        threat_signature="test_signature", current_antibody={"config": "v1"}, success_rate=0.75
     )
 
     assert result is not None
@@ -194,10 +178,7 @@ async def test_adaptive_optimize_response(adaptive_client):
 @pytest.mark.asyncio
 async def test_adaptive_get_antibodies(adaptive_client):
     """Test antibody retrieval."""
-    result = await adaptive_client.get_antibodies(
-        min_affinity=0.5,
-        limit=10
-    )
+    result = await adaptive_client.get_antibodies(min_affinity=0.5, limit=10)
 
     assert result is not None
 
@@ -220,7 +201,7 @@ async def test_governance_submit_low_risk_decision(governance_client):
         description="Test low-risk decision",
         risk_level=RiskLevel.LOW,
         context={"test": "data"},
-        recommended_action="approve"
+        recommended_action="approve",
     )
 
     assert result is not None
@@ -238,7 +219,7 @@ async def test_governance_submit_high_risk_decision(governance_client):
         description="Test high-risk decision",
         risk_level=RiskLevel.HIGH,
         context={"impact": "critical"},
-        recommended_action="execute"
+        recommended_action="execute",
     )
 
     assert result is not None
@@ -275,11 +256,7 @@ async def test_graceful_degradation_on_unavailable_service():
     assert not client.is_available()
 
     # But should still work (degraded mode)
-    result = await client.request_suppression(
-        agent_id="test",
-        threat_level=0.5,
-        current_load=0.8
-    )
+    result = await client.request_suppression(agent_id="test", threat_level=0.5, current_load=0.8)
 
     assert result is not None
     assert result.get("degraded_mode") is True
@@ -301,11 +278,7 @@ async def test_circuit_breaker_opens_after_failures():
 
     # Make requests until circuit opens
     for i in range(5):
-        await client.request_suppression(
-            agent_id="test",
-            threat_level=0.5,
-            current_load=0.8
-        )
+        await client.request_suppression(agent_id="test", threat_level=0.5, current_load=0.8)
 
     # Circuit should be open
     # Call base class method to get local metrics (not async)

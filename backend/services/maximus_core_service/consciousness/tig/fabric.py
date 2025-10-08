@@ -31,7 +31,7 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -124,7 +124,7 @@ class CircuitBreaker:
 
         self.state = "closed"  # closed, open, half_open
         self.failures = 0
-        self.last_failure_time: Optional[float] = None
+        self.last_failure_time: float | None = None
 
     def is_open(self) -> bool:
         """
@@ -175,7 +175,7 @@ class ProcessingState:
     - Phase sync: oscillatory synchronization for ESGT coherence
     """
 
-    active_modules: List[str] = field(default_factory=list)
+    active_modules: list[str] = field(default_factory=list)
     attention_level: float = 0.5  # 0.0-1.0, modulated by acetylcholine
     cpu_utilization: float = 0.0
     memory_utilization: float = 0.0
@@ -185,7 +185,7 @@ class ProcessingState:
     phase_sync: complex = complex(1.0, 0.0)
 
     # Information content currently being processed
-    processing_content: Optional[Dict[str, Any]] = None
+    processing_content: dict[str, Any] | None = None
 
 
 @dataclass
@@ -206,7 +206,7 @@ class TIGNode:
     """
 
     id: str
-    connections: Dict[str, TIGConnection] = field(default_factory=dict)
+    connections: dict[str, TIGConnection] = field(default_factory=dict)
     state: ProcessingState = field(default_factory=ProcessingState)
     node_state: NodeState = NodeState.INITIALIZING
     message_queue: asyncio.Queue = field(default_factory=lambda: asyncio.Queue(maxsize=10000))
@@ -246,7 +246,7 @@ class TIGNode:
 
         return triangles / possible if possible > 0 else 0.0
 
-    async def broadcast_to_neighbors(self, message: Dict[str, Any], priority: int = 0) -> int:
+    async def broadcast_to_neighbors(self, message: dict[str, Any], priority: int = 0) -> int:
         """
         Broadcast message to all connected neighbors.
 
@@ -274,7 +274,7 @@ class TIGNode:
 
         return successful
 
-    async def _send_to_neighbor(self, neighbor_id: str, message: Dict[str, Any], priority: int) -> bool:
+    async def _send_to_neighbor(self, neighbor_id: str, message: dict[str, Any], priority: int) -> bool:
         """Internal method to send message to specific neighbor."""
         # In production, this would use actual network protocols
         # For now, we simulate with direct queue insertion
@@ -345,7 +345,7 @@ class FabricMetrics:
 
     # Non-degeneracy validation
     has_feed_forward_bottlenecks: bool = False
-    bottleneck_locations: List[str] = field(default_factory=list)
+    bottleneck_locations: list[str] = field(default_factory=list)
     min_path_redundancy: int = 0  # Minimum alternative paths
 
     # Performance metrics
@@ -356,7 +356,7 @@ class FabricMetrics:
     # Temporal
     last_update: float = field(default_factory=time.time)
 
-    def validate_iit_compliance(self) -> Tuple[bool, List[str]]:
+    def validate_iit_compliance(self) -> tuple[bool, list[str]]:
         """
         Validate that fabric meets IIT structural requirements.
 
@@ -423,19 +423,19 @@ class TIGFabric:
 
     def __init__(self, config: TopologyConfig):
         self.config = config
-        self.nodes: Dict[str, TIGNode] = {}
+        self.nodes: dict[str, TIGNode] = {}
         self.graph = nx.Graph()  # NetworkX graph for analysis
         self.metrics = FabricMetrics()
         self._initialized = False
 
         # FASE VII (Safety Hardening): Fault tolerance components
-        self.node_health: Dict[str, NodeHealth] = {}
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self.node_health: dict[str, NodeHealth] = {}
+        self.circuit_breakers: dict[str, CircuitBreaker] = {}
         self.dead_node_timeout = 5.0  # seconds
         self.max_failures_before_isolation = 3
 
         # Health monitoring task
-        self._health_monitor_task: Optional[asyncio.Task] = None
+        self._health_monitor_task: asyncio.Task | None = None
         self._running = False
 
     async def initialize(self) -> None:
@@ -549,8 +549,21 @@ class TIGFabric:
         # PASS 2: Targeted enhancement for high-degree nodes (hubs)
         # Hubs are critical for ECI - ensure they form moderately connected core
         # CONSERVATIVE: Reduced sampling to avoid over-densification
+        #
+        # NOTE: This pass only makes sense for larger graphs (16+ nodes) where
+        # hub structure emerges. For small graphs (<12 nodes), hub enhancement
+        # is skipped as all nodes have similar connectivity.
+        if len(nodes) < 12:
+            return
+
         degrees = dict(self.graph.degree())
-        high_degree_nodes = [n for n, d in degrees.items() if d > np.percentile(list(degrees.values()), 75)]
+        degree_values = list(degrees.values())
+
+        # Safety: Skip hub enhancement if graph is degenerate (all same degree)
+        if len(set(degree_values)) <= 2:
+            return
+
+        high_degree_nodes = [n for n, d in degrees.items() if d > np.percentile(degree_values, 75)]
 
         for hub in high_degree_nodes:
             hub_neighbors = list(self.graph.neighbors(hub))
@@ -718,7 +731,7 @@ class TIGFabric:
 
             self.metrics.min_path_redundancy = min(redundancies) if redundancies else 0
 
-    async def broadcast_global(self, message: Dict[str, Any], priority: int = 0) -> int:
+    async def broadcast_global(self, message: dict[str, Any], priority: int = 0) -> int:
         """
         Broadcast message to all nodes (implements GWD global workspace).
 
@@ -749,7 +762,7 @@ class TIGFabric:
         """Get current fabric metrics for consciousness validation."""
         return self.metrics
 
-    def get_node(self, node_id: str) -> Optional[TIGNode]:
+    def get_node(self, node_id: str) -> TIGNode | None:
         """Retrieve specific node by ID."""
         return self.nodes.get(node_id)
 
@@ -761,10 +774,10 @@ class TIGFabric:
         Detects dead nodes, triggers isolation, and monitors for recovery.
         """
         while self._running:
-            try:
-                current_time = time.time()
+            current_time = time.time()
 
-                for node_id, health in self.node_health.items():
+            for node_id, health in self.node_health.items():
+                try:
                     # Check if node is dead (not seen within timeout)
                     if current_time - health.last_seen > self.dead_node_timeout:
                         if not health.isolated:
@@ -774,11 +787,11 @@ class TIGFabric:
                     elif health.isolated and health.failures == 0:
                         await self._reintegrate_node(node_id)
 
-                await asyncio.sleep(1.0)  # Check every second
+                except Exception as e:
+                    print(f"⚠️  Health monitoring error for {node_id}: {e}")
+                    # Continue monitoring other nodes despite errors
 
-            except Exception as e:
-                print(f"⚠️  Health monitoring error: {e}")
-                # Continue monitoring despite errors
+            await asyncio.sleep(1.0)  # Check every second
 
     async def _isolate_dead_node(self, node_id: str) -> None:
         """
@@ -903,7 +916,7 @@ class TIGFabric:
 
             return True
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             print(f"⚠️  TIG: Send timeout to node {node_id}")
             return self._handle_send_failure(node_id, "timeout")
 
@@ -931,7 +944,7 @@ class TIGFabric:
 
         return False
 
-    def get_health_metrics(self) -> Dict[str, Any]:
+    def get_health_metrics(self) -> dict[str, Any]:
         """
         Get TIG health metrics for Safety Core integration.
 

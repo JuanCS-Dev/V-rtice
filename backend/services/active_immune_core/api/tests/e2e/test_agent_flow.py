@@ -143,9 +143,7 @@ async def test_agent_actions_flow(client: AsyncClient, agent_ids: list):
     agent_ids.append(agent_id)
 
     # Start agent
-    start_response = await client.post(
-        f"/agents/{agent_id}/actions", json={"action": "start"}
-    )
+    start_response = await client.post(f"/agents/{agent_id}/actions", json={"action": "start"})
     assert start_response.status_code == 200
     start_data = start_response.json()
 
@@ -153,17 +151,13 @@ async def test_agent_actions_flow(client: AsyncClient, agent_ids: list):
     assert start_data["action"] == "start"
 
     # Pause agent
-    pause_response = await client.post(
-        f"/agents/{agent_id}/actions", json={"action": "pause"}
-    )
+    pause_response = await client.post(f"/agents/{agent_id}/actions", json={"action": "pause"})
     # May succeed or fail depending on current status
     # Just verify it returns a valid response
     assert pause_response.status_code in [200, 400]
 
     # Stop agent
-    stop_response = await client.post(
-        f"/agents/{agent_id}/actions", json={"action": "stop"}
-    )
+    stop_response = await client.post(f"/agents/{agent_id}/actions", json={"action": "stop"})
     assert stop_response.status_code == 200
     stop_data = stop_response.json()
 

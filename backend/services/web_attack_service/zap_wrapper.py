@@ -12,12 +12,13 @@ identifying web-specific attack vectors.
 """
 
 import asyncio
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Dict, List, Optional
 
-from models import ScanType, Severity, ZAPAlert, ZAPScanRequest, ZAPScanResult
 from zapv2 import ZAPv2
+
+from models import ScanType, Severity, ZAPAlert, ZAPScanRequest, ZAPScanResult
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +44,7 @@ class ZAPWrapper:
             zap_api_url (str): A URL da API do ZAP.
             zap_api_key (Optional[str]): A chave da API do ZAP para autenticação.
         """
-        self.zap = ZAPv2(
-            apikey=zap_api_key, proxies={"http": zap_api_url, "https": zap_api_url}
-        )
+        self.zap = ZAPv2(apikey=zap_api_key, proxies={"http": zap_api_url, "https": zap_api_url})
 
     async def scan(self, request: ZAPScanRequest) -> ZAPScanResult:
         """
@@ -111,9 +110,7 @@ class ZAPWrapper:
         context_name = request.context_name or "default_context"
 
         # Create context
-        context_id = await asyncio.to_thread(
-            self.zap.context.new_context, contextname=context_name
-        )
+        context_id = await asyncio.to_thread(self.zap.context.new_context, contextname=context_name)
 
         # Include URLs
         if request.include_in_context:
@@ -152,9 +149,7 @@ class ZAPWrapper:
 
         # Set credentials
         if request.username and request.password:
-            await asyncio.to_thread(
-                self.zap.users.new_user, contextid=context_id, name="test_user"
-            )
+            await asyncio.to_thread(self.zap.users.new_user, contextid=context_id, name="test_user")
 
             await asyncio.to_thread(
                 self.zap.users.set_authentication_credentials,
@@ -195,9 +190,7 @@ class ZAPWrapper:
         """
         logger.info(f"Starting AJAX spider on {target_url}")
 
-        await asyncio.to_thread(
-            self.zap.ajaxSpider.scan, url=target_url, inscope="true"
-        )
+        await asyncio.to_thread(self.zap.ajaxSpider.scan, url=target_url, inscope="true")
 
         # Wait for completion
         while self.zap.ajaxSpider.status == "running":
@@ -205,9 +198,7 @@ class ZAPWrapper:
 
         logger.info("AJAX spider complete")
 
-    async def _active_scan(
-        self, target_url: str, request: ZAPScanRequest, context_id: str
-    ):
+    async def _active_scan(self, target_url: str, request: ZAPScanRequest, context_id: str):
         """Executa uma varredura ativa do ZAP no URL alvo.
 
         Args:
@@ -297,14 +288,8 @@ class ZAPWrapper:
                 description=alert_data.get("description", ""),
                 solution=alert_data.get("solution", ""),
                 reference=alert_data.get("reference", ""),
-                cwe_id=(
-                    int(alert_data.get("cweid", 0)) if alert_data.get("cweid") else None
-                ),
-                wasc_id=(
-                    int(alert_data.get("wascid", 0))
-                    if alert_data.get("wascid")
-                    else None
-                ),
+                cwe_id=(int(alert_data.get("cweid", 0)) if alert_data.get("cweid") else None),
+                wasc_id=(int(alert_data.get("wascid", 0)) if alert_data.get("wascid") else None),
                 timestamp=datetime.now(),
             )
 

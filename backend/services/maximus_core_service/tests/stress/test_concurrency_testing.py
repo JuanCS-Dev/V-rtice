@@ -9,6 +9,7 @@ Version: 1.0.0 - FASE IV Sprint 2
 """
 
 import asyncio
+
 import pytest
 import pytest_asyncio
 
@@ -55,7 +56,7 @@ async def test_concurrent_esgt_ignitions(esgt_coordinator):
         tasks = []
         for i in range(batch_size):
             idx = batch * batch_size + i
-            salience = SalienceScore(novelty=0.7 + idx*0.01, relevance=0.75, urgency=0.7)
+            salience = SalienceScore(novelty=0.7 + idx * 0.01, relevance=0.75, urgency=0.7)
             task = esgt_coordinator.initiate_esgt(salience, {"concurrent": idx, "batch": batch})
             tasks.append(task)
 

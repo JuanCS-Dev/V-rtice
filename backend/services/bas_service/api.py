@@ -15,18 +15,19 @@ of the Maximus AI system.
 """
 
 import asyncio
+import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import uuid
+
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from atomic_executor import AtomicExecutor
 from attack_techniques import AttackTechniques
-from fastapi import FastAPI, HTTPException
 from metrics import MetricsCollector
 from models import AttackResult, AttackSimulation, SimulationStatus
 from purple_team_engine import PurpleTeamEngine
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus BAS Service", version="1.0.0")
 
@@ -87,9 +88,7 @@ async def start_simulation(request: StartSimulationRequest) -> AttackSimulation:
     Returns:
         AttackSimulation: The details of the started simulation.
     """
-    print(
-        f"[API] Starting simulation: {request.attack_scenario} against {request.target_service}"
-    )
+    print(f"[API] Starting simulation: {request.attack_scenario} against {request.target_service}")
     simulation_id = str(uuid.uuid4())
     simulation = AttackSimulation(
         id=simulation_id,

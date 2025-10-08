@@ -18,10 +18,9 @@ Date: 2025-10-06
 """
 
 import argparse
-from dataclasses import dataclass
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -38,8 +37,6 @@ except ImportError:
     logging.warning("PyTorch not available, training will not work")
 
 from training.layer_trainer import LayerTrainer, TrainingConfig
-from training.dataset_builder import DatasetBuilder, PyTorchDatasetWrapper
-from training.data_preprocessor import LayerType
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -50,6 +47,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 if TORCH_AVAILABLE:
+
     class Layer1VAE(nn.Module):
         """Variational Autoencoder for Layer 1 (Sensory).
 
@@ -60,13 +58,7 @@ if TORCH_AVAILABLE:
         - Applied to cybersecurity event compression
         """
 
-        def __init__(
-            self,
-            input_dim: int = 128,
-            hidden_dim: int = 96,
-            latent_dim: int = 64,
-            dropout: float = 0.2
-        ):
+        def __init__(self, input_dim: int = 128, hidden_dim: int = 96, latent_dim: int = 64, dropout: float = 0.2):
             """Initialize VAE.
 
             Args:
@@ -87,7 +79,7 @@ if TORCH_AVAILABLE:
                 nn.Dropout(dropout),
                 nn.Linear(hidden_dim, hidden_dim),
                 nn.ReLU(),
-                nn.Dropout(dropout)
+                nn.Dropout(dropout),
             )
 
             # Latent parameters
@@ -103,7 +95,7 @@ if TORCH_AVAILABLE:
                 nn.ReLU(),
                 nn.Dropout(dropout),
                 nn.Linear(hidden_dim, input_dim),
-                nn.Sigmoid()  # Assuming features are normalized to [0, 1]
+                nn.Sigmoid(),  # Assuming features are normalized to [0, 1]
             )
 
             # Initialize weights
@@ -117,7 +109,7 @@ if TORCH_AVAILABLE:
                     if m.bias is not None:
                         nn.init.constant_(m.bias, 0)
 
-        def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        def encode(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
             """Encode input to latent parameters.
 
             Args:
@@ -156,7 +148,7 @@ if TORCH_AVAILABLE:
             """
             return self.decoder(z)
 
-        def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
             """Forward pass.
 
             Args:
@@ -182,16 +174,11 @@ if TORCH_AVAILABLE:
             mean, _ = self.encode(x)
             return mean
 
-
     # =============================================================================
     # LOSS FUNCTION
     # =============================================================================
 
-    def vae_loss_fn(
-        model: Layer1VAE,
-        batch: Tuple[torch.Tensor, torch.Tensor],
-        beta: float = 1.0
-    ) -> torch.Tensor:
+    def vae_loss_fn(model: Layer1VAE, batch: tuple[torch.Tensor, torch.Tensor], beta: float = 1.0) -> torch.Tensor:
         """VAE loss function: Reconstruction + KL divergence.
 
         Loss = MSE(x, x_reconstructed) + beta * KL(q(z|x) || p(z))
@@ -222,15 +209,11 @@ if TORCH_AVAILABLE:
 
         return total_loss
 
-
     # =============================================================================
     # METRICS
     # =============================================================================
 
-    def reconstruction_error_metric(
-        model: Layer1VAE,
-        batch: Tuple[torch.Tensor, torch.Tensor]
-    ) -> float:
+    def reconstruction_error_metric(model: Layer1VAE, batch: tuple[torch.Tensor, torch.Tensor]) -> float:
         """Compute reconstruction error (MSE).
 
         Args:
@@ -245,11 +228,7 @@ if TORCH_AVAILABLE:
         mse = F.mse_loss(reconstruction, features)
         return mse.item()
 
-
-    def kl_divergence_metric(
-        model: Layer1VAE,
-        batch: Tuple[torch.Tensor, torch.Tensor]
-    ) -> float:
+    def kl_divergence_metric(model: Layer1VAE, batch: tuple[torch.Tensor, torch.Tensor]) -> float:
         """Compute KL divergence.
 
         Args:
@@ -269,14 +248,15 @@ if TORCH_AVAILABLE:
 # TRAINING FUNCTION
 # =============================================================================
 
+
 def train_layer1_vae(
     train_features: np.ndarray,
     train_labels: np.ndarray,
-    val_features: Optional[np.ndarray] = None,
-    val_labels: Optional[np.ndarray] = None,
-    config: Optional[TrainingConfig] = None,
-    beta: float = 1.0
-) -> Tuple[Any, Dict[str, Any]]:
+    val_features: np.ndarray | None = None,
+    val_labels: np.ndarray | None = None,
+    config: TrainingConfig | None = None,
+    beta: float = 1.0,
+) -> tuple[Any, dict[str, Any]]:
     """Train Layer 1 VAE.
 
     Args:
@@ -302,65 +282,36 @@ def train_layer1_vae(
             batch_size=32,
             num_epochs=100,
             learning_rate=1e-3,
-            early_stopping_patience=10
+            early_stopping_patience=10,
         )
 
     logger.info(f"Training Layer 1 VAE: {len(train_features)} training samples")
 
     # Create datasets
-    train_dataset = TensorDataset(
-        torch.FloatTensor(train_features),
-        torch.LongTensor(train_labels)
-    )
+    train_dataset = TensorDataset(torch.FloatTensor(train_features), torch.LongTensor(train_labels))
 
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.batch_size,
-        shuffle=True,
-        num_workers=4,
-        pin_memory=True
-    )
+    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=4, pin_memory=True)
 
     val_loader = None
     if val_features is not None:
-        val_dataset = TensorDataset(
-            torch.FloatTensor(val_features),
-            torch.LongTensor(val_labels)
-        )
+        val_dataset = TensorDataset(torch.FloatTensor(val_features), torch.LongTensor(val_labels))
 
         val_loader = DataLoader(
-            val_dataset,
-            batch_size=config.batch_size,
-            shuffle=False,
-            num_workers=4,
-            pin_memory=True
+            val_dataset, batch_size=config.batch_size, shuffle=False, num_workers=4, pin_memory=True
         )
 
     # Create model
-    model = Layer1VAE(
-        input_dim=train_features.shape[1],
-        hidden_dim=96,
-        latent_dim=64,
-        dropout=0.2
-    )
+    model = Layer1VAE(input_dim=train_features.shape[1], hidden_dim=96, latent_dim=64, dropout=0.2)
 
     # Create loss function with beta
     def loss_fn(m, batch):
         return vae_loss_fn(m, batch, beta=beta)
 
     # Metrics
-    metrics = {
-        "reconstruction_error": reconstruction_error_metric,
-        "kl_divergence": kl_divergence_metric
-    }
+    metrics = {"reconstruction_error": reconstruction_error_metric, "kl_divergence": kl_divergence_metric}
 
     # Create trainer
-    trainer = LayerTrainer(
-        model=model,
-        loss_fn=loss_fn,
-        config=config,
-        metric_fns=metrics
-    )
+    trainer = LayerTrainer(model=model, loss_fn=loss_fn, config=config, metric_fns=metrics)
 
     # Train
     history = trainer.train(train_loader, val_loader)
@@ -369,13 +320,14 @@ def train_layer1_vae(
         "history": history,
         "config": config,
         "best_val_loss": trainer.best_val_loss,
-        "best_epoch": trainer.best_epoch
+        "best_epoch": trainer.best_epoch,
     }
 
 
 # =============================================================================
 # CLI
 # =============================================================================
+
 
 def main():
     """Main training script."""
@@ -424,7 +376,7 @@ def main():
         learning_rate=args.learning_rate,
         early_stopping_patience=args.early_stopping_patience,
         checkpoint_dir=Path(args.checkpoint_dir),
-        log_dir=Path(args.log_dir)
+        log_dir=Path(args.log_dir),
     )
 
     # Train
@@ -434,10 +386,10 @@ def main():
         val_features=val_features,
         val_labels=val_labels,
         config=config,
-        beta=args.beta
+        beta=args.beta,
     )
 
-    logger.info(f"Training complete!")
+    logger.info("Training complete!")
     logger.info(f"Best validation loss: {results['best_val_loss']:.4f} at epoch {results['best_epoch']}")
 
     # Save final model

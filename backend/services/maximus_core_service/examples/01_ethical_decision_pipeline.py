@@ -16,22 +16,21 @@ Status: ✅ REGRA DE OURO 10/10
 
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from ethics.consequentialist_engine import ConsequentialistEngine
 from ethics.integration_engine import EthicalIntegrationEngine
 from ethics.kantian_checker import KantianChecker
-from ethics.virtue_ethics import VirtueEthicsEngine
-from ethics.consequentialist_engine import ConsequentialistEngine
 from ethics.principialism import PrincipalismEngine
-from xai.lime_cybersec import LIMECybersecExplainer
+from ethics.virtue_ethics import VirtueEthicsEngine
 from governance.decision_logger import DecisionLogger
 from governance.hitl_controller import HITLController
 
 
-def create_security_action() -> Dict[str, Any]:
+def create_security_action() -> dict[str, Any]:
     """
     Create a sample security action: blocking an IP address due to malware detection.
 
@@ -44,11 +43,7 @@ def create_security_action() -> Dict[str, Any]:
             "target": "192.168.1.100",
             "reason": "malware_detected",
             "duration_hours": 24,
-            "impact": {
-                "affected_users": 1,
-                "affected_services": ["web_access"],
-                "severity": "HIGH"
-            }
+            "impact": {"affected_users": 1, "affected_services": ["web_access"], "severity": "HIGH"},
         },
         "context": {
             "threat_type": "malware",
@@ -56,12 +51,12 @@ def create_security_action() -> Dict[str, Any]:
             "false_positive_rate": 0.05,
             "previous_incidents": 3,
             "source_reputation": "unknown",
-            "detection_method": "behavioral_analysis"
-        }
+            "detection_method": "behavioral_analysis",
+        },
     }
 
 
-def step1_ethical_evaluation(action: Dict[str, Any]) -> Dict[str, Any]:
+def step1_ethical_evaluation(action: dict[str, Any]) -> dict[str, Any]:
     """
     Step 1: Evaluate action against all ethical frameworks.
 
@@ -83,8 +78,7 @@ def step1_ethical_evaluation(action: Dict[str, Any]) -> Dict[str, Any]:
 
     # Create integration engine
     integration_engine = EthicalIntegrationEngine(
-        engines=[kantian, virtue, consequentialist, principlism],
-        weights=[0.3, 0.25, 0.25, 0.2]
+        engines=[kantian, virtue, consequentialist, principlism], weights=[0.3, 0.25, 0.25, 0.2]
     )
 
     # Evaluate action
@@ -94,20 +88,20 @@ def step1_ethical_evaluation(action: Dict[str, Any]) -> Dict[str, Any]:
 
     evaluation = integration_engine.evaluate(action)
 
-    print(f"\n🔍 Ethical Evaluation Results:")
+    print("\n🔍 Ethical Evaluation Results:")
     print(f"   Overall Decision: {evaluation['decision']}")
     print(f"   Aggregate Score: {evaluation['aggregate_score']:.2f}")
 
-    print(f"\n📊 Framework Breakdown:")
-    for framework_name, framework_result in evaluation['frameworks'].items():
-        status_emoji = "✅" if framework_result['decision'] == "APPROVED" else "❌"
+    print("\n📊 Framework Breakdown:")
+    for framework_name, framework_result in evaluation["frameworks"].items():
+        status_emoji = "✅" if framework_result["decision"] == "APPROVED" else "❌"
         print(f"   {status_emoji} {framework_name.capitalize()}: {framework_result['score']:.2f}")
         print(f"      Reasoning: {framework_result['reasoning']}")
 
     return evaluation
 
 
-def step2_xai_explanation(action: Dict[str, Any], evaluation: Dict[str, Any]) -> Dict[str, Any]:
+def step2_xai_explanation(action: dict[str, Any], evaluation: dict[str, Any]) -> dict[str, Any]:
     """
     Step 2: Generate XAI explanation for the decision.
 
@@ -129,10 +123,10 @@ def step2_xai_explanation(action: Dict[str, Any], evaluation: Dict[str, Any]) ->
         "previous_incidents": 0.28,
         "severity": 0.22,
         "false_positive_rate": 0.10,
-        "source_reputation": 0.05
+        "source_reputation": 0.05,
     }
 
-    print(f"\n🔍 Feature Importance for Decision:")
+    print("\n🔍 Feature Importance for Decision:")
     for feature, importance in sorted(feature_importance.items(), key=lambda x: x[1], reverse=True):
         bar_length = int(importance * 40)
         bar = "█" * bar_length
@@ -146,21 +140,17 @@ def step2_xai_explanation(action: Dict[str, Any], evaluation: Dict[str, Any]) ->
             f"previous incidents ({action['context']['previous_incidents']}) "
             f"strongly indicate legitimate threat requiring action."
         ),
-        "confidence": evaluation['aggregate_score']
+        "confidence": evaluation["aggregate_score"],
     }
 
-    print(f"\n💡 Interpretation:")
+    print("\n💡 Interpretation:")
     print(f"   {explanation['interpretation']}")
     print(f"   Confidence: {explanation['confidence']:.2%}")
 
     return explanation
 
 
-def step3_governance_logging(
-    action: Dict[str, Any],
-    evaluation: Dict[str, Any],
-    explanation: Dict[str, Any]
-) -> str:
+def step3_governance_logging(action: dict[str, Any], evaluation: dict[str, Any], explanation: dict[str, Any]) -> str:
     """
     Step 3: Log decision for audit and governance.
 
@@ -183,25 +173,22 @@ def step3_governance_logging(
         "ethical_evaluation": evaluation,
         "explanation": explanation,
         "executed": False,
-        "timestamp": "2025-10-06T12:00:00.000Z"
+        "timestamp": "2025-10-06T12:00:00.000Z",
     }
 
     decision_id = logger.log_decision(decision_data)
 
-    print(f"\n📝 Decision Logged:")
+    print("\n📝 Decision Logged:")
     print(f"   Decision ID: {decision_id}")
     print(f"   Action: {action['action']['type']}")
     print(f"   Ethical Score: {evaluation['aggregate_score']:.2f}")
     print(f"   Executed: {decision_data['executed']}")
-    print(f"   Audit trail available for compliance review")
+    print("   Audit trail available for compliance review")
 
     return decision_id
 
 
-def step4_hitl_escalation(
-    evaluation: Dict[str, Any],
-    action: Dict[str, Any]
-) -> Dict[str, Any]:
+def step4_hitl_escalation(evaluation: dict[str, Any], action: dict[str, Any]) -> dict[str, Any]:
     """
     Step 4: Check if human escalation is needed.
 
@@ -216,55 +203,41 @@ def step4_hitl_escalation(
     print("STEP 4: HITL ESCALATION CHECK")
     print("=" * 80)
 
-    controller = HITLController(
-        confidence_threshold=0.75,
-        risk_levels_requiring_approval=["HIGH", "CRITICAL"]
-    )
+    controller = HITLController(confidence_threshold=0.75, risk_levels_requiring_approval=["HIGH", "CRITICAL"])
 
-    confidence = evaluation['aggregate_score']
-    risk_level = action['action']['impact']['severity']
+    confidence = evaluation["aggregate_score"]
+    risk_level = action["action"]["impact"]["severity"]
 
-    print(f"\n🎯 Escalation Decision Criteria:")
+    print("\n🎯 Escalation Decision Criteria:")
     print(f"   Confidence: {confidence:.2f} (threshold: 0.75)")
     print(f"   Risk Level: {risk_level}")
 
-    should_escalate = controller.should_escalate(
-        confidence=confidence,
-        risk_level=risk_level
-    )
+    should_escalate = controller.should_escalate(confidence=confidence, risk_level=risk_level)
 
     if should_escalate:
-        print(f"\n⚠️  ESCALATION REQUIRED")
+        print("\n⚠️  ESCALATION REQUIRED")
         print(f"   Reason: {'Low confidence' if confidence < 0.75 else 'High risk action'}")
-        print(f"   Action: Sending to human analyst for review")
-        print(f"   Estimated review time: 5 minutes")
+        print("   Action: Sending to human analyst for review")
+        print("   Estimated review time: 5 minutes")
 
         escalation = {
             "escalated": True,
             "reason": "HIGH_RISK" if risk_level in ["HIGH", "CRITICAL"] else "LOW_CONFIDENCE",
             "confidence": confidence,
             "risk_level": risk_level,
-            "status": "PENDING_APPROVAL"
+            "status": "PENDING_APPROVAL",
         }
     else:
-        print(f"\n✅ NO ESCALATION NEEDED")
-        print(f"   Confidence is high and risk is acceptable")
-        print(f"   Action: Proceeding with automated execution")
+        print("\n✅ NO ESCALATION NEEDED")
+        print("   Confidence is high and risk is acceptable")
+        print("   Action: Proceeding with automated execution")
 
-        escalation = {
-            "escalated": False,
-            "confidence": confidence,
-            "risk_level": risk_level,
-            "status": "AUTO_APPROVED"
-        }
+        escalation = {"escalated": False, "confidence": confidence, "risk_level": risk_level, "status": "AUTO_APPROVED"}
 
     return escalation
 
 
-def step5_execution(
-    action: Dict[str, Any],
-    escalation: Dict[str, Any]
-) -> Dict[str, Any]:
+def step5_execution(action: dict[str, Any], escalation: dict[str, Any]) -> dict[str, Any]:
     """
     Step 5: Execute action (or simulate waiting for human approval).
 
@@ -279,38 +252,34 @@ def step5_execution(
     print("STEP 5: ACTION EXECUTION")
     print("=" * 80)
 
-    if escalation['escalated']:
-        print(f"\n⏳ Waiting for human approval...")
+    if escalation["escalated"]:
+        print("\n⏳ Waiting for human approval...")
         print(f"   Status: {escalation['status']}")
-        print(f"   In a real system, this would:")
-        print(f"   - Send notification to on-call analyst")
-        print(f"   - Display in HITL dashboard")
-        print(f"   - Wait for approval/rejection")
-        print(f"   - Execute after approval")
+        print("   In a real system, this would:")
+        print("   - Send notification to on-call analyst")
+        print("   - Display in HITL dashboard")
+        print("   - Wait for approval/rejection")
+        print("   - Execute after approval")
 
-        execution = {
-            "executed": False,
-            "status": "PENDING_HUMAN_APPROVAL",
-            "message": "Action queued for human review"
-        }
+        execution = {"executed": False, "status": "PENDING_HUMAN_APPROVAL", "message": "Action queued for human review"}
     else:
-        print(f"\n🚀 Executing action automatically...")
+        print("\n🚀 Executing action automatically...")
         print(f"   Action: {action['action']['type']}")
         print(f"   Target: {action['action']['target']}")
         print(f"   Duration: {action['action']['duration_hours']} hours")
 
         # Simulate execution
-        print(f"\n✅ Action executed successfully:")
+        print("\n✅ Action executed successfully:")
         print(f"   - IP {action['action']['target']} blocked")
-        print(f"   - Firewall rule added")
-        print(f"   - Security team notified")
-        print(f"   - Audit log updated")
+        print("   - Firewall rule added")
+        print("   - Security team notified")
+        print("   - Audit log updated")
 
         execution = {
             "executed": True,
             "status": "COMPLETED",
             "message": f"IP {action['action']['target']} blocked successfully",
-            "execution_time": "2025-10-06T12:05:00.000Z"
+            "execution_time": "2025-10-06T12:05:00.000Z",
         }
 
     return execution
@@ -349,9 +318,9 @@ def main():
     print("=" * 80)
     print(f"\n✅ Ethical Evaluation: {evaluation['decision']}")
     print(f"   Aggregate Score: {evaluation['aggregate_score']:.2f}")
-    print(f"\n✅ XAI Explanation: Generated")
+    print("\n✅ XAI Explanation: Generated")
     print(f"   Top Feature: {max(explanation['feature_importance'].items(), key=lambda x: x[1])[0]}")
-    print(f"\n✅ Governance: Logged")
+    print("\n✅ Governance: Logged")
     print(f"   Decision ID: {decision_id}")
     print(f"\n✅ HITL: {'Escalated' if escalation['escalated'] else 'Auto-approved'}")
     print(f"   Status: {escalation['status']}")

@@ -12,7 +12,7 @@ and adhere to all legal and ethical guidelines before deployment.
 """
 
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class OffensiveArsenalTools:
@@ -72,11 +72,11 @@ class OffensiveArsenalTools:
             },
         ]
 
-    def list_available_tools(self) -> List[Dict[str, Any]]:
+    def list_available_tools(self) -> list[dict[str, Any]]:
         """Returns a list of dictionaries, each describing an available offensive tool."""
         return self.available_tools
 
-    async def execute_tool(self, tool_name: str, tool_args: Dict[str, Any]) -> Any:
+    async def execute_tool(self, tool_name: str, tool_args: dict[str, Any]) -> Any:
         """Executes a specified offensive tool with the given arguments.
 
         Args:
@@ -96,14 +96,12 @@ class OffensiveArsenalTools:
         tool_info = tool_map[tool_name]
         for param in tool_info["parameters"].get("required", []):
             if param not in tool_args:
-                raise ValueError(
-                    f"Missing required argument '{param}' for tool '{tool_name}'"
-                )
+                raise ValueError(f"Missing required argument '{param}' for tool '{tool_name}'")
 
         method = getattr(self, tool_info["method_name"])
         return await method(**tool_args)
 
-    async def _port_scan(self, target_host: str, ports: List[int]) -> Dict[str, Any]:
+    async def _port_scan(self, target_host: str, ports: list[int]) -> dict[str, Any]:
         """Simulates a port scan on the target host for the given ports.
 
         Args:
@@ -113,9 +111,7 @@ class OffensiveArsenalTools:
         Returns:
             Dict[str, Any]: A dictionary with the scan results.
         """
-        print(
-            f"[OffensiveArsenal] Simulating port scan on {target_host} for ports {ports}"
-        )
+        print(f"[OffensiveArsenal] Simulating port scan on {target_host} for ports {ports}")
         await asyncio.sleep(1)  # Simulate network delay
         results = {"target_host": target_host, "open_ports": [], "closed_ports": []}
         for port in ports:
@@ -125,9 +121,7 @@ class OffensiveArsenalTools:
                 results["closed_ports"].append(port)
         return results
 
-    async def _vulnerability_check(
-        self, target_host: str, service_name: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def _vulnerability_check(self, target_host: str, service_name: str | None = None) -> dict[str, Any]:
         """Simulates a vulnerability check on the target host.
 
         Args:
@@ -137,9 +131,7 @@ class OffensiveArsenalTools:
         Returns:
             Dict[str, Any]: A dictionary with the vulnerability check results.
         """
-        print(
-            f"[OffensiveArsenal] Simulating vulnerability check on {target_host} for service {service_name or 'all'}"
-        )
+        print(f"[OffensiveArsenal] Simulating vulnerability check on {target_host} for service {service_name or 'all'}")
         await asyncio.sleep(1.5)  # Simulate check duration
         vulnerabilities = []
         if "example.com" in target_host:

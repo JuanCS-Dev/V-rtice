@@ -17,7 +17,6 @@ protecting it from being misled by manipulated information, and ensuring its
 decisions are based on an accurate understanding of reality.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -37,9 +36,7 @@ class RealityDistortionDetector:
         self.last_detection_time: Optional[datetime] = None
         self.current_status: str = "monitoring_for_distortion"
 
-    def detect(
-        self, content: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    def detect(self, content: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Detects attempts to distort reality within textual content.
 
         Args:
@@ -49,9 +46,7 @@ class RealityDistortionDetector:
         Returns:
             Dict[str, Any]: A dictionary containing the detection results.
         """
-        print(
-            f"[RealityDistortionDetector] Detecting reality distortion in content (length: {len(content)})..."
-        )
+        print(f"[RealityDistortionDetector] Detecting reality distortion in content (length: {len(content)})...")
         # Simulate detection based on keywords and simple factual checks
         distortion_score = 0.0
         indicators: List[str] = []
@@ -97,9 +92,5 @@ class RealityDistortionDetector:
         return {
             "status": self.current_status,
             "total_detections": len(self.distortion_history),
-            "last_detection": (
-                self.last_detection_time.isoformat()
-                if self.last_detection_time
-                else "N/A"
-            ),
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
         }

@@ -16,16 +16,13 @@ Missing lines identified:
 """
 
 import asyncio
-from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents import AgentStatus, AgentType
 from active_immune_core.agents.nk_cell import CelulaNKDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -152,9 +149,7 @@ class TestNKCellBaselineUpdate:
     """Tests for _update_baseline coverage (Lines 338-368)"""
 
     @pytest.mark.asyncio
-    async def test_update_baseline_establishes_new_host(
-        self, nk_cell, sample_host, normal_metrics
-    ):
+    async def test_update_baseline_establishes_new_host(self, nk_cell, sample_host, normal_metrics):
         """
         Test baseline establishment for new host.
 
@@ -193,15 +188,11 @@ class TestNKCellBaselineUpdate:
             await nk_cell._update_baseline()
 
         # ASSERT
-        assert (
-            sample_host["id"] in nk_cell.baseline_behavior
-        ), "Should establish baseline for new host"
+        assert sample_host["id"] in nk_cell.baseline_behavior, "Should establish baseline for new host"
         assert nk_cell.baseline_behavior[sample_host["id"]] == normal_metrics
 
     @pytest.mark.asyncio
-    async def test_update_baseline_skips_isolated_hosts(
-        self, nk_cell, sample_host, normal_metrics
-    ):
+    async def test_update_baseline_skips_isolated_hosts(self, nk_cell, sample_host, normal_metrics):
         """
         Test baseline update skips isolated hosts.
 
@@ -228,14 +219,10 @@ class TestNKCellBaselineUpdate:
             await nk_cell._update_baseline()
 
         # ASSERT
-        assert (
-            nk_cell.baseline_behavior == baseline_before
-        ), "Should not update baseline for isolated host"
+        assert nk_cell.baseline_behavior == baseline_before, "Should not update baseline for isolated host"
 
     @pytest.mark.asyncio
-    async def test_update_baseline_exponential_moving_average(
-        self, nk_cell, sample_host, normal_metrics
-    ):
+    async def test_update_baseline_exponential_moving_average(self, nk_cell, sample_host, normal_metrics):
         """
         Test baseline update uses exponential moving average.
 
@@ -314,9 +301,7 @@ class TestNKCellCytokineSecretion:
         """
         # ARRANGE: Mock cytokine messenger to raise exception
         nk_cell._cytokine_messenger = MagicMock()
-        nk_cell._cytokine_messenger.send_cytokine = AsyncMock(
-            side_effect=Exception("Kafka send failed")
-        )
+        nk_cell._cytokine_messenger.send_cytokine = AsyncMock(side_effect=Exception("Kafka send failed"))
 
         alvo = sample_host.copy()
         alvo["anomaly_score"] = 0.95
@@ -371,9 +356,7 @@ class TestNKCellAnomalyCalculation:
 
         # ASSERT
         assert score == 0.0, "First observation should return 0.0 anomaly score"
-        assert (
-            host_id in nk_cell.baseline_behavior
-        ), "Should establish baseline on first observation"
+        assert host_id in nk_cell.baseline_behavior, "Should establish baseline on first observation"
         assert nk_cell.baseline_behavior[host_id] == normal_metrics
 
 
@@ -421,9 +404,7 @@ class TestNKCellMetrics:
         metrics = nk_cell.get_nk_metrics()
 
         # ASSERT
-        assert metrics["eficiencia_deteccao"] == 0.0, (
-            "Should return 0.0 efficiency when no anomalies"
-        )
+        assert metrics["eficiencia_deteccao"] == 0.0, "Should return 0.0 efficiency when no anomalies"
 
 
 # ==================== SUMMARY ====================

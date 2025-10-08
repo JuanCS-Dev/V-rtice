@@ -12,7 +12,7 @@ and building a comprehensive understanding of the network attack surface.
 """
 
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 class MasscanWrapper:
@@ -42,9 +42,7 @@ class MasscanWrapper:
         if not ports:
             raise ValueError("At least one port must be specified for Masscan scan.")
 
-        print(
-            f"[MasscanWrapper] Simulating Masscan port scan on {target} for ports {ports}"
-        )
+        print(f"[MasscanWrapper] Simulating Masscan port scan on {target} for ports {ports}")
         await asyncio.sleep(0.5)  # Simulate scan time
 
         open_ports = []

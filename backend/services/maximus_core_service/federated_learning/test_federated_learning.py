@@ -14,41 +14,40 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-import pytest
-import numpy as np
-from datetime import datetime
-import tempfile
 import os
+import tempfile
 
-from .base import (
-    FLConfig,
-    FLRound,
-    ModelUpdate,
-    ClientInfo,
-    FLMetrics,
-    FLStatus,
-    AggregationStrategy,
-    ModelType,
-)
+import numpy as np
+import pytest
+
 from .aggregation import (
+    DPAggregator,
     FedAvgAggregator,
     SecureAggregator,
-    DPAggregator,
 )
-from .fl_coordinator import FLCoordinator, CoordinatorConfig
-from .fl_client import FLClient, ClientConfig
-from .model_adapters import (
-    ThreatClassifierAdapter,
-    MalwareDetectorAdapter,
-    create_model_adapter,
+from .base import (
+    AggregationStrategy,
+    ClientInfo,
+    FLConfig,
+    FLRound,
+    FLStatus,
+    ModelType,
+    ModelUpdate,
 )
 from .communication import FLCommunicationChannel, MessageType
+from .fl_client import ClientConfig, FLClient
+from .fl_coordinator import CoordinatorConfig, FLCoordinator
+from .model_adapters import (
+    MalwareDetectorAdapter,
+    ThreatClassifierAdapter,
+    create_model_adapter,
+)
 from .storage import FLModelRegistry, FLRoundHistory
-
 
 # ============================================================================
 # Test Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def fl_config():
@@ -84,8 +83,7 @@ def sample_updates(sample_weights):
     updates = []
     for i in range(3):
         weights = {
-            key: val + np.random.randn(*val.shape).astype(np.float32) * 0.01
-            for key, val in sample_weights.items()
+            key: val + np.random.randn(*val.shape).astype(np.float32) * 0.01 for key, val in sample_weights.items()
         }
         update = ModelUpdate(
             client_id=f"client_{i}",
@@ -101,6 +99,7 @@ def sample_updates(sample_weights):
 # ============================================================================
 # Test Base Classes
 # ============================================================================
+
 
 class TestBaseClasses:
     """Tests for base classes and data structures."""
@@ -175,6 +174,7 @@ class TestBaseClasses:
 # Test Aggregation Algorithms
 # ============================================================================
 
+
 class TestAggregation:
     """Tests for aggregation algorithms."""
 
@@ -194,12 +194,8 @@ class TestAggregation:
         weights_a = {"layer": np.array([1.0, 1.0]).astype(np.float32)}
         weights_b = {"layer": np.array([3.0, 3.0]).astype(np.float32)}
 
-        update_a = ModelUpdate(
-            client_id="a", round_id=1, weights=weights_a, num_samples=25
-        )
-        update_b = ModelUpdate(
-            client_id="b", round_id=1, weights=weights_b, num_samples=75
-        )
+        update_a = ModelUpdate(client_id="a", round_id=1, weights=weights_a, num_samples=25)
+        update_b = ModelUpdate(client_id="b", round_id=1, weights=weights_b, num_samples=75)
 
         aggregator = FedAvgAggregator()
         result = aggregator.aggregate([update_a, update_b])
@@ -233,6 +229,7 @@ class TestAggregation:
 # Test FL Coordinator
 # ============================================================================
 
+
 class TestFLCoordinator:
     """Tests for FL coordinator."""
 
@@ -250,9 +247,7 @@ class TestFLCoordinator:
         config = CoordinatorConfig(fl_config=fl_config)
         coordinator = FLCoordinator(config)
 
-        client_info = ClientInfo(
-            client_id="client_1", organization="Org1", total_samples=1000
-        )
+        client_info = ClientInfo(client_id="client_1", organization="Org1", total_samples=1000)
         success = coordinator.register_client(client_info)
 
         assert success == True
@@ -267,9 +262,7 @@ class TestFLCoordinator:
 
         # Register clients
         for i in range(3):
-            coordinator.register_client(
-                ClientInfo(client_id=f"client_{i}", organization=f"Org{i}")
-            )
+            coordinator.register_client(ClientInfo(client_id=f"client_{i}", organization=f"Org{i}"))
 
         # Start round
         round_obj = coordinator.start_round()
@@ -286,9 +279,7 @@ class TestFLCoordinator:
 
         # Register clients
         for i in range(3):
-            coordinator.register_client(
-                ClientInfo(client_id=f"client_{i}", organization=f"Org{i}")
-            )
+            coordinator.register_client(ClientInfo(client_id=f"client_{i}", organization=f"Org{i}"))
 
         # Start round
         coordinator.start_round()
@@ -309,6 +300,7 @@ class TestFLCoordinator:
 # ============================================================================
 # Test FL Client
 # ============================================================================
+
 
 class TestFLClient:
     """Tests for FL client."""
@@ -367,6 +359,7 @@ class TestFLClient:
 # Test Model Adapters
 # ============================================================================
 
+
 class TestModelAdapters:
     """Tests for model adapters."""
 
@@ -408,6 +401,7 @@ class TestModelAdapters:
 # Test Communication
 # ============================================================================
 
+
 class TestCommunication:
     """Tests for communication layer."""
 
@@ -429,9 +423,7 @@ class TestCommunication:
 
         # Verify
         for layer_name in sample_weights:
-            assert np.allclose(
-                deserialized[layer_name], sample_weights[layer_name]
-            )
+            assert np.allclose(deserialized[layer_name], sample_weights[layer_name])
 
     def test_message_creation(self):
         """Test message creation."""
@@ -467,6 +459,7 @@ class TestCommunication:
 # Test Storage
 # ============================================================================
 
+
 class TestStorage:
     """Tests for storage and persistence."""
 
@@ -492,9 +485,7 @@ class TestStorage:
 
             assert loaded_weights is not None
             for layer_name in sample_weights:
-                assert np.allclose(
-                    loaded_weights[layer_name], sample_weights[layer_name]
-                )
+                assert np.allclose(loaded_weights[layer_name], sample_weights[layer_name])
 
     def test_round_history(self, fl_config, sample_updates):
         """Test round history."""
@@ -522,6 +513,7 @@ class TestStorage:
 # ============================================================================
 # Integration Tests
 # ============================================================================
+
 
 class TestIntegration:
     """End-to-end integration tests."""
@@ -558,14 +550,10 @@ class TestIntegration:
         # Clients participate
         for client in clients:
             # Fetch global model
-            client.fetch_global_model(
-                round_obj.round_id, coordinator.global_model_weights
-            )
+            client.fetch_global_model(round_obj.round_id, coordinator.global_model_weights)
 
             # Train and submit update
-            metrics = client.train_local_model(
-                train_data, train_labels, fl_config
-            )
+            metrics = client.train_local_model(train_data, train_labels, fl_config)
             update = client.compute_update(len(train_data), metrics)
             coordinator.receive_update(update)
 

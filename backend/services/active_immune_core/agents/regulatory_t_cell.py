@@ -20,20 +20,18 @@ MOST ADVANCED CELL - Machine Learning + Multi-Criteria Analysis:
 PRODUCTION-READY: Real ML, real scoring, no mocks, graceful degradation.
 """
 
-import asyncio
-import json
 import logging
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 from uuid import uuid4
 
 import numpy as np
 from pydantic import BaseModel, Field
 
 from .base import AgenteImunologicoBase
-from .models import AgentStatus, AgentType
+from .models import AgentType
 
 logger = logging.getLogger(__name__)
 
@@ -205,9 +203,7 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
             try:
                 # Monitor all cytokines to detect excessive responses
                 for cytokine_type in ["IL1", "IL2", "IL4", "IL8", "IFN_GAMMA"]:
-                    await self._cytokine_messenger.subscribe_cytokine(
-                        cytokine_type, self._monitor_immune_activity
-                    )
+                    await self._cytokine_messenger.subscribe_cytokine(cytokine_type, self._monitor_immune_activity)
                 logger.info(f"Regulatory T {self.state.id[:8]} monitoring immune activity")
             except Exception as e:
                 logger.warning(f"Failed to subscribe to cytokines: {e}, degraded mode")
@@ -326,18 +322,22 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
         }
 
         total_score = (
-            friendly_fire_score * weights["friendly_fire"] +
-            excessive_response_score * weights["excessive_response"] +
-            temporal_pattern_score * weights["temporal_pattern"] +
-            target_diversity_score * weights["target_diversity"] +
-            false_positive_history_score * weights["false_positive_history"] +
-            self_similarity_score * weights["self_similarity"]
+            friendly_fire_score * weights["friendly_fire"]
+            + excessive_response_score * weights["excessive_response"]
+            + temporal_pattern_score * weights["temporal_pattern"]
+            + target_diversity_score * weights["target_diversity"]
+            + false_positive_history_score * weights["false_positive_history"]
+            + self_similarity_score * weights["self_similarity"]
         )
 
         # Generate justification
         justification = self._generate_justification(
-            friendly_fire_score, excessive_response_score, temporal_pattern_score,
-            target_diversity_score, false_positive_history_score, self_similarity_score
+            friendly_fire_score,
+            excessive_response_score,
+            temporal_pattern_score,
+            target_diversity_score,
+            false_positive_history_score,
+            self_similarity_score,
         )
 
         return AutoimmunityRiskScore(
@@ -440,9 +440,7 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
         """Deep analysis state (transition from monitoring)"""
         self.regulatory_state = RegulatoryTState.MONITORING  # Return to monitoring
 
-    async def _make_suppression_decision(
-        self, agent_id: str, risk_score: AutoimmunityRiskScore
-    ) -> None:
+    async def _make_suppression_decision(self, agent_id: str, risk_score: AutoimmunityRiskScore) -> None:
         """
         Make intelligent suppression decision using Q-learning.
 
@@ -504,6 +502,7 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
         # Exploration: random action
         if np.random.random() < self.epsilon:
             import random
+
             return random.choice(actions)
 
         # Exploitation: choose best action
@@ -569,7 +568,11 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
             self.il10_secretions += 1
 
             # Secrete TGF-β if moderate or higher
-            if decision.suppression_level in [SuppressionLevel.MODERATE, SuppressionLevel.STRONG, SuppressionLevel.CRITICAL]:
+            if decision.suppression_level in [
+                SuppressionLevel.MODERATE,
+                SuppressionLevel.STRONG,
+                SuppressionLevel.CRITICAL,
+            ]:
                 tgf_beta_level = self._get_tgf_beta_level(decision.suppression_level)
                 await self._cytokine_messenger.send_cytokine(
                     tipo="TGF_BETA",
@@ -661,10 +664,7 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
 
             # Check if agent still active after suppression
             recent_activity = self.monitored_agents.get(agent_id, [])
-            activity_after_suppression = [
-                a for a in recent_activity
-                if a["timestamp"] > decision.timestamp
-            ]
+            activity_after_suppression = [a for a in recent_activity if a["timestamp"] > decision.timestamp]
 
             # If still very active after suppression, mark as ineffective
             if len(activity_after_suppression) > 10:
@@ -674,8 +674,7 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
                 # Auto-correction: escalate suppression
                 if decision.suppression_level != SuppressionLevel.CRITICAL:
                     logger.warning(
-                        f"Regulatory T {self.state.id[:8]} auto-correction: "
-                        f"ineffective suppression, escalating"
+                        f"Regulatory T {self.state.id[:8]} auto-correction: ineffective suppression, escalating"
                     )
                     self.auto_corrections += 1
             else:
@@ -730,9 +729,7 @@ class LinfocitoTRegulador(AgenteImunologicoBase):
         """
         agent_id = alvo.get("agent_id", "unknown")
 
-        logger.info(
-            f"Regulatory T {self.state.id[:8]} suppressing agent {agent_id[:8]}"
-        )
+        logger.info(f"Regulatory T {self.state.id[:8]} suppressing agent {agent_id[:8]}")
 
         # Create minimal risk score for direct suppression
         risk_score = AutoimmunityRiskScore(

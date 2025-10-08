@@ -10,23 +10,21 @@ Version: 3.0.0
 
 import asyncio
 from unittest.mock import AsyncMock, Mock
-from prometheus_client import Counter, Gauge
 
 import pytest
-import pytest_asyncio
+from prometheus_client import Counter, Gauge
 
 from active_immune_core.agents.base import AgenteImunologicoBase
-from active_immune_core.agents.models import AgentStatus, AgentType
-
+from active_immune_core.agents.models import AgentType
 
 # ==================== SETUP PROMETHEUS METRICS ====================
 
 # Create real Prometheus metrics that match what base.py expects
-agents_active = Gauge('agents_active_test', 'Active agents', ['type', 'status'])
-agents_total = Counter('agents_total_test', 'Total agents', ['type'])
-agent_apoptosis_total = Counter('agent_apoptosis_total_test', 'Apoptosis events', ['reason'])
-threats_detected_total = Counter('threats_detected_total_test', 'Threats detected', ['agent_type'])
-threats_neutralized_total = Counter('threats_neutralized_total_test', 'Threats neutralized', ['agent_type', 'method'])
+agents_active = Gauge("agents_active_test", "Active agents", ["type", "status"])
+agents_total = Counter("agents_total_test", "Total agents", ["type"])
+agent_apoptosis_total = Counter("agent_apoptosis_total_test", "Apoptosis events", ["reason"])
+threats_detected_total = Counter("threats_detected_total_test", "Threats detected", ["agent_type"])
+threats_neutralized_total = Counter("threats_neutralized_total_test", "Threats neutralized", ["agent_type", "method"])
 
 
 # ==================== TEST AGENT ====================
@@ -62,14 +60,14 @@ class TestPrometheusIntegration:
         import types
 
         # Create a real module object
-        main_module = types.ModuleType('main')
+        main_module = types.ModuleType("main")
         main_module.agents_active = agents_active
         main_module.agents_total = agents_total
         main_module.agent_apoptosis_total = agent_apoptosis_total
         main_module.threats_detected_total = threats_detected_total
         main_module.threats_neutralized_total = threats_neutralized_total
 
-        sys.modules['main'] = main_module
+        sys.modules["main"] = main_module
 
         try:
             # Get initial metric values
@@ -95,6 +93,7 @@ class TestPrometheusIntegration:
 
             # ACT 1: Start agent (lines 162-163)
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
                 agent._http_session = session
                 await agent.iniciar()
@@ -114,8 +113,7 @@ class TestPrometheusIntegration:
                 # ACT 3: Neutralize (line 468)
                 agent._validate_ethical = AsyncMock(return_value=True)
                 success = await agent.neutralizar(
-                    {"ip": "192.168.1.100", "threat_level": 3, "id": "threat_001"},
-                    metodo="quarantine"
+                    {"ip": "192.168.1.100", "threat_level": 3, "id": "threat_001"}, metodo="quarantine"
                 )
 
                 # ASSERT: Neutralization metric incremented (lines 468-470)
@@ -137,5 +135,5 @@ class TestPrometheusIntegration:
 
         finally:
             # Cleanup
-            if 'main' in sys.modules:
-                del sys.modules['main']
+            if "main" in sys.modules:
+                del sys.modules["main"]

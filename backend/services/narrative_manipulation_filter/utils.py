@@ -5,12 +5,12 @@ Collection of helper functions for text processing, hashing,
 URL parsing, similarity computation, and adversarial robustness.
 """
 
-from datetime import datetime, timedelta
 import hashlib
 import logging
 import re
 import string
-from typing import Dict, List, Optional, Set, Tuple
+from datetime import datetime
+from typing import List, Optional, Set, Tuple
 from urllib.parse import urlparse, urlunparse
 
 import numpy as np
@@ -109,7 +109,9 @@ def extract_urls(text: str) -> List[str]:
     Returns:
         List of URLs
     """
-    url_pattern = r"https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&/=]*)"
+    url_pattern = (
+        r"https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&/=]*)"
+    )
     return re.findall(url_pattern, text)
 
 
@@ -341,18 +343,14 @@ def detect_homoglyph_attack(text: str) -> Tuple[bool, List[str]]:
             suspicious_chars.append(f"{char} (looks like {cyrillic_homoglyphs[char]})")
 
     # Check for mixed scripts (suspicious)
-    has_latin = any(
-        "\u0041" <= c <= "\u005a" or "\u0061" <= c <= "\u007a" for c in text
-    )
+    has_latin = any("\u0041" <= c <= "\u005a" or "\u0061" <= c <= "\u007a" for c in text)
     has_cyrillic = any("\u0400" <= c <= "\u04ff" for c in text)
 
     is_suspicious = len(suspicious_chars) > 0 or (has_latin and has_cyrillic)
     return is_suspicious, suspicious_chars
 
 
-def add_adversarial_noise(
-    text: str, perturbation_type: str = "char_swap", intensity: float = 0.05
-) -> str:
+def add_adversarial_noise(text: str, perturbation_type: str = "char_swap", intensity: float = 0.05) -> str:
     """
     Add adversarial perturbations for robustness testing.
 
@@ -444,9 +442,7 @@ def exponential_decay_weight(timestamp: datetime, half_life_days: int = 30) -> f
     return weight
 
 
-def bayesian_update(
-    prior: float, likelihood_true: float, likelihood_false: float
-) -> float:
+def bayesian_update(prior: float, likelihood_true: float, likelihood_false: float) -> float:
     """
     Bayesian belief update.
 
@@ -477,9 +473,7 @@ def beta_distribution_credibility(alpha: float, beta: float) -> float:
     return alpha / (alpha + beta)
 
 
-def wilson_score_interval(
-    successes: int, total: int, confidence: float = 0.95
-) -> Tuple[float, float]:
+def wilson_score_interval(successes: int, total: int, confidence: float = 0.95) -> Tuple[float, float]:
     """
     Calculate Wilson score confidence interval.
 
@@ -503,9 +497,7 @@ def wilson_score_interval(
 
     denominator = 1 + z**2 / total
     center = (p_hat + z**2 / (2 * total)) / denominator
-    margin = (
-        z * np.sqrt((p_hat * (1 - p_hat) + z**2 / (4 * total)) / total) / denominator
-    )
+    margin = z * np.sqrt((p_hat * (1 - p_hat) + z**2 / (4 * total)) / total) / denominator
 
     lower = max(0.0, center - margin)
     upper = min(1.0, center + margin)

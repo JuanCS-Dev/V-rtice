@@ -27,9 +27,7 @@ import pytest
 from coordination.pattern_detector import (
     PatternDetector,
     PatternType,
-    ThreatPattern,
 )
-
 
 # ==================== LIFECYCLE TESTS ====================
 
@@ -273,11 +271,13 @@ class TestCoordinatedAttackDetection:
         now = datetime.now()
         cytokines = []
         for i in range(15):
-            cytokines.append({
-                "timestamp": (now - timedelta(seconds=i)).isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-                "area_alvo": "network-zone-1",
-            })
+            cytokines.append(
+                {
+                    "timestamp": (now - timedelta(seconds=i)).isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                    "area_alvo": "network-zone-1",
+                }
+            )
 
         # ACT: Detect patterns
         patterns = await detector.detect_coordinated_attacks(cytokines)
@@ -298,10 +298,12 @@ class TestCoordinatedAttackDetection:
         now = datetime.now()
         cytokines = []
         for i in range(5):
-            cytokines.append({
-                "timestamp": (now - timedelta(seconds=i)).isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-            })
+            cytokines.append(
+                {
+                    "timestamp": (now - timedelta(seconds=i)).isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                }
+            )
 
         # ACT: Detect patterns
         patterns = await detector.detect_coordinated_attacks(cytokines)
@@ -319,10 +321,12 @@ class TestCoordinatedAttackDetection:
         now = datetime.now()
         cytokines = []
         for i in range(10):
-            cytokines.append({
-                "timestamp": (now - timedelta(seconds=i)).isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-            })
+            cytokines.append(
+                {
+                    "timestamp": (now - timedelta(seconds=i)).isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                }
+            )
 
         # ACT: Detect patterns
         patterns = await detector.detect_coordinated_attacks(cytokines)
@@ -342,17 +346,21 @@ class TestCoordinatedAttackDetection:
 
         # Add 5 recent threats (within 60s)
         for i in range(5):
-            cytokines.append({
-                "timestamp": (now - timedelta(seconds=i)).isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-            })
+            cytokines.append(
+                {
+                    "timestamp": (now - timedelta(seconds=i)).isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                }
+            )
 
         # Add 10 old threats (older than 60s) - should be excluded
         for i in range(10):
-            cytokines.append({
-                "timestamp": (now - timedelta(seconds=120 + i)).isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-            })
+            cytokines.append(
+                {
+                    "timestamp": (now - timedelta(seconds=120 + i)).isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                }
+            )
 
         # ACT: Detect patterns
         patterns = await detector.detect_coordinated_attacks(cytokines)
@@ -370,10 +378,12 @@ class TestCoordinatedAttackDetection:
         now = datetime.now()
         cytokines = []
         for i in range(12):
-            cytokines.append({
-                "timestamp": (now - timedelta(seconds=i)).isoformat(),
-                "payload": {"is_threat": True},
-            })
+            cytokines.append(
+                {
+                    "timestamp": (now - timedelta(seconds=i)).isoformat(),
+                    "payload": {"is_threat": True},
+                }
+            )
 
         # ACT: Detect patterns
         patterns = await detector.detect_coordinated_attacks(cytokines)

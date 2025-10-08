@@ -6,18 +6,19 @@ Authors: Juan + Claude
 Date: 2025-10-07
 """
 
-import pytest
 import asyncio
 
+import pytest
+
 from coordination.thread_safe_structures import (
-    ThreadSafeBuffer,
     AtomicCounter,
-    ThreadSafeTemperature,
+    ThreadSafeBuffer,
     ThreadSafeCounter,
+    ThreadSafeTemperature,
 )
 
-
 # ==================== THREAD-SAFE BUFFER TESTS ====================
+
 
 class TestThreadSafeBuffer:
     """Test thread-safe circular buffer"""
@@ -160,6 +161,7 @@ class TestThreadSafeBuffer:
 
 # ==================== ATOMIC COUNTER TESTS ====================
 
+
 class TestAtomicCounter:
     """Test atomic counter"""
 
@@ -252,6 +254,7 @@ class TestAtomicCounter:
 
 
 # ==================== THREAD-SAFE TEMPERATURE TESTS ====================
+
 
 class TestThreadSafeTemperature:
     """Test thread-safe temperature management"""
@@ -395,6 +398,7 @@ class TestThreadSafeTemperature:
 
 # ==================== THREAD-SAFE COUNTER TESTS ====================
 
+
 class TestThreadSafeCounter:
     """Test thread-safe counter (defaultdict-style)"""
 
@@ -535,6 +539,7 @@ class TestThreadSafeCounter:
 
 
 # ==================== INTEGRATION TESTS ====================
+
 
 class TestThreadSafeStructuresIntegration:
     """Test integration scenarios"""

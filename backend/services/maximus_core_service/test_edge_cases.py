@@ -14,11 +14,10 @@ Quality: Production-ready, REGRA DE OURO compliant
 """
 
 import asyncio
-import httpx
 import sys
-from datetime import datetime, timezone, timedelta
-from typing import List, Dict
-import time
+from datetime import UTC, datetime
+
+import httpx
 
 
 class EdgeCasesTester:
@@ -27,9 +26,9 @@ class EdgeCasesTester:
     def __init__(self, backend_url: str = "http://localhost:8001"):
         """Initialize tester."""
         self.backend_url = backend_url
-        self.results: List[Dict] = []
+        self.results: list[dict] = []
 
-    async def test_cli_stats_with_data(self) -> Dict:
+    async def test_cli_stats_with_data(self) -> dict:
         """
         Test governance stats CLI after approving decisions.
 
@@ -63,7 +62,7 @@ class EdgeCasesTester:
             decisions_approved = 0
             for i in range(3):
                 # Enqueue
-                decision_id = f"test_stats_{i}_{datetime.now(timezone.utc).timestamp()}"
+                decision_id = f"test_stats_{i}_{datetime.now(UTC).timestamp()}"
                 payload = {
                     "decision_id": decision_id,
                     "risk_level": "medium",
@@ -94,16 +93,14 @@ class EdgeCasesTester:
                     )
                     response.raise_for_status()
                     decisions_approved += 1
-                    print(f"   ✅ Decision {i+1}/3 approved")
+                    print(f"   ✅ Decision {i + 1}/3 approved")
 
                 await asyncio.sleep(0.2)
 
             # Get stats
             print("\n3. Retrieving operator stats...")
             async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{self.backend_url}/api/v1/governance/session/{operator_id}/stats"
-                )
+                response = await client.get(f"{self.backend_url}/api/v1/governance/session/{operator_id}/stats")
                 response.raise_for_status()
                 stats = response.json()
 
@@ -131,7 +128,7 @@ class EdgeCasesTester:
             print(f"\n❌ FAIL - {e}")
             return {"test": "cli_stats_with_data", "status": "FAIL", "error": str(e)}
 
-    async def test_cli_health(self) -> Dict:
+    async def test_cli_health(self) -> dict:
         """
         Test governance health CLI command.
 
@@ -145,9 +142,7 @@ class EdgeCasesTester:
         try:
             print("\n1. Checking backend health...")
             async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{self.backend_url}/api/v1/governance/health"
-                )
+                response = await client.get(f"{self.backend_url}/api/v1/governance/health")
                 response.raise_for_status()
                 health = response.json()
 
@@ -172,7 +167,7 @@ class EdgeCasesTester:
             print(f"\n❌ FAIL - {e}")
             return {"test": "cli_health", "status": "FAIL", "error": str(e)}
 
-    async def test_backend_offline_handling(self) -> Dict:
+    async def test_backend_offline_handling(self) -> dict:
         """
         Test CLI error handling when backend is offline.
 
@@ -220,7 +215,7 @@ class EdgeCasesTester:
                 "error": str(e),
             }
 
-    async def test_sla_warning_trigger(self) -> Dict:
+    async def test_sla_warning_trigger(self) -> dict:
         """
         Test SLA warning event trigger.
 
@@ -239,7 +234,7 @@ class EdgeCasesTester:
 
         try:
             print("\n1. Enqueuing decision with 2min SLA...")
-            decision_id = f"test_sla_warn_{datetime.now(timezone.utc).timestamp()}"
+            decision_id = f"test_sla_warn_{datetime.now(UTC).timestamp()}"
 
             # Note: Our test endpoint doesn't allow custom SLA
             # In production, SLA is determined by risk_level
@@ -260,7 +255,7 @@ class EdgeCasesTester:
             print(f"\n❌ FAIL - {e}")
             return {"test": "sla_warning_trigger", "status": "FAIL", "error": str(e)}
 
-    async def test_multiple_operators(self) -> Dict:
+    async def test_multiple_operators(self) -> dict:
         """
         Test multiple operators receiving same decision (broadcast).
 
@@ -296,17 +291,13 @@ class EdgeCasesTester:
                             "session_id": session_data["session_id"],
                         }
                     )
-                    print(f"   ✅ Operator {i+1} session created")
+                    print(f"   ✅ Operator {i + 1} session created")
 
             # Check active connections before
             async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{self.backend_url}/api/v1/governance/health"
-                )
+                response = await client.get(f"{self.backend_url}/api/v1/governance/health")
                 health_before = response.json()
-                print(
-                    f"\n2. Active connections before SSE: {health_before['active_connections']}"
-                )
+                print(f"\n2. Active connections before SSE: {health_before['active_connections']}")
 
             # Note: To properly test SSE broadcast, we'd need to:
             # 1. Open SSE streams for both operators (requires async generators)
@@ -329,7 +320,7 @@ class EdgeCasesTester:
             print(f"\n❌ FAIL - {e}")
             return {"test": "multiple_operators", "status": "FAIL", "error": str(e)}
 
-    async def run_all_tests(self) -> Dict:
+    async def run_all_tests(self) -> dict:
         """
         Run all edge case tests.
 
@@ -340,7 +331,7 @@ class EdgeCasesTester:
         print("🧪 GOVERNANCE SSE - EDGE CASES TEST SUITE")
         print("=" * 80)
         print(f"Backend URL: {self.backend_url}")
-        print(f"Start Time: {datetime.now(timezone.utc).isoformat()}")
+        print(f"Start Time: {datetime.now(UTC).isoformat()}")
         print()
 
         tests = [
@@ -375,18 +366,17 @@ class EdgeCasesTester:
             status_icon = {"PASS": "✅", "FAIL": "❌", "SKIP": "⏭️ "}[result["status"]]
             print(f"   {status_icon} {result['test']}")
 
-        print(f"\nEnd Time: {datetime.now(timezone.utc).isoformat()}")
+        print(f"\nEnd Time: {datetime.now(UTC).isoformat()}")
         print()
 
         if failed > 0:
             print("❌ SOME TESTS FAILED - Review errors above")
             return {"overall": "FAIL", "results": results}
-        elif passed > 0:
+        if passed > 0:
             print("✅ ALL ACTIVE TESTS PASSED")
             return {"overall": "PASS", "results": results}
-        else:
-            print("⚠️  ALL TESTS SKIPPED")
-            return {"overall": "SKIP", "results": results}
+        print("⚠️  ALL TESTS SKIPPED")
+        return {"overall": "SKIP", "results": results}
 
 
 async def main():

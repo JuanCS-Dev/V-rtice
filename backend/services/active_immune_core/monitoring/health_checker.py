@@ -18,7 +18,7 @@ Version: 1.0.0
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
@@ -193,9 +193,7 @@ class HealthChecker:
             f"threshold={failure_threshold}, auto={enable_auto_check})"
         )
 
-    def register_component(
-        self, name: str, check_func: Optional[Callable] = None
-    ) -> ComponentHealth:
+    def register_component(self, name: str, check_func: Optional[Callable] = None) -> ComponentHealth:
         """
         Register component for health monitoring.
 
@@ -324,15 +322,10 @@ class HealthChecker:
                 "unhealthy": unhealthy,
                 "unknown": unknown,
             },
-            "components": {
-                name: comp.to_dict() for name, comp in self._components.items()
-            },
+            "components": {name: comp.to_dict() for name, comp in self._components.items()},
         }
 
-        logger.debug(
-            f"Health check: {overall_status.value} "
-            f"(healthy={healthy}/{total})"
-        )
+        logger.debug(f"Health check: {overall_status.value} (healthy={healthy}/{total})")
 
         return report
 
@@ -366,9 +359,7 @@ class HealthChecker:
 
             if component.status in [HealthStatus.UNHEALTHY, HealthStatus.UNKNOWN]:
                 ready = False
-                reasons.append(
-                    f"Critical component '{name}' is {component.status.value}"
-                )
+                reasons.append(f"Critical component '{name}' is {component.status.value}")
 
         report = {
             "ready": ready,
@@ -440,15 +431,10 @@ class HealthChecker:
 
         for name, component in self._components.items():
             summary["components_status"][name] = component.status.value
-            summary["last_checks"][name] = (
-                component.last_check.isoformat() if component.last_check else None
-            )
+            summary["last_checks"][name] = component.last_check.isoformat() if component.last_check else None
 
         return summary
 
     def __repr__(self) -> str:
         """String representation"""
-        return (
-            f"<HealthChecker components={len(self._components)} "
-            f"auto_check={self._running}>"
-        )
+        return f"<HealthChecker components={len(self._components)} auto_check={self._running}>"

@@ -14,13 +14,13 @@ import asyncio
 import logging
 import uuid
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import aiohttp
 
+from agents.models import AgenteState, AgentStatus, AgentType
 from communication import CytokineMessenger, HormoneMessenger
-from agents.models import AgentStatus, AgentType, AgenteState
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +100,7 @@ class AgenteImunologicoBase(ABC):
         # Metrics buffer
         self._metrics_buffer: List[Dict[str, Any]] = []
 
-        logger.info(
-            f"Initialized {self.state.tipo} agent {self.state.id} "
-            f"(patrol area: {area_patrulha})"
-        )
+        logger.info(f"Initialized {self.state.tipo} agent {self.state.id} (patrol area: {area_patrulha})")
 
     # ==================== LIFECYCLE ====================
 
@@ -252,8 +249,7 @@ class AgenteImunologicoBase(ABC):
                             "deteccoes": self.state.deteccoes_total,
                             "neutralizacoes": self.state.neutralizacoes_total,
                             "falsos_positivos": self.state.falsos_positivos,
-                            "tempo_vida_horas": self.state.tempo_vida.total_seconds()
-                            / 3600,
+                            "tempo_vida_horas": self.state.tempo_vida.total_seconds() / 3600,
                         },
                     },
                     emissor_id=self.state.id,
@@ -283,8 +279,7 @@ class AgenteImunologicoBase(ABC):
                 # Check energy
                 if self.state.energia < 10.0:
                     logger.warning(
-                        f"Agent {self.state.id} low energy ({self.state.energia:.1f}%), "
-                        "triggering apoptosis"
+                        f"Agent {self.state.id} low energy ({self.state.energia:.1f}%), triggering apoptosis"
                     )
                     await self.apoptose(reason="energy_depleted")
                     break
@@ -425,16 +420,11 @@ class AgenteImunologicoBase(ABC):
 
         # ETHICAL AI CHECK - PRODUCTION (real HTTP request)
         if not await self._validate_ethical(alvo, metodo):
-            logger.warning(
-                f"Agent {self.state.id} action blocked by Ethical AI: "
-                f"{metodo} on {alvo.get('id')}"
-            )
+            logger.warning(f"Agent {self.state.id} action blocked by Ethical AI: {metodo} on {alvo.get('id')}")
             self.state.status = old_status
             return False
 
-        logger.info(
-            f"Agent {self.state.id} neutralizing: {alvo.get('id')} (method={metodo})"
-        )
+        logger.info(f"Agent {self.state.id} neutralizing: {alvo.get('id')} (method={metodo})")
 
         try:
             # Call subclass neutralization logic
@@ -465,9 +455,7 @@ class AgenteImunologicoBase(ABC):
                 try:
                     from main import threats_neutralized_total
 
-                    threats_neutralized_total.labels(
-                        agent_type=self.state.tipo, method=metodo
-                    ).inc()
+                    threats_neutralized_total.labels(agent_type=self.state.tipo, method=metodo).inc()
                 except ImportError:
                     pass
 
@@ -670,16 +658,12 @@ class AgenteImunologicoBase(ABC):
                     approved = result.get("decisao") == "APROVADO"
 
                     if not approved:
-                        logger.warning(
-                            f"Ethical AI blocked action: {result.get('justificativa')}"
-                        )
+                        logger.warning(f"Ethical AI blocked action: {result.get('justificativa')}")
 
                     return approved
                 else:
                     error_text = await response.text()
-                    logger.error(
-                        f"Ethical AI validation failed ({response.status}): {error_text}"
-                    )
+                    logger.error(f"Ethical AI validation failed ({response.status}): {error_text}")
                     return False  # Fail-safe: block on error
 
         except aiohttp.ClientError as e:

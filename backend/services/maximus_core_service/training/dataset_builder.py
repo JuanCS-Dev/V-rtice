@@ -12,12 +12,11 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
 import logging
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -40,7 +39,7 @@ class DatasetSplit:
     name: str  # "train", "val", "test"
     features: np.ndarray
     labels: np.ndarray
-    sample_ids: List[str]
+    sample_ids: list[str]
     indices: np.ndarray
 
     def __len__(self) -> int:
@@ -48,17 +47,16 @@ class DatasetSplit:
 
     def __repr__(self) -> str:
         label_dist = np.bincount(self.labels[self.labels >= 0])
-        return (f"DatasetSplit(name={self.name}, size={len(self)}, "
-                f"label_dist={label_dist.tolist()})")
+        return f"DatasetSplit(name={self.name}, size={len(self)}, label_dist={label_dist.tolist()})"
 
-    def get_class_distribution(self) -> Dict[int, int]:
+    def get_class_distribution(self) -> dict[int, int]:
         """Get class distribution.
 
         Returns:
             Dictionary mapping label to count
         """
         unique, counts = np.unique(self.labels[self.labels >= 0], return_counts=True)
-        return dict(zip(unique.tolist(), counts.tolist()))
+        return dict(zip(unique.tolist(), counts.tolist(), strict=False))
 
     def save(self, output_path: Path):
         """Save split to file.
@@ -67,11 +65,7 @@ class DatasetSplit:
             output_path: Path to save .npz file
         """
         np.savez_compressed(
-            output_path,
-            features=self.features,
-            labels=self.labels,
-            sample_ids=self.sample_ids,
-            indices=self.indices
+            output_path, features=self.features, labels=self.labels, sample_ids=self.sample_ids, indices=self.indices
         )
         logger.info(f"Saved {self.name} split to {output_path}")
 
@@ -93,7 +87,7 @@ class DatasetSplit:
             features=data["features"],
             labels=data["labels"],
             sample_ids=data["sample_ids"].tolist(),
-            indices=data["indices"]
+            indices=data["indices"],
         )
 
 
@@ -109,18 +103,12 @@ class DatasetBuilder:
     Example:
         ```python
         builder = DatasetBuilder(
-            features=features,
-            labels=labels,
-            sample_ids=sample_ids,
-            output_dir="training/data/splits"
+            features=features, labels=labels, sample_ids=sample_ids, output_dir="training/data/splits"
         )
 
         # Create stratified split
         splits = builder.create_splits(
-            strategy=SplitStrategy.STRATIFIED,
-            train_ratio=0.7,
-            val_ratio=0.15,
-            test_ratio=0.15
+            strategy=SplitStrategy.STRATIFIED, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15
         )
 
         print(f"Train: {len(splits['train'])} samples")
@@ -133,10 +121,10 @@ class DatasetBuilder:
         self,
         features: np.ndarray,
         labels: np.ndarray,
-        sample_ids: List[str],
-        timestamps: Optional[np.ndarray] = None,
-        output_dir: Optional[Path] = None,
-        random_seed: int = 42
+        sample_ids: list[str],
+        timestamps: np.ndarray | None = None,
+        output_dir: Path | None = None,
+        random_seed: int = 42,
     ):
         """Initialize dataset builder.
 
@@ -163,8 +151,7 @@ class DatasetBuilder:
         # Set random seed
         np.random.seed(random_seed)
 
-        logger.info(f"DatasetBuilder initialized: {len(features)} samples, "
-                    f"{features.shape[1]} features")
+        logger.info(f"DatasetBuilder initialized: {len(features)} samples, {features.shape[1]} features")
 
     def create_splits(
         self,
@@ -172,8 +159,8 @@ class DatasetBuilder:
         train_ratio: float = 0.7,
         val_ratio: float = 0.15,
         test_ratio: float = 0.15,
-        balance_classes: bool = False
-    ) -> Dict[str, DatasetSplit]:
+        balance_classes: bool = False,
+    ) -> dict[str, DatasetSplit]:
         """Create train/val/test splits.
 
         Args:
@@ -207,7 +194,7 @@ class DatasetBuilder:
                 features=self.features[indices],
                 labels=self.labels[indices],
                 sample_ids=[self.sample_ids[i] for i in indices],
-                indices=indices
+                indices=indices,
             )
             splits[name] = split
 
@@ -219,12 +206,7 @@ class DatasetBuilder:
 
         return splits
 
-    def _random_split(
-        self,
-        train_ratio: float,
-        val_ratio: float,
-        test_ratio: float
-    ) -> Dict[str, np.ndarray]:
+    def _random_split(self, train_ratio: float, val_ratio: float, test_ratio: float) -> dict[str, np.ndarray]:
         """Create random split.
 
         Args:
@@ -246,21 +228,12 @@ class DatasetBuilder:
 
         # Split
         train_indices = indices[:n_train]
-        val_indices = indices[n_train:n_train + n_val]
-        test_indices = indices[n_train + n_val:]
+        val_indices = indices[n_train : n_train + n_val]
+        test_indices = indices[n_train + n_val :]
 
-        return {
-            "train": train_indices,
-            "val": val_indices,
-            "test": test_indices
-        }
+        return {"train": train_indices, "val": val_indices, "test": test_indices}
 
-    def _stratified_split(
-        self,
-        train_ratio: float,
-        val_ratio: float,
-        test_ratio: float
-    ) -> Dict[str, np.ndarray]:
+    def _stratified_split(self, train_ratio: float, val_ratio: float, test_ratio: float) -> dict[str, np.ndarray]:
         """Create stratified split (balanced classes).
 
         Args:
@@ -292,8 +265,8 @@ class DatasetBuilder:
 
             # Split
             train_indices.extend(label_indices[:n_train].tolist())
-            val_indices.extend(label_indices[n_train:n_train + n_val].tolist())
-            test_indices.extend(label_indices[n_train + n_val:].tolist())
+            val_indices.extend(label_indices[n_train : n_train + n_val].tolist())
+            test_indices.extend(label_indices[n_train + n_val :].tolist())
 
         # Convert to arrays and shuffle
         train_indices = np.array(train_indices)
@@ -304,18 +277,9 @@ class DatasetBuilder:
         np.random.shuffle(val_indices)
         np.random.shuffle(test_indices)
 
-        return {
-            "train": train_indices,
-            "val": val_indices,
-            "test": test_indices
-        }
+        return {"train": train_indices, "val": val_indices, "test": test_indices}
 
-    def _temporal_split(
-        self,
-        train_ratio: float,
-        val_ratio: float,
-        test_ratio: float
-    ) -> Dict[str, np.ndarray]:
+    def _temporal_split(self, train_ratio: float, val_ratio: float, test_ratio: float) -> dict[str, np.ndarray]:
         """Create temporal split (respect time ordering).
 
         Args:
@@ -341,14 +305,10 @@ class DatasetBuilder:
 
         # Split (oldest to newest)
         train_indices = sorted_indices[:n_train]
-        val_indices = sorted_indices[n_train:n_train + n_val]
-        test_indices = sorted_indices[n_train + n_val:]
+        val_indices = sorted_indices[n_train : n_train + n_val]
+        test_indices = sorted_indices[n_train + n_val :]
 
-        return {
-            "train": train_indices,
-            "val": val_indices,
-            "test": test_indices
-        }
+        return {"train": train_indices, "val": val_indices, "test": test_indices}
 
     def _balance_classes(self, split: DatasetSplit) -> DatasetSplit:
         """Balance classes using undersampling/oversampling.
@@ -387,7 +347,7 @@ class DatasetBuilder:
             features=split.features[balanced_indices],
             labels=split.labels[balanced_indices],
             sample_ids=[split.sample_ids[i] for i in balanced_indices],
-            indices=split.indices[balanced_indices]
+            indices=split.indices[balanced_indices],
         )
 
         logger.info(f"Balanced {split.name}: {len(split)} -> {len(balanced_split)} samples")
@@ -395,7 +355,7 @@ class DatasetBuilder:
 
         return balanced_split
 
-    def save_splits(self, splits: Dict[str, DatasetSplit], prefix: str = "layer1"):
+    def save_splits(self, splits: dict[str, DatasetSplit], prefix: str = "layer1"):
         """Save all splits to disk.
 
         Args:
@@ -410,11 +370,7 @@ class DatasetBuilder:
         logger.info(f"Saved {len(splits)} splits with prefix '{prefix}'")
 
     @classmethod
-    def load_splits(
-        cls,
-        split_dir: Path,
-        prefix: str = "layer1"
-    ) -> Dict[str, DatasetSplit]:
+    def load_splits(cls, split_dir: Path, prefix: str = "layer1") -> dict[str, DatasetSplit]:
         """Load splits from disk.
 
         Args:
@@ -439,12 +395,7 @@ class DatasetBuilder:
 
         return splits
 
-    def augment_data(
-        self,
-        split: DatasetSplit,
-        augmentation_factor: int = 2,
-        noise_std: float = 0.01
-    ) -> DatasetSplit:
+    def augment_data(self, split: DatasetSplit, augmentation_factor: int = 2, noise_std: float = 0.01) -> DatasetSplit:
         """Augment data with noise.
 
         Args:
@@ -472,7 +423,7 @@ class DatasetBuilder:
 
             augmented_features.append(augmented_feat)
             augmented_labels.append(split.labels)
-            augmented_ids.extend([f"{sid}_aug{i+1}" for sid in split.sample_ids])
+            augmented_ids.extend([f"{sid}_aug{i + 1}" for sid in split.sample_ids])
 
         # Concatenate
         augmented_features = np.concatenate(augmented_features)
@@ -484,15 +435,16 @@ class DatasetBuilder:
             features=augmented_features,
             labels=augmented_labels,
             sample_ids=augmented_ids,
-            indices=np.arange(len(augmented_features))
+            indices=np.arange(len(augmented_features)),
         )
 
-        logger.info(f"Augmented {split.name}: {len(split)} -> {len(augmented_split)} samples "
-                    f"(factor={augmentation_factor})")
+        logger.info(
+            f"Augmented {split.name}: {len(split)} -> {len(augmented_split)} samples (factor={augmentation_factor})"
+        )
 
         return augmented_split
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get dataset statistics.
 
         Returns:
@@ -512,13 +464,13 @@ class DatasetBuilder:
                 "mean": self.features.mean(axis=0).tolist(),
                 "std": self.features.std(axis=0).tolist(),
                 "min": self.features.min(axis=0).tolist(),
-                "max": self.features.max(axis=0).tolist()
-            }
+                "max": self.features.max(axis=0).tolist(),
+            },
         }
 
         if n_labeled > 0:
             unique, counts = np.unique(self.labels[labeled_mask], return_counts=True)
-            stats["class_distribution"] = dict(zip(unique.tolist(), counts.tolist()))
+            stats["class_distribution"] = dict(zip(unique.tolist(), counts.tolist(), strict=False))
 
         return stats
 
@@ -534,12 +486,7 @@ class PyTorchDatasetWrapper:
         train_dataset = PyTorchDatasetWrapper(train_split)
 
         # Create data loader
-        train_loader = DataLoader(
-            train_dataset,
-            batch_size=32,
-            shuffle=True,
-            num_workers=4
-        )
+        train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
 
         # Iterate
         for batch_features, batch_labels in train_loader:
@@ -561,7 +508,7 @@ class PyTorchDatasetWrapper:
     def __len__(self) -> int:
         return len(self.split)
 
-    def __getitem__(self, idx: int) -> Tuple[np.ndarray, int]:
+    def __getitem__(self, idx: int) -> tuple[np.ndarray, int]:
         """Get item by index.
 
         Args:

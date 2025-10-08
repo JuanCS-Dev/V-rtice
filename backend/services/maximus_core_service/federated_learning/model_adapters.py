@@ -16,10 +16,11 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Tuple
-import numpy as np
 import logging
+from abc import ABC, abstractmethod
+from typing import Any
+
+import numpy as np
 
 from .base import ModelType
 
@@ -45,7 +46,7 @@ class BaseModelAdapter(ABC):
         self.model = None
 
     @abstractmethod
-    def get_weights(self) -> Dict[str, np.ndarray]:
+    def get_weights(self) -> dict[str, np.ndarray]:
         """
         Extract trainable weights from model.
 
@@ -55,7 +56,7 @@ class BaseModelAdapter(ABC):
         pass
 
     @abstractmethod
-    def set_weights(self, weights: Dict[str, np.ndarray]) -> None:
+    def set_weights(self, weights: dict[str, np.ndarray]) -> None:
         """
         Set model weights.
 
@@ -73,7 +74,7 @@ class BaseModelAdapter(ABC):
         batch_size: int,
         learning_rate: float,
         validation_split: float = 0.1,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Train model for specified number of epochs.
 
@@ -91,9 +92,7 @@ class BaseModelAdapter(ABC):
         pass
 
     @abstractmethod
-    def evaluate(
-        self, test_data: Any, test_labels: Any
-    ) -> Dict[str, float]:
+    def evaluate(self, test_data: Any, test_labels: Any) -> dict[str, float]:
         """
         Evaluate model on test data.
 
@@ -106,7 +105,7 @@ class BaseModelAdapter(ABC):
         """
         pass
 
-    def get_model_info(self) -> Dict[str, Any]:
+    def get_model_info(self) -> dict[str, Any]:
         """
         Get model information.
 
@@ -160,16 +159,14 @@ class ThreatClassifierAdapter(BaseModelAdapter):
             "output_bias": np.zeros(4, dtype=np.float32),
         }
 
-    def get_weights(self) -> Dict[str, np.ndarray]:
+    def get_weights(self) -> dict[str, np.ndarray]:
         """Extract weights from threat classifier."""
         if self.model is None:
             raise RuntimeError("Model not initialized")
 
-        return {
-            name: weights.copy() for name, weights in self.model.items()
-        }
+        return {name: weights.copy() for name, weights in self.model.items()}
 
-    def set_weights(self, weights: Dict[str, np.ndarray]) -> None:
+    def set_weights(self, weights: dict[str, np.ndarray]) -> None:
         """Set threat classifier weights."""
         if self.model is None:
             raise RuntimeError("Model not initialized")
@@ -179,10 +176,7 @@ class ThreatClassifierAdapter(BaseModelAdapter):
         provided_layers = set(weights.keys())
 
         if expected_layers != provided_layers:
-            raise ValueError(
-                f"Weight mismatch: expected {expected_layers}, "
-                f"got {provided_layers}"
-            )
+            raise ValueError(f"Weight mismatch: expected {expected_layers}, got {provided_layers}")
 
         # Set weights
         for layer_name, layer_weights in weights.items():
@@ -204,7 +198,7 @@ class ThreatClassifierAdapter(BaseModelAdapter):
         batch_size: int,
         learning_rate: float,
         validation_split: float = 0.1,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Train threat classifier.
 
@@ -222,10 +216,7 @@ class ThreatClassifierAdapter(BaseModelAdapter):
         Returns:
             Training metrics
         """
-        logger.info(
-            f"Training threat classifier: {epochs} epochs, "
-            f"batch_size={batch_size}, lr={learning_rate}"
-        )
+        logger.info(f"Training threat classifier: {epochs} epochs, batch_size={batch_size}, lr={learning_rate}")
 
         # Simulate training by perturbing weights
         for layer_name in self.model:
@@ -242,16 +233,11 @@ class ThreatClassifierAdapter(BaseModelAdapter):
             "epochs_completed": epochs,
         }
 
-        logger.info(
-            f"Training completed: loss={metrics['loss']:.4f}, "
-            f"accuracy={metrics['accuracy']:.4f}"
-        )
+        logger.info(f"Training completed: loss={metrics['loss']:.4f}, accuracy={metrics['accuracy']:.4f}")
 
         return metrics
 
-    def evaluate(
-        self, test_data: Any, test_labels: Any
-    ) -> Dict[str, float]:
+    def evaluate(self, test_data: Any, test_labels: Any) -> dict[str, float]:
         """
         Evaluate threat classifier on test data.
 
@@ -317,16 +303,14 @@ class MalwareDetectorAdapter(BaseModelAdapter):
             "output_bias": np.zeros(2, dtype=np.float32),
         }
 
-    def get_weights(self) -> Dict[str, np.ndarray]:
+    def get_weights(self) -> dict[str, np.ndarray]:
         """Extract weights from malware detector."""
         if self.model is None:
             raise RuntimeError("Model not initialized")
 
-        return {
-            name: weights.copy() for name, weights in self.model.items()
-        }
+        return {name: weights.copy() for name, weights in self.model.items()}
 
-    def set_weights(self, weights: Dict[str, np.ndarray]) -> None:
+    def set_weights(self, weights: dict[str, np.ndarray]) -> None:
         """Set malware detector weights."""
         if self.model is None:
             raise RuntimeError("Model not initialized")
@@ -336,10 +320,7 @@ class MalwareDetectorAdapter(BaseModelAdapter):
         provided_layers = set(weights.keys())
 
         if expected_layers != provided_layers:
-            raise ValueError(
-                f"Weight mismatch: expected {expected_layers}, "
-                f"got {provided_layers}"
-            )
+            raise ValueError(f"Weight mismatch: expected {expected_layers}, got {provided_layers}")
 
         # Set weights
         for layer_name, layer_weights in weights.items():
@@ -361,7 +342,7 @@ class MalwareDetectorAdapter(BaseModelAdapter):
         batch_size: int,
         learning_rate: float,
         validation_split: float = 0.1,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Train malware detector.
 
@@ -379,10 +360,7 @@ class MalwareDetectorAdapter(BaseModelAdapter):
         Returns:
             Training metrics
         """
-        logger.info(
-            f"Training malware detector: {epochs} epochs, "
-            f"batch_size={batch_size}, lr={learning_rate}"
-        )
+        logger.info(f"Training malware detector: {epochs} epochs, batch_size={batch_size}, lr={learning_rate}")
 
         # Simulate training
         for layer_name in self.model:
@@ -398,16 +376,11 @@ class MalwareDetectorAdapter(BaseModelAdapter):
             "epochs_completed": epochs,
         }
 
-        logger.info(
-            f"Training completed: loss={metrics['loss']:.4f}, "
-            f"accuracy={metrics['accuracy']:.4f}"
-        )
+        logger.info(f"Training completed: loss={metrics['loss']:.4f}, accuracy={metrics['accuracy']:.4f}")
 
         return metrics
 
-    def evaluate(
-        self, test_data: Any, test_labels: Any
-    ) -> Dict[str, float]:
+    def evaluate(self, test_data: Any, test_labels: Any) -> dict[str, float]:
         """
         Evaluate malware detector on test data.
 
@@ -431,10 +404,7 @@ class MalwareDetectorAdapter(BaseModelAdapter):
             "false_positive_rate": 0.02 + np.random.rand() * 0.01,
         }
 
-        logger.info(
-            f"Evaluation: accuracy={metrics['accuracy']:.4f}, "
-            f"FPR={metrics['false_positive_rate']:.4f}"
-        )
+        logger.info(f"Evaluation: accuracy={metrics['accuracy']:.4f}, FPR={metrics['false_positive_rate']:.4f}")
 
         return metrics
 
@@ -454,7 +424,6 @@ def create_model_adapter(model_type: ModelType) -> BaseModelAdapter:
     """
     if model_type == ModelType.THREAT_CLASSIFIER:
         return ThreatClassifierAdapter()
-    elif model_type == ModelType.MALWARE_DETECTOR:
+    if model_type == ModelType.MALWARE_DETECTOR:
         return MalwareDetectorAdapter()
-    else:
-        raise ValueError(f"Unsupported model type: {model_type}")
+    raise ValueError(f"Unsupported model type: {model_type}")

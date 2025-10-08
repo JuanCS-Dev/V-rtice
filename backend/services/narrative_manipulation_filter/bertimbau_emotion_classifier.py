@@ -6,18 +6,17 @@ Based on GoEmotions dataset adapted for Portuguese via BERTimbau.
 """
 
 import asyncio
-from collections import defaultdict
-from functools import lru_cache
 import logging
 from typing import Dict, List, Optional, Tuple
 
-from cache_manager import cache_manager, CacheCategory
+import numpy as np
+import torch
+from sentence_transformers import SentenceTransformer
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
 from models import EmotionCategory, EmotionProfile
-import numpy as np
-from sentence_transformers import SentenceTransformer
-import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from utils import hash_text
 
 logger = logging.getLogger(__name__)
@@ -108,9 +107,7 @@ class BERTimbauEmotionClassifier:
             logger.info(f"Loading BERTimbau emotion classifier: {self.model_name}")
 
             # Load tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name, use_fast=True
-            )
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
 
             # Load model
             # Note: In production, use a fine-tuned version for emotion classification
@@ -126,15 +123,11 @@ class BERTimbauEmotionClassifier:
 
             # Quantization for faster inference
             if self.use_quantization and self.device == "cpu":
-                self.model = torch.quantization.quantize_dynamic(
-                    self.model, {torch.nn.Linear}, dtype=torch.qint8
-                )
+                self.model = torch.quantization.quantize_dynamic(self.model, {torch.nn.Linear}, dtype=torch.qint8)
                 logger.info("✅ INT8 quantization applied")
 
             # Sentence embedder for semantic analysis
-            self.embedder = SentenceTransformer(
-                "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-            )
+            self.embedder = SentenceTransformer("sentence-transformers/paraphrase-multilingual-mpnet-base-v2")
 
             self._initialized = True
             logger.info("✅ BERTimbau emotion classifier initialized")
@@ -144,9 +137,7 @@ class BERTimbauEmotionClassifier:
             raise
 
     @torch.no_grad()
-    def classify_emotion(
-        self, text: str, return_all_scores: bool = True, use_cache: bool = True
-    ) -> EmotionProfile:
+    def classify_emotion(self, text: str, return_all_scores: bool = True, use_cache: bool = True) -> EmotionProfile:
         """
         Classify emotion in text.
 
@@ -171,9 +162,9 @@ class BERTimbauEmotionClassifier:
                 return EmotionProfile(**cached)
 
         # Tokenize
-        inputs = self.tokenizer(
-            text, return_tensors="pt", truncation=True, max_length=512, padding=True
-        ).to(self.device)
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512, padding=True).to(
+            self.device
+        )
 
         # Forward pass
         outputs = self.model(**inputs)
@@ -183,9 +174,7 @@ class BERTimbauEmotionClassifier:
         probs = torch.sigmoid(logits).cpu().numpy()[0]
 
         # Map to emotion categories
-        emotion_scores = {
-            self._label_mapping[i]: float(probs[i]) for i in range(len(probs))
-        }
+        emotion_scores = {self._label_mapping[i]: float(probs[i]) for i in range(len(probs))}
 
         # Normalize to sum to 1.0 (convert multi-label to single-label distribution)
         total = sum(emotion_scores.values())
@@ -196,14 +185,8 @@ class BERTimbauEmotionClassifier:
         primary_emotion = max(emotion_scores.items(), key=lambda x: x[1])[0]
 
         # Calculate arousal and valence (weighted by emotion scores)
-        arousal = sum(
-            score * self.EMOTION_AROUSAL_VALENCE[emotion][0]
-            for emotion, score in emotion_scores.items()
-        )
-        valence = sum(
-            score * self.EMOTION_AROUSAL_VALENCE[emotion][1]
-            for emotion, score in emotion_scores.items()
-        )
+        arousal = sum(score * self.EMOTION_AROUSAL_VALENCE[emotion][0] for emotion, score in emotion_scores.items())
+        valence = sum(score * self.EMOTION_AROUSAL_VALENCE[emotion][1] for emotion, score in emotion_scores.items())
 
         # Create profile
         profile = EmotionProfile(
@@ -227,9 +210,7 @@ class BERTimbauEmotionClassifier:
 
         return profile
 
-    def batch_classify(
-        self, texts: List[str], batch_size: int = 32
-    ) -> List[EmotionProfile]:
+    def batch_classify(self, texts: List[str], batch_size: int = 32) -> List[EmotionProfile]:
         """
         Classify emotions in batch for efficiency.
 
@@ -266,10 +247,7 @@ class BERTimbauEmotionClassifier:
             probs = torch.sigmoid(logits).cpu().numpy()
 
             for prob_dist in probs:
-                emotion_scores = {
-                    self._label_mapping[i]: float(prob_dist[i])
-                    for i in range(len(prob_dist))
-                }
+                emotion_scores = {self._label_mapping[i]: float(prob_dist[i]) for i in range(len(prob_dist))}
 
                 # Normalize
                 total = sum(emotion_scores.values())
@@ -279,12 +257,10 @@ class BERTimbauEmotionClassifier:
                 primary_emotion = max(emotion_scores.items(), key=lambda x: x[1])[0]
 
                 arousal = sum(
-                    score * self.EMOTION_AROUSAL_VALENCE[emotion][0]
-                    for emotion, score in emotion_scores.items()
+                    score * self.EMOTION_AROUSAL_VALENCE[emotion][0] for emotion, score in emotion_scores.items()
                 )
                 valence = sum(
-                    score * self.EMOTION_AROUSAL_VALENCE[emotion][1]
-                    for emotion, score in emotion_scores.items()
+                    score * self.EMOTION_AROUSAL_VALENCE[emotion][1] for emotion, score in emotion_scores.items()
                 )
 
                 profile = EmotionProfile(
@@ -298,9 +274,7 @@ class BERTimbauEmotionClassifier:
 
         return results
 
-    def detect_emotional_trajectory(
-        self, text: str, window_size: int = 50
-    ) -> List[Tuple[int, EmotionCategory]]:
+    def detect_emotional_trajectory(self, text: str, window_size: int = 50) -> List[Tuple[int, EmotionCategory]]:
         """
         Detect emotion changes over text.
 
@@ -324,9 +298,7 @@ class BERTimbauEmotionClassifier:
 
         return trajectory
 
-    def detect_emotional_manipulation_signals(
-        self, profile: EmotionProfile
-    ) -> Dict[str, float]:
+    def detect_emotional_manipulation_signals(self, profile: EmotionProfile) -> Dict[str, float]:
         """
         Detect manipulation signals from emotion profile.
 
@@ -345,10 +317,7 @@ class BERTimbauEmotionClassifier:
             EmotionCategory.EXCITEMENT,
             EmotionCategory.SURPRISE,
         ]
-        high_arousal_score = sum(
-            profile.emotion_scores.get(emotion, 0.0)
-            for emotion in high_arousal_emotions
-        )
+        high_arousal_score = sum(profile.emotion_scores.get(emotion, 0.0) for emotion in high_arousal_emotions)
         signals["high_arousal"] = high_arousal_score
 
         # Negative emotions (anger, fear, disgust)
@@ -359,9 +328,7 @@ class BERTimbauEmotionClassifier:
             EmotionCategory.GRIEF,
             EmotionCategory.SADNESS,
         ]
-        negative_score = sum(
-            profile.emotion_scores.get(emotion, 0.0) for emotion in negative_emotions
-        )
+        negative_score = sum(profile.emotion_scores.get(emotion, 0.0) for emotion in negative_emotions)
         signals["negative_emotion"] = negative_score
 
         # Fear + urgency
@@ -373,21 +340,15 @@ class BERTimbauEmotionClassifier:
         signals["polarization"] = polarization
 
         # Emotional inconsistency (mixed high-arousal emotions)
-        top_emotions = sorted(
-            profile.emotion_scores.items(), key=lambda x: x[1], reverse=True
-        )[:3]
+        top_emotions = sorted(profile.emotion_scores.items(), key=lambda x: x[1], reverse=True)[:3]
 
         if len(top_emotions) >= 2:
-            arousal_variance = np.var(
-                [self.EMOTION_AROUSAL_VALENCE[e[0]][0] for e in top_emotions]
-            )
+            arousal_variance = np.var([self.EMOTION_AROUSAL_VALENCE[e[0]][0] for e in top_emotions])
             signals["emotional_inconsistency"] = float(arousal_variance)
 
         return signals
 
-    def calculate_manipulation_score(
-        self, profile: EmotionProfile, signals: Dict[str, float]
-    ) -> float:
+    def calculate_manipulation_score(self, profile: EmotionProfile, signals: Dict[str, float]) -> float:
         """
         Calculate overall emotional manipulation score.
 
@@ -414,6 +375,4 @@ class BERTimbauEmotionClassifier:
 # GLOBAL INSTANCE
 # ============================================================================
 
-bertimbau_classifier = BERTimbauEmotionClassifier(
-    device="cuda" if torch.cuda.is_available() else "cpu"
-)
+bertimbau_classifier = BERTimbauEmotionClassifier(device="cuda" if torch.cuda.is_available() else "cpu")

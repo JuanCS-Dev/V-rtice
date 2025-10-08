@@ -10,9 +10,7 @@ These tests target SPECIFIC uncovered lines with surgical precision:
 Focus: SURGICAL PRECISION for homeostatic controller gaps
 """
 
-import asyncio
-from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
@@ -20,9 +18,7 @@ import pytest_asyncio
 from active_immune_core.coordination.homeostatic_controller import (
     HomeostaticController,
     SystemState,
-    ActionType,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -59,9 +55,7 @@ class TestMMEIIntegrationEdgeCases:
         """
         # ARRANGE: Mock MMEI client to raise exception
         mock_mmei = MagicMock()
-        mock_mmei.get_abstract_needs = AsyncMock(
-            side_effect=Exception("MMEI service unavailable")
-        )
+        mock_mmei.get_abstract_needs = AsyncMock(side_effect=Exception("MMEI service unavailable"))
         controller.mmei_client = mock_mmei
 
         # ACT: Try to monitor (includes MMEI fetch)
@@ -72,10 +66,8 @@ class TestMMEIIntegrationEdgeCases:
             handled_gracefully = False
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle MMEI fetch failure gracefully"
-        assert controller.current_needs is None, \
-            "Should clear needs on fetch failure"
+        assert handled_gracefully, "Should handle MMEI fetch failure gracefully"
+        assert controller.current_needs is None, "Should clear needs on fetch failure"
 
     @pytest.mark.asyncio
     async def test_analyze_detects_high_rest_need_fatigue(self, controller):
@@ -102,8 +94,7 @@ class TestMMEIIntegrationEdgeCases:
         issues = await controller._analyze()
 
         # ASSERT: Should detect high rest_need
-        assert "high_rest_need_fatigue" in issues, \
-            "Should detect high rest_need (>0.7) as system fatigue"
+        assert "high_rest_need_fatigue" in issues, "Should detect high rest_need (>0.7) as system fatigue"
 
     @pytest.mark.asyncio
     async def test_analyze_detects_high_repair_need_alert(self, controller):
@@ -128,8 +119,7 @@ class TestMMEIIntegrationEdgeCases:
         issues = await controller._analyze()
 
         # ASSERT
-        assert "high_repair_need_alert" in issues, \
-            "Should detect high repair_need (>0.7) as system alert"
+        assert "high_repair_need_alert" in issues, "Should detect high repair_need (>0.7) as system alert"
 
     @pytest.mark.asyncio
     async def test_analyze_detects_efficiency_optimization_needed(self, controller):
@@ -154,8 +144,7 @@ class TestMMEIIntegrationEdgeCases:
         issues = await controller._analyze()
 
         # ASSERT
-        assert "efficiency_optimization_needed" in issues, \
-            "Should detect high efficiency_need (>0.6) for optimization"
+        assert "efficiency_optimization_needed" in issues, "Should detect high efficiency_need (>0.6) for optimization"
 
 
 # ==================== STATE TRANSITIONS ====================
@@ -188,8 +177,7 @@ class TestStateTransitions:
         controller._update_system_state()
 
         # ASSERT: Should transition to EMERGENCIA
-        assert controller.current_state == SystemState.EMERGENCIA, \
-            "Should transition to EMERGENCIA with CPU > 90%"
+        assert controller.current_state == SystemState.EMERGENCIA, "Should transition to EMERGENCIA with CPU > 90%"
 
     @pytest.mark.asyncio
     async def test_state_transition_to_inflamacao(self, controller):
@@ -212,8 +200,7 @@ class TestStateTransitions:
         controller._update_system_state()
 
         # ASSERT
-        assert controller.current_state == SystemState.INFLAMACAO, \
-            "Should transition to INFLAMACAO with threats > 20"
+        assert controller.current_state == SystemState.INFLAMACAO, "Should transition to INFLAMACAO with threats > 20"
 
     @pytest.mark.asyncio
     async def test_state_transition_to_ativacao(self, controller):
@@ -236,8 +223,7 @@ class TestStateTransitions:
         controller._update_system_state()
 
         # ASSERT
-        assert controller.current_state == SystemState.ATIVACAO, \
-            "Should transition to ATIVACAO with threats > 10"
+        assert controller.current_state == SystemState.ATIVACAO, "Should transition to ATIVACAO with threats > 10"
 
     @pytest.mark.asyncio
     async def test_state_transition_to_atencao(self, controller):
@@ -260,8 +246,7 @@ class TestStateTransitions:
         controller._update_system_state()
 
         # ASSERT
-        assert controller.current_state == SystemState.ATENCAO, \
-            "Should transition to ATENCAO with threats > 5"
+        assert controller.current_state == SystemState.ATENCAO, "Should transition to ATENCAO with threats > 5"
 
 
 # ==================== HIGH THREAT LOAD DETECTION ====================
@@ -290,8 +275,7 @@ class TestHighThreatLoadDetection:
         issues = await controller._analyze()
 
         # ASSERT
-        assert "high_threat_load" in issues, \
-            "Should detect high_threat_load when threats > threshold"
+        assert "high_threat_load" in issues, "Should detect high_threat_load when threats > threshold"
 
 
 # ==================== HTTP SESSION UNAVAILABLE ====================
@@ -316,8 +300,7 @@ class TestHTTPSessionUnavailable:
         metrics = await controller._collect_system_metrics()
 
         # ASSERT: Should return empty dict
-        assert metrics == {}, \
-            "Should return empty metrics when HTTP session unavailable"
+        assert metrics == {}, "Should return empty metrics when HTTP session unavailable"
 
 
 # ==================== EXECUTE METHODS EDGE CASES ====================

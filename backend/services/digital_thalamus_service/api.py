@@ -15,16 +15,16 @@ system, and higher-level cognitive services to receive pre-processed, prioritize
 sensory information for efficient decision-making.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
+
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
 from attention_control import AttentionControl
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
 from sensory_gating import SensoryGating
 from signal_filtering import SignalFiltering
-import uvicorn
 
 app = FastAPI(title="Maximus Digital Thalamus Service", version="1.0.0")
 
@@ -86,9 +86,7 @@ async def ingest_sensory_data(request: SensoryDataIngest) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary confirming ingestion and processing status.
     """
-    print(
-        f"[API] Ingesting {request.sensor_type} data from {request.sensor_id} (priority: {request.priority})"
-    )
+    print(f"[API] Ingesting {request.sensor_type} data from {request.sensor_id} (priority: {request.priority})")
 
     # Apply sensory gating
     # Normalize priority (1-10) to intensity (0.0-1.0)
@@ -103,9 +101,7 @@ async def ingest_sensory_data(request: SensoryDataIngest) -> Dict[str, Any]:
     filtered_data = signal_filtering.apply_filters(request.data, request.sensor_type)
 
     # Apply attention control (prioritization/routing)
-    processed_data = await attention_control.prioritize_and_route(
-        filtered_data, request.sensor_type, request.priority
-    )
+    processed_data = await attention_control.prioritize_and_route(filtered_data, request.sensor_type, request.priority)
 
     return {
         "timestamp": datetime.now().isoformat(),

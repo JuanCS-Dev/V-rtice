@@ -15,7 +15,8 @@ Date: 2025-10-06
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -65,7 +66,7 @@ class LaplaceMechanism(PrivacyMechanism):
         # Calculate Laplace scale: b = Δf / ε
         self.scale = privacy_params.sensitivity / privacy_params.epsilon
 
-    def add_noise(self, true_value: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def add_noise(self, true_value: float | np.ndarray) -> float | np.ndarray:
         """
         Add Laplace noise to a value or array.
 
@@ -81,10 +82,9 @@ class LaplaceMechanism(PrivacyMechanism):
             # Array: add independent Laplace noise to each element
             noise = np.random.laplace(0, self.scale, size=true_value.shape)
             return true_value + noise
-        else:
-            # Scalar: add single Laplace noise
-            noise = np.random.laplace(0, self.scale)
-            return true_value + noise
+        # Scalar: add single Laplace noise
+        noise = np.random.laplace(0, self.scale)
+        return true_value + noise
 
     def __repr__(self) -> str:
         return (
@@ -124,8 +124,7 @@ class GaussianMechanism(PrivacyMechanism):
         """
         if privacy_params.delta == 0:
             raise ValueError(
-                f"Gaussian mechanism requires delta > 0 (approximate DP). "
-                f"Use Laplace mechanism for pure DP."
+                "Gaussian mechanism requires delta > 0 (approximate DP). Use Laplace mechanism for pure DP."
             )
 
         # Force mechanism type
@@ -135,12 +134,10 @@ class GaussianMechanism(PrivacyMechanism):
         # Calculate Gaussian standard deviation:
         # σ = Δf × sqrt(2 × ln(1.25/δ)) / ε
         self.std = (
-            privacy_params.sensitivity *
-            np.sqrt(2 * np.log(1.25 / privacy_params.delta)) /
-            privacy_params.epsilon
+            privacy_params.sensitivity * np.sqrt(2 * np.log(1.25 / privacy_params.delta)) / privacy_params.epsilon
         )
 
-    def add_noise(self, true_value: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def add_noise(self, true_value: float | np.ndarray) -> float | np.ndarray:
         """
         Add Gaussian noise to a value or array.
 
@@ -156,10 +153,9 @@ class GaussianMechanism(PrivacyMechanism):
             # Array: add independent Gaussian noise to each element
             noise = np.random.normal(0, self.std, size=true_value.shape)
             return true_value + noise
-        else:
-            # Scalar: add single Gaussian noise
-            noise = np.random.normal(0, self.std)
-            return true_value + noise
+        # Scalar: add single Gaussian noise
+        noise = np.random.normal(0, self.std)
+        return true_value + noise
 
     def __repr__(self) -> str:
         return (
@@ -192,9 +188,9 @@ class ExponentialMechanism(PrivacyMechanism):
     def __init__(
         self,
         privacy_params: PrivacyParameters,
-        candidates: List[Any],
+        candidates: list[Any],
         score_function: Callable[[Any], float],
-        score_sensitivity: Optional[float] = None
+        score_sensitivity: float | None = None,
     ):
         """
         Initialize Exponential mechanism.
@@ -210,10 +206,7 @@ class ExponentialMechanism(PrivacyMechanism):
             ValueError: If delta > 0 or no candidates provided
         """
         if privacy_params.delta > 0:
-            raise ValueError(
-                f"Exponential mechanism requires delta=0 (pure DP). "
-                f"Got delta={privacy_params.delta}."
-            )
+            raise ValueError(f"Exponential mechanism requires delta=0 (pure DP). Got delta={privacy_params.delta}.")
 
         if not candidates:
             raise ValueError("Exponential mechanism requires at least one candidate")
@@ -224,16 +217,12 @@ class ExponentialMechanism(PrivacyMechanism):
 
         self.candidates = candidates
         self.score_function = score_function
-        self.score_sensitivity = (
-            score_sensitivity
-            if score_sensitivity is not None
-            else privacy_params.sensitivity
-        )
+        self.score_sensitivity = score_sensitivity if score_sensitivity is not None else privacy_params.sensitivity
 
         # Pre-compute scores for all candidates
         self.scores = np.array([score_function(c) for c in candidates])
 
-    def add_noise(self, true_value: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def add_noise(self, true_value: float | np.ndarray) -> float | np.ndarray:
         """
         Not applicable for Exponential Mechanism.
 
@@ -248,7 +237,7 @@ class ExponentialMechanism(PrivacyMechanism):
             "See https://en.wikipedia.org/wiki/Exponential_mechanism for details."
         )
 
-    def select(self, context: Optional[Any] = None) -> Any:
+    def select(self, context: Any | None = None) -> Any:
         """
         Select a candidate using the exponential mechanism.
 
@@ -263,10 +252,7 @@ class ExponentialMechanism(PrivacyMechanism):
         """
         # Calculate selection probabilities
         # P(c) ∝ exp(ε × score(c) / (2 × Δu))
-        exponents = (
-            self.privacy_params.epsilon * self.scores /
-            (2 * self.score_sensitivity)
-        )
+        exponents = self.privacy_params.epsilon * self.scores / (2 * self.score_sensitivity)
 
         # Numerically stable softmax
         exponents_shifted = exponents - np.max(exponents)
@@ -284,10 +270,7 @@ class ExponentialMechanism(PrivacyMechanism):
         Returns:
             Array of selection probabilities (sums to 1)
         """
-        exponents = (
-            self.privacy_params.epsilon * self.scores /
-            (2 * self.score_sensitivity)
-        )
+        exponents = self.privacy_params.epsilon * self.scores / (2 * self.score_sensitivity)
         exponents_shifted = exponents - np.max(exponents)
         probabilities = np.exp(exponents_shifted)
         probabilities /= np.sum(probabilities)
@@ -312,11 +295,7 @@ class AdvancedNoiseMechanisms:
     """
 
     @staticmethod
-    def analytic_gaussian_std(
-        epsilon: float,
-        delta: float,
-        sensitivity: float
-    ) -> float:
+    def analytic_gaussian_std(epsilon: float, delta: float, sensitivity: float) -> float:
         """
         Calculate Gaussian standard deviation using analytic formula.
 
@@ -338,11 +317,7 @@ class AdvancedNoiseMechanisms:
         return sensitivity * np.sqrt(2 * np.log(1 / delta)) / epsilon
 
     @staticmethod
-    def get_noise_multiplier(
-        epsilon: float,
-        delta: float,
-        mechanism: str = "gaussian"
-    ) -> float:
+    def get_noise_multiplier(epsilon: float, delta: float, mechanism: str = "gaussian") -> float:
         """
         Get noise multiplier (σ/Δf or b/Δf).
 
@@ -358,19 +333,15 @@ class AdvancedNoiseMechanisms:
             # Laplace: b/Δf = 1/ε
             return 1 / epsilon
 
-        elif mechanism == "gaussian":
+        if mechanism == "gaussian":
             # Gaussian: σ/Δf = sqrt(2 × ln(1.25/δ)) / ε
             return np.sqrt(2 * np.log(1.25 / delta)) / epsilon
 
-        else:
-            raise ValueError(f"Unknown mechanism: {mechanism}")
+        raise ValueError(f"Unknown mechanism: {mechanism}")
 
     @staticmethod
     def expected_absolute_error(
-        epsilon: float,
-        delta: float = 0.0,
-        sensitivity: float = 1.0,
-        mechanism: str = "laplace"
+        epsilon: float, delta: float = 0.0, sensitivity: float = 1.0, mechanism: str = "laplace"
     ) -> float:
         """
         Calculate expected absolute error of DP mechanism.
@@ -388,17 +359,12 @@ class AdvancedNoiseMechanisms:
             # E[|Lap(0,b)|] = b = Δf/ε
             return sensitivity / epsilon
 
-        elif mechanism == "gaussian":
+        if mechanism == "gaussian":
             # E[|N(0,σ²)|] = σ × sqrt(2/π)
-            std = (
-                sensitivity *
-                np.sqrt(2 * np.log(1.25 / delta)) /
-                epsilon
-            )
+            std = sensitivity * np.sqrt(2 * np.log(1.25 / delta)) / epsilon
             return std * np.sqrt(2 / np.pi)
 
-        else:
-            raise ValueError(f"Unknown mechanism: {mechanism}")
+        raise ValueError(f"Unknown mechanism: {mechanism}")
 
     @staticmethod
     def confidence_interval(
@@ -407,7 +373,7 @@ class AdvancedNoiseMechanisms:
         delta: float = 0.0,
         sensitivity: float = 1.0,
         mechanism: str = "laplace",
-        confidence_level: float = 0.95
+        confidence_level: float = 0.95,
     ) -> tuple[float, float]:
         """
         Calculate confidence interval for true value.
@@ -431,13 +397,10 @@ class AdvancedNoiseMechanisms:
             margin = scale * np.log(1 / alpha)
 
         elif mechanism == "gaussian":
-            std = (
-                sensitivity *
-                np.sqrt(2 * np.log(1.25 / delta)) /
-                epsilon
-            )
+            std = sensitivity * np.sqrt(2 * np.log(1.25 / delta)) / epsilon
             # Gaussian: quantile = std × z_score
             from scipy import stats
+
             z_score = stats.norm.ppf((1 + confidence_level) / 2)
             margin = std * z_score
 

@@ -49,7 +49,6 @@ Same stimulus can be:
 import asyncio
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 from consciousness.esgt.coordinator import ESGTCoordinator
 from consciousness.mcea.controller import ArousalController, ArousalState
@@ -123,7 +122,7 @@ class ESGTArousalBridge:
         self,
         arousal_controller: ArousalController,
         esgt_coordinator: ESGTCoordinator,
-        config: Optional[ArousalModulationConfig] = None,
+        config: ArousalModulationConfig | None = None,
         bridge_id: str = "arousal-esgt-bridge",
     ):
         """
@@ -142,7 +141,7 @@ class ESGTArousalBridge:
 
         # State
         self._running: bool = False
-        self._modulation_task: Optional[asyncio.Task] = None
+        self._modulation_task: asyncio.Task | None = None
 
         # Metrics
         self.total_modulations: int = 0

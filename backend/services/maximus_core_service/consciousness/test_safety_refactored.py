@@ -1506,7 +1506,7 @@ class TestKillSwitchFailSafePaths:
 
         # Make save raise exception
         def failing_save(self):
-            raise IOError("Disk full - cannot save report")
+            raise OSError("Disk full - cannot save report")
 
         monkeypatch.setattr(IncidentReport, "save", failing_save)
 

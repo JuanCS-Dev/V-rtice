@@ -16,24 +16,22 @@ from pathlib import Path
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(parent_dir))
 
-import asyncio
 import logging
 from contextlib import asynccontextmanager
-from datetime import timedelta
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Governance imports
+from governance_sse.api_routes import create_governance_api
+
 # HITL imports
 from hitl import (
     DecisionQueue,
-    OperatorInterface,
     HITLDecisionFramework,
+    OperatorInterface,
     SLAConfig,
 )
-
-# Governance imports
-from governance_sse.api_routes import create_governance_api
 
 # Configure logging
 logging.basicConfig(
@@ -47,6 +45,7 @@ logger = logging.getLogger(__name__)
 # Application Lifespan Management
 # ============================================================================
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -59,10 +58,10 @@ async def lifespan(app: FastAPI):
 
     # Initialize HITL components
     sla_config = SLAConfig(
-        low_risk_timeout=30,        # 30 minutes
-        medium_risk_timeout=15,     # 15 minutes
-        high_risk_timeout=10,       # 10 minutes
-        critical_risk_timeout=5,    # 5 minutes
+        low_risk_timeout=30,  # 30 minutes
+        medium_risk_timeout=15,  # 15 minutes
+        high_risk_timeout=10,  # 10 minutes
+        critical_risk_timeout=5,  # 5 minutes
         warning_threshold=0.75,
         auto_escalate_on_timeout=True,
     )

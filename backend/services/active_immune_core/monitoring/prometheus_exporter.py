@@ -18,7 +18,6 @@ Version: 1.0.0
 
 import logging
 import time
-from typing import Any, Dict, List, Optional
 
 from prometheus_client import (
     REGISTRY,
@@ -301,17 +300,11 @@ class PrometheusExporter:
         self.agents_total.labels(type=agent_type).dec()
         logger.debug(f"Agent unregistered: {agent_id}")
 
-    def update_agent_health(
-        self, agent_id: str, agent_type: str, health_score: float
-    ) -> None:
+    def update_agent_health(self, agent_id: str, agent_type: str, health_score: float) -> None:
         """Update agent health score"""
-        self.agent_health_score.labels(agent_id=agent_id, type=agent_type).set(
-            health_score
-        )
+        self.agent_health_score.labels(agent_id=agent_id, type=agent_type).set(health_score)
 
-    def update_agent_load(
-        self, agent_id: str, agent_type: str, load: float
-    ) -> None:
+    def update_agent_load(self, agent_id: str, agent_type: str, load: float) -> None:
         """Update agent load"""
         self.agent_load.labels(agent_id=agent_id, type=agent_type).set(load)
 
@@ -340,9 +333,7 @@ class PrometheusExporter:
         """Record task assignment"""
         self.tasks_assigned.labels(task_type=task_type).inc()
 
-    def record_task_completed(
-        self, task_type: str, duration: float, retries: int = 0
-    ) -> None:
+    def record_task_completed(self, task_type: str, duration: float, retries: int = 0) -> None:
         """Record task completion with duration and retries"""
         self.tasks_completed.labels(task_type=task_type).inc()
         self.task_duration.labels(task_type=task_type).observe(duration)
@@ -417,13 +408,9 @@ class PrometheusExporter:
         """Record operation duration"""
         self.operation_duration.labels(operation=operation).observe(duration)
 
-    def record_api_request(
-        self, endpoint: str, method: str, status: int, latency: float
-    ) -> None:
+    def record_api_request(self, endpoint: str, method: str, status: int, latency: float) -> None:
         """Record API request"""
-        self.api_requests.labels(
-            endpoint=endpoint, method=method, status=str(status)
-        ).inc()
+        self.api_requests.labels(endpoint=endpoint, method=method, status=str(status)).inc()
         self.api_latency.labels(endpoint=endpoint).observe(latency)
 
     # ==================== EXPORT ====================

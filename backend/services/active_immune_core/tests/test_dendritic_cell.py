@@ -23,7 +23,6 @@ from active_immune_core.agents import CelulaDendritica
 from active_immune_core.agents.dendritic_cell import (
     CapturedAntigen,
     DendriticState,
-    ProcessedPeptide,
 )
 from active_immune_core.agents.models import AgentStatus
 
@@ -83,6 +82,7 @@ async def dendritic() -> CelulaDendritica:
     except Exception as e:
         # Log but don't fail test due to teardown issues
         import logging
+
         logging.getLogger(__name__).warning(f"Fixture teardown error: {e}")
     finally:
         # Final state reset to prevent contamination
@@ -233,9 +233,7 @@ class TestAntigenCapture:
     """Test antigen capture"""
 
     @pytest.mark.asyncio
-    async def test_capture_antigen_above_threshold(
-        self, dendritic: CelulaDendritica, sample_threat_event: dict
-    ):
+    async def test_capture_antigen_above_threshold(self, dendritic: CelulaDendritica, sample_threat_event: dict):
         """Test antigen capture when above threshold"""
         await dendritic._attempt_antigen_capture(sample_threat_event)
 
@@ -244,18 +242,14 @@ class TestAntigenCapture:
         assert dendritic.captured_antigens[0].source_ip == "192.0.2.100"
 
     @pytest.mark.asyncio
-    async def test_no_capture_below_threshold(
-        self, dendritic: CelulaDendritica, weak_threat_event: dict
-    ):
+    async def test_no_capture_below_threshold(self, dendritic: CelulaDendritica, weak_threat_event: dict):
         """Test no capture when below threshold"""
         await dendritic._attempt_antigen_capture(weak_threat_event)
 
         assert len(dendritic.captured_antigens) == 0
 
     @pytest.mark.asyncio
-    async def test_capture_creates_peptides(
-        self, dendritic_no_background: CelulaDendritica, sample_threat_event: dict
-    ):
+    async def test_capture_creates_peptides(self, dendritic_no_background: CelulaDendritica, sample_threat_event: dict):
         """Test antigen capture triggers peptide processing (NO BACKGROUND TASKS)"""
         await dendritic_no_background._attempt_antigen_capture(sample_threat_event)
 
@@ -295,9 +289,7 @@ class TestAntigenProcessing:
         assert len(dendritic.processed_peptides) == 2
 
     @pytest.mark.asyncio
-    async def test_peptides_have_unique_ids(
-        self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen
-    ):
+    async def test_peptides_have_unique_ids(self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen):
         """Test peptides have unique IDs"""
         await dendritic._process_antigen(captured_antigen)
 
@@ -305,9 +297,7 @@ class TestAntigenProcessing:
         assert len(peptide_ids) == len(set(peptide_ids))  # All unique
 
     @pytest.mark.asyncio
-    async def test_peptides_linked_to_antigen(
-        self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen
-    ):
+    async def test_peptides_linked_to_antigen(self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen):
         """Test peptides are linked to parent antigen"""
         await dendritic._process_antigen(captured_antigen)
 
@@ -329,9 +319,7 @@ class TestMaturationMigration:
         await dendritic.parar()
 
     @pytest.mark.asyncio
-    async def test_maturation_triggered_by_antigen_count(
-        self, dendritic: CelulaDendritica, sample_threat_event: dict
-    ):
+    async def test_maturation_triggered_by_antigen_count(self, dendritic: CelulaDendritica, sample_threat_event: dict):
         """Test maturation triggered when antigen count reached"""
         # Add antigens up to migration threshold
         for _ in range(dendritic.migration_antigen_count):
@@ -344,9 +332,7 @@ class TestMaturationMigration:
         assert dendritic.migrations == 1
 
     @pytest.mark.asyncio
-    async def test_migration_changes_to_mature(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_migration_changes_to_mature(self, dendritic: CelulaDendritica):
         """Test migration changes state to mature"""
         dendritic.maturation_state = DendriticState.MIGRATING
 
@@ -356,9 +342,7 @@ class TestMaturationMigration:
         assert dendritic.current_lymphnode is not None
 
     @pytest.mark.asyncio
-    async def test_exhaustion_after_many_presentations(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_exhaustion_after_many_presentations(self, dendritic: CelulaDendritica):
         """Test exhaustion after many presentations"""
         dendritic.maturation_state = DendriticState.MATURE
 
@@ -406,9 +390,7 @@ class TestMHCIPresentation:
         # This is expected behavior (graceful degradation)
 
     @pytest.mark.asyncio
-    async def test_mhc_i_targets_cytotoxic_t(
-        self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen
-    ):
+    async def test_mhc_i_targets_cytotoxic_t(self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen):
         """Test MHC-I presentation targets Cytotoxic T cells"""
         await dendritic._process_antigen(captured_antigen)
         await dendritic._present_mhc_i()
@@ -454,9 +436,7 @@ class TestMHCIIPresentation:
         # This is expected behavior (graceful degradation)
 
     @pytest.mark.asyncio
-    async def test_mhc_ii_targets_helper_t(
-        self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen
-    ):
+    async def test_mhc_ii_targets_helper_t(self, dendritic: CelulaDendritica, captured_antigen: CapturedAntigen):
         """Test MHC-II presentation targets Helper T cells"""
         await dendritic._process_antigen(captured_antigen)
         await dendritic._present_mhc_ii()
@@ -472,9 +452,7 @@ class TestIL12Secretion:
     """Test IL12 secretion"""
 
     @pytest.mark.asyncio
-    async def test_secrete_il12_without_messenger(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_secrete_il12_without_messenger(self, dendritic: CelulaDendritica):
         """Test IL12 secretion without messenger doesn't crash"""
         # No messenger started
         await dendritic._secrete_il12()
@@ -483,9 +461,7 @@ class TestIL12Secretion:
         assert dendritic.il12_secretions == 0
 
     @pytest.mark.asyncio
-    async def test_secrete_il12_increments_counter(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_secrete_il12_increments_counter(self, dendritic: CelulaDendritica):
         """Test IL12 secretion increments counter"""
         await dendritic.iniciar()
 
@@ -539,9 +515,7 @@ class TestTCellActivation:
         assert len(dendritic_no_background.mhc_ii_presentations) >= 1
 
     @pytest.mark.asyncio
-    async def test_only_present_in_mature_state(
-        self, dendritic: CelulaDendritica, sample_threat_event: dict
-    ):
+    async def test_only_present_in_mature_state(self, dendritic: CelulaDendritica, sample_threat_event: dict):
         """Test patrol behavior changes with maturation state"""
         await dendritic.iniciar()
 
@@ -565,9 +539,7 @@ class TestInvestigationNeutralization:
     """Test Dendritic Cell investigation and neutralization"""
 
     @pytest.mark.asyncio
-    async def test_investigation_captures_antigen(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_investigation_captures_antigen(self, dendritic: CelulaDendritica):
         """Test investigation identifies threats for capture"""
         result = await dendritic.executar_investigacao({"threat_score": 0.8})
 
@@ -576,9 +548,7 @@ class TestInvestigationNeutralization:
         assert "antigen_capture" in result["metodo"]
 
     @pytest.mark.asyncio
-    async def test_investigation_below_threshold(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_investigation_below_threshold(self, dendritic: CelulaDendritica):
         """Test investigation below capture threshold"""
         result = await dendritic.executar_investigacao({"threat_score": 0.3})
 
@@ -586,13 +556,9 @@ class TestInvestigationNeutralization:
         assert "no_capture" in result["metodo"]
 
     @pytest.mark.asyncio
-    async def test_neutralization_delegates_to_t_cells(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_neutralization_delegates_to_t_cells(self, dendritic: CelulaDendritica):
         """Test neutralization delegates to T cells"""
-        result = await dendritic.executar_neutralizacao(
-            {"threat_score": 0.8}, metodo="delegate"
-        )
+        result = await dendritic.executar_neutralizacao({"threat_score": 0.8}, metodo="delegate")
 
         assert result is True  # Presented for T cell action
 
@@ -622,7 +588,8 @@ class TestDendriticMetrics:
 
     @pytest.mark.asyncio
     async def test_metrics_with_captures_and_presentations(
-        self, dendritic_no_background: CelulaDendritica,
+        self,
+        dendritic_no_background: CelulaDendritica,
         sample_threat_event: dict,
         captured_antigen: CapturedAntigen,
     ):
@@ -660,9 +627,7 @@ class TestDendriticEdgeCases:
     """Test Dendritic Cell edge cases"""
 
     @pytest.mark.asyncio
-    async def test_process_antigen_with_empty_data(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_process_antigen_with_empty_data(self, dendritic: CelulaDendritica):
         """Test processing antigen with empty raw data"""
         empty_antigen = CapturedAntigen(
             antigen_id="ag_empty_001",
@@ -678,9 +643,7 @@ class TestDendriticEdgeCases:
         assert len(dendritic.processed_peptides) == 2  # Still creates peptides
 
     @pytest.mark.asyncio
-    async def test_present_without_peptides(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_present_without_peptides(self, dendritic: CelulaDendritica):
         """Test presentation without any peptides"""
         await dendritic.iniciar()
         dendritic.maturation_state = DendriticState.MATURE
@@ -694,9 +657,7 @@ class TestDendriticEdgeCases:
         await dendritic.parar()
 
     @pytest.mark.asyncio
-    async def test_exhausted_state_minimal_activity(
-        self, dendritic: CelulaDendritica
-    ):
+    async def test_exhausted_state_minimal_activity(self, dendritic: CelulaDendritica):
         """Test exhausted state reduces activity"""
         await dendritic.iniciar()
         dendritic.maturation_state = DendriticState.EXHAUSTED

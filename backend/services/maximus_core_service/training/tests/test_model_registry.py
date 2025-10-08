@@ -11,12 +11,10 @@ Date: 2025-10-06
 """
 
 from datetime import datetime
-from pathlib import Path
 
-import numpy as np
 import pytest
 
-from training.model_registry import ModelRegistry, ModelMetadata
+from training.model_registry import ModelMetadata, ModelRegistry
 
 
 def test_model_registration(temp_dir, simple_pytorch_model):
@@ -52,14 +50,11 @@ def test_model_registration(temp_dir, simple_pytorch_model):
         created_at=datetime.utcnow(),
         metrics={"val_loss": 0.045, "accuracy": 0.95},
         hyperparameters={"learning_rate": 1e-3, "batch_size": 32},
-        training_dataset="training/data/train.npz"
+        training_dataset="training/data/train.npz",
     )
 
     # Register model
-    registered_path = registry.register_model(
-        model_path=checkpoint_path,
-        metadata=metadata
-    )
+    registered_path = registry.register_model(model_path=checkpoint_path, metadata=metadata)
 
     # Verify registration
     assert registered_path.exists(), f"Registered model not found at {registered_path}"
@@ -88,7 +83,7 @@ def test_model_registration(temp_dir, simple_pytorch_model):
         created_at=datetime.utcnow(),
         metrics={"val_loss": 0.030, "accuracy": 0.97},
         hyperparameters={"learning_rate": 5e-4, "batch_size": 64},
-        training_dataset="training/data/train_v2.npz"
+        training_dataset="training/data/train_v2.npz",
     )
 
     registry.register_model(checkpoint_path_v2, metadata_v2)
@@ -145,7 +140,7 @@ def test_stage_transitions(temp_dir, simple_pytorch_model):
         created_at=datetime.utcnow(),
         metrics={"val_loss": 0.050, "accuracy": 0.93},
         hyperparameters={},
-        stage="none"
+        stage="none",
     )
 
     registry.register_model(checkpoint_path_v1, metadata_v1)
@@ -179,7 +174,7 @@ def test_stage_transitions(temp_dir, simple_pytorch_model):
         created_at=datetime.utcnow(),
         metrics={"val_loss": 0.030, "accuracy": 0.97},
         hyperparameters={},
-        stage="staging"
+        stage="staging",
     )
 
     registry.register_model(checkpoint_path_v2, metadata_v2)
@@ -194,8 +189,7 @@ def test_stage_transitions(temp_dir, simple_pytorch_model):
 
     # Verify v1 was demoted to archived
     metadata_v1 = registry.get_metadata("test_model", "v1.0.0")
-    assert metadata_v1.stage == "archived", \
-        f"Expected v1 to be archived, but stage is {metadata_v1.stage}"
+    assert metadata_v1.stage == "archived", f"Expected v1 to be archived, but stage is {metadata_v1.stage}"
 
     # Get production model
     production_path = registry.get_model("test_model", stage="production")

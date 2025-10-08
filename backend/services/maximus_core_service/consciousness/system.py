@@ -20,7 +20,7 @@ Version: 2.0.0 - FASE VII Week 9-10 (Safety Integration)
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from consciousness.esgt.coordinator import ESGTCoordinator, TriggerConditions
 from consciousness.mcea.controller import ArousalConfig, ArousalController
@@ -53,7 +53,7 @@ class ConsciousnessConfig:
 
     # Safety Protocol (FASE VII)
     safety_enabled: bool = True
-    safety_thresholds: Optional[SafetyThresholds] = None
+    safety_thresholds: SafetyThresholds | None = None
 
 
 class ConsciousnessSystem:
@@ -73,7 +73,7 @@ class ConsciousnessSystem:
     comprehensive safety guarantees.
     """
 
-    def __init__(self, config: Optional[ConsciousnessConfig] = None):
+    def __init__(self, config: ConsciousnessConfig | None = None):
         """Initialize consciousness system.
 
         Args:
@@ -83,10 +83,10 @@ class ConsciousnessSystem:
         self._running = False
 
         # Components (initialized on start)
-        self.tig_fabric: Optional[TIGFabric] = None
-        self.esgt_coordinator: Optional[ESGTCoordinator] = None
-        self.arousal_controller: Optional[ArousalController] = None
-        self.safety_protocol: Optional[ConsciousnessSafetyProtocol] = None
+        self.tig_fabric: TIGFabric | None = None
+        self.esgt_coordinator: ESGTCoordinator | None = None
+        self.arousal_controller: ArousalController | None = None
+        self.safety_protocol: ConsciousnessSafetyProtocol | None = None
 
     async def start(self) -> None:
         """Start consciousness system.
@@ -202,7 +202,7 @@ class ConsciousnessSystem:
         except Exception as e:
             print(f"⚠️  Error during shutdown: {e}")
 
-    def get_system_dict(self) -> Dict[str, Any]:
+    def get_system_dict(self) -> dict[str, Any]:
         """Get system components and state for Safety Protocol monitoring.
 
         This method provides complete system state to the SafetyProtocol
@@ -262,7 +262,7 @@ class ConsciousnessSystem:
 
         return components_ok
 
-    def get_safety_status(self) -> Optional[Dict[str, Any]]:
+    def get_safety_status(self) -> dict[str, Any] | None:
         """Get safety protocol status.
 
         Returns:
@@ -273,7 +273,7 @@ class ConsciousnessSystem:
 
         return self.safety_protocol.get_status()
 
-    def get_safety_violations(self, limit: int = 100) -> List[SafetyViolation]:
+    def get_safety_violations(self, limit: int = 100) -> list[SafetyViolation]:
         """Get recent safety violations.
 
         Args:

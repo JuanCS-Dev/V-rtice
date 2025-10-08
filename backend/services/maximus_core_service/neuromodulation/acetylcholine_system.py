@@ -9,9 +9,9 @@ Biological inspiration:
 Production-ready implementation.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -78,9 +78,7 @@ class AcetylcholineSystem:
         # Enter focus mode if very important
         self.focus_mode = importance > 0.8
 
-        logger.debug(
-            f"ACh modulated: importance={importance:.2f}, level={self.level:.3f}, focus={self.focus_mode}"
-        )
+        logger.debug(f"ACh modulated: importance={importance:.2f}, level={self.level:.3f}, focus={self.focus_mode}")
 
     def get_salience_threshold(self) -> float:
         """Get current salience threshold for attention filtering.
@@ -127,9 +125,7 @@ class AcetylcholineSystem:
         should_attend = salience >= threshold
 
         if should_attend:
-            logger.debug(
-                f"Attention triggered: salience={salience:.2f} >= threshold={threshold:.2f}"
-            )
+            logger.debug(f"Attention triggered: salience={salience:.2f} >= threshold={threshold:.2f}")
 
         return should_attend
 

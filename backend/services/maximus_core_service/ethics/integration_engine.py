@@ -13,10 +13,10 @@ Handles:
 """
 
 import asyncio
-from dataclasses import dataclass
 import logging
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from typing import Any
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -54,18 +54,18 @@ class IntegratedEthicalDecision:
     final_decision: str
     final_confidence: float
     explanation: str
-    framework_results: Dict[str, EthicalFrameworkResult]
+    framework_results: dict[str, EthicalFrameworkResult]
     aggregation_method: str
     veto_applied: bool
     framework_agreement_rate: float
     total_latency_ms: int
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class EthicalIntegrationEngine:
     """Integrates multiple ethical frameworks into unified decisions."""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize integration engine.
 
         Args:
@@ -85,9 +85,7 @@ class EthicalIntegrationEngine:
         )
 
         # Veto settings
-        self.veto_frameworks = self.config.get(
-            "veto_frameworks", ["kantian_deontology"]
-        )
+        self.veto_frameworks = self.config.get("veto_frameworks", ["kantian_deontology"])
         self.veto_enabled = self.config.get("veto_enabled", True)
 
         # Decision thresholds
@@ -101,13 +99,9 @@ class EthicalIntegrationEngine:
         self.hitl_threshold_high = 0.70
 
         # Initialize frameworks
-        self.frameworks: Dict[str, EthicalFramework] = {
-            "kantian_deontology": KantianImperativeChecker(
-                self.config.get("kantian", {})
-            ),
-            "consequentialism": ConsequentialistEngine(
-                self.config.get("consequentialist", {})
-            ),
+        self.frameworks: dict[str, EthicalFramework] = {
+            "kantian_deontology": KantianImperativeChecker(self.config.get("kantian", {})),
+            "consequentialism": ConsequentialistEngine(self.config.get("consequentialist", {})),
             "virtue_ethics": VirtueEthicsAssessment(self.config.get("virtue", {})),
             "principialism": PrinciplismFramework(self.config.get("principialism", {})),
         }
@@ -118,9 +112,7 @@ class EthicalIntegrationEngine:
             ttl_seconds=self.config.get("cache_ttl", 3600),
         )
 
-    async def evaluate(
-        self, action_context: ActionContext
-    ) -> IntegratedEthicalDecision:
+    async def evaluate(self, action_context: ActionContext) -> IntegratedEthicalDecision:
         """Evaluate action using all ethical frameworks and integrate results.
 
         Args:
@@ -132,14 +124,10 @@ class EthicalIntegrationEngine:
         start_time = time.time()
         metadata = {"reasoning_steps": []}
 
-        metadata["reasoning_steps"].append(
-            "🧠 Starting integrated ethical evaluation..."
-        )
+        metadata["reasoning_steps"].append("🧠 Starting integrated ethical evaluation...")
 
         # Step 1: Run all frameworks in parallel for performance
-        metadata["reasoning_steps"].append(
-            "Running 4 ethical frameworks in parallel..."
-        )
+        metadata["reasoning_steps"].append("Running 4 ethical frameworks in parallel...")
 
         try:
             framework_results = await self._run_frameworks_parallel(action_context)
@@ -161,7 +149,7 @@ class EthicalIntegrationEngine:
                 metadata=metadata,
             )
 
-        metadata["reasoning_steps"].append(f"✓ All frameworks completed")
+        metadata["reasoning_steps"].append("✓ All frameworks completed")
 
         # Step 2: Check for veto (if not already caught)
         if self.veto_enabled:
@@ -169,9 +157,7 @@ class EthicalIntegrationEngine:
                 if framework_name in framework_results:
                     result = framework_results[framework_name]
                     if result.veto and not result.approved:
-                        metadata["reasoning_steps"].append(
-                            f"❌ VETO by {framework_name}: {result.explanation}"
-                        )
+                        metadata["reasoning_steps"].append(f"❌ VETO by {framework_name}: {result.explanation}")
 
                         total_latency_ms = int((time.time() - start_time) * 1000)
 
@@ -182,9 +168,7 @@ class EthicalIntegrationEngine:
                             framework_results=framework_results,
                             aggregation_method="veto",
                             veto_applied=True,
-                            framework_agreement_rate=self._calculate_agreement_rate(
-                                framework_results
-                            ),
+                            framework_agreement_rate=self._calculate_agreement_rate(framework_results),
                             total_latency_ms=total_latency_ms,
                             metadata=metadata,
                         )
@@ -203,16 +187,12 @@ class EthicalIntegrationEngine:
         metadata["reasoning_steps"].append(f"Aggregated score: {aggregated_score:.3f}")
 
         # Step 5: Make final decision
-        final_decision, final_confidence, aggregation_method = (
-            self._make_final_decision(
-                aggregated_score, agreement_rate, framework_results
-            )
+        final_decision, final_confidence, aggregation_method = self._make_final_decision(
+            aggregated_score, agreement_rate, framework_results
         )
 
         # Step 6: Generate explanation
-        explanation = self._generate_explanation(
-            final_decision, aggregated_score, agreement_rate, framework_results
-        )
+        explanation = self._generate_explanation(final_decision, aggregated_score, agreement_rate, framework_results)
 
         metadata["reasoning_steps"].append(f"Final decision: {final_decision}")
         metadata["reasoning_steps"].append(f"Explanation: {explanation}")
@@ -221,9 +201,7 @@ class EthicalIntegrationEngine:
         metadata["performance"] = {
             "total_latency_ms": total_latency_ms,
             "kantian_latency_ms": framework_results["kantian_deontology"].latency_ms,
-            "consequentialist_latency_ms": framework_results[
-                "consequentialism"
-            ].latency_ms,
+            "consequentialist_latency_ms": framework_results["consequentialism"].latency_ms,
             "virtue_ethics_latency_ms": framework_results["virtue_ethics"].latency_ms,
             "principialism_latency_ms": framework_results["principialism"].latency_ms,
         }
@@ -240,9 +218,7 @@ class EthicalIntegrationEngine:
             metadata=metadata,
         )
 
-    async def _run_frameworks_parallel(
-        self, action_context: ActionContext
-    ) -> Dict[str, EthicalFrameworkResult]:
+    async def _run_frameworks_parallel(self, action_context: ActionContext) -> dict[str, EthicalFrameworkResult]:
         """Run all frameworks in parallel for performance.
 
         Args:
@@ -270,9 +246,7 @@ class EthicalIntegrationEngine:
 
         # Run uncached frameworks concurrently
         uncached_frameworks = {
-            name: framework
-            for name, framework in self.frameworks.items()
-            if name not in framework_results
+            name: framework for name, framework in self.frameworks.items() if name not in framework_results
         }
 
         if not uncached_frameworks:
@@ -280,19 +254,16 @@ class EthicalIntegrationEngine:
             return framework_results
 
         # Run uncached frameworks in parallel
-        tasks = {
-            name: framework.evaluate(action_context)
-            for name, framework in uncached_frameworks.items()
-        }
+        tasks = {name: framework.evaluate(action_context) for name, framework in uncached_frameworks.items()}
 
         # Wait for all to complete
         results = await asyncio.gather(*tasks.values(), return_exceptions=True)
 
         # Map results back to framework names and cache them
-        for (name, _), result in zip(tasks.items(), results):
+        for (name, _), result in zip(tasks.items(), results, strict=False):
             if isinstance(result, VetoException):
                 raise result  # Re-raise veto
-            elif isinstance(result, Exception):
+            if isinstance(result, Exception):
                 # Log error but continue (framework failure shouldn't crash entire system)
                 logger.error(f"Framework {name} failed: {str(result)}", exc_info=True)
                 # Create a default negative result
@@ -316,9 +287,7 @@ class EthicalIntegrationEngine:
 
         return framework_results
 
-    def _calculate_agreement_rate(
-        self, framework_results: Dict[str, EthicalFrameworkResult]
-    ) -> float:
+    def _calculate_agreement_rate(self, framework_results: dict[str, EthicalFrameworkResult]) -> float:
         """Calculate how many frameworks agree on the decision.
 
         Args:
@@ -340,9 +309,7 @@ class EthicalIntegrationEngine:
 
         return max(agreement_on_approve, agreement_on_reject)
 
-    def _aggregate_frameworks(
-        self, framework_results: Dict[str, EthicalFrameworkResult]
-    ) -> float:
+    def _aggregate_frameworks(self, framework_results: dict[str, EthicalFrameworkResult]) -> float:
         """Aggregate framework results using weighted average.
 
         Args:
@@ -388,8 +355,8 @@ class EthicalIntegrationEngine:
         self,
         aggregated_score: float,
         agreement_rate: float,
-        framework_results: Dict[str, EthicalFrameworkResult],
-    ) -> Tuple[str, float, str]:
+        framework_results: dict[str, EthicalFrameworkResult],
+    ) -> tuple[str, float, str]:
         """Make final decision from aggregated score and agreement rate.
 
         Args:
@@ -417,17 +384,14 @@ class EthicalIntegrationEngine:
 
         # Low score = REJECT
         if aggregated_score < self.rejection_threshold:
-            confidence = (
-                1.0 - aggregated_score
-            )  # Lower score = higher rejection confidence
+            confidence = 1.0 - aggregated_score  # Lower score = higher rejection confidence
             return ("REJECTED", confidence, "weighted_rejection")
 
         # Middle ground with high agreement
         if agreement_rate >= 0.75:
             if aggregated_score >= 0.60:
                 return ("APPROVED", aggregated_score, "majority_consensus")
-            else:
-                return ("REJECTED", 1.0 - aggregated_score, "majority_consensus")
+            return ("REJECTED", 1.0 - aggregated_score, "majority_consensus")
 
         # Default: escalate on ambiguity
         return ("ESCALATED_HITL", 0.5, "ambiguous_escalation")
@@ -437,7 +401,7 @@ class EthicalIntegrationEngine:
         final_decision: str,
         aggregated_score: float,
         agreement_rate: float,
-        framework_results: Dict[str, EthicalFrameworkResult],
+        framework_results: dict[str, EthicalFrameworkResult],
     ) -> str:
         """Generate human-readable explanation for the decision.
 
@@ -455,19 +419,25 @@ class EthicalIntegrationEngine:
         rejections = [name for name, r in framework_results.items() if not r.approved]
 
         if final_decision == "APPROVED":
-            explanation = f"Action ethically approved (score: {aggregated_score:.2f}, agreement: {agreement_rate:.0%}). "
+            explanation = (
+                f"Action ethically approved (score: {aggregated_score:.2f}, agreement: {agreement_rate:.0%}). "
+            )
             if approvals:
                 explanation += f"Approved by: {', '.join(approvals)}. "
             if rejections:
                 explanation += f"Concerns from: {', '.join(rejections)}."
         elif final_decision == "REJECTED":
-            explanation = f"Action ethically rejected (score: {aggregated_score:.2f}, agreement: {agreement_rate:.0%}). "
+            explanation = (
+                f"Action ethically rejected (score: {aggregated_score:.2f}, agreement: {agreement_rate:.0%}). "
+            )
             if rejections:
                 explanation += f"Rejected by: {', '.join(rejections)}. "
             if approvals:
                 explanation += f"Minority support from: {', '.join(approvals)}."
         else:  # ESCALATED_HITL
-            explanation = f"Action escalated to human review (score: {aggregated_score:.2f}, agreement: {agreement_rate:.0%}). "
+            explanation = (
+                f"Action escalated to human review (score: {aggregated_score:.2f}, agreement: {agreement_rate:.0%}). "
+            )
             if agreement_rate < 0.75:
                 explanation += "Frameworks disagree significantly. "
             else:

@@ -9,10 +9,9 @@ Biological inspiration:
 Production-ready implementation with real algorithms.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
-from typing import Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -66,9 +65,7 @@ class DopamineSystem:
 
         logger.info(f"Dopamine system initialized (baseline_tonic={baseline_tonic})")
 
-    def compute_reward_prediction_error(
-        self, expected_reward: float, actual_reward: float
-    ) -> float:
+    def compute_reward_prediction_error(self, expected_reward: float, actual_reward: float) -> float:
         """Compute reward prediction error (RPE / TD error).
 
         Biological: Positive RPE → dopamine burst, Negative RPE → dopamine dip
@@ -90,10 +87,7 @@ class DopamineSystem:
         # Update phasic burst
         self.phasic_burst = max(-1.0, min(1.0, rpe))
 
-        logger.debug(
-            f"RPE computed: expected={expected_reward:.3f}, "
-            f"actual={actual_reward:.3f}, rpe={rpe:.3f}"
-        )
+        logger.debug(f"RPE computed: expected={expected_reward:.3f}, actual={actual_reward:.3f}, rpe={rpe:.3f}")
 
         return rpe
 
@@ -117,13 +111,8 @@ class DopamineSystem:
         modulation = min(1.0, surprise)
 
         # Calculate modulated learning rate
-        modulated_lr = (
-            base_learning_rate
-            + (self.learning_rate_max - base_learning_rate) * modulation
-        )
-        modulated_lr = max(
-            self.learning_rate_min, min(self.learning_rate_max, modulated_lr)
-        )
+        modulated_lr = base_learning_rate + (self.learning_rate_max - base_learning_rate) * modulation
+        modulated_lr = max(self.learning_rate_min, min(self.learning_rate_max, modulated_lr))
 
         logger.debug(
             f"Learning rate modulated: base={base_learning_rate:.6f}, "
@@ -151,15 +140,10 @@ class DopamineSystem:
         delta_motivation = avg_rpe * 0.1  # Scaling factor
 
         # Update with decay
-        self.motivation_level = (
-            self.motivation_level * self.motivation_decay + delta_motivation
-        )
+        self.motivation_level = self.motivation_level * self.motivation_decay + delta_motivation
         self.motivation_level = max(0.0, min(1.0, self.motivation_level))
 
-        logger.debug(
-            f"Motivation updated: avg_rpe={avg_rpe:.3f}, "
-            f"motivation={self.motivation_level:.3f}"
-        )
+        logger.debug(f"Motivation updated: avg_rpe={avg_rpe:.3f}, motivation={self.motivation_level:.3f}")
 
         return self.motivation_level
 
@@ -180,10 +164,7 @@ class DopamineSystem:
         # Slow drift towards target (homeostatic regulation)
         self.tonic_level = 0.95 * self.tonic_level + 0.05 * target_tonic
 
-        logger.debug(
-            f"Tonic dopamine updated: stress={stress_level:.3f}, "
-            f"tonic={self.tonic_level:.3f}"
-        )
+        logger.debug(f"Tonic dopamine updated: stress={stress_level:.3f}, tonic={self.tonic_level:.3f}")
 
         return self.tonic_level
 
@@ -194,9 +175,9 @@ class DopamineSystem:
             Current dopamine state
         """
         # Calculate current learning rate
-        learning_rate = self.learning_rate_min + (
-            self.learning_rate_max - self.learning_rate_min
-        ) * abs(self.phasic_burst)
+        learning_rate = self.learning_rate_min + (self.learning_rate_max - self.learning_rate_min) * abs(
+            self.phasic_burst
+        )
 
         return DopamineState(
             tonic_level=self.tonic_level,

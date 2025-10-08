@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-10-07T22:37:57.348919",
+  "esgt_state": {},
+  "arousal_state": {},
+  "mmei_state": {},
+  "tig_metrics": {},
+  "recent_events": [],
+  "active_goals": [],
+  "violations": [
+    {
+      "violation_id": "test",
+      "violation_type": "self_modification",
+      "severity": "emergency",
+      "timestamp": "2025-10-07T22:37:57.348466",
+      "value_observed": 1,
+      "threshold_violated": 0,
+      "context": {},
+      "message": "Test violation"
+    }
+  ]
+}

@@ -71,58 +71,50 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
+from .audit_trail import (
+    AuditQuery,
+    AuditTrail,
+    ComplianceReport,
+)
 from .base import (
-    # Core data structures
-    HITLDecision,
-    DecisionContext,
-    OperatorAction,
+    ActionType,
     AuditEntry,
-
     # Enums
     AutomationLevel,
-    RiskLevel,
+    DecisionContext,
     DecisionStatus,
-    ActionType,
-
+    EscalationConfig,
     # Configuration
     HITLConfig,
+    # Core data structures
+    HITLDecision,
+    OperatorAction,
+    RiskLevel,
     SLAConfig,
-    EscalationConfig,
 )
-
-from .risk_assessor import (
-    RiskAssessor,
-    RiskScore,
-    RiskFactors,
-)
-
 from .decision_framework import (
-    HITLDecisionFramework,
     DecisionResult,
+    HITLDecisionFramework,
 )
-
 from .decision_queue import (
     DecisionQueue,
     QueuedDecision,
     SLAMonitor,
 )
-
 from .escalation_manager import (
+    EscalationEvent,
     EscalationManager,
     EscalationRule,
-    EscalationEvent,
 )
-
 from .operator_interface import (
     OperatorInterface,
-    OperatorSession,
     OperatorMetrics,
+    OperatorSession,
 )
-
-from .audit_trail import (
-    AuditTrail,
-    AuditQuery,
-    ComplianceReport,
+from .risk_assessor import (
+    RiskAssessor,
+    RiskFactors,
+    RiskScore,
 )
 
 # Version information
@@ -141,31 +133,25 @@ __all__ = [
     "HITLConfig",
     "SLAConfig",
     "EscalationConfig",
-
     # Risk assessment
     "RiskAssessor",
     "RiskScore",
     "RiskFactors",
-
     # Decision framework
     "HITLDecisionFramework",
     "DecisionResult",
-
     # Queue management
     "DecisionQueue",
     "QueuedDecision",
     "SLAMonitor",
-
     # Escalation
     "EscalationManager",
     "EscalationRule",
     "EscalationEvent",
-
     # Operator interface
     "OperatorInterface",
     "OperatorSession",
     "OperatorMetrics",
-
     # Audit
     "AuditTrail",
     "AuditQuery",

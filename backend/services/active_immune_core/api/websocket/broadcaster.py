@@ -9,7 +9,7 @@ Version: 1.0.0
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from .events import WSEvent, WSEventType
 from .router import get_connection_manager
@@ -80,9 +80,7 @@ async def broadcast_agent_deleted(agent_id: str) -> int:
     return await manager.broadcast(event, room="agents")
 
 
-async def broadcast_agent_status_changed(
-    agent_id: str, old_status: str, new_status: str
-) -> int:
+async def broadcast_agent_status_changed(agent_id: str, old_status: str, new_status: str) -> int:
     """
     Broadcast agent status changed event.
 
@@ -109,9 +107,7 @@ async def broadcast_agent_status_changed(
     return await manager.broadcast(event, room="agents")
 
 
-async def broadcast_agent_action(
-    agent_id: str, action: str, result: Dict[str, Any]
-) -> int:
+async def broadcast_agent_action(agent_id: str, action: str, result: Dict[str, Any]) -> int:
     """
     Broadcast agent action event.
 
@@ -159,9 +155,7 @@ async def broadcast_task_created(task_data: Dict[str, Any]) -> int:
     return await manager.broadcast(event, room="tasks")
 
 
-async def broadcast_task_status_changed(
-    task_id: str, old_status: str, new_status: str
-) -> int:
+async def broadcast_task_status_changed(task_id: str, old_status: str, new_status: str) -> int:
     """
     Broadcast task status changed event.
 
@@ -263,9 +257,7 @@ async def broadcast_consensus_proposed(proposal_data: Dict[str, Any]) -> int:
     return await manager.broadcast(event, room="coordination")
 
 
-async def broadcast_consensus_decided(
-    proposal_id: str, decision: str, approval_rate: float
-) -> int:
+async def broadcast_consensus_decided(proposal_id: str, decision: str, approval_rate: float) -> int:
     """
     Broadcast consensus decision event.
 
@@ -338,9 +330,7 @@ async def broadcast_metrics_updated(metrics_data: Dict[str, Any]) -> int:
     return await manager.broadcast(event, room="system")
 
 
-async def broadcast_alert_triggered(
-    alert_level: str, message: str, details: Optional[Dict[str, Any]] = None
-) -> int:
+async def broadcast_alert_triggered(alert_level: str, message: str, details: Optional[Dict[str, Any]] = None) -> int:
     """
     Broadcast alert triggered event.
 

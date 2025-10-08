@@ -8,10 +8,9 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
-from fastapi.testclient import TestClient
 from typing import Dict
 
+from fastapi.testclient import TestClient
 
 # ==================== CREATE TASK ====================
 
@@ -38,10 +37,7 @@ def test_create_task_success(client: TestClient, sample_task_data: Dict):
 
 def test_create_task_minimal_data(client: TestClient):
     """Test task creation with minimal data"""
-    response = client.post(
-        "/coordination/tasks",
-        json={"task_type": "detection", "priority": 5}
-    )
+    response = client.post("/coordination/tasks", json={"task_type": "detection", "priority": 5})
 
     assert response.status_code == 201
     data = response.json()
@@ -51,10 +47,7 @@ def test_create_task_minimal_data(client: TestClient):
 
 def test_create_task_invalid_data(client: TestClient):
     """Test task creation with invalid data"""
-    response = client.post(
-        "/coordination/tasks",
-        json={"invalid_field": "value"}
-    )
+    response = client.post("/coordination/tasks", json={"invalid_field": "value"})
 
     assert response.status_code == 422
 
@@ -63,10 +56,7 @@ def test_create_task_generates_unique_ids(client: TestClient):
     """Test that each created task gets unique ID"""
     tasks = []
     for _ in range(3):
-        response = client.post(
-            "/coordination/tasks",
-            json={"task_type": "detection", "priority": 5}
-        )
+        response = client.post("/coordination/tasks", json={"task_type": "detection", "priority": 5})
         assert response.status_code == 201
         tasks.append(response.json())
 
@@ -138,10 +128,7 @@ def test_list_tasks_pagination(client: TestClient):
     """Test pagination of task list"""
     # Create 5 tasks
     for i in range(5):
-        client.post(
-            "/coordination/tasks",
-            json={"task_type": "detection", "priority": 5}
-        )
+        client.post("/coordination/tasks", json={"task_type": "detection", "priority": 5})
 
     # Get first 2
     response = client.get("/coordination/tasks?skip=0&limit=2")
@@ -266,15 +253,9 @@ def test_election_status_after_election(client: TestClient):
 # ==================== CONSENSUS ====================
 
 
-def test_create_consensus_proposal_success(
-    client: TestClient,
-    sample_consensus_proposal: Dict
-):
+def test_create_consensus_proposal_success(client: TestClient, sample_consensus_proposal: Dict):
     """Test creating consensus proposal"""
-    response = client.post(
-        "/coordination/consensus/propose",
-        json=sample_consensus_proposal
-    )
+    response = client.post("/coordination/consensus/propose", json=sample_consensus_proposal)
 
     assert response.status_code == 201
     data = response.json()
@@ -301,7 +282,7 @@ def test_consensus_proposal_approval_logic(client: TestClient):
             "proposal_type": "test",
             "proposal_data": {"description": "Test proposal"},
             "proposer_id": "agent_test",
-        }
+        },
     )
 
     assert response.status_code == 201
@@ -329,16 +310,10 @@ def test_list_consensus_proposals_empty(client: TestClient):
     assert isinstance(data["proposals"], list)
 
 
-def test_list_consensus_proposals_with_data(
-    client: TestClient,
-    sample_consensus_proposal: Dict
-):
+def test_list_consensus_proposals_with_data(client: TestClient, sample_consensus_proposal: Dict):
     """Test listing proposals with data"""
     # Create proposal
-    client.post(
-        "/coordination/consensus/propose",
-        json=sample_consensus_proposal
-    )
+    client.post("/coordination/consensus/propose", json=sample_consensus_proposal)
 
     # List proposals
     response = client.get("/coordination/consensus/proposals")
@@ -351,16 +326,10 @@ def test_list_consensus_proposals_with_data(
     assert len(data["proposals"]) >= 1
 
 
-def test_list_consensus_proposals_filter_by_status(
-    client: TestClient,
-    sample_consensus_proposal: Dict
-):
+def test_list_consensus_proposals_filter_by_status(client: TestClient, sample_consensus_proposal: Dict):
     """Test filtering proposals by status"""
     # Create proposal
-    create_response = client.post(
-        "/coordination/consensus/propose",
-        json=sample_consensus_proposal
-    )
+    create_response = client.post("/coordination/consensus/propose", json=sample_consensus_proposal)
     status_val = create_response.json()["status"]
 
     # Filter by status
@@ -386,7 +355,7 @@ def test_list_consensus_proposals_pagination(client: TestClient):
                 "proposal_type": "test",
                 "proposal_data": {"description": f"Proposal {i}"},
                 "proposer_id": "agent_test",
-            }
+            },
         )
 
     # Get first 2
@@ -396,16 +365,10 @@ def test_list_consensus_proposals_pagination(client: TestClient):
     assert len(data["proposals"]) == 2
 
 
-def test_get_consensus_proposal_success(
-    client: TestClient,
-    sample_consensus_proposal: Dict
-):
+def test_get_consensus_proposal_success(client: TestClient, sample_consensus_proposal: Dict):
     """Test getting specific proposal"""
     # Create proposal
-    create_response = client.post(
-        "/coordination/consensus/propose",
-        json=sample_consensus_proposal
-    )
+    create_response = client.post("/coordination/consensus/propose", json=sample_consensus_proposal)
     proposal_id = create_response.json()["proposal_id"]
 
     # Get proposal
@@ -446,17 +409,11 @@ def test_get_coordination_status_empty(client: TestClient):
     assert data["system_health"] in ["healthy", "degraded", "unhealthy"]
 
 
-def test_get_coordination_status_with_agents(
-    client: TestClient,
-    multiple_agents: list[Dict]
-):
+def test_get_coordination_status_with_agents(client: TestClient, multiple_agents: list[Dict]):
     """Test coordination status with agents"""
     # Start some agents (status is controlled by agent state machine)
     for agent in multiple_agents[:2]:
-        client.post(
-            f"/agents/{agent['agent_id']}/actions",
-            json={"action": "start"}
-        )
+        client.post(f"/agents/{agent['agent_id']}/actions", json={"action": "start"})
 
     response = client.get("/coordination/status")
 
@@ -469,10 +426,7 @@ def test_get_coordination_status_with_agents(
     assert data["alive_agents"] >= 0  # At least 0 active agents
 
 
-def test_get_coordination_status_with_tasks(
-    client: TestClient,
-    multiple_tasks: list[Dict]
-):
+def test_get_coordination_status_with_tasks(client: TestClient, multiple_tasks: list[Dict]):
     """Test coordination status with tasks"""
     response = client.get("/coordination/status")
 
@@ -490,10 +444,7 @@ def test_get_coordination_status_health_calculation(client: TestClient):
     """Test system health calculation returns valid values"""
     # Create some agents
     for _ in range(2):
-        client.post(
-            "/agents/",
-            json={"agent_type": "neutrophil"}
-        )
+        client.post("/agents/", json={"agent_type": "neutrophil"})
 
     response = client.get("/coordination/status")
 

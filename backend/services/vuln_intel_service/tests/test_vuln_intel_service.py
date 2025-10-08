@@ -13,16 +13,16 @@ Note: CVECorrelator and NucleiWrapper are mocked in tests to isolate
 API logic (test infrastructure mocking, not production code).
 """
 
+# Import the FastAPI app
+import sys
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, MagicMock, patch
 
-# Import the FastAPI app
-import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/vuln_intel_service")
 from api import app
-
 
 # ==================== FIXTURES ====================
 
@@ -37,7 +37,7 @@ async def client():
 @pytest_asyncio.fixture
 async def mock_cve_correlator():
     """Mock CVECorrelator for testing."""
-    with patch('api.cve_correlator') as mock_cve:
+    with patch("api.cve_correlator") as mock_cve:
         mock_cve.get_cve_info = AsyncMock(return_value=None)  # Default: not found
         mock_cve.correlate_vulnerability = AsyncMock(return_value=[])  # Default: empty
         yield mock_cve
@@ -46,7 +46,7 @@ async def mock_cve_correlator():
 @pytest_asyncio.fixture
 async def mock_nuclei_wrapper():
     """Mock NucleiWrapper for testing."""
-    with patch('api.nuclei_wrapper') as mock_nuclei:
+    with patch("api.nuclei_wrapper") as mock_nuclei:
         mock_nuclei.run_scan = AsyncMock(return_value={"vulnerabilities": []})
         yield mock_nuclei
 
@@ -81,7 +81,7 @@ class TestQueryCVEEndpoint:
             "cve_id": "CVE-2023-1234",
             "description": "Remote code execution vulnerability",
             "cvss_score": 9.8,
-            "severity": "CRITICAL"
+            "severity": "CRITICAL",
         }
 
         payload = {"cve_id": "CVE-2023-1234"}
@@ -111,11 +111,7 @@ class TestQueryCVEEndpoint:
         """Test querying CVEs with different ID formats."""
         mock_cve_correlator.get_cve_info.return_value = {"cve_id": "test"}
 
-        cve_ids = [
-            "CVE-2023-1234",
-            "CVE-2024-0001",
-            "CVE-2020-99999"
-        ]
+        cve_ids = ["CVE-2023-1234", "CVE-2024-0001", "CVE-2020-99999"]
 
         for cve_id in cve_ids:
             payload = {"cve_id": cve_id}
@@ -133,6 +129,7 @@ class TestQueryCVEEndpoint:
         assert "timestamp" in data
         # Verify ISO format
         from datetime import datetime
+
         datetime.fromisoformat(data["timestamp"])
 
 
@@ -147,13 +144,10 @@ class TestCorrelateSoftwareVulnsEndpoint:
         """Test correlating software with known vulnerabilities."""
         mock_cve_correlator.correlate_vulnerability.return_value = [
             {"cve_id": "CVE-2023-1111", "severity": "HIGH"},
-            {"cve_id": "CVE-2023-2222", "severity": "MEDIUM"}
+            {"cve_id": "CVE-2023-2222", "severity": "MEDIUM"},
         ]
 
-        payload = {
-            "software_name": "Apache",
-            "software_version": "2.4.49"
-        }
+        payload = {"software_name": "Apache", "software_version": "2.4.49"}
         response = await client.post("/correlate_software_vulns", json=payload)
 
         assert response.status_code == 200
@@ -168,10 +162,7 @@ class TestCorrelateSoftwareVulnsEndpoint:
         """Test correlating software with no known vulnerabilities."""
         mock_cve_correlator.correlate_vulnerability.return_value = []
 
-        payload = {
-            "software_name": "SafeSoftware",
-            "software_version": "1.0.0"
-        }
+        payload = {"software_name": "SafeSoftware", "software_version": "1.0.0"}
         response = await client.post("/correlate_software_vulns", json=payload)
 
         assert response.status_code == 200
@@ -183,18 +174,10 @@ class TestCorrelateSoftwareVulnsEndpoint:
         """Test correlating different software products."""
         mock_cve_correlator.correlate_vulnerability.return_value = [{"cve_id": "test"}]
 
-        software_list = [
-            ("Apache", "2.4.49"),
-            ("nginx", "1.18.0"),
-            ("OpenSSL", "1.1.1k"),
-            ("WordPress", "5.8.0")
-        ]
+        software_list = [("Apache", "2.4.49"), ("nginx", "1.18.0"), ("OpenSSL", "1.1.1k"), ("WordPress", "5.8.0")]
 
         for sw_name, sw_version in software_list:
-            payload = {
-                "software_name": sw_name,
-                "software_version": sw_version
-            }
+            payload = {"software_name": sw_name, "software_version": sw_version}
             response = await client.post("/correlate_software_vulns", json=payload)
             assert response.status_code == 200
 
@@ -219,9 +202,7 @@ class TestNucleiScanEndpoint:
     async def test_nuclei_scan_basic(self, client, mock_cve_correlator, mock_nuclei_wrapper):
         """Test basic Nuclei scan."""
         mock_nuclei_wrapper.run_scan.return_value = {
-            "vulnerabilities": [
-                {"template": "cve-2023-1234", "severity": "critical", "url": "http://target.com"}
-            ]
+            "vulnerabilities": [{"template": "cve-2023-1234", "severity": "critical", "url": "http://target.com"}]
         }
 
         payload = {"target": "http://target.com"}
@@ -239,27 +220,17 @@ class TestNucleiScanEndpoint:
         """Test Nuclei scan with custom template."""
         mock_nuclei_wrapper.run_scan.return_value = {"vulnerabilities": []}
 
-        payload = {
-            "target": "http://target.com",
-            "template_path": "/templates/cves/"
-        }
+        payload = {"target": "http://target.com", "template_path": "/templates/cves/"}
         response = await client.post("/nuclei_scan", json=payload)
 
         assert response.status_code == 200
-        mock_nuclei_wrapper.run_scan.assert_called_once_with(
-            "http://target.com",
-            "/templates/cves/",
-            None
-        )
+        mock_nuclei_wrapper.run_scan.assert_called_once_with("http://target.com", "/templates/cves/", None)
 
     async def test_nuclei_scan_with_options(self, client, mock_cve_correlator, mock_nuclei_wrapper):
         """Test Nuclei scan with custom options."""
         mock_nuclei_wrapper.run_scan.return_value = {"vulnerabilities": []}
 
-        payload = {
-            "target": "http://target.com",
-            "options": ["-severity", "high,critical", "-rate-limit", "150"]
-        }
+        payload = {"target": "http://target.com", "options": ["-severity", "high,critical", "-rate-limit", "150"]}
         response = await client.post("/nuclei_scan", json=payload)
 
         assert response.status_code == 200
@@ -309,7 +280,9 @@ class TestRequestValidation:
         response = await client.post("/correlate_software_vulns", json=payload)
         assert response.status_code == 422
 
-    async def test_correlate_missing_software_version_returns_422(self, client, mock_cve_correlator, mock_nuclei_wrapper):
+    async def test_correlate_missing_software_version_returns_422(
+        self, client, mock_cve_correlator, mock_nuclei_wrapper
+    ):
         """Test correlation without software_version."""
         payload = {"software_name": "Apache"}
 
@@ -345,10 +318,7 @@ class TestEdgeCases:
         """Test correlation with special characters in software name."""
         mock_cve_correlator.correlate_vulnerability.return_value = []
 
-        payload = {
-            "software_name": "Apache HTTP Server (mod_ssl)",
-            "software_version": "2.4.49-r1"
-        }
+        payload = {"software_name": "Apache HTTP Server (mod_ssl)", "software_version": "2.4.49-r1"}
         response = await client.post("/correlate_software_vulns", json=payload)
 
         assert response.status_code == 200
@@ -357,12 +327,7 @@ class TestEdgeCases:
         """Test Nuclei scan with different target formats."""
         mock_nuclei_wrapper.run_scan.return_value = {"vulnerabilities": []}
 
-        targets = [
-            "http://target.com",
-            "https://target.com:8443",
-            "192.168.1.1",
-            "file:///path/to/targets.txt"
-        ]
+        targets = ["http://target.com", "https://target.com:8443", "192.168.1.1", "file:///path/to/targets.txt"]
 
         for target in targets:
             payload = {"target": target}
@@ -373,10 +338,7 @@ class TestEdgeCases:
         """Test Nuclei scan with empty options list."""
         mock_nuclei_wrapper.run_scan.return_value = {"vulnerabilities": []}
 
-        payload = {
-            "target": "http://target.com",
-            "options": []
-        }
+        payload = {"target": "http://target.com", "options": []}
         response = await client.post("/nuclei_scan", json=payload)
 
         assert response.status_code == 200
@@ -386,15 +348,12 @@ class TestEdgeCases:
         mock_cve_correlator.get_cve_info.return_value = {
             "cve_id": "CVE-2023-1234",
             "description": "Test vulnerability",
-            "cvss_v3": {
-                "base_score": 9.8,
-                "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
-            },
+            "cvss_v3": {"base_score": 9.8, "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"},
             "references": [
                 {"url": "https://nvd.nist.gov/vuln/detail/CVE-2023-1234"},
-                {"url": "https://github.com/advisories/GHSA-xxxx"}
+                {"url": "https://github.com/advisories/GHSA-xxxx"},
             ],
-            "exploits": ["metasploit", "exploit-db"]
+            "exploits": ["metasploit", "exploit-db"],
         }
 
         payload = {"cve_id": "CVE-2023-1234"}

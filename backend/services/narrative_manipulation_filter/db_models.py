@@ -5,26 +5,24 @@ Persistent storage for analysis history, source reputation tracking,
 fact-check caching, and Bayesian belief updates.
 """
 
-from datetime import datetime
 import enum
 import uuid
+from datetime import datetime
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     CheckConstraint,
     Column,
     DateTime,
-)
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import (
     Float,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
 )
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -73,17 +71,13 @@ class AnalysisHistory(Base):
     completed_at = Column(DateTime, nullable=True)
 
     # Input
-    text_hash = Column(
-        String(64), nullable=False, index=True
-    )  # SHA256 for deduplication
+    text_hash = Column(String(64), nullable=False, index=True)  # SHA256 for deduplication
     text = Column(Text, nullable=False)
     source_url = Column(String(2048), nullable=True)
     source_domain = Column(String(255), nullable=True, index=True)
 
     # Status
-    status = Column(
-        SQLEnum(AnalysisStatusEnum), default=AnalysisStatusEnum.PENDING, nullable=False
-    )
+    status = Column(SQLEnum(AnalysisStatusEnum), default=AnalysisStatusEnum.PENDING, nullable=False)
 
     # Results
     threat_score = Column(Float, nullable=True)
@@ -106,19 +100,13 @@ class AnalysisHistory(Base):
     models_used = Column(ARRAY(String), nullable=True)
 
     # Relationships
-    source_reputation_id = Column(
-        UUID(as_uuid=True), ForeignKey("source_reputation.id"), nullable=True
-    )
+    source_reputation_id = Column(UUID(as_uuid=True), ForeignKey("source_reputation.id"), nullable=True)
     source_reputation = relationship("SourceReputation", back_populates="analyses")
 
     # Constraints
     __table_args__ = (
-        CheckConstraint(
-            "threat_score >= 0 AND threat_score <= 1", name="check_threat_score_range"
-        ),
-        CheckConstraint(
-            "confidence >= 0 AND confidence <= 1", name="check_confidence_range"
-        ),
+        CheckConstraint("threat_score >= 0 AND threat_score <= 1", name="check_threat_score_range"),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="check_confidence_range"),
         Index("idx_analysis_source_domain_created", "source_domain", "created_at"),
         Index("idx_analysis_threat_score", "threat_score"),
     )
@@ -199,9 +187,7 @@ class FactCheckCache(Base):
     confidence = Column(Float, nullable=False)
 
     # Source Attribution
-    source_api = Column(
-        String(50), nullable=False
-    )  # 'google_factcheck', 'claimbuster', 'kg_sparql'
+    source_api = Column(String(50), nullable=False)  # 'google_factcheck', 'claimbuster', 'kg_sparql'
     source_url = Column(String(2048), nullable=True)
     rating_text = Column(String(255), nullable=True)
 
@@ -215,16 +201,12 @@ class FactCheckCache(Base):
     last_accessed = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
-    source_reputation_id = Column(
-        UUID(as_uuid=True), ForeignKey("source_reputation.id"), nullable=True
-    )
+    source_reputation_id = Column(UUID(as_uuid=True), ForeignKey("source_reputation.id"), nullable=True)
     source_reputation = relationship("SourceReputation", back_populates="fact_checks")
 
     # Constraints
     __table_args__ = (
-        CheckConstraint(
-            "confidence >= 0 AND confidence <= 1", name="check_fc_confidence_range"
-        ),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="check_fc_confidence_range"),
         Index("idx_factcheck_claim_hash", "claim_text_hash"),
         Index("idx_factcheck_expires", "expires_at"),
     )
@@ -240,9 +222,7 @@ class EntityCache(Base):
 
     # Entity Identification
     surface_form = Column(String(255), nullable=False, index=True)
-    context_hash = Column(
-        String(64), nullable=False, index=True
-    )  # Context for disambiguation
+    context_hash = Column(String(64), nullable=False, index=True)  # Context for disambiguation
 
     # Linked Entity
     entity_uri = Column(String(512), nullable=False)
@@ -261,11 +241,7 @@ class EntityCache(Base):
     hit_count = Column(Integer, default=0, nullable=False)
 
     # Constraints
-    __table_args__ = (
-        Index(
-            "idx_entity_surface_context", "surface_form", "context_hash", unique=True
-        ),
-    )
+    __table_args__ = (Index("idx_entity_surface_context", "surface_form", "context_hash", unique=True),)
 
 
 class PropagandaPattern(Base):
@@ -279,9 +255,7 @@ class PropagandaPattern(Base):
     # Pattern
     technique = Column(String(50), nullable=False, index=True)  # PropagandaTechnique
     pattern_text = Column(Text, nullable=False)
-    pattern_embedding = Column(
-        ARRAY(Float), nullable=True
-    )  # 768-dim sentence embedding
+    pattern_embedding = Column(ARRAY(Float), nullable=True)  # 768-dim sentence embedding
 
     # Statistics
     occurrence_count = Column(Integer, default=1, nullable=False)
@@ -297,9 +271,7 @@ class PropagandaPattern(Base):
     last_seen = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Constraints
-    __table_args__ = (
-        Index("idx_propaganda_technique_precision", "technique", "precision"),
-    )
+    __table_args__ = (Index("idx_propaganda_technique_precision", "technique", "precision"),)
 
 
 class ArgumentFramework(Base):
@@ -311,9 +283,7 @@ class ArgumentFramework(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     # Framework Metadata
-    analysis_id = Column(
-        UUID(as_uuid=True), ForeignKey("analysis_history.id"), nullable=False
-    )
+    analysis_id = Column(UUID(as_uuid=True), ForeignKey("analysis_history.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Seriema Graph Reference
@@ -343,9 +313,7 @@ class MLModelMetrics(Base):
     # Model Identification
     model_name = Column(String(100), nullable=False, index=True)
     model_version = Column(String(50), nullable=False)
-    task_type = Column(
-        String(50), nullable=False
-    )  # 'emotion', 'propaganda', 'fallacy', etc.
+    task_type = Column(String(50), nullable=False)  # 'emotion', 'propaganda', 'fallacy', etc.
 
     # Performance Metrics
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
@@ -385,9 +353,7 @@ class AdversarialExample(Base):
     # Original & Perturbed
     original_text = Column(Text, nullable=False)
     perturbed_text = Column(Text, nullable=False)
-    perturbation_type = Column(
-        String(50), nullable=False
-    )  # 'char_swap', 'word_synonym', etc.
+    perturbation_type = Column(String(50), nullable=False)  # 'char_swap', 'word_synonym', etc.
 
     # Model Fooling
     model_fooled = Column(String(100), nullable=False)

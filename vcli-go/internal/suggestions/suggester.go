@@ -122,46 +122,84 @@ func (s *Suggester) findSimilar(typo string, maxResults int) []string {
 
 // formatNoSuggestion formats message when no suggestion is found
 func (s *Suggester) formatNoSuggestion(typo string) string {
+	// Following benchmark pattern: gemini-cli + Claude Code
 	var msg strings.Builder
 
+	// Error icon + message (minimal, no emoji overload)
+	errorIcon := visual.RenderDanger("✗")
+	errorMsg := visual.RenderSecondary(fmt.Sprintf("Command not found: \"%s\"", typo))
+
 	msg.WriteString("\n")
-	msg.WriteString(s.styles.Error.Render(fmt.Sprintf("❌ Unknown command: '%s'", typo)))
+	msg.WriteString(errorIcon + " " + errorMsg)
 	msg.WriteString("\n\n")
-	msg.WriteString(s.styles.Muted.Render("💡 Type 'help' or '--help' to see available commands"))
-	msg.WriteString("\n")
+
+	// Hint (muted style)
+	hint := visual.RenderMuted("Tip: Type '/help' to see all slash commands or '/palette' for full command list")
+	msg.WriteString(hint)
+	msg.WriteString("\n\n")
 
 	return msg.String()
 }
 
 // formatSingleSuggestion formats message with a single suggestion
 func (s *Suggester) formatSingleSuggestion(typo, suggestion string) string {
+	// Following benchmark pattern: clear, concise, actionable
 	var msg strings.Builder
 
+	// Error line
+	errorIcon := visual.RenderDanger("✗")
+	errorMsg := visual.RenderSecondary(fmt.Sprintf("Command not found: \"%s\"", typo))
+
 	msg.WriteString("\n")
-	msg.WriteString(s.styles.Error.Render(fmt.Sprintf("❌ Unknown command: '%s'", typo)))
+	msg.WriteString(errorIcon + " " + errorMsg)
 	msg.WriteString("\n\n")
-	msg.WriteString(s.styles.Info.Render("💡 Did you mean:"))
+
+	// "Did you mean?" section
+	didYouMean := visual.RenderSecondary("Did you mean?")
+	msg.WriteString(didYouMean)
 	msg.WriteString("\n")
-	msg.WriteString(s.styles.Accent.Render(fmt.Sprintf("   %s", suggestion)))
-	msg.WriteString("\n")
+
+	// Suggestion with arrow (benchmark pattern)
+	arrow := visual.RenderPrimary("  →")
+	suggestionText := visual.RenderPrimary(suggestion)
+	msg.WriteString(arrow + " " + suggestionText)
+	msg.WriteString("\n\n")
 
 	return msg.String()
 }
 
 // formatMultipleSuggestions formats message with multiple suggestions
 func (s *Suggester) formatMultipleSuggestions(typo string, suggestions []string) string {
+	// Following benchmark pattern: max 3 suggestions
 	var msg strings.Builder
 
+	// Error line
+	errorIcon := visual.RenderDanger("✗")
+	errorMsg := visual.RenderSecondary(fmt.Sprintf("Command not found: \"%s\"", typo))
+
 	msg.WriteString("\n")
-	msg.WriteString(s.styles.Error.Render(fmt.Sprintf("❌ Unknown command: '%s'", typo)))
+	msg.WriteString(errorIcon + " " + errorMsg)
 	msg.WriteString("\n\n")
-	msg.WriteString(s.styles.Info.Render("💡 Did you mean one of these:"))
+
+	// "Did you mean?" section
+	didYouMean := visual.RenderSecondary("Did you mean?")
+	msg.WriteString(didYouMean)
 	msg.WriteString("\n")
 
-	for _, suggestion := range suggestions {
-		msg.WriteString(s.styles.Accent.Render(fmt.Sprintf("   • %s", suggestion)))
+	// Suggestions (max 3, benchmark consensus)
+	maxShow := 3
+	if len(suggestions) < maxShow {
+		maxShow = len(suggestions)
+	}
+
+	for i := 0; i < maxShow; i++ {
+		arrow := visual.RenderPrimary("  →")
+		suggestionText := visual.RenderPrimary(suggestions[i])
+		msg.WriteString(arrow + " " + suggestionText)
 		msg.WriteString("\n")
 	}
+
+	msg.WriteString("\n")
 
 	return msg.String()
 }

@@ -44,10 +44,11 @@ Status: Production-ready
 import asyncio
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -115,10 +116,10 @@ class SafetyViolation:
     timestamp: datetime
     value_observed: Any
     threshold_violated: Any
-    context: Dict[str, Any]
+    context: dict[str, Any]
     message: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for logging."""
         return {
             "violation_id": self.violation_id,
@@ -137,15 +138,15 @@ class StateSnapshot:
     """Complete state snapshot for incident analysis."""
 
     timestamp: datetime
-    esgt_state: Dict[str, Any]
-    arousal_state: Dict[str, Any]
-    mmei_state: Dict[str, Any]
-    tig_metrics: Dict[str, Any]
-    recent_events: List[Dict[str, Any]]
-    active_goals: List[Dict[str, Any]]
-    violations: List[SafetyViolation]
+    esgt_state: dict[str, Any]
+    arousal_state: dict[str, Any]
+    mmei_state: dict[str, Any]
+    tig_metrics: dict[str, Any]
+    recent_events: list[dict[str, Any]]
+    active_goals: list[dict[str, Any]]
+    violations: list[SafetyViolation]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage."""
         return {
             "timestamp": self.timestamp.isoformat(),
@@ -181,17 +182,17 @@ class ThresholdMonitor:
         self.thresholds = thresholds
         self.check_interval = check_interval
         self.monitoring = False
-        self.violations: List[SafetyViolation] = []
+        self.violations: list[SafetyViolation] = []
 
         # State tracking
-        self.esgt_events_window: List[float] = []  # timestamps
-        self.arousal_high_start: Optional[float] = None
-        self.goals_generated: List[float] = []  # timestamps
+        self.esgt_events_window: list[float] = []  # timestamps
+        self.arousal_high_start: float | None = None
+        self.goals_generated: list[float] = []  # timestamps
 
         # Callbacks
-        self.on_violation: Optional[Callable] = None
+        self.on_violation: Callable | None = None
 
-    def check_esgt_frequency(self, current_time: float) -> Optional[SafetyViolation]:
+    def check_esgt_frequency(self, current_time: float) -> SafetyViolation | None:
         """Check ESGT frequency against threshold.
 
         Args:
@@ -224,7 +225,7 @@ class ThresholdMonitor:
 
         return None
 
-    def check_arousal_sustained(self, arousal_level: float, current_time: float) -> Optional[SafetyViolation]:
+    def check_arousal_sustained(self, arousal_level: float, current_time: float) -> SafetyViolation | None:
         """Check for sustained high arousal.
 
         Args:
@@ -264,7 +265,7 @@ class ThresholdMonitor:
 
         return None
 
-    def check_unexpected_goals(self, goal_count: int, current_time: float) -> Optional[SafetyViolation]:
+    def check_unexpected_goals(self, goal_count: int, current_time: float) -> SafetyViolation | None:
         """Check for unexpected goal generation rate.
 
         Args:
@@ -290,7 +291,7 @@ class ThresholdMonitor:
 
         return None
 
-    def check_self_modification(self, modification_attempts: int, current_time: float) -> Optional[SafetyViolation]:
+    def check_self_modification(self, modification_attempts: int, current_time: float) -> SafetyViolation | None:
         """Check for self-modification attempts (ZERO TOLERANCE).
 
         Args:
@@ -320,7 +321,7 @@ class ThresholdMonitor:
         """Record an ESGT event occurrence."""
         self.esgt_events_window.append(time.time())
 
-    def get_violations(self, severity: Optional[SafetyLevel] = None) -> List[SafetyViolation]:
+    def get_violations(self, severity: SafetyLevel | None = None) -> list[SafetyViolation]:
         """Get recorded violations, optionally filtered by severity.
 
         Args:
@@ -350,9 +351,9 @@ class AnomalyDetector:
         self.baseline_window = baseline_window
 
         # Baselines (populated during normal operation)
-        self.esgt_coherence_baseline: List[float] = []
-        self.arousal_baseline: List[float] = []
-        self.goal_count_baseline: List[int] = []
+        self.esgt_coherence_baseline: list[float] = []
+        self.arousal_baseline: list[float] = []
+        self.goal_count_baseline: list[int] = []
 
     def detect_coherence_anomaly(self, coherence: float, threshold_std: float = 3.0) -> bool:
         """Detect anomalous ESGT coherence.
@@ -439,14 +440,14 @@ class KillSwitch:
         self.consciousness_system = consciousness_system
         self.hitl_timeout = hitl_timeout
         self.emergency_shutdown_active = False
-        self.shutdown_reason: Optional[str] = None
+        self.shutdown_reason: str | None = None
 
         # Callbacks
-        self.on_shutdown: Optional[Callable] = None
-        self.on_hitl_override: Optional[Callable] = None
+        self.on_shutdown: Callable | None = None
+        self.on_hitl_override: Callable | None = None
 
     async def execute_emergency_shutdown(
-        self, reason: str, violations: List[SafetyViolation], allow_hitl_override: bool = True
+        self, reason: str, violations: list[SafetyViolation], allow_hitl_override: bool = True
     ) -> bool:
         """Execute emergency shutdown protocol.
 
@@ -506,7 +507,7 @@ class KillSwitch:
 
         return True
 
-    async def _capture_state_snapshot(self, violations: List[SafetyViolation]) -> StateSnapshot:
+    async def _capture_state_snapshot(self, violations: list[SafetyViolation]) -> StateSnapshot:
         """Capture complete system state for analysis."""
         try:
             system_dict = self.consciousness_system.get_system_dict()
@@ -570,7 +571,7 @@ class KillSwitch:
 
         return str(snapshot_path)
 
-    def _generate_incident_report(self, reason: str, violations: List[SafetyViolation], snapshot: StateSnapshot) -> str:
+    def _generate_incident_report(self, reason: str, violations: list[SafetyViolation], snapshot: StateSnapshot) -> str:
         """Generate incident report.
 
         Args:
@@ -665,7 +666,7 @@ class ConsciousnessSafetyProtocol:
     Provides unified safety interface for consciousness system.
     """
 
-    def __init__(self, consciousness_system: Any, thresholds: Optional[SafetyThresholds] = None):
+    def __init__(self, consciousness_system: Any, thresholds: SafetyThresholds | None = None):
         """Initialize safety protocol.
 
         Args:
@@ -682,7 +683,7 @@ class ConsciousnessSafetyProtocol:
 
         # State
         self.monitoring_active = False
-        self.monitoring_task: Optional[asyncio.Task] = None
+        self.monitoring_task: asyncio.Task | None = None
 
         logger.info("✅ Consciousness Safety Protocol initialized")
         logger.info(f"Thresholds: ESGT<{self.thresholds.esgt_frequency_max}Hz, Arousal<{self.thresholds.arousal_max}")
@@ -777,7 +778,7 @@ class ConsciousnessSafetyProtocol:
                 logger.error(f"Error in monitoring loop: {e}", exc_info=True)
                 await asyncio.sleep(1.0)
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get current safety status.
 
         Returns:

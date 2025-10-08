@@ -15,16 +15,15 @@ Unlike Macrophages (investigators), Neutrophils:
 PRODUCTION-READY: Real HTTP, Kafka, Redis, no mocks, graceful degradation.
 """
 
-import asyncio
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import aiohttp
 
 from .base import AgenteImunologicoBase
-from .models import AgentStatus, AgentType
+from .models import AgentType
 
 logger = logging.getLogger(__name__)
 
@@ -133,8 +132,7 @@ class NeutrofiloDigital(AgenteImunologicoBase):
             return
 
         logger.info(
-            f"Neutrophil {self.state.id[:8]} following IL-8 to {alvo['area']} "
-            f"(concentration={alvo['concentracao']})"
+            f"Neutrophil {self.state.id[:8]} following IL-8 to {alvo['area']} (concentration={alvo['concentracao']})"
         )
 
         # 3. Migrate to inflammation site
@@ -204,10 +202,7 @@ class NeutrofiloDigital(AgenteImunologicoBase):
         Args:
             area_destino: Target network zone
         """
-        logger.info(
-            f"Neutrophil {self.state.id[:8]} migrating: "
-            f"{self.state.localizacao_atual} -> {area_destino}"
-        )
+        logger.info(f"Neutrophil {self.state.id[:8]} migrating: {self.state.localizacao_atual} -> {area_destino}")
 
         # Update location
         self.state.localizacao_atual = area_destino
@@ -260,10 +255,7 @@ class NeutrofiloDigital(AgenteImunologicoBase):
                     self.swarm_members.append(state["id"])
 
             if self.swarm_members:
-                logger.info(
-                    f"Neutrophil {self.state.id[:8]} joined swarm "
-                    f"({len(self.swarm_members)} members)"
-                )
+                logger.info(f"Neutrophil {self.state.id[:8]} joined swarm ({len(self.swarm_members)} members)")
             else:
                 logger.debug("No swarm members found (solo neutrophil)")
 
@@ -283,9 +275,7 @@ class NeutrofiloDigital(AgenteImunologicoBase):
         """
         swarm_size = len(self.swarm_members) + 1  # +1 for self
 
-        logger.info(
-            f"Neutrophil swarm attacking (size={swarm_size}, threshold={self.swarm_threshold})"
-        )
+        logger.info(f"Neutrophil swarm attacking (size={swarm_size}, threshold={self.swarm_threshold})")
 
         if swarm_size >= self.swarm_threshold:
             # Form NET (coordinated containment)
@@ -418,9 +408,7 @@ class NeutrofiloDigital(AgenteImunologicoBase):
         Returns:
             Investigation result (always threat if IL-8 present)
         """
-        logger.debug(
-            f"Neutrophil {self.state.id[:8]} investigating {alvo.get('id', 'unknown')}"
-        )
+        logger.debug(f"Neutrophil {self.state.id[:8]} investigating {alvo.get('id', 'unknown')}")
 
         # Neutrophils assume threat if IL-8 triggered
         # (IL-8 is secreted by trusted sources: Macrophages, Dendritic cells)
@@ -501,9 +489,7 @@ class NeutrofiloDigital(AgenteImunologicoBase):
             Dict with Neutrophil-specific stats
         """
         lifespan_hours = self.state.tempo_vida.total_seconds() / 3600
-        lifespan_remaining_hours = (
-            self.tempo_vida_max.total_seconds() - self.state.tempo_vida.total_seconds()
-        ) / 3600
+        lifespan_remaining_hours = (self.tempo_vida_max.total_seconds() - self.state.tempo_vida.total_seconds()) / 3600
 
         return {
             "nets_formadas": self.nets_formadas,
@@ -512,11 +498,7 @@ class NeutrofiloDigital(AgenteImunologicoBase):
             "swarm_size_current": len(self.swarm_members) + 1,
             "lifespan_hours": round(lifespan_hours, 2),
             "lifespan_remaining_hours": round(max(0, lifespan_remaining_hours), 2),
-            "eficiencia_swarm": (
-                self.nets_formadas / self.chemotaxis_count
-                if self.chemotaxis_count > 0
-                else 0.0
-            ),
+            "eficiencia_swarm": (self.nets_formadas / self.chemotaxis_count if self.chemotaxis_count > 0 else 0.0),
         }
 
     def __repr__(self) -> str:

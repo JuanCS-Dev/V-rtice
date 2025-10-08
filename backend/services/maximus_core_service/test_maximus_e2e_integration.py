@@ -16,15 +16,12 @@ Date: 2025-10-06
 Quality: REGRA DE OURO - Zero mocks, production validation
 """
 
-import pytest
-import asyncio
 from pathlib import Path
-from datetime import datetime
-
 
 # ============================================================================
 # TEST 1: MAXIMUS INITIALIZES ALL SUBSYSTEMS
 # ============================================================================
+
 
 def test_maximus_initialization_complete():
     """Test that MaximusIntegrated initializes all core subsystems."""
@@ -33,7 +30,7 @@ def test_maximus_initialization_complete():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check Neuromodulation (FASE 5)
@@ -74,6 +71,7 @@ def test_maximus_initialization_complete():
 # TEST 2: NEUROMODULATION AFFECTS ALL SYSTEMS
 # ============================================================================
 
+
 def test_neuromodulation_integration_across_systems():
     """Test that neuromodulation integrates with all major systems."""
     print("\n" + "=" * 80)
@@ -81,7 +79,7 @@ def test_neuromodulation_integration_across_systems():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Neuromodulation → Attention System
@@ -113,6 +111,7 @@ def test_neuromodulation_integration_across_systems():
 # TEST 3: PREDICTIVE CODING → NEUROMODULATION FLOW
 # ============================================================================
 
+
 def test_predictive_coding_neuromodulation_flow():
     """Test the flow from Predictive Coding to Neuromodulation."""
     print("\n" + "=" * 80)
@@ -120,7 +119,7 @@ def test_predictive_coding_neuromodulation_flow():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Find process_prediction_error method
@@ -152,6 +151,7 @@ def test_predictive_coding_neuromodulation_flow():
 # TEST 4: SKILL LEARNING → MULTI-SYSTEM INTEGRATION
 # ============================================================================
 
+
 def test_skill_learning_multi_system_integration():
     """Test that Skill Learning integrates with multiple systems."""
     print("\n" + "=" * 80)
@@ -159,7 +159,7 @@ def test_skill_learning_multi_system_integration():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Find execute_learned_skill method
@@ -214,6 +214,7 @@ def test_skill_learning_multi_system_integration():
 # TEST 5: SYSTEM STATUS INCLUDES ALL SUBSYSTEMS
 # ============================================================================
 
+
 def test_system_status_complete():
     """Test that get_system_status() includes all subsystems."""
     print("\n" + "=" * 80)
@@ -221,7 +222,7 @@ def test_system_status_complete():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Find get_system_status method
@@ -262,6 +263,7 @@ def test_system_status_complete():
 # TEST 6: GRACEFUL DEGRADATION ACROSS OPTIONAL SYSTEMS
 # ============================================================================
 
+
 def test_graceful_degradation_complete():
     """Test that optional systems degrade gracefully."""
     print("\n" + "=" * 80)
@@ -269,7 +271,7 @@ def test_graceful_degradation_complete():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Predictive Coding graceful degradation (torch dependency)
@@ -311,6 +313,7 @@ def test_graceful_degradation_complete():
 # TEST 7: ETHICAL AI INTEGRATION
 # ============================================================================
 
+
 def test_ethical_ai_integration():
     """Test that Ethical AI is properly integrated."""
     print("\n" + "=" * 80)
@@ -318,7 +321,7 @@ def test_ethical_ai_integration():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check EthicalGuardian initialization
@@ -354,6 +357,7 @@ def test_ethical_ai_integration():
 # TEST 8: REGRA DE OURO COMPLIANCE ACROSS ALL FILES
 # ============================================================================
 
+
 def test_regra_de_ouro_compliance():
     """Test REGRA DE OURO compliance across critical files."""
     print("\n" + "=" * 80)
@@ -373,7 +377,7 @@ def test_regra_de_ouro_compliance():
             print(f"⚠️  {component}: File not found, skipping")
             continue
 
-        with open(path, "r") as f:
+        with open(path) as f:
             source = f.read()
 
         # Check for mock imports
@@ -385,15 +389,18 @@ def test_regra_de_ouro_compliance():
         # Allow "Placeholder" in comments explaining architecture, but not actual placeholder classes
         if has_placeholder:
             # Verify it's just documentation
-            assert "Real implementation" in source or "actual implementation" in source.lower(), \
+            assert "Real implementation" in source or "actual implementation" in source.lower(), (
                 f"{component} contains placeholder classes!"
+            )
 
         # Check for TODO/FIXME
         lines = source.split("\n")
         todo_lines = [line for line in lines if "TODO" in line.upper() or "FIXME" in line.upper()]
 
         # Filter out documentation TODOs (those in docstrings/comments explaining architecture)
-        code_todos = [line for line in todo_lines if not ("\"\"\"" in line or "'''" in line or "documentation" in line.lower())]
+        code_todos = [
+            line for line in todo_lines if not ('"""' in line or "'''" in line or "documentation" in line.lower())
+        ]
 
         assert len(code_todos) == 0, f"{component} contains TODO/FIXME comments: {code_todos}"
 

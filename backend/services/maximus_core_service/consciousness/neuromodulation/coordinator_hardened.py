@@ -30,8 +30,8 @@ Date: 2025-10-08
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Dict, List, Optional
 
 from consciousness.neuromodulation.acetylcholine_hardened import AcetylcholineModulator
 from consciousness.neuromodulation.dopamine_hardened import DopamineModulator
@@ -108,7 +108,7 @@ class NeuromodulationCoordinator:
     """
 
     def __init__(
-        self, config: Optional[CoordinatorConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: CoordinatorConfig | None = None, kill_switch_callback: Callable[[str], None] | None = None
     ):
         """Initialize neuromodulation coordinator.
 
@@ -126,7 +126,7 @@ class NeuromodulationCoordinator:
         self.norepinephrine = NorepinephrineModulator(kill_switch_callback=kill_switch_callback)
 
         # Modulator lookup
-        self._modulators: Dict[str, NeuromodulatorBase] = {
+        self._modulators: dict[str, NeuromodulatorBase] = {
             "dopamine": self.dopamine,
             "serotonin": self.serotonin,
             "acetylcholine": self.acetylcholine,
@@ -146,7 +146,7 @@ class NeuromodulationCoordinator:
             f"NE (baseline={self.norepinephrine.config.baseline})"
         )
 
-    def coordinate_modulation(self, requests: List[ModulationRequest]) -> Dict[str, float]:
+    def coordinate_modulation(self, requests: list[ModulationRequest]) -> dict[str, float]:
         """
         Coordinate modulations across multiple neuromodulators.
 
@@ -222,7 +222,7 @@ class NeuromodulationCoordinator:
 
         return results
 
-    def _compute_conflict_score(self, requests: List[ModulationRequest]) -> float:
+    def _compute_conflict_score(self, requests: list[ModulationRequest]) -> float:
         """
         Compute conflict score for modulation requests.
 
@@ -243,10 +243,9 @@ class NeuromodulationCoordinator:
         if da_delta * sht_delta > 0:  # Same sign (both + or both -)
             conflict = min(abs(da_delta), abs(sht_delta))
             return conflict
-        else:
-            return 0.0
+        return 0.0
 
-    def _resolve_conflicts(self, requests: List[ModulationRequest]) -> List[ModulationRequest]:
+    def _resolve_conflicts(self, requests: list[ModulationRequest]) -> list[ModulationRequest]:
         """
         Resolve conflicts by reducing magnitude of conflicting requests.
 
@@ -277,7 +276,7 @@ class NeuromodulationCoordinator:
 
         return resolved
 
-    def _apply_interactions(self, requests: List[ModulationRequest]) -> List[ModulationRequest]:
+    def _apply_interactions(self, requests: list[ModulationRequest]) -> list[ModulationRequest]:
         """
         Apply non-linear interactions between neuromodulators.
 
@@ -351,7 +350,7 @@ class NeuromodulationCoordinator:
 
         return open_count >= 3
 
-    def get_levels(self) -> Dict[str, float]:
+    def get_levels(self) -> dict[str, float]:
         """
         Get current levels of all 4 neuromodulators.
 

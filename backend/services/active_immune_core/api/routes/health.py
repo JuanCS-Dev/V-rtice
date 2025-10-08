@@ -8,7 +8,8 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 

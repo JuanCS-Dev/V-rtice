@@ -11,13 +11,12 @@ Focus: ULTRA-PRECISION for exact line hits
 
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
 
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -63,26 +62,21 @@ class TestBroadcastActivationLevel:
             mock_publish.return_value = AsyncMock()
 
             # ACT: Broadcast activation level
-            await lymphnode._broadcast_activation_level(
-                state_name="ATIVAÇÃO",
-                target_percentage=0.5
-            )
+            await lymphnode._broadcast_activation_level(state_name="ATIVAÇÃO", target_percentage=0.5)
 
         # ASSERT: Should publish to adrenaline channel
         mock_publish.assert_called_once()
         call_args = mock_publish.call_args[0]
 
         # Verify channel
-        assert "adrenalina" in call_args[0], \
-            "Should publish to adrenaline hormone channel"
+        assert "adrenalina" in call_args[0], "Should publish to adrenaline hormone channel"
 
         # Verify message content (JSON)
         import json
+
         message = json.loads(call_args[1])
-        assert message["state"] == "ATIVAÇÃO", \
-            "Should include homeostatic state"
-        assert message["target_activation"] == 0.5, \
-            "Should include target activation percentage"
+        assert message["state"] == "ATIVAÇÃO", "Should include homeostatic state"
+        assert message["target_activation"] == 0.5, "Should include target activation percentage"
 
     @pytest.mark.asyncio
     async def test_broadcast_activation_level_without_redis(self):
@@ -102,17 +96,13 @@ class TestBroadcastActivationLevel:
 
         # ACT: Try to broadcast (should return early)
         try:
-            await node._broadcast_activation_level(
-                state_name="REPOUSO",
-                target_percentage=0.05
-            )
+            await node._broadcast_activation_level(state_name="REPOUSO", target_percentage=0.05)
             handled_gracefully = True
         except Exception:
             handled_gracefully = False
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle missing Redis gracefully"
+        assert handled_gracefully, "Should handle missing Redis gracefully"
 
     @pytest.mark.asyncio
     async def test_broadcast_activation_level_handles_redis_exception(self, lymphnode):
@@ -129,17 +119,13 @@ class TestBroadcastActivationLevel:
 
             # ACT: Try to broadcast (should not crash)
             try:
-                await lymphnode._broadcast_activation_level(
-                    state_name="INFLAMAÇÃO",
-                    target_percentage=0.8
-                )
+                await lymphnode._broadcast_activation_level(state_name="INFLAMAÇÃO", target_percentage=0.8)
                 handled_gracefully = True
             except Exception:
                 handled_gracefully = False
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle Redis failure gracefully"
+        assert handled_gracefully, "Should handle Redis failure gracefully"
 
 
 # ==================== THREAT DETECTION TIME-BASED CLEANUP (Lines 661-663) ====================
@@ -172,8 +158,7 @@ class TestThreatDetectionCleanup:
             lymphnode.last_pattern_check = datetime.now()  # Line 663
 
         # ASSERT: Threat detections should be cleared
-        assert len(lymphnode.threat_detections) == 0, \
-            "Should clear old threat detections after 1 hour"
+        assert len(lymphnode.threat_detections) == 0, "Should clear old threat detections after 1 hour"
 
     @pytest.mark.asyncio
     async def test_threat_detections_not_cleared_before_one_hour(self, lymphnode):
@@ -197,8 +182,7 @@ class TestThreatDetectionCleanup:
             lymphnode.threat_detections.clear()
 
         # ASSERT: Should NOT clear
-        assert len(lymphnode.threat_detections) == initial_count, \
-            "Should preserve threat detections if < 1 hour old"
+        assert len(lymphnode.threat_detections) == initial_count, "Should preserve threat detections if < 1 hour old"
 
 
 # ==================== PATTERN DETECTION BUFFER CHECK (Lines 644-645) ====================
@@ -226,8 +210,7 @@ class TestPatternDetectionBufferCheck:
         should_skip = len(lymphnode.cytokine_buffer) < 10  # Line 644
 
         # ASSERT: Should skip
-        assert should_skip is True, \
-            "Should skip pattern detection with small buffer"
+        assert should_skip is True, "Should skip pattern detection with small buffer"
 
     @pytest.mark.asyncio
     async def test_pattern_detection_proceeds_with_sufficient_buffer(self, lymphnode):
@@ -246,8 +229,7 @@ class TestPatternDetectionBufferCheck:
         should_skip = len(lymphnode.cytokine_buffer) < 10
 
         # ASSERT: Should proceed
-        assert should_skip is False, \
-            "Should proceed with pattern detection when buffer >= 10"
+        assert should_skip is False, "Should proceed with pattern detection when buffer >= 10"
 
 
 # ==================== PATTERN DETECTION EXCEPTION HANDLING (Lines 668-669) ====================
@@ -266,9 +248,7 @@ class TestPatternDetectionExceptionHandling:
         Coverage: Lines 668-669 (except Exception handler)
         """
         # ARRANGE: Mock _detect_persistent_threats to raise exception
-        with patch.object(
-            lymphnode, "_detect_persistent_threats", side_effect=Exception("Analysis failed")
-        ):
+        with patch.object(lymphnode, "_detect_persistent_threats", side_effect=Exception("Analysis failed")):
             # ACT: Try to detect (should not crash)
             try:
                 await lymphnode._detect_persistent_threats()

@@ -8,11 +8,11 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
 import time
-from prometheus_client import REGISTRY, CollectorRegistry
-from monitoring.prometheus_exporter import PrometheusExporter
 
+import pytest
+
+from monitoring.prometheus_exporter import PrometheusExporter
 
 # Global counter to ensure unique namespaces for each test
 _test_counter = 0
@@ -281,7 +281,7 @@ class TestExportMetrics:
         exporter.record_task_completed("detection", 1.5, 0)
 
         metrics = exporter.export_metrics()
-        metrics_str = metrics.decode('utf-8')
+        metrics_str = metrics.decode("utf-8")
 
         # Should contain metric names
         assert "immune_core" in metrics_str or "test_immune_core" in metrics_str
@@ -292,7 +292,7 @@ class TestExportMetrics:
     def test_export_metrics_includes_system_info(self, exporter):
         """Test that export includes system info"""
         metrics = exporter.export_metrics()
-        metrics_str = metrics.decode('utf-8')
+        metrics_str = metrics.decode("utf-8")
 
         # Should contain system info
         # Note: Exact format depends on prometheus_client version

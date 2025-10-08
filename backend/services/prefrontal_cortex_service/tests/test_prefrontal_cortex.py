@@ -18,10 +18,11 @@ Test Structure:
 - TestEdgeCases: Boundary conditions and error scenarios
 """
 
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
-from datetime import datetime
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 # Import FastAPI app and core components
 from api import app
@@ -29,8 +30,8 @@ from emotional_state_monitor import EmotionalStateMonitor
 from impulse_inhibition import ImpulseInhibition
 from rational_decision_validator import RationalDecisionValidator
 
-
 # ==================== Fixtures ====================
+
 
 @pytest_asyncio.fixture
 async def client():
@@ -59,6 +60,7 @@ def decision_validator():
 
 
 # ==================== Test Classes ====================
+
 
 @pytest.mark.asyncio
 class TestHealthEndpoint:
@@ -96,7 +98,7 @@ class TestStrategicPlanEndpoint:
         payload = {
             "problem_description": "Optimize network security posture",
             "current_context": {"threat_level": "medium", "resources": "limited"},
-            "long_term_goals": ["improve_security", "maintain_performance"]
+            "long_term_goals": ["improve_security", "maintain_performance"],
         }
         response = await client.post("/strategic_plan", json=payload)
         assert response.status_code == 200
@@ -118,7 +120,7 @@ class TestStrategicPlanEndpoint:
         payload = {
             "problem_description": "Handle security incident",
             "current_context": {},
-            "long_term_goals": ["security"]
+            "long_term_goals": ["security"],
         }
         response = await client.post("/strategic_plan", json=payload)
         assert response.status_code == 200
@@ -131,7 +133,7 @@ class TestStrategicPlanEndpoint:
         payload = {
             "problem_description": "Deploy emergency patch",
             "current_context": {},
-            "long_term_goals": ["stability"]
+            "long_term_goals": ["stability"],
         }
         response = await client.post("/strategic_plan", json=payload)
         assert response.status_code == 200
@@ -149,10 +151,10 @@ class TestMakeDecisionEndpoint:
         payload = {
             "options": [
                 {"option_id": "A", "name": "Immediate action", "estimated_cost": 100},
-                {"option_id": "B", "name": "Delayed action", "estimated_cost": 200}
+                {"option_id": "B", "name": "Delayed action", "estimated_cost": 200},
             ],
             "criteria": {"cost_efficiency": {"max": 150}},
-            "context": {"urgency": "high"}
+            "context": {"urgency": "high"},
         }
         response = await client.post("/make_decision", json=payload)
         assert response.status_code == 200
@@ -166,11 +168,9 @@ class TestMakeDecisionEndpoint:
     async def test_make_decision_with_validation_issues(self, client):
         """Test decision making when validation finds issues - cost violation."""
         payload = {
-            "options": [
-                {"option_id": "A", "name": "Expensive option", "estimated_cost": 500}
-            ],
+            "options": [{"option_id": "A", "name": "Expensive option", "estimated_cost": 500}],
             "criteria": {"cost_efficiency": {"max": 100}},
-            "context": {}
+            "context": {},
         }
         response = await client.post("/make_decision", json=payload)
         assert response.status_code == 200
@@ -182,11 +182,7 @@ class TestMakeDecisionEndpoint:
 
     async def test_make_decision_preserves_timestamp(self, client):
         """Test that decision includes timestamp."""
-        payload = {
-            "options": [{"option_id": "A"}],
-            "criteria": {},
-            "context": None
-        }
+        payload = {"options": [{"option_id": "A"}], "criteria": {}, "context": None}
         response = await client.post("/make_decision", json=payload)
         assert response.status_code == 200
         data = response.json()
@@ -254,8 +250,7 @@ class TestEmotionalStateMonitor:
     async def test_update_emotional_state_combined_factors(self, emotional_monitor):
         """Test emotional state with combined telemetry and context."""
         await emotional_monitor.update_emotional_state(
-            {"error_rate": 0.2},
-            {"threat_level": "high", "task_success": False}
+            {"error_rate": 0.2}, {"threat_level": "high", "task_success": False}
         )
         assert emotional_monitor.current_emotional_state["stress"] > 0.1
 
@@ -299,10 +294,7 @@ class TestImpulseInhibition:
     async def test_apply_inhibition_high_risk_inhibited(self, impulse_inhibitor):
         """Test that high risk action is inhibited with high inhibition level."""
         impulse_inhibitor.adjust_inhibition_level(0.9)
-        result = await impulse_inhibitor.apply_inhibition(
-            {"type": "risky_action", "risk_score": 0.6},
-            {}
-        )
+        result = await impulse_inhibitor.apply_inhibition({"type": "risky_action", "risk_score": 0.6}, {})
         assert result["action_inhibited"] is True
         assert "High risk" in result["reason"]
         assert result["inhibition_level"] == 0.9
@@ -310,10 +302,7 @@ class TestImpulseInhibition:
     async def test_apply_inhibition_low_urgency_inhibited(self, impulse_inhibitor):
         """Test that low urgency action is inhibited with low inhibition level."""
         impulse_inhibitor.adjust_inhibition_level(0.2)
-        result = await impulse_inhibitor.apply_inhibition(
-            {"type": "low_priority_action", "urgency": 0.1},
-            {}
-        )
+        result = await impulse_inhibitor.apply_inhibition({"type": "low_priority_action", "urgency": 0.1}, {})
         assert result["action_inhibited"] is True
         assert "Low urgency" in result["reason"]
 
@@ -321,8 +310,7 @@ class TestImpulseInhibition:
         """Test that action is not inhibited when conditions don't match."""
         impulse_inhibitor.adjust_inhibition_level(0.5)
         result = await impulse_inhibitor.apply_inhibition(
-            {"type": "normal_action", "risk_score": 0.2, "urgency": 0.5},
-            {}
+            {"type": "normal_action", "risk_score": 0.2, "urgency": 0.5}, {}
         )
         assert result["action_inhibited"] is False
         assert "No inhibition" in result["reason"]
@@ -401,12 +389,9 @@ class TestRationalDecisionValidator:
             "option_id": "D",
             "estimated_cost": 500,
             "ethical_review_passed": False,
-            "description": "unintended_side_effect detected"
+            "description": "unintended_side_effect detected",
         }
-        criteria = {
-            "cost_efficiency": {"max": 100},
-            "ethical_compliance": True
-        }
+        criteria = {"cost_efficiency": {"max": 100}, "ethical_compliance": True}
         result = decision_validator.validate_decision(decision, criteria, {})
         assert abs(result["validation_score"] - 0.0) < 0.001  # Float comparison with tolerance
         assert len(result["issues_found"]) == 3
@@ -431,21 +416,13 @@ class TestEdgeCases:
 
     async def test_strategic_plan_empty_goals(self, client):
         """Test strategic plan with empty goals list."""
-        payload = {
-            "problem_description": "Test problem",
-            "current_context": {},
-            "long_term_goals": []
-        }
+        payload = {"problem_description": "Test problem", "current_context": {}, "long_term_goals": []}
         response = await client.post("/strategic_plan", json=payload)
         assert response.status_code == 200
 
     async def test_make_decision_single_option(self, client):
         """Test decision making with only one option."""
-        payload = {
-            "options": [{"option_id": "ONLY_ONE"}],
-            "criteria": {},
-            "context": None
-        }
+        payload = {"options": [{"option_id": "ONLY_ONE"}], "criteria": {}, "context": None}
         response = await client.post("/make_decision", json=payload)
         assert response.status_code == 200
         assert response.json()["chosen_option"]["option_id"] == "ONLY_ONE"
@@ -461,10 +438,7 @@ class TestEdgeCases:
         """Test that mood doesn't go below -1.0."""
         # Try to push mood below -1.0
         for _ in range(20):
-            await emotional_monitor.update_emotional_state(
-                {"error_rate": 0.5},
-                {"threat_level": "high"}
-            )
+            await emotional_monitor.update_emotional_state({"error_rate": 0.5}, {"threat_level": "high"})
         assert emotional_monitor.current_emotional_state["mood"] >= -1.0
 
     def test_decision_validation_score_floor(self, decision_validator):
@@ -473,11 +447,8 @@ class TestEdgeCases:
             "option_id": "X",
             "estimated_cost": 9999,
             "ethical_review_passed": False,
-            "description": "massive unintended_side_effect"
+            "description": "massive unintended_side_effect",
         }
-        criteria = {
-            "cost_efficiency": {"max": 1},
-            "ethical_compliance": True
-        }
+        criteria = {"cost_efficiency": {"max": 1}, "ethical_compliance": True}
         result = decision_validator.validate_decision(decision, criteria, {})
         assert result["validation_score"] >= -0.001  # Float tolerance for effectively zero

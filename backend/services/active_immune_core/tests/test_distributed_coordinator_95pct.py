@@ -23,7 +23,6 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import time
 from datetime import datetime, timedelta
 
 import pytest
@@ -35,9 +34,7 @@ from agents.distributed_coordinator import (
     DistributedTask,
     TaskStatus,
     VoteDecision,
-    VoteProposal,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -314,9 +311,7 @@ class TestTaskTimeoutMaxRetries:
         assert task.retries == 3
         assert task_id in coordinator._task_queue
 
-    def test_task_timeout_fails_when_max_retries_exceeded(
-        self, coordinator: DistributedCoordinator
-    ):
+    def test_task_timeout_fails_when_max_retries_exceeded(self, coordinator: DistributedCoordinator):
         """Test check_task_timeouts() fails task when max retries exceeded"""
         # ARRANGE: Create task with max retries already used
         coordinator.register_agent("agent_1", capabilities={"test"})
@@ -463,9 +458,7 @@ class TestEdgeCaseIntegration:
         assert leader_id == "alpha"
         assert coordinator.get_agent("alpha").role == AgentRole.LEADER
 
-    def test_task_reassignment_cascade_on_multiple_failures(
-        self, coordinator: DistributedCoordinator
-    ):
+    def test_task_reassignment_cascade_on_multiple_failures(self, coordinator: DistributedCoordinator):
         """Test cascading task reassignment when multiple agents fail"""
         # ARRANGE: Register multiple agents
         coordinator.register_agent("agent_1", capabilities={"skill_a"})
@@ -499,9 +492,7 @@ class TestEdgeCaseIntegration:
         assert task_2.retries == 1
         assert coordinator._recoveries_performed == 3
 
-    def test_consensus_with_mixed_votes_and_quorum(
-        self, coordinator: DistributedCoordinator
-    ):
+    def test_consensus_with_mixed_votes_and_quorum(self, coordinator: DistributedCoordinator):
         """Test consensus voting with mixed votes requiring exact quorum"""
         # ARRANGE: Register 5 agents
         for i in range(5):

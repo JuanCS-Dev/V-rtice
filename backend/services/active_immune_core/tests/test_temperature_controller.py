@@ -23,14 +23,14 @@ Date: 2025-10-07
 import pytest
 
 from coordination.temperature_controller import (
-    TemperatureController,
     HomeostaticState,
+    TemperatureController,
 )
-
 
 # =============================================================================
 # TEST FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def controller():

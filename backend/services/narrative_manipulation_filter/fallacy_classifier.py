@@ -10,13 +10,14 @@ Detects 21 types of logical fallacies using:
 import asyncio
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 
-from cache_manager import cache_manager, CacheCategory
-from config import get_settings
-from models import Argument, ArgumentRole, Fallacy, FallacyType
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+from cache_manager import CacheCategory, cache_manager
+from config import get_settings
+from models import Argument, Fallacy, FallacyType
 from utils import hash_text
 
 logger = logging.getLogger(__name__)
@@ -184,9 +185,7 @@ class FallacyClassifier:
         try:
             logger.info(f"Loading fallacy classifier: {self.model_name}")
 
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name, use_fast=True
-            )
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
 
             # Multi-class classification (21 fallacies)
             num_labels = len(FallacyType)
@@ -201,17 +200,13 @@ class FallacyClassifier:
 
             # Quantization
             if self.device == "cpu":
-                self.model = torch.quantization.quantize_dynamic(
-                    self.model, {torch.nn.Linear}, dtype=torch.qint8
-                )
+                self.model = torch.quantization.quantize_dynamic(self.model, {torch.nn.Linear}, dtype=torch.qint8)
 
             self._initialized = True
             logger.info("✅ Fallacy classifier initialized")
 
         except Exception as e:
-            logger.error(
-                f"❌ Failed to initialize fallacy classifier: {e}", exc_info=True
-            )
+            logger.error(f"❌ Failed to initialize fallacy classifier: {e}", exc_info=True)
             raise
 
     @torch.no_grad()
@@ -244,9 +239,9 @@ class FallacyClassifier:
                 return Fallacy(**cached) if cached else None
 
         # Tokenize
-        inputs = self.tokenizer(
-            text, return_tensors="pt", truncation=True, max_length=512, padding=True
-        ).to(self.device)
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512, padding=True).to(
+            self.device
+        )
 
         # Forward pass
         outputs = self.model(**inputs)
@@ -271,9 +266,7 @@ class FallacyClassifier:
             description=self._generate_description(fallacy_type, text),
             severity=self._calculate_severity(fallacy_type, confidence),
             evidence=text,
-            counter_argument=self.COUNTER_TEMPLATES.get(
-                fallacy_type, "Este argumento contém uma falácia lógica."
-            ),
+            counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Este argumento contém uma falácia lógica."),
         )
 
         # Cache
@@ -306,17 +299,11 @@ class FallacyClassifier:
         for fallacy_type, patterns in self.FALLACY_PATTERNS.items():
             # Check keywords
             keyword_matches = sum(
-                1
-                for pattern in patterns.get("keywords", [])
-                if re.search(pattern, text_lower, re.IGNORECASE)
+                1 for pattern in patterns.get("keywords", []) if re.search(pattern, text_lower, re.IGNORECASE)
             )
 
             # Check phrases
-            phrase_matches = sum(
-                1
-                for phrase in patterns.get("phrases", [])
-                if phrase.lower() in text_lower
-            )
+            phrase_matches = sum(1 for phrase in patterns.get("phrases", []) if phrase.lower() in text_lower)
 
             total_matches = keyword_matches + phrase_matches
 
@@ -329,9 +316,7 @@ class FallacyClassifier:
                     description=self._generate_description(fallacy_type, argument.text),
                     severity=self._calculate_severity(fallacy_type, confidence),
                     evidence=argument.text,
-                    counter_argument=self.COUNTER_TEMPLATES.get(
-                        fallacy_type, "Falácia detectada."
-                    ),
+                    counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Falácia detectada."),
                 )
                 fallacies.append(fallacy)
 
@@ -391,9 +376,7 @@ class FallacyClassifier:
             FallacyType.BEGGING_THE_QUESTION: f"Assume como verdade o que deveria provar: '{text[:100]}...'",
         }
 
-        return descriptions.get(
-            fallacy_type, f"Falácia {fallacy_type.value} detectada: '{text[:100]}...'"
-        )
+        return descriptions.get(fallacy_type, f"Falácia {fallacy_type.value} detectada: '{text[:100]}...'")
 
     @staticmethod
     def _calculate_severity(fallacy_type: FallacyType, confidence: float) -> float:
@@ -426,9 +409,7 @@ class FallacyClassifier:
 
         return min(1.0, severity)
 
-    def batch_classify(
-        self, arguments: List[Argument], batch_size: int = 16
-    ) -> List[Optional[Fallacy]]:
+    def batch_classify(self, arguments: List[Argument], batch_size: int = 16) -> List[Optional[Fallacy]]:
         """
         Batch fallacy classification.
 
@@ -478,9 +459,7 @@ class FallacyClassifier:
                     description=self._generate_description(fallacy_type, arg.text),
                     severity=self._calculate_severity(fallacy_type, confidence),
                     evidence=arg.text,
-                    counter_argument=self.COUNTER_TEMPLATES.get(
-                        fallacy_type, "Falácia detectada."
-                    ),
+                    counter_argument=self.COUNTER_TEMPLATES.get(fallacy_type, "Falácia detectada."),
                 )
 
                 results.append(fallacy)
@@ -492,6 +471,4 @@ class FallacyClassifier:
 # GLOBAL INSTANCE
 # ============================================================================
 
-fallacy_classifier = FallacyClassifier(
-    device="cuda" if torch.cuda.is_available() else "cpu"
-)
+fallacy_classifier = FallacyClassifier(device="cuda" if torch.cuda.is_available() else "cpu")

@@ -14,11 +14,11 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
 import logging
 import os
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Try to import PyTorch
 try:
@@ -27,6 +27,7 @@ try:
     import torch.nn as nn
     from torch.nn.parallel import DistributedDataParallel as DDP
     from torch.utils.data import DataLoader, DistributedSampler
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -75,34 +76,16 @@ class DistributedTrainer:
         # Launch with:
         # torchrun --nproc_per_node=4 train_distributed.py
 
-        config = DistributedConfig(
-            backend="nccl",
-            batch_size_per_gpu=32
-        )
+        config = DistributedConfig(backend="nccl", batch_size_per_gpu=32)
 
-        trainer = DistributedTrainer(
-            model=model,
-            optimizer=optimizer,
-            loss_fn=loss_fn,
-            config=config
-        )
+        trainer = DistributedTrainer(model=model, optimizer=optimizer, loss_fn=loss_fn, config=config)
 
         # Train
-        history = trainer.train(
-            train_dataset=train_dataset,
-            val_dataset=val_dataset,
-            num_epochs=100
-        )
+        history = trainer.train(train_dataset=train_dataset, val_dataset=val_dataset, num_epochs=100)
         ```
     """
 
-    def __init__(
-        self,
-        model: Any,
-        optimizer: Any,
-        loss_fn: callable,
-        config: DistributedConfig = DistributedConfig()
-    ):
+    def __init__(self, model: Any, optimizer: Any, loss_fn: callable, config: DistributedConfig = DistributedConfig()):
         """Initialize distributed trainer.
 
         Args:
@@ -148,11 +131,13 @@ class DistributedTrainer:
                 backend=self.config.backend,
                 init_method=self.config.init_method,
                 rank=self.rank,
-                world_size=self.world_size
+                world_size=self.world_size,
             )
 
-            logger.info(f"Initialized distributed: rank={self.rank}, "
-                       f"world_size={self.world_size}, backend={self.config.backend}")
+            logger.info(
+                f"Initialized distributed: rank={self.rank}, "
+                f"world_size={self.world_size}, backend={self.config.backend}"
+            )
 
         # Set device
         if torch.cuda.is_available():
@@ -184,7 +169,7 @@ class DistributedTrainer:
                 model,
                 device_ids=[self.local_rank],
                 output_device=self.local_rank,
-                find_unused_parameters=self.config.find_unused_parameters
+                find_unused_parameters=self.config.find_unused_parameters,
             )
 
             logger.info(f"Wrapped model with DDP on rank {self.rank}")
@@ -192,11 +177,8 @@ class DistributedTrainer:
         return model
 
     def train(
-        self,
-        train_dataset: Any,
-        val_dataset: Optional[Any] = None,
-        num_epochs: int = 100
-    ) -> List[Dict[str, float]]:
+        self, train_dataset: Any, val_dataset: Any | None = None, num_epochs: int = 100
+    ) -> list[dict[str, float]]:
         """Train model.
 
         Args:
@@ -208,19 +190,17 @@ class DistributedTrainer:
             Training history (only on rank 0)
         """
         # Create distributed samplers
-        train_sampler = DistributedSampler(
-            train_dataset,
-            num_replicas=self.world_size,
-            rank=self.rank,
-            shuffle=True
-        ) if self.world_size > 1 else None
+        train_sampler = (
+            DistributedSampler(train_dataset, num_replicas=self.world_size, rank=self.rank, shuffle=True)
+            if self.world_size > 1
+            else None
+        )
 
-        val_sampler = DistributedSampler(
-            val_dataset,
-            num_replicas=self.world_size,
-            rank=self.rank,
-            shuffle=False
-        ) if (val_dataset is not None and self.world_size > 1) else None
+        val_sampler = (
+            DistributedSampler(val_dataset, num_replicas=self.world_size, rank=self.rank, shuffle=False)
+            if (val_dataset is not None and self.world_size > 1)
+            else None
+        )
 
         # Create data loaders
         train_loader = DataLoader(
@@ -229,7 +209,7 @@ class DistributedTrainer:
             sampler=train_sampler,
             shuffle=(train_sampler is None),
             num_workers=4,
-            pin_memory=True
+            pin_memory=True,
         )
 
         val_loader = None
@@ -240,7 +220,7 @@ class DistributedTrainer:
                 sampler=val_sampler,
                 shuffle=False,
                 num_workers=4,
-                pin_memory=True
+                pin_memory=True,
             )
 
         # Training loop
@@ -266,16 +246,14 @@ class DistributedTrainer:
 
             # Log (only rank 0)
             if self.is_main_process():
-                epoch_metrics = {
-                    "epoch": epoch,
-                    "train_loss": train_loss,
-                    "val_loss": val_loss
-                }
+                epoch_metrics = {"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss}
                 history.append(epoch_metrics)
 
-                logger.info(f"Epoch {epoch}/{num_epochs} - "
-                           f"train_loss: {train_loss:.4f} - "
-                           f"val_loss: {val_loss:.4f if val_loss else 'N/A'}")
+                logger.info(
+                    f"Epoch {epoch}/{num_epochs} - "
+                    f"train_loss: {train_loss:.4f} - "
+                    f"val_loss: {val_loss:.4f if val_loss else 'N/A'}"
+                )
 
             # Synchronize before next epoch
             if self.world_size > 1:
@@ -355,14 +333,13 @@ class DistributedTrainer:
         if isinstance(batch, torch.Tensor):
             return batch.to(self.device, non_blocking=True)
 
-        elif isinstance(batch, (tuple, list)):
+        if isinstance(batch, (tuple, list)):
             return tuple(self._batch_to_device(x) for x in batch)
 
-        elif isinstance(batch, dict):
+        if isinstance(batch, dict):
             return {k: self._batch_to_device(v) for k, v in batch.items()}
 
-        else:
-            return batch
+        return batch
 
     def _reduce_metric(self, metric: float) -> float:
         """Reduce metric across all ranks.
@@ -416,7 +393,7 @@ class DistributedTrainer:
             "model_state_dict": model_state_dict,
             "optimizer_state_dict": self.optimizer.state_dict(),
             "config": self.config.__dict__,
-            **kwargs
+            **kwargs,
         }
 
         self.config.checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -456,6 +433,7 @@ class DistributedTrainer:
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def setup_for_distributed(is_master: bool):
     """Setup environment for distributed training.

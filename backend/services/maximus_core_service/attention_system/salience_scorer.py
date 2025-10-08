@@ -4,11 +4,11 @@ Determines which events/anomalies warrant deep (foveal) analysis vs.
 which can be handled by lightweight (peripheral) processing.
 """
 
-from dataclasses import dataclass
-from enum import Enum
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any
 
 import numpy as np
 
@@ -31,7 +31,7 @@ class SalienceScore:
 
     score: float  # 0.0 - 1.0
     level: SalienceLevel
-    factors: Dict[str, float]  # Individual factor contributions
+    factors: dict[str, float]  # Individual factor contributions
     timestamp: float
     target_id: str
     requires_foveal: bool
@@ -60,9 +60,7 @@ class SalienceScorer:
         self.baseline_stats = {}  # Baseline statistics for novelty detection
         self.score_history = []  # Recent scores for trending
 
-    def calculate_salience(
-        self, event: Dict[str, Any], context: Optional[Dict] = None
-    ) -> SalienceScore:
+    def calculate_salience(self, event: dict[str, Any], context: dict | None = None) -> SalienceScore:
         """Calculate salience score for an event.
 
         Args:
@@ -131,22 +129,17 @@ class SalienceScorer:
         )
 
         # Update history
-        self.score_history.append(
-            {"score": overall_score, "timestamp": time.time(), "target_id": target_id}
-        )
+        self.score_history.append({"score": overall_score, "timestamp": time.time(), "target_id": target_id})
 
         # Keep only last 1000 scores
         if len(self.score_history) > 1000:
             self.score_history = self.score_history[-1000:]
 
-        logger.debug(
-            f"Salience score: {overall_score:.3f} ({level.name}) "
-            f"for {target_id} (foveal={requires_foveal})"
-        )
+        logger.debug(f"Salience score: {overall_score:.3f} ({level.name}) for {target_id} (foveal={requires_foveal})")
 
         return score_result
 
-    def _calculate_novelty(self, event: Dict) -> float:
+    def _calculate_novelty(self, event: dict) -> float:
         """Calculate novelty factor (0.0-1.0).
 
         Novelty = statistical surprise based on historical baselines.
@@ -196,7 +189,7 @@ class SalienceScorer:
             logger.warning(f"Novelty calculation error: {e}")
             return 0.5
 
-    def _calculate_magnitude(self, event: Dict) -> float:
+    def _calculate_magnitude(self, event: dict) -> float:
         """Calculate magnitude factor (0.0-1.0).
 
         Magnitude = normalized size of deviation from normal range.
@@ -216,18 +209,10 @@ class SalienceScorer:
             # Calculate deviation from normal range
             if value < normal_min:
                 # Below normal
-                deviation = (
-                    (normal_min - value) / (normal_min - critical_min)
-                    if critical_min < normal_min
-                    else 1.0
-                )
+                deviation = (normal_min - value) / (normal_min - critical_min) if critical_min < normal_min else 1.0
             else:
                 # Above normal
-                deviation = (
-                    (value - normal_max) / (critical_max - normal_max)
-                    if critical_max > normal_max
-                    else 1.0
-                )
+                deviation = (value - normal_max) / (critical_max - normal_max) if critical_max > normal_max else 1.0
 
             magnitude = np.clip(deviation, 0.0, 1.0)
 
@@ -237,7 +222,7 @@ class SalienceScorer:
             logger.warning(f"Magnitude calculation error: {e}")
             return 0.5
 
-    def _calculate_velocity(self, event: Dict, context: Optional[Dict]) -> float:
+    def _calculate_velocity(self, event: dict, context: dict | None) -> float:
         """Calculate velocity factor (0.0-1.0).
 
         Velocity = rate of change over time.
@@ -266,7 +251,7 @@ class SalienceScorer:
             logger.warning(f"Velocity calculation error: {e}")
             return 0.0
 
-    def _calculate_threat(self, event: Dict) -> float:
+    def _calculate_threat(self, event: dict) -> float:
         """Calculate threat factor (0.0-1.0).
 
         Threat = potential impact on system health/security.
@@ -278,9 +263,7 @@ class SalienceScorer:
                 "security_alert": 1.0 if event.get("security_alert", False) else 0.0,
                 "anomaly_score": event.get("anomaly_score", 0),  # Already 0-1
                 "failure_prediction": event.get("failure_probability", 0),  # 0-1
-                "critical_service": (
-                    1.0 if event.get("critical_service", False) else 0.5
-                ),
+                "critical_service": (1.0 if event.get("critical_service", False) else 0.5),
             }
 
             # Weighted threat score
@@ -300,7 +283,7 @@ class SalienceScorer:
             logger.warning(f"Threat calculation error: {e}")
             return 0.5
 
-    def _calculate_context(self, event: Dict, context: Optional[Dict]) -> float:
+    def _calculate_context(self, event: dict, context: dict | None) -> float:
         """Calculate context factor (0.0-1.0).
 
         Context = historical importance based on past events.
@@ -312,9 +295,7 @@ class SalienceScorer:
             # Context indicators
             recent_alerts = context.get("recent_alerts_count", 0)
             similar_past_incidents = context.get("similar_incidents", 0)
-            time_since_last_alert = context.get(
-                "time_since_last_alert", 3600
-            )  # seconds
+            time_since_last_alert = context.get("time_since_last_alert", 3600)  # seconds
 
             # Recency boost (more recent = higher context)
             recency = 1.0 - min(time_since_last_alert / 3600.0, 1.0)  # 1h = 0
@@ -325,9 +306,7 @@ class SalienceScorer:
             # Historical pattern boost
             pattern_boost = min(similar_past_incidents / 5.0, 1.0)
 
-            context_score = (
-                recency * 0.4 + frequency_penalty * 0.3 + pattern_boost * 0.3
-            )
+            context_score = recency * 0.4 + frequency_penalty * 0.3 + pattern_boost * 0.3
 
             return float(np.clip(context_score, 0.0, 1.0))
 
@@ -335,7 +314,7 @@ class SalienceScorer:
             logger.warning(f"Context calculation error: {e}")
             return 0.5
 
-    def get_top_salient_targets(self, n: int = 10) -> List[Dict]:
+    def get_top_salient_targets(self, n: int = 10) -> list[dict]:
         """Get top N most salient recent targets.
 
         Args:
@@ -348,9 +327,7 @@ class SalienceScorer:
             return []
 
         # Sort by score descending
-        sorted_history = sorted(
-            self.score_history, key=lambda x: x["score"], reverse=True
-        )
+        sorted_history = sorted(self.score_history, key=lambda x: x["score"], reverse=True)
 
         return sorted_history[:n]
 

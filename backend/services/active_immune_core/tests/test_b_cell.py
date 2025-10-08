@@ -12,7 +12,7 @@ Tests cover actual production implementation of B Cell:
 
 import asyncio
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
@@ -24,7 +24,6 @@ from active_immune_core.agents.b_cell import (
     MemoryBCell,
 )
 from active_immune_core.agents.models import AgentStatus
-
 
 # ==================== FIXTURES ====================
 
@@ -139,9 +138,7 @@ class TestBCellLifecycle:
 class TestPatternRecognition:
     """Test pattern recognition and affinity calculation"""
 
-    def test_extract_signature(
-        self, b_cell: LinfocitoBDigital, sample_event: dict
-    ):
+    def test_extract_signature(self, b_cell: LinfocitoBDigital, sample_event: dict):
         """Test signature extraction from event"""
         signature = b_cell._extract_signature(sample_event)
 
@@ -219,9 +216,7 @@ class TestPatternLearning:
         """Test learning a new pattern"""
         signature = {"dst_port": 22, "protocol": "tcp"}
 
-        antibody = await b_cell.learn_pattern(
-            pattern_type="port_scan", signature=signature, confidence=0.8
-        )
+        antibody = await b_cell.learn_pattern(pattern_type="port_scan", signature=signature, confidence=0.8)
 
         assert antibody.pattern_type == "port_scan"
         assert antibody.signature == signature
@@ -232,12 +227,8 @@ class TestPatternLearning:
     @pytest.mark.asyncio
     async def test_learn_multiple_patterns(self, b_cell: LinfocitoBDigital):
         """Test learning multiple patterns"""
-        await b_cell.learn_pattern(
-            "port_scan", {"dst_port": 22, "protocol": "tcp"}, 0.8
-        )
-        await b_cell.learn_pattern(
-            "brute_force", {"dst_port": 22, "failed_logins": 5}, 0.75
-        )
+        await b_cell.learn_pattern("port_scan", {"dst_port": 22, "protocol": "tcp"}, 0.8)
+        await b_cell.learn_pattern("brute_force", {"dst_port": 22, "failed_logins": 5}, 0.75)
 
         assert len(b_cell.antibody_patterns) == 2
         assert len(b_cell.state.padroes_aprendidos) == 2
@@ -245,9 +236,7 @@ class TestPatternLearning:
     @pytest.mark.asyncio
     async def test_antibody_pattern_stored(self, b_cell: LinfocitoBDigital):
         """Test antibody pattern is properly stored"""
-        antibody = await b_cell.learn_pattern(
-            "malware", {"hash": "abc123"}, 0.9
-        )
+        antibody = await b_cell.learn_pattern("malware", {"hash": "abc123"}, 0.9)
 
         stored = b_cell.antibody_patterns[antibody.pattern_id]
         assert stored == antibody
@@ -261,9 +250,7 @@ class TestMemoryFormation:
     """Test memory B cell formation"""
 
     @pytest.mark.asyncio
-    async def test_form_memory_cell(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_form_memory_cell(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test forming memory cell from antibody"""
         memory = await b_cell.form_memory_cell(sample_antibody)
 
@@ -274,9 +261,7 @@ class TestMemoryFormation:
         assert b_cell.differentiation_state == BCellState.MEMORY
 
     @pytest.mark.asyncio
-    async def test_memory_cell_persists(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_memory_cell_persists(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test memory cell is added to list"""
         initial_count = len(b_cell.memory_cells)
 
@@ -285,9 +270,7 @@ class TestMemoryFormation:
         assert len(b_cell.memory_cells) == initial_count + 1
 
     @pytest.mark.asyncio
-    async def test_memory_cell_lifespan(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_memory_cell_lifespan(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test memory cell has correct lifespan"""
         memory = await b_cell.form_memory_cell(sample_antibody)
 
@@ -307,9 +290,7 @@ class TestDifferentiation:
         assert cell.differentiation_state == BCellState.NAIVE
 
     @pytest.mark.asyncio
-    async def test_differentiate_to_plasma_cell(
-        self, b_cell: LinfocitoBDigital
-    ):
+    async def test_differentiate_to_plasma_cell(self, b_cell: LinfocitoBDigital):
         """Test differentiation to plasma cell"""
         await b_cell._differentiate_to_plasma_cell()
 
@@ -317,9 +298,7 @@ class TestDifferentiation:
         assert b_cell.differentiation_state == BCellState.PLASMA
 
     @pytest.mark.asyncio
-    async def test_plasma_cell_cant_redifferentiate(
-        self, b_cell: LinfocitoBDigital
-    ):
+    async def test_plasma_cell_cant_redifferentiate(self, b_cell: LinfocitoBDigital):
         """Test plasma cell state is terminal"""
         await b_cell._differentiate_to_plasma_cell()
         assert b_cell.differentiation_state == BCellState.PLASMA
@@ -338,9 +317,7 @@ class TestClonalExpansion:
     """Test clonal expansion triggering"""
 
     @pytest.mark.asyncio
-    async def test_clonal_expansion_triggered(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_clonal_expansion_triggered(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test clonal expansion is triggered"""
         initial_count = b_cell.clonal_expansions
 
@@ -349,9 +326,7 @@ class TestClonalExpansion:
         assert b_cell.clonal_expansions == initial_count + 1
 
     @pytest.mark.asyncio
-    async def test_clonal_expansion_multiple_times(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_clonal_expansion_multiple_times(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test clonal expansion can be triggered multiple times"""
         await b_cell._trigger_clonal_expansion(sample_antibody)
         await b_cell._trigger_clonal_expansion(sample_antibody)
@@ -367,9 +342,7 @@ class TestInvestigation:
     """Test B Cell investigation behavior"""
 
     @pytest.mark.asyncio
-    async def test_investigation_returns_not_threat(
-        self, b_cell: LinfocitoBDigital
-    ):
+    async def test_investigation_returns_not_threat(self, b_cell: LinfocitoBDigital):
         """Test B Cells don't investigate unknown threats"""
         result = await b_cell.investigar({"ip": "192.0.2.100"})
 
@@ -385,9 +358,7 @@ class TestIL4Secretion:
     """Test IL4 cytokine secretion"""
 
     @pytest.mark.asyncio
-    async def test_secretar_il4_without_messenger(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_secretar_il4_without_messenger(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test IL4 secretion without messenger doesn't crash"""
         # No messenger started
         await b_cell._secretar_il4(sample_antibody, {})
@@ -396,9 +367,7 @@ class TestIL4Secretion:
         assert b_cell.il4_secretions == 0
 
     @pytest.mark.asyncio
-    async def test_secretar_il4_increments_counter(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_secretar_il4_increments_counter(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test IL4 secretion increments counter"""
         await b_cell.iniciar()
 
@@ -417,20 +386,14 @@ class TestNeutralization:
     """Test B Cell neutralization"""
 
     @pytest.mark.asyncio
-    async def test_neutralization_without_pattern(
-        self, b_cell: LinfocitoBDigital
-    ):
+    async def test_neutralization_without_pattern(self, b_cell: LinfocitoBDigital):
         """Test neutralization fails without matching pattern"""
-        result = await b_cell.executar_neutralizacao(
-            {"pattern_id": "nonexistent"}, metodo="isolate"
-        )
+        result = await b_cell.executar_neutralizacao({"pattern_id": "nonexistent"}, metodo="isolate")
 
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_neutralization_with_pattern(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_neutralization_with_pattern(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test neutralization with antibody pattern"""
         # Add antibody to B cell
         b_cell.antibody_patterns[sample_antibody.pattern_id] = sample_antibody
@@ -470,9 +433,7 @@ class TestBCellMetrics:
         assert "avg_pattern_confidence" in metrics
 
     @pytest.mark.asyncio
-    async def test_metrics_with_patterns(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_metrics_with_patterns(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test metrics with learned patterns"""
         b_cell.antibody_patterns[sample_antibody.pattern_id] = sample_antibody
 
@@ -500,9 +461,7 @@ class TestBCellEdgeCases:
     """Test B Cell edge cases"""
 
     @pytest.mark.asyncio
-    async def test_pattern_match_with_no_patterns(
-        self, b_cell: LinfocitoBDigital, sample_event: dict
-    ):
+    async def test_pattern_match_with_no_patterns(self, b_cell: LinfocitoBDigital, sample_event: dict):
         """Test pattern matching with no learned patterns"""
         # Should not crash
         await b_cell._check_pattern_match(sample_event)
@@ -510,9 +469,7 @@ class TestBCellEdgeCases:
         assert b_cell.pattern_matches == 0
 
     @pytest.mark.asyncio
-    async def test_neutralization_without_ip(
-        self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern
-    ):
+    async def test_neutralization_without_ip(self, b_cell: LinfocitoBDigital, sample_antibody: AntibodyPattern):
         """Test neutralization without target IP"""
         b_cell.antibody_patterns[sample_antibody.pattern_id] = sample_antibody
 
@@ -527,9 +484,7 @@ class TestBCellEdgeCases:
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_calculate_affinity_with_none_values(
-        self, b_cell: LinfocitoBDigital
-    ):
+    async def test_calculate_affinity_with_none_values(self, b_cell: LinfocitoBDigital):
         """Test affinity calculation with None values"""
         affinity = b_cell._calculate_affinity(None, None)
         assert affinity == 0.0
@@ -580,6 +535,7 @@ class TestBCellSuccessPaths:
 
     async def test_load_memory_patterns_success(self, b_cell, mocker):
         """Test loading memory patterns from database (lines 148-154)"""
+
         # Mock _load_memory_patterns to add patterns
         async def mock_load():
             pattern = AntibodyPattern(
@@ -663,14 +619,10 @@ class TestBCellSuccessPaths:
         await asyncio.sleep(0.5)
 
         # Mock _get_network_activity to return events
-        mocker.patch.object(
-            b_cell, "_get_network_activity", return_value=[sample_event]
-        )
+        mocker.patch.object(b_cell, "_get_network_activity", return_value=[sample_event])
 
         # Mock _check_pattern_match to track calls
-        mock_check = mocker.patch.object(
-            b_cell, "_check_pattern_match", new_callable=AsyncMock
-        )
+        mock_check = mocker.patch.object(b_cell, "_check_pattern_match", new_callable=AsyncMock)
 
         # Execute patrol
         await b_cell.patrulhar()
@@ -680,9 +632,7 @@ class TestBCellSuccessPaths:
 
         await b_cell.parar()
 
-    async def test_pattern_match_triggers_activation(
-        self, b_cell, mocker, sample_antibody, high_affinity_event
-    ):
+    async def test_pattern_match_triggers_activation(self, b_cell, mocker, sample_antibody, high_affinity_event):
         """Test pattern matching triggers activation (lines 214-225)"""
         await b_cell.iniciar()
         await asyncio.sleep(0.5)
@@ -691,9 +641,7 @@ class TestBCellSuccessPaths:
         b_cell.antibody_patterns[sample_antibody.pattern_id] = sample_antibody
 
         # Mock activation to track calls
-        mock_activate = mocker.patch.object(
-            b_cell, "_activate_on_pattern_match", new_callable=AsyncMock
-        )
+        mock_activate = mocker.patch.object(b_cell, "_activate_on_pattern_match", new_callable=AsyncMock)
 
         # Check pattern match - should trigger activation
         await b_cell._check_pattern_match(high_affinity_event)
@@ -704,9 +652,7 @@ class TestBCellSuccessPaths:
 
         await b_cell.parar()
 
-    async def test_activation_full_flow_naive_to_activated(
-        self, b_cell, mocker, sample_antibody, high_affinity_event
-    ):
+    async def test_activation_full_flow_naive_to_activated(self, b_cell, mocker, sample_antibody, high_affinity_event):
         """Test full activation flow from NAIVE to ACTIVATED (lines 284-304)"""
         await b_cell.iniciar()
         await asyncio.sleep(0.5)
@@ -718,14 +664,10 @@ class TestBCellSuccessPaths:
         mock_neutralize = mocker.patch.object(
             b_cell, "_neutralizar_com_anticorpo", new_callable=AsyncMock, return_value=True
         )
-        mock_il4 = mocker.patch.object(
-            b_cell, "_secretar_il4", new_callable=AsyncMock
-        )
+        mock_il4 = mocker.patch.object(b_cell, "_secretar_il4", new_callable=AsyncMock)
 
         # Trigger activation with low affinity (won't trigger plasma differentiation)
-        await b_cell._activate_on_pattern_match(
-            sample_antibody, high_affinity_event, affinity=0.8
-        )
+        await b_cell._activate_on_pattern_match(sample_antibody, high_affinity_event, affinity=0.8)
 
         # Lines 284-304 should be covered
         assert sample_antibody.detections == 4  # Was 3, now 4
@@ -743,15 +685,11 @@ class TestBCellSuccessPaths:
         await asyncio.sleep(0.5)
 
         # Mock neutralization and IL4
-        mocker.patch.object(
-            b_cell, "_neutralizar_com_anticorpo", new_callable=AsyncMock, return_value=True
-        )
+        mocker.patch.object(b_cell, "_neutralizar_com_anticorpo", new_callable=AsyncMock, return_value=True)
         mocker.patch.object(b_cell, "_secretar_il4", new_callable=AsyncMock)
 
         # Trigger activation with HIGH affinity (>= 0.9)
-        await b_cell._activate_on_pattern_match(
-            sample_antibody, high_affinity_event, affinity=0.95
-        )
+        await b_cell._activate_on_pattern_match(sample_antibody, high_affinity_event, affinity=0.95)
 
         # Lines 296-297 should be covered
         assert b_cell.plasma_cell_active is True
@@ -759,9 +697,7 @@ class TestBCellSuccessPaths:
 
         await b_cell.parar()
 
-    async def test_activation_triggers_clonal_expansion(
-        self, b_cell, mocker, sample_antibody, high_affinity_event
-    ):
+    async def test_activation_triggers_clonal_expansion(self, b_cell, mocker, sample_antibody, high_affinity_event):
         """Test activation triggers clonal expansion when threshold reached (lines 300-301)"""
         await b_cell.iniciar()
         await asyncio.sleep(0.5)
@@ -770,18 +706,12 @@ class TestBCellSuccessPaths:
         sample_antibody.detections = 4
 
         # Mock sub-methods
-        mocker.patch.object(
-            b_cell, "_neutralizar_com_anticorpo", new_callable=AsyncMock, return_value=True
-        )
+        mocker.patch.object(b_cell, "_neutralizar_com_anticorpo", new_callable=AsyncMock, return_value=True)
         mocker.patch.object(b_cell, "_secretar_il4", new_callable=AsyncMock)
-        mock_clonal = mocker.patch.object(
-            b_cell, "_trigger_clonal_expansion", new_callable=AsyncMock
-        )
+        mock_clonal = mocker.patch.object(b_cell, "_trigger_clonal_expansion", new_callable=AsyncMock)
 
         # Trigger activation - should trigger clonal expansion
-        await b_cell._activate_on_pattern_match(
-            sample_antibody, high_affinity_event, affinity=0.8
-        )
+        await b_cell._activate_on_pattern_match(sample_antibody, high_affinity_event, affinity=0.8)
 
         # Lines 300-301 should be covered
         assert sample_antibody.detections == 5
@@ -789,9 +719,7 @@ class TestBCellSuccessPaths:
 
         await b_cell.parar()
 
-    async def test_neutralization_http_200_success(
-        self, b_cell, mocker, sample_antibody
-    ):
+    async def test_neutralization_http_200_success(self, b_cell, mocker, sample_antibody):
         """Test neutralization with HTTP 200 response (lines 386-389)"""
         await b_cell.iniciar()
         await asyncio.sleep(0.5)
@@ -813,9 +741,7 @@ class TestBCellSuccessPaths:
         initial_confidence = sample_antibody.confidence
 
         # Neutralize with antibody
-        result = await b_cell._neutralizar_com_anticorpo(
-            sample_antibody, {"dst_ip": "10.0.1.50"}
-        )
+        result = await b_cell._neutralizar_com_anticorpo(sample_antibody, {"dst_ip": "10.0.1.50"})
 
         # Lines 386-389 should be covered
         assert result is True
@@ -824,9 +750,7 @@ class TestBCellSuccessPaths:
 
         await b_cell.parar()
 
-    async def test_neutralization_generic_exception(
-        self, b_cell, mocker, sample_antibody
-    ):
+    async def test_neutralization_generic_exception(self, b_cell, mocker, sample_antibody):
         """Test neutralization generic exception handling (lines 400-402)"""
         await b_cell.iniciar()
         await asyncio.sleep(0.5)
@@ -838,18 +762,14 @@ class TestBCellSuccessPaths:
         mocker.patch("aiohttp.ClientSession", return_value=mock_session)
 
         # Neutralize - should handle exception gracefully
-        result = await b_cell._neutralizar_com_anticorpo(
-            sample_antibody, {"dst_ip": "10.0.1.50"}
-        )
+        result = await b_cell._neutralizar_com_anticorpo(sample_antibody, {"dst_ip": "10.0.1.50"})
 
         # Lines 400-402 should be covered
         assert result is False
 
         await b_cell.parar()
 
-    async def test_form_memory_cell_persistence_failure(
-        self, b_cell, mocker, sample_antibody
-    ):
+    async def test_form_memory_cell_persistence_failure(self, b_cell, mocker, sample_antibody):
         """Test memory cell formation with persistence failure (lines 432-433)"""
         await b_cell.iniciar()
         await asyncio.sleep(0.5)
@@ -871,9 +791,7 @@ class TestBCellSuccessPaths:
 
         await b_cell.parar()
 
-    async def test_il4_secretion_exception_handling(
-        self, b_cell, mocker, sample_antibody, sample_event
-    ):
+    async def test_il4_secretion_exception_handling(self, b_cell, mocker, sample_antibody, sample_event):
         """Test IL4 secretion exception handling (lines 541-542)"""
         await b_cell.iniciar()
         await asyncio.sleep(0.5)

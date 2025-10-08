@@ -9,13 +9,12 @@ Orchestrates:
 """
 
 import asyncio
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from argument_miner import argument_miner
 from argumentation_framework import (
-    ArgumentationFramework,
     build_framework_from_arguments,
 )
 from config import get_settings
@@ -60,9 +59,7 @@ class LogicalFallacyModule:
             logger.info("🚀 Initializing logical fallacy detection models...")
 
             # Initialize models in parallel
-            await asyncio.gather(
-                argument_miner.initialize(), fallacy_classifier.initialize()
-            )
+            await asyncio.gather(argument_miner.initialize(), fallacy_classifier.initialize())
 
             self._models_initialized = True
 
@@ -100,9 +97,7 @@ class LogicalFallacyModule:
 
         # ========== STAGE 1: ARGUMENT MINING ==========
 
-        arguments = argument_miner.extract_arguments(
-            text=text, min_confidence=0.6, use_cache=True
-        )
+        arguments = argument_miner.extract_arguments(text=text, min_confidence=0.6, use_cache=True)
 
         logger.info(f"Extracted {len(arguments)} arguments from text")
 
@@ -141,9 +136,7 @@ class LogicalFallacyModule:
 
         # ========== STAGE 3: ARGUMENTATION FRAMEWORK ANALYSIS ==========
 
-        framework = build_framework_from_arguments(
-            arguments=arguments, fallacies=fallacies
-        )
+        framework = build_framework_from_arguments(arguments=arguments, fallacies=fallacies)
 
         # Calculate coherence
         coherence = framework.calculate_coherence()
@@ -188,9 +181,7 @@ class LogicalFallacyModule:
                     framework_id=framework_id, algorithm="degree"
                 )
 
-                graph_stats = await seriema_graph_client.get_framework_statistics(
-                    framework_id=framework_id
-                )
+                graph_stats = await seriema_graph_client.get_framework_statistics(framework_id=framework_id)
 
                 graph_metadata = {
                     "framework_id": framework_id,
@@ -281,10 +272,7 @@ class LogicalFallacyModule:
 
         # Weighted combination
         base_score = (
-            fallacy_density_score * 0.40
-            + severity_score * 0.30
-            + coherence_score * 0.20
-            + structure_score * 0.10
+            fallacy_density_score * 0.40 + severity_score * 0.30 + coherence_score * 0.20 + structure_score * 0.10
         )
 
         # Boosters for severe cases
@@ -334,23 +322,15 @@ class LogicalFallacyModule:
             raise ValueError(f"Framework not found: {framework_id}")
 
         # Centrality analysis
-        pagerank = await seriema_graph_client.get_argument_centrality(
-            framework_id=framework_id, algorithm="pagerank"
-        )
+        pagerank = await seriema_graph_client.get_argument_centrality(framework_id=framework_id, algorithm="pagerank")
 
-        degree = await seriema_graph_client.get_argument_centrality(
-            framework_id=framework_id, algorithm="degree"
-        )
+        degree = await seriema_graph_client.get_argument_centrality(framework_id=framework_id, algorithm="degree")
 
         # Circular arguments
-        cycles = await seriema_graph_client.detect_circular_arguments(
-            framework_id=framework_id
-        )
+        cycles = await seriema_graph_client.detect_circular_arguments(framework_id=framework_id)
 
         # Statistics
-        stats = await seriema_graph_client.get_framework_statistics(
-            framework_id=framework_id
-        )
+        stats = await seriema_graph_client.get_framework_statistics(framework_id=framework_id)
 
         # Top central arguments
         top_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)[:5]

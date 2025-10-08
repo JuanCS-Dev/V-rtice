@@ -17,7 +17,6 @@ trusted sources, discount unreliable content, and build a robust and accurate
 knowledge base.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -47,9 +46,7 @@ class SourceCredibilityEvaluator:
         Returns:
             Dict[str, Any]: A dictionary containing the credibility assessment.
         """
-        print(
-            f"[SourceCredibilityEvaluator] Evaluating source: {source_info.get('url', 'N/A')}"
-        )
+        print(f"[SourceCredibilityEvaluator] Evaluating source: {source_info.get('url', 'N/A')}")
 
         credibility_score = 0.5  # Neutral starting point
         assessment = "Neutral."
@@ -104,10 +101,6 @@ class SourceCredibilityEvaluator:
         return {
             "status": self.current_status,
             "total_evaluations": len(self.evaluation_history),
-            "last_evaluation": (
-                self.last_evaluation_time.isoformat()
-                if self.last_evaluation_time
-                else "N/A"
-            ),
+            "last_evaluation": (self.last_evaluation_time.isoformat() if self.last_evaluation_time else "N/A"),
             "trusted_sources_count": len(self.trusted_sources),
         }

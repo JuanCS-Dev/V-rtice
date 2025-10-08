@@ -36,9 +36,7 @@ class AIProcessor:
         self.last_processing_time: Optional[datetime] = None
         self.current_status: str = "ready_for_processing"
 
-    async def process_raw_data(
-        self, raw_data: List[Dict[str, Any]], query_context: str
-    ) -> Dict[str, Any]:
+    async def process_raw_data(self, raw_data: List[Dict[str, Any]], query_context: str) -> Dict[str, Any]:
         """Processes raw OSINT data using AI to extract insights and generate summaries.
 
         Args:
@@ -48,9 +46,7 @@ class AIProcessor:
         Returns:
             Dict[str, Any]: A dictionary containing AI-generated insights and summaries.
         """
-        print(
-            f"[AIProcessor] Processing {len(raw_data)} raw data entries for query: {query_context}"
-        )
+        print(f"[AIProcessor] Processing {len(raw_data)} raw data entries for query: {query_context}")
         await asyncio.sleep(0.5)  # Simulate AI processing time
 
         synthesized_summary = f"AI-generated summary for query '{query_context}':\n"
@@ -108,9 +104,5 @@ class AIProcessor:
         return {
             "status": self.current_status,
             "total_processing_tasks": len(self.processing_history),
-            "last_processing": (
-                self.last_processing_time.isoformat()
-                if self.last_processing_time
-                else "N/A"
-            ),
+            "last_processing": (self.last_processing_time.isoformat() if self.last_processing_time else "N/A"),
         }

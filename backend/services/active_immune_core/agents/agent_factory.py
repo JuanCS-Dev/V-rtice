@@ -15,8 +15,6 @@ PRODUCTION-READY: No mocks, type hints, error handling, graceful degradation.
 """
 
 import logging
-import uuid
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
 from .base import AgenteImunologicoBase
@@ -106,10 +104,7 @@ class AgentFactory:
             ValueError: If agent type not supported
         """
         if tipo not in self._agent_classes:
-            raise ValueError(
-                f"Unsupported agent type: {tipo}. "
-                f"Supported types: {list(self._agent_classes.keys())}"
-            )
+            raise ValueError(f"Unsupported agent type: {tipo}. Supported types: {list(self._agent_classes.keys())}")
 
         agent_class = self._agent_classes[tipo]
 
@@ -129,9 +124,7 @@ class AgentFactory:
         self._agents[agent.state.id] = agent
         self.agents_created_total += 1
 
-        logger.info(
-            f"Agent created: {agent.state.id[:8]} (type={tipo}, total={len(self._agents)})"
-        )
+        logger.info(f"Agent created: {agent.state.id[:8]} (type={tipo}, total={len(self._agents)})")
 
         return agent
 
@@ -157,9 +150,7 @@ class AgentFactory:
         Returns:
             Cloned agent
         """
-        logger.info(
-            f"Cloning agent: {original.state.id[:8]} (type={original.state.tipo}, mutate={mutate})"
-        )
+        logger.info(f"Cloning agent: {original.state.id[:8]} (type={original.state.tipo}, mutate={mutate})")
 
         # Create clone with same parameters
         clone = await self.create_agent(
@@ -186,10 +177,7 @@ class AgentFactory:
         # Track statistics
         self.agents_cloned_total += 1
 
-        logger.info(
-            f"Agent cloned: {clone.state.id[:8]} "
-            f"(parent={original.state.id[:8]}, mutated={mutate})"
-        )
+        logger.info(f"Agent cloned: {clone.state.id[:8]} (parent={original.state.id[:8]}, mutated={mutate})")
 
         return clone
 
@@ -220,15 +208,11 @@ class AgentFactory:
 
         # Mutate aggressiveness
         delta_aggression = random.uniform(-mutation_rate, mutation_rate)
-        agent.state.nivel_agressividade = max(
-            0.0, min(1.0, agent.state.nivel_agressividade + delta_aggression)
-        )
+        agent.state.nivel_agressividade = max(0.0, min(1.0, agent.state.nivel_agressividade + delta_aggression))
 
         # Mutate sensitivity
         delta_sensitivity = random.uniform(-mutation_rate, mutation_rate)
-        agent.state.sensibilidade = max(
-            0.0, min(1.0, agent.state.sensibilidade + delta_sensitivity)
-        )
+        agent.state.sensibilidade = max(0.0, min(1.0, agent.state.sensibilidade + delta_sensitivity))
 
         logger.debug(
             f"Mutation applied: aggression={agent.state.nivel_agressividade:.2f}, "
@@ -258,9 +242,7 @@ class AgentFactory:
         Returns:
             List of cloned agents
         """
-        logger.info(
-            f"Clonal expansion: {num_clones} clones of {original.state.id[:8]}"
-        )
+        logger.info(f"Clonal expansion: {num_clones} clones of {original.state.id[:8]}")
 
         clones = []
 
@@ -268,10 +250,7 @@ class AgentFactory:
             clone = await self.clone_agent(original, mutate=mutate)
             clones.append(clone)
 
-        logger.info(
-            f"Clonal expansion complete: {num_clones} clones created "
-            f"(total agents={len(self._agents)})"
-        )
+        logger.info(f"Clonal expansion complete: {num_clones} clones created (total agents={len(self._agents)})")
 
         return clones
 
@@ -345,9 +324,7 @@ class AgentFactory:
         del self._agents[agent_id]
         self.agents_destroyed_total += 1
 
-        logger.info(
-            f"Agent destroyed: {agent_id[:8]} (total agents={len(self._agents)})"
-        )
+        logger.info(f"Agent destroyed: {agent_id[:8]} (total agents={len(self._agents)})")
 
         return True
 
@@ -395,9 +372,7 @@ class AgentFactory:
             "agents_cloned_total": self.agents_cloned_total,
             "agents_destroyed_total": self.agents_destroyed_total,
             "cloning_rate": (
-                self.agents_cloned_total / self.agents_created_total
-                if self.agents_created_total > 0
-                else 0.0
+                self.agents_cloned_total / self.agents_created_total if self.agents_created_total > 0 else 0.0
             ),
         }
 

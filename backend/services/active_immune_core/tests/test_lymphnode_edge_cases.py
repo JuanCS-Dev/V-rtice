@@ -9,7 +9,7 @@ Focus: GRACEFUL DEGRADATION and RESILIENCE
 """
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pytest_asyncio
@@ -17,7 +17,6 @@ import pytest_asyncio
 from active_immune_core.agents import AgentType
 from active_immune_core.agents.models import AgenteState
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -73,8 +72,7 @@ class TestESGTIntegrationEdgeCases:
             node.set_esgt_subscriber(mock_subscriber)
 
         # ASSERT: Should handle gracefully (early return)
-        assert node.esgt_subscriber is None, \
-            "Should not set subscriber when ESGT unavailable"
+        assert node.esgt_subscriber is None, "Should not set subscriber when ESGT unavailable"
         # No exception raised = graceful degradation ✅
 
 
@@ -109,10 +107,8 @@ class TestAntiInflammatoryResponse:
         await lymphnode._processar_citocina_regional(il10_cytokine)
 
         # ASSERT: Temperature should decrease
-        assert lymphnode.temperatura_regional < initial_temp, \
-            "IL10 should decrease temperature (anti-inflammatory)"
-        assert lymphnode.temperatura_regional == initial_temp - 0.1, \
-            "IL10 should decrease by 0.1°C"
+        assert lymphnode.temperatura_regional < initial_temp, "IL10 should decrease temperature (anti-inflammatory)"
+        assert lymphnode.temperatura_regional == initial_temp - 0.1, "IL10 should decrease by 0.1°C"
 
     @pytest.mark.asyncio
     async def test_processar_tgfbeta_decreases_temperature(self, lymphnode):
@@ -138,10 +134,8 @@ class TestAntiInflammatoryResponse:
         await lymphnode._processar_citocina_regional(tgfbeta_cytokine)
 
         # ASSERT
-        assert lymphnode.temperatura_regional < initial_temp, \
-            "TGFbeta should decrease temperature"
-        assert lymphnode.temperatura_regional == initial_temp - 0.1, \
-            "TGFbeta should decrease by 0.1°C"
+        assert lymphnode.temperatura_regional < initial_temp, "TGFbeta should decrease temperature"
+        assert lymphnode.temperatura_regional == initial_temp - 0.1, "TGFbeta should decrease by 0.1°C"
 
     @pytest.mark.asyncio
     async def test_anti_inflammatory_respects_minimum_temperature(self, lymphnode):
@@ -166,8 +160,7 @@ class TestAntiInflammatoryResponse:
             await lymphnode._processar_citocina_regional(il10)
 
         # ASSERT: Should be clamped at 36.5°C (not below)
-        assert lymphnode.temperatura_regional == 36.5, \
-            "Temperature should not drop below 36.5°C (homeostatic minimum)"
+        assert lymphnode.temperatura_regional == 36.5, "Temperature should not drop below 36.5°C (homeostatic minimum)"
 
 
 # ==================== ERROR HANDLING ====================
@@ -209,10 +202,8 @@ class TestErrorHandling:
                 handled_gracefully = False
 
         # ASSERT: Should handle error gracefully
-        assert handled_gracefully, \
-            "Should handle Redis failure gracefully (no crash)"
-        assert destruidos == 1, \
-            "Should still complete apoptosis locally despite signal failure"
+        assert handled_gracefully, "Should handle Redis failure gracefully (no crash)"
+        assert destruidos == 1, "Should still complete apoptosis locally despite signal failure"
 
     @pytest.mark.asyncio
     async def test_iniciar_handles_redis_unavailable(self):
@@ -245,8 +236,7 @@ class TestErrorHandling:
                     await node.parar()
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle Redis unavailable gracefully (degraded mode)"
+        assert handled_gracefully, "Should handle Redis unavailable gracefully (degraded mode)"
 
     @pytest.mark.asyncio
     async def test_escalate_to_maximus_without_redis(self, lymphnode):
@@ -278,8 +268,7 @@ class TestErrorHandling:
             lymphnode._redis_client = original_redis
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle Redis unavailable gracefully (cannot escalate)"
+        assert handled_gracefully, "Should handle Redis unavailable gracefully (cannot escalate)"
 
 
 # ==================== SUMMARY ====================

@@ -8,15 +8,15 @@ Automatically generates SPARQL queries from natural language claims:
 4. SPARQL query construction
 """
 
-from dataclasses import dataclass
 import logging
-import re
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from typing import Any, Optional
+
+import spacy
+from spacy.tokens import Token
 
 from config import get_settings
 from entity_linker import Entity, entity_linker
-import spacy
-from spacy.tokens import Token
 
 logger = logging.getLogger(__name__)
 
@@ -166,9 +166,7 @@ class SPARQLQueryGenerator:
         self._initialized = True
         logger.info("✅ SPARQL query generator initialized")
 
-    async def generate_from_claim(
-        self, claim: str, query_type: str = "ask"
-    ) -> Optional[SPARQLQuery]:
+    async def generate_from_claim(self, claim: str, query_type: str = "ask") -> Optional[SPARQLQuery]:
         """
         Generate SPARQL query from natural language claim.
 
@@ -300,9 +298,7 @@ class SPARQLQueryGenerator:
             elif "morr" in predicate_lemma or "falec" in predicate_lemma:
                 predicate_property = "wdt:P20"  # place of death
             else:
-                predicate_property = self.PROPERTY_MAPPINGS.get(
-                    predicate_lemma, "wdt:P31"
-                )
+                predicate_property = self.PROPERTY_MAPPINGS.get(predicate_lemma, "wdt:P31")
         else:
             predicate_property = self.PROPERTY_MAPPINGS.get(predicate_lemma, "wdt:P31")
 

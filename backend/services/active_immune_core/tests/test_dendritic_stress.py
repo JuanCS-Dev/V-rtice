@@ -19,7 +19,6 @@ import pytest_asyncio
 
 from active_immune_core.agents import CelulaDendritica
 from active_immune_core.agents.dendritic_cell import CapturedAntigen, DendriticState
-from active_immune_core.agents.models import AgentStatus
 
 
 @pytest_asyncio.fixture
@@ -54,9 +53,7 @@ class TestDendriticStress:
     """Stress tests for dendritic cell under high concurrency"""
 
     @pytest.mark.asyncio
-    async def test_concurrent_antigen_captures(
-        self, dendritic_stress: CelulaDendritica
-    ):
+    async def test_concurrent_antigen_captures(self, dendritic_stress: CelulaDendritica):
         """Test concurrent antigen captures from multiple coroutines"""
 
         # Create 50 concurrent capture operations
@@ -71,21 +68,14 @@ class TestDendriticStress:
         ]
 
         # Execute all captures concurrently
-        await asyncio.gather(
-            *[
-                dendritic_stress._attempt_antigen_capture(event)
-                for event in capture_events
-            ]
-        )
+        await asyncio.gather(*[dendritic_stress._attempt_antigen_capture(event) for event in capture_events])
 
         # Verify all were captured (thread-safe read)
         antigen_count = await dendritic_stress.safe_get_antigen_count()
         assert antigen_count == 50, f"Expected 50 antigens, got {antigen_count}"
 
     @pytest.mark.asyncio
-    async def test_concurrent_peptide_processing(
-        self, dendritic_stress: CelulaDendritica
-    ):
+    async def test_concurrent_peptide_processing(self, dendritic_stress: CelulaDendritica):
         """Test concurrent peptide processing"""
 
         # Create 30 antigens
@@ -101,9 +91,7 @@ class TestDendriticStress:
         ]
 
         # Process all concurrently
-        await asyncio.gather(
-            *[dendritic_stress._process_antigen(ag) for ag in antigens]
-        )
+        await asyncio.gather(*[dendritic_stress._process_antigen(ag) for ag in antigens])
 
         # Each antigen creates 2 peptides (MHC-I + MHC-II)
         # Thread-safe read
@@ -111,9 +99,7 @@ class TestDendriticStress:
         assert peptide_count == 60, f"Expected 60 peptides, got {peptide_count}"
 
     @pytest.mark.asyncio
-    async def test_with_background_tasks_running(
-        self, dendritic_stress: CelulaDendritica
-    ):
+    async def test_with_background_tasks_running(self, dendritic_stress: CelulaDendritica):
         """Test captures while background tasks are running"""
 
         # Start background tasks
@@ -132,12 +118,7 @@ class TestDendriticStress:
             for i in range(20)
         ]
 
-        await asyncio.gather(
-            *[
-                dendritic_stress._attempt_antigen_capture(event)
-                for event in capture_events
-            ]
-        )
+        await asyncio.gather(*[dendritic_stress._attempt_antigen_capture(event) for event in capture_events])
 
         # Verify captures succeeded despite background tasks
         antigen_count = await dendritic_stress.safe_get_antigen_count()
@@ -146,9 +127,7 @@ class TestDendriticStress:
         await dendritic_stress.parar()
 
     @pytest.mark.asyncio
-    async def test_concurrent_presentations(
-        self, dendritic_stress: CelulaDendritica
-    ):
+    async def test_concurrent_presentations(self, dendritic_stress: CelulaDendritica):
         """Test concurrent MHC presentations"""
 
         # Setup mature state
@@ -170,17 +149,13 @@ class TestDendriticStress:
             await dendritic_stress._process_antigen(ag)
 
         # Present all concurrently (MHC-I)
-        await asyncio.gather(
-            *[dendritic_stress._present_mhc_i() for _ in range(10)]
-        )
+        await asyncio.gather(*[dendritic_stress._present_mhc_i() for _ in range(10)])
 
         # Verify presentations were created
         assert len(dendritic_stress.mhc_i_presentations) >= 10
 
     @pytest.mark.asyncio
-    async def test_rapid_state_transitions(
-        self, dendritic_stress: CelulaDendritica
-    ):
+    async def test_rapid_state_transitions(self, dendritic_stress: CelulaDendritica):
         """Test rapid state transitions don't cause corruption"""
 
         # Rapidly cycle through maturation states
@@ -201,9 +176,7 @@ class TestDendriticStress:
         ]
 
     @pytest.mark.asyncio
-    async def test_random_operations_chaos(
-        self, dendritic_stress: CelulaDendritica
-    ):
+    async def test_random_operations_chaos(self, dendritic_stress: CelulaDendritica):
         """Chaos test: random operations in random order"""
 
         async def random_operation():
@@ -237,7 +210,7 @@ class TestDendriticStress:
         # Execute 100 random operations concurrently
         await asyncio.gather(
             *[random_operation() for _ in range(100)],
-            return_exceptions=True  # Don't fail on individual errors
+            return_exceptions=True,  # Don't fail on individual errors
         )
 
         # System should still be operational
@@ -278,9 +251,7 @@ async def test_sustained_load():
         await asyncio.gather(*[cell_workload(cell) for cell in cells])
 
         # Verify all cells processed correctly (gather all counts)
-        antigen_counts = await asyncio.gather(
-            *[cell.safe_get_antigen_count() for cell in cells]
-        )
+        antigen_counts = await asyncio.gather(*[cell.safe_get_antigen_count() for cell in cells])
         total_antigens = sum(antigen_counts)
         assert total_antigens == 1000, f"Expected 1000 antigens, got {total_antigens}"
 

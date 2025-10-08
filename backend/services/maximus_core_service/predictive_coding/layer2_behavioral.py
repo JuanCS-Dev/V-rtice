@@ -9,9 +9,8 @@ Free Energy Principle: Model relationships between events as graph structure.
 Prediction error = unexpected graph patterns (e.g., anomalous process chains).
 """
 
-from dataclasses import dataclass
 import logging
-from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass
 
 import numpy as np
 import torch
@@ -27,8 +26,8 @@ class EventGraph:
 
     node_features: torch.Tensor  # [num_nodes, feature_dim]
     edge_index: torch.Tensor  # [2, num_edges] (source, target pairs)
-    edge_features: Optional[torch.Tensor] = None  # [num_edges, edge_feature_dim]
-    node_labels: Optional[torch.Tensor] = None  # [num_nodes] ground truth
+    edge_features: torch.Tensor | None = None  # [num_edges, edge_feature_dim]
+    node_labels: torch.Tensor | None = None  # [num_nodes] ground truth
 
 
 class GraphConvLayer(nn.Module):
@@ -88,7 +87,7 @@ class BehavioralGNN(nn.Module):
     def __init__(
         self,
         input_dim: int = 64,  # From L1 latent representations
-        hidden_dims: List[int] = [128, 128, 64],
+        hidden_dims: list[int] = [128, 128, 64],
         output_dim: int = 64,  # Predicted next event embedding
         num_classes: int = 10,  # Event types (e.g., benign, malware, exploit)
     ):
@@ -121,7 +120,7 @@ class BehavioralGNN(nn.Module):
 
     def forward(
         self, node_features: torch.Tensor, edge_index: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass through GNN.
 
         Args:
@@ -159,9 +158,7 @@ class BehavioralLayer:
     Detects anomalous process chains, suspicious network flows, etc.
     """
 
-    def __init__(
-        self, latent_dim: int = 64, device: str = "cpu", anomaly_threshold: float = 0.7
-    ):
+    def __init__(self, latent_dim: int = 64, device: str = "cpu", anomaly_threshold: float = 0.7):
         """Initialize Behavioral Layer.
 
         Args:
@@ -188,7 +185,7 @@ class BehavioralLayer:
 
         logger.info(f"BehavioralLayer initialized on {device}")
 
-    def predict(self, event_graph: EventGraph) -> Dict:
+    def predict(self, event_graph: EventGraph) -> dict:
         """Predict behavioral patterns and detect anomalies.
 
         Args:
@@ -204,9 +201,7 @@ class BehavioralLayer:
             edge_index = event_graph.edge_index.to(self.device)
 
             # Forward pass
-            embeddings, next_event_pred, event_classes = self.gnn(
-                node_features, edge_index
-            )
+            embeddings, next_event_pred, event_classes = self.gnn(node_features, edge_index)
 
             # Compute prediction error (if ground truth available)
             if event_graph.node_labels is not None:
@@ -215,9 +210,7 @@ class BehavioralLayer:
 
                 # Anomaly detection via prediction error
                 error_mean = pred_error.mean().item()
-                anomaly_scores = (pred_error - self.error_mean) / (
-                    self.error_std + 1e-8
-                )
+                anomaly_scores = (pred_error - self.error_mean) / (self.error_std + 1e-8)
                 is_anomalous = anomaly_scores > self.anomaly_threshold
 
                 # Update error statistics
@@ -242,9 +235,7 @@ class BehavioralLayer:
                 "anomaly_scores": anomaly_scores.cpu().numpy(),
             }
 
-    def detect_anomalous_chains(
-        self, event_graph: EventGraph, chain_length: int = 5
-    ) -> List[List[int]]:
+    def detect_anomalous_chains(self, event_graph: EventGraph, chain_length: int = 5) -> list[list[int]]:
         """Detect anomalous event chains (e.g., suspicious process trees).
 
         Args:
@@ -271,9 +262,7 @@ class BehavioralLayer:
 
         return chains
 
-    def _trace_chain_backwards(
-        self, node: int, edge_index: np.ndarray, max_length: int
-    ) -> List[int]:
+    def _trace_chain_backwards(self, node: int, edge_index: np.ndarray, max_length: int) -> list[int]:
         """Trace event chain backwards from anomalous node.
 
         Args:
@@ -300,9 +289,7 @@ class BehavioralLayer:
 
         return list(reversed(chain))  # Chronological order
 
-    def train_step(
-        self, event_graph: EventGraph, optimizer: torch.optim.Optimizer
-    ) -> Dict[str, float]:
+    def train_step(self, event_graph: EventGraph, optimizer: torch.optim.Optimizer) -> dict[str, float]:
         """Single training step.
 
         Args:

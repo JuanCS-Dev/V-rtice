@@ -18,7 +18,6 @@ privacy of individuals whose data is collected.
 
 import hashlib
 import re
-from typing import Any, Dict, Optional
 
 
 class SecurityUtils:

@@ -8,16 +8,16 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, Any
-import uuid
-
+from typing import Any
 
 # ============================================================================
 # Enums
 # ============================================================================
+
 
 class AutomationLevel(Enum):
     """
@@ -29,6 +29,7 @@ class AutomationLevel(Enum):
     - ADVISORY: AI advises, human decides (≥60% confidence)
     - MANUAL: Human only, no AI execution (<60% confidence or high risk)
     """
+
     FULL = "full"  # Auto-execute, log audit trail
     SUPERVISED = "supervised"  # Require human approval
     ADVISORY = "advisory"  # AI suggests, human chooses
@@ -45,6 +46,7 @@ class RiskLevel(Enum):
     - HIGH: 10min SLA, manager escalation
     - CRITICAL: 5min SLA, immediate executive escalation
     """
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -53,6 +55,7 @@ class RiskLevel(Enum):
 
 class DecisionStatus(Enum):
     """Status of HITL decision in workflow."""
+
     PENDING = "pending"  # Waiting for operator review
     APPROVED = "approved"  # Operator approved
     REJECTED = "rejected"  # Operator rejected
@@ -74,6 +77,7 @@ class ActionType(Enum):
     - Investigation: collect_forensics, capture_memory, snapshot_vm
     - Response: send_alert, create_ticket, notify_team, escalate_incident
     """
+
     # Network actions
     ISOLATE_HOST = "isolate_host"
     BLOCK_IP = "block_ip"
@@ -117,6 +121,7 @@ class ActionType(Enum):
 # Configuration Classes
 # ============================================================================
 
+
 @dataclass
 class SLAConfig:
     """
@@ -124,6 +129,7 @@ class SLAConfig:
 
     Defines timeout periods for different risk levels and escalation policies.
     """
+
     # SLA timeout by risk level (minutes)
     low_risk_timeout: int = 30
     medium_risk_timeout: int = 15
@@ -137,12 +143,14 @@ class SLAConfig:
     auto_escalate_on_timeout: bool = True
 
     # Escalation chain
-    escalation_chain: List[str] = field(default_factory=lambda: [
-        "soc_operator",
-        "soc_supervisor",
-        "security_manager",
-        "ciso",
-    ])
+    escalation_chain: list[str] = field(
+        default_factory=lambda: [
+            "soc_operator",
+            "soc_supervisor",
+            "security_manager",
+            "ciso",
+        ]
+    )
 
     def get_timeout_minutes(self, risk_level: RiskLevel) -> int:
         """Get SLA timeout for risk level."""
@@ -168,6 +176,7 @@ class SLAConfig:
 @dataclass
 class EscalationConfig:
     """Configuration for decision escalation."""
+
     # Enable escalation
     enabled: bool = True
 
@@ -202,6 +211,7 @@ class EscalationConfig:
 @dataclass
 class HITLConfig:
     """Main HITL framework configuration."""
+
     # Confidence thresholds for automation levels
     full_automation_threshold: float = 0.95  # ≥95% → FULL
     supervised_threshold: float = 0.80  # ≥80% → SUPERVISED
@@ -243,13 +253,9 @@ class HITLConfig:
 
         # Validate threshold ordering
         if not (self.advisory_threshold <= self.supervised_threshold <= self.full_automation_threshold):
-            raise ValueError(
-                "Thresholds must be ordered: advisory <= supervised <= full_automation"
-            )
+            raise ValueError("Thresholds must be ordered: advisory <= supervised <= full_automation")
 
-    def get_automation_level(
-        self, confidence: float, risk_level: RiskLevel
-    ) -> AutomationLevel:
+    def get_automation_level(self, confidence: float, risk_level: RiskLevel) -> AutomationLevel:
         """
         Determine automation level based on confidence and risk.
 
@@ -270,17 +276,17 @@ class HITLConfig:
         # Confidence-based levels
         if confidence >= self.full_automation_threshold:
             return AutomationLevel.FULL
-        elif confidence >= self.supervised_threshold:
+        if confidence >= self.supervised_threshold:
             return AutomationLevel.SUPERVISED
-        elif confidence >= self.advisory_threshold:
+        if confidence >= self.advisory_threshold:
             return AutomationLevel.ADVISORY
-        else:
-            return AutomationLevel.MANUAL
+        return AutomationLevel.MANUAL
 
 
 # ============================================================================
 # Core Data Classes
 # ============================================================================
+
 
 @dataclass
 class DecisionContext:
@@ -289,9 +295,10 @@ class DecisionContext:
 
     Contains all information needed for human review and audit trail.
     """
+
     # Action details
     action_type: ActionType
-    action_params: Dict[str, Any] = field(default_factory=dict)
+    action_params: dict[str, Any] = field(default_factory=dict)
 
     # AI reasoning
     ai_reasoning: str = ""
@@ -301,10 +308,10 @@ class DecisionContext:
     # Threat context
     threat_score: float = 0.0
     threat_type: str = ""
-    iocs: List[str] = field(default_factory=list)  # Indicators of Compromise
+    iocs: list[str] = field(default_factory=list)  # Indicators of Compromise
 
     # Asset context
-    affected_assets: List[str] = field(default_factory=list)
+    affected_assets: list[str] = field(default_factory=list)
     asset_criticality: str = "medium"  # low, medium, high, critical
 
     # Business context
@@ -312,11 +319,11 @@ class DecisionContext:
     estimated_cost: float = 0.0
 
     # Related incidents
-    related_incidents: List[str] = field(default_factory=list)
-    similar_past_decisions: List[str] = field(default_factory=list)
+    related_incidents: list[str] = field(default_factory=list)
+    similar_past_decisions: list[str] = field(default_factory=list)
 
     # Additional metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def get_summary(self) -> str:
         """Get human-readable summary of context."""
@@ -343,6 +350,7 @@ class HITLDecision:
     Represents a single security decision made by MAXIMUS AI that may
     require human oversight based on confidence and risk level.
     """
+
     # Unique identifier
     decision_id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
@@ -359,31 +367,31 @@ class HITLDecision:
     updated_at: datetime = field(default_factory=datetime.utcnow)
 
     # SLA tracking
-    sla_deadline: Optional[datetime] = None
+    sla_deadline: datetime | None = None
     sla_warning_sent: bool = False
 
     # Assignment
-    assigned_operator: Optional[str] = None
-    assigned_at: Optional[datetime] = None
+    assigned_operator: str | None = None
+    assigned_at: datetime | None = None
 
     # Review tracking
-    reviewed_by: Optional[str] = None
-    reviewed_at: Optional[datetime] = None
+    reviewed_by: str | None = None
+    reviewed_at: datetime | None = None
     operator_comment: str = ""
 
     # Execution tracking
-    executed_at: Optional[datetime] = None
-    execution_result: Dict[str, Any] = field(default_factory=dict)
-    execution_error: Optional[str] = None
+    executed_at: datetime | None = None
+    execution_result: dict[str, Any] = field(default_factory=dict)
+    execution_error: str | None = None
 
     # Escalation tracking
     escalated: bool = False
-    escalated_to: Optional[str] = None
-    escalated_at: Optional[datetime] = None
+    escalated_to: str | None = None
+    escalated_at: datetime | None = None
     escalation_reason: str = ""
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_overdue(self) -> bool:
         """Check if decision is past SLA deadline."""
@@ -391,7 +399,7 @@ class HITLDecision:
             return False
         return datetime.utcnow() > self.sla_deadline
 
-    def get_time_remaining(self) -> Optional[timedelta]:
+    def get_time_remaining(self) -> timedelta | None:
         """Get time remaining until SLA deadline."""
         if self.sla_deadline is None:
             return None
@@ -420,6 +428,7 @@ class OperatorAction:
     """
     Action taken by human operator on a decision.
     """
+
     # Action details
     decision_id: str
     operator_id: str
@@ -431,12 +440,12 @@ class OperatorAction:
     reasoning: str = ""
 
     # Modifications (if operator changed parameters)
-    modifications: Dict[str, Any] = field(default_factory=dict)
+    modifications: dict[str, Any] = field(default_factory=dict)
 
     # Metadata
-    session_id: Optional[str] = None
-    ip_address: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    session_id: str | None = None
+    ip_address: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -444,6 +453,7 @@ class AuditEntry:
     """
     Immutable audit trail entry for compliance and forensics.
     """
+
     # Entry identifier
     entry_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: datetime = field(default_factory=datetime.utcnow)
@@ -460,18 +470,18 @@ class AuditEntry:
     actor_id: str = ""
 
     # Decision snapshot (for forensics)
-    decision_snapshot: Dict[str, Any] = field(default_factory=dict)
+    decision_snapshot: dict[str, Any] = field(default_factory=dict)
 
     # Context snapshot
-    context_snapshot: Dict[str, Any] = field(default_factory=dict)
+    context_snapshot: dict[str, Any] = field(default_factory=dict)
 
     # Compliance tags
-    compliance_tags: List[str] = field(default_factory=list)
+    compliance_tags: list[str] = field(default_factory=list)
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def redact_pii(self, pii_fields: List[str]) -> "AuditEntry":
+    def redact_pii(self, pii_fields: list[str]) -> "AuditEntry":
         """
         Redact PII from audit entry.
 

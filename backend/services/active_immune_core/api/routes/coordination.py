@@ -10,15 +10,17 @@ Version: 1.0.0
 
 from datetime import datetime
 from typing import Dict, Optional
-from fastapi import APIRouter, Query, Path, HTTPException, status
+
+from fastapi import APIRouter, HTTPException, Path, Query, status
+
 from api.models.coordination import (
-    TaskCreate,
-    TaskResponse,
-    TaskListResponse,
-    ElectionResponse,
     ConsensusProposal,
     ConsensusResponse,
     CoordinationStatus,
+    ElectionResponse,
+    TaskCreate,
+    TaskListResponse,
+    TaskResponse,
 )
 from api.websocket import broadcaster
 
@@ -239,9 +241,7 @@ async def trigger_election() -> ElectionResponse:
 
     # Broadcast leader elected if changed
     if leader_changed:
-        await broadcaster.broadcast_leader_elected(
-            _election_data["leader_id"], _election_data["election_term"]
-        )
+        await broadcaster.broadcast_leader_elected(_election_data["leader_id"], _election_data["election_term"])
 
     return ElectionResponse(**_election_data)
 
@@ -299,9 +299,7 @@ async def create_consensus_proposal(proposal: ConsensusProposal) -> ConsensusRes
     await broadcaster.broadcast_consensus_proposed(proposal_result)
 
     # Broadcast consensus decided
-    await broadcaster.broadcast_consensus_decided(
-        proposal_id, status_val, approval_rate
-    )
+    await broadcaster.broadcast_consensus_decided(proposal_id, status_val, approval_rate)
 
     return ConsensusResponse(**proposal_result)
 
@@ -385,21 +383,10 @@ async def get_coordination_status() -> CoordinationStatus:
 
     total_agents = len(agents)
     # Count agents with active statuses (active, ativo, patrulhando)
-    alive_agents = sum(
-        1 for a in agents
-        if a.status.lower() in ["active", "ativo", "patrulhando"]
-    )
+    alive_agents = sum(1 for a in agents if a.status.lower() in ["active", "ativo", "patrulhando"])
 
-    avg_health = (
-        sum(a.health for a in agents) / total_agents
-        if total_agents > 0
-        else 0.0
-    )
-    avg_load = (
-        sum(a.load for a in agents) / total_agents
-        if total_agents > 0
-        else 0.0
-    )
+    avg_health = sum(a.health for a in agents) / total_agents if total_agents > 0 else 0.0
+    avg_load = sum(a.load for a in agents) / total_agents if total_agents > 0 else 0.0
 
     # Count tasks by status
     tasks_pending = sum(1 for t in _tasks_store.values() if t["status"] == "pending")

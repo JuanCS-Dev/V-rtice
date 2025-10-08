@@ -8,9 +8,8 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import asyncio
 import logging
-import pytest
+
 import pytest_asyncio
 
 from .core_manager import CoreManager
@@ -39,14 +38,14 @@ async def cleanup_core():
             core = CoreManager._instance
 
             # Stop all agents
-            if core.agent_factory and hasattr(core.agent_factory, '_agents'):
+            if core.agent_factory and hasattr(core.agent_factory, "_agents"):
                 agent_ids = list(core.agent_factory._agents.keys())
                 logger.debug(f"Stopping {len(agent_ids)} leftover agents")
 
                 for agent_id in agent_ids:
                     try:
                         agent = core.agent_factory._agents[agent_id]
-                        if hasattr(agent, '_running') and agent._running:
+                        if hasattr(agent, "_running") and agent._running:
                             await agent.parar()
                     except Exception as e:
                         logger.debug(f"Error stopping agent {agent_id}: {e}")
@@ -76,14 +75,14 @@ async def cleanup_core():
             core = CoreManager._instance
 
             # Stop all agents
-            if core.agent_factory and hasattr(core.agent_factory, '_agents'):
+            if core.agent_factory and hasattr(core.agent_factory, "_agents"):
                 agent_ids = list(core.agent_factory._agents.keys())
                 logger.debug(f"Stopping {len(agent_ids)} test agents")
 
                 for agent_id in agent_ids:
                     try:
                         agent = core.agent_factory._agents[agent_id]
-                        if hasattr(agent, '_running') and agent._running:
+                        if hasattr(agent, "_running") and agent._running:
                             await agent.parar()
                     except Exception as e:
                         logger.debug(f"Error stopping agent {agent_id}: {e}")

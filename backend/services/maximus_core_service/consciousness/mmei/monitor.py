@@ -78,9 +78,9 @@ import asyncio
 import hashlib
 import time
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Dict, List, Optional
 
 import numpy as np
 
@@ -113,8 +113,8 @@ class PhysicalMetrics:
     exception_count: int = 0  # Recent exceptions
 
     # Physical state (if available)
-    temperature_celsius: Optional[float] = None  # CPU/system temp
-    power_draw_watts: Optional[float] = None  # Power consumption
+    temperature_celsius: float | None = None  # CPU/system temp
+    power_draw_watts: float | None = None  # Power consumption
 
     # Network state
     network_latency_ms: float = 0.0  # Average latency
@@ -197,7 +197,7 @@ class AbstractNeeds:
 
         return (most_urgent_name, most_urgent_value, urgency)
 
-    def get_critical_needs(self, threshold: float = 0.80) -> List[tuple[str, float]]:
+    def get_critical_needs(self, threshold: float = 0.80) -> list[tuple[str, float]]:
         """Get all needs above critical threshold."""
         needs = {
             "rest_need": self.rest_need,
@@ -212,14 +212,13 @@ class AbstractNeeds:
         """Classify urgency level based on need value."""
         if need_value < 0.20:
             return NeedUrgency.SATISFIED
-        elif need_value < 0.40:
+        if need_value < 0.40:
             return NeedUrgency.LOW
-        elif need_value < 0.60:
+        if need_value < 0.60:
             return NeedUrgency.MODERATE
-        elif need_value < 0.80:
+        if need_value < 0.80:
             return NeedUrgency.HIGH
-        else:
-            return NeedUrgency.CRITICAL
+        return NeedUrgency.CRITICAL
 
     def __repr__(self) -> str:
         most_urgent, value, urgency = self.get_most_urgent()
@@ -397,27 +396,27 @@ class InternalStateMonitor:
     "Consciousness is not just in the head - it is in the body."
     """
 
-    def __init__(self, config: Optional[InteroceptionConfig] = None, monitor_id: str = "mmei-monitor-primary"):
+    def __init__(self, config: InteroceptionConfig | None = None, monitor_id: str = "mmei-monitor-primary"):
         self.monitor_id = monitor_id
         self.config = config or InteroceptionConfig()
 
         # State
         self._running: bool = False
-        self._monitoring_task: Optional[asyncio.Task] = None
+        self._monitoring_task: asyncio.Task | None = None
 
         # Metrics history
-        self._metrics_history: List[PhysicalMetrics] = []
-        self._needs_history: List[AbstractNeeds] = []
+        self._metrics_history: list[PhysicalMetrics] = []
+        self._needs_history: list[AbstractNeeds] = []
 
         # Current state
-        self._current_metrics: Optional[PhysicalMetrics] = None
-        self._current_needs: Optional[AbstractNeeds] = None
+        self._current_metrics: PhysicalMetrics | None = None
+        self._current_needs: AbstractNeeds | None = None
 
         # Metrics collection
-        self._metrics_collector: Optional[Callable[[], PhysicalMetrics]] = None
+        self._metrics_collector: Callable[[], PhysicalMetrics] | None = None
 
         # Callbacks
-        self._need_callbacks: List[tuple[Callable, float]] = []  # (callback, threshold)
+        self._need_callbacks: list[tuple[Callable, float]] = []  # (callback, threshold)
 
         # Performance tracking
         self.total_collections: int = 0
@@ -430,10 +429,10 @@ class InternalStateMonitor:
 
         # FASE VII (Safety Hardening): Goal management & overflow protection
         self.rate_limiter = RateLimiter(max_per_minute=MAX_GOALS_PER_MINUTE)
-        self.active_goals: List[Goal] = []  # Currently active goals
+        self.active_goals: list[Goal] = []  # Currently active goals
         self.goal_queue: deque = deque(maxlen=MAX_GOAL_QUEUE_SIZE)  # Pending goals
         self.goal_hashes: set[str] = set()  # For deduplication
-        self.goal_hash_timestamps: Dict[str, float] = {}  # Dedup expiry tracking
+        self.goal_hash_timestamps: dict[str, float] = {}  # Dedup expiry tracking
         self.total_goals_generated: int = 0
         self.goals_rate_limited: int = 0
         self.goals_deduplicated: int = 0
@@ -536,7 +535,7 @@ class InternalStateMonitor:
                 print(f"⚠️  MMEI collection error: {e}")
                 await asyncio.sleep(interval)
 
-    async def _collect_metrics(self) -> Optional[PhysicalMetrics]:
+    async def _collect_metrics(self) -> PhysicalMetrics | None:
         """Collect current physical metrics."""
         try:
             start = time.time()
@@ -669,15 +668,15 @@ class InternalStateMonitor:
                 except Exception as e:
                     print(f"⚠️  Need callback error: {e}")
 
-    def get_current_needs(self) -> Optional[AbstractNeeds]:
+    def get_current_needs(self) -> AbstractNeeds | None:
         """Get most recent computed needs."""
         return self._current_needs
 
-    def get_current_metrics(self) -> Optional[PhysicalMetrics]:
+    def get_current_metrics(self) -> PhysicalMetrics | None:
         """Get most recent collected metrics."""
         return self._current_metrics
 
-    def get_needs_trend(self, need_name: str, window_samples: Optional[int] = None) -> List[float]:
+    def get_needs_trend(self, need_name: str, window_samples: int | None = None) -> list[float]:
         """
         Get historical trend for specific need.
 
@@ -695,7 +694,7 @@ class InternalStateMonitor:
 
         return [getattr(needs, need_name, 0.0) for needs in history]
 
-    def get_moving_average(self, need_name: str, window_samples: Optional[int] = None) -> float:
+    def get_moving_average(self, need_name: str, window_samples: int | None = None) -> float:
         """
         Get moving average of specific need.
 
@@ -716,7 +715,7 @@ class InternalStateMonitor:
 
         return float(np.mean(trend))
 
-    def get_statistics(self) -> Dict[str, any]:
+    def get_statistics(self) -> dict[str, any]:
         """Get monitor performance statistics."""
         success_rate = (
             (self.total_collections - self.failed_collections) / self.total_collections
@@ -744,7 +743,7 @@ class InternalStateMonitor:
         need_name: str,
         need_value: float,
         urgency: NeedUrgency,
-    ) -> Optional[Goal]:
+    ) -> Goal | None:
         """
         Generate a goal from an abstract need with full safety checks.
 
@@ -907,7 +906,7 @@ class InternalStateMonitor:
 
         return False
 
-    def get_health_metrics(self) -> Dict[str, any]:
+    def get_health_metrics(self) -> dict[str, any]:
         """
         Get MMEI health metrics for Safety Core integration.
 
@@ -945,9 +944,7 @@ class InternalStateMonitor:
                 "repair_need": current_needs.repair_need if current_needs else 0.0,
                 "efficiency_need": current_needs.efficiency_need if current_needs else 0.0,
                 "connectivity_need": current_needs.connectivity_need if current_needs else 0.0,
-                "most_urgent": (
-                    current_needs.get_most_urgent()[0] if current_needs else None
-                ),
+                "most_urgent": (current_needs.get_most_urgent()[0] if current_needs else None),
             },
         }
 

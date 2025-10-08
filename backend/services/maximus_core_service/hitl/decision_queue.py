@@ -17,16 +17,15 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set
-from collections import deque
 import logging
 import threading
+from collections import deque
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 
 from .base import (
-    HITLDecision,
     DecisionStatus,
+    HITLDecision,
     RiskLevel,
     SLAConfig,
 )
@@ -38,11 +37,13 @@ logger = logging.getLogger(__name__)
 # Queued Decision
 # ============================================================================
 
+
 @dataclass
 class QueuedDecision:
     """
     Wrapper for decision in queue with queueing metadata.
     """
+
     # Decision reference
     decision: HITLDecision
 
@@ -63,7 +64,7 @@ class QueuedDecision:
         """Get time decision has been in queue."""
         return datetime.utcnow() - self.queued_at
 
-    def get_time_until_sla(self) -> Optional[timedelta]:
+    def get_time_until_sla(self) -> timedelta | None:
         """Get time remaining until SLA deadline."""
         if self.decision.sla_deadline is None:
             return None
@@ -95,6 +96,7 @@ class QueuedDecision:
 # SLA Monitor
 # ============================================================================
 
+
 class SLAMonitor:
     """
     Monitors decisions for SLA violations and warnings.
@@ -117,12 +119,12 @@ class SLAMonitor:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Callbacks
-        self._warning_callbacks: List[callable] = []
-        self._violation_callbacks: List[callable] = []
+        self._warning_callbacks: list[callable] = []
+        self._violation_callbacks: list[callable] = []
 
         # Monitoring state
         self._running = False
-        self._monitor_thread: Optional[threading.Thread] = None
+        self._monitor_thread: threading.Thread | None = None
 
         # Metrics
         self.metrics = {
@@ -145,9 +147,7 @@ class SLAMonitor:
             return
 
         self._running = True
-        self._monitor_thread = threading.Thread(
-            target=self._monitor_loop, daemon=True
-        )
+        self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self._monitor_thread.start()
         self.logger.info(f"SLA monitor started (check_interval={self.check_interval}s)")
 
@@ -174,9 +174,7 @@ class SLAMonitor:
             queued_decision: Queued decision to check
         """
         # Check for warning
-        if queued_decision.should_send_sla_warning(
-            self.sla_config.warning_threshold
-        ):
+        if queued_decision.should_send_sla_warning(self.sla_config.warning_threshold):
             self._trigger_warning(queued_decision)
 
         # Check for violation
@@ -227,6 +225,7 @@ class SLAMonitor:
 # Decision Queue
 # ============================================================================
 
+
 class DecisionQueue:
     """
     Priority queue for decisions awaiting human review.
@@ -234,7 +233,7 @@ class DecisionQueue:
     Implements multi-level priority queue with SLA monitoring.
     """
 
-    def __init__(self, sla_config: Optional[SLAConfig] = None, max_size: int = 1000):
+    def __init__(self, sla_config: SLAConfig | None = None, max_size: int = 1000):
         """
         Initialize decision queue.
 
@@ -247,7 +246,7 @@ class DecisionQueue:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Priority queues (one per risk level)
-        self._queues: Dict[RiskLevel, deque] = {
+        self._queues: dict[RiskLevel, deque] = {
             RiskLevel.CRITICAL: deque(),
             RiskLevel.HIGH: deque(),
             RiskLevel.MEDIUM: deque(),
@@ -255,11 +254,11 @@ class DecisionQueue:
         }
 
         # Decision lookup (by decision_id)
-        self._decisions: Dict[str, QueuedDecision] = {}
+        self._decisions: dict[str, QueuedDecision] = {}
 
         # Operator assignment tracking
-        self._operators: Set[str] = set()
-        self._operator_assignments: Dict[str, List[str]] = {}  # operator_id -> [decision_ids]
+        self._operators: set[str] = set()
+        self._operator_assignments: dict[str, list[str]] = {}  # operator_id -> [decision_ids]
         self._current_operator_index: int = 0  # For round-robin
 
         # SLA monitor
@@ -319,9 +318,7 @@ class DecisionQueue:
 
         return queued
 
-    def dequeue(
-        self, risk_level: Optional[RiskLevel] = None, operator_id: Optional[str] = None
-    ) -> Optional[HITLDecision]:
+    def dequeue(self, risk_level: RiskLevel | None = None, operator_id: str | None = None) -> HITLDecision | None:
         """
         Remove and return highest priority decision from queue.
 
@@ -371,8 +368,8 @@ class DecisionQueue:
         return None  # All queues empty
 
     def get_pending_decisions(
-        self, risk_level: Optional[RiskLevel] = None, operator_id: Optional[str] = None
-    ) -> List[HITLDecision]:
+        self, risk_level: RiskLevel | None = None, operator_id: str | None = None
+    ) -> list[HITLDecision]:
         """
         Get pending decisions without removing from queue.
 
@@ -397,16 +394,18 @@ class DecisionQueue:
                 # Filter by operator if specified
                 # Only skip if decision is assigned to a DIFFERENT operator
                 # Unassigned decisions (None) are available to all operators
-                if (operator_id and
-                    queued.decision.assigned_operator is not None and
-                    queued.decision.assigned_operator != operator_id):
+                if (
+                    operator_id
+                    and queued.decision.assigned_operator is not None
+                    and queued.decision.assigned_operator != operator_id
+                ):
                     continue
 
                 decisions.append(queued.decision)
 
         return decisions
 
-    def get_decision(self, decision_id: str) -> Optional[QueuedDecision]:
+    def get_decision(self, decision_id: str) -> QueuedDecision | None:
         """Get decision from queue by ID (without removing)."""
         return self._decisions.get(decision_id)
 
@@ -463,11 +462,9 @@ class DecisionQueue:
         # Update metrics
         self.metrics["total_assigned"] += 1
 
-        self.logger.info(
-            f"Decision assigned: {decision.decision_id} → {operator_id}"
-        )
+        self.logger.info(f"Decision assigned: {decision.decision_id} → {operator_id}")
 
-    def get_next_operator_round_robin(self) -> Optional[str]:
+    def get_next_operator_round_robin(self) -> str | None:
         """Get next operator using round-robin assignment."""
         if not self._operators:
             return None
@@ -486,18 +483,12 @@ class DecisionQueue:
     def _handle_sla_warning(self, decision: HITLDecision):
         """Handle SLA warning (callback from SLAMonitor)."""
         self.metrics["sla_warnings"] += 1
-        self.logger.warning(
-            f"SLA warning for decision: {decision.decision_id} "
-            f"(risk={decision.risk_level.value})"
-        )
+        self.logger.warning(f"SLA warning for decision: {decision.decision_id} (risk={decision.risk_level.value})")
 
     def _handle_sla_violation(self, decision: HITLDecision):
         """Handle SLA violation (callback from SLAMonitor)."""
         self.metrics["sla_violations"] += 1
-        self.logger.error(
-            f"SLA violation for decision: {decision.decision_id} "
-            f"(risk={decision.risk_level.value})"
-        )
+        self.logger.error(f"SLA violation for decision: {decision.decision_id} (risk={decision.risk_level.value})")
 
     def _calculate_priority(self, decision: HITLDecision) -> float:
         """
@@ -532,18 +523,16 @@ class DecisionQueue:
         """Get total number of decisions in queue."""
         return sum(len(queue) for queue in self._queues.values())
 
-    def get_size_by_risk(self) -> Dict[RiskLevel, int]:
+    def get_size_by_risk(self) -> dict[RiskLevel, int]:
         """Get queue size by risk level."""
         return {level: len(queue) for level, queue in self._queues.items()}
 
-    def get_metrics(self) -> Dict[str, any]:
+    def get_metrics(self) -> dict[str, any]:
         """Get queue metrics."""
         return {
             **self.metrics,
             "current_queue_size": self.get_total_size(),
-            "queue_by_risk": {
-                level.value: size for level, size in self.get_size_by_risk().items()
-            },
+            "queue_by_risk": {level.value: size for level, size in self.get_size_by_risk().items()},
             "average_time_in_queue": self._calculate_average_time_in_queue(),
         }
 
@@ -552,13 +541,10 @@ class DecisionQueue:
         if not self._decisions:
             return 0.0
 
-        total_time = sum(
-            queued.get_time_in_queue().total_seconds()
-            for queued in self._decisions.values()
-        )
+        total_time = sum(queued.get_time_in_queue().total_seconds() for queued in self._decisions.values())
         return total_time / len(self._decisions)
 
     def __del__(self):
         """Cleanup: stop SLA monitor."""
-        if hasattr(self, 'sla_monitor'):
+        if hasattr(self, "sla_monitor"):
             self.sla_monitor.stop()

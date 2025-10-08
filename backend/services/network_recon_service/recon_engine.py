@@ -14,10 +14,8 @@ Key functionalities include:
   threat assessment, vulnerability management, and offensive operations.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import uuid
 
 from masscan_wrapper import MasscanWrapper
 from metrics import MetricsCollector
@@ -62,9 +60,7 @@ class ReconEngine:
             if task.scan_type == "nmap_full":
                 results_data = await self.nmap_wrapper.full_scan(task.target)
             elif task.scan_type == "masscan_ports":
-                results_data = await self.masscan_wrapper.port_scan(
-                    task.target, task.parameters.get("ports", [])
-                )
+                results_data = await self.masscan_wrapper.port_scan(task.target, task.parameters.get("ports", []))
             else:
                 raise ValueError(f"Unsupported scan type: {task.scan_type}")
 
@@ -119,8 +115,4 @@ class ReconEngine:
         Returns:
             List[ReconTask]: A list of active ReconTask objects.
         """
-        return [
-            task
-            for task in self.active_tasks.values()
-            if task.status == ReconStatus.RUNNING
-        ]
+        return [task for task in self.active_tasks.values() if task.status == ReconStatus.RUNNING]

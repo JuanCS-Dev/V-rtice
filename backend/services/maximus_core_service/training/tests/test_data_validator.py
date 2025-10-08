@@ -11,14 +11,8 @@ Date: 2025-10-06
 """
 
 import numpy as np
-import pytest
 
-from training.data_validator import (
-    DataValidator,
-    ValidationResult,
-    ValidationIssue,
-    ValidationSeverity
-)
+from training.data_validator import DataValidator, ValidationIssue, ValidationResult, ValidationSeverity
 
 
 def test_validation_passes(synthetic_features, synthetic_labels):
@@ -30,18 +24,10 @@ def test_validation_passes(synthetic_features, synthetic_labels):
     - Validation result is marked as passed
     """
     # Create validator with clean data
-    validator = DataValidator(
-        features=synthetic_features,
-        labels=synthetic_labels
-    )
+    validator = DataValidator(features=synthetic_features, labels=synthetic_labels)
 
     # Run validation
-    result = validator.validate(
-        check_missing=True,
-        check_outliers=True,
-        check_labels=True,
-        check_distributions=True
-    )
+    result = validator.validate(check_missing=True, check_outliers=True, check_labels=True, check_distributions=True)
 
     # Verify validation passed
     assert isinstance(result, ValidationResult)
@@ -92,10 +78,7 @@ def test_validation_detects_issues():
     # 90 samples of class 0 - very imbalanced
 
     # Create validator
-    validator = DataValidator(
-        features=features,
-        labels=labels
-    )
+    validator = DataValidator(features=features, labels=labels)
 
     # Run validation
     result = validator.validate(
@@ -104,7 +87,7 @@ def test_validation_detects_issues():
         check_labels=True,
         check_distributions=True,
         missing_threshold=0.01,  # Very low threshold to catch our missing values
-        outlier_threshold=3.0
+        outlier_threshold=3.0,
     )
 
     # Verify validation detected issues
@@ -113,8 +96,7 @@ def test_validation_detects_issues():
 
     # Should have at least some warnings or errors
     warning_or_error_issues = [
-        issue for issue in result.issues
-        if issue.severity in [ValidationSeverity.WARNING, ValidationSeverity.ERROR]
+        issue for issue in result.issues if issue.severity in [ValidationSeverity.WARNING, ValidationSeverity.ERROR]
     ]
     assert len(warning_or_error_issues) > 0, "No warnings or errors detected in problematic data"
 
@@ -130,28 +112,33 @@ def test_validation_detects_issues():
     assert len(outlier_issues) > 0, "Failed to detect outliers"
 
     # Should detect label imbalance
-    label_issues = [issue for issue in result.issues if "label" in issue.check_name.lower() or "class" in issue.check_name.lower() or "imbalance" in issue.message.lower()]
+    label_issues = [
+        issue
+        for issue in result.issues
+        if "label" in issue.check_name.lower()
+        or "class" in issue.check_name.lower()
+        or "imbalance" in issue.message.lower()
+    ]
     assert len(label_issues) > 0, "Failed to detect label imbalance"
 
     # Should detect constant features (this might be reported as distributions issue)
     constant_or_dist_issues = [
-        issue for issue in result.issues
+        issue
+        for issue in result.issues
         if "constant" in issue.check_name.lower()
         or "variance" in issue.check_name.lower()
         or "distribution" in issue.check_name.lower()
     ]
     # Constant features might not be reported if variance check passes
     # Just verify we have at least missing and outlier issues
-    assert len(missing_issues) > 0 and len(outlier_issues) > 0, \
-        "Failed to detect basic data quality issues"
+    assert len(missing_issues) > 0 and len(outlier_issues) > 0, "Failed to detect basic data quality issues"
 
     # Verify severity levels exist
     error_issues = [issue for issue in result.issues if issue.severity == ValidationSeverity.ERROR]
     warning_issues = [issue for issue in result.issues if issue.severity == ValidationSeverity.WARNING]
 
     # Should have some warnings or errors (severity assignment may vary)
-    assert len(error_issues) + len(warning_issues) > 0, \
-        "No ERROR or WARNING severity issues found"
+    assert len(error_issues) + len(warning_issues) > 0, "No ERROR or WARNING severity issues found"
 
     # Verify issue details
     for issue in result.issues:

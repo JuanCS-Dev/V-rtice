@@ -1,0 +1,44 @@
+# Active Immune Core Service - Production Dependencies
+
+# FastAPI (updated for CVE-2024-24762, CVE-2024-64930, CVE-2025-54121)
+fastapi==0.118.0
+starlette==0.47.2  # Explicit override for CVE-2025-54121
+uvicorn[standard]==0.34.0
+pydantic==2.10.6
+pydantic-settings==2.7.1
+
+# Async HTTP (updated for CVE-2025-53643, CVE-2024-23334, CVE-2024-30251, CVE-2024-27306, CVE-2024-52304)
+aiohttp==3.12.14
+httpx==0.28.1
+
+# Kafka (Cytokines)
+aiokafka==0.10.0
+
+# Redis (Hormones + State)
+redis==5.0.1
+aioredis==2.0.1
+
+# PostgreSQL (Memory)
+asyncpg==0.29.0
+sqlalchemy[asyncio]==2.0.23
+alembic==1.13.0
+
+# Monitoring
+prometheus-client==0.19.0
+
+# Logging
+structlog==23.3.0
+python-json-logger==2.0.7
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Development tools (moved to requirements-dev.txt for proper separation)
+# black, isort, flake8, mypy, bandit, safety should be in dev dependencies only
+
+# Type stubs
+types-redis==4.6.0.11
+types-aiofiles==23.2.0.0

@@ -9,21 +9,19 @@ Version: 1.0.0
 """
 
 import pytest
-from datetime import datetime
 
-from .core_manager import CoreManager
-from .coordination_service import (
-    CoordinationService,
-    LymphnodeNotAvailableError,
-    AgentNotFoundForCloneError,
-)
-from .agent_service import AgentService
 from ..models.coordination import (
     CloneResponse,
-    LymphnodeMetrics,
     HomeostaticStateResponse,
+    LymphnodeMetrics,
 )
-
+from .agent_service import AgentService
+from .coordination_service import (
+    AgentNotFoundForCloneError,
+    CoordinationService,
+    LymphnodeNotAvailableError,
+)
+from .core_manager import CoreManager
 
 # ==================== FIXTURES ====================
 
@@ -90,10 +88,7 @@ async def test_clone_agent_success():
 
     # First, create an agent to clone
     agent_service = AgentService()
-    original = await agent_service.create_agent(
-        "macrofago",
-        {"area_patrulha": "test_area"}
-    )
+    original = await agent_service.create_agent("macrofago", {"area_patrulha": "test_area"})
 
     # Clone the agent
     clone_response = await service.clone_agent(
@@ -138,10 +133,7 @@ async def test_clone_agent_single():
 
     # Create an agent to clone
     agent_service = AgentService()
-    original = await agent_service.create_agent(
-        "nk_cell",
-        {"area_patrulha": "test_area"}
-    )
+    original = await agent_service.create_agent("nk_cell", {"area_patrulha": "test_area"})
 
     # Clone with default num_clones
     clone_response = await service.clone_agent(
@@ -189,10 +181,7 @@ async def test_lymphnode_metrics_after_clone():
 
     # Create and clone an agent
     agent_service = AgentService()
-    original = await agent_service.create_agent(
-        "neutrofilo",
-        {"area_patrulha": "test_area"}
-    )
+    original = await agent_service.create_agent("neutrofilo", {"area_patrulha": "test_area"})
 
     await service.clone_agent(
         agent_id=original.agent_id,
@@ -252,10 +241,7 @@ async def test_destroy_clones():
 
     # Create and clone an agent
     agent_service = AgentService()
-    original = await agent_service.create_agent(
-        "macrofago",
-        {"area_patrulha": "test_area"}
-    )
+    original = await agent_service.create_agent("macrofago", {"area_patrulha": "test_area"})
 
     # Clone with specific specialization
     await service.clone_agent(
@@ -293,10 +279,7 @@ async def test_multiple_clones_different_specializations():
 
     # Create an agent
     agent_service = AgentService()
-    original = await agent_service.create_agent(
-        "macrofago",
-        {"area_patrulha": "test_area"}
-    )
+    original = await agent_service.create_agent("macrofago", {"area_patrulha": "test_area"})
 
     # Create clones with different specializations
     clone_response1 = await service.clone_agent(
@@ -338,10 +321,7 @@ async def test_concurrent_cloning():
     agent_service = AgentService()
     agents = []
     for i in range(3):
-        agent = await agent_service.create_agent(
-            "macrofago",
-            {"area_patrulha": f"area_{i}"}
-        )
+        agent = await agent_service.create_agent("macrofago", {"area_patrulha": f"area_{i}"})
         agents.append(agent)
 
     # Clone all concurrently

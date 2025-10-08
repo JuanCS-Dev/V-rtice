@@ -5,17 +5,17 @@ Implements multi-tier caching strategy with category-specific TTLs,
 LRU eviction, and async operations for high-performance lookups.
 """
 
-from datetime import timedelta
-from enum import Enum
 import hashlib
 import json
 import logging
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from config import get_settings
-from redis.asyncio import Redis
 import redis.asyncio as aioredis
+from redis.asyncio import Redis
 from redis.exceptions import RedisError
+
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -115,9 +115,7 @@ class CacheManager:
         }
         return ttl_map.get(category, 3600)  # Default 1 hour
 
-    async def get(
-        self, category: CacheCategory, identifier: str, deserialize: bool = True
-    ) -> Optional[Any]:
+    async def get(self, category: CacheCategory, identifier: str, deserialize: bool = True) -> Optional[Any]:
         """
         Get value from cache.
 
@@ -269,9 +267,7 @@ class CacheManager:
             logger.error(f"Factory function error for {category}/{identifier}: {e}")
             raise
 
-    async def increment(
-        self, category: CacheCategory, identifier: str, amount: int = 1
-    ) -> int:
+    async def increment(self, category: CacheCategory, identifier: str, amount: int = 1) -> int:
         """
         Increment counter value.
 
@@ -293,9 +289,7 @@ class CacheManager:
             logger.error(f"Redis INCR error: {e}")
             return 0
 
-    async def get_many(
-        self, category: CacheCategory, identifiers: List[str]
-    ) -> Dict[str, Any]:
+    async def get_many(self, category: CacheCategory, identifiers: List[str]) -> Dict[str, Any]:
         """
         Get multiple values in single round-trip.
 

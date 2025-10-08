@@ -4,12 +4,13 @@ Connector for fetching data from SINESP (Sistema Nacional de Informações
 de Segurança Pública) service.
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from config import get_settings
 import httpx
+
+from config import get_settings
 from models import DataSource, Ocorrencia, SinespVehicleResponse, Veiculo
 
 logger = logging.getLogger(__name__)
@@ -56,9 +57,7 @@ class SinespConnector:
         """
         try:
             if not self._client:
-                raise RuntimeError(
-                    "Connector not initialized. Use async context manager."
-                )
+                raise RuntimeError("Connector not initialized. Use async context manager.")
 
             logger.info(f"Fetching vehicle data for plate: {placa}")
 
@@ -108,9 +107,7 @@ class SinespConnector:
         logger.info(f"Fetched {len(veiculos)} vehicles out of {len(placas)} plates")
         return veiculos
 
-    async def fetch_occurrences(
-        self, filters: Optional[Dict[str, Any]] = None
-    ) -> List[Ocorrencia]:
+    async def fetch_occurrences(self, filters: Optional[Dict[str, Any]] = None) -> List[Ocorrencia]:
         """
         Fetch occurrences (criminal reports) from SINESP.
 
@@ -122,9 +119,7 @@ class SinespConnector:
         """
         try:
             if not self._client:
-                raise RuntimeError(
-                    "Connector not initialized. Use async context manager."
-                )
+                raise RuntimeError("Connector not initialized. Use async context manager.")
 
             filters = filters or {}
             logger.info(f"Fetching occurrences with filters: {filters}")
@@ -189,9 +184,7 @@ class SinespConnector:
         """
         try:
             if not self._client:
-                raise RuntimeError(
-                    "Connector not initialized. Use async context manager."
-                )
+                raise RuntimeError("Connector not initialized. Use async context manager.")
 
             response = await self._client.get("/ocorrencias/tipos")
             response.raise_for_status()
@@ -216,9 +209,7 @@ class SinespConnector:
         try:
             if not self._client:
                 # Create temporary client for health check
-                async with httpx.AsyncClient(
-                    base_url=self.base_url, timeout=5.0
-                ) as client:
+                async with httpx.AsyncClient(base_url=self.base_url, timeout=5.0) as client:
                     response = await client.get("/health")
                     return response.status_code == 200
             else:

@@ -26,7 +26,6 @@ from active_immune_core.communication.cytokines import (
     CytokineType,
 )
 
-
 # ==================== FIXTURES ====================
 
 
@@ -349,6 +348,7 @@ class TestConsumerDegradedMode:
 
     async def test_subscribe_duplicate_consumer_id(self, messenger):
         """Test subscribing with duplicate consumer ID"""
+
         async def callback(msg: CytokineMessage):
             pass
 
@@ -432,6 +432,7 @@ class TestMessengerUtilities:
 
     async def test_get_active_consumers_with_subscribers(self, messenger):
         """Test getting active consumers after subscribing"""
+
         async def callback(msg: CytokineMessage):
             pass
 
@@ -471,6 +472,7 @@ class TestEdgeCases:
 
     async def test_callback_exception_handling(self, messenger):
         """Test that callback exceptions don't crash messenger"""
+
         async def failing_callback(msg: CytokineMessage):
             raise Exception("Callback error")
 

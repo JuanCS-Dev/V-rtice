@@ -1,7 +1,6 @@
 """Docker Actuator - Container Management via Docker SDK"""
 
 import logging
-from typing import Any, Dict, List, Optional
 
 import docker
 from docker.errors import APIError, DockerException
@@ -24,7 +23,7 @@ class DockerActuator:
             logger.error(f"Docker connection failed: {e}")
             self.client = None
 
-    def scale_service(self, service_name: str, replicas: int) -> Dict:
+    def scale_service(self, service_name: str, replicas: int) -> dict:
         """Scale Docker Swarm service or compose service."""
         if not self.client:
             return {"success": False, "error": "Docker client unavailable"}
@@ -67,20 +66,16 @@ class DockerActuator:
         except APIError as e:
             if "service" in str(e).lower() and "not found" in str(e).lower():
                 # Fallback to compose (restart with env var for scaling)
-                logger.warning(
-                    f"Service {service_name} not in Swarm, attempting compose scaling"
-                )
+                logger.warning(f"Service {service_name} not in Swarm, attempting compose scaling")
                 return self._scale_compose_service(service_name, replicas)
 
             logger.error(f"Docker scale error: {e}")
             return {"success": False, "error": str(e)}
 
-    def _scale_compose_service(self, service_name: str, replicas: int) -> Dict:
+    def _scale_compose_service(self, service_name: str, replicas: int) -> dict:
         """Scale Docker Compose service by container count."""
         try:
-            containers = self.client.containers.list(
-                filters={"label": f"com.docker.compose.service={service_name}"}
-            )
+            containers = self.client.containers.list(filters={"label": f"com.docker.compose.service={service_name}"})
 
             current_count = len(containers)
 
@@ -125,17 +120,15 @@ class DockerActuator:
     def update_resource_limits(
         self,
         container_name: str,
-        cpu_limit: Optional[float] = None,
-        memory_limit: Optional[str] = None,
-    ) -> Dict:
+        cpu_limit: float | None = None,
+        memory_limit: str | None = None,
+    ) -> dict:
         """Update container resource limits (CPU cores, memory)."""
         if not self.client:
             return {"success": False, "error": "Docker client unavailable"}
 
         if self.dry_run_mode:
-            logger.info(
-                f"DRY-RUN: Update {container_name} limits - CPU: {cpu_limit}, Memory: {memory_limit}"
-            )
+            logger.info(f"DRY-RUN: Update {container_name} limits - CPU: {cpu_limit}, Memory: {memory_limit}")
             self.action_log.append(
                 {
                     "action": "update_limits",
@@ -187,7 +180,7 @@ class DockerActuator:
             logger.error(f"Resource limit update error: {e}")
             return {"success": False, "error": str(e)}
 
-    def restart_container(self, container_name: str, timeout: int = 10) -> Dict:
+    def restart_container(self, container_name: str, timeout: int = 10) -> dict:
         """Gracefully restart container."""
         if not self.client:
             return {"success": False, "error": "Docker client unavailable"}
@@ -227,7 +220,7 @@ class DockerActuator:
             logger.error(f"Container restart error: {e}")
             return {"success": False, "error": str(e)}
 
-    def get_container_stats(self, container_name: str) -> Dict:
+    def get_container_stats(self, container_name: str) -> dict:
         """Get real-time container statistics."""
         if not self.client:
             return {"success": False, "error": "Docker client unavailable"}
@@ -238,16 +231,10 @@ class DockerActuator:
 
             # Parse CPU usage
             cpu_delta = (
-                stats["cpu_stats"]["cpu_usage"]["total_usage"]
-                - stats["precpu_stats"]["cpu_usage"]["total_usage"]
+                stats["cpu_stats"]["cpu_usage"]["total_usage"] - stats["precpu_stats"]["cpu_usage"]["total_usage"]
             )
-            system_delta = (
-                stats["cpu_stats"]["system_cpu_usage"]
-                - stats["precpu_stats"]["system_cpu_usage"]
-            )
-            cpu_percent = (
-                (cpu_delta / system_delta) * 100.0 if system_delta > 0 else 0.0
-            )
+            system_delta = stats["cpu_stats"]["system_cpu_usage"] - stats["precpu_stats"]["system_cpu_usage"]
+            cpu_percent = (cpu_delta / system_delta) * 100.0 if system_delta > 0 else 0.0
 
             # Parse memory usage
             mem_usage = stats["memory_stats"]["usage"]
@@ -262,14 +249,10 @@ class DockerActuator:
                 "memory_limit_mb": round(mem_limit / (1024 * 1024), 2),
                 "memory_percent": round(mem_percent, 2),
                 "network_rx_bytes": (
-                    stats["networks"]["eth0"]["rx_bytes"]
-                    if "eth0" in stats.get("networks", {})
-                    else 0
+                    stats["networks"]["eth0"]["rx_bytes"] if "eth0" in stats.get("networks", {}) else 0
                 ),
                 "network_tx_bytes": (
-                    stats["networks"]["eth0"]["tx_bytes"]
-                    if "eth0" in stats.get("networks", {})
-                    else 0
+                    stats["networks"]["eth0"]["tx_bytes"] if "eth0" in stats.get("networks", {}) else 0
                 ),
             }
 
@@ -286,6 +269,6 @@ class DockerActuator:
             return int(float(mem_str[:-1]) * units[mem_str[-1]])
         return int(mem_str)  # Assume bytes if no unit
 
-    def get_action_log(self) -> List[Dict]:
+    def get_action_log(self) -> list[dict]:
         """Return action history for audit."""
         return self.action_log

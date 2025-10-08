@@ -6,36 +6,31 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-import pytest
 import time
+
 import numpy as np
+import pytest
 
 try:
     import torch
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
 
-from performance.batch_predictor import (
-    BatchPredictor,
-    BatchConfig,
-    Priority,
-    ResponseFuture
-)
+from performance.batch_predictor import BatchConfig, BatchPredictor, Priority, ResponseFuture
 
 
 @pytest.fixture
 def predict_fn():
     """Create simple prediction function."""
+
     def predict(batch):
         """Simple prediction function."""
         time.sleep(0.01)  # Simulate processing
-        if TORCH_AVAILABLE and isinstance(batch, torch.Tensor):
+        if TORCH_AVAILABLE and isinstance(batch, torch.Tensor) or isinstance(batch, np.ndarray):
             return batch * 2
-        elif isinstance(batch, np.ndarray):
-            return batch * 2
-        else:
-            return [x * 2 for x in batch]
+        return [x * 2 for x in batch]
 
     return predict
 
@@ -43,12 +38,7 @@ def predict_fn():
 @pytest.fixture
 def batch_config():
     """Create batch config."""
-    return BatchConfig(
-        max_batch_size=8,
-        batch_timeout_ms=50.0,
-        num_workers=1,
-        adaptive_batching=False
-    )
+    return BatchConfig(max_batch_size=8, batch_timeout_ms=50.0, num_workers=1, adaptive_batching=False)
 
 
 def test_response_future_basic():
@@ -60,12 +50,7 @@ def test_response_future_basic():
     assert not future.done()
 
     # Set result
-    response = BatchResponse(
-        request_id="test",
-        output="result",
-        latency_ms=10.0,
-        batch_size=1
-    )
+    response = BatchResponse(request_id="test", output="result", latency_ms=10.0, batch_size=1)
     future.set_result(response)
 
     assert future.done()
@@ -219,12 +204,7 @@ def test_batch_predictor_stats(predict_fn, batch_config):
 
 def test_batch_predictor_adaptive_batching(predict_fn):
     """Test adaptive batching."""
-    config = BatchConfig(
-        max_batch_size=16,
-        batch_timeout_ms=100.0,
-        adaptive_batching=True,
-        target_latency_ms=50.0
-    )
+    config = BatchConfig(max_batch_size=16, batch_timeout_ms=100.0, adaptive_batching=True, target_latency_ms=50.0)
 
     predictor = BatchPredictor(predict_fn=predict_fn, config=config)
     predictor.start()
@@ -255,12 +235,7 @@ def test_batch_predictor_adaptive_batching(predict_fn):
 
 def test_batch_config_validation():
     """Test batch config validation."""
-    config = BatchConfig(
-        max_batch_size=32,
-        min_batch_size=1,
-        batch_timeout_ms=100.0,
-        num_workers=2
-    )
+    config = BatchConfig(max_batch_size=32, min_batch_size=1, batch_timeout_ms=100.0, num_workers=2)
 
     assert config.max_batch_size == 32
     assert config.min_batch_size == 1

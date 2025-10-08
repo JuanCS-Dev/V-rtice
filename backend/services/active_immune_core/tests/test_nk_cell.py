@@ -5,15 +5,13 @@ Uses graceful degradation paths for testing.
 """
 
 import asyncio
-from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
 
 from active_immune_core.agents import AgentStatus, AgentType
 from active_immune_core.agents.nk_cell import CelulaNKDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -152,9 +150,7 @@ class TestAnomalyScoring:
         # Should be low
         assert score < 0.3
 
-    async def test_calcular_anomalia_high_deviation(
-        self, nk_cell, normal_metrics, anomalous_metrics
-    ):
+    async def test_calcular_anomalia_high_deviation(self, nk_cell, normal_metrics, anomalous_metrics):
         """Test anomaly score for high deviation"""
         host_id = "host_001"
 
@@ -202,9 +198,7 @@ class TestAnomalyScoring:
 class TestBaselineManagement:
     """Test baseline learning and updates"""
 
-    async def test_baseline_established_on_first_patrol(
-        self, nk_cell, normal_metrics
-    ):
+    async def test_baseline_established_on_first_patrol(self, nk_cell, normal_metrics):
         """Test that baseline is established during patrol"""
         host_id = "host_001"
 
@@ -351,9 +345,7 @@ class TestNKCellNeutralization:
         host_id = compromised_host["id"]
 
         # Attempt neutralization (RTE service not running, will degrade gracefully)
-        result = await nk_cell.executar_neutralizacao(
-            compromised_host, metodo="isolate"
-        )
+        result = await nk_cell.executar_neutralizacao(compromised_host, metodo="isolate")
 
         # Should succeed locally even if RTE unavailable
         assert result is True
@@ -395,9 +387,7 @@ class TestNKCellNeutralization:
         await asyncio.sleep(0.5)
 
         # Neutralize
-        result = await nk_cell.executar_neutralizacao(
-            compromised_host, metodo="isolate"
-        )
+        result = await nk_cell.executar_neutralizacao(compromised_host, metodo="isolate")
 
         # Should succeed (tracked locally even if cytokine fails)
         assert result is True
@@ -568,15 +558,17 @@ class TestNKCellWithMockedServices:
         # Mock HTTP response with MHC violations
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={
-            "hosts": [
-                {"id": "host_001", "audit_enabled": True},
-                {"id": "host_002", "audit_enabled": False},  # Violation
-                {"id": "host_003", "audit_enabled": False},  # Violation
-            ]
-        })
+        mock_response.json = AsyncMock(
+            return_value={
+                "hosts": [
+                    {"id": "host_001", "audit_enabled": True},
+                    {"id": "host_002", "audit_enabled": False},  # Violation
+                    {"id": "host_003", "audit_enabled": False},  # Violation
+                ]
+            }
+        )
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
 
             hosts = await nk_cell._detectar_mhc_ausente()
@@ -595,7 +587,7 @@ class TestNKCellWithMockedServices:
         mock_response = AsyncMock()
         mock_response.status = 404
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
 
             hosts = await nk_cell._detectar_mhc_ausente()
@@ -613,7 +605,7 @@ class TestNKCellWithMockedServices:
         mock_response = AsyncMock()
         mock_response.status = 500
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
 
             hosts = await nk_cell._detectar_mhc_ausente()
@@ -632,7 +624,7 @@ class TestNKCellWithMockedServices:
         mock_response.status = 200
         mock_response.json = AsyncMock(return_value=normal_metrics)
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
 
             metrics = await nk_cell._get_host_metrics("host_001")
@@ -649,7 +641,7 @@ class TestNKCellWithMockedServices:
         mock_response = AsyncMock()
         mock_response.status = 500
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
 
             metrics = await nk_cell._get_host_metrics("host_001")
@@ -670,9 +662,7 @@ class TestNKCellWithMockedServices:
         # Mock host list
         mock_list_response = AsyncMock()
         mock_list_response.status = 200
-        mock_list_response.json = AsyncMock(return_value={
-            "hosts": [{"id": "host_001"}]
-        })
+        mock_list_response.json = AsyncMock(return_value={"hosts": [{"id": "host_001"}]})
 
         # Mock metrics (slightly different from baseline, but normal)
         updated_metrics = normal_metrics.copy()
@@ -683,8 +673,8 @@ class TestNKCellWithMockedServices:
         mock_metrics_response.json = AsyncMock(return_value=updated_metrics)
 
         async def mock_get(*args, **kwargs):
-            url = args[0] if args else kwargs.get('url', '')
-            if '/list' in url:
+            url = args[0] if args else kwargs.get("url", "")
+            if "/list" in url:
                 mock = AsyncMock()
                 mock.__aenter__.return_value = mock_list_response
                 return mock
@@ -693,7 +683,7 @@ class TestNKCellWithMockedServices:
                 mock.__aenter__.return_value = mock_metrics_response
                 return mock
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_get):
             await nk_cell._update_baseline()
 
             # Baseline should be updated (EMA)
@@ -714,11 +704,9 @@ class TestNKCellWithMockedServices:
 
         mock_list_response = AsyncMock()
         mock_list_response.status = 200
-        mock_list_response.json = AsyncMock(return_value={
-            "hosts": [{"id": "host_001"}]
-        })
+        mock_list_response.json = AsyncMock(return_value={"hosts": [{"id": "host_001"}]})
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_list_response
 
             await nk_cell._update_baseline()
@@ -749,7 +737,7 @@ class TestNKCellWithMockedServices:
         mock_response.status = 200
         mock_response.json = AsyncMock(return_value=anomalous_metrics)
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
 
             result = await nk_cell.executar_investigacao({"id": "host_001"})
@@ -770,12 +758,10 @@ class TestNKCellWithMockedServices:
         mock_response = AsyncMock()
         mock_response.status = 200
 
-        with patch.object(nk_cell._http_session, 'post') as mock_post:
+        with patch.object(nk_cell._http_session, "post") as mock_post:
             mock_post.return_value.__aenter__.return_value = mock_response
 
-            result = await nk_cell.executar_neutralizacao(
-                compromised_host, metodo="isolate"
-            )
+            result = await nk_cell.executar_neutralizacao(compromised_host, metodo="isolate")
 
             assert result is True
             assert compromised_host["id"] in nk_cell.hosts_isolados
@@ -790,12 +776,10 @@ class TestNKCellWithMockedServices:
         mock_response = AsyncMock()
         mock_response.status = 404
 
-        with patch.object(nk_cell._http_session, 'post') as mock_post:
+        with patch.object(nk_cell._http_session, "post") as mock_post:
             mock_post.return_value.__aenter__.return_value = mock_response
 
-            result = await nk_cell.executar_neutralizacao(
-                compromised_host, metodo="isolate"
-            )
+            result = await nk_cell.executar_neutralizacao(compromised_host, metodo="isolate")
 
             # Should still succeed (graceful degradation)
             assert result is True
@@ -811,12 +795,10 @@ class TestNKCellWithMockedServices:
         mock_response = AsyncMock()
         mock_response.status = 500
 
-        with patch.object(nk_cell._http_session, 'post') as mock_post:
+        with patch.object(nk_cell._http_session, "post") as mock_post:
             mock_post.return_value.__aenter__.return_value = mock_response
 
-            result = await nk_cell.executar_neutralizacao(
-                compromised_host, metodo="isolate"
-            )
+            result = await nk_cell.executar_neutralizacao(compromised_host, metodo="isolate")
 
             # Should fail (not 200 or 404)
             assert result is False
@@ -853,7 +835,7 @@ class TestNKCellWithMockedServices:
         async def mock_timeout(*args, **kwargs):
             raise asyncio.TimeoutError()
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_timeout):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_timeout):
             hosts = await nk_cell._detectar_mhc_ausente()
 
             # Should return empty list on timeout
@@ -870,7 +852,7 @@ class TestNKCellWithMockedServices:
         async def mock_exception(*args, **kwargs):
             raise Exception("Network error")
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_exception):
             hosts = await nk_cell._detectar_mhc_ausente()
 
             # Should return empty list on exception
@@ -885,10 +867,11 @@ class TestNKCellWithMockedServices:
 
         # Mock connector error
         import aiohttp
+
         async def mock_connector_error(*args, **kwargs):
             raise aiohttp.ClientConnectorError(None, OSError("Connection refused"))
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_connector_error):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_connector_error):
             metrics = await nk_cell._get_host_metrics("host_001")
 
             # Should return empty dict
@@ -905,7 +888,7 @@ class TestNKCellWithMockedServices:
         async def mock_exception(*args, **kwargs):
             raise Exception("Timeout")
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_exception):
             metrics = await nk_cell._get_host_metrics("host_001")
 
             # Should return empty dict
@@ -920,10 +903,11 @@ class TestNKCellWithMockedServices:
 
         # Mock connector error
         import aiohttp
+
         async def mock_connector_error(*args, **kwargs):
             raise aiohttp.ClientConnectorError(None, OSError("Connection refused"))
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_connector_error):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_connector_error):
             anomalies = await nk_cell._detectar_anomalias_comportamentais()
 
             # Should return empty list
@@ -940,7 +924,7 @@ class TestNKCellWithMockedServices:
         async def mock_exception(*args, **kwargs):
             raise Exception("Network timeout")
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_exception):
             anomalies = await nk_cell._detectar_anomalias_comportamentais()
 
             # Should return empty list
@@ -957,7 +941,7 @@ class TestNKCellWithMockedServices:
         async def mock_exception(*args, **kwargs):
             raise Exception("Database error")
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_exception):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_exception):
             # Should not raise exception, just log error
             await nk_cell._update_baseline()
 
@@ -970,13 +954,12 @@ class TestNKCellWithMockedServices:
 
         # Mock connector error
         import aiohttp
+
         async def mock_connector_error(*args, **kwargs):
             raise aiohttp.ClientConnectorError(None, OSError("Connection refused"))
 
-        with patch.object(nk_cell._http_session, 'post', side_effect=mock_connector_error):
-            result = await nk_cell.executar_neutralizacao(
-                compromised_host, metodo="isolate"
-            )
+        with patch.object(nk_cell._http_session, "post", side_effect=mock_connector_error):
+            result = await nk_cell.executar_neutralizacao(compromised_host, metodo="isolate")
 
             # Should still succeed (graceful degradation)
             assert result is True
@@ -993,10 +976,8 @@ class TestNKCellWithMockedServices:
         async def mock_exception(*args, **kwargs):
             raise Exception("Timeout error")
 
-        with patch.object(nk_cell._http_session, 'post', side_effect=mock_exception):
-            result = await nk_cell.executar_neutralizacao(
-                compromised_host, metodo="isolate"
-            )
+        with patch.object(nk_cell._http_session, "post", side_effect=mock_exception):
+            result = await nk_cell.executar_neutralizacao(compromised_host, metodo="isolate")
 
             # Should fail on generic exception
             assert result is False
@@ -1051,17 +1032,15 @@ class TestNKCellWithMockedServices:
         # Mock host list with new host
         mock_list_response = AsyncMock()
         mock_list_response.status = 200
-        mock_list_response.json = AsyncMock(return_value={
-            "hosts": [{"id": "host_002"}]
-        })
+        mock_list_response.json = AsyncMock(return_value={"hosts": [{"id": "host_002"}]})
 
         mock_metrics_response = AsyncMock()
         mock_metrics_response.status = 200
         mock_metrics_response.json = AsyncMock(return_value=normal_metrics)
 
         async def mock_get(*args, **kwargs):
-            url = args[0] if args else kwargs.get('url', '')
-            if '/list' in url:
+            url = args[0] if args else kwargs.get("url", "")
+            if "/list" in url:
                 mock_ctx = AsyncMock()
                 mock_ctx.__aenter__.return_value = mock_list_response
                 mock_ctx.__aexit__.return_value = None
@@ -1072,7 +1051,7 @@ class TestNKCellWithMockedServices:
                 mock_ctx.__aexit__.return_value = None
                 return mock_ctx
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_get):
             await nk_cell._update_baseline()
 
             # New host should be added to baseline
@@ -1097,17 +1076,15 @@ class TestNKCellWithMockedServices:
 
         mock_list_response = AsyncMock()
         mock_list_response.status = 200
-        mock_list_response.json = AsyncMock(return_value={
-            "hosts": [{"id": "host_001"}]
-        })
+        mock_list_response.json = AsyncMock(return_value={"hosts": [{"id": "host_001"}]})
 
         mock_metrics_response = AsyncMock()
         mock_metrics_response.status = 200
         mock_metrics_response.json = AsyncMock(return_value=extended_metrics)
 
         async def mock_get(*args, **kwargs):
-            url = args[0] if args else kwargs.get('url', '')
-            if '/list' in url:
+            url = args[0] if args else kwargs.get("url", "")
+            if "/list" in url:
                 mock_ctx = AsyncMock()
                 mock_ctx.__aenter__.return_value = mock_list_response
                 mock_ctx.__aexit__.return_value = None
@@ -1118,7 +1095,7 @@ class TestNKCellWithMockedServices:
                 mock_ctx.__aexit__.return_value = None
                 return mock_ctx
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_get):
             await nk_cell._update_baseline()
 
             # New keys should be added
@@ -1133,17 +1110,19 @@ class TestNKCellWithMockedServices:
         # Mock response with host missing ID
         mock_list_response = AsyncMock()
         mock_list_response.status = 200
-        mock_list_response.json = AsyncMock(return_value={
-            "hosts": [
-                {"hostname": "test"},  # No id field
-            ]
-        })
+        mock_list_response.json = AsyncMock(
+            return_value={
+                "hosts": [
+                    {"hostname": "test"},  # No id field
+                ]
+            }
+        )
 
         mock_ctx = AsyncMock()
         mock_ctx.__aenter__.return_value = mock_list_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(nk_cell._http_session, 'get') as mock_get:
+        with patch.object(nk_cell._http_session, "get") as mock_get:
             mock_get.return_value = mock_ctx
 
             anomalies = await nk_cell._detectar_anomalias_comportamentais()
@@ -1158,17 +1137,15 @@ class TestNKCellWithMockedServices:
 
         mock_list_response = AsyncMock()
         mock_list_response.status = 200
-        mock_list_response.json = AsyncMock(return_value={
-            "hosts": [{"id": "host_001"}]
-        })
+        mock_list_response.json = AsyncMock(return_value={"hosts": [{"id": "host_001"}]})
 
         # Mock metrics endpoint returns empty
         mock_metrics_response = AsyncMock()
         mock_metrics_response.status = 500  # Error response
 
         async def mock_get(*args, **kwargs):
-            url = args[0] if args else kwargs.get('url', '')
-            if '/list' in url:
+            url = args[0] if args else kwargs.get("url", "")
+            if "/list" in url:
                 mock_ctx = AsyncMock()
                 mock_ctx.__aenter__.return_value = mock_list_response
                 mock_ctx.__aexit__.return_value = None
@@ -1179,7 +1156,7 @@ class TestNKCellWithMockedServices:
                 mock_ctx.__aexit__.return_value = None
                 return mock_ctx
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_get):
             await nk_cell._update_baseline()
 
             # Should not crash, just skip
@@ -1207,17 +1184,15 @@ class TestNKCellWithMockedServices:
 
         mock_list_response = AsyncMock()
         mock_list_response.status = 200
-        mock_list_response.json = AsyncMock(return_value={
-            "hosts": [{"id": "host_001"}]
-        })
+        mock_list_response.json = AsyncMock(return_value={"hosts": [{"id": "host_001"}]})
 
         mock_metrics_response = AsyncMock()
         mock_metrics_response.status = 200
         mock_metrics_response.json = AsyncMock(return_value=anomalous)
 
         async def mock_get(*args, **kwargs):
-            url = args[0] if args else kwargs.get('url', '')
-            if '/list' in url:
+            url = args[0] if args else kwargs.get("url", "")
+            if "/list" in url:
                 mock_ctx = AsyncMock()
                 mock_ctx.__aenter__.return_value = mock_list_response
                 mock_ctx.__aexit__.return_value = None
@@ -1231,7 +1206,7 @@ class TestNKCellWithMockedServices:
         # Store original baseline
         original_cpu = nk_cell.baseline_behavior["host_001"]["cpu_usage"]
 
-        with patch.object(nk_cell._http_session, 'get', side_effect=mock_get):
+        with patch.object(nk_cell._http_session, "get", side_effect=mock_get):
             await nk_cell._update_baseline()
 
             # Baseline should NOT be updated (anomaly > 0.3)
@@ -1239,4 +1214,3 @@ class TestNKCellWithMockedServices:
             assert nk_cell.baseline_behavior["host_001"]["cpu_usage"] < 50.0  # Not updated to 99
 
         await nk_cell.parar()
-

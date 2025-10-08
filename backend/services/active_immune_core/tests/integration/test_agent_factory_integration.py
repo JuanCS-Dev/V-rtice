@@ -11,7 +11,6 @@ import pytest_asyncio
 
 from active_immune_core.agents import AgentFactory, AgentType
 
-
 # ==================== FIXTURES ====================
 
 
@@ -34,9 +33,7 @@ class TestAgentFactoryCreation:
 
     async def test_create_macrofago(self, factory):
         """Test creating Macrophage"""
-        mac = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_test"
-        )
+        mac = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_test")
 
         assert mac.state.tipo == AgentType.MACROFAGO
         assert mac.state.area_patrulha == "subnet_test"
@@ -44,9 +41,7 @@ class TestAgentFactoryCreation:
 
     async def test_create_nk_cell(self, factory):
         """Test creating NK Cell"""
-        nk = await factory.create_agent(
-            AgentType.NK_CELL, area_patrulha="subnet_test"
-        )
+        nk = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_test")
 
         assert nk.state.tipo == AgentType.NK_CELL
         assert nk.state.area_patrulha == "subnet_test"
@@ -54,9 +49,7 @@ class TestAgentFactoryCreation:
 
     async def test_create_neutrofilo(self, factory):
         """Test creating Neutrophil"""
-        neutro = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_test"
-        )
+        neutro = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_test")
 
         assert neutro.state.tipo == AgentType.NEUTROFILO
         assert neutro.state.area_patrulha == "subnet_test"
@@ -66,9 +59,7 @@ class TestAgentFactoryCreation:
         """Test creating multiple agents of different types"""
         mac = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1")
         nk = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_2")
-        neutro = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_3"
-        )
+        neutro = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_3")
 
         assert len(factory._agents) == 3
         assert factory.agents_created_total == 3
@@ -85,9 +76,7 @@ class TestAgentFactoryCloning:
 
     async def test_clone_macrofago(self, factory):
         """Test cloning Macrophage"""
-        original = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_test"
-        )
+        original = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_test")
 
         clone = await factory.clone_agent(original, mutate=False)
 
@@ -98,9 +87,7 @@ class TestAgentFactoryCloning:
 
     async def test_clone_with_mutation(self, factory):
         """Test cloning with somatic hypermutation"""
-        original = await factory.create_agent(
-            AgentType.NK_CELL, area_patrulha="subnet_test"
-        )
+        original = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_test")
 
         # Store original parameters
         original_aggression = original.state.nivel_agressividade
@@ -115,9 +102,7 @@ class TestAgentFactoryCloning:
 
     async def test_clonal_expansion(self, factory):
         """Test creating multiple clones (clonal expansion)"""
-        original = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_test"
-        )
+        original = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_test")
 
         clones = await factory.clonal_expansion(original, num_clones=5, mutate=True)
 
@@ -130,9 +115,7 @@ class TestAgentFactoryCloning:
 
     async def test_clone_specialization_marking(self, factory):
         """Test that clones are marked with specialization"""
-        original = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_test"
-        )
+        original = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_test")
 
         clone = await factory.clone_agent(original, mutate=True)
 
@@ -147,9 +130,7 @@ class TestAgentFactoryManagement:
 
     async def test_get_agent_by_id(self, factory):
         """Test retrieving agent by ID"""
-        agent = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_test"
-        )
+        agent = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_test")
 
         retrieved = factory.get_agent(agent.state.id)
 
@@ -163,12 +144,8 @@ class TestAgentFactoryManagement:
 
     async def test_get_agents_by_type(self, factory):
         """Test retrieving agents by type"""
-        mac1 = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_1"
-        )
-        mac2 = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_2"
-        )
+        mac1 = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1")
+        mac2 = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_2")
         nk = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_3")
 
         macrofagos = factory.get_agents_by_type(AgentType.MACROFAGO)
@@ -181,12 +158,8 @@ class TestAgentFactoryManagement:
 
     async def test_get_active_agents(self, factory):
         """Test retrieving only active (running) agents"""
-        agent1 = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_1"
-        )
-        agent2 = await factory.create_agent(
-            AgentType.NK_CELL, area_patrulha="subnet_2"
-        )
+        agent1 = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1")
+        agent2 = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_2")
 
         # Start one agent
         await agent1.iniciar()
@@ -201,12 +174,8 @@ class TestAgentFactoryManagement:
 
     async def test_get_all_agents(self, factory):
         """Test retrieving all agents"""
-        agent1 = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_1"
-        )
-        agent2 = await factory.create_agent(
-            AgentType.NK_CELL, area_patrulha="subnet_2"
-        )
+        agent1 = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1")
+        agent2 = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_2")
 
         all_agents = factory.get_all_agents()
 
@@ -216,9 +185,7 @@ class TestAgentFactoryManagement:
 
     async def test_destroy_agent(self, factory):
         """Test destroying agent"""
-        agent = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_test"
-        )
+        agent = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_test")
 
         agent_id = agent.state.id
 
@@ -237,9 +204,7 @@ class TestAgentFactoryManagement:
 
     async def test_destroy_running_agent(self, factory):
         """Test destroying running agent (should stop first)"""
-        agent = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_test"
-        )
+        agent = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_test")
 
         await agent.iniciar()
         await asyncio.sleep(0.5)
@@ -256,15 +221,9 @@ class TestAgentFactoryLifecycle:
 
     async def test_shutdown_all_agents(self, factory):
         """Test shutting down all agents"""
-        agent1 = await factory.create_agent(
-            AgentType.MACROFAGO, area_patrulha="subnet_1"
-        )
-        agent2 = await factory.create_agent(
-            AgentType.NK_CELL, area_patrulha="subnet_2"
-        )
-        agent3 = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_3"
-        )
+        agent1 = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1")
+        agent2 = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_2")
+        agent3 = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_3")
 
         # Start agents
         await agent1.iniciar()
@@ -287,12 +246,8 @@ class TestAgentFactoryMetrics:
         """Test retrieving factory metrics"""
         mac = await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1")
         nk = await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_2")
-        neutro1 = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_3"
-        )
-        neutro2 = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_4"
-        )
+        neutro1 = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_3")
+        neutro2 = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_4")
 
         # Clone one agent
         await factory.clone_agent(mac)
@@ -334,15 +289,9 @@ class TestAgentFactoryIntegration:
         agents = []
 
         # Create agents of each type
-        agents.append(
-            await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1")
-        )
-        agents.append(
-            await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_2")
-        )
-        agents.append(
-            await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_3")
-        )
+        agents.append(await factory.create_agent(AgentType.MACROFAGO, area_patrulha="subnet_1"))
+        agents.append(await factory.create_agent(AgentType.NK_CELL, area_patrulha="subnet_2"))
+        agents.append(await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_3"))
 
         # Start all agents
         for agent in agents:
@@ -360,9 +309,7 @@ class TestAgentFactoryIntegration:
     async def test_clonal_expansion_scenario(self, factory):
         """Test clonal expansion scenario (threat response)"""
         # Create original agent
-        original = await factory.create_agent(
-            AgentType.NEUTROFILO, area_patrulha="subnet_threat"
-        )
+        original = await factory.create_agent(AgentType.NEUTROFILO, area_patrulha="subnet_threat")
 
         # Simulate threat detection (trigger clonal expansion)
         clones = await factory.clonal_expansion(original, num_clones=10, mutate=True)

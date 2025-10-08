@@ -24,45 +24,41 @@ PRODUCTION-READY: Real Kafka, Redis, no mocks, graceful degradation.
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
-from enum import Enum
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
 import redis.asyncio as aioredis
 from aiokafka import AIOKafkaConsumer
-from pydantic import ValidationError
 
 from agents import AgentFactory, AgentType
 from agents.models import AgenteState
+from coordination.agent_orchestrator import AgentOrchestrator
+from coordination.cytokine_aggregator import CytokineAggregator
 from coordination.exceptions import (
+    AgentOrchestrationError,
     CytokineProcessingError,
+    HormonePublishError,
     LymphnodeConnectionError,
     LymphnodeRateLimitError,
     LymphnodeResourceExhaustedError,
     PatternDetectionError,
-    AgentOrchestrationError,
-    HormonePublishError,
 )
-from coordination.pattern_detector import PatternDetector
-from coordination.cytokine_aggregator import CytokineAggregator
-from coordination.agent_orchestrator import AgentOrchestrator
-from coordination.temperature_controller import TemperatureController, HomeostaticState
 from coordination.lymphnode_metrics import LymphnodeMetrics
+from coordination.pattern_detector import PatternDetector
 from coordination.rate_limiter import ClonalExpansionRateLimiter
+from coordination.temperature_controller import HomeostaticState, TemperatureController
 from coordination.thread_safe_structures import (
     ThreadSafeBuffer,
-    AtomicCounter,
-    ThreadSafeTemperature,
     ThreadSafeCounter,
 )
-from coordination.validators import validate_cytokine
 
 logger = logging.getLogger(__name__)
 
 # ESGT Integration (optional dependency - no path manipulation)
 try:
-    from consciousness.integration import ESGTSubscriber
     from consciousness.esgt.coordinator import ESGTEvent
+    from consciousness.integration import ESGTSubscriber
+
     ESGT_AVAILABLE = True
 except ImportError:
     ESGT_AVAILABLE = False
@@ -183,8 +179,8 @@ class LinfonodoDigital:
         )
 
         # ESGT Integration (consciousness ignition)
-        self.esgt_subscriber: Optional['ESGTSubscriber'] = None
-        self.recent_ignitions: List['ESGTEvent'] = []
+        self.esgt_subscriber: Optional["ESGTSubscriber"] = None
+        self.recent_ignitions: List["ESGTEvent"] = []
         self.max_ignition_history: int = 100
 
         # Background tasks
@@ -194,9 +190,7 @@ class LinfonodoDigital:
         # Redis client
         self._redis_client: Optional[aioredis.Redis] = None
 
-        logger.info(
-            f"Lymphnode {self.id} ({self.nivel}) initialized for {self.area}"
-        )
+        logger.info(f"Lymphnode {self.id} ({self.nivel}) initialized for {self.area}")
 
     async def get_homeostatic_state(self) -> HomeostaticState:
         """
@@ -220,6 +214,7 @@ class LinfonodoDigital:
         """
         # Try to get current temp, but fall back to last known value
         import asyncio
+
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
@@ -244,7 +239,7 @@ class LinfonodoDigital:
 
     # ==================== ESGT INTEGRATION ====================
 
-    def set_esgt_subscriber(self, subscriber: 'ESGTSubscriber') -> None:
+    def set_esgt_subscriber(self, subscriber: "ESGTSubscriber") -> None:
         """
         Set ESGT subscriber for conscious ignition integration.
 
@@ -260,7 +255,7 @@ class LinfonodoDigital:
         subscriber.on_ignition(self._handle_esgt_ignition)
         logger.info(f"Lymphnode {self.id} connected to ESGT (ignition response enabled)")
 
-    async def _handle_esgt_ignition(self, event: 'ESGTEvent') -> None:
+    async def _handle_esgt_ignition(self, event: "ESGTEvent") -> None:
         """
         Handle ESGT ignition event.
 
@@ -277,15 +272,11 @@ class LinfonodoDigital:
         # Extract salience
         salience = event.salience.composite_score()
 
-        logger.info(
-            f"🧠 ESGT ignition detected (salience={salience:.2f}, event_id={event.id})"
-        )
+        logger.info(f"🧠 ESGT ignition detected (salience={salience:.2f}, event_id={event.id})")
 
         # High salience → Threat response
         if salience > 0.8:
-            logger.warning(
-                f"🚨 High salience ESGT ({salience:.2f}) → Triggering immune activation"
-            )
+            logger.warning(f"🚨 High salience ESGT ({salience:.2f}) → Triggering immune activation")
 
             # Increase temperature (inflammation)
             await self._adjust_temperature(delta=+1.0)
@@ -301,9 +292,7 @@ class LinfonodoDigital:
 
         # Medium salience → Increase vigilance
         elif salience > 0.6:
-            logger.info(
-                f"📊 Medium salience ESGT ({salience:.2f}) → Increasing vigilance"
-            )
+            logger.info(f"📊 Medium salience ESGT ({salience:.2f}) → Increasing vigilance")
             await self._adjust_temperature(delta=+0.5)
 
         # Low salience → No action
@@ -321,9 +310,7 @@ class LinfonodoDigital:
         """
         await self._temperature_controller.adjust_temperature(delta)
 
-    async def _broadcast_hormone(
-        self, hormone_type: str, level: float, source: str
-    ) -> None:
+    async def _broadcast_hormone(self, hormone_type: str, level: float, source: str) -> None:
         """
         Broadcast hormone signal via Redis (global).
 
@@ -345,9 +332,7 @@ class LinfonodoDigital:
                 "timestamp": datetime.now().isoformat(),
             }
 
-            await self._redis_client.publish(
-                f"immunis:hormones:{hormone_type}", json.dumps(message)
-            )
+            await self._redis_client.publish(f"immunis:hormones:{hormone_type}", json.dumps(message))
 
             logger.debug(f"Broadcast hormone {hormone_type} (level={level:.2f})")
 
@@ -532,11 +517,13 @@ class LinfonodoDigital:
         try:
             await self._redis_client.publish(
                 f"agent:{agente_id}:apoptosis",
-                json.dumps({
-                    "lymphnode_id": self.id,
-                    "reason": "lymphnode_directive",
-                    "timestamp": datetime.now().isoformat(),
-                }),
+                json.dumps(
+                    {
+                        "lymphnode_id": self.id,
+                        "reason": "lymphnode_directive",
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                ),
             )
 
             logger.debug(f"Apoptosis signal sent to agent {agente_id[:8]}")
@@ -647,8 +634,7 @@ class LinfonodoDigital:
 
         current_temp = await self.temperatura_regional.get()
         logger.debug(
-            f"Lymphnode {self.id} processed cytokine: {result.metadata.get('tipo')} "
-            f"(temp={current_temp:.1f}°C)"
+            f"Lymphnode {self.id} processed cytokine: {result.metadata.get('tipo')} (temp={current_temp:.1f}°C)"
         )
 
     async def _escalar_para_global(self, citocina: Dict[str, Any]) -> None:
@@ -673,11 +659,13 @@ class LinfonodoDigital:
             # Send via cortisol hormone (stress signal)
             await self._redis_client.publish(
                 "hormonio:cortisol",
-                json.dumps({
-                    "origem": self.id,
-                    "citocina": citocina,
-                    "timestamp": datetime.now().isoformat(),
-                }),
+                json.dumps(
+                    {
+                        "origem": self.id,
+                        "citocina": citocina,
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                ),
             )
 
         except (ConnectionError, TimeoutError) as e:
@@ -824,8 +812,7 @@ class LinfonodoDigital:
                 current_temp = await self._temperature_controller.apply_decay()
 
                 logger.debug(
-                    f"Lymphnode {self.id} temperature: {current_temp:.1f}°C "
-                    f"(agents: {len(self.agentes_ativos)})"
+                    f"Lymphnode {self.id} temperature: {current_temp:.1f}°C (agents: {len(self.agentes_ativos)})"
                 )
 
             except asyncio.CancelledError:
@@ -897,9 +884,7 @@ class LinfonodoDigital:
             except Exception as e:
                 logger.error(f"Unexpected homeostasis regulation error: {e}")
 
-    async def _broadcast_activation_level(
-        self, state_name: str, target_percentage: float
-    ) -> None:
+    async def _broadcast_activation_level(self, state_name: str, target_percentage: float) -> None:
         """
         Broadcast activation level to all agents via hormones.
 
@@ -917,13 +902,15 @@ class LinfonodoDigital:
             # Broadcast via adrenaline hormone (activation signal)
             await self._redis_client.publish(
                 "hormonio:adrenalina",
-                json.dumps({
-                    "lymphnode_id": self.id,
-                    "state": state_name,
-                    "target_activation": target_percentage,
-                    "temperatura_regional": current_temp,
-                    "timestamp": datetime.now().isoformat(),
-                }),
+                json.dumps(
+                    {
+                        "lymphnode_id": self.id,
+                        "state": state_name,
+                        "target_activation": target_percentage,
+                        "temperatura_regional": current_temp,
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                ),
             )
 
             logger.debug(f"Activation level broadcast: {state_name} ({target_percentage:.0%})")
@@ -960,28 +947,23 @@ class LinfonodoDigital:
             "lymphnode_id": self.id,
             "nivel": self.nivel,
             "area": self.area,
-
             # Temperature & homeostasis (from TemperatureController)
             "temperatura_regional": temp_stats["current_temperature"],
             "homeostatic_state": temp_stats["homeostatic_state"],
-
             # Agent orchestration (from AgentOrchestrator)
             "agentes_total": agent_stats["active_agents"],
             "agentes_dormindo": agent_stats["sleeping_agents"],
             "total_clones_created_history": agent_stats["total_clones_created"],
             "total_clones_destroyed_history": agent_stats["total_clones_destroyed"],
-
             # Metrics (from LymphnodeMetrics)
             "ameacas_detectadas": metrics_stats["total_threats_detected"],
             "neutralizacoes": metrics_stats["total_neutralizations"],
             "clones_criados": metrics_stats["total_clones_created"],
             "clones_destruidos": metrics_stats["total_clones_destroyed"],
             "neutralization_rate": metrics_stats["neutralization_rate"],
-
             # Pattern detection (from PatternDetector)
             "persistent_threats_detected": pattern_stats["persistent_patterns"],
             "coordinated_attacks_detected": pattern_stats["coordinated_patterns"],
-
             # Local state
             "cytokine_buffer_size": buffer_size,
             "threats_being_tracked": threats_tracked,
@@ -992,9 +974,7 @@ class LinfonodoDigital:
         """String representation"""
         # Get temperature safely (blocking call acceptable for repr)
         try:
-            temp = asyncio.get_event_loop().run_until_complete(
-                self.temperatura_regional.get()
-            )
+            temp = asyncio.get_event_loop().run_until_complete(self.temperatura_regional.get())
         except RuntimeError:
             temp = 37.0  # Fallback if no event loop
 

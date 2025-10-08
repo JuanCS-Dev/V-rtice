@@ -8,20 +8,21 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-from datetime import datetime
-from typing import Dict, List, Optional
-from fastapi import APIRouter, Query, Path, HTTPException, status
-from api.models.agents import (
-    AgentCreate,
-    AgentUpdate,
-    AgentResponse,
-    AgentListResponse,
-    AgentStatsResponse,
-    AgentAction,
-    AgentActionResponse,
-)
+from typing import List, Optional
+
+from fastapi import APIRouter, HTTPException, Path, Query, status
+
 from api.core_integration import AgentService
 from api.core_integration.agent_service import AgentNotFoundError, AgentServiceError
+from api.models.agents import (
+    AgentAction,
+    AgentActionResponse,
+    AgentCreate,
+    AgentListResponse,
+    AgentResponse,
+    AgentStatsResponse,
+    AgentUpdate,
+)
 from api.websocket import broadcaster
 
 router = APIRouter()

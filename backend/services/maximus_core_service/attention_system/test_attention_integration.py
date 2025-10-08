@@ -7,7 +7,6 @@ import asyncio
 import logging
 import random
 import time
-from typing import Dict
 
 from attention_core import (
     AttentionSystem,
@@ -15,11 +14,9 @@ from attention_core import (
     FovealAnalyzer,
     PeripheralMonitor,
 )
-from salience_scorer import SalienceLevel, SalienceScorer
+from salience_scorer import SalienceScorer
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 
 def create_mock_data_source(source_id: str, anomaly_probability: float = 0.1):
@@ -30,7 +27,7 @@ def create_mock_data_source(source_id: str, anomaly_probability: float = 0.1):
         anomaly_probability: Probability of generating anomalous data
     """
 
-    def get_data() -> Dict:
+    def get_data() -> dict:
         """Generate simulated metrics."""
         # Normal data
         is_anomaly = random.random() < anomaly_probability
@@ -68,10 +65,7 @@ async def test_peripheral_monitor():
     monitor = PeripheralMonitor(scan_interval_seconds=0.1)
 
     # Create mock data sources
-    sources = [
-        create_mock_data_source(f"source_{i}", anomaly_probability=0.3)
-        for i in range(10)
-    ]
+    sources = [create_mock_data_source(f"source_{i}", anomaly_probability=0.3) for i in range(10)]
 
     # Perform scan
     print("\nScanning 10 data sources...")
@@ -80,12 +74,9 @@ async def test_peripheral_monitor():
     print(f"✓ Peripheral scan complete: {len(detections)} detections")
 
     for detection in detections[:5]:  # Show first 5
-        print(
-            f"  - {detection.target_id}: {detection.detection_type} "
-            f"(confidence={detection.confidence:.2f})"
-        )
+        print(f"  - {detection.target_id}: {detection.detection_type} (confidence={detection.confidence:.2f})")
 
-    print(f"\n✓ Test passed - Peripheral monitor functional")
+    print("\n✓ Test passed - Peripheral monitor functional")
 
 
 async def test_foveal_analyzer():
@@ -110,7 +101,7 @@ async def test_foveal_analyzer():
     print("\nPerforming deep analysis on high-salience target...")
     analysis = await analyzer.deep_analyze(detection)
 
-    print(f"✓ Foveal analysis complete:")
+    print("✓ Foveal analysis complete:")
     print(f"  - Threat level: {analysis.threat_level}")
     print(f"  - Confidence: {analysis.confidence:.2f}")
     print(f"  - Analysis time: {analysis.analysis_time_ms:.1f}ms")
@@ -118,13 +109,11 @@ async def test_foveal_analyzer():
     print(f"  - Actions: {', '.join(analysis.recommended_actions[:3])}")
 
     if analysis.analysis_time_ms < 100:
-        print(f"\n✓ Performance target met (<100ms)")
+        print("\n✓ Performance target met (<100ms)")
     else:
-        print(
-            f"\n⚠ Performance warning: {analysis.analysis_time_ms:.1f}ms (target <100ms)"
-        )
+        print(f"\n⚠ Performance warning: {analysis.analysis_time_ms:.1f}ms (target <100ms)")
 
-    print(f"\n✓ Test passed - Foveal analyzer functional")
+    print("\n✓ Test passed - Foveal analyzer functional")
 
 
 async def test_salience_scorer():
@@ -171,12 +160,9 @@ async def test_salience_scorer():
         print(f"\n  Event: {event['id']}")
         print(f"    Score: {score.score:.3f} ({score.level.name})")
         print(f"    Foveal required: {score.requires_foveal}")
-        print(
-            f"    Factors: novelty={score.factors['novelty']:.2f}, "
-            f"threat={score.factors['threat']:.2f}"
-        )
+        print(f"    Factors: novelty={score.factors['novelty']:.2f}, threat={score.factors['threat']:.2f}")
 
-    print(f"\n✓ Test passed - Salience scorer functional")
+    print("\n✓ Test passed - Salience scorer functional")
 
 
 async def test_full_attention_system():
@@ -188,17 +174,9 @@ async def test_full_attention_system():
     attention = AttentionSystem(foveal_threshold=0.6, scan_interval=0.5)
 
     # Create data sources with varying anomaly rates
-    sources = [
-        create_mock_data_source(f"network_flow_{i}", anomaly_probability=0.2)
-        for i in range(5)
-    ]
+    sources = [create_mock_data_source(f"network_flow_{i}", anomaly_probability=0.2) for i in range(5)]
 
-    sources.extend(
-        [
-            create_mock_data_source(f"system_metric_{i}", anomaly_probability=0.1)
-            for i in range(5)
-        ]
-    )
+    sources.extend([create_mock_data_source(f"system_metric_{i}", anomaly_probability=0.1) for i in range(5)])
 
     # Callback for critical findings
     critical_findings = []
@@ -258,13 +236,13 @@ async def test_full_attention_system():
     # Get performance stats
     stats = attention.get_performance_stats()
 
-    print(f"\n✓ Attention system completed 3 cycles")
+    print("\n✓ Attention system completed 3 cycles")
     print(f"  - Total peripheral detections: {stats['peripheral']['detections_total']}")
     print(f"  - Total foveal analyses: {stats['foveal']['analyses_total']}")
     print(f"  - Avg foveal time: {stats['foveal']['avg_analysis_time_ms']:.1f}ms")
     print(f"  - Critical findings: {len(critical_findings)}")
 
-    print(f"\n✓ Test passed - Full attention system functional")
+    print("\n✓ Test passed - Full attention system functional")
 
 
 async def main():

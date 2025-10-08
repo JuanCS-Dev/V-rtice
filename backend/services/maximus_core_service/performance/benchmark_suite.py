@@ -14,19 +14,20 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
-from datetime import datetime
 import json
 import logging
-from pathlib import Path
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
 # Try to import psutil for system metrics
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
@@ -52,19 +53,19 @@ class BenchmarkMetrics:
     throughput_batches_per_sec: float
 
     # Memory metrics (MB)
-    peak_memory_mb: Optional[float] = None
-    avg_memory_mb: Optional[float] = None
+    peak_memory_mb: float | None = None
+    avg_memory_mb: float | None = None
 
     # GPU metrics (if available)
-    gpu_utilization_percent: Optional[float] = None
-    gpu_memory_mb: Optional[float] = None
+    gpu_utilization_percent: float | None = None
+    gpu_memory_mb: float | None = None
 
     # Additional info
     batch_size: int = 1
     num_iterations: int = 100
     device: str = "cpu"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary.
 
         Returns:
@@ -78,25 +79,15 @@ class BenchmarkMetrics:
                 "p99_ms": self.p99_latency,
                 "min_ms": self.min_latency,
                 "max_ms": self.max_latency,
-                "std_ms": self.std_latency
+                "std_ms": self.std_latency,
             },
             "throughput": {
                 "samples_per_sec": self.throughput_samples_per_sec,
-                "batches_per_sec": self.throughput_batches_per_sec
+                "batches_per_sec": self.throughput_batches_per_sec,
             },
-            "memory": {
-                "peak_mb": self.peak_memory_mb,
-                "avg_mb": self.avg_memory_mb
-            },
-            "gpu": {
-                "utilization_percent": self.gpu_utilization_percent,
-                "memory_mb": self.gpu_memory_mb
-            },
-            "config": {
-                "batch_size": self.batch_size,
-                "num_iterations": self.num_iterations,
-                "device": self.device
-            }
+            "memory": {"peak_mb": self.peak_memory_mb, "avg_mb": self.avg_memory_mb},
+            "gpu": {"utilization_percent": self.gpu_utilization_percent, "memory_mb": self.gpu_memory_mb},
+            "config": {"batch_size": self.batch_size, "num_iterations": self.num_iterations, "device": self.device},
         }
 
 
@@ -107,9 +98,9 @@ class BenchmarkResult:
     model_name: str
     timestamp: datetime
     metrics: BenchmarkMetrics
-    hardware_info: Dict[str, Any]
+    hardware_info: dict[str, Any]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary.
 
         Returns:
@@ -119,7 +110,7 @@ class BenchmarkResult:
             "model_name": self.model_name,
             "timestamp": self.timestamp.isoformat(),
             "metrics": self.metrics.to_dict(),
-            "hardware_info": self.hardware_info
+            "hardware_info": self.hardware_info,
         }
 
     def save(self, output_path: Path):
@@ -154,11 +145,7 @@ class BenchmarkSuite:
 
         # Benchmark single configuration
         result = suite.benchmark_model(
-            model=model,
-            input_shape=(1, 128),
-            batch_sizes=[1, 8, 32, 64],
-            num_iterations=1000,
-            device="cuda"
+            model=model, input_shape=(1, 128), batch_sizes=[1, 8, 32, 64], num_iterations=1000, device="cuda"
         )
 
         suite.print_report(result)
@@ -168,7 +155,7 @@ class BenchmarkSuite:
 
     def __init__(self):
         """Initialize benchmark suite."""
-        self.results: List[BenchmarkResult] = []
+        self.results: list[BenchmarkResult] = []
 
         # Get hardware info
         self.hardware_info = self._get_hardware_info()
@@ -178,12 +165,12 @@ class BenchmarkSuite:
     def benchmark_model(
         self,
         model: Any,
-        input_shape: Tuple[int, ...],
-        batch_sizes: List[int] = [1, 8, 32, 64],
+        input_shape: tuple[int, ...],
+        batch_sizes: list[int] = [1, 8, 32, 64],
         num_iterations: int = 1000,
         warmup_iterations: int = 100,
-        device: str = "cpu"
-    ) -> Dict[int, BenchmarkMetrics]:
+        device: str = "cpu",
+    ) -> dict[int, BenchmarkMetrics]:
         """Benchmark model across multiple batch sizes.
 
         Args:
@@ -213,7 +200,7 @@ class BenchmarkSuite:
                 batch_size=batch_size,
                 num_iterations=num_iterations,
                 warmup_iterations=warmup_iterations,
-                device=device
+                device=device,
             )
 
             results[batch_size] = metrics
@@ -227,11 +214,11 @@ class BenchmarkSuite:
     def _benchmark_single_config(
         self,
         model: Any,
-        input_shape: Tuple[int, ...],
+        input_shape: tuple[int, ...],
         batch_size: int,
         num_iterations: int,
         warmup_iterations: int,
-        device: str
+        device: str,
     ) -> BenchmarkMetrics:
         """Benchmark single configuration.
 
@@ -322,7 +309,7 @@ class BenchmarkSuite:
             gpu_memory_mb=gpu_memory,
             batch_size=batch_size,
             num_iterations=num_iterations,
-            device=device
+            device=device,
         )
 
     def _prepare_model(self, model: Any, device: str) -> Any:
@@ -354,7 +341,7 @@ class BenchmarkSuite:
 
         return model
 
-    def _create_dummy_input(self, shape: Tuple[int, ...], device: str) -> Any:
+    def _create_dummy_input(self, shape: tuple[int, ...], device: str) -> Any:
         """Create dummy input tensor.
 
         Args:
@@ -366,6 +353,7 @@ class BenchmarkSuite:
         """
         try:
             import torch
+
             return torch.randn(shape, device=device)
         except ImportError:
             return np.random.randn(*shape).astype(np.float32)
@@ -396,10 +384,9 @@ class BenchmarkSuite:
             # Fallback for non-PyTorch models
             if hasattr(model, "predict"):
                 return model.predict(input_tensor)
-            else:
-                return model(input_tensor)
+            return model(input_tensor)
 
-    def _get_memory_usage(self) -> Optional[float]:
+    def _get_memory_usage(self) -> float | None:
         """Get current memory usage in MB.
 
         Returns:
@@ -411,7 +398,7 @@ class BenchmarkSuite:
         process = psutil.Process()
         return process.memory_info().rss / (1024 * 1024)
 
-    def _get_gpu_metrics(self) -> Tuple[Optional[float], Optional[float]]:
+    def _get_gpu_metrics(self) -> tuple[float | None, float | None]:
         """Get GPU utilization and memory.
 
         Returns:
@@ -432,7 +419,7 @@ class BenchmarkSuite:
 
         return None, None
 
-    def _get_hardware_info(self) -> Dict[str, Any]:
+    def _get_hardware_info(self) -> dict[str, Any]:
         """Get hardware information.
 
         Returns:
@@ -463,7 +450,7 @@ class BenchmarkSuite:
 
         return info
 
-    def print_report(self, results: Dict[int, BenchmarkMetrics]):
+    def print_report(self, results: dict[int, BenchmarkMetrics]):
         """Print benchmark report.
 
         Args:
@@ -485,19 +472,21 @@ class BenchmarkSuite:
         print("-" * 80)
 
         for batch_size, metrics in sorted(results.items()):
-            print(f"{batch_size:>8} {metrics.mean_latency:>12.2f} {metrics.p95_latency:>12.2f} "
-                  f"{metrics.p99_latency:>12.2f} {metrics.throughput_samples_per_sec:>20.0f}")
+            print(
+                f"{batch_size:>8} {metrics.mean_latency:>12.2f} {metrics.p95_latency:>12.2f} "
+                f"{metrics.p99_latency:>12.2f} {metrics.throughput_samples_per_sec:>20.0f}"
+            )
 
         print("=" * 80)
 
     def compare_models(
         self,
-        models: Dict[str, Any],
-        input_shape: Tuple[int, ...],
+        models: dict[str, Any],
+        input_shape: tuple[int, ...],
         batch_size: int = 32,
         num_iterations: int = 1000,
-        device: str = "cpu"
-    ) -> Dict[str, BenchmarkMetrics]:
+        device: str = "cpu",
+    ) -> dict[str, BenchmarkMetrics]:
         """Compare multiple models.
 
         Args:
@@ -525,7 +514,7 @@ class BenchmarkSuite:
                 batch_size=batch_size,
                 num_iterations=num_iterations,
                 warmup_iterations=100,
-                device=device
+                device=device,
             )
 
             results[model_name] = metrics
@@ -535,7 +524,7 @@ class BenchmarkSuite:
 
         return results
 
-    def print_comparison(self, results: Dict[str, BenchmarkMetrics]):
+    def print_comparison(self, results: dict[str, BenchmarkMetrics]):
         """Print model comparison.
 
         Args:
@@ -550,8 +539,10 @@ class BenchmarkSuite:
 
         for model_name, metrics in sorted(results.items(), key=lambda x: x[1].mean_latency):
             mem_str = f"{metrics.peak_memory_mb:.1f}" if metrics.peak_memory_mb else "N/A"
-            print(f"{model_name:>20} {metrics.mean_latency:>20.2f} "
-                  f"{metrics.throughput_samples_per_sec:>20.0f} {mem_str:>15}")
+            print(
+                f"{model_name:>20} {metrics.mean_latency:>20.2f} "
+                f"{metrics.throughput_samples_per_sec:>20.0f} {mem_str:>15}"
+            )
 
         print("=" * 80)
 
@@ -559,6 +550,7 @@ class BenchmarkSuite:
 # =============================================================================
 # CLI
 # =============================================================================
+
 
 def main():
     """Main benchmark script."""
@@ -582,6 +574,7 @@ def main():
     # Load model (example for PyTorch)
     try:
         import torch
+
         model = torch.load(args.model_path)
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
@@ -596,7 +589,7 @@ def main():
         input_shape=input_shape,
         batch_sizes=batch_sizes,
         num_iterations=args.num_iterations,
-        device=args.device
+        device=args.device,
     )
 
     # Print report
@@ -608,7 +601,7 @@ def main():
             model_name=Path(args.model_path).stem,
             timestamp=datetime.utcnow(),
             metrics=metrics,
-            hardware_info=suite.hardware_info
+            hardware_info=suite.hardware_info,
         )
 
         output_path = Path(args.output).parent / f"{Path(args.output).stem}_bs{batch_size}.json"

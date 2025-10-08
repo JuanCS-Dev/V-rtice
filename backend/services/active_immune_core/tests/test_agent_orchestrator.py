@@ -21,24 +21,24 @@ Version: 1.0.0
 Date: 2025-10-07
 """
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock
 
-from coordination.agent_orchestrator import AgentOrchestrator
+import pytest
+
 from agents.agent_factory import AgentFactory
-from agents.models import AgentType, AgenteState
-from coordination.rate_limiter import ClonalExpansionRateLimiter
+from agents.models import AgenteState, AgentType
+from coordination.agent_orchestrator import AgentOrchestrator
 from coordination.exceptions import (
+    AgentOrchestrationError,
     LymphnodeRateLimitError,
     LymphnodeResourceExhaustedError,
-    AgentOrchestrationError,
 )
-
+from coordination.rate_limiter import ClonalExpansionRateLimiter
 
 # =============================================================================
 # TEST FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def agent_factory():
@@ -184,17 +184,23 @@ class TestAgentRegistration:
     async def test_register_multiple_agents(self, orchestrator):
         """Test registering multiple agents."""
         state1 = AgenteState(
-            id="agent-1", tipo=AgentType.NEUTROFILO, estado="active",
+            id="agent-1",
+            tipo=AgentType.NEUTROFILO,
+            estado="active",
             localizacao_atual="node-test",
             area_patrulha="zone-test",
         )
         state2 = AgenteState(
-            id="agent-2", tipo=AgentType.MACROFAGO, estado="active",
+            id="agent-2",
+            tipo=AgentType.MACROFAGO,
+            estado="active",
             localizacao_atual="node-test",
             area_patrulha="zone-test",
         )
         state3 = AgenteState(
-            id="agent-3", tipo=AgentType.NK_CELL, estado="active",
+            id="agent-3",
+            tipo=AgentType.NK_CELL,
+            estado="active",
             localizacao_atual="node-test",
             area_patrulha="zone-test",
         )
@@ -245,8 +251,8 @@ class TestClonalExpansion:
                 estado="active",
                 especializacao="malware-x",
                 sensibilidade=0.5,
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             mock_agent.iniciar = AsyncMock()
             mock_agents.append(mock_agent)
@@ -275,8 +281,8 @@ class TestClonalExpansion:
                 estado="active",
                 especializacao="ransomware-y",
                 sensibilidade=0.5,  # Will be mutated
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             mock_agent.iniciar = AsyncMock()
             mock_agents.append(mock_agent)
@@ -290,10 +296,7 @@ class TestClonalExpansion:
         )
 
         # Check that sensitivity was mutated for each clone
-        sensitivities = [
-            orchestrator.agentes_ativos[f"clone-{i}"].sensibilidade
-            for i in range(3)
-        ]
+        sensitivities = [orchestrator.agentes_ativos[f"clone-{i}"].sensibilidade for i in range(3)]
 
         # Should have different sensitivities due to mutation
         assert sensitivities[0] != sensitivities[1] or sensitivities[1] != sensitivities[2]
@@ -326,8 +329,8 @@ class TestClonalExpansion:
                 id=f"agent-{i}",
                 tipo=AgentType.NEUTROFILO,
                 estado="active",
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             await orchestrator.register_agent(state)
 
@@ -352,8 +355,8 @@ class TestClonalExpansion:
                 estado="active",
                 especializacao="apt-z",
                 sensibilidade=0.5,
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             mock_agent.iniciar = AsyncMock()
             mock_agents.append(mock_agent)
@@ -413,8 +416,8 @@ class TestClonalExpansion:
                 estado="active",
                 especializacao="test-spec",
                 sensibilidade=0.5,
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             mock_agent.iniciar = AsyncMock()
             mock_agents.append(mock_agent)
@@ -491,8 +494,8 @@ class TestCloneDestruction:
                 tipo=AgentType.NEUTROFILO,
                 estado="active",
                 especializacao="malware-x",
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             await orchestrator.register_agent(state)
 
@@ -575,8 +578,8 @@ class TestCloneDestruction:
                 tipo=AgentType.NEUTROFILO,
                 estado="active",
                 especializacao="test-spec",
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             await orchestrator.register_agent(state)
 
@@ -596,8 +599,8 @@ class TestCloneDestruction:
                 tipo=AgentType.NEUTROFILO,
                 estado="active",
                 especializacao="test-spec",
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             await orchestrator.register_agent(state)
 
@@ -686,12 +689,16 @@ class TestStatistics:
     async def test_get_active_agents(self, orchestrator):
         """Test retrieving all active agents."""
         state1 = AgenteState(
-            id="agent-1", tipo=AgentType.NEUTROFILO, estado="active",
+            id="agent-1",
+            tipo=AgentType.NEUTROFILO,
+            estado="active",
             localizacao_atual="node-test",
             area_patrulha="zone-test",
         )
         state2 = AgenteState(
-            id="agent-2", tipo=AgentType.MACROFAGO, estado="active",
+            id="agent-2",
+            tipo=AgentType.MACROFAGO,
+            estado="active",
             localizacao_atual="node-test",
             area_patrulha="zone-test",
         )
@@ -717,8 +724,8 @@ class TestStatistics:
                 estado="active",
                 especializacao="test-spec",
                 sensibilidade=0.5,
-            localizacao_atual="node-test",
-            area_patrulha="zone-test",
+                localizacao_atual="node-test",
+                area_patrulha="zone-test",
             )
             mock_agent.iniciar = AsyncMock()
             mock_agents.append(mock_agent)

@@ -277,7 +277,7 @@ async def test_aggregate_circuit_breaker_opens_on_consecutive_failures():
     for _ in range(3):
         try:
             await bridge.coordinate_processing(raw_input)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
 
     # Aggregate breaker should be open

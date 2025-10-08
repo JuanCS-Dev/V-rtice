@@ -17,16 +17,17 @@ understanding of the network attack surface.
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
 from metrics import MetricsCollector
 from models import ReconResult, ReconStatus, ReconTask
-from pydantic import BaseModel
 from recon_engine import ReconEngine
-import uvicorn
 
 app = FastAPI(title="Maximus Network Reconnaissance Service", version="1.0.0")
 

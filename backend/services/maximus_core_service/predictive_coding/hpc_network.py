@@ -14,10 +14,8 @@ Free Energy Minimization: System learns to predict future states and acts to min
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-import torch
 
 from .layer1_sensory import SensoryLayer
 from .layer2_behavioral import BehavioralLayer, EventGraph
@@ -46,39 +44,29 @@ class HierarchicalPredictiveCodingNetwork:
         self.device = device
 
         # Initialize all 5 layers
-        self.l1_sensory = SensoryLayer(
-            input_dim=10000, latent_dim=latent_dim, device=device
-        )
+        self.l1_sensory = SensoryLayer(input_dim=10000, latent_dim=latent_dim, device=device)
 
         self.l2_behavioral = BehavioralLayer(latent_dim=latent_dim, device=device)
 
-        self.l3_operational = OperationalLayer(
-            latent_dim=latent_dim, device=device, prediction_horizon_hours=6
-        )
+        self.l3_operational = OperationalLayer(latent_dim=latent_dim, device=device, prediction_horizon_hours=6)
 
-        self.l4_tactical = TacticalLayer(
-            latent_dim=latent_dim, device=device, prediction_horizon_days=7
-        )
+        self.l4_tactical = TacticalLayer(latent_dim=latent_dim, device=device, prediction_horizon_days=7)
 
-        self.l5_strategic = StrategicLayer(
-            latent_dim=latent_dim, device=device, prediction_horizon_weeks=12
-        )
+        self.l5_strategic = StrategicLayer(latent_dim=latent_dim, device=device, prediction_horizon_weeks=12)
 
         # Prediction error buffers
         self.prediction_errors = {"l1": [], "l2": [], "l3": [], "l4": [], "l5": []}
 
-        logger.info(
-            f"hPC Network initialized with {latent_dim}D latent space on {device}"
-        )
+        logger.info(f"hPC Network initialized with {latent_dim}D latent space on {device}")
 
     def hierarchical_inference(
         self,
         raw_event: np.ndarray,
-        event_graph: Optional[EventGraph] = None,
-        l2_sequence: Optional[np.ndarray] = None,
-        l3_sequence: Optional[np.ndarray] = None,
-        l4_sequence: Optional[np.ndarray] = None,
-    ) -> Dict:
+        event_graph: EventGraph | None = None,
+        l2_sequence: np.ndarray | None = None,
+        l3_sequence: np.ndarray | None = None,
+        l4_sequence: np.ndarray | None = None,
+    ) -> dict:
         """Perform hierarchical inference through all layers.
 
         Bottom-up flow: Raw event → L1 → L2 → L3 → L4 → L5
@@ -129,9 +117,7 @@ class HierarchicalPredictiveCodingNetwork:
 
         return results
 
-    def compute_free_energy(
-        self, predictions: Dict, ground_truth: Optional[Dict] = None
-    ) -> Dict[str, float]:
+    def compute_free_energy(self, predictions: dict, ground_truth: dict | None = None) -> dict[str, float]:
         """Compute Free Energy (prediction error) for each layer.
 
         Free Energy ≈ Prediction Error = surprise
@@ -173,7 +159,7 @@ class HierarchicalPredictiveCodingNetwork:
 
         return free_energy
 
-    def get_unified_threat_assessment(self, predictions: Dict) -> Dict:
+    def get_unified_threat_assessment(self, predictions: dict) -> dict:
         """Generate unified threat assessment from all layers.
 
         Combines predictions from all layers into single assessment.
@@ -202,17 +188,12 @@ class HierarchicalPredictiveCodingNetwork:
             )
 
         # Layer 2: Behavioral patterns
-        if (
-            predictions["l2_behavioral"]
-            and predictions["l2_behavioral"]["is_anomalous"].any()
-        ):
+        if predictions["l2_behavioral"] and predictions["l2_behavioral"]["is_anomalous"].any():
             assessment["findings"].append(
                 {
                     "layer": "BEHAVIORAL",
                     "type": "ANOMALOUS_PATTERN",
-                    "affected_nodes": int(
-                        predictions["l2_behavioral"]["is_anomalous"].sum()
-                    ),
+                    "affected_nodes": int(predictions["l2_behavioral"]["is_anomalous"].sum()),
                 }
             )
 
@@ -223,9 +204,7 @@ class HierarchicalPredictiveCodingNetwork:
                 assessment["findings"].append(
                     {
                         "layer": "OPERATIONAL",
-                        "type": predictions["l3_operational"].get(
-                            "threat_type", "UNKNOWN"
-                        ),
+                        "type": predictions["l3_operational"].get("threat_type", "UNKNOWN"),
                         "severity": float(severity),
                     }
                 )

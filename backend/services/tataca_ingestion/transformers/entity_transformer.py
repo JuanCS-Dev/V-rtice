@@ -4,10 +4,10 @@ Transforms raw data from various sources into normalized domain entities with
 validation, cleansing, and enrichment.
 """
 
-from datetime import datetime
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 from models import (
     DataSource,
@@ -36,9 +36,7 @@ class EntityTransformer:
         self._placa_pattern = re.compile(r"^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$")
         self._cep_pattern = re.compile(r"^\d{5}-?\d{3}$")
 
-    def transform_pessoa(
-        self, raw_data: Dict[str, Any], source: DataSource
-    ) -> TransformResult:
+    def transform_pessoa(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw person data into Pessoa entity.
 
@@ -101,13 +99,9 @@ class EntityTransformer:
 
         except Exception as e:
             logger.error(f"Error transforming Pessoa: {e}", exc_info=True)
-            return TransformResult(
-                success=False, entity_type=EntityType.PESSOA, error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.PESSOA, error_message=str(e))
 
-    def transform_veiculo(
-        self, raw_data: Dict[str, Any], source: DataSource
-    ) -> TransformResult:
+    def transform_veiculo(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw vehicle data into Veiculo entity.
 
@@ -131,9 +125,7 @@ class EntityTransformer:
 
             # Parse years
             ano_fabricacao = self._parse_year(raw_data.get("ano_fabricacao"))
-            ano_modelo = self._parse_year(
-                raw_data.get("ano_modelo") or raw_data.get("ano")
-            )
+            ano_modelo = self._parse_year(raw_data.get("ano_modelo") or raw_data.get("ano"))
 
             # Build metadata
             metadata = {
@@ -174,13 +166,9 @@ class EntityTransformer:
 
         except Exception as e:
             logger.error(f"Error transforming Veiculo: {e}", exc_info=True)
-            return TransformResult(
-                success=False, entity_type=EntityType.VEICULO, error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.VEICULO, error_message=str(e))
 
-    def transform_endereco(
-        self, raw_data: Dict[str, Any], source: DataSource
-    ) -> TransformResult:
+    def transform_endereco(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw address data into Endereco entity.
 
@@ -239,13 +227,9 @@ class EntityTransformer:
 
         except Exception as e:
             logger.error(f"Error transforming Endereco: {e}", exc_info=True)
-            return TransformResult(
-                success=False, entity_type=EntityType.ENDERECO, error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.ENDERECO, error_message=str(e))
 
-    def transform_ocorrencia(
-        self, raw_data: Dict[str, Any], source: DataSource
-    ) -> TransformResult:
+    def transform_ocorrencia(self, raw_data: Dict[str, Any], source: DataSource) -> TransformResult:
         """
         Transform raw occurrence data into Ocorrencia entity.
 
@@ -297,11 +281,7 @@ class EntityTransformer:
                 local_logradouro=self._normalize_text(raw_data.get("local_logradouro")),
                 local_bairro=self._normalize_text(raw_data.get("local_bairro")),
                 local_cidade=self._normalize_text(raw_data.get("local_cidade")),
-                local_estado=(
-                    raw_data.get("local_estado", "").upper()
-                    if raw_data.get("local_estado")
-                    else None
-                ),
+                local_estado=(raw_data.get("local_estado", "").upper() if raw_data.get("local_estado") else None),
                 delegacia=raw_data.get("delegacia"),
                 status=self._normalize_text(raw_data.get("status")),
                 metadata=metadata,
@@ -318,9 +298,7 @@ class EntityTransformer:
 
         except Exception as e:
             logger.error(f"Error transforming Ocorrencia: {e}", exc_info=True)
-            return TransformResult(
-                success=False, entity_type=EntityType.OCORRENCIA, error_message=str(e)
-            )
+            return TransformResult(success=False, entity_type=EntityType.OCORRENCIA, error_message=str(e))
 
     # Normalization helpers
 

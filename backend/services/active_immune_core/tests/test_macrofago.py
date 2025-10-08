@@ -5,16 +5,13 @@ Uses graceful degradation paths for testing.
 """
 
 import asyncio
-from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
-import aiohttp
 import pytest
 import pytest_asyncio
 
 from active_immune_core.agents import AgentStatus, AgentType
 from active_immune_core.agents.macrofago import MacrofagoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -143,9 +140,7 @@ class TestSuspicionScoring:
         # Should have some suspicion due to traffic
         assert score >= 0.2
 
-    async def test_calcular_suspeita_malicious_connection(
-        self, macrofago, malicious_connection
-    ):
+    async def test_calcular_suspeita_malicious_connection(self, macrofago, malicious_connection):
         """Test suspicion score for highly suspicious connection"""
         score = macrofago._calcular_suspeita(malicious_connection)
 
@@ -289,9 +284,7 @@ class TestMacrofagoNeutralization:
         dst_ip = malicious_connection["dst_ip"]
 
         # Attempt neutralization (RTE service not running, will degrade gracefully)
-        result = await macrofago.executar_neutralizacao(
-            malicious_connection, metodo="isolate"
-        )
+        result = await macrofago.executar_neutralizacao(malicious_connection, metodo="isolate")
 
         # Should succeed locally even if RTE unavailable
         assert result is True
@@ -304,9 +297,7 @@ class TestMacrofagoNeutralization:
         await macrofago.iniciar()
         await asyncio.sleep(0.5)
 
-        result = await macrofago.executar_neutralizacao(
-            sample_connection, metodo="monitor"
-        )
+        result = await macrofago.executar_neutralizacao(sample_connection, metodo="monitor")
 
         # Should succeed without blocking
         assert result is True
@@ -321,9 +312,7 @@ class TestMacrofagoNeutralization:
         # Add 150 IPs
         for i in range(150):
             ip = f"192.0.2.{i}"
-            await macrofago.executar_neutralizacao(
-                {"dst_ip": ip}, metodo="isolate"
-            )
+            await macrofago.executar_neutralizacao({"dst_ip": ip}, metodo="isolate")
 
         # Should only keep last 100
         assert len(macrofago.fagocitados) == 100
@@ -452,18 +441,20 @@ class TestScanNetworkConnectionsWithHTTP:
         # Mock HTTP response
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={
-            "connections": [
-                {"src_ip": "10.0.0.1", "dst_ip": "203.0.113.50", "dst_port": 8080},
-                {"src_ip": "10.0.0.2", "dst_ip": "203.0.113.51", "dst_port": 443},
-            ]
-        })
+        mock_response.json = AsyncMock(
+            return_value={
+                "connections": [
+                    {"src_ip": "10.0.0.1", "dst_ip": "203.0.113.50", "dst_port": 8080},
+                    {"src_ip": "10.0.0.2", "dst_ip": "203.0.113.51", "dst_port": 443},
+                ]
+            }
+        )
 
         mock_ctx = AsyncMock()
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'get') as mock_get:
+        with patch.object(macrofago._http_session, "get") as mock_get:
             mock_get.return_value = mock_ctx
 
             connections = await macrofago._scan_network_connections()
@@ -485,7 +476,7 @@ class TestScanNetworkConnectionsWithHTTP:
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'get') as mock_get:
+        with patch.object(macrofago._http_session, "get") as mock_get:
             mock_get.return_value = mock_ctx
 
             connections = await macrofago._scan_network_connections()
@@ -506,7 +497,7 @@ class TestScanNetworkConnectionsWithHTTP:
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'get') as mock_get:
+        with patch.object(macrofago._http_session, "get") as mock_get:
             mock_get.return_value = mock_ctx
 
             connections = await macrofago._scan_network_connections()
@@ -519,7 +510,7 @@ class TestScanNetworkConnectionsWithHTTP:
         """Test network scan with timeout"""
         await macrofago.iniciar()
 
-        with patch.object(macrofago._http_session, 'get') as mock_get:
+        with patch.object(macrofago._http_session, "get") as mock_get:
             mock_get.side_effect = asyncio.TimeoutError()
 
             connections = await macrofago._scan_network_connections()
@@ -532,7 +523,7 @@ class TestScanNetworkConnectionsWithHTTP:
         """Test network scan with generic exception"""
         await macrofago.iniciar()
 
-        with patch.object(macrofago._http_session, 'get') as mock_get:
+        with patch.object(macrofago._http_session, "get") as mock_get:
             mock_get.side_effect = Exception("Unexpected error")
 
             connections = await macrofago._scan_network_connections()
@@ -552,18 +543,20 @@ class TestInvestigationWithHTTP:
 
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={
-            "reputation": {"score": 9},
-            "malicious": True,
-            "blocklists": ["spamhaus", "barracuda"],
-            "geolocation": {"country": "XX"}
-        })
+        mock_response.json = AsyncMock(
+            return_value={
+                "reputation": {"score": 9},
+                "malicious": True,
+                "blocklists": ["spamhaus", "barracuda"],
+                "geolocation": {"country": "XX"},
+            }
+        )
 
         mock_ctx = AsyncMock()
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.return_value = mock_ctx
 
             result = await macrofago.executar_investigacao(malicious_connection)
@@ -580,17 +573,19 @@ class TestInvestigationWithHTTP:
 
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={
-            "reputation": {"score": 2},
-            "malicious": False,
-            "blocklists": [],
-        })
+        mock_response.json = AsyncMock(
+            return_value={
+                "reputation": {"score": 2},
+                "malicious": False,
+                "blocklists": [],
+            }
+        )
 
         mock_ctx = AsyncMock()
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.return_value = mock_ctx
 
             result = await macrofago.executar_investigacao(sample_connection)
@@ -611,7 +606,7 @@ class TestInvestigationWithHTTP:
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.return_value = mock_ctx
 
             result = await macrofago.executar_investigacao(malicious_connection)
@@ -633,7 +628,7 @@ class TestInvestigationWithHTTP:
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.return_value = mock_ctx
 
             result = await macrofago.executar_investigacao(sample_connection)
@@ -647,7 +642,7 @@ class TestInvestigationWithHTTP:
         """Test investigation timeout falls back to heuristics"""
         await macrofago.iniciar()
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.side_effect = asyncio.TimeoutError()
 
             result = await macrofago.executar_investigacao(sample_connection)
@@ -661,7 +656,7 @@ class TestInvestigationWithHTTP:
         """Test investigation generic exception returns safe error"""
         await macrofago.iniciar()
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.side_effect = Exception("Unexpected error")
 
             result = await macrofago.executar_investigacao(sample_connection)
@@ -693,7 +688,7 @@ class TestNeutralizationWithHTTP:
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.return_value = mock_ctx
 
             result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
@@ -716,7 +711,7 @@ class TestNeutralizationWithHTTP:
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.return_value = mock_ctx
 
             result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
@@ -739,7 +734,7 @@ class TestNeutralizationWithHTTP:
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.return_value = mock_ctx
 
             result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
@@ -752,7 +747,7 @@ class TestNeutralizationWithHTTP:
         """Test neutralization timeout"""
         await macrofago.iniciar()
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.side_effect = asyncio.TimeoutError()
 
             result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")
@@ -765,7 +760,7 @@ class TestNeutralizationWithHTTP:
         """Test neutralization generic exception"""
         await macrofago.iniciar()
 
-        with patch.object(macrofago._http_session, 'post') as mock_post:
+        with patch.object(macrofago._http_session, "post") as mock_post:
             mock_post.side_effect = Exception("Unexpected error")
 
             result = await macrofago.executar_neutralizacao(malicious_connection, "isolate")

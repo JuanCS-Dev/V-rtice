@@ -1,15 +1,16 @@
 """Debug script to test AgentService"""
+
 import asyncio
-import sys
 import logging
+import sys
 
 logging.basicConfig(level=logging.INFO)
 
 # Add current directory to path
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 
-from api.core_integration.core_manager import CoreManager
 from api.core_integration.agent_service import AgentService
+from api.core_integration.core_manager import CoreManager
 
 
 async def test_create_agent():
@@ -47,10 +48,7 @@ async def test_create_agent():
 
         # Create agent
         print("\n4. Creating Macrofago agent...")
-        response = await service.create_agent(
-            agent_type="macrofago",
-            config={"area_patrulha": "test_area"}
-        )
+        response = await service.create_agent(agent_type="macrofago", config={"area_patrulha": "test_area"})
         print(f"✓ Agent created: {response.agent_id}")
         print(f"  Type: {response.agent_type}")
         print(f"  Status: {response.status}")
@@ -68,6 +66,7 @@ async def test_create_agent():
     except Exception as e:
         print(f"\n✗ TEST FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

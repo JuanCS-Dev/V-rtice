@@ -7,16 +7,16 @@ Date: 2025-10-06
 """
 
 import pytest
-import numpy as np
 
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
 
-from performance.benchmark_suite import BenchmarkSuite, BenchmarkConfig, BenchmarkMetrics
+from performance.benchmark_suite import BenchmarkConfig, BenchmarkMetrics, BenchmarkSuite
 
 
 @pytest.fixture
@@ -39,10 +39,7 @@ def simple_model():
 @pytest.fixture
 def benchmark_config():
     """Create benchmark config."""
-    return BenchmarkConfig(
-        num_iterations=10,
-        warmup_iterations=2
-    )
+    return BenchmarkConfig(num_iterations=10, warmup_iterations=2)
 
 
 def test_benchmark_suite_initialization(benchmark_config):
@@ -59,11 +56,7 @@ def test_benchmark_model_single_batch(simple_model, benchmark_config):
     suite = BenchmarkSuite(config=benchmark_config)
 
     results = suite.benchmark_model(
-        model=simple_model,
-        input_shape=(8, 128),
-        batch_sizes=[8],
-        num_iterations=10,
-        device="cpu"
+        model=simple_model, input_shape=(8, 128), batch_sizes=[8], num_iterations=10, device="cpu"
     )
 
     assert 8 in results
@@ -83,11 +76,7 @@ def test_benchmark_model_multiple_batches(simple_model, benchmark_config):
     suite = BenchmarkSuite(config=benchmark_config)
 
     results = suite.benchmark_model(
-        model=simple_model,
-        input_shape=(1, 128),
-        batch_sizes=[1, 4, 8],
-        num_iterations=10,
-        device="cpu"
+        model=simple_model, input_shape=(1, 128), batch_sizes=[1, 4, 8], num_iterations=10, device="cpu"
     )
 
     assert len(results) == 3
@@ -109,7 +98,7 @@ def test_benchmark_metrics_percentiles(simple_model, benchmark_config):
         input_shape=(4, 128),
         batch_sizes=[4],
         num_iterations=50,  # More iterations for better percentile stats
-        device="cpu"
+        device="cpu",
     )
 
     metrics = results[4]
@@ -128,11 +117,7 @@ def test_benchmark_result_to_dict(simple_model, benchmark_config):
     suite = BenchmarkSuite(config=benchmark_config)
 
     results = suite.benchmark_model(
-        model=simple_model,
-        input_shape=(2, 128),
-        batch_sizes=[2],
-        num_iterations=5,
-        device="cpu"
+        model=simple_model, input_shape=(2, 128), batch_sizes=[2], num_iterations=5, device="cpu"
     )
 
     result_dict = results[2].to_dict()
@@ -150,19 +135,11 @@ def test_benchmark_with_different_input_shapes(simple_model, benchmark_config):
 
     # Test with different input sizes
     results_small = suite.benchmark_model(
-        model=simple_model,
-        input_shape=(1, 128),
-        batch_sizes=[1],
-        num_iterations=10,
-        device="cpu"
+        model=simple_model, input_shape=(1, 128), batch_sizes=[1], num_iterations=10, device="cpu"
     )
 
     results_large = suite.benchmark_model(
-        model=simple_model,
-        input_shape=(16, 128),
-        batch_sizes=[16],
-        num_iterations=10,
-        device="cpu"
+        model=simple_model, input_shape=(16, 128), batch_sizes=[16], num_iterations=10, device="cpu"
     )
 
     # Larger batches should generally have higher throughput (samples/sec)
@@ -172,11 +149,7 @@ def test_benchmark_with_different_input_shapes(simple_model, benchmark_config):
 
 def test_benchmark_config_validation():
     """Test config validation."""
-    config = BenchmarkConfig(
-        num_iterations=100,
-        warmup_iterations=10,
-        batch_sizes=[1, 8, 32]
-    )
+    config = BenchmarkConfig(num_iterations=100, warmup_iterations=10, batch_sizes=[1, 8, 32])
 
     assert config.num_iterations == 100
     assert config.warmup_iterations == 10

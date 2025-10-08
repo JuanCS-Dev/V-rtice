@@ -10,8 +10,6 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from pathlib import Path
-
 import numpy as np
 import pytest
 
@@ -69,16 +67,11 @@ def test_training_loop(simple_pytorch_model, train_val_test_splits, temp_dir):
         learning_rate=1e-3,
         checkpoint_dir=temp_dir / "checkpoints",
         log_dir=temp_dir / "logs",
-        save_every=2
+        save_every=2,
     )
 
     # Create trainer
-    trainer = LayerTrainer(
-        model=simple_pytorch_model,
-        optimizer_name="adam",
-        loss_fn=loss_fn,
-        config=config
-    )
+    trainer = LayerTrainer(model=simple_pytorch_model, optimizer_name="adam", loss_fn=loss_fn, config=config)
 
     # Train
     history = trainer.train(train_loader=train_loader, val_loader=val_loader)
@@ -101,8 +94,9 @@ def test_training_loop(simple_pytorch_model, train_val_test_splits, temp_dir):
 
     # Loss should decrease or stay similar (not increase significantly)
     # Allow 20% increase tolerance for stochastic training
-    assert last_train_loss <= first_train_loss * 1.2, \
+    assert last_train_loss <= first_train_loss * 1.2, (
         f"Training loss increased significantly: {first_train_loss:.4f} -> {last_train_loss:.4f}"
+    )
 
     # Verify checkpoint was saved
     checkpoint_dir = temp_dir / "checkpoints"
@@ -166,28 +160,21 @@ def test_early_stopping(simple_pytorch_model, train_val_test_splits, temp_dir):
         learning_rate=1e-3,
         early_stopping_patience=3,  # Stop after 3 epochs without improvement
         checkpoint_dir=temp_dir / "checkpoints_early_stop",
-        log_dir=temp_dir / "logs_early_stop"
+        log_dir=temp_dir / "logs_early_stop",
     )
 
     # Create trainer
-    trainer = LayerTrainer(
-        model=simple_pytorch_model,
-        optimizer_name="adam",
-        loss_fn=loss_fn,
-        config=config
-    )
+    trainer = LayerTrainer(model=simple_pytorch_model, optimizer_name="adam", loss_fn=loss_fn, config=config)
 
     # Train
     history = trainer.train(train_loader=train_loader, val_loader=val_loader)
 
     # Verify early stopping triggered
     # Training should stop before 100 epochs due to early stopping
-    assert len(history) < 100, \
-        f"Early stopping failed: trained for {len(history)} epochs (expected < 100)"
+    assert len(history) < 100, f"Early stopping failed: trained for {len(history)} epochs (expected < 100)"
 
     # Verify we trained for at least a few epochs
-    assert len(history) >= 3, \
-        f"Training stopped too early: {len(history)} epochs"
+    assert len(history) >= 3, f"Training stopped too early: {len(history)} epochs"
 
     # Verify validation loss was tracked
     val_losses = [m.val_loss for m in history if m.val_loss is not None]
@@ -199,5 +186,6 @@ def test_early_stopping(simple_pytorch_model, train_val_test_splits, temp_dir):
 
     # Verify best epoch is not the last epoch (early stopping should have triggered)
     # Allow last epoch to be best epoch + patience
-    assert len(history) <= best_epoch + config.early_stopping_patience + 2, \
+    assert len(history) <= best_epoch + config.early_stopping_patience + 2, (
         f"Early stopping delayed: best epoch {best_epoch}, stopped at {len(history)}"
+    )

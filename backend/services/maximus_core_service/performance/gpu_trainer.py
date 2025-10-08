@@ -14,12 +14,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-
-import numpy as np
+from typing import Any
 
 # Try to import PyTorch
 try:
@@ -27,6 +25,7 @@ try:
     import torch.nn as nn
     from torch.cuda.amp import GradScaler, autocast
     from torch.utils.data import DataLoader
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -45,7 +44,7 @@ class GPUTrainingConfig:
 
     # Multi-GPU settings
     use_data_parallel: bool = True
-    gpu_ids: Optional[List[int]] = None  # None = all available GPUs
+    gpu_ids: list[int] | None = None  # None = all available GPUs
 
     # Memory optimization
     gradient_accumulation_steps: int = 1
@@ -75,34 +74,15 @@ class GPUTrainer:
 
     Example:
         ```python
-        config = GPUTrainingConfig(
-            device="cuda",
-            use_amp=True,
-            use_data_parallel=True
-        )
+        config = GPUTrainingConfig(device="cuda", use_amp=True, use_data_parallel=True)
 
-        trainer = GPUTrainer(
-            model=model,
-            optimizer=optimizer,
-            loss_fn=loss_fn,
-            config=config
-        )
+        trainer = GPUTrainer(model=model, optimizer=optimizer, loss_fn=loss_fn, config=config)
 
-        history = trainer.train(
-            train_loader=train_loader,
-            val_loader=val_loader,
-            num_epochs=100
-        )
+        history = trainer.train(train_loader=train_loader, val_loader=val_loader, num_epochs=100)
         ```
     """
 
-    def __init__(
-        self,
-        model: Any,
-        optimizer: Any,
-        loss_fn: callable,
-        config: GPUTrainingConfig = GPUTrainingConfig()
-    ):
+    def __init__(self, model: Any, optimizer: Any, loss_fn: callable, config: GPUTrainingConfig = GPUTrainingConfig()):
         """Initialize GPU trainer.
 
         Args:
@@ -186,11 +166,8 @@ class GPUTrainer:
         return model
 
     def train(
-        self,
-        train_loader: DataLoader,
-        val_loader: Optional[DataLoader] = None,
-        num_epochs: int = 100
-    ) -> List[Dict[str, float]]:
+        self, train_loader: DataLoader, val_loader: DataLoader | None = None, num_epochs: int = 100
+    ) -> list[dict[str, float]]:
         """Train model.
 
         Args:
@@ -213,11 +190,7 @@ class GPUTrainer:
                 val_loss = self._validate_epoch(val_loader, epoch)
 
             # Log
-            epoch_metrics = {
-                "epoch": epoch,
-                "train_loss": train_loss,
-                "val_loss": val_loss
-            }
+            epoch_metrics = {"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss}
 
             # GPU stats
             if self.config.log_gpu_stats and self.device.type == "cuda":
@@ -226,9 +199,11 @@ class GPUTrainer:
 
             history.append(epoch_metrics)
 
-            logger.info(f"Epoch {epoch}/{num_epochs} - "
-                       f"train_loss: {train_loss:.4f} - "
-                       f"val_loss: {val_loss:.4f if val_loss else 'N/A'}")
+            logger.info(
+                f"Epoch {epoch}/{num_epochs} - "
+                f"train_loss: {train_loss:.4f} - "
+                f"val_loss: {val_loss:.4f if val_loss else 'N/A'}"
+            )
 
         return history
 
@@ -279,10 +254,11 @@ class GPUTrainer:
             num_batches += 1
 
             # Log GPU stats
-            if (self.config.log_gpu_stats and
-                self.device.type == "cuda" and
-                batch_idx % self.config.log_every_n_steps == 0):
-
+            if (
+                self.config.log_gpu_stats
+                and self.device.type == "cuda"
+                and batch_idx % self.config.log_every_n_steps == 0
+            ):
                 gpu_stats = self._get_gpu_stats()
                 logger.debug(f"Epoch {epoch} - Batch {batch_idx} - GPU: {gpu_stats}")
 
@@ -332,14 +308,13 @@ class GPUTrainer:
         if isinstance(batch, torch.Tensor):
             return batch.to(self.device, non_blocking=self.config.non_blocking)
 
-        elif isinstance(batch, (tuple, list)):
+        if isinstance(batch, (tuple, list)):
             return tuple(self._batch_to_device(x) for x in batch)
 
-        elif isinstance(batch, dict):
+        if isinstance(batch, dict):
             return {k: self._batch_to_device(v) for k, v in batch.items()}
 
-        else:
-            return batch
+        return batch
 
     def _get_amp_dtype(self) -> torch.dtype:
         """Get AMP dtype.
@@ -349,10 +324,9 @@ class GPUTrainer:
         """
         if self.config.amp_dtype == "bfloat16":
             return torch.bfloat16
-        else:
-            return torch.float16
+        return torch.float16
 
-    def _get_gpu_stats(self) -> Dict[str, float]:
+    def _get_gpu_stats(self) -> dict[str, float]:
         """Get GPU statistics.
 
         Returns:
@@ -388,10 +362,12 @@ class GPUTrainer:
         """
         checkpoint = {
             "epoch": epoch,
-            "model_state_dict": self.model.module.state_dict() if isinstance(self.model, nn.DataParallel) else self.model.state_dict(),
+            "model_state_dict": self.model.module.state_dict()
+            if isinstance(self.model, nn.DataParallel)
+            else self.model.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "config": self.config.__dict__,
-            **kwargs
+            **kwargs,
         }
 
         if self.scaler is not None:
@@ -430,12 +406,13 @@ class GPUTrainer:
 # Utility Functions
 # =============================================================================
 
+
 def get_optimal_batch_size(
     model: nn.Module,
-    input_shape: Tuple[int, ...],
+    input_shape: tuple[int, ...],
     device: str = "cuda",
     start_batch_size: int = 1,
-    max_batch_size: int = 512
+    max_batch_size: int = 512,
 ) -> int:
     """Find optimal batch size that fits in GPU memory.
 
@@ -474,8 +451,7 @@ def get_optimal_batch_size(
                 optimal_size = batch_size // 2
                 logger.info(f"Optimal batch size: {optimal_size}")
                 return optimal_size
-            else:
-                raise e
+            raise e
 
     return max_batch_size
 

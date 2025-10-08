@@ -5,7 +5,6 @@ cybersecurity actions.
 """
 
 import asyncio
-from typing import Any, Dict
 
 from .base import ActionContext
 from .config import get_config, get_config_for_risk
@@ -55,9 +54,7 @@ async def example_1_threat_mitigation():
     print("\n📊 Individual Framework Results:")
     for name, result in decision.framework_results.items():
         status = "✅ APPROVED" if result.approved else "❌ REJECTED"
-        print(
-            f"  {name}: {status} (confidence: {result.confidence:.2%}, {result.latency_ms}ms)"
-        )
+        print(f"  {name}: {status} (confidence: {result.confidence:.2%}, {result.latency_ms}ms)")
 
 
 async def example_2_offensive_action():
@@ -75,9 +72,7 @@ async def example_2_offensive_action():
         impact_assessment={
             "disruption_level": 0.3,
             "people_impacted": 10,
-            "side_effects": [
-                {"severity": "medium", "description": "Temporary service degradation"}
-            ],
+            "side_effects": [{"severity": "medium", "description": "Temporary service degradation"}],
         },
         operator_context={"operator_id": "operator_123", "authorized_pentest": True},
         urgency="medium",
@@ -198,7 +193,7 @@ async def example_5_risk_adjusted():
     print(f"\n📋 Action: {action_context.action_description}")
     print(f"🎯 Final Decision: {decision.final_decision}")
     print(f"📊 Confidence: {decision.final_confidence:.2%}")
-    print(f"🚨 Risk Level: CRITICAL")
+    print("🚨 Risk Level: CRITICAL")
     print(f"⏱️  Total Latency: {decision.total_latency_ms}ms")
     print(f"\n💡 Explanation: {decision.explanation}")
 

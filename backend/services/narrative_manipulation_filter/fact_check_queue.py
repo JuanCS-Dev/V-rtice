@@ -8,13 +8,12 @@ Kafka-based queue system for deep verification:
 """
 
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import json
-import logging
 from typing import Any, Dict, List, Optional
 
-from cache_manager import cache_manager, CacheCategory
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
 from entity_linker import entity_linker
 from kafka_client import kafka_client
@@ -170,9 +169,7 @@ class FactCheckQueue:
 
         try:
             # Subscribe to claims topic
-            async for message in kafka_client.consume(
-                topic=self.TOPIC_CLAIMS, group_id="fact_check_workers"
-            ):
+            async for message in kafka_client.consume(topic=self.TOPIC_CLAIMS, group_id="fact_check_workers"):
                 if not self._running:
                     break
 
@@ -188,7 +185,8 @@ class FactCheckQueue:
 
                     # STEP 1: Generate SPARQL query
                     sparql_query = await sparql_generator.generate_from_claim(
-                        claim=claim, query_type="ask"  # Boolean verification
+                        claim=claim,
+                        query_type="ask",  # Boolean verification
                     )
 
                     if not sparql_query:
@@ -208,9 +206,7 @@ class FactCheckQueue:
                     )
 
                     # STEP 3: Publish result
-                    await self._publish_result(
-                        claim=claim, result=result, context=context, worker_id=worker_id
-                    )
+                    await self._publish_result(claim=claim, result=result, context=context, worker_id=worker_id)
 
                     # STEP 4: Cache result
                     await self._cache_result(claim_hash, result)
@@ -221,9 +217,7 @@ class FactCheckQueue:
                     )
 
                 except Exception as e:
-                    logger.error(
-                        f"Worker {worker_id} processing error: {e}", exc_info=True
-                    )
+                    logger.error(f"Worker {worker_id} processing error: {e}", exc_info=True)
 
                     await self._publish_error(
                         claim=data.get("claim", "unknown"),
@@ -238,9 +232,7 @@ class FactCheckQueue:
         finally:
             logger.info(f"Worker {worker_id} stopped")
 
-    async def _publish_result(
-        self, claim: str, result: Any, context: Dict[str, Any], worker_id: int
-    ) -> None:
+    async def _publish_result(self, claim: str, result: Any, context: Dict[str, Any], worker_id: int) -> None:
         """Publish verification result to results topic."""
         message = {
             "claim": claim,
@@ -262,9 +254,7 @@ class FactCheckQueue:
             "tier": 2,
         }
 
-        await kafka_client.publish(
-            topic=self.TOPIC_RESULTS, message=message, key=hash_text(claim)
-        )
+        await kafka_client.publish(topic=self.TOPIC_RESULTS, message=message, key=hash_text(claim))
 
         logger.debug(f"Published result for: {claim[:50]}")
 
@@ -277,9 +267,7 @@ class FactCheckQueue:
             "timestamp": datetime.utcnow().isoformat(),
         }
 
-        await kafka_client.publish(
-            topic=self.TOPIC_ERRORS, message=message, key=hash_text(claim)
-        )
+        await kafka_client.publish(topic=self.TOPIC_ERRORS, message=message, key=hash_text(claim))
 
         logger.debug(f"Published error for: {claim[:50]}")
 
@@ -304,13 +292,9 @@ class FactCheckQueue:
             "timestamp": result.timestamp.isoformat() if result.timestamp else None,
         }
 
-        await cache_manager.set(
-            category=CacheCategory.FACTCHECK, key=cache_key, value=cache_data
-        )
+        await cache_manager.set(category=CacheCategory.FACTCHECK, key=cache_key, value=cache_data)
 
-    async def get_result(
-        self, claim: str, wait_timeout: Optional[float] = None
-    ) -> Optional[Dict[str, Any]]:
+    async def get_result(self, claim: str, wait_timeout: Optional[float] = None) -> Optional[Dict[str, Any]]:
         """
         Get verification result for claim.
 
@@ -336,9 +320,7 @@ class FactCheckQueue:
 
             start_time = asyncio.get_event_loop().time()
 
-            async for message in kafka_client.consume(
-                topic=self.TOPIC_RESULTS, group_id=f"result_waiter_{claim_hash}"
-            ):
+            async for message in kafka_client.consume(topic=self.TOPIC_RESULTS, group_id=f"result_waiter_{claim_hash}"):
                 data = message["value"]
 
                 if hash_text(data["claim"]) == claim_hash:

@@ -74,7 +74,7 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -145,14 +145,13 @@ class SalienceScore:
         total = self.compute_total()
         if total < 0.25:
             return SalienceLevel.MINIMAL
-        elif total < 0.50:
+        if total < 0.50:
             return SalienceLevel.LOW
-        elif total < 0.75:
+        if total < 0.75:
             return SalienceLevel.MEDIUM
-        elif total < 0.85:
+        if total < 0.85:
             return SalienceLevel.HIGH
-        else:
-            return SalienceLevel.CRITICAL
+        return SalienceLevel.CRITICAL
 
 
 @dataclass
@@ -224,25 +223,25 @@ class ESGTEvent:
 
     event_id: str
     timestamp_start: float
-    timestamp_end: Optional[float] = None
+    timestamp_end: float | None = None
 
     # Content
-    content: Dict[str, Any] = field(default_factory=dict)
+    content: dict[str, Any] = field(default_factory=dict)
     content_source: str = ""  # SPM that contributed content
 
     # Participants
-    participating_nodes: Set[str] = field(default_factory=set)
+    participating_nodes: set[str] = field(default_factory=set)
     node_count: int = 0
 
     # Synchronization metrics
     target_coherence: float = 0.70
     achieved_coherence: float = 0.0
-    coherence_history: List[float] = field(default_factory=list)
-    time_to_sync_ms: Optional[float] = None
+    coherence_history: list[float] = field(default_factory=list)
+    time_to_sync_ms: float | None = None
 
     # Phase information
     current_phase: ESGTPhase = ESGTPhase.IDLE
-    phase_transitions: List[Tuple[ESGTPhase, float]] = field(default_factory=list)
+    phase_transitions: list[tuple[ESGTPhase, float]] = field(default_factory=list)
 
     # Performance metrics
     prepare_latency_ms: float = 0.0
@@ -252,7 +251,7 @@ class ESGTEvent:
 
     # Outcome
     success: bool = False
-    failure_reason: Optional[str] = None
+    failure_reason: str | None = None
 
     def transition_phase(self, new_phase: ESGTPhase) -> None:
         """Record phase transition."""
@@ -260,7 +259,7 @@ class ESGTEvent:
         self.phase_transitions.append((new_phase, timestamp))
         self.current_phase = new_phase
 
-    def finalize(self, success: bool, reason: Optional[str] = None) -> None:
+    def finalize(self, success: bool, reason: str | None = None) -> None:
         """Mark event as complete."""
         self.timestamp_end = time.time()
         self.success = success
@@ -273,8 +272,7 @@ class ESGTEvent:
         """Get event duration in milliseconds."""
         if self.timestamp_end:
             return (self.timestamp_end - self.timestamp_start) * 1000
-        else:
-            return (time.time() - self.timestamp_start) * 1000
+        return (time.time() - self.timestamp_start) * 1000
 
     def was_successful(self) -> bool:
         """Check if event achieved conscious-level coherence."""
@@ -325,9 +323,9 @@ class ESGTCoordinator:
     def __init__(
         self,
         tig_fabric: TIGFabric,
-        ptp_cluster: Optional[PTPCluster] = None,
-        triggers: Optional[TriggerConditions] = None,
-        kuramoto_config: Optional[OscillatorConfig] = None,
+        ptp_cluster: PTPCluster | None = None,
+        triggers: TriggerConditions | None = None,
+        kuramoto_config: OscillatorConfig | None = None,
         coordinator_id: str = "esgt-coordinator",
     ):
         self.coordinator_id = coordinator_id
@@ -340,13 +338,13 @@ class ESGTCoordinator:
         self.kuramoto = KuramotoNetwork(self.kuramoto_config)
 
         # ESGT state
-        self.active_event: Optional[ESGTEvent] = None
-        self.event_history: List[ESGTEvent] = []
+        self.active_event: ESGTEvent | None = None
+        self.event_history: list[ESGTEvent] = []
         self.last_esgt_time: float = 0.0
 
         # Monitoring
         self._running: bool = False
-        self._monitor_task: Optional[asyncio.Task] = None
+        self._monitor_task: asyncio.Task | None = None
 
         # Performance tracking
         self.total_events: int = 0
@@ -374,7 +372,7 @@ class ESGTCoordinator:
     async def initiate_esgt(
         self,
         salience: SalienceScore,
-        content: Dict[str, Any],
+        content: dict[str, Any],
         content_source: str = "unknown",
         target_duration_ms: float = 200.0,
         target_coherence: float = 0.70,
@@ -553,7 +551,7 @@ class ESGTCoordinator:
 
         return True, ""
 
-    async def _recruit_nodes(self, content: Dict[str, Any]) -> Set[str]:
+    async def _recruit_nodes(self, content: dict[str, Any]) -> set[str]:
         """
         Recruit participating nodes for ESGT.
 
@@ -572,7 +570,7 @@ class ESGTCoordinator:
 
         return recruited
 
-    def _build_topology(self, node_ids: Set[str]) -> Dict[str, List[str]]:
+    def _build_topology(self, node_ids: set[str]) -> dict[str, list[str]]:
         """Build connectivity topology for Kuramoto network."""
         topology = {}
 
@@ -589,7 +587,7 @@ class ESGTCoordinator:
 
         return topology
 
-    async def _sustain_coherence(self, event: ESGTEvent, duration_ms: float, topology: Dict[str, List[str]]) -> None:
+    async def _sustain_coherence(self, event: ESGTEvent, duration_ms: float, topology: dict[str, list[str]]) -> None:
         """
         Sustain synchronization for target duration.
 

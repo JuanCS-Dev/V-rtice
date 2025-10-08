@@ -13,7 +13,6 @@ Key functionalities include:
   of information, protecting the AI's reasoning processes from manipulation.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -47,9 +46,7 @@ class LogicalFallacyDetector:
         Returns:
             Dict[str, Any]: A dictionary containing the detection results.
         """
-        print(
-            f"[LogicalFallacyDetector] Detecting fallacies in content (length: {len(content)})..."
-        )
+        print(f"[LogicalFallacyDetector] Detecting fallacies in content (length: {len(content)})...")
 
         detected_fallacies: List[Dict[str, Any]] = []
         content_lower = content.lower()
@@ -62,10 +59,7 @@ class LogicalFallacyDetector:
                             "type": fallacy_type,
                             "keyword_match": keyword,
                             "excerpt": content[
-                                content_lower.find(keyword)
-                                - 20 : content_lower.find(keyword)
-                                + len(keyword)
-                                + 20
+                                content_lower.find(keyword) - 20 : content_lower.find(keyword) + len(keyword) + 20
                             ],
                         }
                     )
@@ -97,10 +91,6 @@ class LogicalFallacyDetector:
         return {
             "status": self.current_status,
             "total_detections": len(self.detection_history),
-            "last_detection": (
-                self.last_detection_time.isoformat()
-                if self.last_detection_time
-                else "N/A"
-            ),
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
             "known_fallacy_types": list(self.fallacy_patterns.keys()),
         }

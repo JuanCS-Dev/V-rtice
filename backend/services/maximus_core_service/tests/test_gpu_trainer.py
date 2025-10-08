@@ -11,7 +11,8 @@ import pytest
 try:
     import torch
     import torch.nn as nn
-    from torch.utils.data import TensorDataset, DataLoader
+    from torch.utils.data import DataLoader, TensorDataset
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -55,7 +56,7 @@ def gpu_config():
         device="cpu",  # Use CPU for testing
         use_amp=False,  # Disable AMP for CPU
         use_data_parallel=False,
-        gradient_accumulation_steps=1
+        gradient_accumulation_steps=1,
     )
 
 
@@ -71,12 +72,7 @@ def test_gpu_trainer_initialization(simple_model, gpu_config):
 
     optimizer = torch.optim.Adam(simple_model.parameters())
 
-    trainer = GPUTrainer(
-        model=simple_model,
-        optimizer=optimizer,
-        loss_fn=dummy_loss_fn,
-        config=gpu_config
-    )
+    trainer = GPUTrainer(model=simple_model, optimizer=optimizer, loss_fn=dummy_loss_fn, config=gpu_config)
 
     assert trainer.device.type == "cpu"
     assert trainer.config.use_amp is False
@@ -85,6 +81,7 @@ def test_gpu_trainer_initialization(simple_model, gpu_config):
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_gpu_trainer_single_epoch(simple_model, simple_dataset, gpu_config):
     """Test training for single epoch."""
+
     def dummy_loss_fn(model, batch):
         x, y = batch
         output = model(x)
@@ -92,20 +89,11 @@ def test_gpu_trainer_single_epoch(simple_model, simple_dataset, gpu_config):
 
     optimizer = torch.optim.Adam(simple_model.parameters())
 
-    trainer = GPUTrainer(
-        model=simple_model,
-        optimizer=optimizer,
-        loss_fn=dummy_loss_fn,
-        config=gpu_config
-    )
+    trainer = GPUTrainer(model=simple_model, optimizer=optimizer, loss_fn=dummy_loss_fn, config=gpu_config)
 
     train_loader = DataLoader(simple_dataset, batch_size=16, shuffle=True)
 
-    history = trainer.train(
-        train_loader=train_loader,
-        val_loader=None,
-        num_epochs=1
-    )
+    history = trainer.train(train_loader=train_loader, val_loader=None, num_epochs=1)
 
     assert len(history) == 1
     assert history[0]["epoch"] == 1
@@ -116,6 +104,7 @@ def test_gpu_trainer_single_epoch(simple_model, simple_dataset, gpu_config):
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_gpu_trainer_multiple_epochs(simple_model, simple_dataset, gpu_config):
     """Test training for multiple epochs."""
+
     def dummy_loss_fn(model, batch):
         x, y = batch
         output = model(x)
@@ -123,20 +112,11 @@ def test_gpu_trainer_multiple_epochs(simple_model, simple_dataset, gpu_config):
 
     optimizer = torch.optim.Adam(simple_model.parameters())
 
-    trainer = GPUTrainer(
-        model=simple_model,
-        optimizer=optimizer,
-        loss_fn=dummy_loss_fn,
-        config=gpu_config
-    )
+    trainer = GPUTrainer(model=simple_model, optimizer=optimizer, loss_fn=dummy_loss_fn, config=gpu_config)
 
     train_loader = DataLoader(simple_dataset, batch_size=16, shuffle=True)
 
-    history = trainer.train(
-        train_loader=train_loader,
-        val_loader=None,
-        num_epochs=3
-    )
+    history = trainer.train(train_loader=train_loader, val_loader=None, num_epochs=3)
 
     assert len(history) == 3
 
@@ -148,6 +128,7 @@ def test_gpu_trainer_multiple_epochs(simple_model, simple_dataset, gpu_config):
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_gpu_trainer_with_validation(simple_model, simple_dataset, gpu_config):
     """Test training with validation."""
+
     def dummy_loss_fn(model, batch):
         x, y = batch
         output = model(x)
@@ -155,21 +136,12 @@ def test_gpu_trainer_with_validation(simple_model, simple_dataset, gpu_config):
 
     optimizer = torch.optim.Adam(simple_model.parameters())
 
-    trainer = GPUTrainer(
-        model=simple_model,
-        optimizer=optimizer,
-        loss_fn=dummy_loss_fn,
-        config=gpu_config
-    )
+    trainer = GPUTrainer(model=simple_model, optimizer=optimizer, loss_fn=dummy_loss_fn, config=gpu_config)
 
     train_loader = DataLoader(simple_dataset, batch_size=16, shuffle=True)
     val_loader = DataLoader(simple_dataset, batch_size=16, shuffle=False)
 
-    history = trainer.train(
-        train_loader=train_loader,
-        val_loader=val_loader,
-        num_epochs=2
-    )
+    history = trainer.train(train_loader=train_loader, val_loader=val_loader, num_epochs=2)
 
     assert len(history) == 2
 
@@ -181,12 +153,7 @@ def test_gpu_trainer_with_validation(simple_model, simple_dataset, gpu_config):
 
 def test_gpu_config_validation():
     """Test GPU config validation."""
-    config = GPUTrainingConfig(
-        device="cpu",
-        use_amp=False,
-        max_batch_size=64,
-        gradient_accumulation_steps=2
-    )
+    config = GPUTrainingConfig(device="cpu", use_amp=False, max_batch_size=64, gradient_accumulation_steps=2)
 
     assert config.device == "cpu"
     assert config.max_batch_size == 64

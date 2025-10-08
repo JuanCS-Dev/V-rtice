@@ -37,8 +37,9 @@ Date: 2025-10-08
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -62,11 +63,11 @@ class HierarchyConfig:
 
     # Layer configurations (input_dim shrinks as we go up the hierarchy)
     # Use None to indicate defaults, set in __post_init__
-    layer1_config: Optional[LayerConfig] = None
-    layer2_config: Optional[LayerConfig] = None
-    layer3_config: Optional[LayerConfig] = None
-    layer4_config: Optional[LayerConfig] = None
-    layer5_config: Optional[LayerConfig] = None
+    layer1_config: LayerConfig | None = None
+    layer2_config: LayerConfig | None = None
+    layer3_config: LayerConfig | None = None
+    layer4_config: LayerConfig | None = None
+    layer5_config: LayerConfig | None = None
 
     def __post_init__(self):
         """Initialize default layer configs if not provided."""
@@ -89,7 +90,7 @@ class HierarchyState:
     total_cycles: int
     total_errors: int
     total_timeouts: int
-    layers_active: List[bool]  # [L1, L2, L3, L4, L5]
+    layers_active: list[bool]  # [L1, L2, L3, L4, L5]
     aggregate_circuit_breaker_open: bool
     average_cycle_time_ms: float
     average_prediction_error: float
@@ -124,7 +125,7 @@ class PredictiveCodingHierarchy:
     """
 
     def __init__(
-        self, config: Optional[HierarchyConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: HierarchyConfig | None = None, kill_switch_callback: Callable[[str], None] | None = None
     ):
         """Initialize predictive coding hierarchy.
 
@@ -150,8 +151,8 @@ class PredictiveCodingHierarchy:
         self.total_timeouts = 0
 
         # Performance tracking
-        self._cycle_times: List[float] = []
-        self._prediction_errors: List[float] = []
+        self._cycle_times: list[float] = []
+        self._prediction_errors: list[float] = []
 
         logger.info(
             "PredictiveCodingHierarchy initialized with 5 layers:\n"
@@ -162,7 +163,7 @@ class PredictiveCodingHierarchy:
             f"  L5 (Strategic): input={self.config.layer5_config.input_dim} → hidden={self.config.layer5_config.hidden_dim}"
         )
 
-    async def process_input(self, raw_input: np.ndarray) -> Dict[str, float]:
+    async def process_input(self, raw_input: np.ndarray) -> dict[str, float]:
         """
         Process raw input through full hierarchy (bottom-up + top-down).
 
@@ -226,7 +227,7 @@ class PredictiveCodingHierarchy:
 
             return errors
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.total_timeouts += 1
             logger.error(f"⚠️ Hierarchy TIMEOUT ({self.config.max_hierarchy_cycle_time_ms}ms exceeded)")
 
@@ -248,7 +249,7 @@ class PredictiveCodingHierarchy:
 
             raise
 
-    async def _bottom_up_pass(self, raw_input: np.ndarray) -> Dict[str, float]:
+    async def _bottom_up_pass(self, raw_input: np.ndarray) -> dict[str, float]:
         """
         Execute bottom-up pass through hierarchy.
 
@@ -409,7 +410,7 @@ class PredictiveCodingHierarchy:
             average_prediction_error=avg_error,
         )
 
-    def get_health_metrics(self) -> Dict[str, Any]:
+    def get_health_metrics(self) -> dict[str, Any]:
         """
         Export aggregate health metrics for Safety Core monitoring.
 

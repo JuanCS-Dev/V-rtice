@@ -12,7 +12,6 @@ and the target's defensive response.
 """
 
 import asyncio
-from datetime import datetime
 from typing import Any, Dict, Optional
 
 from models import AttackTechnique
@@ -29,9 +28,7 @@ class AtomicExecutor:
         """Initializes the AtomicExecutor."""
         print("[AtomicExecutor] Initialized Atomic Executor.")
 
-    async def execute_technique(
-        self, technique: AttackTechnique, target_service: str
-    ) -> Dict[str, Any]:
+    async def execute_technique(self, technique: AttackTechnique, target_service: str) -> Dict[str, Any]:
         """Executes a specific atomic attack technique.
 
         Args:
@@ -41,9 +38,7 @@ class AtomicExecutor:
         Returns:
             Dict[str, Any]: A dictionary containing the output and status of the executed technique.
         """
-        print(
-            f"[AtomicExecutor] Executing technique '{technique.id}' against {target_service}"
-        )
+        print(f"[AtomicExecutor] Executing technique '{technique.id}' against {target_service}")
         await asyncio.sleep(0.1)  # Simulate execution time
 
         # Simulate different outcomes based on technique and target
@@ -60,15 +55,11 @@ class AtomicExecutor:
             output["details"] = "Simulated credential dumping attempt."
             if "auth_service" in target_service:
                 output["status"] = "malicious_activity_detected"
-                output["message"] = (
-                    "Credential access attempt detected on auth service."
-                )
+                output["message"] = "Credential access attempt detected on auth service."
 
         return output
 
-    async def get_technique_details(
-        self, technique_id: str
-    ) -> Optional[AttackTechnique]:
+    async def get_technique_details(self, technique_id: str) -> Optional[AttackTechnique]:
         """Retrieves details for a specific attack technique.
 
         Args:

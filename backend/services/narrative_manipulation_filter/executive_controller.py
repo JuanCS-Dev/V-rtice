@@ -11,11 +11,11 @@ Master pipeline for comprehensive manipulation detection.
 """
 
 import asyncio
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, Optional
 
-from cognitive_control_layer import cognitive_control, ProcessingMode
+from cognitive_control_layer import ProcessingMode, cognitive_control
 from config import get_settings
 from emotional_manipulation_module import emotional_manipulation_module
 from logical_fallacy_module import logical_fallacy_module
@@ -66,9 +66,7 @@ class ExecutiveController:
                 source_credibility_module.initialize(),
                 emotional_manipulation_module.initialize(),
                 logical_fallacy_module.initialize(),
-                reality_distortion_module.initialize(
-                    enable_tier2=True, start_tier2_workers=False
-                ),
+                reality_distortion_module.initialize(enable_tier2=True, start_tier2_workers=False),
                 threat_assessment_engine.initialize(),
             )
 
@@ -76,9 +74,7 @@ class ExecutiveController:
             logger.info("✅ Cognitive Defense System initialized")
 
         except Exception as e:
-            logger.error(
-                f"❌ Failed to initialize executive controller: {e}", exc_info=True
-            )
+            logger.error(f"❌ Failed to initialize executive controller: {e}", exc_info=True)
             raise
 
     async def analyze(
@@ -111,18 +107,14 @@ class ExecutiveController:
         # ========== STAGE 1: COGNITIVE CONTROL ==========
 
         # 1.1 Adversarial input filtering
-        sanitized_content, is_adversarial = (
-            await cognitive_control.filter_adversarial_input(content)
-        )
+        sanitized_content, is_adversarial = await cognitive_control.filter_adversarial_input(content)
 
         if is_adversarial:
             logger.warning("⚠️ Adversarial input detected and sanitized")
 
         # 1.2 Mode determination (if not provided)
         if mode is None:
-            mode = await cognitive_control.determine_mode(
-                sanitized_content, source_info
-            )
+            mode = await cognitive_control.determine_mode(sanitized_content, source_info)
 
         logger.info(f"Processing mode: {mode.value}")
 
@@ -135,8 +127,7 @@ class ExecutiveController:
         context = await working_memory.load_context(sanitized_content, source_info)
 
         logger.debug(
-            f"Context loaded: reputation={context.source_reputation.score:.2f}, "
-            f"history={len(context.recent_analyses)}"
+            f"Context loaded: reputation={context.source_reputation.score:.2f}, history={len(context.recent_analyses)}"
         )
 
         # ========== STAGE 3: MODULE EXECUTION ==========
@@ -162,9 +153,7 @@ class ExecutiveController:
                 publisher=source_info.get("publisher"),
             ),
             # Module 2: Emotional Manipulation
-            emotional_manipulation_module.detect_emotional_manipulation(
-                text=sanitized_content, persist_to_db=True
-            ),
+            emotional_manipulation_module.detect_emotional_manipulation(text=sanitized_content, persist_to_db=True),
             # Module 3: Logical Fallacy
             logical_fallacy_module.detect_logical_fallacies(
                 text=sanitized_content,
@@ -180,12 +169,8 @@ class ExecutiveController:
         )
 
         # Unpack results (handle exceptions)
-        credibility_result = self._unwrap_result(
-            module_results[0], "source_credibility"
-        )
-        emotional_result = self._unwrap_result(
-            module_results[1], "emotional_manipulation"
-        )
+        credibility_result = self._unwrap_result(module_results[0], "source_credibility")
+        emotional_result = self._unwrap_result(module_results[1], "emotional_manipulation")
         logical_result = self._unwrap_result(module_results[2], "logical_fallacy")
         reality_result = self._unwrap_result(module_results[3], "reality_distortion")
 
@@ -228,9 +213,7 @@ class ExecutiveController:
             "credibility_score": credibility_result.get("credibility_score", 0.5),
             "emotional_score": emotional_result.get("manipulation_score", 0.0),
             "fallacy_count": len(logical_result.get("fallacies", [])),
-            "verification_result": str(
-                reality_result.get("verification_status", "unverified")
-            ),
+            "verification_result": str(reality_result.get("verification_status", "unverified")),
             "confidence": report.confidence,
             "verdict": report.verdict,
             "explanation": report.explanation,
@@ -272,9 +255,7 @@ class ExecutiveController:
 
         return result
 
-    def _build_skip_report(
-        self, content_hash: str, source_info: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _build_skip_report(self, content_hash: str, source_info: Dict[str, Any]) -> Dict[str, Any]:
         """Build report for skipped content."""
         return {
             "content_hash": content_hash,
@@ -336,9 +317,7 @@ class ExecutiveController:
             "timestamp": report.timestamp.isoformat(),
         }
 
-    async def get_detailed_report(
-        self, content: str, source_info: Optional[Dict[str, Any]] = None
-    ) -> str:
+    async def get_detailed_report(self, content: str, source_info: Optional[Dict[str, Any]] = None) -> str:
         """
         Get detailed markdown report.
 

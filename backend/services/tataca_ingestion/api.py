@@ -7,14 +7,16 @@ Coordinates data extraction, transformation, and loading into both PostgreSQL
 (Aurora) and Neo4j (Seriema Graph) for structured storage and graph analysis.
 """
 
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
 
-from config import get_settings
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from config import get_settings
 from models import (
     DataSource,
     EntityType,
@@ -23,13 +25,10 @@ from models import (
     IngestJobStatus,
     JobStatus,
 )
-from pydantic import BaseModel
 from scheduler import JobScheduler
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 settings = get_settings()
@@ -198,9 +197,7 @@ async def get_job_status(job_id: str):
 @app.get("/jobs", response_model=List[IngestJobStatus])
 async def list_jobs(
     status: Optional[JobStatus] = Query(None, description="Filter by job status"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of jobs to return"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of jobs to return"),
 ):
     """
     List ingestion jobs.
@@ -416,9 +413,7 @@ async def cancel_job(job_id: str):
         JobStatus.FAILED,
         JobStatus.CANCELLED,
     ]:
-        raise HTTPException(
-            status_code=400, detail=f"Cannot cancel job in {job_status.status} status"
-        )
+        raise HTTPException(status_code=400, detail=f"Cannot cancel job in {job_status.status} status")
 
     # Mark as cancelled
     job_status.status = JobStatus.CANCELLED

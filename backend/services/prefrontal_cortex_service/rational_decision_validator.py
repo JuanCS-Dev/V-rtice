@@ -16,7 +16,6 @@ effective but also rational, ethical, and aligned with its overarching objective
 preventing flawed reasoning or unintended negative outcomes.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -52,25 +51,18 @@ class RationalDecisionValidator:
         Returns:
             Dict[str, Any]: A dictionary containing the validation results and rationale.
         """
-        print(
-            f"[RationalDecisionValidator] Validating decision: {decision.get('option_id', 'N/A')}"
-        )
+        print(f"[RationalDecisionValidator] Validating decision: {decision.get('option_id', 'N/A')}")
 
         validation_score = 1.0  # Start with perfect score
         issues: List[str] = []
         rationale = "Decision appears rational and aligned with criteria."
 
         # Simulate validation against criteria
-        if (
-            criteria.get("cost_efficiency")
-            and decision.get("estimated_cost", 0) > criteria["cost_efficiency"]["max"]
-        ):
+        if criteria.get("cost_efficiency") and decision.get("estimated_cost", 0) > criteria["cost_efficiency"]["max"]:
             validation_score -= 0.3
             issues.append("High cost, violates efficiency criteria.")
 
-        if criteria.get("ethical_compliance") and not decision.get(
-            "ethical_review_passed", True
-        ):
+        if criteria.get("ethical_compliance") and not decision.get("ethical_review_passed", True):
             validation_score -= 0.5
             issues.append("Ethical concerns detected.")
 
@@ -103,9 +95,5 @@ class RationalDecisionValidator:
         return {
             "status": self.current_status,
             "total_validations": len(self.validation_history),
-            "last_validation": (
-                self.last_validation_time.isoformat()
-                if self.last_validation_time
-                else "N/A"
-            ),
+            "last_validation": (self.last_validation_time.isoformat() if self.last_validation_time else "N/A"),
         }

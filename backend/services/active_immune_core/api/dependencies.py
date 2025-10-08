@@ -9,9 +9,10 @@ Version: 1.0.0
 """
 
 from typing import Optional
+
 from fastapi import HTTPException, status
 
-from monitoring import PrometheusExporter, HealthChecker, MetricsCollector
+from monitoring import HealthChecker, MetricsCollector, PrometheusExporter
 
 
 def get_prometheus_exporter() -> PrometheusExporter:
@@ -85,6 +86,7 @@ def get_prometheus_exporter_optional() -> Optional[PrometheusExporter]:
         PrometheusExporter instance or None
     """
     from api.main import prometheus_exporter
+
     return prometheus_exporter
 
 
@@ -96,6 +98,7 @@ def get_health_checker_optional() -> Optional[HealthChecker]:
         HealthChecker instance or None
     """
     from api.main import health_checker
+
     return health_checker
 
 
@@ -107,4 +110,5 @@ def get_metrics_collector_optional() -> Optional[MetricsCollector]:
         MetricsCollector instance or None
     """
     from api.main import metrics_collector
+
     return metrics_collector

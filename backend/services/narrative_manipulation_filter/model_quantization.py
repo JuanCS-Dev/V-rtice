@@ -13,17 +13,17 @@ Quantized models:
 """
 
 import logging
-import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Dict
 
-from config import get_settings
 import torch
 from transformers import (
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
     AutoTokenizer,
 )
+
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +52,7 @@ class ModelQuantizer:
 
         self.quantized_models: Dict[str, torch.nn.Module] = {}
 
-    def quantize_sequence_classification(
-        self, model_name: str, output_name: str, num_labels: int
-    ) -> Path:
+    def quantize_sequence_classification(self, model_name: str, output_name: str, num_labels: int) -> Path:
         """
         Quantize sequence classification model.
 
@@ -69,9 +67,7 @@ class ModelQuantizer:
         logger.info(f"🔧 Quantizing {model_name}...")
 
         # Load model
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_name, num_labels=num_labels
-        )
+        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
 
         # Apply dynamic quantization
         quantized_model = torch.quantization.quantize_dynamic(
@@ -95,30 +91,17 @@ class ModelQuantizer:
         logger.info(f"✅ Quantized model saved: {output_path}")
 
         # Calculate size reduction
-        original_size = sum(
-            p.element_size() * p.numel() for p in model.parameters()
-        ) / (
-            1024**2
-        )  # MB
+        original_size = sum(p.element_size() * p.numel() for p in model.parameters()) / (1024**2)  # MB
 
-        quantized_size = sum(
-            p.element_size() * p.numel() for p in quantized_model.parameters()
-        ) / (
-            1024**2
-        )  # MB
+        quantized_size = sum(p.element_size() * p.numel() for p in quantized_model.parameters()) / (1024**2)  # MB
 
         reduction = (1 - quantized_size / original_size) * 100
 
-        logger.info(
-            f"Size: {original_size:.1f}MB → {quantized_size:.1f}MB "
-            f"({reduction:.1f}% reduction)"
-        )
+        logger.info(f"Size: {original_size:.1f}MB → {quantized_size:.1f}MB ({reduction:.1f}% reduction)")
 
         return output_path
 
-    def quantize_token_classification(
-        self, model_name: str, output_name: str, num_labels: int
-    ) -> Path:
+    def quantize_token_classification(self, model_name: str, output_name: str, num_labels: int) -> Path:
         """
         Quantize token classification model.
 
@@ -133,9 +116,7 @@ class ModelQuantizer:
         logger.info(f"🔧 Quantizing token classifier {model_name}...")
 
         # Load model
-        model = AutoModelForTokenClassification.from_pretrained(
-            model_name, num_labels=num_labels
-        )
+        model = AutoModelForTokenClassification.from_pretrained(model_name, num_labels=num_labels)
 
         # Apply dynamic quantization
         quantized_model = torch.quantization.quantize_dynamic(
@@ -189,15 +170,11 @@ class ModelQuantizer:
             # In production, save model config alongside weights
             base_model_name = "neuralmind/bert-base-portuguese-cased"  # Default
 
-            model = AutoModelForSequenceClassification.from_pretrained(
-                base_model_name, num_labels=num_labels
-            )
+            model = AutoModelForSequenceClassification.from_pretrained(base_model_name, num_labels=num_labels)
         else:
             base_model_name = "neuralmind/bert-base-portuguese-cased"
 
-            model = AutoModelForTokenClassification.from_pretrained(
-                base_model_name, num_labels=num_labels
-            )
+            model = AutoModelForTokenClassification.from_pretrained(base_model_name, num_labels=num_labels)
 
         # Apply quantization
         quantized_model = torch.quantization.quantize_dynamic(
@@ -214,9 +191,7 @@ class ModelQuantizer:
 
         return quantized_model
 
-    def benchmark_model(
-        self, model_name: str, test_inputs: list, num_iterations: int = 100
-    ) -> Dict[str, float]:
+    def benchmark_model(self, model_name: str, test_inputs: list, num_iterations: int = 100) -> Dict[str, float]:
         """
         Benchmark quantized model performance.
 
@@ -241,9 +216,7 @@ class ModelQuantizer:
 
         # Warmup
         for text in test_inputs[:5]:
-            inputs = tokenizer(
-                text, return_tensors="pt", truncation=True, max_length=512
-            )
+            inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
             with torch.no_grad():
                 _ = model(**inputs)
 
@@ -252,9 +225,7 @@ class ModelQuantizer:
 
         for _ in range(num_iterations):
             for text in test_inputs:
-                inputs = tokenizer(
-                    text, return_tensors="pt", truncation=True, max_length=512
-                )
+                inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
 
                 start = time.perf_counter()
                 with torch.no_grad():

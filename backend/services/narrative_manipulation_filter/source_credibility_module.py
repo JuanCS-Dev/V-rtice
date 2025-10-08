@@ -9,9 +9,11 @@ Orchestrates:
 - Two-tier verification (Tier 1: fast cache/API, Tier 2: deep KG)
 """
 
-from datetime import datetime
 import logging
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Optional
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import get_settings
 from credibility_scorer import BayesianCredibilityScorer, CredibilityAggregator
@@ -19,7 +21,6 @@ from domain_fingerprinter import domain_fingerprinter
 from fact_check_aggregator import fact_check_aggregator
 from models import CredibilityRating, SourceCredibilityResult
 from newsguard_client import newsguard_client
-from sqlalchemy.ext.asyncio import AsyncSession
 from utils import extract_domain, hash_text
 
 from .repositories.source_repository import SourceReputationRepository
@@ -39,9 +40,7 @@ class SourceCredibilityModule:
 
     def __init__(self):
         """Initialize Module 1."""
-        self.bayesian_scorer = BayesianCredibilityScorer(
-            prior_alpha=1.0, prior_beta=1.0, decay_half_life_days=30
-        )
+        self.bayesian_scorer = BayesianCredibilityScorer(prior_alpha=1.0, prior_beta=1.0, decay_half_life_days=30)
 
     async def assess_source_credibility(
         self,
@@ -94,11 +93,7 @@ class SourceCredibilityModule:
         # 3. Domain fingerprinting & hopping detection
         fingerprint = domain_fingerprinter.fingerprint_domain(
             domain,
-            metadata={
-                "newsguard_score": (
-                    newsguard_data.get("overall_score") if newsguard_data else None
-                )
-            },
+            metadata={"newsguard_score": (newsguard_data.get("overall_score") if newsguard_data else None)},
         )
         hopping_analysis = domain_fingerprinter.detect_domain_hopping(domain)
 
@@ -106,20 +101,14 @@ class SourceCredibilityModule:
         if not source_reputation:
             # New domain - initialize from NewsGuard
             if newsguard_data:
-                alpha, beta = self.bayesian_scorer.initialize_from_newsguard(
-                    newsguard_data["overall_score"]
-                )
+                alpha, beta = self.bayesian_scorer.initialize_from_newsguard(newsguard_data["overall_score"])
             else:
                 alpha, beta = 1.0, 1.0  # Uniform prior
 
             source_reputation = await repo.create_or_update(
                 domain=domain,
-                newsguard_score=(
-                    newsguard_data.get("overall_score") if newsguard_data else None
-                ),
-                newsguard_rating=(
-                    newsguard_data.get("rating") if newsguard_data else None
-                ),
+                newsguard_score=(newsguard_data.get("overall_score") if newsguard_data else None),
+                newsguard_rating=(newsguard_data.get("rating") if newsguard_data else None),
                 newsguard_nutrition_label=newsguard_data,
                 prior_credibility=alpha / (alpha + beta),
                 alpha=alpha,
@@ -129,23 +118,15 @@ class SourceCredibilityModule:
 
         # 5. Update similar domains from hopping detection
         if hopping_analysis["similar_domains"]:
-            similar_domain_names = [
-                d["domain"] for d in hopping_analysis["similar_domains"]
-            ]
-            await repo.add_similar_domains(
-                domain, similar_domain_names, hopping_analysis["cluster_id"]
-            )
+            similar_domain_names = [d["domain"] for d in hopping_analysis["similar_domains"]]
+            await repo.add_similar_domains(domain, similar_domain_names, hopping_analysis["cluster_id"])
 
         # 6. Calculate Tier 1 credibility
-        bayesian_score = self.bayesian_scorer.get_credibility_score(
-            source_reputation.alpha, source_reputation.beta
-        )
+        bayesian_score = self.bayesian_scorer.get_credibility_score(source_reputation.alpha, source_reputation.beta)
 
         # Aggregate NewsGuard + Bayesian history
         if newsguard_data:
-            uncertainty = self.bayesian_scorer.get_uncertainty(
-                source_reputation.alpha, source_reputation.beta
-            )
+            uncertainty = self.bayesian_scorer.get_uncertainty(source_reputation.alpha, source_reputation.beta)
             confidence = 1.0 - uncertainty
 
             tier1_score = CredibilityAggregator.aggregate_newsguard_and_history(
@@ -170,9 +151,7 @@ class SourceCredibilityModule:
         if hopping_analysis["is_likely_hopping"]:
             hopping_penalty = 0.2 if hopping_analysis["risk_level"] == "high" else 0.1
             tier1_score *= 1 - hopping_penalty
-            logger.warning(
-                f"Domain hopping detected for {domain}, penalty applied: {hopping_penalty}"
-            )
+            logger.warning(f"Domain hopping detected for {domain}, penalty applied: {hopping_penalty}")
 
         # ========== TIER 2: DEEP FACT-CHECK VERIFICATION ==========
 
@@ -199,13 +178,8 @@ class SourceCredibilityModule:
                 # Verify claims
                 for sentence in sentences:
                     try:
-                        verification = await fact_check_aggregator.verify_claim(
-                            sentence
-                        )
-                        if (
-                            verification["check_worthiness"]
-                            >= settings.THRESHOLD_CHECK_WORTHINESS
-                        ):
+                        verification = await fact_check_aggregator.verify_claim(sentence)
+                        if verification["check_worthiness"] >= settings.THRESHOLD_CHECK_WORTHINESS:
                             fact_check_matches.append(verification)
 
                             # Cache result
@@ -224,19 +198,11 @@ class SourceCredibilityModule:
 
                 # Aggregate fact-check results
                 if fact_check_matches:
-                    false_claims = sum(
-                        1
-                        for fc in fact_check_matches
-                        if fc["verification_status"] == "verified_false"
-                    )
+                    false_claims = sum(1 for fc in fact_check_matches if fc["verification_status"] == "verified_false")
                     total_claims = len(fact_check_matches)
 
                     # Tier 2 score based on fact-checks
-                    tier2_score = (
-                        1.0 - (false_claims / total_claims)
-                        if total_claims > 0
-                        else tier1_score
-                    )
+                    tier2_score = 1.0 - (false_claims / total_claims) if total_claims > 0 else tier1_score
 
                     # Combine Tier 1 + Tier 2 (weighted average)
                     final_score = tier1_score * 0.4 + tier2_score * 0.6
@@ -253,9 +219,7 @@ class SourceCredibilityModule:
         credibility_score_100 = final_score * 100
 
         # Determine rating
-        uncertainty = self.bayesian_scorer.get_uncertainty(
-            source_reputation.alpha, source_reputation.beta
-        )
+        uncertainty = self.bayesian_scorer.get_uncertainty(source_reputation.alpha, source_reputation.beta)
         rating = self.bayesian_scorer.categorize_credibility(final_score, uncertainty)
 
         # Build result
@@ -265,57 +229,37 @@ class SourceCredibilityModule:
             rating=rating,
             # NewsGuard 9 criteria (normalized)
             does_not_repeatedly_publish_false_content=(
-                newsguard_data["criteria_scores"].get(
-                    "does_not_repeatedly_publish_false_content", 0.5
-                )
+                newsguard_data["criteria_scores"].get("does_not_repeatedly_publish_false_content", 0.5)
                 if newsguard_data
                 else 0.5
             ),
             gathers_and_presents_info_responsibly=(
-                newsguard_data["criteria_scores"].get(
-                    "gathers_and_presents_info_responsibly", 0.5
-                )
+                newsguard_data["criteria_scores"].get("gathers_and_presents_info_responsibly", 0.5)
                 if newsguard_data
                 else 0.5
             ),
             regularly_corrects_errors=(
-                newsguard_data["criteria_scores"].get("regularly_corrects_errors", 0.5)
-                if newsguard_data
-                else 0.5
+                newsguard_data["criteria_scores"].get("regularly_corrects_errors", 0.5) if newsguard_data else 0.5
             ),
             handles_difference_between_news_opinion=(
-                newsguard_data["criteria_scores"].get(
-                    "handles_difference_between_news_opinion", 0.5
-                )
+                newsguard_data["criteria_scores"].get("handles_difference_between_news_opinion", 0.5)
                 if newsguard_data
                 else 0.5
             ),
             avoids_deceptive_headlines=(
-                newsguard_data["criteria_scores"].get("avoids_deceptive_headlines", 0.5)
-                if newsguard_data
-                else 0.5
+                newsguard_data["criteria_scores"].get("avoids_deceptive_headlines", 0.5) if newsguard_data else 0.5
             ),
             website_discloses_ownership=(
-                newsguard_data["criteria_scores"].get(
-                    "website_discloses_ownership", 0.5
-                )
-                if newsguard_data
-                else 0.5
+                newsguard_data["criteria_scores"].get("website_discloses_ownership", 0.5) if newsguard_data else 0.5
             ),
             clearly_labels_advertising=(
-                newsguard_data["criteria_scores"].get("clearly_labels_advertising", 0.5)
-                if newsguard_data
-                else 0.5
+                newsguard_data["criteria_scores"].get("clearly_labels_advertising", 0.5) if newsguard_data else 0.5
             ),
             reveals_whos_in_charge=(
-                newsguard_data["criteria_scores"].get("reveals_whos_in_charge", 0.5)
-                if newsguard_data
-                else 0.5
+                newsguard_data["criteria_scores"].get("reveals_whos_in_charge", 0.5) if newsguard_data else 0.5
             ),
             provides_names_of_content_creators=(
-                newsguard_data["criteria_scores"].get(
-                    "provides_names_of_content_creators", 0.5
-                )
+                newsguard_data["criteria_scores"].get("provides_names_of_content_creators", 0.5)
                 if newsguard_data
                 else 0.5
             ),
@@ -337,8 +281,7 @@ class SourceCredibilityModule:
         )
 
         logger.info(
-            f"Source credibility assessed: {domain} = {credibility_score_100:.1f} "
-            f"({rating.value}, tier {tier_used})"
+            f"Source credibility assessed: {domain} = {credibility_score_100:.1f} ({rating.value}, tier {tier_used})"
         )
 
         return result
@@ -362,9 +305,7 @@ class SourceCredibilityModule:
             tier_used=1,
         )
 
-    async def update_with_feedback(
-        self, domain: str, is_reliable: bool, db_session: AsyncSession
-    ) -> None:
+    async def update_with_feedback(self, domain: str, is_reliable: bool, db_session: AsyncSession) -> None:
         """
         Update source credibility with user/automated feedback.
 

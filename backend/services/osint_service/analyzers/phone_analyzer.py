@@ -16,8 +16,8 @@ tracking communication patterns, and enriching threat intelligence related to
 telephony-based attacks or social engineering campaigns.
 """
 
-from datetime import datetime
 import re
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 
@@ -31,9 +31,7 @@ class PhoneAnalyzer:
     def __init__(self):
         """Initializes the PhoneAnalyzer with common phone number patterns."""
         # Regex for common international phone number formats (simplified)
-        self.phone_pattern = re.compile(
-            r"\+?\d{1,4}[-.\s]?\(?\d{1,3}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-        )
+        self.phone_pattern = re.compile(r"\+?\d{1,4}[-.\s]?\(?\d{1,3}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}")
         self.analysis_history: List[Dict[str, Any]] = []
         self.last_analysis_time: Optional[datetime] = None
 
@@ -46,9 +44,7 @@ class PhoneAnalyzer:
         Returns:
             Dict[str, Any]: A dictionary containing the extracted phone numbers and their analysis.
         """
-        print(
-            f"[PhoneAnalyzer] Analyzing text for phone numbers (length: {len(text)})..."
-        )
+        print(f"[PhoneAnalyzer] Analyzing text for phone numbers (length: {len(text)})...")
         extracted_numbers = self.phone_pattern.findall(text)
 
         countries: Dict[str, int] = {}
@@ -67,9 +63,7 @@ class PhoneAnalyzer:
             "number_count": len(extracted_numbers),
             "countries_found": countries,
             "potential_social_engineering_indicators": (
-                True
-                if any("urgent" in text.lower() for _ in extracted_numbers)
-                else False
+                True if any("urgent" in text.lower() for _ in extracted_numbers) else False
             ),
         }
         self.analysis_history.append(analysis_result)
@@ -97,9 +91,5 @@ class PhoneAnalyzer:
         return {
             "status": "active",
             "total_analyses": len(self.analysis_history),
-            "last_analysis": (
-                self.last_analysis_time.isoformat()
-                if self.last_analysis_time
-                else "N/A"
-            ),
+            "last_analysis": (self.last_analysis_time.isoformat() if self.last_analysis_time else "N/A"),
         }

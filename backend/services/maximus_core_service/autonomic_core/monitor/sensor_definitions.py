@@ -10,10 +10,8 @@ Categories:
 """
 
 import asyncio
-import json
 import logging
-import subprocess
-from typing import Any, Dict
+from typing import Any
 
 import psutil
 
@@ -34,7 +32,7 @@ class ComputeSensors:
         - swap_usage (%): Swap usage
     """
 
-    async def collect(self) -> Dict[str, Any]:
+    async def collect(self) -> dict[str, Any]:
         """Collect all compute metrics."""
         metrics = {}
 
@@ -70,7 +68,7 @@ class ComputeSensors:
 
         return metrics
 
-    async def _get_gpu_metrics(self) -> Dict[str, Any]:
+    async def _get_gpu_metrics(self) -> dict[str, Any]:
         """Get GPU metrics via nvidia-smi."""
         cmd = [
             "nvidia-smi",
@@ -95,8 +93,7 @@ class ComputeSensors:
                 "gpu_memory_total_mb": float(gpu_data[3]),
                 "gpu_memory_usage": (float(gpu_data[2]) / float(gpu_data[3])) * 100,
             }
-        else:
-            raise Exception(f"nvidia-smi failed: {stderr.decode()}")
+        raise Exception(f"nvidia-smi failed: {stderr.decode()}")
 
 
 class NetworkSensors:
@@ -117,7 +114,7 @@ class NetworkSensors:
         self.last_net_io = psutil.net_io_counters()
         self.last_check_time = asyncio.get_event_loop().time()
 
-    async def collect(self) -> Dict[str, Any]:
+    async def collect(self) -> dict[str, Any]:
         """Collect all network metrics."""
         metrics = {}
 
@@ -129,12 +126,8 @@ class NetworkSensors:
 
             if time_delta > 0:
                 # Calculate bytes/s
-                bytes_sent_per_sec = (
-                    current_net_io.bytes_sent - self.last_net_io.bytes_sent
-                ) / time_delta
-                bytes_recv_per_sec = (
-                    current_net_io.bytes_recv - self.last_net_io.bytes_recv
-                ) / time_delta
+                bytes_sent_per_sec = (current_net_io.bytes_sent - self.last_net_io.bytes_sent) / time_delta
+                bytes_recv_per_sec = (current_net_io.bytes_recv - self.last_net_io.bytes_recv) / time_delta
 
                 metrics["bytes_sent_per_sec"] = bytes_sent_per_sec
                 metrics["bytes_recv_per_sec"] = bytes_recv_per_sec
@@ -142,16 +135,12 @@ class NetworkSensors:
                 # Estimate bandwidth saturation (assuming 1Gbps = 125MB/s)
                 total_bandwidth = bytes_sent_per_sec + bytes_recv_per_sec
                 max_bandwidth = 125 * 1024 * 1024  # 1Gbps in bytes/s
-                metrics["bandwidth_saturation"] = min(
-                    (total_bandwidth / max_bandwidth) * 100, 100
-                )
+                metrics["bandwidth_saturation"] = min((total_bandwidth / max_bandwidth) * 100, 100)
 
             # Connection stats
             connections = psutil.net_connections()
             metrics["connection_count"] = len(connections)
-            metrics["connection_established"] = len(
-                [c for c in connections if c.status == "ESTABLISHED"]
-            )
+            metrics["connection_established"] = len([c for c in connections if c.status == "ESTABLISHED"])
 
             # Packet stats
             metrics["packets_sent"] = current_net_io.packets_sent
@@ -161,14 +150,10 @@ class NetworkSensors:
 
             total_packets = current_net_io.packets_sent + current_net_io.packets_recv
             dropped_packets = current_net_io.dropin + current_net_io.dropout
-            metrics["packet_loss"] = (
-                (dropped_packets / total_packets * 100) if total_packets > 0 else 0
-            )
+            metrics["packet_loss"] = (dropped_packets / total_packets * 100) if total_packets > 0 else 0
 
             # Simulated latency metrics (would come from actual monitoring in production)
-            metrics["latency_p50"] = (
-                10.0  # Placeholder - integrate with real monitoring
-            )
+            metrics["latency_p50"] = 10.0  # Placeholder - integrate with real monitoring
             metrics["latency_p95"] = 25.0
             metrics["latency_p99"] = 50.0
 
@@ -201,7 +186,7 @@ class ApplicationSensors:
         self.request_count = 0
         self.last_check_time = asyncio.get_event_loop().time()
 
-    async def collect(self) -> Dict[str, Any]:
+    async def collect(self) -> dict[str, Any]:
         """Collect all application metrics."""
         metrics = {}
 
@@ -258,7 +243,7 @@ class MLModelSensors:
         self.cache_hits = 0
         self.cache_misses = 0
 
-    async def collect(self) -> Dict[str, Any]:
+    async def collect(self) -> dict[str, Any]:
         """Collect all ML model metrics."""
         metrics = {}
 
@@ -268,12 +253,8 @@ class MLModelSensors:
                 import numpy as np
 
                 metrics["inference_latency"] = np.mean(self.inference_times)
-                metrics["inference_latency_p99"] = np.percentile(
-                    self.inference_times, 99
-                )
-                metrics["predictions_per_sec"] = (
-                    len(self.inference_times) / 15.0
-                )  # Over scrape interval
+                metrics["inference_latency_p99"] = np.percentile(self.inference_times, 99)
+                metrics["predictions_per_sec"] = len(self.inference_times) / 15.0  # Over scrape interval
                 self.inference_times = []  # Reset
             else:
                 metrics["inference_latency"] = 0
@@ -282,9 +263,7 @@ class MLModelSensors:
 
             # Cache metrics
             total_requests = self.cache_hits + self.cache_misses
-            metrics["cache_hit_rate"] = (
-                (self.cache_hits / total_requests * 100) if total_requests > 0 else 0
-            )
+            metrics["cache_hit_rate"] = (self.cache_hits / total_requests * 100) if total_requests > 0 else 0
             self.cache_hits = 0
             self.cache_misses = 0
 
@@ -331,7 +310,7 @@ class StorageSensors:
         self.last_check_time = asyncio.get_event_loop().time()
         self.query_times = []
 
-    async def collect(self) -> Dict[str, Any]:
+    async def collect(self) -> dict[str, Any]:
         """Collect all storage metrics."""
         metrics = {}
 
@@ -343,12 +322,8 @@ class StorageSensors:
 
             if time_delta > 0:
                 # Calculate bytes/s
-                read_bytes_per_sec = (
-                    current_disk_io.read_bytes - self.last_disk_io.read_bytes
-                ) / time_delta
-                write_bytes_per_sec = (
-                    current_disk_io.write_bytes - self.last_disk_io.write_bytes
-                ) / time_delta
+                read_bytes_per_sec = (current_disk_io.read_bytes - self.last_disk_io.read_bytes) / time_delta
+                write_bytes_per_sec = (current_disk_io.write_bytes - self.last_disk_io.write_bytes) / time_delta
 
                 metrics["disk_read_bytes_per_sec"] = read_bytes_per_sec
                 metrics["disk_write_bytes_per_sec"] = write_bytes_per_sec
@@ -360,9 +335,7 @@ class StorageSensors:
 
             # I/O wait (from CPU times - iowait)
             cpu_times = psutil.cpu_times_percent(interval=0.1)
-            metrics["disk_io_wait"] = (
-                cpu_times.iowait if hasattr(cpu_times, "iowait") else 0
-            )
+            metrics["disk_io_wait"] = cpu_times.iowait if hasattr(cpu_times, "iowait") else 0
 
             # Query latency
             if self.query_times:

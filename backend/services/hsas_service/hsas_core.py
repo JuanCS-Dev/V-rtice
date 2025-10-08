@@ -49,9 +49,7 @@ class HSASCore:
             details (str): Detailed description of the feedback.
             rating (Optional[int]): A numerical rating.
         """
-        print(
-            f"[HSASCore] Processing human feedback (type: {feedback_type}, rating: {rating})"
-        )
+        print(f"[HSASCore] Processing human feedback (type: {feedback_type}, rating: {rating})")
         await asyncio.sleep(0.1)  # Simulate processing
 
         feedback_entry = {
@@ -72,9 +70,7 @@ class HSASCore:
         self.last_alignment_update = datetime.now()
         print(f"[HSASCore] Alignment score updated to: {self.alignment_score:.2f}")
 
-    async def generate_explanation(
-        self, decision_id: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def generate_explanation(self, decision_id: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Generates an explanation for a specific AI decision or action.
 
         Args:
@@ -101,10 +97,6 @@ class HSASCore:
         return {
             "status": self.current_status,
             "alignment_score": self.alignment_score,
-            "last_update": (
-                self.last_alignment_update.isoformat()
-                if self.last_alignment_update
-                else "N/A"
-            ),
+            "last_update": (self.last_alignment_update.isoformat() if self.last_alignment_update else "N/A"),
             "feedback_processed_count": len(self.human_feedback_history),
         }

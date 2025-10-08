@@ -17,11 +17,9 @@ import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-import pytest_asyncio
 
 from active_immune_core.agents.base import AgenteImunologicoBase
 from active_immune_core.agents.models import AgentStatus, AgentType
-
 
 # ==================== TEST AGENT ====================
 
@@ -82,7 +80,7 @@ class TestEnergyDepletionApoptosis:
         agent._http_session = AsyncMock()
 
         # Mock sleep to make patrol loop run quickly
-        with patch('active_immune_core.agents.base.asyncio.sleep', new_callable=AsyncMock):
+        with patch("active_immune_core.agents.base.asyncio.sleep", new_callable=AsyncMock):
             # ACT: Run patrol loop
             task = asyncio.create_task(agent._patrol_loop())
 
@@ -120,7 +118,7 @@ class TestStatusBasedEnergyDecay:
             return
 
         # Mock sleep to return immediately
-        with patch('active_immune_core.agents.base.asyncio.sleep', side_effect=no_sleep):
+        with patch("active_immune_core.agents.base.asyncio.sleep", side_effect=no_sleep):
             # ACT: Run decay loop
             task = asyncio.create_task(agent._energy_decay_loop())
 
@@ -153,7 +151,7 @@ class TestStatusBasedEnergyDecay:
             return
 
         # Mock sleep to return immediately
-        with patch('active_immune_core.agents.base.asyncio.sleep', side_effect=no_sleep):
+        with patch("active_immune_core.agents.base.asyncio.sleep", side_effect=no_sleep):
             # ACT: Run decay loop
             task = asyncio.create_task(agent._energy_decay_loop())
 
@@ -186,7 +184,7 @@ class TestStatusBasedEnergyDecay:
             return
 
         # Mock sleep to return immediately
-        with patch('active_immune_core.agents.base.asyncio.sleep', side_effect=no_sleep):
+        with patch("active_immune_core.agents.base.asyncio.sleep", side_effect=no_sleep):
             # ACT: Run decay loop
             task = asyncio.create_task(agent._energy_decay_loop())
 
@@ -219,7 +217,7 @@ class TestStatusBasedEnergyDecay:
             return
 
         # Mock sleep to return immediately
-        with patch('active_immune_core.agents.base.asyncio.sleep', side_effect=no_sleep):
+        with patch("active_immune_core.agents.base.asyncio.sleep", side_effect=no_sleep):
             # ACT: Run decay loop
             task = asyncio.create_task(agent._energy_decay_loop())
 
@@ -252,7 +250,7 @@ class TestStatusBasedEnergyDecay:
             return
 
         # Mock sleep to return immediately
-        with patch('active_immune_core.agents.base.asyncio.sleep', side_effect=no_sleep):
+        with patch("active_immune_core.agents.base.asyncio.sleep", side_effect=no_sleep):
             # ACT: Run decay loop
             task = asyncio.create_task(agent._energy_decay_loop())
 

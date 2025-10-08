@@ -14,18 +14,13 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from prometheus_client import (
-    Counter, Gauge, Histogram, Summary, Info,
-    CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
-)
-from typing import Dict, Any, Optional
-import time
+from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, Counter, Gauge, Histogram, Info, generate_latest
 
 
 class MaximusMetricsExporter:
     """Prometheus metrics exporter for MAXIMUS AI 3.0."""
 
-    def __init__(self, registry: Optional[CollectorRegistry] = None):
+    def __init__(self, registry: CollectorRegistry | None = None):
         """
         Initialize Prometheus metrics exporter.
 
@@ -38,193 +33,163 @@ class MaximusMetricsExporter:
         # PREDICTIVE CODING METRICS (FASE 3)
         # ============================================================
         self.free_energy = Histogram(
-            'maximus_free_energy',
-            'Free Energy (surprise) by layer - measures prediction error',
-            ['layer'],
+            "maximus_free_energy",
+            "Free Energy (surprise) by layer - measures prediction error",
+            ["layer"],
             registry=self.registry,
-            buckets=[0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
+            buckets=[0.1, 0.3, 0.5, 0.7, 0.9, 1.0],
         )
 
         self.pc_latency = Histogram(
-            'maximus_predictive_coding_latency_seconds',
-            'Predictive Coding inference latency by layer',
-            ['layer'],
+            "maximus_predictive_coding_latency_seconds",
+            "Predictive Coding inference latency by layer",
+            ["layer"],
             registry=self.registry,
-            buckets=[0.001, 0.01, 0.05, 0.1, 0.5, 1.0]
+            buckets=[0.001, 0.01, 0.05, 0.1, 0.5, 1.0],
         )
 
         self.prediction_errors = Counter(
-            'maximus_prediction_errors_total',
-            'Total prediction errors by layer',
-            ['layer'],
-            registry=self.registry
+            "maximus_prediction_errors_total", "Total prediction errors by layer", ["layer"], registry=self.registry
         )
 
         # ============================================================
         # NEUROMODULATION METRICS (FASE 5)
         # ============================================================
         self.dopamine_level = Gauge(
-            'maximus_dopamine_level',
-            'Current dopamine level (RPE - Reward Prediction Error)',
-            registry=self.registry
+            "maximus_dopamine_level", "Current dopamine level (RPE - Reward Prediction Error)", registry=self.registry
         )
 
         self.acetylcholine_level = Gauge(
-            'maximus_acetylcholine_level',
-            'Current acetylcholine level (attention modulation)',
-            registry=self.registry
+            "maximus_acetylcholine_level", "Current acetylcholine level (attention modulation)", registry=self.registry
         )
 
         self.norepinephrine_level = Gauge(
-            'maximus_norepinephrine_level',
-            'Current norepinephrine level (arousal/alertness)',
-            registry=self.registry
+            "maximus_norepinephrine_level", "Current norepinephrine level (arousal/alertness)", registry=self.registry
         )
 
         self.serotonin_level = Gauge(
-            'maximus_serotonin_level',
-            'Current serotonin level (patience/exploration)',
-            registry=self.registry
+            "maximus_serotonin_level", "Current serotonin level (patience/exploration)", registry=self.registry
         )
 
         self.learning_rate = Gauge(
-            'maximus_learning_rate',
-            'Current modulated learning rate (base * dopamine)',
-            registry=self.registry
+            "maximus_learning_rate", "Current modulated learning rate (base * dopamine)", registry=self.registry
         )
 
         # ============================================================
         # SKILL LEARNING METRICS (FASE 6)
         # ============================================================
         self.skill_executions = Counter(
-            'maximus_skill_executions_total',
-            'Total skill executions by name, mode, and status',
-            ['skill_name', 'mode', 'status'],
-            registry=self.registry
+            "maximus_skill_executions_total",
+            "Total skill executions by name, mode, and status",
+            ["skill_name", "mode", "status"],
+            registry=self.registry,
         )
 
         self.skill_reward = Histogram(
-            'maximus_skill_reward',
-            'Skill execution rewards distribution',
-            ['skill_name'],
+            "maximus_skill_reward",
+            "Skill execution rewards distribution",
+            ["skill_name"],
             registry=self.registry,
-            buckets=[-1.0, -0.5, -0.1, 0.0, 0.1, 0.5, 1.0]
+            buckets=[-1.0, -0.5, -0.1, 0.0, 0.1, 0.5, 1.0],
         )
 
         self.skill_latency = Histogram(
-            'maximus_skill_execution_latency_seconds',
-            'Skill execution latency',
-            ['skill_name', 'mode'],
+            "maximus_skill_execution_latency_seconds",
+            "Skill execution latency",
+            ["skill_name", "mode"],
             registry=self.registry,
-            buckets=[0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
+            buckets=[0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
         )
 
         self.skill_success_rate = Gauge(
-            'maximus_skill_success_rate',
-            'Skill execution success rate (0-1)',
-            ['skill_name'],
-            registry=self.registry
+            "maximus_skill_success_rate", "Skill execution success rate (0-1)", ["skill_name"], registry=self.registry
         )
 
         # ============================================================
         # ATTENTION SYSTEM METRICS (FASE 0)
         # ============================================================
         self.attention_salience = Histogram(
-            'maximus_attention_salience',
-            'Event salience scores from attention system',
+            "maximus_attention_salience",
+            "Event salience scores from attention system",
             registry=self.registry,
-            buckets=[0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
+            buckets=[0.1, 0.3, 0.5, 0.7, 0.9, 1.0],
         )
 
         self.attention_threshold = Gauge(
-            'maximus_attention_threshold',
-            'Current attention threshold for event prioritization',
-            registry=self.registry
+            "maximus_attention_threshold",
+            "Current attention threshold for event prioritization",
+            registry=self.registry,
         )
 
         self.attention_updates = Counter(
-            'maximus_attention_updates_total',
-            'Total attention threshold updates',
-            ['reason'],
-            registry=self.registry
+            "maximus_attention_updates_total", "Total attention threshold updates", ["reason"], registry=self.registry
         )
 
         # ============================================================
         # ETHICAL AI METRICS (Ethical AI Stack)
         # ============================================================
         self.ethical_decisions = Counter(
-            'maximus_ethical_decisions_total',
-            'Total ethical decisions by result',
-            ['result'],
-            registry=self.registry
+            "maximus_ethical_decisions_total", "Total ethical decisions by result", ["result"], registry=self.registry
         )
 
         self.ethical_approval_rate = Gauge(
-            'maximus_ethical_approval_rate',
-            'Ethical AI approval rate (0-1)',
-            registry=self.registry
+            "maximus_ethical_approval_rate", "Ethical AI approval rate (0-1)", registry=self.registry
         )
 
         self.ethical_violations = Counter(
-            'maximus_ethical_violations_total',
-            'Total ethical violations by category',
-            ['category'],
-            registry=self.registry
+            "maximus_ethical_violations_total",
+            "Total ethical violations by category",
+            ["category"],
+            registry=self.registry,
         )
 
         # ============================================================
         # SYSTEM METRICS
         # ============================================================
         self.events_processed = Counter(
-            'maximus_events_processed_total',
-            'Total events processed by type and threat status',
-            ['event_type', 'detected_as_threat'],
-            registry=self.registry
+            "maximus_events_processed_total",
+            "Total events processed by type and threat status",
+            ["event_type", "detected_as_threat"],
+            registry=self.registry,
         )
 
         self.pipeline_latency = Histogram(
-            'maximus_pipeline_latency_seconds',
-            'End-to-end pipeline latency (event → response)',
+            "maximus_pipeline_latency_seconds",
+            "End-to-end pipeline latency (event → response)",
             registry=self.registry,
-            buckets=[0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0]
+            buckets=[0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0],
         )
 
         self.threat_detection_accuracy = Gauge(
-            'maximus_threat_detection_accuracy',
-            'Current threat detection accuracy (0-1)',
-            registry=self.registry
+            "maximus_threat_detection_accuracy", "Current threat detection accuracy (0-1)", registry=self.registry
         )
 
         self.false_positive_rate = Gauge(
-            'maximus_false_positive_rate',
-            'Current false positive rate (0-1)',
-            registry=self.registry
+            "maximus_false_positive_rate", "Current false positive rate (0-1)", registry=self.registry
         )
 
         self.false_negative_rate = Gauge(
-            'maximus_false_negative_rate',
-            'Current false negative rate (0-1)',
-            registry=self.registry
+            "maximus_false_negative_rate", "Current false negative rate (0-1)", registry=self.registry
         )
 
         # ============================================================
         # SYSTEM INFO
         # ============================================================
         self.system_info = Info(
-            'maximus_system_info',
-            'MAXIMUS AI 3.0 system information and feature flags',
-            registry=self.registry
+            "maximus_system_info", "MAXIMUS AI 3.0 system information and feature flags", registry=self.registry
         )
 
         # Initialize system info
-        self.system_info.info({
-            'version': '3.0.0',
-            'predictive_coding_enabled': 'true',
-            'skill_learning_enabled': 'true',
-            'neuromodulation_enabled': 'true',
-            'ethical_ai_enabled': 'true',
-            'regra_de_ouro_compliant': 'true'
-        })
+        self.system_info.info(
+            {
+                "version": "3.0.0",
+                "predictive_coding_enabled": "true",
+                "skill_learning_enabled": "true",
+                "neuromodulation_enabled": "true",
+                "ethical_ai_enabled": "true",
+                "regra_de_ouro_compliant": "true",
+            }
+        )
 
     # ============================================================
     # PREDICTIVE CODING RECORDING
@@ -246,7 +211,7 @@ class MaximusMetricsExporter:
     # ============================================================
     # NEUROMODULATION RECORDING
     # ============================================================
-    def record_neuromodulation(self, state: Dict[str, float]):
+    def record_neuromodulation(self, state: dict[str, float]):
         """
         Record Neuromodulation state.
 
@@ -258,22 +223,21 @@ class MaximusMetricsExporter:
                 - serotonin: float (patience)
                 - learning_rate: float (modulated LR)
         """
-        if 'dopamine' in state:
-            self.dopamine_level.set(state['dopamine'])
-        if 'acetylcholine' in state:
-            self.acetylcholine_level.set(state['acetylcholine'])
-        if 'norepinephrine' in state:
-            self.norepinephrine_level.set(state['norepinephrine'])
-        if 'serotonin' in state:
-            self.serotonin_level.set(state['serotonin'])
-        if 'learning_rate' in state:
-            self.learning_rate.set(state['learning_rate'])
+        if "dopamine" in state:
+            self.dopamine_level.set(state["dopamine"])
+        if "acetylcholine" in state:
+            self.acetylcholine_level.set(state["acetylcholine"])
+        if "norepinephrine" in state:
+            self.norepinephrine_level.set(state["norepinephrine"])
+        if "serotonin" in state:
+            self.serotonin_level.set(state["serotonin"])
+        if "learning_rate" in state:
+            self.learning_rate.set(state["learning_rate"])
 
     # ============================================================
     # SKILL LEARNING RECORDING
     # ============================================================
-    def record_skill_execution(self, skill_name: str, mode: str,
-                                success: bool, reward: float, latency: float):
+    def record_skill_execution(self, skill_name: str, mode: str, success: bool, reward: float, latency: float):
         """
         Record Skill Learning execution metrics.
 
@@ -284,12 +248,8 @@ class MaximusMetricsExporter:
             reward: Reward received (-1 to 1)
             latency: Execution latency in seconds
         """
-        status = 'success' if success else 'failure'
-        self.skill_executions.labels(
-            skill_name=skill_name,
-            mode=mode,
-            status=status
-        ).inc()
+        status = "success" if success else "failure"
+        self.skill_executions.labels(skill_name=skill_name, mode=mode, status=status).inc()
         self.skill_reward.labels(skill_name=skill_name).observe(reward)
         self.skill_latency.labels(skill_name=skill_name, mode=mode).observe(latency)
 
@@ -336,7 +296,7 @@ class MaximusMetricsExporter:
         Args:
             approved: Whether the decision was approved
         """
-        result = 'approved' if approved else 'rejected'
+        result = "approved" if approved else "rejected"
         self.ethical_decisions.labels(result=result).inc()
 
     def update_ethical_approval_rate(self, rate: float):
@@ -369,11 +329,8 @@ class MaximusMetricsExporter:
             detected_as_threat: Whether detected as threat
             latency: Processing latency in seconds
         """
-        threat_label = 'true' if detected_as_threat else 'false'
-        self.events_processed.labels(
-            event_type=event_type,
-            detected_as_threat=threat_label
-        ).inc()
+        threat_label = "true" if detected_as_threat else "false"
+        self.events_processed.labels(event_type=event_type, detected_as_threat=threat_label).inc()
         self.pipeline_latency.observe(latency)
 
     def update_detection_metrics(self, accuracy: float, fp_rate: float, fn_rate: float):

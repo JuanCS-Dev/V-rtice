@@ -20,16 +20,14 @@ License: Proprietary - VÉRTICE Platform
 """
 
 from datetime import datetime
-from typing import Dict
 
 from .base import (
-    Regulation,
     Control,
-    RegulationType,
     ControlCategory,
     EvidenceType,
+    Regulation,
+    RegulationType,
 )
-
 
 # ============================================================================
 # EU AI ACT - High-Risk AI System (Tier I)
@@ -933,7 +931,7 @@ IEEE_7000 = Regulation(
 # REGULATION REGISTRY
 # ============================================================================
 
-REGULATION_REGISTRY: Dict[RegulationType, Regulation] = {
+REGULATION_REGISTRY: dict[RegulationType, Regulation] = {
     RegulationType.EU_AI_ACT: EU_AI_ACT,
     RegulationType.GDPR: GDPR,
     RegulationType.NIST_AI_RMF: NIST_AI_RMF,

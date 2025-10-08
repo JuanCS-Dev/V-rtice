@@ -8,9 +8,10 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-from typing import Any, Dict, Optional
-from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field
 
 
 class CytokineEvent(BaseModel):

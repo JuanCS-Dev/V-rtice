@@ -13,16 +13,14 @@ not just coverage numbers.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents.models import AgenteState
 from active_immune_core.agents import AgentType
-from active_immune_core.coordination.lymphnode import LinfonodoDigital, HomeostaticState
-
+from active_immune_core.agents.models import AgenteState
+from active_immune_core.coordination.lymphnode import LinfonodoDigital
 
 # ==================== FIXTURES ====================
 
@@ -105,9 +103,7 @@ class TestTemperatureRegulation:
         await lymphnode._adjust_temperature(delta=+2.0)
 
         # ASSERT
-        assert (
-            lymphnode.temperatura_regional == 39.0
-        ), "Temperature should increase by delta"
+        assert lymphnode.temperatura_regional == 39.0, "Temperature should increase by delta"
 
     @pytest.mark.asyncio
     async def test_temperature_decrease_with_negative_delta(self, lymphnode):
@@ -125,9 +121,7 @@ class TestTemperatureRegulation:
         await lymphnode._adjust_temperature(delta=-2.0)
 
         # ASSERT
-        assert (
-            lymphnode.temperatura_regional == 37.0
-        ), "Temperature should decrease by delta"
+        assert lymphnode.temperatura_regional == 37.0, "Temperature should decrease by delta"
 
     @pytest.mark.asyncio
     async def test_temperature_clamped_at_maximum(self, lymphnode):
@@ -145,9 +139,7 @@ class TestTemperatureRegulation:
         await lymphnode._adjust_temperature(delta=+5.0)
 
         # ASSERT: Should be clamped at 40.0°C
-        assert (
-            lymphnode.temperatura_regional == 40.0
-        ), "Temperature should be clamped at 40.0°C maximum"
+        assert lymphnode.temperatura_regional == 40.0, "Temperature should be clamped at 40.0°C maximum"
 
     @pytest.mark.asyncio
     async def test_temperature_clamped_at_minimum(self, lymphnode):
@@ -165,9 +157,7 @@ class TestTemperatureRegulation:
         await lymphnode._adjust_temperature(delta=-5.0)
 
         # ASSERT: Should be clamped at 36.0°C
-        assert (
-            lymphnode.temperatura_regional == 36.0
-        ), "Temperature should be clamped at 36.0°C minimum"
+        assert lymphnode.temperatura_regional == 36.0, "Temperature should be clamped at 36.0°C minimum"
 
 
 # ==================== CLONAL EXPANSION ERROR HANDLING ====================
@@ -235,9 +225,7 @@ class TestPatternDetectionBufferManagement:
         lymphnode.cytokine_buffer = [{"tipo": "IL1", "timestamp": datetime.now().isoformat()} for _ in range(5)]
 
         # Mock _detect_persistent_threats to verify it's NOT called
-        with patch.object(
-            lymphnode, "_detect_persistent_threats", new_callable=AsyncMock
-        ) as mock_detect:
+        with patch.object(lymphnode, "_detect_persistent_threats", new_callable=AsyncMock) as mock_detect:
             # ACT: Manually trigger one iteration of pattern detection loop
             # (simulating what background task does)
             if len(lymphnode.cytokine_buffer) >= 10:
@@ -257,8 +245,7 @@ class TestPatternDetectionBufferManagement:
         """
         # ARRANGE: Create large buffer (> 1000)
         lymphnode.cytokine_buffer = [
-            {"tipo": "IL1", "timestamp": datetime.now().isoformat(), "id": i}
-            for i in range(1500)
+            {"tipo": "IL1", "timestamp": datetime.now().isoformat(), "id": i} for i in range(1500)
         ]
 
         # ACT: Manually trigger buffer truncation logic

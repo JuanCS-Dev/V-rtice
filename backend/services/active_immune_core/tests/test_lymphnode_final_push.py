@@ -9,7 +9,6 @@ Focus: FINAL PUSH to 85%
 """
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
@@ -17,7 +16,6 @@ import pytest_asyncio
 from active_immune_core.agents import AgentType
 from active_immune_core.agents.models import AgenteState
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -71,8 +69,7 @@ class TestTemperatureDecayLogic:
 
         # ASSERT: Should decay
         expected = 39.0 * 0.98
-        assert lymphnode.temperatura_regional == expected, \
-            "Temperature should decay by 2% per cycle"
+        assert lymphnode.temperatura_regional == expected, "Temperature should decay by 2% per cycle"
 
     @pytest.mark.asyncio
     async def test_temperature_decay_stops_at_baseline(self, lymphnode):
@@ -92,8 +89,7 @@ class TestTemperatureDecayLogic:
             lymphnode.temperatura_regional = max(36.5, lymphnode.temperatura_regional)
 
         # ASSERT: Should be clamped at 36.5
-        assert lymphnode.temperatura_regional == 36.5, \
-            "Temperature should not decay below baseline (36.5°C)"
+        assert lymphnode.temperatura_regional == 36.5, "Temperature should not decay below baseline (36.5°C)"
 
     @pytest.mark.asyncio
     async def test_temperature_decay_continuous_inflammation(self, lymphnode):
@@ -142,12 +138,11 @@ class TestHomeostaticRegulationEdgeCases:
         # ACT: Simulate homeostatic check (what happens in loop)
         total_agents = len(lymphnode.agentes_ativos)  # Line 782
 
-        should_skip = (total_agents == 0)  # Line 784
+        should_skip = total_agents == 0  # Line 784
 
         # ASSERT: Should skip
         assert total_agents == 0
-        assert should_skip is True, \
-            "Should skip homeostatic regulation with zero agents"
+        assert should_skip is True, "Should skip homeostatic regulation with zero agents"
 
     @pytest.mark.asyncio
     async def test_homeostatic_regulation_calculates_target_active(self, lymphnode):
@@ -180,8 +175,7 @@ class TestHomeostaticRegulationEdgeCases:
 
         # ASSERT: Should calculate correct target
         assert total_agents == 20
-        assert target_active == 10, \
-            "Should target 50% agents active (10 out of 20) in ATIVAÇÃO state"
+        assert target_active == 10, "Should target 50% agents active (10 out of 20) in ATIVAÇÃO state"
 
 
 # ==================== SUMMARY ====================

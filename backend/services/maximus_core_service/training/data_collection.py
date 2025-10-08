@@ -12,13 +12,14 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from enum import Enum
 import json
 import logging
+from collections.abc import Iterator
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any
 
 import pandas as pd
 
@@ -44,8 +45,8 @@ class DataSource:
 
     name: str
     source_type: DataSourceType
-    connection_params: Dict[str, Any]
-    query_filter: Optional[str] = None
+    connection_params: dict[str, Any]
+    query_filter: str | None = None
     time_field: str = "@timestamp"
     batch_size: int = 1000
 
@@ -61,10 +62,10 @@ class CollectedEvent:
     timestamp: datetime
     source: str
     event_type: str
-    raw_data: Dict[str, Any]
-    labels: Optional[Dict[str, Any]] = None
+    raw_data: dict[str, Any]
+    labels: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "event_id": self.event_id,
@@ -72,7 +73,7 @@ class CollectedEvent:
             "source": self.source,
             "event_type": self.event_type,
             "raw_data": self.raw_data,
-            "labels": self.labels or {}
+            "labels": self.labels or {},
         }
 
 
@@ -93,7 +94,7 @@ class DataCollector:
         source = DataSource(
             name="synthetic_events",
             source_type=DataSourceType.JSON_FILE,
-            connection_params={"path": "demo/synthetic_events.json"}
+            connection_params={"path": "demo/synthetic_events.json"},
         )
 
         collector = DataCollector(sources=[source])
@@ -102,12 +103,7 @@ class DataCollector:
         ```
     """
 
-    def __init__(
-        self,
-        sources: List[DataSource],
-        output_dir: Optional[Path] = None,
-        checkpoint_enabled: bool = True
-    ):
+    def __init__(self, sources: list[DataSource], output_dir: Path | None = None, checkpoint_enabled: bool = True):
         """Initialize data collector.
 
         Args:
@@ -122,12 +118,7 @@ class DataCollector:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Statistics
-        self.stats = {
-            "events_collected": 0,
-            "events_deduplicated": 0,
-            "errors": 0,
-            "sources_processed": 0
-        }
+        self.stats = {"events_collected": 0, "events_deduplicated": 0, "errors": 0, "sources_processed": 0}
 
         # Deduplication cache (event IDs)
         self._seen_event_ids: set = set()
@@ -136,10 +127,10 @@ class DataCollector:
 
     def collect(
         self,
-        start_date: Optional[Union[str, datetime]] = None,
-        end_date: Optional[Union[str, datetime]] = None,
-        max_events: Optional[int] = None,
-        resume_from_checkpoint: bool = True
+        start_date: str | datetime | None = None,
+        end_date: str | datetime | None = None,
+        max_events: int | None = None,
+        resume_from_checkpoint: bool = True,
     ) -> Iterator[CollectedEvent]:
         """Collect events from all configured sources.
 
@@ -203,10 +194,7 @@ class DataCollector:
         logger.info(f"Collection complete: {self.stats}")
 
     def _collect_from_source(
-        self,
-        source: DataSource,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime]
+        self, source: DataSource, start_date: datetime | None, end_date: datetime | None
     ) -> Iterator[CollectedEvent]:
         """Collect events from a single source.
 
@@ -232,10 +220,7 @@ class DataCollector:
             logger.warning(f"Unsupported source type: {source.source_type}")
 
     def _collect_from_json_file(
-        self,
-        source: DataSource,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime]
+        self, source: DataSource, start_date: datetime | None, end_date: datetime | None
     ) -> Iterator[CollectedEvent]:
         """Collect events from JSON file.
 
@@ -253,7 +238,7 @@ class DataCollector:
             logger.error(f"JSON file not found: {file_path}")
             return
 
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             data = json.load(f)
 
         # Handle both list of events and single event
@@ -284,7 +269,7 @@ class DataCollector:
                     source=source.name,
                     event_type=event_type,
                     raw_data=event_data,
-                    labels=event_data.get("labels")
+                    labels=event_data.get("labels"),
                 )
 
             except Exception as e:
@@ -292,10 +277,7 @@ class DataCollector:
                 continue
 
     def _collect_from_csv_file(
-        self,
-        source: DataSource,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime]
+        self, source: DataSource, start_date: datetime | None, end_date: datetime | None
     ) -> Iterator[CollectedEvent]:
         """Collect events from CSV file.
 
@@ -338,7 +320,7 @@ class DataCollector:
                     source=source.name,
                     event_type=str(event_type),
                     raw_data=row.to_dict(),
-                    labels=json.loads(row.get("labels", "{}")) if "labels" in row else None
+                    labels=json.loads(row.get("labels", "{}")) if "labels" in row else None,
                 )
 
             except Exception as e:
@@ -346,10 +328,7 @@ class DataCollector:
                 continue
 
     def _collect_from_parquet_file(
-        self,
-        source: DataSource,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime]
+        self, source: DataSource, start_date: datetime | None, end_date: datetime | None
     ) -> Iterator[CollectedEvent]:
         """Collect events from Parquet file.
 
@@ -374,10 +353,7 @@ class DataCollector:
             yield event
 
     def _collect_from_zeek_logs(
-        self,
-        source: DataSource,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime]
+        self, source: DataSource, start_date: datetime | None, end_date: datetime | None
     ) -> Iterator[CollectedEvent]:
         """Collect events from Zeek logs.
 
@@ -423,7 +399,7 @@ class DataCollector:
                             timestamp=timestamp,
                             source=source.name,
                             event_type=event_type,
-                            raw_data=row.to_dict()
+                            raw_data=row.to_dict(),
                         )
 
                     except Exception as e:
@@ -435,10 +411,7 @@ class DataCollector:
                 continue
 
     def _collect_from_elasticsearch(
-        self,
-        source: DataSource,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime]
+        self, source: DataSource, start_date: datetime | None, end_date: datetime | None
     ) -> Iterator[CollectedEvent]:
         """Collect events from Elasticsearch.
 
@@ -460,15 +433,7 @@ class DataCollector:
         es_client = Elasticsearch([source.connection_params["host"]])
 
         # Build query
-        query = {
-            "query": {
-                "bool": {
-                    "must": []
-                }
-            },
-            "sort": [{source.time_field: "asc"}],
-            "size": source.batch_size
-        }
+        query = {"query": {"bool": {"must": []}}, "sort": [{source.time_field: "asc"}], "size": source.batch_size}
 
         # Add time range filter
         if start_date or end_date:
@@ -478,15 +443,11 @@ class DataCollector:
             if end_date:
                 time_range["lte"] = end_date.isoformat()
 
-            query["query"]["bool"]["must"].append({
-                "range": {source.time_field: time_range}
-            })
+            query["query"]["bool"]["must"].append({"range": {source.time_field: time_range}})
 
         # Add custom filter
         if source.query_filter:
-            query["query"]["bool"]["must"].append({
-                "query_string": {"query": source.query_filter}
-            })
+            query["query"]["bool"]["must"].append({"query_string": {"query": source.query_filter}})
 
         index = source.connection_params.get("index", "*")
 
@@ -511,7 +472,7 @@ class DataCollector:
                         timestamp=timestamp,
                         source=source.name,
                         event_type=event_type,
-                        raw_data=source_data
+                        raw_data=source_data,
                     )
 
                 except Exception as e:
@@ -526,11 +487,7 @@ class DataCollector:
         # Clear scroll
         es_client.clear_scroll(scroll_id=scroll_id)
 
-    def save_to_file(
-        self,
-        events: List[CollectedEvent],
-        filename: str = "collected_events.json"
-    ) -> Path:
+    def save_to_file(self, events: list[CollectedEvent], filename: str = "collected_events.json") -> Path:
         """Save collected events to file.
 
         Args:
@@ -557,7 +514,7 @@ class DataCollector:
         checkpoint_data = {
             "timestamp": datetime.utcnow().isoformat(),
             "stats": self.stats,
-            "seen_event_ids": list(self._seen_event_ids)
+            "seen_event_ids": list(self._seen_event_ids),
         }
 
         with open(checkpoint_path, "w") as f:
@@ -573,7 +530,7 @@ class DataCollector:
             logger.debug("No checkpoint found")
             return
 
-        with open(checkpoint_path, "r") as f:
+        with open(checkpoint_path) as f:
             checkpoint_data = json.load(f)
 
         self.stats = checkpoint_data.get("stats", self.stats)
@@ -581,14 +538,10 @@ class DataCollector:
 
         logger.info(f"Checkpoint loaded: {len(self._seen_event_ids)} events seen")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get collection statistics.
 
         Returns:
             Dictionary with statistics
         """
-        return {
-            **self.stats,
-            "unique_events": len(self._seen_event_ids),
-            "sources_configured": len(self.sources)
-        }
+        return {**self.stats, "unique_events": len(self._seen_event_ids), "sources_configured": len(self.sources)}

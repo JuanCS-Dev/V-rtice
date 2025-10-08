@@ -11,11 +11,10 @@ Version: 1.0.0
 """
 
 import logging
-from typing import Optional, Dict, Any, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from .base_client import BaseExternalClient
-
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +35,7 @@ class MemoryClient(BaseExternalClient):
     - No cross-service memory sharing in degraded mode
     """
 
-    def __init__(
-        self,
-        base_url: str = "http://localhost:8019",
-        **kwargs
-    ):
+    def __init__(self, base_url: str = "http://localhost:8019", **kwargs):
         """
         Initialize Memory client.
 
@@ -60,7 +55,7 @@ class MemoryClient(BaseExternalClient):
         threat_type: str,
         response_success: bool,
         antibody_profile: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Consolidate new memory to long-term storage.
@@ -85,14 +80,10 @@ class MemoryClient(BaseExternalClient):
                 "antibody_profile": antibody_profile,
                 "metadata": metadata,
                 "timestamp": datetime.now().isoformat(),
-            }
+            },
         )
 
-    async def recall_memory(
-        self,
-        threat_signature: str,
-        similarity_threshold: float = 0.8
-    ) -> Dict[str, Any]:
+    async def recall_memory(self, threat_signature: str, similarity_threshold: float = 0.8) -> Dict[str, Any]:
         """
         Recall memory for similar threat.
 
@@ -104,17 +95,11 @@ class MemoryClient(BaseExternalClient):
             Matching memories and antibody profiles
         """
         return await self.request(
-            "GET",
-            f"/api/v1/memory/recall/{threat_signature}",
-            params={"similarity_threshold": similarity_threshold}
+            "GET", f"/api/v1/memory/recall/{threat_signature}", params={"similarity_threshold": similarity_threshold}
         )
 
     async def search_memories(
-        self,
-        query: str,
-        threat_type: Optional[str] = None,
-        success_only: bool = False,
-        limit: int = 10
+        self, query: str, threat_type: Optional[str] = None, success_only: bool = False, limit: int = 10
     ) -> Dict[str, Any]:
         """
         Search memories by criteria.
@@ -139,17 +124,9 @@ class MemoryClient(BaseExternalClient):
         if success_only:
             params["success_only"] = "true"
 
-        return await self.request(
-            "GET",
-            "/api/v1/memory/search",
-            params=params
-        )
+        return await self.request("GET", "/api/v1/memory/search", params=params)
 
-    async def forget_memory(
-        self,
-        memory_id: str,
-        reason: str = "privacy_compliance"
-    ) -> Dict[str, Any]:
+    async def forget_memory(self, memory_id: str, reason: str = "privacy_compliance") -> Dict[str, Any]:
         """
         Forget (delete) a memory.
 
@@ -162,11 +139,7 @@ class MemoryClient(BaseExternalClient):
         Returns:
             Deletion result
         """
-        return await self.request(
-            "DELETE",
-            f"/api/v1/memory/{memory_id}",
-            json={"reason": reason}
-        )
+        return await self.request("DELETE", f"/api/v1/memory/{memory_id}", json={"reason": reason})
 
     async def get_metrics(self) -> Dict[str, Any]:
         """
@@ -177,12 +150,7 @@ class MemoryClient(BaseExternalClient):
         """
         return await self.request("GET", "/api/v1/memory/metrics")
 
-    async def degraded_fallback(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Optional[Dict[str, Any]]:
+    async def degraded_fallback(self, method: str, endpoint: str, **kwargs) -> Optional[Dict[str, Any]]:
         """
         Fallback to local memory cache.
 
@@ -200,9 +168,7 @@ class MemoryClient(BaseExternalClient):
         Returns:
             Synthetic degraded response
         """
-        logger.warning(
-            f"MemoryClient: Operating in degraded mode for {method} {endpoint}"
-        )
+        logger.warning(f"MemoryClient: Operating in degraded mode for {method} {endpoint}")
 
         # Parse endpoint
         if endpoint == "/api/v1/memory/consolidate":
@@ -238,10 +204,7 @@ class MemoryClient(BaseExternalClient):
             # Simple local recall (exact match only)
             threat_signature = endpoint.split("/")[-1]
 
-            matching = [
-                m for m in self._local_memory_cache
-                if m.get("threat_signature") == threat_signature
-            ]
+            matching = [m for m in self._local_memory_cache if m.get("threat_signature") == threat_signature]
 
             return {
                 "status": "degraded",
@@ -266,10 +229,7 @@ class MemoryClient(BaseExternalClient):
 
             # Simple substring search
             if query:
-                results = [
-                    m for m in results
-                    if query in m.get("threat_signature", "")
-                ]
+                results = [m for m in results if query in m.get("threat_signature", "")]
 
             return {
                 "status": "degraded",
@@ -283,10 +243,7 @@ class MemoryClient(BaseExternalClient):
             # Remove from local cache
             memory_id = endpoint.split("/")[-1]
 
-            self._local_memory_cache = [
-                m for m in self._local_memory_cache
-                if m.get("memory_id") != memory_id
-            ]
+            self._local_memory_cache = [m for m in self._local_memory_cache if m.get("memory_id") != memory_id]
 
             return {
                 "status": "degraded",

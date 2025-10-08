@@ -51,19 +51,23 @@ class ReportGenerator:
         Returns:
             Dict[str, Any]: A dictionary representing the generated report.
         """
-        print(
-            f"[ReportGenerator] Generating report for query: {query} (type: {investigation_type})..."
-        )
+        print(f"[ReportGenerator] Generating report for query: {query} (type: {investigation_type})...")
         await asyncio.sleep(0.5)  # Simulate report generation time
 
-        report_content = f"# OSINT Investigation Report\n\n"
+        report_content = "# OSINT Investigation Report\n\n"
         report_content += f"## Query: {query}\n"
         report_content += f"## Investigation Type: {investigation_type}\n\n"
-        report_content += f"### Summary of Findings\n"
-        report_content += f"- AI Processed Summary: {analysis_results.get('ai_summary', {}).get('synthesized_summary', 'N/A')}\n"
+        report_content += "### Summary of Findings\n"
+        report_content += (
+            f"- AI Processed Summary: {analysis_results.get('ai_summary', {}).get('synthesized_summary', 'N/A')}\n"
+        )
         report_content += f"- Extracted Emails: {analysis_results.get('email_found', {}).get('extracted_emails', [])}\n"
-        report_content += f"- Extracted Phone Numbers: {analysis_results.get('phone_found', {}).get('extracted_phone_numbers', [])}\n"
-        report_content += f"- Detected Patterns: {analysis_results.get('patterns_detected', {}).get('detected_patterns', [])}\n\n"
+        report_content += (
+            f"- Extracted Phone Numbers: {analysis_results.get('phone_found', {}).get('extracted_phone_numbers', [])}\n"
+        )
+        report_content += (
+            f"- Detected Patterns: {analysis_results.get('patterns_detected', {}).get('detected_patterns', [])}\n\n"
+        )
 
         report_content += f"### Raw Collected Data ({len(collected_data)} entries)\n"
         for entry in collected_data:
@@ -91,7 +95,5 @@ class ReportGenerator:
         return {
             "status": "active",
             "total_reports_generated": len(self.generated_reports),
-            "last_report": (
-                self.last_report_time.isoformat() if self.last_report_time else "N/A"
-            ),
+            "last_report": (self.last_report_time.isoformat() if self.last_report_time else "N/A"),
         }

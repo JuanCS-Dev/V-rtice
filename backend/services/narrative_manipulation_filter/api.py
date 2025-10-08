@@ -5,31 +5,29 @@ Refactored API with dependency injection, lifespan management,
 and comprehensive health checks for all infrastructure components.
 """
 
-from contextlib import asynccontextmanager
-from datetime import datetime
 import logging
 import time
+from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Any, Dict
+
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from cache_manager import cache_manager
 from config import get_settings
 from database import db_manager, get_db_session
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from kafka_client import kafka_client
 from models import (
     AnalysisRequest,
     AnalysisResponse,
-    CognitiveDefenseReport,
     HealthCheckResponse,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 settings = get_settings()
@@ -94,9 +92,7 @@ async def lifespan(app: FastAPI):
     else:
         logger.info("✅ All systems initialized successfully")
 
-    logger.info(
-        f"🎯 Cognitive Defense System v{settings.SERVICE_VERSION} ready on port {settings.SERVICE_PORT}"
-    )
+    logger.info(f"🎯 Cognitive Defense System v{settings.SERVICE_VERSION} ready on port {settings.SERVICE_PORT}")
 
     yield
 
@@ -241,9 +237,7 @@ async def simple_health_check() -> Dict[str, str]:
 
 
 @app.post("/api/analyze", response_model=AnalysisResponse)
-async def analyze_content(
-    request: AnalysisRequest, db: AsyncSession = Depends(get_db_session)
-) -> AnalysisResponse:
+async def analyze_content(request: AnalysisRequest, db: AsyncSession = Depends(get_db_session)) -> AnalysisResponse:
     """
     Analyze content for narrative manipulation.
 
@@ -320,9 +314,7 @@ async def analyze_content(
 
         logical_result = LogicalFallacyResult(fallacy_score=0.2, coherence_score=0.8)
 
-        reality_result = RealityDistortionResult(
-            distortion_score=0.25, factuality_score=0.75
-        )
+        reality_result = RealityDistortionResult(distortion_score=0.25, factuality_score=0.75)
 
         processing_time = (time.time() - start_time) * 1000
 
@@ -365,9 +357,7 @@ async def legacy_analyze_content(request: AnalysisRequest) -> Dict[str, Any]:
 
     DEPRECATED: Use /api/analyze instead.
     """
-    logger.warning(
-        "⚠️  Legacy endpoint /analyze_content called - use /api/analyze instead"
-    )
+    logger.warning("⚠️  Legacy endpoint /analyze_content called - use /api/analyze instead")
 
     response = await analyze_content(request)
 
@@ -378,9 +368,7 @@ async def legacy_analyze_content(request: AnalysisRequest) -> Dict[str, Any]:
             "analysis": response.report.model_dump() if response.report else {},
         }
     else:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=response.error
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=response.error)
 
 
 # ============================================================================
@@ -395,9 +383,7 @@ async def cache_stats() -> Dict[str, Any]:
         stats = await cache_manager.get_stats()
         return {"success": True, "stats": stats}
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @app.get("/stats/database")
@@ -425,9 +411,7 @@ async def database_stats() -> Dict[str, Any]:
 
         return {"success": True, "table_counts": counts}
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @app.get("/info")

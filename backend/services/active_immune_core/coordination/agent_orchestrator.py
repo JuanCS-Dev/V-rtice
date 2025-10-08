@@ -33,20 +33,20 @@ Version: 1.0.0
 Date: 2025-10-07
 """
 
+import json
+import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
-import logging
-import json
 
 from agents.agent_factory import AgentFactory
-from agents.models import AgentType, AgenteState
-from coordination.rate_limiter import ClonalExpansionRateLimiter
-from coordination.thread_safe_structures import AtomicCounter
+from agents.models import AgenteState, AgentType
 from coordination.exceptions import (
+    AgentOrchestrationError,
     LymphnodeRateLimitError,
     LymphnodeResourceExhaustedError,
-    AgentOrchestrationError,
 )
+from coordination.rate_limiter import ClonalExpansionRateLimiter
+from coordination.thread_safe_structures import AtomicCounter
 
 logger = logging.getLogger(__name__)
 
@@ -115,10 +115,7 @@ class AgentOrchestrator:
         self._total_clones_criados = AtomicCounter()
         self._total_clones_destruidos = AtomicCounter()
 
-        logger.info(
-            f"AgentOrchestrator initialized: "
-            f"lymphnode={lymphnode_id}, area={area}"
-        )
+        logger.info(f"AgentOrchestrator initialized: lymphnode={lymphnode_id}, area={area}")
 
     async def register_agent(self, agente_state: AgenteState) -> None:
         """Register agent with orchestrator.
@@ -130,10 +127,7 @@ class AgentOrchestrator:
         """
         self.agentes_ativos[agente_state.id] = agente_state
 
-        logger.info(
-            f"Agent {agente_state.id[:8]} ({agente_state.tipo}) registered "
-            f"with lymphnode {self.lymphnode_id}"
-        )
+        logger.info(f"Agent {agente_state.id[:8]} ({agente_state.tipo}) registered with lymphnode {self.lymphnode_id}")
 
     async def remove_agent(self, agente_id: str) -> None:
         """Remove agent from orchestrator (apoptosis/migration).
@@ -147,10 +141,7 @@ class AgentOrchestrator:
             agente_state = self.agentes_ativos[agente_id]
             del self.agentes_ativos[agente_id]
 
-            logger.info(
-                f"Agent {agente_id[:8]} ({agente_state.tipo}) removed "
-                f"from lymphnode {self.lymphnode_id}"
-            )
+            logger.info(f"Agent {agente_id[:8]} ({agente_state.tipo}) removed from lymphnode {self.lymphnode_id}")
 
     async def create_clones(
         self,
@@ -188,9 +179,7 @@ class AgentOrchestrator:
                 current_total_agents=len(self.agentes_ativos),
             )
         except (LymphnodeRateLimitError, LymphnodeResourceExhaustedError) as e:
-            logger.warning(
-                f"Lymphnode {self.lymphnode_id} clonal expansion BLOCKED: {e}"
-            )
+            logger.warning(f"Lymphnode {self.lymphnode_id} clonal expansion BLOCKED: {e}")
             raise
 
         logger.info(
@@ -214,9 +203,7 @@ class AgentOrchestrator:
 
                 # Apply somatic hypermutation (variation in sensitivity/aggressiveness)
                 mutation = (i * 0.04) - 0.1  # Range: -10% to +10%
-                agente.state.sensibilidade = max(
-                    0.0, min(1.0, agente.state.sensibilidade + mutation)
-                )
+                agente.state.sensibilidade = max(0.0, min(1.0, agente.state.sensibilidade + mutation))
 
                 # Start agent
                 await agente.iniciar()
@@ -235,13 +222,9 @@ class AgentOrchestrator:
 
         # If too many failures, raise error
         if failures > quantidade // 2:
-            raise AgentOrchestrationError(
-                f"Clonal expansion failed: {failures}/{quantidade} clones failed to create"
-            )
+            raise AgentOrchestrationError(f"Clonal expansion failed: {failures}/{quantidade} clones failed to create")
 
-        logger.info(
-            f"Clonal expansion complete: {len(clone_ids)}/{quantidade} clones created"
-        )
+        logger.info(f"Clonal expansion complete: {len(clone_ids)}/{quantidade} clones created")
 
         return clone_ids
 
@@ -278,9 +261,7 @@ class AgentOrchestrator:
         # Release from rate limiter
         await self.rate_limiter.release_clones(especializacao, destruidos)
 
-        logger.info(
-            f"Lymphnode {self.lymphnode_id} destroyed {destruidos} clones ({especializacao})"
-        )
+        logger.info(f"Lymphnode {self.lymphnode_id} destroyed {destruidos} clones ({especializacao})")
 
         return destruidos
 
@@ -299,11 +280,13 @@ class AgentOrchestrator:
         try:
             await self.redis_client.publish(
                 f"agent:{agente_id}:apoptosis",
-                json.dumps({
-                    "lymphnode_id": self.lymphnode_id,
-                    "reason": "lymphnode_directive",
-                    "timestamp": datetime.now().isoformat(),
-                }),
+                json.dumps(
+                    {
+                        "lymphnode_id": self.lymphnode_id,
+                        "reason": "lymphnode_directive",
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                ),
             )
 
             logger.debug(f"Apoptosis signal sent to agent {agente_id[:8]}")
@@ -330,11 +313,7 @@ class AgentOrchestrator:
         Returns:
             List of AgenteState for matching agents
         """
-        return [
-            state
-            for state in self.agentes_ativos.values()
-            if state.especializacao == especializacao
-        ]
+        return [state for state in self.agentes_ativos.values() if state.especializacao == especializacao]
 
     def get_agent_count(self) -> int:
         """Get total number of active agents.

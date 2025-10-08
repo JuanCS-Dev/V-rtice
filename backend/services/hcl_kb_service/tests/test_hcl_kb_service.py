@@ -10,17 +10,17 @@ Tests cover actual production implementation:
 - Error handling and edge cases
 """
 
+# Import the FastAPI app
+import sys
+from datetime import datetime
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from datetime import datetime
 
-# Import the FastAPI app
-import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/hcl_kb_service")
 from main import app, knowledge_base
-from models import HCLDataType, HCLDataEntry
-
+from models import HCLDataEntry, HCLDataType
 
 # ==================== FIXTURES ====================
 
@@ -62,14 +62,7 @@ class TestStoreDataEndpoint:
 
     async def test_store_metrics_data_success(self, client):
         """Test storing METRICS type data."""
-        payload = {
-            "data_type": "metrics",
-            "data": {
-                "cpu_usage": 45.5,
-                "memory_usage": 60.0,
-                "error_rate": 0.01
-            }
-        }
+        payload = {"data_type": "metrics", "data": {"cpu_usage": 45.5, "memory_usage": 60.0, "error_rate": 0.01}}
 
         response = await client.post("/store_data", json=payload)
 
@@ -82,13 +75,7 @@ class TestStoreDataEndpoint:
 
     async def test_store_analysis_data_success(self, client):
         """Test storing ANALYSIS type data."""
-        payload = {
-            "data_type": "analysis",
-            "data": {
-                "anomalies_detected": 2,
-                "health_score": 0.85
-            }
-        }
+        payload = {"data_type": "analysis", "data": {"anomalies_detected": 2, "health_score": 0.85}}
 
         response = await client.post("/store_data", json=payload)
 
@@ -99,13 +86,7 @@ class TestStoreDataEndpoint:
 
     async def test_store_plan_data_success(self, client):
         """Test storing PLAN type data."""
-        payload = {
-            "data_type": "plan",
-            "data": {
-                "plan_id": "plan_001",
-                "actions": ["scale_up", "restart_service"]
-            }
-        }
+        payload = {"data_type": "plan", "data": {"plan_id": "plan_001", "actions": ["scale_up", "restart_service"]}}
 
         response = await client.post("/store_data", json=payload)
 
@@ -117,11 +98,7 @@ class TestStoreDataEndpoint:
         """Test storing EXECUTION type data."""
         payload = {
             "data_type": "execution",
-            "data": {
-                "plan_id": "plan_001",
-                "status": "completed",
-                "duration_ms": 1500
-            }
+            "data": {"plan_id": "plan_001", "status": "completed", "duration_ms": 1500},
         }
 
         response = await client.post("/store_data", json=payload)
@@ -132,10 +109,7 @@ class TestStoreDataEndpoint:
 
     async def test_store_multiple_entries_increments_id(self, client):
         """Test storing multiple entries increments entry_id."""
-        payload = {
-            "data_type": "metrics",
-            "data": {"value": 1}
-        }
+        payload = {"data_type": "metrics", "data": {"value": 1}}
 
         # Store 3 entries
         response1 = await client.post("/store_data", json=payload)
@@ -148,10 +122,7 @@ class TestStoreDataEndpoint:
 
     async def test_store_data_invalid_type_returns_422(self, client):
         """Test storing data with invalid data_type."""
-        payload = {
-            "data_type": "invalid_type",
-            "data": {"value": 1}
-        }
+        payload = {"data_type": "invalid_type", "data": {"value": 1}}
 
         response = await client.post("/store_data", json=payload)
 
@@ -189,10 +160,7 @@ class TestRetrieveDataEndpoint:
     async def test_retrieve_metrics_after_storing(self, client):
         """Test retrieving METRICS data after storing."""
         # Store data first
-        store_payload = {
-            "data_type": "metrics",
-            "data": {"cpu": 50}
-        }
+        store_payload = {"data_type": "metrics", "data": {"cpu": 50}}
         await client.post("/store_data", json=store_payload)
 
         # Retrieve
@@ -208,10 +176,7 @@ class TestRetrieveDataEndpoint:
         """Test retrieving data with limit parameter."""
         # Store 5 entries
         for i in range(5):
-            await client.post("/store_data", json={
-                "data_type": "analysis",
-                "data": {"id": i}
-            })
+            await client.post("/store_data", json={"data_type": "analysis", "data": {"id": i}})
 
         # Retrieve with limit=3
         response = await client.get("/retrieve_data/analysis?limit=3")
@@ -227,16 +192,10 @@ class TestRetrieveDataEndpoint:
     async def test_retrieve_different_data_types_are_separated(self, client):
         """Test that different data types are stored separately."""
         # Store metrics
-        await client.post("/store_data", json={
-            "data_type": "metrics",
-            "data": {"type": "metrics"}
-        })
+        await client.post("/store_data", json={"data_type": "metrics", "data": {"type": "metrics"}})
 
         # Store analysis
-        await client.post("/store_data", json={
-            "data_type": "analysis",
-            "data": {"type": "analysis"}
-        })
+        await client.post("/store_data", json={"data_type": "analysis", "data": {"type": "analysis"}})
 
         # Retrieve metrics
         metrics_response = await client.get("/retrieve_data/metrics")
@@ -257,10 +216,7 @@ class TestRetrieveDataEndpoint:
 
         # Store one entry for each type
         for dt in data_types:
-            await client.post("/store_data", json={
-                "data_type": dt,
-                "data": {"value": dt}
-            })
+            await client.post("/store_data", json={"data_type": dt, "data": {"value": dt}})
 
         # Retrieve each type
         for dt in data_types:
@@ -295,17 +251,11 @@ class TestKnowledgeSummaryEndpoint:
         """Test knowledge summary after storing data."""
         # Store 3 metrics entries
         for i in range(3):
-            await client.post("/store_data", json={
-                "data_type": "metrics",
-                "data": {"id": i}
-            })
+            await client.post("/store_data", json={"data_type": "metrics", "data": {"id": i}})
 
         # Store 2 analysis entries
         for i in range(2):
-            await client.post("/store_data", json={
-                "data_type": "analysis",
-                "data": {"id": i}
-            })
+            await client.post("/store_data", json={"data_type": "analysis", "data": {"id": i}})
 
         response = await client.get("/knowledge_summary")
 
@@ -322,19 +272,13 @@ class TestKnowledgeSummaryEndpoint:
     async def test_knowledge_summary_tracks_last_entry_timestamp(self, client):
         """Test that last_entry timestamp is updated."""
         # Store first entry
-        await client.post("/store_data", json={
-            "data_type": "plan",
-            "data": {"version": 1}
-        })
+        await client.post("/store_data", json={"data_type": "plan", "data": {"version": 1}})
 
         summary1 = await client.get("/knowledge_summary")
         timestamp1 = summary1.json()["plan"]["last_entry"]
 
         # Store second entry (should update last_entry)
-        await client.post("/store_data", json={
-            "data_type": "plan",
-            "data": {"version": 2}
-        })
+        await client.post("/store_data", json={"data_type": "plan", "data": {"version": 2}})
 
         summary2 = await client.get("/knowledge_summary")
         timestamp2 = summary2.json()["plan"]["last_entry"]
@@ -364,7 +308,7 @@ class TestModels:
             timestamp="2025-10-07T12:00:00",
             data_type=HCLDataType.METRICS,
             data={"cpu": 50},
-            metadata={"source": "test"}
+            metadata={"source": "test"},
         )
 
         assert entry.timestamp == "2025-10-07T12:00:00"
@@ -374,10 +318,7 @@ class TestModels:
 
     def test_hcl_data_entry_default_timestamp(self):
         """Test HCLDataEntry generates default timestamp."""
-        entry = HCLDataEntry(
-            data_type=HCLDataType.ANALYSIS,
-            data={"value": 1}
-        )
+        entry = HCLDataEntry(data_type=HCLDataType.ANALYSIS, data={"value": 1})
 
         # Should have generated a timestamp
         assert entry.timestamp is not None
@@ -387,10 +328,7 @@ class TestModels:
 
     def test_hcl_data_entry_metadata_optional(self):
         """Test that metadata field is optional."""
-        entry = HCLDataEntry(
-            data_type=HCLDataType.PLAN,
-            data={"action": "scale"}
-        )
+        entry = HCLDataEntry(data_type=HCLDataType.PLAN, data={"action": "scale"})
 
         assert entry.metadata is None
 
@@ -405,10 +343,7 @@ class TestEdgeCases:
     async def test_retrieve_with_zero_limit(self, client):
         """Test retrieving with limit=0."""
         # Store data
-        await client.post("/store_data", json={
-            "data_type": "metrics",
-            "data": {"value": 1}
-        })
+        await client.post("/store_data", json={"data_type": "metrics", "data": {"value": 1}})
 
         response = await client.get("/retrieve_data/metrics?limit=0")
 
@@ -421,10 +356,7 @@ class TestEdgeCases:
         """Test retrieving with limit larger than available data."""
         # Store 3 entries
         for i in range(3):
-            await client.post("/store_data", json={
-                "data_type": "analysis",
-                "data": {"id": i}
-            })
+            await client.post("/store_data", json={"data_type": "analysis", "data": {"id": i}})
 
         # Request 100 entries
         response = await client.get("/retrieve_data/analysis?limit=100")
@@ -436,10 +368,7 @@ class TestEdgeCases:
 
     async def test_store_data_with_empty_data_dict(self, client):
         """Test storing data with empty data payload."""
-        payload = {
-            "data_type": "metrics",
-            "data": {}
-        }
+        payload = {"data_type": "metrics", "data": {}}
 
         response = await client.post("/store_data", json=payload)
 
@@ -453,13 +382,10 @@ class TestEdgeCases:
             "data": {
                 "actions": [
                     {"type": "scale_up", "target": "service_a", "replicas": 5},
-                    {"type": "restart", "target": "service_b"}
+                    {"type": "restart", "target": "service_b"},
                 ],
-                "metadata": {
-                    "created_by": "analyzer",
-                    "priority": "high"
-                }
-            }
+                "metadata": {"created_by": "analyzer", "priority": "high"},
+            },
         }
 
         response = await client.post("/store_data", json=payload)

@@ -11,10 +11,9 @@ Version: 1.0.0
 """
 
 import logging
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from .base_client import BaseExternalClient
-
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +34,7 @@ class IPIntelClient(BaseExternalClient):
     - Simple threat categorization
     """
 
-    def __init__(
-        self,
-        base_url: str = "http://localhost:8022",
-        **kwargs
-    ):
+    def __init__(self, base_url: str = "http://localhost:8022", **kwargs):
         """
         Initialize IP Intelligence client.
 
@@ -58,10 +53,7 @@ class IPIntelClient(BaseExternalClient):
             "localhost": False,
         }
 
-    async def lookup_ip(
-        self,
-        ip_address: str
-    ) -> Dict[str, Any]:
+    async def lookup_ip(self, ip_address: str) -> Dict[str, Any]:
         """
         Lookup IP address information.
 
@@ -71,15 +63,9 @@ class IPIntelClient(BaseExternalClient):
         Returns:
             IP information including reputation, geo-location, etc.
         """
-        return await self.request(
-            "GET",
-            f"/ip/{ip_address}"
-        )
+        return await self.request("GET", f"/ip/{ip_address}")
 
-    async def check_reputation(
-        self,
-        ip_address: str
-    ) -> Dict[str, Any]:
+    async def check_reputation(self, ip_address: str) -> Dict[str, Any]:
         """
         Check IP reputation.
 
@@ -89,15 +75,9 @@ class IPIntelClient(BaseExternalClient):
         Returns:
             Reputation score and classification
         """
-        return await self.request(
-            "GET",
-            f"/reputation/{ip_address}"
-        )
+        return await self.request("GET", f"/reputation/{ip_address}")
 
-    async def batch_lookup(
-        self,
-        ip_addresses: list[str]
-    ) -> Dict[str, Any]:
+    async def batch_lookup(self, ip_addresses: list[str]) -> Dict[str, Any]:
         """
         Batch lookup multiple IPs.
 
@@ -107,18 +87,9 @@ class IPIntelClient(BaseExternalClient):
         Returns:
             Lookup results for all IPs
         """
-        return await self.request(
-            "POST",
-            "/batch_lookup",
-            json={"ip_addresses": ip_addresses}
-        )
+        return await self.request("POST", "/batch_lookup", json={"ip_addresses": ip_addresses})
 
-    async def degraded_fallback(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Optional[Dict[str, Any]]:
+    async def degraded_fallback(self, method: str, endpoint: str, **kwargs) -> Optional[Dict[str, Any]]:
         """
         Fallback to local IP intelligence.
 
@@ -135,9 +106,7 @@ class IPIntelClient(BaseExternalClient):
         Returns:
             Synthetic degraded response
         """
-        logger.warning(
-            f"IPIntelClient: Operating in degraded mode for {method} {endpoint}"
-        )
+        logger.warning(f"IPIntelClient: Operating in degraded mode for {method} {endpoint}")
 
         # Parse endpoint
         if endpoint.startswith("/ip/"):

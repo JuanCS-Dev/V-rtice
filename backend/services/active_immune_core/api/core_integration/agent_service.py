@@ -15,36 +15,37 @@ Version: 1.0.0
 """
 
 import logging
-from datetime import datetime
-from typing import List, Optional, Dict, Any
 from collections import defaultdict
+from typing import Any, Dict, Optional
 
-from .core_manager import CoreManager, CoreNotInitializedError
 from ..models.agents import (
-    AgentCreate,
-    AgentUpdate,
-    AgentResponse,
-    AgentListResponse,
-    AgentStatsResponse,
     AgentAction,
     AgentActionResponse,
+    AgentListResponse,
+    AgentResponse,
+    AgentStatsResponse,
+    AgentUpdate,
 )
+from .core_manager import CoreManager
 
 logger = logging.getLogger(__name__)
 
 
 class AgentServiceError(Exception):
     """Base exception for AgentService errors"""
+
     pass
 
 
 class AgentNotFoundError(AgentServiceError):
     """Raised when agent not found"""
+
     pass
 
 
 class CoreUnavailableError(AgentServiceError):
     """Raised when Core System is unavailable"""
+
     pass
 
 
@@ -174,10 +175,7 @@ class AgentService:
             }
 
             if agent_type not in type_mapping:
-                raise AgentServiceError(
-                    f"Invalid agent type: {agent_type}. "
-                    f"Valid types: {list(type_mapping.keys())}"
-                )
+                raise AgentServiceError(f"Invalid agent type: {agent_type}. Valid types: {list(type_mapping.keys())}")
 
             core_agent_type = type_mapping[agent_type]
 
@@ -239,25 +237,16 @@ class AgentService:
             filtered_agents = all_agents
 
             if agent_type:
-                filtered_agents = [
-                    a for a in filtered_agents
-                    if a.state.tipo.lower() == agent_type.lower()
-                ]
+                filtered_agents = [a for a in filtered_agents if a.state.tipo.lower() == agent_type.lower()]
 
             if status:
-                filtered_agents = [
-                    a for a in filtered_agents
-                    if a.state.status == status
-                ]
+                filtered_agents = [a for a in filtered_agents if a.state.status == status]
 
             # Apply pagination
             paginated_agents = filtered_agents[skip : skip + limit]
 
             # Convert to responses
-            agent_responses = [
-                self._agent_state_to_response(agent)
-                for agent in paginated_agents
-            ]
+            agent_responses = [self._agent_state_to_response(agent) for agent in paginated_agents]
 
             # Calculate statistics
             by_type: Dict[str, int] = defaultdict(int)
@@ -438,16 +427,12 @@ class AgentService:
             total_tasks = state.deteccoes_total + state.neutralizacoes_total
             tasks_completed = state.neutralizacoes_total
             tasks_failed = state.falsos_positivos
-            success_rate = (
-                tasks_completed / total_tasks if total_tasks > 0 else 0.0
-            )
+            success_rate = tasks_completed / total_tasks if total_tasks > 0 else 0.0
 
             uptime_seconds = state.tempo_vida.total_seconds()
 
             # Estimate average task duration (simple heuristic)
-            average_task_duration = (
-                uptime_seconds / total_tasks if total_tasks > 0 else 0.0
-            )
+            average_task_duration = uptime_seconds / total_tasks if total_tasks > 0 else 0.0
 
             return AgentStatsResponse(
                 agent_id=state.id,

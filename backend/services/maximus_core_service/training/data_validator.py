@@ -14,11 +14,11 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import logging
 from dataclasses import dataclass
 from enum import Enum
-import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -40,7 +40,7 @@ class ValidationIssue:
     severity: ValidationSeverity
     check_name: str
     message: str
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
     def __repr__(self) -> str:
         return f"[{self.severity.value.upper()}] {self.check_name}: {self.message}"
@@ -51,16 +51,15 @@ class ValidationResult:
     """Result of data validation."""
 
     passed: bool
-    issues: List[ValidationIssue]
-    statistics: Dict[str, Any]
+    issues: list[ValidationIssue]
+    statistics: dict[str, Any]
 
     def __repr__(self) -> str:
         n_errors = sum(1 for issue in self.issues if issue.severity == ValidationSeverity.ERROR)
         n_warnings = sum(1 for issue in self.issues if issue.severity == ValidationSeverity.WARNING)
         n_info = sum(1 for issue in self.issues if issue.severity == ValidationSeverity.INFO)
 
-        return (f"ValidationResult(passed={self.passed}, "
-                f"errors={n_errors}, warnings={n_warnings}, info={n_info})")
+        return f"ValidationResult(passed={self.passed}, errors={n_errors}, warnings={n_warnings}, info={n_info})"
 
     def print_report(self):
         """Print validation report."""
@@ -102,15 +101,10 @@ class DataValidator:
         validator = DataValidator(
             features=features,
             labels=labels,
-            reference_features=None  # Optional reference for drift detection
+            reference_features=None,  # Optional reference for drift detection
         )
 
-        result = validator.validate(
-            check_missing=True,
-            check_outliers=True,
-            check_labels=True,
-            check_drift=False
-        )
+        result = validator.validate(check_missing=True, check_outliers=True, check_labels=True, check_drift=False)
 
         result.print_report()
 
@@ -123,8 +117,8 @@ class DataValidator:
         self,
         features: np.ndarray,
         labels: np.ndarray,
-        reference_features: Optional[np.ndarray] = None,
-        feature_names: Optional[List[str]] = None
+        reference_features: np.ndarray | None = None,
+        feature_names: list[str] | None = None,
     ):
         """Initialize data validator.
 
@@ -152,7 +146,7 @@ class DataValidator:
         check_drift: bool = False,
         outlier_threshold: float = 3.0,
         missing_threshold: float = 0.1,
-        drift_threshold: float = 0.1
+        drift_threshold: float = 0.1,
     ) -> ValidationResult:
         """Run all validation checks.
 
@@ -202,20 +196,13 @@ class DataValidator:
         has_errors = any(issue.severity == ValidationSeverity.ERROR for issue in issues)
         passed = not has_errors
 
-        result = ValidationResult(
-            passed=passed,
-            issues=issues,
-            statistics=statistics
-        )
+        result = ValidationResult(passed=passed, issues=issues, statistics=statistics)
 
         logger.info(f"Validation complete: {result}")
 
         return result
 
-    def _check_missing_values(
-        self,
-        missing_threshold: float
-    ) -> Tuple[List[ValidationIssue], Dict[str, Any]]:
+    def _check_missing_values(self, missing_threshold: float) -> tuple[list[ValidationIssue], dict[str, Any]]:
         """Check for missing values (NaN, Inf).
 
         Args:
@@ -241,19 +228,23 @@ class DataValidator:
             nan_feature_indices = np.where(nan_features)[0]
 
             if nan_fraction > missing_threshold:
-                issues.append(ValidationIssue(
-                    severity=ValidationSeverity.ERROR,
-                    check_name="missing_values",
-                    message=f"Too many NaN values: {n_nan} ({nan_fraction:.2%})",
-                    details={"nan_features": [self.feature_names[i] for i in nan_feature_indices]}
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=ValidationSeverity.ERROR,
+                        check_name="missing_values",
+                        message=f"Too many NaN values: {n_nan} ({nan_fraction:.2%})",
+                        details={"nan_features": [self.feature_names[i] for i in nan_feature_indices]},
+                    )
+                )
             else:
-                issues.append(ValidationIssue(
-                    severity=ValidationSeverity.WARNING,
-                    check_name="missing_values",
-                    message=f"Found {n_nan} NaN values ({nan_fraction:.2%})",
-                    details={"nan_features": [self.feature_names[i] for i in nan_feature_indices]}
-                ))
+                issues.append(
+                    ValidationIssue(
+                        severity=ValidationSeverity.WARNING,
+                        check_name="missing_values",
+                        message=f"Found {n_nan} NaN values ({nan_fraction:.2%})",
+                        details={"nan_features": [self.feature_names[i] for i in nan_feature_indices]},
+                    )
+                )
 
         # Check for Inf
         inf_mask = np.isinf(self.features)
@@ -267,26 +258,27 @@ class DataValidator:
             inf_features = inf_mask.any(axis=0)
             inf_feature_indices = np.where(inf_features)[0]
 
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.ERROR if inf_fraction > missing_threshold else ValidationSeverity.WARNING,
-                check_name="missing_values",
-                message=f"Found {n_inf} Inf values ({inf_fraction:.2%})",
-                details={"inf_features": [self.feature_names[i] for i in inf_feature_indices]}
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.ERROR
+                    if inf_fraction > missing_threshold
+                    else ValidationSeverity.WARNING,
+                    check_name="missing_values",
+                    message=f"Found {n_inf} Inf values ({inf_fraction:.2%})",
+                    details={"inf_features": [self.feature_names[i] for i in inf_feature_indices]},
+                )
+            )
 
         if n_nan == 0 and n_inf == 0:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.INFO,
-                check_name="missing_values",
-                message="No missing values detected"
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.INFO, check_name="missing_values", message="No missing values detected"
+                )
+            )
 
         return issues, statistics
 
-    def _check_outliers(
-        self,
-        outlier_threshold: float
-    ) -> Tuple[List[ValidationIssue], Dict[str, Any]]:
+    def _check_outliers(self, outlier_threshold: float) -> tuple[list[ValidationIssue], dict[str, Any]]:
         """Check for outliers using Z-score.
 
         Args:
@@ -321,27 +313,30 @@ class DataValidator:
             outliers_per_feature = outlier_mask.sum(axis=0)
             top_outlier_features = np.argsort(outliers_per_feature)[-5:][::-1]
 
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.WARNING if outlier_fraction < 0.05 else ValidationSeverity.ERROR,
-                check_name="outliers",
-                message=f"Found {n_outliers} outliers ({outlier_fraction:.2%})",
-                details={
-                    "top_outlier_features": [
-                        (self.feature_names[i], int(outliers_per_feature[i]))
-                        for i in top_outlier_features
-                    ]
-                }
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.WARNING if outlier_fraction < 0.05 else ValidationSeverity.ERROR,
+                    check_name="outliers",
+                    message=f"Found {n_outliers} outliers ({outlier_fraction:.2%})",
+                    details={
+                        "top_outlier_features": [
+                            (self.feature_names[i], int(outliers_per_feature[i])) for i in top_outlier_features
+                        ]
+                    },
+                )
+            )
         else:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.INFO,
-                check_name="outliers",
-                message=f"No outliers detected (threshold={outlier_threshold})"
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.INFO,
+                    check_name="outliers",
+                    message=f"No outliers detected (threshold={outlier_threshold})",
+                )
+            )
 
         return issues, statistics
 
-    def _check_labels(self) -> Tuple[List[ValidationIssue], Dict[str, Any]]:
+    def _check_labels(self) -> tuple[list[ValidationIssue], dict[str, Any]]:
         """Check label distribution.
 
         Returns:
@@ -362,16 +357,16 @@ class DataValidator:
         statistics["label_fraction"] = float(n_labeled / len(self.labels))
 
         if n_labeled == 0:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.ERROR,
-                check_name="labels",
-                message="No labeled samples found"
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.ERROR, check_name="labels", message="No labeled samples found"
+                )
+            )
             return issues, statistics
 
         # Class distribution
         unique_labels, label_counts = np.unique(labeled_labels, return_counts=True)
-        class_distribution = dict(zip(unique_labels.tolist(), label_counts.tolist()))
+        class_distribution = dict(zip(unique_labels.tolist(), label_counts.tolist(), strict=False))
 
         statistics["class_distribution"] = class_distribution
         statistics["n_classes"] = len(unique_labels)
@@ -384,29 +379,35 @@ class DataValidator:
         statistics["imbalance_ratio"] = float(imbalance_ratio)
 
         if imbalance_ratio > 10:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.WARNING,
-                check_name="labels",
-                message=f"Severe class imbalance detected (ratio={imbalance_ratio:.1f}:1)",
-                details={"class_distribution": class_distribution}
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.WARNING,
+                    check_name="labels",
+                    message=f"Severe class imbalance detected (ratio={imbalance_ratio:.1f}:1)",
+                    details={"class_distribution": class_distribution},
+                )
+            )
         elif imbalance_ratio > 3:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.INFO,
-                check_name="labels",
-                message=f"Class imbalance detected (ratio={imbalance_ratio:.1f}:1)",
-                details={"class_distribution": class_distribution}
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.INFO,
+                    check_name="labels",
+                    message=f"Class imbalance detected (ratio={imbalance_ratio:.1f}:1)",
+                    details={"class_distribution": class_distribution},
+                )
+            )
         else:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.INFO,
-                check_name="labels",
-                message=f"Balanced classes (ratio={imbalance_ratio:.1f}:1)"
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.INFO,
+                    check_name="labels",
+                    message=f"Balanced classes (ratio={imbalance_ratio:.1f}:1)",
+                )
+            )
 
         return issues, statistics
 
-    def _check_distributions(self) -> Tuple[List[ValidationIssue], Dict[str, Any]]:
+    def _check_distributions(self) -> tuple[list[ValidationIssue], dict[str, Any]]:
         """Check feature distributions.
 
         Returns:
@@ -432,12 +433,14 @@ class DataValidator:
 
         if n_zero_variance > 0:
             zero_variance_indices = np.where(zero_variance_mask)[0]
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.WARNING,
-                check_name="distributions",
-                message=f"Found {n_zero_variance} zero-variance features",
-                details={"zero_variance_features": [self.feature_names[i] for i in zero_variance_indices]}
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.WARNING,
+                    check_name="distributions",
+                    message=f"Found {n_zero_variance} zero-variance features",
+                    details={"zero_variance_features": [self.feature_names[i] for i in zero_variance_indices]},
+                )
+            )
 
         # Check for constant features
         constant_mask = feature_maxs == feature_mins
@@ -447,26 +450,27 @@ class DataValidator:
 
         if n_constant > 0:
             constant_indices = np.where(constant_mask)[0]
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.WARNING,
-                check_name="distributions",
-                message=f"Found {n_constant} constant features",
-                details={"constant_features": [self.feature_names[i] for i in constant_indices]}
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.WARNING,
+                    check_name="distributions",
+                    message=f"Found {n_constant} constant features",
+                    details={"constant_features": [self.feature_names[i] for i in constant_indices]},
+                )
+            )
 
         if n_zero_variance == 0 and n_constant == 0:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.INFO,
-                check_name="distributions",
-                message="All features have non-zero variance"
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.INFO,
+                    check_name="distributions",
+                    message="All features have non-zero variance",
+                )
+            )
 
         return issues, statistics
 
-    def _check_drift(
-        self,
-        drift_threshold: float
-    ) -> Tuple[List[ValidationIssue], Dict[str, Any]]:
+    def _check_drift(self, drift_threshold: float) -> tuple[list[ValidationIssue], dict[str, Any]]:
         """Check for data drift compared to reference.
 
         Args:
@@ -479,11 +483,13 @@ class DataValidator:
         statistics = {}
 
         if self.reference_features is None:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.INFO,
-                check_name="drift",
-                message="No reference features provided for drift detection"
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.INFO,
+                    check_name="drift",
+                    message="No reference features provided for drift detection",
+                )
+            )
             return issues, statistics
 
         # Calculate feature-wise drift using KL divergence approximation
@@ -513,23 +519,28 @@ class DataValidator:
             # Find features with highest drift
             top_drift_features = np.argsort(drift_scores)[-5:][::-1]
 
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.WARNING if overall_drift < drift_threshold * 2 else ValidationSeverity.ERROR,
-                check_name="drift",
-                message=f"Data drift detected (drift={overall_drift:.3f})",
-                details={
-                    "top_drift_features": [
-                        (self.feature_names[i], float(drift_scores[i]))
-                        for i in top_drift_features
-                    ]
-                }
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.WARNING
+                    if overall_drift < drift_threshold * 2
+                    else ValidationSeverity.ERROR,
+                    check_name="drift",
+                    message=f"Data drift detected (drift={overall_drift:.3f})",
+                    details={
+                        "top_drift_features": [
+                            (self.feature_names[i], float(drift_scores[i])) for i in top_drift_features
+                        ]
+                    },
+                )
+            )
         else:
-            issues.append(ValidationIssue(
-                severity=ValidationSeverity.INFO,
-                check_name="drift",
-                message=f"No significant drift detected (drift={overall_drift:.3f})"
-            ))
+            issues.append(
+                ValidationIssue(
+                    severity=ValidationSeverity.INFO,
+                    check_name="drift",
+                    message=f"No significant drift detected (drift={overall_drift:.3f})",
+                )
+            )
 
         return issues, statistics
 

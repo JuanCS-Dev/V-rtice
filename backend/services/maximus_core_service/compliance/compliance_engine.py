@@ -18,11 +18,12 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Callable, Any
-import uuid
 import logging
+import uuid
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
 from .base import (
     ComplianceConfig,
@@ -30,12 +31,12 @@ from .base import (
     ComplianceStatus,
     ComplianceViolation,
     Control,
+    ControlCategory,
     Evidence,
     RegulationType,
     ViolationSeverity,
-    ControlCategory,
 )
-from .regulations import REGULATION_REGISTRY, get_regulation
+from .regulations import get_regulation
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +57,8 @@ class ComplianceCheckResult:
     not_applicable: int
     pending_review: int
     evidence_required: int
-    results: List[ComplianceResult] = field(default_factory=list)
-    violations: List[ComplianceViolation] = field(default_factory=list)
+    results: list[ComplianceResult] = field(default_factory=list)
+    violations: list[ComplianceViolation] = field(default_factory=list)
     compliance_percentage: float = 0.0
     score: float = 0.0  # Weighted compliance score (0.0-1.0)
 
@@ -69,10 +70,10 @@ class ComplianceCheckResult:
 
             # Weighted score (compliant=1.0, partially=0.5, others=0.0)
             weighted_sum = (
-                (self.compliant * 1.0) +
-                (self.partially_compliant * 0.5) +
-                (self.non_compliant * 0.0) +
-                (self.not_applicable * 1.0)  # N/A counts as compliant
+                (self.compliant * 1.0)
+                + (self.partially_compliant * 0.5)
+                + (self.non_compliant * 0.0)
+                + (self.not_applicable * 1.0)  # N/A counts as compliant
             )
             applicable_controls = self.total_controls - self.not_applicable
             if applicable_controls > 0:
@@ -84,7 +85,7 @@ class ComplianceCheckResult:
         """Check if compliance meets certification threshold."""
         return self.compliance_percentage >= threshold
 
-    def get_critical_violations(self) -> List[ComplianceViolation]:
+    def get_critical_violations(self) -> list[ComplianceViolation]:
         """Get critical severity violations."""
         return [v for v in self.violations if v.severity == ViolationSeverity.CRITICAL]
 
@@ -97,7 +98,7 @@ class ComplianceSnapshot:
 
     snapshot_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: datetime = field(default_factory=datetime.utcnow)
-    regulation_results: Dict[RegulationType, ComplianceCheckResult] = field(default_factory=dict)
+    regulation_results: dict[RegulationType, ComplianceCheckResult] = field(default_factory=dict)
     overall_compliance_percentage: float = 0.0
     overall_score: float = 0.0
     total_violations: int = 0
@@ -132,7 +133,7 @@ class ComplianceEngine:
     Extensible through custom control checkers.
     """
 
-    def __init__(self, config: Optional[ComplianceConfig] = None):
+    def __init__(self, config: ComplianceConfig | None = None):
         """
         Initialize compliance engine.
 
@@ -140,15 +141,13 @@ class ComplianceEngine:
             config: Compliance configuration (uses default if None)
         """
         self.config = config or ComplianceConfig()
-        self._control_checkers: Dict[str, ControlChecker] = {}
-        self._category_checkers: Dict[ControlCategory, ControlChecker] = {}
+        self._control_checkers: dict[str, ControlChecker] = {}
+        self._category_checkers: dict[ControlCategory, ControlChecker] = {}
 
         # Register default checkers
         self._register_default_checkers()
 
-        logger.info(
-            f"Compliance engine initialized with {len(self.config.enabled_regulations)} regulations"
-        )
+        logger.info(f"Compliance engine initialized with {len(self.config.enabled_regulations)} regulations")
 
     def _register_default_checkers(self):
         """Register default automated checkers for control categories."""
@@ -310,7 +309,7 @@ class ComplianceEngine:
     def check_control(
         self,
         control: Control,
-        evidence: Optional[List[Evidence]] = None,
+        evidence: list[Evidence] | None = None,
     ) -> ComplianceResult:
         """
         Check compliance for a specific control.
@@ -374,7 +373,7 @@ class ComplianceEngine:
     def check_compliance(
         self,
         regulation_type: RegulationType,
-        evidence_by_control: Optional[Dict[str, List[Evidence]]] = None,
+        evidence_by_control: dict[str, list[Evidence]] | None = None,
     ) -> ComplianceCheckResult:
         """
         Check compliance for a specific regulation.
@@ -409,8 +408,8 @@ class ComplianceEngine:
         evidence_by_control = evidence_by_control or {}
 
         # Check each control
-        results: List[ComplianceResult] = []
-        violations: List[ComplianceViolation] = []
+        results: list[ComplianceResult] = []
+        violations: list[ComplianceViolation] = []
 
         for control in regulation.controls:
             # Get evidence for this control
@@ -472,7 +471,7 @@ class ComplianceEngine:
 
     def run_all_checks(
         self,
-        evidence_by_regulation: Optional[Dict[RegulationType, Dict[str, List[Evidence]]]] = None,
+        evidence_by_regulation: dict[RegulationType, dict[str, list[Evidence]]] | None = None,
     ) -> ComplianceSnapshot:
         """
         Run compliance checks for all enabled regulations.
@@ -486,7 +485,7 @@ class ComplianceEngine:
         logger.info(f"Running compliance checks for {len(self.config.enabled_regulations)} regulations")
 
         evidence_by_regulation = evidence_by_regulation or {}
-        results: Dict[RegulationType, ComplianceCheckResult] = {}
+        results: dict[RegulationType, ComplianceCheckResult] = {}
 
         for regulation_type in self.config.enabled_regulations:
             # Get evidence for this regulation
@@ -508,8 +507,8 @@ class ComplianceEngine:
 
     def get_compliance_status(
         self,
-        regulation_type: Optional[RegulationType] = None,
-    ) -> Dict[str, Any]:
+        regulation_type: RegulationType | None = None,
+    ) -> dict[str, Any]:
         """
         Get current compliance status summary.
 
@@ -533,30 +532,29 @@ class ComplianceEngine:
                 "critical_violations": len(result.get_critical_violations()),
                 "certification_ready": result.is_certification_ready(),
             }
-        else:
-            # All regulations
-            snapshot = self.run_all_checks()
-            return {
-                "overall_compliance_percentage": snapshot.overall_compliance_percentage,
-                "overall_score": snapshot.overall_score,
-                "total_violations": snapshot.total_violations,
-                "critical_violations": snapshot.critical_violations,
-                "regulations": {
-                    reg_type.value: {
-                        "compliance_percentage": result.compliance_percentage,
-                        "score": result.score,
-                        "violations": len(result.violations),
-                    }
-                    for reg_type, result in snapshot.regulation_results.items()
-                },
-            }
+        # All regulations
+        snapshot = self.run_all_checks()
+        return {
+            "overall_compliance_percentage": snapshot.overall_compliance_percentage,
+            "overall_score": snapshot.overall_score,
+            "total_violations": snapshot.total_violations,
+            "critical_violations": snapshot.critical_violations,
+            "regulations": {
+                reg_type.value: {
+                    "compliance_percentage": result.compliance_percentage,
+                    "score": result.score,
+                    "violations": len(result.violations),
+                }
+                for reg_type, result in snapshot.regulation_results.items()
+            },
+        }
 
     def generate_compliance_report(
         self,
         start_date: datetime,
         end_date: datetime,
-        regulation_types: Optional[List[RegulationType]] = None,
-    ) -> Dict[str, Any]:
+        regulation_types: list[RegulationType] | None = None,
+    ) -> dict[str, Any]:
         """
         Generate compliance report for time period.
 
@@ -580,9 +578,7 @@ class ComplianceEngine:
 
         # Filter to requested regulations
         filtered_results = {
-            reg_type: result
-            for reg_type, result in snapshot.regulation_results.items()
-            if reg_type in regulation_types
+            reg_type: result for reg_type, result in snapshot.regulation_results.items() if reg_type in regulation_types
         }
 
         # Build report

@@ -16,7 +16,6 @@ being swayed by emotionally charged but logically unsound information, ensuring
 that its responses are based on objective analysis rather than subjective influence.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -56,9 +55,7 @@ class EmotionalManipulationDetector:
         )
 
         emotional_score = 0.0
-        detected_emotions: Dict[str, int] = {
-            emotion: 0 for emotion in self.emotional_keywords.keys()
-        }
+        detected_emotions: Dict[str, int] = {emotion: 0 for emotion in self.emotional_keywords.keys()}
         indicators: List[str] = []
         assessment = "No significant emotional manipulation detected."
 
@@ -101,10 +98,6 @@ class EmotionalManipulationDetector:
         return {
             "status": self.current_status,
             "total_detections": len(self.detection_history),
-            "last_detection": (
-                self.last_detection_time.isoformat()
-                if self.last_detection_time
-                else "N/A"
-            ),
+            "last_detection": (self.last_detection_time.isoformat() if self.last_detection_time else "N/A"),
             "known_emotional_categories": list(self.emotional_keywords.keys()),
         }

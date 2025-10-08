@@ -8,17 +8,18 @@ Implements prefrontal cortex-inspired cognitive control:
 - Conflict resolution (multi-signal reconciliation)
 """
 
-from datetime import datetime, timedelta
-from enum import Enum
 import logging
 import re
-from typing import Any, Dict, Optional, Tuple
 import unicodedata
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, Tuple
 
-from cache_manager import cache_manager, CacheCategory
+import numpy as np
+
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
 from fact_check_aggregator import fact_check_aggregator
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -97,9 +98,7 @@ class CognitiveControlLayer:
         self._initialized = True
         logger.info("✅ Cognitive control layer initialized")
 
-    async def determine_mode(
-        self, content: str, source_info: Dict[str, Any]
-    ) -> ProcessingMode:
+    async def determine_mode(self, content: str, source_info: Dict[str, Any]) -> ProcessingMode:
         """
         Determine optimal processing mode.
 
@@ -132,9 +131,7 @@ class CognitiveControlLayer:
 
         # Skip if opinion/question with low check-worthiness
         if is_opinion and check_worthiness < 0.3:
-            logger.debug(
-                f"Mode: SKIP (opinion, check_worthiness={check_worthiness:.3f})"
-            )
+            logger.debug(f"Mode: SKIP (opinion, check_worthiness={check_worthiness:.3f})")
             return ProcessingMode.SKIP
 
         # Fast track if reputable source and low check-worthiness
@@ -144,10 +141,7 @@ class CognitiveControlLayer:
 
         # Deep analysis if bad reputation or high check-worthiness
         if reputation < 0.3 or check_worthiness > 0.7:
-            logger.debug(
-                f"Mode: DEEP_ANALYSIS (reputation={reputation:.3f}, "
-                f"check_worthiness={check_worthiness:.3f})"
-            )
+            logger.debug(f"Mode: DEEP_ANALYSIS (reputation={reputation:.3f}, check_worthiness={check_worthiness:.3f})")
             return ProcessingMode.DEEP_ANALYSIS
 
         # Default: standard processing
@@ -167,9 +161,7 @@ class CognitiveControlLayer:
             Check-worthiness score (0-1)
         """
         try:
-            result = await fact_check_aggregator.claimbuster_client.score_claim(
-                text=content, use_cache=True
-            )
+            result = await fact_check_aggregator.claimbuster_client.score_claim(text=content, use_cache=True)
 
             score = result.get("score", 0.5)
             return score
@@ -217,10 +209,7 @@ class CognitiveControlLayer:
         content_lower = content.lower()
 
         # Check for questions
-        if "?" in content or any(
-            q in content_lower
-            for q in ["como", "quem", "quando", "onde", "por que", "o que"]
-        ):
+        if "?" in content or any(q in content_lower for q in ["como", "quem", "quando", "onde", "por que", "o que"]):
             return True
 
         # Check for first-person pronouns (opinion indicators)
@@ -330,9 +319,7 @@ class CognitiveControlLayer:
 
         # Keep only last 24 hours
         cutoff = datetime.utcnow() - timedelta(hours=24)
-        self._performance_history = [
-            m for m in self._performance_history if m["timestamp"] > cutoff
-        ]
+        self._performance_history = [m for m in self._performance_history if m["timestamp"] > cutoff]
 
         # Need minimum history for drift detection
         if len(self._performance_history) < 10:
@@ -408,30 +395,20 @@ class CognitiveControlLayer:
             return 0.0, 0.0
 
         # Confidence-weighted average
-        weighted_sum = sum(
-            signal_scores[module] * signal_confidences.get(module, 1.0)
-            for module in signal_scores
-        )
+        weighted_sum = sum(signal_scores[module] * signal_confidences.get(module, 1.0) for module in signal_scores)
 
-        total_weight = sum(
-            signal_confidences.get(module, 1.0) for module in signal_scores
-        )
+        total_weight = sum(signal_confidences.get(module, 1.0) for module in signal_scores)
 
         reconciled_score = weighted_sum / total_weight if total_weight > 0 else 0.0
 
         # Confidence: harmonic mean of individual confidences
         confidences = list(signal_confidences.values())
         if confidences:
-            reconciled_confidence = len(confidences) / sum(
-                1 / c for c in confidences if c > 0
-            )
+            reconciled_confidence = len(confidences) / sum(1 / c for c in confidences if c > 0)
         else:
             reconciled_confidence = 0.0
 
-        logger.debug(
-            f"Signal reconciliation: score={reconciled_score:.3f}, "
-            f"confidence={reconciled_confidence:.3f}"
-        )
+        logger.debug(f"Signal reconciliation: score={reconciled_score:.3f}, confidence={reconciled_confidence:.3f}")
 
         return reconciled_score, reconciled_confidence
 

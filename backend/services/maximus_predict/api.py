@@ -118,9 +118,7 @@ async def generate_prediction_endpoint(request: PredictionRequest) -> dict[str, 
     Returns:
         Dict[str, Any]: A dictionary containing the prediction results and confidence.
     """
-    print(
-        f"[API] Generating {request.prediction_type} prediction for data: {request.data}"
-    )
+    print(f"[API] Generating {request.prediction_type} prediction for data: {request.data}")
     await asyncio.sleep(0.1)  # Simulate prediction time
 
     prediction_result = predictive_model.predict(request.data, request.prediction_type)

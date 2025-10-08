@@ -7,7 +7,7 @@ Streams collected metrics to Kafka topic 'system.telemetry.raw' for real-time pr
 import asyncio
 import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 try:
     from kafka import KafkaProducer
@@ -30,9 +30,7 @@ class KafkaMetricsStreamer:
     without querying the database.
     """
 
-    def __init__(
-        self, broker: str = "localhost:9092", topic: str = "system.telemetry.raw"
-    ):
+    def __init__(self, broker: str = "localhost:9092", topic: str = "system.telemetry.raw"):
         """
         Initialize Kafka streamer.
 
@@ -68,7 +66,7 @@ class KafkaMetricsStreamer:
             logger.error(f"Failed to connect to Kafka: {e}")
             self.producer = None
 
-    async def send(self, metrics: Dict[str, Any]) -> bool:
+    async def send(self, metrics: dict[str, Any]) -> bool:
         """
         Send metrics to Kafka topic.
 
@@ -95,10 +93,7 @@ class KafkaMetricsStreamer:
             self.messages_sent += 1
 
             if self.messages_sent % 100 == 0:
-                logger.info(
-                    f"Streamed {self.messages_sent} metric batches "
-                    f"(errors: {self.errors})"
-                )
+                logger.info(f"Streamed {self.messages_sent} metric batches (errors: {self.errors})")
 
             return True
 
@@ -119,7 +114,7 @@ class KafkaMetricsStreamer:
             await loop.run_in_executor(None, self.producer.close)
             self.producer = None
 
-    def get_stats(self) -> Dict[str, int]:
+    def get_stats(self) -> dict[str, int]:
         """
         Get streaming statistics.
 

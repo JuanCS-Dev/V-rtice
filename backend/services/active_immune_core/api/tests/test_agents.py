@@ -8,10 +8,9 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
-from fastapi.testclient import TestClient
 from typing import Dict
 
+from fastapi.testclient import TestClient
 
 # ==================== CREATE AGENT ====================
 
@@ -42,10 +41,7 @@ def test_create_agent_success(client: TestClient, sample_agent_data: Dict):
 
 def test_create_agent_minimal_data(client: TestClient):
     """Test agent creation with minimal data"""
-    response = client.post(
-        "/agents/",
-        json={"agent_type": "neutrophil"}
-    )
+    response = client.post("/agents/", json={"agent_type": "neutrophil"})
 
     assert response.status_code == 201
     data = response.json()
@@ -58,10 +54,7 @@ def test_create_agent_minimal_data(client: TestClient):
 
 def test_create_agent_invalid_data(client: TestClient):
     """Test agent creation with invalid data"""
-    response = client.post(
-        "/agents/",
-        json={"invalid_field": "value"}
-    )
+    response = client.post("/agents/", json={"invalid_field": "value"})
 
     assert response.status_code == 422  # Validation error
 
@@ -70,10 +63,7 @@ def test_create_agent_generates_unique_ids(client: TestClient):
     """Test that each created agent gets unique ID"""
     agents = []
     for _ in range(3):
-        response = client.post(
-            "/agents/",
-            json={"agent_type": "neutrophil"}
-        )
+        response = client.post("/agents/", json={"agent_type": "neutrophil"})
         assert response.status_code == 201
         agents.append(response.json())
 
@@ -195,10 +185,7 @@ def test_update_agent_status(client: TestClient, created_agent: Dict):
     """Test updating agent status"""
     agent_id = created_agent["agent_id"]
 
-    response = client.patch(
-        f"/agents/{agent_id}",
-        json={"status": "active"}
-    )
+    response = client.patch(f"/agents/{agent_id}", json={"status": "active"})
 
     assert response.status_code == 200
     data = response.json()
@@ -213,10 +200,7 @@ def test_update_agent_health(client: TestClient, created_agent: Dict):
     """Test updating agent health"""
     agent_id = created_agent["agent_id"]
 
-    response = client.patch(
-        f"/agents/{agent_id}",
-        json={"health": 0.75}
-    )
+    response = client.patch(f"/agents/{agent_id}", json={"health": 0.75})
 
     assert response.status_code == 200
     data = response.json()
@@ -232,10 +216,7 @@ def test_update_agent_load(client: TestClient, created_agent: Dict):
     """Test updating agent load"""
     agent_id = created_agent["agent_id"]
 
-    response = client.patch(
-        f"/agents/{agent_id}",
-        json={"load": 0.85}
-    )
+    response = client.patch(f"/agents/{agent_id}", json={"load": 0.85})
 
     assert response.status_code == 200
     data = response.json()
@@ -252,10 +233,7 @@ def test_update_agent_config(client: TestClient, created_agent: Dict):
     agent_id = created_agent["agent_id"]
 
     new_config = {"new_key": "new_value"}
-    response = client.patch(
-        f"/agents/{agent_id}",
-        json={"config": new_config}
-    )
+    response = client.patch(f"/agents/{agent_id}", json={"config": new_config})
 
     assert response.status_code == 200
     data = response.json()
@@ -276,7 +254,7 @@ def test_update_agent_multiple_fields(client: TestClient, created_agent: Dict):
             "status": "active",
             "health": 0.9,
             "load": 0.3,
-        }
+        },
     )
 
     assert response.status_code == 200
@@ -291,10 +269,7 @@ def test_update_agent_multiple_fields(client: TestClient, created_agent: Dict):
 
 def test_update_agent_not_found(client: TestClient):
     """Test updating non-existent agent"""
-    response = client.patch(
-        "/agents/nonexistent_agent",
-        json={"status": "active"}
-    )
+    response = client.patch("/agents/nonexistent_agent", json={"status": "active"})
 
     assert response.status_code == 404
 
@@ -379,10 +354,7 @@ def test_agent_action_start(client: TestClient, created_agent: Dict):
     """Test starting an agent"""
     agent_id = created_agent["agent_id"]
 
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "start"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "start"})
 
     assert response.status_code == 200
     data = response.json()
@@ -399,16 +371,10 @@ def test_agent_action_stop(client: TestClient, created_agent: Dict):
     agent_id = created_agent["agent_id"]
 
     # Start first
-    client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "start"}
-    )
+    client.post(f"/agents/{agent_id}/actions", json={"action": "start"})
 
     # Then stop
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "stop"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "stop"})
 
     assert response.status_code == 200
     data = response.json()
@@ -425,16 +391,10 @@ def test_agent_action_pause(client: TestClient, created_agent: Dict):
     agent_id = created_agent["agent_id"]
 
     # Start first
-    client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "start"}
-    )
+    client.post(f"/agents/{agent_id}/actions", json={"action": "start"})
 
     # Then pause
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "pause"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "pause"})
 
     # Note: pause implemented as stop (AgentService.execute_action line 518)
     # May return 200 OK or 400 if not applicable
@@ -454,10 +414,7 @@ def test_agent_action_resume(client: TestClient, created_agent: Dict):
     client.post(f"/agents/{agent_id}/actions", json={"action": "pause"})
 
     # Then resume
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "resume"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "resume"})
 
     # Note: resume implemented as start (AgentService.execute_action line 523)
     # May return 200 OK or 400 if not applicable
@@ -472,10 +429,7 @@ def test_agent_action_restart(client: TestClient, created_agent: Dict):
     """Test restarting an agent"""
     agent_id = created_agent["agent_id"]
 
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "restart"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "restart"})
 
     assert response.status_code == 200
     data = response.json()
@@ -491,10 +445,7 @@ def test_agent_action_invalid(client: TestClient, created_agent: Dict):
     """Test invalid action"""
     agent_id = created_agent["agent_id"]
 
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "invalid_action"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "invalid_action"})
 
     assert response.status_code == 400
 
@@ -503,10 +454,7 @@ def test_agent_action_pause_inactive_fails(client: TestClient, created_agent: Di
     """Test that pausing inactive agent is idempotent (returns success)"""
     agent_id = created_agent["agent_id"]
 
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "pause"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "pause"})
 
     # Agent system is idempotent - pause inactive agent just logs warning
     # This is better design than failing (HTTP idempotency)
@@ -520,10 +468,7 @@ def test_agent_action_resume_not_paused_fails(client: TestClient, created_agent:
     """Test that resuming non-paused agent is idempotent (returns success)"""
     agent_id = created_agent["agent_id"]
 
-    response = client.post(
-        f"/agents/{agent_id}/actions",
-        json={"action": "resume"}
-    )
+    response = client.post(f"/agents/{agent_id}/actions", json={"action": "resume"})
 
     # Agent system is idempotent - resume already running agent just logs warning
     # This is better design than failing (HTTP idempotency)
@@ -535,10 +480,7 @@ def test_agent_action_resume_not_paused_fails(client: TestClient, created_agent:
 
 def test_agent_action_not_found(client: TestClient):
     """Test action on non-existent agent"""
-    response = client.post(
-        "/agents/nonexistent_agent/actions",
-        json={"action": "start"}
-    )
+    response = client.post("/agents/nonexistent_agent/actions", json={"action": "start"})
 
     assert response.status_code == 404
 

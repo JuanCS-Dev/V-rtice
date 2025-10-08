@@ -5,17 +5,16 @@
 
 import asyncio
 import base64
-from datetime import datetime
-import json
 import logging
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import httpx
+
 from models import (
     BurpScanRequest,
     BurpScanResult,
     BurpVulnerability,
-    ScanType,
     Severity,
 )
 
@@ -90,9 +89,7 @@ class BurpSuiteWrapper:
                 timestamp=datetime.now(),
             )
 
-    async def _create_scan_task(
-        self, client: httpx.AsyncClient, request: BurpScanRequest
-    ) -> str:
+    async def _create_scan_task(self, client: httpx.AsyncClient, request: BurpScanRequest) -> str:
         """Create Burp scan task via API"""
         payload = {
             "scan_configurations": [
@@ -102,9 +99,7 @@ class BurpSuiteWrapper:
                 }
             ],
             "urls": [str(request.target_url)],
-            "scope": {
-                "include": [{"rule": str(request.target_url), "type": "SimpleScopeDef"}]
-            },
+            "scope": {"include": [{"rule": str(request.target_url), "type": "SimpleScopeDef"}]},
         }
 
         # Authentication
@@ -112,27 +107,19 @@ class BurpSuiteWrapper:
             user = request.auth_credentials.get("username")
             password = request.auth_credentials.get("password")
             auth_header = base64.b64encode(f"{user}:{password}".encode()).decode()
-            payload["application_logins"] = [
-                {"type": "basic", "username": user, "password": password}
-            ]
+            payload["application_logins"] = [{"type": "basic", "username": user, "password": password}]
 
-        response = await client.post(
-            f"{self.burp_api_url}/v0.1/scan", headers=self.headers, json=payload
-        )
+        response = await client.post(f"{self.burp_api_url}/v0.1/scan", headers=self.headers, json=payload)
 
         if response.status_code != 201:
             raise RuntimeError(f"Burp scan creation failed: {response.text}")
 
         return response.headers.get("Location", "").split("/")[-1]
 
-    async def _wait_for_scan(
-        self, client: httpx.AsyncClient, task_id: str, poll_interval: int = 5
-    ):
+    async def _wait_for_scan(self, client: httpx.AsyncClient, task_id: str, poll_interval: int = 5):
         """Wait for scan completion"""
         while True:
-            response = await client.get(
-                f"{self.burp_api_url}/v0.1/scan/{task_id}", headers=self.headers
-            )
+            response = await client.get(f"{self.burp_api_url}/v0.1/scan/{task_id}", headers=self.headers)
 
             if response.status_code != 200:
                 raise RuntimeError(f"Failed to get scan status: {response.text}")
@@ -147,13 +134,9 @@ class BurpSuiteWrapper:
 
             await asyncio.sleep(poll_interval)
 
-    async def _get_scan_results(
-        self, client: httpx.AsyncClient, task_id: str
-    ) -> List[BurpVulnerability]:
+    async def _get_scan_results(self, client: httpx.AsyncClient, task_id: str) -> List[BurpVulnerability]:
         """Retrieve scan results"""
-        response = await client.get(
-            f"{self.burp_api_url}/v0.1/scan/{task_id}", headers=self.headers
-        )
+        response = await client.get(f"{self.burp_api_url}/v0.1/scan/{task_id}", headers=self.headers)
 
         if response.status_code != 200:
             raise RuntimeError(f"Failed to get scan results: {response.text}")
@@ -182,25 +165,19 @@ class BurpSuiteWrapper:
             return BurpVulnerability(
                 issue_type=issue.get("type_index", 0),
                 issue_name=issue.get("issue_type", "Unknown"),
-                severity=severity_map.get(
-                    issue.get("severity", "medium").lower(), Severity.MEDIUM
-                ),
+                severity=severity_map.get(issue.get("severity", "medium").lower(), Severity.MEDIUM),
                 confidence=issue.get("confidence", "tentative"),
                 url=issue.get("origin", ""),
                 path=issue.get("path", ""),
                 method=issue.get("method", "GET"),
                 parameter=issue.get("issue_detail", {}).get("insertion_point"),
                 request=(
-                    base64.b64decode(issue.get("request", "")).decode(
-                        "utf-8", errors="ignore"
-                    )
+                    base64.b64decode(issue.get("request", "")).decode("utf-8", errors="ignore")
                     if issue.get("request")
                     else ""
                 ),
                 response=(
-                    base64.b64decode(issue.get("response", "")).decode(
-                        "utf-8", errors="ignore"
-                    )
+                    base64.b64decode(issue.get("response", "")).decode("utf-8", errors="ignore")
                     if issue.get("response")
                     else ""
                 ),
@@ -212,9 +189,7 @@ class BurpSuiteWrapper:
             logger.warning(f"Failed to parse Burp issue: {str(e)}")
             return None
 
-    async def _enhance_with_ai(
-        self, findings: List[BurpVulnerability], ai_copilot
-    ) -> List[BurpVulnerability]:
+    async def _enhance_with_ai(self, findings: List[BurpVulnerability], ai_copilot) -> List[BurpVulnerability]:
         """Enhance findings with AI analysis"""
         for finding in findings:
             try:
@@ -234,9 +209,7 @@ class BurpSuiteWrapper:
                 )
 
                 finding.ai_analysis = {"analysis": analysis_text}
-                finding.ai_recommendations = self._extract_recommendations(
-                    analysis_text
-                )
+                finding.ai_recommendations = self._extract_recommendations(analysis_text)
 
             except Exception as e:
                 logger.warning(f"AI enhancement failed for finding: {str(e)}")
@@ -249,9 +222,7 @@ class BurpSuiteWrapper:
         lines = analysis_text.split("\n")
 
         for line in lines:
-            if any(
-                keyword in line.lower() for keyword in ["recommend", "should", "fix"]
-            ):
+            if any(keyword in line.lower() for keyword in ["recommend", "should", "fix"]):
                 cleaned = line.strip("- *#").strip()
                 if len(cleaned) > 20:
                     recommendations.append(cleaned)
@@ -260,9 +231,7 @@ class BurpSuiteWrapper:
 
     async def _get_scan_stats(self, client: httpx.AsyncClient, task_id: str) -> Dict:
         """Get scan statistics"""
-        response = await client.get(
-            f"{self.burp_api_url}/v0.1/scan/{task_id}", headers=self.headers
-        )
+        response = await client.get(f"{self.burp_api_url}/v0.1/scan/{task_id}", headers=self.headers)
 
         if response.status_code != 200:
             return {"requests": 0, "pages": 0}

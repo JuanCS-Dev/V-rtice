@@ -11,17 +11,17 @@ Achieves 10x throughput improvement for high-load scenarios.
 """
 
 import asyncio
-from collections import defaultdict
-from dataclasses import dataclass
 import logging
 import time
-from typing import Any, Dict, List, Optional, Tuple
 import uuid
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
-from config import get_settings
 import numpy as np
 import torch
 from transformers import AutoTokenizer
+
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -101,8 +101,7 @@ class BatchInferenceEngine:
         self.processor_task = asyncio.create_task(self._batch_processor())
 
         logger.info(
-            f"✅ Batch inference engine started "
-            f"(batch_size={self.batch_size}, wait_time={self.wait_time*1000:.0f}ms)"
+            f"✅ Batch inference engine started (batch_size={self.batch_size}, wait_time={self.wait_time * 1000:.0f}ms)"
         )
 
     async def stop(self) -> None:
@@ -134,9 +133,7 @@ class BatchInferenceEngine:
         request_id = str(uuid.uuid4())
         future = asyncio.get_event_loop().create_future()
 
-        request = BatchRequest(
-            request_id=request_id, text=text, timestamp=time.time(), future=future
-        )
+        request = BatchRequest(request_id=request_id, text=text, timestamp=time.time(), future=future)
 
         # Add to queue
         await self.queue.put(request)
@@ -170,9 +167,7 @@ class BatchInferenceEngine:
                         break
 
                     try:
-                        request = await asyncio.wait_for(
-                            self.queue.get(), timeout=remaining_time
-                        )
+                        request = await asyncio.wait_for(self.queue.get(), timeout=remaining_time)
                         batch.append(request)
 
                     except asyncio.TimeoutError:
@@ -270,9 +265,7 @@ class BatchInferenceEngine:
         avg_latency_ms = self.total_latency / self.total_batches
 
         # Throughput: samples per second
-        throughput_qps = (
-            1000 * avg_batch_size / avg_latency_ms if avg_latency_ms > 0 else 0
-        )
+        throughput_qps = 1000 * avg_batch_size / avg_latency_ms if avg_latency_ms > 0 else 0
 
         return {
             "total_requests": self.total_requests,

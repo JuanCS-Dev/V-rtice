@@ -14,24 +14,20 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from datetime import datetime, timedelta
-import tempfile
 import os
+import tempfile
+from datetime import datetime, timedelta
 
 from .base import (
     ComplianceConfig,
-    Control,
-    Evidence,
-    EvidenceType,
     RegulationType,
-    ControlCategory,
 )
-from .regulations import get_regulation
+from .certifications import ISO27001Checker
 from .compliance_engine import ComplianceEngine
 from .evidence_collector import EvidenceCollector
 from .gap_analyzer import GapAnalyzer
 from .monitoring import ComplianceMonitor
-from .certifications import ISO27001Checker, SOC2Checker
+from .regulations import get_regulation
 
 
 def print_header(title: str):
@@ -72,7 +68,7 @@ def example_1_basic_compliance_check():
 
     result = engine.check_compliance(RegulationType.ISO_27001)
 
-    print(f"\n   ✓ Compliance check complete")
+    print("\n   ✓ Compliance check complete")
     print(f"   ✓ Total controls: {result.total_controls}")
     print(f"   ✓ Compliant: {result.compliant}")
     print(f"   ✓ Non-compliant: {result.non_compliant}")
@@ -81,30 +77,30 @@ def example_1_basic_compliance_check():
     print(f"   ✓ Evidence required: {result.evidence_required}")
 
     # Step 2: View compliance percentage and score
-    print(f"\n📈 STEP 2: Compliance Metrics")
+    print("\n📈 STEP 2: Compliance Metrics")
     print(f"   Compliance Percentage: {result.compliance_percentage:.1f}%")
     print(f"   Compliance Score: {result.score:.2f}/1.00")
 
     if result.compliance_percentage >= 95:
-        print(f"   ✅ EXCELLENT - Ready for certification!")
+        print("   ✅ EXCELLENT - Ready for certification!")
     elif result.compliance_percentage >= 80:
-        print(f"   ⚠️  GOOD - Close to certification readiness")
+        print("   ⚠️  GOOD - Close to certification readiness")
     elif result.compliance_percentage >= 60:
-        print(f"   ⚠️  FAIR - More work needed")
+        print("   ⚠️  FAIR - More work needed")
     else:
-        print(f"   ❌ NEEDS IMPROVEMENT - Significant gaps")
+        print("   ❌ NEEDS IMPROVEMENT - Significant gaps")
 
     # Step 3: Review violations
-    print(f"\n🚨 STEP 3: Violations Detected")
+    print("\n🚨 STEP 3: Violations Detected")
     if result.violations:
         print(f"   Found {len(result.violations)} violations:")
         for v in result.violations[:3]:  # Show first 3
             print(f"      - [{v.severity.value.upper()}] {v.title}")
     else:
-        print(f"   ✅ No violations detected")
+        print("   ✅ No violations detected")
 
     # Step 4: Generate compliance report
-    print(f"\n📄 STEP 4: Generating Compliance Report")
+    print("\n📄 STEP 4: Generating Compliance Report")
 
     start_date = datetime.utcnow() - timedelta(days=30)
     end_date = datetime.utcnow()
@@ -292,7 +288,7 @@ def example_3_certification_readiness():
         cert_result = checker.check_certification_readiness(all_evidence)
 
         print(f"\n   {cert_result.get_summary()}")
-        print(f"\n   📊 Metrics:")
+        print("\n   📊 Metrics:")
         print(f"      Compliance: {cert_result.compliance_percentage:.1f}%")
         print(f"      Score: {cert_result.score:.2f}/1.00")
         print(f"      Gaps: {cert_result.gaps_to_certification}")
@@ -325,7 +321,7 @@ def example_3_certification_readiness():
         if success:
             print(f"   ✅ Evidence package exported to: {export_path}")
         else:
-            print(f"   ❌ Failed to export evidence package")
+            print("   ❌ Failed to export evidence package")
 
         # Step 5: Start monitoring
         print("\n📡 STEP 5: Starting Compliance Monitoring")
@@ -342,7 +338,7 @@ def example_3_certification_readiness():
         # Get current metrics
         metrics = monitor.get_current_metrics()
         if metrics:
-            print(f"\n   ✓ Monitoring active")
+            print("\n   ✓ Monitoring active")
             print(f"   ✓ Overall compliance: {metrics.overall_compliance_percentage:.1f}%")
             print(f"   ✓ Trend: {metrics.compliance_trend}")
             print(f"   ✓ Total violations: {metrics.total_violations}")
@@ -355,8 +351,8 @@ def example_3_certification_readiness():
         if "current_metrics" in dashboard:
             print(f"   Overall Compliance: {dashboard['current_metrics']['overall_compliance']:.1f}%")
             print(f"   Trend: {dashboard['current_metrics']['trend']}")
-            print(f"   Violations:")
-            for severity, count in dashboard['violations_by_severity'].items():
+            print("   Violations:")
+            for severity, count in dashboard["violations_by_severity"].items():
                 print(f"      - {severity}: {count}")
 
     print("\n✅ Example 3 Complete - Certification readiness assessed!\n")

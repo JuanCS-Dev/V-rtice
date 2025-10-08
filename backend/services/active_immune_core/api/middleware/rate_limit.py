@@ -11,7 +11,8 @@ Version: 1.0.0
 import logging
 import time
 from collections import defaultdict
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict
+
 from fastapi import HTTPException, Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -51,9 +52,7 @@ class TokenBucket:
         # Refill tokens
         now = time.time()
         elapsed = now - self.last_refill
-        self.tokens = min(
-            self.capacity, self.tokens + (elapsed * self.refill_rate)
-        )
+        self.tokens = min(self.capacity, self.tokens + (elapsed * self.refill_rate))
         self.last_refill = now
 
         # Check if enough tokens
@@ -109,9 +108,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.enable = enable
 
         # Store buckets per client IP
-        self.buckets: Dict[str, TokenBucket] = defaultdict(
-            lambda: TokenBucket(default_capacity, default_refill_rate)
-        )
+        self.buckets: Dict[str, TokenBucket] = defaultdict(lambda: TokenBucket(default_capacity, default_refill_rate))
 
         logger.info(
             f"RateLimitMiddleware initialized (capacity={default_capacity}, "
@@ -145,10 +142,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if not bucket.consume():
             wait_time = bucket.get_wait_time()
 
-            logger.warning(
-                f"Rate limit exceeded for {client_ip} "
-                f"(wait {wait_time:.1f}s)"
-            )
+            logger.warning(f"Rate limit exceeded for {client_ip} (wait {wait_time:.1f}s)")
 
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -194,9 +188,7 @@ def rate_limit(
             ...
     """
     # Store per-endpoint buckets
-    buckets: Dict[str, TokenBucket] = defaultdict(
-        lambda: TokenBucket(capacity, refill_rate)
-    )
+    buckets: Dict[str, TokenBucket] = defaultdict(lambda: TokenBucket(capacity, refill_rate))
 
     async def check_rate_limit(request: Request) -> None:
         """Check rate limit for this endpoint"""
@@ -245,11 +237,7 @@ class RateLimitStats:
         return {
             "total_requests": self.total_requests,
             "blocked_requests": self.blocked_requests,
-            "block_rate": (
-                self.blocked_requests / self.total_requests
-                if self.total_requests > 0
-                else 0.0
-            ),
+            "block_rate": (self.blocked_requests / self.total_requests if self.total_requests > 0 else 0.0),
             "unique_ips": len(self.unique_ips),
         }
 

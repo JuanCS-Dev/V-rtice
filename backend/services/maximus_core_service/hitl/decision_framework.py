@@ -17,24 +17,22 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Callable, Any
 import logging
-import asyncio
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
 from .base import (
-    HITLDecision,
-    DecisionContext,
-    OperatorAction,
-    AuditEntry,
-    AutomationLevel,
-    RiskLevel,
-    DecisionStatus,
     ActionType,
+    AutomationLevel,
+    DecisionContext,
+    DecisionStatus,
     HITLConfig,
+    HITLDecision,
+    OperatorAction,
 )
-from .risk_assessor import RiskAssessor, RiskScore
+from .risk_assessor import RiskAssessor
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +40,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # Decision Result
 # ============================================================================
+
 
 @dataclass
 class DecisionResult:
@@ -51,6 +50,7 @@ class DecisionResult:
     Indicates whether decision was executed immediately, queued for review,
     or rejected.
     """
+
     # Decision reference
     decision: HITLDecision
 
@@ -60,11 +60,11 @@ class DecisionResult:
     rejected: bool = False
 
     # Execution details
-    execution_output: Dict[str, Any] = field(default_factory=dict)
-    execution_error: Optional[str] = None
+    execution_output: dict[str, Any] = field(default_factory=dict)
+    execution_error: str | None = None
 
     # Audit trail entry
-    audit_entry_id: Optional[str] = None
+    audit_entry_id: str | None = None
 
     # Timing
     processing_time: float = 0.0  # seconds
@@ -73,17 +73,17 @@ class DecisionResult:
         """Get human-readable summary."""
         if self.executed:
             return f"Executed: {self.decision.context.action_type.value} (ID: {self.decision.decision_id})"
-        elif self.queued:
+        if self.queued:
             return f"Queued for review: {self.decision.context.action_type.value} (ID: {self.decision.decision_id})"
-        elif self.rejected:
+        if self.rejected:
             return f"Rejected: {self.decision.context.action_type.value} (ID: {self.decision.decision_id})"
-        else:
-            return f"Pending: {self.decision.decision_id}"
+        return f"Pending: {self.decision.decision_id}"
 
 
 # ============================================================================
 # HITL Decision Framework
 # ============================================================================
+
 
 class HITLDecisionFramework:
     """
@@ -95,8 +95,8 @@ class HITLDecisionFramework:
 
     def __init__(
         self,
-        config: Optional[HITLConfig] = None,
-        risk_assessor: Optional[RiskAssessor] = None,
+        config: HITLConfig | None = None,
+        risk_assessor: RiskAssessor | None = None,
     ):
         """
         Initialize HITL framework.
@@ -110,13 +110,13 @@ class HITLDecisionFramework:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Action executors (registered by action type)
-        self._executors: Dict[ActionType, Callable] = {}
+        self._executors: dict[ActionType, Callable] = {}
 
         # Decision queue (will be set by DecisionQueue)
-        self._decision_queue: Optional[Any] = None
+        self._decision_queue: Any | None = None
 
         # Audit trail (will be set by AuditTrail)
-        self._audit_trail: Optional[Any] = None
+        self._audit_trail: Any | None = None
 
         # Metrics
         self.metrics = {
@@ -154,11 +154,11 @@ class HITLDecisionFramework:
     def evaluate_action(
         self,
         action_type: ActionType,
-        action_params: Dict[str, Any],
+        action_params: dict[str, Any],
         ai_reasoning: str,
         confidence: float,
         threat_score: float = 0.0,
-        affected_assets: Optional[List[str]] = None,
+        affected_assets: list[str] | None = None,
         **context_kwargs,
     ) -> DecisionResult:
         """
@@ -202,9 +202,7 @@ class HITLDecisionFramework:
         )
 
         # Determine automation level
-        automation_level = self.config.get_automation_level(
-            confidence, risk_score.risk_level
-        )
+        automation_level = self.config.get_automation_level(confidence, risk_score.risk_level)
 
         # Create HITL decision
         decision = HITLDecision(
@@ -221,9 +219,7 @@ class HITLDecisionFramework:
 
         # Log decision creation to audit trail
         if self._audit_trail:
-            audit_entry = self._audit_trail.log_decision_created(
-                decision, risk_score
-            )
+            audit_entry = self._audit_trail.log_decision_created(decision, risk_score)
             decision.metadata["audit_entry_id"] = audit_entry.entry_id
 
         # Process based on automation level
@@ -231,9 +227,7 @@ class HITLDecisionFramework:
 
         if automation_level == AutomationLevel.FULL:
             # Execute immediately
-            self.logger.info(
-                f"FULL automation: executing {action_type.value} (decision={decision.decision_id})"
-            )
+            self.logger.info(f"FULL automation: executing {action_type.value} (decision={decision.decision_id})")
             result = self._execute_immediately(decision)
             self.metrics["auto_executed"] += 1
 
@@ -283,9 +277,7 @@ class HITLDecisionFramework:
 
             # Log to audit trail
             if self._audit_trail:
-                audit_entry = self._audit_trail.log_decision_executed(
-                    decision, execution_output
-                )
+                audit_entry = self._audit_trail.log_decision_executed(decision, execution_output)
                 audit_entry_id = audit_entry.entry_id
             else:
                 audit_entry_id = None
@@ -297,10 +289,7 @@ class HITLDecisionFramework:
                 audit_entry_id=audit_entry_id,
             )
 
-            self.logger.info(
-                f"Decision executed: {decision.decision_id} "
-                f"(action={decision.context.action_type.value})"
-            )
+            self.logger.info(f"Decision executed: {decision.decision_id} (action={decision.context.action_type.value})")
 
             return result
 
@@ -327,9 +316,7 @@ class HITLDecisionFramework:
     def _queue_for_review(self, decision: HITLDecision) -> DecisionResult:
         """Queue decision for human review."""
         if self._decision_queue is None:
-            self.logger.warning(
-                "Decision queue not set - decision will not be queued"
-            )
+            self.logger.warning("Decision queue not set - decision will not be queued")
             return DecisionResult(decision=decision, queued=False)
 
         # Add to queue
@@ -356,9 +343,7 @@ class HITLDecisionFramework:
 
         return result
 
-    def execute_decision(
-        self, decision: HITLDecision, operator_action: Optional[OperatorAction] = None
-    ) -> DecisionResult:
+    def execute_decision(self, decision: HITLDecision, operator_action: OperatorAction | None = None) -> DecisionResult:
         """
         Execute a decision (after human approval).
 
@@ -369,16 +354,12 @@ class HITLDecisionFramework:
         Returns:
             DecisionResult
         """
-        self.logger.info(
-            f"Executing decision {decision.decision_id} "
-            f"(action={decision.context.action_type.value})"
-        )
+        self.logger.info(f"Executing decision {decision.decision_id} (action={decision.context.action_type.value})")
 
         # Apply operator modifications if any
         if operator_action and operator_action.modifications:
             self.logger.info(
-                f"Applying operator modifications to {decision.decision_id}: "
-                f"{operator_action.modifications}"
+                f"Applying operator modifications to {decision.decision_id}: {operator_action.modifications}"
             )
             decision.context.action_params.update(operator_action.modifications)
 
@@ -397,9 +378,7 @@ class HITLDecisionFramework:
 
             # Log to audit trail
             if self._audit_trail:
-                audit_entry = self._audit_trail.log_decision_executed(
-                    decision, execution_output, operator_action
-                )
+                audit_entry = self._audit_trail.log_decision_executed(decision, execution_output, operator_action)
                 audit_entry_id = audit_entry.entry_id
             else:
                 audit_entry_id = None
@@ -433,7 +412,7 @@ class HITLDecisionFramework:
                 execution_error=str(e),
             )
 
-    def _execute_action(self, context: DecisionContext) -> Dict[str, Any]:
+    def _execute_action(self, context: DecisionContext) -> dict[str, Any]:
         """
         Execute security action.
 
@@ -452,26 +431,18 @@ class HITLDecisionFramework:
         # Get executor
         executor = self._executors.get(action_type)
         if executor is None:
-            raise ValueError(
-                f"No executor registered for action type: {action_type.value}"
-            )
+            raise ValueError(f"No executor registered for action type: {action_type.value}")
 
         # Execute
-        self.logger.debug(
-            f"Executing {action_type.value} with params: {context.action_params}"
-        )
+        self.logger.debug(f"Executing {action_type.value} with params: {context.action_params}")
 
         result = executor(context)
 
-        self.logger.debug(
-            f"Execution complete: {action_type.value} → {result}"
-        )
+        self.logger.debug(f"Execution complete: {action_type.value} → {result}")
 
         return result
 
-    def reject_decision(
-        self, decision: HITLDecision, operator_action: OperatorAction
-    ) -> None:
+    def reject_decision(self, decision: HITLDecision, operator_action: OperatorAction) -> None:
         """
         Reject a decision (operator veto).
 
@@ -479,9 +450,7 @@ class HITLDecisionFramework:
             decision: Decision to reject
             operator_action: Operator action with rejection reasoning
         """
-        self.logger.info(
-            f"Decision rejected: {decision.decision_id} by {operator_action.operator_id}"
-        )
+        self.logger.info(f"Decision rejected: {decision.decision_id} by {operator_action.operator_id}")
 
         decision.status = DecisionStatus.REJECTED
         decision.reviewed_by = operator_action.operator_id
@@ -494,9 +463,7 @@ class HITLDecisionFramework:
         if self._audit_trail:
             self._audit_trail.log_decision_rejected(decision, operator_action)
 
-    def escalate_decision(
-        self, decision: HITLDecision, escalation_reason: str, escalated_to: str
-    ) -> None:
+    def escalate_decision(self, decision: HITLDecision, escalation_reason: str, escalated_to: str) -> None:
         """
         Escalate decision to higher authority.
 
@@ -505,10 +472,7 @@ class HITLDecisionFramework:
             escalation_reason: Reason for escalation
             escalated_to: Target role/person
         """
-        self.logger.info(
-            f"Decision escalated: {decision.decision_id} → {escalated_to} "
-            f"(reason: {escalation_reason})"
-        )
+        self.logger.info(f"Decision escalated: {decision.decision_id} → {escalated_to} (reason: {escalation_reason})")
 
         decision.status = DecisionStatus.ESCALATED
         decision.escalated = True
@@ -520,11 +484,9 @@ class HITLDecisionFramework:
 
         # Log to audit trail
         if self._audit_trail:
-            self._audit_trail.log_decision_escalated(
-                decision, escalation_reason, escalated_to
-            )
+            self._audit_trail.log_decision_escalated(decision, escalation_reason, escalated_to)
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get framework metrics."""
         return {
             **self.metrics,
@@ -547,9 +509,7 @@ class HITLDecisionFramework:
 
     # Convenience methods for common actions
 
-    def block_ip(
-        self, ip_address: str, confidence: float, threat_score: float, reason: str
-    ) -> DecisionResult:
+    def block_ip(self, ip_address: str, confidence: float, threat_score: float, reason: str) -> DecisionResult:
         """Convenience method to block IP address."""
         return self.evaluate_action(
             action_type=ActionType.BLOCK_IP,
@@ -559,9 +519,7 @@ class HITLDecisionFramework:
             threat_score=threat_score,
         )
 
-    def isolate_host(
-        self, host_id: str, confidence: float, threat_score: float, reason: str
-    ) -> DecisionResult:
+    def isolate_host(self, host_id: str, confidence: float, threat_score: float, reason: str) -> DecisionResult:
         """Convenience method to isolate host."""
         return self.evaluate_action(
             action_type=ActionType.ISOLATE_HOST,

@@ -12,29 +12,30 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
 import logging
 import os
-import tempfile
-import numpy as np
 import random
+import tempfile
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
-from .base import (
-    FLRound,
-    ModelUpdate,
-    FLConfig,
-    FLMetrics,
-    ClientInfo,
-    FLStatus,
-    AggregationStrategy,
-)
+import numpy as np
+
 from .aggregation import (
+    AggregationResult,
+    DPAggregator,
     FedAvgAggregator,
     SecureAggregator,
-    DPAggregator,
-    AggregationResult,
+)
+from .base import (
+    AggregationStrategy,
+    ClientInfo,
+    FLConfig,
+    FLMetrics,
+    FLRound,
+    FLStatus,
+    ModelUpdate,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,16 +55,16 @@ class CoordinatorConfig:
         auto_save: Whether to automatically save models
         save_directory: Directory to save models
     """
+
     fl_config: FLConfig
     max_rounds: int = 100
     convergence_threshold: float = 0.001
     min_improvement_rounds: int = 5
     evaluation_frequency: int = 1
     auto_save: bool = True
-    save_directory: str = field(default_factory=lambda: os.getenv(
-        "FL_MODELS_DIR",
-        tempfile.mkdtemp(prefix="fl_models_", suffix="_maximus")
-    ))
+    save_directory: str = field(
+        default_factory=lambda: os.getenv("FL_MODELS_DIR", tempfile.mkdtemp(prefix="fl_models_", suffix="_maximus"))
+    )
 
 
 class FLCoordinator:
@@ -89,10 +90,10 @@ class FLCoordinator:
         self.fl_config = config.fl_config
 
         # Initialize state
-        self.global_model_weights: Optional[Dict[str, np.ndarray]] = None
-        self.current_round: Optional[FLRound] = None
-        self.round_history: List[FLRound] = []
-        self.registered_clients: Dict[str, ClientInfo] = {}
+        self.global_model_weights: dict[str, np.ndarray] | None = None
+        self.current_round: FLRound | None = None
+        self.round_history: list[FLRound] = []
+        self.registered_clients: dict[str, ClientInfo] = {}
         self.metrics = FLMetrics()
 
         # Initialize aggregator based on strategy
@@ -113,16 +114,15 @@ class FLCoordinator:
 
         if strategy == AggregationStrategy.FEDAVG:
             return FedAvgAggregator()
-        elif strategy == AggregationStrategy.SECURE:
+        if strategy == AggregationStrategy.SECURE:
             return SecureAggregator(threshold=self.fl_config.min_clients)
-        elif strategy == AggregationStrategy.DP_FEDAVG:
+        if strategy == AggregationStrategy.DP_FEDAVG:
             return DPAggregator(
                 epsilon=self.fl_config.dp_epsilon,
                 delta=self.fl_config.dp_delta,
                 clip_norm=self.fl_config.dp_clip_norm,
             )
-        else:
-            raise ValueError(f"Unknown aggregation strategy: {strategy}")
+        raise ValueError(f"Unknown aggregation strategy: {strategy}")
 
     def register_client(self, client_info: ClientInfo) -> bool:
         """
@@ -135,15 +135,11 @@ class FLCoordinator:
             True if registration successful
         """
         if client_info.client_id in self.registered_clients:
-            logger.warning(
-                f"Client {client_info.client_id} already registered, updating info"
-            )
+            logger.warning(f"Client {client_info.client_id} already registered, updating info")
 
         self.registered_clients[client_info.client_id] = client_info
         self.metrics.total_clients = len(self.registered_clients)
-        self.metrics.active_clients = sum(
-            1 for c in self.registered_clients.values() if c.active
-        )
+        self.metrics.active_clients = sum(1 for c in self.registered_clients.values() if c.active)
 
         logger.info(
             f"Registered client {client_info.client_id} "
@@ -168,14 +164,12 @@ class FLCoordinator:
 
         del self.registered_clients[client_id]
         self.metrics.total_clients = len(self.registered_clients)
-        self.metrics.active_clients = sum(
-            1 for c in self.registered_clients.values() if c.active
-        )
+        self.metrics.active_clients = sum(1 for c in self.registered_clients.values() if c.active)
 
         logger.info(f"Unregistered client {client_id}")
         return True
 
-    def set_global_model(self, weights: Dict[str, np.ndarray]) -> None:
+    def set_global_model(self, weights: dict[str, np.ndarray]) -> None:
         """
         Set the initial global model weights.
 
@@ -183,12 +177,9 @@ class FLCoordinator:
             weights: Initial model weights
         """
         self.global_model_weights = weights
-        logger.info(
-            f"Set global model with {sum(w.size for w in weights.values())} "
-            "parameters"
-        )
+        logger.info(f"Set global model with {sum(w.size for w in weights.values())} parameters")
 
-    def get_global_model(self) -> Optional[Dict[str, np.ndarray]]:
+    def get_global_model(self) -> dict[str, np.ndarray] | None:
         """
         Get current global model weights.
 
@@ -221,16 +212,10 @@ class FLCoordinator:
         if self.global_model_weights is None:
             raise RuntimeError("Global model not initialized")
 
-        active_clients = [
-            client_id for client_id, info in self.registered_clients.items()
-            if info.active
-        ]
+        active_clients = [client_id for client_id, info in self.registered_clients.items() if info.active]
 
         if len(active_clients) < self.fl_config.min_clients:
-            raise RuntimeError(
-                f"Not enough active clients: {len(active_clients)} < "
-                f"{self.fl_config.min_clients}"
-            )
+            raise RuntimeError(f"Not enough active clients: {len(active_clients)} < {self.fl_config.min_clients}")
 
         # Select clients for this round
         selected_clients = self._select_clients(active_clients)
@@ -245,14 +230,11 @@ class FLCoordinator:
             global_model_version=self.fl_config.model_version,
         )
 
-        logger.info(
-            f"Started round {round_id} with {len(selected_clients)} clients: "
-            f"{selected_clients}"
-        )
+        logger.info(f"Started round {round_id} with {len(selected_clients)} clients: {selected_clients}")
 
         return self.current_round
 
-    def _select_clients(self, active_clients: List[str]) -> List[str]:
+    def _select_clients(self, active_clients: list[str]) -> list[str]:
         """
         Select clients for the current round.
 
@@ -295,31 +277,21 @@ class FLCoordinator:
             FLStatus.TRAINING,
         ]:
             raise RuntimeError(
-                f"Round {self.current_round.round_id} not accepting updates: "
-                f"{self.current_round.status.value}"
+                f"Round {self.current_round.round_id} not accepting updates: {self.current_round.status.value}"
             )
 
         # Validate update
         if update.client_id not in self.current_round.selected_clients:
-            raise RuntimeError(
-                f"Client {update.client_id} not selected for round "
-                f"{self.current_round.round_id}"
-            )
+            raise RuntimeError(f"Client {update.client_id} not selected for round {self.current_round.round_id}")
 
         if update.round_id != self.current_round.round_id:
-            raise RuntimeError(
-                f"Update round ID {update.round_id} != current round "
-                f"{self.current_round.round_id}"
-            )
+            raise RuntimeError(f"Update round ID {update.round_id} != current round {self.current_round.round_id}")
 
         # Check for duplicate
         if any(u.client_id == update.client_id for u in self.current_round.received_updates):
-            logger.warning(
-                f"Duplicate update from client {update.client_id}, replacing"
-            )
+            logger.warning(f"Duplicate update from client {update.client_id}, replacing")
             self.current_round.received_updates = [
-                u for u in self.current_round.received_updates
-                if u.client_id != update.client_id
+                u for u in self.current_round.received_updates if u.client_id != update.client_id
             ]
 
         # Add update
@@ -335,10 +307,7 @@ class FLCoordinator:
 
         # Check if we have enough updates to aggregate
         if len(self.current_round.received_updates) >= self.fl_config.min_clients:
-            logger.info(
-                f"Minimum updates received ({self.fl_config.min_clients}), "
-                "ready to aggregate"
-            )
+            logger.info(f"Minimum updates received ({self.fl_config.min_clients}), ready to aggregate")
 
         return True
 
@@ -357,16 +326,14 @@ class FLCoordinator:
 
         if len(self.current_round.received_updates) < self.fl_config.min_clients:
             raise RuntimeError(
-                f"Not enough updates: {len(self.current_round.received_updates)} < "
-                f"{self.fl_config.min_clients}"
+                f"Not enough updates: {len(self.current_round.received_updates)} < {self.fl_config.min_clients}"
             )
 
         # Update status
         self.current_round.status = FLStatus.AGGREGATING
 
         logger.info(
-            f"Aggregating {len(self.current_round.received_updates)} updates "
-            f"for round {self.current_round.round_id}"
+            f"Aggregating {len(self.current_round.received_updates)} updates for round {self.current_round.round_id}"
         )
 
         # Aggregate using configured strategy
@@ -378,9 +345,7 @@ class FLCoordinator:
 
         # Store aggregation result
         self.current_round.aggregation_result = agg_result.to_dict()
-        self.current_round.metrics = agg_result.metadata.get(
-            "average_client_metrics", {}
-        )
+        self.current_round.metrics = agg_result.metadata.get("average_client_metrics", {})
 
         logger.info(
             f"Aggregation complete: {agg_result.num_clients} clients, "
@@ -435,30 +400,21 @@ class FLCoordinator:
         self.metrics.total_rounds = len(self.round_history)
 
         # Calculate average participation rate
-        participation_rates = [
-            r.get_participation_rate() for r in self.round_history
-        ]
+        participation_rates = [r.get_participation_rate() for r in self.round_history]
         self.metrics.average_participation_rate = np.mean(participation_rates)
 
         # Calculate average round duration
-        durations = [
-            r.get_duration_seconds() for r in self.round_history
-            if r.get_duration_seconds() is not None
-        ]
+        durations = [r.get_duration_seconds() for r in self.round_history if r.get_duration_seconds() is not None]
         if durations:
             self.metrics.average_round_duration = np.mean(durations)
 
         # Total samples trained
-        self.metrics.total_samples_trained = sum(
-            r.get_total_samples() for r in self.round_history
-        )
+        self.metrics.total_samples_trained = sum(r.get_total_samples() for r in self.round_history)
 
         # Update timestamp
         self.metrics.last_updated = datetime.utcnow()
 
-    def evaluate_global_model(
-        self, test_data: Any, test_labels: Any, model_adapter: Any
-    ) -> Dict[str, float]:
+    def evaluate_global_model(self, test_data: Any, test_labels: Any, model_adapter: Any) -> dict[str, float]:
         """
         Evaluate global model on test set.
 
@@ -494,17 +450,13 @@ class FLCoordinator:
             logger.info(f"New best accuracy: {accuracy:.4f} (+{improvement:.4f})")
         else:
             self.rounds_without_improvement += 1
-            logger.info(
-                f"No improvement: {accuracy:.4f} "
-                f"({self.rounds_without_improvement} rounds)"
-            )
+            logger.info(f"No improvement: {accuracy:.4f} ({self.rounds_without_improvement} rounds)")
 
         # Check convergence
         if self.rounds_without_improvement >= self.config.min_improvement_rounds:
             self.metrics.convergence_status = True
             logger.info(
-                f"Model converged after {self.metrics.total_rounds} rounds "
-                f"(accuracy: {self.best_accuracy:.4f})"
+                f"Model converged after {self.metrics.total_rounds} rounds (accuracy: {self.best_accuracy:.4f})"
             )
 
         return eval_metrics
@@ -534,7 +486,7 @@ class FLCoordinator:
         """Get current FL metrics."""
         return self.metrics
 
-    def get_round_status(self) -> Optional[Dict[str, Any]]:
+    def get_round_status(self) -> dict[str, Any] | None:
         """
         Get status of current round.
 
@@ -550,11 +502,6 @@ class FLCoordinator:
             "selected_clients": self.current_round.selected_clients,
             "received_updates": len(self.current_round.received_updates),
             "expected_updates": len(self.current_round.selected_clients),
-            "progress": (
-                len(self.current_round.received_updates) /
-                len(self.current_round.selected_clients)
-            ),
-            "elapsed_time": (
-                (datetime.utcnow() - self.current_round.start_time).total_seconds()
-            ),
+            "progress": (len(self.current_round.received_updates) / len(self.current_round.selected_clients)),
+            "elapsed_time": ((datetime.utcnow() - self.current_round.start_time).total_seconds()),
         }

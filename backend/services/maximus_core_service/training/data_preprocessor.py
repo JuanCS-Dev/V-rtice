@@ -13,14 +13,13 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
 import hashlib
 import logging
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -45,12 +44,11 @@ class PreprocessedSample:
     sample_id: str
     layer: LayerType
     features: np.ndarray
-    label: Optional[int] = None
-    metadata: Optional[Dict[str, Any]] = None
+    label: int | None = None
+    metadata: dict[str, Any] | None = None
 
     def __repr__(self) -> str:
-        return (f"PreprocessedSample(layer={self.layer.value}, "
-                f"features_shape={self.features.shape}, label={self.label})")
+        return f"PreprocessedSample(layer={self.layer.value}, features_shape={self.features.shape}, label={self.label})"
 
 
 class LayerPreprocessor(ABC):
@@ -65,7 +63,7 @@ class LayerPreprocessor(ABC):
         self.layer = layer
 
     @abstractmethod
-    def preprocess(self, event: Dict[str, Any]) -> PreprocessedSample:
+    def preprocess(self, event: dict[str, Any]) -> PreprocessedSample:
         """Preprocess event for this layer.
 
         Args:
@@ -110,10 +108,10 @@ class Layer1Preprocessor(LayerPreprocessor):
             "process_creation": 1,
             "file_creation": 2,
             "registry_modification": 3,
-            "authentication": 4
+            "authentication": 4,
         }
 
-    def preprocess(self, event: Dict[str, Any]) -> PreprocessedSample:
+    def preprocess(self, event: dict[str, Any]) -> PreprocessedSample:
         """Preprocess event for Layer 1.
 
         Args:
@@ -188,7 +186,7 @@ class Layer1Preprocessor(LayerPreprocessor):
             layer=self.layer,
             features=features,
             label=label,
-            metadata={"event_type": event_type, "timestamp": event.get("timestamp")}
+            metadata={"event_type": event_type, "timestamp": event.get("timestamp")},
         )
 
     def get_feature_dim(self) -> int:
@@ -227,7 +225,7 @@ class Layer1Preprocessor(LayerPreprocessor):
             Encoded vector
         """
         hash_bytes = hashlib.md5(s.encode()).digest()
-        hash_ints = np.frombuffer(hash_bytes[:dim * 4], dtype=np.int32)
+        hash_ints = np.frombuffer(hash_bytes[: dim * 4], dtype=np.int32)
         return (hash_ints % 256).astype(np.float32) / 255.0
 
     @staticmethod
@@ -242,14 +240,14 @@ class Layer1Preprocessor(LayerPreprocessor):
             Encoded vector
         """
         try:
-            hash_bytes = bytes.fromhex(hash_str[:dim * 8])
-            hash_ints = np.frombuffer(hash_bytes[:dim * 4], dtype=np.int32)
+            hash_bytes = bytes.fromhex(hash_str[: dim * 8])
+            hash_ints = np.frombuffer(hash_bytes[: dim * 4], dtype=np.int32)
             return (hash_ints % 256).astype(np.float32) / 255.0
         except:
             return np.zeros(dim, dtype=np.float32)
 
     @staticmethod
-    def _extract_label(event: Dict[str, Any]) -> Optional[int]:
+    def _extract_label(event: dict[str, Any]) -> int | None:
         """Extract label from event.
 
         Args:
@@ -283,7 +281,7 @@ class Layer1Preprocessor(LayerPreprocessor):
         return None
 
     @staticmethod
-    def _generate_sample_id(event: Dict[str, Any]) -> str:
+    def _generate_sample_id(event: dict[str, Any]) -> str:
         """Generate unique sample ID.
 
         Args:
@@ -319,7 +317,7 @@ class Layer2Preprocessor(LayerPreprocessor):
         self.node_feature_dim = 64
         self.edge_feature_dim = 16
 
-    def preprocess(self, event: Dict[str, Any]) -> PreprocessedSample:
+    def preprocess(self, event: dict[str, Any]) -> PreprocessedSample:
         """Preprocess event for Layer 2.
 
         Creates a graph representation:
@@ -341,10 +339,10 @@ class Layer2Preprocessor(LayerPreprocessor):
             entity_data={
                 "name": event.get("process_name", event.get("user_name", event.get("source_ip"))),
                 "id": event.get("process_pid", event.get("source_port")),
-                "attributes": event.get("process_attributes", {})
-            }
+                "attributes": event.get("process_attributes", {}),
+            },
         )
-        features[0:self.node_feature_dim] = source_features
+        features[0 : self.node_feature_dim] = source_features
 
         # Extract destination node (file/IP/service)
         dest_features = self._extract_entity_features(
@@ -352,14 +350,14 @@ class Layer2Preprocessor(LayerPreprocessor):
             entity_data={
                 "name": event.get("file_name", event.get("dest_ip")),
                 "id": event.get("dest_port"),
-                "attributes": event.get("file_attributes", {})
-            }
+                "attributes": event.get("file_attributes", {}),
+            },
         )
-        features[self.node_feature_dim:self.node_feature_dim * 2] = dest_features
+        features[self.node_feature_dim : self.node_feature_dim * 2] = dest_features
 
         # Extract edge (interaction type)
         edge_features = self._extract_interaction_features(event)
-        features[self.node_feature_dim * 2:] = edge_features
+        features[self.node_feature_dim * 2 :] = edge_features
 
         # Extract label
         label = Layer1Preprocessor._extract_label(event)
@@ -372,7 +370,7 @@ class Layer2Preprocessor(LayerPreprocessor):
             layer=self.layer,
             features=features,
             label=label,
-            metadata={"event_type": event.get("type")}
+            metadata={"event_type": event.get("type")},
         )
 
     def get_feature_dim(self) -> int:
@@ -383,11 +381,7 @@ class Layer2Preprocessor(LayerPreprocessor):
         """
         return self.node_feature_dim * 2 + self.edge_feature_dim
 
-    def _extract_entity_features(
-        self,
-        entity_type: str,
-        entity_data: Dict[str, Any]
-    ) -> np.ndarray:
+    def _extract_entity_features(self, entity_type: str, entity_data: dict[str, Any]) -> np.ndarray:
         """Extract node features for an entity.
 
         Args:
@@ -418,7 +412,7 @@ class Layer2Preprocessor(LayerPreprocessor):
         # Reserved for additional attributes
         return features
 
-    def _extract_interaction_features(self, event: Dict[str, Any]) -> np.ndarray:
+    def _extract_interaction_features(self, event: dict[str, Any]) -> np.ndarray:
         """Extract edge features (interaction type).
 
         Args:
@@ -469,9 +463,9 @@ class Layer3Preprocessor(LayerPreprocessor):
 
         self.window_size = window_size
         self.event_feature_dim = 32
-        self.event_buffer: List[np.ndarray] = []
+        self.event_buffer: list[np.ndarray] = []
 
-    def preprocess(self, event: Dict[str, Any]) -> PreprocessedSample:
+    def preprocess(self, event: dict[str, Any]) -> PreprocessedSample:
         """Preprocess event for Layer 3.
 
         Args:
@@ -488,7 +482,7 @@ class Layer3Preprocessor(LayerPreprocessor):
 
         # Keep only last window_size events
         if len(self.event_buffer) > self.window_size:
-            self.event_buffer = self.event_buffer[-self.window_size:]
+            self.event_buffer = self.event_buffer[-self.window_size :]
 
         # Pad if needed
         features_list = self.event_buffer.copy()
@@ -509,7 +503,7 @@ class Layer3Preprocessor(LayerPreprocessor):
             layer=self.layer,
             features=features,
             label=label,
-            metadata={"window_size": len(self.event_buffer)}
+            metadata={"window_size": len(self.event_buffer)},
         )
 
     def get_feature_dim(self) -> int:
@@ -520,7 +514,7 @@ class Layer3Preprocessor(LayerPreprocessor):
         """
         return self.window_size * self.event_feature_dim
 
-    def _extract_event_features(self, event: Dict[str, Any]) -> np.ndarray:
+    def _extract_event_features(self, event: dict[str, Any]) -> np.ndarray:
         """Extract features for a single event in time series.
 
         Args:
@@ -565,7 +559,7 @@ class DataPreprocessor:
         ```
     """
 
-    def __init__(self, output_dir: Optional[Path] = None):
+    def __init__(self, output_dir: Path | None = None):
         """Initialize preprocessor.
 
         Args:
@@ -575,7 +569,7 @@ class DataPreprocessor:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Initialize layer preprocessors
-        self.preprocessors: Dict[LayerType, LayerPreprocessor] = {
+        self.preprocessors: dict[LayerType, LayerPreprocessor] = {
             LayerType.LAYER1_SENSORY: Layer1Preprocessor(),
             LayerType.LAYER2_BEHAVIORAL: Layer2Preprocessor(),
             LayerType.LAYER3_OPERATIONAL: Layer3Preprocessor(),
@@ -585,10 +579,8 @@ class DataPreprocessor:
         logger.info(f"DataPreprocessor initialized with {len(self.preprocessors)} layer preprocessors")
 
     def preprocess_event(
-        self,
-        event: Dict[str, Any],
-        layers: Union[str, List[LayerType]] = "all"
-    ) -> Union[PreprocessedSample, Dict[LayerType, PreprocessedSample]]:
+        self, event: dict[str, Any], layers: str | list[LayerType] = "all"
+    ) -> PreprocessedSample | dict[LayerType, PreprocessedSample]:
         """Preprocess event for specified layers.
 
         Args:
@@ -605,19 +597,14 @@ class DataPreprocessor:
             # Single layer
             preprocessor = self.preprocessors[layers[0]]
             return preprocessor.preprocess(event)
-        else:
-            # Multiple layers
-            samples = {}
-            for layer in layers:
-                preprocessor = self.preprocessors[layer]
-                samples[layer] = preprocessor.preprocess(event)
-            return samples
+        # Multiple layers
+        samples = {}
+        for layer in layers:
+            preprocessor = self.preprocessors[layer]
+            samples[layer] = preprocessor.preprocess(event)
+        return samples
 
-    def preprocess_batch(
-        self,
-        events: List[Dict[str, Any]],
-        layer: LayerType
-    ) -> List[PreprocessedSample]:
+    def preprocess_batch(self, events: list[dict[str, Any]], layer: LayerType) -> list[PreprocessedSample]:
         """Preprocess batch of events for a specific layer.
 
         Args:
@@ -631,11 +618,7 @@ class DataPreprocessor:
         samples = [preprocessor.preprocess(event) for event in events]
         return samples
 
-    def save_samples(
-        self,
-        samples: List[PreprocessedSample],
-        filename: str
-    ) -> Path:
+    def save_samples(self, samples: list[PreprocessedSample], filename: str) -> Path:
         """Save preprocessed samples to file.
 
         Args:
@@ -662,13 +645,13 @@ class DataPreprocessor:
             features=features,
             labels=labels,
             sample_ids=sample_ids,
-            layer=str(samples[0].layer.value) if samples else ""
+            layer=str(samples[0].layer.value) if samples else "",
         )
 
         logger.info(f"Saved {len(samples)} samples to {output_path}")
         return output_path
 
-    def load_samples(self, filepath: Path) -> List[PreprocessedSample]:
+    def load_samples(self, filepath: Path) -> list[PreprocessedSample]:
         """Load preprocessed samples from file.
 
         Args:
@@ -690,12 +673,7 @@ class DataPreprocessor:
         for i in range(len(features)):
             label = int(labels[i]) if labels[i] >= 0 else None
 
-            sample = PreprocessedSample(
-                sample_id=str(sample_ids[i]),
-                layer=layer,
-                features=features[i],
-                label=label
-            )
+            sample = PreprocessedSample(sample_id=str(sample_ids[i]), layer=layer, features=features[i], label=label)
             samples.append(sample)
 
         logger.info(f"Loaded {len(samples)} samples from {filepath}")

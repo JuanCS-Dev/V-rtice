@@ -7,16 +7,16 @@ Date: 2025-10-06
 """
 
 import pytest
-import numpy as np
 
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
 
-from performance.inference_engine import InferenceEngine, InferenceConfig, LRUCache
+from performance.inference_engine import InferenceConfig, InferenceEngine, LRUCache
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def inference_config():
         enable_cache=True,
         use_amp=False,  # Disable AMP for CPU
         compile_model=False,  # Disable compile for compatibility
-        num_warmup_runs=2
+        num_warmup_runs=2,
     )
 
 
@@ -191,12 +191,7 @@ def test_cache_clear(simple_model, inference_config):
 
 def test_inference_config_validation():
     """Test inference config validation."""
-    config = InferenceConfig(
-        backend="pytorch",
-        device="cpu",
-        max_batch_size=32,
-        enable_cache=True
-    )
+    config = InferenceConfig(backend="pytorch", device="cpu", max_batch_size=32, enable_cache=True)
 
     assert config.backend == "pytorch"
     assert config.max_batch_size == 32

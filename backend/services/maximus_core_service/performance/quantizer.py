@@ -12,10 +12,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -24,6 +24,7 @@ try:
     import torch
     import torch.nn as nn
     import torch.quantization as quant
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -48,7 +49,7 @@ class QuantizationConfig:
     num_calibration_batches: int = 100
 
     # Layers to skip
-    skip_layers: List[str] = None
+    skip_layers: list[str] = None
 
     # Output
     output_dir: Path = Path("models/quantized")
@@ -72,24 +73,16 @@ class ModelQuantizer:
     Example:
         ```python
         # Dynamic quantization (simplest)
-        quantizer = ModelQuantizer(config=QuantizationConfig(
-            quantization_type="dynamic"
-        ))
+        quantizer = ModelQuantizer(config=QuantizationConfig(quantization_type="dynamic"))
 
         quantized_model = quantizer.quantize(model)
         quantizer.save_model(quantized_model, "model_quantized.pt")
 
         # Static quantization (more accurate)
-        config = QuantizationConfig(
-            quantization_type="static",
-            num_calibration_batches=100
-        )
+        config = QuantizationConfig(quantization_type="static", num_calibration_batches=100)
 
         quantizer = ModelQuantizer(config=config)
-        quantized_model = quantizer.quantize(
-            model,
-            calibration_loader=calib_loader
-        )
+        quantized_model = quantizer.quantize(model, calibration_loader=calib_loader)
         ```
     """
 
@@ -107,14 +100,10 @@ class ModelQuantizer:
         # Set quantization backend
         torch.backends.quantized.engine = config.backend
 
-        logger.info(f"ModelQuantizer initialized: type={config.quantization_type}, "
-                   f"backend={config.backend}")
+        logger.info(f"ModelQuantizer initialized: type={config.quantization_type}, backend={config.backend}")
 
     def quantize(
-        self,
-        model: nn.Module,
-        calibration_loader: Optional[Any] = None,
-        example_inputs: Optional[torch.Tensor] = None
+        self, model: nn.Module, calibration_loader: Any | None = None, example_inputs: torch.Tensor | None = None
     ) -> nn.Module:
         """Quantize model.
 
@@ -141,8 +130,9 @@ class ModelQuantizer:
             quantized_model = self._static_quantization(quantized_model, calibration_loader)
 
         else:
-            raise ValueError(f"Unknown quantization type: {self.config.quantization_type}. "
-                           f"Supported types: 'dynamic', 'static'")
+            raise ValueError(
+                f"Unknown quantization type: {self.config.quantization_type}. Supported types: 'dynamic', 'static'"
+            )
 
         # Evaluate size reduction
         self._print_size_comparison(model, quantized_model)
@@ -166,21 +156,13 @@ class ModelQuantizer:
             logger.info(f"Skipping layers: {self.config.skip_layers}")
 
         # Quantize
-        quantized_model = quant.quantize_dynamic(
-            model,
-            qconfig_spec=layers_to_quantize,
-            dtype=self._get_dtype()
-        )
+        quantized_model = quant.quantize_dynamic(model, qconfig_spec=layers_to_quantize, dtype=self._get_dtype())
 
         logger.info("Dynamic quantization complete")
 
         return quantized_model
 
-    def _static_quantization(
-        self,
-        model: nn.Module,
-        calibration_loader: Any
-    ) -> nn.Module:
+    def _static_quantization(self, model: nn.Module, calibration_loader: Any) -> nn.Module:
         """Apply static quantization (weights + activations).
 
         Args:
@@ -233,16 +215,10 @@ class ModelQuantizer:
             Model with fused modules
         """
         # Common fusion patterns
-        fusion_patterns = [
-            ["conv", "bn", "relu"],
-            ["conv", "relu"],
-            ["linear", "relu"]
-        ]
+        fusion_patterns = [["conv", "bn", "relu"], ["conv", "relu"], ["linear", "relu"]]
 
         # Automatic fusion (if available)
         try:
-            from torch.quantization import fuse_modules
-
             # Try to fuse (this is model-specific)
             # For production, you'd need to specify exact module names
             logger.debug("Attempting module fusion")
@@ -260,10 +236,9 @@ class ModelQuantizer:
         """
         if self.config.dtype == "qint8":
             return torch.qint8
-        elif self.config.dtype == "float16":
+        if self.config.dtype == "float16":
             return torch.float16
-        else:
-            raise ValueError(f"Unknown dtype: {self.config.dtype}")
+        raise ValueError(f"Unknown dtype: {self.config.dtype}")
 
     def _print_size_comparison(self, original_model: nn.Module, quantized_model: nn.Module):
         """Print model size comparison.
@@ -319,9 +294,9 @@ class ModelQuantizer:
         self,
         original_model: nn.Module,
         quantized_model: nn.Module,
-        input_shape: Tuple[int, ...],
-        num_iterations: int = 1000
-    ) -> Dict[str, float]:
+        input_shape: tuple[int, ...],
+        num_iterations: int = 1000,
+    ) -> dict[str, float]:
         """Benchmark quantized vs original model.
 
         Args:
@@ -377,7 +352,7 @@ class ModelQuantizer:
             "original_latency_ms": orig_mean,
             "quantized_latency_ms": quant_mean,
             "speedup": speedup,
-            "latency_reduction_pct": (1 - quant_mean / orig_mean) * 100
+            "latency_reduction_pct": (1 - quant_mean / orig_mean) * 100,
         }
 
         logger.info(f"Quantization speedup: {speedup:.2f}x")
@@ -389,6 +364,7 @@ class ModelQuantizer:
 # =============================================================================
 # FP16 Quantization
 # =============================================================================
+
 
 def quantize_to_fp16(model: nn.Module) -> nn.Module:
     """Quantize model to FP16.
@@ -413,6 +389,7 @@ def quantize_to_fp16(model: nn.Module) -> nn.Module:
 # CLI
 # =============================================================================
 
+
 def main():
     """Main quantization script."""
     import argparse
@@ -420,12 +397,20 @@ def main():
     parser = argparse.ArgumentParser(description="Quantize MAXIMUS Models")
 
     parser.add_argument("--model_path", type=str, required=True, help="Path to model")
-    parser.add_argument("--quantization_type", type=str, default="dynamic",
-                       choices=["dynamic", "static"],
-                       help="Quantization type: dynamic (weights only) or static (weights + activations)")
-    parser.add_argument("--backend", type=str, default="fbgemm",
-                       choices=["fbgemm", "qnnpack"],
-                       help="Quantization backend: fbgemm (x86) or qnnpack (ARM)")
+    parser.add_argument(
+        "--quantization_type",
+        type=str,
+        default="dynamic",
+        choices=["dynamic", "static"],
+        help="Quantization type: dynamic (weights only) or static (weights + activations)",
+    )
+    parser.add_argument(
+        "--backend",
+        type=str,
+        default="fbgemm",
+        choices=["fbgemm", "qnnpack"],
+        help="Quantization backend: fbgemm (x86) or qnnpack (ARM)",
+    )
     parser.add_argument("--output", type=str, default="model_quantized.pt", help="Output filename")
 
     args = parser.parse_args()
@@ -434,10 +419,7 @@ def main():
     model = torch.load(args.model_path)
 
     # Create quantizer
-    config = QuantizationConfig(
-        quantization_type=args.quantization_type,
-        backend=args.backend
-    )
+    config = QuantizationConfig(quantization_type=args.quantization_type, backend=args.backend)
 
     quantizer = ModelQuantizer(config=config)
 

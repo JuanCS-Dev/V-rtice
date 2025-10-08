@@ -12,13 +12,12 @@ HCL Analyzer Service, enabling effective self-management and adaptive behavior.
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
+
+import uvicorn
+from fastapi import FastAPI
 
 from collectors import SystemMetricsCollector
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import uvicorn
 
 app = FastAPI(title="Maximus HCL Monitor Service", version="1.0.0")
 

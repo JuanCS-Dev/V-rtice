@@ -10,10 +10,7 @@ self-regulation and adaptive behavior.
 """
 
 import asyncio
-from datetime import datetime
 from enum import Enum
-import time
-from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -73,7 +70,7 @@ class HomeostaticControlLoop:
         self.check_interval = check_interval_seconds
         self.is_running = False
         self.current_mode = OperationalMode.BALANCED
-        self.state_history: List[SystemState] = []
+        self.state_history: list[SystemState] = []
 
         # Actual components (passed from caller or None)
         self.monitor = monitor
@@ -101,6 +98,6 @@ class HomeostaticControlLoop:
             print("🧠 [HCL] Executing control loop...")
             await asyncio.sleep(self.check_interval)
 
-    def get_current_state(self) -> Optional[SystemState]:
+    def get_current_state(self) -> SystemState | None:
         """Returns the most recently recorded system state."""
         return self.state_history[-1] if self.state_history else None

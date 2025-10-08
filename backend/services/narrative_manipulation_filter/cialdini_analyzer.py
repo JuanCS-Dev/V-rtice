@@ -10,10 +10,10 @@ Detects exploitation of Cialdini's 6 principles of influence:
 6. Scarcity (escassez)
 """
 
-from collections import Counter
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from collections import Counter
+from typing import Dict, List
 
 from config import get_settings
 from models import CialdiniPrinciple
@@ -234,9 +234,7 @@ class CialdiniAnalyzer:
             matches = re.finditer(keyword, text_lower, re.IGNORECASE)
             for match in matches:
                 context = self._extract_context(text, match.start(), match.end())
-                confidence = self._calculate_confidence(
-                    context, self.PRINCIPLE_PATTERNS["reciprocity"]
-                )
+                confidence = self._calculate_confidence(context, self.PRINCIPLE_PATTERNS["reciprocity"])
 
                 if confidence > 0.3:
                     detections.append(
@@ -244,9 +242,7 @@ class CialdiniAnalyzer:
                             principle="reciprocity",
                             confidence=confidence,
                             evidence_text=context,
-                            manipulation_intent=self._assess_manipulation_intent(
-                                context
-                            ),
+                            manipulation_intent=self._assess_manipulation_intent(context),
                         )
                     )
 
@@ -271,9 +267,7 @@ class CialdiniAnalyzer:
                 context = self._extract_context(text, match.start(), match.end())
                 confidence = min(
                     0.8,
-                    self._calculate_confidence(
-                        context, self.PRINCIPLE_PATTERNS["commitment"]
-                    ),
+                    self._calculate_confidence(context, self.PRINCIPLE_PATTERNS["commitment"]),
                 )
 
                 detections.append(
@@ -424,9 +418,7 @@ class CialdiniAnalyzer:
 
         return all_detections
 
-    def _extract_context(
-        self, text: str, start: int, end: int, window: int = 50
-    ) -> str:
+    def _extract_context(self, text: str, start: int, end: int, window: int = 50) -> str:
         """Extract context around match."""
         context_start = max(0, start - window)
         context_end = min(len(text), end + window)
@@ -448,9 +440,7 @@ class CialdiniAnalyzer:
                 match_count += 0.5
 
         # Normalize
-        max_matches = len(principle_patterns.get("keywords", [])) + len(
-            principle_patterns.get("phrases", [])
-        )
+        max_matches = len(principle_patterns.get("keywords", [])) + len(principle_patterns.get("phrases", []))
         confidence = min(1.0, match_count / max(max_matches, 1))
 
         return confidence
@@ -473,9 +463,7 @@ class CialdiniAnalyzer:
 
         return min(1.0, manipulation_score)
 
-    def _deduplicate_detections(
-        self, detections: List[CialdiniPrinciple]
-    ) -> List[CialdiniPrinciple]:
+    def _deduplicate_detections(self, detections: List[CialdiniPrinciple]) -> List[CialdiniPrinciple]:
         """Remove duplicate detections based on evidence overlap."""
         if len(detections) <= 1:
             return detections
@@ -492,9 +480,7 @@ class CialdiniAnalyzer:
 
         return unique
 
-    def get_principle_statistics(
-        self, detections: List[CialdiniPrinciple]
-    ) -> Dict[str, any]:
+    def get_principle_statistics(self, detections: List[CialdiniPrinciple]) -> Dict[str, any]:
         """Get statistics about detected principles."""
         principle_counts = Counter(d.principle for d in detections)
 
@@ -502,20 +488,12 @@ class CialdiniAnalyzer:
             "total_detections": len(detections),
             "unique_principles": len(principle_counts),
             "principle_distribution": dict(principle_counts),
-            "avg_confidence": (
-                sum(d.confidence for d in detections) / len(detections)
-                if detections
-                else 0.0
-            ),
+            "avg_confidence": (sum(d.confidence for d in detections) / len(detections) if detections else 0.0),
             "avg_manipulation_intent": (
-                sum(d.manipulation_intent for d in detections) / len(detections)
-                if detections
-                else 0.0
+                sum(d.manipulation_intent for d in detections) / len(detections) if detections else 0.0
             ),
             "high_confidence_count": sum(1 for d in detections if d.confidence > 0.7),
-            "high_manipulation_count": sum(
-                1 for d in detections if d.manipulation_intent > 0.6
-            ),
+            "high_manipulation_count": sum(1 for d in detections if d.manipulation_intent > 0.6),
         }
 
 

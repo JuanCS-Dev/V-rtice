@@ -88,9 +88,10 @@ Implementation Design:
 
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from consciousness.mmei.monitor import AbstractNeeds, NeedUrgency
 
@@ -135,7 +136,7 @@ class Goal:
 
     # Description
     description: str = ""
-    target_component: Optional[str] = None  # Which system to act on
+    target_component: str | None = None  # Which system to act on
 
     # Motivation
     source_need: str = ""  # Which need generated this goal
@@ -147,15 +148,15 @@ class Goal:
 
     # State
     created_at: float = field(default_factory=time.time)
-    satisfied_at: Optional[float] = None
+    satisfied_at: float | None = None
     is_active: bool = True
 
     # Execution tracking
     execution_attempts: int = 0
-    last_execution_at: Optional[float] = None
+    last_execution_at: float | None = None
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_expired(self) -> bool:
         """Check if goal has timed out."""
@@ -281,24 +282,22 @@ class AutonomousGoalGenerator:
     "Motivation is the translation of feeling into action."
     """
 
-    def __init__(
-        self, config: Optional[GoalGenerationConfig] = None, generator_id: str = "mmei-goal-generator-primary"
-    ):
+    def __init__(self, config: GoalGenerationConfig | None = None, generator_id: str = "mmei-goal-generator-primary"):
         self.generator_id = generator_id
         self.config = config or GoalGenerationConfig()
 
         # Active goals
-        self._active_goals: List[Goal] = []
+        self._active_goals: list[Goal] = []
 
         # Goal history
-        self._completed_goals: List[Goal] = []
-        self._expired_goals: List[Goal] = []
+        self._completed_goals: list[Goal] = []
+        self._expired_goals: list[Goal] = []
 
         # Last generation timestamp (prevent spam)
-        self._last_generation: Dict[str, float] = {}
+        self._last_generation: dict[str, float] = {}
 
         # Goal consumers (execution callbacks)
-        self._goal_consumers: List[Callable[[Goal], None]] = []
+        self._goal_consumers: list[Callable[[Goal], None]] = []
 
         # Statistics
         self.total_goals_generated: int = 0
@@ -317,7 +316,7 @@ class AutonomousGoalGenerator:
         """
         self._goal_consumers.append(consumer)
 
-    def generate_goals(self, needs: AbstractNeeds) -> List[Goal]:
+    def generate_goals(self, needs: AbstractNeeds) -> list[Goal]:
         """
         Generate autonomous goals from current needs.
 
@@ -330,7 +329,7 @@ class AutonomousGoalGenerator:
         Returns:
             List of newly generated goals (may be empty)
         """
-        new_goals: List[Goal] = []
+        new_goals: list[Goal] = []
 
         # First, update existing goals (check satisfaction, expiration)
         self._update_active_goals(needs)
@@ -402,7 +401,7 @@ class AutonomousGoalGenerator:
 
     def _update_active_goals(self, needs: AbstractNeeds) -> None:
         """Update active goals - check satisfaction and expiration."""
-        still_active: List[Goal] = []
+        still_active: list[Goal] = []
 
         for goal in self._active_goals:
             # Check expiration
@@ -448,14 +447,13 @@ class AutonomousGoalGenerator:
         """Classify need urgency."""
         if need_value < 0.20:
             return NeedUrgency.SATISFIED
-        elif need_value < 0.40:
+        if need_value < 0.40:
             return NeedUrgency.LOW
-        elif need_value < 0.60:
+        if need_value < 0.60:
             return NeedUrgency.MODERATE
-        elif need_value < 0.80:
+        if need_value < 0.80:
             return NeedUrgency.HIGH
-        else:
-            return NeedUrgency.CRITICAL
+        return NeedUrgency.CRITICAL
 
     # Goal creation methods for each need type
 
@@ -581,7 +579,7 @@ class AutonomousGoalGenerator:
 
     # Query methods
 
-    def get_active_goals(self, sort_by_priority: bool = True) -> List[Goal]:
+    def get_active_goals(self, sort_by_priority: bool = True) -> list[Goal]:
         """
         Get all active goals.
 
@@ -595,15 +593,15 @@ class AutonomousGoalGenerator:
             return sorted(self._active_goals, key=lambda g: g.get_priority_score(), reverse=True)
         return self._active_goals.copy()
 
-    def get_critical_goals(self) -> List[Goal]:
+    def get_critical_goals(self) -> list[Goal]:
         """Get all active goals with CRITICAL priority."""
         return [g for g in self._active_goals if g.priority == GoalPriority.CRITICAL]
 
-    def get_goals_by_type(self, goal_type: GoalType) -> List[Goal]:
+    def get_goals_by_type(self, goal_type: GoalType) -> list[Goal]:
         """Get all active goals of specific type."""
         return [g for g in self._active_goals if g.goal_type == goal_type]
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get goal generation statistics."""
         satisfaction_rate = (
             self.total_goals_satisfied / self.total_goals_generated if self.total_goals_generated > 0 else 0.0

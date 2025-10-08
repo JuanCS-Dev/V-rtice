@@ -1,6 +1,5 @@
 """Health check tests - Fase 1 validation"""
 
-import pytest
 from fastapi import status
 
 

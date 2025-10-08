@@ -14,7 +14,7 @@ performance, and efficiency of the Maximus AI system.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 # Assuming these are client interfaces to other HCL services
 # In a real microservices setup, these would be HTTP clients or message queue producers
@@ -38,9 +38,7 @@ class HCLAnalyzerClient:
         print("[HCLRegulator] Mock HCLAnalyzerClient: Analyzing metrics.")
         await asyncio.sleep(0.1)
         # Simplified analysis result
-        requires_intervention = (
-            metrics["cpu_usage"] > 80 or metrics["memory_usage"] > 90
-        )
+        requires_intervention = metrics["cpu_usage"] > 80 or metrics["memory_usage"] > 90
         return {
             "overall_health_score": 0.7,
             "anomalies": [],
@@ -157,9 +155,7 @@ class HomeostaticRegulator:
                     "cpu_usage": metrics["cpu_usage"],
                     "memory_usage": metrics["memory_usage"],
                 }
-                plan = await self.planner_client.generate_plan(
-                    analysis_result, current_state, self.operational_goals
-                )
+                plan = await self.planner_client.generate_plan(analysis_result, current_state, self.operational_goals)
                 await self.kb_client.store_data("plan", plan)
 
                 # 4. Execute
@@ -214,6 +210,4 @@ class HomeostaticRegulator:
             "priority": priority,
             "last_updated": datetime.now().isoformat(),
         }
-        print(
-            f"🧠 [HCL Regulator] Operational goal '{goal_name}' updated to {value} with priority {priority}."
-        )
+        print(f"🧠 [HCL Regulator] Operational goal '{goal_name}' updated to {value} with priority {priority}.")

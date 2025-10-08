@@ -10,8 +10,7 @@ from typing import Any, Dict
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents import AgentStatus, AgentType, AgenteImunologicoBase
-
+from active_immune_core.agents import AgenteImunologicoBase, AgentStatus, AgentType
 
 # ==================== TEST AGENT IMPLEMENTATION ====================
 
@@ -127,18 +126,14 @@ class TestAgentDetection:
         await asyncio.sleep(0.5)
 
         # Investigate non-threat
-        result = await test_agent.investigar(
-            {"id": "target_1", "is_malicious": False}
-        )
+        result = await test_agent.investigar({"id": "target_1", "is_malicious": False})
 
         assert result["is_threat"] is False
         assert test_agent.investigation_count == 1
         assert test_agent.state.deteccoes_total == 1
 
         # Investigate threat
-        result = await test_agent.investigar(
-            {"id": "target_2", "is_malicious": True, "threat_level": 8}
-        )
+        result = await test_agent.investigar({"id": "target_2", "is_malicious": True, "threat_level": 8})
 
         assert result["is_threat"] is True
         assert test_agent.investigation_count == 2
@@ -158,9 +153,7 @@ class TestAgentDetection:
 
         # Neutralize (will likely fail due to Ethical AI unavailable)
         # This tests fail-safe behavior
-        result = await test_agent.neutralizar(
-            {"id": "malicious_target"}, metodo="isolate"
-        )
+        result = await test_agent.neutralizar({"id": "malicious_target"}, metodo="isolate")
 
         # Should fail because Ethical AI service is unavailable (fail-safe)
         assert result is False

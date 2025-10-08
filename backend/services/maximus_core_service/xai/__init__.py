@@ -14,11 +14,7 @@ Key Components:
 Usage:
     >>> from xai import ExplanationEngine
     >>> engine = ExplanationEngine()
-    >>> explanation = await engine.explain(
-    ...     decision_id="uuid",
-    ...     explanation_type="lime",
-    ...     detail_level="summary"
-    ... )
+    >>> explanation = await engine.explain(decision_id="uuid", explanation_type="lime", detail_level="summary")
 
 Performance Target: <2s per explanation
 """

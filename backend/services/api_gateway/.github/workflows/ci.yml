@@ -24,7 +24,7 @@ on:
 env:
   # 🔧 Customize estas variáveis para o seu service
   SERVICE_NAME: api_gateway  # ALTERAR
-  SERVICE_PORT: 8003        # ALTERAR se necessário
+  SERVICE_PORT: 8000        # ALTERAR se necessário
   PYTHON_VERSION: '3.11'
   UV_VERSION: '0.1.0'      # Versão do uv
 

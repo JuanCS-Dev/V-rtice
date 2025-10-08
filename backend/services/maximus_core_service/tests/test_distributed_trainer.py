@@ -10,14 +10,15 @@ import pytest
 
 try:
     import torch
-    import torch.nn as nn
     import torch.distributed as dist
+    import torch.nn as nn
     from torch.utils.data import TensorDataset
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
 
-from performance.distributed_trainer import DistributedTrainer, DistributedConfig
+from performance.distributed_trainer import DistributedConfig, DistributedTrainer
 
 
 @pytest.fixture
@@ -57,18 +58,13 @@ def dist_config():
         world_size=1,
         rank=0,
         batch_size_per_gpu=16,
-        sync_batch_norm=False  # Disable for single process
+        sync_batch_norm=False,  # Disable for single process
     )
 
 
 def test_distributed_config_validation():
     """Test distributed config validation."""
-    config = DistributedConfig(
-        backend="nccl",
-        world_size=4,
-        rank=0,
-        batch_size_per_gpu=32
-    )
+    config = DistributedConfig(backend="nccl", world_size=4, rank=0, batch_size_per_gpu=32)
 
     assert config.backend == "nccl"
     assert config.world_size == 4
@@ -89,12 +85,7 @@ def test_distributed_trainer_single_process(simple_model, simple_dataset, dist_c
     # Note: This test runs in single-process mode (world_size=1)
     # Full distributed testing requires multi-process setup
 
-    trainer = DistributedTrainer(
-        model=simple_model,
-        optimizer=optimizer,
-        loss_fn=dummy_loss_fn,
-        config=dist_config
-    )
+    trainer = DistributedTrainer(model=simple_model, optimizer=optimizer, loss_fn=dummy_loss_fn, config=dist_config)
 
     assert trainer.world_size == 1
     assert trainer.rank == 0
@@ -111,12 +102,7 @@ def test_distributed_trainer_is_main_process(simple_model, dist_config):
 
     optimizer = torch.optim.Adam(simple_model.parameters())
 
-    trainer = DistributedTrainer(
-        model=simple_model,
-        optimizer=optimizer,
-        loss_fn=dummy_loss_fn,
-        config=dist_config
-    )
+    trainer = DistributedTrainer(model=simple_model, optimizer=optimizer, loss_fn=dummy_loss_fn, config=dist_config)
 
     # With rank=0, should be main process
     assert trainer.is_main_process() is True
@@ -133,12 +119,7 @@ def test_distributed_trainer_device_setup(simple_model, dist_config):
 
     optimizer = torch.optim.Adam(simple_model.parameters())
 
-    trainer = DistributedTrainer(
-        model=simple_model,
-        optimizer=optimizer,
-        loss_fn=dummy_loss_fn,
-        config=dist_config
-    )
+    trainer = DistributedTrainer(model=simple_model, optimizer=optimizer, loss_fn=dummy_loss_fn, config=dist_config)
 
     # Should set device (CPU or CUDA)
     assert trainer.device is not None
@@ -146,11 +127,7 @@ def test_distributed_trainer_device_setup(simple_model, dist_config):
 
 def test_distributed_utility_functions():
     """Test distributed utility functions."""
-    from performance.distributed_trainer import (
-        get_rank,
-        get_world_size,
-        is_dist_available_and_initialized
-    )
+    from performance.distributed_trainer import get_rank, get_world_size, is_dist_available_and_initialized
 
     # When not initialized, should return safe defaults
     rank = get_rank()

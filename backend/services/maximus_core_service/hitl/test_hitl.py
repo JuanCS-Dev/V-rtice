@@ -15,43 +15,37 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-import pytest
 import time
 from datetime import datetime, timedelta
-from typing import Dict, Any
 
+import pytest
+
+from .audit_trail import AuditQuery, AuditTrail
 from .base import (
-    HITLConfig,
-    SLAConfig,
-    EscalationConfig,
-    HITLDecision,
-    DecisionContext,
-    OperatorAction,
-    AuditEntry,
-    AutomationLevel,
-    RiskLevel,
-    DecisionStatus,
     ActionType,
+    AutomationLevel,
+    DecisionContext,
+    DecisionStatus,
+    HITLConfig,
+    HITLDecision,
+    OperatorAction,
+    RiskLevel,
 )
-from .risk_assessor import RiskAssessor, RiskScore, RiskFactors
-from .decision_framework import HITLDecisionFramework, DecisionResult
+from .decision_framework import HITLDecisionFramework
+from .decision_queue import DecisionQueue
 from .escalation_manager import (
     EscalationManager,
-    EscalationRule,
     EscalationType,
 )
-from .decision_queue import DecisionQueue, QueuedDecision, SLAMonitor
 from .operator_interface import (
     OperatorInterface,
-    OperatorSession,
-    OperatorMetrics,
 )
-from .audit_trail import AuditTrail, AuditQuery, ComplianceReport
-
+from .risk_assessor import RiskAssessor
 
 # ============================================================================
 # Test Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def hitl_config():
@@ -137,6 +131,7 @@ def operator_interface(decision_framework, decision_queue, escalation_manager, a
 # Test Base Classes
 # ============================================================================
 
+
 class TestBaseClasses:
     """Tests for base classes and configurations."""
 
@@ -187,6 +182,7 @@ class TestBaseClasses:
 # ============================================================================
 # Test Risk Assessor
 # ============================================================================
+
 
 class TestRiskAssessor:
     """Tests for risk assessment engine."""
@@ -240,11 +236,13 @@ class TestRiskAssessor:
 # Test Decision Framework
 # ============================================================================
 
+
 class TestDecisionFramework:
     """Tests for HITL decision framework."""
 
     def test_full_automation_execution(self, decision_framework):
         """Test automatic execution for high-confidence, low-risk decision."""
+
         # Register dummy executor
         def dummy_executor(context):
             return {"status": "success", "host_isolated": context.action_params["host_id"]}
@@ -301,6 +299,7 @@ class TestDecisionFramework:
 # Test Escalation Manager
 # ============================================================================
 
+
 class TestEscalationManager:
     """Tests for escalation management."""
 
@@ -342,6 +341,7 @@ class TestEscalationManager:
 # ============================================================================
 # Test Decision Queue
 # ============================================================================
+
 
 class TestDecisionQueue:
     """Tests for decision queue management."""
@@ -410,6 +410,7 @@ class TestDecisionQueue:
 # Test Operator Interface
 # ============================================================================
 
+
 class TestOperatorInterface:
     """Tests for operator interface."""
 
@@ -471,6 +472,7 @@ class TestOperatorInterface:
 # ============================================================================
 # Test Audit Trail
 # ============================================================================
+
 
 class TestAuditTrail:
     """Tests for audit trail."""
@@ -536,6 +538,7 @@ class TestAuditTrail:
 # Integration Tests
 # ============================================================================
 
+
 class TestIntegration:
     """End-to-end integration tests."""
 
@@ -580,9 +583,7 @@ class TestIntegration:
         )
 
         # Step 3: Operator gets pending decisions
-        pending = operator_interface.get_pending_decisions(
-            session_id=session.session_id, limit=10
-        )
+        pending = operator_interface.get_pending_decisions(session_id=session.session_id, limit=10)
 
         assert len(pending) == 1
         decision = pending[0]

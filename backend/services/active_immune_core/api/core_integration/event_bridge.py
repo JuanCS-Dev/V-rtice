@@ -18,22 +18,21 @@ Version: 1.0.0
 import asyncio
 import json
 import logging
-from datetime import datetime
-from typing import Set, Dict, Any, Optional, List
 from collections import defaultdict
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Set
 
-from fastapi import WebSocket
+import redis.asyncio as aioredis
 from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import KafkaConnectionError
-import redis.asyncio as aioredis
-
-from .core_manager import CoreManager
+from fastapi import WebSocket
 
 logger = logging.getLogger(__name__)
 
 
 class EventBridgeError(Exception):
     """Base exception for EventBridge errors"""
+
     pass
 
 
@@ -118,14 +117,10 @@ class EventBridge:
         self._running = True
 
         # Start Kafka consumer
-        self._tasks.append(
-            asyncio.create_task(self._stream_kafka_events(), name="kafka_stream")
-        )
+        self._tasks.append(asyncio.create_task(self._stream_kafka_events(), name="kafka_stream"))
 
         # Start Redis consumer
-        self._tasks.append(
-            asyncio.create_task(self._stream_redis_events(), name="redis_stream")
-        )
+        self._tasks.append(asyncio.create_task(self._stream_redis_events(), name="redis_stream"))
 
         logger.info("✓ EventBridge started (2 background tasks)")
 
@@ -313,9 +308,7 @@ class EventBridge:
                     logger.error(f"Error processing Kafka event: {e}")
 
         except KafkaConnectionError:
-            logger.warning(
-                "Kafka unavailable for event streaming (running in degraded mode)"
-            )
+            logger.warning("Kafka unavailable for event streaming (running in degraded mode)")
         except Exception as e:
             logger.error(f"Kafka streaming error: {e}", exc_info=True)
 
@@ -373,9 +366,7 @@ class EventBridge:
                     logger.error(f"Error processing Redis event: {e}")
 
         except Exception as e:
-            logger.warning(
-                f"Redis unavailable for event streaming (running in degraded mode): {e}"
-            )
+            logger.warning(f"Redis unavailable for event streaming (running in degraded mode): {e}")
 
     async def _broadcast_event(self, event: Dict[str, Any]) -> None:
         """
@@ -387,11 +378,7 @@ class EventBridge:
         event_type = event.get("event", "unknown")
 
         # Find subscribed clients
-        subscribers = [
-            ws
-            for ws in self._connections
-            if event_type in self._connection_subscriptions.get(ws, set())
-        ]
+        subscribers = [ws for ws in self._connections if event_type in self._connection_subscriptions.get(ws, set())]
 
         if not subscribers:
             return

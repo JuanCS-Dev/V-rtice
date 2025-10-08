@@ -20,10 +20,10 @@ Like biological Basal Ganglia: Habitual, fast, model-free reinforcement learning
 NO MOCKS - Production-ready implementation.
 """
 
-from collections import deque
-from datetime import datetime
 import logging
 import math
+from collections import deque
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
@@ -54,9 +54,7 @@ class ActorNetwork:
         self.w3 = self._xavier_init((hidden_dim, action_dim))
         self.b3 = np.zeros(action_dim)
 
-        logger.info(
-            f"ActorNetwork initialized (state={state_dim}, action={action_dim}, hidden={hidden_dim})"
-        )
+        logger.info(f"ActorNetwork initialized (state={state_dim}, action={action_dim}, hidden={hidden_dim})")
 
     def _xavier_init(self, shape: Tuple[int, int]) -> np.ndarray:
         """Xavier weight initialization.
@@ -116,9 +114,7 @@ class ActorNetwork:
 
         return action_probs
 
-    def select_action(
-        self, state: np.ndarray, temperature: float = 1.0, deterministic: bool = False
-    ) -> int:
+    def select_action(self, state: np.ndarray, temperature: float = 1.0, deterministic: bool = False) -> int:
         """Select action from policy.
 
         Args:
@@ -174,9 +170,7 @@ class CriticNetwork:
         self.w3 = self._xavier_init((hidden_dim, 1))
         self.b3 = np.zeros(1)
 
-        logger.info(
-            f"CriticNetwork initialized (state={state_dim}, hidden={hidden_dim})"
-        )
+        logger.info(f"CriticNetwork initialized (state={state_dim}, hidden={hidden_dim})")
 
     def _xavier_init(self, shape: Tuple[int, int]) -> np.ndarray:
         """Xavier weight initialization."""
@@ -263,10 +257,7 @@ class ActorCriticCore:
         self.update_count = 0
         self.last_update_time: Optional[datetime] = None
 
-        logger.info(
-            f"ActorCriticCore initialized (state={state_dim}, action={action_dim}, "
-            f"gamma={gamma})"
-        )
+        logger.info(f"ActorCriticCore initialized (state={state_dim}, action={action_dim}, gamma={gamma})")
 
     def select_action(
         self,
@@ -299,9 +290,7 @@ class ActorCriticCore:
 
         return action, value
 
-    def compute_td_error(
-        self, state: np.ndarray, reward: float, next_state: np.ndarray, done: bool
-    ) -> float:
+    def compute_td_error(self, state: np.ndarray, reward: float, next_state: np.ndarray, done: bool) -> float:
         """Compute TD-error (Reward Prediction Error for dopamine).
 
         TD-error = r + γ * V(s') - V(s)
@@ -327,10 +316,7 @@ class ActorCriticCore:
         # Store in history
         self.td_error_history.append(td_error)
 
-        logger.debug(
-            f"TD-error: {td_error:.4f} (r={reward:.4f}, V(s)={v_current:.4f}, "
-            f"V(s')={v_next:.4f})"
-        )
+        logger.debug(f"TD-error: {td_error:.4f} (r={reward:.4f}, V(s)={v_current:.4f}, V(s')={v_next:.4f})")
 
         return td_error
 
@@ -412,9 +398,7 @@ class ActorCriticCore:
             return {"error": "insufficient_data"}
 
         # Sample batch from experience buffer
-        indices = np.random.choice(
-            len(self.experience_buffer), batch_size, replace=False
-        )
+        indices = np.random.choice(len(self.experience_buffer), batch_size, replace=False)
         batch = [self.experience_buffer[i] for i in indices]
 
         # Compute losses
@@ -451,8 +435,7 @@ class ActorCriticCore:
         self.last_update_time = datetime.now()
 
         logger.info(
-            f"Networks updated (count={self.update_count}): "
-            f"actor_loss={actor_loss:.4f}, critic_loss={critic_loss:.4f}"
+            f"Networks updated (count={self.update_count}): actor_loss={actor_loss:.4f}, critic_loss={critic_loss:.4f}"
         )
 
         return {
@@ -637,8 +620,6 @@ class ActorCriticCore:
             "learning_rates": {"actor": self.lr_actor, "critic": self.lr_critic},
             "experience_buffer_size": len(self.experience_buffer),
             "update_count": self.update_count,
-            "last_update": (
-                self.last_update_time.isoformat() if self.last_update_time else "N/A"
-            ),
+            "last_update": (self.last_update_time.isoformat() if self.last_update_time else "N/A"),
             "td_error_statistics": td_stats,
         }

@@ -10,7 +10,6 @@ Quality: Production-ready, REGRA DE OURO compliant
 
 import asyncio
 import sys
-from typing import Dict
 
 
 async def test_maximus_integration():
@@ -22,15 +21,15 @@ async def test_maximus_integration():
     try:
         # Test 1: Import all required modules
         print("\n1️⃣ Testing imports...")
+
+        from governance_sse import create_governance_api
         from hitl import (
             DecisionQueue,
+            HITLConfig,
+            HITLDecisionFramework,
             OperatorInterface,
             SLAConfig,
-            HITLDecisionFramework,
-            HITLConfig,
         )
-        from governance_sse import create_governance_api
-        from fastapi import FastAPI
 
         print("   ✅ All imports successful")
 
@@ -108,7 +107,7 @@ async def test_maximus_integration():
         if route_count < len(expected_routes):
             print(f"   ⚠️  Warning: Expected at least {len(expected_routes)} routes, found {route_count}")
         else:
-            print(f"   ✅ All expected routes present")
+            print("   ✅ All expected routes present")
 
         # Test 9: Cleanup
         print("\n9️⃣ Cleaning up...")
@@ -119,11 +118,11 @@ async def test_maximus_integration():
         print("✅ ALL INTEGRATION TESTS PASSED")
         print("=" * 80)
         print("\n📊 Summary:")
-        print(f"   - SLA Config: ✅ Created")
-        print(f"   - HITL Config: ✅ Created")
-        print(f"   - DecisionQueue: ✅ Initialized")
-        print(f"   - HITLDecisionFramework: ✅ Initialized")
-        print(f"   - OperatorInterface: ✅ Initialized")
+        print("   - SLA Config: ✅ Created")
+        print("   - HITL Config: ✅ Created")
+        print("   - DecisionQueue: ✅ Initialized")
+        print("   - HITLDecisionFramework: ✅ Initialized")
+        print("   - OperatorInterface: ✅ Initialized")
         print(f"   - Governance API Router: ✅ Created ({route_count} routes)")
         print("\n✅ MAXIMUS Core Service is ready for HITL Governance integration")
         print()

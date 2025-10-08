@@ -5,7 +5,6 @@ Fetches current needs from MMEI interoception monitor for immune system integrat
 """
 
 import logging
-from typing import Optional
 
 import httpx
 
@@ -37,14 +36,14 @@ class MMEIClient:
         self.timeout = timeout
         self.client = httpx.AsyncClient(timeout=timeout)
 
-        self._last_needs: Optional[AbstractNeeds] = None
+        self._last_needs: AbstractNeeds | None = None
         self._consecutive_failures = 0
 
     async def close(self):
         """Close HTTP client."""
         await self.client.aclose()
 
-    async def get_current_needs(self) -> Optional[AbstractNeeds]:
+    async def get_current_needs(self) -> AbstractNeeds | None:
         """
         Fetch current abstract needs from MMEI monitor.
 
@@ -76,17 +75,16 @@ class MMEIClient:
 
                 return needs
 
-            else:
-                logger.warning(f"MMEI service returned {response.status_code}, using cached needs")
-                self._consecutive_failures += 1
-                return self._fallback_needs()
+            logger.warning(f"MMEI service returned {response.status_code}, using cached needs")
+            self._consecutive_failures += 1
+            return self._fallback_needs()
 
         except (httpx.RequestError, httpx.TimeoutException) as e:
             logger.warning(f"MMEI service unavailable: {e}, using cached needs")
             self._consecutive_failures += 1
             return self._fallback_needs()
 
-    def _fallback_needs(self) -> Optional[AbstractNeeds]:
+    def _fallback_needs(self) -> AbstractNeeds | None:
         """
         Fallback strategy when MMEI unavailable.
 
@@ -96,12 +94,11 @@ class MMEIClient:
         if self._consecutive_failures < 3:
             # Return cached needs
             return self._last_needs
-        else:
-            # After 3 failures, assume MMEI down
-            logger.error("MMEI service persistently unavailable, returning None")
-            return None
+        # After 3 failures, assume MMEI down
+        logger.error("MMEI service persistently unavailable, returning None")
+        return None
 
-    def get_last_needs(self) -> Optional[AbstractNeeds]:
+    def get_last_needs(self) -> AbstractNeeds | None:
         """Get last successfully fetched needs (cached)."""
         return self._last_needs
 

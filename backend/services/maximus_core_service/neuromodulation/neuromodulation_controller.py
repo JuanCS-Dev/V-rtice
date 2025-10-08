@@ -6,10 +6,10 @@ to modulate AI behavior in bio-inspired ways.
 Production-ready implementation.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .acetylcholine_system import AcetylcholineState, AcetylcholineSystem
 from .dopamine_system import DopamineState, DopamineSystem
@@ -61,9 +61,7 @@ class NeuromodulationController:
 
         logger.info("Neuromodulation controller initialized (4 systems operational)")
 
-    def process_reward(
-        self, expected_reward: float, actual_reward: float, success: bool
-    ) -> Dict[str, float]:
+    def process_reward(self, expected_reward: float, actual_reward: float, success: bool) -> dict[str, float]:
         """Process task outcome through neuromodulatory systems.
 
         Args:
@@ -75,9 +73,7 @@ class NeuromodulationController:
             Dict with modulation parameters
         """
         # Dopamine: Compute RPE
-        rpe = self.dopamine.compute_reward_prediction_error(
-            expected_reward, actual_reward
-        )
+        rpe = self.dopamine.compute_reward_prediction_error(expected_reward, actual_reward)
 
         # Update dopamine motivation
         self.dopamine.update_motivation()
@@ -222,7 +218,7 @@ class NeuromodulationController:
             timestamp=datetime.utcnow(),
         )
 
-    def export_state(self) -> Dict[str, Any]:
+    def export_state(self) -> dict[str, Any]:
         """Export state as dictionary for monitoring/logging.
 
         Returns:

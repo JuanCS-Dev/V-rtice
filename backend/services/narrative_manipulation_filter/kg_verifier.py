@@ -4,17 +4,17 @@ Knowledge Graph Verifier for Claim Verification.
 Executes SPARQL queries against Wikidata and DBpedia to verify factual claims.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
 
-from cache_manager import cache_manager, CacheCategory
+from cache_manager import CacheCategory, cache_manager
 from config import get_settings
 from dbpedia_client import dbpedia_client
 from entity_linker import Entity
 from models import VerificationStatus
-from sparql_generator import SPARQLQuery, TriplePattern
+from sparql_generator import SPARQLQuery
 from utils import hash_text
 from wikidata_client import wikidata_client
 
@@ -160,9 +160,7 @@ class KnowledgeGraphVerifier:
 
         return result
 
-    async def _verify_on_wikidata(
-        self, sparql_query: SPARQLQuery
-    ) -> VerificationResult:
+    async def _verify_on_wikidata(self, sparql_query: SPARQLQuery) -> VerificationResult:
         """Execute SPARQL query on Wikidata."""
         try:
             # Execute query
@@ -298,15 +296,11 @@ class KnowledgeGraphVerifier:
                     claim=sparql_query.original_claim,
                     verified=verified,
                     verification_status=(
-                        VerificationStatus.VERIFIED_TRUE
-                        if verified
-                        else VerificationStatus.VERIFIED_FALSE
+                        VerificationStatus.VERIFIED_TRUE if verified else VerificationStatus.VERIFIED_FALSE
                     ),
                     confidence=0.85,  # Slightly lower confidence for DBpedia
                     verdict="TRUE" if verified else "FALSE",
-                    evidence={
-                        "dbpedia_result": "confirmed" if verified else "not_found"
-                    },
+                    evidence={"dbpedia_result": "confirmed" if verified else "not_found"},
                     sparql_query=dbpedia_query,
                     kg_source="dbpedia",
                 )
@@ -327,9 +321,7 @@ class KnowledgeGraphVerifier:
                     )
 
                 # Extract values
-                actual_values = [
-                    binding.get("value", {}).get("value", "") for binding in bindings
-                ]
+                actual_values = [binding.get("value", {}).get("value", "") for binding in bindings]
 
                 return VerificationResult(
                     claim=sparql_query.original_claim,
@@ -383,9 +375,7 @@ class KnowledgeGraphVerifier:
 
         return query
 
-    async def batch_verify(
-        self, sparql_queries: List[SPARQLQuery]
-    ) -> List[VerificationResult]:
+    async def batch_verify(self, sparql_queries: List[SPARQLQuery]) -> List[VerificationResult]:
         """Verify multiple claims in parallel."""
         import asyncio
 

@@ -20,7 +20,7 @@ Version: 1.0.0
 
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import aiohttp
 
@@ -146,23 +146,18 @@ class MacrofagoDigital(AgenteImunologicoBase):
                     data = await response.json()
                     connections = data.get("connections", [])
 
-                    logger.debug(
-                        f"Scanned {len(connections)} active connections in "
-                        f"{self.state.area_patrulha}"
-                    )
+                    logger.debug(f"Scanned {len(connections)} active connections in {self.state.area_patrulha}")
 
                     return connections
 
                 elif response.status == 404:
                     # RTE service or endpoint not found
-                    logger.debug(f"RTE service returned 404 (service may not be running)")
+                    logger.debug("RTE service returned 404 (service may not be running)")
                     return []
 
                 else:
                     error_text = await response.text()
-                    logger.warning(
-                        f"Network scan failed ({response.status}): {error_text}"
-                    )
+                    logger.warning(f"Network scan failed ({response.status}): {error_text}")
                     return []
 
         except aiohttp.ClientConnectorError as e:
@@ -269,9 +264,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
                     intel = await response.json()
 
                     # Extract threat indicators
-                    reputation_score = (
-                        intel.get("reputation", {}).get("score", 0)
-                    )
+                    reputation_score = intel.get("reputation", {}).get("score", 0)
                     is_malicious = intel.get("malicious", False)
                     blocklists = intel.get("blocklists", [])
 
@@ -292,9 +285,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
 
                     if is_threat:
                         logger.warning(
-                            f"Threat confirmed: {dst_ip} "
-                            f"(reputation={reputation_score}, "
-                            f"blocklists={len(blocklists)})"
+                            f"Threat confirmed: {dst_ip} (reputation={reputation_score}, blocklists={len(blocklists)})"
                         )
                     else:
                         logger.info(f"IP {dst_ip} appears benign")
@@ -303,19 +294,14 @@ class MacrofagoDigital(AgenteImunologicoBase):
 
                 elif response.status == 404:
                     # IP Intel service not found
-                    logger.debug(
-                        f"IP Intel service unavailable (404), "
-                        "using conservative heuristics"
-                    )
+                    logger.debug("IP Intel service unavailable (404), using conservative heuristics")
 
                     # Fallback: Conservative heuristic-based detection
                     return self._heuristic_investigation(alvo)
 
                 else:
                     error_text = await response.text()
-                    logger.warning(
-                        f"IP Intel failed ({response.status}): {error_text}"
-                    )
+                    logger.warning(f"IP Intel failed ({response.status}): {error_text}")
                     return self._heuristic_investigation(alvo)
 
         except aiohttp.ClientConnectorError as e:
@@ -405,9 +391,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
         """
         dst_ip = alvo.get("dst_ip", "unknown")
 
-        logger.info(
-            f"Macrophage {self.state.id} phagocytosing: {dst_ip} (method={metodo})"
-        )
+        logger.info(f"Macrophage {self.state.id} phagocytosing: {dst_ip} (method={metodo})")
 
         if metodo == "isolate":
             # Call RTE Service to block IP (PRODUCTION - real HTTP)
@@ -439,9 +423,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
 
                     elif response.status == 404:
                         # RTE service not available
-                        logger.warning(
-                            f"RTE service unavailable (404), cannot block {dst_ip}"
-                        )
+                        logger.warning(f"RTE service unavailable (404), cannot block {dst_ip}")
 
                         # Still consider it "neutralized" locally
                         self.fagocitados.append(dst_ip)
@@ -450,9 +432,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
 
                     else:
                         error_text = await response.text()
-                        logger.error(
-                            f"Failed to block {dst_ip} ({response.status}): {error_text}"
-                        )
+                        logger.error(f"Failed to block {dst_ip} ({response.status}): {error_text}")
                         return False
 
             except aiohttp.ClientConnectorError as e:
@@ -494,9 +474,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
             logger.warning("Cytokine messenger not running, cannot present antigen")
             return
 
-        logger.info(
-            f"Macrophage {self.state.id} presenting antigen: {ameaca.get('dst_ip')}"
-        )
+        logger.info(f"Macrophage {self.state.id} presenting antigen: {ameaca.get('dst_ip')}")
 
         try:
             # Send IL12 (activates Dendritic Cells → T-Cell activation)
@@ -521,10 +499,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
 
             self.antigenos_apresentados += 1
 
-            logger.debug(
-                f"Antigen presented successfully "
-                f"(total: {self.antigenos_apresentados})"
-            )
+            logger.debug(f"Antigen presented successfully (total: {self.antigenos_apresentados})")
 
         except Exception as e:
             logger.error(f"Failed to present antigen: {e}")
@@ -565,9 +540,7 @@ class MacrofagoDigital(AgenteImunologicoBase):
             "antigenos_apresentados": self.antigenos_apresentados,
             "conexoes_escaneadas": self.conexoes_escaneadas,
             "eficiencia_fagocitose": (
-                self.state.neutralizacoes_total / self.state.deteccoes_total
-                if self.state.deteccoes_total > 0
-                else 0.0
+                self.state.neutralizacoes_total / self.state.deteccoes_total if self.state.deteccoes_total > 0 else 0.0
             ),
         }
 

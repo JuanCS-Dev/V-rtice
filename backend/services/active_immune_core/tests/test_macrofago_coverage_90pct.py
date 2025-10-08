@@ -16,15 +16,12 @@ Missing lines identified:
 """
 
 import asyncio
-from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents import AgentStatus, AgentType
 from active_immune_core.agents.macrofago import MacrofagoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -85,9 +82,7 @@ class TestMacrofagoPatrolFlow:
     """Tests for complete patrol flow (Lines 93-126)"""
 
     @pytest.mark.asyncio
-    async def test_patrol_detects_and_neutralizes_threat(
-        self, macrofago, suspicious_connection
-    ):
+    async def test_patrol_detects_and_neutralizes_threat(self, macrofago, suspicious_connection):
         """
         Test complete patrol flow: scan → detect → investigate → neutralize.
 
@@ -102,9 +97,7 @@ class TestMacrofagoPatrolFlow:
         # ARRANGE: Mock RTE connections response
         mock_connections_response = AsyncMock()
         mock_connections_response.status = 200
-        mock_connections_response.json = AsyncMock(
-            return_value={"connections": [suspicious_connection]}
-        )
+        mock_connections_response.json = AsyncMock(return_value={"connections": [suspicious_connection]})
 
         # Mock IP Intel response (high threat)
         mock_intel_response = AsyncMock()
@@ -123,9 +116,7 @@ class TestMacrofagoPatrolFlow:
         mock_block_response.text = AsyncMock(return_value="OK")
 
         # ACT: Execute patrol with ethical AI bypass
-        with patch.object(
-            macrofago, "_validate_ethical", new_callable=AsyncMock, return_value=True
-        ):
+        with patch.object(macrofago, "_validate_ethical", new_callable=AsyncMock, return_value=True):
             with patch.object(macrofago._http_session, "get") as mock_get:
                 with patch.object(macrofago._http_session, "post") as mock_post:
 
@@ -138,25 +129,18 @@ class TestMacrofagoPatrolFlow:
                             mock.__aenter__.return_value = mock_block_response
                         return mock
 
-                    mock_get.return_value.__aenter__.return_value = (
-                        mock_connections_response
-                    )
+                    mock_get.return_value.__aenter__.return_value = mock_connections_response
                     mock_post.side_effect = post_side_effect
 
                     await macrofago.patrulhar()
 
         # ASSERT: Threat should be phagocytosed
         assert len(macrofago.fagocitados) > 0, "Should phagocytose threat"
-        assert (
-            suspicious_connection["dst_ip"] in macrofago.fagocitados
-        ), "Should phagocytose suspicious IP"
+        assert suspicious_connection["dst_ip"] in macrofago.fagocitados, "Should phagocytose suspicious IP"
         assert macrofago.conexoes_escaneadas == 1, "Should scan 1 connection"
 
-
     @pytest.mark.asyncio
-    async def test_patrol_skips_normal_connections(
-        self, macrofago, normal_connection
-    ):
+    async def test_patrol_skips_normal_connections(self, macrofago, normal_connection):
         """
         Test patrol flow with normal connection (low suspicion score).
 
@@ -170,9 +154,7 @@ class TestMacrofagoPatrolFlow:
         # ARRANGE: Mock RTE response with normal connection
         mock_connections_response = AsyncMock()
         mock_connections_response.status = 200
-        mock_connections_response.json = AsyncMock(
-            return_value={"connections": [normal_connection]}
-        )
+        mock_connections_response.json = AsyncMock(return_value={"connections": [normal_connection]})
 
         fagocitados_before = len(macrofago.fagocitados)
 
@@ -183,9 +165,7 @@ class TestMacrofagoPatrolFlow:
             await macrofago.patrulhar()
 
         # ASSERT: Normal connection should not be phagocytosed
-        assert (
-            len(macrofago.fagocitados) == fagocitados_before
-        ), "Should not phagocytose normal connection"
+        assert len(macrofago.fagocitados) == fagocitados_before, "Should not phagocytose normal connection"
         assert macrofago.conexoes_escaneadas == 1, "Should still scan connection"
 
 

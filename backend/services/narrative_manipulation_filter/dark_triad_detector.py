@@ -7,10 +7,9 @@ Detects linguistic markers of Dark Triad personality traits:
 3. Psychopathy (psicopatia) - Callousness, impulsivity, lack of empathy
 """
 
-from collections import defaultdict
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
 from config import get_settings
 from models import DarkTriadMarkers
@@ -177,11 +176,7 @@ class DarkTriadDetector:
         }
 
         for category, patterns in self.NARCISSISM_PATTERNS.items():
-            matches = sum(
-                1
-                for pattern in patterns
-                if re.search(pattern, text_lower, re.IGNORECASE)
-            )
+            matches = sum(1 for pattern in patterns if re.search(pattern, text_lower, re.IGNORECASE))
 
             # Normalize by pattern count
             category_score = min(1.0, matches / len(patterns))
@@ -191,9 +186,7 @@ class DarkTriadDetector:
         # Check first-person pronoun density (narcissism correlate)
         words = text_lower.split()
         first_person_count = sum(
-            1
-            for word in words
-            if word in ["eu", "meu", "minha", "meus", "minhas", "comigo", "me"]
+            1 for word in words if word in ["eu", "meu", "minha", "meus", "minhas", "comigo", "me"]
         )
         first_person_ratio = first_person_count / len(words) if words else 0
 
@@ -227,11 +220,7 @@ class DarkTriadDetector:
         }
 
         for category, patterns in self.MACHIAVELLIANISM_PATTERNS.items():
-            matches = sum(
-                1
-                for pattern in patterns
-                if re.search(pattern, text_lower, re.IGNORECASE)
-            )
+            matches = sum(1 for pattern in patterns if re.search(pattern, text_lower, re.IGNORECASE))
 
             category_score = min(1.0, matches / len(patterns))
             score += category_score * weights[category]
@@ -261,11 +250,7 @@ class DarkTriadDetector:
         }
 
         for category, patterns in self.PSYCHOPATHY_PATTERNS.items():
-            matches = sum(
-                1
-                for pattern in patterns
-                if re.search(pattern, text_lower, re.IGNORECASE)
-            )
+            matches = sum(1 for pattern in patterns if re.search(pattern, text_lower, re.IGNORECASE))
 
             category_score = min(1.0, matches / len(patterns))
             score += category_score * weights[category]
@@ -332,9 +317,7 @@ class DarkTriadDetector:
         ]
 
         text_lower = text.lower()
-        sadism_matches = sum(
-            1 for pattern in sadism_patterns if re.search(pattern, text_lower)
-        )
+        sadism_matches = sum(1 for pattern in sadism_patterns if re.search(pattern, text_lower))
         sadism_score = min(1.0, sadism_matches / len(sadism_patterns))
 
         return {
@@ -362,14 +345,10 @@ class DarkTriadDetector:
             risk_description = "High Dark Triad traits - severe manipulation risk"
         elif aggregate >= 0.5:
             risk_level = "high"
-            risk_description = (
-                "Moderate-high Dark Triad traits - significant manipulation risk"
-            )
+            risk_description = "Moderate-high Dark Triad traits - significant manipulation risk"
         elif aggregate >= 0.3:
             risk_level = "medium"
-            risk_description = (
-                "Some Dark Triad traits present - moderate manipulation risk"
-            )
+            risk_description = "Some Dark Triad traits present - moderate manipulation risk"
         else:
             risk_level = "low"
             risk_description = "Low Dark Triad traits - minimal manipulation risk"

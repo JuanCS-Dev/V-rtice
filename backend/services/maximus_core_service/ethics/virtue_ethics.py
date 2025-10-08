@@ -11,7 +11,7 @@ Core Principles:
 """
 
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from .base import ActionContext, EthicalFramework, EthicalFrameworkResult, EthicalVerdict
 
@@ -59,7 +59,7 @@ class VirtueEthicsAssessment(EthicalFramework):
         },
     }
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize virtue ethics assessor.
 
         Args:
@@ -92,11 +92,9 @@ class VirtueEthicsAssessment(EthicalFramework):
         )
 
         # Approval threshold (weighted average virtue score)
-        self.approval_threshold = (
-            config.get("approval_threshold", 0.70) if config else 0.70
-        )
+        self.approval_threshold = config.get("approval_threshold", 0.70) if config else 0.70
 
-    def get_framework_principles(self) -> List[str]:
+    def get_framework_principles(self) -> list[str]:
         """Get virtue ethics principles.
 
         Returns:
@@ -130,22 +128,15 @@ class VirtueEthicsAssessment(EthicalFramework):
         for virtue_name, virtue_def in self.CARDINAL_VIRTUES.items():
             score = self._assess_virtue(virtue_name, virtue_def, action_context)
             virtue_scores[virtue_name] = score
-            reasoning_steps.append(
-                f"  {virtue_name.capitalize()}: {score:.2f} ({virtue_def['golden_mean']})"
-            )
+            reasoning_steps.append(f"  {virtue_name.capitalize()}: {score:.2f} ({virtue_def['golden_mean']})")
 
         metadata["virtues_assessed"] = virtue_scores
 
         # Calculate weighted average
-        weighted_score = sum(
-            virtue_scores[virtue] * self.virtue_weights[virtue]
-            for virtue in virtue_scores
-        )
+        weighted_score = sum(virtue_scores[virtue] * self.virtue_weights[virtue] for virtue in virtue_scores)
 
         metadata["character_alignment"] = weighted_score
-        reasoning_steps.append(
-            f"Weighted virtue score: {weighted_score:.3f} (threshold: {self.approval_threshold})"
-        )
+        reasoning_steps.append(f"Weighted virtue score: {weighted_score:.3f} (threshold: {self.approval_threshold})")
 
         # Golden mean analysis
         reasoning_steps.append("Analyzing golden mean (balance between extremes)...")
@@ -153,9 +144,7 @@ class VirtueEthicsAssessment(EthicalFramework):
         metadata["golden_mean_analysis"] = golden_mean_analysis
 
         if golden_mean_analysis["extremes_detected"]:
-            reasoning_steps.append(
-                f"  ⚠️  Extremes detected: {', '.join(golden_mean_analysis['extremes'])}"
-            )
+            reasoning_steps.append(f"  ⚠️  Extremes detected: {', '.join(golden_mean_analysis['extremes'])}")
         else:
             reasoning_steps.append("  ✓ Action balanced, no extremes detected")
 
@@ -171,12 +160,12 @@ class VirtueEthicsAssessment(EthicalFramework):
 
         # Decision
         approved = final_score >= self.approval_threshold
-        confidence = min(
-            abs(final_score - 0.5) * 2, 1.0
-        )  # Confidence based on distance from neutral
+        confidence = min(abs(final_score - 0.5) * 2, 1.0)  # Confidence based on distance from neutral
 
         if approved:
-            explanation = f"Action aligns with virtuous character (score: {final_score:.3f} ≥ {self.approval_threshold})"
+            explanation = (
+                f"Action aligns with virtuous character (score: {final_score:.3f} ≥ {self.approval_threshold})"
+            )
             verdict = EthicalVerdict.APPROVED
             reasoning_steps.append(f"✅ {explanation}")
         else:
@@ -201,7 +190,7 @@ class VirtueEthicsAssessment(EthicalFramework):
     def _assess_virtue(
         self,
         virtue_name: str,
-        virtue_def: Dict[str, str],
+        virtue_def: dict[str, str],
         action_context: ActionContext,
     ) -> float:
         """Assess how well action exemplifies a specific virtue.
@@ -236,12 +225,10 @@ class VirtueEthicsAssessment(EthicalFramework):
 
             return 0.7  # Neutral/moderate courage
 
-        elif virtue_name == "temperance":
+        if virtue_name == "temperance":
             # Temperance: Moderation in response
             if action_context.impact_assessment:
-                disruption = action_context.impact_assessment.get(
-                    "disruption_level", 0.0
-                )
+                disruption = action_context.impact_assessment.get("disruption_level", 0.0)
 
                 # Check for excess (passivity)
                 if (
@@ -261,7 +248,7 @@ class VirtueEthicsAssessment(EthicalFramework):
 
             return 0.7  # Neutral
 
-        elif virtue_name == "justice":
+        if virtue_name == "justice":
             # Justice: Fair treatment of all stakeholders
             stakeholder_count = 0
 
@@ -274,22 +261,18 @@ class VirtueEthicsAssessment(EthicalFramework):
 
             if stakeholder_count >= 3:
                 return 0.9  # Just (considers all parties)
-            elif stakeholder_count == 2:
+            if stakeholder_count == 2:
                 return 0.7  # Partial justice
-            else:
-                return 0.4  # Unjust (narrow focus)
+            return 0.4  # Unjust (narrow focus)
 
-        elif virtue_name == "wisdom":
+        if virtue_name == "wisdom":
             # Wisdom: Practical wisdom (phronesis)
             deliberation_indicators = 0
 
             if action_context.alternatives:
                 deliberation_indicators += 1  # Considered alternatives
 
-            if (
-                action_context.threat_data
-                and action_context.threat_data.get("confidence", 0) > 0.8
-            ):
+            if action_context.threat_data and action_context.threat_data.get("confidence", 0) > 0.8:
                 deliberation_indicators += 1  # High confidence (well-informed)
 
             if action_context.operator_context:
@@ -300,7 +283,7 @@ class VirtueEthicsAssessment(EthicalFramework):
 
             return min(0.5 + (deliberation_indicators * 0.15), 1.0)
 
-        elif virtue_name == "honesty":
+        if virtue_name == "honesty":
             # Honesty: Truthfulness and transparency
             if "covert" in action_desc or "hidden" in action_desc:
                 return 0.4  # Lacks transparency
@@ -310,26 +293,21 @@ class VirtueEthicsAssessment(EthicalFramework):
 
             return 0.7  # Neutral
 
-        elif virtue_name == "vigilance":
+        if virtue_name == "vigilance":
             # Vigilance: Appropriate watchfulness
             if action_type in ["monitoring", "threat_detection"]:
                 if "excessive" in action_desc or "invasive" in action_desc:
                     return 0.3  # Paranoid (excess)
-                else:
-                    return 0.9  # Vigilant (golden mean)
+                return 0.9  # Vigilant (golden mean)
 
-            if action_context.threat_data and action_context.threat_data.get(
-                "missed_indicators"
-            ):
+            if action_context.threat_data and action_context.threat_data.get("missed_indicators"):
                 return 0.4  # Negligent (deficiency)
 
             return 0.7  # Neutral
 
         return 0.7  # Default neutral score
 
-    def _analyze_golden_mean(
-        self, action_context: ActionContext, virtue_scores: Dict[str, float]
-    ) -> Dict[str, Any]:
+    def _analyze_golden_mean(self, action_context: ActionContext, virtue_scores: dict[str, float]) -> dict[str, Any]:
         """Analyze if action hits the golden mean or tends toward extremes.
 
         Args:
@@ -391,11 +369,7 @@ class VirtueEthicsAssessment(EthicalFramework):
             confidence = action_context.threat_data.get("confidence", 0.5)
 
             # Is response proportionate?
-            if (
-                action_context.action_type == "offensive_action"
-                and threat_severity > 0.7
-                and confidence > 0.8
-            ):
+            if action_context.action_type == "offensive_action" and threat_severity > 0.7 and confidence > 0.8:
                 phronesis += 0.2  # Right action for serious threat
             elif action_context.action_type == "monitoring" and threat_severity < 0.5:
                 phronesis += 0.15  # Right action for low threat
@@ -411,9 +385,7 @@ class VirtueEthicsAssessment(EthicalFramework):
             phronesis += 0.15  # Considered alternatives (deliberative)
 
         # Right reasons?
-        if action_context.threat_data and action_context.threat_data.get(
-            "justification"
-        ):
+        if action_context.threat_data and action_context.threat_data.get("justification"):
             phronesis += 0.1  # Clear justification
 
         return min(phronesis, 1.0)

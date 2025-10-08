@@ -9,15 +9,12 @@ Focus: COMPLEX BEHAVIORS requiring sophisticated mocking
 """
 
 import asyncio
-from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents import AgentType
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -67,27 +64,22 @@ class TestESGTIntegration:
         initial_temp = lymphnode.temperatura_regional
 
         # Mock _broadcast_hormone to verify it's called
-        with patch.object(
-            lymphnode, "_broadcast_hormone", new_callable=AsyncMock
-        ) as mock_broadcast:
+        with patch.object(lymphnode, "_broadcast_hormone", new_callable=AsyncMock) as mock_broadcast:
             # ACT: Handle ESGT ignition
             await lymphnode._handle_esgt_ignition(mock_event)
 
         # ASSERT: Should trigger immune activation
-        assert lymphnode.temperatura_regional > initial_temp, \
-            "High salience should increase temperature (fever)"
-        assert lymphnode.temperatura_regional >= initial_temp + 1.0, \
+        assert lymphnode.temperatura_regional > initial_temp, "High salience should increase temperature (fever)"
+        assert lymphnode.temperatura_regional >= initial_temp + 1.0, (
             "Should increase by at least +1.0°C (immune activation)"
+        )
 
         # Verify IL-1 broadcast
         mock_broadcast.assert_called_once()
         call_args = mock_broadcast.call_args[1]
-        assert call_args["hormone_type"] == "IL-1", \
-            "Should broadcast IL-1 (pro-inflammatory)"
-        assert call_args["level"] == 0.9, \
-            "Should pass salience level"
-        assert "esgt_ignition" in call_args["source"], \
-            "Should indicate ESGT source"
+        assert call_args["hormone_type"] == "IL-1", "Should broadcast IL-1 (pro-inflammatory)"
+        assert call_args["level"] == 0.9, "Should pass salience level"
+        assert "esgt_ignition" in call_args["source"], "Should indicate ESGT source"
 
     @pytest.mark.asyncio
     async def test_handle_esgt_medium_salience_increases_vigilance(self, lymphnode):
@@ -111,12 +103,9 @@ class TestESGTIntegration:
         await lymphnode._handle_esgt_ignition(mock_event)
 
         # ASSERT: Should increase temperature moderately
-        assert lymphnode.temperatura_regional > initial_temp, \
-            "Medium salience should increase temperature"
-        assert lymphnode.temperatura_regional >= initial_temp + 0.5, \
-            "Should increase by +0.5°C"
-        assert lymphnode.temperatura_regional < initial_temp + 1.0, \
-            "Should NOT fully activate (< +1.0°C)"
+        assert lymphnode.temperatura_regional > initial_temp, "Medium salience should increase temperature"
+        assert lymphnode.temperatura_regional >= initial_temp + 0.5, "Should increase by +0.5°C"
+        assert lymphnode.temperatura_regional < initial_temp + 1.0, "Should NOT fully activate (< +1.0°C)"
 
     @pytest.mark.asyncio
     async def test_handle_esgt_low_salience_no_action(self, lymphnode):
@@ -139,8 +128,7 @@ class TestESGTIntegration:
         await lymphnode._handle_esgt_ignition(mock_event)
 
         # ASSERT: Should NOT affect temperature
-        assert lymphnode.temperatura_regional == initial_temp, \
-            "Low salience should not affect immune system"
+        assert lymphnode.temperatura_regional == initial_temp, "Low salience should not affect immune system"
 
     @pytest.mark.asyncio
     async def test_set_esgt_subscriber_registers_handler(self, lymphnode):
@@ -161,11 +149,11 @@ class TestESGTIntegration:
             lymphnode.set_esgt_subscriber(mock_subscriber)
 
         # ASSERT: Should register handler
-        assert lymphnode.esgt_subscriber == mock_subscriber, \
-            "Should store subscriber"
-        mock_subscriber.on_ignition.assert_called_once_with(
-            lymphnode._handle_esgt_ignition
-        ), "Should register ignition handler"
+        assert lymphnode.esgt_subscriber == mock_subscriber, "Should store subscriber"
+        (
+            mock_subscriber.on_ignition.assert_called_once_with(lymphnode._handle_esgt_ignition),
+            "Should register ignition handler",
+        )
 
 
 # ==================== HORMONE BROADCASTING (Redis Pub/Sub) ====================
@@ -189,19 +177,14 @@ class TestHormoneBroadcasting:
             mock_publish.return_value = AsyncMock()
 
             # ACT: Broadcast hormone
-            await lymphnode._broadcast_hormone(
-                hormone_type="cortisol",
-                level=0.8,
-                source="stress_response"
-            )
+            await lymphnode._broadcast_hormone(hormone_type="cortisol", level=0.8, source="stress_response")
 
         # ASSERT: Should publish to Redis
         mock_publish.assert_called_once()
         call_args = mock_publish.call_args[0]
 
         # Verify channel
-        assert "hormone" in call_args[0].lower(), \
-            "Should publish to hormone channel"
+        assert "hormone" in call_args[0].lower(), "Should publish to hormone channel"
 
         # Verify message contains hormone data
         # (message is JSON string, so we check it was called)
@@ -225,18 +208,13 @@ class TestHormoneBroadcasting:
 
         # ACT: Try to broadcast (should return early)
         try:
-            await node._broadcast_hormone(
-                hormone_type="test_hormone",
-                level=0.5,
-                source="test"
-            )
+            await node._broadcast_hormone(hormone_type="test_hormone", level=0.5, source="test")
             handled_gracefully = True
         except Exception:
             handled_gracefully = False
 
         # ASSERT
-        assert handled_gracefully, \
-            "Should handle missing Redis gracefully"
+        assert handled_gracefully, "Should handle missing Redis gracefully"
 
 
 # ==================== BACKGROUND TASK LOOPS (One-Iteration Testing) ====================
@@ -268,8 +246,7 @@ class TestBackgroundLoops:
         await lymphnode._processar_citocina_regional(il1_cytokine)
 
         # ASSERT: Pro-inflammatory should increase temperature
-        assert lymphnode.temperatura_regional == initial_temp + 0.2, \
-            "IL1 should increase temperature by 0.2°C"
+        assert lymphnode.temperatura_regional == initial_temp + 0.2, "IL1 should increase temperature by 0.2°C"
 
     @pytest.mark.asyncio
     async def test_processar_cytokine_respects_max_temperature(self, lymphnode):
@@ -292,8 +269,7 @@ class TestBackgroundLoops:
             await lymphnode._processar_citocina_regional(il6_cytokine)
 
         # ASSERT: Should be clamped at 42.0°C
-        assert lymphnode.temperatura_regional == 42.0, \
-            "Temperature should not exceed 42.0°C (safety limit)"
+        assert lymphnode.temperatura_regional == 42.0, "Temperature should not exceed 42.0°C (safety limit)"
 
 
 # ==================== CYTOKINE AREA FILTERING ====================
@@ -357,8 +333,7 @@ class TestCytokineFiltering:
         await global_node._processar_citocina_regional(cytokine_from_other_area)
 
         # ASSERT: Global node should process it (temperature increase)
-        assert global_node.temperatura_regional == 37.2, \
-            "Global lymphnode should process cytokines from any area"
+        assert global_node.temperatura_regional == 37.2, "Global lymphnode should process cytokines from any area"
 
 
 # ==================== SUMMARY ====================

@@ -14,21 +14,18 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Dict, List, Optional
 import logging
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
 
 from .base import (
-    ComplianceConfig,
     ComplianceResult,
     ComplianceStatus,
-    Control,
     Evidence,
     RegulationType,
 )
-from .compliance_engine import ComplianceEngine, ComplianceCheckResult
+from .compliance_engine import ComplianceCheckResult, ComplianceEngine
 from .evidence_collector import EvidenceCollector
 
 logger = logging.getLogger(__name__)
@@ -48,11 +45,11 @@ class CertificationResult:
     score: float = 0.0
     required_threshold: float = 95.0
     gaps_to_certification: int = 0
-    critical_gaps: List[str] = field(default_factory=list)  # control_ids
-    recommendations: List[str] = field(default_factory=list)
+    critical_gaps: list[str] = field(default_factory=list)  # control_ids
+    recommendations: list[str] = field(default_factory=list)
     estimated_days_to_certification: int = 0
-    compliance_results: List[ComplianceResult] = field(default_factory=list)
-    evidence_summary: Dict[str, int] = field(default_factory=dict)
+    compliance_results: list[ComplianceResult] = field(default_factory=list)
+    evidence_summary: dict[str, int] = field(default_factory=dict)
 
     def get_summary(self) -> str:
         """Get summary text."""
@@ -61,13 +58,12 @@ class CertificationResult:
                 f"READY FOR CERTIFICATION: {self.compliance_percentage:.1f}% compliant "
                 f"(threshold: {self.required_threshold}%)"
             )
-        else:
-            return (
-                f"NOT READY: {self.compliance_percentage:.1f}% compliant "
-                f"(need {self.required_threshold}%), "
-                f"{self.gaps_to_certification} gaps remaining, "
-                f"estimated {self.estimated_days_to_certification} days to certification"
-            )
+        return (
+            f"NOT READY: {self.compliance_percentage:.1f}% compliant "
+            f"(need {self.required_threshold}%), "
+            f"{self.gaps_to_certification} gaps remaining, "
+            f"estimated {self.estimated_days_to_certification} days to certification"
+        )
 
 
 class ISO27001Checker:
@@ -80,7 +76,7 @@ class ISO27001Checker:
     def __init__(
         self,
         compliance_engine: ComplianceEngine,
-        evidence_collector: Optional[EvidenceCollector] = None,
+        evidence_collector: EvidenceCollector | None = None,
     ):
         """
         Initialize ISO 27001 checker.
@@ -97,7 +93,7 @@ class ISO27001Checker:
 
     def check_certification_readiness(
         self,
-        evidence_by_control: Optional[Dict[str, List[Evidence]]] = None,
+        evidence_by_control: dict[str, list[Evidence]] | None = None,
     ) -> CertificationResult:
         """
         Check ISO 27001 certification readiness.
@@ -129,8 +125,7 @@ class ISO27001Checker:
         gaps = [
             r.control_id
             for r in compliance_result.results
-            if r.status != ComplianceStatus.COMPLIANT
-            and r.status != ComplianceStatus.NOT_APPLICABLE
+            if r.status != ComplianceStatus.COMPLIANT and r.status != ComplianceStatus.NOT_APPLICABLE
         ]
 
         # Identify critical gaps (mandatory controls)
@@ -143,9 +138,7 @@ class ISO27001Checker:
         critical_gaps = [g for g in gaps if g in mandatory_ids]
 
         # Generate recommendations
-        recommendations = self._generate_iso27001_recommendations(
-            compliance_result, critical_gaps
-        )
+        recommendations = self._generate_iso27001_recommendations(compliance_result, critical_gaps)
 
         # Estimate days to certification (assuming 40 hours/week, 1 engineer)
         # Average 20 hours per gap
@@ -177,8 +170,8 @@ class ISO27001Checker:
     def _generate_iso27001_recommendations(
         self,
         compliance_result: ComplianceCheckResult,
-        critical_gaps: List[str],
-    ) -> List[str]:
+        critical_gaps: list[str],
+    ) -> list[str]:
         """Generate ISO 27001-specific recommendations."""
         recommendations = []
 
@@ -199,33 +192,23 @@ class ISO27001Checker:
                     "Establish and document Information Security Policy (A.5.1) - Required for certification"
                 )
             if result.control_id in access_controls and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Implement privileged access controls (A.8.2) - High priority for certification"
-                )
+                recommendations.append("Implement privileged access controls (A.8.2) - High priority for certification")
             if result.control_id in crypto_controls and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Define and implement cryptography standards (A.8.24)"
-                )
+                recommendations.append("Define and implement cryptography standards (A.8.24)")
             if result.control_id in monitoring_controls and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Implement security monitoring and logging (A.8.16)"
-                )
+                recommendations.append("Implement security monitoring and logging (A.8.16)")
 
         if compliance_result.compliance_percentage < 80:
-            recommendations.append(
-                "Consider engaging ISO 27001 consultant to accelerate certification readiness"
-            )
+            recommendations.append("Consider engaging ISO 27001 consultant to accelerate certification readiness")
 
-        recommendations.append(
-            "Schedule internal audit 3 months before certification audit"
-        )
+        recommendations.append("Schedule internal audit 3 months before certification audit")
 
         return recommendations[:10]  # Limit to top 10
 
     def _calculate_evidence_summary(
         self,
-        evidence_by_control: Optional[Dict[str, List[Evidence]]],
-    ) -> Dict[str, int]:
+        evidence_by_control: dict[str, list[Evidence]] | None,
+    ) -> dict[str, int]:
         """Calculate evidence summary statistics."""
         if not evidence_by_control:
             return {"total": 0, "verified": 0, "expired": 0}
@@ -260,7 +243,7 @@ class SOC2Checker:
     def __init__(
         self,
         compliance_engine: ComplianceEngine,
-        evidence_collector: Optional[EvidenceCollector] = None,
+        evidence_collector: EvidenceCollector | None = None,
     ):
         """
         Initialize SOC 2 checker.
@@ -277,7 +260,7 @@ class SOC2Checker:
 
     def check_certification_readiness(
         self,
-        evidence_by_control: Optional[Dict[str, List[Evidence]]] = None,
+        evidence_by_control: dict[str, list[Evidence]] | None = None,
         audit_period_months: int = 6,
     ) -> CertificationResult:
         """
@@ -314,8 +297,7 @@ class SOC2Checker:
         gaps = [
             r.control_id
             for r in compliance_result.results
-            if r.status != ComplianceStatus.COMPLIANT
-            and r.status != ComplianceStatus.NOT_APPLICABLE
+            if r.status != ComplianceStatus.COMPLIANT and r.status != ComplianceStatus.NOT_APPLICABLE
         ]
 
         # Critical gaps - Security is mandatory
@@ -327,9 +309,7 @@ class SOC2Checker:
         ]
 
         # Generate recommendations
-        recommendations = self._generate_soc2_recommendations(
-            compliance_result, critical_gaps, audit_period_months
-        )
+        recommendations = self._generate_soc2_recommendations(compliance_result, critical_gaps, audit_period_months)
 
         # Estimate days to readiness
         # SOC 2 Type II requires audit period + remediation time
@@ -362,55 +342,39 @@ class SOC2Checker:
     def _generate_soc2_recommendations(
         self,
         compliance_result: ComplianceCheckResult,
-        critical_gaps: List[str],
+        critical_gaps: list[str],
         audit_period_months: int,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate SOC 2-specific recommendations."""
         recommendations = []
 
         if critical_gaps:
-            recommendations.append(
-                f"Address {len(critical_gaps)} critical Security (CC6) controls first"
-            )
+            recommendations.append(f"Address {len(critical_gaps)} critical Security (CC6) controls first")
 
-        recommendations.append(
-            f"Implement continuous monitoring for {audit_period_months}-month audit period"
-        )
+        recommendations.append(f"Implement continuous monitoring for {audit_period_months}-month audit period")
 
         # Check for specific SOC 2 requirements
         for result in compliance_result.results:
             if result.control_id == "SOC2-CC6.1" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Implement logical and physical access controls (CC6.1) - CRITICAL"
-                )
+                recommendations.append("Implement logical and physical access controls (CC6.1) - CRITICAL")
             if result.control_id == "SOC2-CC6.6" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Implement comprehensive logging and monitoring (CC6.6)"
-                )
+                recommendations.append("Implement comprehensive logging and monitoring (CC6.6)")
             if result.control_id == "SOC2-CC6.7" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Establish incident response plan and procedures (CC6.7)"
-                )
+                recommendations.append("Establish incident response plan and procedures (CC6.7)")
 
-        recommendations.append(
-            "Collect evidence continuously throughout audit period (automated logging)"
-        )
+        recommendations.append("Collect evidence continuously throughout audit period (automated logging)")
 
-        recommendations.append(
-            f"Plan for {audit_period_months}-month SOC 2 Type II audit window"
-        )
+        recommendations.append(f"Plan for {audit_period_months}-month SOC 2 Type II audit window")
 
         if compliance_result.compliance_percentage < 85:
-            recommendations.append(
-                "Consider SOC 2 readiness assessment with audit firm"
-            )
+            recommendations.append("Consider SOC 2 readiness assessment with audit firm")
 
         return recommendations[:10]
 
     def _calculate_evidence_summary(
         self,
-        evidence_by_control: Optional[Dict[str, List[Evidence]]],
-    ) -> Dict[str, int]:
+        evidence_by_control: dict[str, list[Evidence]] | None,
+    ) -> dict[str, int]:
         """Calculate evidence summary statistics."""
         if not evidence_by_control:
             return {"total": 0, "verified": 0, "expired": 0}
@@ -444,7 +408,7 @@ class IEEE7000Checker:
     def __init__(
         self,
         compliance_engine: ComplianceEngine,
-        evidence_collector: Optional[EvidenceCollector] = None,
+        evidence_collector: EvidenceCollector | None = None,
     ):
         """
         Initialize IEEE 7000 checker.
@@ -461,7 +425,7 @@ class IEEE7000Checker:
 
     def check_certification_readiness(
         self,
-        evidence_by_control: Optional[Dict[str, List[Evidence]]] = None,
+        evidence_by_control: dict[str, list[Evidence]] | None = None,
     ) -> CertificationResult:
         """
         Check IEEE 7000 certification readiness.
@@ -493,8 +457,7 @@ class IEEE7000Checker:
         gaps = [
             r.control_id
             for r in compliance_result.results
-            if r.status != ComplianceStatus.COMPLIANT
-            and r.status != ComplianceStatus.NOT_APPLICABLE
+            if r.status != ComplianceStatus.COMPLIANT and r.status != ComplianceStatus.NOT_APPLICABLE
         ]
 
         # Critical gaps - core value elicitation and risk assessment
@@ -507,9 +470,7 @@ class IEEE7000Checker:
         critical_gaps = [g for g in gaps if g in critical_controls]
 
         # Generate recommendations
-        recommendations = self._generate_ieee7000_recommendations(
-            compliance_result, critical_gaps
-        )
+        recommendations = self._generate_ieee7000_recommendations(compliance_result, critical_gaps)
 
         # Estimate days to certification
         estimated_hours = len(gaps) * 25  # IEEE 7000 is documentation-heavy
@@ -540,58 +501,40 @@ class IEEE7000Checker:
     def _generate_ieee7000_recommendations(
         self,
         compliance_result: ComplianceCheckResult,
-        critical_gaps: List[str],
-    ) -> List[str]:
+        critical_gaps: list[str],
+    ) -> list[str]:
         """Generate IEEE 7000-specific recommendations."""
         recommendations = []
 
         if critical_gaps:
-            recommendations.append(
-                f"Complete {len(critical_gaps)} critical value-based engineering processes"
-            )
+            recommendations.append(f"Complete {len(critical_gaps)} critical value-based engineering processes")
 
         # Check for specific IEEE 7000 requirements
         for result in compliance_result.results:
             if result.control_id == "IEEE-7000-5.2" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Complete stakeholder analysis (5.2) - Document all affected stakeholders"
-                )
+                recommendations.append("Complete stakeholder analysis (5.2) - Document all affected stakeholders")
             if result.control_id == "IEEE-7000-5.3" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Conduct value elicitation workshops (5.3) - CRITICAL for certification"
-                )
+                recommendations.append("Conduct value elicitation workshops (5.3) - CRITICAL for certification")
             if result.control_id == "IEEE-7000-5.4" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Map stakeholder values to system requirements (5.4)"
-                )
+                recommendations.append("Map stakeholder values to system requirements (5.4)")
             if result.control_id == "IEEE-7000-5.5" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Conduct ethical risk assessment (5.5) - CRITICAL for certification"
-                )
+                recommendations.append("Conduct ethical risk assessment (5.5) - CRITICAL for certification")
             if result.control_id == "IEEE-7000-5.7" and result.status != ComplianceStatus.COMPLIANT:
-                recommendations.append(
-                    "Implement transparency and explainability features (5.7)"
-                )
+                recommendations.append("Implement transparency and explainability features (5.7)")
 
-        recommendations.append(
-            "Document complete value-based requirements traceability matrix"
-        )
+        recommendations.append("Document complete value-based requirements traceability matrix")
 
-        recommendations.append(
-            "Conduct stakeholder validation of value requirements"
-        )
+        recommendations.append("Conduct stakeholder validation of value requirements")
 
         if compliance_result.compliance_percentage < 80:
-            recommendations.append(
-                "Consider IEEE 7000 training for development team"
-            )
+            recommendations.append("Consider IEEE 7000 training for development team")
 
         return recommendations[:10]
 
     def _calculate_evidence_summary(
         self,
-        evidence_by_control: Optional[Dict[str, List[Evidence]]],
-    ) -> Dict[str, int]:
+        evidence_by_control: dict[str, list[Evidence]] | None,
+    ) -> dict[str, int]:
         """Calculate evidence summary statistics."""
         if not evidence_by_control:
             return {"total": 0, "verified": 0, "expired": 0}

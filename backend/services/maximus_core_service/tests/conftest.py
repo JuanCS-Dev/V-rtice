@@ -6,9 +6,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -16,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -62,11 +64,7 @@ def sample_threat_data():
         "payload_size": 1024,
         "threat_score": 0.85,
         "threat_type": "malware",
-        "indicators": {
-            "suspicious_patterns": 3,
-            "known_malware_signatures": 1,
-            "anomaly_score": 0.72
-        }
+        "indicators": {"suspicious_patterns": 3, "known_malware_signatures": 1, "anomaly_score": 0.72},
     }
 
 
@@ -79,14 +77,8 @@ def sample_decision_request():
         "target": "192.168.1.100",
         "risk_level": "HIGH",
         "confidence": 0.89,
-        "context": {
-            "threat_score": 0.85,
-            "false_positive_rate": 0.05
-        },
-        "ethical_constraints": {
-            "privacy_concern": False,
-            "transparency_required": True
-        }
+        "context": {"threat_score": 0.85, "false_positive_rate": 0.05},
+        "ethical_constraints": {"privacy_concern": False, "transparency_required": True},
     }
 
 
@@ -96,20 +88,10 @@ def sample_model_explanation():
     return {
         "prediction": "malicious",
         "confidence": 0.92,
-        "feature_importance": {
-            "payload_size": 0.35,
-            "port": 0.28,
-            "suspicious_patterns": 0.22,
-            "anomaly_score": 0.15
-        },
+        "feature_importance": {"payload_size": 0.35, "port": 0.28, "suspicious_patterns": 0.22, "anomaly_score": 0.15},
         "counterfactuals": [
-            {
-                "feature": "payload_size",
-                "original_value": 1024,
-                "suggested_value": 512,
-                "new_prediction": "benign"
-            }
-        ]
+            {"feature": "payload_size", "original_value": 1024, "suggested_value": 512, "new_prediction": "benign"}
+        ],
     }
 
 
@@ -128,21 +110,9 @@ def temp_data_path(tmp_path):
 # Markers for test categorization
 def pytest_configure(config):
     """Configure custom pytest markers."""
-    config.addinivalue_line(
-        "markers", "unit: Unit tests (fast, isolated)"
-    )
-    config.addinivalue_line(
-        "markers", "integration: Integration tests (medium speed, component interaction)"
-    )
-    config.addinivalue_line(
-        "markers", "e2e: End-to-end tests (slow, full workflow)"
-    )
-    config.addinivalue_line(
-        "markers", "slow: Slow tests (skip with -m 'not slow')"
-    )
-    config.addinivalue_line(
-        "markers", "requires_torch: Tests requiring PyTorch"
-    )
-    config.addinivalue_line(
-        "markers", "requires_gpu: Tests requiring GPU"
-    )
+    config.addinivalue_line("markers", "unit: Unit tests (fast, isolated)")
+    config.addinivalue_line("markers", "integration: Integration tests (medium speed, component interaction)")
+    config.addinivalue_line("markers", "e2e: End-to-end tests (slow, full workflow)")
+    config.addinivalue_line("markers", "slow: Slow tests (skip with -m 'not slow')")
+    config.addinivalue_line("markers", "requires_torch: Tests requiring PyTorch")
+    config.addinivalue_line("markers", "requires_gpu: Tests requiring GPU")

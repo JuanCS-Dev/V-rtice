@@ -12,7 +12,6 @@ NO MOCKS - All components use real instances and integrations.
 """
 
 import asyncio
-from typing import Dict, List
 
 import pytest
 import pytest_asyncio
@@ -28,7 +27,6 @@ from active_immune_core.coordination.homeostatic_controller import (
     SystemState,
 )
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -272,10 +270,7 @@ async def test_selection_engine_provides_fitness_to_controller():
             )
             engine.population_fitness[fitness.agent_id] = fitness
             # Manually track best agent (normally done by evolutionary loop)
-            if (
-                engine.best_agent_ever is None
-                or fitness.fitness_score > engine.best_agent_ever.fitness_score
-            ):
+            if engine.best_agent_ever is None or fitness.fitness_score > engine.best_agent_ever.fitness_score:
                 engine.best_agent_ever = fitness
 
         # Get engine metrics
@@ -361,13 +356,9 @@ async def test_coordinated_threat_response_workflow():
 
         # Verify elite agents are top performers
         if len(elite_agents) > 0:
-            avg_elite_fitness = sum(a.fitness_score for a in elite_agents) / len(
-                elite_agents
-            )
+            avg_elite_fitness = sum(a.fitness_score for a in elite_agents) / len(elite_agents)
             all_agents = list(engine.population_fitness.values())
-            avg_all_fitness = sum(a.fitness_score for a in all_agents) / len(
-                all_agents
-            )
+            avg_all_fitness = sum(a.fitness_score for a in all_agents) / len(all_agents)
             # Elite agents should be better than average
             assert avg_elite_fitness >= avg_all_fitness
 

@@ -7,12 +7,11 @@ Date: 2025-10-06
 """
 
 import pytest
-import numpy as np
-from pathlib import Path
 
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -51,7 +50,7 @@ def profiler_config(tmp_path):
         enable_gpu_profiling=False,
         num_iterations=10,
         warmup_iterations=2,
-        output_dir=tmp_path / "profiling"
+        output_dir=tmp_path / "profiling",
     )
 
 
@@ -69,11 +68,7 @@ def test_profile_model_cpu(simple_model, profiler_config):
     """Test model profiling on CPU."""
     profiler = Profiler(config=profiler_config)
 
-    result = profiler.profile_model(
-        model=simple_model,
-        input_shape=(8, 128),
-        device="cpu"
-    )
+    result = profiler.profile_model(model=simple_model, input_shape=(8, 128), device="cpu")
 
     assert isinstance(result, ProfileResult)
     assert result.total_time_ms > 0
@@ -86,11 +81,7 @@ def test_profile_result_layer_times(simple_model, profiler_config):
     """Test layer-wise timing in profile results."""
     profiler = Profiler(config=profiler_config)
 
-    result = profiler.profile_model(
-        model=simple_model,
-        input_shape=(4, 128),
-        device="cpu"
-    )
+    result = profiler.profile_model(model=simple_model, input_shape=(4, 128), device="cpu")
 
     # Layer times should be recorded
     assert isinstance(result.layer_times, dict)
@@ -103,11 +94,7 @@ def test_profile_memory_tracking(simple_model, profiler_config):
     """Test memory profiling."""
     profiler = Profiler(config=profiler_config)
 
-    result = profiler.profile_model(
-        model=simple_model,
-        input_shape=(16, 128),
-        device="cpu"
-    )
+    result = profiler.profile_model(model=simple_model, input_shape=(16, 128), device="cpu")
 
     # Memory tracking may or may not be available depending on psutil
     if result.peak_memory_mb is not None:
@@ -121,11 +108,7 @@ def test_profile_result_to_dict(simple_model, profiler_config):
 
     profiler = Profiler(config=profiler_config)
 
-    result = profiler.profile_model(
-        model=simple_model,
-        input_shape=(2, 128),
-        device="cpu"
-    )
+    result = profiler.profile_model(model=simple_model, input_shape=(2, 128), device="cpu")
 
     result_dict = result.to_dict()
 
@@ -143,11 +126,7 @@ def test_profile_result_save(simple_model, profiler_config, tmp_path):
 
     profiler = Profiler(config=profiler_config)
 
-    result = profiler.profile_model(
-        model=simple_model,
-        input_shape=(2, 128),
-        device="cpu"
-    )
+    result = profiler.profile_model(model=simple_model, input_shape=(2, 128), device="cpu")
 
     output_path = tmp_path / "profile_result.json"
     result.save(output_path)
@@ -163,11 +142,7 @@ def test_profiler_warmup(simple_model, profiler_config):
 
     profiler = Profiler(config=profiler_config)
 
-    result = profiler.profile_model(
-        model=simple_model,
-        input_shape=(4, 128),
-        device="cpu"
-    )
+    result = profiler.profile_model(model=simple_model, input_shape=(4, 128), device="cpu")
 
     # Should complete without errors
     assert result.total_time_ms > 0

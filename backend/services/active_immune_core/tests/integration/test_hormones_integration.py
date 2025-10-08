@@ -149,9 +149,7 @@ class TestHormoneIntegration:
         }
 
         # Set state
-        success = await hormone_messenger.set_agent_state(
-            agent_id=agent_id, state=state, ttl=60
-        )
+        success = await hormone_messenger.set_agent_state(agent_id=agent_id, state=state, ttl=60)
         assert success is True
 
         # Get state

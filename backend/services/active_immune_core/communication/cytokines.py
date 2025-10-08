@@ -157,10 +157,7 @@ class CytokineMessenger:
         self._in_memory_subscribers: Dict[str, List[Callable]] = {}  # cytokine_type -> [callbacks]
         self._in_memory_area_filters: Dict[Callable, Optional[str]] = {}  # callback -> area_filter
 
-        logger.info(
-            f"CytokineMessenger initialized (servers={bootstrap_servers}, "
-            f"prefix={topic_prefix})"
-        )
+        logger.info(f"CytokineMessenger initialized (servers={bootstrap_servers}, prefix={topic_prefix})")
 
     # ==================== LIFECYCLE ====================
 
@@ -259,8 +256,7 @@ class CytokineMessenger:
         # Degraded mode: use in-memory delivery (NO MOCK - real local queue)
         if self._degraded_mode:
             logger.debug(
-                f"[IN-MEMORY MODE] Cytokine {tipo} from {emissor_id} "
-                f"(delivering to {area_alvo or 'broadcast'})"
+                f"[IN-MEMORY MODE] Cytokine {tipo} from {emissor_id} (delivering to {area_alvo or 'broadcast'})"
             )
 
             # Create message
@@ -311,13 +307,10 @@ class CytokineMessenger:
         for attempt in range(1, self.max_retries + 1):
             try:
                 # Send to Kafka
-                metadata = await self._producer.send_and_wait(
-                    topic, value=message.model_dump()
-                )
+                metadata = await self._producer.send_and_wait(topic, value=message.model_dump())
 
                 logger.debug(
-                    f"Cytokine {tipo} sent by {emissor_id} "
-                    f"(partition={metadata.partition}, offset={metadata.offset})"
+                    f"Cytokine {tipo} sent by {emissor_id} (partition={metadata.partition}, offset={metadata.offset})"
                 )
 
                 # Update metrics (if available)
@@ -331,9 +324,7 @@ class CytokineMessenger:
                 return True
 
             except KafkaTimeoutError:
-                logger.warning(
-                    f"Kafka timeout sending {tipo} (attempt {attempt}/{self.max_retries})"
-                )
+                logger.warning(f"Kafka timeout sending {tipo} (attempt {attempt}/{self.max_retries})")
                 if attempt == self.max_retries:
                     logger.error(f"Failed to send {tipo} after {self.max_retries} attempts")
                     return False
@@ -376,9 +367,7 @@ class CytokineMessenger:
 
         # Degraded mode: use in-memory subscription (NO MOCK - real local queue)
         if self._degraded_mode:
-            logger.debug(
-                f"[IN-MEMORY MODE] Subscribing {consumer_id} to {cytokine_types}"
-            )
+            logger.debug(f"[IN-MEMORY MODE] Subscribing {consumer_id} to {cytokine_types}")
 
             # Add callback to in-memory subscribers for each cytokine type
             for cytokine_type in cytokine_types:
@@ -407,22 +396,15 @@ class CytokineMessenger:
             await consumer.start()
             self._consumers[consumer_id] = consumer
 
-            logger.info(
-                f"Subscribed to {topics} with consumer {consumer_id} (group={group_id})"
-            )
+            logger.info(f"Subscribed to {topics} with consumer {consumer_id} (group={group_id})")
 
             # Start consumption task
-            task = asyncio.create_task(
-                self._consume_loop(consumer, consumer_id, callback, area_filter)
-            )
+            task = asyncio.create_task(self._consume_loop(consumer, consumer_id, callback, area_filter))
             self._consumer_tasks.add(task)
             task.add_done_callback(self._consumer_tasks.discard)
 
         except Exception as e:
-            logger.warning(
-                f"Failed to subscribe consumer {consumer_id}: {e}. "
-                "Running in DEGRADED MODE"
-            )
+            logger.warning(f"Failed to subscribe consumer {consumer_id}: {e}. Running in DEGRADED MODE")
             self._degraded_mode = True
 
     async def _consume_loop(
@@ -454,8 +436,7 @@ class CytokineMessenger:
                     age = (datetime.now() - msg_time).total_seconds()
                     if age > cytokine.ttl_segundos:
                         logger.debug(
-                            f"Skipping expired cytokine {cytokine.tipo} "
-                            f"(age={age:.1f}s, ttl={cytokine.ttl_segundos}s)"
+                            f"Skipping expired cytokine {cytokine.tipo} (age={age:.1f}s, ttl={cytokine.ttl_segundos}s)"
                         )
                         continue
 
@@ -474,9 +455,7 @@ class CytokineMessenger:
                         callback(cytokine)
 
                 except Exception as e:
-                    logger.error(
-                        f"Error processing cytokine in {consumer_id}: {e}", exc_info=True
-                    )
+                    logger.error(f"Error processing cytokine in {consumer_id}: {e}", exc_info=True)
 
         except asyncio.CancelledError:
             logger.info(f"Consume loop cancelled for {consumer_id}")

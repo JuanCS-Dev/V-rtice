@@ -11,15 +11,12 @@ Version: 4.0.0 - Direct Execution
 """
 
 import asyncio
-from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-import pytest_asyncio
 
 from active_immune_core.agents.base import AgenteImunologicoBase
-from active_immune_core.agents.models import AgentStatus, AgentType
-
+from active_immune_core.agents.models import AgentStatus
 
 # ==================== CONCRETE TEST AGENT ====================
 
@@ -91,7 +88,7 @@ class TestAgentLifecycleDirectExecution:
         mock_session = await setup_agent_with_mocked_communication(agent)
 
         # Mock ClientSession creation
-        with patch('aiohttp.ClientSession', return_value=mock_session):
+        with patch("aiohttp.ClientSession", return_value=mock_session):
             # ACT: Start agent (lines 137-172)
             await agent.iniciar()
 
@@ -121,7 +118,7 @@ class TestAgentLifecycleDirectExecution:
         mock_session = await setup_agent_with_mocked_communication(agent)
 
         # Make ClientSession raise exception during iniciar
-        with patch('aiohttp.ClientSession', side_effect=RuntimeError("HTTP session failed")):
+        with patch("aiohttp.ClientSession", side_effect=RuntimeError("HTTP session failed")):
             # ACT & ASSERT: Should raise and rollback (lines 169-172)
             with pytest.raises(RuntimeError, match="HTTP session failed"):
                 await agent.iniciar()
@@ -214,8 +211,7 @@ class TestInvestigationNeutralizationDirectExecution:
 
         # ACT: Neutralize (lines 409-472)
         success = await agent.neutralizar(
-            {"ip": "192.168.1.100", "threat_level": 3, "id": "threat_001"},
-            metodo="quarantine"
+            {"ip": "192.168.1.100", "threat_level": 3, "id": "threat_001"}, metodo="quarantine"
         )
 
         # ASSERT: Neutralization successful (lines 428-472 covered)
@@ -233,10 +229,7 @@ class TestInvestigationNeutralizationDirectExecution:
         agent._validate_ethical = AsyncMock(return_value=False)
 
         # ACT: Try to neutralize (should be blocked)
-        success = await agent.neutralizar(
-            {"ip": "192.168.1.100", "threat_level": 3},
-            metodo="terminate"
-        )
+        success = await agent.neutralizar({"ip": "192.168.1.100", "threat_level": 3}, metodo="terminate")
 
         # ASSERT: Blocked by ethics (lines 419-422 covered)
         assert success is False
@@ -262,10 +255,7 @@ class TestInvestigationNeutralizationDirectExecution:
         agent.executar_neutralizacao = failing_neutralization
 
         # ACT: Try to neutralize (should handle exception)
-        success = await agent.neutralizar(
-            {"ip": "192.168.1.100", "threat_level": 3},
-            metodo="isolate"
-        )
+        success = await agent.neutralizar({"ip": "192.168.1.100", "threat_level": 3}, metodo="isolate")
 
         # ASSERT: Exception handled (lines 476-478 covered)
         assert success is False
@@ -298,6 +288,7 @@ class TestMemoryCreationDirectExecution:
 
         # Create mock context manager that raises ClientError
         import aiohttp
+
         mock_response = AsyncMock()
         mock_response.__aenter__ = AsyncMock(side_effect=aiohttp.ClientError("Connection failed"))
         mock_response.__aexit__ = AsyncMock()

@@ -9,18 +9,19 @@ Date: 2025-10-06
 """
 
 import pytest
-from pathlib import Path
 
 try:
     import torch
     import torch.nn as nn
-    from torch.utils.data import TensorDataset, DataLoader
+    from torch.utils.data import DataLoader, TensorDataset
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
 
 try:
     import onnx
+
     ONNX_AVAILABLE = True
 except ImportError:
     ONNX_AVAILABLE = False
@@ -70,43 +71,28 @@ def trained_model():
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_benchmark_then_optimize(trained_model, tmp_path):
     """Test benchmarking, then optimizing with quantization."""
-    from performance import BenchmarkSuite, BenchmarkConfig
-    from performance import ModelQuantizer, QuantizationConfig
+    from performance import BenchmarkConfig, BenchmarkSuite, ModelQuantizer, QuantizationConfig
 
     # Benchmark original model
-    bench_config = BenchmarkConfig(
-        num_iterations=10,
-        warmup_iterations=2
-    )
+    bench_config = BenchmarkConfig(num_iterations=10, warmup_iterations=2)
 
     suite = BenchmarkSuite(config=bench_config)
 
     original_results = suite.benchmark_model(
-        model=trained_model,
-        input_shape=(4, 128),
-        batch_sizes=[4],
-        num_iterations=10,
-        device="cpu"
+        model=trained_model, input_shape=(4, 128), batch_sizes=[4], num_iterations=10, device="cpu"
     )
 
     original_latency = original_results[4].mean_latency
 
     # Quantize model
-    quant_config = QuantizationConfig(
-        quantization_type="dynamic",
-        output_dir=tmp_path / "quantized"
-    )
+    quant_config = QuantizationConfig(quantization_type="dynamic", output_dir=tmp_path / "quantized")
 
     quantizer = ModelQuantizer(config=quant_config)
     quantized_model = quantizer.quantize(trained_model)
 
     # Benchmark quantized model
     quantized_results = suite.benchmark_model(
-        model=quantized_model,
-        input_shape=(4, 128),
-        batch_sizes=[4],
-        num_iterations=10,
-        device="cpu"
+        model=quantized_model, input_shape=(4, 128), batch_sizes=[4], num_iterations=10, device="cpu"
     )
 
     quantized_latency = quantized_results[4].mean_latency
@@ -119,15 +105,10 @@ def test_benchmark_then_optimize(trained_model, tmp_path):
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_prune_then_benchmark(trained_model, tmp_path):
     """Test pruning model then benchmarking."""
-    from performance import ModelPruner, PruningConfig
-    from performance import BenchmarkSuite, BenchmarkConfig
+    from performance import BenchmarkConfig, BenchmarkSuite, ModelPruner, PruningConfig
 
     # Prune model
-    prune_config = PruningConfig(
-        pruning_type="unstructured",
-        target_sparsity=0.4,
-        output_dir=tmp_path / "pruned"
-    )
+    prune_config = PruningConfig(pruning_type="unstructured", target_sparsity=0.4, output_dir=tmp_path / "pruned")
 
     pruner = ModelPruner(config=prune_config)
     pruned_model = pruner.prune(trained_model)
@@ -141,39 +122,27 @@ def test_prune_then_benchmark(trained_model, tmp_path):
     suite = BenchmarkSuite(config=bench_config)
 
     results = suite.benchmark_model(
-        model=pruned_model,
-        input_shape=(4, 128),
-        batch_sizes=[4],
-        num_iterations=10,
-        device="cpu"
+        model=pruned_model, input_shape=(4, 128), batch_sizes=[4], num_iterations=10, device="cpu"
     )
 
     assert results[4].mean_latency > 0
 
 
-@pytest.mark.skipif(not TORCH_AVAILABLE or not ONNX_AVAILABLE,
-                   reason="PyTorch or ONNX not available")
+@pytest.mark.skipif(not TORCH_AVAILABLE or not ONNX_AVAILABLE, reason="PyTorch or ONNX not available")
 def test_export_then_infer(trained_model, tmp_path):
     """Test exporting to ONNX then running inference."""
-    from performance import ONNXExporter, ONNXExportConfig
+    from performance import ONNXExportConfig, ONNXExporter
 
     # Export to ONNX
     export_config = ONNXExportConfig(
-        opset_version=14,
-        optimize=True,
-        test_with_random_input=False,
-        output_dir=tmp_path / "onnx"
+        opset_version=14, optimize=True, test_with_random_input=False, output_dir=tmp_path / "onnx"
     )
 
     exporter = ONNXExporter(config=export_config)
 
     dummy_input = torch.randn(1, 128)
 
-    result = exporter.export(
-        model=trained_model,
-        dummy_input=dummy_input,
-        output_path="model.onnx"
-    )
+    result = exporter.export(model=trained_model, dummy_input=dummy_input, output_path="model.onnx")
 
     assert result.validation_passed is True
     assert result.onnx_path.exists()
@@ -186,15 +155,10 @@ def test_export_then_infer(trained_model, tmp_path):
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_inference_engine_with_cache(trained_model):
     """Test inference engine with caching."""
-    from performance import InferenceEngine, InferenceConfig
+    from performance import InferenceConfig, InferenceEngine
 
     config = InferenceConfig(
-        backend="pytorch",
-        device="cpu",
-        enable_cache=True,
-        use_amp=False,
-        compile_model=False,
-        num_warmup_runs=2
+        backend="pytorch", device="cpu", enable_cache=True, use_amp=False, compile_model=False, num_warmup_runs=2
     )
 
     engine = InferenceEngine(model=trained_model, config=config)
@@ -217,18 +181,13 @@ def test_inference_engine_with_cache(trained_model):
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_batch_predictor_end_to_end(trained_model):
     """Test batch predictor end-to-end."""
-    from performance import BatchPredictor, BatchConfig
+    from performance import BatchConfig, BatchPredictor
 
     def predict_fn(batch):
         """Prediction function."""
         return trained_model(batch)
 
-    config = BatchConfig(
-        max_batch_size=8,
-        batch_timeout_ms=50.0,
-        num_workers=1,
-        adaptive_batching=False
-    )
+    config = BatchConfig(max_batch_size=8, batch_timeout_ms=50.0, num_workers=1, adaptive_batching=False)
 
     predictor = BatchPredictor(predict_fn=predict_fn, config=config)
     predictor.start()
@@ -265,42 +224,27 @@ def test_batch_predictor_end_to_end(trained_model):
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")
 def test_profile_then_optimize(trained_model, tmp_path):
     """Test profiling model then optimizing based on results."""
-    from performance import Profiler, ProfilerConfig
-    from performance import ModelQuantizer, QuantizationConfig
+    from performance import ModelQuantizer, Profiler, ProfilerConfig, QuantizationConfig
 
     # Profile original model
     profile_config = ProfilerConfig(
-        enable_cpu_profiling=True,
-        enable_memory_profiling=True,
-        num_iterations=20,
-        output_dir=tmp_path / "profiling"
+        enable_cpu_profiling=True, enable_memory_profiling=True, num_iterations=20, output_dir=tmp_path / "profiling"
     )
 
     profiler = Profiler(config=profile_config)
 
-    result = profiler.profile_model(
-        model=trained_model,
-        input_shape=(8, 128),
-        device="cpu"
-    )
+    result = profiler.profile_model(model=trained_model, input_shape=(8, 128), device="cpu")
 
     original_latency = result.avg_time_ms
 
     # Based on profile, optimize with quantization
-    quant_config = QuantizationConfig(
-        quantization_type="dynamic",
-        output_dir=tmp_path / "optimized"
-    )
+    quant_config = QuantizationConfig(quantization_type="dynamic", output_dir=tmp_path / "optimized")
 
     quantizer = ModelQuantizer(config=quant_config)
     optimized_model = quantizer.quantize(trained_model)
 
     # Profile optimized model
-    optimized_result = profiler.profile_model(
-        model=optimized_model,
-        input_shape=(8, 128),
-        device="cpu"
-    )
+    optimized_result = profiler.profile_model(model=optimized_model, input_shape=(8, 128), device="cpu")
 
     optimized_latency = optimized_result.avg_time_ms
 
@@ -315,9 +259,12 @@ def test_full_optimization_pipeline(tmp_path):
         pytest.skip("PyTorch not available")
 
     from performance import (
-        ModelPruner, PruningConfig,
-        ModelQuantizer, QuantizationConfig,
-        InferenceEngine, InferenceConfig
+        InferenceConfig,
+        InferenceEngine,
+        ModelPruner,
+        ModelQuantizer,
+        PruningConfig,
+        QuantizationConfig,
     )
 
     # 1. Create and train model
@@ -333,32 +280,20 @@ def test_full_optimization_pipeline(tmp_path):
     model = SimpleModel()
 
     # 2. Prune
-    prune_config = PruningConfig(
-        pruning_type="unstructured",
-        target_sparsity=0.3,
-        output_dir=tmp_path / "pruned"
-    )
+    prune_config = PruningConfig(pruning_type="unstructured", target_sparsity=0.3, output_dir=tmp_path / "pruned")
 
     pruner = ModelPruner(config=prune_config)
     model = pruner.prune(model)
 
     # 3. Quantize
-    quant_config = QuantizationConfig(
-        quantization_type="dynamic",
-        output_dir=tmp_path / "quantized"
-    )
+    quant_config = QuantizationConfig(quantization_type="dynamic", output_dir=tmp_path / "quantized")
 
     quantizer = ModelQuantizer(config=quant_config)
     model = quantizer.quantize(model)
 
     # 4. Inference
     inf_config = InferenceConfig(
-        backend="pytorch",
-        device="cpu",
-        enable_cache=False,
-        use_amp=False,
-        compile_model=False,
-        num_warmup_runs=2
+        backend="pytorch", device="cpu", enable_cache=False, use_amp=False, compile_model=False, num_warmup_runs=2
     )
 
     engine = InferenceEngine(model=model, config=inf_config)

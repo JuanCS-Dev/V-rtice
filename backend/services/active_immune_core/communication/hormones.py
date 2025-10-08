@@ -66,9 +66,7 @@ class HormoneMessage(BaseModel):
     )
     nivel: float = Field(ge=0.0, le=10.0, description="Hormone level (0-10)")
     payload: Dict[str, Any] = Field(description="Message payload")
-    duracao_estimada_segundos: int = Field(
-        default=300, ge=10, description="Estimated effect duration"
-    )
+    duracao_estimada_segundos: int = Field(default=300, ge=10, description="Estimated effect duration")
 
     class Config:
         json_schema_extra = {
@@ -128,10 +126,7 @@ class HormoneMessenger:
         self._running = False
         self._degraded_mode = False  # Track if running without Redis
 
-        logger.info(
-            f"HormoneMessenger initialized (redis={redis_url}, "
-            f"prefix={channel_prefix})"
-        )
+        logger.info(f"HormoneMessenger initialized (redis={redis_url}, prefix={channel_prefix})")
 
     # ==================== LIFECYCLE ====================
 
@@ -226,9 +221,7 @@ class HormoneMessenger:
         """
         # Degraded mode: log but don't publish
         if self._degraded_mode:
-            logger.debug(
-                f"[DEGRADED MODE] Hormone {tipo} from {emissor} (nivel={nivel})"
-            )
+            logger.debug(f"[DEGRADED MODE] Hormone {tipo} from {emissor} (nivel={nivel})")
             return 0
 
         if not self._redis_client:
@@ -249,14 +242,9 @@ class HormoneMessenger:
 
         try:
             # Publish to Redis Pub/Sub
-            num_subscribers = await self._redis_client.publish(
-                channel, json.dumps(message.model_dump())
-            )
+            num_subscribers = await self._redis_client.publish(channel, json.dumps(message.model_dump()))
 
-            logger.debug(
-                f"Hormone {tipo} published by {emissor} "
-                f"(nivel={nivel}, subscribers={num_subscribers})"
-            )
+            logger.debug(f"Hormone {tipo} published by {emissor} (nivel={nivel}, subscribers={num_subscribers})")
 
             # Update metrics (if available)
             try:
@@ -294,9 +282,7 @@ class HormoneMessenger:
 
         # Degraded mode: skip subscription
         if self._degraded_mode:
-            logger.debug(
-                f"[DEGRADED MODE] Would subscribe {subscriber_id} to {hormone_types}"
-            )
+            logger.debug(f"[DEGRADED MODE] Would subscribe {subscriber_id} to {hormone_types}")
             return
 
         if not self._redis_client:
@@ -316,17 +302,12 @@ class HormoneMessenger:
             logger.info(f"Subscribed to {channels} with subscriber {subscriber_id}")
 
             # Start subscription task
-            task = asyncio.create_task(
-                self._subscription_loop(pubsub, subscriber_id, callback)
-            )
+            task = asyncio.create_task(self._subscription_loop(pubsub, subscriber_id, callback))
             self._subscription_tasks.add(task)
             task.add_done_callback(self._subscription_tasks.discard)
 
         except Exception as e:
-            logger.warning(
-                f"Failed to subscribe {subscriber_id}: {e}. "
-                "Running in DEGRADED MODE"
-            )
+            logger.warning(f"Failed to subscribe {subscriber_id}: {e}. Running in DEGRADED MODE")
             self._degraded_mode = True
 
     async def _subscription_loop(
@@ -352,18 +333,13 @@ class HormoneMessenger:
                     data = json.loads(message["data"])
                     hormone = HormoneMessage(**data)
 
-                    logger.debug(
-                        f"Hormone {hormone.tipo} received by {subscriber_id} "
-                        f"(nivel={hormone.nivel})"
-                    )
+                    logger.debug(f"Hormone {hormone.tipo} received by {subscriber_id} (nivel={hormone.nivel})")
 
                     # Update metrics
                     try:
                         from main import cytokines_received_total  # Reuse metric
 
-                        cytokines_received_total.labels(
-                            type=f"hormone_{hormone.tipo}"
-                        ).inc()
+                        cytokines_received_total.labels(type=f"hormone_{hormone.tipo}").inc()
                     except ImportError:
                         pass
 
@@ -387,9 +363,7 @@ class HormoneMessenger:
             raise
 
         except Exception as e:
-            logger.error(
-                f"Fatal error in subscription loop {subscriber_id}: {e}", exc_info=True
-            )
+            logger.error(f"Fatal error in subscription loop {subscriber_id}: {e}", exc_info=True)
 
         finally:
             logger.info(f"Subscription loop ended for {subscriber_id}")
@@ -418,9 +392,7 @@ class HormoneMessenger:
 
     # ==================== STATE MANAGEMENT ====================
 
-    async def set_agent_state(
-        self, agent_id: str, state: Dict[str, Any], ttl: int = 60
-    ) -> bool:
+    async def set_agent_state(self, agent_id: str, state: Dict[str, Any], ttl: int = 60) -> bool:
         """
         Store agent state in Redis (ephemeral).
 

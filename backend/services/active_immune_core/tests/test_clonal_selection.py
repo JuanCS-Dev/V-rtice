@@ -13,7 +13,6 @@ Tests cover actual production implementation:
 """
 
 import asyncio
-from typing import Dict
 
 import pytest
 import pytest_asyncio
@@ -23,7 +22,6 @@ from active_immune_core.coordination.clonal_selection import (
     ClonalSelectionEngine,
     FitnessMetrics,
 )
-
 
 # ==================== FITNESS METRICS TESTS ====================
 

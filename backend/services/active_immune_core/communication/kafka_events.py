@@ -20,8 +20,8 @@ import asyncio
 import json
 import logging
 from datetime import datetime
-from typing import Dict, Any, Optional, List
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import KafkaConnectionError, KafkaError
@@ -93,13 +93,9 @@ class KafkaEventProducer:
         # Metrics
         self.total_events_published = 0
         self.total_events_failed = 0
-        self.events_by_topic: Dict[str, int] = {
-            topic.value: 0 for topic in EventTopic
-        }
+        self.events_by_topic: Dict[str, int] = {topic.value: 0 for topic in EventTopic}
 
-        logger.info(
-            f"KafkaEventProducer initialized (bootstrap={bootstrap_servers})"
-        )
+        logger.info(f"KafkaEventProducer initialized (bootstrap={bootstrap_servers})")
 
     # ==================== LIFECYCLE ====================
 
@@ -136,9 +132,7 @@ class KafkaEventProducer:
             if self.enable_degraded_mode:
                 self._running = True
                 self._kafka_available = False
-                logger.warning(
-                    f"Kafka unavailable - running in degraded mode: {e}"
-                )
+                logger.warning(f"Kafka unavailable - running in degraded mode: {e}")
             else:
                 raise
 
@@ -210,24 +204,18 @@ class KafkaEventProducer:
                     self.total_events_published += 1
                     self.events_by_topic[topic.value] += 1
 
-                    logger.debug(
-                        f"Published event to {topic.value} (key={key})"
-                    )
+                    logger.debug(f"Published event to {topic.value} (key={key})")
                     return True
 
                 except Exception as e:
                     if attempt < self.max_retries:
-                        backoff = self.retry_backoff_base ** attempt
+                        backoff = self.retry_backoff_base**attempt
                         logger.warning(
-                            f"Failed to publish to {topic.value} "
-                            f"(attempt {attempt + 1}/{self.max_retries + 1}): {e}"
+                            f"Failed to publish to {topic.value} (attempt {attempt + 1}/{self.max_retries + 1}): {e}"
                         )
                         await asyncio.sleep(backoff)
                     else:
-                        logger.error(
-                            f"Failed to publish to {topic.value} after "
-                            f"{self.max_retries + 1} attempts: {e}"
-                        )
+                        logger.error(f"Failed to publish to {topic.value} after {self.max_retries + 1} attempts: {e}")
                         self._kafka_available = False
 
         # Graceful degradation - log to file
@@ -253,16 +241,16 @@ class KafkaEventProducer:
         try:
             with open("/tmp/immunis_events_fallback.jsonl", "a") as f:
                 f.write(
-                    json.dumps({
-                        "topic": topic.value,
-                        "event": event_data,
-                        "logged_at": datetime.utcnow().isoformat(),
-                    }) + "\n"
+                    json.dumps(
+                        {
+                            "topic": topic.value,
+                            "event": event_data,
+                            "logged_at": datetime.utcnow().isoformat(),
+                        }
+                    )
+                    + "\n"
                 )
-            logger.warning(
-                f"Event logged to fallback file: {topic.value} "
-                "(Kafka unavailable)"
-            )
+            logger.warning(f"Event logged to fallback file: {topic.value} (Kafka unavailable)")
         except Exception as e:
             logger.error(f"Failed to log event to fallback file: {e}")
 

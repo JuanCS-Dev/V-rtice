@@ -1,12 +1,10 @@
 """Anomaly Detector - Isolation Forest + LSTM Autoencoder"""
 
 import logging
-from typing import Dict
 
 import numpy as np
-from sklearn.ensemble import IsolationForest
-import torch
 import torch.nn as nn
+from sklearn.ensemble import IsolationForest
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +42,7 @@ class AnomalyDetector:
         # Convert to tensor and train (simplified for production)
         logger.info("Anomaly detector training complete")
 
-    def detect(self, metrics: np.ndarray) -> Dict:
+    def detect(self, metrics: np.ndarray) -> dict:
         """
         Detect anomalies in real-time metrics.
 

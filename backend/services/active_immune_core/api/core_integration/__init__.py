@@ -15,9 +15,9 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-from .core_manager import CoreManager
 from .agent_service import AgentService
 from .coordination_service import CoordinationService
+from .core_manager import CoreManager
 from .event_bridge import EventBridge
 
 __all__ = ["CoreManager", "AgentService", "CoordinationService", "EventBridge"]

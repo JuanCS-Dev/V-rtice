@@ -7,11 +7,11 @@ Date: 2025-10-06
 """
 
 import pytest
-from pathlib import Path
 
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -43,11 +43,7 @@ def simple_model():
 @pytest.fixture
 def quant_config(tmp_path):
     """Create quantization config."""
-    return QuantizationConfig(
-        quantization_type="dynamic",
-        backend="fbgemm",
-        output_dir=tmp_path / "quantized"
-    )
+    return QuantizationConfig(quantization_type="dynamic", backend="fbgemm", output_dir=tmp_path / "quantized")
 
 
 def test_quantizer_initialization(quant_config):
@@ -101,11 +97,7 @@ def test_quantization_config_validation():
     if not TORCH_AVAILABLE:
         pytest.skip("PyTorch not available")
 
-    config = QuantizationConfig(
-        quantization_type="dynamic",
-        dtype="qint8",
-        backend="fbgemm"
-    )
+    config = QuantizationConfig(quantization_type="dynamic", dtype="qint8", backend="fbgemm")
 
     assert config.quantization_type == "dynamic"
     assert config.dtype == "qint8"

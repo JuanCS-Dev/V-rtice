@@ -24,13 +24,14 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
 
 class CompositionType(str, Enum):
     """Type of privacy composition"""
+
     BASIC_SEQUENTIAL = "basic_sequential"
     ADVANCED_SEQUENTIAL = "advanced_sequential"
     PARALLEL = "parallel"
@@ -51,13 +52,14 @@ class QueryRecord:
         composition_type: How this query composes with others
         metadata: Additional query information
     """
+
     timestamp: float
     epsilon: float
     delta: float
     query_type: str
     mechanism: str = "unknown"
     composition_type: CompositionType = CompositionType.BASIC_SEQUENTIAL
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class PrivacyAccountant:
@@ -69,9 +71,7 @@ class PrivacyAccountant:
 
     Example:
         >>> accountant = PrivacyAccountant(
-        ...     total_epsilon=10.0,
-        ...     total_delta=1e-5,
-        ...     composition_type=CompositionType.ADVANCED_SEQUENTIAL
+        ...     total_epsilon=10.0, total_delta=1e-5, composition_type=CompositionType.ADVANCED_SEQUENTIAL
         ... )
         >>>
         >>> # Execute queries
@@ -87,7 +87,7 @@ class PrivacyAccountant:
         self,
         total_epsilon: float,
         total_delta: float,
-        composition_type: CompositionType = CompositionType.BASIC_SEQUENTIAL
+        composition_type: CompositionType = CompositionType.BASIC_SEQUENTIAL,
     ):
         """
         Initialize privacy accountant.
@@ -110,7 +110,7 @@ class PrivacyAccountant:
         self.composition_type = composition_type
 
         # Query history
-        self.queries: List[QueryRecord] = []
+        self.queries: list[QueryRecord] = []
 
         # Accounting state
         self.created_at = time.time()
@@ -121,9 +121,9 @@ class PrivacyAccountant:
         delta: float = 0.0,
         query_type: str = "unknown",
         mechanism: str = "unknown",
-        composition_type: Optional[CompositionType] = None,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Tuple[float, float]:
+        composition_type: CompositionType | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> tuple[float, float]:
         """
         Add a query to the privacy accounting.
 
@@ -152,7 +152,7 @@ class PrivacyAccountant:
             query_type=query_type,
             mechanism=mechanism,
             composition_type=comp_type,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         # Check if budget would be exceeded (before adding)
@@ -170,7 +170,7 @@ class PrivacyAccountant:
 
         return total_eps, total_dlt
 
-    def get_total_privacy_loss(self) -> Tuple[float, float]:
+    def get_total_privacy_loss(self) -> tuple[float, float]:
         """
         Get total privacy loss from all queries.
 
@@ -179,10 +179,7 @@ class PrivacyAccountant:
         """
         return self._compute_total_privacy_loss(self.queries)
 
-    def _compute_total_privacy_loss(
-        self,
-        queries: List[QueryRecord]
-    ) -> Tuple[float, float]:
+    def _compute_total_privacy_loss(self, queries: list[QueryRecord]) -> tuple[float, float]:
         """
         Compute total privacy loss using appropriate composition theorem.
 
@@ -223,7 +220,7 @@ class PrivacyAccountant:
 
         return (total_epsilon, total_delta)
 
-    def _basic_composition(self, queries: List[QueryRecord]) -> Tuple[float, float]:
+    def _basic_composition(self, queries: list[QueryRecord]) -> tuple[float, float]:
         """
         Basic composition theorem.
 
@@ -240,7 +237,7 @@ class PrivacyAccountant:
         total_delta = sum(q.delta for q in queries)
         return (total_epsilon, total_delta)
 
-    def _advanced_composition(self, queries: List[QueryRecord]) -> Tuple[float, float]:
+    def _advanced_composition(self, queries: list[QueryRecord]) -> tuple[float, float]:
         """
         Advanced composition theorem (tighter bound).
 
@@ -282,7 +279,7 @@ class PrivacyAccountant:
 
         return (epsilon_total, delta_total)
 
-    def _parallel_composition(self, queries: List[QueryRecord]) -> Tuple[float, float]:
+    def _parallel_composition(self, queries: list[QueryRecord]) -> tuple[float, float]:
         """
         Parallel composition theorem.
 
@@ -302,7 +299,7 @@ class PrivacyAccountant:
         max_delta = max(q.delta for q in queries)
         return (max_epsilon, max_delta)
 
-    def get_remaining_budget(self) -> Tuple[float, float]:
+    def get_remaining_budget(self) -> tuple[float, float]:
         """
         Get remaining privacy budget.
 
@@ -310,10 +307,7 @@ class PrivacyAccountant:
             tuple: (remaining_epsilon, remaining_delta)
         """
         total_eps, total_dlt = self.get_total_privacy_loss()
-        return (
-            max(0.0, self.total_epsilon - total_eps),
-            max(0.0, self.total_delta - total_dlt)
-        )
+        return (max(0.0, self.total_epsilon - total_eps), max(0.0, self.total_delta - total_dlt))
 
     def is_budget_exhausted(self) -> bool:
         """
@@ -342,7 +336,7 @@ class PrivacyAccountant:
             epsilon=epsilon,
             delta=delta,
             query_type="temp",
-            composition_type=self.composition_type
+            composition_type=self.composition_type,
         )
 
         # Compute total privacy loss with this query
@@ -350,7 +344,7 @@ class PrivacyAccountant:
 
         return total_eps <= self.total_epsilon and total_dlt <= self.total_delta
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get privacy accounting statistics.
 
@@ -373,21 +367,16 @@ class PrivacyAccountant:
             "uptime_seconds": time.time() - self.created_at,
             "query_breakdown": {
                 "basic_sequential": sum(
-                    1 for q in self.queries
-                    if q.composition_type == CompositionType.BASIC_SEQUENTIAL
+                    1 for q in self.queries if q.composition_type == CompositionType.BASIC_SEQUENTIAL
                 ),
                 "advanced_sequential": sum(
-                    1 for q in self.queries
-                    if q.composition_type == CompositionType.ADVANCED_SEQUENTIAL
+                    1 for q in self.queries if q.composition_type == CompositionType.ADVANCED_SEQUENTIAL
                 ),
-                "parallel": sum(
-                    1 for q in self.queries
-                    if q.composition_type == CompositionType.PARALLEL
-                ),
-            }
+                "parallel": sum(1 for q in self.queries if q.composition_type == CompositionType.PARALLEL),
+            },
         }
 
-    def get_query_history(self) -> List[Dict[str, Any]]:
+    def get_query_history(self) -> list[dict[str, Any]]:
         """
         Get history of all queries.
 
@@ -402,7 +391,7 @@ class PrivacyAccountant:
                 "query_type": q.query_type,
                 "mechanism": q.mechanism,
                 "composition_type": q.composition_type.value,
-                "metadata": q.metadata
+                "metadata": q.metadata,
             }
             for q in self.queries
         ]
@@ -430,7 +419,7 @@ class SubsampledPrivacyAccountant(PrivacyAccountant):
         >>> accountant = SubsampledPrivacyAccountant(
         ...     total_epsilon=10.0,
         ...     total_delta=1e-5,
-        ...     sampling_rate=0.01  # 1% subsample
+        ...     sampling_rate=0.01,  # 1% subsample
         ... )
         >>>
         >>> # Query on subsample has amplified privacy
@@ -442,7 +431,7 @@ class SubsampledPrivacyAccountant(PrivacyAccountant):
         total_epsilon: float,
         total_delta: float,
         sampling_rate: float,
-        composition_type: CompositionType = CompositionType.ADVANCED_SEQUENTIAL
+        composition_type: CompositionType = CompositionType.ADVANCED_SEQUENTIAL,
     ):
         """
         Initialize subsampled privacy accountant.
@@ -468,9 +457,9 @@ class SubsampledPrivacyAccountant(PrivacyAccountant):
         delta: float = 0.0,
         query_type: str = "unknown",
         mechanism: str = "unknown",
-        composition_type: Optional[CompositionType] = None,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Tuple[float, float]:
+        composition_type: CompositionType | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> tuple[float, float]:
         """
         Add a query with privacy amplification by subsampling.
 
@@ -507,5 +496,5 @@ class SubsampledPrivacyAccountant(PrivacyAccountant):
             query_type=query_type,
             mechanism=mechanism,
             composition_type=composition_type,
-            metadata=metadata
+            metadata=metadata,
         )

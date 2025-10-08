@@ -11,12 +11,14 @@ Date: 2025-10-06
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Any, Optional
+from typing import Any
+
 import numpy as np
 
 
 class FLStatus(Enum):
     """Federated learning round status."""
+
     INITIALIZING = "initializing"
     WAITING_FOR_CLIENTS = "waiting_for_clients"
     TRAINING = "training"
@@ -27,6 +29,7 @@ class FLStatus(Enum):
 
 class AggregationStrategy(Enum):
     """Aggregation strategy for federated learning."""
+
     FEDAVG = "fedavg"  # Federated Averaging (McMahan et al., 2017)
     SECURE = "secure"  # Secure aggregation with secret sharing
     DP_FEDAVG = "dp_fedavg"  # FedAvg with differential privacy
@@ -35,6 +38,7 @@ class AggregationStrategy(Enum):
 
 class ModelType(Enum):
     """Supported model types for federated learning."""
+
     THREAT_CLASSIFIER = "threat_classifier"  # narrative_manipulation_filter
     MALWARE_DETECTOR = "malware_detector"  # immunis_macrophage_service
     CUSTOM = "custom"
@@ -62,6 +66,7 @@ class FLConfig:
         communication_timeout: Timeout for client communication (seconds)
         model_version: Current global model version
     """
+
     model_type: ModelType
     aggregation_strategy: AggregationStrategy = AggregationStrategy.FEDAVG
     min_clients: int = 3
@@ -100,7 +105,7 @@ class FLConfig:
             if self.dp_clip_norm <= 0:
                 raise ValueError("dp_clip_norm must be positive")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
             "model_type": self.model_type.value,
@@ -136,16 +141,17 @@ class ClientInfo:
         active: Whether client is currently active
         public_key: Public key for secure communication (optional)
     """
+
     client_id: str
     organization: str
     client_version: str = "1.0.0"
-    capabilities: Dict[str, Any] = field(default_factory=dict)
+    capabilities: dict[str, Any] = field(default_factory=dict)
     last_seen: datetime = field(default_factory=datetime.utcnow)
     total_samples: int = 0
     active: bool = True
-    public_key: Optional[str] = None
+    public_key: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert client info to dictionary."""
         return {
             "client_id": self.client_id,
@@ -176,16 +182,17 @@ class ModelUpdate:
         computation_time: Time taken for local training (seconds)
         signature: Digital signature for verification (optional)
     """
+
     client_id: str
     round_id: int
-    weights: Dict[str, np.ndarray]
+    weights: dict[str, np.ndarray]
     num_samples: int
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.utcnow)
     differential_privacy_applied: bool = False
     epsilon_used: float = 0.0
     computation_time: float = 0.0
-    signature: Optional[str] = None
+    signature: str | None = None
 
     def __post_init__(self):
         """Validate model update."""
@@ -205,7 +212,7 @@ class ModelUpdate:
         total_bytes = sum(w.nbytes for w in self.weights.values())
         return total_bytes / (1024 * 1024)
 
-    def to_dict(self, include_weights: bool = False) -> Dict[str, Any]:
+    def to_dict(self, include_weights: bool = False) -> dict[str, Any]:
         """
         Convert update to dictionary.
 
@@ -227,10 +234,7 @@ class ModelUpdate:
 
         if include_weights:
             # Convert numpy arrays to lists for JSON serialization
-            result["weights"] = {
-                layer: weights.tolist()
-                for layer, weights in self.weights.items()
-            }
+            result["weights"] = {layer: weights.tolist() for layer, weights in self.weights.items()}
         else:
             result["weight_layers"] = list(self.weights.keys())
 
@@ -254,16 +258,17 @@ class FLRound:
         aggregation_result: Result of aggregation (None if not completed)
         metrics: Round-level metrics
     """
+
     round_id: int
     status: FLStatus
     config: FLConfig
-    selected_clients: List[str] = field(default_factory=list)
-    received_updates: List[ModelUpdate] = field(default_factory=list)
+    selected_clients: list[str] = field(default_factory=list)
+    received_updates: list[ModelUpdate] = field(default_factory=list)
     global_model_version: int = 0
     start_time: datetime = field(default_factory=datetime.utcnow)
-    end_time: Optional[datetime] = None
-    aggregation_result: Optional[Dict[str, Any]] = None
-    metrics: Dict[str, float] = field(default_factory=dict)
+    end_time: datetime | None = None
+    aggregation_result: dict[str, Any] | None = None
+    metrics: dict[str, float] = field(default_factory=dict)
 
     def get_participation_rate(self) -> float:
         """Get fraction of selected clients that submitted updates."""
@@ -271,7 +276,7 @@ class FLRound:
             return 0.0
         return len(self.received_updates) / len(self.selected_clients)
 
-    def get_duration_seconds(self) -> Optional[float]:
+    def get_duration_seconds(self) -> float | None:
         """Get round duration in seconds (None if not completed)."""
         if self.end_time is None:
             return None
@@ -281,7 +286,7 @@ class FLRound:
         """Get total number of samples across all updates."""
         return sum(update.num_samples for update in self.received_updates)
 
-    def get_average_metrics(self) -> Dict[str, float]:
+    def get_average_metrics(self) -> dict[str, float]:
         """
         Get weighted average of client metrics.
 
@@ -299,14 +304,13 @@ class FLRound:
         avg_metrics = {}
         for metric_name in metric_names:
             weighted_sum = sum(
-                update.metrics.get(metric_name, 0.0) * update.num_samples
-                for update in self.received_updates
+                update.metrics.get(metric_name, 0.0) * update.num_samples for update in self.received_updates
             )
             avg_metrics[metric_name] = weighted_sum / total_samples
 
         return avg_metrics
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert round to dictionary."""
         return {
             "round_id": self.round_id,
@@ -342,6 +346,7 @@ class FLMetrics:
         privacy_budget_used: Total privacy budget used (if DP enabled)
         last_updated: When metrics were last updated
     """
+
     total_rounds: int = 0
     total_clients: int = 0
     active_clients: int = 0
@@ -353,7 +358,7 @@ class FLMetrics:
     privacy_budget_used: float = 0.0
     last_updated: datetime = field(default_factory=datetime.utcnow)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert metrics to dictionary."""
         return {
             "total_rounds": self.total_rounds,

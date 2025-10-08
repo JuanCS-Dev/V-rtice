@@ -92,9 +92,9 @@ Enables MPE - the foundational "wakefulness" that precedes content.
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Dict, List, Optional
 
 import numpy as np
 
@@ -156,14 +156,13 @@ class ArousalState:
         """
         if arousal <= 0.2:
             return ArousalLevel.SLEEP
-        elif arousal <= 0.4:
+        if arousal <= 0.4:
             return ArousalLevel.DROWSY
-        elif arousal <= 0.6:
+        if arousal <= 0.6:
             return ArousalLevel.RELAXED
-        elif arousal <= 0.8:
+        if arousal <= 0.8:
             return ArousalLevel.ALERT
-        else:
-            return ArousalLevel.HYPERALERT
+        return ArousalLevel.HYPERALERT
 
     def get_arousal_factor(self) -> float:
         """
@@ -332,7 +331,7 @@ class ArousalController:
     "Wakefulness is the stage upon which consciousness performs."
     """
 
-    def __init__(self, config: Optional[ArousalConfig] = None, controller_id: str = "mcea-arousal-controller-primary"):
+    def __init__(self, config: ArousalConfig | None = None, controller_id: str = "mcea-arousal-controller-primary"):
         self.controller_id = controller_id
         self.config = config or ArousalConfig()
 
@@ -346,24 +345,24 @@ class ArousalController:
         self._target_arousal: float = self.config.baseline_arousal
 
         # Active modulations
-        self._active_modulations: List[ArousalModulation] = []
+        self._active_modulations: list[ArousalModulation] = []
 
         # Stress accumulator
         self._accumulated_stress: float = 0.0
 
         # ESGT refractory state
-        self._refractory_until: Optional[float] = None
+        self._refractory_until: float | None = None
 
         # State
         self._running: bool = False
-        self._update_task: Optional[asyncio.Task] = None
+        self._update_task: asyncio.Task | None = None
 
         # Level transition tracking
         self._last_level: ArousalLevel = self._current_state.level
         self._level_transition_time: float = time.time()
 
         # Callbacks
-        self._arousal_callbacks: List[Callable[[ArousalState], None]] = []
+        self._arousal_callbacks: list[Callable[[ArousalState], None]] = []
 
         # Statistics
         self.total_updates: int = 0
@@ -482,8 +481,7 @@ class ArousalController:
 
         if total_priority > 0:
             return total / total_priority
-        else:
-            return 0.0
+        return 0.0
 
     def _compute_temporal_contribution(self, dt: float) -> float:
         """Compute arousal contribution from stress buildup/recovery."""
@@ -525,14 +523,13 @@ class ArousalController:
         """
         if arousal <= 0.2:
             return ArousalLevel.SLEEP
-        elif arousal <= 0.4:
+        if arousal <= 0.4:
             return ArousalLevel.DROWSY
-        elif arousal <= 0.6:
+        if arousal <= 0.6:
             return ArousalLevel.RELAXED
-        elif arousal <= 0.8:
+        if arousal <= 0.8:
             return ArousalLevel.ALERT
-        else:
-            return ArousalLevel.HYPERALERT
+        return ArousalLevel.HYPERALERT
 
     async def _invoke_callbacks(self) -> None:
         """Invoke registered callbacks with current state."""
@@ -605,7 +602,7 @@ class ArousalController:
         """Manually reset accumulated stress."""
         self._accumulated_stress = 0.0
 
-    def get_statistics(self) -> Dict[str, any]:
+    def get_statistics(self) -> dict[str, any]:
         """Get controller statistics."""
         return {
             "controller_id": self.controller_id,

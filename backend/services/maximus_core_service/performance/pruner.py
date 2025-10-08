@@ -14,10 +14,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -26,6 +26,7 @@ try:
     import torch
     import torch.nn as nn
     import torch.nn.utils.prune as prune
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -54,7 +55,7 @@ class PruningConfig:
     finetune_epochs: int = 10
 
     # Layer selection
-    skip_layers: List[str] = None
+    skip_layers: list[str] = None
 
     # Output
     output_dir: Path = Path("models/pruned")
@@ -84,9 +85,9 @@ class PruningResult:
     size_reduction_pct: float
 
     # Layer-wise sparsity
-    layer_sparsity: Dict[str, float]
+    layer_sparsity: dict[str, float]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary.
 
         Returns:
@@ -99,7 +100,7 @@ class PruningResult:
             "original_size_mb": self.original_size_mb,
             "pruned_size_mb": self.pruned_size_mb,
             "size_reduction_pct": self.size_reduction_pct,
-            "layer_sparsity": self.layer_sparsity
+            "layer_sparsity": self.layer_sparsity,
         }
 
 
@@ -117,29 +118,19 @@ class ModelPruner:
     Example:
         ```python
         # Simple unstructured pruning
-        config = PruningConfig(
-            pruning_type="unstructured",
-            target_sparsity=0.5
-        )
+        config = PruningConfig(pruning_type="unstructured", target_sparsity=0.5)
 
         pruner = ModelPruner(config=config)
         pruned_model = pruner.prune(model)
 
         # Iterative pruning with fine-tuning
         config = PruningConfig(
-            pruning_type="unstructured",
-            target_sparsity=0.7,
-            iterative=True,
-            num_iterations=5,
-            finetune_epochs=10
+            pruning_type="unstructured", target_sparsity=0.7, iterative=True, num_iterations=5, finetune_epochs=10
         )
 
         pruner = ModelPruner(config=config)
         pruned_model = pruner.prune_iterative(
-            model=model,
-            train_loader=train_loader,
-            optimizer=optimizer,
-            loss_fn=loss_fn
+            model=model, train_loader=train_loader, optimizer=optimizer, loss_fn=loss_fn
         )
         ```
     """
@@ -155,8 +146,7 @@ class ModelPruner:
 
         self.config = config
 
-        logger.info(f"ModelPruner initialized: type={config.pruning_type}, "
-                   f"sparsity={config.target_sparsity}")
+        logger.info(f"ModelPruner initialized: type={config.pruning_type}, sparsity={config.target_sparsity}")
 
     def prune(self, model: nn.Module) -> nn.Module:
         """Prune model to target sparsity.
@@ -167,8 +157,9 @@ class ModelPruner:
         Returns:
             Pruned model
         """
-        logger.info(f"Pruning model with {self.config.pruning_type} pruning "
-                   f"to {self.config.target_sparsity:.1%} sparsity")
+        logger.info(
+            f"Pruning model with {self.config.pruning_type} pruning to {self.config.target_sparsity:.1%} sparsity"
+        )
 
         # Get pruneable layers
         layers_to_prune = self._get_pruneable_layers(model)
@@ -181,8 +172,9 @@ class ModelPruner:
             model = self._structured_pruning(model, layers_to_prune)
 
         else:
-            raise ValueError(f"Unknown pruning type: {self.config.pruning_type}. "
-                           f"Supported types: 'unstructured', 'structured'")
+            raise ValueError(
+                f"Unknown pruning type: {self.config.pruning_type}. Supported types: 'unstructured', 'structured'"
+            )
 
         # Make pruning permanent
         self._make_permanent(model, layers_to_prune)
@@ -192,12 +184,7 @@ class ModelPruner:
         return model
 
     def prune_iterative(
-        self,
-        model: nn.Module,
-        train_loader: Any,
-        optimizer: Any,
-        loss_fn: callable,
-        device: str = "cpu"
+        self, model: nn.Module, train_loader: Any, optimizer: Any, loss_fn: callable, device: str = "cpu"
     ) -> nn.Module:
         """Prune model iteratively with fine-tuning.
 
@@ -219,8 +206,7 @@ class ModelPruner:
         sparsity_schedule = self._compute_sparsity_schedule()
 
         for iteration, target_sparsity in enumerate(sparsity_schedule, 1):
-            logger.info(f"Iteration {iteration}/{self.config.num_iterations} - "
-                       f"Target sparsity: {target_sparsity:.1%}")
+            logger.info(f"Iteration {iteration}/{self.config.num_iterations} - Target sparsity: {target_sparsity:.1%}")
 
             # Update config for this iteration
             original_sparsity = self.config.target_sparsity
@@ -241,7 +227,7 @@ class ModelPruner:
                     optimizer=optimizer,
                     loss_fn=loss_fn,
                     num_epochs=self.config.finetune_epochs,
-                    device=device
+                    device=device,
                 )
 
         logger.info("Iterative pruning complete")
@@ -289,12 +275,12 @@ class ModelPruner:
             original_size_mb=original_size,
             pruned_size_mb=pruned_size,
             size_reduction_pct=size_reduction,
-            layer_sparsity=layer_sparsity
+            layer_sparsity=layer_sparsity,
         )
 
         return result
 
-    def _get_pruneable_layers(self, model: nn.Module) -> List[Tuple[nn.Module, str]]:
+    def _get_pruneable_layers(self, model: nn.Module) -> list[tuple[nn.Module, str]]:
         """Get layers that can be pruned.
 
         Args:
@@ -318,11 +304,7 @@ class ModelPruner:
 
         return layers
 
-    def _unstructured_pruning(
-        self,
-        model: nn.Module,
-        layers: List[Tuple[nn.Module, str]]
-    ) -> nn.Module:
+    def _unstructured_pruning(self, model: nn.Module, layers: list[tuple[nn.Module, str]]) -> nn.Module:
         """Apply unstructured pruning (individual weights).
 
         Args:
@@ -334,38 +316,20 @@ class ModelPruner:
         """
         for module, param_name in layers:
             if self.config.pruning_method == "l1":
-                prune.l1_unstructured(
-                    module,
-                    name=param_name,
-                    amount=self.config.target_sparsity
-                )
+                prune.l1_unstructured(module, name=param_name, amount=self.config.target_sparsity)
 
             elif self.config.pruning_method == "random":
-                prune.random_unstructured(
-                    module,
-                    name=param_name,
-                    amount=self.config.target_sparsity
-                )
+                prune.random_unstructured(module, name=param_name, amount=self.config.target_sparsity)
 
             elif self.config.pruning_method == "ln":
-                prune.ln_structured(
-                    module,
-                    name=param_name,
-                    amount=self.config.target_sparsity,
-                    n=2,
-                    dim=0
-                )
+                prune.ln_structured(module, name=param_name, amount=self.config.target_sparsity, n=2, dim=0)
 
             else:
                 raise ValueError(f"Unknown pruning method: {self.config.pruning_method}")
 
         return model
 
-    def _structured_pruning(
-        self,
-        model: nn.Module,
-        layers: List[Tuple[nn.Module, str]]
-    ) -> nn.Module:
+    def _structured_pruning(self, model: nn.Module, layers: list[tuple[nn.Module, str]]) -> nn.Module:
         """Apply structured pruning (entire filters/neurons).
 
         Args:
@@ -378,38 +342,20 @@ class ModelPruner:
         for module, param_name in layers:
             # Structured pruning along dimension 0 (output channels/neurons)
             if self.config.pruning_method == "l1":
-                prune.ln_structured(
-                    module,
-                    name=param_name,
-                    amount=self.config.target_sparsity,
-                    n=1,
-                    dim=0
-                )
+                prune.ln_structured(module, name=param_name, amount=self.config.target_sparsity, n=1, dim=0)
 
             elif self.config.pruning_method == "ln":
-                prune.ln_structured(
-                    module,
-                    name=param_name,
-                    amount=self.config.target_sparsity,
-                    n=2,
-                    dim=0
-                )
+                prune.ln_structured(module, name=param_name, amount=self.config.target_sparsity, n=2, dim=0)
 
             elif self.config.pruning_method == "random":
-                prune.random_structured(
-                    module,
-                    name=param_name,
-                    amount=self.config.target_sparsity,
-                    dim=0
-                )
+                prune.random_structured(module, name=param_name, amount=self.config.target_sparsity, dim=0)
 
             else:
-                raise ValueError(f"Pruning method {self.config.pruning_method} "
-                               f"not supported for structured pruning")
+                raise ValueError(f"Pruning method {self.config.pruning_method} not supported for structured pruning")
 
         return model
 
-    def _make_permanent(self, model: nn.Module, layers: List[Tuple[nn.Module, str]]):
+    def _make_permanent(self, model: nn.Module, layers: list[tuple[nn.Module, str]]):
         """Make pruning permanent by removing masks.
 
         Args:
@@ -423,29 +369,19 @@ class ModelPruner:
                 # Parameter was not pruned
                 pass
 
-    def _compute_sparsity_schedule(self) -> List[float]:
+    def _compute_sparsity_schedule(self) -> list[float]:
         """Compute sparsity schedule for iterative pruning.
 
         Returns:
             List of target sparsities for each iteration
         """
         # Linear schedule from 0 to target_sparsity
-        schedule = np.linspace(
-            0.0,
-            self.config.target_sparsity,
-            self.config.num_iterations + 1
-        )[1:]  # Skip 0
+        schedule = np.linspace(0.0, self.config.target_sparsity, self.config.num_iterations + 1)[1:]  # Skip 0
 
         return schedule.tolist()
 
     def _finetune(
-        self,
-        model: nn.Module,
-        train_loader: Any,
-        optimizer: Any,
-        loss_fn: callable,
-        num_epochs: int,
-        device: str
+        self, model: nn.Module, train_loader: Any, optimizer: Any, loss_fn: callable, num_epochs: int, device: str
     ) -> nn.Module:
         """Fine-tune pruned model.
 
@@ -500,14 +436,13 @@ class ModelPruner:
         if isinstance(batch, torch.Tensor):
             return batch.to(device)
 
-        elif isinstance(batch, (tuple, list)):
+        if isinstance(batch, (tuple, list)):
             return tuple(self._batch_to_device(x, device) for x in batch)
 
-        elif isinstance(batch, dict):
+        if isinstance(batch, dict):
             return {k: self._batch_to_device(v, device) for k, v in batch.items()}
 
-        else:
-            return batch
+        return batch
 
     def _get_model_size(self, model: nn.Module) -> float:
         """Get model size in MB.
@@ -550,23 +485,22 @@ class ModelPruner:
         print("PRUNING REPORT")
         print("=" * 80)
 
-        print(f"\nOverall:")
+        print("\nOverall:")
         print(f"  Total parameters: {result.original_params:,}")
         print(f"  Pruned parameters: {result.pruned_params:,}")
         print(f"  Sparsity achieved: {result.sparsity_achieved:.1%}")
 
-        print(f"\nModel Size:")
+        print("\nModel Size:")
         print(f"  Original: {result.original_size_mb:.2f} MB")
         print(f"  Pruned: {result.pruned_size_mb:.2f} MB")
         print(f"  Reduction: {result.size_reduction_pct:.1f}%")
 
         if result.layer_sparsity:
-            print(f"\nLayer-wise Sparsity:")
+            print("\nLayer-wise Sparsity:")
             print(f"  {'Layer':>40} {'Sparsity':>15}")
             print("  " + "-" * 55)
 
-            for layer_name, sparsity in sorted(result.layer_sparsity.items(),
-                                              key=lambda x: x[1], reverse=True):
+            for layer_name, sparsity in sorted(result.layer_sparsity.items(), key=lambda x: x[1], reverse=True):
                 print(f"  {layer_name:>40} {sparsity:>15.1%}")
 
         print("=" * 80)
@@ -576,6 +510,7 @@ class ModelPruner:
 # CLI
 # =============================================================================
 
+
 def main():
     """Main pruning script."""
     import argparse
@@ -583,16 +518,22 @@ def main():
     parser = argparse.ArgumentParser(description="Prune MAXIMUS Models")
 
     parser.add_argument("--model_path", type=str, required=True, help="Path to model")
-    parser.add_argument("--pruning_type", type=str, default="unstructured",
-                       choices=["unstructured", "structured"],
-                       help="Pruning type: unstructured (individual weights) or structured (filters)")
-    parser.add_argument("--pruning_method", type=str, default="l1",
-                       choices=["l1", "random", "ln"],
-                       help="Pruning method: l1 (magnitude), random, or ln (norm)")
-    parser.add_argument("--target_sparsity", type=float, default=0.5,
-                       help="Target sparsity (0.0 to 1.0)")
-    parser.add_argument("--output", type=str, default="model_pruned.pt",
-                       help="Output filename")
+    parser.add_argument(
+        "--pruning_type",
+        type=str,
+        default="unstructured",
+        choices=["unstructured", "structured"],
+        help="Pruning type: unstructured (individual weights) or structured (filters)",
+    )
+    parser.add_argument(
+        "--pruning_method",
+        type=str,
+        default="l1",
+        choices=["l1", "random", "ln"],
+        help="Pruning method: l1 (magnitude), random, or ln (norm)",
+    )
+    parser.add_argument("--target_sparsity", type=float, default=0.5, help="Target sparsity (0.0 to 1.0)")
+    parser.add_argument("--output", type=str, default="model_pruned.pt", help="Output filename")
 
     args = parser.parse_args()
 
@@ -601,9 +542,7 @@ def main():
 
     # Create pruner
     config = PruningConfig(
-        pruning_type=args.pruning_type,
-        pruning_method=args.pruning_method,
-        target_sparsity=args.target_sparsity
+        pruning_type=args.pruning_type, pruning_method=args.pruning_method, target_sparsity=args.target_sparsity
     )
 
     pruner = ModelPruner(config=config)

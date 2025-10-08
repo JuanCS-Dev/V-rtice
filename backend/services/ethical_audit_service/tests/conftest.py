@@ -6,14 +6,13 @@ This module provides reusable fixtures following PAGANI Standard:
 - DO NOT mock internal business logic
 """
 
-from datetime import datetime, timedelta
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from auth import TokenData, UserRole
 from models import (
@@ -21,13 +20,12 @@ from models import (
     DecisionType,
     EthicalDecisionLog,
     FinalDecision,
-    OverrideReason,
     OperatorRole,
+    OverrideReason,
     Regulation,
     RiskLevel,
     UrgencyLevel,
 )
-
 
 # ============================================================================
 # MOCK DATABASE FIXTURES
@@ -76,6 +74,15 @@ class MockAsyncPGConnection:
 
     async def fetch(self, query: str, *args):
         """Mock fetch for multiple row queries."""
+        # Handle Analytics timeline queries
+        if "time_bucket" in query:
+            return getattr(self, "_timeline_data", [])
+
+        # Handle Analytics risk heatmap queries
+        if "decision_type" in query and "risk_level" in query and "GROUP BY" in query:
+            return getattr(self, "_heatmap_data", [])
+
+        # Handle regular queries
         if "ethical_decisions" in query:
             return self._data_store["ethical_decisions"]
         elif "human_overrides" in query:
@@ -109,23 +116,27 @@ class MockAsyncPGConnection:
     async def log_override(self, override):
         """Mock log_override for testing."""
         override_id = uuid.uuid4()
-        self._data_store["human_overrides"].append({
-            "id": override_id,
-            "decision_id": override.decision_id,
-            "operator_id": override.operator_id,
-            "timestamp": datetime.utcnow(),
-        })
+        self._data_store["human_overrides"].append(
+            {
+                "id": override_id,
+                "decision_id": override.decision_id,
+                "operator_id": override.operator_id,
+                "timestamp": datetime.utcnow(),
+            }
+        )
         return override_id
 
     async def log_compliance_check(self, check):
         """Mock log_compliance_check for testing."""
         compliance_id = uuid.uuid4()
-        self._data_store["compliance_logs"].append({
-            "id": compliance_id,
-            "regulation": check.regulation,
-            "check_result": check.check_result,
-            "timestamp": datetime.utcnow(),
-        })
+        self._data_store["compliance_logs"].append(
+            {
+                "id": compliance_id,
+                "regulation": check.regulation,
+                "check_result": check.check_result,
+                "timestamp": datetime.utcnow(),
+            }
+        )
         return compliance_id
 
     async def get_decision(self, decision_id):
@@ -152,6 +163,66 @@ class MockAsyncPGConnection:
     async def query_decisions(self, query):
         """Mock query_decisions for testing."""
         return (self._data_store["ethical_decisions"], len(self._data_store["ethical_decisions"]))
+
+    async def get_metrics(self):
+        """Mock get_metrics for testing - returns dummy metrics."""
+        from models import EthicalMetrics
+
+        return EthicalMetrics(
+            total_decisions_last_24h=10,
+            approval_rate=0.75,
+            rejection_rate=0.20,
+            hitl_escalation_rate=0.05,
+            avg_latency_ms=250.0,
+            p95_latency_ms=500.0,
+            p99_latency_ms=750.0,
+            framework_agreement_rate=0.85,
+            kantian_veto_rate=0.05,
+            total_overrides_last_24h=2,
+            override_rate=0.02,
+            override_reasons={"false_positive": 1, "policy_exception": 1},
+            compliance_checks_last_week=50,
+            compliance_pass_rate=0.96,
+            critical_violations=0,
+            risk_distribution={"low": 30, "medium": 50, "high": 15, "critical": 5},
+        )
+
+    async def get_framework_performance(self, hours=24):
+        """Mock get_framework_performance for testing."""
+        return [
+            {
+                "framework_name": "Kantian",
+                "total_decisions": 100,
+                "avg_latency_ms": 250.0,
+                "p95_latency_ms": 500.0,
+                "approval_rate": 0.80,
+                "avg_confidence": 0.85,
+            },
+            {
+                "framework_name": "Consequentialist",
+                "total_decisions": 100,
+                "avg_latency_ms": 245.0,
+                "p95_latency_ms": 490.0,
+                "approval_rate": 0.75,
+                "avg_confidence": 0.82,
+            },
+            {
+                "framework_name": "Virtue Ethics",
+                "total_decisions": 100,
+                "avg_latency_ms": 260.0,
+                "p95_latency_ms": 510.0,
+                "approval_rate": 0.78,
+                "avg_confidence": 0.83,
+            },
+            {
+                "framework_name": "Principialism",
+                "total_decisions": 100,
+                "avg_latency_ms": 240.0,
+                "p95_latency_ms": 485.0,
+                "approval_rate": 0.82,
+                "avg_confidence": 0.88,
+            },
+        ]
 
 
 class MockAsyncPGPool:
@@ -199,6 +270,8 @@ async def mock_db(mock_db_pool):
     db.query_decisions = mock_db_pool.connection.query_decisions
     db.log_override = mock_db_pool.connection.log_override
     db.log_compliance_check = mock_db_pool.connection.log_compliance_check
+    db.get_metrics = mock_db_pool.connection.get_metrics
+    db.get_framework_performance = mock_db_pool.connection.get_framework_performance
 
     return db
 
@@ -309,7 +382,7 @@ def create_test_decision_log():
         decision_type: DecisionType = DecisionType.OFFENSIVE_ACTION,
         final_decision: FinalDecision = FinalDecision.APPROVED,
         risk_level: RiskLevel = RiskLevel.MEDIUM,
-        **kwargs
+        **kwargs,
     ) -> EthicalDecisionLog:
         """Create a test EthicalDecisionLog instance.
 
@@ -347,9 +420,7 @@ def create_test_override_request():
     """Factory fixture for creating test HumanOverrideRequest payloads."""
 
     def _create(
-        decision_id: uuid.UUID = None,
-        operator_role: str = OperatorRole.SOC_ANALYST.value,
-        **kwargs
+        decision_id: uuid.UUID = None, operator_role: str = OperatorRole.SOC_ANALYST.value, **kwargs
     ) -> Dict[str, Any]:
         """Create a test HumanOverrideRequest payload.
 
@@ -381,10 +452,7 @@ def create_test_override_request():
 def create_test_compliance_request():
     """Factory fixture for creating test ComplianceCheckRequest payloads."""
 
-    def _create(
-        regulation: Regulation = Regulation.NIST_AI_RMF,
-        **kwargs
-    ) -> Dict[str, Any]:
+    def _create(regulation: Regulation = Regulation.NIST_AI_RMF, **kwargs) -> Dict[str, Any]:
         """Create a test ComplianceCheckRequest payload.
 
         Args:

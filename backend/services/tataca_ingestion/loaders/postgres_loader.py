@@ -4,18 +4,16 @@ Loads transformed entities into PostgreSQL Aurora database with deduplication
 and conflict resolution.
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from config import get_settings
-from models import EntityType, LoadResult
 from sqlalchemy import (
+    JSON,
     Column,
     DateTime,
     Float,
     Integer,
-    JSON,
     MetaData,
     String,
     Table,
@@ -24,6 +22,9 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
+from config import get_settings
+from models import EntityType, LoadResult
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -154,14 +155,10 @@ class PostgresLoader:
             logger.info("Initializing PostgreSQL loader...")
 
             # Create async engine
-            self.engine = create_async_engine(
-                self.connection_string, echo=False, pool_size=20, max_overflow=40
-            )
+            self.engine = create_async_engine(self.connection_string, echo=False, pool_size=20, max_overflow=40)
 
             # Create session factory
-            self.session_factory = sessionmaker(
-                self.engine, class_=AsyncSession, expire_on_commit=False
-            )
+            self.session_factory = sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
             # Create tables if they don't exist
             async with self.engine.begin() as conn:
@@ -179,9 +176,7 @@ class PostgresLoader:
             await self.engine.dispose()
             logger.info("PostgreSQL loader closed")
 
-    async def load_entity(
-        self, entity_type: EntityType, entity_data: Dict[str, Any]
-    ) -> LoadResult:
+    async def load_entity(self, entity_type: EntityType, entity_data: Dict[str, Any]) -> LoadResult:
         """
         Load a single entity into PostgreSQL.
 
@@ -217,10 +212,7 @@ class PostgresLoader:
                 success=False,
                 entity_type=entity_type,
                 entity_id=str(
-                    entity_data.get("cpf")
-                    or entity_data.get("placa")
-                    or entity_data.get("numero_bo")
-                    or "unknown"
+                    entity_data.get("cpf") or entity_data.get("placa") or entity_data.get("numero_bo") or "unknown"
                 ),
                 postgres_loaded=False,
                 error_message=str(e),
@@ -365,9 +357,7 @@ class PostgresLoader:
                 postgres_loaded=True,
             )
 
-    async def load_batch(
-        self, entity_type: EntityType, entities: List[Dict[str, Any]]
-    ) -> List[LoadResult]:
+    async def load_batch(self, entity_type: EntityType, entities: List[Dict[str, Any]]) -> List[LoadResult]:
         """
         Load multiple entities in batch.
 
@@ -385,9 +375,7 @@ class PostgresLoader:
             results.append(result)
 
         success_count = sum(1 for r in results if r.success)
-        logger.info(
-            f"Batch loaded {success_count}/{len(entities)} {entity_type} entities"
-        )
+        logger.info(f"Batch loaded {success_count}/{len(entities)} {entity_type} entities")
 
         return results
 

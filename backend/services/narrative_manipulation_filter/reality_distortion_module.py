@@ -9,12 +9,10 @@ Orchestrates all verification components for comprehensive fact-checking.
 """
 
 import asyncio
-from datetime import datetime
-from enum import Enum
 import logging
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from cache_manager import cache_manager, CacheCategory
 from config import get_settings
 from entity_linker import entity_linker
 from fact_check_aggregator import fact_check_aggregator
@@ -22,7 +20,6 @@ from fact_check_queue import fact_check_queue
 from kg_verifier import kg_verifier
 from models import VerificationStatus
 from sparql_generator import sparql_generator
-from utils import hash_text
 
 logger = logging.getLogger(__name__)
 
@@ -138,9 +135,7 @@ class RealityDistortionModule:
             logger.info("✅ Reality distortion module initialized")
 
         except Exception as e:
-            logger.error(
-                f"❌ Failed to initialize reality distortion module: {e}", exc_info=True
-            )
+            logger.error(f"❌ Failed to initialize reality distortion module: {e}", exc_info=True)
             raise
 
     async def verify_content(
@@ -198,11 +193,7 @@ class RealityDistortionModule:
             ]
         ]
 
-        unverified = [
-            r
-            for r in tier1_results
-            if r["verification_status"] == VerificationStatus.UNVERIFIED.value
-        ]
+        unverified = [r for r in tier1_results if r["verification_status"] == VerificationStatus.UNVERIFIED.value]
 
         # STEP 3: Tier 2 verification for unverified claims (if enabled)
         tier2_pending = False
@@ -217,9 +208,7 @@ class RealityDistortionModule:
                 verified.extend(tier2_results)
                 # Remove claims that were verified in Tier 2
                 verified_claim_texts = {r["claim"] for r in tier2_results}
-                unverified = [
-                    u for u in unverified if u["claim_text"] not in verified_claim_texts
-                ]
+                unverified = [u for u in unverified if u["claim_text"] not in verified_claim_texts]
             elif tier2_timeout is None:
                 # Async mode - results pending
                 tier2_pending = True
@@ -248,8 +237,7 @@ class RealityDistortionModule:
         )
 
         logger.info(
-            f"Verification complete: score={distortion_score:.3f}, "
-            f"status={overall_status.value}, tier={tier_used}"
+            f"Verification complete: score={distortion_score:.3f}, status={overall_status.value}, tier={tier_used}"
         )
 
         return result
@@ -340,9 +328,7 @@ class RealityDistortionModule:
         if wait_timeout is None:
             # Async mode: enqueue and return immediately
             for claim in claims:
-                await fact_check_queue.enqueue_claim(
-                    claim=claim, context={}, priority="normal"
-                )
+                await fact_check_queue.enqueue_claim(claim=claim, context={}, priority="normal")
             logger.info(f"Enqueued {len(claims)} claims for async Tier 2 verification")
             return []
 
@@ -351,9 +337,7 @@ class RealityDistortionModule:
 
         for claim in claims:
             await fact_check_queue.enqueue_claim(claim=claim)
-            tasks.append(
-                fact_check_queue.get_result(claim=claim, wait_timeout=wait_timeout)
-            )
+            tasks.append(fact_check_queue.get_result(claim=claim, wait_timeout=wait_timeout))
 
         results = await asyncio.gather(*tasks)
 
@@ -384,22 +368,12 @@ class RealityDistortionModule:
 
         # Count verification statuses
         false_count = sum(
-            1
-            for v in verified
-            if v.get("verification_status") == VerificationStatus.VERIFIED_FALSE.value
+            1 for v in verified if v.get("verification_status") == VerificationStatus.VERIFIED_FALSE.value
         )
 
-        true_count = sum(
-            1
-            for v in verified
-            if v.get("verification_status") == VerificationStatus.VERIFIED_TRUE.value
-        )
+        true_count = sum(1 for v in verified if v.get("verification_status") == VerificationStatus.VERIFIED_TRUE.value)
 
-        mixed_count = sum(
-            1
-            for v in verified
-            if v.get("verification_status") == VerificationStatus.MIXED.value
-        )
+        mixed_count = sum(1 for v in verified if v.get("verification_status") == VerificationStatus.MIXED.value)
 
         unverified_count = len(unverified)
 
@@ -497,7 +471,7 @@ class RealityDistortionModule:
                 [
                     "## Unverified Claims",
                     "",
-                    "⚠️ The following claims could not be verified:" "",
+                    "⚠️ The following claims could not be verified:",
                 ]
             )
 

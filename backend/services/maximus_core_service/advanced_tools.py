@@ -12,7 +12,7 @@ functionality.
 """
 
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class AdvancedTools:
@@ -73,11 +73,11 @@ class AdvancedTools:
             },
         ]
 
-    def list_available_tools(self) -> List[Dict[str, Any]]:
+    def list_available_tools(self) -> list[dict[str, Any]]:
         """Returns a list of dictionaries, each describing an available advanced tool."""
         return self.available_tools
 
-    async def execute_tool(self, tool_name: str, tool_args: Dict[str, Any]) -> Any:
+    async def execute_tool(self, tool_name: str, tool_args: dict[str, Any]) -> Any:
         """Executes a specified advanced tool with the given arguments.
 
         Args:
@@ -97,14 +97,12 @@ class AdvancedTools:
         tool_info = tool_map[tool_name]
         for param in tool_info["parameters"].get("required", []):
             if param not in tool_args:
-                raise ValueError(
-                    f"Missing required argument '{param}' for tool '{tool_name}'"
-                )
+                raise ValueError(f"Missing required argument '{param}' for tool '{tool_name}'")
 
         method = getattr(self, tool_info["method_name"])
         return await method(**tool_args)
 
-    async def _data_analysis(self, data: List[float], method: str) -> Dict[str, Any]:
+    async def _data_analysis(self, data: list[float], method: str) -> dict[str, Any]:
         """Simulates advanced statistical analysis on provided data.
 
         Args:
@@ -121,11 +119,7 @@ class AdvancedTools:
         elif method == "median":
             sorted_data = sorted(data)
             mid = len(sorted_data) // 2
-            result = (
-                (sorted_data[mid - 1] + sorted_data[mid]) / 2
-                if len(sorted_data) % 2 == 0
-                else sorted_data[mid]
-            )
+            result = (sorted_data[mid - 1] + sorted_data[mid]) / 2 if len(sorted_data) % 2 == 0 else sorted_data[mid]
         elif method == "std_dev":
             if len(data) < 2:
                 result = 0.0
@@ -138,9 +132,7 @@ class AdvancedTools:
             raise ValueError(f"Unsupported analysis method: {method}")
         return {"method": method, "result": result, "data_points": len(data)}
 
-    async def _system_diagnostics(
-        self, component: str, level: str = "basic"
-    ) -> Dict[str, Any]:
+    async def _system_diagnostics(self, component: str, level: str = "basic") -> dict[str, Any]:
         """Simulates running diagnostic checks on a system component.
 
         Args:
@@ -154,9 +146,7 @@ class AdvancedTools:
         await asyncio.sleep(1.0)  # Simulate diagnostic time
         status = "healthy" if component != "network" else "degraded"
         details = (
-            f"All {component} checks passed."
-            if status == "healthy"
-            else f"Network latency high, check connectivity."
+            f"All {component} checks passed." if status == "healthy" else "Network latency high, check connectivity."
         )
         return {
             "component": component,

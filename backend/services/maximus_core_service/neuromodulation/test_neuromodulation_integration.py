@@ -17,20 +17,19 @@ Quality: REGRA DE OURO - Zero mocks, 100% production code
 """
 
 import pytest
-from datetime import datetime
 
 from neuromodulation import (
-    NeuromodulationController,
-    DopamineSystem,
-    SerotoninSystem,
-    NorepinephrineSystem,
     AcetylcholineSystem,
+    DopamineSystem,
+    NeuromodulationController,
+    NorepinephrineSystem,
+    SerotoninSystem,
 )
-
 
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def controller():
@@ -66,6 +65,7 @@ def acetylcholine_system():
 # TEST 1: DOPAMINE RPE MODULATES LEARNING RATE
 # ============================================================================
 
+
 def test_dopamine_modulates_learning_rate(dopamine_system):
     """Test that Reward Prediction Error (RPE) modulates learning rate correctly."""
     print("\n" + "=" * 80)
@@ -75,9 +75,7 @@ def test_dopamine_modulates_learning_rate(dopamine_system):
     # Test positive RPE (better than expected) → increase learning rate
     expected_reward = 0.5
     actual_reward = 0.8
-    rpe_positive = dopamine_system.compute_reward_prediction_error(
-        expected_reward, actual_reward
-    )
+    rpe_positive = dopamine_system.compute_reward_prediction_error(expected_reward, actual_reward)
 
     assert rpe_positive > 0, "Positive RPE should be > 0"
     assert rpe_positive == (actual_reward - expected_reward), "RPE = actual - expected"
@@ -96,9 +94,7 @@ def test_dopamine_modulates_learning_rate(dopamine_system):
     dopamine_system_neg = DopamineSystem()
     expected_reward_neg = 0.8
     actual_reward_neg = 0.3
-    rpe_negative = dopamine_system_neg.compute_reward_prediction_error(
-        expected_reward_neg, actual_reward_neg
-    )
+    rpe_negative = dopamine_system_neg.compute_reward_prediction_error(expected_reward_neg, actual_reward_neg)
 
     assert rpe_negative < 0, "Negative RPE should be < 0"
 
@@ -106,13 +102,16 @@ def test_dopamine_modulates_learning_rate(dopamine_system):
     # Negative RPE with large magnitude ALSO increases LR (surprise-based)
     assert modulated_lr_neg >= base_lr, "Large surprise (negative RPE) should increase LR"
     print(f"✅ Negative RPE: {rpe_negative:.3f} → LR modulated (surprise-based)")
-    print(f"   Base LR: {base_lr}, Modulated LR (positive surprise): {modulated_lr:.4f}, (negative surprise): {modulated_lr_neg:.4f}")
-    print(f"   Both increased because abs(RPE) determines learning rate (biological surprise)")
+    print(
+        f"   Base LR: {base_lr}, Modulated LR (positive surprise): {modulated_lr:.4f}, (negative surprise): {modulated_lr_neg:.4f}"
+    )
+    print("   Both increased because abs(RPE) determines learning rate (biological surprise)")
 
 
 # ============================================================================
 # TEST 2: SEROTONIN CONTROLS EXPLORATION/EXPLOITATION
 # ============================================================================
+
 
 def test_serotonin_controls_exploration_exploitation(serotonin_system):
     """Test that serotonin level controls exploration vs exploitation trade-off."""
@@ -151,6 +150,7 @@ def test_serotonin_controls_exploration_exploitation(serotonin_system):
 # TEST 3: NOREPINEPHRINE RESPONDS TO THREATS
 # ============================================================================
 
+
 def test_norepinephrine_responds_to_threats(norepinephrine_system):
     """Test that norepinephrine increases arousal in response to threats."""
     print("\n" + "=" * 80)
@@ -166,7 +166,9 @@ def test_norepinephrine_responds_to_threats(norepinephrine_system):
     # Check arousal increased
     new_arousal = norepinephrine_system.get_arousal_level()
     assert new_arousal > initial_arousal, "Threat should increase arousal"
-    print(f"✅ Threat detected (severity {threat_severity}) → Arousal increased: {initial_arousal:.2f} → {new_arousal:.2f}")
+    print(
+        f"✅ Threat detected (severity {threat_severity}) → Arousal increased: {initial_arousal:.2f} → {new_arousal:.2f}"
+    )
 
     # Get attention gain (related to arousal/vigilance)
     attention_gain = norepinephrine_system.get_attention_gain()
@@ -186,6 +188,7 @@ def test_norepinephrine_responds_to_threats(norepinephrine_system):
 # ============================================================================
 # TEST 4: ACETYLCHOLINE MODULATES ATTENTION GAIN
 # ============================================================================
+
 
 def test_acetylcholine_modulates_attention_gain(acetylcholine_system):
     """Test that acetylcholine modulates attention gain based on novelty/learning."""
@@ -230,6 +233,7 @@ def test_acetylcholine_modulates_attention_gain(acetylcholine_system):
 # TEST 5: CONTROLLER COORDINATES ALL 4 SYSTEMS
 # ============================================================================
 
+
 def test_controller_coordinates_all_systems(controller):
     """Test that NeuromodulationController coordinates all 4 systems correctly."""
     print("\n" + "=" * 80)
@@ -246,11 +250,7 @@ def test_controller_coordinates_all_systems(controller):
     # Test reward processing coordinates dopamine + serotonin
     expected_reward = 0.5
     actual_reward = 0.7
-    result = controller.process_reward(
-        expected_reward=expected_reward,
-        actual_reward=actual_reward,
-        success=True
-    )
+    result = controller.process_reward(expected_reward=expected_reward, actual_reward=actual_reward, success=True)
 
     assert "rpe" in result, "Should return RPE"
     assert "motivation" in result, "Should return motivation"

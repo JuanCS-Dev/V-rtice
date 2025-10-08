@@ -57,9 +57,7 @@ class RLAgent:
         await asyncio.sleep(0.1)  # Simulate decision making
 
         # Simplified state representation for Q-learning lookup
-        state_key = self._get_state_key(
-            current_state, analysis_result, operational_goals
-        )
+        state_key = self._get_state_key(current_state, analysis_result, operational_goals)
 
         # In a real RL agent, this would involve an epsilon-greedy policy or similar
         # to choose actions based on the Q-table or a neural network.
@@ -95,16 +93,10 @@ class RLAgent:
             self.q_table[new_state_key] = {}
 
         current_q = self.q_table[old_state_key].get(action_key, 0.0)
-        max_future_q = (
-            max(self.q_table[new_state_key].values())
-            if self.q_table[new_state_key]
-            else 0.0
-        )
+        max_future_q = max(self.q_table[new_state_key].values()) if self.q_table[new_state_key] else 0.0
 
         # Q-learning update rule
-        new_q = current_q + self.learning_rate * (
-            reward + self.discount_factor * max_future_q - current_q
-        )
+        new_q = current_q + self.learning_rate * (reward + self.discount_factor * max_future_q - current_q)
         self.q_table[old_state_key][action_key] = new_q
 
         self.training_episodes += 1
@@ -129,9 +121,7 @@ class RLAgent:
         # In a real system, this would involve state discretization or feature extraction
         cpu_status = "high" if current_state.get("cpu_usage", 0) > 70 else "low"
         mem_status = "high" if current_state.get("memory_usage", 0) > 80 else "low"
-        intervention_needed = (
-            "yes" if analysis_result.get("requires_intervention", False) else "no"
-        )
+        intervention_needed = "yes" if analysis_result.get("requires_intervention", False) else "no"
         goal = operational_goals.get("mode", "balanced")
         return f"cpu:{cpu_status}_mem:{mem_status}_intervene:{intervention_needed}_goal:{goal}"
 
@@ -146,9 +136,7 @@ class RLAgent:
         """
         if state_key in self.q_table:
             # Choose action with highest Q-value (exploitation)
-            best_action_key = max(
-                self.q_table[state_key], key=self.q_table[state_key].get
-            )
+            best_action_key = max(self.q_table[state_key], key=self.q_table[state_key].get)
             # Convert action_key back to action dict (simplified)
             if "scale_up" in best_action_key:
                 return {"type": "scale_deployment", "parameters": {"replicas": 1}}
@@ -178,11 +166,7 @@ class RLAgent:
             "status": "active",
             "learning_rate": self.learning_rate,
             "discount_factor": self.discount_factor,
-            "last_training": (
-                self.last_training_time.isoformat()
-                if self.last_training_time
-                else "N/A"
-            ),
+            "last_training": (self.last_training_time.isoformat() if self.last_training_time else "N/A"),
             "training_episodes": self.training_episodes,
             "q_table_size": sum(len(actions) for actions in self.q_table.values()),
         }

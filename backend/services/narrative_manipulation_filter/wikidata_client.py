@@ -9,15 +9,14 @@ Integrates Wikidata knowledge graph for fact verification:
 """
 
 import asyncio
-from datetime import datetime
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 
 import aiohttp
-from cache_manager import cache_manager, CacheCategory
-from config import get_settings
-from models import Entity, EntityType, KnowledgeGraphFact
 from SPARQLWrapper import JSON, SPARQLWrapper
+
+from cache_manager import CacheCategory, cache_manager
+from config import get_settings
 from utils import hash_text
 
 logger = logging.getLogger(__name__)
@@ -89,9 +88,7 @@ class WikidataSearchClient:
                 "limit": limit,
             }
 
-            async with self.session.get(
-                self.search_endpoint, params=params
-            ) as response:
+            async with self.session.get(self.search_endpoint, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
                     results = data.get("search", [])
@@ -102,9 +99,7 @@ class WikidataSearchClient:
             # Cache result
             if use_cache:
                 cache_key = f"wikidata_search:{hash_text(query)}:{language}"
-                await cache_manager.set(
-                    CacheCategory.EXTERNAL_API, cache_key, results, ttl_override=3600
-                )
+                await cache_manager.set(CacheCategory.EXTERNAL_API, cache_key, results, ttl_override=3600)
 
             logger.info(f"Found {len(results)} Wikidata entities for '{query}'")
             return results
@@ -148,9 +143,7 @@ class WikidataSearchClient:
                 "languages": language,
             }
 
-            async with self.session.get(
-                self.search_endpoint, params=params
-            ) as response:
+            async with self.session.get(self.search_endpoint, params=params) as response:
                 if response.status == 200:
                     data = await response.json()
                     entity_data = data.get("entities", {}).get(entity_id, {})
@@ -199,9 +192,7 @@ class WikidataSPARQLClient:
         # Set user agent (required by Wikidata)
         self.sparql.addCustomHttpHeader("User-Agent", "VerticeCognitiveDefense/2.0")
 
-    async def query(
-        self, sparql_query: str, use_cache: bool = True
-    ) -> List[Dict[str, Any]]:
+    async def query(self, sparql_query: str, use_cache: bool = True) -> List[Dict[str, Any]]:
         """
         Execute SPARQL query.
 
@@ -231,9 +222,7 @@ class WikidataSPARQLClient:
             # Cache result
             if use_cache:
                 cache_key = f"wikidata_sparql:{hash_text(sparql_query)}"
-                await cache_manager.set(
-                    CacheCategory.EXTERNAL_API, cache_key, bindings, ttl_override=3600
-                )
+                await cache_manager.set(CacheCategory.EXTERNAL_API, cache_key, bindings, ttl_override=3600)
 
             logger.info(f"Wikidata SPARQL query returned {len(bindings)} results")
             return bindings
@@ -242,9 +231,7 @@ class WikidataSPARQLClient:
             logger.error(f"Wikidata SPARQL query error: {e}", exc_info=True)
             return []
 
-    async def get_entity_claims(
-        self, entity_id: str, property_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    async def get_entity_claims(self, entity_id: str, property_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get claims/statements for an entity.
 
@@ -279,9 +266,7 @@ class WikidataSPARQLClient:
         results = await self.query(query)
         return results
 
-    async def verify_claim(
-        self, entity_id: str, property_id: str, expected_value: str
-    ) -> Dict[str, Any]:
+    async def verify_claim(self, entity_id: str, property_id: str, expected_value: str) -> Dict[str, Any]:
         """
         Verify if entity has specific claim.
 
@@ -322,9 +307,7 @@ class WikidataSPARQLClient:
             "entity_id": entity_id,
             "property_id": property_id,
             "expected_value": expected_value,
-            "actual_values": [
-                v.get("valueLabel", {}).get("value", "") for v in actual_values
-            ],
+            "actual_values": [v.get("valueLabel", {}).get("value", "") for v in actual_values],
         }
 
     async def get_birth_death_dates(self, entity_id: str) -> Dict[str, Optional[str]]:
@@ -403,9 +386,7 @@ class WikidataSPARQLClient:
 
         return types
 
-    async def check_temporal_overlap(
-        self, entity1_id: str, entity2_id: str
-    ) -> Dict[str, Any]:
+    async def check_temporal_overlap(self, entity1_id: str, entity2_id: str) -> Dict[str, Any]:
         """
         Check if two entities have temporal overlap (e.g., lived at same time).
 
@@ -513,9 +494,7 @@ class WikidataClient:
         await self.search.close()
         self._initialized = False
 
-    async def resolve_entity(
-        self, entity_text: str, language: str = "pt"
-    ) -> Optional[str]:
+    async def resolve_entity(self, entity_text: str, language: str = "pt") -> Optional[str]:
         """
         Resolve entity text to Wikidata ID.
 
@@ -526,17 +505,13 @@ class WikidataClient:
         Returns:
             Wikidata entity ID (e.g., Q42) or None
         """
-        results = await self.search.search_entity(
-            query=entity_text, language=language, limit=1
-        )
+        results = await self.search.search_entity(query=entity_text, language=language, limit=1)
 
         if results:
             return results[0].get("id")
         return None
 
-    async def get_entity_summary(
-        self, entity_id: str, language: str = "pt"
-    ) -> Dict[str, Any]:
+    async def get_entity_summary(self, entity_id: str, language: str = "pt") -> Dict[str, Any]:
         """
         Get comprehensive entity summary.
 
@@ -607,9 +582,7 @@ class WikidataClient:
 
         # Get property ID (simplified - in production, use property search)
         # For now, assume predicate is already a P-ID or we have a mapping
-        property_id = (
-            predicate if predicate.startswith("P") else "P31"
-        )  # Default to instance of
+        property_id = predicate if predicate.startswith("P") else "P31"  # Default to instance of
 
         if object_id:
             # Verify entity-to-entity claim

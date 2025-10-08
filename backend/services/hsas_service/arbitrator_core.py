@@ -25,11 +25,11 @@ Like biological motor control: Basal Ganglia (habits) + Cerebellum (planning) ar
 NO MOCKS - Production-ready implementation.
 """
 
+import logging
 from collections import deque
 from datetime import datetime
 from enum import Enum
-import logging
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -55,9 +55,7 @@ class ArbitratorCore:
     - Dyna-style integration
     """
 
-    def __init__(
-        self, uncertainty_threshold: float = 0.3, alpha_threshold: float = 0.1
-    ):
+    def __init__(self, uncertainty_threshold: float = 0.3, alpha_threshold: float = 0.1):
         """Initialize Arbitrator Core.
 
         Args:
@@ -79,9 +77,7 @@ class ArbitratorCore:
         self.last_arbitration_time: Optional[datetime] = None
         self.current_mode: Optional[ControlMode] = None
 
-        logger.info(
-            f"ArbitratorCore initialized (uncertainty_threshold={uncertainty_threshold})"
-        )
+        logger.info(f"ArbitratorCore initialized (uncertainty_threshold={uncertainty_threshold})")
 
     def arbitrate(
         self,
@@ -202,26 +198,14 @@ class ArbitratorCore:
         Returns:
             Mode statistics
         """
-        model_free_rate = (
-            self.model_free_successes / self.model_free_trials
-            if self.model_free_trials > 0
-            else 0.0
-        )
+        model_free_rate = self.model_free_successes / self.model_free_trials if self.model_free_trials > 0 else 0.0
 
-        model_based_rate = (
-            self.model_based_successes / self.model_based_trials
-            if self.model_based_trials > 0
-            else 0.0
-        )
+        model_based_rate = self.model_based_successes / self.model_based_trials if self.model_based_trials > 0 else 0.0
 
         # Count mode selections
         recent_history = list(self.mode_selection_history)[-100:]
-        model_free_count = sum(
-            1 for h in recent_history if h["mode"] == ControlMode.MODEL_FREE.value
-        )
-        model_based_count = sum(
-            1 for h in recent_history if h["mode"] == ControlMode.MODEL_BASED.value
-        )
+        model_free_count = sum(1 for h in recent_history if h["mode"] == ControlMode.MODEL_FREE.value)
+        model_based_count = sum(1 for h in recent_history if h["mode"] == ControlMode.MODEL_BASED.value)
 
         return {
             "model_free": {
@@ -276,11 +260,7 @@ class ArbitratorCore:
             "current_mode": self.current_mode.value if self.current_mode else "N/A",
             "uncertainty_threshold": self.uncertainty_threshold,
             "arbitration_count": self.arbitration_count,
-            "last_arbitration": (
-                self.last_arbitration_time.isoformat()
-                if self.last_arbitration_time
-                else "N/A"
-            ),
+            "last_arbitration": (self.last_arbitration_time.isoformat() if self.last_arbitration_time else "N/A"),
             "mode_statistics": mode_stats,
             "uncertainty_statistics": uncertainty_stats,
         }
@@ -390,22 +370,15 @@ class DynaIntegration:
 
         # Sample real experience
         if len(self.real_experience) >= num_real:
-            real_indices = np.random.choice(
-                len(self.real_experience), num_real, replace=False
-            )
+            real_indices = np.random.choice(len(self.real_experience), num_real, replace=False)
             batch.extend([self.real_experience[i] for i in real_indices])
 
         # Sample imaginary experience
         if len(self.imaginary_experience) >= num_imaginary:
-            imaginary_indices = np.random.choice(
-                len(self.imaginary_experience), num_imaginary, replace=False
-            )
+            imaginary_indices = np.random.choice(len(self.imaginary_experience), num_imaginary, replace=False)
             batch.extend([self.imaginary_experience[i] for i in imaginary_indices])
 
-        logger.debug(
-            f"Sampled batch: {len(batch)} experiences "
-            f"(real={num_real}, imaginary={num_imaginary})"
-        )
+        logger.debug(f"Sampled batch: {len(batch)} experiences (real={num_real}, imaginary={num_imaginary})")
 
         return batch
 

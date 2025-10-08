@@ -12,10 +12,9 @@ and enabling efficient data exchange within the social engineering simulation
 ecosystem.
 """
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CampaignBase(BaseModel):

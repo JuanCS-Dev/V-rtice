@@ -11,6 +11,7 @@ import pytest
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -47,7 +48,7 @@ def pruning_config(tmp_path):
         pruning_method="l1",
         target_sparsity=0.3,
         iterative=False,
-        output_dir=tmp_path / "pruned"
+        output_dir=tmp_path / "pruned",
     )
 
 
@@ -132,11 +133,7 @@ def test_structured_pruning_config():
     if not TORCH_AVAILABLE:
         pytest.skip("PyTorch not available")
 
-    config = PruningConfig(
-        pruning_type="structured",
-        pruning_method="l1",
-        target_sparsity=0.4
-    )
+    config = PruningConfig(pruning_type="structured", pruning_method="l1", target_sparsity=0.4)
 
     pruner = ModelPruner(config=config)
     assert pruner.config.pruning_type == "structured"

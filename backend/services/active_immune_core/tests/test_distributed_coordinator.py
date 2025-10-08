@@ -11,21 +11,16 @@ Comprehensive test suite for DistributedCoordinator with 45+ tests covering:
 NO MOCKS - Real coordination logic tested.
 """
 
-import time
 from datetime import datetime, timedelta
 
 import pytest
 
 from active_immune_core.agents.distributed_coordinator import (
-    AgentNode,
     AgentRole,
     DistributedCoordinator,
-    DistributedTask,
     TaskStatus,
     VoteDecision,
-    VoteProposal,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -347,9 +342,7 @@ class TestTaskManagement:
         coordinator.submit_task("medium", {}, priority=5)
 
         # Queue should be sorted by priority (descending)
-        priorities = [
-            coordinator._tasks[tid].priority for tid in coordinator._task_queue
-        ]
+        priorities = [coordinator._tasks[tid].priority for tid in coordinator._task_queue]
         assert priorities == [9, 5, 3]
 
     async def test_get_task(self, coordinator):
@@ -556,9 +549,7 @@ class TestConsensusVoting:
             "agent_1",
         )
 
-        result = coordinator_with_agents.cast_vote(
-            proposal_id, "agent_1", VoteDecision.APPROVE
-        )
+        result = coordinator_with_agents.cast_vote(proposal_id, "agent_1", VoteDecision.APPROVE)
 
         assert result is True
 
@@ -573,9 +564,7 @@ class TestConsensusVoting:
             "agent_1",
         )
 
-        result = coordinator_with_agents.cast_vote(
-            proposal_id, "non_existent", VoteDecision.APPROVE
-        )
+        result = coordinator_with_agents.cast_vote(proposal_id, "non_existent", VoteDecision.APPROVE)
 
         assert result is False
 
@@ -590,9 +579,7 @@ class TestConsensusVoting:
             "agent_2",
         )
 
-        result = coordinator_with_agents.cast_vote(
-            proposal_id, "agent_1", VoteDecision.APPROVE
-        )
+        result = coordinator_with_agents.cast_vote(proposal_id, "agent_1", VoteDecision.APPROVE)
 
         assert result is False
 

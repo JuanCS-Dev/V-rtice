@@ -10,8 +10,7 @@ parameters, executes the appropriate tool, and returns the results, facilitating
 a robust and extensible architecture.
 """
 
-import asyncio
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from all_services_tools import AllServicesTools
 
@@ -34,7 +33,7 @@ class ToolOrchestrator:
             gemini_client (Any): An initialized Gemini client for tool interactions.
         """
         self.all_tools = AllServicesTools(gemini_client)
-        self.ethical_wrapper: Optional["EthicalToolWrapper"] = None  # Injected later
+        self.ethical_wrapper: EthicalToolWrapper | None = None  # Injected later
 
     def set_ethical_wrapper(self, wrapper: "EthicalToolWrapper"):
         """
@@ -45,9 +44,7 @@ class ToolOrchestrator:
         """
         self.ethical_wrapper = wrapper
 
-    async def execute_tools(
-        self, tool_calls: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    async def execute_tools(self, tool_calls: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Executes a list of tool calls.
 
         Args:
@@ -64,9 +61,7 @@ class ToolOrchestrator:
 
             tool_info = self.all_tools.get_tool(tool_name)
             if not tool_info:
-                results.append(
-                    {"tool_name": tool_name, "error": f"Tool '{tool_name}' not found."}
-                )
+                results.append({"tool_name": tool_name, "error": f"Tool '{tool_name}' not found."})
                 continue
 
             try:
@@ -82,25 +77,35 @@ class ToolOrchestrator:
 
                     # Return result with ethical information
                     if execution_result.success:
-                        results.append({
-                            "tool_name": tool_name,
-                            "output": execution_result.output,
-                            "ethical_validation": {
-                                "decision": execution_result.ethical_decision.decision_type.value if execution_result.ethical_decision else "unknown",
-                                "duration_ms": execution_result.ethical_validation_duration_ms,
-                            },
-                            "execution_duration_ms": execution_result.execution_duration_ms,
-                            "total_duration_ms": execution_result.total_duration_ms,
-                        })
+                        results.append(
+                            {
+                                "tool_name": tool_name,
+                                "output": execution_result.output,
+                                "ethical_validation": {
+                                    "decision": execution_result.ethical_decision.decision_type.value
+                                    if execution_result.ethical_decision
+                                    else "unknown",
+                                    "duration_ms": execution_result.ethical_validation_duration_ms,
+                                },
+                                "execution_duration_ms": execution_result.execution_duration_ms,
+                                "total_duration_ms": execution_result.total_duration_ms,
+                            }
+                        )
                     else:
-                        results.append({
-                            "tool_name": tool_name,
-                            "error": execution_result.error,
-                            "ethical_validation": {
-                                "decision": execution_result.ethical_decision.decision_type.value if execution_result.ethical_decision else "error",
-                                "rejection_reasons": execution_result.ethical_decision.rejection_reasons if execution_result.ethical_decision else [],
-                            },
-                        })
+                        results.append(
+                            {
+                                "tool_name": tool_name,
+                                "error": execution_result.error,
+                                "ethical_validation": {
+                                    "decision": execution_result.ethical_decision.decision_type.value
+                                    if execution_result.ethical_decision
+                                    else "error",
+                                    "rejection_reasons": execution_result.ethical_decision.rejection_reasons
+                                    if execution_result.ethical_decision
+                                    else [],
+                                },
+                            }
+                        )
                 else:
                     # Original execution (no ethical validation)
                     method = tool_info["method"]
@@ -111,7 +116,7 @@ class ToolOrchestrator:
                 results.append({"tool_name": tool_name, "error": str(e)})
         return results
 
-    def list_all_available_tools(self) -> List[Dict[str, Any]]:
+    def list_all_available_tools(self) -> list[dict[str, Any]]:
         """Lists all tools registered with the orchestrator.
 
         Returns:
@@ -119,7 +124,7 @@ class ToolOrchestrator:
         """
         return self.all_tools.list_all_tools()
 
-    def get_gemini_function_declarations(self) -> List[Dict[str, Any]]:
+    def get_gemini_function_declarations(self) -> list[dict[str, Any]]:
         """Generates Gemini-compatible function declarations for all available tools.
 
         Returns:

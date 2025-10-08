@@ -32,8 +32,8 @@ Version: 1.0.0
 Date: 2025-10-07
 """
 
-from typing import Dict, Any
 import logging
+from typing import Any, Dict
 
 from coordination.thread_safe_structures import AtomicCounter
 
@@ -226,13 +226,12 @@ class LymphnodeMetrics:
             "total_clones_created": clones_created,
             "total_clones_destroyed": clones_destroyed,
             "net_clones": clones_created - clones_destroyed,
-            "neutralization_rate": (
-                neutralizations / threats if threats > 0 else 0.0
-            ),
+            "neutralization_rate": (neutralizations / threats if threats > 0 else 0.0),
         }
 
     def __repr__(self) -> str:
         import asyncio
+
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
@@ -244,8 +243,4 @@ class LymphnodeMetrics:
         except:
             metrics_str = "metrics=?"
 
-        return (
-            f"LymphnodeMetrics("
-            f"lymphnode={self.lymphnode_id}, "
-            f"{metrics_str})"
-        )
+        return f"LymphnodeMetrics(lymphnode={self.lymphnode_id}, {metrics_str})"

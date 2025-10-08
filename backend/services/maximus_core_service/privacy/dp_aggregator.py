@@ -15,7 +15,7 @@ Date: 2025-10-06
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -31,6 +31,7 @@ from .dp_mechanisms import GaussianMechanism, LaplaceMechanism
 
 class DPQueryType(str, Enum):
     """Type of differential privacy query"""
+
     COUNT = "count"
     SUM = "sum"
     MEAN = "mean"
@@ -50,10 +51,7 @@ class DPAggregator:
 
     Example:
         >>> aggregator = DPAggregator(epsilon=1.0, delta=1e-5)
-        >>> result = aggregator.count_by_group(
-        ...     data=threat_data,
-        ...     group_column='country'
-        ... )
+        >>> result = aggregator.count_by_group(data=threat_data, group_column="country")
         >>> print(f"Noisy counts: {result.noisy_value}")
     """
 
@@ -61,8 +59,8 @@ class DPAggregator:
         self,
         epsilon: float = 1.0,
         delta: float = 1e-5,
-        privacy_budget: Optional[PrivacyBudget] = None,
-        mechanism: str = "laplace"
+        privacy_budget: PrivacyBudget | None = None,
+        mechanism: str = "laplace",
     ):
         """
         Initialize DP aggregator.
@@ -81,11 +79,7 @@ class DPAggregator:
         self.privacy_budget = privacy_budget
 
     def _spend_budget(
-        self,
-        epsilon: float,
-        delta: float,
-        query_type: str,
-        metadata: Optional[Dict[str, Any]] = None
+        self, epsilon: float, delta: float, query_type: str, metadata: dict[str, Any] | None = None
     ) -> None:
         """
         Spend privacy budget if tracker is enabled.
@@ -100,19 +94,14 @@ class DPAggregator:
             ValueError: If budget is exhausted
         """
         if self.privacy_budget is not None:
-            self.privacy_budget.spend(
-                epsilon=epsilon,
-                delta=delta,
-                query_type=query_type,
-                query_metadata=metadata
-            )
+            self.privacy_budget.spend(epsilon=epsilon, delta=delta, query_type=query_type, query_metadata=metadata)
 
     def count(
         self,
-        data: Union[pd.DataFrame, np.ndarray, list],
-        epsilon: Optional[float] = None,
-        delta: Optional[float] = None,
-        clamp_output: bool = True
+        data: pd.DataFrame | np.ndarray | list,
+        epsilon: float | None = None,
+        delta: float | None = None,
+        clamp_output: bool = True,
     ) -> DPResult:
         """
         Differentially private count query.
@@ -129,9 +118,7 @@ class DPAggregator:
             DPResult with noisy count
         """
         # Get true count
-        if isinstance(data, pd.DataFrame):
-            true_count = len(data)
-        elif isinstance(data, np.ndarray):
+        if isinstance(data, pd.DataFrame) or isinstance(data, np.ndarray):
             true_count = len(data)
         else:
             true_count = len(data)
@@ -144,12 +131,7 @@ class DPAggregator:
         sensitivity = SensitivityCalculator.count_sensitivity()
 
         # Create privacy parameters
-        params = PrivacyParameters(
-            epsilon=eps,
-            delta=dlt,
-            sensitivity=sensitivity,
-            mechanism=self.default_mechanism
-        )
+        params = PrivacyParameters(epsilon=eps, delta=dlt, sensitivity=sensitivity, mechanism=self.default_mechanism)
 
         # Choose mechanism
         if params.is_pure_dp:
@@ -158,10 +140,7 @@ class DPAggregator:
             mechanism = GaussianMechanism(params)
 
         # Execute query
-        result = mechanism.execute_query(
-            true_value=float(true_count),
-            query_type=DPQueryType.COUNT.value
-        )
+        result = mechanism.execute_query(true_value=float(true_count), query_type=DPQueryType.COUNT.value)
 
         # Clamp negative counts to 0
         if clamp_output and result.noisy_value < 0:
@@ -176,9 +155,9 @@ class DPAggregator:
         self,
         data: pd.DataFrame,
         group_column: str,
-        epsilon: Optional[float] = None,
-        delta: Optional[float] = None,
-        clamp_output: bool = True
+        epsilon: float | None = None,
+        delta: float | None = None,
+        clamp_output: bool = True,
     ) -> DPResult:
         """
         Differentially private group-by count.
@@ -208,12 +187,7 @@ class DPAggregator:
         sensitivity = SensitivityCalculator.count_sensitivity()
 
         # Create privacy parameters
-        params = PrivacyParameters(
-            epsilon=eps,
-            delta=dlt,
-            sensitivity=sensitivity,
-            mechanism=self.default_mechanism
-        )
+        params = PrivacyParameters(epsilon=eps, delta=dlt, sensitivity=sensitivity, mechanism=self.default_mechanism)
 
         # Choose mechanism
         if params.is_pure_dp:
@@ -225,7 +199,7 @@ class DPAggregator:
         result = mechanism.execute_query(
             true_value=true_values,
             query_type=DPQueryType.COUNT.value,
-            metadata={"groups": groups, "group_column": group_column}
+            metadata={"groups": groups, "group_column": group_column},
         )
 
         # Clamp negative counts to 0
@@ -233,7 +207,7 @@ class DPAggregator:
             result.noisy_value = np.maximum(result.noisy_value, 0)
 
         # Convert to dict for readability
-        noisy_counts = {g: float(c) for g, c in zip(groups, result.noisy_value)}
+        noisy_counts = {g: float(c) for g, c in zip(groups, result.noisy_value, strict=False)}
         result.noisy_value = noisy_counts
         result.true_value = true_counts
 
@@ -244,11 +218,11 @@ class DPAggregator:
 
     def sum(
         self,
-        data: Union[pd.DataFrame, np.ndarray, list],
-        value_column: Optional[str] = None,
+        data: pd.DataFrame | np.ndarray | list,
+        value_column: str | None = None,
         value_range: float = 1.0,
-        epsilon: Optional[float] = None,
-        delta: Optional[float] = None
+        epsilon: float | None = None,
+        delta: float | None = None,
     ) -> DPResult:
         """
         Differentially private sum query.
@@ -286,12 +260,7 @@ class DPAggregator:
         sensitivity = SensitivityCalculator.sum_sensitivity(value_range)
 
         # Create privacy parameters
-        params = PrivacyParameters(
-            epsilon=eps,
-            delta=dlt,
-            sensitivity=sensitivity,
-            mechanism=self.default_mechanism
-        )
+        params = PrivacyParameters(epsilon=eps, delta=dlt, sensitivity=sensitivity, mechanism=self.default_mechanism)
 
         # Choose mechanism
         if params.is_pure_dp:
@@ -301,9 +270,7 @@ class DPAggregator:
 
         # Execute query
         result = mechanism.execute_query(
-            true_value=true_sum,
-            query_type=DPQueryType.SUM.value,
-            metadata={"value_range": value_range}
+            true_value=true_sum, query_type=DPQueryType.SUM.value, metadata={"value_range": value_range}
         )
 
         # Spend budget
@@ -313,12 +280,12 @@ class DPAggregator:
 
     def mean(
         self,
-        data: Union[pd.DataFrame, np.ndarray, list],
-        value_column: Optional[str] = None,
+        data: pd.DataFrame | np.ndarray | list,
+        value_column: str | None = None,
         value_range: float = 1.0,
-        epsilon: Optional[float] = None,
-        delta: Optional[float] = None,
-        clamp_bounds: Optional[tuple[float, float]] = None
+        epsilon: float | None = None,
+        delta: float | None = None,
+        clamp_bounds: tuple[float, float] | None = None,
     ) -> DPResult:
         """
         Differentially private mean query.
@@ -363,12 +330,7 @@ class DPAggregator:
         sensitivity = SensitivityCalculator.mean_sensitivity(value_range, n)
 
         # Create privacy parameters
-        params = PrivacyParameters(
-            epsilon=eps,
-            delta=dlt,
-            sensitivity=sensitivity,
-            mechanism=self.default_mechanism
-        )
+        params = PrivacyParameters(epsilon=eps, delta=dlt, sensitivity=sensitivity, mechanism=self.default_mechanism)
 
         # Choose mechanism
         if params.is_pure_dp:
@@ -378,9 +340,7 @@ class DPAggregator:
 
         # Execute query
         result = mechanism.execute_query(
-            true_value=true_mean,
-            query_type=DPQueryType.MEAN.value,
-            metadata={"value_range": value_range, "n": n}
+            true_value=true_mean, query_type=DPQueryType.MEAN.value, metadata={"value_range": value_range, "n": n}
         )
 
         # Spend budget
@@ -390,12 +350,12 @@ class DPAggregator:
 
     def histogram(
         self,
-        data: Union[pd.DataFrame, np.ndarray, list],
-        value_column: Optional[str] = None,
-        bins: Union[int, np.ndarray] = 10,
-        epsilon: Optional[float] = None,
-        delta: Optional[float] = None,
-        clamp_output: bool = True
+        data: pd.DataFrame | np.ndarray | list,
+        value_column: str | None = None,
+        bins: int | np.ndarray = 10,
+        epsilon: float | None = None,
+        delta: float | None = None,
+        clamp_output: bool = True,
     ) -> DPResult:
         """
         Differentially private histogram.
@@ -434,12 +394,7 @@ class DPAggregator:
         sensitivity = SensitivityCalculator.histogram_sensitivity()
 
         # Create privacy parameters
-        params = PrivacyParameters(
-            epsilon=eps,
-            delta=dlt,
-            sensitivity=sensitivity,
-            mechanism=self.default_mechanism
-        )
+        params = PrivacyParameters(epsilon=eps, delta=dlt, sensitivity=sensitivity, mechanism=self.default_mechanism)
 
         # Choose mechanism
         if params.is_pure_dp:
@@ -451,7 +406,7 @@ class DPAggregator:
         result = mechanism.execute_query(
             true_value=true_counts.astype(float),
             query_type=DPQueryType.HISTOGRAM.value,
-            metadata={"bins": len(true_counts), "bin_edges": bin_edges.tolist()}
+            metadata={"bins": len(true_counts), "bin_edges": bin_edges.tolist()},
         )
 
         # Clamp negative counts to 0
@@ -465,10 +420,10 @@ class DPAggregator:
 
     def count_distinct_approximate(
         self,
-        data: Union[pd.DataFrame, np.ndarray, list],
-        value_column: Optional[str] = None,
-        epsilon: Optional[float] = None,
-        delta: Optional[float] = None
+        data: pd.DataFrame | np.ndarray | list,
+        value_column: str | None = None,
+        epsilon: float | None = None,
+        delta: float | None = None,
     ) -> DPResult:
         """
         Approximate differentially private count distinct.
@@ -509,12 +464,7 @@ class DPAggregator:
         sensitivity = 1.0
 
         # Create privacy parameters
-        params = PrivacyParameters(
-            epsilon=eps,
-            delta=dlt,
-            sensitivity=sensitivity,
-            mechanism=self.default_mechanism
-        )
+        params = PrivacyParameters(epsilon=eps, delta=dlt, sensitivity=sensitivity, mechanism=self.default_mechanism)
 
         # Choose mechanism
         if params.is_pure_dp:
@@ -523,10 +473,7 @@ class DPAggregator:
             mechanism = GaussianMechanism(params)
 
         # Execute query
-        result = mechanism.execute_query(
-            true_value=true_distinct,
-            query_type=DPQueryType.COUNT_DISTINCT.value
-        )
+        result = mechanism.execute_query(true_value=true_distinct, query_type=DPQueryType.COUNT_DISTINCT.value)
 
         # Clamp to non-negative
         result.noisy_value = max(0.0, result.noisy_value)
@@ -536,7 +483,7 @@ class DPAggregator:
 
         return result
 
-    def get_budget_status(self) -> Optional[Dict[str, Any]]:
+    def get_budget_status(self) -> dict[str, Any] | None:
         """
         Get privacy budget statistics.
 

@@ -6,15 +6,16 @@ Authors: Juan + Claude
 Date: 2025-10-07
 """
 
-import pytest
 import asyncio
 import time
 
-from coordination.rate_limiter import RateLimiter, ClonalExpansionRateLimiter
-from coordination.exceptions import LymphnodeRateLimitError, LymphnodeResourceExhaustedError
+import pytest
 
+from coordination.exceptions import LymphnodeRateLimitError, LymphnodeResourceExhaustedError
+from coordination.rate_limiter import ClonalExpansionRateLimiter, RateLimiter
 
 # ==================== RATE LIMITER TESTS ====================
+
 
 class TestRateLimiter:
     """Test basic token bucket rate limiter"""
@@ -140,7 +141,7 @@ class TestRateLimiter:
 
         assert result is False
         assert elapsed >= 0.05  # Did wait for timeout
-        assert elapsed < 0.2   # But not too long
+        assert elapsed < 0.2  # But not too long
 
     @pytest.mark.asyncio
     async def test_wait_for_token_success_after_refill(self):
@@ -194,6 +195,7 @@ class TestRateLimiter:
 
 
 # ==================== CLONAL EXPANSION RATE LIMITER TESTS ====================
+
 
 class TestClonalExpansionRateLimiter:
     """Test specialized clonal expansion rate limiter"""
@@ -403,6 +405,7 @@ class TestClonalExpansionRateLimiter:
 
 
 # ==================== INTEGRATION TESTS ====================
+
 
 class TestRateLimiterIntegration:
     """Test rate limiter integration scenarios"""

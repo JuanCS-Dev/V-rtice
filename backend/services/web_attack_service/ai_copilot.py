@@ -17,9 +17,9 @@ it to intelligently identify and simulate web-based attack scenarios.
 """
 
 import asyncio
-from datetime import datetime
 import json
 import logging
+from datetime import datetime
 from typing import Dict, List, Optional
 
 # Gemini (Google)
@@ -39,6 +39,7 @@ except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 import httpx
+
 from models import (
     AICoPilotRequest,
     AICoPilotResponse,
@@ -103,9 +104,7 @@ class AICoPilot:
         if not self.gemini_client and not self.anthropic_client:
             logger.warning("No AI provider available - Co-Pilot disabled")
 
-    async def generate_attack_vectors(
-        self, request: AICoPilotRequest
-    ) -> AICoPilotResponse:
+    async def generate_attack_vectors(self, request: AICoPilotRequest) -> AICoPilotResponse:
         """
         Generate attack vectors using AI
 
@@ -234,9 +233,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
 
         return prompt
 
-    async def _generate_with_gemini(
-        self, prompt: str, temperature: float, max_tokens: int
-    ) -> tuple[str, int]:
+    async def _generate_with_gemini(self, prompt: str, temperature: float, max_tokens: int) -> tuple[str, int]:
         """Gera uma resposta usando o modelo Gemini.
 
         Args:
@@ -254,9 +251,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             response = await asyncio.to_thread(
                 self.gemini_client.generate_content,
                 prompt,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=temperature, max_output_tokens=max_tokens
-                ),
+                generation_config=genai.types.GenerationConfig(temperature=temperature, max_output_tokens=max_tokens),
             )
 
             text = response.text
@@ -269,9 +264,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             logger.error(f"Gemini generation failed: {str(e)}")
             raise
 
-    async def _generate_with_anthropic(
-        self, prompt: str, temperature: float, max_tokens: int
-    ) -> tuple[str, int]:
+    async def _generate_with_anthropic(self, prompt: str, temperature: float, max_tokens: int) -> tuple[str, int]:
         """Gera uma resposta usando o modelo Anthropic.
 
         Args:
@@ -303,9 +296,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             logger.error(f"Anthropic generation failed: {str(e)}")
             raise
 
-    def _parse_ai_response(
-        self, response_text: str, attack_type: VulnerabilityType
-    ) -> List[AIGeneratedPayload]:
+    def _parse_ai_response(self, response_text: str, attack_type: VulnerabilityType) -> List[AIGeneratedPayload]:
         """Analisa a resposta da IA, extraindo payloads de ataque estruturados.
 
         Args:
@@ -343,13 +334,9 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
                     payload=p.get("payload", ""),
                     payload_type=attack_type,
                     explanation=p.get("explanation", ""),
-                    risk_level=severity_map.get(
-                        p.get("risk_level", "medium").lower(), Severity.MEDIUM
-                    ),
+                    risk_level=severity_map.get(p.get("risk_level", "medium").lower(), Severity.MEDIUM),
                     prefrontal_cortex_approved=False,
-                    destructiveness_score=self._calculate_destructiveness(
-                        p.get("payload", "")
-                    ),
+                    destructiveness_score=self._calculate_destructiveness(p.get("payload", "")),
                 )
                 payloads.append(payload)
 
@@ -391,9 +378,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
 
         return score
 
-    def _fallback_parse(
-        self, response_text: str, attack_type: VulnerabilityType
-    ) -> List[AIGeneratedPayload]:
+    def _fallback_parse(self, response_text: str, attack_type: VulnerabilityType) -> List[AIGeneratedPayload]:
         """Parser de fallback quando a extração JSON da resposta da IA falha.
 
         Tenta extrair payloads de texto usando heurísticas simples.
@@ -423,17 +408,13 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
                             payload_type=attack_type,
                             explanation="Extracted from AI response (fallback parser)",
                             risk_level=Severity.MEDIUM,
-                            destructiveness_score=self._calculate_destructiveness(
-                                payload_text
-                            ),
+                            destructiveness_score=self._calculate_destructiveness(payload_text),
                         )
                     )
 
         return payloads[:5]  # Limit to 5
 
-    async def _validate_payloads(
-        self, payloads: List[AIGeneratedPayload]
-    ) -> List[AIGeneratedPayload]:
+    async def _validate_payloads(self, payloads: List[AIGeneratedPayload]) -> List[AIGeneratedPayload]:
         """Valida payloads através do serviço Prefrontal Cortex (inibição de impulso).
 
         Args:
@@ -471,9 +452,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
                             payload.prefrontal_cortex_approved = True
                             validated.append(payload)
                         else:
-                            logger.info(
-                                f"Payload blocked by Prefrontal Cortex: {payload.payload[:50]}"
-                            )
+                            logger.info(f"Payload blocked by Prefrontal Cortex: {payload.payload[:50]}")
 
                 except Exception as e:
                     logger.warning(f"Prefrontal Cortex validation failed: {str(e)}")
@@ -506,10 +485,7 @@ Think creatively - what novel attack vectors might bypass modern defenses?"""
             # Fallback: look for recommendation patterns
             lines = response_text.split("\n")
             for line in lines:
-                if any(
-                    keyword in line.lower()
-                    for keyword in ["recommend", "should", "must", "remediation"]
-                ):
+                if any(keyword in line.lower() for keyword in ["recommend", "should", "must", "remediation"]):
                     cleaned = line.strip("- *#").strip()
                     if len(cleaned) > 20:  # Meaningful recommendation
                         recommendations.append(cleaned)

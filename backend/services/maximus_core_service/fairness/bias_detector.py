@@ -12,19 +12,12 @@ Detection Methods:
 """
 
 import logging
-import numpy as np
-from typing import Dict, Any, List, Optional, Tuple
-from collections import defaultdict, Counter
-from scipy import stats
-from datetime import datetime
+from typing import Any
 
-from .base import (
-    ProtectedAttribute,
-    FairnessMetric,
-    BiasDetectionResult,
-    FairnessException,
-    InsufficientDataException
-)
+import numpy as np
+from scipy import stats
+
+from .base import BiasDetectionResult, InsufficientDataException, ProtectedAttribute
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +35,7 @@ class BiasDetector:
         effect_size_thresholds: Thresholds for Cohen's d effect size
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize BiasDetector.
 
         Args:
@@ -51,19 +44,15 @@ class BiasDetector:
         config = config or {}
 
         # Statistical parameters
-        self.min_sample_size = config.get('min_sample_size', 30)
-        self.significance_level = config.get('significance_level', 0.05)  # 95% confidence
-        self.disparate_impact_threshold = config.get('disparate_impact_threshold', 0.8)  # 4/5ths rule
+        self.min_sample_size = config.get("min_sample_size", 30)
+        self.significance_level = config.get("significance_level", 0.05)  # 95% confidence
+        self.disparate_impact_threshold = config.get("disparate_impact_threshold", 0.8)  # 4/5ths rule
 
         # Effect size thresholds (Cohen's d)
-        self.effect_size_thresholds = config.get('effect_size_thresholds', {
-            'small': 0.2,
-            'medium': 0.5,
-            'large': 0.8
-        })
+        self.effect_size_thresholds = config.get("effect_size_thresholds", {"small": 0.2, "medium": 0.5, "large": 0.8})
 
         # Detection sensitivity
-        self.sensitivity = config.get('sensitivity', 'medium')  # low, medium, high
+        self.sensitivity = config.get("sensitivity", "medium")  # low, medium, high
 
         logger.info(
             f"BiasDetector initialized with significance_level={self.significance_level}, "
@@ -71,10 +60,7 @@ class BiasDetector:
         )
 
     def detect_statistical_parity_bias(
-        self,
-        predictions: np.ndarray,
-        protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        self, predictions: np.ndarray, protected_attribute: np.ndarray, protected_value: Any = 1
     ) -> BiasDetectionResult:
         """Detect bias using statistical parity (chi-square test).
 
@@ -113,10 +99,7 @@ class BiasDetector:
         group_1_neg = np.sum((binary_predictions == 0) & group_1_mask)
         group_1_pos = np.sum((binary_predictions == 1) & group_1_mask)
 
-        contingency_table = np.array([
-            [group_0_neg, group_0_pos],
-            [group_1_neg, group_1_pos]
-        ])
+        contingency_table = np.array([[group_0_neg, group_0_pos], [group_1_neg, group_1_pos]])
 
         # Chi-square test
         chi2, p_value, dof, expected = stats.chi2_contingency(contingency_table)
@@ -129,7 +112,7 @@ class BiasDetector:
         cramer_v = np.sqrt(chi2 / n_total)
 
         # Determine severity based on p-value and effect size
-        severity = self._determine_severity(p_value, cramer_v, method='chi_square')
+        severity = self._determine_severity(p_value, cramer_v, method="chi_square")
 
         # Confidence in detection
         confidence = 1.0 - p_value if bias_detected else p_value
@@ -148,7 +131,7 @@ class BiasDetector:
         result = BiasDetectionResult(
             bias_detected=bias_detected,
             protected_attribute=ProtectedAttribute.GEOGRAPHIC_LOCATION,  # Will be set by caller
-            detection_method='statistical_parity_chi_square',
+            detection_method="statistical_parity_chi_square",
             p_value=float(p_value),
             effect_size=float(cramer_v),
             confidence=float(confidence),
@@ -156,13 +139,13 @@ class BiasDetector:
             severity=severity,
             sample_size=int(n_total),
             metadata={
-                'chi2_statistic': float(chi2),
-                'degrees_of_freedom': int(dof),
-                'contingency_table': contingency_table.tolist(),
-                'pos_rate_group_0': float(pos_rate_0),
-                'pos_rate_group_1': float(pos_rate_1),
-                'cramers_v': float(cramer_v)
-            }
+                "chi2_statistic": float(chi2),
+                "degrees_of_freedom": int(dof),
+                "contingency_table": contingency_table.tolist(),
+                "pos_rate_group_0": float(pos_rate_0),
+                "pos_rate_group_1": float(pos_rate_1),
+                "cramers_v": float(cramer_v),
+            },
         )
 
         logger.debug(
@@ -173,10 +156,7 @@ class BiasDetector:
         return result
 
     def detect_disparate_impact(
-        self,
-        predictions: np.ndarray,
-        protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        self, predictions: np.ndarray, protected_attribute: np.ndarray, protected_value: Any = 1
     ) -> BiasDetectionResult:
         """Detect bias using disparate impact analysis (4/5ths rule).
 
@@ -216,7 +196,7 @@ class BiasDetector:
         if selection_rate_0 > 0:
             di_ratio = selection_rate_1 / selection_rate_0
         else:
-            di_ratio = 1.0 if selection_rate_1 == 0 else float('inf')
+            di_ratio = 1.0 if selection_rate_1 == 0 else float("inf")
 
         # Bias detected if ratio < threshold (4/5ths = 0.8)
         bias_detected = di_ratio < self.disparate_impact_threshold
@@ -228,13 +208,13 @@ class BiasDetector:
         # Determine severity based on how far from threshold
         deviation = abs(di_ratio - 1.0)
         if deviation < 0.1:
-            severity = 'low'
+            severity = "low"
         elif deviation < 0.3:
-            severity = 'medium'
+            severity = "medium"
         elif deviation < 0.5:
-            severity = 'high'
+            severity = "high"
         else:
-            severity = 'critical'
+            severity = "critical"
 
         # Confidence based on sample size and deviation
         confidence = min(1.0, deviation * np.sqrt(min(n0, n1) / self.min_sample_size))
@@ -248,14 +228,12 @@ class BiasDetector:
                     f"of reference group rate {selection_rate_0:.2%})"
                 )
             else:
-                affected_groups.append(
-                    f"Reference group (protected group favored with ratio {di_ratio:.2f})"
-                )
+                affected_groups.append(f"Reference group (protected group favored with ratio {di_ratio:.2f})")
 
         result = BiasDetectionResult(
             bias_detected=bias_detected,
             protected_attribute=ProtectedAttribute.GEOGRAPHIC_LOCATION,
-            detection_method='disparate_impact_4_5ths_rule',
+            detection_method="disparate_impact_4_5ths_rule",
             p_value=None,  # Not applicable for this method
             effect_size=float(abs(1.0 - di_ratio)),  # Deviation from parity
             confidence=float(confidence),
@@ -263,12 +241,12 @@ class BiasDetector:
             severity=severity,
             sample_size=int(n0 + n1),
             metadata={
-                'disparate_impact_ratio': float(di_ratio),
-                'selection_rate_group_0': float(selection_rate_0),
-                'selection_rate_group_1': float(selection_rate_1),
-                'threshold': self.disparate_impact_threshold,
-                'passes_4_5ths_rule': di_ratio >= self.disparate_impact_threshold
-            }
+                "disparate_impact_ratio": float(di_ratio),
+                "selection_rate_group_0": float(selection_rate_0),
+                "selection_rate_group_1": float(selection_rate_1),
+                "threshold": self.disparate_impact_threshold,
+                "passes_4_5ths_rule": di_ratio >= self.disparate_impact_threshold,
+            },
         )
 
         logger.debug(
@@ -279,10 +257,7 @@ class BiasDetector:
         return result
 
     def detect_distribution_bias(
-        self,
-        predictions: np.ndarray,
-        protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        self, predictions: np.ndarray, protected_attribute: np.ndarray, protected_value: Any = 1
     ) -> BiasDetectionResult:
         """Detect bias using distribution comparison (Kolmogorov-Smirnov test).
 
@@ -329,7 +304,7 @@ class BiasDetector:
         cohens_d = (mean_0 - mean_1) / pooled_std if pooled_std > 0 else 0.0
 
         # Determine severity
-        severity = self._determine_severity(p_value, abs(cohens_d), method='ks_test')
+        severity = self._determine_severity(p_value, abs(cohens_d), method="ks_test")
 
         # Confidence
         confidence = 1.0 - p_value if bias_detected else p_value
@@ -338,18 +313,14 @@ class BiasDetector:
         affected_groups = []
         if bias_detected:
             if mean_0 > mean_1:
-                affected_groups.append(
-                    f"Protected group (lower mean score: {mean_1:.3f} vs {mean_0:.3f})"
-                )
+                affected_groups.append(f"Protected group (lower mean score: {mean_1:.3f} vs {mean_0:.3f})")
             else:
-                affected_groups.append(
-                    f"Reference group (lower mean score: {mean_0:.3f} vs {mean_1:.3f})"
-                )
+                affected_groups.append(f"Reference group (lower mean score: {mean_0:.3f} vs {mean_1:.3f})")
 
         result = BiasDetectionResult(
             bias_detected=bias_detected,
             protected_attribute=ProtectedAttribute.GEOGRAPHIC_LOCATION,
-            detection_method='distribution_ks_test',
+            detection_method="distribution_ks_test",
             p_value=float(p_value),
             effect_size=float(abs(cohens_d)),
             confidence=float(confidence),
@@ -357,14 +328,14 @@ class BiasDetector:
             severity=severity,
             sample_size=int(n0 + n1),
             metadata={
-                'ks_statistic': float(ks_statistic),
-                'mean_group_0': float(mean_0),
-                'mean_group_1': float(mean_1),
-                'std_group_0': float(std_0),
-                'std_group_1': float(std_1),
-                'cohens_d': float(cohens_d),
-                'effect_size_category': self._categorize_effect_size(abs(cohens_d))
-            }
+                "ks_statistic": float(ks_statistic),
+                "mean_group_0": float(mean_0),
+                "mean_group_1": float(mean_1),
+                "std_group_0": float(std_0),
+                "std_group_1": float(std_1),
+                "cohens_d": float(cohens_d),
+                "effect_size_category": self._categorize_effect_size(abs(cohens_d)),
+            },
         )
 
         logger.debug(
@@ -379,7 +350,7 @@ class BiasDetector:
         predictions: np.ndarray,
         true_labels: np.ndarray,
         protected_attribute: np.ndarray,
-        protected_value: Any = 1
+        protected_value: Any = 1,
     ) -> BiasDetectionResult:
         """Detect bias through performance disparity across groups.
 
@@ -413,22 +384,12 @@ class BiasDetector:
             raise InsufficientDataException(self.min_sample_size, min(n0, n1))
 
         # Calculate accuracy for each group
-        accuracy_0 = np.mean(
-            binary_predictions[group_0_mask] == binary_labels[group_0_mask]
-        )
-        accuracy_1 = np.mean(
-            binary_predictions[group_1_mask] == binary_labels[group_1_mask]
-        )
+        accuracy_0 = np.mean(binary_predictions[group_0_mask] == binary_labels[group_0_mask])
+        accuracy_1 = np.mean(binary_predictions[group_1_mask] == binary_labels[group_1_mask])
 
         # Calculate F1 score for each group
-        f1_0 = self._calculate_f1_score(
-            binary_predictions[group_0_mask],
-            binary_labels[group_0_mask]
-        )
-        f1_1 = self._calculate_f1_score(
-            binary_predictions[group_1_mask],
-            binary_labels[group_1_mask]
-        )
+        f1_0 = self._calculate_f1_score(binary_predictions[group_0_mask], binary_labels[group_0_mask])
+        f1_1 = self._calculate_f1_score(binary_predictions[group_1_mask], binary_labels[group_1_mask])
 
         # Performance disparity
         accuracy_diff = abs(accuracy_0 - accuracy_1)
@@ -436,9 +397,9 @@ class BiasDetector:
 
         # Bias detected if performance differs significantly (threshold based on sensitivity)
         thresholds = {
-            'low': 0.15,      # 15% difference
-            'medium': 0.10,   # 10% difference
-            'high': 0.05      # 5% difference
+            "low": 0.15,  # 15% difference
+            "medium": 0.10,  # 10% difference
+            "high": 0.05,  # 5% difference
         }
         threshold = thresholds.get(self.sensitivity, 0.10)
 
@@ -447,13 +408,13 @@ class BiasDetector:
         # Severity based on max difference
         max_diff = max(accuracy_diff, f1_diff)
         if max_diff < 0.05:
-            severity = 'low'
+            severity = "low"
         elif max_diff < 0.10:
-            severity = 'medium'
+            severity = "medium"
         elif max_diff < 0.20:
-            severity = 'high'
+            severity = "high"
         else:
-            severity = 'critical'
+            severity = "critical"
 
         # Confidence based on sample sizes and difference magnitude
         confidence = min(1.0, max_diff * 5 * np.sqrt(min(n0, n1) / self.min_sample_size))
@@ -462,18 +423,14 @@ class BiasDetector:
         affected_groups = []
         if bias_detected:
             if accuracy_0 > accuracy_1:
-                affected_groups.append(
-                    f"Protected group (lower accuracy: {accuracy_1:.2%} vs {accuracy_0:.2%})"
-                )
+                affected_groups.append(f"Protected group (lower accuracy: {accuracy_1:.2%} vs {accuracy_0:.2%})")
             elif accuracy_1 > accuracy_0:
-                affected_groups.append(
-                    f"Reference group (lower accuracy: {accuracy_0:.2%} vs {accuracy_1:.2%})"
-                )
+                affected_groups.append(f"Reference group (lower accuracy: {accuracy_0:.2%} vs {accuracy_1:.2%})")
 
         result = BiasDetectionResult(
             bias_detected=bias_detected,
             protected_attribute=ProtectedAttribute.GEOGRAPHIC_LOCATION,
-            detection_method='performance_disparity',
+            detection_method="performance_disparity",
             p_value=None,  # Could add statistical test if needed
             effect_size=float(max_diff),
             confidence=float(confidence),
@@ -481,14 +438,14 @@ class BiasDetector:
             severity=severity,
             sample_size=int(n0 + n1),
             metadata={
-                'accuracy_group_0': float(accuracy_0),
-                'accuracy_group_1': float(accuracy_1),
-                'accuracy_difference': float(accuracy_diff),
-                'f1_group_0': float(f1_0),
-                'f1_group_1': float(f1_1),
-                'f1_difference': float(f1_diff),
-                'threshold': threshold
-            }
+                "accuracy_group_0": float(accuracy_0),
+                "accuracy_group_1": float(accuracy_1),
+                "accuracy_difference": float(accuracy_diff),
+                "f1_group_0": float(f1_0),
+                "f1_group_1": float(f1_1),
+                "f1_difference": float(f1_diff),
+                "threshold": threshold,
+            },
         )
 
         logger.debug(
@@ -502,9 +459,9 @@ class BiasDetector:
         self,
         predictions: np.ndarray,
         protected_attribute: np.ndarray,
-        true_labels: Optional[np.ndarray] = None,
-        protected_value: Any = 1
-    ) -> Dict[str, BiasDetectionResult]:
+        true_labels: np.ndarray | None = None,
+        protected_value: Any = 1,
+    ) -> dict[str, BiasDetectionResult]:
         """Run all applicable bias detection methods.
 
         Args:
@@ -520,7 +477,7 @@ class BiasDetector:
 
         # Statistical parity (chi-square)
         try:
-            results['statistical_parity'] = self.detect_statistical_parity_bias(
+            results["statistical_parity"] = self.detect_statistical_parity_bias(
                 predictions, protected_attribute, protected_value
             )
         except Exception as e:
@@ -528,7 +485,7 @@ class BiasDetector:
 
         # Disparate impact
         try:
-            results['disparate_impact'] = self.detect_disparate_impact(
+            results["disparate_impact"] = self.detect_disparate_impact(
                 predictions, protected_attribute, protected_value
             )
         except Exception as e:
@@ -536,16 +493,14 @@ class BiasDetector:
 
         # Distribution comparison
         try:
-            results['distribution'] = self.detect_distribution_bias(
-                predictions, protected_attribute, protected_value
-            )
+            results["distribution"] = self.detect_distribution_bias(predictions, protected_attribute, protected_value)
         except Exception as e:
             logger.error(f"Distribution bias detection failed: {e}")
 
         # Performance disparity (requires true labels)
         if true_labels is not None:
             try:
-                results['performance_disparity'] = self.detect_performance_disparity(
+                results["performance_disparity"] = self.detect_performance_disparity(
                     predictions, true_labels, protected_attribute, protected_value
                 )
             except Exception as e:
@@ -553,12 +508,7 @@ class BiasDetector:
 
         return results
 
-    def _determine_severity(
-        self,
-        p_value: float,
-        effect_size: float,
-        method: str
-    ) -> str:
+    def _determine_severity(self, p_value: float, effect_size: float, method: str) -> str:
         """Determine severity of bias based on p-value and effect size.
 
         Args:
@@ -570,19 +520,19 @@ class BiasDetector:
             Severity level: low, medium, high, or critical
         """
         # Very strong statistical significance + large effect
-        if p_value < 0.001 and effect_size > self.effect_size_thresholds['large']:
-            return 'critical'
+        if p_value < 0.001 and effect_size > self.effect_size_thresholds["large"]:
+            return "critical"
 
         # Strong significance + medium/large effect
-        if p_value < 0.01 and effect_size > self.effect_size_thresholds['medium']:
-            return 'high'
+        if p_value < 0.01 and effect_size > self.effect_size_thresholds["medium"]:
+            return "high"
 
         # Moderate significance + small/medium effect
-        if p_value < self.significance_level and effect_size > self.effect_size_thresholds['small']:
-            return 'medium'
+        if p_value < self.significance_level and effect_size > self.effect_size_thresholds["small"]:
+            return "medium"
 
         # Weak evidence of bias
-        return 'low'
+        return "low"
 
     def _categorize_effect_size(self, cohens_d: float) -> str:
         """Categorize Cohen's d effect size.
@@ -595,22 +545,17 @@ class BiasDetector:
         """
         abs_d = abs(cohens_d)
 
-        if abs_d < self.effect_size_thresholds['small']:
-            return 'negligible'
-        elif abs_d < self.effect_size_thresholds['medium']:
-            return 'small'
-        elif abs_d < self.effect_size_thresholds['large']:
-            return 'medium'
-        elif abs_d < 1.2:
-            return 'large'
-        else:
-            return 'very_large'
+        if abs_d < self.effect_size_thresholds["small"]:
+            return "negligible"
+        if abs_d < self.effect_size_thresholds["medium"]:
+            return "small"
+        if abs_d < self.effect_size_thresholds["large"]:
+            return "medium"
+        if abs_d < 1.2:
+            return "large"
+        return "very_large"
 
-    def _calculate_f1_score(
-        self,
-        predictions: np.ndarray,
-        true_labels: np.ndarray
-    ) -> float:
+    def _calculate_f1_score(self, predictions: np.ndarray, true_labels: np.ndarray) -> float:
         """Calculate F1 score.
 
         Args:

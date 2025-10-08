@@ -74,9 +74,7 @@ class MockDiscordClient:
         Returns:
             MagicMock: Um objeto mock de mensagem.
         """
-        return MagicMock(
-            author=MagicMock(name="MockUser"), content="Mock message content."
-        )
+        return MagicMock(author=MagicMock(name="MockUser"), content="Mock message content.")
 
     async def fetch_channel_history(self, channel, limit: int):
         """Simula a busca do histórico de mensagens de um canal.
@@ -120,9 +118,7 @@ class DiscordBotScraper(BaseScraper):
         """
         self.discord_token = config.get("discord_token") if config else None
         if not self.discord_token:
-            print(
-                "[DiscordBotScraper] Warning: Discord token not provided. Running in mock mode."
-            )
+            print("[DiscordBotScraper] Warning: Discord token not provided. Running in mock mode.")
         self.client = MockDiscordClient()  # Replace with actual discord.Client()
         self.scraped_data: List[Dict[str, Any]] = []
         self.last_scrape_time: Optional[datetime] = None
@@ -141,9 +137,7 @@ class DiscordBotScraper(BaseScraper):
         if self.current_status != "running":
             await self.connect()
 
-        print(
-            f"[DiscordBotScraper] Scraping channel {channel_id} for {limit} messages..."
-        )
+        print(f"[DiscordBotScraper] Scraping channel {channel_id} for {limit} messages...")
         self.current_status = "scraping"
 
         try:
@@ -161,9 +155,7 @@ class DiscordBotScraper(BaseScraper):
                         "author": msg.author.name,
                         "content": msg.content,
                         "channel_id": channel_id,
-                        "server_id": (
-                            channel.guild.id if hasattr(channel, "guild") else None
-                        ),
+                        "server_id": (channel.guild.id if hasattr(channel, "guild") else None),
                     }
                 )
             self.scraped_data.extend(scraped_messages)
@@ -181,9 +173,7 @@ class DiscordBotScraper(BaseScraper):
             await self.client.start(self.discord_token)
             self.current_status = "running"
         else:
-            print(
-                "[DiscordBotScraper] Running in mock mode, no actual Discord connection."
-            )
+            print("[DiscordBotScraper] Running in mock mode, no actual Discord connection.")
             self.current_status = "running"  # Mock connection
 
     async def disconnect(self):
@@ -199,8 +189,6 @@ class DiscordBotScraper(BaseScraper):
         """
         return {
             "status": self.current_status,
-            "last_scrape": (
-                self.last_scrape_time.isoformat() if self.last_scrape_time else "N/A"
-            ),
+            "last_scrape": (self.last_scrape_time.isoformat() if self.last_scrape_time else "N/A"),
             "total_messages_scraped": len(self.scraped_data),
         }

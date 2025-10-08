@@ -14,18 +14,18 @@ Note: ReconEngine and MetricsCollector are mocked in tests to isolate
 API logic (test infrastructure mocking, not production code).
 """
 
+# Import the FastAPI app
+import sys
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
 
-# Import the FastAPI app
-import sys
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/network_recon_service")
 from api import app
-from models import ReconStatus, ReconTask, ReconResult
-
+from models import ReconResult, ReconStatus, ReconTask
 
 # ==================== FIXTURES ====================
 
@@ -40,7 +40,7 @@ async def client():
 @pytest_asyncio.fixture
 async def mock_recon_engine():
     """Mock ReconEngine for testing."""
-    with patch('api.recon_engine') as mock_engine:
+    with patch("api.recon_engine") as mock_engine:
         # Mock methods
         mock_engine.start_recon_task = AsyncMock()
         mock_engine.get_task = MagicMock(return_value=None)  # Default: not found
@@ -51,12 +51,10 @@ async def mock_recon_engine():
 @pytest_asyncio.fixture
 async def mock_metrics_collector():
     """Mock MetricsCollector for testing."""
-    with patch('api.metrics_collector') as mock_metrics:
-        mock_metrics.get_all_metrics = MagicMock(return_value={
-            "total_scans": 100,
-            "active_scans": 5,
-            "completed_scans": 95
-        })
+    with patch("api.metrics_collector") as mock_metrics:
+        mock_metrics.get_all_metrics = MagicMock(
+            return_value={"total_scans": 100, "active_scans": 5, "completed_scans": 95}
+        )
         yield mock_metrics
 
 
@@ -68,7 +66,7 @@ def create_recon_task(task_id="task-123", target="192.168.1.0/24", status=ReconS
         scan_type="nmap_full",
         parameters={"ports": "1-1000"},
         start_time=datetime.now().isoformat(),
-        status=status
+        status=status,
     )
 
 
@@ -78,7 +76,7 @@ def create_recon_result(task_id="task-123"):
         task_id=task_id,
         status="success",
         output={"hosts_found": 10, "open_ports": [22, 80, 443]},
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
     )
 
 
@@ -108,11 +106,7 @@ class TestStartReconEndpoint:
 
     async def test_start_recon_nmap_scan(self, client, mock_recon_engine, mock_metrics_collector):
         """Test starting nmap reconnaissance scan."""
-        payload = {
-            "target": "192.168.1.0/24",
-            "scan_type": "nmap_full",
-            "parameters": {"ports": "1-1000"}
-        }
+        payload = {"target": "192.168.1.0/24", "scan_type": "nmap_full", "parameters": {"ports": "1-1000"}}
 
         response = await client.post("/start_recon", json=payload)
 
@@ -132,11 +126,7 @@ class TestStartReconEndpoint:
 
     async def test_start_recon_masscan_scan(self, client, mock_recon_engine, mock_metrics_collector):
         """Test starting masscan reconnaissance scan."""
-        payload = {
-            "target": "10.0.0.1",
-            "scan_type": "masscan_ports",
-            "parameters": {"ports": "80,443,8080"}
-        }
+        payload = {"target": "10.0.0.1", "scan_type": "masscan_ports", "parameters": {"ports": "80,443,8080"}}
 
         response = await client.post("/start_recon", json=payload)
 
@@ -149,7 +139,7 @@ class TestStartReconEndpoint:
         """Test starting scan without optional parameters."""
         payload = {
             "target": "example.com",
-            "scan_type": "nmap_quick"
+            "scan_type": "nmap_quick",
             # No parameters field
         }
 
@@ -162,10 +152,7 @@ class TestStartReconEndpoint:
 
     async def test_start_recon_generates_unique_task_id(self, client, mock_recon_engine, mock_metrics_collector):
         """Test that each scan gets a unique task ID (UUID)."""
-        payload = {
-            "target": "192.168.1.1",
-            "scan_type": "nmap_full"
-        }
+        payload = {"target": "192.168.1.1", "scan_type": "nmap_full"}
 
         response1 = await client.post("/start_recon", json=payload)
         response2 = await client.post("/start_recon", json=payload)
@@ -181,10 +168,7 @@ class TestStartReconEndpoint:
 
     async def test_start_recon_task_created_in_background(self, client, mock_recon_engine, mock_metrics_collector):
         """Test that recon task is started in background (asyncio.create_task)."""
-        payload = {
-            "target": "192.168.1.1",
-            "scan_type": "nmap_full"
-        }
+        payload = {"target": "192.168.1.1", "scan_type": "nmap_full"}
 
         response = await client.post("/start_recon", json=payload)
 
@@ -234,7 +218,7 @@ class TestGetTaskStatusEndpoint:
             (ReconStatus.RUNNING, "running"),
             (ReconStatus.COMPLETED, "completed"),
             (ReconStatus.FAILED, "failed"),
-            (ReconStatus.CANCELLED, "cancelled")
+            (ReconStatus.CANCELLED, "cancelled"),
         ]
 
         for status_enum, status_str in states:
@@ -289,11 +273,11 @@ class TestGetTaskResultsEndpoint:
             output={
                 "hosts": [
                     {"ip": "192.168.1.1", "ports": [22, 80], "services": ["ssh", "http"]},
-                    {"ip": "192.168.1.2", "ports": [443], "services": ["https"]}
+                    {"ip": "192.168.1.2", "ports": [443], "services": ["https"]},
                 ],
-                "summary": {"total_hosts": 2, "total_ports": 3}
+                "summary": {"total_hosts": 2, "total_ports": 3},
             },
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
         mock_recon_engine.get_task_results.return_value = result
 
@@ -332,7 +316,7 @@ class TestGetMetricsEndpoint:
         mock_metrics_collector.get_all_metrics.return_value = {
             "total_scans": 0,
             "active_scans": 0,
-            "completed_scans": 0
+            "completed_scans": 0,
         }
 
         response = await client.get("/metrics")
@@ -375,10 +359,7 @@ class TestRequestValidation:
 
     async def test_start_recon_empty_target_accepted(self, client, mock_recon_engine, mock_metrics_collector):
         """Test starting scan with empty target string."""
-        payload = {
-            "target": "",
-            "scan_type": "nmap_quick"
-        }
+        payload = {"target": "", "scan_type": "nmap_quick"}
 
         response = await client.post("/start_recon", json=payload)
 
@@ -408,7 +389,7 @@ class TestModels:
             scan_type="nmap_full",
             parameters={"ports": "1-1000"},
             start_time="2025-10-07T12:00:00",
-            status=ReconStatus.PENDING
+            status=ReconStatus.PENDING,
         )
 
         assert task.id == "task-001"
@@ -417,12 +398,7 @@ class TestModels:
 
     def test_recon_task_default_start_time(self):
         """Test ReconTask generates default start_time."""
-        task = ReconTask(
-            id="task-002",
-            target="10.0.0.1",
-            scan_type="masscan",
-            parameters={}
-        )
+        task = ReconTask(id="task-002", target="10.0.0.1", scan_type="masscan", parameters={})
 
         # Should have generated timestamp
         assert task.start_time is not None
@@ -430,12 +406,7 @@ class TestModels:
 
     def test_recon_result_creation(self):
         """Test creating ReconResult model."""
-        result = ReconResult(
-            task_id="task-001",
-            status="success",
-            output={"hosts": 5},
-            timestamp="2025-10-07T12:30:00"
-        )
+        result = ReconResult(task_id="task-001", status="success", output={"hosts": 5}, timestamp="2025-10-07T12:30:00")
 
         assert result.task_id == "task-001"
         assert result.status == "success"
@@ -452,35 +423,24 @@ class TestEdgeCases:
     async def test_start_recon_multiple_targets_format(self, client, mock_recon_engine, mock_metrics_collector):
         """Test starting scan with different target formats."""
         targets = [
-            "192.168.1.1",           # Single IP
-            "192.168.1.0/24",        # CIDR range
-            "example.com",            # Domain
-            "192.168.1.1-254",       # IP range
+            "192.168.1.1",  # Single IP
+            "192.168.1.0/24",  # CIDR range
+            "example.com",  # Domain
+            "192.168.1.1-254",  # IP range
         ]
 
         for target in targets:
-            payload = {
-                "target": target,
-                "scan_type": "nmap_quick"
-            }
+            payload = {"target": target, "scan_type": "nmap_quick"}
             response = await client.post("/start_recon", json=payload)
             assert response.status_code == 200
             assert response.json()["target"] == target
 
     async def test_start_recon_different_scan_types(self, client, mock_recon_engine, mock_metrics_collector):
         """Test starting different scan types."""
-        scan_types = [
-            "nmap_full",
-            "nmap_quick",
-            "masscan_ports",
-            "custom_scan"
-        ]
+        scan_types = ["nmap_full", "nmap_quick", "masscan_ports", "custom_scan"]
 
         for scan_type in scan_types:
-            payload = {
-                "target": "192.168.1.1",
-                "scan_type": scan_type
-            }
+            payload = {"target": "192.168.1.1", "scan_type": scan_type}
             response = await client.post("/start_recon", json=payload)
             assert response.status_code == 200
             assert response.json()["scan_type"] == scan_type
@@ -494,12 +454,8 @@ class TestEdgeCases:
                 "ports": "1-65535",
                 "timing": "aggressive",
                 "scripts": ["vuln", "default", "discovery"],
-                "options": {
-                    "os_detection": True,
-                    "service_version": True,
-                    "traceroute": False
-                }
-            }
+                "options": {"os_detection": True, "service_version": True, "traceroute": False},
+            },
         }
 
         response = await client.post("/start_recon", json=payload)
@@ -509,14 +465,11 @@ class TestEdgeCases:
         assert data["parameters"]["scripts"] == ["vuln", "default", "discovery"]
         assert data["parameters"]["options"]["os_detection"] is True
 
-    async def test_get_task_status_with_special_characters_in_id(self, client, mock_recon_engine, mock_metrics_collector):
+    async def test_get_task_status_with_special_characters_in_id(
+        self, client, mock_recon_engine, mock_metrics_collector
+    ):
         """Test getting task status with special characters in ID."""
-        task_ids = [
-            "task-with-dashes",
-            "task_with_underscores",
-            "TASK-UPPERCASE",
-            "task.with.dots"
-        ]
+        task_ids = ["task-with-dashes", "task_with_underscores", "TASK-UPPERCASE", "task.with.dots"]
 
         for task_id in task_ids:
             task = create_recon_task(task_id=task_id)
@@ -530,16 +483,10 @@ class TestEdgeCases:
         """Test handling multiple concurrent scan requests."""
         import asyncio
 
-        payload = {
-            "target": "192.168.1.1",
-            "scan_type": "nmap_quick"
-        }
+        payload = {"target": "192.168.1.1", "scan_type": "nmap_quick"}
 
         # Send 5 concurrent requests
-        responses = await asyncio.gather(*[
-            client.post("/start_recon", json=payload)
-            for _ in range(5)
-        ])
+        responses = await asyncio.gather(*[client.post("/start_recon", json=payload) for _ in range(5)])
 
         # All should succeed
         assert all(r.status_code == 200 for r in responses)

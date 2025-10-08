@@ -12,14 +12,13 @@ open-source information into actionable intelligence, supporting threat
 intelligence, risk assessment, and strategic planning within the Maximus AI system.
 """
 
-import asyncio
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from ai_orchestrator import AIOrchestrator
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
+
+from ai_orchestrator import AIOrchestrator
 
 app = FastAPI(title="Maximus OSINT Service", version="1.0.0")
 
@@ -77,12 +76,8 @@ async def start_osint_investigation(
     Returns:
         Dict[str, Any]: A dictionary containing the investigation ID and initial status.
     """
-    print(
-        f"[API] Starting OSINT investigation: {request.investigation_type} for {request.query}"
-    )
-    response = await ai_orchestrator.start_investigation(
-        request.query, request.investigation_type, request.parameters
-    )
+    print(f"[API] Starting OSINT investigation: {request.investigation_type} for {request.query}")
+    response = await ai_orchestrator.start_investigation(request.query, request.investigation_type, request.parameters)
     return response
 
 

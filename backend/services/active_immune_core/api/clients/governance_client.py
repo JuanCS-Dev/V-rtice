@@ -11,17 +11,17 @@ Version: 1.0.0
 """
 
 import logging
-from typing import Optional, Dict, Any, List
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from .base_client import BaseExternalClient
-
 
 logger = logging.getLogger(__name__)
 
 
 class RiskLevel(str, Enum):
     """Risk level for governance decisions."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -49,7 +49,7 @@ class GovernanceClient(BaseExternalClient):
         base_url: str = "http://localhost:8002",
         operator_id: str = "active_immune_core",
         auto_approve_low_risk: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize Governance client.
@@ -92,7 +92,7 @@ class GovernanceClient(BaseExternalClient):
                 "operator_id": self.operator_id,
                 "operator_name": "Active Immune Core",
                 "operator_role": "autonomous_system",
-            }
+            },
         )
 
         if response:
@@ -106,7 +106,7 @@ class GovernanceClient(BaseExternalClient):
         risk_level: RiskLevel,
         context: Dict[str, Any],
         recommended_action: Optional[str] = None,
-        alternatives: Optional[List[Dict[str, Any]]] = None
+        alternatives: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
         Submit decision for human review.
@@ -133,13 +133,10 @@ class GovernanceClient(BaseExternalClient):
                 "recommended_action": recommended_action,
                 "alternatives": alternatives or [],
                 "requester": "active_immune_core",
-            }
+            },
         )
 
-    async def get_decision_status(
-        self,
-        decision_id: str
-    ) -> Dict[str, Any]:
+    async def get_decision_status(self, decision_id: str) -> Dict[str, Any]:
         """
         Get status of submitted decision.
 
@@ -150,10 +147,7 @@ class GovernanceClient(BaseExternalClient):
             Decision status (pending/approved/rejected/escalated)
         """
         # Note: Actual endpoint may vary - using generic pattern
-        return await self.request(
-            "GET",
-            f"/api/v1/governance/decision/{decision_id}/status"
-        )
+        return await self.request("GET", f"/api/v1/governance/decision/{decision_id}/status")
 
     async def get_pending_stats(self) -> Dict[str, Any]:
         """
@@ -162,10 +156,7 @@ class GovernanceClient(BaseExternalClient):
         Returns:
             Pending decisions statistics
         """
-        return await self.request(
-            "GET",
-            "/api/v1/governance/pending"
-        )
+        return await self.request("GET", "/api/v1/governance/pending")
 
     async def get_operator_stats(self) -> Dict[str, Any]:
         """
@@ -180,17 +171,9 @@ class GovernanceClient(BaseExternalClient):
                 "operator_id": self.operator_id,
             }
 
-        return await self.request(
-            "GET",
-            f"/api/v1/governance/session/{self.operator_id}/stats"
-        )
+        return await self.request("GET", f"/api/v1/governance/session/{self.operator_id}/stats")
 
-    async def degraded_fallback(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Optional[Dict[str, Any]]:
+    async def degraded_fallback(self, method: str, endpoint: str, **kwargs) -> Optional[Dict[str, Any]]:
         """
         Fallback to automatic decision-making.
 
@@ -208,9 +191,7 @@ class GovernanceClient(BaseExternalClient):
         Returns:
             Synthetic degraded decision
         """
-        logger.warning(
-            f"GovernanceClient: Operating in degraded mode for {method} {endpoint}"
-        )
+        logger.warning(f"GovernanceClient: Operating in degraded mode for {method} {endpoint}")
 
         # Parse endpoint
         if endpoint == "/api/v1/governance/test/enqueue":
@@ -227,16 +208,12 @@ class GovernanceClient(BaseExternalClient):
             elif risk_level == "medium":
                 decision = "approved"
                 reason = "auto_approved_medium_risk_degraded_mode"
-                logger.warning(
-                    f"GovernanceClient: Auto-approving medium-risk decision: {decision_type}"
-                )
+                logger.warning(f"GovernanceClient: Auto-approving medium-risk decision: {decision_type}")
 
             elif risk_level in ["high", "critical"]:
                 decision = "rejected"
                 reason = "auto_rejected_high_risk_safety_first"
-                logger.error(
-                    f"GovernanceClient: Auto-rejecting {risk_level}-risk decision: {decision_type}"
-                )
+                logger.error(f"GovernanceClient: Auto-rejecting {risk_level}-risk decision: {decision_type}")
 
             else:
                 decision = "rejected"

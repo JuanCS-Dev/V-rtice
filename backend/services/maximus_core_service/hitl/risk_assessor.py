@@ -19,14 +19,13 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 import logging
+from dataclasses import dataclass, field
 
 from .base import (
+    ActionType,
     DecisionContext,
     RiskLevel,
-    ActionType,
 )
 
 logger = logging.getLogger(__name__)
@@ -36,6 +35,7 @@ logger = logging.getLogger(__name__)
 # Risk Data Classes
 # ============================================================================
 
+
 @dataclass
 class RiskFactors:
     """
@@ -43,6 +43,7 @@ class RiskFactors:
 
     Each factor is scored 0.0 (low risk) to 1.0 (high risk).
     """
+
     # Threat factors
     threat_severity: float = 0.0  # Threat score from detection engine
     threat_confidence: float = 0.0  # Confidence in threat identification
@@ -71,7 +72,7 @@ class RiskFactors:
     time_of_day: float = 0.0  # Higher risk outside business hours
     operator_availability: float = 0.0  # Are operators available?
 
-    def get_all_factors(self) -> Dict[str, float]:
+    def get_all_factors(self) -> dict[str, float]:
         """Get all risk factors as dict."""
         return {
             "threat_severity": self.threat_severity,
@@ -104,6 +105,7 @@ class RiskScore:
     """
     Computed risk score with breakdown by category.
     """
+
     # Overall risk score (0.0 to 1.0)
     overall_score: float = 0.0
 
@@ -123,13 +125,13 @@ class RiskScore:
 
     # Risk justification
     justification: str = ""
-    key_concerns: List[str] = field(default_factory=list)
+    key_concerns: list[str] = field(default_factory=list)
 
     # Recommendations
-    recommended_automation: Optional[str] = None
-    mitigation_suggestions: List[str] = field(default_factory=list)
+    recommended_automation: str | None = None
+    mitigation_suggestions: list[str] = field(default_factory=list)
 
-    def get_category_breakdown(self) -> Dict[str, float]:
+    def get_category_breakdown(self) -> dict[str, float]:
         """Get risk breakdown by category."""
         return {
             "threat": self.threat_risk,
@@ -156,6 +158,7 @@ class RiskScore:
 # ============================================================================
 # Risk Assessor
 # ============================================================================
+
 
 class RiskAssessor:
     """
@@ -251,26 +254,22 @@ class RiskAssessor:
 
         # Compute weighted overall score
         overall_score = (
-            self.WEIGHTS["threat"] * threat_risk +
-            self.WEIGHTS["asset"] * asset_risk +
-            self.WEIGHTS["business"] * business_risk +
-            self.WEIGHTS["action"] * action_risk +
-            self.WEIGHTS["compliance"] * compliance_risk +
-            self.WEIGHTS["environmental"] * environmental_risk
+            self.WEIGHTS["threat"] * threat_risk
+            + self.WEIGHTS["asset"] * asset_risk
+            + self.WEIGHTS["business"] * business_risk
+            + self.WEIGHTS["action"] * action_risk
+            + self.WEIGHTS["compliance"] * compliance_risk
+            + self.WEIGHTS["environmental"] * environmental_risk
         )
 
         # Determine risk level
         risk_level = self._score_to_level(overall_score)
 
         # Generate justification and concerns
-        justification, key_concerns = self._generate_justification(
-            factors, overall_score, risk_level
-        )
+        justification, key_concerns = self._generate_justification(factors, overall_score, risk_level)
 
         # Generate recommendations
-        mitigation_suggestions = self._generate_mitigation_suggestions(
-            factors, context
-        )
+        mitigation_suggestions = self._generate_mitigation_suggestions(factors, context)
 
         # Build risk score
         risk_score = RiskScore(
@@ -306,25 +305,17 @@ class RiskAssessor:
 
         # Asset factors
         factors.asset_criticality = self._assess_asset_criticality(context)
-        factors.asset_count = self._normalize_asset_count(
-            len(context.affected_assets)
-        )
+        factors.asset_count = self._normalize_asset_count(len(context.affected_assets))
         factors.data_sensitivity = self._assess_data_sensitivity(context)
 
         # Business factors
-        factors.financial_impact = self._normalize_financial_impact(
-            context.estimated_cost
-        )
+        factors.financial_impact = self._normalize_financial_impact(context.estimated_cost)
         factors.operational_impact = self._assess_operational_impact(context)
         factors.reputational_impact = self._assess_reputational_impact(context)
 
         # Action factors
-        factors.action_reversibility = self.ACTION_REVERSIBILITY.get(
-            context.action_type, 0.5
-        )
-        factors.action_aggressiveness = self.ACTION_AGGRESSIVENESS.get(
-            context.action_type, 0.5
-        )
+        factors.action_reversibility = self.ACTION_REVERSIBILITY.get(context.action_type, 0.5)
+        factors.action_aggressiveness = self.ACTION_AGGRESSIVENESS.get(context.action_type, 0.5)
         factors.action_scope = self._assess_action_scope(context)
 
         # Compliance factors
@@ -337,68 +328,44 @@ class RiskAssessor:
 
         return factors
 
-    def _compute_threat_risk(
-        self, factors: RiskFactors, context: DecisionContext
-    ) -> float:
+    def _compute_threat_risk(self, factors: RiskFactors, context: DecisionContext) -> float:
         """Compute threat-related risk (0.0 to 1.0)."""
         # Weight threat factors
         threat_risk = (
-            0.5 * factors.threat_severity +
-            0.3 * (1.0 - factors.threat_confidence) +  # Lower confidence = higher risk
-            0.2 * factors.threat_novelty
+            0.5 * factors.threat_severity
+            + 0.3 * (1.0 - factors.threat_confidence)  # Lower confidence = higher risk
+            + 0.2 * factors.threat_novelty
         )
         return min(1.0, threat_risk)
 
-    def _compute_asset_risk(
-        self, factors: RiskFactors, context: DecisionContext
-    ) -> float:
+    def _compute_asset_risk(self, factors: RiskFactors, context: DecisionContext) -> float:
         """Compute asset-related risk."""
-        asset_risk = (
-            0.5 * factors.asset_criticality +
-            0.3 * factors.data_sensitivity +
-            0.2 * factors.asset_count
-        )
+        asset_risk = 0.5 * factors.asset_criticality + 0.3 * factors.data_sensitivity + 0.2 * factors.asset_count
         return min(1.0, asset_risk)
 
-    def _compute_business_risk(
-        self, factors: RiskFactors, context: DecisionContext
-    ) -> float:
+    def _compute_business_risk(self, factors: RiskFactors, context: DecisionContext) -> float:
         """Compute business impact risk."""
         business_risk = (
-            0.4 * factors.financial_impact +
-            0.3 * factors.operational_impact +
-            0.3 * factors.reputational_impact
+            0.4 * factors.financial_impact + 0.3 * factors.operational_impact + 0.3 * factors.reputational_impact
         )
         return min(1.0, business_risk)
 
-    def _compute_action_risk(
-        self, factors: RiskFactors, context: DecisionContext
-    ) -> float:
+    def _compute_action_risk(self, factors: RiskFactors, context: DecisionContext) -> float:
         """Compute action-related risk."""
         action_risk = (
-            0.5 * factors.action_reversibility +
-            0.3 * factors.action_aggressiveness +
-            0.2 * factors.action_scope
+            0.5 * factors.action_reversibility + 0.3 * factors.action_aggressiveness + 0.2 * factors.action_scope
         )
         return min(1.0, action_risk)
 
-    def _compute_compliance_risk(
-        self, factors: RiskFactors, context: DecisionContext
-    ) -> float:
+    def _compute_compliance_risk(self, factors: RiskFactors, context: DecisionContext) -> float:
         """Compute compliance/regulatory risk."""
-        compliance_risk = (
-            0.6 * factors.compliance_impact +
-            0.4 * factors.privacy_impact
-        )
+        compliance_risk = 0.6 * factors.compliance_impact + 0.4 * factors.privacy_impact
         return min(1.0, compliance_risk)
 
-    def _compute_environmental_risk(
-        self, factors: RiskFactors, context: DecisionContext
-    ) -> float:
+    def _compute_environmental_risk(self, factors: RiskFactors, context: DecisionContext) -> float:
         """Compute environmental risk (time, availability, etc.)."""
         environmental_risk = (
-            0.5 * factors.time_of_day +
-            0.5 * (1.0 - factors.operator_availability)  # Low availability = high risk
+            0.5 * factors.time_of_day + 0.5 * (1.0 - factors.operator_availability)  # Low availability = high risk
         )
         return min(1.0, environmental_risk)
 
@@ -406,16 +373,13 @@ class RiskAssessor:
         """Convert numeric score to risk level."""
         if score >= self.CRITICAL_THRESHOLD:
             return RiskLevel.CRITICAL
-        elif score >= self.HIGH_THRESHOLD:
+        if score >= self.HIGH_THRESHOLD:
             return RiskLevel.HIGH
-        elif score >= self.MEDIUM_THRESHOLD:
+        if score >= self.MEDIUM_THRESHOLD:
             return RiskLevel.MEDIUM
-        else:
-            return RiskLevel.LOW
+        return RiskLevel.LOW
 
-    def _generate_justification(
-        self, factors: RiskFactors, score: float, level: RiskLevel
-    ) -> tuple[str, List[str]]:
+    def _generate_justification(self, factors: RiskFactors, score: float, level: RiskLevel) -> tuple[str, list[str]]:
         """Generate human-readable justification for risk assessment."""
         concerns = []
 
@@ -433,25 +397,16 @@ class RiskAssessor:
             )
         elif level == RiskLevel.HIGH:
             justification = (
-                f"HIGH RISK (score={score:.2f}): Significant risk factors present. "
-                f"Senior operator approval required."
+                f"HIGH RISK (score={score:.2f}): Significant risk factors present. Senior operator approval required."
             )
         elif level == RiskLevel.MEDIUM:
-            justification = (
-                f"MEDIUM RISK (score={score:.2f}): Moderate risk. "
-                f"Operator review recommended."
-            )
+            justification = f"MEDIUM RISK (score={score:.2f}): Moderate risk. Operator review recommended."
         else:
-            justification = (
-                f"LOW RISK (score={score:.2f}): Minimal risk factors. "
-                f"May proceed with supervision."
-            )
+            justification = f"LOW RISK (score={score:.2f}): Minimal risk factors. May proceed with supervision."
 
         return justification, concerns
 
-    def _generate_mitigation_suggestions(
-        self, factors: RiskFactors, context: DecisionContext
-    ) -> List[str]:
+    def _generate_mitigation_suggestions(self, factors: RiskFactors, context: DecisionContext) -> list[str]:
         """Generate risk mitigation suggestions."""
         suggestions = []
 
@@ -479,10 +434,9 @@ class RiskAssessor:
         # Check if threat has similar past incidents
         if context.similar_past_decisions:
             return 0.2  # Known threat pattern
-        elif context.threat_type in ["zero_day", "unknown", "novel"]:
+        if context.threat_type in ["zero_day", "unknown", "novel"]:
             return 0.9  # Novel threat
-        else:
-            return 0.5  # Moderately novel
+        return 0.5  # Moderately novel
 
     def _assess_asset_criticality(self, context: DecisionContext) -> float:
         """Assess criticality of affected assets."""
@@ -499,12 +453,11 @@ class RiskAssessor:
         # 1 asset = 0.1, 10 assets = 0.5, 100+ assets = 1.0
         if count <= 1:
             return 0.1
-        elif count <= 10:
+        if count <= 10:
             return 0.1 + (count - 1) * 0.044  # Linear 0.1 to 0.5
-        elif count <= 100:
+        if count <= 100:
             return 0.5 + (count - 10) * 0.0056  # Linear 0.5 to 1.0
-        else:
-            return 1.0
+        return 1.0
 
     def _assess_data_sensitivity(self, context: DecisionContext) -> float:
         """Assess sensitivity of data on affected assets."""
@@ -524,52 +477,48 @@ class RiskAssessor:
         # $0 = 0.0, $10K = 0.3, $100K = 0.6, $1M+ = 1.0
         if cost <= 0:
             return 0.0
-        elif cost < 10000:
+        if cost < 10000:
             return cost / 33333  # Linear 0 to 0.3
-        elif cost < 100000:
+        if cost < 100000:
             return 0.3 + (cost - 10000) / 300000  # Linear 0.3 to 0.6
-        elif cost < 1000000:
+        if cost < 1000000:
             return 0.6 + (cost - 100000) / 2250000  # Linear 0.6 to 1.0
-        else:
-            return 1.0
+        return 1.0
 
     def _assess_operational_impact(self, context: DecisionContext) -> float:
         """Assess impact on business operations."""
         business_impact = context.business_impact.lower()
         if "critical" in business_impact or "severe" in business_impact:
             return 1.0
-        elif "high" in business_impact or "major" in business_impact:
+        if "high" in business_impact or "major" in business_impact:
             return 0.8
-        elif "moderate" in business_impact or "medium" in business_impact:
+        if "moderate" in business_impact or "medium" in business_impact:
             return 0.5
-        elif "low" in business_impact or "minor" in business_impact:
+        if "low" in business_impact or "minor" in business_impact:
             return 0.3
-        else:
-            return 0.5  # Default moderate
+        return 0.5  # Default moderate
 
     def _assess_reputational_impact(self, context: DecisionContext) -> float:
         """Assess potential reputational damage."""
         # High for public-facing assets, data breaches
         if "public" in context.metadata.get("asset_type", ""):
             return 0.7
-        elif "customer_data" in context.metadata.get("data_type", ""):
+        if "customer_data" in context.metadata.get("data_type", ""):
             return 0.8
-        else:
-            return 0.3
+        return 0.3
 
     def _assess_action_scope(self, context: DecisionContext) -> float:
         """Assess scope of action (local=0.0, global=1.0)."""
         scope = context.action_params.get("scope", "local")
         if scope == "global":
             return 1.0
-        elif scope == "organization":
+        if scope == "organization":
             return 0.8
-        elif scope == "department":
+        if scope == "department":
             return 0.5
-        elif scope == "host":
+        if scope == "host":
             return 0.2
-        else:
-            return 0.1  # Local/single entity
+        return 0.1  # Local/single entity
 
     def _assess_compliance_impact(self, context: DecisionContext) -> float:
         """Assess regulatory/compliance implications."""
@@ -577,19 +526,17 @@ class RiskAssessor:
         compliance_tags = context.metadata.get("compliance_tags", [])
         if any(tag in compliance_tags for tag in ["hipaa", "gdpr", "pci-dss"]):
             return 0.9  # High compliance impact
-        elif compliance_tags:
+        if compliance_tags:
             return 0.6  # Some compliance requirements
-        else:
-            return 0.2  # Minimal compliance impact
+        return 0.2  # Minimal compliance impact
 
     def _assess_privacy_impact(self, context: DecisionContext) -> float:
         """Assess PII/privacy implications."""
         if "pii" in context.metadata.get("data_type", ""):
             return 0.9
-        elif "user_data" in context.metadata.get("data_type", ""):
+        if "user_data" in context.metadata.get("data_type", ""):
             return 0.6
-        else:
-            return 0.2
+        return 0.2
 
     def _assess_time_of_day(self) -> float:
         """Assess risk based on time of day (higher risk outside business hours)."""
@@ -600,10 +547,9 @@ class RiskAssessor:
         # Outside hours: higher risk due to reduced oversight
         if 9 <= hour < 17:
             return 0.2  # Business hours
-        elif 17 <= hour < 22 or 6 <= hour < 9:
+        if 17 <= hour < 22 or 6 <= hour < 9:
             return 0.5  # Evening/early morning
-        else:
-            return 0.8  # Night (22-6)
+        return 0.8  # Night (22-6)
 
     def _assess_operator_availability(self) -> float:
         """Assess operator availability (0=none, 1=full)."""
@@ -614,7 +560,6 @@ class RiskAssessor:
         hour = datetime.utcnow().hour
         if 9 <= hour < 17:
             return 0.9  # Business hours
-        elif 17 <= hour < 22:
+        if 17 <= hour < 22:
             return 0.6  # Evening shift
-        else:
-            return 0.3  # Night shift (limited)
+        return 0.3  # Night shift (limited)

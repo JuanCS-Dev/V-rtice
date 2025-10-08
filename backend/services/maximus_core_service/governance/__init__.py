@@ -18,34 +18,31 @@ __version__ = "1.0.0"
 __author__ = "VÉRTICE Platform Team"
 
 # Base data structures
+# Audit infrastructure
+from .audit_infrastructure import AuditLogger
 from .base import (
+    # Audit structures
+    AuditLog,
     # Enums
     AuditLogLevel,
     DecisionType,
-    ERBMemberRole,
-    GovernanceAction,
-    PolicySeverity,
-    PolicyType,
-
-    # Config
-    GovernanceConfig,
-
     # ERB structures
     ERBDecision,
     ERBMeeting,
     ERBMember,
-
-    # Policy structures
-    Policy,
-    PolicyViolation,
-
-    # Audit structures
-    AuditLog,
-    WhistleblowerReport,
-
+    ERBMemberRole,
+    GovernanceAction,
+    # Config
+    GovernanceConfig,
     # Results
     GovernanceResult,
+    # Policy structures
+    Policy,
     PolicyEnforcementResult,
+    PolicySeverity,
+    PolicyType,
+    PolicyViolation,
+    WhistleblowerReport,
 )
 
 # ERB management
@@ -64,9 +61,6 @@ from .policies import (
 # Policy enforcement
 from .policy_engine import PolicyEngine
 
-# Audit infrastructure
-from .audit_infrastructure import AuditLogger
-
 __all__ = [
     # Enums
     "AuditLogLevel",
@@ -75,16 +69,13 @@ __all__ = [
     "GovernanceAction",
     "PolicySeverity",
     "PolicyType",
-
     # Config
     "GovernanceConfig",
-
     # ERB
     "ERBDecision",
     "ERBManager",
     "ERBMeeting",
     "ERBMember",
-
     # Policies
     "Policy",
     "PolicyEnforcementResult",
@@ -96,12 +87,10 @@ __all__ = [
     "create_incident_response_policy",
     "create_red_teaming_policy",
     "create_whistleblower_policy",
-
     # Audit
     "AuditLog",
     "AuditLogger",
     "WhistleblowerReport",
-
     # Results
     "GovernanceResult",
 ]

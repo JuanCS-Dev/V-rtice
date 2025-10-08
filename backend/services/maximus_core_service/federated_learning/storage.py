@@ -11,18 +11,19 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Dict, List, Optional, Any
-import os
 import json
+import logging
+import os
 import pickle
 import tempfile
-import numpy as np
-import logging
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
-from .base import FLRound, FLMetrics, ModelType
+import numpy as np
+
+from .base import FLRound, ModelType
 
 logger = logging.getLogger(__name__)
 
@@ -39,34 +40,34 @@ class RestrictedUnpickler(pickle.Unpickler):
 
     # Whitelist of allowed modules and classes
     ALLOWED_MODULES = {
-        'numpy',
-        'numpy.core.multiarray',
-        'numpy.core.numeric',
-        'numpy.core._multiarray_umath',
-        'numpy._core.multiarray',  # Newer numpy versions use _core
-        'numpy._core.numeric',
-        'numpy._core._multiarray_umath',
-        'builtins',
-        'collections',
+        "numpy",
+        "numpy.core.multiarray",
+        "numpy.core.numeric",
+        "numpy.core._multiarray_umath",
+        "numpy._core.multiarray",  # Newer numpy versions use _core
+        "numpy._core.numeric",
+        "numpy._core._multiarray_umath",
+        "builtins",
+        "collections",
     }
 
     ALLOWED_CLASSES = {
-        'numpy.ndarray',
-        'numpy.dtype',
-        'numpy.core.multiarray._reconstruct',
-        'numpy._core.multiarray._reconstruct',  # Newer numpy versions
-        'builtins.dict',
-        'builtins.list',
-        'builtins.tuple',
-        'builtins.set',
-        'builtins.frozenset',
-        'builtins.int',
-        'builtins.float',
-        'builtins.str',
-        'builtins.bytes',
-        'builtins.bool',
-        'builtins.NoneType',
-        'collections.OrderedDict',
+        "numpy.ndarray",
+        "numpy.dtype",
+        "numpy.core.multiarray._reconstruct",
+        "numpy._core.multiarray._reconstruct",  # Newer numpy versions
+        "builtins.dict",
+        "builtins.list",
+        "builtins.tuple",
+        "builtins.set",
+        "builtins.frozenset",
+        "builtins.int",
+        "builtins.float",
+        "builtins.str",
+        "builtins.bytes",
+        "builtins.bool",
+        "builtins.NoneType",
+        "collections.OrderedDict",
     }
 
     def find_class(self, module, name):
@@ -91,8 +92,7 @@ class RestrictedUnpickler(pickle.Unpickler):
 
         # Reject anything not whitelisted
         raise pickle.UnpicklingError(
-            f"Forbidden class: {full_name}. "
-            f"Only numpy arrays and basic Python types are allowed for security."
+            f"Forbidden class: {full_name}. Only numpy arrays and basic Python types are allowed for security."
         )
 
 
@@ -127,16 +127,17 @@ class ModelVersion:
         file_path: Path to saved model file
         metadata: Additional metadata
     """
+
     version_id: int
     model_type: ModelType
     round_id: int
     timestamp: datetime = field(default_factory=datetime.utcnow)
     accuracy: float = 0.0
     total_parameters: int = 0
-    file_path: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    file_path: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "version_id": self.version_id,
@@ -162,7 +163,7 @@ class FLModelRegistry:
     - Reproducibility
     """
 
-    def __init__(self, storage_dir: Optional[str] = None):
+    def __init__(self, storage_dir: str | None = None):
         """
         Initialize model registry.
 
@@ -171,15 +172,12 @@ class FLModelRegistry:
                         If None, uses FL_MODELS_DIR env var or creates secure temp dir.
         """
         if storage_dir is None:
-            storage_dir = os.getenv(
-                "FL_MODELS_DIR",
-                tempfile.mkdtemp(prefix="fl_models_", suffix="_maximus")
-            )
+            storage_dir = os.getenv("FL_MODELS_DIR", tempfile.mkdtemp(prefix="fl_models_", suffix="_maximus"))
         self.storage_dir = Path(storage_dir)
         self.storage_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
 
-        self.versions: Dict[int, ModelVersion] = {}
-        self.best_version_id: Optional[int] = None
+        self.versions: dict[int, ModelVersion] = {}
+        self.best_version_id: int | None = None
         self.best_accuracy: float = 0.0
 
         logger.info(f"FL Model Registry initialized: {storage_dir}")
@@ -189,9 +187,9 @@ class FLModelRegistry:
         version_id: int,
         model_type: ModelType,
         round_id: int,
-        weights: Dict[str, np.ndarray],
+        weights: dict[str, np.ndarray],
         accuracy: float = 0.0,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> ModelVersion:
         """
         Save a global model version.
@@ -212,7 +210,7 @@ class FLModelRegistry:
         file_path = self.storage_dir / file_name
 
         # Save weights to file
-        with open(file_path, 'wb') as f:
+        with open(file_path, "wb") as f:
             pickle.dump(weights, f)
 
         # Calculate total parameters
@@ -236,9 +234,7 @@ class FLModelRegistry:
         if accuracy > self.best_accuracy:
             self.best_accuracy = accuracy
             self.best_version_id = version_id
-            logger.info(
-                f"New best model: v{version_id} (accuracy={accuracy:.4f})"
-            )
+            logger.info(f"New best model: v{version_id} (accuracy={accuracy:.4f})")
 
         logger.info(
             f"Saved model v{version_id} from round {round_id} "
@@ -247,9 +243,7 @@ class FLModelRegistry:
 
         return version
 
-    def load_global_model(
-        self, version_id: int
-    ) -> Optional[Dict[str, np.ndarray]]:
+    def load_global_model(self, version_id: int) -> dict[str, np.ndarray] | None:
         """
         Load a global model version.
 
@@ -271,7 +265,7 @@ class FLModelRegistry:
 
         # Load weights securely using RestrictedUnpickler
         try:
-            with open(version.file_path, 'rb') as f:
+            with open(version.file_path, "rb") as f:
                 weights = safe_pickle_load(f)
             logger.info(f"Loaded model v{version_id} from {version.file_path}")
             return weights
@@ -282,7 +276,7 @@ class FLModelRegistry:
             logger.error(f"Error loading model v{version_id}: {e}")
             return None
 
-    def get_best_model(self) -> Optional[Dict[str, np.ndarray]]:
+    def get_best_model(self) -> dict[str, np.ndarray] | None:
         """
         Get the best model version (highest accuracy).
 
@@ -294,7 +288,7 @@ class FLModelRegistry:
 
         return self.load_global_model(self.best_version_id)
 
-    def get_latest_model(self) -> Optional[Dict[str, np.ndarray]]:
+    def get_latest_model(self) -> dict[str, np.ndarray] | None:
         """
         Get the latest model version.
 
@@ -307,9 +301,7 @@ class FLModelRegistry:
         latest_version_id = max(self.versions.keys())
         return self.load_global_model(latest_version_id)
 
-    def list_versions(
-        self, limit: Optional[int] = None
-    ) -> List[ModelVersion]:
+    def list_versions(self, limit: int | None = None) -> list[ModelVersion]:
         """
         List all model versions.
 
@@ -330,7 +322,7 @@ class FLModelRegistry:
 
         return versions
 
-    def get_version_info(self, version_id: int) -> Optional[ModelVersion]:
+    def get_version_info(self, version_id: int) -> ModelVersion | None:
         """
         Get information about a specific version.
 
@@ -379,7 +371,7 @@ class FLRoundHistory:
     convergence monitoring.
     """
 
-    def __init__(self, storage_dir: Optional[str] = None):
+    def __init__(self, storage_dir: str | None = None):
         """
         Initialize round history.
 
@@ -388,14 +380,11 @@ class FLRoundHistory:
                         If None, uses FL_ROUNDS_DIR env var or creates secure temp dir.
         """
         if storage_dir is None:
-            storage_dir = os.getenv(
-                "FL_ROUNDS_DIR",
-                tempfile.mkdtemp(prefix="fl_rounds_", suffix="_maximus")
-            )
+            storage_dir = os.getenv("FL_ROUNDS_DIR", tempfile.mkdtemp(prefix="fl_rounds_", suffix="_maximus"))
         self.storage_dir = Path(storage_dir)
         self.storage_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
 
-        self.rounds: List[FLRound] = []
+        self.rounds: list[FLRound] = []
 
         logger.info(f"FL Round History initialized: {storage_dir}")
 
@@ -416,19 +405,16 @@ class FLRoundHistory:
         file_name = f"round_{round_obj.round_id:04d}.json"
         file_path = self.storage_dir / file_name
 
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             json.dump(round_obj.to_dict(), f, indent=2)
 
         duration = round_obj.get_duration_seconds()
         duration_str = f"{duration:.1f}s" if duration is not None else "in progress"
-        logger.info(
-            f"Saved round {round_obj.round_id} to {file_path} "
-            f"(duration={duration_str})"
-        )
+        logger.info(f"Saved round {round_obj.round_id} to {file_path} (duration={duration_str})")
 
         return True
 
-    def get_round(self, round_id: int) -> Optional[FLRound]:
+    def get_round(self, round_id: int) -> FLRound | None:
         """
         Get a specific round.
 
@@ -444,7 +430,7 @@ class FLRoundHistory:
 
         return None
 
-    def get_round_stats(self) -> Dict[str, Any]:
+    def get_round_stats(self) -> dict[str, Any]:
         """
         Get statistics across all rounds.
 
@@ -461,23 +447,15 @@ class FLRoundHistory:
         total_updates = sum(len(r.received_updates) for r in self.rounds)
         total_samples = sum(r.get_total_samples() for r in self.rounds)
 
-        durations = [
-            r.get_duration_seconds() for r in self.rounds
-            if r.get_duration_seconds() is not None
-        ]
+        durations = [r.get_duration_seconds() for r in self.rounds if r.get_duration_seconds() is not None]
 
-        participation_rates = [
-            r.get_participation_rate() for r in self.rounds
-        ]
+        participation_rates = [r.get_participation_rate() for r in self.rounds]
 
         avg_metrics = {}
         if self.rounds[-1].metrics:
             metric_names = self.rounds[-1].metrics.keys()
             for metric_name in metric_names:
-                values = [
-                    r.metrics.get(metric_name, 0.0) for r in self.rounds
-                    if r.metrics
-                ]
+                values = [r.metrics.get(metric_name, 0.0) for r in self.rounds if r.metrics]
                 if values:
                     avg_metrics[metric_name] = np.mean(values)
 
@@ -490,7 +468,7 @@ class FLRoundHistory:
             "average_metrics": avg_metrics,
         }
 
-    def get_convergence_data(self) -> Dict[str, List[float]]:
+    def get_convergence_data(self) -> dict[str, list[float]]:
         """
         Get convergence data for plotting.
 
@@ -515,9 +493,7 @@ class FLRoundHistory:
             duration = round_obj.get_duration_seconds()
             convergence_data["duration"].append(duration if duration else 0.0)
 
-            convergence_data["participation_rate"].append(
-                round_obj.get_participation_rate()
-            )
+            convergence_data["participation_rate"].append(round_obj.get_participation_rate())
 
             if round_obj.metrics:
                 for metric_name, value in round_obj.metrics.items():
@@ -526,9 +502,7 @@ class FLRoundHistory:
 
         return convergence_data
 
-    def plot_convergence(
-        self, metric_name: str = "loss", save_path: Optional[str] = None
-    ) -> str:
+    def plot_convergence(self, metric_name: str = "loss", save_path: str | None = None) -> str:
         """
         Plot convergence curve for a specific metric.
 
@@ -557,7 +531,7 @@ class FLRoundHistory:
         min_val = min(values) if values else 0.0
         range_val = max_val - min_val if max_val > min_val else 1.0
 
-        for r_id, value in zip(round_ids, values):
+        for r_id, value in zip(round_ids, values, strict=False):
             normalized = (value - min_val) / range_val
             bar_length = int(normalized * 40)
             bar = "#" * bar_length
@@ -569,8 +543,7 @@ class FLRoundHistory:
         plot_str = "\n".join(plot_lines)
 
         if save_path:
-            with open(save_path, 'w') as f:
+            with open(save_path, "w") as f:
                 f.write(plot_str)
             return f"Plot saved to {save_path}"
-        else:
-            return plot_str
+        return plot_str

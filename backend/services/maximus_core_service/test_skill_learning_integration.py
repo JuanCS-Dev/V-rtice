@@ -18,13 +18,12 @@ Date: 2025-10-06
 Quality: REGRA DE OURO - Zero mocks, graceful degradation
 """
 
-import pytest
 from pathlib import Path
-
 
 # ============================================================================
 # TEST 1: MAXIMUS INITIALIZES WITH SKILL LEARNING SUPPORT
 # ============================================================================
+
 
 def test_maximus_initializes_with_skill_learning():
     """Test that MaximusIntegrated initializes with Skill Learning support."""
@@ -34,7 +33,7 @@ def test_maximus_initializes_with_skill_learning():
 
     # Read maximus_integrated.py source
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check that Skill Learning is initialized
@@ -58,6 +57,7 @@ def test_maximus_initializes_with_skill_learning():
 # TEST 2: SKILL LEARNING AVAILABILITY FLAG
 # ============================================================================
 
+
 def test_skill_learning_availability_flag():
     """Test that skill_learning_available flag is properly set."""
     print("\n" + "=" * 80)
@@ -65,17 +65,15 @@ def test_skill_learning_availability_flag():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check that flag is set in try block
-    assert "self.skill_learning_available = True" in source, \
-        "Missing skill_learning_available = True"
+    assert "self.skill_learning_available = True" in source, "Missing skill_learning_available = True"
     print("✅ Availability flag set to True in try block")
 
     # Check that flag is initialized to False
-    assert "self.skill_learning_available = False" in source, \
-        "Missing skill_learning_available = False initialization"
+    assert "self.skill_learning_available = False" in source, "Missing skill_learning_available = False initialization"
     print("✅ Availability flag initialized to False before try")
 
     print("✅ Test passed")
@@ -85,6 +83,7 @@ def test_skill_learning_availability_flag():
 # TEST 3: execute_learned_skill() HANDLES UNAVAILABLE
 # ============================================================================
 
+
 def test_execute_learned_skill_api():
     """Test that execute_learned_skill() has correct API."""
     print("\n" + "=" * 80)
@@ -92,28 +91,25 @@ def test_execute_learned_skill_api():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check method exists
-    assert "async def execute_learned_skill(" in source, \
-        "Missing execute_learned_skill() method"
+    assert "async def execute_learned_skill(" in source, "Missing execute_learned_skill() method"
     print("✅ execute_learned_skill() method exists")
 
     # Check it returns gracefully when unavailable
-    assert '"available": False,' in source or \
-           "'available': False," in source, \
+    assert '"available": False,' in source or "'available': False," in source, (
         "execute_learned_skill() doesn't handle unavailable"
+    )
     print("✅ Method handles unavailable HSAS gracefully")
 
     # Check neuromodulation integration
-    assert "self.neuromodulation.dopamine" in source, \
-        "Method missing dopamine integration"
+    assert "self.neuromodulation.dopamine" in source, "Method missing dopamine integration"
     print("✅ Method integrates with dopamine (RPE)")
 
     # Check it has skill execution logic
-    assert "execute_skill" in source.lower() or "skill_name" in source.lower(), \
-        "Method missing skill execution logic"
+    assert "execute_skill" in source.lower() or "skill_name" in source.lower(), "Method missing skill execution logic"
     print("✅ Method references skill execution")
 
     print("✅ Test passed")
@@ -123,6 +119,7 @@ def test_execute_learned_skill_api():
 # TEST 4: learn_skill_from_demonstration() CONNECTS WITH MEMORY
 # ============================================================================
 
+
 def test_learn_skill_from_demonstration_memory_connection():
     """Test that learn_skill_from_demonstration() connects with memory."""
     print("\n" + "=" * 80)
@@ -130,27 +127,23 @@ def test_learn_skill_from_demonstration_memory_connection():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check method exists
-    assert "async def learn_skill_from_demonstration(" in source, \
-        "Missing learn_skill_from_demonstration() method"
+    assert "async def learn_skill_from_demonstration(" in source, "Missing learn_skill_from_demonstration() method"
     print("✅ learn_skill_from_demonstration() method exists")
 
     # Check it stores in memory system
-    assert "self.memory_system.store_memory" in source, \
-        "Method doesn't store in memory system"
+    assert "self.memory_system.store_memory" in source, "Method doesn't store in memory system"
     print("✅ Method stores learned skill in memory")
 
     # Check it updates dopamine (intrinsic reward)
-    assert "self.neuromodulation.dopamine" in source, \
-        "Method doesn't provide intrinsic reward"
+    assert "self.neuromodulation.dopamine" in source, "Method doesn't provide intrinsic reward"
     print("✅ Method provides dopamine boost for learning")
 
     # Check it calls HSAS service
-    assert "learn_from_demonstration" in source, \
-        "Method doesn't call HSAS service"
+    assert "learn_from_demonstration" in source, "Method doesn't call HSAS service"
     print("✅ Method calls HSAS service")
 
     print("✅ Test passed")
@@ -160,6 +153,7 @@ def test_learn_skill_from_demonstration_memory_connection():
 # TEST 5: compose_skill_from_primitives() CONNECTS WITH NEUROMODULATION
 # ============================================================================
 
+
 def test_compose_skill_neuromodulation_connection():
     """Test that compose_skill_from_primitives() connects with neuromodulation."""
     print("\n" + "=" * 80)
@@ -167,27 +161,23 @@ def test_compose_skill_neuromodulation_connection():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check method exists
-    assert "async def compose_skill_from_primitives(" in source, \
-        "Missing compose_skill_from_primitives() method"
+    assert "async def compose_skill_from_primitives(" in source, "Missing compose_skill_from_primitives() method"
     print("✅ compose_skill_from_primitives() method exists")
 
     # Check it updates serotonin (creativity)
-    assert "self.neuromodulation.serotonin" in source, \
-        "Method doesn't connect with serotonin system"
+    assert "self.neuromodulation.serotonin" in source, "Method doesn't connect with serotonin system"
     print("✅ Method connects with serotonin (creativity)")
 
     # Check it stores composed skill
-    assert "self.memory_system.store_memory" in source, \
-        "Method doesn't store composed skill"
+    assert "self.memory_system.store_memory" in source, "Method doesn't store composed skill"
     print("✅ Method stores composed skill in memory")
 
     # Check it calls HSAS compose_skill
-    assert "compose_skill" in source, \
-        "Method doesn't call HSAS service"
+    assert "compose_skill" in source, "Method doesn't call HSAS service"
     print("✅ Method calls HSAS service")
 
     print("✅ Test passed")
@@ -197,6 +187,7 @@ def test_compose_skill_neuromodulation_connection():
 # TEST 6: get_skill_learning_state() RETURNS CORRECT STRUCTURE
 # ============================================================================
 
+
 def test_get_skill_learning_state_structure():
     """Test that get_skill_learning_state() returns correct structure."""
     print("\n" + "=" * 80)
@@ -204,23 +195,21 @@ def test_get_skill_learning_state_structure():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check method exists
-    assert "def get_skill_learning_state(" in source, \
-        "Missing get_skill_learning_state() method"
+    assert "def get_skill_learning_state(" in source, "Missing get_skill_learning_state() method"
     print("✅ get_skill_learning_state() method exists")
 
     # Check it returns availability info
-    assert '"available": False' in source or "'available': False" in source, \
-        "Method doesn't return availability info"
+    assert '"available": False' in source or "'available': False" in source, "Method doesn't return availability info"
     print("✅ Method returns availability info")
 
     # Check it accesses controller state
-    assert "self.skill_learning.export_state" in source or \
-           "self.skill_learning" in source, \
+    assert "self.skill_learning.export_state" in source or "self.skill_learning" in source, (
         "Method doesn't access Skill Learning controller state"
+    )
     print("✅ Method accesses Skill Learning controller state")
 
     print("✅ Test passed")
@@ -230,6 +219,7 @@ def test_get_skill_learning_state_structure():
 # TEST 7: SYSTEM STATUS INCLUDES SKILL LEARNING
 # ============================================================================
 
+
 def test_system_status_includes_skill_learning():
     """Test that get_system_status() includes Skill Learning info."""
     print("\n" + "=" * 80)
@@ -237,22 +227,19 @@ def test_system_status_includes_skill_learning():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Find get_system_status method
-    assert "async def get_system_status(" in source, \
-        "Missing get_system_status() method"
+    assert "async def get_system_status(" in source, "Missing get_system_status() method"
     print("✅ get_system_status() method exists")
 
     # Check it includes skill_learning_status
-    assert "skill_learning_status" in source, \
-        "System status doesn't include skill_learning_status"
+    assert "skill_learning_status" in source, "System status doesn't include skill_learning_status"
     print("✅ System status includes skill_learning_status")
 
     # Check it calls get_skill_learning_state()
-    assert "self.get_skill_learning_state()" in source, \
-        "System status doesn't call get_skill_learning_state()"
+    assert "self.get_skill_learning_state()" in source, "System status doesn't call get_skill_learning_state()"
     print("✅ System status calls get_skill_learning_state()")
 
     print("✅ Test passed")
@@ -262,6 +249,7 @@ def test_system_status_includes_skill_learning():
 # TEST 8: PREDICTIVE CODING INTEGRATION
 # ============================================================================
 
+
 def test_skill_learning_predictive_coding_integration():
     """Test that Skill Learning integrates with Predictive Coding."""
     print("\n" + "=" * 80)
@@ -269,7 +257,7 @@ def test_skill_learning_predictive_coding_integration():
     print("=" * 80)
 
     path = Path(__file__).parent / "maximus_integrated.py"
-    with open(path, "r") as f:
+    with open(path) as f:
         source = f.read()
 
     # Check execute_learned_skill connects to Predictive Coding
@@ -278,17 +266,18 @@ def test_skill_learning_predictive_coding_integration():
     execute_skill_end = source.find("\n    async def", execute_skill_start + 1)
     execute_skill_code = source[execute_skill_start:execute_skill_end]
 
-    assert "predictive_coding_available" in execute_skill_code, \
+    assert "predictive_coding_available" in execute_skill_code, (
         "execute_learned_skill doesn't check Predictive Coding availability"
+    )
     print("✅ execute_learned_skill() checks Predictive Coding availability")
 
-    assert "process_prediction_error" in execute_skill_code, \
-        "execute_learned_skill doesn't process prediction errors"
+    assert "process_prediction_error" in execute_skill_code, "execute_learned_skill doesn't process prediction errors"
     print("✅ execute_learned_skill() processes prediction errors")
 
     # Check layer parameter is correct (tactical timescale)
-    assert 'layer="l4"' in execute_skill_code or "layer='l4'" in execute_skill_code, \
+    assert 'layer="l4"' in execute_skill_code or "layer='l4'" in execute_skill_code, (
         "execute_learned_skill uses wrong Predictive Coding layer"
+    )
     print("✅ execute_learned_skill() uses correct layer (L4 - tactical)")
 
     print("✅ Test passed")

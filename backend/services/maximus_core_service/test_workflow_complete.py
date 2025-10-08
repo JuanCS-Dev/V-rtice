@@ -12,14 +12,15 @@ Quality: REGRA DE OURO compliant - NO MOCK, NO PLACEHOLDER, NO TODO
 
 import asyncio
 import time
-from typing import List, Dict
 from dataclasses import dataclass, field
 from enum import Enum
+
 import httpx
 
 
 class WorkflowPhase(Enum):
     """Workflow test phases."""
+
     SESSION_CREATION = "session_creation"
     DECISION_ENQUEUE = "decision_enqueue"
     DECISION_PROCESSING = "decision_processing"
@@ -30,6 +31,7 @@ class WorkflowPhase(Enum):
 @dataclass
 class WorkflowMetrics:
     """Metrics collected during workflow testing."""
+
     sessions_created: int = 0
     decisions_enqueued: int = 0
     decisions_approved: int = 0
@@ -37,12 +39,13 @@ class WorkflowMetrics:
     decisions_escalated: int = 0
     total_processed: int = 0
     processing_time: float = 0.0
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 @dataclass
 class OperatorSession:
     """Operator session data."""
+
     operator_id: str
     session_id: str
     decisions_processed: int = 0
@@ -70,7 +73,7 @@ class WorkflowValidator:
         """
         self.base_url = base_url
         self.metrics = WorkflowMetrics()
-        self.sessions: List[OperatorSession] = []
+        self.sessions: list[OperatorSession] = []
 
     async def test_single_operator_workflow(self) -> bool:
         """
@@ -86,9 +89,9 @@ class WorkflowValidator:
         Returns:
             True if workflow successful
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Single Operator Complete Workflow")
-        print("="*80)
+        print("=" * 80)
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -99,8 +102,8 @@ class WorkflowValidator:
                     json={
                         "operator_id": operator_id,
                         "operator_name": "Workflow Test Operator",
-                        "role": "soc_operator"
-                    }
+                        "role": "soc_operator",
+                    },
                 )
                 assert session_response.status_code == 200, "Session creation failed"
 
@@ -108,13 +111,12 @@ class WorkflowValidator:
                 session_id = session_data["session_id"]
 
                 self.metrics.sessions_created += 1
-                print(f"✅ Phase 1: Session created")
+                print("✅ Phase 1: Session created")
                 print(f"   Session ID: {session_id}")
 
                 # Phase 2: Enqueue 10 decisions (2 LOW, 3 MED, 4 HIGH, 1 CRIT)
                 decisions = []
-                risk_levels = ["low", "low", "medium", "medium", "medium",
-                               "high", "high", "high", "high", "critical"]
+                risk_levels = ["low", "low", "medium", "medium", "medium", "high", "high", "high", "high", "critical"]
 
                 for i, risk in enumerate(risk_levels):
                     decision_id = f"workflow_test_{i}_{time.time()}"
@@ -129,19 +131,16 @@ class WorkflowValidator:
                             "ai_reasoning": f"Workflow test decision #{i}",
                             "threat_score": 5.0 + i,
                             "threat_type": "test",
-                            "metadata": {"test_number": i}
-                        }
+                            "metadata": {"test_number": i},
+                        },
                     )
                     assert enqueue_response.status_code == 200, f"Enqueue {i} failed"
 
-                    decisions.append({
-                        "decision_id": decision_id,
-                        "risk_level": risk
-                    })
+                    decisions.append({"decision_id": decision_id, "risk_level": risk})
                     self.metrics.decisions_enqueued += 1
 
                 print(f"✅ Phase 2: {len(decisions)} decisions enqueued")
-                print(f"   Risk distribution: 2 LOW, 3 MED, 4 HIGH, 1 CRIT")
+                print("   Risk distribution: 2 LOW, 3 MED, 4 HIGH, 1 CRIT")
 
                 # Phase 3: Process decisions
                 # Strategy: Approve 5, Reject 3, Escalate 2
@@ -155,7 +154,7 @@ class WorkflowValidator:
                     if action == "approve":
                         response = await client.post(
                             f"{self.base_url}/api/v1/governance/decision/{decision_id}/approve",
-                            json={"session_id": session_id, "comment": f"Test approval {i}"}
+                            json={"session_id": session_id, "comment": f"Test approval {i}"},
                         )
                         self.metrics.decisions_approved += 1
 
@@ -165,8 +164,8 @@ class WorkflowValidator:
                             json={
                                 "session_id": session_id,
                                 "reason": f"Test rejection {i}",
-                                "comment": f"Workflow test rejection #{i}"
-                            }
+                                "comment": f"Workflow test rejection #{i}",
+                            },
                         )
                         self.metrics.decisions_rejected += 1
 
@@ -176,8 +175,8 @@ class WorkflowValidator:
                             json={
                                 "session_id": session_id,
                                 "escalation_reason": f"Test escalation {i}",
-                                "comment": f"Workflow test escalation #{i}"
-                            }
+                                "comment": f"Workflow test escalation #{i}",
+                            },
                         )
                         self.metrics.decisions_escalated += 1
 
@@ -193,33 +192,29 @@ class WorkflowValidator:
                 print(f"   Processing time: {self.metrics.processing_time:.2f}s")
 
                 # Phase 4: Validate stats
-                stats_response = await client.get(
-                    f"{self.base_url}/api/v1/governance/session/{operator_id}/stats"
-                )
+                stats_response = await client.get(f"{self.base_url}/api/v1/governance/session/{operator_id}/stats")
                 assert stats_response.status_code == 200, "Stats fetch failed"
 
                 stats_data = stats_response.json()
 
                 # Verify stats accuracy
-                assert stats_data["total_decisions_reviewed"] == self.metrics.total_processed, \
+                assert stats_data["total_decisions_reviewed"] == self.metrics.total_processed, (
                     f"Reviewed count mismatch: {stats_data['total_decisions_reviewed']} != {self.metrics.total_processed}"
+                )
 
-                assert stats_data["total_approved"] == self.metrics.decisions_approved, \
-                    f"Approved count mismatch"
+                assert stats_data["total_approved"] == self.metrics.decisions_approved, "Approved count mismatch"
 
-                assert stats_data["total_rejected"] == self.metrics.decisions_rejected, \
-                    f"Rejected count mismatch"
+                assert stats_data["total_rejected"] == self.metrics.decisions_rejected, "Rejected count mismatch"
 
-                assert stats_data["total_escalated"] == self.metrics.decisions_escalated, \
-                    f"Escalated count mismatch"
+                assert stats_data["total_escalated"] == self.metrics.decisions_escalated, "Escalated count mismatch"
 
-                print(f"✅ Phase 4: Stats validated")
+                print("✅ Phase 4: Stats validated")
                 print(f"   Total reviewed: {stats_data['total_decisions_reviewed']} ✓")
-                print(f"   Approval rate: {stats_data['approval_rate']*100:.1f}%")
-                print(f"   Rejection rate: {stats_data['rejection_rate']*100:.1f}%")
-                print(f"   Escalation rate: {stats_data['escalation_rate']*100:.1f}%")
+                print(f"   Approval rate: {stats_data['approval_rate'] * 100:.1f}%")
+                print(f"   Rejection rate: {stats_data['rejection_rate'] * 100:.1f}%")
+                print(f"   Escalation rate: {stats_data['escalation_rate'] * 100:.1f}%")
 
-            print(f"✅ WORKFLOW COMPLETED SUCCESSFULLY")
+            print("✅ WORKFLOW COMPLETED SUCCESSFULLY")
 
             return True
 
@@ -235,9 +230,9 @@ class WorkflowValidator:
         Returns:
             True if concurrent workflow successful
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Concurrent Operators Workflow")
-        print("="*80)
+        print("=" * 80)
 
         try:
             num_operators = 3
@@ -254,19 +249,16 @@ class WorkflowValidator:
                         json={
                             "operator_id": operator_id,
                             "operator_name": f"Concurrent Operator {i}",
-                            "role": "soc_operator"
-                        }
+                            "role": "soc_operator",
+                        },
                     )
                     session_data = session_response.json()
-                    sessions.append({
-                        "operator_id": operator_id,
-                        "session_id": session_data["session_id"]
-                    })
+                    sessions.append({"operator_id": operator_id, "session_id": session_data["session_id"]})
 
                 print(f"✅ Created {num_operators} operator sessions")
 
                 # Each operator processes decisions concurrently
-                async def operator_workflow(session: Dict, operator_num: int):
+                async def operator_workflow(session: dict, operator_num: int):
                     """Individual operator workflow."""
                     decisions_processed = 0
 
@@ -284,8 +276,8 @@ class WorkflowValidator:
                                 "ai_reasoning": f"Concurrent test op{operator_num} dec{j}",
                                 "threat_score": 7.0,
                                 "threat_type": "test",
-                                "metadata": {}
-                            }
+                                "metadata": {},
+                            },
                         )
 
                         # Process decision (approve)
@@ -293,8 +285,8 @@ class WorkflowValidator:
                             f"{self.base_url}/api/v1/governance/decision/{decision_id}/approve",
                             json={
                                 "session_id": session["session_id"],
-                                "comment": f"Concurrent approval op{operator_num} dec{j}"
-                            }
+                                "comment": f"Concurrent approval op{operator_num} dec{j}",
+                            },
                         )
 
                         decisions_processed += 1
@@ -304,20 +296,18 @@ class WorkflowValidator:
                 # Run all operators concurrently
                 start_time = time.time()
 
-                results = await asyncio.gather(*[
-                    operator_workflow(session, i) for i, session in enumerate(sessions)
-                ])
+                results = await asyncio.gather(*[operator_workflow(session, i) for i, session in enumerate(sessions)])
 
                 elapsed_time = time.time() - start_time
 
                 total_processed = sum(results)
 
-                print(f"✅ Concurrent processing completed:")
+                print("✅ Concurrent processing completed:")
                 print(f"   Operators: {num_operators}")
                 print(f"   Total decisions: {total_processed}")
                 print(f"   Per operator: {decisions_per_operator}")
                 print(f"   Elapsed time: {elapsed_time:.2f}s")
-                print(f"   Throughput: {total_processed/elapsed_time:.1f} decisions/sec")
+                print(f"   Throughput: {total_processed / elapsed_time:.1f} decisions/sec")
 
                 # Validate each operator's stats
                 for session in sessions:
@@ -326,10 +316,11 @@ class WorkflowValidator:
                     )
                     stats_data = stats_response.json()
 
-                    assert stats_data["total_decisions_reviewed"] == decisions_per_operator, \
+                    assert stats_data["total_decisions_reviewed"] == decisions_per_operator, (
                         f"Operator {session['operator_id']} stats mismatch"
+                    )
 
-                print(f"✅ All operator stats validated")
+                print("✅ All operator stats validated")
 
             return True
 
@@ -345,9 +336,9 @@ class WorkflowValidator:
         Returns:
             True if mixed actions workflow successful
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Mixed Actions Workflow")
-        print("="*80)
+        print("=" * 80)
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -358,8 +349,8 @@ class WorkflowValidator:
                     json={
                         "operator_id": operator_id,
                         "operator_name": "Mixed Actions Operator",
-                        "role": "soc_operator"
-                    }
+                        "role": "soc_operator",
+                    },
                 )
                 session_data = session_response.json()
                 session_id = session_data["session_id"]
@@ -370,7 +361,7 @@ class WorkflowValidator:
                     ("reject", "Rejection test"),
                     ("escalate", "Escalation test"),
                     ("approve", "Second approval"),
-                    ("reject", "Second rejection")
+                    ("reject", "Second rejection"),
                 ]
 
                 action_counts = {"approve": 0, "reject": 0, "escalate": 0}
@@ -390,8 +381,8 @@ class WorkflowValidator:
                             "ai_reasoning": f"Mixed action test {action}",
                             "threat_score": 8.0,
                             "threat_type": "test",
-                            "metadata": {}
-                        }
+                            "metadata": {},
+                        },
                     )
 
                     # Process with specific action - build payload based on action type
@@ -401,39 +392,35 @@ class WorkflowValidator:
                         payload = {
                             "session_id": session_id,
                             "reason": comment,
-                            "comment": f"Mixed action test rejection #{i}"
+                            "comment": f"Mixed action test rejection #{i}",
                         }
                     elif action == "escalate":
                         payload = {
                             "session_id": session_id,
                             "escalation_reason": comment,
-                            "comment": f"Mixed action test escalation #{i}"
+                            "comment": f"Mixed action test escalation #{i}",
                         }
                     else:
                         payload = {"session_id": session_id, "comment": comment}
 
                     response = await client.post(
-                        f"{self.base_url}/api/v1/governance/decision/{decision_id}/{action}",
-                        json=payload
+                        f"{self.base_url}/api/v1/governance/decision/{decision_id}/{action}", json=payload
                     )
 
                     assert response.status_code == 200, f"Action {action} failed"
                     action_counts[action] += 1
 
-                print(f"✅ Mixed actions processed:")
+                print("✅ Mixed actions processed:")
                 print(f"   Approvals: {action_counts['approve']}")
                 print(f"   Rejections: {action_counts['reject']}")
                 print(f"   Escalations: {action_counts['escalate']}")
 
                 # Validate stats
-                stats_response = await client.get(
-                    f"{self.base_url}/api/v1/governance/session/{operator_id}/stats"
-                )
+                stats_response = await client.get(f"{self.base_url}/api/v1/governance/session/{operator_id}/stats")
                 stats_data = stats_response.json()
 
                 total_expected = sum(action_counts.values())
-                assert stats_data["total_decisions_reviewed"] == total_expected, \
-                    "Total reviewed mismatch"
+                assert stats_data["total_decisions_reviewed"] == total_expected, "Total reviewed mismatch"
 
                 print(f"✅ Stats validated: {stats_data['total_decisions_reviewed']} total")
 
@@ -451,9 +438,9 @@ class WorkflowValidator:
         Returns:
             True if all tests pass
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Complete Workflow Validation Suite")
-        print("="*80)
+        print("=" * 80)
         print(f"Base URL: {self.base_url}")
         print()
 
@@ -465,9 +452,9 @@ class WorkflowValidator:
         results.append(("Mixed Actions Workflow", await self.test_mixed_actions_workflow()))
 
         # Print summary
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 Workflow Validation Summary")
-        print("="*80)
+        print("=" * 80)
 
         passed = sum(1 for _, result in results if result)
         total = len(results)
@@ -475,9 +462,9 @@ class WorkflowValidator:
         print(f"\nTotal Tests: {total}")
         print(f"✅ Passed: {passed}")
         print(f"❌ Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        print(f"Success Rate: {(passed / total) * 100:.1f}%")
 
-        print(f"\nOverall Metrics:")
+        print("\nOverall Metrics:")
         print(f"  Sessions created: {self.metrics.sessions_created}")
         print(f"  Decisions enqueued: {self.metrics.decisions_enqueued}")
         print(f"  Total processed: {self.metrics.total_processed}")
@@ -486,18 +473,18 @@ class WorkflowValidator:
         print(f"  Escalated: {self.metrics.decisions_escalated}")
 
         if self.metrics.errors:
-            print(f"\n⚠️  Errors encountered:")
+            print("\n⚠️  Errors encountered:")
             for error in self.metrics.errors[:5]:
                 print(f"   - {error}")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
 
         if passed == total:
             print("✅ ALL WORKFLOW TESTS PASSED - Complete workflows validated!")
         else:
             print(f"❌ {total - passed} test(s) failed - Review errors above")
 
-        print("="*80)
+        print("=" * 80)
         print()
 
         return passed == total

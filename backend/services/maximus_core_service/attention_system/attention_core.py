@@ -9,15 +9,16 @@ to events that warrant attention.
 """
 
 import asyncio
-from collections import deque
-from dataclasses import dataclass
 import logging
 import time
-from typing import Any, Callable, Dict, List, Optional
+from collections import deque
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
-from .salience_scorer import SalienceLevel, SalienceScore, SalienceScorer
+from .salience_scorer import SalienceScorer
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class PeripheralDetection:
     detection_type: str  # 'statistical_anomaly', 'entropy_change', 'volume_spike'
     confidence: float  # 0.0-1.0
     timestamp: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -40,10 +41,10 @@ class FovealAnalysis:
     target_id: str
     threat_level: str  # 'BENIGN', 'SUSPICIOUS', 'MALICIOUS', 'CRITICAL'
     confidence: float  # 0.0-1.0
-    findings: List[Dict[str, Any]]
+    findings: list[dict[str, Any]]
     analysis_time_ms: float
     timestamp: float
-    recommended_actions: List[str]
+    recommended_actions: list[str]
 
 
 class PeripheralMonitor:
@@ -64,9 +65,7 @@ class PeripheralMonitor:
         self.detection_history = deque(maxlen=1000)
         self.running = False
 
-    async def scan_all(
-        self, data_sources: List[Callable[[], Dict]]
-    ) -> List[PeripheralDetection]:
+    async def scan_all(self, data_sources: list[Callable[[], dict]]) -> list[PeripheralDetection]:
         """Scan all data sources for significant changes.
 
         Args:
@@ -94,22 +93,16 @@ class PeripheralMonitor:
             # Log performance
             scan_time = (time.time() - scan_start) * 1000
             if scan_time > 100:
-                logger.warning(
-                    f"Peripheral scan slow: {scan_time:.1f}ms (target <100ms)"
-                )
+                logger.warning(f"Peripheral scan slow: {scan_time:.1f}ms (target <100ms)")
 
-            logger.debug(
-                f"Peripheral scan: {len(detections)} detections in {scan_time:.1f}ms"
-            )
+            logger.debug(f"Peripheral scan: {len(detections)} detections in {scan_time:.1f}ms")
 
         except Exception as e:
             logger.error(f"Peripheral scan error: {e}")
 
         return detections
 
-    async def _scan_source(
-        self, source: Callable[[], Dict]
-    ) -> List[PeripheralDetection]:
+    async def _scan_source(self, source: Callable[[], dict]) -> list[PeripheralDetection]:
         """Scan a single data source.
 
         Args:
@@ -149,9 +142,7 @@ class PeripheralMonitor:
 
         return detections
 
-    def _detect_statistical_anomaly(
-        self, source_id: str, data: Dict
-    ) -> Optional[PeripheralDetection]:
+    def _detect_statistical_anomaly(self, source_id: str, data: dict) -> PeripheralDetection | None:
         """Detect statistical anomalies using Z-score.
 
         Returns detection if |z-score| > 3.0 (99.7% confidence)
@@ -205,9 +196,7 @@ class PeripheralMonitor:
 
         return None
 
-    def _detect_entropy_change(
-        self, source_id: str, data: Dict
-    ) -> Optional[PeripheralDetection]:
+    def _detect_entropy_change(self, source_id: str, data: dict) -> PeripheralDetection | None:
         """Detect significant entropy changes.
 
         Sudden changes in data distribution may indicate attacks or failures.
@@ -245,9 +234,7 @@ class PeripheralMonitor:
                     return PeripheralDetection(
                         target_id=f"{source_id}_entropy",
                         detection_type="entropy_change",
-                        confidence=min(
-                            deviation / 0.60, 1.0
-                        ),  # 60% deviation -> confidence=1.0
+                        confidence=min(deviation / 0.60, 1.0),  # 60% deviation -> confidence=1.0
                         timestamp=time.time(),
                         metadata={
                             "current_entropy": entropy,
@@ -261,9 +248,7 @@ class PeripheralMonitor:
 
         return None
 
-    def _detect_volume_spike(
-        self, source_id: str, data: Dict
-    ) -> Optional[PeripheralDetection]:
+    def _detect_volume_spike(self, source_id: str, data: dict) -> PeripheralDetection | None:
         """Detect volume spikes (sudden increases in event rate).
 
         DDoS attacks, port scans, and failures often show volume spikes.
@@ -295,9 +280,7 @@ class PeripheralMonitor:
                 return PeripheralDetection(
                     target_id=f"{source_id}_volume",
                     detection_type="volume_spike",
-                    confidence=min(
-                        (rate / baseline["mean"]) / 10.0, 1.0
-                    ),  # 10x -> confidence=1.0
+                    confidence=min((rate / baseline["mean"]) / 10.0, 1.0),  # 10x -> confidence=1.0
                     timestamp=time.time(),
                     metadata={
                         "current_rate": rate,
@@ -325,9 +308,7 @@ class FovealAnalyzer:
         self.total_analyses = 0
         self.total_analysis_time_ms = 0
 
-    async def deep_analyze(
-        self, target: PeripheralDetection, full_data: Optional[Dict] = None
-    ) -> FovealAnalysis:
+    async def deep_analyze(self, target: PeripheralDetection, full_data: dict | None = None) -> FovealAnalysis:
         """Perform deep analysis on a high-salience target.
 
         Args:
@@ -340,9 +321,7 @@ class FovealAnalyzer:
         analysis_start = time.time()
 
         try:
-            logger.info(
-                f"Foveal analysis: {target.target_id} ({target.detection_type})"
-            )
+            logger.info(f"Foveal analysis: {target.target_id} ({target.detection_type})")
 
             # Perform analysis based on detection type
             if target.detection_type == "statistical_anomaly":
@@ -378,14 +357,9 @@ class FovealAnalyzer:
             self.analysis_history.append(analysis)
 
             if analysis_time > 100:
-                logger.warning(
-                    f"Foveal analysis slow: {analysis_time:.1f}ms (target <100ms)"
-                )
+                logger.warning(f"Foveal analysis slow: {analysis_time:.1f}ms (target <100ms)")
 
-            logger.info(
-                f"Foveal complete: {target.target_id} -> {threat_level} "
-                f"({analysis_time:.1f}ms)"
-            )
+            logger.info(f"Foveal complete: {target.target_id} -> {threat_level} ({analysis_time:.1f}ms)")
 
             return analysis
 
@@ -403,9 +377,7 @@ class FovealAnalyzer:
                 recommended_actions=["ESCALATE_TO_HUMAN"],
             )
 
-    async def _analyze_statistical_anomaly(
-        self, target: PeripheralDetection, full_data: Optional[Dict]
-    ) -> List[Dict]:
+    async def _analyze_statistical_anomaly(self, target: PeripheralDetection, full_data: dict | None) -> list[dict]:
         """Analyze statistical anomaly in detail."""
         findings = []
 
@@ -433,9 +405,7 @@ class FovealAnalyzer:
 
         return findings
 
-    async def _analyze_entropy_change(
-        self, target: PeripheralDetection, full_data: Optional[Dict]
-    ) -> List[Dict]:
+    async def _analyze_entropy_change(self, target: PeripheralDetection, full_data: dict | None) -> list[dict]:
         """Analyze entropy change in detail."""
         findings = []
 
@@ -447,7 +417,7 @@ class FovealAnalyzer:
             {
                 "type": "entropy_anomaly",
                 "severity": "HIGH" if deviation > 0.5 else "MEDIUM",
-                "details": f"Entropy changed by {deviation*100:.1f}%",
+                "details": f"Entropy changed by {deviation * 100:.1f}%",
                 "current": current_entropy,
                 "baseline": baseline_entropy,
             }
@@ -475,9 +445,7 @@ class FovealAnalyzer:
 
         return findings
 
-    async def _analyze_volume_spike(
-        self, target: PeripheralDetection, full_data: Optional[Dict]
-    ) -> List[Dict]:
+    async def _analyze_volume_spike(self, target: PeripheralDetection, full_data: dict | None) -> list[dict]:
         """Analyze volume spike in detail."""
         findings = []
 
@@ -506,9 +474,7 @@ class FovealAnalyzer:
 
         return findings
 
-    async def _generic_deep_analysis(
-        self, target: PeripheralDetection, full_data: Optional[Dict]
-    ) -> List[Dict]:
+    async def _generic_deep_analysis(self, target: PeripheralDetection, full_data: dict | None) -> list[dict]:
         """Generic deep analysis fallback."""
         return [
             {
@@ -519,7 +485,7 @@ class FovealAnalyzer:
             }
         ]
 
-    def _assess_threat_level(self, findings: List[Dict]) -> str:
+    def _assess_threat_level(self, findings: list[dict]) -> str:
         """Assess overall threat level from findings.
 
         Returns: 'BENIGN', 'SUSPICIOUS', 'MALICIOUS', 'CRITICAL'
@@ -538,16 +504,13 @@ class FovealAnalyzer:
         # Determine overall threat
         if severity_counts["CRITICAL"] > 0:
             return "CRITICAL"
-        elif severity_counts["HIGH"] >= 2:
+        if severity_counts["HIGH"] >= 2:
             return "MALICIOUS"
-        elif severity_counts["HIGH"] >= 1:
+        if severity_counts["HIGH"] >= 1 or severity_counts["MEDIUM"] >= 3:
             return "SUSPICIOUS"
-        elif severity_counts["MEDIUM"] >= 3:
-            return "SUSPICIOUS"
-        else:
-            return "BENIGN"
+        return "BENIGN"
 
-    def _generate_actions(self, threat_level: str, findings: List[Dict]) -> List[str]:
+    def _generate_actions(self, threat_level: str, findings: list[dict]) -> list[str]:
         """Generate recommended actions based on threat level."""
         actions = []
 
@@ -569,9 +532,7 @@ class FovealAnalyzer:
                 ]
             )
         elif threat_level == "SUSPICIOUS":
-            actions.extend(
-                ["INCREASE_MONITORING", "LOG_DETAILED_EVIDENCE", "NOTIFY_ON_CALL"]
-            )
+            actions.extend(["INCREASE_MONITORING", "LOG_DETAILED_EVIDENCE", "NOTIFY_ON_CALL"])
         else:
             actions.append("CONTINUE_MONITORING")
 
@@ -607,8 +568,8 @@ class AttentionSystem:
 
     async def monitor(
         self,
-        data_sources: List[Callable[[], Dict]],
-        on_critical_finding: Optional[Callable[[FovealAnalysis], None]] = None,
+        data_sources: list[Callable[[], dict]],
+        on_critical_finding: Callable[[FovealAnalysis], None] | None = None,
     ):
         """Continuous attention-driven monitoring.
 
@@ -644,10 +605,7 @@ class AttentionSystem:
                 foveal_analyses = []
                 for detection, salience in scored_targets:
                     if salience.requires_foveal:
-                        logger.info(
-                            f"Foveal saccade: {detection.target_id} "
-                            f"(salience={salience.score:.3f})"
-                        )
+                        logger.info(f"Foveal saccade: {detection.target_id} (salience={salience.score:.3f})")
 
                         analysis = await self.foveal.deep_analyze(detection)
                         foveal_analyses.append(analysis)
@@ -668,9 +626,7 @@ class AttentionSystem:
 
                 # 4. Log summary
                 if foveal_analyses:
-                    critical_count = sum(
-                        1 for a in foveal_analyses if a.threat_level == "CRITICAL"
-                    )
+                    critical_count = sum(1 for a in foveal_analyses if a.threat_level == "CRITICAL")
                     logger.info(
                         f"Attention cycle: {len(detections)} detections, "
                         f"{len(foveal_analyses)} foveal analyses, "
@@ -691,7 +647,7 @@ class AttentionSystem:
         self.running = False
         logger.info("Attention system stop requested")
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get attention system performance statistics."""
         return {
             "peripheral": {"detections_total": len(self.peripheral.detection_history)},

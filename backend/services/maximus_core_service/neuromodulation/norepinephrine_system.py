@@ -9,9 +9,9 @@ Biological inspiration:
 Production-ready implementation.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -77,9 +77,7 @@ class NorepinephrineSystem:
         if len(self.acute_stressors) > 10:
             self.acute_stressors.pop(0)
 
-        logger.warning(
-            f"Threat detected! NE surge: {ne_surge:.2f}, level now: {self.level:.3f}"
-        )
+        logger.warning(f"Threat detected! NE surge: {ne_surge:.2f}, level now: {self.level:.3f}")
 
     def get_arousal_level(self) -> float:
         """Get current arousal level.
@@ -105,9 +103,7 @@ class NorepinephrineSystem:
         gain = 2.0 - (deviation * 2.0)  # Linear degradation
         gain = max(0.5, min(2.0, gain))
 
-        logger.debug(
-            f"Attention gain: {gain:.2f} (arousal={self.level:.3f}, optimal={self.optimal_arousal})"
-        )
+        logger.debug(f"Attention gain: {gain:.2f} (arousal={self.level:.3f}, optimal={self.optimal_arousal})")
 
         return gain
 

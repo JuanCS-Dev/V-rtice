@@ -11,10 +11,9 @@ Version: 1.0.0
 """
 
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, Optional
 
 from .base_client import BaseExternalClient
-
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +33,7 @@ class TregClient(BaseExternalClient):
     - Uses simple threshold logic when service unavailable
     """
 
-    def __init__(
-        self,
-        base_url: str = "http://localhost:8018",
-        **kwargs
-    ):
+    def __init__(self, base_url: str = "http://localhost:8018", **kwargs):
         """
         Initialize Treg client.
 
@@ -53,11 +48,7 @@ class TregClient(BaseExternalClient):
         self._local_suppression_threshold = 0.7  # Suppress if load > 70%
 
     async def request_suppression(
-        self,
-        agent_id: str,
-        threat_level: float,
-        current_load: float,
-        reason: str = "homeostatic_control"
+        self, agent_id: str, threat_level: float, current_load: float, reason: str = "homeostatic_control"
     ) -> Dict[str, Any]:
         """
         Request immune suppression from Treg service.
@@ -79,13 +70,10 @@ class TregClient(BaseExternalClient):
                 "threat_level": threat_level,
                 "current_load": current_load,
                 "reason": reason,
-            }
+            },
         )
 
-    async def check_tolerance(
-        self,
-        threat_signature: str
-    ) -> Dict[str, Any]:
+    async def check_tolerance(self, threat_signature: str) -> Dict[str, Any]:
         """
         Check if system has tolerance for a threat signature.
 
@@ -95,16 +83,9 @@ class TregClient(BaseExternalClient):
         Returns:
             Tolerance status
         """
-        return await self.request(
-            "GET",
-            f"/api/v1/treg/tolerance/{threat_signature}"
-        )
+        return await self.request("GET", f"/api/v1/treg/tolerance/{threat_signature}")
 
-    async def activate_treg(
-        self,
-        count: int = 1,
-        target_area: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def activate_treg(self, count: int = 1, target_area: Optional[str] = None) -> Dict[str, Any]:
         """
         Activate Treg cells.
 
@@ -121,7 +102,7 @@ class TregClient(BaseExternalClient):
             json={
                 "count": count,
                 "target_area": target_area,
-            }
+            },
         )
 
     async def get_metrics(self) -> Dict[str, Any]:
@@ -133,12 +114,7 @@ class TregClient(BaseExternalClient):
         """
         return await self.request("GET", "/api/v1/treg/metrics")
 
-    async def degraded_fallback(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Optional[Dict[str, Any]]:
+    async def degraded_fallback(self, method: str, endpoint: str, **kwargs) -> Optional[Dict[str, Any]]:
         """
         Fallback to local heuristic-based suppression.
 
@@ -155,9 +131,7 @@ class TregClient(BaseExternalClient):
         Returns:
             Synthetic degraded response
         """
-        logger.warning(
-            f"TregClient: Operating in degraded mode for {method} {endpoint}"
-        )
+        logger.warning(f"TregClient: Operating in degraded mode for {method} {endpoint}")
 
         # Parse endpoint to determine action
         if endpoint == "/api/v1/treg/suppress":

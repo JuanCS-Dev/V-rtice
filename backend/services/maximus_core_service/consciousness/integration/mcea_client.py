@@ -5,7 +5,6 @@ Fetches current arousal state from MCEA for immune system modulation.
 """
 
 import logging
-from typing import Optional
 
 import httpx
 
@@ -37,14 +36,14 @@ class MCEAClient:
         self.timeout = timeout
         self.client = httpx.AsyncClient(timeout=timeout)
 
-        self._last_arousal: Optional[ArousalState] = None
+        self._last_arousal: ArousalState | None = None
         self._consecutive_failures = 0
 
     async def close(self):
         """Close HTTP client."""
         await self.client.aclose()
 
-    async def get_current_arousal(self) -> Optional[ArousalState]:
+    async def get_current_arousal(self) -> ArousalState | None:
         """
         Fetch current arousal state from MCEA controller.
 
@@ -74,10 +73,9 @@ class MCEAClient:
 
                 return arousal_state
 
-            else:
-                logger.warning(f"MCEA service returned {response.status_code}, using cached arousal")
-                self._consecutive_failures += 1
-                return self._fallback_arousal()
+            logger.warning(f"MCEA service returned {response.status_code}, using cached arousal")
+            self._consecutive_failures += 1
+            return self._fallback_arousal()
 
         except (httpx.RequestError, httpx.TimeoutException) as e:
             logger.warning(f"MCEA service unavailable: {e}, using cached arousal")
@@ -94,16 +92,15 @@ class MCEAClient:
         if self._consecutive_failures < 3 and self._last_arousal:
             # Return cached arousal
             return self._last_arousal
-        else:
-            # After 3 failures, assume MCEA down - use baseline
-            logger.warning("MCEA service persistently unavailable, using baseline arousal")
-            return ArousalState(
-                arousal=0.5,
-                level=ArousalLevel.RELAXED,
-                threshold=0.70,
-            )
+        # After 3 failures, assume MCEA down - use baseline
+        logger.warning("MCEA service persistently unavailable, using baseline arousal")
+        return ArousalState(
+            arousal=0.5,
+            level=ArousalLevel.RELAXED,
+            threshold=0.70,
+        )
 
-    def get_last_arousal(self) -> Optional[ArousalState]:
+    def get_last_arousal(self) -> ArousalState | None:
         """Get last successfully fetched arousal (cached)."""
         return self._last_arousal
 

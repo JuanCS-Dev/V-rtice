@@ -214,9 +214,7 @@ async def test_get_safety_violations(consciousness_system_with_safety):
     # Add a test violation
     import time
 
-    system.safety_protocol.threshold_monitor.check_self_modification(
-        modification_attempts=1, current_time=time.time()
-    )
+    system.safety_protocol.threshold_monitor.check_self_modification(modification_attempts=1, current_time=time.time())
 
     # Now should have 1 violation
     violations = system.get_safety_violations(limit=10)

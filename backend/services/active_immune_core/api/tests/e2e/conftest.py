@@ -9,13 +9,13 @@ Version: 1.0.0
 """
 
 import asyncio
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
 from typing import AsyncGenerator
 
-from api.main import create_app
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+
 from api.core_integration import CoreManager
+from api.main import create_app
 
 
 @pytest_asyncio.fixture(scope="session")

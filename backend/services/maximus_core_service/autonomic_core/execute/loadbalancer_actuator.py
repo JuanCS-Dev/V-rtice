@@ -1,10 +1,9 @@
 """Load Balancer Actuator - Traffic Shift and Circuit Breaker"""
 
-from collections import deque
-from datetime import datetime, timedelta
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from collections import deque
+from datetime import datetime
 
 import httpx
 
@@ -47,9 +46,7 @@ class CircuitBreaker:
 
         if self.state == "CLOSED" and self.failure_count >= self.failure_threshold:
             self.state = "OPEN"
-            logger.warning(
-                f"Circuit breaker: CLOSED -> OPEN (failures: {self.failure_count})"
-            )
+            logger.warning(f"Circuit breaker: CLOSED -> OPEN (failures: {self.failure_count})")
 
         elif self.state == "HALF_OPEN":
             self.state = "OPEN"
@@ -63,10 +60,7 @@ class CircuitBreaker:
 
         if self.state == "OPEN":
             # Check if timeout expired
-            if (
-                self.last_failure_time
-                and time.time() - self.last_failure_time >= self.timeout_seconds
-            ):
+            if self.last_failure_time and time.time() - self.last_failure_time >= self.timeout_seconds:
                 self.state = "HALF_OPEN"
                 self.success_count = 0
                 logger.info("Circuit breaker: OPEN -> HALF_OPEN (timeout expired)")
@@ -92,7 +86,7 @@ class LoadBalancerActuator:
         self.lb_api_url = lb_api_url
         self.dry_run_mode = dry_run_mode
         self.action_log = []
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self.circuit_breakers: dict[str, CircuitBreaker] = {}
         self.traffic_history = deque(maxlen=1000)
 
     def get_circuit_breaker(self, service: str) -> CircuitBreaker:
@@ -101,9 +95,7 @@ class LoadBalancerActuator:
             self.circuit_breakers[service] = CircuitBreaker()
         return self.circuit_breakers[service]
 
-    async def shift_traffic(
-        self, service: str, target_version: str, weight_percent: int
-    ) -> Dict:
+    async def shift_traffic(self, service: str, target_version: str, weight_percent: int) -> dict:
         """Shift traffic between service versions (canary/blue-green).
 
         Args:
@@ -112,9 +104,7 @@ class LoadBalancerActuator:
             weight_percent: Traffic weight 0-100
         """
         if self.dry_run_mode:
-            logger.info(
-                f"DRY-RUN: Shift {weight_percent}% traffic to {service}:{target_version}"
-            )
+            logger.info(f"DRY-RUN: Shift {weight_percent}% traffic to {service}:{target_version}")
             self.action_log.append(
                 {
                     "action": "shift_traffic",
@@ -153,24 +143,21 @@ class LoadBalancerActuator:
                 )
 
                 if success:
-                    logger.info(
-                        f"Traffic shifted: {service}:{target_version} -> {weight_percent}%"
-                    )
+                    logger.info(f"Traffic shifted: {service}:{target_version} -> {weight_percent}%")
                     return {
                         "success": True,
                         "service": service,
                         "target_version": target_version,
                         "weight_percent": weight_percent,
                     }
-                else:
-                    logger.error(f"Traffic shift failed: {response.text}")
-                    return {"success": False, "error": response.text}
+                logger.error(f"Traffic shift failed: {response.text}")
+                return {"success": False, "error": response.text}
 
         except Exception as e:
             logger.error(f"Traffic shift error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def enable_circuit_breaker(self, service: str, enabled: bool = True) -> Dict:
+    async def enable_circuit_breaker(self, service: str, enabled: bool = True) -> dict:
         """Enable/disable circuit breaker for service.
 
         Args:
@@ -222,7 +209,7 @@ class LoadBalancerActuator:
             logger.error(f"Circuit breaker toggle error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def adjust_rate_limit(self, service: str, requests_per_second: int) -> Dict:
+    async def adjust_rate_limit(self, service: str, requests_per_second: int) -> dict:
         """Adjust rate limiting for service.
 
         Args:
@@ -230,9 +217,7 @@ class LoadBalancerActuator:
             requests_per_second: Max requests per second (1-10000)
         """
         if self.dry_run_mode:
-            logger.info(
-                f"DRY-RUN: Set rate limit {service} -> {requests_per_second} req/s"
-            )
+            logger.info(f"DRY-RUN: Set rate limit {service} -> {requests_per_second} req/s")
             self.action_log.append(
                 {
                     "action": "rate_limit",
@@ -265,28 +250,23 @@ class LoadBalancerActuator:
                 )
 
                 if success:
-                    logger.info(
-                        f"Rate limit set: {service} -> {requests_per_second} req/s"
-                    )
+                    logger.info(f"Rate limit set: {service} -> {requests_per_second} req/s")
                     return {
                         "success": True,
                         "service": service,
                         "requests_per_second": requests_per_second,
                     }
-                else:
-                    return {"success": False, "error": response.text}
+                return {"success": False, "error": response.text}
 
         except Exception as e:
             logger.error(f"Rate limit adjustment error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def get_traffic_stats(self, service: str) -> Dict:
+    async def get_traffic_stats(self, service: str) -> dict:
         """Get traffic statistics for service."""
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{self.lb_api_url}/stats/{service}", timeout=5.0
-                )
+                response = await client.get(f"{self.lb_api_url}/stats/{service}", timeout=5.0)
 
                 if response.status_code == 200:
                     data = response.json()
@@ -308,8 +288,7 @@ class LoadBalancerActuator:
                             "success_count": cb.success_count,
                         },
                     }
-                else:
-                    return {"success": False, "error": f"HTTP {response.status_code}"}
+                return {"success": False, "error": f"HTTP {response.status_code}"}
 
         except Exception as e:
             logger.error(f"Traffic stats retrieval error: {e}")
@@ -322,7 +301,7 @@ class LoadBalancerActuator:
         initial_weight: int = 5,
         increment: int = 10,
         wait_seconds: int = 300,
-    ) -> Dict:
+    ) -> dict:
         """Gradual canary rollout with automatic rollback on errors.
 
         Args:
@@ -334,8 +313,7 @@ class LoadBalancerActuator:
         """
         if self.dry_run_mode:
             logger.info(
-                f"DRY-RUN: Canary rollout {service}:{canary_version} "
-                f"(start={initial_weight}%, step={increment}%)"
+                f"DRY-RUN: Canary rollout {service}:{canary_version} (start={initial_weight}%, step={increment}%)"
             )
             return {"success": True, "dry_run": True}
 
@@ -345,9 +323,7 @@ class LoadBalancerActuator:
 
             while current_weight <= 100:
                 # Shift traffic
-                shift_result = await self.shift_traffic(
-                    service, canary_version, current_weight
-                )
+                shift_result = await self.shift_traffic(service, canary_version, current_weight)
 
                 if not shift_result["success"]:
                     logger.error(f"Canary rollout failed at {current_weight}%")
@@ -367,9 +343,7 @@ class LoadBalancerActuator:
                     }
                 )
 
-                logger.info(
-                    f"Canary rollout: {service}:{canary_version} @ {current_weight}%"
-                )
+                logger.info(f"Canary rollout: {service}:{canary_version} @ {current_weight}%")
 
                 # Wait before next increment (except last step)
                 if current_weight < 100:
@@ -378,7 +352,7 @@ class LoadBalancerActuator:
                     # Check circuit breaker state
                     cb = self.get_circuit_breaker(service)
                     if cb.get_state() == "OPEN":
-                        logger.error(f"Circuit breaker OPEN, rolling back canary")
+                        logger.error("Circuit breaker OPEN, rolling back canary")
                         await self.shift_traffic(service, canary_version, 0)
                         return {
                             "success": False,
@@ -406,7 +380,7 @@ class LoadBalancerActuator:
             await self.shift_traffic(service, canary_version, 0)
             return {"success": False, "error": str(e), "rollback": True}
 
-    def get_action_log(self) -> List[Dict]:
+    def get_action_log(self) -> list[dict]:
         """Return action history for audit."""
         return self.action_log
 

@@ -44,7 +44,7 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional, Callable
 
 import numpy as np
 
@@ -182,10 +182,10 @@ class PTPSynchronizer:
         # Clock state
         self.local_time_ns: int = 0  # Nanoseconds since epoch
         self.offset_ns: float = 0.0  # Offset from master
-        self.master_id: Optional[str] = None
+        self.master_id: str | None = None
 
         # Quality metrics
-        self.jitter_history: List[float] = []
+        self.jitter_history: list[float] = []
         self.drift_ppm: float = 0.0
         self.last_sync_time: float = 0.0
 
@@ -202,18 +202,18 @@ class PTPSynchronizer:
 
         # Measurement history for filtering
         # PAGANI FIX: Increased window size for more stable jitter calculation
-        self.offset_history: List[float] = []
-        self.delay_history: List[float] = []
+        self.offset_history: list[float] = []
+        self.delay_history: list[float] = []
 
         # Exponential moving average state
         # PAGANI FIX v2 FINAL: Balanced filtering for <100ns jitter
         # v3 (alpha=0.08) was too conservative → 276ns (sluggish response)
         # v2 (alpha=0.1) achieved 108ns (near target)
-        self.ema_offset: Optional[float] = None
+        self.ema_offset: float | None = None
         self.ema_alpha: float = 0.1  # Smoothing factor (balanced)
 
         # Sync monitoring
-        self._sync_task: Optional[asyncio.Task] = None
+        self._sync_task: asyncio.Task | None = None
         self._running: bool = False
 
     async def start(self) -> None:
@@ -253,7 +253,7 @@ class PTPSynchronizer:
                 pass
         self.state = SyncState.PASSIVE
 
-    async def sync_to_master(self, master_id: str, master_time_source: Optional[callable] = None) -> SyncResult:
+    async def sync_to_master(self, master_id: str, master_time_source: Optional[Callable] = None) -> SyncResult:
         """
         Synchronize to a master clock.
 
@@ -425,9 +425,8 @@ class PTPSynchronizer:
         """
         if self.role == ClockRole.GRAND_MASTER:
             return time.time_ns()
-        else:
-            # Return local time adjusted by offset
-            return time.time_ns() - int(self.offset_ns)
+        # Return local time adjusted by offset
+        return time.time_ns() - int(self.offset_ns)
 
     def get_offset(self) -> ClockOffset:
         """
@@ -508,8 +507,8 @@ class PTPCluster:
 
     def __init__(self, target_jitter_ns: float = 100.0):
         self.target_jitter_ns = target_jitter_ns
-        self.synchronizers: Dict[str, PTPSynchronizer] = {}
-        self.grand_master_id: Optional[str] = None
+        self.synchronizers: dict[str, PTPSynchronizer] = {}
+        self.grand_master_id: str | None = None
 
     async def add_grand_master(self, node_id: str) -> PTPSynchronizer:
         """Add a grand master clock to the cluster."""
@@ -533,7 +532,7 @@ class PTPCluster:
 
         return sync
 
-    async def synchronize_all(self) -> Dict[str, SyncResult]:
+    async def synchronize_all(self) -> dict[str, SyncResult]:
         """Synchronize all slave nodes to grand master."""
         if not self.grand_master_id:
             raise RuntimeError("No grand master configured")
@@ -559,7 +558,7 @@ class PTPCluster:
 
         return True
 
-    def get_cluster_metrics(self) -> Dict[str, Any]:
+    def get_cluster_metrics(self) -> dict[str, Any]:
         """Get cluster-wide synchronization metrics."""
         offsets = []
         jitters = []

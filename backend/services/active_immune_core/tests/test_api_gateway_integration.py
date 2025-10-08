@@ -10,9 +10,8 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
 import httpx
-
+import pytest
 
 # ==================== CONFIGURATION ====================
 
@@ -47,10 +46,7 @@ async def test_immune_health_through_gateway():
     """Test Active Immune Core health check through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/health",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/health", timeout=10.0)
 
             # Should proxy to Active Immune Core
             assert response.status_code in [200, 503]  # 503 if service down
@@ -72,10 +68,7 @@ async def test_immune_stats_through_gateway():
     """Test getting stats through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/stats",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/stats", timeout=10.0)
 
             # Should proxy request
             assert response.status_code in [200, 404, 503]
@@ -92,10 +85,7 @@ async def test_immune_list_agents_through_gateway():
     """Test listing agents through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/agents",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/agents", timeout=10.0)
 
             # Should proxy request
             assert response.status_code in [200, 404, 503]
@@ -112,10 +102,7 @@ async def test_immune_list_threats_through_gateway():
     """Test listing threats through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/threats",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/threats", timeout=10.0)
 
             # Should proxy request
             assert response.status_code in [200, 404, 503]
@@ -131,12 +118,8 @@ async def test_immune_detect_threat_through_gateway():
         try:
             response = await client.post(
                 f"{API_GATEWAY_URL}/api/immune/threats/detect",
-                json={
-                    "threat_type": "malware",
-                    "target": "192.168.1.100",
-                    "payload": {"test": "data"}
-                },
-                timeout=30.0
+                json={"threat_type": "malware", "target": "192.168.1.100", "payload": {"test": "data"}},
+                timeout=30.0,
             )
 
             # Should proxy request
@@ -154,10 +137,7 @@ async def test_immune_list_lymphnodes_through_gateway():
     """Test listing lymphnodes through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/lymphnodes",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/lymphnodes", timeout=10.0)
 
             # Should proxy request
             assert response.status_code in [200, 404, 503]
@@ -174,10 +154,7 @@ async def test_immune_list_antibodies_through_gateway():
     """Test listing antibodies through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/memory/antibodies",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/memory/antibodies", timeout=10.0)
 
             # Should proxy request
             assert response.status_code in [200, 404, 503]
@@ -192,9 +169,7 @@ async def test_immune_search_memory_through_gateway():
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/memory/search",
-                params={"query": "test"},
-                timeout=10.0
+                f"{API_GATEWAY_URL}/api/immune/memory/search", params={"query": "test"}, timeout=10.0
             )
 
             # Should proxy request
@@ -212,10 +187,7 @@ async def test_immune_homeostasis_status_through_gateway():
     """Test homeostasis status through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/homeostasis",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/homeostasis", timeout=10.0)
 
             # Should proxy request
             assert response.status_code in [200, 404, 503]
@@ -232,10 +204,7 @@ async def test_immune_metrics_through_gateway():
     """Test Prometheus metrics through gateway."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/metrics",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/metrics", timeout=10.0)
 
             # Should proxy request
             assert response.status_code in [200, 404, 503]
@@ -257,16 +226,10 @@ async def test_direct_vs_gateway_response():
     async with httpx.AsyncClient() as client:
         try:
             # Direct access to Active Immune Core
-            direct_response = await client.get(
-                f"{ACTIVE_IMMUNE_URL}/health",
-                timeout=10.0
-            )
+            direct_response = await client.get(f"{ACTIVE_IMMUNE_URL}/health", timeout=10.0)
 
             # Access through gateway
-            gateway_response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/health",
-                timeout=10.0
-            )
+            gateway_response = await client.get(f"{API_GATEWAY_URL}/api/immune/health", timeout=10.0)
 
             # Both should succeed or fail together
             assert direct_response.status_code == gateway_response.status_code
@@ -296,10 +259,7 @@ async def test_gateway_rate_limiting():
     async with httpx.AsyncClient() as client:
         try:
             # Make a normal request
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/health",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/health", timeout=10.0)
 
             # Should not be rate limited on first request
             assert response.status_code != 429  # Not "Too Many Requests"
@@ -316,10 +276,7 @@ async def test_gateway_handles_invalid_route():
     """Test gateway handles invalid Active Immune Core routes."""
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/invalid/route/that/does/not/exist",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/invalid/route/that/does/not/exist", timeout=10.0)
 
             # Should return 404 or 503
             assert response.status_code in [404, 503]
@@ -334,10 +291,7 @@ async def test_gateway_handles_service_unavailable():
     async with httpx.AsyncClient() as client:
         try:
             # Try to access through gateway
-            response = await client.get(
-                f"{API_GATEWAY_URL}/api/immune/health",
-                timeout=10.0
-            )
+            response = await client.get(f"{API_GATEWAY_URL}/api/immune/health", timeout=10.0)
 
             # Should return 200 (service up) or 503 (service down)
             assert response.status_code in [200, 503]

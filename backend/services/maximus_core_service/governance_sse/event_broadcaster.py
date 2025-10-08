@@ -13,15 +13,14 @@ Quality: Production-ready, REGRA DE OURO compliant
 """
 
 import logging
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 # HITL imports
 from hitl import (
+    DecisionStatus,
     HITLDecision,
     RiskLevel,
-    DecisionStatus,
 )
 
 # Local imports
@@ -34,6 +33,7 @@ logger = logging.getLogger(__name__)
 # Event Priority and Filtering
 # ============================================================================
 
+
 @dataclass
 class BroadcastOptions:
     """
@@ -41,10 +41,11 @@ class BroadcastOptions:
 
     Allows fine-grained control over event delivery.
     """
+
     # Targeting
-    target_operators: Optional[List[str]] = None  # None = all operators
-    target_roles: Optional[List[str]] = None  # Filter by operator role
-    priority_only: Optional[RiskLevel] = None  # Only operators handling this risk level
+    target_operators: list[str] | None = None  # None = all operators
+    target_roles: list[str] | None = None  # Filter by operator role
+    priority_only: RiskLevel | None = None  # Only operators handling this risk level
 
     # Delivery
     reliable: bool = True  # Retry on delivery failure
@@ -53,7 +54,7 @@ class BroadcastOptions:
 
     # Filtering
     deduplicate: bool = True  # Don't send duplicate events
-    ttl_seconds: Optional[int] = None  # Event time-to-live
+    ttl_seconds: int | None = None  # Event time-to-live
 
 
 class EventBroadcaster:
@@ -97,7 +98,7 @@ class EventBroadcaster:
     async def broadcast_decision_pending(
         self,
         decision: HITLDecision,
-        options: Optional[BroadcastOptions] = None,
+        options: BroadcastOptions | None = None,
     ) -> bool:
         """
         Broadcast that a new decision is pending operator review.
@@ -114,8 +115,8 @@ class EventBroadcaster:
         # Create SSE event
         event = SSEEvent(
             event_type="decision_pending",
-            event_id=f"dec_{decision.decision_id}_{datetime.now(timezone.utc).timestamp()}",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            event_id=f"dec_{decision.decision_id}_{datetime.now(UTC).timestamp()}",
+            timestamp=datetime.now(UTC).isoformat(),
             data=decision_to_sse_data(decision),
         )
 
@@ -124,10 +125,7 @@ class EventBroadcaster:
 
         if success:
             self.metrics["events_broadcast"] += 1
-            self.logger.info(
-                f"Broadcasted decision_pending: {decision.decision_id} "
-                f"(risk={decision.risk_level.value})"
-            )
+            self.logger.info(f"Broadcasted decision_pending: {decision.decision_id} (risk={decision.risk_level.value})")
         else:
             self.metrics["delivery_failures"] += 1
             self.logger.error(f"Failed to broadcast decision {decision.decision_id}")
@@ -139,8 +137,8 @@ class EventBroadcaster:
         decision_id: str,
         status: DecisionStatus,
         operator_id: str,
-        reasoning: Optional[str] = None,
-        options: Optional[BroadcastOptions] = None,
+        reasoning: str | None = None,
+        options: BroadcastOptions | None = None,
     ) -> bool:
         """
         Broadcast that a decision has been resolved.
@@ -160,13 +158,13 @@ class EventBroadcaster:
         # Create SSE event
         event = SSEEvent(
             event_type="decision_resolved",
-            event_id=f"resolved_{decision_id}_{datetime.now(timezone.utc).timestamp()}",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            event_id=f"resolved_{decision_id}_{datetime.now(UTC).timestamp()}",
+            timestamp=datetime.now(UTC).isoformat(),
             data={
                 "decision_id": decision_id,
                 "status": status.value,
                 "resolved_by": operator_id,
-                "resolved_at": datetime.now(timezone.utc).isoformat(),
+                "resolved_at": datetime.now(UTC).isoformat(),
                 "reasoning": reasoning,
             },
         )
@@ -177,8 +175,7 @@ class EventBroadcaster:
         if success:
             self.metrics["events_broadcast"] += 1
             self.logger.info(
-                f"Broadcasted decision_resolved: {decision_id} "
-                f"(status={status.value}, operator={operator_id})"
+                f"Broadcasted decision_resolved: {decision_id} (status={status.value}, operator={operator_id})"
             )
         else:
             self.metrics["delivery_failures"] += 1
@@ -189,7 +186,7 @@ class EventBroadcaster:
         self,
         decision: HITLDecision,
         time_remaining_seconds: int,
-        options: Optional[BroadcastOptions] = None,
+        options: BroadcastOptions | None = None,
     ) -> bool:
         """
         Broadcast SLA warning for decision approaching deadline.
@@ -206,8 +203,8 @@ class EventBroadcaster:
 
         event = SSEEvent(
             event_type="sla_warning",
-            event_id=f"sla_warn_{decision.decision_id}_{datetime.now(timezone.utc).timestamp()}",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            event_id=f"sla_warn_{decision.decision_id}_{datetime.now(UTC).timestamp()}",
+            timestamp=datetime.now(UTC).isoformat(),
             data={
                 "decision_id": decision.decision_id,
                 "risk_level": decision.risk_level.value,
@@ -222,8 +219,7 @@ class EventBroadcaster:
         if success:
             self.metrics["events_broadcast"] += 1
             self.logger.warning(
-                f"Broadcasted SLA warning: {decision.decision_id} "
-                f"(remaining={time_remaining_seconds}s)"
+                f"Broadcasted SLA warning: {decision.decision_id} (remaining={time_remaining_seconds}s)"
             )
 
         return success
@@ -231,7 +227,7 @@ class EventBroadcaster:
     async def broadcast_sla_violation(
         self,
         decision: HITLDecision,
-        options: Optional[BroadcastOptions] = None,
+        options: BroadcastOptions | None = None,
     ) -> bool:
         """
         Broadcast SLA violation alert.
@@ -247,8 +243,8 @@ class EventBroadcaster:
 
         event = SSEEvent(
             event_type="sla_violation",
-            event_id=f"sla_viol_{decision.decision_id}_{datetime.now(timezone.utc).timestamp()}",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            event_id=f"sla_viol_{decision.decision_id}_{datetime.now(UTC).timestamp()}",
+            timestamp=datetime.now(UTC).isoformat(),
             data={
                 "decision_id": decision.decision_id,
                 "risk_level": decision.risk_level.value,
@@ -270,7 +266,7 @@ class EventBroadcaster:
         self,
         message: str,
         severity: str = "info",
-        options: Optional[BroadcastOptions] = None,
+        options: BroadcastOptions | None = None,
     ) -> bool:
         """
         Broadcast system message to operators.
@@ -287,8 +283,8 @@ class EventBroadcaster:
 
         event = SSEEvent(
             event_type="system_message",
-            event_id=f"sys_{datetime.now(timezone.utc).timestamp()}",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            event_id=f"sys_{datetime.now(UTC).timestamp()}",
+            timestamp=datetime.now(UTC).isoformat(),
             data={
                 "message": message,
                 "severity": severity,
@@ -302,9 +298,7 @@ class EventBroadcaster:
 
         return success
 
-    async def _broadcast_with_options(
-        self, event: SSEEvent, options: BroadcastOptions
-    ) -> bool:
+    async def _broadcast_with_options(self, event: SSEEvent, options: BroadcastOptions) -> bool:
         """
         Internal broadcast with option processing.
 
@@ -356,19 +350,18 @@ class EventBroadcaster:
                     )
                     return False
 
-                self.logger.warning(
-                    f"Broadcast retry {retries}/{options.max_retries} for {event.event_id}"
-                )
+                self.logger.warning(f"Broadcast retry {retries}/{options.max_retries} for {event.event_id}")
 
                 if options.reliable:
                     import asyncio
+
                     await asyncio.sleep(options.retry_delay)
                 else:
                     return False
 
         return False
 
-    def get_metrics(self) -> Dict:
+    def get_metrics(self) -> dict:
         """
         Get broadcaster metrics.
 

@@ -6,9 +6,9 @@ Streams to Kafka and stores in TimescaleDB.
 """
 
 import asyncio
-from datetime import datetime
 import logging
-from typing import Any, Dict, List
+from datetime import datetime
+from typing import Any
 
 try:
     from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
@@ -20,9 +20,7 @@ except ImportError:
     CollectorRegistry = None
     Gauge = None
     push_to_gateway = None
-import json
 
-import psutil
 
 from .kafka_streamer import KafkaMetricsStreamer
 from .sensor_definitions import (
@@ -76,34 +74,23 @@ class SystemMonitor:
         self.storage_sensors = StorageSensors()
 
         # Initialize Kafka streamer
-        self.kafka_streamer = KafkaMetricsStreamer(
-            broker=kafka_broker, topic=kafka_topic
-        )
+        self.kafka_streamer = KafkaMetricsStreamer(broker=kafka_broker, topic=kafka_topic)
 
         # Prometheus registry
         self.registry = CollectorRegistry()
         self._setup_prometheus_metrics()
 
         # Metrics cache
-        self.latest_metrics: Dict[str, Any] = {}
+        self.latest_metrics: dict[str, Any] = {}
 
-        logger.info(
-            f"SystemMonitor initialized (scrape_interval={scrape_interval}s, "
-            f"kafka_topic={kafka_topic})"
-        )
+        logger.info(f"SystemMonitor initialized (scrape_interval={scrape_interval}s, kafka_topic={kafka_topic})")
 
     def _setup_prometheus_metrics(self):
         """Setup Prometheus Gauge metrics for all sensors."""
         # Compute metrics
-        self.prom_cpu_usage = Gauge(
-            "cpu_usage_percent", "CPU usage percentage", registry=self.registry
-        )
-        self.prom_memory_usage = Gauge(
-            "memory_usage_percent", "Memory usage percentage", registry=self.registry
-        )
-        self.prom_gpu_usage = Gauge(
-            "gpu_usage_percent", "GPU usage percentage", registry=self.registry
-        )
+        self.prom_cpu_usage = Gauge("cpu_usage_percent", "CPU usage percentage", registry=self.registry)
+        self.prom_memory_usage = Gauge("memory_usage_percent", "Memory usage percentage", registry=self.registry)
+        self.prom_gpu_usage = Gauge("gpu_usage_percent", "GPU usage percentage", registry=self.registry)
 
         # Network metrics
         self.prom_latency = Gauge(
@@ -123,27 +110,17 @@ class SystemMonitor:
             "Application errors per second",
             registry=self.registry,
         )
-        self.prom_throughput = Gauge(
-            "application_throughput_rps", "Requests per second", registry=self.registry
-        )
+        self.prom_throughput = Gauge("application_throughput_rps", "Requests per second", registry=self.registry)
 
         # ML metrics
-        self.prom_inference_latency = Gauge(
-            "ml_inference_latency_ms", "ML inference latency", registry=self.registry
-        )
-        self.prom_model_drift = Gauge(
-            "ml_model_drift", "Model drift KL divergence", registry=self.registry
-        )
+        self.prom_inference_latency = Gauge("ml_inference_latency_ms", "ML inference latency", registry=self.registry)
+        self.prom_model_drift = Gauge("ml_model_drift", "Model drift KL divergence", registry=self.registry)
 
         # Storage metrics
-        self.prom_disk_io = Gauge(
-            "disk_io_wait_percent", "Disk I/O wait percentage", registry=self.registry
-        )
-        self.prom_query_latency = Gauge(
-            "db_query_latency_ms", "Database query latency", registry=self.registry
-        )
+        self.prom_disk_io = Gauge("disk_io_wait_percent", "Disk I/O wait percentage", registry=self.registry)
+        self.prom_query_latency = Gauge("db_query_latency_ms", "Database query latency", registry=self.registry)
 
-    async def collect_metrics(self) -> Dict[str, Any]:
+    async def collect_metrics(self) -> dict[str, Any]:
         """
         Collect all 50+ metrics from all sensors.
 
@@ -183,10 +160,7 @@ class SystemMonitor:
             self.latest_metrics = metrics
 
             # Log summary
-            logger.debug(
-                f"Collected {len(metrics)} metrics in "
-                f"{metrics['collection_latency_ms']:.2f}ms"
-            )
+            logger.debug(f"Collected {len(metrics)} metrics in {metrics['collection_latency_ms']:.2f}ms")
 
             return metrics
 
@@ -194,7 +168,7 @@ class SystemMonitor:
             logger.error(f"Error collecting metrics: {e}", exc_info=True)
             return {"timestamp": datetime.utcnow().isoformat(), "error": str(e)}
 
-    def _update_prometheus(self, metrics: Dict[str, Any]):
+    def _update_prometheus(self, metrics: dict[str, Any]):
         """Update Prometheus Gauge metrics."""
         try:
             # Compute
@@ -265,7 +239,7 @@ class SystemMonitor:
                 logger.error(f"Error in monitoring loop: {e}", exc_info=True)
                 await asyncio.sleep(self.scrape_interval)
 
-    def get_latest_metrics(self) -> Dict[str, Any]:
+    def get_latest_metrics(self) -> dict[str, Any]:
         """
         Get most recent metrics without waiting for new collection.
 

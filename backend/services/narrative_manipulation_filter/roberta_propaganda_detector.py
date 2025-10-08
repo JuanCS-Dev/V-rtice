@@ -7,14 +7,15 @@ Fine-grained Propaganda Detection using token-level classification.
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
-from cache_manager import cache_manager, CacheCategory
-from config import get_settings
-from models import PropagandaSpan, PropagandaTechnique
 import numpy as np
 import torch
 from transformers import AutoModelForTokenClassification, AutoTokenizer
+
+from cache_manager import CacheCategory, cache_manager
+from config import get_settings
+from models import PropagandaSpan, PropagandaTechnique
 from utils import hash_text
 
 logger = logging.getLogger(__name__)
@@ -78,25 +79,19 @@ class RoBERTaPropagandaDetector:
             logger.info(f"Loading RoBERTa propaganda detector: {self.model_name}")
 
             # Load tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name, use_fast=True
-            )
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
 
             # Load model for token classification
             # Note: In production, use fine-tuned model on SemEval-2020 dataset
             num_labels = len(self.TECHNIQUE_LABELS) * 2 + 1  # B-/I- tags + O
-            self.model = AutoModelForTokenClassification.from_pretrained(
-                self.model_name, num_labels=num_labels
-            )
+            self.model = AutoModelForTokenClassification.from_pretrained(self.model_name, num_labels=num_labels)
 
             self.model.to(self.device)
             self.model.eval()
 
             # Quantization for CPU
             if self.device == "cpu":
-                self.model = torch.quantization.quantize_dynamic(
-                    self.model, {torch.nn.Linear}, dtype=torch.qint8
-                )
+                self.model = torch.quantization.quantize_dynamic(self.model, {torch.nn.Linear}, dtype=torch.qint8)
 
             self._initialized = True
             logger.info("✅ RoBERTa propaganda detector initialized")
@@ -152,9 +147,7 @@ class RoBERTaPropagandaDetector:
         predictions = np.argmax(logits, axis=-1)
 
         # Convert to BIO tags
-        spans = self._extract_spans_from_bio(
-            text, predictions, offset_mapping, logits, min_confidence
-        )
+        spans = self._extract_spans_from_bio(text, predictions, offset_mapping, logits, min_confidence)
 
         # Cache result
         if use_cache:
@@ -256,9 +249,7 @@ class RoBERTaPropagandaDetector:
 
         return spans
 
-    def merge_overlapping_spans(
-        self, spans: List[PropagandaSpan]
-    ) -> List[PropagandaSpan]:
+    def merge_overlapping_spans(self, spans: List[PropagandaSpan]) -> List[PropagandaSpan]:
         """
         Merge overlapping propaganda spans.
 
@@ -294,9 +285,7 @@ class RoBERTaPropagandaDetector:
 
         return merged
 
-    def calculate_propaganda_density(
-        self, text: str, spans: List[PropagandaSpan]
-    ) -> float:
+    def calculate_propaganda_density(self, text: str, spans: List[PropagandaSpan]) -> float:
         """
         Calculate propaganda density (% of text containing propaganda).
 
@@ -315,9 +304,7 @@ class RoBERTaPropagandaDetector:
         density = total_propaganda_chars / len(text)
         return float(np.clip(density, 0.0, 1.0))
 
-    def get_technique_distribution(
-        self, spans: List[PropagandaSpan]
-    ) -> Dict[PropagandaTechnique, int]:
+    def get_technique_distribution(self, spans: List[PropagandaSpan]) -> Dict[PropagandaTechnique, int]:
         """
         Get distribution of propaganda techniques.
 
@@ -333,9 +320,7 @@ class RoBERTaPropagandaDetector:
 
         return distribution
 
-    def detect_multi_technique_patterns(
-        self, spans: List[PropagandaSpan]
-    ) -> List[Dict[str, any]]:
+    def detect_multi_technique_patterns(self, spans: List[PropagandaSpan]) -> List[Dict[str, any]]:
         """
         Detect patterns of multiple techniques used together.
 
@@ -361,9 +346,7 @@ class RoBERTaPropagandaDetector:
                 distance = span2.start_char - span1.end_char
 
                 if 0 <= distance <= 100:  # Close proximity
-                    technique_pair = tuple(
-                        sorted([span1.technique.value, span2.technique.value])
-                    )
+                    technique_pair = tuple(sorted([span1.technique.value, span2.technique.value]))
 
                     pattern_name = KNOWN_PATTERNS.get(technique_pair)
 
@@ -383,9 +366,7 @@ class RoBERTaPropagandaDetector:
 
         return patterns
 
-    def batch_detect(
-        self, texts: List[str], batch_size: int = 16
-    ) -> List[List[PropagandaSpan]]:
+    def batch_detect(self, texts: List[str], batch_size: int = 16) -> List[List[PropagandaSpan]]:
         """
         Batch propaganda detection for efficiency.
 
@@ -421,9 +402,7 @@ class RoBERTaPropagandaDetector:
             # Process each text
             for text, logit, offset_mapping in zip(batch, logits, offset_mappings):
                 predictions = np.argmax(logit, axis=-1)
-                spans = self._extract_spans_from_bio(
-                    text, predictions, offset_mapping, logit, min_confidence=0.7
-                )
+                spans = self._extract_spans_from_bio(text, predictions, offset_mapping, logit, min_confidence=0.7)
                 results.append(spans)
 
         return results
@@ -433,6 +412,4 @@ class RoBERTaPropagandaDetector:
 # GLOBAL INSTANCE
 # ============================================================================
 
-roberta_detector = RoBERTaPropagandaDetector(
-    device="cuda" if torch.cuda.is_available() else "cpu"
-)
+roberta_detector = RoBERTaPropagandaDetector(device="cuda" if torch.cuda.is_available() else "cpu")

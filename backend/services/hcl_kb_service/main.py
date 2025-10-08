@@ -13,12 +13,13 @@ adapt to changing conditions, and continuously improve its self-management capab
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException
-from models import HCLDataEntry, HCLDataType
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from models import HCLDataEntry, HCLDataType
 
 app = FastAPI(title="Maximus HCL Knowledge Base Service", version="1.0.0")
 
@@ -97,9 +98,7 @@ async def store_hcl_data(request: StoreDataRequest) -> Dict[str, Any]:
 
 
 @app.get("/retrieve_data/{data_type}", response_model=List[HCLDataEntry])
-async def retrieve_hcl_data(
-    data_type: HCLDataType, limit: int = 10
-) -> List[HCLDataEntry]:
+async def retrieve_hcl_data(data_type: HCLDataType, limit: int = 10) -> List[HCLDataEntry]:
     """Retrieves HCL-related data from the knowledge base.
 
     Args:

@@ -12,17 +12,18 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import copy
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
-import logging
+from typing import Any
+
 import numpy as np
-import copy
 
 from .base import (
-    ModelUpdate,
-    FLConfig,
     ClientInfo,
+    FLConfig,
+    ModelUpdate,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ class ClientConfig:
         dp_delta: Failure probability for local DP
         dp_clip_norm: Gradient clipping norm
     """
+
     client_id: str
     organization: str
     coordinator_url: str
@@ -91,17 +93,13 @@ class FLClient:
             },
         )
 
-        self.current_round_id: Optional[int] = None
-        self.global_model_weights: Optional[Dict[str, np.ndarray]] = None
-        self.initial_weights: Optional[Dict[str, np.ndarray]] = None
+        self.current_round_id: int | None = None
+        self.global_model_weights: dict[str, np.ndarray] | None = None
+        self.initial_weights: dict[str, np.ndarray] | None = None
 
-        logger.info(
-            f"FL Client initialized: {config.client_id} ({config.organization})"
-        )
+        logger.info(f"FL Client initialized: {config.client_id} ({config.organization})")
 
-    def fetch_global_model(
-        self, round_id: int, global_weights: Dict[str, np.ndarray]
-    ) -> bool:
+    def fetch_global_model(self, round_id: int, global_weights: dict[str, np.ndarray]) -> bool:
         """
         Fetch global model from coordinator.
 
@@ -123,8 +121,7 @@ class FLClient:
         self.model_adapter.set_weights(global_weights)
 
         logger.info(
-            f"Fetched global model for round {round_id} "
-            f"({sum(w.size for w in global_weights.values())} parameters)"
+            f"Fetched global model for round {round_id} ({sum(w.size for w in global_weights.values())} parameters)"
         )
 
         return True
@@ -135,7 +132,7 @@ class FLClient:
         train_labels: Any,
         fl_config: FLConfig,
         validation_split: float = 0.1,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Train model on local private data.
 
@@ -184,7 +181,7 @@ class FLClient:
     def compute_update(
         self,
         num_samples: int,
-        training_metrics: Dict[str, float],
+        training_metrics: dict[str, float],
     ) -> ModelUpdate:
         """
         Compute model update to send to coordinator.
@@ -235,9 +232,7 @@ class FLClient:
 
         return update
 
-    def _apply_local_dp(
-        self, weights: Dict[str, np.ndarray]
-    ) -> Dict[str, np.ndarray]:
+    def _apply_local_dp(self, weights: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """
         Apply differential privacy to model update.
 
@@ -252,28 +247,23 @@ class FLClient:
             DP-protected weights
         """
         logger.info(
-            f"Applying local DP (ε={self.config.dp_epsilon}, "
-            f"δ={self.config.dp_delta}, clip={self.config.dp_clip_norm})"
+            f"Applying local DP (ε={self.config.dp_epsilon}, δ={self.config.dp_delta}, clip={self.config.dp_clip_norm})"
         )
 
         # Calculate current L2 norm
-        l2_norm = np.sqrt(sum(np.sum(w ** 2) for w in weights.values()))
+        l2_norm = np.sqrt(sum(np.sum(w**2) for w in weights.values()))
 
         # Clip to bounded norm
         if l2_norm > self.config.dp_clip_norm:
             scaling_factor = self.config.dp_clip_norm / l2_norm
-            clipped_weights = {
-                layer: w * scaling_factor for layer, w in weights.items()
-            }
+            clipped_weights = {layer: w * scaling_factor for layer, w in weights.items()}
             logger.debug(f"Clipped weights: {l2_norm:.4f} -> {self.config.dp_clip_norm:.4f}")
         else:
             clipped_weights = weights
 
         # Add Gaussian noise
         sensitivity = self.config.dp_clip_norm
-        noise_scale = (
-            sensitivity * np.sqrt(2 * np.log(1.25 / self.config.dp_delta))
-        ) / self.config.dp_epsilon
+        noise_scale = (sensitivity * np.sqrt(2 * np.log(1.25 / self.config.dp_delta))) / self.config.dp_epsilon
 
         noisy_weights = {}
         for layer, w in clipped_weights.items():
@@ -284,9 +274,7 @@ class FLClient:
 
         return noisy_weights
 
-    def send_update(
-        self, update: ModelUpdate, coordinator: Any = None
-    ) -> bool:
+    def send_update(self, update: ModelUpdate, coordinator: Any = None) -> bool:
         """
         Send model update to coordinator.
 
@@ -300,9 +288,7 @@ class FLClient:
         Returns:
             True if send successful
         """
-        logger.info(
-            f"Sending update to coordinator: {update.get_update_size_mb():.1f} MB"
-        )
+        logger.info(f"Sending update to coordinator: {update.get_update_size_mb():.1f} MB")
 
         # In real implementation:
         # response = requests.post(
@@ -326,12 +312,12 @@ class FLClient:
     def participate_in_round(
         self,
         round_id: int,
-        global_weights: Dict[str, np.ndarray],
+        global_weights: dict[str, np.ndarray],
         train_data: Any,
         train_labels: Any,
         fl_config: FLConfig,
         coordinator: Any = None,
-    ) -> Tuple[bool, Optional[ModelUpdate]]:
+    ) -> tuple[bool, ModelUpdate | None]:
         """
         Participate in a federated learning round.
 
@@ -357,15 +343,10 @@ class FLClient:
             self.fetch_global_model(round_id, global_weights)
 
             # Step 2: Train local model
-            training_metrics = self.train_local_model(
-                train_data, train_labels, fl_config
-            )
+            training_metrics = self.train_local_model(train_data, train_labels, fl_config)
 
             # Step 3: Compute update
-            num_samples = (
-                len(train_data) if hasattr(train_data, "__len__")
-                else train_data.shape[0]
-            )
+            num_samples = len(train_data) if hasattr(train_data, "__len__") else train_data.shape[0]
             update = self.compute_update(num_samples, training_metrics)
 
             # Step 4: Send update
@@ -398,6 +379,4 @@ class FLClient:
         """
         self.client_info.total_samples = total_samples
         self.client_info.last_seen = datetime.utcnow()
-        logger.info(
-            f"Updated client info: {total_samples} samples available"
-        )
+        logger.info(f"Updated client info: {total_samples} samples available")

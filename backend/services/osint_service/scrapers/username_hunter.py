@@ -55,9 +55,7 @@ class UsernameHunter(BaseScraper):
         Returns:
             List[Dict[str, Any]]: A list of dictionaries, each representing a discovered profile or mention.
         """
-        print(
-            f"[UsernameHunter] Hunting for username: {username} across {len(self.platforms_to_check)} platforms..."
-        )
+        print(f"[UsernameHunter] Hunting for username: {username} across {len(self.platforms_to_check)} platforms...")
         self.current_status = "hunting"
 
         found_profiles: List[Dict[str, Any]] = []
@@ -84,9 +82,7 @@ class UsernameHunter(BaseScraper):
                     }
                 )
             else:
-                found_profiles.append(
-                    {"platform": platform, "username": username, "found": False}
-                )
+                found_profiles.append({"platform": platform, "username": username, "found": False})
 
         self.hunt_history.append(
             {
@@ -108,9 +104,7 @@ class UsernameHunter(BaseScraper):
         """
         return {
             "status": self.current_status,
-            "last_hunt": (
-                self.last_hunt_time.isoformat() if self.last_hunt_time else "N/A"
-            ),
+            "last_hunt": (self.last_hunt_time.isoformat() if self.last_hunt_time else "N/A"),
             "total_hunts_performed": len(self.hunt_history),
             "platforms_monitored": len(self.platforms_to_check),
         }

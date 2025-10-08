@@ -16,12 +16,11 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Any, Set
-import uuid
-
+from typing import Any
 
 # ============================================================================
 # ENUMS
@@ -123,10 +122,10 @@ class Control:
     title: str  # Control title
     description: str  # Detailed description of requirement
     mandatory: bool = True  # Whether control is mandatory
-    test_procedure: Optional[str] = None  # How to test compliance
-    evidence_required: List[EvidenceType] = field(default_factory=list)
-    reference: Optional[str] = None  # Citation (e.g., "Article 9, Section 2")
-    tags: Set[str] = field(default_factory=set)  # Tags for filtering
+    test_procedure: str | None = None  # How to test compliance
+    evidence_required: list[EvidenceType] = field(default_factory=list)
+    reference: str | None = None  # Citation (e.g., "Article 9, Section 2")
+    tags: set[str] = field(default_factory=set)  # Tags for filtering
 
     def __post_init__(self):
         """Validate control data."""
@@ -152,12 +151,12 @@ class Regulation:
     effective_date: datetime  # When regulation becomes effective
     jurisdiction: str  # Geographic jurisdiction (e.g., "EU", "USA", "Brazil")
     description: str  # High-level description
-    controls: List[Control] = field(default_factory=list)
-    scope: Optional[str] = None  # Applicability scope
-    penalties: Optional[str] = None  # Non-compliance penalties
+    controls: list[Control] = field(default_factory=list)
+    scope: str | None = None  # Applicability scope
+    penalties: str | None = None  # Non-compliance penalties
     update_frequency_days: int = 90  # How often to review for updates
-    authority: Optional[str] = None  # Regulatory authority
-    url: Optional[str] = None  # Official regulation URL
+    authority: str | None = None  # Regulatory authority
+    url: str | None = None  # Official regulation URL
 
     def __post_init__(self):
         """Validate regulation data."""
@@ -168,15 +167,15 @@ class Regulation:
         if self.update_frequency_days <= 0:
             raise ValueError("update_frequency_days must be positive")
 
-    def get_mandatory_controls(self) -> List[Control]:
+    def get_mandatory_controls(self) -> list[Control]:
         """Return list of mandatory controls."""
         return [c for c in self.controls if c.mandatory]
 
-    def get_controls_by_category(self, category: ControlCategory) -> List[Control]:
+    def get_controls_by_category(self, category: ControlCategory) -> list[Control]:
         """Return controls for specific category."""
         return [c for c in self.controls if c.category == category]
 
-    def get_control(self, control_id: str) -> Optional[Control]:
+    def get_control(self, control_id: str) -> Control | None:
         """Get specific control by ID."""
         for control in self.controls:
             if control.control_id == control_id:
@@ -198,14 +197,14 @@ class Evidence:
     title: str = ""
     description: str = ""
     collected_at: datetime = field(default_factory=datetime.utcnow)
-    collected_by: Optional[str] = None  # User/system that collected evidence
-    file_path: Optional[str] = None  # Path to evidence file
-    file_hash: Optional[str] = None  # SHA-256 hash for integrity
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    expiration_date: Optional[datetime] = None  # When evidence expires
+    collected_by: str | None = None  # User/system that collected evidence
+    file_path: str | None = None  # Path to evidence file
+    file_hash: str | None = None  # SHA-256 hash for integrity
+    metadata: dict[str, Any] = field(default_factory=dict)
+    expiration_date: datetime | None = None  # When evidence expires
     verified: bool = False  # Whether evidence was verified by auditor
-    verified_by: Optional[str] = None
-    verified_at: Optional[datetime] = None
+    verified_by: str | None = None
+    verified_at: datetime | None = None
 
     def __post_init__(self):
         """Validate evidence data."""
@@ -243,15 +242,15 @@ class ComplianceViolation:
     description: str = ""  # What was violated
     detected_at: datetime = field(default_factory=datetime.utcnow)
     detected_by: str = "system"  # System or auditor name
-    impact: Optional[str] = None  # Business/security impact
-    recommendation: Optional[str] = None  # Remediation recommendation
-    affected_systems: List[str] = field(default_factory=list)
-    cve_ids: List[str] = field(default_factory=list)  # Related CVEs if applicable
-    mitre_tactics: List[str] = field(default_factory=list)  # MITRE ATT&CK tactics
+    impact: str | None = None  # Business/security impact
+    recommendation: str | None = None  # Remediation recommendation
+    affected_systems: list[str] = field(default_factory=list)
+    cve_ids: list[str] = field(default_factory=list)  # Related CVEs if applicable
+    mitre_tactics: list[str] = field(default_factory=list)  # MITRE ATT&CK tactics
     resolved: bool = False
-    resolved_at: Optional[datetime] = None
-    resolved_by: Optional[str] = None
-    resolution_notes: Optional[str] = None
+    resolved_at: datetime | None = None
+    resolved_by: str | None = None
+    resolution_notes: str | None = None
 
     def __post_init__(self):
         """Validate violation data."""
@@ -289,11 +288,11 @@ class ComplianceResult:
     status: ComplianceStatus = ComplianceStatus.PENDING_REVIEW
     checked_at: datetime = field(default_factory=datetime.utcnow)
     checked_by: str = "system"
-    score: Optional[float] = None  # Compliance score 0.0-1.0
-    evidence: List[Evidence] = field(default_factory=list)
-    violations: List[ComplianceViolation] = field(default_factory=list)
-    notes: Optional[str] = None
-    next_check_due: Optional[datetime] = None
+    score: float | None = None  # Compliance score 0.0-1.0
+    evidence: list[Evidence] = field(default_factory=list)
+    violations: list[ComplianceViolation] = field(default_factory=list)
+    notes: str | None = None
+    next_check_due: datetime | None = None
     automated: bool = True  # Whether check was automated
 
     def __post_init__(self):
@@ -311,7 +310,7 @@ class ComplianceResult:
         """Check if violations were found."""
         return len(self.violations) > 0
 
-    def get_critical_violations(self) -> List[ComplianceViolation]:
+    def get_critical_violations(self) -> list[ComplianceViolation]:
         """Get critical violations."""
         return [v for v in self.violations if v.severity == ViolationSeverity.CRITICAL]
 
@@ -332,7 +331,7 @@ class Gap:
     required_state: str = ""  # Required implementation status
     gap_type: str = "missing_control"  # missing_control, partial_implementation, outdated
     identified_at: datetime = field(default_factory=datetime.utcnow)
-    estimated_effort_hours: Optional[int] = None
+    estimated_effort_hours: int | None = None
     priority: int = 3  # 1 (highest) to 5 (lowest)
     remediation_status: RemediationStatus = RemediationStatus.NOT_STARTED
 
@@ -356,16 +355,16 @@ class RemediationAction:
     gap_id: str = ""
     title: str = ""
     description: str = ""
-    assigned_to: Optional[str] = None
-    due_date: Optional[datetime] = None
+    assigned_to: str | None = None
+    due_date: datetime | None = None
     status: RemediationStatus = RemediationStatus.NOT_STARTED
-    estimated_hours: Optional[int] = None
-    actual_hours: Optional[int] = None
-    blockers: List[str] = field(default_factory=list)
-    dependencies: List[str] = field(default_factory=list)  # Other action IDs
+    estimated_hours: int | None = None
+    actual_hours: int | None = None
+    blockers: list[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)  # Other action IDs
     completion_percentage: int = 0
     created_at: datetime = field(default_factory=datetime.utcnow)
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
 
     def __post_init__(self):
         """Validate remediation action data."""
@@ -393,23 +392,23 @@ class RemediationPlan:
     regulation_type: RegulationType = RegulationType.ISO_27001
     created_at: datetime = field(default_factory=datetime.utcnow)
     created_by: str = ""
-    gaps: List[Gap] = field(default_factory=list)
-    actions: List[RemediationAction] = field(default_factory=list)
-    target_completion_date: Optional[datetime] = None
+    gaps: list[Gap] = field(default_factory=list)
+    actions: list[RemediationAction] = field(default_factory=list)
+    target_completion_date: datetime | None = None
     status: str = "draft"  # draft, approved, in_progress, completed
-    approved_by: Optional[str] = None
-    approved_at: Optional[datetime] = None
+    approved_by: str | None = None
+    approved_at: datetime | None = None
 
     def __post_init__(self):
         """Validate remediation plan data."""
         if not self.created_by:
             raise ValueError("created_by is required")
 
-    def get_critical_gaps(self) -> List[Gap]:
+    def get_critical_gaps(self) -> list[Gap]:
         """Get critical severity gaps."""
         return [g for g in self.gaps if g.severity == ViolationSeverity.CRITICAL]
 
-    def get_overdue_actions(self) -> List[RemediationAction]:
+    def get_overdue_actions(self) -> list[RemediationAction]:
         """Get overdue remediation actions."""
         return [a for a in self.actions if a.is_overdue()]
 
@@ -435,18 +434,18 @@ class GapAnalysisResult:
     compliant_controls: int = 0
     non_compliant_controls: int = 0
     partially_compliant_controls: int = 0
-    gaps: List[Gap] = field(default_factory=list)
+    gaps: list[Gap] = field(default_factory=list)
     compliance_percentage: float = 0.0
-    remediation_plan: Optional[RemediationPlan] = None
+    remediation_plan: RemediationPlan | None = None
     estimated_remediation_hours: int = 0
-    next_review_date: Optional[datetime] = None
+    next_review_date: datetime | None = None
 
     def __post_init__(self):
         """Calculate compliance percentage."""
         if self.total_controls > 0:
             self.compliance_percentage = (self.compliant_controls / self.total_controls) * 100
 
-    def get_gaps_by_severity(self, severity: ViolationSeverity) -> List[Gap]:
+    def get_gaps_by_severity(self, severity: ViolationSeverity) -> list[Gap]:
         """Get gaps filtered by severity."""
         return [g for g in self.gaps if g.severity == severity]
 
@@ -467,7 +466,7 @@ class ComplianceConfig:
     """
 
     # Scope
-    enabled_regulations: List[RegulationType] = field(
+    enabled_regulations: list[RegulationType] = field(
         default_factory=lambda: [
             RegulationType.EU_AI_ACT,
             RegulationType.GDPR,
@@ -494,7 +493,7 @@ class ComplianceConfig:
     # Reporting
     generate_weekly_report: bool = True
     generate_monthly_report: bool = True
-    compliance_report_recipients: List[str] = field(default_factory=list)
+    compliance_report_recipients: list[str] = field(default_factory=list)
 
     # Storage
     evidence_storage_path: str = "/data/compliance/evidence"

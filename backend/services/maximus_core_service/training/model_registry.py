@@ -13,14 +13,12 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
-from datetime import datetime
 import json
 import logging
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-import numpy as np
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,13 +31,13 @@ class ModelMetadata:
     version: str
     layer_name: str
     created_at: datetime
-    metrics: Dict[str, float]
-    hyperparameters: Dict[str, Any]
-    training_dataset: Optional[str] = None
+    metrics: dict[str, float]
+    hyperparameters: dict[str, Any]
+    training_dataset: str | None = None
     framework: str = "pytorch"
     stage: str = "none"  # "none", "staging", "production", "archived"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary.
 
         Returns:
@@ -54,11 +52,11 @@ class ModelMetadata:
             "hyperparameters": self.hyperparameters,
             "training_dataset": self.training_dataset,
             "framework": self.framework,
-            "stage": self.stage
+            "stage": self.stage,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ModelMetadata":
+    def from_dict(cls, data: dict[str, Any]) -> "ModelMetadata":
         """Create from dictionary.
 
         Args:
@@ -92,13 +90,10 @@ class ModelRegistry:
             layer_name="layer1",
             created_at=datetime.utcnow(),
             metrics={"val_loss": 0.045, "accuracy": 0.95},
-            hyperparameters={"learning_rate": 1e-3, "batch_size": 32}
+            hyperparameters={"learning_rate": 1e-3, "batch_size": 32},
         )
 
-        registry.register_model(
-            model_path="training/checkpoints/layer1_vae_best.pt",
-            metadata=metadata
-        )
+        registry.register_model(model_path="training/checkpoints/layer1_vae_best.pt", metadata=metadata)
 
         # Promote to staging
         registry.transition_stage("layer1_vae", "v1.0.0", "staging")
@@ -120,16 +115,12 @@ class ModelRegistry:
         self.metadata_file = self.registry_dir / "registry.json"
 
         # Load existing registry
-        self.registry: Dict[str, Dict[str, ModelMetadata]] = {}
+        self.registry: dict[str, dict[str, ModelMetadata]] = {}
         self._load_registry()
 
         logger.info(f"ModelRegistry initialized: {self.registry_dir}")
 
-    def register_model(
-        self,
-        model_path: Path,
-        metadata: ModelMetadata
-    ) -> Path:
+    def register_model(self, model_path: Path, metadata: ModelMetadata) -> Path:
         """Register a model.
 
         Args:
@@ -148,6 +139,7 @@ class ModelRegistry:
 
         # Copy model file
         import shutil
+
         registered_model_path = model_dir / "model.pt"
         shutil.copy(model_path, registered_model_path)
 
@@ -168,12 +160,7 @@ class ModelRegistry:
 
         return registered_model_path
 
-    def get_model(
-        self,
-        model_name: str,
-        version: Optional[str] = None,
-        stage: Optional[str] = None
-    ) -> Optional[Path]:
+    def get_model(self, model_name: str, version: str | None = None, stage: str | None = None) -> Path | None:
         """Get model path.
 
         Args:
@@ -216,11 +203,7 @@ class ModelRegistry:
 
         return model_path
 
-    def get_metadata(
-        self,
-        model_name: str,
-        version: str
-    ) -> Optional[ModelMetadata]:
+    def get_metadata(self, model_name: str, version: str) -> ModelMetadata | None:
         """Get model metadata.
 
         Args:
@@ -235,7 +218,7 @@ class ModelRegistry:
 
         return self.registry[model_name].get(version)
 
-    def list_models(self, model_name: Optional[str] = None) -> Dict[str, List[str]]:
+    def list_models(self, model_name: str | None = None) -> dict[str, list[str]]:
         """List all registered models.
 
         Args:
@@ -251,12 +234,7 @@ class ModelRegistry:
 
         return {name: list(versions.keys()) for name, versions in self.registry.items()}
 
-    def transition_stage(
-        self,
-        model_name: str,
-        version: str,
-        new_stage: str
-    ) -> bool:
+    def transition_stage(self, model_name: str, version: str, new_stage: str) -> bool:
         """Transition model to a new stage.
 
         Args:
@@ -300,12 +278,7 @@ class ModelRegistry:
 
         return True
 
-    def compare_models(
-        self,
-        model_name: str,
-        versions: List[str],
-        metric: str = "val_loss"
-    ) -> Dict[str, float]:
+    def compare_models(self, model_name: str, versions: list[str], metric: str = "val_loss") -> dict[str, float]:
         """Compare models by a metric.
 
         Args:
@@ -327,11 +300,11 @@ class ModelRegistry:
 
     def search_models(
         self,
-        model_name: Optional[str] = None,
-        layer_name: Optional[str] = None,
-        stage: Optional[str] = None,
-        min_accuracy: Optional[float] = None
-    ) -> List[ModelMetadata]:
+        model_name: str | None = None,
+        layer_name: str | None = None,
+        stage: str | None = None,
+        min_accuracy: float | None = None,
+    ) -> list[ModelMetadata]:
         """Search models by criteria.
 
         Args:
@@ -364,11 +337,7 @@ class ModelRegistry:
 
         return results
 
-    def delete_model(
-        self,
-        model_name: str,
-        version: str
-    ) -> bool:
+    def delete_model(self, model_name: str, version: str) -> bool:
         """Delete a model from registry.
 
         Args:
@@ -391,6 +360,7 @@ class ModelRegistry:
 
         # Delete files
         import shutil
+
         model_dir = self.registry_dir / model_name / version
         if model_dir.exists():
             shutil.rmtree(model_dir)
@@ -407,7 +377,7 @@ class ModelRegistry:
             logger.debug("No existing registry found, starting fresh")
             return
 
-        with open(self.metadata_file, "r") as f:
+        with open(self.metadata_file) as f:
             data = json.load(f)
 
         for model_name, versions in data.items():

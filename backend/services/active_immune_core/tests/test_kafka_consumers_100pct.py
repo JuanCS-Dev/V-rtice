@@ -25,7 +25,6 @@ from communication.kafka_consumers import (
     KafkaEventConsumer,
 )
 
-
 # ==================== FIXTURES ====================
 
 

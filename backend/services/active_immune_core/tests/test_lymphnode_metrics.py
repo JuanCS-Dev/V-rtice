@@ -24,10 +24,10 @@ import pytest
 
 from coordination.lymphnode_metrics import LymphnodeMetrics
 
-
 # =============================================================================
 # TEST FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def metrics():

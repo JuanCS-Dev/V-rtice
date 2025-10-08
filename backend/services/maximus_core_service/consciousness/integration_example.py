@@ -66,7 +66,6 @@ Press Ctrl+C to stop.
 import asyncio
 import random
 import time
-from typing import Optional
 
 # MCEA imports
 from consciousness.mcea.controller import (
@@ -126,10 +125,10 @@ class ConsciousnessIntegrationDemo:
         )
 
         # Components
-        self.mmei_monitor: Optional[InternalStateMonitor] = None
-        self.goal_generator: Optional[AutonomousGoalGenerator] = None
-        self.arousal_controller: Optional[ArousalController] = None
-        self.stress_monitor: Optional[StressMonitor] = None
+        self.mmei_monitor: InternalStateMonitor | None = None
+        self.goal_generator: AutonomousGoalGenerator | None = None
+        self.arousal_controller: ArousalController | None = None
+        self.stress_monitor: StressMonitor | None = None
 
         # Simulation state
         self.simulated_cpu: float = 30.0

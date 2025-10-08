@@ -21,19 +21,17 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from enum import Enum
 import logging
-import json
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
 
 from .base import (
+    AuditEntry,
+    AutomationLevel,
+    DecisionStatus,
     HITLDecision,
     OperatorAction,
-    AuditEntry,
-    DecisionStatus,
-    AutomationLevel,
     RiskLevel,
 )
 from .risk_assessor import RiskScore
@@ -45,30 +43,32 @@ logger = logging.getLogger(__name__)
 # Audit Query
 # ============================================================================
 
+
 @dataclass
 class AuditQuery:
     """
     Query parameters for audit trail search.
     """
+
     # Time range
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
 
     # Decision filters
-    decision_ids: List[str] = field(default_factory=list)
-    risk_levels: List[RiskLevel] = field(default_factory=list)
-    automation_levels: List[AutomationLevel] = field(default_factory=list)
-    statuses: List[DecisionStatus] = field(default_factory=list)
+    decision_ids: list[str] = field(default_factory=list)
+    risk_levels: list[RiskLevel] = field(default_factory=list)
+    automation_levels: list[AutomationLevel] = field(default_factory=list)
+    statuses: list[DecisionStatus] = field(default_factory=list)
 
     # Actor filters
-    operator_ids: List[str] = field(default_factory=list)
-    actor_types: List[str] = field(default_factory=list)  # "ai", "human"
+    operator_ids: list[str] = field(default_factory=list)
+    actor_types: list[str] = field(default_factory=list)  # "ai", "human"
 
     # Event filters
-    event_types: List[str] = field(default_factory=list)
+    event_types: list[str] = field(default_factory=list)
 
     # Compliance filters
-    compliance_tags: List[str] = field(default_factory=list)
+    compliance_tags: list[str] = field(default_factory=list)
 
     # Pagination
     limit: int = 100
@@ -83,11 +83,13 @@ class AuditQuery:
 # Compliance Report
 # ============================================================================
 
+
 @dataclass
 class ComplianceReport:
     """
     Compliance report for regulatory requirements.
     """
+
     # Report details
     report_id: str
     generated_at: datetime = field(default_factory=datetime.utcnow)
@@ -122,12 +124,12 @@ class ComplianceReport:
     sla_compliance_rate: float = 0.0
 
     # Audit entries included
-    audit_entries: List[AuditEntry] = field(default_factory=list)
+    audit_entries: list[AuditEntry] = field(default_factory=list)
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "report_id": self.report_id,
@@ -169,6 +171,7 @@ class ComplianceReport:
 # Audit Trail
 # ============================================================================
 
+
 class AuditTrail:
     """
     Immutable audit trail for HITL decisions.
@@ -177,7 +180,7 @@ class AuditTrail:
     compliance, forensics, and analytics.
     """
 
-    def __init__(self, storage_backend: Optional[Any] = None):
+    def __init__(self, storage_backend: Any | None = None):
         """
         Initialize audit trail.
 
@@ -189,7 +192,7 @@ class AuditTrail:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # In-memory storage (if no backend)
-        self._audit_log: List[AuditEntry] = []
+        self._audit_log: list[AuditEntry] = []
 
         # PII fields to redact
         self._pii_fields = [
@@ -212,9 +215,7 @@ class AuditTrail:
 
         self.logger.info("Audit Trail initialized")
 
-    def log_decision_created(
-        self, decision: HITLDecision, risk_score: RiskScore
-    ) -> AuditEntry:
+    def log_decision_created(self, decision: HITLDecision, risk_score: RiskScore) -> AuditEntry:
         """
         Log decision creation event.
 
@@ -269,8 +270,8 @@ class AuditTrail:
     def log_decision_executed(
         self,
         decision: HITLDecision,
-        execution_output: Dict[str, Any],
-        operator_action: Optional[OperatorAction] = None,
+        execution_output: dict[str, Any],
+        operator_action: OperatorAction | None = None,
     ) -> AuditEntry:
         """Log decision execution."""
         actor_type = "human" if operator_action else "ai"
@@ -295,9 +296,7 @@ class AuditTrail:
 
         return entry
 
-    def log_decision_approved(
-        self, decision: HITLDecision, operator_action: OperatorAction
-    ) -> AuditEntry:
+    def log_decision_approved(self, decision: HITLDecision, operator_action: OperatorAction) -> AuditEntry:
         """Log decision approval."""
         entry = AuditEntry(
             decision_id=decision.decision_id,
@@ -318,9 +317,7 @@ class AuditTrail:
 
         return entry
 
-    def log_decision_rejected(
-        self, decision: HITLDecision, operator_action: OperatorAction
-    ) -> AuditEntry:
+    def log_decision_rejected(self, decision: HITLDecision, operator_action: OperatorAction) -> AuditEntry:
         """Log decision rejection."""
         entry = AuditEntry(
             decision_id=decision.decision_id,
@@ -342,9 +339,7 @@ class AuditTrail:
 
         return entry
 
-    def log_decision_escalated(
-        self, decision: HITLDecision, escalation_reason: str, escalated_to: str
-    ) -> AuditEntry:
+    def log_decision_escalated(self, decision: HITLDecision, escalation_reason: str, escalated_to: str) -> AuditEntry:
         """Log decision escalation."""
         entry = AuditEntry(
             decision_id=decision.decision_id,
@@ -387,7 +382,7 @@ class AuditTrail:
 
         return entry
 
-    def query(self, query: AuditQuery, redact_pii: bool = True) -> List[AuditEntry]:
+    def query(self, query: AuditQuery, redact_pii: bool = True) -> list[AuditEntry]:
         """
         Query audit trail.
 
@@ -437,9 +432,7 @@ class AuditTrail:
 
         return entries
 
-    def generate_compliance_report(
-        self, start_time: datetime, end_time: datetime
-    ) -> ComplianceReport:
+    def generate_compliance_report(self, start_time: datetime, end_time: datetime) -> ComplianceReport:
         """
         Generate compliance report for time period.
 
@@ -453,9 +446,7 @@ class AuditTrail:
         import uuid
 
         # Query all entries in period
-        query = AuditQuery(
-            start_time=start_time, end_time=end_time, limit=100000
-        )
+        query = AuditQuery(start_time=start_time, end_time=end_time, limit=100000)
         entries = self.query(query, redact_pii=False)
 
         # Initialize report
@@ -512,9 +503,7 @@ class AuditTrail:
         if report.total_decisions > 0:
             report.automation_rate = report.auto_executed / report.total_decisions
             report.human_oversight_rate = report.human_reviewed / report.total_decisions
-            report.sla_compliance_rate = 1.0 - (
-                report.sla_violations / report.total_decisions
-            )
+            report.sla_compliance_rate = 1.0 - (report.sla_violations / report.total_decisions)
 
         self.logger.info(
             f"Compliance report generated: {report.report_id} "
@@ -523,7 +512,7 @@ class AuditTrail:
 
         return report
 
-    def _snapshot_decision(self, decision: HITLDecision) -> Dict[str, Any]:
+    def _snapshot_decision(self, decision: HITLDecision) -> dict[str, Any]:
         """Create snapshot of decision for audit."""
         return {
             "decision_id": decision.decision_id,
@@ -537,7 +526,7 @@ class AuditTrail:
             "created_at": decision.created_at.isoformat(),
         }
 
-    def _get_compliance_tags(self, decision: HITLDecision) -> List[str]:
+    def _get_compliance_tags(self, decision: HITLDecision) -> list[str]:
         """Get compliance tags for decision."""
         tags = []
 
@@ -573,10 +562,8 @@ class AuditTrail:
 
         self.metrics["total_entries"] += 1
 
-        self.logger.debug(
-            f"Audit entry stored: {entry.event_type} (decision={entry.decision_id})"
-        )
+        self.logger.debug(f"Audit entry stored: {entry.event_type} (decision={entry.decision_id})")
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get audit trail metrics."""
         return self.metrics.copy()

@@ -18,7 +18,7 @@ decisions in complex, real-world scenarios.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 class EmotionalStateMonitor:
@@ -41,52 +41,32 @@ class EmotionalStateMonitor:
         self.last_update_time: Optional[datetime] = None
         self.current_status: str = "monitoring_emotions"
 
-    async def update_emotional_state(
-        self, telemetry: Dict[str, Any], context: Optional[Dict[str, Any]] = None
-    ):
+    async def update_emotional_state(self, telemetry: Dict[str, Any], context: Optional[Dict[str, Any]] = None):
         """Updates the AI's emotional state based on incoming telemetry and context.
 
         Args:
             telemetry (Dict[str, Any]): Internal telemetry data (e.g., error rates, resource usage).
             context (Optional[Dict[str, Any]]): External contextual cues (e.g., threat level, task success).
         """
-        print(
-            f"[EmotionalStateMonitor] Updating emotional state based on telemetry: {telemetry}"
-        )
+        print(f"[EmotionalStateMonitor] Updating emotional state based on telemetry: {telemetry}")
         await asyncio.sleep(0.05)  # Simulate processing
 
         # Simulate emotional state changes based on telemetry and context
         if telemetry.get("error_rate", 0) > 0.1:
-            self.current_emotional_state["stress"] = min(
-                1.0, self.current_emotional_state["stress"] + 0.1
-            )
-            self.current_emotional_state["frustration"] = min(
-                1.0, self.current_emotional_state["frustration"] + 0.05
-            )
-            self.current_emotional_state["mood"] = max(
-                -1.0, self.current_emotional_state["mood"] - 0.1
-            )
+            self.current_emotional_state["stress"] = min(1.0, self.current_emotional_state["stress"] + 0.1)
+            self.current_emotional_state["frustration"] = min(1.0, self.current_emotional_state["frustration"] + 0.05)
+            self.current_emotional_state["mood"] = max(-1.0, self.current_emotional_state["mood"] - 0.1)
 
         if context and context.get("threat_level") == "high":
-            self.current_emotional_state["stress"] = min(
-                1.0, self.current_emotional_state["stress"] + 0.2
-            )
-            self.current_emotional_state["mood"] = max(
-                -1.0, self.current_emotional_state["mood"] - 0.2
-            )
+            self.current_emotional_state["stress"] = min(1.0, self.current_emotional_state["stress"] + 0.2)
+            self.current_emotional_state["mood"] = max(-1.0, self.current_emotional_state["mood"] - 0.2)
 
         if context and context.get("task_success", False):
-            self.current_emotional_state["confidence"] = min(
-                1.0, self.current_emotional_state["confidence"] + 0.1
-            )
-            self.current_emotional_state["mood"] = min(
-                1.0, self.current_emotional_state["mood"] + 0.1
-            )
+            self.current_emotional_state["confidence"] = min(1.0, self.current_emotional_state["confidence"] + 0.1)
+            self.current_emotional_state["mood"] = min(1.0, self.current_emotional_state["mood"] + 0.1)
 
         self.last_update_time = datetime.now()
-        print(
-            f"[EmotionalStateMonitor] New emotional state: {self.current_emotional_state}"
-        )
+        print(f"[EmotionalStateMonitor] New emotional state: {self.current_emotional_state}")
 
     async def get_current_state(self) -> Dict[str, Any]:
         """Retrieves the AI's current simulated emotional state.
@@ -97,9 +77,7 @@ class EmotionalStateMonitor:
         return {
             "status": self.current_status,
             "emotional_state": self.current_emotional_state,
-            "last_update": (
-                self.last_update_time.isoformat() if self.last_update_time else "N/A"
-            ),
+            "last_update": (self.last_update_time.isoformat() if self.last_update_time else "N/A"),
         }
 
     def adjust_emotional_parameter(self, parameter: str, value: float):
@@ -121,6 +99,4 @@ class EmotionalStateMonitor:
 
         self.current_emotional_state[parameter] = value
         self.last_update_time = datetime.now()
-        print(
-            f"[EmotionalStateMonitor] Emotional parameter '{parameter}' adjusted to {value:.2f}"
-        )
+        print(f"[EmotionalStateMonitor] Emotional parameter '{parameter}' adjusted to {value:.2f}")

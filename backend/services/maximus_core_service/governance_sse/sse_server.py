@@ -23,18 +23,16 @@ Quality: Production-ready, REGRA DE OURO compliant
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
-from typing import AsyncGenerator, Dict, List, Optional, Set
-from dataclasses import dataclass, asdict
 from collections import deque
+from collections.abc import AsyncGenerator
+from dataclasses import dataclass
+from datetime import UTC, datetime
 
 # HITL imports
 from hitl import (
-    HITLDecision,
     DecisionQueue,
-    RiskLevel,
     DecisionStatus,
-    ActionType,
+    HITLDecision,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,6 +42,7 @@ logger = logging.getLogger(__name__)
 # SSE Event Models
 # ============================================================================
 
+
 @dataclass
 class SSEEvent:
     """
@@ -51,13 +50,14 @@ class SSEEvent:
 
     Format compatible with W3C Server-Sent Events specification.
     """
+
     # Event metadata
     event_type: str  # "decision_pending", "decision_resolved", "heartbeat"
     event_id: str  # Unique event ID
     timestamp: str  # ISO format timestamp
 
     # Event data
-    data: Dict
+    data: dict
 
     def to_sse_format(self) -> str:
         """
@@ -78,7 +78,7 @@ class SSEEvent:
 
         # Data can be multiline JSON
         data_json = json.dumps(self.data, default=str)
-        for line in data_json.split('\n'):
+        for line in data_json.split("\n"):
             lines.append(f"data: {line}")
 
         # SSE requires double newline to end event
@@ -88,7 +88,7 @@ class SSEEvent:
         return "\n".join(lines)
 
 
-def decision_to_sse_data(decision: HITLDecision) -> Dict:
+def decision_to_sse_data(decision: HITLDecision) -> dict:
     """
     Convert HITLDecision to SSE data payload.
 
@@ -105,20 +105,16 @@ def decision_to_sse_data(decision: HITLDecision) -> Dict:
         "risk_level": decision.risk_level.value,
         "status": decision.status.value,
         "confidence": decision.context.confidence,
-
         # Context
         "context": decision.context.metadata,
         "reasoning": decision.context.ai_reasoning,
         "recommended_action": decision.context.action_params.get("action", "review"),
-
         # Threat info
         "threat_score": decision.context.threat_score,
         "threat_type": decision.context.threat_type,
-
         # Timing
         "created_at": decision.created_at.isoformat(),
         "sla_deadline": decision.sla_deadline.isoformat() if decision.sla_deadline else None,
-
         # Metadata
         "automation_level": decision.automation_level.value,
     }
@@ -128,9 +124,11 @@ def decision_to_sse_data(decision: HITLDecision) -> Dict:
 # Connection Manager
 # ============================================================================
 
+
 @dataclass
 class OperatorConnection:
     """Active operator SSE connection."""
+
     operator_id: str
     session_id: str
     queue: asyncio.Queue
@@ -160,9 +158,9 @@ class ConnectionManager:
         Args:
             heartbeat_interval: Seconds between heartbeats
         """
-        self.connections: Dict[str, OperatorConnection] = {}
+        self.connections: dict[str, OperatorConnection] = {}
         self.heartbeat_interval = heartbeat_interval
-        self._heartbeat_task: Optional[asyncio.Task] = None
+        self._heartbeat_task: asyncio.Task | None = None
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Metrics
@@ -173,9 +171,7 @@ class ConnectionManager:
             "total_events_failed": 0,
         }
 
-    async def add_connection(
-        self, operator_id: str, session_id: str
-    ) -> OperatorConnection:
+    async def add_connection(self, operator_id: str, session_id: str) -> OperatorConnection:
         """
         Register new operator connection.
 
@@ -190,8 +186,8 @@ class ConnectionManager:
             operator_id=operator_id,
             session_id=session_id,
             queue=asyncio.Queue(maxsize=100),  # Buffer 100 events
-            connected_at=datetime.now(timezone.utc),
-            last_heartbeat=datetime.now(timezone.utc),
+            connected_at=datetime.now(UTC),
+            last_heartbeat=datetime.now(UTC),
         )
 
         connection_key = f"{operator_id}:{session_id}"
@@ -227,7 +223,7 @@ class ConnectionManager:
 
             self.metrics["active_connections"] = len(self.connections)
 
-            duration = (datetime.now(timezone.utc) - connection.connected_at).total_seconds()
+            duration = (datetime.now(UTC) - connection.connected_at).total_seconds()
 
             self.logger.info(
                 f"Operator disconnected: {operator_id} "
@@ -235,7 +231,7 @@ class ConnectionManager:
                 f"events_sent={connection.events_sent})"
             )
 
-    async def broadcast_event(self, event: SSEEvent, target_operators: Optional[List[str]] = None):
+    async def broadcast_event(self, event: SSEEvent, target_operators: list[str] | None = None):
         """
         Broadcast SSE event to operators.
 
@@ -263,18 +259,14 @@ class ConnectionManager:
             except asyncio.QueueFull:
                 connection.events_failed += 1
                 failed += 1
-                self.logger.warning(
-                    f"Event queue full for {connection.operator_id}, event dropped"
-                )
+                self.logger.warning(f"Event queue full for {connection.operator_id}, event dropped")
 
         self.metrics["total_events_sent"] += successful
         self.metrics["total_events_failed"] += failed
 
-        self.logger.debug(
-            f"Broadcast event {event.event_id}: {successful} sent, {failed} failed"
-        )
+        self.logger.debug(f"Broadcast event {event.event_id}: {successful} sent, {failed} failed")
 
-    def get_connection(self, operator_id: str, session_id: str) -> Optional[OperatorConnection]:
+    def get_connection(self, operator_id: str, session_id: str) -> OperatorConnection | None:
         """Get connection by operator and session."""
         connection_key = f"{operator_id}:{session_id}"
         return self.connections.get(connection_key)
@@ -286,8 +278,8 @@ class ConnectionManager:
 
             heartbeat_event = SSEEvent(
                 event_type="heartbeat",
-                event_id=f"hb_{datetime.now(timezone.utc).timestamp()}",
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                event_id=f"hb_{datetime.now(UTC).timestamp()}",
+                timestamp=datetime.now(UTC).isoformat(),
                 data={"message": "heartbeat", "active_connections": len(self.connections)},
             )
 
@@ -295,7 +287,7 @@ class ConnectionManager:
 
             # Update last_heartbeat for all connections
             for connection in self.connections.values():
-                connection.last_heartbeat = datetime.now(timezone.utc)
+                connection.last_heartbeat = datetime.now(UTC)
 
         self.logger.info("Heartbeat loop stopped (no active connections)")
 
@@ -303,6 +295,7 @@ class ConnectionManager:
 # ============================================================================
 # Governance SSE Server
 # ============================================================================
+
 
 class GovernanceSSEServer:
     """
@@ -344,7 +337,7 @@ class GovernanceSSEServer:
         self.recent_events: deque = deque(maxlen=50)
 
         # Background tasks
-        self._monitor_task: Optional[asyncio.Task] = None
+        self._monitor_task: asyncio.Task | None = None
 
         # Metrics
         self.metrics = {
@@ -355,9 +348,7 @@ class GovernanceSSEServer:
 
         self.logger.info("Governance SSE Server initialized")
 
-    async def stream_decisions(
-        self, operator_id: str, session_id: str
-    ) -> AsyncGenerator[SSEEvent, None]:
+    async def stream_decisions(self, operator_id: str, session_id: str) -> AsyncGenerator[SSEEvent, None]:
         """
         Stream pending decisions to operator via SSE.
 
@@ -384,7 +375,7 @@ class GovernanceSSEServer:
             welcome_event = SSEEvent(
                 event_type="connected",
                 event_id=f"conn_{session_id}",
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 data={
                     "message": "Connected to Governance SSE Stream",
                     "operator_id": operator_id,
@@ -401,12 +392,10 @@ class GovernanceSSEServer:
             while True:
                 try:
                     # Wait for event with timeout
-                    event = await asyncio.wait_for(
-                        connection.queue.get(), timeout=self.poll_interval
-                    )
+                    event = await asyncio.wait_for(connection.queue.get(), timeout=self.poll_interval)
                     yield event
 
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     # No events in queue, continue
                     continue
 
@@ -427,7 +416,7 @@ class GovernanceSSEServer:
         self.logger.info("Starting queue monitor")
 
         # Track seen decisions to avoid duplicates
-        seen_decisions: Set[str] = set()
+        seen_decisions: set[str] = set()
 
         try:
             while self.connection_manager.connections:
@@ -447,7 +436,7 @@ class GovernanceSSEServer:
                     event = SSEEvent(
                         event_type="decision_pending",
                         event_id=f"dec_{decision.decision_id}",
-                        timestamp=datetime.now(timezone.utc).isoformat(),
+                        timestamp=datetime.now(UTC).isoformat(),
                         data=decision_to_sse_data(decision),
                     )
 
@@ -460,10 +449,7 @@ class GovernanceSSEServer:
                     self.metrics["decisions_streamed"] += 1
                     self.metrics["events_generated"] += 1
 
-                    self.logger.debug(
-                        f"Broadcasted decision {decision.decision_id} "
-                        f"(risk={decision.risk_level.value})"
-                    )
+                    self.logger.debug(f"Broadcasted decision {decision.decision_id} (risk={decision.risk_level.value})")
 
                 # Cleanup stale seen_decisions (keep last 1000)
                 if len(seen_decisions) > 1000:
@@ -484,9 +470,7 @@ class GovernanceSSEServer:
         finally:
             self.logger.info("Queue monitor stopped")
 
-    async def notify_decision_resolved(
-        self, decision_id: str, status: DecisionStatus, operator_id: str
-    ):
+    async def notify_decision_resolved(self, decision_id: str, status: DecisionStatus, operator_id: str):
         """
         Notify all operators that a decision has been resolved.
 
@@ -498,19 +482,19 @@ class GovernanceSSEServer:
         event = SSEEvent(
             event_type="decision_resolved",
             event_id=f"resolved_{decision_id}",
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             data={
                 "decision_id": decision_id,
                 "status": status.value,
                 "resolved_by": operator_id,
-                "resolved_at": datetime.now(timezone.utc).isoformat(),
+                "resolved_at": datetime.now(UTC).isoformat(),
             },
         )
 
         await self.connection_manager.broadcast_event(event)
         self.metrics["events_generated"] += 1
 
-    def get_health(self) -> Dict:
+    def get_health(self) -> dict:
         """
         Get server health status.
 
@@ -526,7 +510,7 @@ class GovernanceSSEServer:
             "polls_executed": self.metrics["polls_executed"],
             "queue_size": self.decision_queue.get_total_size(),
             "recent_events_buffered": len(self.recent_events),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     def get_active_connections(self) -> int:

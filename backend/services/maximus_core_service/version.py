@@ -15,9 +15,11 @@ RELEASE_NAME = "MAXIMUS AI 3.0 - Ethical AI for Cybersecurity"
 RELEASE_DATE = "2025-10-06"
 REGRA_DE_OURO_COMPLIANCE = "10/10"
 
+
 def get_version() -> str:
     """Get version string."""
     return __version__
+
 
 def get_version_info() -> dict:
     """Get detailed version information."""
@@ -27,5 +29,5 @@ def get_version_info() -> dict:
         "status": __status__,
         "release_name": RELEASE_NAME,
         "release_date": RELEASE_DATE,
-        "regra_de_ouro": REGRA_DE_OURO_COMPLIANCE
+        "regra_de_ouro": REGRA_DE_OURO_COMPLIANCE,
     }

@@ -15,17 +15,18 @@ Status: ✅ REGRA DE OURO 10/10
 """
 
 import sys
-from pathlib import Path
-from typing import Dict, Any, Tuple
 import time
+from pathlib import Path
+from typing import Any
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
+    import numpy as np
     import torch
     import torch.nn as nn
-    import numpy as np
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -34,12 +35,10 @@ except ImportError:
     sys.exit(1)
 
 from training.gpu_trainer import GPUTrainer
-from performance.profiler import ModelProfiler
-from fairness.bias_detector import BiasDetector
-from privacy.privacy_accountant import PrivacyAccountant
-from xai.lime_cybersec import LIMECybersecExplainer
-from ethics.integration_engine import EthicalIntegrationEngine
+
 from ethics.consequentialist_engine import ConsequentialistEngine
+from fairness.bias_detector import BiasDetector
+from performance.profiler import ModelProfiler
 
 
 class ThreatDetectionModel(nn.Module):
@@ -71,7 +70,7 @@ class ThreatDetectionModel(nn.Module):
         return x
 
 
-def step1_prepare_dataset() -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def step1_prepare_dataset() -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Step 1: Prepare synthetic cybersecurity dataset.
 
@@ -99,15 +98,15 @@ def step1_prepare_dataset() -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, t
     X_test[malware_mask_test, [0, 2, 5]] += 2.0
     y_test = malware_mask_test.long()
 
-    print(f"\n📊 Dataset Statistics:")
+    print("\n📊 Dataset Statistics:")
     print(f"   Training samples: {len(X_train)}")
     print(f"   Test samples: {len(X_test)}")
     print(f"   Features: {X_train.shape[1]}")
-    print(f"   Classes: 2 (benign=0, malware=1)")
-    print(f"\n   Training class distribution:")
+    print("   Classes: 2 (benign=0, malware=1)")
+    print("\n   Training class distribution:")
     print(f"     Benign:  {(y_train == 0).sum().item()} ({(y_train == 0).float().mean().item():.1%})")
     print(f"     Malware: {(y_train == 1).sum().item()} ({(y_train == 1).float().mean().item():.1%})")
-    print(f"\n   Test class distribution:")
+    print("\n   Test class distribution:")
     print(f"     Benign:  {(y_test == 0).sum().item()} ({(y_test == 0).float().mean().item():.1%})")
     print(f"     Malware: {(y_test == 1).sum().item()} ({(y_test == 1).float().mean().item():.1%})")
 
@@ -115,11 +114,8 @@ def step1_prepare_dataset() -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, t
 
 
 def step2_train_model(
-    X_train: torch.Tensor,
-    y_train: torch.Tensor,
-    X_test: torch.Tensor,
-    y_test: torch.Tensor
-) -> Tuple[nn.Module, Dict[str, Any]]:
+    X_train: torch.Tensor, y_train: torch.Tensor, X_test: torch.Tensor, y_test: torch.Tensor
+) -> tuple[nn.Module, dict[str, Any]]:
     """
     Step 2: Train model with GPU acceleration and AMP.
 
@@ -139,11 +135,11 @@ def step2_train_model(
     # Initialize model
     model = ThreatDetectionModel()
 
-    print(f"\n🏗️  Model Architecture:")
-    print(f"   Input: 10 features")
-    print(f"   Hidden Layer 1: 64 neurons (ReLU, Dropout 0.2)")
-    print(f"   Hidden Layer 2: 32 neurons (ReLU, Dropout 0.2)")
-    print(f"   Output: 2 classes (benign, malware)")
+    print("\n🏗️  Model Architecture:")
+    print("   Input: 10 features")
+    print("   Hidden Layer 1: 64 neurons (ReLU, Dropout 0.2)")
+    print("   Hidden Layer 2: 32 neurons (ReLU, Dropout 0.2)")
+    print("   Output: 2 classes (benign, malware)")
     total_params = sum(p.numel() for p in model.parameters())
     print(f"   Total Parameters: {total_params:,}")
 
@@ -151,41 +147,33 @@ def step2_train_model(
     trainer = GPUTrainer(
         model=model,
         learning_rate=0.001,
-        use_amp=True  # Automatic Mixed Precision
+        use_amp=True,  # Automatic Mixed Precision
     )
 
-    print(f"\n🚀 Training Configuration:")
-    print(f"   Optimizer: Adam")
-    print(f"   Learning Rate: 0.001")
-    print(f"   Batch Size: 32")
-    print(f"   Epochs: 10")
+    print("\n🚀 Training Configuration:")
+    print("   Optimizer: Adam")
+    print("   Learning Rate: 0.001")
+    print("   Batch Size: 32")
+    print("   Epochs: 10")
     print(f"   Device: {trainer.device}")
-    print(f"   AMP: Enabled (faster training)")
+    print("   AMP: Enabled (faster training)")
 
     # Create dataloaders
     train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
     test_dataset = torch.utils.data.TensorDataset(X_test, y_test)
 
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=32, shuffle=True
-    )
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=32, shuffle=False
-    )
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     # Train model
-    print(f"\n🔄 Training Progress:")
+    print("\n🔄 Training Progress:")
     start_time = time.time()
 
-    metrics = trainer.train(
-        train_loader=train_loader,
-        val_loader=test_loader,
-        epochs=10
-    )
+    metrics = trainer.train(train_loader=train_loader, val_loader=test_loader, epochs=10)
 
     training_time = time.time() - start_time
 
-    print(f"\n✅ Training Completed:")
+    print("\n✅ Training Completed:")
     print(f"   Total Time: {training_time:.2f} seconds")
     print(f"   Final Train Loss: {metrics['train_loss'][-1]:.4f}")
     print(f"   Final Train Accuracy: {metrics['train_accuracy'][-1]:.2%}")
@@ -195,11 +183,7 @@ def step2_train_model(
     return model, metrics
 
 
-def step3_evaluate_performance(
-    model: nn.Module,
-    X_test: torch.Tensor,
-    y_test: torch.Tensor
-) -> Dict[str, Any]:
+def step3_evaluate_performance(model: nn.Module, X_test: torch.Tensor, y_test: torch.Tensor) -> dict[str, Any]:
     """
     Step 3: Evaluate model performance with profiling.
 
@@ -218,7 +202,7 @@ def step3_evaluate_performance(
     # Profile model
     profiler = ModelProfiler()
 
-    print(f"\n⚡ Profiling Model:")
+    print("\n⚡ Profiling Model:")
     model.eval()
     with torch.no_grad():
         # Single sample latency
@@ -233,7 +217,7 @@ def step3_evaluate_performance(
         latency_p95 = np.percentile(latencies, 95)
         latency_p99 = np.percentile(latencies, 99)
 
-        print(f"   Latency (single sample):")
+        print("   Latency (single sample):")
         print(f"     P50: {latency_p50:.2f}ms")
         print(f"     P95: {latency_p95:.2f}ms")
         print(f"     P99: {latency_p99:.2f}ms")
@@ -264,7 +248,7 @@ def step3_evaluate_performance(
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
         f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
 
-        print(f"\n📊 Accuracy Metrics:")
+        print("\n📊 Accuracy Metrics:")
         print(f"   Accuracy:  {accuracy:.2%}")
         print(f"   Precision: {precision:.2%}")
         print(f"   Recall:    {recall:.2%}")
@@ -278,17 +262,13 @@ def step3_evaluate_performance(
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
-        "f1_score": f1_score
+        "f1_score": f1_score,
     }
 
     return performance
 
 
-def step4_check_fairness(
-    model: nn.Module,
-    X_test: torch.Tensor,
-    y_test: torch.Tensor
-) -> Dict[str, Any]:
+def step4_check_fairness(model: nn.Module, X_test: torch.Tensor, y_test: torch.Tensor) -> dict[str, Any]:
     """
     Step 4: Check model fairness across protected attributes.
 
@@ -308,8 +288,8 @@ def step4_check_fairness(
     # In real system, this would come from actual data
     protected_attr = (X_test[:, 0] > 0).long()  # Split based on feature 0
 
-    print(f"\n🔍 Fairness Check:")
-    print(f"   Protected Attribute: IP Subnet")
+    print("\n🔍 Fairness Check:")
+    print("   Protected Attribute: IP Subnet")
     print(f"   Group A: {(protected_attr == 0).sum().item()} samples")
     print(f"   Group B: {(protected_attr == 1).sum().item()} samples")
 
@@ -342,14 +322,14 @@ def step4_check_fairness(
 
     equal_opportunity_diff = abs(group_a_tpr - group_b_tpr)
 
-    print(f"\n📊 Fairness Metrics:")
-    print(f"   Demographic Parity:")
+    print("\n📊 Fairness Metrics:")
+    print("   Demographic Parity:")
     print(f"     Group A positive rate: {group_a_positive_rate:.2%}")
     print(f"     Group B positive rate: {group_b_positive_rate:.2%}")
     print(f"     Difference: {demographic_parity_diff:.2%} (threshold: 10%)")
     print(f"     {'✅ FAIR' if demographic_parity_diff < 0.10 else '❌ BIASED'}")
 
-    print(f"\n   Equal Opportunity:")
+    print("\n   Equal Opportunity:")
     print(f"     Group A TPR: {group_a_tpr:.2%}")
     print(f"     Group B TPR: {group_b_tpr:.2%}")
     print(f"     Difference: {equal_opportunity_diff:.2%} (threshold: 10%)")
@@ -358,16 +338,13 @@ def step4_check_fairness(
     fairness = {
         "demographic_parity_diff": demographic_parity_diff,
         "equal_opportunity_diff": equal_opportunity_diff,
-        "fair": demographic_parity_diff < 0.10 and equal_opportunity_diff < 0.10
+        "fair": demographic_parity_diff < 0.10 and equal_opportunity_diff < 0.10,
     }
 
     return fairness
 
 
-def step5_ethical_compliance(
-    performance: Dict[str, Any],
-    fairness: Dict[str, Any]
-) -> Dict[str, Any]:
+def step5_ethical_compliance(performance: dict[str, Any], fairness: dict[str, Any]) -> dict[str, Any]:
     """
     Step 5: Check ethical compliance of trained model.
 
@@ -390,26 +367,22 @@ def step5_ethical_compliance(
             "type": "deploy_model",
             "model_name": "threat_detector_v3",
             "performance": performance,
-            "fairness": fairness
+            "fairness": fairness,
         },
         "context": {
             "stakeholders": ["security_team", "users", "compliance_team"],
-            "expected_benefits": [
-                "Improved threat detection",
-                "Faster response times",
-                "Reduced false positives"
-            ],
+            "expected_benefits": ["Improved threat detection", "Faster response times", "Reduced false positives"],
             "potential_risks": [
                 "False negatives (missed threats)",
                 "False positives (user disruption)",
-                "Bias against certain user groups"
-            ]
-        }
+                "Bias against certain user groups",
+            ],
+        },
     }
 
-    print(f"\n🔍 Ethical Evaluation:")
-    print(f"   Framework: Consequentialist (Utilitarian)")
-    print(f"   Evaluating: Model deployment decision")
+    print("\n🔍 Ethical Evaluation:")
+    print("   Framework: Consequentialist (Utilitarian)")
+    print("   Evaluating: Model deployment decision")
 
     evaluation = ethics_engine.evaluate(action)
 
@@ -417,32 +390,28 @@ def step5_ethical_compliance(
     print(f"   Decision: {evaluation['decision']}")
     print(f"   Reasoning: {evaluation['reasoning']}")
 
-    if fairness['fair'] and performance['accuracy'] > 0.85:
-        print(f"\n✅ ETHICAL COMPLIANCE: PASSED")
-        print(f"   Model meets fairness standards")
-        print(f"   Model meets performance standards")
-        print(f"   Expected utility is positive")
+    if fairness["fair"] and performance["accuracy"] > 0.85:
+        print("\n✅ ETHICAL COMPLIANCE: PASSED")
+        print("   Model meets fairness standards")
+        print("   Model meets performance standards")
+        print("   Expected utility is positive")
     else:
-        print(f"\n❌ ETHICAL COMPLIANCE: FAILED")
-        if not fairness['fair']:
-            print(f"   Fairness issue detected")
-        if performance['accuracy'] <= 0.85:
-            print(f"   Performance below threshold")
+        print("\n❌ ETHICAL COMPLIANCE: FAILED")
+        if not fairness["fair"]:
+            print("   Fairness issue detected")
+        if performance["accuracy"] <= 0.85:
+            print("   Performance below threshold")
 
     compliance = {
-        "ethical_score": evaluation['score'],
-        "decision": evaluation['decision'],
-        "compliant": fairness['fair'] and performance['accuracy'] > 0.85
+        "ethical_score": evaluation["score"],
+        "decision": evaluation["decision"],
+        "compliant": fairness["fair"] and performance["accuracy"] > 0.85,
     }
 
     return compliance
 
 
-def step6_deployment(
-    model: nn.Module,
-    compliance: Dict[str, Any],
-    performance: Dict[str, Any]
-) -> Dict[str, Any]:
+def step6_deployment(model: nn.Module, compliance: dict[str, Any], performance: dict[str, Any]) -> dict[str, Any]:
     """
     Step 6: Deploy model to production (if compliant).
 
@@ -458,49 +427,45 @@ def step6_deployment(
     print("STEP 6: MODEL DEPLOYMENT")
     print("=" * 80)
 
-    if compliance['compliant']:
-        print(f"\n🚀 Deploying Model to Production:")
-        print(f"   Model: threat_detector_v3")
+    if compliance["compliant"]:
+        print("\n🚀 Deploying Model to Production:")
+        print("   Model: threat_detector_v3")
         print(f"   Accuracy: {performance['accuracy']:.2%}")
         print(f"   Latency P50: {performance['latency_p50_ms']:.2f}ms")
         print(f"   Ethical Score: {compliance['ethical_score']:.2f}")
 
         # Simulate deployment steps
-        print(f"\n   Deployment Steps:")
-        print(f"   ✅ Model serialization (ONNX)")
-        print(f"   ✅ Docker image build")
-        print(f"   ✅ Push to container registry")
-        print(f"   ✅ Kubernetes deployment")
-        print(f"   ✅ Health check passed")
-        print(f"   ✅ Traffic gradually ramped (0% → 10% → 50% → 100%)")
+        print("\n   Deployment Steps:")
+        print("   ✅ Model serialization (ONNX)")
+        print("   ✅ Docker image build")
+        print("   ✅ Push to container registry")
+        print("   ✅ Kubernetes deployment")
+        print("   ✅ Health check passed")
+        print("   ✅ Traffic gradually ramped (0% → 10% → 50% → 100%)")
 
         deployment = {
             "deployed": True,
             "status": "LIVE",
             "version": "v3.0.0",
             "rollback_enabled": True,
-            "monitoring_enabled": True
+            "monitoring_enabled": True,
         }
 
-        print(f"\n✅ DEPLOYMENT SUCCESSFUL")
-        print(f"   Model is now serving production traffic")
-        print(f"   Rollback available if issues detected")
-        print(f"   Monitoring: Prometheus + Grafana")
+        print("\n✅ DEPLOYMENT SUCCESSFUL")
+        print("   Model is now serving production traffic")
+        print("   Rollback available if issues detected")
+        print("   Monitoring: Prometheus + Grafana")
 
     else:
-        print(f"\n❌ DEPLOYMENT BLOCKED")
-        print(f"   Reason: Ethical compliance failed")
-        print(f"   Action: Model requires improvement before deployment")
-        print(f"   Recommendation:")
-        print(f"   - Improve fairness metrics")
-        print(f"   - Collect more diverse training data")
-        print(f"   - Retrain with debiasing techniques")
+        print("\n❌ DEPLOYMENT BLOCKED")
+        print("   Reason: Ethical compliance failed")
+        print("   Action: Model requires improvement before deployment")
+        print("   Recommendation:")
+        print("   - Improve fairness metrics")
+        print("   - Collect more diverse training data")
+        print("   - Retrain with debiasing techniques")
 
-        deployment = {
-            "deployed": False,
-            "status": "BLOCKED",
-            "reason": "ETHICAL_COMPLIANCE_FAILED"
-        }
+        deployment = {"deployed": False, "status": "BLOCKED", "reason": "ETHICAL_COMPLIANCE_FAILED"}
 
     return deployment
 
@@ -536,10 +501,10 @@ def main():
     print("\n" + "=" * 80)
     print("WORKFLOW SUMMARY")
     print("=" * 80)
-    print(f"\n✅ Training: Completed")
+    print("\n✅ Training: Completed")
     print(f"   Accuracy: {performance['accuracy']:.2%}")
     print(f"   F1 Score: {performance['f1_score']:.2%}")
-    print(f"\n✅ Performance: Evaluated")
+    print("\n✅ Performance: Evaluated")
     print(f"   Latency P50: {performance['latency_p50_ms']:.2f}ms")
     print(f"   Throughput: {performance['throughput_samples_per_sec']:.2f} samples/sec")
     print(f"\n✅ Fairness: {'PASSED' if fairness['fair'] else 'FAILED'}")

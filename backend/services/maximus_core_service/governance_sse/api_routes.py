@@ -19,9 +19,7 @@ Quality: Production-ready, REGRA DE OURO compliant
 """
 
 import logging
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
-from uuid import uuid4
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -29,16 +27,17 @@ from pydantic import BaseModel, Field
 
 # HITL imports
 from hitl import (
-    HITLDecision,
     DecisionQueue,
-    OperatorInterface,
     DecisionStatus,
+    HITLDecision,
+    OperatorInterface,
     RiskLevel,
 )
 
+from .event_broadcaster import EventBroadcaster
+
 # Local imports
 from .sse_server import GovernanceSSEServer, SSEEvent
-from .event_broadcaster import EventBroadcaster
 
 logger = logging.getLogger(__name__)
 
@@ -47,17 +46,20 @@ logger = logging.getLogger(__name__)
 # Request/Response Models
 # ============================================================================
 
+
 class SessionCreateRequest(BaseModel):
     """Request to create operator session."""
+
     operator_id: str = Field(..., description="Unique operator identifier")
     operator_name: str = Field(..., description="Operator display name")
     operator_role: str = Field(default="soc_operator", description="Operator role")
-    ip_address: Optional[str] = Field(None, description="Client IP address")
-    user_agent: Optional[str] = Field(None, description="Client user agent")
+    ip_address: str | None = Field(None, description="Client IP address")
+    user_agent: str | None = Field(None, description="Client user agent")
 
 
 class SessionCreateResponse(BaseModel):
     """Response from session creation."""
+
     session_id: str
     operator_id: str
     expires_at: str
@@ -66,9 +68,10 @@ class SessionCreateResponse(BaseModel):
 
 class DecisionActionRequest(BaseModel):
     """Request to act on a decision."""
+
     session_id: str = Field(..., description="Active session ID")
-    reasoning: Optional[str] = Field(None, description="Reasoning for action")
-    comment: Optional[str] = Field(None, description="Additional comments")
+    reasoning: str | None = Field(None, description="Reasoning for action")
+    comment: str | None = Field(None, description="Additional comments")
 
 
 class ApproveDecisionRequest(DecisionActionRequest):
@@ -78,33 +81,38 @@ class ApproveDecisionRequest(DecisionActionRequest):
     - session_id: Operator session identifier
     - comment: Optional approval comments
     """
+
     ...
 
 
 class RejectDecisionRequest(DecisionActionRequest):
     """Request to reject a decision."""
+
     reason: str = Field(..., description="Rejection reason (required)")
 
 
 class EscalateDecisionRequest(DecisionActionRequest):
     """Request to escalate a decision."""
-    escalation_target: Optional[str] = Field(None, description="Target role/person")
+
+    escalation_target: str | None = Field(None, description="Target role/person")
     escalation_reason: str = Field(..., description="Why escalation is needed")
 
 
 class DecisionActionResponse(BaseModel):
     """Response from decision action."""
+
     decision_id: str
     action: str  # "approved", "rejected", "escalated"
     status: str
     message: str
-    executed: Optional[bool] = None
-    result: Optional[Dict] = None
-    error: Optional[str] = None
+    executed: bool | None = None
+    result: dict | None = None
+    error: str | None = None
 
 
 class HealthResponse(BaseModel):
     """Health check response."""
+
     status: str
     active_connections: int
     total_connections: int
@@ -115,14 +123,16 @@ class HealthResponse(BaseModel):
 
 class PendingStatsResponse(BaseModel):
     """Pending decisions statistics."""
+
     total_pending: int
-    by_risk_level: Dict[str, int]
-    oldest_pending_seconds: Optional[int]
+    by_risk_level: dict[str, int]
+    oldest_pending_seconds: int | None
     sla_violations: int
 
 
 class OperatorStatsResponse(BaseModel):
     """Operator statistics."""
+
     operator_id: str
     total_sessions: int
     total_decisions_reviewed: int
@@ -139,11 +149,12 @@ class OperatorStatsResponse(BaseModel):
 # API Router Factory
 # ============================================================================
 
+
 def create_governance_api(
     decision_queue: DecisionQueue,
     operator_interface: OperatorInterface,
-    sse_server: Optional[GovernanceSSEServer] = None,
-    event_broadcaster: Optional[EventBroadcaster] = None,
+    sse_server: GovernanceSSEServer | None = None,
+    event_broadcaster: EventBroadcaster | None = None,
 ) -> APIRouter:
     """
     Create FastAPI router for Governance API.
@@ -222,8 +233,8 @@ def create_governance_api(
                 # Send error event
                 error_event = SSEEvent(
                     event_type="error",
-                    event_id=f"error_{datetime.now(timezone.utc).timestamp()}",
-                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    event_id=f"error_{datetime.now(UTC).timestamp()}",
+                    timestamp=datetime.now(UTC).isoformat(),
                     data={"error": str(e), "message": "Stream error occurred"},
                 )
                 yield error_event.to_sse_format()
@@ -274,14 +285,11 @@ def create_governance_api(
 
             # Find oldest decision
             oldest = min(pending, key=lambda d: d.created_at)
-            age = (datetime.now(timezone.utc) - oldest.created_at).total_seconds()
+            age = (datetime.now(UTC) - oldest.created_at).total_seconds()
             oldest_pending_seconds = int(age)
 
         # Count SLA violations
-        sla_violations = sum(
-            1 for d in pending
-            if d.sla_deadline and datetime.now(timezone.utc) > d.sla_deadline
-        )
+        sla_violations = sum(1 for d in pending if d.sla_deadline and datetime.now(UTC) > d.sla_deadline)
 
         return PendingStatsResponse(
             total_pending=total,
@@ -343,8 +351,7 @@ def create_governance_api(
 
         # Find active sessions for this operator
         active_sessions = [
-            session for session in operator_interface._sessions.values()
-            if session.operator_id == operator_id
+            session for session in operator_interface._sessions.values() if session.operator_id == operator_id
         ]
 
         # If no metrics and no active sessions, return zeros
@@ -542,7 +549,7 @@ def create_governance_api(
     # ========================================================================
 
     @router.post("/test/enqueue")
-    async def enqueue_test_decision(decision_dict: Dict):
+    async def enqueue_test_decision(decision_dict: dict):
         """
         Enqueue a test decision (for E2E testing only).
 
@@ -557,8 +564,9 @@ def create_governance_api(
         """
         try:
             # Import required types
-            from hitl import DecisionContext, AutomationLevel, ActionType
-            from datetime import datetime, timedelta, timezone
+            from datetime import datetime, timedelta
+
+            from hitl import ActionType, AutomationLevel, DecisionContext
 
             # Parse decision dict into HITLDecision
             context_dict = decision_dict.get("context", {})
@@ -573,12 +581,12 @@ def create_governance_api(
             )
 
             decision = HITLDecision(
-                decision_id=decision_dict.get("decision_id", f"test_{datetime.now(timezone.utc).timestamp()}"),
+                decision_id=decision_dict.get("decision_id", f"test_{datetime.now(UTC).timestamp()}"),
                 context=context,
                 risk_level=RiskLevel(decision_dict.get("risk_level", "high")),
                 automation_level=AutomationLevel(decision_dict.get("automation_level", "supervised")),
-                created_at=datetime.now(timezone.utc),
-                sla_deadline=datetime.now(timezone.utc) + timedelta(minutes=10),
+                created_at=datetime.now(UTC),
+                sla_deadline=datetime.now(UTC) + timedelta(minutes=10),
                 status=DecisionStatus.PENDING,
             )
 

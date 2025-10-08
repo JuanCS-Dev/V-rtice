@@ -27,7 +27,7 @@ PRODUCTION-READY: Real metrics, real actions, PostgreSQL knowledge base, no mock
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -39,9 +39,11 @@ logger = logging.getLogger(__name__)
 # MMEI Integration (optional dependency)
 try:
     import sys
-    sys.path.insert(0, '/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+    sys.path.insert(0, "/home/juan/vertice-dev/backend/services/maximus_core_service")
     from consciousness.integration import MMEIClient
     from consciousness.mmei.monitor import AbstractNeeds
+
     MMEI_AVAILABLE = True
 except ImportError:
     MMEI_AVAILABLE = False
@@ -119,8 +121,8 @@ class HomeostaticController:
         self.agent_metrics: Dict[str, Any] = {}
 
         # MMEI Integration (consciousness needs)
-        self.mmei_client: Optional['MMEIClient'] = None
-        self.current_needs: Optional['AbstractNeeds'] = None
+        self.mmei_client: Optional["MMEIClient"] = None
+        self.current_needs: Optional["AbstractNeeds"] = None
 
         # Thresholds (fuzzy logic boundaries)
         self.cpu_threshold_high = 0.8  # 80%
@@ -148,7 +150,7 @@ class HomeostaticController:
 
     # ==================== MMEI INTEGRATION ====================
 
-    def set_mmei_client(self, client: 'MMEIClient') -> None:
+    def set_mmei_client(self, client: "MMEIClient") -> None:
         """
         Set MMEI client for consciousness needs integration.
 
@@ -557,10 +559,7 @@ class HomeostaticController:
             new_state = SystemState.REPOUSO
 
         if new_state != self.current_state:
-            logger.info(
-                f"Controller {self.id} state transition: "
-                f"{self.current_state} -> {new_state}"
-            )
+            logger.info(f"Controller {self.id} state transition: {self.current_state} -> {new_state}")
             self.current_state = new_state
 
     # ==================== ANALYZE ====================
@@ -606,25 +605,18 @@ class HomeostaticController:
             # High rest_need → System fatigue
             if self.current_needs.rest_need > 0.7:
                 issues.append("high_rest_need_fatigue")
-                logger.info(
-                    f"Detected high rest_need={self.current_needs.rest_need:.2f} "
-                    "(system fatigue)"
-                )
+                logger.info(f"Detected high rest_need={self.current_needs.rest_need:.2f} (system fatigue)")
 
             # High repair_need → System alert
             if self.current_needs.repair_need > 0.7:
                 issues.append("high_repair_need_alert")
-                logger.info(
-                    f"Detected high repair_need={self.current_needs.repair_need:.2f} "
-                    "(system alert)"
-                )
+                logger.info(f"Detected high repair_need={self.current_needs.repair_need:.2f} (system alert)")
 
             # High efficiency_need → Optimization needed
             if self.current_needs.efficiency_need > 0.6:
                 issues.append("efficiency_optimization_needed")
                 logger.info(
-                    f"Detected high efficiency_need={self.current_needs.efficiency_need:.2f} "
-                    "(optimization needed)"
+                    f"Detected high efficiency_need={self.current_needs.efficiency_need:.2f} (optimization needed)"
                 )
 
         if issues:
@@ -650,9 +642,7 @@ class HomeostaticController:
         # Determine action parameters based on issues
         params = self._determine_action_params(action, issues)
 
-        logger.info(
-            f"Controller {self.id} planned action: {action} (params={params})"
-        )
+        logger.info(f"Controller {self.id} planned action: {action} (params={params})")
 
         return action, params
 
@@ -703,9 +693,7 @@ class HomeostaticController:
 
         return action
 
-    def _determine_action_params(
-        self, action: ActionType, issues: List[str]
-    ) -> Dict[str, Any]:
+    def _determine_action_params(self, action: ActionType, issues: List[str]) -> Dict[str, Any]:
         """
         Determine action parameters based on issues.
 
@@ -936,9 +924,7 @@ class HomeostaticController:
         # Clamp to valid range
         return max(-1.0, min(1.0, reward))
 
-    def _update_q_value(
-        self, state: SystemState, action: ActionType, reward: float
-    ) -> None:
+    def _update_q_value(self, state: SystemState, action: ActionType, reward: float) -> None:
         """
         Update Q-value using Q-learning algorithm.
 
@@ -957,9 +943,7 @@ class HomeostaticController:
 
         self.q_table[(state, action)] = new_q
 
-        logger.debug(
-            f"Q-value updated: {state}/{action} = {new_q:.3f} (reward={reward:.3f})"
-        )
+        logger.debug(f"Q-value updated: {state}/{action} = {new_q:.3f} (reward={reward:.3f})")
 
     # ==================== METRICS ====================
 
@@ -974,9 +958,7 @@ class HomeostaticController:
             "controller_id": self.id,
             "current_state": self.current_state.value,
             "last_action": self.last_action.value if self.last_action else None,
-            "last_action_timestamp": (
-                self.last_action_timestamp.isoformat() if self.last_action_timestamp else None
-            ),
+            "last_action_timestamp": (self.last_action_timestamp.isoformat() if self.last_action_timestamp else None),
             "system_metrics": self.system_metrics,
             "agent_metrics": self.agent_metrics,
             "q_table_size": len(self.q_table),
@@ -984,8 +966,4 @@ class HomeostaticController:
 
     def __repr__(self) -> str:
         """String representation"""
-        return (
-            f"HomeostaticController({self.id}|"
-            f"state={self.current_state}|"
-            f"last_action={self.last_action})"
-        )
+        return f"HomeostaticController({self.id}|state={self.current_state}|last_action={self.last_action})"

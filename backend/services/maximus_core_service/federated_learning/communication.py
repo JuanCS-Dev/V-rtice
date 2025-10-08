@@ -11,19 +11,21 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import base64
+import json
+import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Any, Optional
-import json
+from typing import Any
+
 import numpy as np
-import logging
-import base64
 
 logger = logging.getLogger(__name__)
 
 
 class MessageType(Enum):
     """Types of FL communication messages."""
+
     CLIENT_REGISTER = "client_register"
     CLIENT_UNREGISTER = "client_unregister"
     ROUND_START = "round_start"
@@ -45,11 +47,12 @@ class EncryptedMessage:
         timestamp: Message timestamp
         sender_id: ID of sender (client or coordinator)
     """
+
     message_type: MessageType
-    payload: Dict[str, Any]
-    signature: Optional[str] = None
-    timestamp: Optional[str] = None
-    sender_id: Optional[str] = None
+    payload: dict[str, Any]
+    signature: str | None = None
+    timestamp: str | None = None
+    sender_id: str | None = None
 
 
 class FLCommunicationChannel:
@@ -76,13 +79,10 @@ class FLCommunicationChannel:
         self.verify_signatures = verify_signatures
 
         logger.info(
-            f"FL Communication channel initialized "
-            f"(encryption={use_encryption}, signatures={verify_signatures})"
+            f"FL Communication channel initialized (encryption={use_encryption}, signatures={verify_signatures})"
         )
 
-    def serialize_weights(
-        self, weights: Dict[str, np.ndarray]
-    ) -> Dict[str, str]:
+    def serialize_weights(self, weights: dict[str, np.ndarray]) -> dict[str, str]:
         """
         Serialize model weights for transmission.
 
@@ -101,7 +101,7 @@ class FLCommunicationChannel:
             weight_bytes = layer_weights.tobytes()
 
             # Base64 encode
-            weight_b64 = base64.b64encode(weight_bytes).decode('utf-8')
+            weight_b64 = base64.b64encode(weight_bytes).decode("utf-8")
 
             # Store with metadata
             serialized[layer_name] = {
@@ -112,9 +112,7 @@ class FLCommunicationChannel:
 
         return serialized
 
-    def deserialize_weights(
-        self, serialized: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, np.ndarray]:
+    def deserialize_weights(self, serialized: dict[str, dict[str, Any]]) -> dict[str, np.ndarray]:
         """
         Deserialize model weights from transmission format.
 
@@ -134,18 +132,16 @@ class FLCommunicationChannel:
             dtype = np.dtype(layer_data["dtype"])
             shape = tuple(layer_data["shape"])
 
-            weights[layer_name] = np.frombuffer(
-                weight_bytes, dtype=dtype
-            ).reshape(shape)
+            weights[layer_name] = np.frombuffer(weight_bytes, dtype=dtype).reshape(shape)
 
         return weights
 
     def create_message(
         self,
         message_type: MessageType,
-        payload: Dict[str, Any],
-        sender_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        payload: dict[str, Any],
+        sender_id: str | None = None,
+    ) -> dict[str, Any]:
         """
         Create a communication message.
 
@@ -183,9 +179,7 @@ class FLCommunicationChannel:
 
         return message
 
-    def parse_message(
-        self, message_data: Dict[str, Any]
-    ) -> EncryptedMessage:
+    def parse_message(self, message_data: dict[str, Any]) -> EncryptedMessage:
         """
         Parse a received message.
 
@@ -222,7 +216,7 @@ class FLCommunicationChannel:
             sender_id=message_data.get("sender_id"),
         )
 
-    def _sign_message(self, message: Dict[str, Any]) -> str:
+    def _sign_message(self, message: dict[str, Any]) -> str:
         """
         Create digital signature for message.
 
@@ -240,7 +234,7 @@ class FLCommunicationChannel:
         signature = f"sig_{hash(message_str) % 1000000:06d}"
         return signature
 
-    def _verify_signature(self, message: Dict[str, Any]) -> bool:
+    def _verify_signature(self, message: dict[str, Any]) -> bool:
         """
         Verify message signature.
 
@@ -254,9 +248,7 @@ class FLCommunicationChannel:
         # For now, just check signature exists
         return "signature" in message and message["signature"].startswith("sig_")
 
-    def send_model_download_request(
-        self, client_id: str, round_id: int
-    ) -> Dict[str, Any]:
+    def send_model_download_request(self, client_id: str, round_id: int) -> dict[str, Any]:
         """
         Create model download request message.
 
@@ -279,10 +271,10 @@ class FLCommunicationChannel:
 
     def send_model_download_response(
         self,
-        weights: Dict[str, np.ndarray],
+        weights: dict[str, np.ndarray],
         round_id: int,
         model_version: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Create model download response message.
 
@@ -312,10 +304,10 @@ class FLCommunicationChannel:
         self,
         client_id: str,
         round_id: int,
-        weights: Dict[str, np.ndarray],
+        weights: dict[str, np.ndarray],
         num_samples: int,
-        metrics: Dict[str, float],
-    ) -> Dict[str, Any]:
+        metrics: dict[str, float],
+    ) -> dict[str, Any]:
         """
         Create update submission message.
 
@@ -348,8 +340,8 @@ class FLCommunicationChannel:
         self,
         round_id: int,
         selected_clients: list,
-        config: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        config: dict[str, Any],
+    ) -> dict[str, Any]:
         """
         Create round start notification message.
 
@@ -373,7 +365,7 @@ class FLCommunicationChannel:
             sender_id="coordinator",
         )
 
-    def get_message_size_mb(self, message: Dict[str, Any]) -> float:
+    def get_message_size_mb(self, message: dict[str, Any]) -> float:
         """
         Calculate message size in megabytes.
 
@@ -384,5 +376,5 @@ class FLCommunicationChannel:
             Size in MB
         """
         message_str = json.dumps(message)
-        size_bytes = len(message_str.encode('utf-8'))
+        size_bytes = len(message_str.encode("utf-8"))
         return size_bytes / (1024 * 1024)

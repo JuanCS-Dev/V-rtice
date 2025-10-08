@@ -31,24 +31,23 @@ PRODUCTION-READY: Real agent metrics, PostgreSQL storage, no mocks.
 """
 
 import asyncio
-import json
 import logging
-import random
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import asyncpg
 
-from agents.models import AgentType, AgenteState
+from agents.models import AgentType
 
 logger = logging.getLogger(__name__)
 
 # MCEA Integration (optional dependency)
 try:
     import sys
-    sys.path.insert(0, '/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+    sys.path.insert(0, "/home/juan/vertice-dev/backend/services/maximus_core_service")
     from consciousness.integration import MCEAClient
     from consciousness.mcea.controller import ArousalState
+
     MCEA_AVAILABLE = True
 except ImportError:
     MCEA_AVAILABLE = False
@@ -160,7 +159,7 @@ class ClonalSelectionEngine:
         self.population_fitness: Dict[str, FitnessMetrics] = {}
 
         # MCEA Integration (arousal modulation)
-        self.mcea_client: Optional['MCEAClient'] = None
+        self.mcea_client: Optional["MCEAClient"] = None
         self.current_arousal: float = 0.5  # Default baseline
 
         # Evolutionary statistics
@@ -183,7 +182,7 @@ class ClonalSelectionEngine:
 
     # ==================== MCEA INTEGRATION ====================
 
-    def set_mcea_client(self, client: 'MCEAClient') -> None:
+    def set_mcea_client(self, client: "MCEAClient") -> None:
         """
         Set MCEA client for arousal-modulated selection.
 
@@ -350,9 +349,7 @@ class ClonalSelectionEngine:
         """
         while self._running:
             try:
-                logger.info(
-                    f"Engine {self.id} starting generation {self.generation}"
-                )
+                logger.info(f"Engine {self.id} starting generation {self.generation}")
 
                 # 0. FETCH AROUSAL (MCEA integration)
                 if self.mcea_client:
@@ -360,10 +357,7 @@ class ClonalSelectionEngine:
                         arousal_state = await self.mcea_client.get_current_arousal()
                         if arousal_state:
                             self.current_arousal = arousal_state.arousal
-                            logger.info(
-                                f"MCEA arousal={self.current_arousal:.2f} "
-                                f"(level={arousal_state.level.value})"
-                            )
+                            logger.info(f"MCEA arousal={self.current_arousal:.2f} (level={arousal_state.level.value})")
                     except Exception as e:
                         logger.warning(f"Failed to fetch MCEA arousal: {e}")
 
@@ -430,10 +424,7 @@ class ClonalSelectionEngine:
             await self._store_fitness(fitness)
 
             # Track best agent ever
-            if (
-                not self.best_agent_ever
-                or fitness.fitness_score > self.best_agent_ever.fitness_score
-            ):
+            if not self.best_agent_ever or fitness.fitness_score > self.best_agent_ever.fitness_score:
                 self.best_agent_ever = fitness
 
     async def _fetch_all_agents(self) -> List[Dict[str, Any]]:
@@ -468,17 +459,11 @@ class ClonalSelectionEngine:
         energia_consumida = 100.0 - agent_data.get("energia", 100.0)
 
         # Calculate metrics
-        detection_accuracy = (
-            neutralizacoes / deteccoes if deteccoes > 0 else 0.0
-        )
+        detection_accuracy = neutralizacoes / deteccoes if deteccoes > 0 else 0.0
 
-        false_positive_rate = (
-            falsos_positivos / deteccoes if deteccoes > 0 else 0.0
-        )
+        false_positive_rate = falsos_positivos / deteccoes if deteccoes > 0 else 0.0
 
-        resource_efficiency = (
-            neutralizacoes / energia_consumida if energia_consumida > 0 else 0.0
-        )
+        resource_efficiency = neutralizacoes / energia_consumida if energia_consumida > 0 else 0.0
 
         response_time_avg = agent_data.get("response_time_avg", 30.0)
 
@@ -575,13 +560,9 @@ class ClonalSelectionEngine:
             survivors: Selected high-performing agents
         """
         # Number of clones per survivor
-        clones_per_survivor = max(
-            1, (self.population_size - len(survivors)) // len(survivors)
-        )
+        clones_per_survivor = max(1, (self.population_size - len(survivors)) // len(survivors))
 
-        logger.info(
-            f"Engine {self.id} cloning {clones_per_survivor} per survivor"
-        )
+        logger.info(f"Engine {self.id} cloning {clones_per_survivor} per survivor")
 
         for survivor in survivors:
             # Clone this agent multiple times
@@ -598,8 +579,7 @@ class ClonalSelectionEngine:
         # Placeholder: Would call Lymphnode API to clone agent
         # For now, just log (graceful degradation)
         logger.debug(
-            f"Engine {self.id} creating mutated clone of {parent.agent_id[:8]} "
-            f"(fitness={parent.fitness_score:.3f})"
+            f"Engine {self.id} creating mutated clone of {parent.agent_id[:8]} (fitness={parent.fitness_score:.3f})"
         )
 
         self.total_clones_created += 1
@@ -660,8 +640,7 @@ class ClonalSelectionEngine:
             Dict with engine metrics
         """
         avg_fitness = (
-            sum(f.fitness_score for f in self.population_fitness.values())
-            / len(self.population_fitness)
+            sum(f.fitness_score for f in self.population_fitness.values()) / len(self.population_fitness)
             if self.population_fitness
             else 0.0
         )
@@ -674,19 +653,13 @@ class ClonalSelectionEngine:
             "total_clones_created": self.total_clones_created,
             "total_agents_eliminated": self.total_agents_eliminated,
             "average_fitness": avg_fitness,
-            "best_fitness_ever": (
-                self.best_agent_ever.fitness_score if self.best_agent_ever else 0.0
-            ),
-            "best_agent_ever": (
-                self.best_agent_ever.agent_id[:8] if self.best_agent_ever else None
-            ),
+            "best_fitness_ever": (self.best_agent_ever.fitness_score if self.best_agent_ever else 0.0),
+            "best_agent_ever": (self.best_agent_ever.agent_id[:8] if self.best_agent_ever else None),
         }
 
     def __repr__(self) -> str:
         """String representation"""
-        best_score = (
-            self.best_agent_ever.fitness_score if self.best_agent_ever else 0.0
-        )
+        best_score = self.best_agent_ever.fitness_score if self.best_agent_ever else 0.0
         return (
             f"ClonalSelectionEngine({self.id}|"
             f"gen={self.generation}|"

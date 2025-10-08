@@ -18,24 +18,23 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Callable
 import logging
 import threading
 import time
 import uuid
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 
 from .base import (
     ComplianceConfig,
     ComplianceViolation,
-    Evidence,
     RegulationType,
     ViolationSeverity,
 )
 from .compliance_engine import ComplianceEngine, ComplianceSnapshot
 from .evidence_collector import EvidenceCollector
-from .gap_analyzer import GapAnalyzer, RemediationPlan
+from .gap_analyzer import GapAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +50,12 @@ class ComplianceAlert:
     severity: ViolationSeverity = ViolationSeverity.MEDIUM
     title: str = ""
     message: str = ""
-    regulation_type: Optional[RegulationType] = None
+    regulation_type: RegulationType | None = None
     triggered_at: datetime = field(default_factory=datetime.utcnow)
     acknowledged: bool = False
-    acknowledged_by: Optional[str] = None
-    acknowledged_at: Optional[datetime] = None
-    metadata: Dict[str, any] = field(default_factory=dict)
+    acknowledged_by: str | None = None
+    acknowledged_at: datetime | None = None
+    metadata: dict[str, any] = field(default_factory=dict)
 
     def acknowledge(self, acknowledged_by: str):
         """Mark alert as acknowledged."""
@@ -75,7 +74,7 @@ class MonitoringMetrics:
     timestamp: datetime = field(default_factory=datetime.utcnow)
     overall_compliance_percentage: float = 0.0
     overall_score: float = 0.0
-    compliance_by_regulation: Dict[str, float] = field(default_factory=dict)
+    compliance_by_regulation: dict[str, float] = field(default_factory=dict)
     total_violations: int = 0
     critical_violations: int = 0
     high_violations: int = 0
@@ -99,9 +98,9 @@ class ComplianceMonitor:
     def __init__(
         self,
         compliance_engine: ComplianceEngine,
-        evidence_collector: Optional[EvidenceCollector] = None,
-        gap_analyzer: Optional[GapAnalyzer] = None,
-        config: Optional[ComplianceConfig] = None,
+        evidence_collector: EvidenceCollector | None = None,
+        gap_analyzer: GapAnalyzer | None = None,
+        config: ComplianceConfig | None = None,
     ):
         """
         Initialize compliance monitor.
@@ -118,10 +117,10 @@ class ComplianceMonitor:
         self.config = config or ComplianceConfig()
 
         self._monitoring = False
-        self._monitor_thread: Optional[threading.Thread] = None
-        self._alerts: List[ComplianceAlert] = []
-        self._metrics_history: List[MonitoringMetrics] = []
-        self._alert_handlers: List[Callable[[ComplianceAlert], None]] = []
+        self._monitor_thread: threading.Thread | None = None
+        self._alerts: list[ComplianceAlert] = []
+        self._metrics_history: list[MonitoringMetrics] = []
+        self._alert_handlers: list[Callable[[ComplianceAlert], None]] = []
 
         logger.info("Compliance monitor initialized")
 
@@ -203,10 +202,7 @@ class ComplianceMonitor:
         evidence_by_regulation = None
         if self.evidence_collector:
             all_evidence = self.evidence_collector.get_all_evidence()
-            evidence_by_regulation = {
-                reg_type: all_evidence
-                for reg_type in self.config.enabled_regulations
-            }
+            evidence_by_regulation = {reg_type: all_evidence for reg_type in self.config.enabled_regulations}
 
         # Run compliance checks
         snapshot = self.engine.run_all_checks(evidence_by_regulation)
@@ -230,9 +226,7 @@ class ComplianceMonitor:
 
         # Keep only last 30 days of metrics
         cutoff = datetime.utcnow() - timedelta(days=30)
-        self._metrics_history = [
-            m for m in self._metrics_history if m.timestamp > cutoff
-        ]
+        self._metrics_history = [m for m in self._metrics_history if m.timestamp > cutoff]
 
         logger.debug(f"Monitoring checks complete, {len(self._alerts)} total alerts")
 
@@ -341,11 +335,7 @@ class ComplianceMonitor:
 
         for evidence_list in all_evidence.values():
             for evidence in evidence_list:
-                if (
-                    evidence.expiration_date
-                    and evidence.expiration_date < threshold_date
-                    and not evidence.is_expired()
-                ):
+                if evidence.expiration_date and evidence.expiration_date < threshold_date and not evidence.is_expired():
                     expiring_soon.append(evidence)
 
         if expiring_soon:
@@ -375,9 +365,7 @@ class ComplianceMonitor:
         if len(self._alerts) > 1000:
             self._alerts = self._alerts[-1000:]
 
-        logger.warning(
-            f"COMPLIANCE ALERT [{alert.severity.value.upper()}]: {alert.title} - {alert.message}"
-        )
+        logger.warning(f"COMPLIANCE ALERT [{alert.severity.value.upper()}]: {alert.title} - {alert.message}")
 
         # Call registered handlers
         for handler in self._alert_handlers:
@@ -441,11 +429,7 @@ class ComplianceMonitor:
                 for evidence in evidence_list:
                     if evidence.is_expired():
                         expired_evidence += 1
-                    elif (
-                        evidence.expiration_date
-                        and evidence.expiration_date
-                        < datetime.utcnow() + timedelta(days=30)
-                    ):
+                    elif evidence.expiration_date and evidence.expiration_date < datetime.utcnow() + timedelta(days=30):
                         expiring_soon += 1
 
         # Compliance trend
@@ -456,8 +440,7 @@ class ComplianceMonitor:
             overall_compliance_percentage=snapshot.overall_compliance_percentage,
             overall_score=snapshot.overall_score,
             compliance_by_regulation={
-                reg_type.value: result.compliance_percentage
-                for reg_type, result in snapshot.regulation_results.items()
+                reg_type.value: result.compliance_percentage for reg_type, result in snapshot.regulation_results.items()
             },
             total_violations=snapshot.total_violations,
             critical_violations=critical_count,
@@ -501,12 +484,11 @@ class ComplianceMonitor:
 
         if diff > 2.0:
             return "improving"
-        elif diff < -2.0:
+        if diff < -2.0:
             return "declining"
-        else:
-            return "stable"
+        return "stable"
 
-    def get_current_metrics(self) -> Optional[MonitoringMetrics]:
+    def get_current_metrics(self) -> MonitoringMetrics | None:
         """
         Get current monitoring metrics.
 
@@ -520,7 +502,7 @@ class ComplianceMonitor:
     def get_metrics_history(
         self,
         days: int = 30,
-    ) -> List[MonitoringMetrics]:
+    ) -> list[MonitoringMetrics]:
         """
         Get metrics history for specified days.
 
@@ -535,10 +517,10 @@ class ComplianceMonitor:
 
     def get_alerts(
         self,
-        alert_type: Optional[str] = None,
-        acknowledged: Optional[bool] = None,
-        severity: Optional[ViolationSeverity] = None,
-    ) -> List[ComplianceAlert]:
+        alert_type: str | None = None,
+        acknowledged: bool | None = None,
+        severity: ViolationSeverity | None = None,
+    ) -> list[ComplianceAlert]:
         """
         Get alerts filtered by criteria.
 
@@ -582,7 +564,7 @@ class ComplianceMonitor:
 
         return False
 
-    def generate_dashboard_data(self) -> Dict[str, any]:
+    def generate_dashboard_data(self) -> dict[str, any]:
         """
         Generate dashboard data for compliance monitoring.
 

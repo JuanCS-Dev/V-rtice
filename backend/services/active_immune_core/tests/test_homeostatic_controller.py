@@ -12,19 +12,16 @@ Tests cover actual production implementation:
 """
 
 import asyncio
-from datetime import datetime
-from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
 
 from active_immune_core.coordination.homeostatic_controller import (
+    ActionType,
     HomeostaticController,
     SystemState,
-    ActionType,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -496,7 +493,7 @@ async def test_repr(controller: HomeostaticController):
     repr_str = repr(controller)
     assert "ctrl_test_001" in repr_str
     # Repr includes either the enum value or the full enum name
-    assert (SystemState.REPOUSO.value in repr_str or "SystemState.REPOUSO" in repr_str)
+    assert SystemState.REPOUSO.value in repr_str or "SystemState.REPOUSO" in repr_str
 
 
 # ==================== PHASE 2: ADVANCED COVERAGE (56%→85%) ====================
@@ -505,16 +502,14 @@ async def test_repr(controller: HomeostaticController):
 @pytest.mark.asyncio
 async def test_execute_scale_up_success():
     """Test successful scale up execution."""
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
 
         from unittest.mock import AsyncMock, patch
-        with patch.object(ctrl._http_session, 'post') as mock_post:
+
+        with patch.object(ctrl._http_session, "post") as mock_post:
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value={"success": True})
@@ -534,16 +529,14 @@ async def test_execute_scale_up_success():
 @pytest.mark.asyncio
 async def test_execute_scale_down_success():
     """Test successful scale down execution."""
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
 
         from unittest.mock import AsyncMock, patch
-        with patch.object(ctrl._http_session, 'post') as mock_post:
+
+        with patch.object(ctrl._http_session, "post") as mock_post:
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value={"success": True})
@@ -563,16 +556,14 @@ async def test_execute_scale_down_success():
 @pytest.mark.asyncio
 async def test_execute_clone_specialized_success():
     """Test successful specialized clone creation."""
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
 
         from unittest.mock import AsyncMock, patch
-        with patch.object(ctrl._http_session, 'post') as mock_post:
+
+        with patch.object(ctrl._http_session, "post") as mock_post:
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value={"clone_ids": ["clone_001", "clone_002"]})
@@ -592,16 +583,14 @@ async def test_execute_clone_specialized_success():
 @pytest.mark.asyncio
 async def test_execute_destroy_clones_success():
     """Test successful clone destruction."""
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
 
         from unittest.mock import AsyncMock, patch
-        with patch.object(ctrl._http_session, 'post') as mock_post:
+
+        with patch.object(ctrl._http_session, "post") as mock_post:
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value={"destroyed": 3})
@@ -621,16 +610,14 @@ async def test_execute_destroy_clones_success():
 @pytest.mark.asyncio
 async def test_execute_adjust_sensitivity_success():
     """Test successful sensitivity adjustment."""
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
 
         from unittest.mock import AsyncMock, patch
-        with patch.object(ctrl._http_session, 'post') as mock_post:
+
+        with patch.object(ctrl._http_session, "post") as mock_post:
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value={"success": True})
@@ -673,10 +660,7 @@ async def test_determine_action_params_scale_up():
     try:
         await ctrl.iniciar()
 
-        params = ctrl._determine_action_params(
-            ActionType.SCALE_UP_AGENTS,
-            issues=["cpu_high", "memory_high"]
-        )
+        params = ctrl._determine_action_params(ActionType.SCALE_UP_AGENTS, issues=["cpu_high", "memory_high"])
 
         assert "quantity" in params
         assert "reason" in params
@@ -693,10 +677,7 @@ async def test_determine_action_params_clone_specialized():
     try:
         await ctrl.iniciar()
 
-        params = ctrl._determine_action_params(
-            ActionType.CLONE_SPECIALIZED,
-            issues=["persistent_threat"]
-        )
+        params = ctrl._determine_action_params(ActionType.CLONE_SPECIALIZED, issues=["persistent_threat"])
 
         assert "specialization" in params
         assert "quantity" in params
@@ -846,17 +827,18 @@ async def test_monitor_method_collects_metrics():
 
         # Mock HTTP session for Prometheus
         from unittest.mock import AsyncMock, patch
+
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={
-            "data": {"result": [{"metric": {}, "value": [1234567890, "50.5"]}]}
-        })
+        mock_response.json = AsyncMock(
+            return_value={"data": {"result": [{"metric": {}, "value": [1234567890, "50.5"]}]}}
+        )
 
         mock_ctx = AsyncMock()
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(ctrl._http_session, 'get', return_value=mock_ctx):
+        with patch.object(ctrl._http_session, "get", return_value=mock_ctx):
             await ctrl._monitor()
 
             # Should have collected metrics
@@ -1043,7 +1025,9 @@ async def test_iniciar_with_postgres_connection():
     async def mock_create_pool(*args, **kwargs):
         return mock_pool
 
-    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+    with patch(
+        "active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool
+    ):
         await ctrl.iniciar()
 
         # Should have created pool
@@ -1074,7 +1058,9 @@ async def test_parar_closes_db_pool():
     async def mock_create_pool(*args, **kwargs):
         return mock_pool
 
-    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+    with patch(
+        "active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool
+    ):
         await ctrl.iniciar()
         await ctrl.parar()
 
@@ -1168,7 +1154,7 @@ async def test_collect_system_metrics_prometheus_failure():
         async def raise_error(*args, **kwargs):
             raise Exception("Prometheus unavailable")
 
-        with patch.object(ctrl._http_session, 'get', side_effect=raise_error):
+        with patch.object(ctrl._http_session, "get", side_effect=raise_error):
             metrics = await ctrl._collect_system_metrics()
 
             # Should return fallback metrics
@@ -1192,7 +1178,7 @@ async def test_collect_agent_metrics_lymphnode_failure():
         async def raise_error(*args, **kwargs):
             raise Exception("Lymphnode unavailable")
 
-        with patch.object(ctrl._http_session, 'get', side_effect=raise_error):
+        with patch.object(ctrl._http_session, "get", side_effect=raise_error):
             metrics = await ctrl._collect_agent_metrics()
 
             # Should return empty metrics
@@ -1206,10 +1192,7 @@ async def test_execute_scale_up_http_error():
     """Test _execute_scale_up handles HTTP error."""
     import aiohttp
 
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
@@ -1218,7 +1201,7 @@ async def test_execute_scale_up_http_error():
         def mock_post_error(*args, **kwargs):
             raise aiohttp.ClientConnectorError(connection_key=None, os_error=OSError("Connection failed"))
 
-        with patch.object(ctrl._http_session, 'post', side_effect=mock_post_error):
+        with patch.object(ctrl._http_session, "post", side_effect=mock_post_error):
             result = await ctrl._execute_scale_up({"quantity": 5})
 
             # Should return False on error
@@ -1230,10 +1213,7 @@ async def test_execute_scale_up_http_error():
 @pytest.mark.asyncio
 async def test_execute_scale_up_non_200_response():
     """Test _execute_scale_up handles non-200 response."""
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
@@ -1246,7 +1226,7 @@ async def test_execute_scale_up_non_200_response():
         mock_ctx.__aenter__.return_value = mock_response
         mock_ctx.__aexit__.return_value = None
 
-        with patch.object(ctrl._http_session, 'post', return_value=mock_ctx):
+        with patch.object(ctrl._http_session, "post", return_value=mock_ctx):
             result = await ctrl._execute_scale_up({"quantity": 5})
 
             # Should return False for non-200
@@ -1281,6 +1261,7 @@ async def test_select_action_uses_epsilon_greedy():
 # PHASE 5: Database Success Path Coverage
 # ========================================
 
+
 @pytest.mark.asyncio
 async def test_create_knowledge_table_success():
     """Test _create_knowledge_table executes CREATE TABLE successfully."""
@@ -1304,7 +1285,9 @@ async def test_create_knowledge_table_success():
     async def mock_create_pool(*args, **kwargs):
         return mock_pool
 
-    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+    with patch(
+        "active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool
+    ):
         await ctrl.iniciar()
 
         # Verify CREATE TABLE was executed
@@ -1338,7 +1321,9 @@ async def test_store_decision_success():
     async def mock_create_pool(*args, **kwargs):
         return mock_pool
 
-    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+    with patch(
+        "active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool
+    ):
         await ctrl.iniciar()
 
         # Store a decision
@@ -1372,10 +1357,12 @@ async def test_load_q_table_success_with_data():
     mock_conn.execute = AsyncMock()
 
     # Mock fetch to return Q-table data
-    mock_conn.fetch = AsyncMock(return_value=[
-        {"state": "repouso", "action": "noop", "avg_reward": 0.5},
-        {"state": "ativacao", "action": "scale_up_agents", "avg_reward": 5.0},
-    ])
+    mock_conn.fetch = AsyncMock(
+        return_value=[
+            {"state": "repouso", "action": "noop", "avg_reward": 0.5},
+            {"state": "ativacao", "action": "scale_up_agents", "avg_reward": 5.0},
+        ]
+    )
 
     # Mock pool.acquire as async context manager
     mock_acquire = MagicMock()
@@ -1386,7 +1373,9 @@ async def test_load_q_table_success_with_data():
     async def mock_create_pool(*args, **kwargs):
         return mock_pool
 
-    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+    with patch(
+        "active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool
+    ):
         await ctrl.iniciar()
 
         # Load Q-table
@@ -1472,23 +1461,25 @@ async def test_full_mape_k_cycle_execution():
     # Mock HTTP responses
     mock_response_prometheus = AsyncMock()
     mock_response_prometheus.status = 200
-    mock_response_prometheus.json = AsyncMock(return_value={
-        "data": {"result": [{"value": [1234567890, "50.0"]}]}
-    })
+    mock_response_prometheus.json = AsyncMock(return_value={"data": {"result": [{"value": [1234567890, "50.0"]}]}})
 
     mock_response_lymphnode = AsyncMock()
     mock_response_lymphnode.status = 200
-    mock_response_lymphnode.json = AsyncMock(return_value={
-        "total_agents": 25,
-        "active_agents": 20,
-        "threats_detected": 3,
-    })
+    mock_response_lymphnode.json = AsyncMock(
+        return_value={
+            "total_agents": 25,
+            "active_agents": 20,
+            "threats_detected": 3,
+        }
+    )
 
-    with patch("active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool):
+    with patch(
+        "active_immune_core.coordination.homeostatic_controller.asyncpg.create_pool", side_effect=mock_create_pool
+    ):
         await ctrl.iniciar()
 
         # Mock HTTP session for metrics collection
-        with patch.object(ctrl._http_session, 'get') as mock_get:
+        with patch.object(ctrl._http_session, "get") as mock_get:
             mock_get.return_value.__aenter__ = AsyncMock(return_value=mock_response_prometheus)
             mock_get.return_value.__aexit__ = AsyncMock(return_value=None)
 
@@ -1506,10 +1497,7 @@ async def test_full_mape_k_cycle_execution():
 @pytest.mark.asyncio
 async def test_execute_routes_all_action_types():
     """Test _execute routes to correct executors for all action types."""
-    ctrl = HomeostaticController(
-        controller_id="ctrl_test",
-        lymphnode_url="http://localhost:8001"
-    )
+    ctrl = HomeostaticController(controller_id="ctrl_test", lymphnode_url="http://localhost:8001")
 
     try:
         await ctrl.iniciar()
@@ -1518,7 +1506,7 @@ async def test_execute_routes_all_action_types():
         mock_response = AsyncMock()
         mock_response.status = 200
 
-        with patch.object(ctrl._http_session, 'post') as mock_post:
+        with patch.object(ctrl._http_session, "post") as mock_post:
             mock_post.return_value.__aenter__ = AsyncMock(return_value=mock_response)
             mock_post.return_value.__aexit__ = AsyncMock(return_value=None)
 

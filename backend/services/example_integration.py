@@ -8,6 +8,8 @@ Este arquivo demonstra como usar os dois sistemas finais em conjunto.
 import asyncio
 import time
 
+import numpy as np
+
 from hsas_service import (
     Action,
     HybridSkillAcquisitionSystem,
@@ -16,8 +18,7 @@ from hsas_service import (
     State,
     Transition,
 )
-from memory_consolidation_service import MemoryConsolidationEngine, OperationalMode
-import numpy as np
+from memory_consolidation_service import MemoryConsolidationEngine
 
 
 async def example_workflow():
@@ -47,9 +48,7 @@ async def example_workflow():
     )
 
     # Hybrid Skill Acquisition System
-    hsas = HybridSkillAcquisitionSystem(
-        state_dim=5, action_dim=20, default_mode=LearningMode.HYBRID
-    )
+    hsas = HybridSkillAcquisitionSystem(state_dim=5, action_dim=20, default_mode=LearningMode.HYBRID)
 
     # Aprender skills compostos
     await hsas.learn_skill(
@@ -102,7 +101,7 @@ async def example_workflow():
             attack_type="malware",
         )
 
-        print(f"📊 Estado detectado:")
+        print("📊 Estado detectado:")
         print(f"   Threat Level: {state.threat_level:.2f}")
         print(f"   Alerts: {state.num_alerts}")
         print(f"   Severity: {state.severity}")
@@ -122,7 +121,7 @@ async def example_workflow():
                 action_id=f"action_block_{episode}",
                 action_type="block_ip",
                 primitive_type=SkillPrimitiveType.BLOCKING,
-                parameters={"ip_address": f"192.168.1.{100+episode}"},
+                parameters={"ip_address": f"192.168.1.{100 + episode}"},
                 cost=1.0,
                 risk=0.1,
             ),
@@ -142,7 +141,7 @@ async def example_workflow():
         # HSAS seleciona ação
         selected_action, mode_used = await hsas.select_action(state, available_actions)
 
-        print(f"🤖 HSAS Decisão:")
+        print("🤖 HSAS Decisão:")
         print(f"   Modo: {mode_used}")
         print(f"   Ação: {selected_action.action_type}")
         print(f"   Parâmetros: {selected_action.parameters}")
@@ -211,7 +210,7 @@ async def example_workflow():
         )
 
         await hsas.learn_from_transition(transition)
-        print(f"📚 HSAS aprendeu da transição")
+        print("📚 HSAS aprendeu da transição")
         print()
 
     # ========================================================================
@@ -237,9 +236,7 @@ async def example_workflow():
     print(f"Experiências replayadas: {metrics.experiences_replayed}")
     print(f"Consolidadas para LTM: {metrics.experiences_consolidated}")
     print(f"Padrões extraídos: {metrics.patterns_extracted}")
-    print(
-        f"Experiências sintéticas: {metrics.consolidation_types.get('pseudo_rehearsal', 0)}"
-    )
+    print(f"Experiências sintéticas: {metrics.consolidation_types.get('pseudo_rehearsal', 0)}")
     print(f"Memórias podadas: {metrics.experiences_pruned}")
     print()
     print(f"TD Error antes: {metrics.avg_td_error_before:.4f}")
@@ -261,12 +258,8 @@ async def example_workflow():
     print("🧠 Memory Consolidation Engine:")
     print(f"   Replay buffer: {mce_stats['buffer_stats']['replay_buffer_size']}")
     print(f"   Long-term memory: {mce_stats['buffer_stats']['long_term_memory_size']}")
-    print(
-        f"   Padrões extraídos: {mce_stats['experience_stats']['patterns_extracted']}"
-    )
-    print(
-        f"   Total consolidações: {mce_stats['consolidation_stats']['total_consolidations']}"
-    )
+    print(f"   Padrões extraídos: {mce_stats['experience_stats']['patterns_extracted']}")
+    print(f"   Total consolidações: {mce_stats['consolidation_stats']['total_consolidations']}")
     print(f"   Memory usage: {mce_stats['memory_usage_mb']:.2f} MB")
     print()
 
@@ -275,9 +268,7 @@ async def example_workflow():
     print(f"   Uso de modos: {hsas_stats['actions']['mode_usage']}")
     print(f"   Skills aprendidas: {hsas_stats['skills']['total_learned']}")
     print(f"   Taxa de sucesso: {hsas_stats['skills']['avg_success_rate']:.2%}")
-    print(
-        f"   Conhecimento do world model: {hsas_stats['learning']['world_model_knowledge']} transições"
-    )
+    print(f"   Conhecimento do world model: {hsas_stats['learning']['world_model_knowledge']} transições")
     print()
 
     print("=" * 70)

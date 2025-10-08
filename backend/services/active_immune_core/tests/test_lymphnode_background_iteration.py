@@ -14,12 +14,10 @@ import asyncio
 from datetime import datetime
 
 import pytest
-import pytest_asyncio
 
 from active_immune_core.agents import AgentType
 from active_immune_core.agents.models import AgenteState
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== BACKGROUND TASK ITERATION TESTS ====================
 
@@ -87,11 +85,13 @@ class TestBackgroundTaskIteration:
 
         # Add cytokines to buffer (need >= 10 for pattern detection)
         for i in range(15):
-            node.cytokine_buffer.append({
-                "tipo": "TNF",
-                "timestamp": datetime.now().isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-            })
+            node.cytokine_buffer.append(
+                {
+                    "tipo": "TNF",
+                    "timestamp": datetime.now().isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                }
+            )
 
         # ACT: Wait for pattern detection cycle (60s normally)
         await asyncio.sleep(1.0)
@@ -174,8 +174,7 @@ class TestDirectMethodCalls:
         buffer_too_small = len(node.cytokine_buffer) < 10
 
         # ASSERT
-        assert buffer_too_small is True, \
-            "Buffer with 5 items should be considered too small"
+        assert buffer_too_small is True, "Buffer with 5 items should be considered too small"
 
     @pytest.mark.asyncio
     async def test_homeostatic_zero_agents_skip_logic(self):
@@ -195,7 +194,7 @@ class TestDirectMethodCalls:
 
         # ACT: Check condition from line 782-784
         total_agents = len(node.agentes_ativos)
-        should_skip = (total_agents == 0)
+        should_skip = total_agents == 0
 
         # ASSERT
         assert total_agents == 0

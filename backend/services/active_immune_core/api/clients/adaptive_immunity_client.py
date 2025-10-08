@@ -11,10 +11,9 @@ Version: 1.0.0
 """
 
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 from .base_client import BaseExternalClient
-
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +34,7 @@ class AdaptiveImmunityClient(BaseExternalClient):
     - No cross-service adaptive learning
     """
 
-    def __init__(
-        self,
-        base_url: str = "http://localhost:8020",
-        **kwargs
-    ):
+    def __init__(self, base_url: str = "http://localhost:8020", **kwargs):
         """
         Initialize Adaptive Immunity client.
 
@@ -50,10 +45,7 @@ class AdaptiveImmunityClient(BaseExternalClient):
         super().__init__(base_url=base_url, **kwargs)
 
     async def analyze_threat(
-        self,
-        threat_data: Dict[str, Any],
-        threat_type: str,
-        context: Optional[Dict[str, Any]] = None
+        self, threat_data: Dict[str, Any], threat_type: str, context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Perform adaptive threat analysis.
@@ -76,7 +68,7 @@ class AdaptiveImmunityClient(BaseExternalClient):
                 "threat_data": threat_data,
                 "threat_type": threat_type,
                 "context": context,
-            }
+            },
         )
 
     async def optimize_response(
@@ -84,7 +76,7 @@ class AdaptiveImmunityClient(BaseExternalClient):
         threat_signature: str,
         current_antibody: Dict[str, Any],
         success_rate: float,
-        feedback: Optional[Dict[str, Any]] = None
+        feedback: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Optimize immune response (antibody tuning).
@@ -108,14 +100,11 @@ class AdaptiveImmunityClient(BaseExternalClient):
                 "current_antibody": current_antibody,
                 "success_rate": success_rate,
                 "feedback": feedback,
-            }
+            },
         )
 
     async def get_antibodies(
-        self,
-        threat_type: Optional[str] = None,
-        min_affinity: float = 0.5,
-        limit: int = 10
+        self, threat_type: Optional[str] = None, min_affinity: float = 0.5, limit: int = 10
     ) -> Dict[str, Any]:
         """
         Get antibody library.
@@ -138,17 +127,10 @@ class AdaptiveImmunityClient(BaseExternalClient):
         if threat_type:
             params["threat_type"] = threat_type
 
-        return await self.request(
-            "GET",
-            "/api/v1/adaptive/antibodies",
-            params=params
-        )
+        return await self.request("GET", "/api/v1/adaptive/antibodies", params=params)
 
     async def coordinate_clonal_selection(
-        self,
-        threat_signature: str,
-        agent_pool: List[str],
-        selection_pressure: float = 0.7
+        self, threat_signature: str, agent_pool: List[str], selection_pressure: float = 0.7
     ) -> Dict[str, Any]:
         """
         Coordinate clonal selection across services.
@@ -171,7 +153,7 @@ class AdaptiveImmunityClient(BaseExternalClient):
                 "threat_signature": threat_signature,
                 "agent_pool": agent_pool,
                 "selection_pressure": selection_pressure,
-            }
+            },
         )
 
     async def get_metrics(self) -> Dict[str, Any]:
@@ -183,12 +165,7 @@ class AdaptiveImmunityClient(BaseExternalClient):
         """
         return await self.request("GET", "/api/v1/adaptive/metrics")
 
-    async def degraded_fallback(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Optional[Dict[str, Any]]:
+    async def degraded_fallback(self, method: str, endpoint: str, **kwargs) -> Optional[Dict[str, Any]]:
         """
         Fallback to local adaptive immunity modules.
 
@@ -206,9 +183,7 @@ class AdaptiveImmunityClient(BaseExternalClient):
         Returns:
             Synthetic degraded response
         """
-        logger.warning(
-            f"AdaptiveImmunityClient: Operating in degraded mode for {method} {endpoint}"
-        )
+        logger.warning(f"AdaptiveImmunityClient: Operating in degraded mode for {method} {endpoint}")
 
         # Parse endpoint
         if endpoint == "/api/v1/adaptive/analyze_threat":

@@ -18,25 +18,21 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
 import logging
-import uuid
+from datetime import datetime, timedelta
 
 from .base import (
     ComplianceConfig,
     ComplianceResult,
     ComplianceStatus,
     Control,
+    ControlCategory,
     Gap,
     GapAnalysisResult,
-    RegulationType,
     RemediationAction,
     RemediationPlan,
     RemediationStatus,
     ViolationSeverity,
-    ControlCategory,
 )
 from .compliance_engine import ComplianceCheckResult
 from .regulations import get_regulation
@@ -45,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 # Effort estimation (hours) by gap type and control category
-EFFORT_ESTIMATES: Dict[Tuple[str, ControlCategory], int] = {
+EFFORT_ESTIMATES: dict[tuple[str, ControlCategory], int] = {
     # Missing controls - high effort
     ("missing_control", ControlCategory.TECHNICAL): 80,
     ("missing_control", ControlCategory.SECURITY): 60,
@@ -92,7 +88,7 @@ class GapAnalyzer:
     Identifies compliance gaps and generates prioritized remediation plans.
     """
 
-    def __init__(self, config: Optional[ComplianceConfig] = None):
+    def __init__(self, config: ComplianceConfig | None = None):
         """
         Initialize gap analyzer.
 
@@ -118,7 +114,7 @@ class GapAnalyzer:
         logger.info(f"Analyzing compliance gaps for {compliance_result.regulation_type.value}")
 
         regulation = get_regulation(compliance_result.regulation_type)
-        gaps: List[Gap] = []
+        gaps: list[Gap] = []
 
         # Analyze each control result
         for result in compliance_result.results:
@@ -188,12 +184,11 @@ class GapAnalyzer:
             Remediation plan
         """
         logger.info(
-            f"Creating remediation plan for {gap_analysis.regulation_type.value}, "
-            f"{len(gap_analysis.gaps)} gaps"
+            f"Creating remediation plan for {gap_analysis.regulation_type.value}, {len(gap_analysis.gaps)} gaps"
         )
 
         # Create remediation actions for each gap
-        actions: List[RemediationAction] = []
+        actions: list[RemediationAction] = []
         regulation = get_regulation(gap_analysis.regulation_type)
 
         for gap in gap_analysis.gaps:
@@ -202,9 +197,7 @@ class GapAnalyzer:
                 continue
 
             # Generate action for gap
-            action = self._create_remediation_action(
-                gap, control, target_completion_days
-            )
+            action = self._create_remediation_action(gap, control, target_completion_days)
             actions.append(action)
 
         # Create plan
@@ -221,18 +214,16 @@ class GapAnalyzer:
         gap_analysis.remediation_plan = plan
 
         logger.info(
-            f"Remediation plan created: {plan.plan_id}, "
-            f"{len(actions)} actions, "
-            f"target: {target_completion_days} days"
+            f"Remediation plan created: {plan.plan_id}, {len(actions)} actions, target: {target_completion_days} days"
         )
 
         return plan
 
     def prioritize_gaps(
         self,
-        gaps: List[Gap],
+        gaps: list[Gap],
         criteria: str = "risk",  # risk, effort, impact
-    ) -> List[Gap]:
+    ) -> list[Gap]:
         """
         Prioritize gaps based on criteria.
 
@@ -253,30 +244,28 @@ class GapAnalyzer:
                     g.priority,
                 ),
             )
-        elif criteria == "effort":
+        if criteria == "effort":
             # Prioritize by effort (quick wins first)
             return sorted(
                 gaps,
                 key=lambda g: (g.estimated_effort_hours or 999, g.priority),
             )
-        elif criteria == "impact":
+        if criteria == "impact":
             # Prioritize by impact (severity + effort ratio)
             return sorted(
                 gaps,
                 key=lambda g: (
-                    self._severity_to_priority(g.severity) * 10
-                    / max(g.estimated_effort_hours or 1, 1),
+                    self._severity_to_priority(g.severity) * 10 / max(g.estimated_effort_hours or 1, 1),
                     g.priority,
                 ),
                 reverse=True,
             )
-        else:
-            return gaps
+        return gaps
 
     def track_remediation_progress(
         self,
         plan: RemediationPlan,
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """
         Track remediation plan progress.
 
@@ -299,18 +288,10 @@ class GapAnalyzer:
             }
 
         # Count action statuses
-        completed = sum(
-            1 for a in plan.actions if a.status == RemediationStatus.COMPLETED
-        )
-        in_progress = sum(
-            1 for a in plan.actions if a.status == RemediationStatus.IN_PROGRESS
-        )
-        not_started = sum(
-            1 for a in plan.actions if a.status == RemediationStatus.NOT_STARTED
-        )
-        blocked = sum(
-            1 for a in plan.actions if a.status == RemediationStatus.BLOCKED
-        )
+        completed = sum(1 for a in plan.actions if a.status == RemediationStatus.COMPLETED)
+        in_progress = sum(1 for a in plan.actions if a.status == RemediationStatus.IN_PROGRESS)
+        not_started = sum(1 for a in plan.actions if a.status == RemediationStatus.NOT_STARTED)
+        blocked = sum(1 for a in plan.actions if a.status == RemediationStatus.BLOCKED)
         overdue = len(plan.get_overdue_actions())
 
         # Calculate completion percentage
@@ -337,8 +318,8 @@ class GapAnalyzer:
 
     def estimate_remediation_effort(
         self,
-        gaps: List[Gap],
-    ) -> Dict[str, any]:
+        gaps: list[Gap],
+    ) -> dict[str, any]:
         """
         Estimate total remediation effort.
 
@@ -352,25 +333,11 @@ class GapAnalyzer:
 
         # Estimate by severity
         critical_hours = sum(
-            gap.estimated_effort_hours or 0
-            for gap in gaps
-            if gap.severity == ViolationSeverity.CRITICAL
+            gap.estimated_effort_hours or 0 for gap in gaps if gap.severity == ViolationSeverity.CRITICAL
         )
-        high_hours = sum(
-            gap.estimated_effort_hours or 0
-            for gap in gaps
-            if gap.severity == ViolationSeverity.HIGH
-        )
-        medium_hours = sum(
-            gap.estimated_effort_hours or 0
-            for gap in gaps
-            if gap.severity == ViolationSeverity.MEDIUM
-        )
-        low_hours = sum(
-            gap.estimated_effort_hours or 0
-            for gap in gaps
-            if gap.severity == ViolationSeverity.LOW
-        )
+        high_hours = sum(gap.estimated_effort_hours or 0 for gap in gaps if gap.severity == ViolationSeverity.HIGH)
+        medium_hours = sum(gap.estimated_effort_hours or 0 for gap in gaps if gap.severity == ViolationSeverity.MEDIUM)
+        low_hours = sum(gap.estimated_effort_hours or 0 for gap in gaps if gap.severity == ViolationSeverity.LOW)
 
         # Estimate timeline (assuming 40 hours/week, 1 engineer)
         weeks = total_hours / 40 if total_hours > 0 else 0
@@ -391,7 +358,7 @@ class GapAnalyzer:
         self,
         control: Control,
         result: ComplianceResult,
-    ) -> Optional[Gap]:
+    ) -> Gap | None:
         """
         Identify compliance gap from control and result.
 

@@ -50,9 +50,10 @@ but phenomenal experience of internal state.
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from consciousness.esgt.coordinator import SalienceScore
 from consciousness.esgt.spm.base import (
@@ -110,7 +111,7 @@ class MetricsSnapshot:
     thread_count: int = 0
 
     # Interoceptive (from MMEI)
-    needs: Optional[AbstractNeeds] = None
+    needs: AbstractNeeds | None = None
     most_urgent_need: str = "none"
     most_urgent_value: float = 0.0
 
@@ -121,7 +122,7 @@ class MetricsSnapshot:
     error_rate_per_min: float = 0.0
     warning_count: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         result = {
             "timestamp": self.timestamp,
@@ -191,8 +192,8 @@ class MetricsSPM(SpecializedProcessingModule):
     def __init__(
         self,
         spm_id: str,
-        config: Optional[MetricsMonitorConfig] = None,
-        mmei_monitor: Optional[InternalStateMonitor] = None,
+        config: MetricsMonitorConfig | None = None,
+        mmei_monitor: InternalStateMonitor | None = None,
     ):
         """
         Initialize MetricsSPM.
@@ -209,14 +210,14 @@ class MetricsSPM(SpecializedProcessingModule):
 
         # State
         self._running: bool = False
-        self._monitoring_task: Optional[asyncio.Task] = None
+        self._monitoring_task: asyncio.Task | None = None
 
         # History
-        self._snapshots: List[MetricsSnapshot] = []
+        self._snapshots: list[MetricsSnapshot] = []
         self._last_report_time: float = 0.0
 
         # Callbacks
-        self._output_callbacks: List[Callable[[SPMOutput], None]] = []
+        self._output_callbacks: list[Callable[[SPMOutput], None]] = []
 
         # Metrics
         self.total_snapshots: int = 0
@@ -454,7 +455,7 @@ class MetricsSPM(SpecializedProcessingModule):
     # Abstract Method Implementations
     # =========================================================================
 
-    async def process(self) -> Optional[SPMOutput]:
+    async def process(self) -> SPMOutput | None:
         """
         Process and generate output (required by base class).
 
@@ -464,7 +465,7 @@ class MetricsSPM(SpecializedProcessingModule):
         snapshot = await self._collect_snapshot()
         return self._generate_output(snapshot)
 
-    def compute_salience(self, data: Dict[str, Any]) -> SalienceScore:
+    def compute_salience(self, data: dict[str, Any]) -> SalienceScore:
         """
         Compute salience for given data (required by base class).
 
@@ -489,11 +490,11 @@ class MetricsSPM(SpecializedProcessingModule):
         if callback not in self._output_callbacks:
             self._output_callbacks.append(callback)
 
-    def get_current_snapshot(self) -> Optional[MetricsSnapshot]:
+    def get_current_snapshot(self) -> MetricsSnapshot | None:
         """Get most recent snapshot."""
         return self._snapshots[-1] if self._snapshots else None
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get SPM performance metrics."""
         return {
             "spm_id": self.spm_id,

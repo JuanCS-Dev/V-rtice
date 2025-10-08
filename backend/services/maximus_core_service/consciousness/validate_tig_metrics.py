@@ -46,14 +46,13 @@ async def validate_tig_metrics():
         print()
         print("🏎️ PAGANI TARGET ACHIEVED!")
         return 0
-    else:
-        print("❌ IIT VIOLATIONS DETECTED:")
-        for v in violations:
-            print(f"   - {v}")
-        print()
-        print(f"Clustering: {'✅' if metrics.avg_clustering_coefficient >= 0.70 else '❌'}")
-        print(f"ECI:        {'✅' if metrics.effective_connectivity_index >= 0.85 else '❌'}")
-        return 1
+    print("❌ IIT VIOLATIONS DETECTED:")
+    for v in violations:
+        print(f"   - {v}")
+    print()
+    print(f"Clustering: {'✅' if metrics.avg_clustering_coefficient >= 0.70 else '❌'}")
+    print(f"ECI:        {'✅' if metrics.effective_connectivity_index >= 0.85 else '❌'}")
+    return 1
 
 
 if __name__ == "__main__":

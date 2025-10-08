@@ -28,7 +28,6 @@ import pytest_asyncio
 from active_immune_core.agents import AgentType
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
 
-
 # ==================== FIXTURES ====================
 
 
@@ -73,9 +72,7 @@ class TestPersistentThreatDetection:
         lymphnode.threat_detections[threat_id] = 5
 
         # Mock clonar_agente to verify it's called
-        with patch.object(
-            lymphnode, "clonar_agente", new_callable=AsyncMock
-        ) as mock_clone:
+        with patch.object(lymphnode, "clonar_agente", new_callable=AsyncMock) as mock_clone:
             mock_clone.return_value = ["clone_1", "clone_2"]  # Mock clone IDs
 
             # ACT: Detect persistent threats
@@ -84,16 +81,16 @@ class TestPersistentThreatDetection:
         # ASSERT: Should trigger clonal expansion
         mock_clone.assert_called_once()
         call_args = mock_clone.call_args
-        assert call_args[1]["tipo_base"] == AgentType.NEUTROFILO, \
+        assert call_args[1]["tipo_base"] == AgentType.NEUTROFILO, (
             "Should create Neutrofilo clones for persistent threats"
-        assert call_args[1]["especializacao"] == f"threat_{threat_id}", \
+        )
+        assert call_args[1]["especializacao"] == f"threat_{threat_id}", (
             "Should specialize clones for this specific threat"
-        assert call_args[1]["quantidade"] == 10, \
-            "Should create 10 clones (mass response)"
+        )
+        assert call_args[1]["quantidade"] == 10, "Should create 10 clones (mass response)"
 
         # Verify threat count was reset (avoid re-triggering)
-        assert lymphnode.threat_detections[threat_id] == 0, \
-            "Should reset count after triggering expansion"
+        assert lymphnode.threat_detections[threat_id] == 0, "Should reset count after triggering expansion"
 
     @pytest.mark.asyncio
     async def test_persistent_threat_below_threshold_no_action(self, lymphnode):
@@ -109,9 +106,7 @@ class TestPersistentThreatDetection:
         lymphnode.threat_detections[threat_id] = 3
 
         # Mock clonar_agente
-        with patch.object(
-            lymphnode, "clonar_agente", new_callable=AsyncMock
-        ) as mock_clone:
+        with patch.object(lymphnode, "clonar_agente", new_callable=AsyncMock) as mock_clone:
             # ACT
             await lymphnode._detect_persistent_threats()
 
@@ -135,17 +130,14 @@ class TestPersistentThreatDetection:
         }
 
         # Mock clonar_agente
-        with patch.object(
-            lymphnode, "clonar_agente", new_callable=AsyncMock
-        ) as mock_clone:
+        with patch.object(lymphnode, "clonar_agente", new_callable=AsyncMock) as mock_clone:
             mock_clone.return_value = []
 
             # ACT
             await lymphnode._detect_persistent_threats()
 
         # ASSERT: Should trigger expansion for threat_a and threat_b only
-        assert mock_clone.call_count == 2, \
-            "Should expand for 2 threats (threat_c below threshold)"
+        assert mock_clone.call_count == 2, "Should expand for 2 threats (threat_c below threshold)"
 
 
 # ==================== COORDINATED ATTACK DETECTION ====================
@@ -180,9 +172,7 @@ class TestCoordinatedAttackDetection:
             recent_cytokines.append(cytokine)
 
         # Mock clonar_agente to verify MASS clonal expansion
-        with patch.object(
-            lymphnode, "clonar_agente", new_callable=AsyncMock
-        ) as mock_clone:
+        with patch.object(lymphnode, "clonar_agente", new_callable=AsyncMock) as mock_clone:
             mock_clone.return_value = [f"neutrofilo_{i}" for i in range(50)]
 
             # ACT: Detect coordinated attacks
@@ -191,12 +181,13 @@ class TestCoordinatedAttackDetection:
         # ASSERT: Should trigger MASSIVE clonal expansion (50 Neutrófilos!)
         mock_clone.assert_called_once()
         call_args = mock_clone.call_args
-        assert call_args[1]["tipo_base"] == AgentType.NEUTROFILO, \
+        assert call_args[1]["tipo_base"] == AgentType.NEUTROFILO, (
             "Should create Neutrofilo swarm for coordinated attack"
-        assert call_args[1]["especializacao"] == "coordinated_attack_response", \
+        )
+        assert call_args[1]["especializacao"] == "coordinated_attack_response", (
             "Should specialize for coordinated attack response"
-        assert call_args[1]["quantidade"] == 50, \
-            "Should create MASSIVE swarm (50 Neutrófilos) for coordinated attack!"
+        )
+        assert call_args[1]["quantidade"] == 50, "Should create MASSIVE swarm (50 Neutrófilos) for coordinated attack!"
 
     @pytest.mark.asyncio
     async def test_coordinated_attack_below_threshold_no_action(self, lymphnode):
@@ -226,8 +217,7 @@ class TestCoordinatedAttackDetection:
 
         # ASSERT: Temperature should not increase dramatically
         # (no mass response triggered)
-        assert lymphnode.temperatura_regional == initial_temp, \
-            "Should not trigger mass response for < 10 threats"
+        assert lymphnode.temperatura_regional == initial_temp, "Should not trigger mass response for < 10 threats"
 
     @pytest.mark.asyncio
     async def test_coordinated_attack_filters_old_threats(self, lymphnode):
@@ -244,19 +234,23 @@ class TestCoordinatedAttackDetection:
 
         # 5 recent threats (< 1 min)
         for i in range(5):
-            cytokines.append({
-                "tipo": "IL1",
-                "timestamp": (now - timedelta(seconds=i * 10)).isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-            })
+            cytokines.append(
+                {
+                    "tipo": "IL1",
+                    "timestamp": (now - timedelta(seconds=i * 10)).isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                }
+            )
 
         # 10 old threats (> 1 min)
         for i in range(10):
-            cytokines.append({
-                "tipo": "IL1",
-                "timestamp": (now - timedelta(seconds=70 + i * 5)).isoformat(),
-                "payload": {"evento": "ameaca_detectada"},
-            })
+            cytokines.append(
+                {
+                    "tipo": "IL1",
+                    "timestamp": (now - timedelta(seconds=70 + i * 5)).isoformat(),
+                    "payload": {"evento": "ameaca_detectada"},
+                }
+            )
 
         initial_temp = lymphnode.temperatura_regional
 
@@ -264,8 +258,7 @@ class TestCoordinatedAttackDetection:
         await lymphnode._detect_coordinated_attacks(cytokines)
 
         # ASSERT: Should NOT trigger (only 5 recent threats)
-        assert lymphnode.temperatura_regional == initial_temp, \
-            "Should only count recent threats (< 1 min)"
+        assert lymphnode.temperatura_regional == initial_temp, "Should only count recent threats (< 1 min)"
 
     @pytest.mark.asyncio
     async def test_coordinated_attack_handles_missing_timestamp(self, lymphnode):
@@ -290,8 +283,7 @@ class TestCoordinatedAttackDetection:
             handled_gracefully = False
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle cytokines with missing timestamps gracefully"
+        assert handled_gracefully, "Should handle cytokines with missing timestamps gracefully"
 
     @pytest.mark.asyncio
     async def test_coordinated_attack_handles_invalid_timestamp(self, lymphnode):
@@ -324,8 +316,7 @@ class TestCoordinatedAttackDetection:
             handled_gracefully = False
 
         # ASSERT: Should handle gracefully
-        assert handled_gracefully, \
-            "Should handle invalid timestamps gracefully (exception catch)"
+        assert handled_gracefully, "Should handle invalid timestamps gracefully (exception catch)"
 
 
 # ==================== HOMEOSTATIC REGULATION ====================
@@ -351,8 +342,7 @@ class TestHomeostaticRegulation:
         state = lymphnode.homeostatic_state
 
         # ASSERT: Should be in INFLAMAÇÃO
-        assert state == "INFLAMAÇÃO", \
-            "Temperature ≥39.0°C should trigger INFLAMAÇÃO state"
+        assert state == "INFLAMAÇÃO", "Temperature ≥39.0°C should trigger INFLAMAÇÃO state"
 
     @pytest.mark.asyncio
     async def test_homeostatic_state_ativacao(self, lymphnode):
@@ -368,8 +358,7 @@ class TestHomeostaticRegulation:
         state = lymphnode.homeostatic_state
 
         # ASSERT
-        assert state == "ATIVAÇÃO", \
-            "Temperature 38.0-39.0°C should trigger ATIVAÇÃO"
+        assert state == "ATIVAÇÃO", "Temperature 38.0-39.0°C should trigger ATIVAÇÃO"
 
     @pytest.mark.asyncio
     async def test_homeostatic_state_atencao(self, lymphnode):
@@ -385,8 +374,7 @@ class TestHomeostaticRegulation:
         state = lymphnode.homeostatic_state
 
         # ASSERT
-        assert state == "ATENÇÃO", \
-            "Temperature 37.5-38.0°C should trigger ATENÇÃO"
+        assert state == "ATENÇÃO", "Temperature 37.5-38.0°C should trigger ATENÇÃO"
 
     @pytest.mark.asyncio
     async def test_homeostatic_state_vigilancia(self, lymphnode):
@@ -402,8 +390,7 @@ class TestHomeostaticRegulation:
         state = lymphnode.homeostatic_state
 
         # ASSERT
-        assert state == "VIGILÂNCIA", \
-            "Temperature 37.0-37.5°C should trigger VIGILÂNCIA"
+        assert state == "VIGILÂNCIA", "Temperature 37.0-37.5°C should trigger VIGILÂNCIA"
 
     @pytest.mark.asyncio
     async def test_homeostatic_state_repouso(self, lymphnode):
@@ -419,8 +406,7 @@ class TestHomeostaticRegulation:
         state = lymphnode.homeostatic_state
 
         # ASSERT
-        assert state == "REPOUSO", \
-            "Temperature <37.0°C should trigger REPOUSO (rest)"
+        assert state == "REPOUSO", "Temperature <37.0°C should trigger REPOUSO (rest)"
 
 
 # ==================== SUMMARY ====================

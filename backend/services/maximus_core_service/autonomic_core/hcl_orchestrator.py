@@ -5,10 +5,9 @@ Bio-inspired self-regulation with Sympathetic/Parasympathetic operational modes.
 """
 
 import asyncio
-from datetime import datetime
 import logging
 import time
-from typing import Any, Dict, Optional
+from datetime import datetime
 
 from .analyze.anomaly_detector import AnomalyDetector
 from .analyze.degradation_detector import PerformanceDegradationDetector
@@ -23,7 +22,7 @@ from .execute.safety_manager import SafetyManager
 from .knowledge_base.decision_api import DecisionAPI
 from .monitor.system_monitor import SystemMonitor
 from .plan.fuzzy_controller import FuzzyLogicController
-from .plan.mode_definitions import get_mode_policy, OPERATIONAL_MODES
+from .plan.mode_definitions import get_mode_policy
 from .plan.rl_agent import SACAgent
 
 logger = logging.getLogger(__name__)
@@ -67,9 +66,7 @@ class HomeostaticControlLoop:
         # Knowledge Base
         self.decision_api = DecisionAPI(db_url=db_url)
 
-        logger.info(
-            f"HCL Orchestrator initialized (dry_run={dry_run_mode}, interval={loop_interval_seconds}s)"
-        )
+        logger.info(f"HCL Orchestrator initialized (dry_run={dry_run_mode}, interval={loop_interval_seconds}s)")
 
     async def initialize(self):
         """Initialize components and database pool."""
@@ -77,9 +74,7 @@ class HomeostaticControlLoop:
             # Initialize database connection pool
             import asyncpg
 
-            self.decision_api.pool = await asyncpg.create_pool(
-                self.decision_api.db_url, min_size=2, max_size=10
-            )
+            self.decision_api.pool = await asyncpg.create_pool(self.decision_api.db_url, min_size=2, max_size=10)
 
             # Create schema if needed
             from .knowledge_base.database_schema import create_schema
@@ -117,15 +112,11 @@ class HomeostaticControlLoop:
 
                 # 3. PLAN - Determine operational mode and actions
                 plan = await self._plan_actions(metrics, analysis)
-                logger.info(
-                    f"Plan: Mode={plan['operational_mode']}, Actions={len(plan['actions'])}"
-                )
+                logger.info(f"Plan: Mode={plan['operational_mode']}, Actions={len(plan['actions'])}")
 
                 # 4. EXECUTE - Apply actions with safety checks
                 execution = await self._execute_plan(plan, metrics)
-                logger.info(
-                    f"Execute: Success={execution['success']}, Applied={execution['applied_count']}"
-                )
+                logger.info(f"Execute: Success={execution['success']}, Applied={execution['applied_count']}")
 
                 # 5. KNOWLEDGE - Store decision for learning
                 await self._store_decision(metrics, analysis, plan, execution)
@@ -133,9 +124,7 @@ class HomeostaticControlLoop:
                 # Wait for next cycle
                 elapsed = time.time() - loop_start
                 wait_time = max(0, self.loop_interval - elapsed)
-                logger.info(
-                    f"HCL cycle completed in {elapsed:.1f}s, waiting {wait_time:.1f}s"
-                )
+                logger.info(f"HCL cycle completed in {elapsed:.1f}s, waiting {wait_time:.1f}s")
 
                 await asyncio.sleep(wait_time)
 
@@ -145,7 +134,7 @@ class HomeostaticControlLoop:
 
         logger.info("HCL loop stopped")
 
-    async def _analyze_metrics(self, metrics: Dict) -> Dict:
+    async def _analyze_metrics(self, metrics: dict) -> dict:
         """Analyze metrics for anomalies, failures, degradation."""
         analysis = {}
 
@@ -161,9 +150,7 @@ class HomeostaticControlLoop:
             analysis["failure_prediction"] = failure_result
 
             # Performance degradation
-            degradation_result = self.degradation_detector.detect_degradation(
-                metrics.get("latency_p99", 0)
-            )
+            degradation_result = self.degradation_detector.detect_degradation(metrics.get("latency_p99", 0))
             analysis["degradation"] = degradation_result
 
             # Demand forecasting
@@ -175,9 +162,7 @@ class HomeostaticControlLoop:
             if anomaly_result.get("is_anomaly"):
                 issues.append(f"Anomaly detected (score={anomaly_result['score']:.2f})")
             if failure_result.get("failure_probability", 0) > 0.7:
-                issues.append(
-                    f"High failure risk ({failure_result['failure_probability']:.0%})"
-                )
+                issues.append(f"High failure risk ({failure_result['failure_probability']:.0%})")
             if degradation_result.get("is_degraded"):
                 issues.append("Performance degradation detected")
 
@@ -189,7 +174,7 @@ class HomeostaticControlLoop:
 
         return analysis
 
-    async def _plan_actions(self, metrics: Dict, analysis: Dict) -> Dict:
+    async def _plan_actions(self, metrics: dict, analysis: dict) -> dict:
         """Plan operational mode and resource actions."""
         plan = {"operational_mode": self.current_mode, "actions": [], "reasoning": []}
 
@@ -212,21 +197,14 @@ class HomeostaticControlLoop:
                 plan["actions"].extend(self._generate_anomaly_actions(policy, metrics))
                 plan["reasoning"].append("Anomaly mitigation actions")
 
-            if (
-                analysis.get("failure_prediction", {}).get("failure_probability", 0)
-                > 0.7
-            ):
+            if analysis.get("failure_prediction", {}).get("failure_probability", 0) > 0.7:
                 # High failure risk - preventive actions
-                plan["actions"].extend(
-                    self._generate_preventive_actions(policy, metrics)
-                )
+                plan["actions"].extend(self._generate_preventive_actions(policy, metrics))
                 plan["reasoning"].append("Preventive actions for predicted failure")
 
             if analysis.get("degradation", {}).get("is_degraded"):
                 # Performance degradation - optimization actions
-                plan["actions"].extend(
-                    self._generate_optimization_actions(policy, metrics)
-                )
+                plan["actions"].extend(self._generate_optimization_actions(policy, metrics))
                 plan["reasoning"].append("Performance optimization actions")
 
             # RL agent fine-tuning (optional)
@@ -245,7 +223,7 @@ class HomeostaticControlLoop:
 
         return plan
 
-    async def _execute_plan(self, plan: Dict, metrics_before: Dict) -> Dict:
+    async def _execute_plan(self, plan: dict, metrics_before: dict) -> dict:
         """Execute planned actions with safety checks."""
         execution = {
             "success": True,
@@ -257,9 +235,7 @@ class HomeostaticControlLoop:
         try:
             for action in plan.get("actions", []):
                 # Safety check: rate limiting
-                if not self.safety_manager.check_rate_limit(
-                    action.get("type", "NORMAL")
-                ):
+                if not self.safety_manager.check_rate_limit(action.get("type", "NORMAL")):
                     logger.warning(f"Action throttled: {action}")
                     execution["failed_count"] += 1
                     continue
@@ -305,7 +281,7 @@ class HomeostaticControlLoop:
 
         return execution
 
-    async def _execute_action(self, action: Dict) -> Dict:
+    async def _execute_action(self, action: dict) -> dict:
         """Execute individual action using appropriate actuator."""
         action_type = action.get("actuator")
 
@@ -317,16 +293,14 @@ class HomeostaticControlLoop:
                         action["min_replicas"],
                         action["max_replicas"],
                     )
-                elif action["operation"] == "update_resources":
+                if action["operation"] == "update_resources":
                     return self.k8s_actuator.update_resource_limits(
                         action["service"], action["cpu_limit"], action["memory_limit"]
                     )
 
             elif action_type == "docker":
                 if action["operation"] == "scale":
-                    return await self.docker_actuator.scale_service(
-                        action["service"], action["replicas"]
-                    )
+                    return await self.docker_actuator.scale_service(action["service"], action["replicas"])
 
             elif action_type == "database":
                 if action["operation"] == "adjust_pool":
@@ -338,9 +312,7 @@ class HomeostaticControlLoop:
 
             elif action_type == "cache":
                 if action["operation"] == "set_strategy":
-                    return await self.cache_actuator.set_cache_strategy(
-                        action["strategy"]
-                    )
+                    return await self.cache_actuator.set_cache_strategy(action["strategy"])
 
             elif action_type == "loadbalancer":
                 if action["operation"] == "shift_traffic":
@@ -356,9 +328,7 @@ class HomeostaticControlLoop:
             logger.error(f"Action execution error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def _store_decision(
-        self, metrics: Dict, analysis: Dict, plan: Dict, execution: Dict
-    ):
+    async def _store_decision(self, metrics: dict, analysis: dict, plan: dict, execution: dict):
         """Store decision in knowledge base for learning."""
         try:
             decision = {
@@ -377,7 +347,7 @@ class HomeostaticControlLoop:
         except Exception as e:
             logger.error(f"Decision storage error: {e}")
 
-    def _generate_anomaly_actions(self, policy: Dict, metrics: Dict) -> list:
+    def _generate_anomaly_actions(self, policy: dict, metrics: dict) -> list:
         """Generate actions for anomaly mitigation."""
         actions = []
 
@@ -405,7 +375,7 @@ class HomeostaticControlLoop:
 
         return actions
 
-    def _generate_preventive_actions(self, policy: Dict, metrics: Dict) -> list:
+    def _generate_preventive_actions(self, policy: dict, metrics: dict) -> list:
         """Generate preventive actions for predicted failures."""
         actions = []
 
@@ -433,7 +403,7 @@ class HomeostaticControlLoop:
 
         return actions
 
-    def _generate_optimization_actions(self, policy: Dict, metrics: Dict) -> list:
+    def _generate_optimization_actions(self, policy: dict, metrics: dict) -> list:
         """Generate performance optimization actions."""
         actions = []
 
@@ -462,7 +432,7 @@ class HomeostaticControlLoop:
 
         return actions
 
-    def _metrics_to_array(self, metrics: Dict) -> list:
+    def _metrics_to_array(self, metrics: dict) -> list:
         """Convert metrics dict to array for ML models."""
         return [
             metrics.get("cpu_percent", 0),
@@ -472,7 +442,7 @@ class HomeostaticControlLoop:
             # Add more features as needed
         ]
 
-    def _extract_failure_features(self, metrics: Dict) -> Dict:
+    def _extract_failure_features(self, metrics: dict) -> dict:
         """Extract features for failure prediction."""
         return {
             "error_rate_trend": metrics.get("error_rate", 0),
@@ -481,7 +451,7 @@ class HomeostaticControlLoop:
             "disk_io_degradation": metrics.get("disk_io_wait", 0) > 50,
         }
 
-    def _get_rl_state(self, metrics: Dict) -> list:
+    def _get_rl_state(self, metrics: dict) -> list:
         """Get RL agent state vector."""
         return [
             metrics.get("cpu_percent", 0) / 100.0,
@@ -490,7 +460,7 @@ class HomeostaticControlLoop:
             metrics.get("latency_p99", 0) / 1000.0,
         ]
 
-    def _calculate_reward(self, metrics: Dict, execution: Dict) -> float:
+    def _calculate_reward(self, metrics: dict, execution: dict) -> float:
         """Calculate reward signal for RL training."""
         reward = 0.0
 
@@ -532,9 +502,7 @@ async def run_homeostatic_control_loop(
     db_url: str = "postgresql://localhost/vertice",
 ):
     """Run the Homeostatic Control Loop."""
-    hcl = HomeostaticControlLoop(
-        dry_run_mode=dry_run, loop_interval_seconds=interval, db_url=db_url
-    )
+    hcl = HomeostaticControlLoop(dry_run_mode=dry_run, loop_interval_seconds=interval, db_url=db_url)
 
     await hcl.initialize()
     await hcl.run()

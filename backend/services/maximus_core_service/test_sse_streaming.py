@@ -11,34 +11,35 @@ Quality: REGRA DE OURO compliant - NO MOCK, NO PLACEHOLDER, NO TODO
 """
 
 import asyncio
-import time
 import json
-from typing import List, Dict, Optional
+import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+
 import httpx
 
 
 @dataclass
 class SSEEvent:
     """Parsed SSE event."""
+
     event_type: str
     event_id: str
-    data: Dict
+    data: dict
     timestamp: float = field(default_factory=time.time)
 
 
 @dataclass
 class SSETestMetrics:
     """Metrics collected during SSE testing."""
+
     events_received: int = 0
     heartbeats_received: int = 0
     decisions_received: int = 0
     connection_time: float = 0.0
     first_event_latency: float = 0.0
     avg_latency: float = 0.0
-    latencies: List[float] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    latencies: list[float] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 class SSEStreamingValidator:
@@ -63,13 +64,9 @@ class SSEStreamingValidator:
         """
         self.base_url = base_url
         self.metrics = SSETestMetrics()
-        self.events: List[SSEEvent] = []
+        self.events: list[SSEEvent] = []
 
-    async def parse_sse_stream(
-        self,
-        response: httpx.Response,
-        duration: float = 10.0
-    ) -> List[SSEEvent]:
+    async def parse_sse_stream(self, response: httpx.Response, duration: float = 10.0) -> list[SSEEvent]:
         """
         Parse SSE stream from response.
 
@@ -80,12 +77,12 @@ class SSEStreamingValidator:
         Returns:
             List of parsed SSE events
         """
-        events: List[SSEEvent] = []
+        events: list[SSEEvent] = []
         start_time = time.time()
 
         event_type = ""
         event_id = ""
-        data_lines: List[str] = []
+        data_lines: list[str] = []
 
         async for line in response.aiter_lines():
             # Check duration timeout
@@ -102,12 +99,7 @@ class SSEStreamingValidator:
                         data_str = "\n".join(data_lines)
                         data = json.loads(data_str)
 
-                        event = SSEEvent(
-                            event_type=event_type,
-                            event_id=event_id,
-                            data=data,
-                            timestamp=time.time()
-                        )
+                        event = SSEEvent(event_type=event_type, event_id=event_id, data=data, timestamp=time.time())
                         events.append(event)
 
                         # Update metrics
@@ -142,9 +134,9 @@ class SSEStreamingValidator:
         Returns:
             True if connection successful
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: SSE Connection Establishment")
-        print("="*80)
+        print("=" * 80)
 
         try:
             # Create session and connect
@@ -154,25 +146,24 @@ class SSEStreamingValidator:
 
             start_time = time.time()
 
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                async with client.stream(
-                    "GET",
-                    f"{self.base_url}/api/v1/governance/stream/{operator_id}",
-                    params={"session_id": session_id}
-                ) as response:
-                    self.metrics.connection_time = time.time() - start_time
+            async with (
+                httpx.AsyncClient(timeout=30.0) as client,
+                client.stream(
+                    "GET", f"{self.base_url}/api/v1/governance/stream/{operator_id}", params={"session_id": session_id}
+                ) as response,
+            ):
+                self.metrics.connection_time = time.time() - start_time
 
-                    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+                assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
-                    content_type = response.headers.get("content-type", "")
-                    assert "text/event-stream" in content_type, \
-                        f"Wrong content-type: {content_type}"
+                content_type = response.headers.get("content-type", "")
+                assert "text/event-stream" in content_type, f"Wrong content-type: {content_type}"
 
-                    # Read first event (connection confirmation)
-                    events = await self.parse_sse_stream(response, duration=2.0)
+                # Read first event (connection confirmation)
+                events = await self.parse_sse_stream(response, duration=2.0)
 
-                    assert len(events) > 0, "No events received"
-                    assert events[0].event_type == "connected", "First event should be 'connected'"
+                assert len(events) > 0, "No events received"
+                assert events[0].event_type == "connected", "First event should be 'connected'"
 
             print(f"✅ Connection established in {self.metrics.connection_time:.3f}s")
             print(f"   Events received: {len(events)}")
@@ -192,25 +183,25 @@ class SSEStreamingValidator:
         Returns:
             True if heartbeats delivered correctly
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Heartbeat Delivery")
-        print("="*80)
+        print("=" * 80)
 
         try:
             session_response = await self._create_session("sse_test_hb@test")
             session_id = session_response["session_id"]
             operator_id = session_response["operator_id"]
 
-            heartbeat_times: List[float] = []
+            heartbeat_times: list[float] = []
 
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                async with client.stream(
-                    "GET",
-                    f"{self.base_url}/api/v1/governance/stream/{operator_id}",
-                    params={"session_id": session_id}
-                ) as response:
-                    # Listen for 35 seconds to catch at least 1 heartbeat (30s interval + buffer)
-                    events = await self.parse_sse_stream(response, duration=35.0)
+            async with (
+                httpx.AsyncClient(timeout=120.0) as client,
+                client.stream(
+                    "GET", f"{self.base_url}/api/v1/governance/stream/{operator_id}", params={"session_id": session_id}
+                ) as response,
+            ):
+                # Listen for 35 seconds to catch at least 1 heartbeat (30s interval + buffer)
+                events = await self.parse_sse_stream(response, duration=35.0)
 
             # Find heartbeat events
             for event in events:
@@ -221,8 +212,8 @@ class SSEStreamingValidator:
 
             # Validate heartbeat received
             print(f"✅ Heartbeats received: {len(heartbeat_times)}")
-            print(f"   Expected: ≥1 heartbeat within 35s")
-            print(f"   Heartbeat interval: 30s")
+            print("   Expected: ≥1 heartbeat within 35s")
+            print("   Heartbeat interval: 30s")
 
             # If we got multiple heartbeats, validate interval
             if len(heartbeat_times) >= 2:
@@ -245,16 +236,16 @@ class SSEStreamingValidator:
         Returns:
             True if latency acceptable
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Decision Streaming Latency")
-        print("="*80)
+        print("=" * 80)
 
         try:
             session_response = await self._create_session("sse_test_lat@test")
             session_id = session_response["session_id"]
             operator_id = session_response["operator_id"]
 
-            latencies: List[float] = []
+            latencies: list[float] = []
             num_tests = 5
             enqueue_times = {}
             decisions_received = 0
@@ -275,9 +266,7 @@ class SSEStreamingValidator:
 
             async with httpx.AsyncClient(timeout=60.0) as client:
                 async with client.stream(
-                    "GET",
-                    f"{self.base_url}/api/v1/governance/stream/{operator_id}",
-                    params={"session_id": session_id}
+                    "GET", f"{self.base_url}/api/v1/governance/stream/{operator_id}", params={"session_id": session_id}
                 ) as sse_response:
                     # Start enqueuing decisions in background
                     enqueue_task = asyncio.create_task(enqueue_decisions())
@@ -290,7 +279,10 @@ class SSEStreamingValidator:
                             # Look for decision IDs in the stream
                             for decision_id in list(enqueue_times.keys()):
                                 if decision_id in line:
-                                    if decision_id not in [d[0] for d in [(k, v) for k, v in zip(enqueue_times.keys(), latencies)]]:
+                                    if decision_id not in [
+                                        d[0]
+                                        for d in [(k, v) for k, v in zip(enqueue_times.keys(), latencies, strict=False)]
+                                    ]:
                                         receive_time = time.time()
                                         latency = (receive_time - enqueue_times[decision_id]) * 1000
                                         latencies.append(latency)
@@ -326,7 +318,7 @@ class SSEStreamingValidator:
             print(f"   Avg: {avg_latency:.1f}ms")
             print(f"   Max: {max_latency:.1f}ms")
             print(f"   P95: {p95_latency:.1f}ms")
-            print(f"   Target: <550ms")
+            print("   Target: <550ms")
 
             assert p95_latency < 550.0, f"P95 latency {p95_latency:.1f}ms exceeds 550ms target"
 
@@ -337,6 +329,7 @@ class SSEStreamingValidator:
             print(f"❌ Latency test failed: {error_msg}")
             self.metrics.errors.append(error_msg)
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -347,9 +340,9 @@ class SSEStreamingValidator:
         Returns:
             True if all clients receive events
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Multiple Concurrent Clients")
-        print("="*80)
+        print("=" * 80)
 
         try:
             num_clients = 5
@@ -371,36 +364,35 @@ class SSEStreamingValidator:
 
                 async def check_client_receives(session):
                     """Check if client receives decision event."""
-                    async with httpx.AsyncClient(timeout=10.0) as c:
-                        async with c.stream(
+                    async with (
+                        httpx.AsyncClient(timeout=10.0) as c,
+                        c.stream(
                             "GET",
                             f"{self.base_url}/api/v1/governance/stream/{session['operator_id']}",
-                            params={"session_id": session["session_id"]}
-                        ) as response:
-                            # Listen for decision event
-                            async for line in response.aiter_lines():
-                                if decision_id in line:
-                                    return True
-                                # Timeout after 5s
-                                if time.time() - start_time > 5.0:
-                                    return False
+                            params={"session_id": session["session_id"]},
+                        ) as response,
+                    ):
+                        # Listen for decision event
+                        async for line in response.aiter_lines():
+                            if decision_id in line:
+                                return True
+                            # Timeout after 5s
+                            if time.time() - start_time > 5.0:
+                                return False
                     return False
 
                 start_time = time.time()
 
                 # Check all clients concurrently
-                results = await asyncio.gather(*[
-                    check_client_receives(session) for session in sessions
-                ])
+                results = await asyncio.gather(*[check_client_receives(session) for session in sessions])
 
                 received_count = sum(results)
 
             print(f"✅ Clients tested: {num_clients}")
             print(f"   Events received: {received_count}/{num_clients}")
-            print(f"   Delivery rate: {(received_count/num_clients)*100:.1f}%")
+            print(f"   Delivery rate: {(received_count / num_clients) * 100:.1f}%")
 
-            assert received_count == num_clients, \
-                f"Not all clients received event ({received_count}/{num_clients})"
+            assert received_count == num_clients, f"Not all clients received event ({received_count}/{num_clients})"
 
             return True
 
@@ -409,7 +401,7 @@ class SSEStreamingValidator:
             self.metrics.errors.append(str(e))
             return False
 
-    async def _create_session(self, operator_id: str) -> Dict:
+    async def _create_session(self, operator_id: str) -> dict:
         """
         Create operator session.
 
@@ -422,15 +414,11 @@ class SSEStreamingValidator:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/api/v1/governance/session/create",
-                json={
-                    "operator_id": operator_id,
-                    "operator_name": "SSE Test Operator",
-                    "role": "soc_operator"
-                }
+                json={"operator_id": operator_id, "operator_name": "SSE Test Operator", "role": "soc_operator"},
             )
             return response.json()
 
-    async def _enqueue_decision(self, decision_id: str, client: httpx.AsyncClient) -> Dict:
+    async def _enqueue_decision(self, decision_id: str, client: httpx.AsyncClient) -> dict:
         """
         Enqueue test decision.
 
@@ -452,8 +440,8 @@ class SSEStreamingValidator:
                 "ai_reasoning": "SSE streaming test",
                 "threat_score": 9.0,
                 "threat_type": "test",
-                "metadata": {}
-            }
+                "metadata": {},
+            },
         )
         return response.json()
 
@@ -464,9 +452,9 @@ class SSEStreamingValidator:
         Returns:
             True if all tests pass
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 SSE Streaming Validation Suite")
-        print("="*80)
+        print("=" * 80)
         print(f"Base URL: {self.base_url}")
         print()
 
@@ -479,9 +467,9 @@ class SSEStreamingValidator:
         results.append(("Multiple Concurrent Clients", await self.test_multiple_clients()))
 
         # Print summary
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 SSE Validation Summary")
-        print("="*80)
+        print("=" * 80)
 
         passed = sum(1 for _, result in results if result)
         total = len(results)
@@ -489,26 +477,26 @@ class SSEStreamingValidator:
         print(f"\nTotal Tests: {total}")
         print(f"✅ Passed: {passed}")
         print(f"❌ Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        print(f"Success Rate: {(passed / total) * 100:.1f}%")
 
         if self.metrics.latencies:
-            print(f"\nPerformance:")
+            print("\nPerformance:")
             print(f"  Avg Latency: {self.metrics.avg_latency:.1f}ms")
             print(f"  Connection Time: {self.metrics.connection_time:.3f}s")
 
         if self.metrics.errors:
-            print(f"\n⚠️  Errors encountered:")
+            print("\n⚠️  Errors encountered:")
             for error in self.metrics.errors[:5]:  # Show first 5
                 print(f"   - {error}")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
 
         if passed == total:
             print("✅ ALL SSE TESTS PASSED - Streaming is production-ready!")
         else:
             print(f"❌ {total - passed} test(s) failed - Review errors above")
 
-        print("="*80)
+        print("=" * 80)
         print()
 
         return passed == total

@@ -16,31 +16,33 @@ Version: 1.0.0
 
 import logging
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Optional
 
-from .core_manager import CoreManager, CoreNotInitializedError
 from ..models.coordination import (
-    CloneRequest,
     CloneResponse,
-    LymphnodeMetrics,
     HomeostaticStateResponse,
+    LymphnodeMetrics,
 )
+from .core_manager import CoreManager
 
 logger = logging.getLogger(__name__)
 
 
 class CoordinationServiceError(Exception):
     """Base exception for CoordinationService errors"""
+
     pass
 
 
 class LymphnodeNotAvailableError(CoordinationServiceError):
     """Raised when Lymphnode not available"""
+
     pass
 
 
 class AgentNotFoundForCloneError(CoordinationServiceError):
     """Raised when agent not found for cloning"""
+
     pass
 
 
@@ -122,11 +124,7 @@ class CoordinationService:
         """
         self._check_lymphnode_available()
 
-        logger.info(
-            f"Cloning agent: {agent_id}, "
-            f"especializacao={especializacao}, "
-            f"num_clones={num_clones}"
-        )
+        logger.info(f"Cloning agent: {agent_id}, especializacao={especializacao}, num_clones={num_clones}")
 
         try:
             lymphnode = self._core_manager.lymphnode
@@ -258,10 +256,13 @@ class CoordinationService:
                 },
             }
 
-            info = state_info.get(state.value, {
-                "description": "Unknown state",
-                "recommended_action": "Monitor and reassess",
-            })
+            info = state_info.get(
+                state.value,
+                {
+                    "description": "Unknown state",
+                    "recommended_action": "Monitor and reassess",
+                },
+            )
 
             return HomeostaticStateResponse(
                 homeostatic_state=state.value,

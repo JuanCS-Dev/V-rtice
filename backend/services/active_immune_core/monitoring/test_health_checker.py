@@ -9,12 +9,14 @@ Version: 1.0.0
 """
 
 import asyncio
+from datetime import datetime
+
 import pytest
-from datetime import datetime, timedelta
+
 from monitoring.health_checker import (
+    ComponentHealth,
     HealthChecker,
     HealthStatus,
-    ComponentHealth,
 )
 
 
@@ -59,6 +61,7 @@ class TestComponentHealth:
 
     def test_init_with_check_func(self):
         """Test ComponentHealth with check function"""
+
         async def check():
             return HealthStatus.HEALTHY, {"detail": "ok"}
 
@@ -76,6 +79,7 @@ class TestComponentHealth:
     @pytest.mark.asyncio
     async def test_check_healthy(self):
         """Test check returning healthy"""
+
         async def check():
             return HealthStatus.HEALTHY, {"detail": "all good"}
 
@@ -91,6 +95,7 @@ class TestComponentHealth:
     @pytest.mark.asyncio
     async def test_check_unhealthy(self):
         """Test check returning unhealthy"""
+
         async def check():
             return HealthStatus.UNHEALTHY, {"detail": "problem"}
 
@@ -105,6 +110,7 @@ class TestComponentHealth:
     @pytest.mark.asyncio
     async def test_check_exception(self):
         """Test check function raising exception"""
+
         async def check():
             raise ValueError("Test error")
 
@@ -118,6 +124,7 @@ class TestComponentHealth:
     @pytest.mark.asyncio
     async def test_consecutive_failures(self):
         """Test consecutive failures counter"""
+
         async def check():
             return HealthStatus.UNHEALTHY
 
@@ -193,6 +200,7 @@ class TestComponentHealth:
     @pytest.mark.asyncio
     async def test_time_since_healthy(self):
         """Test time since healthy calculation"""
+
         async def check():
             return HealthStatus.HEALTHY
 
@@ -224,6 +232,7 @@ class TestComponentHealth:
     @pytest.mark.asyncio
     async def test_history_tracking(self):
         """Test health status history tracking"""
+
         async def check():
             return HealthStatus.HEALTHY
 
@@ -251,11 +260,7 @@ class TestHealthCheckerInit:
 
     def test_init_custom_params(self):
         """Test HealthChecker with custom parameters"""
-        checker = HealthChecker(
-            check_interval=60,
-            failure_threshold=5,
-            enable_auto_check=True
-        )
+        checker = HealthChecker(check_interval=60, failure_threshold=5, enable_auto_check=True)
         assert checker.check_interval == 60
         assert checker.failure_threshold == 5
         assert checker.enable_auto_check is True
@@ -272,6 +277,7 @@ class TestComponentRegistration:
 
     def test_register_component_with_check_func(self, health_checker):
         """Test registering component with check function"""
+
         async def check():
             return HealthStatus.HEALTHY
 
@@ -396,6 +402,7 @@ class TestHealthCheck:
     @pytest.mark.asyncio
     async def test_check_health_some_degraded(self, health_checker):
         """Test health check with some degraded components"""
+
         async def healthy():
             return HealthStatus.HEALTHY
 
@@ -414,6 +421,7 @@ class TestHealthCheck:
     @pytest.mark.asyncio
     async def test_check_health_some_unhealthy(self, health_checker):
         """Test health check with some unhealthy components"""
+
         async def healthy():
             return HealthStatus.HEALTHY
 
@@ -477,6 +485,7 @@ class TestReadinessCheck:
     @pytest.mark.asyncio
     async def test_check_readiness_critical_unhealthy(self, health_checker):
         """Test readiness check with critical component unhealthy"""
+
         async def unhealthy():
             return HealthStatus.UNHEALTHY
 
@@ -612,6 +621,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_check_function_timeout(self, health_checker):
         """Test check function that times out"""
+
         async def slow_check():
             await asyncio.sleep(10)
             return HealthStatus.HEALTHY
@@ -620,16 +630,14 @@ class TestEdgeCases:
 
         # Check with timeout
         try:
-            await asyncio.wait_for(
-                health_checker.check_component("slow"),
-                timeout=0.1
-            )
+            await asyncio.wait_for(health_checker.check_component("slow"), timeout=0.1)
         except asyncio.TimeoutError:
             pass  # Expected
 
     @pytest.mark.asyncio
     async def test_check_function_returns_invalid(self, health_checker):
         """Test check function returning invalid data"""
+
         async def invalid_check():
             return "invalid"
 

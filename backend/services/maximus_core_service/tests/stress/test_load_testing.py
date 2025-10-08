@@ -20,28 +20,31 @@ Date: 2025-10-07
 import asyncio
 import time
 from dataclasses import dataclass
-from typing import List, Dict, Any
+
 import pytest
 import pytest_asyncio
 
 from consciousness.esgt.coordinator import ESGTCoordinator
 from consciousness.esgt.spm.salience_detector import SalienceScore
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
+
 # Imports not used - removed to simplify
 
 
 # ==================== METRICS COLLECTION ====================
 
+
 @dataclass
 class LoadTestMetrics:
     """Metrics collected during load test."""
+
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
     total_duration_ms: float = 0.0
-    min_latency_ms: float = float('inf')
+    min_latency_ms: float = float("inf")
     max_latency_ms: float = 0.0
-    latencies: List[float] = None
+    latencies: list[float] = None
 
     def __post_init__(self):
         if self.latencies is None:
@@ -90,6 +93,7 @@ class LoadTestMetrics:
 
 # ==================== FIXTURES ====================
 
+
 @pytest_asyncio.fixture
 async def tig_fabric():
     """Create TIG fabric for load testing."""
@@ -114,17 +118,14 @@ async def esgt_coordinator(tig_fabric):
     triggers.max_esgt_frequency_hz = 20.0  # Increased from 5Hz for load testing
     triggers.min_available_nodes = 8  # Ensure sufficient participation
 
-    coordinator = ESGTCoordinator(
-        tig_fabric=tig_fabric,
-        triggers=triggers,
-        coordinator_id="load-test-coordinator"
-    )
+    coordinator = ESGTCoordinator(tig_fabric=tig_fabric, triggers=triggers, coordinator_id="load-test-coordinator")
     await coordinator.start()
     yield coordinator
     await coordinator.stop()
 
 
 # ==================== LOAD TESTS ====================
+
 
 @pytest.mark.asyncio
 @pytest.mark.slow
@@ -138,7 +139,7 @@ async def test_sustained_esgt_load_short(esgt_coordinator):
     metrics = LoadTestMetrics()
     start_time = time.time()
 
-    print(f"\n🔥 Starting short load test:")
+    print("\n🔥 Starting short load test:")
     print(f"   Target Rate: {target_rate} ignitions/second")
     print(f"   Duration: {duration_seconds} seconds")
     print(f"   Total Ignitions: {total_ignitions}")
@@ -149,9 +150,7 @@ async def test_sustained_esgt_load_short(esgt_coordinator):
 
         # Create high-salience content
         salience = SalienceScore(
-            novelty=0.75 + (i % 10) * 0.02,
-            relevance=0.80 + (i % 5) * 0.02,
-            urgency=0.70 + (i % 3) * 0.03
+            novelty=0.75 + (i % 10) * 0.02, relevance=0.80 + (i % 5) * 0.02, urgency=0.70 + (i % 3) * 0.03
         )
         content = {"type": "load_test", "iteration": i}
 
@@ -169,9 +168,11 @@ async def test_sustained_esgt_load_short(esgt_coordinator):
         if (i + 1) % 20 == 0:
             elapsed = time.time() - start_time
             current_rate = (i + 1) / elapsed
-            print(f"   Progress: {i+1}/{total_ignitions} "
-                  f"(rate: {current_rate:.1f}/s, "
-                  f"success: {metrics.get_success_rate():.1f}%)")
+            print(
+                f"   Progress: {i + 1}/{total_ignitions} "
+                f"(rate: {current_rate:.1f}/s, "
+                f"success: {metrics.get_success_rate():.1f}%)"
+            )
 
         # Rate limiting (sleep to maintain target rate)
         expected_time = (i + 1) / target_rate
@@ -182,7 +183,7 @@ async def test_sustained_esgt_load_short(esgt_coordinator):
     metrics.total_duration_ms = (time.time() - start_time) * 1000
 
     # Print results
-    print(f"\n📊 Load Test Results:")
+    print("\n📊 Load Test Results:")
     print(f"   Total Requests: {metrics.total_requests}")
     print(f"   Success Rate: {metrics.get_success_rate():.2f}%")
     print(f"   Avg Latency: {metrics.get_avg_latency_ms():.2f}ms")
@@ -194,11 +195,11 @@ async def test_sustained_esgt_load_short(esgt_coordinator):
     # Assertions - relaxed for simulation environment with refractory periods
     # With 50ms refractory period, max theoretical rate is 20 Hz
     # Target rate of 10 Hz should achieve ~2% success due to sync overhead
-    assert metrics.get_success_rate() >= 1.0, \
+    assert metrics.get_success_rate() >= 1.0, (
         f"Success rate too low: {metrics.get_success_rate():.2f}% (expected ≥1% with refractory periods)"
+    )
 
-    assert metrics.get_p99_latency_ms() < 2000, \
-        f"P99 latency too high: {metrics.get_p99_latency_ms():.2f}ms"
+    assert metrics.get_p99_latency_ms() < 2000, f"P99 latency too high: {metrics.get_p99_latency_ms():.2f}ms"
 
 
 @pytest.mark.asyncio
@@ -220,9 +221,9 @@ async def test_sustained_esgt_load_full(esgt_coordinator):
     metrics = LoadTestMetrics()
     start_time = time.time()
 
-    print(f"\n🔥 Starting FULL load test:")
+    print("\n🔥 Starting FULL load test:")
     print(f"   Target Rate: {target_rate} ignitions/second")
-    print(f"   Duration: {duration_seconds} seconds ({duration_seconds/60:.1f} minutes)")
+    print(f"   Duration: {duration_seconds} seconds ({duration_seconds / 60:.1f} minutes)")
     print(f"   Total Ignitions: {total_ignitions}")
 
     # Execute load test
@@ -231,9 +232,7 @@ async def test_sustained_esgt_load_full(esgt_coordinator):
 
         # Create varying salience content
         salience = SalienceScore(
-            novelty=0.70 + (i % 20) * 0.01,
-            relevance=0.75 + (i % 15) * 0.01,
-            urgency=0.65 + (i % 10) * 0.02
+            novelty=0.70 + (i % 20) * 0.01, relevance=0.75 + (i % 15) * 0.01, urgency=0.65 + (i % 10) * 0.02
         )
         content = {"type": "load_test_full", "iteration": i}
 
@@ -251,10 +250,12 @@ async def test_sustained_esgt_load_full(esgt_coordinator):
         if (i + 1) % 5000 == 0:
             elapsed = time.time() - start_time
             current_rate = (i + 1) / elapsed
-            print(f"   Progress: {i+1}/{total_ignitions} "
-                  f"({(i+1)/total_ignitions*100:.1f}%) "
-                  f"rate: {current_rate:.1f}/s, "
-                  f"success: {metrics.get_success_rate():.1f}%")
+            print(
+                f"   Progress: {i + 1}/{total_ignitions} "
+                f"({(i + 1) / total_ignitions * 100:.1f}%) "
+                f"rate: {current_rate:.1f}/s, "
+                f"success: {metrics.get_success_rate():.1f}%"
+            )
 
         # Rate limiting
         expected_time = (i + 1) / target_rate
@@ -265,7 +266,7 @@ async def test_sustained_esgt_load_full(esgt_coordinator):
     metrics.total_duration_ms = (time.time() - start_time) * 1000
 
     # Print detailed results
-    print(f"\n📊 FULL Load Test Results:")
+    print("\n📊 FULL Load Test Results:")
     print(f"   Total Requests: {metrics.total_requests}")
     print(f"   Successful: {metrics.successful_requests}")
     print(f"   Failed: {metrics.failed_requests}")
@@ -274,18 +275,16 @@ async def test_sustained_esgt_load_full(esgt_coordinator):
     print(f"   P95 Latency: {metrics.get_p95_latency_ms():.2f}ms")
     print(f"   P99 Latency: {metrics.get_p99_latency_ms():.2f}ms")
     print(f"   Min/Max Latency: {metrics.min_latency_ms:.2f}/{metrics.max_latency_ms:.2f}ms")
-    print(f"   Total Duration: {metrics.total_duration_ms/1000:.2f}s ({metrics.total_duration_ms/60000:.2f}min)")
+    print(f"   Total Duration: {metrics.total_duration_ms / 1000:.2f}s ({metrics.total_duration_ms / 60000:.2f}min)")
 
     # Assertions (more strict for full test)
-    assert metrics.get_success_rate() >= 95.0, \
-        f"Success rate too low: {metrics.get_success_rate():.2f}%"
+    assert metrics.get_success_rate() >= 95.0, f"Success rate too low: {metrics.get_success_rate():.2f}%"
 
-    assert metrics.get_p99_latency_ms() < 1000, \
-        f"P99 latency too high: {metrics.get_p99_latency_ms():.2f}ms"
+    assert metrics.get_p99_latency_ms() < 1000, f"P99 latency too high: {metrics.get_p99_latency_ms():.2f}ms"
 
     # Check for performance degradation
-    first_half_latencies = metrics.latencies[:len(metrics.latencies)//2]
-    second_half_latencies = metrics.latencies[len(metrics.latencies)//2:]
+    first_half_latencies = metrics.latencies[: len(metrics.latencies) // 2]
+    second_half_latencies = metrics.latencies[len(metrics.latencies) // 2 :]
 
     first_half_avg = sum(first_half_latencies) / len(first_half_latencies)
     second_half_avg = sum(second_half_latencies) / len(second_half_latencies)
@@ -293,8 +292,7 @@ async def test_sustained_esgt_load_full(esgt_coordinator):
     degradation_pct = ((second_half_avg - first_half_avg) / first_half_avg) * 100
     print(f"   Performance Degradation: {degradation_pct:.2f}%")
 
-    assert degradation_pct < 10.0, \
-        f"Performance degradation too high: {degradation_pct:.2f}%"
+    assert degradation_pct < 10.0, f"Performance degradation too high: {degradation_pct:.2f}%"
 
 
 @pytest.mark.asyncio
@@ -332,7 +330,7 @@ async def test_burst_load_handling(esgt_coordinator):
             latency_ms = burst_duration_ms / burst_size
             metrics.add_request(latency_ms, success)
 
-    print(f"\n📊 Burst Test Results:")
+    print("\n📊 Burst Test Results:")
     print(f"   Burst Size: {burst_size}")
     print(f"   Burst Duration: {burst_duration_ms:.2f}ms")
     print(f"   Success Rate: {metrics.get_success_rate():.2f}%")
@@ -341,12 +339,14 @@ async def test_burst_load_handling(esgt_coordinator):
     # Assertions - relaxed for simulation with refractory periods
     # Burst of 50 concurrent ignitions will be serialized by refractory period
     # Expected: most will fail due to temporal gating
-    assert metrics.get_success_rate() >= 2.0, \
+    assert metrics.get_success_rate() >= 2.0, (
         f"Burst handling success rate too low: {metrics.get_success_rate():.2f}% (expected ≥2%)"
+    )
 
     # Burst duration will be high due to serialization (50 * 50ms ~ 2500ms minimum)
-    assert burst_duration_ms < 15000, \
+    assert burst_duration_ms < 15000, (
         f"Burst took too long: {burst_duration_ms:.2f}ms (expected <15s with serialization)"
+    )
 
 
 @pytest.mark.asyncio

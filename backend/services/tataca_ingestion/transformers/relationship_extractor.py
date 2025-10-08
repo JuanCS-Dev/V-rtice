@@ -3,8 +3,8 @@
 Extracts relationships between entities for knowledge graph construction in Neo4j.
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from models import (
@@ -32,9 +32,7 @@ class RelationshipExtractor:
         """Initialize relationship extractor."""
         pass
 
-    def extract_pessoa_relationships(
-        self, pessoa: Pessoa, raw_data: Dict[str, Any]
-    ) -> List[EntityRelationship]:
+    def extract_pessoa_relationships(self, pessoa: Pessoa, raw_data: Dict[str, Any]) -> List[EntityRelationship]:
         """
         Extract relationships for a Pessoa entity.
 
@@ -65,9 +63,7 @@ class RelationshipExtractor:
                         },
                     )
                     relationships.append(rel)
-                    logger.debug(
-                        f"Extracted POSSUI relationship: {pessoa.nome} -> {placa}"
-                    )
+                    logger.debug(f"Extracted POSSUI relationship: {pessoa.nome} -> {placa}")
 
         # Extract Pessoa -> Endereco (RESIDE_EM)
         if raw_data.get("enderecos"):
@@ -88,9 +84,7 @@ class RelationshipExtractor:
                         },
                     )
                     relationships.append(rel)
-                    logger.debug(
-                        f"Extracted RESIDE_EM relationship: {pessoa.nome} -> {endereco_id}"
-                    )
+                    logger.debug(f"Extracted RESIDE_EM relationship: {pessoa.nome} -> {endereco_id}")
 
         # Extract Pessoa -> Ocorrencia (ENVOLVIDO_EM)
         if raw_data.get("ocorrencias"):
@@ -104,23 +98,17 @@ class RelationshipExtractor:
                         target_id=numero_bo,
                         relation_type=RelationType.ENVOLVIDO_EM,
                         properties={
-                            "papel": ocorrencia_ref.get(
-                                "papel", "envolvido"
-                            ),  # vitima, suspeito, testemunha
+                            "papel": ocorrencia_ref.get("papel", "envolvido"),  # vitima, suspeito, testemunha
                             "data_envolvimento": ocorrencia_ref.get("data"),
                             "created_at": datetime.utcnow().isoformat(),
                         },
                     )
                     relationships.append(rel)
-                    logger.debug(
-                        f"Extracted ENVOLVIDO_EM relationship: {pessoa.nome} -> {numero_bo}"
-                    )
+                    logger.debug(f"Extracted ENVOLVIDO_EM relationship: {pessoa.nome} -> {numero_bo}")
 
         return relationships
 
-    def extract_veiculo_relationships(
-        self, veiculo: Veiculo, raw_data: Dict[str, Any]
-    ) -> List[EntityRelationship]:
+    def extract_veiculo_relationships(self, veiculo: Veiculo, raw_data: Dict[str, Any]) -> List[EntityRelationship]:
         """
         Extract relationships for a Veiculo entity.
 
@@ -147,9 +135,7 @@ class RelationshipExtractor:
                 },
             )
             relationships.append(rel)
-            logger.debug(
-                f"Extracted POSSUI relationship: {veiculo.proprietario_cpf} -> {veiculo.placa}"
-            )
+            logger.debug(f"Extracted POSSUI relationship: {veiculo.proprietario_cpf} -> {veiculo.placa}")
 
         # Extract Veiculo -> Endereco (REGISTRADO_EM)
         municipio = veiculo.metadata.get("municipio")
@@ -170,9 +156,7 @@ class RelationshipExtractor:
                 },
             )
             relationships.append(rel)
-            logger.debug(
-                f"Extracted REGISTRADO_EM relationship: {veiculo.placa} -> {endereco_id}"
-            )
+            logger.debug(f"Extracted REGISTRADO_EM relationship: {veiculo.placa} -> {endereco_id}")
 
         # Extract Veiculo -> Ocorrencia (if vehicle involved in occurrences)
         if raw_data.get("ocorrencias"):
@@ -186,16 +170,12 @@ class RelationshipExtractor:
                         target_id=numero_bo,
                         relation_type=RelationType.ENVOLVIDO_EM,
                         properties={
-                            "tipo_envolvimento": ocorrencia_ref.get(
-                                "tipo", "mencionado"
-                            ),
+                            "tipo_envolvimento": ocorrencia_ref.get("tipo", "mencionado"),
                             "created_at": datetime.utcnow().isoformat(),
                         },
                     )
                     relationships.append(rel)
-                    logger.debug(
-                        f"Extracted ENVOLVIDO_EM relationship: {veiculo.placa} -> {numero_bo}"
-                    )
+                    logger.debug(f"Extracted ENVOLVIDO_EM relationship: {veiculo.placa} -> {numero_bo}")
 
         return relationships
 
@@ -215,11 +195,7 @@ class RelationshipExtractor:
         relationships = []
 
         # Extract Ocorrencia -> Endereco (OCORREU_EM)
-        if (
-            ocorrencia.local_logradouro
-            and ocorrencia.local_cidade
-            and ocorrencia.local_estado
-        ):
+        if ocorrencia.local_logradouro and ocorrencia.local_cidade and ocorrencia.local_estado:
             endereco_id = self._build_endereco_id(
                 {
                     "logradouro": ocorrencia.local_logradouro,
@@ -244,9 +220,7 @@ class RelationshipExtractor:
                 },
             )
             relationships.append(rel)
-            logger.debug(
-                f"Extracted OCORREU_EM relationship: {ocorrencia.numero_bo} -> {endereco_id}"
-            )
+            logger.debug(f"Extracted OCORREU_EM relationship: {ocorrencia.numero_bo} -> {endereco_id}")
 
         # Extract Ocorrencia -> Pessoa (ENVOLVIDO_EM - inverse)
         if raw_data.get("envolvidos"):
@@ -266,9 +240,7 @@ class RelationshipExtractor:
                         },
                     )
                     relationships.append(rel)
-                    logger.debug(
-                        f"Extracted ENVOLVIDO_EM relationship: {pessoa_id} -> {ocorrencia.numero_bo}"
-                    )
+                    logger.debug(f"Extracted ENVOLVIDO_EM relationship: {pessoa_id} -> {ocorrencia.numero_bo}")
 
         # Extract Ocorrencia -> Veiculo (if vehicles mentioned)
         if raw_data.get("veiculos_envolvidos"):
@@ -287,15 +259,11 @@ class RelationshipExtractor:
                         },
                     )
                     relationships.append(rel)
-                    logger.debug(
-                        f"Extracted ENVOLVIDO_EM relationship: {placa} -> {ocorrencia.numero_bo}"
-                    )
+                    logger.debug(f"Extracted ENVOLVIDO_EM relationship: {placa} -> {ocorrencia.numero_bo}")
 
         return relationships
 
-    def extract_endereco_relationships(
-        self, endereco: Endereco, raw_data: Dict[str, Any]
-    ) -> List[EntityRelationship]:
+    def extract_endereco_relationships(self, endereco: Endereco, raw_data: Dict[str, Any]) -> List[EntityRelationship]:
         """
         Extract relationships for an Endereco entity.
 
@@ -341,17 +309,13 @@ class RelationshipExtractor:
         if endereco_data.get("numero"):
             parts.insert(1, str(endereco_data["numero"]))
         if endereco_data.get("bairro"):
-            parts.insert(
-                2 if endereco_data.get("numero") else 1, endereco_data["bairro"]
-            )
+            parts.insert(2 if endereco_data.get("numero") else 1, endereco_data["bairro"])
 
         # Create normalized ID
         endereco_id = "-".join(parts).lower().replace(" ", "_")
         return endereco_id
 
-    def infer_relationships_from_context(
-        self, entities: List[Dict[str, Any]]
-    ) -> List[EntityRelationship]:
+    def infer_relationships_from_context(self, entities: List[Dict[str, Any]]) -> List[EntityRelationship]:
         """
         Infer implicit relationships from entity context.
 
@@ -396,7 +360,5 @@ class RelationshipExtractor:
         # Infer relationships based on patterns
         # (This is where more sophisticated inference could happen)
 
-        logger.info(
-            f"Inferred {len(relationships)} implicit relationships from {len(entities)} entities"
-        )
+        logger.info(f"Inferred {len(relationships)} implicit relationships from {len(entities)} entities")
         return relationships

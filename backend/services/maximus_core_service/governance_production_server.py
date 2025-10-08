@@ -10,20 +10,19 @@ Date: 2025-10-06
 Quality: REGRA DE OURO compliant - NO MOCK, NO PLACEHOLDER, NO TODO
 """
 
-import asyncio
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from governance_sse import create_governance_api
 from hitl import (
     DecisionQueue,
+    EscalationManager,
+    HITLConfig,
+    HITLDecisionFramework,
     OperatorInterface,
     SLAConfig,
-    HITLDecisionFramework,
-    HITLConfig,
-    EscalationManager,
 )
-from governance_sse import create_governance_api
 
 # Create FastAPI app
 app = FastAPI(
@@ -60,11 +59,11 @@ async def startup_event():
     # Create SLA configuration
     print("🔧 Initializing HITL Governance Framework...")
     sla_config = SLAConfig(
-        low_risk_timeout=30,        # 30 minutes
-        medium_risk_timeout=15,     # 15 minutes
-        high_risk_timeout=10,       # 10 minutes
-        critical_risk_timeout=5,    # 5 minutes
-        warning_threshold=0.75,     # Warn at 75% of SLA
+        low_risk_timeout=30,  # 30 minutes
+        medium_risk_timeout=15,  # 15 minutes
+        high_risk_timeout=10,  # 10 minutes
+        critical_risk_timeout=5,  # 5 minutes
+        warning_threshold=0.75,  # Warn at 75% of SLA
         auto_escalate_on_timeout=True,
     )
     print("✅ SLA Config created")
@@ -72,9 +71,9 @@ async def startup_event():
     # Create HITL configuration
     hitl_config = HITLConfig(
         full_automation_threshold=0.99,  # Very high threshold for full automation
-        supervised_threshold=0.80,        # Medium threshold for supervised execution
-        advisory_threshold=0.60,          # Low threshold for advisory
-        high_risk_requires_approval=True,      # HIGH risk always requires approval
+        supervised_threshold=0.80,  # Medium threshold for supervised execution
+        advisory_threshold=0.60,  # Low threshold for advisory
+        high_risk_requires_approval=True,  # HIGH risk always requires approval
         critical_risk_requires_approval=True,  # CRITICAL risk always requires approval
         max_queue_size=1000,
         audit_all_decisions=True,

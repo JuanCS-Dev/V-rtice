@@ -4,13 +4,13 @@ DOUTRINA VÉRTICE - ARTIGO II: PAGANI Standard
 Focus: Cover missing lines with targeted tests for real implementation.
 """
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock, patch, MagicMock
 
-from coordination.clonal_selection import ClonalSelectionEngine, FitnessMetrics, MCEA_AVAILABLE
 from agents.models import AgentType
-
+from coordination.clonal_selection import ClonalSelectionEngine, FitnessMetrics
 
 # ==================== FIXTURES ====================
 
@@ -85,7 +85,7 @@ class TestMCEAIntegration:
     async def test_set_mcea_client_not_available(self, engine):
         """Test set_mcea_client when MCEA not available (lines 193-198)"""
         # Force MCEA_AVAILABLE to False
-        with patch('coordination.clonal_selection.MCEA_AVAILABLE', False):
+        with patch("coordination.clonal_selection.MCEA_AVAILABLE", False):
             mock_client = AsyncMock()
 
             # Should return early with warning (lines 193-195)
@@ -119,6 +119,7 @@ class TestMCEAIntegration:
 
         # Wait for one evolutionary cycle
         import asyncio
+
         await asyncio.sleep(0.5)
 
         # Stop engine
@@ -132,9 +133,7 @@ class TestMCEAIntegration:
         """Test evolutionary loop handles MCEA fetch error (line 368)"""
         # Mock MCEA client that raises exception
         mock_mcea = AsyncMock()
-        mock_mcea.get_current_arousal = AsyncMock(
-            side_effect=Exception("MCEA connection error")
-        )
+        mock_mcea.get_current_arousal = AsyncMock(side_effect=Exception("MCEA connection error"))
 
         engine.mcea_client = mock_mcea
 
@@ -151,6 +150,7 @@ class TestMCEAIntegration:
 
         # Wait for one cycle
         import asyncio
+
         await asyncio.sleep(0.5)
 
         # Stop engine
@@ -229,6 +229,7 @@ class TestEvolutionaryLoop:
 
         # Wait for one cycle
         import asyncio
+
         await asyncio.sleep(0.5)
 
         # Stop engine
@@ -244,6 +245,7 @@ class TestEvolutionaryLoop:
 
         # Wait briefly
         import asyncio
+
         await asyncio.sleep(0.2)
 
         # Stop should cancel tasks (lines 396-397)
@@ -259,6 +261,7 @@ class TestEvaluatePopulation:
 
     async def test_evaluate_population_tracks_best_agent(self, engine):
         """Test evaluation tracks best agent ever (lines 419-437)"""
+
         # Mock _fetch_all_agents to return agents
         async def mock_fetch():
             return [
@@ -411,6 +414,7 @@ class TestEvaluationEdgeCases:
 
     async def test_evaluate_population_skips_agents_without_id(self, engine):
         """Test evaluation skips agents without ID (line 421)"""
+
         # Mock _fetch_all_agents to return agents, some without ID
         async def mock_fetch():
             return [
@@ -453,7 +457,7 @@ class TestMCEAConnection:
     async def test_set_mcea_client_success(self, engine):
         """Test set_mcea_client when MCEA available (lines 197-198)"""
         # Mock MCEA available
-        with patch('coordination.clonal_selection.MCEA_AVAILABLE', True):
+        with patch("coordination.clonal_selection.MCEA_AVAILABLE", True):
             mock_client = AsyncMock()
 
             # Set MCEA client
@@ -486,6 +490,7 @@ class TestEvolutionaryLoopPaths:
 
         # Wait for sleep to happen
         import asyncio
+
         await asyncio.sleep(0.3)
 
         # Stop engine

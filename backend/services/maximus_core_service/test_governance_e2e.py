@@ -9,10 +9,8 @@ Date: 2025-10-06
 Quality: REGRA DE OURO compliant
 """
 
-import asyncio
-import json
 import time
-from typing import Dict, List
+
 import httpx
 
 
@@ -32,7 +30,7 @@ class GovernanceE2EValidator:
         """
         self.base_url = base_url
         self.client = httpx.Client(timeout=30.0)
-        self.results: List[Dict] = []
+        self.results: list[dict] = []
 
     def test(self, name: str, func):
         """
@@ -42,30 +40,21 @@ class GovernanceE2EValidator:
             name: Test name
             func: Test function
         """
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print(f"🧪 Test: {name}")
-        print(f"{'='*80}")
+        print(f"{'=' * 80}")
 
         try:
             start_time = time.time()
             func()
             elapsed = time.time() - start_time
 
-            self.results.append({
-                "test": name,
-                "status": "PASS",
-                "elapsed": f"{elapsed:.3f}s"
-            })
+            self.results.append({"test": name, "status": "PASS", "elapsed": f"{elapsed:.3f}s"})
             print(f"✅ PASS ({elapsed:.3f}s)")
 
         except Exception as e:
             elapsed = time.time() - start_time
-            self.results.append({
-                "test": name,
-                "status": "FAIL",
-                "error": str(e),
-                "elapsed": f"{elapsed:.3f}s"
-            })
+            self.results.append({"test": name, "status": "FAIL", "error": str(e), "elapsed": f"{elapsed:.3f}s"})
             print(f"❌ FAIL ({elapsed:.3f}s): {e}")
 
     def test_root_endpoint(self):
@@ -93,7 +82,7 @@ class GovernanceE2EValidator:
         assert data["components"]["decision_framework"] is True
 
         print(f"   Status: {data['status']}")
-        print(f"   Components: ✅ All healthy")
+        print("   Components: ✅ All healthy")
 
     def test_governance_health(self):
         """Test governance health endpoint."""
@@ -111,16 +100,9 @@ class GovernanceE2EValidator:
 
     def test_session_creation(self):
         """Test operator session creation."""
-        payload = {
-            "operator_id": "test_e2e@test",
-            "operator_name": "E2E Test Operator",
-            "role": "soc_operator"
-        }
+        payload = {"operator_id": "test_e2e@test", "operator_name": "E2E Test Operator", "role": "soc_operator"}
 
-        response = self.client.post(
-            f"{self.base_url}/api/v1/governance/session/create",
-            json=payload
-        )
+        response = self.client.post(f"{self.base_url}/api/v1/governance/session/create", json=payload)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
         data = response.json()
@@ -159,16 +141,10 @@ class GovernanceE2EValidator:
             "ai_reasoning": "E2E test decision for validation",
             "threat_score": 8.5,
             "threat_type": "command_and_control",
-            "metadata": {
-                "source": "e2e_validator",
-                "timestamp": time.time()
-            }
+            "metadata": {"source": "e2e_validator", "timestamp": time.time()},
         }
 
-        response = self.client.post(
-            f"{self.base_url}/api/v1/governance/test/enqueue",
-            json=decision_data
-        )
+        response = self.client.post(f"{self.base_url}/api/v1/governance/test/enqueue", json=decision_data)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
         data = response.json()
@@ -183,14 +159,10 @@ class GovernanceE2EValidator:
 
     def test_approve_decision(self):
         """Test approving a decision."""
-        payload = {
-            "session_id": self.session_id,
-            "comment": "E2E test approval"
-        }
+        payload = {"session_id": self.session_id, "comment": "E2E test approval"}
 
         response = self.client.post(
-            f"{self.base_url}/api/v1/governance/decision/{self.test_decision_id}/approve",
-            json=payload
+            f"{self.base_url}/api/v1/governance/decision/{self.test_decision_id}/approve", json=payload
         )
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
@@ -203,9 +175,7 @@ class GovernanceE2EValidator:
 
     def test_session_stats(self):
         """Test operator session stats."""
-        response = self.client.get(
-            f"{self.base_url}/api/v1/governance/session/test_e2e@test/stats"
-        )
+        response = self.client.get(f"{self.base_url}/api/v1/governance/session/test_e2e@test/stats")
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
         data = response.json()
@@ -217,13 +187,13 @@ class GovernanceE2EValidator:
         print(f"   Sessions: {data.get('total_sessions', 0)}")
         print(f"   Reviewed: {data['total_decisions_reviewed']}")
         print(f"   Approved: {data.get('total_approved', 0)}")
-        print(f"   Approval rate: {data.get('approval_rate', 0)*100:.1f}%")
+        print(f"   Approval rate: {data.get('approval_rate', 0) * 100:.1f}%")
 
     def run_all_tests(self):
         """Run all validation tests."""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Governance E2E Validation Suite")
-        print("="*80)
+        print("=" * 80)
         print(f"Base URL: {self.base_url}")
         print()
 
@@ -238,9 +208,9 @@ class GovernanceE2EValidator:
         self.test("Session Stats", self.test_session_stats)
 
         # Print summary
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 Test Summary")
-        print("="*80)
+        print("=" * 80)
 
         passed = sum(1 for r in self.results if r["status"] == "PASS")
         failed = sum(1 for r in self.results if r["status"] == "FAIL")
@@ -249,7 +219,7 @@ class GovernanceE2EValidator:
         print(f"\nTotal: {total}")
         print(f"✅ Passed: {passed}")
         print(f"❌ Failed: {failed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        print(f"Success Rate: {(passed / total) * 100:.1f}%")
 
         if failed > 0:
             print("\n⚠️  Failed Tests:")
@@ -257,14 +227,14 @@ class GovernanceE2EValidator:
                 if result["status"] == "FAIL":
                     print(f"   - {result['test']}: {result['error']}")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
 
         if failed == 0:
             print("✅ ALL TESTS PASSED - Server is production-ready!")
         else:
             print(f"❌ {failed} test(s) failed - Review errors above")
 
-        print("="*80)
+        print("=" * 80)
         print()
 
         return failed == 0

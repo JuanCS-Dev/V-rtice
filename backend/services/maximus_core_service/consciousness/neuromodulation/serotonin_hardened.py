@@ -32,7 +32,7 @@ Version: 1.0.0
 Date: 2025-10-08
 """
 
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from consciousness.neuromodulation.modulator_base import (
     ModulatorConfig,
@@ -57,7 +57,7 @@ class SerotoninModulator(NeuromodulatorBase):
     """
 
     def __init__(
-        self, config: Optional[ModulatorConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: ModulatorConfig | None = None, kill_switch_callback: Callable[[str], None] | None = None
     ):
         """Initialize serotonin modulator with biological defaults.
 

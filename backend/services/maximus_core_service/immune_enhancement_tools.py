@@ -7,7 +7,7 @@ NO MOCKS - Production-ready immune enhancement.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiohttp
 
@@ -35,8 +35,8 @@ class ImmuneEnhancementTools:
         self.adaptive_url = "http://localhost:8020"
 
     async def suppress_false_positives(
-        self, alerts: List[Dict[str, Any]], suppression_threshold: float = 0.6
-    ) -> Dict[str, Any]:
+        self, alerts: list[dict[str, Any]], suppression_threshold: float = 0.6
+    ) -> dict[str, Any]:
         """Suppress false positive alerts using Regulatory T-Cells.
 
         Args:
@@ -47,29 +47,28 @@ class ImmuneEnhancementTools:
             Evaluation results with suppressed alerts
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.treg_url}/alert/evaluate_batch",
                     json={
                         "alerts": alerts,
                         "suppression_threshold": suppression_threshold,
                     },
                     timeout=aiohttp.ClientTimeout(total=60),
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"FP suppression failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"FP suppression failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in suppress_false_positives: {e}")
             return {"error": str(e)}
 
-    async def get_tolerance_profile(
-        self, entity_id: str, entity_type: str = "ip"
-    ) -> Dict[str, Any]:
+    async def get_tolerance_profile(self, entity_id: str, entity_type: str = "ip") -> dict[str, Any]:
         """Get immune tolerance profile for entity.
 
         Args:
@@ -80,18 +79,19 @@ class ImmuneEnhancementTools:
             Tolerance profile with behavioral fingerprint and FP stats
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.get(
                     f"{self.treg_url}/tolerance/profile/{entity_id}",
                     params={"entity_type": entity_type},
                     timeout=aiohttp.ClientTimeout(total=30),
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Get tolerance profile failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Get tolerance profile failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in get_tolerance_profile: {e}")
@@ -99,7 +99,7 @@ class ImmuneEnhancementTools:
 
     async def consolidate_memory(
         self, trigger_manual: bool = False, importance_threshold: float = 0.6
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Trigger memory consolidation cycle (STM → LTM).
 
         Args:
@@ -110,29 +110,28 @@ class ImmuneEnhancementTools:
             Consolidation results with patterns extracted and memories created
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.memory_url}/consolidation/trigger",
                     json={
                         "importance_threshold": importance_threshold,
                         "manual_trigger": trigger_manual,
                     },
                     timeout=aiohttp.ClientTimeout(total=120),
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Memory consolidation failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Memory consolidation failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in consolidate_memory: {e}")
             return {"error": str(e)}
 
-    async def query_long_term_memory(
-        self, query: str, limit: int = 10, min_importance: float = 0.5
-    ) -> Dict[str, Any]:
+    async def query_long_term_memory(self, query: str, limit: int = 10, min_importance: float = 0.5) -> dict[str, Any]:
         """Query long-term immunological memory.
 
         Args:
@@ -144,8 +143,9 @@ class ImmuneEnhancementTools:
             Long-term memories matching query
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.get(
                     f"{self.memory_url}/memory/long_term",
                     params={
                         "query": query,
@@ -153,21 +153,21 @@ class ImmuneEnhancementTools:
                         "min_importance": min_importance,
                     },
                     timeout=aiohttp.ClientTimeout(total=30),
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"LTM query failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"LTM query failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in query_long_term_memory: {e}")
             return {"error": str(e)}
 
     async def diversify_antibodies(
-        self, threat_samples: List[Dict[str, Any]], repertoire_size: int = 100
-    ) -> Dict[str, Any]:
+        self, threat_samples: list[dict[str, Any]], repertoire_size: int = 100
+    ) -> dict[str, Any]:
         """Initialize antibody repertoire from threat samples.
 
         Args:
@@ -178,29 +178,28 @@ class ImmuneEnhancementTools:
             Initialization results with antibody pool stats
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.adaptive_url}/repertoire/initialize",
                     json={
                         "samples": threat_samples,
                         "repertoire_size": repertoire_size,
                     },
                     timeout=aiohttp.ClientTimeout(total=90),
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Antibody diversification failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Antibody diversification failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in diversify_antibodies: {e}")
             return {"error": str(e)}
 
-    async def run_affinity_maturation(
-        self, feedback_data: Dict[str, Dict[str, bool]]
-    ) -> Dict[str, Any]:
+    async def run_affinity_maturation(self, feedback_data: dict[str, dict[str, bool]]) -> dict[str, Any]:
         """Run affinity maturation cycle (somatic hypermutation).
 
         Args:
@@ -210,24 +209,25 @@ class ImmuneEnhancementTools:
             Maturation results with new antibodies created
         """
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
                     f"{self.adaptive_url}/learning/run_maturation",
                     json=feedback_data,
                     timeout=aiohttp.ClientTimeout(total=90),
-                ) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Affinity maturation failed: {error_text}")
-                        return {"error": f"HTTP {response.status}: {error_text}"}
+                ) as response,
+            ):
+                if response.status == 200:
+                    return await response.json()
+                error_text = await response.text()
+                logger.error(f"Affinity maturation failed: {error_text}")
+                return {"error": f"HTTP {response.status}: {error_text}"}
 
         except Exception as e:
             logger.error(f"Error in run_affinity_maturation: {e}")
             return {"error": str(e)}
 
-    def list_available_tools(self) -> List[Dict[str, Any]]:
+    def list_available_tools(self) -> list[dict[str, Any]]:
         """List all available Immune Enhancement tools.
 
         Returns:
@@ -284,8 +284,6 @@ class ImmuneEnhancementTools:
                 "name": "run_affinity_maturation",
                 "method_name": "run_affinity_maturation",
                 "description": "Run affinity maturation cycle with somatic hypermutation",
-                "parameters": {
-                    "feedback_data": "Antibody feedback (antibody_id -> sample detections)"
-                },
+                "parameters": {"feedback_data": "Antibody feedback (antibody_id -> sample detections)"},
             },
         ]

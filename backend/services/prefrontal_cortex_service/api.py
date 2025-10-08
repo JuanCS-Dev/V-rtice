@@ -20,12 +20,13 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from emotional_state_monitor import EmotionalStateMonitor
-from fastapi import FastAPI, HTTPException
-from impulse_inhibition import ImpulseInhibition
-from pydantic import BaseModel
-from rational_decision_validator import RationalDecisionValidator
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from emotional_state_monitor import EmotionalStateMonitor
+from impulse_inhibition import ImpulseInhibition
+from rational_decision_validator import RationalDecisionValidator
 
 app = FastAPI(title="Maximus Prefrontal Cortex Service", version="1.0.0")
 
@@ -148,9 +149,7 @@ async def make_decision_endpoint(request: DecisionRequest) -> Dict[str, Any]:
 
     # Simulate decision making, validated by rational decision validator
     chosen_option = request.options[0]  # Simple mock: always choose first
-    validation_result = rational_decision_validator.validate_decision(
-        chosen_option, request.criteria, request.context
-    )
+    validation_result = rational_decision_validator.validate_decision(chosen_option, request.criteria, request.context)
 
     return {
         "status": "success",

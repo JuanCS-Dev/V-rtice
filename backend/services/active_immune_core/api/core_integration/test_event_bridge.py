@@ -8,13 +8,12 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import pytest
 
 from .event_bridge import EventBridge
-
 
 # ==================== MOCK WEBSOCKET ====================
 
@@ -232,10 +231,12 @@ async def test_broadcast_event():
     ws3.messages.clear()
 
     # Broadcast cytokine event
-    await bridge._broadcast_event({
-        "event": "cytokine",
-        "data": {"test": "data"},
-    })
+    await bridge._broadcast_event(
+        {
+            "event": "cytokine",
+            "data": {"test": "data"},
+        }
+    )
 
     # ws1 and ws3 should receive (subscribed to cytokine)
     # ws2 should NOT receive (not subscribed)
@@ -244,10 +245,12 @@ async def test_broadcast_event():
     assert len(ws3.messages) == 1
 
     # Broadcast hormone event
-    await bridge._broadcast_event({
-        "event": "hormone",
-        "data": {"test": "data"},
-    })
+    await bridge._broadcast_event(
+        {
+            "event": "hormone",
+            "data": {"test": "data"},
+        }
+    )
 
     # ws2 and ws3 should receive (subscribed to hormone)
     # ws1 should NOT receive new message
@@ -331,19 +334,23 @@ async def test_event_filtering():
     ws.messages.clear()
 
     # Emit hormone event (not subscribed)
-    await bridge._broadcast_event({
-        "event": "hormone",
-        "data": {"test": "data"},
-    })
+    await bridge._broadcast_event(
+        {
+            "event": "hormone",
+            "data": {"test": "data"},
+        }
+    )
 
     # Should NOT receive
     assert len(ws.messages) == 0
 
     # Emit cytokine event (subscribed)
-    await bridge._broadcast_event({
-        "event": "cytokine",
-        "data": {"test": "data"},
-    })
+    await bridge._broadcast_event(
+        {
+            "event": "cytokine",
+            "data": {"test": "data"},
+        }
+    )
 
     # Should receive
     assert len(ws.messages) == 1
@@ -392,7 +399,6 @@ async def test_metrics():
 @pytest.mark.asyncio
 async def test_concurrent_broadcasting():
     """Test concurrent event broadcasting"""
-    import asyncio
 
     bridge = EventBridge()
     await bridge.start()
@@ -406,15 +412,9 @@ async def test_concurrent_broadcasting():
         clients.append(ws)
 
     # Broadcast multiple events concurrently
-    events = [
-        {"event": "cytokine", "data": {"id": i}}
-        for i in range(20)
-    ]
+    events = [{"event": "cytokine", "data": {"id": i}} for i in range(20)]
 
-    broadcast_tasks = [
-        bridge._broadcast_event(event)
-        for event in events
-    ]
+    broadcast_tasks = [bridge._broadcast_event(event) for event in events]
 
     await asyncio.gather(*broadcast_tasks)
 

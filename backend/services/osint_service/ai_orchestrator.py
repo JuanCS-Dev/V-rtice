@@ -17,9 +17,9 @@ into actionable intelligence.
 """
 
 import asyncio
+import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-import uuid
 
 from ai_processor import AIProcessor
 from analyzers.email_analyzer import EmailAnalyzer
@@ -72,9 +72,7 @@ class AIOrchestrator:
             Dict[str, Any]: A dictionary containing the investigation ID and initial status.
         """
         investigation_id = str(uuid.uuid4())
-        print(
-            f"[AIOrchestrator] Starting investigation {investigation_id}: {investigation_type} for {query}"
-        )
+        print(f"[AIOrchestrator] Starting investigation {investigation_id}: {investigation_type} for {query}")
 
         self.active_investigations[investigation_id] = {
             "id": investigation_id,
@@ -88,11 +86,7 @@ class AIOrchestrator:
         }
 
         # Run the investigation workflow in a background task
-        asyncio.create_task(
-            self._run_investigation_workflow(
-                investigation_id, query, investigation_type, parameters
-            )
-        )
+        asyncio.create_task(self._run_investigation_workflow(investigation_id, query, investigation_type, parameters))
 
         return {
             "investigation_id": investigation_id,
@@ -126,13 +120,9 @@ class AIOrchestrator:
 
             if investigation_type == "person_recon":
                 social_data = await self.social_scraper.scrape_profile(query)
-                all_collected_data.append(
-                    {"source": "social_media", "data": social_data}
-                )
+                all_collected_data.append({"source": "social_media", "data": social_data})
                 username_data = await self.username_hunter.hunt_username(query)
-                all_collected_data.append(
-                    {"source": "username_hunter", "data": username_data}
-                )
+                all_collected_data.append({"source": "username_hunter", "data": username_data})
             elif investigation_type == "domain_analysis":
                 # Simulate domain-specific scraping
                 all_collected_data.append(
@@ -146,9 +136,7 @@ class AIOrchestrator:
             investigation["progress"] = 0.5
             investigation["current_step"] = "AI Processing"
             print(f"[AIOrchestrator] {investigation_id}: AI Processing...")
-            ai_summary = await self.ai_processor.process_raw_data(
-                all_collected_data, query
-            )
+            ai_summary = await self.ai_processor.process_raw_data(all_collected_data, query)
             all_collected_data.append({"source": "ai_summary", "data": ai_summary})
 
             # Step 3: Data Analysis
@@ -158,12 +146,8 @@ class AIOrchestrator:
             analysis_results: Dict[str, Any] = {}
             for data_entry in all_collected_data:
                 if data_entry["source"] == "social_media":
-                    analysis_results["email_found"] = self.email_analyzer.analyze_text(
-                        str(data_entry["data"])
-                    )
-                    analysis_results["phone_found"] = self.phone_analyzer.analyze_text(
-                        str(data_entry["data"])
-                    )
+                    analysis_results["email_found"] = self.email_analyzer.analyze_text(str(data_entry["data"]))
+                    analysis_results["phone_found"] = self.phone_analyzer.analyze_text(str(data_entry["data"]))
                 # Add more analysis based on data types
 
             # Step 4: Report Generation
@@ -177,18 +161,14 @@ class AIOrchestrator:
             investigation["results"] = final_report
             investigation["status"] = "completed"
             investigation["progress"] = 1.0
-            print(
-                f"[AIOrchestrator] Investigation {investigation_id} completed successfully."
-            )
+            print(f"[AIOrchestrator] Investigation {investigation_id} completed successfully.")
 
         except Exception as e:
             investigation["status"] = "failed"
             investigation["error"] = str(e)
             print(f"[AIOrchestrator] Investigation {investigation_id} failed: {e}")
 
-    def get_investigation_status(
-        self, investigation_id: str
-    ) -> Optional[Dict[str, Any]]:
+    def get_investigation_status(self, investigation_id: str) -> Optional[Dict[str, Any]]:
         """Retrieves the current status of an OSINT investigation.
 
         Args:
@@ -205,8 +185,4 @@ class AIOrchestrator:
         Returns:
             List[Dict[str, Any]]: A list of active investigation status dictionaries.
         """
-        return [
-            inv
-            for inv in self.active_investigations.values()
-            if inv["status"] == "running"
-        ]
+        return [inv for inv in self.active_investigations.values() if inv["status"] == "running"]

@@ -101,9 +101,10 @@ Enables quantitative assessment of consciousness robustness.
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -313,7 +314,7 @@ class StressMonitor:
     def __init__(
         self,
         arousal_controller: ArousalController,
-        config: Optional[StressTestConfig] = None,
+        config: StressTestConfig | None = None,
         monitor_id: str = "mcea-stress-monitor-primary",
     ):
         self.monitor_id = monitor_id
@@ -322,24 +323,24 @@ class StressMonitor:
 
         # Current stress state
         self._current_stress_level: StressLevel = StressLevel.NONE
-        self._stress_history: List[tuple[float, StressLevel]] = []
+        self._stress_history: list[tuple[float, StressLevel]] = []
 
         # Baseline state (for comparison)
-        self._baseline_arousal: Optional[float] = None
+        self._baseline_arousal: float | None = None
 
         # Active stress test state
-        self._active_test: Optional[StressType] = None
-        self._test_start_time: Optional[float] = None
+        self._active_test: StressType | None = None
+        self._test_start_time: float | None = None
 
         # Monitoring state
         self._running: bool = False
-        self._monitoring_task: Optional[asyncio.Task] = None
+        self._monitoring_task: asyncio.Task | None = None
 
         # Stress alerts
-        self._stress_alert_callbacks: List[tuple[Callable, StressLevel]] = []
+        self._stress_alert_callbacks: list[tuple[Callable, StressLevel]] = []
 
         # Test results
-        self._test_results: List[StressResponse] = []
+        self._test_results: list[StressResponse] = []
 
         # Statistics
         self.total_stress_events: int = 0
@@ -425,14 +426,13 @@ class StressMonitor:
         # Classify
         if combined_stress < 0.2:
             return StressLevel.NONE
-        elif combined_stress < 0.4:
+        if combined_stress < 0.4:
             return StressLevel.MILD
-        elif combined_stress < 0.6:
+        if combined_stress < 0.6:
             return StressLevel.MODERATE
-        elif combined_stress < 0.8:
+        if combined_stress < 0.8:
             return StressLevel.SEVERE
-        else:
-            return StressLevel.CRITICAL
+        return StressLevel.CRITICAL
 
     async def _invoke_stress_alerts(self, stress_level: StressLevel) -> None:
         """Invoke registered stress alert callbacks."""
@@ -467,8 +467,8 @@ class StressMonitor:
         self,
         stress_type: StressType,
         stress_level: StressLevel = StressLevel.SEVERE,
-        duration_seconds: Optional[float] = None,
-        monitor_needs: Optional[AbstractNeeds] = None,
+        duration_seconds: float | None = None,
+        monitor_needs: AbstractNeeds | None = None,
     ) -> StressResponse:
         """
         Run active stress test.
@@ -519,7 +519,7 @@ class StressMonitor:
         )
 
         # Tracking arrays
-        arousal_samples: List[float] = []
+        arousal_samples: list[float] = []
         stress_start = time.time()
 
         # STRESS PHASE
@@ -622,7 +622,7 @@ class StressMonitor:
 
         # Add other stress types as needed
 
-    def _detect_arousal_runaway(self, arousal_samples: List[float]) -> bool:
+    def _detect_arousal_runaway(self, arousal_samples: list[float]) -> bool:
         """Detect if arousal got stuck at maximum (runaway)."""
         if len(arousal_samples) < 10:
             return False
@@ -639,7 +639,7 @@ class StressMonitor:
         """Get current passive stress level."""
         return self._current_stress_level
 
-    def get_stress_history(self, window_seconds: Optional[float] = None) -> List[tuple[float, StressLevel]]:
+    def get_stress_history(self, window_seconds: float | None = None) -> list[tuple[float, StressLevel]]:
         """Get stress level history."""
         if window_seconds is None:
             return self._stress_history.copy()
@@ -647,7 +647,7 @@ class StressMonitor:
         cutoff = time.time() - window_seconds
         return [(t, level) for t, level in self._stress_history if t >= cutoff]
 
-    def get_test_results(self) -> List[StressResponse]:
+    def get_test_results(self) -> list[StressResponse]:
         """Get all stress test results."""
         return self._test_results.copy()
 
@@ -659,7 +659,7 @@ class StressMonitor:
         scores = [r.get_resilience_score() for r in self._test_results]
         return float(np.mean(scores))
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get stress monitoring statistics."""
         pass_rate = self.tests_passed / self.tests_conducted if self.tests_conducted > 0 else 0.0
 

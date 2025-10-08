@@ -98,6 +98,26 @@ func (e *Executor) handleSlashCommand(input string) {
 
 // handleBuiltin handles shell built-in commands
 func (e *Executor) handleBuiltin(input string) bool {
+	// Handle workflow aliases (wf1-wf4)
+	switch input {
+	case "wf1":
+		fmt.Println(e.styles.Accent.Render("🔍 Launching Threat Hunt workflow..."))
+		e.executeCobraCommand([]string{"orchestrate", "defensive", "threat-hunting"})
+		return true
+	case "wf2":
+		fmt.Println(e.styles.Accent.Render("🚨 Launching Incident Response workflow..."))
+		e.executeCobraCommand([]string{"orchestrate", "defensive", "threat-response"})
+		return true
+	case "wf3":
+		fmt.Println(e.styles.Accent.Render("🔒 Launching Security Audit workflow..."))
+		e.executeCobraCommand([]string{"orchestrate", "monitoring", "security-posture"})
+		return true
+	case "wf4":
+		fmt.Println(e.styles.Accent.Render("✅ Launching Compliance Check workflow..."))
+		e.executeCobraCommand([]string{"orchestrate", "monitoring", "anomaly-response"})
+		return true
+	}
+
 	lower := strings.ToLower(input)
 
 	switch lower {

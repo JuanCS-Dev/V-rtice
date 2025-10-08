@@ -15,20 +15,21 @@ Note: NO production logic mocking (PAGANI compliant).
 All component logic is REAL. Only external dependencies would be mocked if present.
 """
 
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient
-from datetime import datetime
 import asyncio
 
 # Import the FastAPI app and components
 import sys
+from datetime import datetime
+
+import pytest
+import pytest_asyncio
+from httpx import AsyncClient
+
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/digital_thalamus_service")
 from api import app
+from attention_control import AttentionControl
 from sensory_gating import SensoryGating
 from signal_filtering import SignalFiltering
-from attention_control import AttentionControl
-
 
 # ==================== FIXTURES ====================
 
@@ -58,12 +59,7 @@ def attention_control_instance():
     return AttentionControl()
 
 
-def create_sensory_data_request(
-    sensor_id="sensor_001",
-    sensor_type="visual",
-    data=None,
-    priority=5
-):
+def create_sensory_data_request(sensor_id="sensor_001", sensor_type="visual", data=None, priority=5):
     """Helper to create SensoryDataIngest payload."""
     if data is None:
         data = {"noise_level": 0.3, "signal_strength": 0.8}
@@ -72,7 +68,7 @@ def create_sensory_data_request(
         "sensor_type": sensor_type,
         "data": data,
         "timestamp": datetime.now().isoformat(),
-        "priority": priority
+        "priority": priority,
     }
 
 
@@ -103,12 +99,14 @@ class TestLifecycleEvents:
     async def test_startup_event_executes(self):
         """Test startup event executes without errors."""
         from api import startup_event
+
         await startup_event()
         # If no exception, test passes
 
     async def test_shutdown_event_executes(self):
         """Test shutdown event executes without errors."""
         from api import shutdown_event
+
         await shutdown_event()
         # If no exception, test passes
 
@@ -125,7 +123,7 @@ class TestIngestSensoryData:
         payload = create_sensory_data_request(
             sensor_type="visual",
             priority=10,  # High intensity/priority
-            data={"noise_level": 0.2, "signal_strength": 0.95}
+            data={"noise_level": 0.2, "signal_strength": 0.95},
         )
 
         response = await client.post("/ingest_sensory_data", json=payload)
@@ -139,9 +137,7 @@ class TestIngestSensoryData:
     async def test_ingest_auditory_data_success(self, client):
         """Test ingesting auditory data processes successfully."""
         payload = create_sensory_data_request(
-            sensor_type="auditory",
-            priority=7,
-            data={"background_noise": 0.6, "speech_signal": 0.8}
+            sensor_type="auditory", priority=7, data={"background_noise": 0.6, "speech_signal": 0.8}
         )
 
         response = await client.post("/ingest_sensory_data", json=payload)
@@ -154,9 +150,7 @@ class TestIngestSensoryData:
     async def test_ingest_chemical_data_success(self, client):
         """Test ingesting chemical sensor data."""
         payload = create_sensory_data_request(
-            sensor_type="chemical",
-            priority=6,
-            data={"concentration": 0.75, "ph_level": 7.2}
+            sensor_type="chemical", priority=6, data={"concentration": 0.75, "ph_level": 7.2}
         )
 
         response = await client.post("/ingest_sensory_data", json=payload)
@@ -169,9 +163,7 @@ class TestIngestSensoryData:
     async def test_ingest_somatosensory_data_success(self, client):
         """Test ingesting somatosensory data."""
         payload = create_sensory_data_request(
-            sensor_type="somatosensory",
-            priority=4,
-            data={"pressure": 0.5, "temperature": 36.5}
+            sensor_type="somatosensory", priority=4, data={"pressure": 0.5, "temperature": 36.5}
         )
 
         response = await client.post("/ingest_sensory_data", json=payload)
@@ -185,7 +177,7 @@ class TestIngestSensoryData:
         payload = create_sensory_data_request(
             sensor_type="visual",
             priority=1,  # Low priority (0.1 intensity when normalized)
-            data={"noise_level": 0.9, "signal_strength": 0.1}
+            data={"noise_level": 0.9, "signal_strength": 0.1},
         )
 
         response = await client.post("/ingest_sensory_data", json=payload)
@@ -223,10 +215,7 @@ class TestIngestSensoryData:
 
     async def test_ingest_returns_processed_payload_summary(self, client):
         """Test that response includes processed payload summary."""
-        payload = create_sensory_data_request(
-            priority=7,
-            data={"key1": "value1", "key2": "value2", "key3": "value3"}
-        )
+        payload = create_sensory_data_request(priority=7, data={"key1": "value1", "key2": "value2", "key3": "value3"})
 
         response = await client.post("/ingest_sensory_data", json=payload)
 
@@ -414,9 +403,7 @@ class TestAttentionControl:
         sensory_data = {"signal": "important_visual_data"}
         # priority=10 * visual_weight=0.8 = 8.0 effective (> 6.0 threshold)
 
-        result = await attention_control_instance.prioritize_and_route(
-            sensory_data, "visual", priority=10
-        )
+        result = await attention_control_instance.prioritize_and_route(sensory_data, "visual", priority=10)
 
         assert result["effective_priority"] == 10 * 0.8  # 8.0
         assert result["routing_destination"] == "Prefrontal_Cortex_Service"
@@ -427,9 +414,7 @@ class TestAttentionControl:
         sensory_data = {"signal": "routine_data"}
         # priority=5 * somatosensory_weight=0.5 = 2.5 effective (<= 6.0 threshold)
 
-        result = await attention_control_instance.prioritize_and_route(
-            sensory_data, "somatosensory", priority=5
-        )
+        result = await attention_control_instance.prioritize_and_route(sensory_data, "somatosensory", priority=5)
 
         assert result["effective_priority"] == 5 * 0.5  # 2.5
         assert result["routing_destination"] == "Maximus_Core_Service"
@@ -439,9 +424,7 @@ class TestAttentionControl:
         sensory_data = {"signal": "boundary_case"}
         # Need effective_priority = 6.0: priority=10 * chemical_weight=0.6 = 6.0
 
-        result = await attention_control_instance.prioritize_and_route(
-            sensory_data, "chemical", priority=10
-        )
+        result = await attention_control_instance.prioritize_and_route(sensory_data, "chemical", priority=10)
 
         assert result["effective_priority"] == 6.0
         # Exactly 6.0 is NOT > 6.0, so routes to Core
@@ -452,9 +435,7 @@ class TestAttentionControl:
         sensory_data = {"audio_stream": "data"}
         # priority=9 * auditory_weight=0.7 = 6.3 effective (> 6.0)
 
-        result = await attention_control_instance.prioritize_and_route(
-            sensory_data, "auditory", priority=9
-        )
+        result = await attention_control_instance.prioritize_and_route(sensory_data, "auditory", priority=9)
 
         assert result["effective_priority"] == 9 * 0.7  # 6.3
         assert result["routing_destination"] == "Prefrontal_Cortex_Service"
@@ -463,9 +444,7 @@ class TestAttentionControl:
         """Test unknown sensor type uses default weight (0.5)."""
         sensory_data = {"unknown_signal": "test"}
 
-        result = await attention_control_instance.prioritize_and_route(
-            sensory_data, "unknown_sensor", priority=8
-        )
+        result = await attention_control_instance.prioritize_and_route(sensory_data, "unknown_sensor", priority=8)
 
         assert result["effective_priority"] == 8 * 0.5  # 4.0 (default weight)
         assert result["routing_destination"] == "Maximus_Core_Service"
@@ -569,10 +548,7 @@ class TestEdgeCases:
 
     async def test_ingest_concurrent_requests(self, client):
         """Test handling concurrent sensory data ingestion."""
-        payloads = [
-            create_sensory_data_request(sensor_id=f"sensor_{i}", priority=5 + i)
-            for i in range(5)
-        ]
+        payloads = [create_sensory_data_request(sensor_id=f"sensor_{i}", priority=5 + i) for i in range(5)]
 
         # Send concurrent requests
         tasks = [client.post("/ingest_sensory_data", json=p) for p in payloads]

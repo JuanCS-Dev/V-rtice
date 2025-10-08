@@ -9,21 +9,19 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-import pytest
 from datetime import datetime, timedelta
-from typing import Dict, Any
+
+import pytest
 
 from .base import (
     DecisionType,
     ERBMemberRole,
     GovernanceConfig,
-    PolicySeverity,
     PolicyType,
 )
 from .ethics_review_board import ERBManager
 from .policies import PolicyRegistry
 from .policy_engine import PolicyEngine
-
 
 # ============================================================================
 # FIXTURES
@@ -86,8 +84,7 @@ def test_add_erb_member(erb_manager):
 def test_remove_erb_member(erb_manager):
     """Test removing ERB member."""
     result = erb_manager.add_member(
-        "Bob Jones", "bob@example.com", ERBMemberRole.TECHNICAL_MEMBER,
-        "Security Inc", ["Cybersecurity"]
+        "Bob Jones", "bob@example.com", ERBMemberRole.TECHNICAL_MEMBER, "Security Inc", ["Cybersecurity"]
     )
     member_id = result.entity_id
 
@@ -329,12 +326,7 @@ def test_erb_statistics(erb_manager):
 def test_policy_engine_statistics(policy_engine):
     """Test policy engine statistics."""
     # Trigger some violations
-    policy_engine.enforce_policy(
-        PolicyType.ETHICAL_USE,
-        "block_ip",
-        {"authorized": False},
-        "user"
-    )
+    policy_engine.enforce_policy(PolicyType.ETHICAL_USE, "block_ip", {"authorized": False}, "user")
 
     stats = policy_engine.get_statistics()
     assert stats["total_violations_detected"] > 0

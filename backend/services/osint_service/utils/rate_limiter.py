@@ -17,8 +17,8 @@ sustainably without being blocked or blacklisted by target services.
 """
 
 import asyncio
-from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from datetime import datetime
+from typing import Any, Dict
 
 
 class RateLimiter:
@@ -49,9 +49,7 @@ class RateLimiter:
         self._refill_tokens()
         while self.tokens < 1:
             wait_time = (1 - self.tokens) / self.rate_limit
-            print(
-                f"[RateLimiter] Rate limit exceeded. Waiting for {wait_time:.2f} seconds."
-            )
+            print(f"[RateLimiter] Rate limit exceeded. Waiting for {wait_time:.2f} seconds.")
             await asyncio.sleep(wait_time)
             self._refill_tokens()
         self.tokens -= 1

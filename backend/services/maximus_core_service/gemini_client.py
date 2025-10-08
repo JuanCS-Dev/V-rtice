@@ -12,10 +12,9 @@ Model: gemini-2.0-flash-exp (mais rápido e barato)
 Alternative: gemini-1.5-pro (mais poderoso)
 """
 
-from dataclasses import dataclass
-import json
 import os
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any
 
 import httpx
 
@@ -52,11 +51,11 @@ class GeminiClient:
     async def generate_text(
         self,
         prompt: str,
-        system_instruction: Optional[str] = None,
-        tools: Optional[List[Dict]] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        system_instruction: str | None = None,
+        tools: list[dict] | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> dict[str, Any]:
         """
         Gera texto usando Gemini.
 
@@ -83,15 +82,11 @@ class GeminiClient:
 
         # Add system instruction
         if system_instruction:
-            request_body["systemInstruction"] = {
-                "parts": [{"text": system_instruction}]
-            }
+            request_body["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
         # Add tools (function declarations)
         if tools:
-            request_body["tools"] = [
-                {"functionDeclarations": self._convert_tools_to_gemini_format(tools)}
-            ]
+            request_body["tools"] = [{"functionDeclarations": self._convert_tools_to_gemini_format(tools)}]
 
         # Call API
         async with httpx.AsyncClient(timeout=self.config.timeout) as client:
@@ -104,9 +99,7 @@ class GeminiClient:
 
             if response.status_code != 200:
                 error_detail = response.text
-                raise Exception(
-                    f"Gemini API error: {response.status_code} - {error_detail}"
-                )
+                raise Exception(f"Gemini API error: {response.status_code} - {error_detail}")
 
             result = response.json()
 
@@ -115,10 +108,10 @@ class GeminiClient:
 
     async def generate_with_conversation(
         self,
-        messages: List[Dict[str, str]],
-        system_instruction: Optional[str] = None,
-        tools: Optional[List[Dict]] = None,
-    ) -> Dict[str, Any]:
+        messages: list[dict[str, str]],
+        system_instruction: str | None = None,
+        tools: list[dict] | None = None,
+    ) -> dict[str, Any]:
         """
         Gera texto com histórico de conversa.
 
@@ -147,14 +140,10 @@ class GeminiClient:
         }
 
         if system_instruction:
-            request_body["systemInstruction"] = {
-                "parts": [{"text": system_instruction}]
-            }
+            request_body["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
         if tools:
-            request_body["tools"] = [
-                {"functionDeclarations": self._convert_tools_to_gemini_format(tools)}
-            ]
+            request_body["tools"] = [{"functionDeclarations": self._convert_tools_to_gemini_format(tools)}]
 
         async with httpx.AsyncClient(timeout=self.config.timeout) as client:
             response = await client.post(
@@ -165,15 +154,13 @@ class GeminiClient:
             )
 
             if response.status_code != 200:
-                raise Exception(
-                    f"Gemini API error: {response.status_code} - {response.text}"
-                )
+                raise Exception(f"Gemini API error: {response.status_code} - {response.text}")
 
             result = response.json()
 
         return self._parse_gemini_response(result)
 
-    async def generate_embeddings(self, text: str) -> List[float]:
+    async def generate_embeddings(self, text: str) -> list[float]:
         """
         Gera embeddings para texto.
 
@@ -205,7 +192,7 @@ class GeminiClient:
 
         return result.get("embedding", {}).get("values", [])
 
-    def _convert_tools_to_gemini_format(self, tools: List[Dict]) -> List[Dict]:
+    def _convert_tools_to_gemini_format(self, tools: list[dict]) -> list[dict]:
         """
         Converte tools do formato Anthropic/OpenAI para Gemini.
 
@@ -249,7 +236,7 @@ class GeminiClient:
 
         return gemini_tools
 
-    def _parse_gemini_response(self, result: Dict[str, Any]) -> Dict[str, Any]:
+    def _parse_gemini_response(self, result: dict[str, Any]) -> dict[str, Any]:
         """
         Parse resposta do Gemini para formato unificado.
 
@@ -336,9 +323,7 @@ async def example_usage():
             "description": "Analyze an IP address for threats",
             "input_schema": {
                 "type": "object",
-                "properties": {
-                    "ip": {"type": "string", "description": "IP address to analyze"}
-                },
+                "properties": {"ip": {"type": "string", "description": "IP address to analyze"}},
                 "required": ["ip"],
             },
         }

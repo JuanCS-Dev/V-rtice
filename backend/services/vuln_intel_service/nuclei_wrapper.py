@@ -43,9 +43,7 @@ class NucleiWrapper:
         Returns:
             Dict[str, Any]: A dictionary containing the simulated Nuclei scan results.
         """
-        print(
-            f"[NucleiWrapper] Simulating Nuclei scan on {target} with template {template_path or 'default'}"
-        )
+        print(f"[NucleiWrapper] Simulating Nuclei scan on {target} with template {template_path or 'default'}")
         await asyncio.sleep(1.0)  # Simulate scan duration
 
         # Simulate Nuclei output

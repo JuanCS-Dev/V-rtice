@@ -105,8 +105,7 @@ class RateLimiter:
         """
         if not await self.acquire(tokens):
             raise LymphnodeRateLimitError(
-                f"Rate limit exceeded: {self.max_rate} ops/sec "
-                f"(burst={self.max_burst}, requested={tokens})"
+                f"Rate limit exceeded: {self.max_rate} ops/sec (burst={self.max_burst}, requested={tokens})"
             )
 
     async def wait_for_token(self, tokens: int = 1, timeout: Optional[float] = None) -> bool:
@@ -146,11 +145,7 @@ class RateLimiter:
 
     def get_stats(self) -> Dict[str, any]:
         """Get rate limiter statistics"""
-        acceptance_rate = (
-            self.total_accepted / self.total_requests
-            if self.total_requests > 0
-            else 0.0
-        )
+        acceptance_rate = self.total_accepted / self.total_requests if self.total_requests > 0 else 0.0
 
         return {
             "max_rate": self.max_rate,
@@ -241,8 +236,7 @@ class ClonalExpansionRateLimiter:
 
             if new_count > self.max_per_specialization:
                 raise LymphnodeRateLimitError(
-                    f"Specialization limit exceeded for '{especializacao}': "
-                    f"{new_count} > {self.max_per_specialization}"
+                    f"Specialization limit exceeded for '{especializacao}': {new_count} > {self.max_per_specialization}"
                 )
 
             self._specialization_counts[especializacao] = new_count

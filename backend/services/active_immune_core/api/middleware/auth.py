@@ -10,9 +10,10 @@ Version: 1.0.0
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Any, Dict, List, Optional
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -115,9 +116,7 @@ class AuthMiddleware:
 
         return User(**user_data)
 
-    def create_access_token(
-        self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None
-    ) -> str:
+    def create_access_token(self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
         """Create JWT access token"""
         to_encode = data.copy()
 

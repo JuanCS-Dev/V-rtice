@@ -8,10 +8,10 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import time
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from monitoring.dependency_health import DependencyHealthChecker
 from monitoring.health_checker import HealthStatus
@@ -62,6 +62,7 @@ async def test_kafka_health_check_slow_response(health_checker):
 
     async def slow_fetch():
         import asyncio
+
         await asyncio.sleep(0.002)  # 2ms > 1ms threshold
         return mock_metadata
 
@@ -190,7 +191,6 @@ async def test_redis_health_check_connection_error(health_checker):
 @pytest.mark.asyncio
 async def test_postgres_health_check_success(health_checker):
     """Test successful PostgreSQL health check."""
-    from unittest.mock import MagicMock
 
     mock_conn = AsyncMock()
     mock_conn.fetchval.side_effect = [
@@ -340,15 +340,9 @@ async def test_postgres_health_check_slow_response(health_checker):
 async def test_check_all_dependencies(health_checker):
     """Test checking all dependencies in parallel."""
     # Mock all dependency checks
-    health_checker.check_kafka_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "Kafka OK"})
-    )
-    health_checker.check_redis_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"})
-    )
-    health_checker.check_postgres_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"})
-    )
+    health_checker.check_kafka_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "Kafka OK"}))
+    health_checker.check_redis_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"}))
+    health_checker.check_postgres_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"}))
 
     results = await health_checker.check_all_dependencies()
 
@@ -365,15 +359,9 @@ async def test_check_all_dependencies(health_checker):
 @pytest.mark.asyncio
 async def test_check_all_dependencies_with_failure(health_checker):
     """Test checking all dependencies when one fails."""
-    health_checker.check_kafka_health = AsyncMock(
-        return_value=(HealthStatus.UNHEALTHY, {"message": "Kafka down"})
-    )
-    health_checker.check_redis_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"})
-    )
-    health_checker.check_postgres_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"})
-    )
+    health_checker.check_kafka_health = AsyncMock(return_value=(HealthStatus.UNHEALTHY, {"message": "Kafka down"}))
+    health_checker.check_redis_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"}))
+    health_checker.check_postgres_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"}))
 
     results = await health_checker.check_all_dependencies()
 
@@ -388,15 +376,9 @@ async def test_check_all_dependencies_with_failure(health_checker):
 @pytest.mark.asyncio
 async def test_get_dependencies_summary_all_healthy(health_checker):
     """Test dependencies summary when all are healthy."""
-    health_checker.check_kafka_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "Kafka OK"})
-    )
-    health_checker.check_redis_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"})
-    )
-    health_checker.check_postgres_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"})
-    )
+    health_checker.check_kafka_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "Kafka OK"}))
+    health_checker.check_redis_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"}))
+    health_checker.check_postgres_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"}))
 
     summary = await health_checker.get_dependencies_summary()
 
@@ -407,15 +389,9 @@ async def test_get_dependencies_summary_all_healthy(health_checker):
 @pytest.mark.asyncio
 async def test_get_dependencies_summary_one_unhealthy(health_checker):
     """Test dependencies summary when one is unhealthy."""
-    health_checker.check_kafka_health = AsyncMock(
-        return_value=(HealthStatus.UNHEALTHY, {"message": "Kafka down"})
-    )
-    health_checker.check_redis_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"})
-    )
-    health_checker.check_postgres_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"})
-    )
+    health_checker.check_kafka_health = AsyncMock(return_value=(HealthStatus.UNHEALTHY, {"message": "Kafka down"}))
+    health_checker.check_redis_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "Redis OK"}))
+    health_checker.check_postgres_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"}))
 
     summary = await health_checker.get_dependencies_summary()
 
@@ -426,15 +402,9 @@ async def test_get_dependencies_summary_one_unhealthy(health_checker):
 @pytest.mark.asyncio
 async def test_get_dependencies_summary_one_degraded(health_checker):
     """Test dependencies summary when one is degraded."""
-    health_checker.check_kafka_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "Kafka OK"})
-    )
-    health_checker.check_redis_health = AsyncMock(
-        return_value=(HealthStatus.DEGRADED, {"message": "Redis slow"})
-    )
-    health_checker.check_postgres_health = AsyncMock(
-        return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"})
-    )
+    health_checker.check_kafka_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "Kafka OK"}))
+    health_checker.check_redis_health = AsyncMock(return_value=(HealthStatus.DEGRADED, {"message": "Redis slow"}))
+    health_checker.check_postgres_health = AsyncMock(return_value=(HealthStatus.HEALTHY, {"message": "PostgreSQL OK"}))
 
     summary = await health_checker.get_dependencies_summary()
 

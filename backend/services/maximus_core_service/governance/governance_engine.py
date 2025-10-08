@@ -10,10 +10,11 @@ Date: 2025-10-06
 """
 
 import time
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any
 from uuid import uuid4
 
 
@@ -33,7 +34,7 @@ class RiskAssessment:
 
     score: float = 0.0  # 0.0 to 1.0
     level: str = "LOW"  # LOW, MEDIUM, HIGH, CRITICAL
-    factors: List[str] = field(default_factory=list)
+    factors: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -46,17 +47,17 @@ class Decision:
 
     decision_id: str = field(default_factory=lambda: str(uuid4()))
     operation_type: str = ""  # e.g., "EXPLOIT_EXECUTION", "LATERAL_MOVEMENT"
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     risk: RiskAssessment = field(default_factory=RiskAssessment)
     status: DecisionStatus = DecisionStatus.PENDING
     priority: str = "MEDIUM"  # LOW, MEDIUM, HIGH, CRITICAL
     created_at: datetime = field(default_factory=datetime.utcnow)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
     sla_seconds: int = 300  # 5 minutes default SLA
-    operator_id: Optional[str] = None
+    operator_id: str | None = None
     operator_comment: str = ""
     operator_reasoning: str = ""
-    resolved_at: Optional[datetime] = None
+    resolved_at: datetime | None = None
 
     def is_expired(self) -> bool:
         """Check if decision has expired."""
@@ -82,7 +83,7 @@ class GovernanceEngine:
 
     def __init__(self):
         """Initialize governance engine."""
-        self.decisions: Dict[str, Decision] = {}
+        self.decisions: dict[str, Decision] = {}
         self.start_time = time.time()
         self._event_subscribers = []
 
@@ -95,57 +96,39 @@ class GovernanceEngine:
         decision1 = Decision(
             decision_id="dec-001",
             operation_type="EXPLOIT_EXECUTION",
-            context={
-                "target": "192.168.1.100",
-                "cve": "CVE-2024-1234",
-                "service": "Apache 2.4.50"
-            },
+            context={"target": "192.168.1.100", "cve": "CVE-2024-1234", "service": "Apache 2.4.50"},
             risk=RiskAssessment(
                 score=0.85,
                 level="HIGH",
-                factors=["Remote code execution", "Production environment", "Critical service"]
+                factors=["Remote code execution", "Production environment", "Critical service"],
             ),
             priority="HIGH",
             sla_seconds=600,
-            expires_at=datetime.utcnow() + timedelta(minutes=10)
+            expires_at=datetime.utcnow() + timedelta(minutes=10),
         )
 
         # Decision 2: Lateral movement
         decision2 = Decision(
             decision_id="dec-002",
             operation_type="LATERAL_MOVEMENT",
-            context={
-                "source": "192.168.1.50",
-                "target": "192.168.1.200",
-                "method": "Pass-the-Hash"
-            },
-            risk=RiskAssessment(
-                score=0.65,
-                level="MEDIUM",
-                factors=["Credential reuse", "Internal network"]
-            ),
+            context={"source": "192.168.1.50", "target": "192.168.1.200", "method": "Pass-the-Hash"},
+            risk=RiskAssessment(score=0.65, level="MEDIUM", factors=["Credential reuse", "Internal network"]),
             priority="MEDIUM",
             sla_seconds=300,
-            expires_at=datetime.utcnow() + timedelta(minutes=5)
+            expires_at=datetime.utcnow() + timedelta(minutes=5),
         )
 
         # Decision 3: Data exfiltration
         decision3 = Decision(
             decision_id="dec-003",
             operation_type="DATA_EXFILTRATION",
-            context={
-                "source": "database-prod-01",
-                "size_mb": 150,
-                "contains_pii": True
-            },
+            context={"source": "database-prod-01", "size_mb": 150, "contains_pii": True},
             risk=RiskAssessment(
-                score=0.95,
-                level="CRITICAL",
-                factors=["PII data", "Large volume", "Production database"]
+                score=0.95, level="CRITICAL", factors=["PII data", "Large volume", "Production database"]
             ),
             priority="CRITICAL",
             sla_seconds=900,
-            expires_at=datetime.utcnow() + timedelta(minutes=15)
+            expires_at=datetime.utcnow() + timedelta(minutes=15),
         )
 
         self.decisions = {
@@ -159,11 +142,8 @@ class GovernanceEngine:
         return time.time() - self.start_time
 
     def get_pending_decisions(
-        self,
-        limit: int = 50,
-        status: str = "PENDING",
-        priority: Optional[str] = None
-    ) -> List[Decision]:
+        self, limit: int = 50, status: str = "PENDING", priority: str | None = None
+    ) -> list[Decision]:
         """Get pending decisions with optional filtering."""
         results = []
 
@@ -188,17 +168,17 @@ class GovernanceEngine:
 
         return results
 
-    def get_decision(self, decision_id: str) -> Optional[Decision]:
+    def get_decision(self, decision_id: str) -> Decision | None:
         """Get a specific decision by ID."""
         return self.decisions.get(decision_id)
 
     def create_decision(
         self,
         operation_type: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         risk: RiskAssessment,
         priority: str = "MEDIUM",
-        sla_seconds: int = 300
+        sla_seconds: int = 300,
     ) -> Decision:
         """Create a new decision requiring HITL review."""
         decision = Decision(
@@ -207,26 +187,18 @@ class GovernanceEngine:
             risk=risk,
             priority=priority,
             sla_seconds=sla_seconds,
-            expires_at=datetime.utcnow() + timedelta(seconds=sla_seconds)
+            expires_at=datetime.utcnow() + timedelta(seconds=sla_seconds),
         )
 
         self.decisions[decision.decision_id] = decision
 
         # Emit event
-        self._emit_event({
-            "type": "new_decision",
-            "decision": decision
-        })
+        self._emit_event({"type": "new_decision", "decision": decision})
 
         return decision
 
     def update_decision_status(
-        self,
-        decision_id: str,
-        status: DecisionStatus,
-        operator_id: str,
-        comment: str = "",
-        reasoning: str = ""
+        self, decision_id: str, status: DecisionStatus, operator_id: str, comment: str = "", reasoning: str = ""
     ) -> bool:
         """Update decision status."""
         decision = self.decisions.get(decision_id)
@@ -240,14 +212,11 @@ class GovernanceEngine:
         decision.resolved_at = datetime.utcnow()
 
         # Emit event
-        self._emit_event({
-            "type": "decision_resolved",
-            "decision": decision
-        })
+        self._emit_event({"type": "decision_resolved", "decision": decision})
 
         return True
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get governance metrics."""
         total = len(self.decisions)
         pending = sum(1 for d in self.decisions.values() if d.status == DecisionStatus.PENDING)
@@ -260,10 +229,7 @@ class GovernanceEngine:
         # Calculate average response time
         resolved_decisions = [d for d in self.decisions.values() if d.resolved_at]
         if resolved_decisions:
-            response_times = [
-                (d.resolved_at - d.created_at).total_seconds()
-                for d in resolved_decisions
-            ]
+            response_times = [(d.resolved_at - d.created_at).total_seconds() for d in resolved_decisions]
             avg_response_time = sum(response_times) / len(response_times)
         else:
             avg_response_time = 0.0
@@ -274,7 +240,8 @@ class GovernanceEngine:
 
         # SLA violations
         sla_violations = sum(
-            1 for d in self.decisions.values()
+            1
+            for d in self.decisions.values()
             if d.resolved_at and (d.resolved_at - d.created_at).total_seconds() > d.sla_seconds
         )
 
@@ -291,25 +258,22 @@ class GovernanceEngine:
             "sla_violations": sla_violations,
         }
 
-    def subscribe_decision_events(self) -> Generator[Dict[str, Any], None, None]:
+    def subscribe_decision_events(self) -> Generator[dict[str, Any], None, None]:
         """Subscribe to decision events (for streaming)."""
         # POC: Return existing decisions as events
         for decision in self.decisions.values():
-            yield {
-                "type": "new_decision",
-                "decision": decision
-            }
+            yield {"type": "new_decision", "decision": decision}
 
-    def subscribe_events(self) -> Generator[Dict[str, Any], None, None]:
+    def subscribe_events(self) -> Generator[dict[str, Any], None, None]:
         """Subscribe to governance events (for streaming)."""
         # POC: Return mock events
         yield {
             "type": "connection_established",
             "message": "Governance engine connected",
-            "metrics": self.get_metrics()
+            "metrics": self.get_metrics(),
         }
 
-    def _emit_event(self, event: Dict[str, Any]):
+    def _emit_event(self, event: dict[str, Any]):
         """Emit an event to subscribers."""
         for subscriber in self._event_subscribers:
             subscriber(event)

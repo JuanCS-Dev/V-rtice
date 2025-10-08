@@ -1,0 +1,14 @@
+# /home/juan/vertice-dev/backend/api_gateway/requirements.txt
+
+fastapi
+uvicorn
+httpx
+redis
+slowapi
+# Novas ferramentas para o painel de instrumentos
+prometheus-client
+structlog
+websockets
+# Authentication
+PyJWT==2.8.0
+cryptography==41.0.7

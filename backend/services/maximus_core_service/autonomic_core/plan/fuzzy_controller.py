@@ -5,8 +5,8 @@ import logging
 import numpy as np
 
 try:
-    from skfuzzy import control as ctrl
     import skfuzzy as fuzz
+    from skfuzzy import control as ctrl
 
     SKFUZZY_AVAILABLE = True
 except ImportError:
@@ -23,9 +23,7 @@ class FuzzyLogicController:
         if SKFUZZY_AVAILABLE:
             self._setup_fuzzy_system()
         else:
-            logger.warning(
-                "Using rule-based fallback (install scikit-fuzzy for full functionality)"
-            )
+            logger.warning("Using rule-based fallback (install scikit-fuzzy for full functionality)")
 
     def _setup_fuzzy_system(self):
         """Setup fuzzy inference system."""
@@ -52,9 +50,7 @@ class FuzzyLogicController:
                 self.traffic["high"] | self.alerts["high"],
                 self.mode["high_performance"],
             ),
-            ctrl.Rule(
-                self.traffic["low"] & self.alerts["low"], self.mode["energy_efficient"]
-            ),
+            ctrl.Rule(self.traffic["low"] & self.alerts["low"], self.mode["energy_efficient"]),
         ]
 
         self.controller = ctrl.ControlSystem(rules)
@@ -85,22 +81,18 @@ class FuzzyLogicController:
 
             if mode_value >= 1.5:
                 return "HIGH_PERFORMANCE"
-            elif mode_value >= 0.5:
+            if mode_value >= 0.5:
                 return "BALANCED"
-            else:
-                return "ENERGY_EFFICIENT"
+            return "ENERGY_EFFICIENT"
 
         except Exception as e:
             logger.error(f"Fuzzy controller error: {e}")
             return self._fallback_mode_selection(traffic, alerts, sla_risk)
 
-    def _fallback_mode_selection(
-        self, traffic: float, alerts: float, sla_risk: float
-    ) -> str:
+    def _fallback_mode_selection(self, traffic: float, alerts: float, sla_risk: float) -> str:
         """Simple rule-based fallback."""
         if traffic > 70 or alerts > 50 or sla_risk > 60:
             return "HIGH_PERFORMANCE"
-        elif traffic < 30 and alerts < 20 and sla_risk < 20:
+        if traffic < 30 and alerts < 20 and sla_risk < 20:
             return "ENERGY_EFFICIENT"
-        else:
-            return "BALANCED"
+        return "BALANCED"

@@ -6,10 +6,10 @@ Acquisition System) service, enabling skill learning within Maximus Core.
 Production-ready implementation with real HSAS integration.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
 
@@ -25,7 +25,7 @@ class SkillExecutionResult:
     steps_executed: int
     total_reward: float
     execution_time: float
-    errors: List[str]
+    errors: list[str]
     timestamp: datetime
 
 
@@ -54,15 +54,15 @@ class SkillLearningController:
         self.client = httpx.AsyncClient(timeout=timeout)
 
         # Local cache
-        self.learned_skills: Dict[str, Any] = {}
-        self.skill_stats: Dict[str, Dict] = {}
+        self.learned_skills: dict[str, Any] = {}
+        self.skill_stats: dict[str, dict] = {}
 
         logger.info(f"Skill learning controller initialized (HSAS: {hsas_url})")
 
     async def execute_skill(
         self,
         skill_name: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         mode: str = "hybrid",  # model_free, model_based, hybrid
     ) -> SkillExecutionResult:
         """Execute a learned skill.
@@ -88,9 +88,7 @@ class SkillLearningController:
             result_data = response.json()
 
             # Track statistics
-            self._update_skill_stats(
-                skill_name, success=result_data.get("success", False)
-            )
+            self._update_skill_stats(skill_name, success=result_data.get("success", False))
 
             execution_time = (datetime.utcnow() - start_time).total_seconds()
 
@@ -125,7 +123,7 @@ class SkillLearningController:
             )
 
     async def learn_from_demonstration(
-        self, skill_name: str, demonstration: List[Dict], expert_name: str = "human"
+        self, skill_name: str, demonstration: list[dict], expert_name: str = "human"
     ) -> bool:
         """Learn skill from expert demonstration (imitation learning).
 
@@ -148,9 +146,7 @@ class SkillLearningController:
             )
             response.raise_for_status()
 
-            logger.info(
-                f"Skill learned from demonstration: {skill_name} (expert: {expert_name})"
-            )
+            logger.info(f"Skill learned from demonstration: {skill_name} (expert: {expert_name})")
 
             # Cache locally
             self.learned_skills[skill_name] = {
@@ -165,9 +161,7 @@ class SkillLearningController:
             logger.error(f"Learning from demonstration failed: {str(e)}")
             return False
 
-    async def compose_skill(
-        self, skill_name: str, primitive_sequence: List[str], description: str = ""
-    ) -> bool:
+    async def compose_skill(self, skill_name: str, primitive_sequence: list[str], description: str = "") -> bool:
         """Compose new skill from sequence of primitives.
 
         Args:
@@ -189,9 +183,7 @@ class SkillLearningController:
             )
             response.raise_for_status()
 
-            logger.info(
-                f"Skill composed: {skill_name} from {len(primitive_sequence)} primitives"
-            )
+            logger.info(f"Skill composed: {skill_name} from {len(primitive_sequence)} primitives")
 
             # Cache locally
             self.learned_skills[skill_name] = {
@@ -206,7 +198,7 @@ class SkillLearningController:
             logger.error(f"Skill composition failed: {str(e)}")
             return False
 
-    async def get_skill_library(self) -> Dict[str, Any]:
+    async def get_skill_library(self) -> dict[str, Any]:
         """Get list of all learned skills.
 
         Returns:
@@ -229,7 +221,7 @@ class SkillLearningController:
             logger.error(f"Failed to retrieve skill library: {str(e)}")
             return self.learned_skills  # Return cached
 
-    async def get_primitive_library(self) -> List[str]:
+    async def get_primitive_library(self) -> list[str]:
         """Get list of available skill primitives.
 
         Returns:
@@ -274,7 +266,7 @@ class SkillLearningController:
 
         stats["success_rate"] = stats["successes"] / stats["executions"]
 
-    def get_skill_stats(self, skill_name: str) -> Optional[Dict]:
+    def get_skill_stats(self, skill_name: str) -> dict | None:
         """Get statistics for a specific skill.
 
         Args:
@@ -285,7 +277,7 @@ class SkillLearningController:
         """
         return self.skill_stats.get(skill_name)
 
-    def export_state(self) -> Dict[str, Any]:
+    def export_state(self) -> dict[str, Any]:
         """Export controller state for monitoring.
 
         Returns:

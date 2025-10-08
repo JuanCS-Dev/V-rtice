@@ -16,23 +16,24 @@ Version: 1.0.0
 
 import asyncio
 import logging
-from typing import Optional, Any, Dict
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 import httpx
-
 
 logger = logging.getLogger(__name__)
 
 
 class CircuitBreakerOpen(Exception):
     """Exception raised when circuit breaker is open."""
+
     pass
 
 
 class ServiceUnavailable(Exception):
     """Exception raised when service is unavailable."""
+
     pass
 
 
@@ -183,7 +184,7 @@ class BaseExternalClient(ABC):
                 except Exception as e:
                     logger.warning(
                         f"{self.__class__.__name__}: Health check failed during circuit breaker recovery: {e}",
-                        exc_info=True
+                        exc_info=True,
                     )
 
         # Circuit still open
@@ -193,17 +194,9 @@ class BaseExternalClient(ABC):
         """Open circuit breaker."""
         self._circuit_open = True
         self._circuit_opened_at = datetime.now()
-        logger.warning(
-            f"{self.__class__.__name__}: Circuit breaker opened after "
-            f"{self._failures} failures"
-        )
+        logger.warning(f"{self.__class__.__name__}: Circuit breaker opened after {self._failures} failures")
 
-    async def request(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Optional[Any]:
+    async def request(self, method: str, endpoint: str, **kwargs) -> Optional[Any]:
         """
         Make HTTP request with circuit breaker and graceful degradation.
 
@@ -263,14 +256,12 @@ class BaseExternalClient(ABC):
 
             except Exception as e:
                 last_exception = e
-                logger.error(
-                    f"{self.__class__.__name__}: Unexpected error on {method} {endpoint}: {e}"
-                )
+                logger.error(f"{self.__class__.__name__}: Unexpected error on {method} {endpoint}: {e}")
                 break
 
             # Exponential backoff before retry
             if attempt < self.max_retries:
-                backoff = self.retry_backoff_base ** attempt
+                backoff = self.retry_backoff_base**attempt
                 await asyncio.sleep(backoff)
 
         # All retries failed
@@ -289,17 +280,10 @@ class BaseExternalClient(ABC):
             )
             return await self.degraded_fallback(method, endpoint, **kwargs)
         else:
-            raise ServiceUnavailable(
-                f"Service unavailable after {self.max_retries + 1} attempts: {last_exception}"
-            )
+            raise ServiceUnavailable(f"Service unavailable after {self.max_retries + 1} attempts: {last_exception}")
 
     @abstractmethod
-    async def degraded_fallback(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs
-    ) -> Optional[Any]:
+    async def degraded_fallback(self, method: str, endpoint: str, **kwargs) -> Optional[Any]:
         """
         Fallback implementation when service is unavailable.
 

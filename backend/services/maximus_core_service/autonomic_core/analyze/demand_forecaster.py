@@ -10,9 +10,7 @@ Performance Targets:
 """
 
 import logging
-from typing import Dict, List, Tuple
 
-import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score
 from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -34,8 +32,8 @@ class ResourceDemandForecaster:
 
     def __init__(
         self,
-        order: Tuple[int, int, int] = (1, 1, 1),
-        seasonal_order: Tuple[int, int, int, int] = (1, 1, 1, 24),
+        order: tuple[int, int, int] = (1, 1, 1),
+        seasonal_order: tuple[int, int, int, int] = (1, 1, 1, 24),
     ):
         """
         Initialize SARIMA forecaster.
@@ -50,10 +48,7 @@ class ResourceDemandForecaster:
         self.memory_model = None
         self.last_training_data = None
 
-        logger.info(
-            f"ResourceDemandForecaster initialized "
-            f"(order={order}, seasonal_order={seasonal_order})"
-        )
+        logger.info(f"ResourceDemandForecaster initialized (order={order}, seasonal_order={seasonal_order})")
 
     def train(self, historical_data: pd.DataFrame):
         """
@@ -111,7 +106,7 @@ class ResourceDemandForecaster:
             logger.error(f"Error training SARIMA models: {e}", exc_info=True)
             raise
 
-    def predict(self, horizon: str = "1h") -> Dict[str, List[float]]:
+    def predict(self, horizon: str = "1h") -> dict[str, list[float]]:
         """
         Forecast resource demand.
 
@@ -144,9 +139,7 @@ class ResourceDemandForecaster:
             memory_forecast = self.memory_model.forecast(steps=steps, exog=future_exog)
 
             logger.debug(
-                f"{horizon} forecast: "
-                f"CPU avg={cpu_forecast.mean():.1f}%, "
-                f"Memory avg={memory_forecast.mean():.1f}%"
+                f"{horizon} forecast: CPU avg={cpu_forecast.mean():.1f}%, Memory avg={memory_forecast.mean():.1f}%"
             )
 
             return {
@@ -166,9 +159,7 @@ class ResourceDemandForecaster:
         last_timestamp = self.last_training_data.index[-1]
 
         # Generate future timestamps (15-min intervals)
-        future_timestamps = pd.date_range(
-            start=last_timestamp + pd.Timedelta(minutes=15), periods=steps, freq="15min"
-        )
+        future_timestamps = pd.date_range(start=last_timestamp + pd.Timedelta(minutes=15), periods=steps, freq="15min")
 
         # Create exogenous features
         future_exog = pd.DataFrame(
@@ -182,7 +173,7 @@ class ResourceDemandForecaster:
 
         return future_exog
 
-    def validate(self, test_data: pd.DataFrame) -> Dict[str, float]:
+    def validate(self, test_data: pd.DataFrame) -> dict[str, float]:
         """
         Validate model accuracy on test set.
 
@@ -211,9 +202,7 @@ class ResourceDemandForecaster:
             cpu_r2 = r2_score(actual_cpu, pred_cpu)
             memory_r2 = r2_score(actual_memory, pred_memory)
 
-            logger.info(
-                f"Validation results: CPU R²={cpu_r2:.3f}, Memory R²={memory_r2:.3f}"
-            )
+            logger.info(f"Validation results: CPU R²={cpu_r2:.3f}, Memory R²={memory_r2:.3f}")
 
             return {
                 "cpu_r2": cpu_r2,

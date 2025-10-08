@@ -14,13 +14,12 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
-from datetime import datetime
 import json
 import logging
-from pathlib import Path
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -29,6 +28,7 @@ try:
     import cProfile
     import pstats
     from pstats import SortKey
+
     CPROFILE_AVAILABLE = True
 except ImportError:
     CPROFILE_AVAILABLE = False
@@ -68,22 +68,22 @@ class ProfileResult:
     avg_time_ms: float
 
     # Layer-wise timing
-    layer_times: Dict[str, float]
+    layer_times: dict[str, float]
 
     # Memory metrics
-    peak_memory_mb: Optional[float] = None
-    memory_by_layer: Optional[Dict[str, float]] = None
+    peak_memory_mb: float | None = None
+    memory_by_layer: dict[str, float] | None = None
 
     # CPU profiling
-    cpu_profile_path: Optional[Path] = None
+    cpu_profile_path: Path | None = None
 
     # GPU profiling
-    gpu_profile_path: Optional[Path] = None
+    gpu_profile_path: Path | None = None
 
     # Bottlenecks
-    bottlenecks: List[str] = None
+    bottlenecks: list[str] = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary.
 
         Returns:
@@ -95,7 +95,7 @@ class ProfileResult:
             "layer_times": self.layer_times,
             "peak_memory_mb": self.peak_memory_mb,
             "memory_by_layer": self.memory_by_layer,
-            "bottlenecks": self.bottlenecks or []
+            "bottlenecks": self.bottlenecks or [],
         }
 
     def save(self, output_path: Path):
@@ -126,17 +126,10 @@ class Profiler:
         import torch
 
         model = MyModel()
-        profiler = Profiler(config=ProfilerConfig(
-            enable_cpu_profiling=True,
-            enable_memory_profiling=True
-        ))
+        profiler = Profiler(config=ProfilerConfig(enable_cpu_profiling=True, enable_memory_profiling=True))
 
         # Profile model
-        result = profiler.profile_model(
-            model=model,
-            input_shape=(32, 128),
-            device="cuda"
-        )
+        result = profiler.profile_model(model=model, input_shape=(32, 128), device="cuda")
 
         profiler.print_report(result)
         result.save("profile_results.json")
@@ -152,17 +145,12 @@ class Profiler:
         self.config = config
 
         # Profiling state
-        self.layer_times: Dict[str, List[float]] = {}
-        self.memory_snapshots: List[float] = []
+        self.layer_times: dict[str, list[float]] = {}
+        self.memory_snapshots: list[float] = []
 
         logger.info("Profiler initialized")
 
-    def profile_model(
-        self,
-        model: Any,
-        input_shape: Tuple[int, ...],
-        device: str = "cpu"
-    ) -> ProfileResult:
+    def profile_model(self, model: Any, input_shape: tuple[int, ...], device: str = "cpu") -> ProfileResult:
         """Profile model execution.
 
         Args:
@@ -248,7 +236,7 @@ class Profiler:
             peak_memory_mb=peak_memory_mb,
             cpu_profile_path=self.config.output_dir / "cpu_profile.prof" if self.config.enable_cpu_profiling else None,
             gpu_profile_path=gpu_profile_path,
-            bottlenecks=bottlenecks
+            bottlenecks=bottlenecks,
         )
 
     def _profile_with_memory(self, model: Any, input_tensor: Any):
@@ -260,6 +248,7 @@ class Profiler:
         """
         try:
             import psutil
+
             process = psutil.Process()
 
             # Memory before
@@ -276,7 +265,7 @@ class Profiler:
             # Fallback without memory tracking
             _ = self._run_inference(model, input_tensor)
 
-    def _profile_gpu(self, model: Any, input_tensor: Any) -> Optional[Path]:
+    def _profile_gpu(self, model: Any, input_tensor: Any) -> Path | None:
         """Profile GPU execution.
 
         Args:
@@ -288,17 +277,17 @@ class Profiler:
         """
         try:
             import torch
-            from torch.profiler import profile, ProfilerActivity
+            from torch.profiler import ProfilerActivity, profile
 
             output_path = self.config.output_dir / "gpu_profile.json"
 
-            with profile(
-                activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                record_shapes=True,
-                profile_memory=True
-            ) as prof:
-                with torch.no_grad():
-                    _ = model(input_tensor)
+            with (
+                profile(
+                    activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True, profile_memory=True
+                ) as prof,
+                torch.no_grad(),
+            ):
+                _ = model(input_tensor)
 
             # Export trace
             prof.export_chrome_trace(str(output_path))
@@ -310,11 +299,7 @@ class Profiler:
             logger.warning(f"GPU profiling failed: {e}")
             return None
 
-    def _detect_bottlenecks(
-        self,
-        layer_times: Dict[str, float],
-        total_time: float
-    ) -> List[str]:
+    def _detect_bottlenecks(self, layer_times: dict[str, float], total_time: float) -> list[str]:
         """Detect bottlenecks.
 
         Args:
@@ -363,7 +348,7 @@ class Profiler:
 
         return model
 
-    def _create_dummy_input(self, shape: Tuple[int, ...], device: str) -> Any:
+    def _create_dummy_input(self, shape: tuple[int, ...], device: str) -> Any:
         """Create dummy input.
 
         Args:
@@ -375,6 +360,7 @@ class Profiler:
         """
         try:
             import torch
+
             return torch.randn(shape, device=device)
         except ImportError:
             return np.random.randn(*shape).astype(np.float32)
@@ -404,8 +390,7 @@ class Profiler:
         except ImportError:
             if hasattr(model, "predict"):
                 return model.predict(input_tensor)
-            else:
-                return model(input_tensor)
+            return model(input_tensor)
 
     def print_report(self, result: ProfileResult):
         """Print profiling report.
@@ -417,7 +402,7 @@ class Profiler:
         print("PROFILING REPORT")
         print("=" * 80)
 
-        print(f"\nOverall:")
+        print("\nOverall:")
         print(f"  Total time: {result.total_time_ms:.2f} ms")
         print(f"  Avg time:   {result.avg_time_ms:.2f} ms")
 
@@ -425,7 +410,7 @@ class Profiler:
             print(f"  Peak memory: {result.peak_memory_mb:.2f} MB")
 
         if result.layer_times:
-            print(f"\nLayer-wise Timing:")
+            print("\nLayer-wise Timing:")
             print(f"  {'Layer':>30} {'Time (ms)':>15} {'% of Total':>15}")
             print("  " + "-" * 60)
 
@@ -435,7 +420,7 @@ class Profiler:
                 print(f"  {layer_name:>30} {layer_time:>15.2f} {pct:>15.1f}%")
 
         if result.bottlenecks:
-            print(f"\nBottlenecks Detected:")
+            print("\nBottlenecks Detected:")
             for bottleneck in result.bottlenecks:
                 print(f"  ⚠ {bottleneck}")
 
@@ -453,6 +438,7 @@ class Profiler:
 # =============================================================================
 # CLI
 # =============================================================================
+
 
 def main():
     """Main profiling script."""
@@ -475,6 +461,7 @@ def main():
     # Load model
     try:
         import torch
+
         model = torch.load(args.model_path)
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
@@ -486,17 +473,13 @@ def main():
         enable_memory_profiling=True,
         enable_gpu_profiling=args.enable_gpu_profiling,
         num_iterations=args.num_iterations,
-        output_dir=Path(args.output_dir)
+        output_dir=Path(args.output_dir),
     )
 
     profiler = Profiler(config=config)
 
     # Profile
-    result = profiler.profile_model(
-        model=model,
-        input_shape=input_shape,
-        device=args.device
-    )
+    result = profiler.profile_model(model=model, input_shape=input_shape, device=args.device)
 
     # Print report
     profiler.print_report(result)

@@ -6,15 +6,15 @@ for scalable, decoupled processing pipeline.
 """
 
 import asyncio
-from contextlib import asynccontextmanager
-from datetime import datetime
 import json
 import logging
+from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from aiokafka.errors import KafkaError
-from aiokafka.structs import TopicPartition
+
 from config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -54,9 +54,7 @@ class KafkaClient:
 
             await self.producer.start()
 
-            logger.info(
-                f"✅ Kafka producer initialized: {self.settings.KAFKA_BOOTSTRAP_SERVERS}"
-            )
+            logger.info(f"✅ Kafka producer initialized: {self.settings.KAFKA_BOOTSTRAP_SERVERS}")
 
         except Exception as e:
             logger.error(f"❌ Failed to initialize Kafka producer: {e}")
@@ -98,9 +96,7 @@ class KafkaClient:
                 message["timestamp"] = datetime.utcnow().isoformat()
 
             # Send to Kafka
-            await self.producer.send(
-                topic=topic, value=message, key=key, partition=partition
-            )
+            await self.producer.send(topic=topic, value=message, key=key, partition=partition)
 
             logger.debug(f"Sent event to {topic}: {key or 'no-key'}")
             return True
@@ -228,9 +224,7 @@ class KafkaClient:
         Returns:
             Background task
         """
-        task = asyncio.create_task(
-            self.consume_messages(topics, group_id, message_handler, auto_offset_reset)
-        )
+        task = asyncio.create_task(self.consume_messages(topics, group_id, message_handler, auto_offset_reset))
         self._consumer_tasks.append(task)
         logger.info(f"Started background consumer: {group_id}")
         return task
@@ -265,9 +259,7 @@ class KafkaClient:
 # ============================================================================
 
 
-async def send_raw_text_event(
-    client: KafkaClient, text: str, analysis_id: str, metadata: Dict = None
-) -> bool:
+async def send_raw_text_event(client: KafkaClient, text: str, analysis_id: str, metadata: Dict = None) -> bool:
     """Send raw text to processing pipeline."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_RAW_TEXT,
@@ -356,9 +348,7 @@ async def send_analysis_complete(
     )
 
 
-async def send_error_event(
-    client: KafkaClient, error_type: str, error_message: str, context: Dict = None
-) -> bool:
+async def send_error_event(client: KafkaClient, error_type: str, error_message: str, context: Dict = None) -> bool:
     """Send error event for monitoring."""
     return await client.send_event(
         topic=client.settings.KAFKA_TOPIC_ERRORS,

@@ -8,16 +8,16 @@ Neo4j integration for storing and analyzing argumentation frameworks:
 - Path finding, subgraph extraction
 """
 
-import asyncio
-from datetime import datetime, timedelta
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from neo4j import AsyncDriver, AsyncGraphDatabase
+from neo4j.exceptions import Neo4jError
 
 from argumentation_framework import ArgumentationFramework
 from config import get_settings
-from models import Argument, ArgumentRole, Fallacy
-from neo4j import AsyncDriver, AsyncGraphDatabase, AsyncSession
-from neo4j.exceptions import Neo4jError, ServiceUnavailable
+from models import Argument, ArgumentRole
 
 logger = logging.getLogger(__name__)
 
@@ -89,9 +89,7 @@ class SeriemaGraphClient:
             logger.info("✅ Seriema Graph client initialized")
 
         except Exception as e:
-            logger.error(
-                f"❌ Failed to initialize Seriema Graph client: {e}", exc_info=True
-            )
+            logger.error(f"❌ Failed to initialize Seriema Graph client: {e}", exc_info=True)
             raise
 
     async def close(self) -> None:
@@ -107,8 +105,7 @@ class SeriemaGraphClient:
             # Constraint on Argument ID
             try:
                 await session.run(
-                    "CREATE CONSTRAINT argument_id_unique IF NOT EXISTS "
-                    "FOR (a:Argument) REQUIRE a.id IS UNIQUE"
+                    "CREATE CONSTRAINT argument_id_unique IF NOT EXISTS FOR (a:Argument) REQUIRE a.id IS UNIQUE"
                 )
             except Neo4jError as e:
                 logger.debug(f"Constraint argument_id_unique already exists or creation failed: {e}")
@@ -116,18 +113,14 @@ class SeriemaGraphClient:
             # Index on framework_id for fast filtering
             try:
                 await session.run(
-                    "CREATE INDEX argument_framework_idx IF NOT EXISTS "
-                    "FOR (a:Argument) ON (a.framework_id)"
+                    "CREATE INDEX argument_framework_idx IF NOT EXISTS FOR (a:Argument) ON (a.framework_id)"
                 )
             except Neo4jError as e:
                 logger.debug(f"Index argument_framework_idx already exists or creation failed: {e}")
 
             # Index on role
             try:
-                await session.run(
-                    "CREATE INDEX argument_role_idx IF NOT EXISTS "
-                    "FOR (a:Argument) ON (a.role)"
-                )
+                await session.run("CREATE INDEX argument_role_idx IF NOT EXISTS FOR (a:Argument) ON (a.role)")
             except Neo4jError as e:
                 logger.debug(f"Index argument_role_idx already exists or creation failed: {e}")
 
@@ -156,9 +149,7 @@ class SeriemaGraphClient:
         try:
             async with self.driver.session(database=self.database) as session:
                 # Use transaction for atomicity
-                await session.execute_write(
-                    self._store_framework_tx, framework, framework_id, metadata or {}
-                )
+                await session.execute_write(self._store_framework_tx, framework, framework_id, metadata or {})
 
             logger.info(
                 f"Stored framework {framework_id}: {len(framework.arguments)} arguments, "
@@ -167,9 +158,7 @@ class SeriemaGraphClient:
             return True
 
         except Exception as e:
-            logger.error(
-                f"Failed to store framework {framework_id}: {e}", exc_info=True
-            )
+            logger.error(f"Failed to store framework {framework_id}: {e}", exc_info=True)
             return False
 
     @staticmethod
@@ -251,9 +240,7 @@ class SeriemaGraphClient:
             metadata=metadata,
         )
 
-    async def retrieve_framework(
-        self, framework_id: str
-    ) -> Optional[ArgumentationFramework]:
+    async def retrieve_framework(self, framework_id: str) -> Optional[ArgumentationFramework]:
         """
         Retrieve argumentation framework from Neo4j.
 
@@ -319,14 +306,10 @@ class SeriemaGraphClient:
                 return framework
 
         except Exception as e:
-            logger.error(
-                f"Failed to retrieve framework {framework_id}: {e}", exc_info=True
-            )
+            logger.error(f"Failed to retrieve framework {framework_id}: {e}", exc_info=True)
             return None
 
-    async def get_argument_centrality(
-        self, framework_id: str, algorithm: str = "pagerank"
-    ) -> Dict[str, float]:
+    async def get_argument_centrality(self, framework_id: str, algorithm: str = "pagerank") -> Dict[str, float]:
         """
         Calculate argument centrality scores.
 
@@ -416,9 +399,7 @@ class SeriemaGraphClient:
 
             return paths
 
-    async def get_argument_neighborhoods(
-        self, framework_id: str, argument_id: str, depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_argument_neighborhoods(self, framework_id: str, argument_id: str, depth: int = 2) -> Dict[str, Any]:
         """
         Get k-hop neighborhood of argument.
 
@@ -446,9 +427,7 @@ class SeriemaGraphClient:
 
             attackers = []
             async for record in result:
-                attackers.append(
-                    {"id": record["id"], "text": record["text"], "role": record["role"]}
-                )
+                attackers.append({"id": record["id"], "text": record["text"], "role": record["role"]})
 
             # Direct attacked
             result = await session.run(
@@ -462,9 +441,7 @@ class SeriemaGraphClient:
 
             attacked = []
             async for record in result:
-                attacked.append(
-                    {"id": record["id"], "text": record["text"], "role": record["role"]}
-                )
+                attacked.append({"id": record["id"], "text": record["text"], "role": record["role"]})
 
             # Indirect (k-hop)
             result = await session.run(
@@ -615,9 +592,7 @@ class SeriemaGraphClient:
             return True
 
         except Exception as e:
-            logger.error(
-                f"Failed to delete framework {framework_id}: {e}", exc_info=True
-            )
+            logger.error(f"Failed to delete framework {framework_id}: {e}", exc_info=True)
             return False
 
     async def health_check(self) -> Dict[str, Any]:

@@ -4,12 +4,12 @@ This module handles all database operations for ethical decisions,
 human overrides, and compliance logs using asyncpg and raw SQL for performance.
 """
 
-from datetime import datetime, timedelta
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple
 import uuid
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 import asyncpg
 
@@ -19,13 +19,10 @@ logger = logging.getLogger(__name__)
 from models import (
     ComplianceCheckRequest,
     DecisionHistoryQuery,
-    DecisionType,
     EthicalDecisionLog,
     EthicalMetrics,
-    FinalDecision,
     FrameworkPerformance,
     HumanOverrideRequest,
-    RiskLevel,
 )
 
 
@@ -45,9 +42,7 @@ class EthicalAuditDatabase:
 
     async def connect(self):
         """Create database connection pool."""
-        self.pool = await asyncpg.create_pool(
-            self.connection_string, min_size=5, max_size=20, command_timeout=60
-        )
+        self.pool = await asyncpg.create_pool(self.connection_string, min_size=5, max_size=20, command_timeout=60)
         print("✅ Connected to PostgreSQL (Ethical Audit Database)")
 
     async def disconnect(self):
@@ -102,26 +97,10 @@ class EthicalAuditDatabase:
                 decision.action_description,
                 decision.system_component,
                 json.dumps(decision.input_context),
-                (
-                    json.dumps(decision.kantian_result)
-                    if decision.kantian_result
-                    else None
-                ),
-                (
-                    json.dumps(decision.consequentialist_result)
-                    if decision.consequentialist_result
-                    else None
-                ),
-                (
-                    json.dumps(decision.virtue_ethics_result)
-                    if decision.virtue_ethics_result
-                    else None
-                ),
-                (
-                    json.dumps(decision.principialism_result)
-                    if decision.principialism_result
-                    else None
-                ),
+                (json.dumps(decision.kantian_result) if decision.kantian_result else None),
+                (json.dumps(decision.consequentialist_result) if decision.consequentialist_result else None),
+                (json.dumps(decision.virtue_ethics_result) if decision.virtue_ethics_result else None),
+                (json.dumps(decision.principialism_result) if decision.principialism_result else None),
                 decision.final_decision.value,
                 decision.final_confidence,
                 decision.decision_explanation,
@@ -160,9 +139,7 @@ class EthicalAuditDatabase:
             return dict(row)
         return None
 
-    async def query_decisions(
-        self, query: DecisionHistoryQuery
-    ) -> Tuple[List[Dict[str, Any]], int]:
+    async def query_decisions(self, query: DecisionHistoryQuery) -> Tuple[List[Dict[str, Any]], int]:
         """Query decisions with filters.
 
         Args:
@@ -278,9 +255,7 @@ class EthicalAuditDatabase:
 
         return override_id
 
-    async def get_overrides_by_decision(
-        self, decision_id: uuid.UUID
-    ) -> List[Dict[str, Any]]:
+    async def get_overrides_by_decision(self, decision_id: uuid.UUID) -> List[Dict[str, Any]]:
         """Get all overrides for a decision.
 
         Args:
@@ -425,9 +400,7 @@ class EthicalAuditDatabase:
                 last_24h,
             )
 
-            override_reasons = {
-                row["override_reason"]: row["total"] for row in overrides
-            }
+            override_reasons = {row["override_reason"]: row["total"] for row in overrides}
             total_overrides = sum(override_reasons.values())
 
             # Compliance (last week)
@@ -475,18 +448,12 @@ class EthicalAuditDatabase:
             override_rate=total_overrides / total if total > 0 else 0.0,
             override_reasons=override_reasons,
             compliance_checks_last_week=compliance["total"] or 0,
-            compliance_pass_rate=(
-                compliance["compliant"] / compliance["total"]
-                if compliance["total"] > 0
-                else 0.0
-            ),
+            compliance_pass_rate=(compliance["compliant"] / compliance["total"] if compliance["total"] > 0 else 0.0),
             critical_violations=compliance["critical_violations"] or 0,
             risk_distribution=risk_distribution,
         )
 
-    async def get_framework_performance(
-        self, hours: int = 24
-    ) -> List[FrameworkPerformance]:
+    async def get_framework_performance(self, hours: int = 24) -> List[FrameworkPerformance]:
         """Get performance metrics for each framework.
 
         Args:
@@ -531,11 +498,7 @@ class EthicalAuditDatabase:
                             total_decisions=row["total"],
                             avg_latency_ms=float(row["avg_latency"] or 0.0),
                             p95_latency_ms=float(row["p95_latency"] or 0.0),
-                            approval_rate=(
-                                row["approved"] / row["total"]
-                                if row["total"] > 0
-                                else 0.0
-                            ),
+                            approval_rate=(row["approved"] / row["total"] if row["total"] > 0 else 0.0),
                             avg_confidence=float(row["avg_confidence"] or 0.0),
                         )
                     )

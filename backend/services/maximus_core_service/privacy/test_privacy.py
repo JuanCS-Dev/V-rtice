@@ -25,7 +25,6 @@ from .base import (
 )
 from .dp_aggregator import DPAggregator, DPQueryType
 from .dp_mechanisms import (
-    AdvancedNoiseMechanisms,
     ExponentialMechanism,
     GaussianMechanism,
     LaplaceMechanism,
@@ -181,11 +180,7 @@ class TestDPMechanisms:
         score_function = lambda c: scores[candidates.index(c)]
 
         params = PrivacyParameters(epsilon=1.0, delta=0.0, sensitivity=0.5)
-        mechanism = ExponentialMechanism(
-            params,
-            candidates=candidates,
-            score_function=score_function
-        )
+        mechanism = ExponentialMechanism(params, candidates=candidates, score_function=score_function)
 
         # Get selection probabilities
         probs = mechanism.get_selection_probabilities()
@@ -208,7 +203,7 @@ class TestDPMechanisms:
             sensitivity=1.0,
             mechanism="laplace",
             noise_added=2.5,
-            query_type="count"
+            query_type="count",
         )
 
         assert result.absolute_error == 2.5
@@ -241,9 +236,7 @@ class TestDPAggregator:
 
     def test_count_by_group(self):
         """Test DP group-by count query"""
-        data = pd.DataFrame({
-            "country": ["US"] * 500 + ["UK"] * 300 + ["DE"] * 200
-        })
+        data = pd.DataFrame({"country": ["US"] * 500 + ["UK"] * 300 + ["DE"] * 200})
         aggregator = DPAggregator(epsilon=1.0, delta=0.0)
 
         result = aggregator.count_by_group(data, group_column="country")
@@ -263,7 +256,7 @@ class TestDPAggregator:
         result = aggregator.sum(
             data,
             value_column="severity",
-            value_range=1.0  # Scores in [0, 1]
+            value_range=1.0,  # Scores in [0, 1]
         )
 
         true_sum = 0.5 * 100 + 0.8 * 50  # = 50 + 40 = 90
@@ -277,11 +270,7 @@ class TestDPAggregator:
         data = pd.DataFrame({"value": values})
         aggregator = DPAggregator(epsilon=1.0, delta=0.0)
 
-        result = aggregator.mean(
-            data,
-            value_column="value",
-            value_range=1.0
-        )
+        result = aggregator.mean(data, value_column="value", value_range=1.0)
 
         true_mean = values.mean()
         assert result.true_value == pytest.approx(true_mean)
@@ -305,9 +294,7 @@ class TestPrivacyAccountant:
     def test_basic_composition(self):
         """Test basic sequential composition"""
         accountant = PrivacyAccountant(
-            total_epsilon=10.0,
-            total_delta=1e-4,
-            composition_type=CompositionType.BASIC_SEQUENTIAL
+            total_epsilon=10.0, total_delta=1e-4, composition_type=CompositionType.BASIC_SEQUENTIAL
         )
 
         # Add 5 queries with ε=1.0 each
@@ -322,9 +309,7 @@ class TestPrivacyAccountant:
     def test_advanced_composition(self):
         """Test advanced composition (tighter bound)"""
         accountant = PrivacyAccountant(
-            total_epsilon=10.0,
-            total_delta=1e-4,
-            composition_type=CompositionType.ADVANCED_SEQUENTIAL
+            total_epsilon=10.0, total_delta=1e-4, composition_type=CompositionType.ADVANCED_SEQUENTIAL
         )
 
         # Add 10 queries with ε=0.5 each
@@ -340,20 +325,11 @@ class TestPrivacyAccountant:
 
     def test_parallel_composition(self):
         """Test parallel composition"""
-        accountant = PrivacyAccountant(
-            total_epsilon=10.0,
-            total_delta=1e-4,
-            composition_type=CompositionType.PARALLEL
-        )
+        accountant = PrivacyAccountant(total_epsilon=10.0, total_delta=1e-4, composition_type=CompositionType.PARALLEL)
 
         # Add 5 queries on disjoint datasets
         for i in range(5):
-            accountant.add_query(
-                epsilon=1.0,
-                delta=1e-5,
-                query_type="count",
-                composition_type=CompositionType.PARALLEL
-            )
+            accountant.add_query(epsilon=1.0, delta=1e-5, query_type="count", composition_type=CompositionType.PARALLEL)
 
         # Parallel composition: max ε = 1.0
         total_eps, total_dlt = accountant.get_total_privacy_loss()
@@ -363,9 +339,7 @@ class TestPrivacyAccountant:
     def test_budget_exhaustion(self):
         """Test privacy budget exhaustion"""
         accountant = PrivacyAccountant(
-            total_epsilon=2.0,
-            total_delta=1e-4,
-            composition_type=CompositionType.BASIC_SEQUENTIAL
+            total_epsilon=2.0, total_delta=1e-4, composition_type=CompositionType.BASIC_SEQUENTIAL
         )
 
         # Add queries until budget exhausted
@@ -383,7 +357,7 @@ class TestPrivacyAccountant:
         accountant = SubsampledPrivacyAccountant(
             total_epsilon=10.0,
             total_delta=1e-4,
-            sampling_rate=0.01  # 1% subsample
+            sampling_rate=0.01,  # 1% subsample
         )
 
         # Add query with base ε=1.0
@@ -471,9 +445,7 @@ class TestPerformance:
         import time
 
         accountant = PrivacyAccountant(
-            total_epsilon=100.0,
-            total_delta=1e-4,
-            composition_type=CompositionType.BASIC_SEQUENTIAL
+            total_epsilon=100.0, total_delta=1e-4, composition_type=CompositionType.BASIC_SEQUENTIAL
         )
 
         start = time.time()

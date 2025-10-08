@@ -9,14 +9,12 @@ Focus: LASER-FOCUSED tests for exact line coverage
 """
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents import AgentType
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -61,11 +59,7 @@ class TestHormoneBroadcastLogging:
             mock_publish.return_value = AsyncMock()
 
             # ACT: Broadcast hormone (should trigger debug log on line 270)
-            await lymphnode._broadcast_hormone(
-                hormone_type="cortisol",
-                level=0.75,
-                source="stress_test"
-            )
+            await lymphnode._broadcast_hormone(hormone_type="cortisol", level=0.75, source="stress_test")
 
         # ASSERT: Verify publish was called (which means line 270 executed)
         mock_publish.assert_called_once()
@@ -107,8 +101,7 @@ class TestNeutralizationTracking:
         await lymphnode._processar_citocina_regional(neutralization_cytokine)
 
         # ASSERT: Counter should increment
-        assert lymphnode.total_neutralizacoes == 1, \
-            "Should track neutralization success"
+        assert lymphnode.total_neutralizacoes == 1, "Should track neutralization success"
 
     @pytest.mark.asyncio
     async def test_processar_nk_cytotoxicity_increments_counter(self, lymphnode):
@@ -136,8 +129,7 @@ class TestNeutralizationTracking:
         await lymphnode._processar_citocina_regional(nk_kill_cytokine)
 
         # ASSERT
-        assert lymphnode.total_neutralizacoes == 1, \
-            "Should track NK cell kills as neutralizations"
+        assert lymphnode.total_neutralizacoes == 1, "Should track NK cell kills as neutralizations"
 
     @pytest.mark.asyncio
     async def test_processar_neutrophil_net_increments_counter(self, lymphnode):
@@ -165,8 +157,7 @@ class TestNeutralizationTracking:
         await lymphnode._processar_citocina_regional(net_cytokine)
 
         # ASSERT
-        assert lymphnode.total_neutralizacoes == 6, \
-            "Should track neutrophil NET formation as neutralization"
+        assert lymphnode.total_neutralizacoes == 6, "Should track neutrophil NET formation as neutralization"
 
     @pytest.mark.asyncio
     async def test_multiple_neutralizations_accumulate(self, lymphnode):
@@ -181,12 +172,24 @@ class TestNeutralizationTracking:
         lymphnode.total_neutralizacoes = 0
 
         events = [
-            {"tipo": "TNF", "area_alvo": lymphnode.area, "prioridade": 5,
-             "payload": {"evento": "neutralizacao_sucesso"}},
-            {"tipo": "IFNgamma", "area_alvo": lymphnode.area, "prioridade": 6,
-             "payload": {"evento": "nk_cytotoxicity"}},
-            {"tipo": "IL8", "area_alvo": lymphnode.area, "prioridade": 7,
-             "payload": {"evento": "neutrophil_net_formation"}},
+            {
+                "tipo": "TNF",
+                "area_alvo": lymphnode.area,
+                "prioridade": 5,
+                "payload": {"evento": "neutralizacao_sucesso"},
+            },
+            {
+                "tipo": "IFNgamma",
+                "area_alvo": lymphnode.area,
+                "prioridade": 6,
+                "payload": {"evento": "nk_cytotoxicity"},
+            },
+            {
+                "tipo": "IL8",
+                "area_alvo": lymphnode.area,
+                "prioridade": 7,
+                "payload": {"evento": "neutrophil_net_formation"},
+            },
         ]
 
         # ACT: Process multiple neutralizations
@@ -194,8 +197,7 @@ class TestNeutralizationTracking:
             await lymphnode._processar_citocina_regional(event)
 
         # ASSERT: Should accumulate
-        assert lymphnode.total_neutralizacoes == 3, \
-            "Should accumulate multiple neutralization types"
+        assert lymphnode.total_neutralizacoes == 3, "Should accumulate multiple neutralization types"
 
 
 # ==================== AREA FILTERING (Line 533) ====================
@@ -277,8 +279,9 @@ class TestAreaFiltering:
             await node._processar_citocina_regional(cytokine)
 
         # ASSERT: Global should process all (temperature increased 3 times)
-        assert abs(node.temperatura_regional - 37.6) < 0.01, \
+        assert abs(node.temperatura_regional - 37.6) < 0.01, (
             "Global lymphnode should process cytokines from all areas (3 * 0.2°C)"
+        )
 
 
 # ==================== SUMMARY ====================

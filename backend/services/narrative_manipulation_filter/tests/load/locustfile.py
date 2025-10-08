@@ -9,11 +9,9 @@ For distributed testing:
 
 """
 
-import json
 import random
-from typing import Dict, List
 
-from locust import between, events, HttpUser, task
+from locust import between, events, task
 from locust.contrib.fasthttp import FastHttpUser
 
 # ============================================================================
@@ -206,9 +204,7 @@ class CognitiveDefenseUser(FastHttpUser):
     @task(1)  # Weight: 1 (metrics endpoint)
     def get_metrics(self):
         """Fetch Prometheus metrics."""
-        with self.client.get(
-            "/metrics", catch_response=True, name="Get Metrics"
-        ) as response:
+        with self.client.get("/metrics", catch_response=True, name="Get Metrics") as response:
             if response.status_code == 200:
                 response.success()
             else:
@@ -217,9 +213,7 @@ class CognitiveDefenseUser(FastHttpUser):
     @task(1)  # Weight: 1
     def health_check(self):
         """Health check endpoint."""
-        with self.client.get(
-            "/health", catch_response=True, name="Health Check"
-        ) as response:
+        with self.client.get("/health", catch_response=True, name="Health Check") as response:
             if response.status_code == 200:
                 result = response.json()
                 if result.get("status") == "healthy":
@@ -257,16 +251,11 @@ def on_test_stop(environment, **kwargs):
         print(f"\nTotal Requests: {environment.stats.total.num_requests}")
         print(f"Total Failures: {environment.stats.total.num_failures}")
         print(f"Median Response Time: {environment.stats.total.median_response_time}ms")
-        print(
-            f"95th Percentile: {environment.stats.total.get_response_time_percentile(0.95)}ms"
-        )
+        print(f"95th Percentile: {environment.stats.total.get_response_time_percentile(0.95)}ms")
         print(f"Requests/sec: {environment.stats.total.total_rps:.2f}")
 
         if environment.stats.total.num_requests > 0:
-            failure_rate = (
-                environment.stats.total.num_failures
-                / environment.stats.total.num_requests
-            ) * 100
+            failure_rate = (environment.stats.total.num_failures / environment.stats.total.num_requests) * 100
             print(f"Failure Rate: {failure_rate:.2f}%")
 
     print("=" * 80 + "\n")

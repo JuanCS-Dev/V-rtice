@@ -19,19 +19,20 @@ the effectiveness of simulated attacks and countermeasures.
 from datetime import datetime
 from typing import Generator
 
-from config import get_settings
 from sqlalchemy import (
     Boolean,
     Column,
-    create_engine,
     DateTime,
     ForeignKey,
     Integer,
     String,
     Text,
+    create_engine,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+
+from config import get_settings
 
 settings = get_settings()
 

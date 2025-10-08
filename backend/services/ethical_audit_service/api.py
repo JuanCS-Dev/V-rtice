@@ -5,38 +5,33 @@ decisions made by the VÉRTICE AI platform. It supports the 4-framework ethical
 architecture (Kantian, Consequentialist, Virtue Ethics, Principialism).
 """
 
-from datetime import datetime
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from slowapi import _rate_limit_exceeded_handler, Limiter
+from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
-import uvicorn
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
 from auth import (
-    get_current_user,
+    TokenData,
     require_admin,
-    require_any_role,
     require_auditor_or_admin,
     require_soc_or_admin,
-    TokenData,
-    UserRole,
 )
 from database import EthicalAuditDatabase
 from models import (
@@ -47,7 +42,6 @@ from models import (
     DecisionHistoryResponse,
     DecisionType,
     EthicalDecisionLog,
-    EthicalDecisionRequest,
     EthicalDecisionResponse,
     EthicalMetrics,
     FinalDecision,
@@ -91,9 +85,7 @@ app.add_middleware(
 )
 
 # Add trusted host middleware for additional security
-TRUSTED_HOSTS = os.getenv(
-    "TRUSTED_HOSTS", "localhost,127.0.0.1,ethical-audit,ethical_audit_service"
-).split(",")
+TRUSTED_HOSTS = os.getenv("TRUSTED_HOSTS", "localhost,127.0.0.1,ethical-audit,ethical_audit_service").split(",")
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=TRUSTED_HOSTS)
 
@@ -168,9 +160,7 @@ async def get_status() -> Dict[str, Any]:
         compliance_count = await conn.fetchval("SELECT COUNT(*) FROM compliance_logs")
 
         # Get latest decision timestamp
-        latest_decision = await conn.fetchval(
-            "SELECT MAX(timestamp) FROM ethical_decisions"
-        )
+        latest_decision = await conn.fetchval("SELECT MAX(timestamp) FROM ethical_decisions")
 
     return {
         "service": "ethical_audit_service",
@@ -228,9 +218,7 @@ async def log_decision(
 
 
 @app.get("/audit/decision/{decision_id}", response_model=Dict[str, Any])
-async def get_decision(
-    decision_id: uuid.UUID, current_user: TokenData = require_auditor_or_admin
-) -> Dict[str, Any]:
+async def get_decision(decision_id: uuid.UUID, current_user: TokenData = require_auditor_or_admin) -> Dict[str, Any]:
     """Retrieve a specific ethical decision by ID.
 
     Args:
@@ -288,26 +276,12 @@ async def query_decisions(
         decision_responses = []
         for dec in decisions:
             # Parse framework results from JSON
-            kantian = (
-                KantianResult(**dec["kantian_result"])
-                if dec.get("kantian_result")
-                else None
-            )
+            kantian = KantianResult(**dec["kantian_result"]) if dec.get("kantian_result") else None
             consequentialist = (
-                ConsequentialistResult(**dec["consequentialist_result"])
-                if dec.get("consequentialist_result")
-                else None
+                ConsequentialistResult(**dec["consequentialist_result"]) if dec.get("consequentialist_result") else None
             )
-            virtue = (
-                VirtueEthicsResult(**dec["virtue_ethics_result"])
-                if dec.get("virtue_ethics_result")
-                else None
-            )
-            principi = (
-                PrinciplismResult(**dec["principialism_result"])
-                if dec.get("principialism_result")
-                else None
-            )
+            virtue = VirtueEthicsResult(**dec["virtue_ethics_result"]) if dec.get("virtue_ethics_result") else None
+            principi = PrinciplismResult(**dec["principialism_result"]) if dec.get("principialism_result") else None
 
             decision_responses.append(
                 EthicalDecisionResponse(
@@ -443,9 +417,7 @@ async def log_compliance_check(
         )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to log compliance check: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to log compliance check: {str(e)}")
 
 
 # ============================================================================
@@ -481,7 +453,7 @@ async def get_metrics() -> EthicalMetrics:
 
 @app.get("/audit/metrics/frameworks", response_model=List[FrameworkPerformance])
 async def get_framework_metrics(
-    hours: int = Query(default=24, ge=1, le=168, description="Hours to look back")
+    hours: int = Query(default=24, ge=1, le=168, description="Hours to look back"),
 ) -> List[FrameworkPerformance]:
     """Get performance metrics for each ethical framework.
 
@@ -505,9 +477,7 @@ async def get_framework_metrics(
         return performance
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get framework metrics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get framework metrics: {str(e)}")
 
 
 # ============================================================================
@@ -518,9 +488,7 @@ async def get_framework_metrics(
 @app.get("/audit/analytics/timeline")
 async def get_decision_timeline(
     hours: int = Query(default=24, ge=1, le=720, description="Hours to analyze"),
-    bucket_minutes: int = Query(
-        default=60, ge=5, le=1440, description="Time bucket size in minutes"
-    ),
+    bucket_minutes: int = Query(default=60, ge=5, le=1440, description="Time bucket size in minutes"),
     current_user: TokenData = require_auditor_or_admin,
 ) -> Dict[str, Any]:
     """Get time-series analytics of ethical decisions.
@@ -658,18 +626,19 @@ async def explain_decision(
     try:
         # Import XAI engine (lazy import to avoid loading if not needed)
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
 
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
+
+        from xai.base import DetailLevel, ExplanationType
         from xai.engine import get_global_engine
-        from xai.base import ExplanationType, DetailLevel
 
         # Get parameters
-        decision_id = explanation_request.get('decision_id')
-        explanation_type = explanation_request.get('explanation_type', 'lime')
-        detail_level = explanation_request.get('detail_level', 'detailed')
-        instance = explanation_request.get('instance', {})
-        prediction = explanation_request.get('prediction')
-        model_reference = explanation_request.get('model_reference', None)
+        decision_id = explanation_request.get("decision_id")
+        explanation_type = explanation_request.get("explanation_type", "lime")
+        detail_level = explanation_request.get("detail_level", "detailed")
+        instance = explanation_request.get("instance", {})
+        prediction = explanation_request.get("prediction")
+        model_reference = explanation_request.get("model_reference", None)
 
         # Validate required fields
         if not instance:
@@ -682,16 +651,14 @@ async def explain_decision(
             exp_type = ExplanationType(explanation_type)
         except ValueError:
             raise HTTPException(
-                status_code=400,
-                detail=f"Invalid explanation_type. Must be one of: lime, shap, counterfactual"
+                status_code=400, detail="Invalid explanation_type. Must be one of: lime, shap, counterfactual"
             )
 
         try:
             det_level = DetailLevel(detail_level)
         except ValueError:
             raise HTTPException(
-                status_code=400,
-                detail=f"Invalid detail_level. Must be one of: summary, detailed, technical"
+                status_code=400, detail="Invalid detail_level. Must be one of: summary, detailed, technical"
             )
 
         # Get XAI engine
@@ -701,6 +668,7 @@ async def explain_decision(
         # Real model loading tracked in GitHub Issue #TODO_CREATE_ISSUE
         # Expected implementation: model registry lookup by model_reference
         from xai.engine import DummyModel
+
         model = DummyModel()
 
         # Future: if model_reference:
@@ -708,17 +676,13 @@ async def explain_decision(
 
         # Add decision_id to instance for tracking
         if decision_id:
-            instance['decision_id'] = decision_id
+            instance["decision_id"] = decision_id
 
         # Generate explanation
         start_time = time.time()
 
         explanation = await engine.explain(
-            model=model,
-            instance=instance,
-            prediction=prediction,
-            explanation_type=exp_type,
-            detail_level=det_level
+            model=model, instance=instance, prediction=prediction, explanation_type=exp_type, detail_level=det_level
         )
 
         latency_ms = int((time.time() - start_time) * 1000)
@@ -742,7 +706,7 @@ async def explain_decision(
                     "importance": f.importance,
                     "value": str(f.value),
                     "description": f.description,
-                    "contribution": f.contribution
+                    "contribution": f.contribution,
                 }
                 for f in explanation.top_features
             ],
@@ -751,7 +715,7 @@ async def explain_decision(
             "visualization_data": explanation.visualization_data,
             "model_type": explanation.model_type,
             "latency_ms": explanation.latency_ms,
-            "metadata": explanation.metadata
+            "metadata": explanation.metadata,
         }
 
         return response
@@ -760,10 +724,7 @@ async def explain_decision(
         raise
     except Exception as e:
         logger.error(f"XAI explanation failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to generate explanation: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to generate explanation: {str(e)}")
 
 
 @app.get("/api/xai/stats")
@@ -780,24 +741,19 @@ async def get_xai_stats(
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
 
         from xai.engine import get_global_engine
 
         engine = get_global_engine()
         stats = engine.get_statistics()
 
-        return {
-            "success": True,
-            "stats": stats
-        }
+        return {"success": True, "stats": stats}
 
     except Exception as e:
         logger.error(f"Failed to get XAI stats: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get XAI statistics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get XAI statistics: {str(e)}")
 
 
 @app.get("/api/xai/top-features")
@@ -818,25 +774,19 @@ async def get_xai_top_features(
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
 
         from xai.engine import get_global_engine
 
         engine = get_global_engine()
         top_features = engine.get_top_features(n=n, time_window_hours=hours)
 
-        return {
-            "success": True,
-            "top_features": top_features,
-            "time_window_hours": hours
-        }
+        return {"success": True, "top_features": top_features, "time_window_hours": hours}
 
     except Exception as e:
         logger.error(f"Failed to get top features: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get top features: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get top features: {str(e)}")
 
 
 @app.get("/api/xai/drift")
@@ -859,28 +809,19 @@ async def get_xai_drift(
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
 
         from xai.engine import get_global_engine
 
         engine = get_global_engine()
-        drift_result = engine.detect_drift(
-            feature_name=feature_name,
-            window_size=window_size,
-            threshold=threshold
-        )
+        drift_result = engine.detect_drift(feature_name=feature_name, window_size=window_size, threshold=threshold)
 
-        return {
-            "success": True,
-            "drift_result": drift_result
-        }
+        return {"success": True, "drift_result": drift_result}
 
     except Exception as e:
         logger.error(f"Failed to detect drift: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to detect drift: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to detect drift: {str(e)}")
 
 
 @app.get("/api/xai/health")
@@ -892,7 +833,8 @@ async def xai_health_check() -> Dict[str, Any]:
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
 
         from xai.engine import get_global_engine
 
@@ -903,10 +845,7 @@ async def xai_health_check() -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"XAI health check failed: {e}", exc_info=True)
-        return {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+        return {"status": "unhealthy", "error": str(e)}
 
 
 # ============================================================================
@@ -940,20 +879,21 @@ async def evaluate_fairness(
     try:
         # Import fairness module
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
 
-        from fairness.monitor import FairnessMonitor
-        from fairness.base import ProtectedAttribute
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
+
         import numpy as np
+        from fairness.base import ProtectedAttribute
+        from fairness.monitor import FairnessMonitor
 
         # Get parameters
-        model_id = fairness_request.get('model_id', 'unknown')
-        predictions = np.array(fairness_request.get('predictions', []))
-        true_labels_list = fairness_request.get('true_labels')
+        model_id = fairness_request.get("model_id", "unknown")
+        predictions = np.array(fairness_request.get("predictions", []))
+        true_labels_list = fairness_request.get("true_labels")
         true_labels = np.array(true_labels_list) if true_labels_list else None
-        protected_attribute = np.array(fairness_request.get('protected_attribute', []))
-        protected_value = fairness_request.get('protected_value', 1)
-        protected_attr_type = fairness_request.get('protected_attr_type', 'geographic_location')
+        protected_attribute = np.array(fairness_request.get("protected_attribute", []))
+        protected_value = fairness_request.get("protected_value", 1)
+        protected_attr_type = fairness_request.get("protected_attr_type", "geographic_location")
 
         # Validate required fields
         if len(predictions) == 0:
@@ -961,10 +901,7 @@ async def evaluate_fairness(
         if len(protected_attribute) == 0:
             raise HTTPException(status_code=400, detail="protected_attribute array is required")
         if len(predictions) != len(protected_attribute):
-            raise HTTPException(
-                status_code=400,
-                detail="predictions and protected_attribute must have same length"
-            )
+            raise HTTPException(status_code=400, detail="predictions and protected_attribute must have same length")
 
         # Convert protected attribute type
         try:
@@ -972,15 +909,12 @@ async def evaluate_fairness(
         except ValueError:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid protected_attr_type. Must be one of: {[e.value for e in ProtectedAttribute]}"
+                detail=f"Invalid protected_attr_type. Must be one of: {[e.value for e in ProtectedAttribute]}",
             )
 
         # Get or create fairness monitor
-        if not hasattr(app.state, 'fairness_monitor'):
-            app.state.fairness_monitor = FairnessMonitor({
-                'history_max_size': 1000,
-                'alert_threshold': 'medium'
-            })
+        if not hasattr(app.state, "fairness_monitor"):
+            app.state.fairness_monitor = FairnessMonitor({"history_max_size": 1000, "alert_threshold": "medium"})
 
         monitor = app.state.fairness_monitor
 
@@ -993,7 +927,7 @@ async def evaluate_fairness(
             protected_attribute=protected_attribute,
             protected_value=protected_value,
             model_id=model_id,
-            protected_attr_type=prot_attr
+            protected_attr_type=prot_attr,
         )
 
         latency_ms = int((time.time() - start_time) * 1000)
@@ -1002,52 +936,48 @@ async def evaluate_fairness(
         fairness_metrics = {}
         for metric, result in snapshot.fairness_results.items():
             fairness_metrics[metric.value] = {
-                'is_fair': result.is_fair,
-                'difference': result.difference,
-                'ratio': result.ratio,
-                'threshold': result.threshold,
-                'group_0_value': result.group_0_value,
-                'group_1_value': result.group_1_value,
-                'sample_size_0': result.sample_size_0,
-                'sample_size_1': result.sample_size_1
+                "is_fair": result.is_fair,
+                "difference": result.difference,
+                "ratio": result.ratio,
+                "threshold": result.threshold,
+                "group_0_value": result.group_0_value,
+                "group_1_value": result.group_1_value,
+                "sample_size_0": result.sample_size_0,
+                "sample_size_1": result.sample_size_1,
             }
 
         bias_results = {}
         for method, result in snapshot.bias_results.items():
             bias_results[method] = {
-                'bias_detected': result.bias_detected,
-                'severity': result.severity,
-                'confidence': result.confidence,
-                'p_value': result.p_value,
-                'effect_size': result.effect_size,
-                'affected_groups': result.affected_groups,
-                'metadata': result.metadata
+                "bias_detected": result.bias_detected,
+                "severity": result.severity,
+                "confidence": result.confidence,
+                "p_value": result.p_value,
+                "effect_size": result.effect_size,
+                "affected_groups": result.affected_groups,
+                "metadata": result.metadata,
             }
 
         logger.info(
-            f"Fairness evaluation complete: model={model_id}, "
-            f"latency={latency_ms}ms, {len(fairness_metrics)} metrics"
+            f"Fairness evaluation complete: model={model_id}, latency={latency_ms}ms, {len(fairness_metrics)} metrics"
         )
 
         return {
-            'success': True,
-            'model_id': model_id,
-            'protected_attribute': prot_attr.value,
-            'sample_size': snapshot.sample_size,
-            'timestamp': snapshot.timestamp.isoformat(),
-            'fairness_metrics': fairness_metrics,
-            'bias_detection': bias_results,
-            'latency_ms': latency_ms
+            "success": True,
+            "model_id": model_id,
+            "protected_attribute": prot_attr.value,
+            "sample_size": snapshot.sample_size,
+            "timestamp": snapshot.timestamp.isoformat(),
+            "fairness_metrics": fairness_metrics,
+            "bias_detection": bias_results,
+            "latency_ms": latency_ms,
         }
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Fairness evaluation failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to evaluate fairness: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to evaluate fairness: {str(e)}")
 
 
 @app.post("/api/fairness/mitigate")
@@ -1074,50 +1004,48 @@ async def mitigate_bias(
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
 
-        from fairness.mitigation import MitigationEngine
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
+
         import numpy as np
+        from fairness.mitigation import MitigationEngine
 
         # Get parameters
-        strategy = mitigation_request.get('strategy', 'auto')
-        predictions = np.array(mitigation_request.get('predictions', []))
-        true_labels = np.array(mitigation_request.get('true_labels', []))
-        protected_attribute = np.array(mitigation_request.get('protected_attribute', []))
-        protected_value = mitigation_request.get('protected_value', 1)
+        strategy = mitigation_request.get("strategy", "auto")
+        predictions = np.array(mitigation_request.get("predictions", []))
+        true_labels = np.array(mitigation_request.get("true_labels", []))
+        protected_attribute = np.array(mitigation_request.get("protected_attribute", []))
+        protected_value = mitigation_request.get("protected_value", 1)
 
         # Validate
         if len(predictions) == 0 or len(true_labels) == 0:
             raise HTTPException(status_code=400, detail="predictions and true_labels are required")
 
         # Get or create mitigation engine
-        if not hasattr(app.state, 'mitigation_engine'):
-            app.state.mitigation_engine = MitigationEngine({
-                'performance_threshold': 0.75,
-                'max_performance_loss': 0.05
-            })
+        if not hasattr(app.state, "mitigation_engine"):
+            app.state.mitigation_engine = MitigationEngine(
+                {"performance_threshold": 0.75, "max_performance_loss": 0.05}
+            )
 
         engine = app.state.mitigation_engine
 
         # Apply mitigation
         start_time = time.time()
 
-        if strategy == 'auto':
-            result = engine.mitigate_auto(
-                predictions, true_labels, protected_attribute, protected_value
-            )
-        elif strategy == 'threshold_optimization':
+        if strategy == "auto":
+            result = engine.mitigate_auto(predictions, true_labels, protected_attribute, protected_value)
+        elif strategy == "threshold_optimization":
             result = engine.mitigate_threshold_optimization(
                 predictions, true_labels, protected_attribute, protected_value
             )
-        elif strategy == 'calibration_adjustment':
+        elif strategy == "calibration_adjustment":
             result = engine.mitigate_calibration_adjustment(
                 predictions, true_labels, protected_attribute, protected_value
             )
         else:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid strategy. Must be: auto, threshold_optimization, or calibration_adjustment"
+                detail="Invalid strategy. Must be: auto, threshold_optimization, or calibration_adjustment",
             )
 
         latency_ms = int((time.time() - start_time) * 1000)
@@ -1128,25 +1056,22 @@ async def mitigate_bias(
         )
 
         return {
-            'success': result.success,
-            'mitigation_method': result.mitigation_method,
-            'protected_attribute': result.protected_attribute.value,
-            'fairness_before': result.fairness_before,
-            'fairness_after': result.fairness_after,
-            'performance_impact': result.performance_impact,
-            'timestamp': result.timestamp.isoformat(),
-            'metadata': result.metadata,
-            'latency_ms': latency_ms
+            "success": result.success,
+            "mitigation_method": result.mitigation_method,
+            "protected_attribute": result.protected_attribute.value,
+            "fairness_before": result.fairness_before,
+            "fairness_after": result.fairness_after,
+            "performance_impact": result.performance_impact,
+            "timestamp": result.timestamp.isoformat(),
+            "metadata": result.metadata,
+            "latency_ms": latency_ms,
         }
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Bias mitigation failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to mitigate bias: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to mitigate bias: {str(e)}")
 
 
 @app.get("/api/fairness/trends")
@@ -1168,12 +1093,8 @@ async def get_fairness_trends(
         Fairness trends analysis
     """
     try:
-        if not hasattr(app.state, 'fairness_monitor'):
-            return {
-                'trends': {},
-                'num_snapshots': 0,
-                'message': 'No fairness data available yet'
-            }
+        if not hasattr(app.state, "fairness_monitor"):
+            return {"trends": {}, "num_snapshots": 0, "message": "No fairness data available yet"}
 
         monitor = app.state.fairness_monitor
 
@@ -1181,22 +1102,18 @@ async def get_fairness_trends(
         fairness_metric = None
         if metric:
             import sys
-            sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+            sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
             from fairness.base import FairnessMetric
 
             try:
                 fairness_metric = FairnessMetric(metric)
             except ValueError:
                 raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid metric. Must be one of: {[e.value for e in FairnessMetric]}"
+                    status_code=400, detail=f"Invalid metric. Must be one of: {[e.value for e in FairnessMetric]}"
                 )
 
-        trends = monitor.get_fairness_trends(
-            model_id=model_id,
-            metric=fairness_metric,
-            lookback_hours=lookback_hours
-        )
+        trends = monitor.get_fairness_trends(model_id=model_id, metric=fairness_metric, lookback_hours=lookback_hours)
 
         return trends
 
@@ -1204,10 +1121,7 @@ async def get_fairness_trends(
         raise
     except Exception as e:
         logger.error(f"Failed to get fairness trends: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get trends: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get trends: {str(e)}")
 
 
 @app.get("/api/fairness/drift")
@@ -1227,11 +1141,8 @@ async def detect_fairness_drift(
         Drift detection results
     """
     try:
-        if not hasattr(app.state, 'fairness_monitor'):
-            return {
-                'drift_detected': False,
-                'message': 'No fairness data available yet'
-            }
+        if not hasattr(app.state, "fairness_monitor"):
+            return {"drift_detected": False, "message": "No fairness data available yet"}
 
         monitor = app.state.fairness_monitor
 
@@ -1239,21 +1150,18 @@ async def detect_fairness_drift(
         fairness_metric = None
         if metric:
             import sys
-            sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
+
+            sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
             from fairness.base import FairnessMetric
 
             try:
                 fairness_metric = FairnessMetric(metric)
             except ValueError:
                 raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid metric. Must be one of: {[e.value for e in FairnessMetric]}"
+                    status_code=400, detail=f"Invalid metric. Must be one of: {[e.value for e in FairnessMetric]}"
                 )
 
-        drift_result = monitor.detect_drift(
-            model_id=model_id,
-            metric=fairness_metric
-        )
+        drift_result = monitor.detect_drift(model_id=model_id, metric=fairness_metric)
 
         return drift_result
 
@@ -1261,10 +1169,7 @@ async def detect_fairness_drift(
         raise
     except Exception as e:
         logger.error(f"Failed to detect fairness drift: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to detect drift: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to detect drift: {str(e)}")
 
 
 @app.get("/api/fairness/alerts")
@@ -1286,51 +1191,37 @@ async def get_fairness_alerts(
         List of fairness alerts
     """
     try:
-        if not hasattr(app.state, 'fairness_monitor'):
-            return {
-                'alerts': [],
-                'total': 0,
-                'message': 'No fairness monitoring active'
-            }
+        if not hasattr(app.state, "fairness_monitor"):
+            return {"alerts": [], "total": 0, "message": "No fairness monitoring active"}
 
         monitor = app.state.fairness_monitor
 
-        alerts = monitor.get_alerts(
-            severity=severity,
-            limit=limit,
-            since_hours=since_hours
-        )
+        alerts = monitor.get_alerts(severity=severity, limit=limit, since_hours=since_hours)
 
         # Convert to dict
         alerts_dict = []
         for alert in alerts:
-            alerts_dict.append({
-                'alert_id': alert.alert_id,
-                'timestamp': alert.timestamp.isoformat(),
-                'severity': alert.severity,
-                'metric': alert.metric.value,
-                'protected_attribute': alert.protected_attribute.value,
-                'violation_details': alert.violation_details,
-                'recommended_action': alert.recommended_action,
-                'auto_mitigated': alert.auto_mitigated,
-                'metadata': alert.metadata
-            })
+            alerts_dict.append(
+                {
+                    "alert_id": alert.alert_id,
+                    "timestamp": alert.timestamp.isoformat(),
+                    "severity": alert.severity,
+                    "metric": alert.metric.value,
+                    "protected_attribute": alert.protected_attribute.value,
+                    "violation_details": alert.violation_details,
+                    "recommended_action": alert.recommended_action,
+                    "auto_mitigated": alert.auto_mitigated,
+                    "metadata": alert.metadata,
+                }
+            )
 
-        return {
-            'alerts': alerts_dict,
-            'total': len(alerts_dict),
-            'severity_filter': severity,
-            'limit': limit
-        }
+        return {"alerts": alerts_dict, "total": len(alerts_dict), "severity_filter": severity, "limit": limit}
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to get fairness alerts: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get alerts: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get alerts: {str(e)}")
 
 
 @app.get("/api/fairness/stats")
@@ -1346,12 +1237,12 @@ async def get_fairness_stats(
         Fairness statistics including violation rate
     """
     try:
-        if not hasattr(app.state, 'fairness_monitor'):
+        if not hasattr(app.state, "fairness_monitor"):
             return {
-                'total_evaluations': 0,
-                'total_violations': 0,
-                'violation_rate': 0.0,
-                'message': 'No fairness monitoring active'
+                "total_evaluations": 0,
+                "total_violations": 0,
+                "violation_rate": 0.0,
+                "message": "No fairness monitoring active",
             }
 
         monitor = app.state.fairness_monitor
@@ -1361,10 +1252,7 @@ async def get_fairness_stats(
 
     except Exception as e:
         logger.error(f"Failed to get fairness stats: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get statistics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get statistics: {str(e)}")
 
 
 @app.get("/api/fairness/health")
@@ -1376,10 +1264,11 @@ async def fairness_health_check() -> Dict[str, Any]:
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
 
-        from fairness.constraints import FairnessConstraints
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
+
         from fairness.bias_detector import BiasDetector
+        from fairness.constraints import FairnessConstraints
         from fairness.mitigation import MitigationEngine
 
         # Test initialization
@@ -1387,33 +1276,30 @@ async def fairness_health_check() -> Dict[str, Any]:
         detector = BiasDetector()
         engine = MitigationEngine()
 
-        monitor_active = hasattr(app.state, 'fairness_monitor')
+        monitor_active = hasattr(app.state, "fairness_monitor")
         monitor_snapshots = len(app.state.fairness_monitor.history) if monitor_active else 0
 
         return {
-            'status': 'healthy',
-            'components': {
-                'fairness_constraints': 'ok',
-                'bias_detector': 'ok',
-                'mitigation_engine': 'ok',
-                'monitor': 'active' if monitor_active else 'inactive'
+            "status": "healthy",
+            "components": {
+                "fairness_constraints": "ok",
+                "bias_detector": "ok",
+                "mitigation_engine": "ok",
+                "monitor": "active" if monitor_active else "inactive",
             },
-            'monitor_snapshots': monitor_snapshots,
-            'timestamp': datetime.utcnow().isoformat()
+            "monitor_snapshots": monitor_snapshots,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
         logger.error(f"Fairness health check failed: {e}", exc_info=True)
-        return {
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.utcnow().isoformat()
-        }
+        return {"status": "unhealthy", "error": str(e), "timestamp": datetime.utcnow().isoformat()}
 
 
 # ============================================================================
 # DIFFERENTIAL PRIVACY ENDPOINTS
 # ============================================================================
+
 
 @app.post("/api/privacy/dp-query")
 async def execute_dp_query(
@@ -1436,16 +1322,17 @@ async def execute_dp_query(
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
 
-        from privacy import DPAggregator
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
+
         import pandas as pd
+        from privacy import DPAggregator
 
         # Extract parameters
-        query_type = request.get('query_type')
-        data = request.get('data')
-        epsilon = request.get('epsilon', 1.0)
-        delta = request.get('delta', 1e-5)
+        query_type = request.get("query_type")
+        data = request.get("data")
+        epsilon = request.get("epsilon", 1.0)
+        delta = request.get("delta", 1e-5)
 
         if not query_type:
             raise HTTPException(status_code=400, detail="query_type required")
@@ -1464,28 +1351,28 @@ async def execute_dp_query(
         aggregator = DPAggregator(epsilon=epsilon, delta=delta)
 
         # Execute query
-        if query_type == 'count':
+        if query_type == "count":
             result = aggregator.count(df)
-        elif query_type == 'count_by_group':
-            group_col = request.get('group_column')
+        elif query_type == "count_by_group":
+            group_col = request.get("group_column")
             if not group_col:
                 raise HTTPException(status_code=400, detail="group_column required for count_by_group")
             result = aggregator.count_by_group(df, group_column=group_col)
-        elif query_type == 'sum':
-            value_col = request.get('value_column')
-            value_range = request.get('value_range', 1.0)
+        elif query_type == "sum":
+            value_col = request.get("value_column")
+            value_range = request.get("value_range", 1.0)
             if not value_col:
                 raise HTTPException(status_code=400, detail="value_column required for sum")
             result = aggregator.sum(df, value_column=value_col, value_range=value_range)
-        elif query_type == 'mean':
-            value_col = request.get('value_column')
-            value_range = request.get('value_range', 1.0)
+        elif query_type == "mean":
+            value_col = request.get("value_column")
+            value_range = request.get("value_range", 1.0)
             if not value_col:
                 raise HTTPException(status_code=400, detail="value_column required for mean")
             result = aggregator.mean(df, value_column=value_col, value_range=value_range)
-        elif query_type == 'histogram':
-            value_col = request.get('value_column')
-            bins = request.get('bins', 10)
+        elif query_type == "histogram":
+            value_col = request.get("value_column")
+            bins = request.get("bins", 10)
             result = aggregator.histogram(df, value_column=value_col, bins=bins)
         else:
             raise HTTPException(status_code=400, detail=f"Unknown query type: {query_type}")
@@ -1499,13 +1386,13 @@ async def execute_dp_query(
 
         # Return result
         return {
-            'query_type': query_type,
-            'result': result.to_dict(),
-            'privacy_guarantee': {
-                'epsilon': result.epsilon_used,
-                'delta': result.delta_used,
-                'mechanism': result.mechanism
-            }
+            "query_type": query_type,
+            "result": result.to_dict(),
+            "privacy_guarantee": {
+                "epsilon": result.epsilon_used,
+                "delta": result.delta_used,
+                "mechanism": result.mechanism,
+            },
         }
 
     except HTTPException:
@@ -1528,19 +1415,13 @@ async def get_privacy_budget(
         Privacy budget statistics
     """
     try:
-        if not hasattr(app.state, 'privacy_budget'):
-            return {
-                'status': 'not_configured',
-                'message': 'No global privacy budget configured'
-            }
+        if not hasattr(app.state, "privacy_budget"):
+            return {"status": "not_configured", "message": "No global privacy budget configured"}
 
         budget = app.state.privacy_budget
         stats = budget.get_statistics()
 
-        return {
-            'status': 'active',
-            'budget': stats
-        }
+        return {"status": "active", "budget": stats}
 
     except Exception as e:
         logger.error(f"Failed to get privacy budget: {e}", exc_info=True)
@@ -1560,24 +1441,23 @@ async def get_privacy_stats(
         Privacy statistics including query counts, privacy loss
     """
     try:
-        stats = {
-            'budget_configured': hasattr(app.state, 'privacy_budget'),
-            'timestamp': datetime.utcnow().isoformat()
-        }
+        stats = {"budget_configured": hasattr(app.state, "privacy_budget"), "timestamp": datetime.utcnow().isoformat()}
 
-        if hasattr(app.state, 'privacy_budget'):
+        if hasattr(app.state, "privacy_budget"):
             budget = app.state.privacy_budget
             budget_stats = budget.get_statistics()
 
-            stats.update({
-                'total_queries': budget_stats['queries_executed'],
-                'epsilon_used': budget_stats['used_epsilon'],
-                'delta_used': budget_stats['used_delta'],
-                'epsilon_remaining': budget_stats['remaining_epsilon'],
-                'delta_remaining': budget_stats['remaining_delta'],
-                'privacy_level': budget_stats['privacy_level'],
-                'budget_exhausted': budget_stats['budget_exhausted']
-            })
+            stats.update(
+                {
+                    "total_queries": budget_stats["queries_executed"],
+                    "epsilon_used": budget_stats["used_epsilon"],
+                    "delta_used": budget_stats["used_delta"],
+                    "epsilon_remaining": budget_stats["remaining_epsilon"],
+                    "delta_remaining": budget_stats["remaining_delta"],
+                    "privacy_level": budget_stats["privacy_level"],
+                    "budget_exhausted": budget_stats["budget_exhausted"],
+                }
+            )
 
         return stats
 
@@ -1595,9 +1475,10 @@ async def privacy_health_check() -> Dict[str, Any]:
     """
     try:
         import sys
-        sys.path.append('/home/juan/vertice-dev/backend/services/maximus_core_service')
 
-        from privacy import DPAggregator, LaplaceMechanism, GaussianMechanism
+        sys.path.append("/home/juan/vertice-dev/backend/services/maximus_core_service")
+
+        from privacy import DPAggregator
         from privacy.base import PrivacyBudget, PrivacyParameters
 
         # Test initialization
@@ -1605,38 +1486,32 @@ async def privacy_health_check() -> Dict[str, Any]:
         budget = PrivacyBudget(total_epsilon=10.0, total_delta=1e-4)
         params = PrivacyParameters(epsilon=1.0, delta=1e-5, sensitivity=1.0)
 
-        budget_configured = hasattr(app.state, 'privacy_budget')
+        budget_configured = hasattr(app.state, "privacy_budget")
 
         return {
-            'status': 'healthy',
-            'components': {
-                'dp_aggregator': 'ok',
-                'laplace_mechanism': 'ok',
-                'gaussian_mechanism': 'ok',
-                'privacy_budget': 'ok',
-                'global_budget': 'configured' if budget_configured else 'not_configured'
+            "status": "healthy",
+            "components": {
+                "dp_aggregator": "ok",
+                "laplace_mechanism": "ok",
+                "gaussian_mechanism": "ok",
+                "privacy_budget": "ok",
+                "global_budget": "configured" if budget_configured else "not_configured",
             },
-            'timestamp': datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
         logger.error(f"Privacy health check failed: {e}", exc_info=True)
-        return {
-            'status': 'unhealthy',
-            'error': str(e),
-            'timestamp': datetime.utcnow().isoformat()
-        }
+        return {"status": "unhealthy", "error": str(e), "timestamp": datetime.utcnow().isoformat()}
 
 
 # ============================================================================
 # FEDERATED LEARNING ENDPOINTS
 # ============================================================================
 
+
 @app.post("/api/fl/coordinator/start-round")
-async def fl_start_round(
-    request: Dict[str, Any],
-    current_user: TokenData = Depends(require_soc_or_admin)
-):
+async def fl_start_round(request: Dict[str, Any], current_user: TokenData = Depends(require_soc_or_admin)):
     """
     Start a new federated learning training round.
 
@@ -1665,11 +1540,11 @@ async def fl_start_round(
     """
     try:
         from federated_learning import (
-            FLCoordinator,
+            AggregationStrategy,
             CoordinatorConfig,
             FLConfig,
+            FLCoordinator,
             ModelType,
-            AggregationStrategy,
         )
         from federated_learning.model_adapters import create_model_adapter
 
@@ -1704,7 +1579,7 @@ async def fl_start_round(
         coordinator.set_global_model(model_adapter.get_weights())
 
         # Store coordinator in app state (simplified; use Redis in production)
-        if not hasattr(app.state, 'fl_coordinators'):
+        if not hasattr(app.state, "fl_coordinators"):
             app.state.fl_coordinators = {}
         app.state.fl_coordinators[model_type.value] = coordinator
 
@@ -1717,13 +1592,13 @@ async def fl_start_round(
         )
 
         return {
-            'round_id': round_obj.round_id,
-            'status': round_obj.status.value,
-            'selected_clients': round_obj.selected_clients,
-            'global_model_version': round_obj.global_model_version,
-            'model_type': model_type.value,
-            'aggregation_strategy': agg_strategy.value,
-            'timestamp': datetime.utcnow().isoformat()
+            "round_id": round_obj.round_id,
+            "status": round_obj.status.value,
+            "selected_clients": round_obj.selected_clients,
+            "global_model_version": round_obj.global_model_version,
+            "model_type": model_type.value,
+            "aggregation_strategy": agg_strategy.value,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
@@ -1732,10 +1607,7 @@ async def fl_start_round(
 
 
 @app.post("/api/fl/coordinator/submit-update")
-async def fl_submit_update(
-    request: Dict[str, Any],
-    current_user: TokenData = Depends(require_soc_or_admin)
-):
+async def fl_submit_update(request: Dict[str, Any], current_user: TokenData = Depends(require_soc_or_admin)):
     """
     Submit a model update from FL client.
 
@@ -1762,21 +1634,17 @@ async def fl_submit_update(
     try:
         from federated_learning import ModelUpdate
         from federated_learning.communication import FLCommunicationChannel
-        import numpy as np
 
         # Get model type
         model_type_str = request.get("model_type", "threat_classifier")
 
         # Get coordinator
-        if not hasattr(app.state, 'fl_coordinators'):
+        if not hasattr(app.state, "fl_coordinators"):
             raise HTTPException(status_code=404, detail="No FL coordinators active")
 
         coordinator = app.state.fl_coordinators.get(model_type_str)
         if not coordinator:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No coordinator for model type: {model_type_str}"
-            )
+            raise HTTPException(status_code=404, detail=f"No coordinator for model type: {model_type_str}")
 
         # Deserialize weights
         channel = FLCommunicationChannel()
@@ -1806,11 +1674,11 @@ async def fl_submit_update(
         )
 
         return {
-            'success': True,
-            'round_status': round_status['status'],
-            'updates_received': round_status['received_updates'],
-            'updates_expected': round_status['expected_updates'],
-            'timestamp': datetime.utcnow().isoformat()
+            "success": True,
+            "round_status": round_status["status"],
+            "updates_received": round_status["received_updates"],
+            "updates_expected": round_status["expected_updates"],
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
@@ -1820,8 +1688,7 @@ async def fl_submit_update(
 
 @app.get("/api/fl/coordinator/global-model")
 async def fl_get_global_model(
-    model_type: str = "threat_classifier",
-    current_user: TokenData = Depends(require_soc_or_admin)
+    model_type: str = "threat_classifier", current_user: TokenData = Depends(require_soc_or_admin)
 ):
     """
     Download the current global model.
@@ -1841,15 +1708,12 @@ async def fl_get_global_model(
         from federated_learning.communication import FLCommunicationChannel
 
         # Get coordinator
-        if not hasattr(app.state, 'fl_coordinators'):
+        if not hasattr(app.state, "fl_coordinators"):
             raise HTTPException(status_code=404, detail="No FL coordinators active")
 
         coordinator = app.state.fl_coordinators.get(model_type)
         if not coordinator:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No coordinator for model type: {model_type}"
-            )
+            raise HTTPException(status_code=404, detail=f"No coordinator for model type: {model_type}")
 
         # Get global model weights
         global_weights = coordinator.get_global_model()
@@ -1866,11 +1730,11 @@ async def fl_get_global_model(
         )
 
         return {
-            'model_type': model_type,
-            'model_version': coordinator.fl_config.model_version,
-            'weights': serialized_weights,
-            'total_parameters': sum(w.size for w in global_weights.values()),
-            'timestamp': datetime.utcnow().isoformat()
+            "model_type": model_type,
+            "model_version": coordinator.fl_config.model_version,
+            "weights": serialized_weights,
+            "total_parameters": sum(w.size for w in global_weights.values()),
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except HTTPException:
@@ -1882,8 +1746,7 @@ async def fl_get_global_model(
 
 @app.get("/api/fl/coordinator/round-status")
 async def fl_round_status(
-    model_type: str = "threat_classifier",
-    current_user: TokenData = Depends(require_auditor_or_admin)
+    model_type: str = "threat_classifier", current_user: TokenData = Depends(require_auditor_or_admin)
 ):
     """
     Get status of current FL round.
@@ -1904,24 +1767,20 @@ async def fl_round_status(
     """
     try:
         # Get coordinator
-        if not hasattr(app.state, 'fl_coordinators'):
-            return {'status': 'no_active_rounds', 'timestamp': datetime.utcnow().isoformat()}
+        if not hasattr(app.state, "fl_coordinators"):
+            return {"status": "no_active_rounds", "timestamp": datetime.utcnow().isoformat()}
 
         coordinator = app.state.fl_coordinators.get(model_type)
         if not coordinator:
-            return {'status': 'no_coordinator', 'timestamp': datetime.utcnow().isoformat()}
+            return {"status": "no_coordinator", "timestamp": datetime.utcnow().isoformat()}
 
         # Get round status
         round_status = coordinator.get_round_status()
 
         if round_status is None:
-            return {'status': 'no_active_round', 'timestamp': datetime.utcnow().isoformat()}
+            return {"status": "no_active_round", "timestamp": datetime.utcnow().isoformat()}
 
-        return {
-            **round_status,
-            'model_type': model_type,
-            'timestamp': datetime.utcnow().isoformat()
-        }
+        return {**round_status, "model_type": model_type, "timestamp": datetime.utcnow().isoformat()}
 
     except Exception as e:
         logger.error(f"FL round status failed: {e}", exc_info=True)
@@ -1930,8 +1789,7 @@ async def fl_round_status(
 
 @app.get("/api/fl/metrics")
 async def fl_get_metrics(
-    model_type: str = "threat_classifier",
-    current_user: TokenData = Depends(require_auditor_or_admin)
+    model_type: str = "threat_classifier", current_user: TokenData = Depends(require_auditor_or_admin)
 ):
     """
     Get federated learning metrics and convergence data.
@@ -1955,25 +1813,19 @@ async def fl_get_metrics(
     """
     try:
         # Get coordinator
-        if not hasattr(app.state, 'fl_coordinators'):
-            return {
-                'error': 'No FL coordinators active',
-                'timestamp': datetime.utcnow().isoformat()
-            }
+        if not hasattr(app.state, "fl_coordinators"):
+            return {"error": "No FL coordinators active", "timestamp": datetime.utcnow().isoformat()}
 
         coordinator = app.state.fl_coordinators.get(model_type)
         if not coordinator:
-            return {
-                'error': f'No coordinator for model type: {model_type}',
-                'timestamp': datetime.utcnow().isoformat()
-            }
+            return {"error": f"No coordinator for model type: {model_type}", "timestamp": datetime.utcnow().isoformat()}
 
         # Get metrics
         metrics = coordinator.get_metrics()
 
         return {
             **metrics.to_dict(),
-            'model_type': model_type,
+            "model_type": model_type,
         }
 
     except Exception as e:
@@ -1985,11 +1837,9 @@ async def fl_get_metrics(
 # HITL/HOTL ENDPOINTS (Phase 5)
 # ============================================================================
 
+
 @app.post("/api/hitl/evaluate")
-async def hitl_evaluate_decision(
-    request: Dict[str, Any],
-    current_user: TokenData = Depends(require_soc_or_admin)
-):
+async def hitl_evaluate_decision(request: Dict[str, Any], current_user: TokenData = Depends(require_soc_or_admin)):
     """
     Submit AI decision for HITL evaluation.
 
@@ -2020,15 +1870,15 @@ async def hitl_evaluate_decision(
     """
     try:
         # Initialize HITL framework if not exists
-        if not hasattr(app.state, 'hitl_framework'):
+        if not hasattr(app.state, "hitl_framework"):
             from maximus_core_service.hitl import (
-                HITLDecisionFramework,
-                HITLConfig,
-                DecisionQueue,
-                AuditTrail,
-                OperatorInterface,
-                EscalationManager,
                 ActionType,
+                AuditTrail,
+                DecisionQueue,
+                EscalationManager,
+                HITLConfig,
+                HITLDecisionFramework,
+                OperatorInterface,
             )
 
             # Create components
@@ -2063,13 +1913,11 @@ async def hitl_evaluate_decision(
         # Parse action type
         action_type_str = request.get("action_type", "").upper()
         from maximus_core_service.hitl import ActionType
+
         try:
             action_type = ActionType[action_type_str]
         except KeyError:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid action_type: {request.get('action_type')}"
-            )
+            raise HTTPException(status_code=400, detail=f"Invalid action_type: {request.get('action_type')}")
 
         # Evaluate decision
         result = framework.evaluate_action(
@@ -2093,11 +1941,7 @@ async def hitl_evaluate_decision(
             "executed": result.executed,
             "queued": result.queued,
             "rejected": result.rejected,
-            "sla_deadline": (
-                result.decision.sla_deadline.isoformat()
-                if result.decision.sla_deadline
-                else None
-            ),
+            "sla_deadline": (result.decision.sla_deadline.isoformat() if result.decision.sla_deadline else None),
             "processing_time": result.processing_time,
             "timestamp": datetime.utcnow().isoformat(),
         }
@@ -2116,9 +1960,7 @@ async def hitl_evaluate_decision(
 
 @app.get("/api/hitl/queue")
 async def hitl_get_queue(
-    risk_level: Optional[str] = None,
-    limit: int = 20,
-    current_user: TokenData = Depends(require_soc_or_admin)
+    risk_level: Optional[str] = None, limit: int = 20, current_user: TokenData = Depends(require_soc_or_admin)
 ):
     """
     Get pending decisions from HITL queue.
@@ -2155,12 +1997,12 @@ async def hitl_get_queue(
     }
     """
     try:
-        if not hasattr(app.state, 'hitl_queue'):
+        if not hasattr(app.state, "hitl_queue"):
             return {
                 "pending_decisions": [],
                 "total_in_queue": 0,
                 "queue_size_by_risk": {},
-                "error": "HITL not initialized"
+                "error": "HITL not initialized",
             }
 
         queue = app.state.hitl_queue
@@ -2169,45 +2011,43 @@ async def hitl_get_queue(
         risk_filter = None
         if risk_level:
             from maximus_core_service.hitl import RiskLevel
+
             try:
                 risk_filter = RiskLevel[risk_level.upper()]
             except KeyError:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid risk_level: {risk_level}"
-                )
+                raise HTTPException(status_code=400, detail=f"Invalid risk_level: {risk_level}")
 
         # Get pending decisions
         pending = queue.get_pending_decisions(risk_level=risk_filter)
 
         # Sort by priority and limit
-        pending.sort(key=lambda d: (
-            4 - list(RiskLevel).index(d.risk_level),
-            d.sla_deadline or datetime.max,
-        ))
+        pending.sort(
+            key=lambda d: (
+                4 - list(RiskLevel).index(d.risk_level),
+                d.sla_deadline or datetime.max,
+            )
+        )
         pending = pending[:limit]
 
         # Format response
         decisions_data = []
         for decision in pending:
             time_remaining = decision.get_time_remaining()
-            decisions_data.append({
-                "decision_id": decision.decision_id,
-                "action_type": decision.context.action_type.value,
-                "action_params": decision.context.action_params,
-                "ai_reasoning": decision.context.ai_reasoning,
-                "confidence": decision.context.confidence,
-                "threat_score": decision.context.threat_score,
-                "risk_level": decision.risk_level.value,
-                "automation_level": decision.automation_level.value,
-                "created_at": decision.created_at.isoformat(),
-                "sla_deadline": (
-                    decision.sla_deadline.isoformat() if decision.sla_deadline else None
-                ),
-                "time_remaining_seconds": (
-                    int(time_remaining.total_seconds()) if time_remaining else None
-                ),
-            })
+            decisions_data.append(
+                {
+                    "decision_id": decision.decision_id,
+                    "action_type": decision.context.action_type.value,
+                    "action_params": decision.context.action_params,
+                    "ai_reasoning": decision.context.ai_reasoning,
+                    "confidence": decision.context.confidence,
+                    "threat_score": decision.context.threat_score,
+                    "risk_level": decision.risk_level.value,
+                    "automation_level": decision.automation_level.value,
+                    "created_at": decision.created_at.isoformat(),
+                    "sla_deadline": (decision.sla_deadline.isoformat() if decision.sla_deadline else None),
+                    "time_remaining_seconds": (int(time_remaining.total_seconds()) if time_remaining else None),
+                }
+            )
 
         # Get queue metrics
         queue_sizes = queue.get_size_by_risk()
@@ -2215,9 +2055,7 @@ async def hitl_get_queue(
         return {
             "pending_decisions": decisions_data,
             "total_in_queue": queue.get_total_size(),
-            "queue_size_by_risk": {
-                level.value: size for level, size in queue_sizes.items()
-            },
+            "queue_size_by_risk": {level.value: size for level, size in queue_sizes.items()},
             "timestamp": datetime.utcnow().isoformat(),
         }
 
@@ -2227,10 +2065,7 @@ async def hitl_get_queue(
 
 
 @app.post("/api/hitl/approve")
-async def hitl_approve_decision(
-    request: Dict[str, Any],
-    current_user: TokenData = Depends(require_soc_or_admin)
-):
+async def hitl_approve_decision(request: Dict[str, Any], current_user: TokenData = Depends(require_soc_or_admin)):
     """
     Approve and execute HITL decision.
 
@@ -2251,13 +2086,13 @@ async def hitl_approve_decision(
     }
     """
     try:
-        if not hasattr(app.state, 'hitl_operator_interface'):
+        if not hasattr(app.state, "hitl_operator_interface"):
             raise HTTPException(status_code=503, detail="HITL not initialized")
 
         interface = app.state.hitl_operator_interface
 
         # Create/get operator session
-        if not hasattr(app.state, 'hitl_operator_sessions'):
+        if not hasattr(app.state, "hitl_operator_sessions"):
             app.state.hitl_operator_sessions = {}
 
         operator_id = current_user.username
@@ -2308,10 +2143,7 @@ async def hitl_approve_decision(
 
 
 @app.post("/api/hitl/reject")
-async def hitl_reject_decision(
-    request: Dict[str, Any],
-    current_user: TokenData = Depends(require_soc_or_admin)
-):
+async def hitl_reject_decision(request: Dict[str, Any], current_user: TokenData = Depends(require_soc_or_admin)):
     """
     Reject HITL decision.
 
@@ -2331,13 +2163,13 @@ async def hitl_reject_decision(
     }
     """
     try:
-        if not hasattr(app.state, 'hitl_operator_interface'):
+        if not hasattr(app.state, "hitl_operator_interface"):
             raise HTTPException(status_code=503, detail="HITL not initialized")
 
         interface = app.state.hitl_operator_interface
 
         # Get/create session
-        if not hasattr(app.state, 'hitl_operator_sessions'):
+        if not hasattr(app.state, "hitl_operator_sessions"):
             app.state.hitl_operator_sessions = {}
 
         operator_id = current_user.username
@@ -2378,10 +2210,7 @@ async def hitl_reject_decision(
 
 
 @app.post("/api/hitl/escalate")
-async def hitl_escalate_decision(
-    request: Dict[str, Any],
-    current_user: TokenData = Depends(require_soc_or_admin)
-):
+async def hitl_escalate_decision(request: Dict[str, Any], current_user: TokenData = Depends(require_soc_or_admin)):
     """
     Escalate HITL decision to higher authority.
 
@@ -2402,13 +2231,13 @@ async def hitl_escalate_decision(
     }
     """
     try:
-        if not hasattr(app.state, 'hitl_operator_interface'):
+        if not hasattr(app.state, "hitl_operator_interface"):
             raise HTTPException(status_code=503, detail="HITL not initialized")
 
         interface = app.state.hitl_operator_interface
 
         # Get/create session
-        if not hasattr(app.state, 'hitl_operator_sessions'):
+        if not hasattr(app.state, "hitl_operator_sessions"):
             app.state.hitl_operator_sessions = {}
 
         operator_id = current_user.username
@@ -2455,7 +2284,7 @@ async def hitl_query_audit(
     end_time: Optional[str] = None,
     event_type: Optional[str] = None,
     limit: int = 100,
-    current_user: TokenData = Depends(require_auditor_or_admin)
+    current_user: TokenData = Depends(require_auditor_or_admin),
 ):
     """
     Query HITL audit trail.
@@ -2488,12 +2317,8 @@ async def hitl_query_audit(
     }
     """
     try:
-        if not hasattr(app.state, 'hitl_audit'):
-            return {
-                "audit_entries": [],
-                "total_entries": 0,
-                "error": "HITL not initialized"
-            }
+        if not hasattr(app.state, "hitl_audit"):
+            return {"audit_entries": [], "total_entries": 0, "error": "HITL not initialized"}
 
         audit = app.state.hitl_audit
 
@@ -2509,11 +2334,13 @@ async def hitl_query_audit(
 
         if start_time:
             from datetime import datetime
-            query_params["start_time"] = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+
+            query_params["start_time"] = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
 
         if end_time:
             from datetime import datetime
-            query_params["end_time"] = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+
+            query_params["end_time"] = datetime.fromisoformat(end_time.replace("Z", "+00:00"))
 
         if event_type:
             query_params["event_types"] = [event_type]
@@ -2555,6 +2382,7 @@ async def hitl_query_audit(
 # COMPLIANCE & CERTIFICATION ENDPOINTS
 # ============================================================================
 
+
 @app.post("/api/compliance/check")
 @limiter.limit("10/minute")
 async def check_compliance(
@@ -2565,8 +2393,8 @@ async def check_compliance(
     """Check compliance for specific regulation."""
     try:
         from maximus_core_service.compliance import (
-            ComplianceEngine,
             ComplianceConfig,
+            ComplianceEngine,
             RegulationType,
         )
 
@@ -2604,7 +2432,7 @@ async def get_compliance_status(
 ):
     """Get overall compliance status for all regulations."""
     try:
-        from maximus_core_service.compliance import ComplianceEngine, ComplianceConfig
+        from maximus_core_service.compliance import ComplianceEngine
 
         # Initialize engine with all regulations
         engine = ComplianceEngine()
@@ -2726,7 +2554,7 @@ async def list_evidence(
 ):
     """List collected compliance evidence."""
     try:
-        from maximus_core_service.compliance import EvidenceCollector, ComplianceConfig
+        from maximus_core_service.compliance import ComplianceConfig, EvidenceCollector
 
         # Initialize collector
         config = ComplianceConfig()
@@ -2775,11 +2603,11 @@ async def collect_evidence(
     """Collect new compliance evidence."""
     try:
         from maximus_core_service.compliance import (
-            EvidenceCollector,
             ComplianceConfig,
+            EvidenceCollector,
             EvidenceType,
         )
-        from maximus_core_service.compliance.regulations import get_regulation, RegulationType
+        from maximus_core_service.compliance.regulations import get_regulation
 
         # Initialize collector
         config = ComplianceConfig()
@@ -2801,21 +2629,13 @@ async def collect_evidence(
 
         # Collect evidence based on type
         if ev_type == EvidenceType.LOG:
-            evidence_item = collector.collect_log_evidence(
-                control, file_path, title, description
-            )
+            evidence_item = collector.collect_log_evidence(control, file_path, title, description)
         elif ev_type == EvidenceType.DOCUMENT:
-            evidence_item = collector.collect_document_evidence(
-                control, file_path, title, description
-            )
+            evidence_item = collector.collect_document_evidence(control, file_path, title, description)
         elif ev_type == EvidenceType.CONFIGURATION:
-            evidence_item = collector.collect_configuration_evidence(
-                control, file_path, title, description
-            )
+            evidence_item = collector.collect_configuration_evidence(control, file_path, title, description)
         elif ev_type == EvidenceType.POLICY:
-            evidence_item = collector.collect_policy_evidence(
-                control, file_path, title, description
-            )
+            evidence_item = collector.collect_policy_evidence(control, file_path, title, description)
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported evidence type: {evidence_type}")
 
@@ -2849,15 +2669,15 @@ async def check_certification_readiness(
     """Check certification readiness for regulation."""
     try:
         from maximus_core_service.compliance import (
+            ComplianceConfig,
             ComplianceEngine,
             EvidenceCollector,
-            ComplianceConfig,
             RegulationType,
         )
         from maximus_core_service.compliance.certifications import (
+            IEEE7000Checker,
             ISO27001Checker,
             SOC2Checker,
-            IEEE7000Checker,
         )
 
         # Initialize components
@@ -2911,10 +2731,10 @@ async def get_compliance_dashboard(
     """Get compliance dashboard data."""
     try:
         from maximus_core_service.compliance import (
-            ComplianceEngine,
-            EvidenceCollector,
-            ComplianceMonitor,
             ComplianceConfig,
+            ComplianceEngine,
+            ComplianceMonitor,
+            EvidenceCollector,
         )
 
         # Initialize components

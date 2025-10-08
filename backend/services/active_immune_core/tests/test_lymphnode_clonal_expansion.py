@@ -27,7 +27,6 @@ from active_immune_core.agents import AgentType
 from active_immune_core.agents.models import AgenteState
 from active_immune_core.coordination.lymphnode import LinfonodoDigital
 
-
 # ==================== FIXTURES ====================
 
 
@@ -96,19 +95,16 @@ class TestClonalExpansion:
 
         # ASSERT: Clonal expansion should succeed
         assert len(clone_ids) == 3, "Should create 3 clones"
-        assert lymphnode.total_clones_criados == initial_clones + 3, \
-            "Should increment clone counter"
+        assert lymphnode.total_clones_criados == initial_clones + 3, "Should increment clone counter"
 
         # Verify all clones registered
         for clone_id in clone_ids:
-            assert clone_id in lymphnode.agentes_ativos, \
-                f"Clone {clone_id} should be registered"
+            assert clone_id in lymphnode.agentes_ativos, f"Clone {clone_id} should be registered"
 
         # Verify specialization was set
         for clone_id in clone_ids:
             state = lymphnode.agentes_ativos[clone_id]
-            assert state.especializacao == "malware_xyz", \
-                "Clone should have correct specialization"
+            assert state.especializacao == "malware_xyz", "Clone should have correct specialization"
 
     @pytest.mark.asyncio
     async def test_somatic_hypermutation_creates_variation(self, lymphnode):
@@ -154,17 +150,14 @@ class TestClonalExpansion:
             )
 
         # ASSERT: Clones should have varied sensitivities (somatic hypermutation)
-        assert len(set(sensitivities)) > 1, \
-            "Clones should have different sensitivities (mutation)"
+        assert len(set(sensitivities)) > 1, "Clones should have different sensitivities (mutation)"
 
         # Verify mutation range (-10% to +10%)
         # Mutation formula: (i * 0.04) - 0.1
         # i=0: -0.1, i=1: -0.06, i=2: -0.02, i=3: +0.02, i=4: +0.06
         expected_base = 0.5
-        assert min(sensitivities) < expected_base, \
-            "Some clones should have lower sensitivity"
-        assert max(sensitivities) > expected_base, \
-            "Some clones should have higher sensitivity"
+        assert min(sensitivities) < expected_base, "Some clones should have lower sensitivity"
+        assert max(sensitivities) > expected_base, "Some clones should have higher sensitivity"
 
     @pytest.mark.asyncio
     async def test_clonal_expansion_handles_errors_gracefully(self, lymphnode):
@@ -178,6 +171,7 @@ class TestClonalExpansion:
         """
         # ARRANGE: Mock factory to fail on second clone
         with patch.object(lymphnode.factory, "create_agent") as mock_create:
+
             def create_agent_with_failure(tipo, **kwargs):
                 """Create agent, but fail on second call"""
                 call_count = len([c for c in mock_create.call_args_list])
@@ -207,8 +201,7 @@ class TestClonalExpansion:
             )
 
         # ASSERT: Should create 2 clones (skip failed one)
-        assert len(clone_ids) == 2, \
-            "Should create 2 clones despite 1 failure (fault tolerance)"
+        assert len(clone_ids) == 2, "Should create 2 clones despite 1 failure (fault tolerance)"
 
 
 # ==================== APOPTOSIS TESTS ====================
@@ -260,20 +253,16 @@ class TestApoptosis:
 
         # ASSERT: Should destroy exactly 3 clones
         assert destruidos == 3, "Should destroy 3 specialized clones"
-        assert lymphnode.total_clones_destruidos == initial_destroyed_count + 3, \
-            "Should increment destruction counter"
+        assert lymphnode.total_clones_destruidos == initial_destroyed_count + 3, "Should increment destruction counter"
 
         # Verify clones removed from registry
-        assert len(lymphnode.agentes_ativos) == initial_total - 3, \
-            "Should remove clones from active registry"
+        assert len(lymphnode.agentes_ativos) == initial_total - 3, "Should remove clones from active registry"
 
         # Verify only specialized clones destroyed (not other_clone)
-        assert "other_clone" in lymphnode.agentes_ativos, \
-            "Should NOT destroy clones with different specialization"
+        assert "other_clone" in lymphnode.agentes_ativos, "Should NOT destroy clones with different specialization"
 
         for i in range(3):
-            assert f"specialized_clone_{i}" not in lymphnode.agentes_ativos, \
-                f"Clone {i} should be destroyed"
+            assert f"specialized_clone_{i}" not in lymphnode.agentes_ativos, f"Clone {i} should be destroyed"
 
     @pytest.mark.asyncio
     async def test_send_apoptosis_signal_without_redis(self, lymphnode):
@@ -299,8 +288,7 @@ class TestApoptosis:
             lymphnode._redis_client = original_redis
 
         # ASSERT: Should handle gracefully
-        assert apoptosis_succeeded, \
-            "Apoptosis should succeed even without Redis (graceful degradation)"
+        assert apoptosis_succeeded, "Apoptosis should succeed even without Redis (graceful degradation)"
 
 
 # ==================== SUMMARY ====================

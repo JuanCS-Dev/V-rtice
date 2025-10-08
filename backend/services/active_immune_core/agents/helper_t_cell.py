@@ -16,16 +16,15 @@ Unlike other immune cells:
 PRODUCTION-READY: Real Kafka/Redis, no mocks, graceful degradation.
 """
 
-import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Dict, List
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
 from .base import AgenteImunologicoBase
-from .models import AgentStatus, AgentType
+from .models import AgentType
 
 logger = logging.getLogger(__name__)
 
@@ -128,8 +127,7 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
         self.ifn_gamma_secretions: int = 0
 
         logger.info(
-            f"Helper T Cell initialized: {self.state.id[:8]} "
-            f"(zone={area_patrulha}, threshold={activation_threshold})"
+            f"Helper T Cell initialized: {self.state.id[:8]} (zone={area_patrulha}, threshold={activation_threshold})"
         )
 
     # ==================== LIFECYCLE ====================
@@ -235,28 +233,19 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
         if any(t in antigen_type for t in ["virus", "malware", "intracellular"]):
             if self.differentiation_state != HelperTState.TH1:
                 self.differentiation_state = HelperTState.TH1
-                logger.info(
-                    f"Helper T {self.state.id[:8]} differentiated to Th1 "
-                    "(cell-mediated immunity)"
-                )
+                logger.info(f"Helper T {self.state.id[:8]} differentiated to Th1 (cell-mediated immunity)")
 
         # Th2: Extracellular threats (parasites, extracellular bacteria)
         elif any(t in antigen_type for t in ["parasite", "extracellular", "ddos"]):
             if self.differentiation_state != HelperTState.TH2:
                 self.differentiation_state = HelperTState.TH2
-                logger.info(
-                    f"Helper T {self.state.id[:8]} differentiated to Th2 "
-                    "(humoral immunity)"
-                )
+                logger.info(f"Helper T {self.state.id[:8]} differentiated to Th2 (humoral immunity)")
 
         # Th17: Fungal/bacterial infections (strong inflammation)
         elif any(t in antigen_type for t in ["fungal", "bacterial", "intrusion"]):
             if self.differentiation_state != HelperTState.TH17:
                 self.differentiation_state = HelperTState.TH17
-                logger.info(
-                    f"Helper T {self.state.id[:8]} differentiated to Th17 "
-                    "(inflammatory response)"
-                )
+                logger.info(f"Helper T {self.state.id[:8]} differentiated to Th17 (inflammatory response)")
 
     # ==================== COORDINATION ====================
 
@@ -325,8 +314,7 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
             self.activated_b_cells += 1
 
             logger.info(
-                f"Helper T {self.state.id[:8]} activated B cells "
-                f"(IL4+IL5, antigen={presentation.antigen_type})"
+                f"Helper T {self.state.id[:8]} activated B cells (IL4+IL5, antigen={presentation.antigen_type})"
             )
 
         except Exception as e:
@@ -411,8 +399,7 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
             self.activated_macrophages += 1
 
             logger.info(
-                f"Helper T {self.state.id[:8]} activated Macrophages "
-                f"(IFN-γ, antigen={presentation.antigen_type})"
+                f"Helper T {self.state.id[:8]} activated Macrophages (IFN-γ, antigen={presentation.antigen_type})"
             )
 
         except Exception as e:
@@ -444,8 +431,7 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
             )
 
             logger.info(
-                f"Helper T {self.state.id[:8]} activated Neutrophils "
-                f"(IL17, antigen={presentation.antigen_type})"
+                f"Helper T {self.state.id[:8]} activated Neutrophils (IL17, antigen={presentation.antigen_type})"
             )
 
         except Exception as e:
@@ -463,9 +449,7 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
         Returns:
             Investigation result (coordination focus)
         """
-        logger.debug(
-            f"Helper T {self.state.id[:8]} coordinates instead of investigating"
-        )
+        logger.debug(f"Helper T {self.state.id[:8]} coordinates instead of investigating")
 
         return {
             "is_threat": False,
@@ -487,9 +471,7 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
         Returns:
             False (Helper T delegates to effector cells)
         """
-        logger.info(
-            f"Helper T {self.state.id[:8]} delegates neutralization to effector cells"
-        )
+        logger.info(f"Helper T {self.state.id[:8]} delegates neutralization to effector cells")
 
         # Create activation signal for effector cells
         signal = ActivationSignal(
@@ -528,10 +510,7 @@ class LinfocitoTAuxiliar(AgenteImunologicoBase):
             "il5_secretions": self.il5_secretions,
             "ifn_gamma_secretions": self.ifn_gamma_secretions,
             "total_cytokines": (
-                self.il2_secretions
-                + self.il4_secretions
-                + self.il5_secretions
-                + self.ifn_gamma_secretions
+                self.il2_secretions + self.il4_secretions + self.il5_secretions + self.ifn_gamma_secretions
             ),
         }
 

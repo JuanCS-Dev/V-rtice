@@ -10,7 +10,6 @@ Prediction error = unexpected threat landscape shifts (emerging APTs, zero-days)
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -84,8 +83,8 @@ class StrategicTransformer(nn.Module):
         )
 
     def forward(
-        self, sequence: torch.Tensor, mask: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        self, sequence: torch.Tensor, mask: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass.
 
         Args:
@@ -185,11 +184,9 @@ class StrategicLayer:
             dropout=0.1,
         ).to(self.device)
 
-        logger.info(
-            f"StrategicLayer initialized (horizon={prediction_horizon_weeks} weeks)"
-        )
+        logger.info(f"StrategicLayer initialized (horizon={prediction_horizon_weeks} weeks)")
 
-    def predict(self, event_sequence: np.ndarray) -> Dict:
+    def predict(self, event_sequence: np.ndarray) -> dict:
         """Predict threat landscape evolution.
 
         Args:
@@ -203,9 +200,7 @@ class StrategicLayer:
         with torch.no_grad():
             sequence = torch.FloatTensor(event_sequence).unsqueeze(0).to(self.device)
 
-            landscape_pred, apt_logits, cve_logits, risk_score = self.transformer(
-                sequence
-            )
+            landscape_pred, apt_logits, cve_logits, risk_score = self.transformer(sequence)
 
             # APT probabilities
             apt_probs = F.softmax(apt_logits, dim=1)
@@ -237,9 +232,7 @@ class StrategicLayer:
                 "prediction_horizon_weeks": self.prediction_horizon,
             }
 
-    def assess_strategic_risk(
-        self, event_sequence: np.ndarray, risk_threshold: float = 0.75
-    ) -> Dict:
+    def assess_strategic_risk(self, event_sequence: np.ndarray, risk_threshold: float = 0.75) -> dict:
         """Assess strategic threat landscape risk.
 
         Args:
@@ -259,21 +252,13 @@ class StrategicLayer:
         top_cve = prediction["top_cve_categories"][0]["category"]
 
         assessment = {
-            "strategic_risk": (
-                "HIGH" if is_high_risk else "MODERATE" if risk_score > 0.5 else "LOW"
-            ),
+            "strategic_risk": ("HIGH" if is_high_risk else "MODERATE" if risk_score > 0.5 else "LOW"),
             "risk_score": float(risk_score),
-            "emerging_apt_groups": [
-                apt["name"] for apt in prediction["top_apt_groups"][:3]
-            ],
-            "emerging_vulnerabilities": [
-                cve["category"] for cve in prediction["top_cve_categories"][:3]
-            ],
+            "emerging_apt_groups": [apt["name"] for apt in prediction["top_apt_groups"][:3]],
+            "emerging_vulnerabilities": [cve["category"] for cve in prediction["top_cve_categories"][:3]],
             "primary_threat": top_apt,
             "primary_vulnerability": top_cve,
-            "recommendation": self._generate_recommendation(
-                is_high_risk, top_apt, top_cve
-            ),
+            "recommendation": self._generate_recommendation(is_high_risk, top_apt, top_cve),
         }
 
         return assessment
@@ -360,20 +345,17 @@ class StrategicLayer:
         ]
         return categories[cve_id] if cve_id < len(categories) else f"CVE_CAT_{cve_id}"
 
-    def _generate_recommendation(
-        self, is_high_risk: bool, top_apt: str, top_cve: str
-    ) -> str:
+    def _generate_recommendation(self, is_high_risk: bool, top_apt: str, top_cve: str) -> str:
         """Generate strategic recommendation."""
         if is_high_risk:
             return (
                 f"URGENT: Elevated threat from {top_apt}. Prioritize patching {top_cve} "
                 f"vulnerabilities. Increase monitoring and threat hunting activities."
             )
-        else:
-            return (
-                f"Monitor {top_apt} activity. Review defenses against {top_cve} exploits. "
-                f"Maintain standard security posture."
-            )
+        return (
+            f"Monitor {top_apt} activity. Review defenses against {top_cve} exploits. "
+            f"Maintain standard security posture."
+        )
 
     def train_step(
         self,
@@ -383,7 +365,7 @@ class StrategicLayer:
         target_cves: torch.Tensor,
         target_risks: torch.Tensor,
         optimizer: torch.optim.Optimizer,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Single training step."""
         self.transformer.train()
 
@@ -394,9 +376,7 @@ class StrategicLayer:
         target_risks = target_risks.to(self.device)
 
         # Forward
-        landscape_pred, apt_logits, cve_logits, risk_score = self.transformer(
-            sequence_batch
-        )
+        landscape_pred, apt_logits, cve_logits, risk_score = self.transformer(sequence_batch)
 
         # Losses
         pred_loss = F.mse_loss(landscape_pred, target_landscapes)

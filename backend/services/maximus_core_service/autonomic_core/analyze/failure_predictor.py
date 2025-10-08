@@ -1,7 +1,6 @@
 """Failure Predictor - XGBoost-based failure forecasting"""
 
 import logging
-from typing import Dict
 
 import numpy as np
 import xgboost as xgb
@@ -33,7 +32,7 @@ class FailurePredictor:
         self.model.fit(X, y)
         logger.info("XGBoost training complete")
 
-    def predict(self, current_metrics: np.ndarray) -> Dict:
+    def predict(self, current_metrics: np.ndarray) -> dict:
         """
         Predict probability of failure in next 30min.
 

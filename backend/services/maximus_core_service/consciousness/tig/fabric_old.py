@@ -31,7 +31,7 @@ import asyncio
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import networkx as nx
 import numpy as np
@@ -93,7 +93,7 @@ class ProcessingState:
     - Phase sync: oscillatory synchronization for ESGT coherence
     """
 
-    active_modules: List[str] = field(default_factory=list)
+    active_modules: list[str] = field(default_factory=list)
     attention_level: float = 0.5  # 0.0-1.0, modulated by acetylcholine
     cpu_utilization: float = 0.0
     memory_utilization: float = 0.0
@@ -103,7 +103,7 @@ class ProcessingState:
     phase_sync: complex = complex(1.0, 0.0)
 
     # Information content currently being processed
-    processing_content: Optional[Dict[str, Any]] = None
+    processing_content: dict[str, Any] | None = None
 
 
 @dataclass
@@ -124,7 +124,7 @@ class TIGNode:
     """
 
     id: str
-    connections: Dict[str, TIGConnection] = field(default_factory=dict)
+    connections: dict[str, TIGConnection] = field(default_factory=dict)
     state: ProcessingState = field(default_factory=ProcessingState)
     node_state: NodeState = NodeState.INITIALIZING
     message_queue: asyncio.Queue = field(default_factory=lambda: asyncio.Queue(maxsize=10000))
@@ -164,7 +164,7 @@ class TIGNode:
 
         return triangles / possible if possible > 0 else 0.0
 
-    async def broadcast_to_neighbors(self, message: Dict[str, Any], priority: int = 0) -> int:
+    async def broadcast_to_neighbors(self, message: dict[str, Any], priority: int = 0) -> int:
         """
         Broadcast message to all connected neighbors.
 
@@ -192,7 +192,7 @@ class TIGNode:
 
         return successful
 
-    async def _send_to_neighbor(self, neighbor_id: str, message: Dict[str, Any], priority: int) -> bool:
+    async def _send_to_neighbor(self, neighbor_id: str, message: dict[str, Any], priority: int) -> bool:
         """Internal method to send message to specific neighbor."""
         # In production, this would use actual network protocols
         # For now, we simulate with direct queue insertion
@@ -263,7 +263,7 @@ class FabricMetrics:
 
     # Non-degeneracy validation
     has_feed_forward_bottlenecks: bool = False
-    bottleneck_locations: List[str] = field(default_factory=list)
+    bottleneck_locations: list[str] = field(default_factory=list)
     min_path_redundancy: int = 0  # Minimum alternative paths
 
     # Performance metrics
@@ -274,7 +274,7 @@ class FabricMetrics:
     # Temporal
     last_update: float = field(default_factory=time.time)
 
-    def validate_iit_compliance(self) -> Tuple[bool, List[str]]:
+    def validate_iit_compliance(self) -> tuple[bool, list[str]]:
         """
         Validate that fabric meets IIT structural requirements.
 
@@ -341,7 +341,7 @@ class TIGFabric:
 
     def __init__(self, config: TopologyConfig):
         self.config = config
-        self.nodes: Dict[str, TIGNode] = {}
+        self.nodes: dict[str, TIGNode] = {}
         self.graph = nx.Graph()  # NetworkX graph for analysis
         self.metrics = FabricMetrics()
         self._initialized = False
@@ -616,7 +616,7 @@ class TIGFabric:
 
             self.metrics.min_path_redundancy = min(redundancies) if redundancies else 0
 
-    async def broadcast_global(self, message: Dict[str, Any], priority: int = 0) -> int:
+    async def broadcast_global(self, message: dict[str, Any], priority: int = 0) -> int:
         """
         Broadcast message to all nodes (implements GWD global workspace).
 
@@ -647,7 +647,7 @@ class TIGFabric:
         """Get current fabric metrics for consciousness validation."""
         return self.metrics
 
-    def get_node(self, node_id: str) -> Optional[TIGNode]:
+    def get_node(self, node_id: str) -> TIGNode | None:
         """Retrieve specific node by ID."""
         return self.nodes.get(node_id)
 

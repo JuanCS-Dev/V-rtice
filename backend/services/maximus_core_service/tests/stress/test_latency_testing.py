@@ -15,13 +15,14 @@ Version: 1.0.0 - FASE IV Sprint 2
 
 import asyncio
 import time
+
 import pytest
 import pytest_asyncio
 
 from consciousness.esgt.coordinator import ESGTCoordinator
 from consciousness.esgt.spm.salience_detector import SalienceScore
-from consciousness.tig.fabric import TIGFabric, TopologyConfig
 from consciousness.mcea.controller import ArousalController
+from consciousness.tig.fabric import TIGFabric, TopologyConfig
 
 
 @pytest_asyncio.fixture
@@ -72,10 +73,10 @@ async def test_esgt_ignition_latency_p99(esgt_coordinator):
     p99 = sorted_latencies[99]
     avg = sum(latencies) / len(latencies)
 
-    print(f"\n⏱️  ESGT Ignition Latency:")
+    print("\n⏱️  ESGT Ignition Latency:")
     print(f"   Avg: {avg:.2f}ms")
     print(f"   P99: {p99:.2f}ms")
-    print(f"   Target: <100ms P99")
+    print("   Target: <100ms P99")
 
     # Relaxed for simulation (hardware will be faster)
     assert p99 < 1000, f"P99 latency too high: {p99:.2f}ms"
@@ -96,11 +97,7 @@ async def test_arousal_modulation_latency():
     # Test 50 modulations
     for i in range(50):
         start = time.time()
-        controller.request_modulation(
-            source=f"test-{i}",
-            delta=0.1,
-            duration_seconds=1.0
-        )
+        controller.request_modulation(source=f"test-{i}", delta=0.1, duration_seconds=1.0)
         latency_ms = (time.time() - start) * 1000
         latencies.append(latency_ms)
 
@@ -109,10 +106,10 @@ async def test_arousal_modulation_latency():
     p99 = sorted(latencies)[int(len(latencies) * 0.99)]
     avg = sum(latencies) / len(latencies)
 
-    print(f"\n⏱️  Arousal Modulation Latency:")
+    print("\n⏱️  Arousal Modulation Latency:")
     print(f"   Avg: {avg:.2f}ms")
     print(f"   P99: {p99:.2f}ms")
-    print(f"   Target: <20ms")
+    print("   Target: <20ms")
 
     assert p99 < 100, f"Arousal modulation P99 too high: {p99:.2f}ms"
 

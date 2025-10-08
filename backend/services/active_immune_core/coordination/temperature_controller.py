@@ -31,9 +31,9 @@ Version: 1.0.0
 Date: 2025-10-07
 """
 
-from enum import Enum
-from typing import Dict, Any
 import logging
+from enum import Enum
+from typing import Any, Dict
 
 from coordination.thread_safe_structures import ThreadSafeTemperature
 
@@ -42,10 +42,11 @@ logger = logging.getLogger(__name__)
 
 class HomeostaticState(str, Enum):
     """Homeostatic states based on temperature."""
-    REPOUSO = "repouso"        # 36.5-37.0°C: Homeostasis
+
+    REPOUSO = "repouso"  # 36.5-37.0°C: Homeostasis
     VIGILANCIA = "vigilancia"  # 37.0-37.5°C: Low-level surveillance
-    ATENCAO = "atencao"        # 37.5-38.0°C: Increased attention
-    ATIVACAO = "ativacao"      # 38.0-39.0°C: Active immune response
+    ATENCAO = "atencao"  # 37.5-38.0°C: Increased attention
+    ATIVACAO = "ativacao"  # 38.0-39.0°C: Active immune response
     INFLAMACAO = "inflamacao"  # 39.0+°C: Inflammation (cytokine storm)
 
 
@@ -79,11 +80,11 @@ class TemperatureController:
     THRESHOLD_VIGILANCIA = 37.0
 
     # Activation percentages per state
-    ACTIVATION_INFLAMACAO = 0.8   # 80% agents active
-    ACTIVATION_ATIVACAO = 0.5     # 50% agents active
-    ACTIVATION_ATENCAO = 0.3      # 30% agents active
+    ACTIVATION_INFLAMACAO = 0.8  # 80% agents active
+    ACTIVATION_ATIVACAO = 0.5  # 50% agents active
+    ACTIVATION_ATENCAO = 0.3  # 30% agents active
     ACTIVATION_VIGILANCIA = 0.15  # 15% agents active
-    ACTIVATION_REPOUSO = 0.05     # 5% agents active
+    ACTIVATION_REPOUSO = 0.05  # 5% agents active
 
     def __init__(
         self,
@@ -135,10 +136,7 @@ class TemperatureController:
         old_temp = await self.temperature.get()
         new_temp = await self.temperature.adjust(delta)
 
-        logger.info(
-            f"Lymphnode {self.lymphnode_id} temperature: "
-            f"{old_temp:.1f}°C → {new_temp:.1f}°C"
-        )
+        logger.info(f"Lymphnode {self.lymphnode_id} temperature: {old_temp:.1f}°C → {new_temp:.1f}°C")
 
         return new_temp
 
@@ -153,10 +151,7 @@ class TemperatureController:
         old_temp = await self.temperature.get()
         new_temp = await self.temperature.multiply(self.decay_rate)
 
-        logger.debug(
-            f"Lymphnode {self.lymphnode_id} temperature decay: "
-            f"{old_temp:.1f}°C → {new_temp:.1f}°C"
-        )
+        logger.debug(f"Lymphnode {self.lymphnode_id} temperature decay: {old_temp:.1f}°C → {new_temp:.1f}°C")
 
         return new_temp
 
@@ -272,6 +267,7 @@ class TemperatureController:
 
     def __repr__(self) -> str:
         import asyncio
+
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
@@ -282,8 +278,4 @@ class TemperatureController:
         except:
             temp_str = "?.?°C"
 
-        return (
-            f"TemperatureController("
-            f"lymphnode={self.lymphnode_id}, "
-            f"temp={temp_str})"
-        )
+        return f"TemperatureController(lymphnode={self.lymphnode_id}, temp={temp_str})"

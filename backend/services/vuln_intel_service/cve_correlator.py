@@ -68,9 +68,7 @@ class CVECorrelator:
         await asyncio.sleep(0.05)  # Simulate database lookup
         return self.cve_database.get(cve_id)
 
-    async def correlate_vulnerability(
-        self, software_name: str, software_version: str
-    ) -> List[Dict[str, Any]]:
+    async def correlate_vulnerability(self, software_name: str, software_version: str) -> List[Dict[str, Any]]:
         """Correlates known vulnerabilities with a specific software and version.
 
         Args:
@@ -80,17 +78,12 @@ class CVECorrelator:
         Returns:
             List[Dict[str, Any]]: A list of dictionaries, each representing a correlated CVE.
         """
-        print(
-            f"[CVECorrelator] Correlating vulnerabilities for {software_name} {software_version}"
-        )
+        print(f"[CVECorrelator] Correlating vulnerabilities for {software_name} {software_version}")
         await asyncio.sleep(0.1)  # Simulate correlation process
 
         correlated_cves: List[Dict[str, Any]] = []
         for cve_id, cve_info in self.cve_database.items():
-            if any(
-                f"{software_name} v{software_version}" in p
-                for p in cve_info.get("affected_products", [])
-            ):
+            if any(f"{software_name} v{software_version}" in p for p in cve_info.get("affected_products", [])):
                 correlated_cves.append(cve_info)
 
         self.last_correlation_time = datetime.now()
@@ -102,9 +95,7 @@ class CVECorrelator:
         Args:
             new_cves (List[Dict[str, Any]]): A list of new CVE entries.
         """
-        print(
-            f"[CVECorrelator] Updating CVE database with {len(new_cves)} new entries."
-        )
+        print(f"[CVECorrelator] Updating CVE database with {len(new_cves)} new entries.")
         await asyncio.sleep(0.1)
         for cve in new_cves:
             if "id" in cve:
@@ -120,9 +111,5 @@ class CVECorrelator:
         return {
             "status": self.current_status,
             "total_cves_in_db": len(self.cve_database),
-            "last_correlation": (
-                self.last_correlation_time.isoformat()
-                if self.last_correlation_time
-                else "N/A"
-            ),
+            "last_correlation": (self.last_correlation_time.isoformat() if self.last_correlation_time else "N/A"),
         }

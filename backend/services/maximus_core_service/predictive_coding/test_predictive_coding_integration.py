@@ -24,17 +24,18 @@ Quality: REGRA DE OURO - Zero mocks, 100% production code validation
 """
 
 import pytest
-import sys
 
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def torch_available():
     """Check if torch is available."""
     try:
         import torch
+
         return True
     except ImportError:
         return False
@@ -44,6 +45,7 @@ def torch_available():
 # TEST 1: LAYER 1 (SENSORY/VAE) STRUCTURE AND API
 # ============================================================================
 
+
 def test_layer1_sensory_structure():
     """Test that Layer 1 (Sensory) has correct structure and API."""
     print("\n" + "=" * 80)
@@ -52,7 +54,8 @@ def test_layer1_sensory_structure():
 
     # Import classes
     try:
-        from predictive_coding import SensoryLayer, EventVAE
+        from predictive_coding import EventVAE, SensoryLayer
+
         print("✅ Imports successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
@@ -76,6 +79,7 @@ def test_layer1_sensory_structure():
 # TEST 2: LAYER 2 (BEHAVIORAL/GNN) STRUCTURE AND API
 # ============================================================================
 
+
 def test_layer2_behavioral_structure():
     """Test that Layer 2 (Behavioral) has correct structure and API."""
     print("\n" + "=" * 80)
@@ -84,7 +88,8 @@ def test_layer2_behavioral_structure():
 
     # Import classes
     try:
-        from predictive_coding import BehavioralLayer, BehavioralGNN, EventGraph
+        from predictive_coding import BehavioralGNN, BehavioralLayer, EventGraph
+
         print("✅ Imports successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
@@ -99,7 +104,7 @@ def test_layer2_behavioral_structure():
     required_gnn_methods = ["forward"]
     for method in required_gnn_methods:
         assert hasattr(BehavioralGNN, method), f"BehavioralGNN missing method: {method}"
-    print(f"✅ BehavioralGNN has all required methods")
+    print("✅ BehavioralGNN has all required methods")
 
     # Check EventGraph structure
     assert hasattr(EventGraph, "nodes"), "EventGraph missing 'nodes' attribute"
@@ -113,6 +118,7 @@ def test_layer2_behavioral_structure():
 # TEST 3: LAYER 3 (OPERATIONAL/TCN) STRUCTURE AND API
 # ============================================================================
 
+
 def test_layer3_operational_structure():
     """Test that Layer 3 (Operational) has correct structure and API."""
     print("\n" + "=" * 80)
@@ -122,6 +128,7 @@ def test_layer3_operational_structure():
     # Import classes
     try:
         from predictive_coding import OperationalLayer, OperationalTCN
+
         print("✅ Imports successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
@@ -136,7 +143,7 @@ def test_layer3_operational_structure():
     required_tcn_methods = ["forward"]
     for method in required_tcn_methods:
         assert hasattr(OperationalTCN, method), f"OperationalTCN missing method: {method}"
-    print(f"✅ OperationalTCN has all required methods")
+    print("✅ OperationalTCN has all required methods")
 
     print("✅ Layer 3 structure validated")
 
@@ -144,6 +151,7 @@ def test_layer3_operational_structure():
 # ============================================================================
 # TEST 4: LAYER 4 (TACTICAL/LSTM) STRUCTURE AND API
 # ============================================================================
+
 
 def test_layer4_tactical_structure():
     """Test that Layer 4 (Tactical) has correct structure and API."""
@@ -154,6 +162,7 @@ def test_layer4_tactical_structure():
     # Import classes
     try:
         from predictive_coding import TacticalLayer, TacticalLSTM
+
         print("✅ Imports successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
@@ -168,7 +177,7 @@ def test_layer4_tactical_structure():
     required_lstm_methods = ["forward"]
     for method in required_lstm_methods:
         assert hasattr(TacticalLSTM, method), f"TacticalLSTM missing method: {method}"
-    print(f"✅ TacticalLSTM has all required methods")
+    print("✅ TacticalLSTM has all required methods")
 
     print("✅ Layer 4 structure validated")
 
@@ -176,6 +185,7 @@ def test_layer4_tactical_structure():
 # ============================================================================
 # TEST 5: LAYER 5 (STRATEGIC/TRANSFORMER) STRUCTURE AND API
 # ============================================================================
+
 
 def test_layer5_strategic_structure():
     """Test that Layer 5 (Strategic) has correct structure and API."""
@@ -186,6 +196,7 @@ def test_layer5_strategic_structure():
     # Import classes
     try:
         from predictive_coding import StrategicLayer, StrategicTransformer
+
         print("✅ Imports successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
@@ -200,7 +211,7 @@ def test_layer5_strategic_structure():
     required_transformer_methods = ["forward"]
     for method in required_transformer_methods:
         assert hasattr(StrategicTransformer, method), f"StrategicTransformer missing method: {method}"
-    print(f"✅ StrategicTransformer has all required methods")
+    print("✅ StrategicTransformer has all required methods")
 
     print("✅ Layer 5 structure validated")
 
@@ -208,6 +219,7 @@ def test_layer5_strategic_structure():
 # ============================================================================
 # TEST 6: FREE ENERGY CALCULATION API
 # ============================================================================
+
 
 def test_free_energy_calculation_api():
     """Test that Free Energy calculation API is correct."""
@@ -218,6 +230,7 @@ def test_free_energy_calculation_api():
     # Import HPC Network
     try:
         from predictive_coding import HierarchicalPredictiveCodingNetwork
+
         print("✅ Import successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
@@ -226,7 +239,7 @@ def test_free_energy_calculation_api():
     required_methods = ["compute_free_energy", "hierarchical_inference"]
     for method in required_methods:
         assert hasattr(HierarchicalPredictiveCodingNetwork, method), f"HPC Network missing method: {method}"
-    print(f"✅ HPC Network has Free Energy methods")
+    print("✅ HPC Network has Free Energy methods")
 
     # Verify method signatures (without calling them)
     import inspect
@@ -251,6 +264,7 @@ def test_free_energy_calculation_api():
 # TEST 7: HIERARCHICAL PREDICTION ERROR PROPAGATION
 # ============================================================================
 
+
 def test_hierarchical_prediction_error_propagation():
     """Test that hierarchical prediction error structure is correct."""
     print("\n" + "=" * 80)
@@ -259,12 +273,14 @@ def test_hierarchical_prediction_error_propagation():
 
     try:
         from predictive_coding import HierarchicalPredictiveCodingNetwork
+
         print("✅ Import successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
 
     # Check that HPC Network tracks prediction errors
     import inspect
+
     source = inspect.getsource(HierarchicalPredictiveCodingNetwork.__init__)
 
     # Should have prediction_errors buffer
@@ -283,6 +299,7 @@ def test_hierarchical_prediction_error_propagation():
 # TEST 8: HPC NETWORK COORDINATION
 # ============================================================================
 
+
 def test_hpc_network_coordination():
     """Test that HPC Network coordinates all layers correctly."""
     print("\n" + "=" * 80)
@@ -291,12 +308,14 @@ def test_hpc_network_coordination():
 
     try:
         from predictive_coding import HierarchicalPredictiveCodingNetwork
+
         print("✅ Import successful")
     except ImportError as e:
         pytest.fail(f"Failed to import: {e}")
 
     # Check __init__ initializes all 5 layers
     import inspect
+
     init_source = inspect.getsource(HierarchicalPredictiveCodingNetwork.__init__)
 
     # Should initialize all 5 layers

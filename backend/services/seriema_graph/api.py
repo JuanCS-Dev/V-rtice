@@ -11,15 +11,14 @@ The service exposes endpoints for:
 - Framework statistics and health monitoring
 """
 
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
-import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
 import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, status
+from pydantic import BaseModel, Field
 
 # Import local SeriemaGraphClient
 try:
@@ -31,9 +30,7 @@ except ImportError as e:
     CLIENT_AVAILABLE = False
     SeriemaGraphClient = None
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Global client instance
@@ -46,12 +43,8 @@ class ArgumentNode(BaseModel):
     id: str = Field(..., description="Unique argument identifier")
     text: str = Field(..., description="Argument text content")
     role: str = Field(default="claim", description="Argument role (claim/premise/etc)")
-    confidence: float = Field(
-        default=1.0, ge=0.0, le=1.0, description="Confidence score"
-    )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0, description="Confidence score")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class AttackRelation(BaseModel):
@@ -68,12 +61,8 @@ class FrameworkRequest(BaseModel):
 
     framework_id: str = Field(..., description="Unique framework identifier")
     arguments: List[ArgumentNode] = Field(..., description="List of arguments")
-    attacks: List[AttackRelation] = Field(
-        default_factory=list, description="Attack relations"
-    )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Framework metadata"
-    )
+    attacks: List[AttackRelation] = Field(default_factory=list, description="Attack relations")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Framework metadata")
 
 
 class PathQueryRequest(BaseModel):
@@ -208,9 +197,7 @@ async def store_framework(
 
 
 @app.get("/framework/{framework_id}")
-async def retrieve_framework(
-    framework_id: str, client: SeriemaGraphClient = Depends(get_client)
-) -> Dict[str, Any]:
+async def retrieve_framework(framework_id: str, client: SeriemaGraphClient = Depends(get_client)) -> Dict[str, Any]:
     """
     Retrieve an argumentation framework from the graph database.
 
@@ -393,9 +380,7 @@ async def get_framework_statistics(
 
 
 @app.delete("/framework/{framework_id}")
-async def delete_framework(
-    framework_id: str, client: SeriemaGraphClient = Depends(get_client)
-) -> Dict[str, Any]:
+async def delete_framework(framework_id: str, client: SeriemaGraphClient = Depends(get_client)) -> Dict[str, Any]:
     """
     Delete an argumentation framework from the database.
 

@@ -19,10 +19,10 @@ import pytest
 from attention_system.attention_core import AttentionSystem
 from neuromodulation import NeuromodulationController
 
-
 # ============================================================================
 # FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def neuromodulation():
@@ -39,6 +39,7 @@ def attention_system():
 # ============================================================================
 # TEST 1: NEUROMODULATION CONTROLLER PROVIDES PARAMETERS
 # ============================================================================
+
 
 def test_neuromodulation_provides_parameters(neuromodulation):
     """Test that NeuromodulationController can provide all necessary parameters."""
@@ -72,6 +73,7 @@ def test_neuromodulation_provides_parameters(neuromodulation):
 # TEST 2: OUTCOME PROCESSING UPDATES DOPAMINE AND SEROTONIN
 # ============================================================================
 
+
 def test_outcome_processing_updates_neuromodulators(neuromodulation):
     """Test that outcome processing updates dopamine and serotonin correctly."""
     print("\n" + "=" * 80)
@@ -83,11 +85,7 @@ def test_outcome_processing_updates_neuromodulators(neuromodulation):
     initial_serotonin = neuromodulation.serotonin.level
 
     # Process positive outcome (better than expected)
-    result = neuromodulation.process_reward(
-        expected_reward=0.5,
-        actual_reward=0.8,
-        success=True
-    )
+    result = neuromodulation.process_reward(expected_reward=0.5, actual_reward=0.8, success=True)
 
     # Verify RPE calculated
     assert "rpe" in result, "Should return RPE"
@@ -110,6 +108,7 @@ def test_outcome_processing_updates_neuromodulators(neuromodulation):
 # ============================================================================
 # TEST 3: THREAT RESPONSE ACTIVATES NOREPINEPHRINE
 # ============================================================================
+
 
 def test_threat_response_activates_norepinephrine(neuromodulation):
     """Test that threat response increases norepinephrine arousal."""
@@ -138,12 +137,13 @@ def test_threat_response_activates_norepinephrine(neuromodulation):
     print(f"✅ Threat severity: {threat_severity}")
     print(f"✅ Arousal: {initial_arousal:.2f} → {updated_arousal:.2f}")
     print(f"✅ Attention gain: {initial_gain:.2f}x → {updated_gain:.2f}x")
-    print(f"   (Yerkes-Dodson: Very high arousal can reduce gain due to anxiety)")
+    print("   (Yerkes-Dodson: Very high arousal can reduce gain due to anxiety)")
 
 
 # ============================================================================
 # TEST 4: ACETYLCHOLINE MODULATES ATTENTION THRESHOLD
 # ============================================================================
+
 
 def test_acetylcholine_modulates_attention_threshold(neuromodulation, attention_system):
     """Test that acetylcholine can modulate attention system threshold."""
@@ -187,6 +187,7 @@ def test_acetylcholine_modulates_attention_threshold(neuromodulation, attention_
 # TEST 5: SEROTONIN CONTROLS EXPLORATION TEMPERATURE
 # ============================================================================
 
+
 def test_serotonin_controls_exploration_temperature(neuromodulation):
     """Test that serotonin can control exploration vs exploitation."""
     print("\n" + "=" * 80)
@@ -212,7 +213,7 @@ def test_serotonin_controls_exploration_temperature(neuromodulation):
     updated_exploration = neuromodulation.serotonin.get_exploration_rate()
     updated_temperature = 0.3 + (updated_exploration / 0.3) * 0.7
 
-    print(f"✅ After failure + stress:")
+    print("✅ After failure + stress:")
     print(f"   Serotonin: {initial_serotonin:.2f} → {updated_serotonin:.2f}")
     print(f"   Exploration rate: {initial_exploration:.3f} → {updated_exploration:.3f}")
     print(f"   Temperature: {initial_temperature:.2f} → {updated_temperature:.2f}")
@@ -224,6 +225,7 @@ def test_serotonin_controls_exploration_temperature(neuromodulation):
 # ============================================================================
 # TEST 6: GLOBAL STATE PROVIDES COMPLETE NEUROMODULATION INFO
 # ============================================================================
+
 
 def test_global_state_provides_complete_info(neuromodulation):
     """Test that global state includes all neuromodulation information."""
@@ -256,7 +258,7 @@ def test_global_state_provides_complete_info(neuromodulation):
     assert -1.0 <= state.overall_mood <= 1.0, "Overall mood should be in [-1, 1]"
     assert 0.0 <= state.cognitive_load <= 1.0, "Cognitive load should be in [0, 1]"
 
-    print(f"✅ Global state complete:")
+    print("✅ Global state complete:")
     print(f"   Dopamine: {state.dopamine.tonic_level:.2f}")
     print(f"   Serotonin: {state.serotonin.level:.2f}")
     print(f"   Norepinephrine: {state.norepinephrine.level:.2f}")

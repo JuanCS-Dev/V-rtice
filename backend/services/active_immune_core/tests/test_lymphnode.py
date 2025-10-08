@@ -19,13 +19,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 
-from active_immune_core.agents.models import AgenteState
 from active_immune_core.agents import AgentType
+from active_immune_core.agents.models import AgenteState
 from active_immune_core.coordination.lymphnode import (
-    LinfonodoDigital,
     HomeostaticState,
+    LinfonodoDigital,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -702,13 +701,15 @@ async def test_detect_coordinated_attacks(lymphnode: LinfonodoDigital):
     now = datetime.now()
     cytokines = []
     for i in range(4):
-        cytokines.append({
-            "tipo": "IL1",
-            "emissor_id": f"mac_{i:03d}",
-            "prioridade": 8,
-            "timestamp": (now - timedelta(seconds=i)).isoformat(),
-            "payload": {"dst_ip": f"198.51.100.{50+i}"},
-        })
+        cytokines.append(
+            {
+                "tipo": "IL1",
+                "emissor_id": f"mac_{i:03d}",
+                "prioridade": 8,
+                "timestamp": (now - timedelta(seconds=i)).isoformat(),
+                "payload": {"dst_ip": f"198.51.100.{50 + i}"},
+            }
+        )
 
     await lymphnode._detect_coordinated_attacks(cytokines)
 
@@ -733,7 +734,7 @@ async def test_monitor_temperature_fever(lymphnode: LinfonodoDigital):
     initial_temp = await lymphnode.temperatura_regional.get()
 
     # Mock asyncio.sleep to speed up test (instead of waiting 30s)
-    with patch('asyncio.sleep', new_callable=AsyncMock) as mock_sleep:
+    with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
         # Simulate one iteration of temperature monitoring
         mock_sleep.return_value = None
 
@@ -747,10 +748,8 @@ async def test_monitor_temperature_fever(lymphnode: LinfonodoDigital):
 
     # Temperature should have decayed (fever subsiding)
     current_temp = await lymphnode.temperatura_regional.get()
-    assert current_temp < initial_temp, \
-        "Fever should subside over time (temperature decay)"
-    assert current_temp == pytest.approx(41.0 * 0.98, rel=0.01), \
-        "Temperature should decay by 2%"
+    assert current_temp < initial_temp, "Fever should subside over time (temperature decay)"
+    assert current_temp == pytest.approx(41.0 * 0.98, rel=0.01), "Temperature should decay by 2%"
 
     await lymphnode.parar()
 
@@ -775,8 +774,7 @@ async def test_monitor_temperature_hypothermia(lymphnode: LinfonodoDigital):
 
     # Temperature should be clamped to homeostatic minimum
     final_temp = await lymphnode.temperatura_regional.get()
-    assert final_temp == 36.5, \
-        "Temperature should never go below 36.5°C (homeostasis)"
+    assert final_temp == 36.5, "Temperature should never go below 36.5°C (homeostasis)"
 
     await lymphnode.parar()
 
@@ -845,11 +843,13 @@ async def test_cytokine_buffer_operations(lymphnode: LinfonodoDigital):
 
     # Add some cytokines to buffer
     for i in range(10):
-        await lymphnode.cytokine_buffer.append({
-            "tipo": "IL1",
-            "emissor_id": f"mac_{i:03d}",
-            "timestamp": datetime.now().isoformat(),
-        })
+        await lymphnode.cytokine_buffer.append(
+            {
+                "tipo": "IL1",
+                "emissor_id": f"mac_{i:03d}",
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
     # Verify buffer has data
     buffer_size = await lymphnode.cytokine_buffer.size()

@@ -31,8 +31,8 @@ Date: 2025-10-08
 import logging
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class NeuromodulatorBase(ABC):
     MAX_CONSECUTIVE_ANOMALIES = 5  # Consecutive bound violations before opening
 
     def __init__(
-        self, config: Optional[ModulatorConfig] = None, kill_switch_callback: Optional[Callable[[str], None]] = None
+        self, config: ModulatorConfig | None = None, kill_switch_callback: Callable[[str], None] | None = None
     ):
         """Initialize neuromodulator.
 

@@ -15,10 +15,10 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
+from . import broadcaster
 from .connection_manager import ConnectionManager
 from .events import WSEvent, WSEventType, WSMessage, WSResponse
-from .router import router, get_connection_manager
-from . import broadcaster
+from .router import get_connection_manager, router
 
 __all__ = [
     "ConnectionManager",

@@ -19,17 +19,15 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-import logging
+from typing import Any
 
 from .base import (
     HITLDecision,
     OperatorAction,
-    DecisionStatus,
     RiskLevel,
-    AutomationLevel,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,11 +37,13 @@ logger = logging.getLogger(__name__)
 # Operator Session
 # ============================================================================
 
+
 @dataclass
 class OperatorSession:
     """
     Active operator session for decision review.
     """
+
     # Session details
     session_id: str
     operator_id: str
@@ -53,7 +53,7 @@ class OperatorSession:
     # Session timing
     started_at: datetime = field(default_factory=datetime.utcnow)
     last_activity: datetime = field(default_factory=datetime.utcnow)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
     # Session metrics
     decisions_reviewed: int = 0
@@ -63,12 +63,12 @@ class OperatorSession:
     decisions_modified: int = 0
 
     # Current work
-    active_decision_ids: List[str] = field(default_factory=list)
+    active_decision_ids: list[str] = field(default_factory=list)
 
     # Session metadata
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    ip_address: str | None = None
+    user_agent: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_expired(self) -> bool:
         """Check if session has expired."""
@@ -101,11 +101,13 @@ class OperatorSession:
 # Operator Metrics
 # ============================================================================
 
+
 @dataclass
 class OperatorMetrics:
     """
     Aggregate metrics for an operator.
     """
+
     operator_id: str
 
     # Lifetime stats
@@ -151,6 +153,7 @@ class OperatorMetrics:
 # Operator Interface
 # ============================================================================
 
+
 class OperatorInterface:
     """
     Interface for SOC operators to review and act on HITL decisions.
@@ -183,10 +186,10 @@ class OperatorInterface:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Active sessions
-        self._sessions: Dict[str, OperatorSession] = {}
+        self._sessions: dict[str, OperatorSession] = {}
 
         # Operator metrics
-        self._operator_metrics: Dict[str, OperatorMetrics] = {}
+        self._operator_metrics: dict[str, OperatorMetrics] = {}
 
         # Session timeout (default: 8 hours)
         self.session_timeout = timedelta(hours=8)
@@ -198,8 +201,8 @@ class OperatorInterface:
         operator_id: str,
         operator_name: str,
         operator_role: str,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
     ) -> OperatorSession:
         """
         Create new operator session.
@@ -233,17 +236,13 @@ class OperatorInterface:
 
         # Initialize metrics if needed
         if operator_id not in self._operator_metrics:
-            self._operator_metrics[operator_id] = OperatorMetrics(
-                operator_id=operator_id
-            )
+            self._operator_metrics[operator_id] = OperatorMetrics(operator_id=operator_id)
 
-        self.logger.info(
-            f"Session created: {session_id} (operator={operator_id}, role={operator_role})"
-        )
+        self.logger.info(f"Session created: {session_id} (operator={operator_id}, role={operator_role})")
 
         return session
 
-    def get_session(self, session_id: str) -> Optional[OperatorSession]:
+    def get_session(self, session_id: str) -> OperatorSession | None:
         """Get active session by ID."""
         session = self._sessions.get(session_id)
         if session and session.is_expired():
@@ -272,9 +271,9 @@ class OperatorInterface:
     def get_pending_decisions(
         self,
         session_id: str,
-        risk_level: Optional[RiskLevel] = None,
+        risk_level: RiskLevel | None = None,
         limit: int = 20,
-    ) -> List[HITLDecision]:
+    ) -> list[HITLDecision]:
         """
         Get pending decisions for operator review.
 
@@ -297,21 +296,19 @@ class OperatorInterface:
             return []
 
         # Get decisions from queue
-        decisions = self.decision_queue.get_pending_decisions(
-            risk_level=risk_level, operator_id=session.operator_id
-        )
+        decisions = self.decision_queue.get_pending_decisions(risk_level=risk_level, operator_id=session.operator_id)
 
         # Sort by priority (CRITICAL first, then by SLA deadline)
-        decisions.sort(key=lambda d: (
-            4 - list(RiskLevel).index(d.risk_level),  # CRITICAL=4, LOW=1
-            d.sla_deadline or datetime.max,
-        ))
+        decisions.sort(
+            key=lambda d: (
+                4 - list(RiskLevel).index(d.risk_level),  # CRITICAL=4, LOW=1
+                d.sla_deadline or datetime.max,
+            )
+        )
 
         return decisions[:limit]
 
-    def approve_decision(
-        self, session_id: str, decision_id: str, comment: str = ""
-    ) -> Dict[str, Any]:
+    def approve_decision(self, session_id: str, decision_id: str, comment: str = "") -> dict[str, Any]:
         """
         Approve and execute decision.
 
@@ -358,10 +355,7 @@ class OperatorInterface:
         if self.decision_queue:
             self.decision_queue.remove_decision(decision_id)
 
-        self.logger.info(
-            f"Decision approved: {decision_id} by {session.operator_id} "
-            f"(executed={result.executed})"
-        )
+        self.logger.info(f"Decision approved: {decision_id} by {session.operator_id} (executed={result.executed})")
 
         return {
             "decision_id": decision_id,
@@ -371,9 +365,7 @@ class OperatorInterface:
             "error": result.execution_error,
         }
 
-    def reject_decision(
-        self, session_id: str, decision_id: str, reason: str, comment: str = ""
-    ) -> Dict[str, Any]:
+    def reject_decision(self, session_id: str, decision_id: str, reason: str, comment: str = "") -> dict[str, Any]:
         """
         Reject decision (veto AI recommendation).
 
@@ -426,10 +418,7 @@ class OperatorInterface:
         if self.decision_queue:
             self.decision_queue.remove_decision(decision_id)
 
-        self.logger.info(
-            f"Decision rejected: {decision_id} by {session.operator_id} "
-            f"(reason={reason})"
-        )
+        self.logger.info(f"Decision rejected: {decision_id} by {session.operator_id} (reason={reason})")
 
         return {
             "decision_id": decision_id,
@@ -441,9 +430,9 @@ class OperatorInterface:
         self,
         session_id: str,
         decision_id: str,
-        modifications: Dict[str, Any],
+        modifications: dict[str, Any],
         comment: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Modify decision parameters and execute.
 
@@ -494,8 +483,7 @@ class OperatorInterface:
             self.decision_queue.remove_decision(decision_id)
 
         self.logger.info(
-            f"Decision modified and approved: {decision_id} by {session.operator_id} "
-            f"(modifications={modifications})"
+            f"Decision modified and approved: {decision_id} by {session.operator_id} (modifications={modifications})"
         )
 
         return {
@@ -507,9 +495,7 @@ class OperatorInterface:
             "error": result.execution_error,
         }
 
-    def escalate_decision(
-        self, session_id: str, decision_id: str, reason: str, comment: str = ""
-    ) -> Dict[str, Any]:
+    def escalate_decision(self, session_id: str, decision_id: str, reason: str, comment: str = "") -> dict[str, Any]:
         """
         Escalate decision to higher authority.
 
@@ -537,9 +523,7 @@ class OperatorInterface:
         if self.escalation_manager is None:
             raise RuntimeError("Escalation manager not set")
 
-        escalation_target = self.escalation_manager.get_escalation_target(
-            session.operator_role, decision
-        )
+        escalation_target = self.escalation_manager.get_escalation_target(session.operator_role, decision)
 
         # Escalate
         from .escalation_manager import EscalationType
@@ -555,9 +539,7 @@ class OperatorInterface:
         session.decisions_reviewed += 1
         session.decisions_escalated += 1
 
-        self.logger.info(
-            f"Decision escalated: {decision_id} by {session.operator_id} → {escalation_target}"
-        )
+        self.logger.info(f"Decision escalated: {decision_id} by {session.operator_id} → {escalation_target}")
 
         return {
             "decision_id": decision_id,
@@ -567,11 +549,11 @@ class OperatorInterface:
             "reason": reason,
         }
 
-    def get_operator_metrics(self, operator_id: str) -> Optional[OperatorMetrics]:
+    def get_operator_metrics(self, operator_id: str) -> OperatorMetrics | None:
         """Get metrics for operator."""
         return self._operator_metrics.get(operator_id)
 
-    def get_session_metrics(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def get_session_metrics(self, session_id: str) -> dict[str, Any] | None:
         """Get metrics for active session."""
         session = self.get_session(session_id)
         if session is None:
@@ -592,7 +574,7 @@ class OperatorInterface:
             "rejection_rate": session.get_rejection_rate(),
         }
 
-    def _get_decision(self, decision_id: str) -> Optional[HITLDecision]:
+    def _get_decision(self, decision_id: str) -> HITLDecision | None:
         """Get decision from queue."""
         if self.decision_queue is None:
             return None

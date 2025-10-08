@@ -12,23 +12,24 @@ Quality: REGRA DE OURO compliant - NO MOCK, NO PLACEHOLDER, NO TODO
 
 import asyncio
 import time
-from typing import List, Dict
 from dataclasses import dataclass, field
+
 import httpx
 
 
 @dataclass
 class StressMetrics:
     """Metrics collected during stress testing."""
+
     decisions_enqueued: int = 0
     decisions_processed: int = 0
     requests_sent: int = 0
     requests_failed: int = 0
     avg_response_time: float = 0.0
     max_response_time: float = 0.0
-    min_response_time: float = float('inf')
-    response_times: List[float] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    min_response_time: float = float("inf")
+    response_times: list[float] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     throughput: float = 0.0
 
 
@@ -64,9 +65,9 @@ class StressValidator:
         Returns:
             True if system handles load
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: High Volume Enqueue (100 decisions/min)")
-        print("="*80)
+        print("=" * 80)
 
         try:
             num_decisions = 100
@@ -90,8 +91,8 @@ class StressValidator:
                             "ai_reasoning": f"High volume stress test #{i}",
                             "threat_score": 5.0 + (i % 5),
                             "threat_type": "stress_test",
-                            "metadata": {"batch": "high_volume", "index": i}
-                        }
+                            "metadata": {"batch": "high_volume", "index": i},
+                        },
                     )
                     tasks.append(task)
 
@@ -112,17 +113,15 @@ class StressValidator:
                 self.metrics.requests_failed += failures
                 self.metrics.throughput = successes / elapsed_time
 
-                print(f"✅ High volume test completed:")
+                print("✅ High volume test completed:")
                 print(f"   Decisions enqueued: {successes}/{num_decisions}")
                 print(f"   Failures: {failures}")
                 print(f"   Elapsed time: {elapsed_time:.2f}s")
                 print(f"   Throughput: {self.metrics.throughput:.1f} decisions/sec")
-                print(f"   Success rate: {(successes/num_decisions)*100:.1f}%")
+                print(f"   Success rate: {(successes / num_decisions) * 100:.1f}%")
 
                 # Verify queue can handle volume
-                health_response = await client.get(
-                    f"{self.base_url}/api/v1/governance/health"
-                )
+                health_response = await client.get(f"{self.base_url}/api/v1/governance/health")
                 health_data = health_response.json()
 
                 print(f"   Queue size after test: {health_data.get('queue_size', 'N/A')}")
@@ -145,15 +144,16 @@ class StressValidator:
         Returns:
             True if system handles concurrent load
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Concurrent Operators (10 simultaneous)")
-        print("="*80)
+        print("=" * 80)
 
         try:
             num_operators = 10
             decisions_per_operator = 10
 
             async with httpx.AsyncClient(timeout=120.0) as client:
+
                 async def operator_load(operator_num: int):
                     """Simulate operator under load."""
                     try:
@@ -163,8 +163,8 @@ class StressValidator:
                             json={
                                 "operator_id": f"stress_op_{operator_num}@test",
                                 "operator_name": f"Stress Operator {operator_num}",
-                                "role": "soc_operator"
-                            }
+                                "role": "soc_operator",
+                            },
                         )
 
                         if session_response.status_code != 200:
@@ -191,14 +191,14 @@ class StressValidator:
                                     "ai_reasoning": f"Concurrent test op{operator_num}",
                                     "threat_score": 7.0,
                                     "threat_type": "test",
-                                    "metadata": {}
-                                }
+                                    "metadata": {},
+                                },
                             )
 
                             # Approve
                             await client.post(
                                 f"{self.base_url}/api/v1/governance/decision/{decision_id}/approve",
-                                json={"session_id": session_id, "comment": "Stress test"}
+                                json={"session_id": session_id, "comment": "Stress test"},
                             )
 
                             processed += 1
@@ -211,9 +211,7 @@ class StressValidator:
                 # Run all operators concurrently
                 start_time = time.time()
 
-                results = await asyncio.gather(*[
-                    operator_load(i) for i in range(num_operators)
-                ])
+                results = await asyncio.gather(*[operator_load(i) for i in range(num_operators)])
 
                 elapsed_time = time.time() - start_time
 
@@ -221,12 +219,12 @@ class StressValidator:
                 successful_operators = sum(1 for r in results if r.get("success"))
                 total_processed = sum(r.get("processed", 0) for r in results)
 
-                print(f"✅ Concurrent operators test completed:")
+                print("✅ Concurrent operators test completed:")
                 print(f"   Operators: {num_operators}")
                 print(f"   Successful: {successful_operators}")
                 print(f"   Total decisions processed: {total_processed}")
                 print(f"   Elapsed time: {elapsed_time:.2f}s")
-                print(f"   System throughput: {total_processed/elapsed_time:.1f} dec/sec")
+                print(f"   System throughput: {total_processed / elapsed_time:.1f} dec/sec")
 
                 assert successful_operators >= num_operators * 0.9, "Too many operator failures"
 
@@ -244,31 +242,27 @@ class StressValidator:
         Returns:
             True if system remains stable
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Rapid-Fire Requests (200 requests)")
-        print("="*80)
+        print("=" * 80)
 
         try:
             num_requests = 200
 
             async with httpx.AsyncClient(timeout=60.0) as client:
+
                 async def make_request(request_num: int):
                     """Make single request and measure time."""
                     start = time.time()
 
                     try:
-                        response = await client.get(
-                            f"{self.base_url}/api/v1/governance/health"
-                        )
+                        response = await client.get(f"{self.base_url}/api/v1/governance/health")
                         elapsed = time.time() - start
 
                         self.metrics.response_times.append(elapsed)
                         self.metrics.requests_sent += 1
 
-                        return {
-                            "success": response.status_code == 200,
-                            "time": elapsed
-                        }
+                        return {"success": response.status_code == 200, "time": elapsed}
 
                     except Exception as e:
                         self.metrics.requests_failed += 1
@@ -282,9 +276,7 @@ class StressValidator:
 
                 for batch_start in range(0, num_requests, batch_size):
                     batch_end = min(batch_start + batch_size, num_requests)
-                    batch_results = await asyncio.gather(*[
-                        make_request(i) for i in range(batch_start, batch_end)
-                    ])
+                    batch_results = await asyncio.gather(*[make_request(i) for i in range(batch_start, batch_end)])
                     all_results.extend(batch_results)
 
                     # Small delay between batches
@@ -307,19 +299,19 @@ class StressValidator:
                     p95 = sorted_times[int(len(sorted_times) * 0.95)]
                     p99 = sorted_times[int(len(sorted_times) * 0.99)]
 
-                print(f"✅ Rapid-fire test completed:")
+                print("✅ Rapid-fire test completed:")
                 print(f"   Requests sent: {num_requests}")
                 print(f"   Successes: {successes}")
                 print(f"   Failures: {failures}")
-                print(f"   Success rate: {(successes/num_requests)*100:.1f}%")
+                print(f"   Success rate: {(successes / num_requests) * 100:.1f}%")
                 print(f"   Total time: {elapsed_time:.2f}s")
-                print(f"\n   Response Times:")
-                print(f"     Min: {self.metrics.min_response_time*1000:.1f}ms")
-                print(f"     Avg: {self.metrics.avg_response_time*1000:.1f}ms")
-                print(f"     Max: {self.metrics.max_response_time*1000:.1f}ms")
-                print(f"     P50: {p50*1000:.1f}ms")
-                print(f"     P95: {p95*1000:.1f}ms")
-                print(f"     P99: {p99*1000:.1f}ms")
+                print("\n   Response Times:")
+                print(f"     Min: {self.metrics.min_response_time * 1000:.1f}ms")
+                print(f"     Avg: {self.metrics.avg_response_time * 1000:.1f}ms")
+                print(f"     Max: {self.metrics.max_response_time * 1000:.1f}ms")
+                print(f"     P50: {p50 * 1000:.1f}ms")
+                print(f"     P95: {p95 * 1000:.1f}ms")
+                print(f"     P99: {p99 * 1000:.1f}ms")
 
                 assert successes >= num_requests * 0.95, "Too many request failures"
                 assert p95 < 1.0, "P95 latency exceeds 1s"
@@ -338,9 +330,9 @@ class StressValidator:
         Returns:
             True if queue handles limits gracefully
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Test: Queue Capacity (approach max 1000)")
-        print("="*80)
+        print("=" * 80)
 
         try:
             # Don't actually fill to 1000 (would take too long)
@@ -349,9 +341,7 @@ class StressValidator:
 
             async with httpx.AsyncClient(timeout=60.0) as client:
                 # Check initial queue size
-                health_before = await client.get(
-                    f"{self.base_url}/api/v1/governance/health"
-                )
+                health_before = await client.get(f"{self.base_url}/api/v1/governance/health")
                 queue_before = health_before.json().get("queue_size", 0)
 
                 # Enqueue decisions
@@ -362,27 +352,25 @@ class StressValidator:
                             "decision_id": f"queue_cap_{i}_{time.time()}",
                             "risk_level": "low",
                             "action_type": "block_ip",
-                            "target": f"192.168.{i//256}.{i%256}",
+                            "target": f"192.168.{i // 256}.{i % 256}",
                             "confidence": 0.80,
                             "ai_reasoning": "Queue capacity test",
                             "threat_score": 6.0,
                             "threat_type": "test",
-                            "metadata": {}
-                        }
+                            "metadata": {},
+                        },
                     )
 
                 # Check queue size grew
-                health_after = await client.get(
-                    f"{self.base_url}/api/v1/governance/health"
-                )
+                health_after = await client.get(f"{self.base_url}/api/v1/governance/health")
                 queue_after = health_after.json().get("queue_size", 0)
 
-                print(f"✅ Queue capacity test:")
+                print("✅ Queue capacity test:")
                 print(f"   Queue before: {queue_before}")
                 print(f"   Queue after: {queue_after}")
                 print(f"   Delta: +{queue_after - queue_before}")
-                print(f"   Max capacity: 1000")
-                print(f"   Current usage: {(queue_after/1000)*100:.1f}%")
+                print("   Max capacity: 1000")
+                print(f"   Current usage: {(queue_after / 1000) * 100:.1f}%")
 
                 assert queue_after > queue_before, "Queue did not grow"
 
@@ -400,9 +388,9 @@ class StressValidator:
         Returns:
             True if all tests pass
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🧪 Stress Conditions & Load Testing Suite")
-        print("="*80)
+        print("=" * 80)
         print(f"Base URL: {self.base_url}")
         print()
 
@@ -415,9 +403,9 @@ class StressValidator:
         results.append(("Queue Capacity", await self.test_queue_capacity()))
 
         # Print summary
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 Stress Testing Summary")
-        print("="*80)
+        print("=" * 80)
 
         passed = sum(1 for _, result in results if result)
         total = len(results)
@@ -425,29 +413,29 @@ class StressValidator:
         print(f"\nTotal Tests: {total}")
         print(f"✅ Passed: {passed}")
         print(f"❌ Failed: {total - passed}")
-        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        print(f"Success Rate: {(passed / total) * 100:.1f}%")
 
-        print(f"\nPerformance Metrics:")
+        print("\nPerformance Metrics:")
         print(f"  Decisions enqueued: {self.metrics.decisions_enqueued}")
         print(f"  Requests sent: {self.metrics.requests_sent}")
         print(f"  Requests failed: {self.metrics.requests_failed}")
 
         if self.metrics.response_times:
-            print(f"  Avg response time: {self.metrics.avg_response_time*1000:.1f}ms")
+            print(f"  Avg response time: {self.metrics.avg_response_time * 1000:.1f}ms")
 
         if self.metrics.errors:
-            print(f"\n⚠️  Errors encountered:")
+            print("\n⚠️  Errors encountered:")
             for error in self.metrics.errors[:5]:
                 print(f"   - {error}")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
 
         if passed == total:
             print("✅ ALL STRESS TESTS PASSED - System is stable under load!")
         else:
             print(f"❌ {total - passed} test(s) failed - Review errors above")
 
-        print("="*80)
+        print("=" * 80)
         print()
 
         return passed == total

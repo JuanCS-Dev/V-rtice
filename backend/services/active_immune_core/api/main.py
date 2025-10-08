@@ -11,15 +11,15 @@ Version: 1.0.0
 import logging
 import time
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from monitoring import PrometheusExporter, HealthChecker, MetricsCollector
+from monitoring import HealthChecker, MetricsCollector, PrometheusExporter
 from monitoring.health_checker import HealthStatus
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
     await health_checker.start_auto_check()
 
     # Initialize Core System
-    from api.core_integration import CoreManager, EventBridge
+    from api.core_integration import CoreManager
     from api.routes.websocket import get_event_bridge
 
     core_manager = CoreManager.get_instance()
@@ -138,10 +138,7 @@ def create_app() -> FastAPI:
 
         # Record request
         if prometheus_exporter:
-            prometheus_exporter.record_operation_duration(
-                "request_started",
-                0.0
-            )
+            prometheus_exporter.record_operation_duration("request_started", 0.0)
 
         try:
             response = await call_next(request)
@@ -159,10 +156,7 @@ def create_app() -> FastAPI:
                 )
 
             # Log request
-            logger.info(
-                f"{request.method} {request.url.path} "
-                f"status={response.status_code} duration={duration:.3f}s"
-            )
+            logger.info(f"{request.method} {request.url.path} status={response.status_code} duration={duration:.3f}s")
 
             return response
 
@@ -178,10 +172,7 @@ def create_app() -> FastAPI:
                     latency=duration,
                 )
 
-            logger.error(
-                f"{request.method} {request.url.path} "
-                f"error={str(e)} duration={duration:.3f}s"
-            )
+            logger.error(f"{request.method} {request.url.path} error={str(e)} duration={duration:.3f}s")
 
             raise
 
@@ -236,7 +227,8 @@ def create_app() -> FastAPI:
         }
 
     # Register routers
-    from api.routes import health, metrics, agents, coordination, lymphnode, websocket as websocket_events
+    from api.routes import agents, coordination, health, lymphnode, metrics
+    from api.routes import websocket as websocket_events
     from api.websocket import router as websocket_router
 
     app.include_router(health.router, prefix="/health", tags=["health"])

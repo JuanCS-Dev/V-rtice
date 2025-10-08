@@ -11,17 +11,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from pathlib import Path
-
 import numpy as np
 import pytest
 
-from training.dataset_builder import (
-    DatasetBuilder,
-    DatasetSplit,
-    SplitStrategy,
-    PyTorchDatasetWrapper
-)
+from training.dataset_builder import DatasetBuilder, DatasetSplit, PyTorchDatasetWrapper, SplitStrategy
 
 
 def test_stratified_split(synthetic_features, synthetic_labels, temp_dir):
@@ -36,20 +29,11 @@ def test_stratified_split(synthetic_features, synthetic_labels, temp_dir):
     sample_ids = [f"sample_{i:04d}" for i in range(len(synthetic_features))]
 
     builder = DatasetBuilder(
-        features=synthetic_features,
-        labels=synthetic_labels,
-        sample_ids=sample_ids,
-        output_dir=temp_dir,
-        random_seed=42
+        features=synthetic_features, labels=synthetic_labels, sample_ids=sample_ids, output_dir=temp_dir, random_seed=42
     )
 
     # Create stratified splits
-    splits = builder.create_splits(
-        strategy=SplitStrategy.STRATIFIED,
-        train_ratio=0.7,
-        val_ratio=0.15,
-        test_ratio=0.15
-    )
+    splits = builder.create_splits(strategy=SplitStrategy.STRATIFIED, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15)
 
     # Verify splits exist
     assert "train" in splits
@@ -62,16 +46,14 @@ def test_stratified_split(synthetic_features, synthetic_labels, temp_dir):
     n_val = len(splits["val"].features)
     n_test = len(splits["test"].features)
 
-    assert n_train + n_val + n_test == n_total, \
+    assert n_train + n_val + n_test == n_total, (
         f"Split sizes don't sum to total: {n_train} + {n_val} + {n_test} != {n_total}"
+    )
 
     # Verify split ratios (allow 5% tolerance)
-    assert abs(n_train / n_total - 0.7) < 0.05, \
-        f"Train ratio {n_train / n_total:.2f} far from 0.7"
-    assert abs(n_val / n_total - 0.15) < 0.05, \
-        f"Val ratio {n_val / n_total:.2f} far from 0.15"
-    assert abs(n_test / n_total - 0.15) < 0.05, \
-        f"Test ratio {n_test / n_total:.2f} far from 0.15"
+    assert abs(n_train / n_total - 0.7) < 0.05, f"Train ratio {n_train / n_total:.2f} far from 0.7"
+    assert abs(n_val / n_total - 0.15) < 0.05, f"Val ratio {n_val / n_total:.2f} far from 0.15"
+    assert abs(n_test / n_total - 0.15) < 0.05, f"Test ratio {n_test / n_total:.2f} far from 0.15"
 
     # Verify class distribution (stratification)
     unique_labels = np.unique(synthetic_labels)
@@ -86,8 +68,9 @@ def test_stratified_split(synthetic_features, synthetic_labels, temp_dir):
         n_label_test = (splits["test"].labels == label).sum()
 
         # Verify all samples are accounted for
-        assert n_label_train + n_label_val + n_label_test == n_label_total, \
+        assert n_label_train + n_label_val + n_label_test == n_label_total, (
             f"Class {label} samples don't sum: {n_label_train} + {n_label_val} + {n_label_test} != {n_label_total}"
+        )
 
         # Verify stratification (each split should have similar class proportions)
         train_ratio_label = n_label_train / n_label_total
@@ -95,8 +78,7 @@ def test_stratified_split(synthetic_features, synthetic_labels, temp_dir):
         test_ratio_label = n_label_test / n_label_total
 
         # Allow 10% tolerance for class distribution
-        assert abs(train_ratio_label - 0.7) < 0.1, \
-            f"Class {label} train ratio {train_ratio_label:.2f} far from 0.7"
+        assert abs(train_ratio_label - 0.7) < 0.1, f"Class {label} train ratio {train_ratio_label:.2f} far from 0.7"
 
     # Verify no data leakage (no sample IDs overlap)
     train_ids = set(splits["train"].sample_ids)
@@ -124,11 +106,9 @@ def test_temporal_split(temp_dir):
 
     # Create timestamps (monotonically increasing) - use actual timestamps
     from datetime import datetime, timedelta
+
     base_time = datetime(2025, 1, 1, 0, 0, 0)
-    timestamps = np.array([
-        (base_time + timedelta(hours=i)).timestamp()
-        for i in range(n_samples)
-    ], dtype=np.float64)
+    timestamps = np.array([(base_time + timedelta(hours=i)).timestamp() for i in range(n_samples)], dtype=np.float64)
 
     # Add timestamps to sample IDs
     sample_ids = [f"sample_{i:04d}_t{int(timestamps[i])}" for i in range(n_samples)]
@@ -140,16 +120,11 @@ def test_temporal_split(temp_dir):
         sample_ids=sample_ids,
         output_dir=temp_dir,
         random_seed=42,
-        timestamps=timestamps  # Pass timestamps for temporal split
+        timestamps=timestamps,  # Pass timestamps for temporal split
     )
 
     # Create temporal splits
-    splits = builder.create_splits(
-        strategy=SplitStrategy.TEMPORAL,
-        train_ratio=0.7,
-        val_ratio=0.15,
-        test_ratio=0.15
-    )
+    splits = builder.create_splits(strategy=SplitStrategy.TEMPORAL, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15)
 
     # Extract timestamps from sample IDs
     def extract_timestamp(sample_id: str) -> int:
@@ -165,10 +140,12 @@ def test_temporal_split(temp_dir):
     max_val_time = max(val_timestamps)
     min_test_time = min(test_timestamps)
 
-    assert max_train_time < min_val_time, \
+    assert max_train_time < min_val_time, (
         f"Train data overlaps with val data: max_train={max_train_time}, min_val={min_val_time}"
-    assert max_val_time < min_test_time, \
+    )
+    assert max_val_time < min_test_time, (
         f"Val data overlaps with test data: max_val={max_val_time}, min_test={min_test_time}"
+    )
 
     # Verify each split is internally sorted
     assert train_timestamps == sorted(train_timestamps), "Train split not chronologically sorted"
@@ -199,31 +176,22 @@ def test_pytorch_dataset_wrapper():
     sample_ids = [f"sample_{i:04d}" for i in range(n_samples)]
 
     # Create DatasetSplit
-    dataset_split = DatasetSplit(
-        features=features,
-        labels=labels,
-        sample_ids=sample_ids
-    )
+    dataset_split = DatasetSplit(features=features, labels=labels, sample_ids=sample_ids)
 
     # Create PyTorch wrapper
     pytorch_dataset = PyTorchDatasetWrapper(dataset_split)
 
     # Verify __len__
-    assert len(pytorch_dataset) == n_samples, \
-        f"Expected length {n_samples}, got {len(pytorch_dataset)}"
+    assert len(pytorch_dataset) == n_samples, f"Expected length {n_samples}, got {len(pytorch_dataset)}"
 
     # Verify __getitem__
     feature, label = pytorch_dataset[0]
 
-    assert isinstance(feature, torch.Tensor), \
-        f"Expected torch.Tensor for feature, got {type(feature)}"
-    assert isinstance(label, torch.Tensor), \
-        f"Expected torch.Tensor for label, got {type(label)}"
+    assert isinstance(feature, torch.Tensor), f"Expected torch.Tensor for feature, got {type(feature)}"
+    assert isinstance(label, torch.Tensor), f"Expected torch.Tensor for label, got {type(label)}"
 
-    assert feature.shape == (128,), \
-        f"Expected feature shape (128,), got {feature.shape}"
-    assert label.shape == (), \
-        f"Expected label shape (), got {label.shape}"
+    assert feature.shape == (128,), f"Expected feature shape (128,), got {feature.shape}"
+    assert label.shape == (), f"Expected label shape (), got {label.shape}"
 
     # Verify DataLoader compatibility
     dataloader = DataLoader(pytorch_dataset, batch_size=8, shuffle=True)
@@ -231,10 +199,8 @@ def test_pytorch_dataset_wrapper():
     # Get first batch
     batch_features, batch_labels = next(iter(dataloader))
 
-    assert batch_features.shape == (8, 128), \
-        f"Expected batch shape (8, 128), got {batch_features.shape}"
-    assert batch_labels.shape == (8,), \
-        f"Expected batch labels shape (8,), got {batch_labels.shape}"
+    assert batch_features.shape == (8, 128), f"Expected batch shape (8, 128), got {batch_features.shape}"
+    assert batch_labels.shape == (8,), f"Expected batch labels shape (8,), got {batch_labels.shape}"
 
     # Verify all batches
     n_batches = 0
@@ -250,5 +216,4 @@ def test_pytorch_dataset_wrapper():
         assert batch_labels.dim() == 1, "Batch labels should be 1D"
 
     # Verify all samples were seen
-    assert total_samples == n_samples, \
-        f"Expected {n_samples} total samples, got {total_samples}"
+    assert total_samples == n_samples, f"Expected {n_samples} total samples, got {total_samples}"

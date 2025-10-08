@@ -15,15 +15,15 @@ Vulnerability Intelligence Service's capabilities for risk assessment, patch
 management, and proactive defense, enhancing the overall cybersecurity posture.
 """
 
-import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from cve_correlator import CVECorrelator
-from fastapi import FastAPI, HTTPException
-from nuclei_wrapper import NucleiWrapper
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+from cve_correlator import CVECorrelator
+from nuclei_wrapper import NucleiWrapper
 
 app = FastAPI(title="Maximus Vulnerability Intelligence Service", version="1.0.0")
 
@@ -131,12 +131,8 @@ async def correlate_software_vulnerabilities(
     Returns:
         Dict[str, Any]: A dictionary containing the correlated CVEs.
     """
-    print(
-        f"[API] Correlating vulnerabilities for {request.software_name} {request.software_version}"
-    )
-    correlated_cves = await cve_correlator.correlate_vulnerability(
-        request.software_name, request.software_version
-    )
+    print(f"[API] Correlating vulnerabilities for {request.software_name} {request.software_version}")
+    correlated_cves = await cve_correlator.correlate_vulnerability(request.software_name, request.software_version)
     return {
         "status": "success",
         "timestamp": datetime.now().isoformat(),
@@ -155,9 +151,7 @@ async def initiate_nuclei_scan(request: NucleiScanRequest) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary containing the Nuclei scan results.
     """
     print(f"[API] Initiating Nuclei scan on {request.target}")
-    scan_results = await nuclei_wrapper.run_scan(
-        request.target, request.template_path, request.options
-    )
+    scan_results = await nuclei_wrapper.run_scan(request.target, request.template_path, request.options)
     return {
         "status": "success",
         "timestamp": datetime.now().isoformat(),

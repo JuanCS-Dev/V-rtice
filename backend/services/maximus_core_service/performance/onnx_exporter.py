@@ -14,10 +14,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -25,6 +25,7 @@ import numpy as np
 try:
     import onnx
     from onnx import numpy_helper
+
     ONNX_AVAILABLE = True
 except ImportError:
     ONNX_AVAILABLE = False
@@ -33,6 +34,7 @@ except ImportError:
 try:
     import torch
     import torch.nn as nn
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -50,9 +52,9 @@ class ONNXExportConfig:
     optimize: bool = True
 
     # Input/Output
-    input_names: List[str] = None
-    output_names: List[str] = None
-    dynamic_axes: Dict[str, Dict[int, str]] = None
+    input_names: list[str] = None
+    output_names: list[str] = None
+    dynamic_axes: dict[str, dict[int, str]] = None
 
     # Validation
     validate_model: bool = True
@@ -88,14 +90,14 @@ class ONNXExportResult:
     model_size_mb: float
 
     # Input/Output shapes
-    input_shapes: List[Tuple[int, ...]]
-    output_shapes: List[Tuple[int, ...]]
+    input_shapes: list[tuple[int, ...]]
+    output_shapes: list[tuple[int, ...]]
 
     # Validation
     validation_passed: bool
     inference_test_passed: bool = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary.
 
         Returns:
@@ -109,7 +111,7 @@ class ONNXExportResult:
             "input_shapes": [list(s) for s in self.input_shapes],
             "output_shapes": [list(s) for s in self.output_shapes],
             "validation_passed": self.validation_passed,
-            "inference_test_passed": self.inference_test_passed
+            "inference_test_passed": self.inference_test_passed,
         }
 
 
@@ -127,32 +129,16 @@ class ONNXExporter:
     Example:
         ```python
         # Simple export
-        config = ONNXExportConfig(
-            opset_version=14,
-            optimize=True
-        )
+        config = ONNXExportConfig(opset_version=14, optimize=True)
 
         exporter = ONNXExporter(config=config)
-        result = exporter.export(
-            model=model,
-            dummy_input=torch.randn(1, 3, 224, 224),
-            output_path="model.onnx"
-        )
+        result = exporter.export(model=model, dummy_input=torch.randn(1, 3, 224, 224), output_path="model.onnx")
 
         # Export with dynamic axes (batch size)
-        config = ONNXExportConfig(
-            dynamic_axes={
-                "input": {0: "batch_size"},
-                "output": {0: "batch_size"}
-            }
-        )
+        config = ONNXExportConfig(dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}})
 
         exporter = ONNXExporter(config=config)
-        result = exporter.export(
-            model=model,
-            dummy_input=torch.randn(1, 3, 224, 224),
-            output_path="model_dynamic.onnx"
-        )
+        result = exporter.export(model=model, dummy_input=torch.randn(1, 3, 224, 224), output_path="model_dynamic.onnx")
         ```
     """
 
@@ -172,12 +158,7 @@ class ONNXExporter:
 
         logger.info(f"ONNXExporter initialized: opset={config.opset_version}")
 
-    def export(
-        self,
-        model: nn.Module,
-        dummy_input: torch.Tensor,
-        output_path: str
-    ) -> ONNXExportResult:
+    def export(self, model: nn.Module, dummy_input: torch.Tensor, output_path: str) -> ONNXExportResult:
         """Export PyTorch model to ONNX.
 
         Args:
@@ -207,7 +188,7 @@ class ONNXExporter:
                 input_names=self.config.input_names,
                 output_names=self.config.output_names,
                 dynamic_axes=self.config.dynamic_axes,
-                verbose=False
+                verbose=False,
             )
 
         logger.info(f"Model exported to {output_path}")
@@ -229,11 +210,7 @@ class ONNXExporter:
         # Test inference
         inference_test_passed = False
         if self.config.test_with_random_input:
-            inference_test_passed = self._test_inference(
-                model,
-                onnx_model,
-                dummy_input
-            )
+            inference_test_passed = self._test_inference(model, onnx_model, dummy_input)
 
         # Get model info
         model_info = self._get_model_info(onnx_model, output_path)
@@ -243,7 +220,7 @@ class ONNXExporter:
             opset_version=self.config.opset_version,
             validation_passed=validation_passed,
             inference_test_passed=inference_test_passed,
-            **model_info
+            **model_info,
         )
 
         logger.info("Export complete")
@@ -278,7 +255,7 @@ class ONNXExporter:
             "fuse_consecutive_transposes",
             "fuse_matmul_add_bias_into_gemm",
             "fuse_pad_into_conv",
-            "fuse_transpose_into_gemm"
+            "fuse_transpose_into_gemm",
         ]
 
         logger.debug(f"Applying {len(passes)} optimization passes")
@@ -305,12 +282,7 @@ class ONNXExporter:
             logger.error(f"Model validation: FAILED - {e}")
             return False
 
-    def _test_inference(
-        self,
-        pytorch_model: nn.Module,
-        onnx_model: Any,
-        dummy_input: torch.Tensor
-    ) -> bool:
+    def _test_inference(self, pytorch_model: nn.Module, onnx_model: Any, dummy_input: torch.Tensor) -> bool:
         """Test ONNX inference against PyTorch.
 
         Args:
@@ -335,10 +307,7 @@ class ONNXExporter:
             pytorch_output = pytorch_output.cpu().numpy()
 
             # ONNX inference
-            session = ort.InferenceSession(
-                onnx_model.SerializeToString(),
-                providers=['CPUExecutionProvider']
-            )
+            session = ort.InferenceSession(onnx_model.SerializeToString(), providers=["CPUExecutionProvider"])
 
             onnx_input = {self.config.input_names[0]: dummy_input.cpu().numpy()}
             onnx_output = session.run(None, onnx_input)[0]
@@ -349,9 +318,8 @@ class ONNXExporter:
             if max_diff < 1e-5:
                 logger.info(f"Inference test: PASSED (max diff: {max_diff:.2e})")
                 return True
-            else:
-                logger.warning(f"Inference test: FAILED (max diff: {max_diff:.2e})")
-                return False
+            logger.warning(f"Inference test: FAILED (max diff: {max_diff:.2e})")
+            return False
 
         except ImportError:
             logger.warning("onnxruntime not available, skipping inference test")
@@ -361,11 +329,7 @@ class ONNXExporter:
             logger.error(f"Inference test failed: {e}")
             return False
 
-    def _get_model_info(
-        self,
-        onnx_model: Any,
-        model_path: Path
-    ) -> Dict[str, Any]:
+    def _get_model_info(self, onnx_model: Any, model_path: Path) -> dict[str, Any]:
         """Get ONNX model information.
 
         Args:
@@ -410,7 +374,7 @@ class ONNXExporter:
             "num_parameters": num_params,
             "model_size_mb": model_size_mb,
             "input_shapes": input_shapes,
-            "output_shapes": output_shapes
+            "output_shapes": output_shapes,
         }
 
     def print_report(self, result: ONNXExportResult):
@@ -423,23 +387,23 @@ class ONNXExporter:
         print("ONNX EXPORT REPORT")
         print("=" * 80)
 
-        print(f"\nModel Info:")
+        print("\nModel Info:")
         print(f"  ONNX file: {result.onnx_path}")
         print(f"  Opset version: {result.opset_version}")
         print(f"  Model size: {result.model_size_mb:.2f} MB")
         print(f"  Parameters: {result.num_parameters:,}")
 
-        print(f"\nInput Shapes:")
+        print("\nInput Shapes:")
         for i, shape in enumerate(result.input_shapes):
             shape_str = str(shape).replace("-1", "dynamic")
             print(f"  {self.config.input_names[i]}: {shape_str}")
 
-        print(f"\nOutput Shapes:")
+        print("\nOutput Shapes:")
         for i, shape in enumerate(result.output_shapes):
             shape_str = str(shape).replace("-1", "dynamic")
             print(f"  {self.config.output_names[i]}: {shape_str}")
 
-        print(f"\nValidation:")
+        print("\nValidation:")
         print(f"  Model validation: {'✓ PASSED' if result.validation_passed else '✗ FAILED'}")
         print(f"  Inference test: {'✓ PASSED' if result.inference_test_passed else '✗ FAILED'}")
 
@@ -449,6 +413,7 @@ class ONNXExporter:
 # =============================================================================
 # Utility Functions
 # =============================================================================
+
 
 def simplify_onnx_model(input_path: str, output_path: str) -> bool:
     """Simplify ONNX model using onnx-simplifier.
@@ -474,9 +439,8 @@ def simplify_onnx_model(input_path: str, output_path: str) -> bool:
             onnx.save(simplified_model, output_path)
             logger.info(f"Model simplified and saved to {output_path}")
             return True
-        else:
-            logger.warning("Model simplification failed validation")
-            return False
+        logger.warning("Model simplification failed validation")
+        return False
 
     except ImportError:
         logger.warning("onnx-simplifier not available. Install with: pip install onnx-simplifier")
@@ -488,10 +452,7 @@ def simplify_onnx_model(input_path: str, output_path: str) -> bool:
 
 
 def convert_to_onnx_with_quantization(
-    model: nn.Module,
-    dummy_input: torch.Tensor,
-    output_path: str,
-    quantization_type: str = "dynamic"
+    model: nn.Module, dummy_input: torch.Tensor, output_path: str, quantization_type: str = "dynamic"
 ) -> bool:
     """Export model to ONNX with quantization.
 
@@ -514,23 +475,18 @@ def convert_to_onnx_with_quantization(
             return False
 
         # Quantize ONNX model
-        from onnxruntime.quantization import quantize_dynamic, QuantType
+        from onnxruntime.quantization import QuantType, quantize_dynamic
 
         quantized_path = output_path.replace(".onnx", "_quantized.onnx")
 
         if quantization_type == "dynamic":
-            quantize_dynamic(
-                str(result.onnx_path),
-                quantized_path,
-                weight_type=QuantType.QUInt8
-            )
+            quantize_dynamic(str(result.onnx_path), quantized_path, weight_type=QuantType.QUInt8)
 
             logger.info(f"Quantized model saved to {quantized_path}")
             return True
 
-        else:
-            logger.warning(f"Quantization type {quantization_type} not implemented")
-            return False
+        logger.warning(f"Quantization type {quantization_type} not implemented")
+        return False
 
     except ImportError:
         logger.warning("onnxruntime not available for quantization")
@@ -545,6 +501,7 @@ def convert_to_onnx_with_quantization(
 # CLI
 # =============================================================================
 
+
 def main():
     """Main ONNX export script."""
     import argparse
@@ -552,8 +509,7 @@ def main():
     parser = argparse.ArgumentParser(description="Export MAXIMUS Models to ONNX")
 
     parser.add_argument("--model_path", type=str, required=True, help="Path to PyTorch model")
-    parser.add_argument("--input_shape", type=str, default="1,3,224,224",
-                       help="Input shape (comma-separated)")
+    parser.add_argument("--input_shape", type=str, default="1,3,224,224", help="Input shape (comma-separated)")
     parser.add_argument("--output", type=str, default="model.onnx", help="Output ONNX filename")
     parser.add_argument("--opset_version", type=int, default=14, help="ONNX opset version")
     parser.add_argument("--optimize", action="store_true", help="Optimize ONNX model")
@@ -577,26 +533,15 @@ def main():
     # Configure dynamic axes
     dynamic_axes = None
     if args.dynamic_batch:
-        dynamic_axes = {
-            "input": {0: "batch_size"},
-            "output": {0: "batch_size"}
-        }
+        dynamic_axes = {"input": {0: "batch_size"}, "output": {0: "batch_size"}}
 
     # Create exporter
-    config = ONNXExportConfig(
-        opset_version=args.opset_version,
-        optimize=args.optimize,
-        dynamic_axes=dynamic_axes
-    )
+    config = ONNXExportConfig(opset_version=args.opset_version, optimize=args.optimize, dynamic_axes=dynamic_axes)
 
     exporter = ONNXExporter(config=config)
 
     # Export
-    result = exporter.export(
-        model=model,
-        dummy_input=dummy_input,
-        output_path=args.output
-    )
+    result = exporter.export(model=model, dummy_input=dummy_input, output_path=args.output)
 
     # Print report
     exporter.print_report(result)

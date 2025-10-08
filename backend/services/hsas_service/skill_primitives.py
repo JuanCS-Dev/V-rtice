@@ -23,10 +23,9 @@ Like biological motor primitives: Fundamental movements composed into skills.
 NO MOCKS - Production-ready implementation.
 """
 
-import asyncio
-from datetime import datetime, timedelta
-from enum import Enum
 import logging
+from datetime import datetime
+from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -161,10 +160,7 @@ class SkillPrimitivesLibrary:
         # Execution history
         self.execution_history: List[Dict[str, Any]] = []
 
-        logger.info(
-            f"SkillPrimitivesLibrary initialized: {len(self.primitives)} primitives "
-            f"(dry_run={dry_run})"
-        )
+        logger.info(f"SkillPrimitivesLibrary initialized: {len(self.primitives)} primitives (dry_run={dry_run})")
 
     def _register_network_primitives(self):
         """Register network control primitives."""
@@ -378,9 +374,7 @@ class SkillPrimitivesLibrary:
 
     # === NETWORK PRIMITIVES IMPLEMENTATION ===
 
-    async def _block_ip(
-        self, ip_address: str, duration_minutes: int = 60, **kwargs
-    ) -> Dict[str, Any]:
+    async def _block_ip(self, ip_address: str, duration_minutes: int = 60, **kwargs) -> Dict[str, Any]:
         """Block IP at firewall."""
         if self.dry_run:
             return {
@@ -413,9 +407,7 @@ class SkillPrimitivesLibrary:
         logger.info(f"Unblocking IP: {ip_address}")
         return {"status": "success", "action": "unblock_ip", "target": ip_address}
 
-    async def _block_domain(
-        self, domain: str, duration_minutes: int = 60, **kwargs
-    ) -> Dict[str, Any]:
+    async def _block_domain(self, domain: str, duration_minutes: int = 60, **kwargs) -> Dict[str, Any]:
         """Block domain at DNS/proxy level."""
         if self.dry_run:
             return {
@@ -447,9 +439,7 @@ class SkillPrimitivesLibrary:
         logger.info(f"Unblocking domain: {domain}")
         return {"status": "success", "action": "unblock_domain", "target": domain}
 
-    async def _rate_limit_ip(
-        self, ip_address: str, rate_limit: int = 10, **kwargs
-    ) -> Dict[str, Any]:
+    async def _rate_limit_ip(self, ip_address: str, rate_limit: int = 10, **kwargs) -> Dict[str, Any]:
         """Apply rate limiting to IP."""
         if self.dry_run:
             return {
@@ -485,9 +475,7 @@ class SkillPrimitivesLibrary:
             "target": ip_address,
         }
 
-    async def _redirect_to_honeypot(
-        self, ip_address: str, honeypot_ip: str, **kwargs
-    ) -> Dict[str, Any]:
+    async def _redirect_to_honeypot(self, ip_address: str, honeypot_ip: str, **kwargs) -> Dict[str, Any]:
         """Redirect traffic to honeypot."""
         if self.dry_run:
             return {
@@ -631,9 +619,7 @@ class SkillPrimitivesLibrary:
 
     # === USER PRIMITIVES IMPLEMENTATION ===
 
-    async def _revoke_session(
-        self, user_id: str, session_id: Optional[str] = None, **kwargs
-    ) -> Dict[str, Any]:
+    async def _revoke_session(self, user_id: str, session_id: Optional[str] = None, **kwargs) -> Dict[str, Any]:
         """Revoke user session."""
         if self.dry_run:
             return {
@@ -770,9 +756,7 @@ class SkillPrimitivesLibrary:
             "type": ioc_type,
         }
 
-    async def _query_threat_feed(
-        self, feed_name: str, query: str, **kwargs
-    ) -> Dict[str, Any]:
+    async def _query_threat_feed(self, feed_name: str, query: str, **kwargs) -> Dict[str, Any]:
         """Query external threat feed."""
         if self.dry_run:
             return {

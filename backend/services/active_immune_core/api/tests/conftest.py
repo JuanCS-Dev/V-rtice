@@ -8,9 +8,10 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
+from typing import Dict, Generator
+
 import pytest
 from fastapi.testclient import TestClient
-from typing import Dict, Generator
 from prometheus_client import REGISTRY
 
 from api.main import create_app
@@ -72,12 +73,7 @@ def sample_agent_data() -> Dict:
     Returns:
         Agent creation payload
     """
-    return {
-        "agent_type": "neutrophil",
-        "config": {
-            "area_patrulha": "test_zone_unit"
-        }
-    }
+    return {"agent_type": "neutrophil", "config": {"area_patrulha": "test_zone_unit"}}
 
 
 @pytest.fixture
@@ -170,11 +166,7 @@ def multiple_agents(client: TestClient) -> list[Dict]:
 
     for agent_type in agent_types:
         response = client.post(
-            "/agents/",
-            json={
-                "agent_type": agent_type,
-                "config": {"area_patrulha": f"test_zone_{agent_type}"}
-            }
+            "/agents/", json={"agent_type": agent_type, "config": {"area_patrulha": f"test_zone_{agent_type}"}}
         )
         assert response.status_code == 201
         agents.append(response.json())
@@ -203,7 +195,7 @@ def multiple_tasks(client: TestClient) -> list[Dict]:
                 "task_type": task_type,
                 "priority": 5,
                 "target": f"target_{task_type}",
-            }
+            },
         )
         assert response.status_code == 201
         tasks.append(response.json())

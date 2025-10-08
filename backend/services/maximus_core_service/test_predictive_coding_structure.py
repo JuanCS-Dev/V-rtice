@@ -19,20 +19,18 @@ Date: 2025-10-06
 Quality: REGRA DE OURO - Zero mocks, structure validation
 """
 
-import pytest
 import ast
-import os
 from pathlib import Path
-
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
 
+
 def read_source(filename):
     """Read source code from predictive_coding directory."""
     path = Path(__file__).parent / "predictive_coding" / filename
-    with open(path, "r") as f:
+    with open(path) as f:
         return f.read()
 
 
@@ -58,6 +56,7 @@ def get_methods(tree, class_name):
 # ============================================================================
 # TEST 1: LAYER 1 (SENSORY/VAE) STRUCTURE
 # ============================================================================
+
 
 def test_layer1_sensory_structure():
     """Test that Layer 1 (Sensory) has correct structure."""
@@ -94,6 +93,7 @@ def test_layer1_sensory_structure():
 # TEST 2: LAYER 2 (BEHAVIORAL/GNN) STRUCTURE
 # ============================================================================
 
+
 def test_layer2_behavioral_structure():
     """Test that Layer 2 (Behavioral) has correct structure."""
     print("\n" + "=" * 80)
@@ -123,6 +123,7 @@ def test_layer2_behavioral_structure():
 # TEST 3: LAYER 3 (OPERATIONAL/TCN) STRUCTURE
 # ============================================================================
 
+
 def test_layer3_operational_structure():
     """Test that Layer 3 (Operational) has correct structure."""
     print("\n" + "=" * 80)
@@ -150,6 +151,7 @@ def test_layer3_operational_structure():
 # ============================================================================
 # TEST 4: LAYER 4 (TACTICAL/LSTM) STRUCTURE
 # ============================================================================
+
 
 def test_layer4_tactical_structure():
     """Test that Layer 4 (Tactical) has correct structure."""
@@ -179,6 +181,7 @@ def test_layer4_tactical_structure():
 # TEST 5: LAYER 5 (STRATEGIC/TRANSFORMER) STRUCTURE
 # ============================================================================
 
+
 def test_layer5_strategic_structure():
     """Test that Layer 5 (Strategic) has correct structure."""
     print("\n" + "=" * 80)
@@ -207,6 +210,7 @@ def test_layer5_strategic_structure():
 # TEST 6: FREE ENERGY PRINCIPLE IN CODE
 # ============================================================================
 
+
 def test_free_energy_principle():
     """Test that Free Energy Principle is implemented in code."""
     print("\n" + "=" * 80)
@@ -216,24 +220,24 @@ def test_free_energy_principle():
     source = read_source("hpc_network.py")
 
     # Check for Free Energy mentions
-    assert "free_energy" in source.lower() or "free energy" in source.lower(), \
+    assert "free_energy" in source.lower() or "free energy" in source.lower(), (
         "Code should mention Free Energy Principle"
+    )
     print("✅ Free Energy Principle referenced in code")
 
     # Check for prediction error tracking
-    assert "prediction_error" in source.lower() or "prediction error" in source.lower(), \
+    assert "prediction_error" in source.lower() or "prediction error" in source.lower(), (
         "Code should track prediction errors"
+    )
     print("✅ Prediction error tracking found")
 
     # Parse AST and check for compute_free_energy method
     tree = parse_source("hpc_network.py")
     classes = get_classes(tree)
-    assert "HierarchicalPredictiveCodingNetwork" in classes, \
-        "Missing main HPC Network class"
+    assert "HierarchicalPredictiveCodingNetwork" in classes, "Missing main HPC Network class"
 
     methods = get_methods(tree, "HierarchicalPredictiveCodingNetwork")
-    assert "compute_free_energy" in methods, \
-        "HPC Network missing compute_free_energy method"
+    assert "compute_free_energy" in methods, "HPC Network missing compute_free_energy method"
     print("✅ compute_free_energy method exists")
 
     print("✅ Free Energy Principle validated")
@@ -242,6 +246,7 @@ def test_free_energy_principle():
 # ============================================================================
 # TEST 7: HIERARCHICAL STRUCTURE VALIDATION
 # ============================================================================
+
 
 def test_hierarchical_structure():
     """Test that hierarchical structure (5 layers) is implemented."""
@@ -260,8 +265,7 @@ def test_hierarchical_structure():
     # Check hierarchical_inference method exists
     tree = parse_source("hpc_network.py")
     methods = get_methods(tree, "HierarchicalPredictiveCodingNetwork")
-    assert "hierarchical_inference" in methods, \
-        "HPC Network missing hierarchical_inference method"
+    assert "hierarchical_inference" in methods, "HPC Network missing hierarchical_inference method"
     print("✅ hierarchical_inference method exists")
 
     print("✅ Hierarchical structure validated")
@@ -270,6 +274,7 @@ def test_hierarchical_structure():
 # ============================================================================
 # TEST 8: HPC NETWORK ORCHESTRATION STRUCTURE
 # ============================================================================
+
 
 def test_hpc_network_orchestration():
     """Test that HPC Network orchestrates all components."""
@@ -281,8 +286,7 @@ def test_hpc_network_orchestration():
 
     # Check HPC Network class exists
     classes = get_classes(tree)
-    assert "HierarchicalPredictiveCodingNetwork" in classes, \
-        "Missing HierarchicalPredictiveCodingNetwork class"
+    assert "HierarchicalPredictiveCodingNetwork" in classes, "Missing HierarchicalPredictiveCodingNetwork class"
     print("✅ HierarchicalPredictiveCodingNetwork class exists")
 
     # Check required methods
@@ -294,8 +298,7 @@ def test_hpc_network_orchestration():
 
     # Check imports from all layers
     source = read_source("hpc_network.py")
-    layer_imports = ["SensoryLayer", "BehavioralLayer", "OperationalLayer",
-                     "TacticalLayer", "StrategicLayer"]
+    layer_imports = ["SensoryLayer", "BehavioralLayer", "OperationalLayer", "TacticalLayer", "StrategicLayer"]
     for layer_import in layer_imports:
         assert layer_import in source, f"HPC Network missing import: {layer_import}"
     print(f"✅ HPC Network imports all {len(layer_imports)} layers")

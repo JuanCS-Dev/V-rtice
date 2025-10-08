@@ -1,0 +1,51 @@
+# ============================================================================
+# PREFRONTAL CORTEX SERVICE - Python Dependencies
+# Rational Control and Emotional Regulation for Maximus AI 3.0
+# ============================================================================
+
+# Core Framework
+fastapi>=0.115.0  # Security fixes for starlette
+uvicorn[standard]>=0.32.0  # Compatibility with updated fastapi
+pydantic>=2.9.0  # Latest security patches
+pydantic-settings>=2.1.0  # Keep current
+
+# HTTP Client (for sensory service polling)
+httpx>=0.27.0  # Security2
+
+# Async Support (asyncio is Python stdlib, removing explicit dependency)
+aiofiles>=23.2.1  # Keep current
+
+# Numerical Computing
+numpy==1.26.2
+scipy==1.11.4
+
+# Logging
+python-json-logger==2.0.7
+
+# Metrics & Monitoring
+prometheus-client==0.19.0
+
+# Database (optional)
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+alembic==1.13.0
+
+# Redis (optional)
+redis==5.0.1
+aioredis==2.0.1
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx>=0.27.0  # Security2  # for testing
+
+# Development
+black>=24.3.0  # CVE-2024-21503 fix (ReDoS vulnerability)
+ruff>=0.1.8  # Keep current
+mypy>=1.7.1  # Keep current
+
+# Security
+python-dotenv==1.0.0
+cryptography>=43.0.1  # Multiple CVE fixes
+anyio>=4.4.0  # Security fix for race condition

@@ -10,24 +10,24 @@ Version: 1.0.0
 
 from .agents import (
     AgentCreate,
-    AgentUpdate,
-    AgentResponse,
     AgentListResponse,
+    AgentResponse,
     AgentStatsResponse,
-)
-from .coordination import (
-    TaskCreate,
-    TaskResponse,
-    TaskListResponse,
-    ElectionResponse,
-    ConsensusProposal,
-    ConsensusResponse,
+    AgentUpdate,
 )
 from .common import (
+    ErrorResponse,
     HealthResponse,
     MetricsResponse,
-    ErrorResponse,
     SuccessResponse,
+)
+from .coordination import (
+    ConsensusProposal,
+    ConsensusResponse,
+    ElectionResponse,
+    TaskCreate,
+    TaskListResponse,
+    TaskResponse,
 )
 
 __all__ = [

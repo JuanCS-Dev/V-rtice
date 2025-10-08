@@ -7,8 +7,9 @@ service for relationship analysis and graph queries.
 import logging
 from typing import Any, Dict, List, Optional
 
-from config import get_settings
 import httpx
+
+from config import get_settings
 from models import EntityRelationship, EntityType, LoadResult
 
 logger = logging.getLogger(__name__)
@@ -39,18 +40,14 @@ class Neo4jLoader:
         try:
             logger.info("Initializing Neo4j loader (via Seriema Graph)...")
 
-            self._client = httpx.AsyncClient(
-                base_url=self.seriema_url, timeout=self.timeout
-            )
+            self._client = httpx.AsyncClient(base_url=self.seriema_url, timeout=self.timeout)
 
             # Health check
             is_healthy = await self.health_check()
             if is_healthy:
                 logger.info("✅ Neo4j loader initialized successfully")
             else:
-                logger.warning(
-                    "⚠️ Seriema Graph service not available - graph features limited"
-                )
+                logger.warning("⚠️ Seriema Graph service not available - graph features limited")
 
         except Exception as e:
             logger.error(f"Failed to initialize Neo4j loader: {e}", exc_info=True)
@@ -62,9 +59,7 @@ class Neo4jLoader:
             await self._client.aclose()
             logger.info("Neo4j loader closed")
 
-    async def load_entity(
-        self, entity_type: EntityType, entity_data: Dict[str, Any]
-    ) -> LoadResult:
+    async def load_entity(self, entity_type: EntityType, entity_data: Dict[str, Any]) -> LoadResult:
         """
         Load a single entity as a node in Neo4j.
 
@@ -179,9 +174,7 @@ class Neo4jLoader:
             logger.error(f"Error loading relationship to Neo4j: {e}", exc_info=True)
             return False
 
-    async def load_batch(
-        self, entity_type: EntityType, entities: List[Dict[str, Any]]
-    ) -> List[LoadResult]:
+    async def load_batch(self, entity_type: EntityType, entities: List[Dict[str, Any]]) -> List[LoadResult]:
         """
         Load multiple entities in batch.
 
@@ -199,15 +192,11 @@ class Neo4jLoader:
             results.append(result)
 
         success_count = sum(1 for r in results if r.success and r.neo4j_loaded)
-        logger.info(
-            f"Batch loaded {success_count}/{len(entities)} {entity_type} nodes to Neo4j"
-        )
+        logger.info(f"Batch loaded {success_count}/{len(entities)} {entity_type} nodes to Neo4j")
 
         return results
 
-    async def load_relationships_batch(
-        self, relationships: List[EntityRelationship]
-    ) -> int:
+    async def load_relationships_batch(self, relationships: List[EntityRelationship]) -> int:
         """
         Load multiple relationships in batch.
 
@@ -224,15 +213,11 @@ class Neo4jLoader:
             if success:
                 success_count += 1
 
-        logger.info(
-            f"Batch loaded {success_count}/{len(relationships)} relationships to Neo4j"
-        )
+        logger.info(f"Batch loaded {success_count}/{len(relationships)} relationships to Neo4j")
 
         return success_count
 
-    async def query_graph(
-        self, query: str, params: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def query_graph(self, query: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Execute a Cypher query via Seriema Graph service.
 
@@ -266,9 +251,7 @@ class Neo4jLoader:
             logger.error(f"Error executing graph query: {e}", exc_info=True)
             raise
 
-    async def get_entity_neighbors(
-        self, entity_type: EntityType, entity_id: str, max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_entity_neighbors(self, entity_type: EntityType, entity_id: str, max_depth: int = 2) -> Dict[str, Any]:
         """
         Get neighboring entities in the graph.
 
@@ -369,9 +352,7 @@ class Neo4jLoader:
             logger.debug(f"Seriema Graph health check failed: {e}")
             return False
 
-    def _get_entity_id(
-        self, entity_type: EntityType, entity_data: Dict[str, Any]
-    ) -> str:
+    def _get_entity_id(self, entity_type: EntityType, entity_data: Dict[str, Any]) -> str:
         """
         Extract entity identifier from data.
 
@@ -390,9 +371,6 @@ class Neo4jLoader:
             return entity_data.get("numero_bo", "unknown")
         elif entity_type == EntityType.ENDERECO:
             # Build composite ID
-            return (
-                entity_data.get("id")
-                or f"{entity_data.get('logradouro', '')}-{entity_data.get('cidade', '')}"
-            )
+            return entity_data.get("id") or f"{entity_data.get('logradouro', '')}-{entity_data.get('cidade', '')}"
         else:
             return "unknown"

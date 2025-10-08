@@ -38,9 +38,7 @@ class SocialMediaScraper(BaseScraper):
         self.last_scrape_time: Optional[datetime] = None
         self.current_status: str = "idle"
 
-    async def scrape(
-        self, query: str, platform: str = "all", depth: int = 1
-    ) -> List[Dict[str, Any]]:
+    async def scrape(self, query: str, platform: str = "all", depth: int = 1) -> List[Dict[str, Any]]:
         """Scrapes publicly available information from social media platforms.
 
         Args:
@@ -51,9 +49,7 @@ class SocialMediaScraper(BaseScraper):
         Returns:
             List[Dict[str, Any]]: A list of dictionaries, each representing a scraped data entry.
         """
-        print(
-            f"[SocialMediaScraper] Scraping '{platform}' for query: '{query}' (depth: {depth})..."
-        )
+        print(f"[SocialMediaScraper] Scraping '{platform}' for query: '{query}' (depth: {depth})...")
         self.current_status = "scraping"
         await asyncio.sleep(0.5)  # Simulate scraping time
 
@@ -119,8 +115,6 @@ class SocialMediaScraper(BaseScraper):
         """
         return {
             "status": self.current_status,
-            "last_scrape": (
-                self.last_scrape_time.isoformat() if self.last_scrape_time else "N/A"
-            ),
+            "last_scrape": (self.last_scrape_time.isoformat() if self.last_scrape_time else "N/A"),
             "total_profiles_scraped": len(self.scraped_profiles),
         }

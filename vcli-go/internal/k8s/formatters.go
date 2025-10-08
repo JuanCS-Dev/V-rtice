@@ -76,17 +76,18 @@ type TableFormatter struct {
 	styleNotReady   lipgloss.Style
 }
 
-// NewTableFormatter creates a new TableFormatter with color styles
+// NewTableFormatter creates a new TableFormatter with design system colors
 func NewTableFormatter() *TableFormatter {
+	// Using design system palette from internal/visual/design_system.go
 	return &TableFormatter{
-		styleRunning:   lipgloss.NewStyle().Foreground(lipgloss.Color("10")), // Green
-		stylePending:   lipgloss.NewStyle().Foreground(lipgloss.Color("11")), // Yellow
-		styleFailed:    lipgloss.NewStyle().Foreground(lipgloss.Color("9")),  // Red
-		styleSucceeded: lipgloss.NewStyle().Foreground(lipgloss.Color("10")), // Green
-		styleUnknown:   lipgloss.NewStyle().Foreground(lipgloss.Color("8")),  // Gray
-		styleHeader:    lipgloss.NewStyle().Bold(true),
-		styleReady:     lipgloss.NewStyle().Foreground(lipgloss.Color("10")), // Green
-		styleNotReady:  lipgloss.NewStyle().Foreground(lipgloss.Color("9")),  // Red
+		styleRunning:   lipgloss.NewStyle().Foreground(lipgloss.Color("#50FA7B")), // ColorSuccess (Green)
+		stylePending:   lipgloss.NewStyle().Foreground(lipgloss.Color("#FFB86C")), // ColorWarning (Yellow)
+		styleFailed:    lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")), // ColorDanger (Red)
+		styleSucceeded: lipgloss.NewStyle().Foreground(lipgloss.Color("#50FA7B")), // ColorSuccess (Green)
+		styleUnknown:   lipgloss.NewStyle().Foreground(lipgloss.Color("#6C6C6C")), // ColorMuted (DarkGray)
+		styleHeader:    lipgloss.NewStyle().Foreground(lipgloss.Color("#00D9FF")).Bold(true).Underline(true), // ColorPrimary (Cyan)
+		styleReady:     lipgloss.NewStyle().Foreground(lipgloss.Color("#50FA7B")), // ColorSuccess (Green)
+		styleNotReady:  lipgloss.NewStyle().Foreground(lipgloss.Color("#FF5555")), // ColorDanger (Red)
 	}
 }
 

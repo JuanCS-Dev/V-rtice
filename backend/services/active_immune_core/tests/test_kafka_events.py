@@ -10,16 +10,12 @@ Version: 1.0.0
 
 import pytest
 import pytest_asyncio
-import asyncio
-from datetime import datetime
 
 from communication import (
-    KafkaEventProducer,
-    EventTopic,
-    KafkaEventConsumer,
     ExternalTopic,
+    KafkaEventConsumer,
+    KafkaEventProducer,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -254,30 +250,36 @@ async def test_consumer_register_handler(kafka_consumer):
 async def test_consumer_default_handlers():
     """Test default event handlers execute without errors."""
     # Test threat intel handler
-    await KafkaEventConsumer.handle_threat_intel({
-        "threat_type": "malware",
-        "signature": "test_signature",
-        "iocs": ["192.168.1.100"],
-        "severity": "high",
-    })
+    await KafkaEventConsumer.handle_threat_intel(
+        {
+            "threat_type": "malware",
+            "signature": "test_signature",
+            "iocs": ["192.168.1.100"],
+            "severity": "high",
+        }
+    )
 
     # Test network event handler
-    await KafkaEventConsumer.handle_network_event({
-        "event_type": "anomaly_detected",
-        "source_ip": "192.168.1.50",
-        "dest_ip": "10.0.0.1",
-        "protocol": "TCP",
-        "anomaly_score": 0.85,
-    })
+    await KafkaEventConsumer.handle_network_event(
+        {
+            "event_type": "anomaly_detected",
+            "source_ip": "192.168.1.50",
+            "dest_ip": "10.0.0.1",
+            "protocol": "TCP",
+            "anomaly_score": 0.85,
+        }
+    )
 
     # Test endpoint event handler
-    await KafkaEventConsumer.handle_endpoint_event({
-        "event_type": "suspicious_process",
-        "hostname": "workstation-01",
-        "process_name": "malware.exe",
-        "file_hash": "abc123",
-        "threat_level": "high",
-    })
+    await KafkaEventConsumer.handle_endpoint_event(
+        {
+            "event_type": "suspicious_process",
+            "hostname": "workstation-01",
+            "process_name": "malware.exe",
+            "file_hash": "abc123",
+            "threat_level": "high",
+        }
+    )
 
     # If we got here, handlers executed successfully
 

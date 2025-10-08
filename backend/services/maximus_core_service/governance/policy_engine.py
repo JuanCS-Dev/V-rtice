@@ -14,16 +14,14 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
 import re
+from datetime import datetime, timedelta
+from typing import Any
 
 from .base import (
-    GovernanceAction,
     GovernanceConfig,
     Policy,
     PolicyEnforcementResult,
-    PolicySeverity,
     PolicyType,
     PolicyViolation,
 )
@@ -48,7 +46,7 @@ class PolicyEngine:
         self.enforcement_count = 0
 
         # Cache for frequently accessed policies
-        self._policy_cache: Dict[PolicyType, Policy] = {}
+        self._policy_cache: dict[PolicyType, Policy] = {}
 
     # ========================================================================
     # POLICY ENFORCEMENT
@@ -58,7 +56,7 @@ class PolicyEngine:
         self,
         policy_type: PolicyType,
         action: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         actor: str = "system",
     ) -> PolicyEnforcementResult:
         """
@@ -94,9 +92,7 @@ class PolicyEngine:
 
         for rule in policy.rules:
             checked_rules += 1
-            violation = self._check_rule(
-                rule, action, context, policy, actor
-            )
+            violation = self._check_rule(rule, action, context, policy, actor)
 
             if violation:
                 violations.append(violation)
@@ -119,9 +115,9 @@ class PolicyEngine:
     def enforce_all_policies(
         self,
         action: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         actor: str = "system",
-    ) -> Dict[PolicyType, PolicyEnforcementResult]:
+    ) -> dict[PolicyType, PolicyEnforcementResult]:
         """
         Enforce all policies against an action.
 
@@ -136,9 +132,7 @@ class PolicyEngine:
         results = {}
 
         for policy_type in PolicyType:
-            results[policy_type] = self.enforce_policy(
-                policy_type, action, context, actor
-            )
+            results[policy_type] = self.enforce_policy(policy_type, action, context, actor)
 
         return results
 
@@ -146,10 +140,10 @@ class PolicyEngine:
         self,
         rule: str,
         action: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         policy: Policy,
         actor: str,
-    ) -> Optional[PolicyViolation]:
+    ) -> PolicyViolation | None:
         """
         Check a single policy rule.
 
@@ -177,33 +171,23 @@ class PolicyEngine:
 
         # Ethical Use Policy Rules
         if policy.policy_type == PolicyType.ETHICAL_USE:
-            violated, violation_description = self._check_ethical_use_rule(
-                rule_id, action, context
-            )
+            violated, violation_description = self._check_ethical_use_rule(rule_id, action, context)
 
         # Red Teaming Policy Rules
         elif policy.policy_type == PolicyType.RED_TEAMING:
-            violated, violation_description = self._check_red_teaming_rule(
-                rule_id, action, context
-            )
+            violated, violation_description = self._check_red_teaming_rule(rule_id, action, context)
 
         # Data Privacy Policy Rules
         elif policy.policy_type == PolicyType.DATA_PRIVACY:
-            violated, violation_description = self._check_data_privacy_rule(
-                rule_id, action, context
-            )
+            violated, violation_description = self._check_data_privacy_rule(rule_id, action, context)
 
         # Incident Response Policy Rules
         elif policy.policy_type == PolicyType.INCIDENT_RESPONSE:
-            violated, violation_description = self._check_incident_response_rule(
-                rule_id, action, context
-            )
+            violated, violation_description = self._check_incident_response_rule(rule_id, action, context)
 
         # Whistleblower Policy Rules
         elif policy.policy_type == PolicyType.WHISTLEBLOWER:
-            violated, violation_description = self._check_whistleblower_rule(
-                rule_id, action, context
-            )
+            violated, violation_description = self._check_whistleblower_rule(rule_id, action, context)
 
         if violated:
             self.violation_count += 1
@@ -228,9 +212,7 @@ class PolicyEngine:
     # RULE-SPECIFIC VALIDATION
     # ========================================================================
 
-    def _check_ethical_use_rule(
-        self, rule_id: str, action: str, context: Dict[str, Any]
-    ) -> Tuple[bool, str]:
+    def _check_ethical_use_rule(self, rule_id: str, action: str, context: dict[str, Any]) -> tuple[bool, str]:
         """Check Ethical Use Policy rules."""
         if rule_id == "RULE-EU-001":
             # AI systems MUST NOT cause harm without authorization
@@ -242,7 +224,7 @@ class PolicyEngine:
             # Offensive capabilities MUST only be used in authorized environments
             offensive_actions = ["execute_exploit", "c2_command", "network_attack"]
             if action in offensive_actions:
-                if not context.get("target_environment") in ["test", "lab", "authorized_client"]:
+                if context.get("target_environment") not in ["test", "lab", "authorized_client"]:
                     return (
                         True,
                         f"Offensive action '{action}' in non-authorized environment: "
@@ -285,15 +267,12 @@ class PolicyEngine:
                 if not context.get("hitl_approved", False):
                     return (
                         True,
-                        f"High-risk action '{action}' (risk={context.get('risk_score')}) "
-                        "lacks HITL approval",
+                        f"High-risk action '{action}' (risk={context.get('risk_score')}) lacks HITL approval",
                     )
 
         return False, ""
 
-    def _check_red_teaming_rule(
-        self, rule_id: str, action: str, context: Dict[str, Any]
-    ) -> Tuple[bool, str]:
+    def _check_red_teaming_rule(self, rule_id: str, action: str, context: dict[str, Any]) -> tuple[bool, str]:
         """Check Red Teaming Policy rules."""
         if rule_id == "RULE-RT-001":
             # Written authorization required
@@ -349,9 +328,7 @@ class PolicyEngine:
 
         return False, ""
 
-    def _check_data_privacy_rule(
-        self, rule_id: str, action: str, context: Dict[str, Any]
-    ) -> Tuple[bool, str]:
+    def _check_data_privacy_rule(self, rule_id: str, action: str, context: dict[str, Any]) -> tuple[bool, str]:
         """Check Data Privacy Policy rules."""
         if rule_id == "RULE-DP-001":
             # Legal basis for personal data collection
@@ -381,8 +358,7 @@ class PolicyEngine:
                     if hours_elapsed > 72:
                         return (
                             True,
-                            f"Data breach reported {hours_elapsed:.1f}h after detection "
-                            "(GDPR requires 72h)",
+                            f"Data breach reported {hours_elapsed:.1f}h after detection (GDPR requires 72h)",
                         )
 
         elif rule_id == "RULE-DP-011":
@@ -392,15 +368,12 @@ class PolicyEngine:
                     if not context.get("human_intervention_available", False):
                         return (
                             True,
-                            f"Automated decision '{action}' lacks human intervention option "
-                            "(GDPR Art. 22)",
+                            f"Automated decision '{action}' lacks human intervention option (GDPR Art. 22)",
                         )
 
         return False, ""
 
-    def _check_incident_response_rule(
-        self, rule_id: str, action: str, context: Dict[str, Any]
-    ) -> Tuple[bool, str]:
+    def _check_incident_response_rule(self, rule_id: str, action: str, context: dict[str, Any]) -> tuple[bool, str]:
         """Check Incident Response Policy rules."""
         if rule_id == "RULE-IR-001":
             # Incidents must be reported within 1 hour
@@ -412,8 +385,7 @@ class PolicyEngine:
                 if hours_elapsed > 1 and not context.get("reported", False):
                     return (
                         True,
-                        f"Incident detected {hours_elapsed:.1f}h ago but not yet reported "
-                        "(1h requirement)",
+                        f"Incident detected {hours_elapsed:.1f}h ago but not yet reported (1h requirement)",
                     )
 
         elif rule_id == "RULE-IR-002":
@@ -428,9 +400,7 @@ class PolicyEngine:
 
         return False, ""
 
-    def _check_whistleblower_rule(
-        self, rule_id: str, action: str, context: Dict[str, Any]
-    ) -> Tuple[bool, str]:
+    def _check_whistleblower_rule(self, rule_id: str, action: str, context: dict[str, Any]) -> tuple[bool, str]:
         """Check Whistleblower Policy rules."""
         if rule_id == "RULE-WB-002":
             # No retaliation against whistleblowers
@@ -451,8 +421,7 @@ class PolicyEngine:
                     if days_elapsed > 30 and context.get("investigation_status") == "not_started":
                         return (
                             True,
-                            f"Whistleblower report pending investigation for {days_elapsed} days "
-                            "(30-day requirement)",
+                            f"Whistleblower report pending investigation for {days_elapsed} days (30-day requirement)",
                         )
 
         return False, ""
@@ -464,9 +433,9 @@ class PolicyEngine:
     def check_action(
         self,
         action: str,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         actor: str = "system",
-    ) -> Tuple[bool, List[PolicyViolation]]:
+    ) -> tuple[bool, list[PolicyViolation]]:
         """
         Quick check if an action is allowed across all policies.
 
@@ -487,17 +456,15 @@ class PolicyEngine:
         is_allowed = len(all_violations) == 0
         return is_allowed, all_violations
 
-    def get_applicable_policies(self, scope: str) -> List[Policy]:
+    def get_applicable_policies(self, scope: str) -> list[Policy]:
         """Get policies applicable to a specific scope."""
         return self.policy_registry.get_policies_by_scope(scope)
 
-    def get_statistics(self) -> Dict[str, int]:
+    def get_statistics(self) -> dict[str, int]:
         """Get policy engine statistics."""
         return {
             "total_violations_detected": self.violation_count,
             "enforcement_actions_taken": self.enforcement_count,
             "total_policies": len(self.policy_registry.get_all_policies()),
-            "approved_policies": len(
-                [p for p in self.policy_registry.get_all_policies() if p.approved_by_erb]
-            ),
+            "approved_policies": len([p for p in self.policy_registry.get_all_policies() if p.approved_by_erb]),
         }

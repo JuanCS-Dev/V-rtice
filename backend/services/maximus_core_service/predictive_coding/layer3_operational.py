@@ -10,7 +10,6 @@ Prediction error = unexpected threat progression (novel attack patterns).
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -72,11 +71,7 @@ class TemporalBlock(nn.Module):
         self.dropout2 = nn.Dropout(dropout)
 
         # Residual connection
-        self.downsample = (
-            nn.Conv1d(in_channels, out_channels, 1)
-            if in_channels != out_channels
-            else None
-        )
+        self.downsample = nn.Conv1d(in_channels, out_channels, 1) if in_channels != out_channels else None
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass.
@@ -124,7 +119,7 @@ class TemporalConvNet(nn.Module):
     def __init__(
         self,
         num_inputs: int,
-        num_channels: List[int],
+        num_channels: list[int],
         kernel_size: int = 3,
         dropout: float = 0.2,
     ):
@@ -180,7 +175,7 @@ class OperationalTCN(nn.Module):
     def __init__(
         self,
         input_dim: int = 64,  # From L2 behavioral representations
-        hidden_channels: List[int] = [128, 128, 64],
+        hidden_channels: list[int] = [128, 128, 64],
         output_dim: int = 64,
         num_threat_classes: int = 15,  # Threat types
         kernel_size: int = 3,
@@ -212,9 +207,7 @@ class OperationalTCN(nn.Module):
 
         logger.info(f"OperationalTCN initialized: {input_dim}D → {output_dim}D")
 
-    def forward(
-        self, sequence: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, sequence: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass.
 
         Args:
@@ -282,14 +275,9 @@ class OperationalLayer:
         self.error_mean = 0.0
         self.error_std = 1.0
 
-        logger.info(
-            f"OperationalLayer initialized on {device} "
-            f"(horizon={prediction_horizon_hours}h)"
-        )
+        logger.info(f"OperationalLayer initialized on {device} (horizon={prediction_horizon_hours}h)")
 
-    def predict(
-        self, event_sequence: np.ndarray, return_all_steps: bool = False
-    ) -> Dict:
+    def predict(self, event_sequence: np.ndarray, return_all_steps: bool = False) -> dict:
         """Predict immediate threats from event sequence.
 
         Args:
@@ -324,9 +312,7 @@ class OperationalLayer:
                 "prediction_horizon_hours": self.prediction_horizon,
             }
 
-    def predict_attack_progression(
-        self, event_sequence: np.ndarray, num_future_steps: int = 10
-    ) -> List[Dict]:
+    def predict_attack_progression(self, event_sequence: np.ndarray, num_future_steps: int = 10) -> list[dict]:
         """Predict multi-step attack progression.
 
         Args:
@@ -361,9 +347,7 @@ class OperationalLayer:
                 )
 
                 # Append prediction to sequence for next iteration
-                current_sequence = torch.cat(
-                    [current_sequence, next_threat.unsqueeze(0)], dim=0
-                )
+                current_sequence = torch.cat([current_sequence, next_threat.unsqueeze(0)], dim=0)
 
                 # Keep only last N timesteps
                 if current_sequence.size(0) > event_sequence.shape[0]:
@@ -371,9 +355,7 @@ class OperationalLayer:
 
         return predictions
 
-    def detect_attack_indicators(
-        self, event_sequence: np.ndarray, severity_threshold: float = 0.7
-    ) -> Dict:
+    def detect_attack_indicators(self, event_sequence: np.ndarray, severity_threshold: float = 0.7) -> dict:
         """Detect attack indicators (reconnaissance, exploitation).
 
         Args:
@@ -422,8 +404,7 @@ class OperationalLayer:
 
         if 0 <= threat_id < len(threat_names):
             return threat_names[threat_id]
-        else:
-            return f"UNKNOWN_{threat_id}"
+        return f"UNKNOWN_{threat_id}"
 
     def _determine_alert_level(self, severity: float, confidence: float) -> str:
         """Determine alert level based on severity and confidence."""
@@ -431,12 +412,11 @@ class OperationalLayer:
 
         if combined_score >= 0.8:
             return "CRITICAL"
-        elif combined_score >= 0.6:
+        if combined_score >= 0.6:
             return "HIGH"
-        elif combined_score >= 0.4:
+        if combined_score >= 0.4:
             return "MEDIUM"
-        else:
-            return "LOW"
+        return "LOW"
 
     def train_step(
         self,
@@ -445,7 +425,7 @@ class OperationalLayer:
         target_classes: torch.Tensor,
         target_severity: torch.Tensor,
         optimizer: torch.optim.Optimizer,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Single training step.
 
         Args:

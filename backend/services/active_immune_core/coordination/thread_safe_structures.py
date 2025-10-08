@@ -8,9 +8,9 @@ Date: 2025-10-07
 
 import asyncio
 from collections import defaultdict, deque
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Dict, Generic, List, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ThreadSafeBuffer(Generic[T]):
@@ -190,12 +190,7 @@ class ThreadSafeTemperature:
     Ensures temperature stays within safe ranges.
     """
 
-    def __init__(
-        self,
-        initial: float = 37.0,
-        min_temp: float = 36.0,
-        max_temp: float = 42.0
-    ):
+    def __init__(self, initial: float = 37.0, min_temp: float = 36.0, max_temp: float = 42.0):
         """
         Initialize temperature.
 

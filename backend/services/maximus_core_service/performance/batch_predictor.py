@@ -14,20 +14,22 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
-from collections import deque
-from dataclasses import dataclass
-from enum import Enum
 import logging
 import queue
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from collections import deque
+from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any
 
 import numpy as np
 
 # Try to import PyTorch
 try:
     import torch
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -37,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 class Priority(Enum):
     """Request priority levels."""
+
     LOW = 0
     NORMAL = 1
     HIGH = 2
@@ -46,11 +49,12 @@ class Priority(Enum):
 @dataclass
 class BatchRequest:
     """Batch prediction request."""
+
     request_id: str
     input_data: Any
     priority: Priority = Priority.NORMAL
     timestamp: float = None
-    callback: Optional[Callable] = None
+    callback: Callable | None = None
 
     def __post_init__(self):
         """Set timestamp."""
@@ -68,6 +72,7 @@ class BatchRequest:
 @dataclass
 class BatchResponse:
     """Batch prediction response."""
+
     request_id: str
     output: Any
     latency_ms: float
@@ -110,29 +115,21 @@ class BatchPredictor:
     Example:
         ```python
         # Create predictor
-        config = BatchConfig(
-            max_batch_size=32,
-            batch_timeout_ms=50.0,
-            adaptive_batching=True
-        )
+        config = BatchConfig(max_batch_size=32, batch_timeout_ms=50.0, adaptive_batching=True)
+
 
         def predict_fn(batch):
             # Your model inference
             return model(batch)
 
-        predictor = BatchPredictor(
-            predict_fn=predict_fn,
-            config=config
-        )
+
+        predictor = BatchPredictor(predict_fn=predict_fn, config=config)
 
         # Start predictor
         predictor.start()
 
         # Submit requests
-        future = predictor.submit(
-            input_data=input_tensor,
-            priority=Priority.HIGH
-        )
+        future = predictor.submit(input_data=input_tensor, priority=Priority.HIGH)
 
         # Get result
         result = future.get(timeout=1.0)
@@ -142,11 +139,7 @@ class BatchPredictor:
         ```
     """
 
-    def __init__(
-        self,
-        predict_fn: Callable[[Any], Any],
-        config: BatchConfig = BatchConfig()
-    ):
+    def __init__(self, predict_fn: Callable[[Any], Any], config: BatchConfig = BatchConfig()):
         """Initialize batch predictor.
 
         Args:
@@ -163,11 +156,11 @@ class BatchPredictor:
             self.request_queue = queue.Queue(maxsize=config.max_queue_size)
 
         # Response futures
-        self.futures: Dict[str, "ResponseFuture"] = {}
+        self.futures: dict[str, ResponseFuture] = {}
         self.futures_lock = threading.Lock()
 
         # Workers
-        self.workers: List[threading.Thread] = []
+        self.workers: list[threading.Thread] = []
         self.running = False
 
         # Statistics
@@ -181,8 +174,7 @@ class BatchPredictor:
         self.current_batch_size = config.max_batch_size
         self.recent_latencies = deque(maxlen=50)
 
-        logger.info(f"BatchPredictor initialized: max_batch={config.max_batch_size}, "
-                   f"workers={config.num_workers}")
+        logger.info(f"BatchPredictor initialized: max_batch={config.max_batch_size}, workers={config.num_workers}")
 
     def start(self):
         """Start batch predictor workers."""
@@ -194,11 +186,7 @@ class BatchPredictor:
 
         # Start worker threads
         for i in range(self.config.num_workers):
-            worker = threading.Thread(
-                target=self._worker_loop,
-                name=f"BatchWorker-{i}",
-                daemon=True
-            )
+            worker = threading.Thread(target=self._worker_loop, name=f"BatchWorker-{i}", daemon=True)
             worker.start()
             self.workers.append(worker)
 
@@ -226,10 +214,7 @@ class BatchPredictor:
         logger.info("Batch predictor stopped")
 
     def submit(
-        self,
-        input_data: Any,
-        priority: Priority = Priority.NORMAL,
-        request_id: Optional[str] = None
+        self, input_data: Any, priority: Priority = Priority.NORMAL, request_id: str | None = None
     ) -> "ResponseFuture":
         """Submit prediction request.
 
@@ -255,11 +240,7 @@ class BatchPredictor:
             self.futures[request_id] = future
 
         # Create request
-        request = BatchRequest(
-            request_id=request_id,
-            input_data=input_data,
-            priority=priority
-        )
+        request = BatchRequest(request_id=request_id, input_data=input_data, priority=priority)
 
         # Queue request
         try:
@@ -291,7 +272,7 @@ class BatchPredictor:
             except Exception as e:
                 logger.error(f"Worker error: {e}", exc_info=True)
 
-    def _collect_batch(self) -> List[BatchRequest]:
+    def _collect_batch(self) -> list[BatchRequest]:
         """Collect batch of requests.
 
         Returns:
@@ -324,7 +305,7 @@ class BatchPredictor:
 
         return batch
 
-    def _process_batch(self, batch: List[BatchRequest]):
+    def _process_batch(self, batch: list[BatchRequest]):
         """Process batch of requests.
 
         Args:
@@ -352,9 +333,7 @@ class BatchPredictor:
             batch_output = self.predict_fn(batch_input)
 
             # Split outputs
-            if TORCH_AVAILABLE and isinstance(batch_output, torch.Tensor):
-                outputs = [batch_output[i] for i in range(batch_size)]
-            elif isinstance(batch_output, np.ndarray):
+            if TORCH_AVAILABLE and isinstance(batch_output, torch.Tensor) or isinstance(batch_output, np.ndarray):
                 outputs = [batch_output[i] for i in range(batch_size)]
             else:
                 outputs = batch_output if isinstance(batch_output, list) else [batch_output] * batch_size
@@ -380,12 +359,9 @@ class BatchPredictor:
             self._update_batch_size(latency_ms)
 
         # Send responses
-        for request, output in zip(batch, outputs):
+        for request, output in zip(batch, outputs, strict=False):
             response = BatchResponse(
-                request_id=request.request_id,
-                output=output,
-                latency_ms=latency_ms,
-                batch_size=batch_size
+                request_id=request.request_id, output=output, latency_ms=latency_ms, batch_size=batch_size
             )
 
             # Set future result
@@ -410,8 +386,7 @@ class BatchPredictor:
         """
         if self.config.adaptive_batching:
             return self.current_batch_size
-        else:
-            return self.config.max_batch_size
+        return self.config.max_batch_size
 
     def _update_batch_size(self, latency_ms: float):
         """Update batch size based on latency.
@@ -428,21 +403,15 @@ class BatchPredictor:
         # Adjust batch size
         if avg_latency > self.config.target_latency_ms * 1.2:
             # Too slow - decrease batch size
-            self.current_batch_size = max(
-                self.config.min_batch_size,
-                int(self.current_batch_size * 0.8)
-            )
+            self.current_batch_size = max(self.config.min_batch_size, int(self.current_batch_size * 0.8))
             logger.debug(f"Decreased batch size to {self.current_batch_size}")
 
         elif avg_latency < self.config.target_latency_ms * 0.8:
             # Fast enough - increase batch size
-            self.current_batch_size = min(
-                self.config.max_batch_size,
-                int(self.current_batch_size * 1.2)
-            )
+            self.current_batch_size = min(self.config.max_batch_size, int(self.current_batch_size * 1.2))
             logger.debug(f"Increased batch size to {self.current_batch_size}")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get predictor statistics.
 
         Returns:
@@ -460,7 +429,7 @@ class BatchPredictor:
                 "avg_latency_ms": avg_latency,
                 "throughput_rps": throughput,
                 "queue_size": self.request_queue.qsize(),
-                "current_batch_size": self.current_batch_size
+                "current_batch_size": self.current_batch_size,
             }
 
 
@@ -469,7 +438,7 @@ class ResponseFuture:
 
     def __init__(self):
         """Initialize future."""
-        self.result: Optional[BatchResponse] = None
+        self.result: BatchResponse | None = None
         self.event = threading.Event()
 
     def set_result(self, result: BatchResponse):
@@ -481,7 +450,7 @@ class ResponseFuture:
         self.result = result
         self.event.set()
 
-    def get(self, timeout: Optional[float] = None) -> BatchResponse:
+    def get(self, timeout: float | None = None) -> BatchResponse:
         """Get result (blocking).
 
         Args:
@@ -511,6 +480,7 @@ class ResponseFuture:
 # CLI
 # =============================================================================
 
+
 def main():
     """Main batch prediction demo."""
     import argparse
@@ -528,19 +498,16 @@ def main():
     def dummy_predict(batch):
         """Dummy prediction function."""
         time.sleep(0.01)  # Simulate processing
-        if TORCH_AVAILABLE and isinstance(batch, torch.Tensor):
+        if TORCH_AVAILABLE and isinstance(batch, torch.Tensor) or isinstance(batch, np.ndarray):
             return batch * 2
-        elif isinstance(batch, np.ndarray):
-            return batch * 2
-        else:
-            return [x * 2 for x in batch]
+        return [x * 2 for x in batch]
 
     # Create predictor
     config = BatchConfig(
         max_batch_size=args.max_batch_size,
         batch_timeout_ms=args.batch_timeout_ms,
         num_workers=args.num_workers,
-        adaptive_batching=True
+        adaptive_batching=True,
     )
 
     predictor = BatchPredictor(predict_fn=dummy_predict, config=config)

@@ -18,15 +18,13 @@ Date: 2025-10-06
 import numpy as np
 
 from .base import (
-    FLConfig,
-    ClientInfo,
     AggregationStrategy,
+    FLConfig,
     ModelType,
 )
-from .fl_coordinator import FLCoordinator, CoordinatorConfig
-from .fl_client import FLClient, ClientConfig
+from .fl_client import ClientConfig, FLClient
+from .fl_coordinator import CoordinatorConfig, FLCoordinator
 from .model_adapters import ThreatClassifierAdapter, create_model_adapter
-from .storage import FLModelRegistry, FLRoundHistory
 
 
 def print_header(title: str):
@@ -136,15 +134,16 @@ def example_1_basic_fl_round():
             )
 
             if success:
-                print(f"   ✓ {client.config.organization}: trained on {num_samples} samples "
-                      f"(loss={update.metrics.get('loss', 0):.4f})")
+                print(
+                    f"   ✓ {client.config.organization}: trained on {num_samples} samples "
+                    f"(loss={update.metrics.get('loss', 0):.4f})"
+                )
 
         # Aggregate updates
         print(f"   Aggregating {len(coordinator.current_round.received_updates)} updates...")
         agg_result = coordinator.aggregate_updates()
 
-        print(f"   ✓ Aggregation complete: {agg_result.num_clients} clients, "
-              f"{agg_result.total_samples} total samples")
+        print(f"   ✓ Aggregation complete: {agg_result.num_clients} clients, {agg_result.total_samples} total samples")
 
         # Complete round
         completed_round = coordinator.complete_round()
@@ -195,15 +194,15 @@ def example_2_secure_aggregation():
     malware_adapter = create_model_adapter(ModelType.MALWARE_DETECTOR)
     coordinator.set_global_model(malware_adapter.get_weights())
 
-    print(f"\n✅ Coordinator initialized with SECURE aggregation")
+    print("\n✅ Coordinator initialized with SECURE aggregation")
 
     # Create clients
     print("\n🏢 Setting up clients...")
     clients = []
     for i in range(3):
         client_config = ClientConfig(
-            client_id=f"org_{chr(65+i)}",  # A, B, C
-            organization=f"Organization {chr(65+i)}",
+            client_id=f"org_{chr(65 + i)}",  # A, B, C
+            organization=f"Organization {chr(65 + i)}",
             coordinator_url="http://localhost:8000",
         )
         adapter = create_model_adapter(ModelType.MALWARE_DETECTOR)
@@ -211,7 +210,7 @@ def example_2_secure_aggregation():
         client.update_client_info(total_samples=1000)
         coordinator.register_client(client.get_client_info())
         clients.append(client)
-        print(f"   ✓ Registered: Org {chr(65+i)}")
+        print(f"   ✓ Registered: Org {chr(65 + i)}")
 
     # Run 1 round
     print("\n🔄 Starting FL Round with Secure Aggregation...")
@@ -233,7 +232,7 @@ def example_2_secure_aggregation():
 
     agg_result = coordinator.aggregate_updates()
 
-    print(f"\n✅ Secure Aggregation Complete!")
+    print("\n✅ Secure Aggregation Complete!")
     print(f"   Strategy: {agg_result.strategy.value}")
     print(f"   Individual Updates Hidden: {agg_result.metadata.get('individual_updates_hidden', False)}")
     print(f"   Aggregated {agg_result.num_clients} clients")
@@ -280,7 +279,7 @@ def example_3_dp_federated_learning():
     threat_adapter = ThreatClassifierAdapter()
     coordinator.set_global_model(threat_adapter.get_weights())
 
-    print(f"\n✅ Coordinator initialized with DP-FedAvg")
+    print("\n✅ Coordinator initialized with DP-FedAvg")
     print(f"   Privacy Budget: ε={fl_config.dp_epsilon}, δ={fl_config.dp_delta}")
 
     # Create clients
@@ -320,7 +319,7 @@ def example_3_dp_federated_learning():
 
     agg_result = coordinator.aggregate_updates()
 
-    print(f"\n✅ DP-FedAvg Aggregation Complete!")
+    print("\n✅ DP-FedAvg Aggregation Complete!")
     print(f"   Privacy Cost: ε={agg_result.privacy_cost}")
     print(f"   Delta: δ={fl_config.dp_delta}")
     print(f"   Clipped Updates: {agg_result.metadata.get('num_clipped_updates', 0)}")

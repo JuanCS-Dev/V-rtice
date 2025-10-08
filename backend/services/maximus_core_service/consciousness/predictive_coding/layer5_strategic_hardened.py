@@ -25,7 +25,7 @@ Version: 1.0.0 - Production Hardened
 Date: 2025-10-08
 """
 
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -68,7 +68,7 @@ class Layer5Strategic(PredictiveCodingLayerBase):
 
         # Causal model state (Bayesian network)
         # Maps strategic_goal → probability
-        self._goal_priors: Dict[str, float] = {
+        self._goal_priors: dict[str, float] = {
             "data_exfiltration": 0.3,
             "service_disruption": 0.2,
             "credential_harvesting": 0.25,
@@ -77,10 +77,10 @@ class Layer5Strategic(PredictiveCodingLayerBase):
         }
 
         # Causal links: (tactical_objective, strategic_goal) → weight
-        self._causal_links: Dict[Tuple[str, str], float] = {}
+        self._causal_links: dict[tuple[str, str], float] = {}
 
         # Historical observations for Bayesian updates
-        self._observation_history: List[Tuple[np.ndarray, str]] = []
+        self._observation_history: list[tuple[np.ndarray, str]] = []
         self._max_history = 50  # Last 50 observations
 
     def get_layer_name(self) -> str:
@@ -130,7 +130,7 @@ class Layer5Strategic(PredictiveCodingLayerBase):
 
         return float(mse)
 
-    def _bayesian_inference(self, tactical_objective: np.ndarray) -> Dict[str, float]:
+    def _bayesian_inference(self, tactical_objective: np.ndarray) -> dict[str, float]:
         """
         Perform Bayesian inference to compute goal posteriors.
 
@@ -190,7 +190,7 @@ class Layer5Strategic(PredictiveCodingLayerBase):
 
         return signatures[signature_id]
 
-    def _compute_likelihoods(self, tactical_signature: str) -> Dict[str, float]:
+    def _compute_likelihoods(self, tactical_signature: str) -> dict[str, float]:
         """
         Compute P(tactical_signature | strategic_goal) for all goals.
 
@@ -244,7 +244,7 @@ class Layer5Strategic(PredictiveCodingLayerBase):
 
         return likelihood_table.get(tactical_signature, {goal: 0.2 for goal in self._goal_priors})
 
-    def _goal_distribution_to_vector(self, goal_posteriors: Dict[str, float]) -> np.ndarray:
+    def _goal_distribution_to_vector(self, goal_posteriors: dict[str, float]) -> np.ndarray:
         """
         Convert goal distribution to vector representation.
 

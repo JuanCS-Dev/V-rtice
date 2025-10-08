@@ -8,11 +8,11 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
-import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Set, Optional
-from fastapi import WebSocket, WebSocketDisconnect
+from typing import Dict, List, Optional, Set
+
+from fastapi import WebSocket
 
 from .events import WSEvent, WSEventType
 
@@ -52,9 +52,7 @@ class ConnectionManager:
 
         logger.info("ConnectionManager initialized")
 
-    async def connect(
-        self, websocket: WebSocket, connection_id: str, metadata: Optional[Dict] = None
-    ) -> None:
+    async def connect(self, websocket: WebSocket, connection_id: str, metadata: Optional[Dict] = None) -> None:
         """
         Accept and register a new WebSocket connection.
 
@@ -70,10 +68,7 @@ class ConnectionManager:
         self.connection_metadata[connection_id] = metadata or {}
         self.total_connections += 1
 
-        logger.info(
-            f"WebSocket connected: {connection_id} "
-            f"(total active: {len(self.active_connections)})"
-        )
+        logger.info(f"WebSocket connected: {connection_id} (total active: {len(self.active_connections)})")
 
         # Send welcome event
         welcome_event = WSEvent(
@@ -109,10 +104,7 @@ class ConnectionManager:
             del self.connection_metadata[connection_id]
             self.total_disconnections += 1
 
-            logger.info(
-                f"WebSocket disconnected: {connection_id} "
-                f"(total active: {len(self.active_connections)})"
-            )
+            logger.info(f"WebSocket disconnected: {connection_id} (total active: {len(self.active_connections)})")
 
     async def join_room(self, connection_id: str, room: str) -> bool:
         """
@@ -174,14 +166,10 @@ class ConnectionManager:
 
         self.subscriptions[connection_id].update(event_types)
 
-        logger.info(
-            f"Connection {connection_id} subscribed to: {[e.value for e in event_types]}"
-        )
+        logger.info(f"Connection {connection_id} subscribed to: {[e.value for e in event_types]}")
         return True
 
-    async def unsubscribe(
-        self, connection_id: str, event_types: List[WSEventType]
-    ) -> bool:
+    async def unsubscribe(self, connection_id: str, event_types: List[WSEventType]) -> bool:
         """
         Unsubscribe connection from specific event types.
 
@@ -197,9 +185,7 @@ class ConnectionManager:
 
         self.subscriptions[connection_id].difference_update(event_types)
 
-        logger.info(
-            f"Connection {connection_id} unsubscribed from: {[e.value for e in event_types]}"
-        )
+        logger.info(f"Connection {connection_id} unsubscribed from: {[e.value for e in event_types]}")
         return True
 
     async def send_personal_message(self, event: WSEvent, connection_id: str) -> bool:
@@ -274,10 +260,7 @@ class ConnectionManager:
             if success:
                 sent_count += 1
 
-        logger.debug(
-            f"Broadcast {event.event_type.value} to {sent_count} connections "
-            f"(room: {room or 'all'})"
-        )
+        logger.debug(f"Broadcast {event.event_type.value} to {sent_count} connections (room: {room or 'all'})")
 
         return sent_count
 
@@ -295,9 +278,7 @@ class ConnectionManager:
             "total_rooms": len(self.rooms),
             "messages_sent": self.total_messages_sent,
             "messages_received": self.total_messages_received,
-            "rooms": {
-                room: len(members) for room, members in self.rooms.items()
-            },
+            "rooms": {room: len(members) for room, members in self.rooms.items()},
         }
 
     def get_connection_info(self, connection_id: str) -> Optional[Dict]:
@@ -314,15 +295,11 @@ class ConnectionManager:
             return None
 
         # Find which rooms this connection is in
-        connection_rooms = [
-            room for room, members in self.rooms.items() if connection_id in members
-        ]
+        connection_rooms = [room for room, members in self.rooms.items() if connection_id in members]
 
         return {
             "connection_id": connection_id,
             "metadata": self.connection_metadata.get(connection_id, {}),
             "rooms": connection_rooms,
-            "subscriptions": [
-                e.value for e in self.subscriptions.get(connection_id, set())
-            ],
+            "subscriptions": [e.value for e in self.subscriptions.get(connection_id, set())],
         }

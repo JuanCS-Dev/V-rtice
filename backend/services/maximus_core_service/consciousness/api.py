@@ -16,7 +16,7 @@ Version: 1.0.0 - FASE V Sprint 2
 import asyncio
 from dataclasses import asdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
@@ -32,7 +32,7 @@ class SalienceInput(BaseModel):
     novelty: float = Field(..., ge=0.0, le=1.0, description="Novelty component [0-1]")
     relevance: float = Field(..., ge=0.0, le=1.0, description="Relevance component [0-1]")
     urgency: float = Field(..., ge=0.0, le=1.0, description="Urgency component [0-1]")
-    context: Dict[str, Any] = Field(default_factory=dict, description="Additional context")
+    context: dict[str, Any] = Field(default_factory=dict, description="Additional context")
 
 
 class ArousalAdjustment(BaseModel):
@@ -50,7 +50,7 @@ class ConsciousnessStateResponse(BaseModel):
     esgt_active: bool
     arousal_level: float
     arousal_classification: str
-    tig_metrics: Dict[str, Any]
+    tig_metrics: dict[str, Any]
     recent_events_count: int
     system_health: str
 
@@ -61,11 +61,11 @@ class ESGTEventResponse(BaseModel):
     event_id: str
     timestamp: str
     success: bool
-    salience: Dict[str, float]
-    coherence: Optional[float]
-    duration_ms: Optional[float]
+    salience: dict[str, float]
+    coherence: float | None
+    duration_ms: float | None
     nodes_participating: int
-    reason: Optional[str]
+    reason: str | None
 
 
 class SafetyStatusResponse(BaseModel):
@@ -74,8 +74,8 @@ class SafetyStatusResponse(BaseModel):
     monitoring_active: bool
     kill_switch_active: bool
     violations_total: int
-    violations_by_severity: Dict[str, int]
-    last_violation: Optional[str]
+    violations_by_severity: dict[str, int]
+    last_violation: str | None
     uptime_seconds: float
 
 
@@ -89,7 +89,7 @@ class SafetyViolationResponse(BaseModel):
     value_observed: float
     threshold_violated: float
     message: str
-    context: Dict[str, Any]
+    context: dict[str, Any]
 
 
 class EmergencyShutdownRequest(BaseModel):
@@ -102,7 +102,7 @@ class EmergencyShutdownRequest(BaseModel):
 # ==================== API FACTORY ====================
 
 
-def create_consciousness_api(consciousness_system: Dict[str, Any]) -> APIRouter:
+def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
     """Create consciousness API router.
 
     Args:
@@ -117,10 +117,10 @@ def create_consciousness_api(consciousness_system: Dict[str, Any]) -> APIRouter:
     router = APIRouter(prefix="/api/consciousness", tags=["consciousness"])
 
     # WebSocket connections for real-time streaming
-    active_connections: List[WebSocket] = []
+    active_connections: list[WebSocket] = []
 
     # Event history (last 100 events)
-    event_history: List[Dict[str, Any]] = []
+    event_history: list[dict[str, Any]] = []
     MAX_HISTORY = 100
 
     # ==================== HELPER FUNCTIONS ====================
@@ -133,7 +133,7 @@ def create_consciousness_api(consciousness_system: Dict[str, Any]) -> APIRouter:
         if len(event_history) > MAX_HISTORY:
             event_history.pop(0)
 
-    async def broadcast_to_websockets(message: Dict[str, Any]) -> None:
+    async def broadcast_to_websockets(message: dict[str, Any]) -> None:
         """Broadcast message to all connected WebSocket clients."""
         dead_connections = []
         for connection in active_connections:
@@ -177,7 +177,7 @@ def create_consciousness_api(consciousness_system: Dict[str, Any]) -> APIRouter:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error retrieving state: {str(e)}")
 
-    @router.get("/esgt/events", response_model=List[ESGTEventResponse])
+    @router.get("/esgt/events", response_model=list[ESGTEventResponse])
     async def get_esgt_events(limit: int = 20):
         """Get recent ESGT events.
 
@@ -373,7 +373,7 @@ def create_consciousness_api(consciousness_system: Dict[str, Any]) -> APIRouter:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error retrieving safety status: {str(e)}")
 
-    @router.get("/safety/violations", response_model=List[SafetyViolationResponse])
+    @router.get("/safety/violations", response_model=list[SafetyViolationResponse])
     async def get_safety_violations(limit: int = 100):
         """Get recent safety violations.
 
@@ -492,7 +492,7 @@ def create_consciousness_api(consciousness_system: Dict[str, Any]) -> APIRouter:
 
                     # Echo back (simple ping/pong)
                     await websocket.send_json({"type": "pong", "timestamp": datetime.now().isoformat()})
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     # Send heartbeat
                     await websocket.send_json({"type": "heartbeat", "timestamp": datetime.now().isoformat()})
 

@@ -13,13 +13,14 @@ actionable insights to the HCL Planner Service, enabling adaptive self-managemen
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List
 
-from fastapi import FastAPI, HTTPException
-from models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
 import numpy as np
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
 
 app = FastAPI(title="Maximus HCL Analyzer Service", version="1.0.0")
 
@@ -115,9 +116,7 @@ async def analyze_system_metrics(request: AnalyzeMetricsRequest) -> AnalysisResu
                 description="Memory usage critically high.",
             )
         )
-        recommendations.append(
-            "Optimize memory consumption or scale up memory resources."
-        )
+        recommendations.append("Optimize memory consumption or scale up memory resources.")
         requires_intervention = True
         overall_health_score -= 0.3
 

@@ -21,22 +21,19 @@ Version: 1.0.0
 Date: 2025-10-07
 """
 
+from datetime import datetime
+
 import pytest
-from datetime import datetime, timedelta
-from typing import Any, Dict
 
 from coordination.cytokine_aggregator import (
     CytokineAggregator,
-    CytokineType,
-    EventType,
     ProcessingResult,
 )
-from pydantic import ValidationError
-
 
 # =============================================================================
 # TEST FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def aggregator():
@@ -281,9 +278,7 @@ class TestAreaFiltering:
         assert should_process is False
 
     @pytest.mark.asyncio
-    async def test_should_process_for_area_global_processes_all(
-        self, global_aggregator, valid_cytokine
-    ):
+    async def test_should_process_for_area_global_processes_all(self, global_aggregator, valid_cytokine):
         """Test global aggregator processes cytokines from all areas."""
         assert global_aggregator.nivel == "global"
 
@@ -316,9 +311,7 @@ class TestCytokineProcessing:
     """Test cytokine processing logic."""
 
     @pytest.mark.asyncio
-    async def test_process_cytokine_threat_detected(
-        self, aggregator, valid_cytokine
-    ):
+    async def test_process_cytokine_threat_detected(self, aggregator, valid_cytokine):
         """Test processing cytokine with threat detection."""
         result = await aggregator.process_cytokine(valid_cytokine)
 
@@ -334,9 +327,7 @@ class TestCytokineProcessing:
         assert stats["total_threats"] == 1
 
     @pytest.mark.asyncio
-    async def test_process_cytokine_neutralization(
-        self, aggregator, anti_inflammatory_cytokine
-    ):
+    async def test_process_cytokine_neutralization(self, aggregator, anti_inflammatory_cytokine):
         """Test processing cytokine with neutralization event."""
         result = await aggregator.process_cytokine(anti_inflammatory_cytokine)
 
@@ -381,9 +372,7 @@ class TestCytokineProcessing:
         assert result.neutralization is True
 
     @pytest.mark.asyncio
-    async def test_process_cytokine_escalation(
-        self, aggregator, high_priority_cytokine
-    ):
+    async def test_process_cytokine_escalation(self, aggregator, high_priority_cytokine):
         """Test processing cytokine that triggers escalation."""
         assert aggregator.escalation_priority_threshold == 9
         assert high_priority_cytokine["prioridade"] == 10
@@ -396,9 +385,7 @@ class TestCytokineProcessing:
         assert stats["total_escalated"] == 1
 
     @pytest.mark.asyncio
-    async def test_process_cytokine_no_escalation_low_priority(
-        self, aggregator, valid_cytokine
-    ):
+    async def test_process_cytokine_no_escalation_low_priority(self, aggregator, valid_cytokine):
         """Test processing cytokine that does NOT trigger escalation."""
         assert valid_cytokine["prioridade"] == 7  # Below threshold
 
@@ -475,9 +462,7 @@ class TestTemperatureImpact:
     """Test temperature impact calculation."""
 
     @pytest.mark.asyncio
-    async def test_temperature_impact_pro_inflammatory(
-        self, aggregator, pro_inflammatory_cytokine
-    ):
+    async def test_temperature_impact_pro_inflammatory(self, aggregator, pro_inflammatory_cytokine):
         """Test pro-inflammatory cytokine increases temperature."""
         result = await aggregator.process_cytokine(pro_inflammatory_cytokine)
 
@@ -485,9 +470,7 @@ class TestTemperatureImpact:
         assert result.temperature_delta == 0.2
 
     @pytest.mark.asyncio
-    async def test_temperature_impact_anti_inflammatory(
-        self, aggregator, anti_inflammatory_cytokine
-    ):
+    async def test_temperature_impact_anti_inflammatory(self, aggregator, anti_inflammatory_cytokine):
         """Test anti-inflammatory cytokine decreases temperature."""
         result = await aggregator.process_cytokine(anti_inflammatory_cytokine)
 

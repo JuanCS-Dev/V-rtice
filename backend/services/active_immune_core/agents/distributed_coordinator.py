@@ -14,13 +14,11 @@ Version: 1.0.0
 """
 
 import logging
-import time
 import uuid
-from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -262,10 +260,7 @@ class DistributedCoordinator:
 
         self._agents[agent_id] = node
 
-        logger.info(
-            f"Agent registered: {agent_id} "
-            f"(priority={priority}, capabilities={len(node.capabilities)})"
-        )
+        logger.info(f"Agent registered: {agent_id} (priority={priority}, capabilities={len(node.capabilities)})")
 
         return node
 
@@ -395,10 +390,7 @@ class DistributedCoordinator:
             elapsed = (now - agent.last_heartbeat).total_seconds()
 
             if elapsed > self.heartbeat_timeout:
-                logger.warning(
-                    f"Agent {agent.id} timeout "
-                    f"(last heartbeat {elapsed:.1f}s ago)"
-                )
+                logger.warning(f"Agent {agent.id} timeout (last heartbeat {elapsed:.1f}s ago)")
 
                 agent.is_alive = False
                 self._failures_detected += 1
@@ -628,10 +620,7 @@ class DistributedCoordinator:
             assigned_count += 1
             self._tasks_assigned += 1
 
-            logger.info(
-                f"Task assigned: {task.id} -> {selected_agent.id} "
-                f"(load={selected_agent.current_load:.2f})"
-            )
+            logger.info(f"Task assigned: {task.id} -> {selected_agent.id} (load={selected_agent.current_load:.2f})")
 
         # Update queue with unassigned tasks
         self._task_queue = remaining_queue
@@ -644,15 +633,9 @@ class DistributedCoordinator:
 
     def get_agent_tasks(self, agent_id: str) -> List[DistributedTask]:
         """Get all tasks assigned to agent"""
-        return [
-            task
-            for task in self._tasks.values()
-            if task.assigned_to == agent_id
-        ]
+        return [task for task in self._tasks.values() if task.assigned_to == agent_id]
 
-    def complete_task(
-        self, task_id: str, result: Optional[Any] = None
-    ) -> bool:
+    def complete_task(self, task_id: str, result: Optional[Any] = None) -> bool:
         """
         Mark task as completed.
 
@@ -733,9 +716,7 @@ class DistributedCoordinator:
 
         for task in self._tasks.values():
             if task.status in [TaskStatus.ASSIGNED, TaskStatus.RUNNING] and task.is_timeout():
-                logger.warning(
-                    f"Task timeout: {task.id} assigned to {task.assigned_to}"
-                )
+                logger.warning(f"Task timeout: {task.id} assigned to {task.assigned_to}")
 
                 task.status = TaskStatus.PENDING
                 task.assigned_to = None
@@ -786,16 +767,11 @@ class DistributedCoordinator:
 
         self._proposals[proposal.id] = proposal
 
-        logger.info(
-            f"Vote proposed: {proposal.id} "
-            f"(type={proposal_type}, quorum={required_quorum:.0%})"
-        )
+        logger.info(f"Vote proposed: {proposal.id} (type={proposal_type}, quorum={required_quorum:.0%})")
 
         return proposal.id
 
-    def cast_vote(
-        self, proposal_id: str, agent_id: str, decision: VoteDecision
-    ) -> bool:
+    def cast_vote(self, proposal_id: str, agent_id: str, decision: VoteDecision) -> bool:
         """
         Cast vote on proposal.
 
@@ -825,9 +801,7 @@ class DistributedCoordinator:
 
         proposal.votes[agent_id] = decision
 
-        logger.debug(
-            f"Vote cast: {agent_id} -> {decision.value} on {proposal_id}"
-        )
+        logger.debug(f"Vote cast: {agent_id} -> {decision.value} on {proposal_id}")
 
         return True
 
@@ -894,16 +868,8 @@ class DistributedCoordinator:
             Dict with all coordinator statistics
         """
         alive_agents = self.get_alive_agents()
-        avg_health = (
-            sum(a.health_score for a in alive_agents) / len(alive_agents)
-            if alive_agents
-            else 0.0
-        )
-        avg_load = (
-            sum(a.current_load for a in alive_agents) / len(alive_agents)
-            if alive_agents
-            else 0.0
-        )
+        avg_health = sum(a.health_score for a in alive_agents) / len(alive_agents) if alive_agents else 0.0
+        avg_load = sum(a.current_load for a in alive_agents) / len(alive_agents) if alive_agents else 0.0
 
         return {
             # Agents

@@ -12,7 +12,6 @@ These tests target REMAINING uncovered lines with ultra-precision:
 Focus: ULTRA-PRECISION for final 5%
 """
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
@@ -20,11 +19,9 @@ import pytest
 import pytest_asyncio
 
 from active_immune_core.coordination.homeostatic_controller import (
-    HomeostaticController,
-    SystemState,
     ActionType,
+    HomeostaticController,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -60,18 +57,14 @@ class TestMMEIUnavailableWarning:
         Coverage: Lines 159-160 (warning + early return)
         """
         # ARRANGE: Mock MMEI_AVAILABLE = False
-        with patch(
-            "active_immune_core.coordination.homeostatic_controller.MMEI_AVAILABLE",
-            False
-        ):
+        with patch("active_immune_core.coordination.homeostatic_controller.MMEI_AVAILABLE", False):
             mock_client = MagicMock()
 
             # ACT: Try to set MMEI client
             controller.set_mmei_client(mock_client)
 
         # ASSERT: Should NOT set client
-        assert controller.mmei_client is None, \
-            "Should not set MMEI client when unavailable"
+        assert controller.mmei_client is None, "Should not set MMEI client when unavailable"
 
 
 # ==================== LYMPHNODE 404 HANDLING ====================
@@ -104,8 +97,7 @@ class TestLymphnod404Handling:
         metrics = await controller._collect_agent_metrics()
 
         # ASSERT: Should return empty dict on 404
-        assert metrics == {}, \
-            "Should return empty metrics on 404 (lymphnode unavailable)"
+        assert metrics == {}, "Should return empty metrics on 404 (lymphnode unavailable)"
 
 
 # ==================== DETERMINE ACTION PARAMS EDGE CASES ====================
@@ -131,8 +123,7 @@ class TestDetermineActionParamsEdgeCases:
         params = controller._determine_action_params(ActionType.SCALE_UP_AGENTS, issues)
 
         # ASSERT: Should scale based on threats
-        assert params["quantity"] == min(50, 30 * 2), \
-            "Should scale proportional to threats (max 50)"
+        assert params["quantity"] == min(50, 30 * 2), "Should scale proportional to threats (max 50)"
         assert params["reason"] == "high_threat_load"
 
     @pytest.mark.asyncio
@@ -152,8 +143,7 @@ class TestDetermineActionParamsEdgeCases:
         params = controller._determine_action_params(ActionType.SCALE_UP_AGENTS, issues)
 
         # ASSERT: Should scale for repair
-        assert params["quantity"] == 15, \
-            "Should scale by 15 for repair need"
+        assert params["quantity"] == 15, "Should scale by 15 for repair need"
         assert params["reason"] == "high_repair_need"
 
     @pytest.mark.asyncio
@@ -172,8 +162,7 @@ class TestDetermineActionParamsEdgeCases:
         params = controller._determine_action_params(ActionType.SCALE_DOWN_AGENTS, issues)
 
         # ASSERT: Should conserve resources
-        assert params["quantity"] == 10, \
-            "Should scale down by 10 for rest need conservation"
+        assert params["quantity"] == 10, "Should scale down by 10 for rest need conservation"
         assert params["reason"] == "rest_need_conservation"
 
     @pytest.mark.asyncio
@@ -192,8 +181,7 @@ class TestDetermineActionParamsEdgeCases:
         params = controller._determine_action_params(ActionType.ADJUST_TEMPERATURE, issues)
 
         # ASSERT: Should cool down
-        assert params["delta"] == -0.5, \
-            "Should cool down by -0.5 for efficiency"
+        assert params["delta"] == -0.5, "Should cool down by -0.5 for efficiency"
         assert params["reason"] == "efficiency_optimization"
 
 
@@ -214,11 +202,11 @@ class TestExecuteMethodExceptions:
         """
         # ARRANGE: Mock HTTP post to raise ClientConnectorError
         import errno
+
         controller._http_session = MagicMock()
         controller._http_session.post = MagicMock(
             side_effect=aiohttp.ClientConnectorError(
-                connection_key=None,
-                os_error=OSError(errno.ECONNREFUSED, "Connection refused")
+                connection_key=None, os_error=OSError(errno.ECONNREFUSED, "Connection refused")
             )
         )
 
@@ -226,8 +214,7 @@ class TestExecuteMethodExceptions:
         success = await controller._execute_scale_down({"quantity": 5})
 
         # ASSERT: Should handle gracefully
-        assert success is False, \
-            "Should return False on ClientConnectorError"
+        assert success is False, "Should return False on ClientConnectorError"
 
     @pytest.mark.asyncio
     async def test_execute_clone_specialized_handles_connector_error(self, controller):
@@ -238,23 +225,19 @@ class TestExecuteMethodExceptions:
         """
         # ARRANGE: Mock HTTP post to raise ClientConnectorError
         import errno
+
         controller._http_session = MagicMock()
         controller._http_session.post = MagicMock(
             side_effect=aiohttp.ClientConnectorError(
-                connection_key=None,
-                os_error=OSError(errno.ECONNREFUSED, "Connection refused")
+                connection_key=None, os_error=OSError(errno.ECONNREFUSED, "Connection refused")
             )
         )
 
         # ACT
-        success = await controller._execute_clone_specialized({
-            "tipo": "neutrofilo",
-            "quantity": 20
-        })
+        success = await controller._execute_clone_specialized({"tipo": "neutrofilo", "quantity": 20})
 
         # ASSERT
-        assert success is False, \
-            "Should handle ClientConnectorError gracefully"
+        assert success is False, "Should handle ClientConnectorError gracefully"
 
     @pytest.mark.asyncio
     async def test_execute_destroy_clones_handles_connector_error(self, controller):
@@ -265,22 +248,19 @@ class TestExecuteMethodExceptions:
         """
         # ARRANGE: Mock HTTP post to raise ClientConnectorError
         import errno
+
         controller._http_session = MagicMock()
         controller._http_session.post = MagicMock(
             side_effect=aiohttp.ClientConnectorError(
-                connection_key=None,
-                os_error=OSError(errno.ECONNREFUSED, "Connection refused")
+                connection_key=None, os_error=OSError(errno.ECONNREFUSED, "Connection refused")
             )
         )
 
         # ACT
-        success = await controller._execute_destroy_clones({
-            "specialization": "malware_xyz"
-        })
+        success = await controller._execute_destroy_clones({"specialization": "malware_xyz"})
 
         # ASSERT
-        assert success is False, \
-            "Should handle ClientConnectorError gracefully"
+        assert success is False, "Should handle ClientConnectorError gracefully"
 
 
 # ==================== EXECUTE ROUTING & EXCEPTION HANDLING ====================
@@ -305,8 +285,7 @@ class TestExecuteRoutingAndExceptions:
         success = await controller._execute(ActionType.SCALE_UP_AGENTS, {})
 
         # ASSERT: Should return False
-        assert success is False, \
-            "Should return False when HTTP session unavailable"
+        assert success is False, "Should return False when HTTP session unavailable"
 
     @pytest.mark.asyncio
     async def test_execute_routes_to_scale_up(self, controller):
@@ -364,8 +343,7 @@ class TestExecuteRoutingAndExceptions:
             success = await controller._execute(ActionType.SCALE_UP_AGENTS, {})
 
         # ASSERT: Should handle gracefully
-        assert success is False, \
-            "Should return False on exception"
+        assert success is False, "Should return False on exception"
 
 
 # ==================== SUMMARY ====================

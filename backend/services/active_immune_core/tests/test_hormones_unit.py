@@ -14,7 +14,6 @@ import pytest_asyncio
 
 from communication.hormones import HormoneMessage, HormoneMessenger, HormoneType
 
-
 # ==================== FIXTURES ====================
 
 
@@ -42,7 +41,7 @@ async def started_messenger():
     async def mock_from_url(*args, **kwargs):
         return mock_redis
 
-    with patch('redis.asyncio.from_url', side_effect=mock_from_url):
+    with patch("redis.asyncio.from_url", side_effect=mock_from_url):
         await m.start()
         yield m
         await m.stop()
@@ -83,7 +82,7 @@ class TestHormoneMessengerLifecycle:
     async def test_start_redis_connection_failure(self, messenger):
         """Test graceful degradation on Redis connection failure (lines 160-166)"""
         # Mock Redis connection to raise exception
-        with patch('redis.asyncio.from_url', side_effect=Exception("Connection refused")):
+        with patch("redis.asyncio.from_url", side_effect=Exception("Connection refused")):
             await messenger.start()
 
         # Lines 160-166 should be covered
@@ -117,7 +116,7 @@ class TestHormoneMessengerLifecycle:
         mock_redis.ping = AsyncMock()
         mock_redis.close = AsyncMock(side_effect=Exception("Close error"))
 
-        with patch('redis.asyncio.from_url', return_value=mock_redis):
+        with patch("redis.asyncio.from_url", return_value=mock_redis):
             await messenger.start()
 
         # Stop should handle exception gracefully (lines 197-198)
@@ -135,7 +134,7 @@ class TestHormonePublishing:
     async def test_publish_degraded_mode(self, messenger):
         """Test publishing in degraded mode (lines 229-232)"""
         # Start in degraded mode
-        with patch('redis.asyncio.from_url', side_effect=Exception("Connection error")):
+        with patch("redis.asyncio.from_url", side_effect=Exception("Connection error")):
             await messenger.start()
 
         assert messenger._degraded_mode is True
@@ -152,9 +151,7 @@ class TestHormonePublishing:
     async def test_publish_exception_handling(self, started_messenger):
         """Test publish exception handling (lines 271-273)"""
         # Mock Redis publish to raise exception
-        started_messenger._redis_client.publish = AsyncMock(
-            side_effect=Exception("Publish error")
-        )
+        started_messenger._redis_client.publish = AsyncMock(side_effect=Exception("Publish error"))
 
         # Should handle exception gracefully (lines 271-273)
         result = await started_messenger.publish_hormone(
@@ -201,7 +198,7 @@ class TestHormoneSubscription:
     async def test_subscribe_degraded_mode(self, messenger):
         """Test subscribing in degraded mode (lines 297-300)"""
         # Start in degraded mode
-        with patch('redis.asyncio.from_url', side_effect=Exception("Connection error")):
+        with patch("redis.asyncio.from_url", side_effect=Exception("Connection error")):
             await messenger.start()
 
         assert messenger._degraded_mode is True
@@ -257,9 +254,7 @@ class TestSubscriptionLoop:
 
         # Start subscription loop in background
         callback = AsyncMock()
-        task = asyncio.create_task(
-            messenger._subscription_loop(mock_pubsub, "test", callback)
-        )
+        task = asyncio.create_task(messenger._subscription_loop(mock_pubsub, "test", callback))
 
         await asyncio.sleep(0.1)
 
@@ -429,23 +424,17 @@ class TestAgentStateManagement:
     async def test_set_agent_state_exception(self, started_messenger):
         """Test set_agent_state handles exception (lines 445-447)"""
         # Mock Redis setex to raise exception
-        started_messenger._redis_client.setex = AsyncMock(
-            side_effect=Exception("Redis setex error")
-        )
+        started_messenger._redis_client.setex = AsyncMock(side_effect=Exception("Redis setex error"))
 
         # Should handle exception gracefully (lines 445-447)
-        result = await started_messenger.set_agent_state(
-            "agent_001", {"status": "active"}, ttl=60
-        )
+        result = await started_messenger.set_agent_state("agent_001", {"status": "active"}, ttl=60)
 
         assert result is False
 
     async def test_get_agent_state_exception(self, started_messenger):
         """Test get_agent_state handles exception (lines 473-475)"""
         # Mock Redis get to raise exception
-        started_messenger._redis_client.get = AsyncMock(
-            side_effect=Exception("Redis get error")
-        )
+        started_messenger._redis_client.get = AsyncMock(side_effect=Exception("Redis get error"))
 
         # Should handle exception gracefully (lines 473-475)
         result = await started_messenger.get_agent_state("agent_002")
@@ -455,9 +444,7 @@ class TestAgentStateManagement:
     async def test_delete_agent_state_exception(self, started_messenger):
         """Test delete_agent_state handles exception (lines 497-499)"""
         # Mock Redis delete to raise exception
-        started_messenger._redis_client.delete = AsyncMock(
-            side_effect=Exception("Redis delete error")
-        )
+        started_messenger._redis_client.delete = AsyncMock(side_effect=Exception("Redis delete error"))
 
         # Should handle exception gracefully (lines 497-499)
         result = await started_messenger.delete_agent_state("agent_003")
@@ -466,6 +453,7 @@ class TestAgentStateManagement:
 
     async def test_get_all_agent_states_exception(self, started_messenger):
         """Test get_all_agent_states handles exception (lines 528-530)"""
+
         # Mock Redis scan_iter to raise exception
         async def mock_scan_error(*args, **kwargs):
             raise Exception("Redis scan error")
@@ -498,7 +486,7 @@ class TestUtilityMethods:
     async def test_is_running_degraded_mode(self, messenger):
         """Test is_running in degraded mode (line 536)"""
         # Start in degraded mode
-        with patch('redis.asyncio.from_url', side_effect=Exception("Connection error")):
+        with patch("redis.asyncio.from_url", side_effect=Exception("Connection error")):
             await messenger.start()
 
         # In degraded mode: _running=True but _redis_client=None

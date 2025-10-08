@@ -1,7 +1,6 @@
 """Performance Degradation Detector - PELT Change Point Detection"""
 
 import logging
-from typing import Dict, Optional
 
 import numpy as np
 import ruptures as rpt
@@ -16,7 +15,7 @@ class PerformanceDegradationDetector:
         self.algo = rpt.Pelt(model=model, min_size=3)
         self.penalty = penalty
 
-    def detect(self, latency_timeseries: np.ndarray) -> Dict:
+    def detect(self, latency_timeseries: np.ndarray) -> dict:
         """
         Identify degradation before SLA breach.
 
@@ -44,8 +43,7 @@ class PerformanceDegradationDetector:
                     severity = (after - before) / before
 
                     logger.warning(
-                        f"Performance degradation detected: "
-                        f"{severity*100:.1f}% increase at index {changepoint_idx}"
+                        f"Performance degradation detected: {severity * 100:.1f}% increase at index {changepoint_idx}"
                     )
 
                     return {

@@ -6,7 +6,7 @@ Subscribes to ESGT coordinator ignition events for immune system coordination.
 
 import asyncio
 import logging
-from typing import Awaitable, Callable, List
+from collections.abc import Awaitable, Callable
 
 from consciousness.esgt.coordinator import ESGTEvent
 
@@ -23,7 +23,7 @@ class ESGTSubscriber:
 
     def __init__(self):
         """Initialize ESGT subscriber."""
-        self._handlers: List[Callable[[ESGTEvent], Awaitable[None]]] = []
+        self._handlers: list[Callable[[ESGTEvent], Awaitable[None]]] = []
         self._event_count = 0
         self._running = False
 

@@ -5,11 +5,10 @@ control.
 """
 
 import asyncio
-from datetime import datetime
-from enum import Enum
 import logging
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime
+from typing import Dict, List, Optional
 
 from config import get_settings
 from connectors import SinespConnector
@@ -118,9 +117,7 @@ class JobScheduler:
                 source=request.source,
                 created_at=datetime.utcnow(),
                 metadata={
-                    "entity_type": (
-                        request.entity_type.value if request.entity_type else "all"
-                    ),
+                    "entity_type": (request.entity_type.value if request.entity_type else "all"),
                     "filters": request.filters,
                     "load_to_postgres": request.load_to_postgres,
                     "load_to_neo4j": request.load_to_neo4j,
@@ -160,9 +157,7 @@ class JobScheduler:
         """
         return self.jobs.get(job_id)
 
-    async def list_jobs(
-        self, status_filter: Optional[JobStatus] = None, limit: int = 100
-    ) -> List[IngestJobStatus]:
+    async def list_jobs(self, status_filter: Optional[JobStatus] = None, limit: int = 100) -> List[IngestJobStatus]:
         """
         List jobs with optional filtering.
 
@@ -240,8 +235,7 @@ class JobScheduler:
             job_status.completed_at = datetime.utcnow()
 
             logger.info(
-                f"Job {job_id} completed: {job_status.records_processed} processed, "
-                f"{job_status.records_failed} failed"
+                f"Job {job_id} completed: {job_status.records_processed} processed, {job_status.records_failed} failed"
             )
 
         except Exception as e:
@@ -283,15 +277,11 @@ class JobScheduler:
 
                             # Load to PostgreSQL
                             if request.load_to_postgres and self.postgres_loader:
-                                await self.postgres_loader.load_entity(
-                                    EntityType.VEICULO, transform_result.entity_data
-                                )
+                                await self.postgres_loader.load_entity(EntityType.VEICULO, transform_result.entity_data)
 
                             # Load to Neo4j
                             if request.load_to_neo4j and self.neo4j_loader:
-                                await self.neo4j_loader.load_entity(
-                                    EntityType.VEICULO, transform_result.entity_data
-                                )
+                                await self.neo4j_loader.load_entity(EntityType.VEICULO, transform_result.entity_data)
 
                             job_status.records_processed += 1
 
@@ -316,15 +306,11 @@ class JobScheduler:
 
                         # Load to PostgreSQL
                         if request.load_to_postgres and self.postgres_loader:
-                            await self.postgres_loader.load_entity(
-                                EntityType.OCORRENCIA, transform_result.entity_data
-                            )
+                            await self.postgres_loader.load_entity(EntityType.OCORRENCIA, transform_result.entity_data)
 
                         # Load to Neo4j
                         if request.load_to_neo4j and self.neo4j_loader:
-                            await self.neo4j_loader.load_entity(
-                                EntityType.OCORRENCIA, transform_result.entity_data
-                            )
+                            await self.neo4j_loader.load_entity(EntityType.OCORRENCIA, transform_result.entity_data)
 
                         job_status.records_processed += 1
 

@@ -11,14 +11,14 @@ Prometheus metrics + alerting:
 - Performance degradation alerts
 """
 
-import asyncio
+import logging
 from datetime import datetime, timedelta
 from enum import Enum
-import logging
 from typing import Any, Dict, List, Optional
 
+from prometheus_client import REGISTRY, Counter, Gauge, Histogram, generate_latest
+
 from config import get_settings
-from prometheus_client import Counter, Gauge, generate_latest, Histogram, REGISTRY
 
 logger = logging.getLogger(__name__)
 
@@ -53,17 +53,11 @@ request_duration = Histogram(
 )
 
 # Module-specific metrics
-credibility_score = Gauge(
-    "cognitive_defense_credibility_score", "Source credibility score", ["source_domain"]
-)
+credibility_score = Gauge("cognitive_defense_credibility_score", "Source credibility score", ["source_domain"])
 
-emotional_score = Gauge(
-    "cognitive_defense_emotional_score", "Emotional manipulation score", ["emotion"]
-)
+emotional_score = Gauge("cognitive_defense_emotional_score", "Emotional manipulation score", ["emotion"])
 
-fallacy_count = Counter(
-    "cognitive_defense_fallacy_total", "Total fallacies detected", ["fallacy_type"]
-)
+fallacy_count = Counter("cognitive_defense_fallacy_total", "Total fallacies detected", ["fallacy_type"])
 
 verification_status = Counter(
     "cognitive_defense_verification_total",
@@ -72,9 +66,7 @@ verification_status = Counter(
 )
 
 # Model performance
-model_confidence = Gauge(
-    "cognitive_defense_model_confidence", "Model prediction confidence", ["model_name"]
-)
+model_confidence = Gauge("cognitive_defense_model_confidence", "Model prediction confidence", ["model_name"])
 
 model_latency = Histogram(
     "cognitive_defense_model_latency_seconds",
@@ -84,27 +76,17 @@ model_latency = Histogram(
 )
 
 # Cache metrics
-cache_hit_total = Counter(
-    "cognitive_defense_cache_hits_total", "Cache hits", ["cache_category"]
-)
+cache_hit_total = Counter("cognitive_defense_cache_hits_total", "Cache hits", ["cache_category"])
 
-cache_miss_total = Counter(
-    "cognitive_defense_cache_misses_total", "Cache misses", ["cache_category"]
-)
+cache_miss_total = Counter("cognitive_defense_cache_misses_total", "Cache misses", ["cache_category"])
 
-cache_hit_rate = Gauge(
-    "cognitive_defense_cache_hit_rate", "Cache hit rate", ["cache_category"]
-)
+cache_hit_rate = Gauge("cognitive_defense_cache_hit_rate", "Cache hit rate", ["cache_category"])
 
 # Error metrics
-error_total = Counter(
-    "cognitive_defense_errors_total", "Total errors", ["error_type", "module"]
-)
+error_total = Counter("cognitive_defense_errors_total", "Total errors", ["error_type", "module"])
 
 # Drift metrics
-model_drift_detected = Counter(
-    "cognitive_defense_drift_total", "Model drift events", ["model_name"]
-)
+model_drift_detected = Counter("cognitive_defense_drift_total", "Model drift events", ["model_name"])
 
 
 class MetricsCollector:
@@ -124,9 +106,7 @@ class MetricsCollector:
         self._initialized = True
         logger.info("✅ Metrics collector initialized")
 
-    def record_request(
-        self, module: str, duration: float, status: str = "success"
-    ) -> None:
+    def record_request(self, module: str, duration: float, status: str = "success") -> None:
         """
         Record request metrics.
 
@@ -154,9 +134,7 @@ class MetricsCollector:
         """Record fact-check verification."""
         verification_status.labels(status=status).inc()
 
-    def record_model_metrics(
-        self, model_name: str, confidence: float, latency: float
-    ) -> None:
+    def record_model_metrics(self, model_name: str, confidence: float, latency: float) -> None:
         """
         Record model performance metrics.
 
@@ -329,9 +307,7 @@ class AlertingSystem:
 
         return alert
 
-    async def send_drift_alert(
-        self, model_name: str, drift_metrics: Dict[str, Any]
-    ) -> None:
+    async def send_drift_alert(self, model_name: str, drift_metrics: Dict[str, Any]) -> None:
         """
         Send model drift alert.
 
@@ -346,9 +322,7 @@ class AlertingSystem:
             metrics=drift_metrics,
         )
 
-    def get_recent_alerts(
-        self, hours: int = 24, severity: Optional[AlertSeverity] = None
-    ) -> List[Dict[str, Any]]:
+    def get_recent_alerts(self, hours: int = 24, severity: Optional[AlertSeverity] = None) -> List[Dict[str, Any]]:
         """
         Get recent alerts.
 
@@ -361,11 +335,7 @@ class AlertingSystem:
         """
         cutoff = datetime.utcnow() - timedelta(hours=hours)
 
-        recent = [
-            alert
-            for alert in self.alerts
-            if datetime.fromisoformat(alert["timestamp"]) > cutoff
-        ]
+        recent = [alert for alert in self.alerts if datetime.fromisoformat(alert["timestamp"]) > cutoff]
 
         if severity:
             recent = [a for a in recent if a["severity"] == severity.value]

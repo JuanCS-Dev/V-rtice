@@ -6,15 +6,13 @@ Uses graceful degradation paths for testing.
 
 import asyncio
 from datetime import timedelta
-from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
 
 from active_immune_core.agents import AgentStatus, AgentType
 from active_immune_core.agents.neutrofilo import NeutrofiloDigital
-
 
 # ==================== FIXTURES ====================
 
@@ -391,9 +389,7 @@ class TestNeutrofiloNeutralization:
         await asyncio.sleep(0.5)
 
         # Attempt neutralization (RTE service not running, will degrade gracefully)
-        result = await neutrofilo.executar_neutralizacao(
-            sample_gradient, metodo="isolate"
-        )
+        result = await neutrofilo.executar_neutralizacao(sample_gradient, metodo="isolate")
 
         # Should succeed locally even if RTE unavailable
         assert result is True
@@ -407,18 +403,14 @@ class TestNeutrofiloNeutralization:
         await asyncio.sleep(0.5)
 
         # Monitor only
-        result = await neutrofilo.executar_neutralizacao(
-            sample_gradient, metodo="monitor"
-        )
+        result = await neutrofilo.executar_neutralizacao(sample_gradient, metodo="monitor")
 
         # Should succeed without blocking
         assert result is True
 
         await neutrofilo.parar()
 
-    async def test_neutralization_increments_engulfed_counter(
-        self, neutrofilo, sample_gradient
-    ):
+    async def test_neutralization_increments_engulfed_counter(self, neutrofilo, sample_gradient):
         """Test that neutralization increments engulfed counter"""
         await neutrofilo.iniciar()
         await asyncio.sleep(0.5)
@@ -693,9 +685,7 @@ class TestNeutrofiloEdgeCases:
         neutrofilo.state.energia = 90.0
 
         # Launch 3 concurrent swarm attacks
-        tasks = [
-            neutrofilo._swarm_attack(gradient) for gradient in multiple_gradients
-        ]
+        tasks = [neutrofilo._swarm_attack(gradient) for gradient in multiple_gradients]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Should handle without crashing
@@ -911,12 +901,8 @@ class TestNeutrofiloSuccessPaths:
 
         # Mock swarm and attack methods
         mock_migrar = mocker.patch.object(neutrofilo, "_migrar", new_callable=AsyncMock)
-        mock_formar_swarm = mocker.patch.object(
-            neutrofilo, "_formar_swarm", new_callable=AsyncMock
-        )
-        mock_swarm_attack = mocker.patch.object(
-            neutrofilo, "_swarm_attack", new_callable=AsyncMock
-        )
+        mock_formar_swarm = mocker.patch.object(neutrofilo, "_formar_swarm", new_callable=AsyncMock)
+        mock_swarm_attack = mocker.patch.object(neutrofilo, "_swarm_attack", new_callable=AsyncMock)
 
         # Execute patrol - should follow highest gradient
         await neutrofilo.patrulhar()
@@ -1040,14 +1026,10 @@ class TestNeutrofiloSuccessPaths:
         mock_response.__aenter__.return_value = mock_response
         mock_response.__aexit__.return_value = None
 
-        mocker.patch.object(
-            neutrofilo._http_session, "post", return_value=mock_response
-        )
+        mocker.patch.object(neutrofilo._http_session, "post", return_value=mock_response)
 
         # Mock IL-10 secretion
-        mock_secretar_il10 = mocker.patch.object(
-            neutrofilo, "_secretar_il10", new_callable=AsyncMock
-        )
+        mock_secretar_il10 = mocker.patch.object(neutrofilo, "_secretar_il10", new_callable=AsyncMock)
 
         initial_nets = neutrofilo.nets_formadas
 
@@ -1071,9 +1053,7 @@ class TestNeutrofiloSuccessPaths:
         mock_response.__aenter__.return_value = mock_response
         mock_response.__aexit__.return_value = None
 
-        mocker.patch.object(
-            neutrofilo._http_session, "post", return_value=mock_response
-        )
+        mocker.patch.object(neutrofilo._http_session, "post", return_value=mock_response)
 
         initial_nets = neutrofilo.nets_formadas
 
@@ -1096,9 +1076,7 @@ class TestNeutrofiloSuccessPaths:
         mock_response.__aenter__.return_value = mock_response
         mock_response.__aexit__.return_value = None
 
-        mocker.patch.object(
-            neutrofilo._http_session, "post", return_value=mock_response
-        )
+        mocker.patch.object(neutrofilo._http_session, "post", return_value=mock_response)
 
         initial_nets = neutrofilo.nets_formadas
 
@@ -1161,16 +1139,12 @@ class TestNeutrofiloSuccessPaths:
         mock_response.__aenter__.return_value = mock_response
         mock_response.__aexit__.return_value = None
 
-        mocker.patch.object(
-            neutrofilo._http_session, "post", return_value=mock_response
-        )
+        mocker.patch.object(neutrofilo._http_session, "post", return_value=mock_response)
 
         initial_engulfed = neutrofilo.targets_engulfed
 
         # Neutralize target
-        result = await neutrofilo.executar_neutralizacao(
-            {"id": "target_001"}, metodo="isolate"
-        )
+        result = await neutrofilo.executar_neutralizacao({"id": "target_001"}, metodo="isolate")
 
         # Lines 469-472 should be covered
         assert result is True
@@ -1189,16 +1163,12 @@ class TestNeutrofiloSuccessPaths:
         mock_response.__aenter__.return_value = mock_response
         mock_response.__aexit__.return_value = None
 
-        mocker.patch.object(
-            neutrofilo._http_session, "post", return_value=mock_response
-        )
+        mocker.patch.object(neutrofilo._http_session, "post", return_value=mock_response)
 
         initial_engulfed = neutrofilo.targets_engulfed
 
         # Neutralize - should handle 404 gracefully
-        result = await neutrofilo.executar_neutralizacao(
-            {"id": "target_001"}, metodo="isolate"
-        )
+        result = await neutrofilo.executar_neutralizacao({"id": "target_001"}, metodo="isolate")
 
         # Lines 474-478 should be covered
         assert result is True
@@ -1217,14 +1187,10 @@ class TestNeutrofiloSuccessPaths:
         mock_response.__aenter__.return_value = mock_response
         mock_response.__aexit__.return_value = None
 
-        mocker.patch.object(
-            neutrofilo._http_session, "post", return_value=mock_response
-        )
+        mocker.patch.object(neutrofilo._http_session, "post", return_value=mock_response)
 
         # Neutralize - should return False on error
-        result = await neutrofilo.executar_neutralizacao(
-            {"id": "target_001"}, metodo="isolate"
-        )
+        result = await neutrofilo.executar_neutralizacao({"id": "target_001"}, metodo="isolate")
 
         # Lines 480-482 should be covered
         assert result is False
@@ -1244,9 +1210,7 @@ class TestNeutrofiloSuccessPaths:
         )
 
         # Should handle exception gracefully (lines 490-492)
-        result = await neutrofilo.executar_neutralizacao(
-            {"id": "target_001"}, metodo="isolate"
-        )
+        result = await neutrofilo.executar_neutralizacao({"id": "target_001"}, metodo="isolate")
 
         # Lines 490-492 should be covered
         assert result is False

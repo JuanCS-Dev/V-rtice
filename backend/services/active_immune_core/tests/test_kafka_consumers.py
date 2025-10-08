@@ -19,10 +19,9 @@ import pytest
 import pytest_asyncio
 
 from active_immune_core.communication.kafka_consumers import (
-    KafkaEventConsumer,
     ExternalTopic,
+    KafkaEventConsumer,
 )
-
 
 # ==================== FIXTURES ====================
 
@@ -242,6 +241,7 @@ async def test_is_available_degraded_mode(consumer: KafkaEventConsumer):
 @pytest.mark.asyncio
 async def test_register_handler(consumer: KafkaEventConsumer):
     """Test registering event handler."""
+
     async def test_handler(event_data: Dict[str, Any]) -> None:
         pass
 
@@ -254,6 +254,7 @@ async def test_register_handler(consumer: KafkaEventConsumer):
 @pytest.mark.asyncio
 async def test_register_multiple_handlers(consumer: KafkaEventConsumer):
     """Test registering multiple handlers for same topic."""
+
     async def handler1(event_data: Dict[str, Any]) -> None:
         pass
 
@@ -269,6 +270,7 @@ async def test_register_multiple_handlers(consumer: KafkaEventConsumer):
 @pytest.mark.asyncio
 async def test_unregister_handler(consumer: KafkaEventConsumer):
     """Test unregistering event handler."""
+
     async def test_handler(event_data: Dict[str, Any]) -> None:
         pass
 
@@ -282,6 +284,7 @@ async def test_unregister_handler(consumer: KafkaEventConsumer):
 @pytest.mark.asyncio
 async def test_unregister_handler_not_registered(consumer: KafkaEventConsumer):
     """Test unregistering handler that was not registered."""
+
     async def test_handler(event_data: Dict[str, Any]) -> None:
         pass
 
@@ -346,6 +349,7 @@ async def test_route_event_no_handlers(consumer: KafkaEventConsumer):
 @pytest.mark.asyncio
 async def test_route_event_handler_error(consumer: KafkaEventConsumer):
     """Test routing event when handler raises exception."""
+
     async def failing_handler(event_data: Dict[str, Any]) -> None:
         raise ValueError("Handler error")
 
@@ -477,6 +481,7 @@ async def test_get_metrics_initial_state(consumer: KafkaEventConsumer):
 @pytest.mark.asyncio
 async def test_get_metrics_after_event_processing(consumer: KafkaEventConsumer):
     """Test get_metrics tracks event processing."""
+
     async def test_handler(event_data: Dict[str, Any]) -> None:
         pass
 
@@ -494,6 +499,7 @@ async def test_get_metrics_after_event_processing(consumer: KafkaEventConsumer):
 @pytest.mark.asyncio
 async def test_get_metrics_tracks_failures(consumer: KafkaEventConsumer):
     """Test get_metrics tracks handler failures."""
+
     async def failing_handler(event_data: Dict[str, Any]) -> None:
         raise Exception("Handler error")
 
@@ -709,6 +715,7 @@ async def test_consume_events_generic_exception():
 @pytest.mark.asyncio
 async def test_route_event_handler_invocation_error(consumer: KafkaEventConsumer):
     """Test _route_event handles handler invocation error."""
+
     # Register handler that will cause invocation error
     def bad_handler(event_data: Dict[str, Any]) -> None:
         # This is intentionally wrong signature (sync instead of async)

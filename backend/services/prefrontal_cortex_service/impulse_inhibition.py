@@ -49,9 +49,7 @@ class ImpulseInhibition:
         Returns:
             Dict[str, Any]: A dictionary indicating whether the action is inhibited and the reason.
         """
-        print(
-            f"[ImpulseInhibition] Applying inhibition to potential action: {potential_action.get('type', 'N/A')}"
-        )
+        print(f"[ImpulseInhibition] Applying inhibition to potential action: {potential_action.get('type', 'N/A')}")
         await asyncio.sleep(0.05)  # Simulate processing
 
         inhibit = False
@@ -106,9 +104,5 @@ class ImpulseInhibition:
         return {
             "status": self.current_status,
             "inhibition_level": self.inhibition_level,
-            "last_adjustment": (
-                self.last_adjustment_time.isoformat()
-                if self.last_adjustment_time
-                else "N/A"
-            ),
+            "last_adjustment": (self.last_adjustment_time.isoformat() if self.last_adjustment_time else "N/A"),
         }

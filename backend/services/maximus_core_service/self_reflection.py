@@ -12,7 +12,7 @@ performance without constant external intervention.
 """
 
 import asyncio
-from typing import Any, Dict, List
+from typing import Any
 
 
 class SelfReflection:
@@ -26,9 +26,7 @@ class SelfReflection:
         """Initializes the SelfReflection module."""
         pass
 
-    async def reflect_and_refine(
-        self, current_response: Dict[str, Any], context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def reflect_and_refine(self, current_response: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         """Performs self-reflection on the current response and refines it if necessary.
 
         Args:
@@ -55,7 +53,7 @@ class SelfReflection:
 
         return refined_response
 
-    async def analyze_reasoning_path(self, reasoning_path: List[str]) -> Dict[str, Any]:
+    async def analyze_reasoning_path(self, reasoning_path: list[str]) -> dict[str, Any]:
         """Analyzes the AI's reasoning path for logical consistency and efficiency.
 
         Args:

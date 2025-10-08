@@ -5,19 +5,19 @@ model predictions using LIME, SHAP, and counterfactual explanations.
 """
 
 import asyncio
-import numpy as np
-from typing import Dict, Any
 
-from .base import ExplanationType, DetailLevel
+import numpy as np
+
+from .base import DetailLevel, ExplanationType
+from .counterfactual import CounterfactualGenerator
 from .engine import ExplanationEngine
 from .lime_cybersec import CyberSecLIME
 from .shap_cybersec import CyberSecSHAP
-from .counterfactual import CounterfactualGenerator
-
 
 # ============================================================================
 # EXAMPLE 1: Basic LIME Explanation
 # ============================================================================
+
 
 async def example_1_basic_lime():
     """Example 1: Basic LIME explanation for threat detection."""
@@ -44,18 +44,18 @@ async def example_1_basic_lime():
 
     # Cybersecurity instance
     instance = {
-        'threat_score': 0.85,
-        'anomaly_score': 0.72,
-        'src_port': 8080,
-        'dst_port': 443,
-        'packet_size': 1500,
-        'request_rate': 120,
-        'decision_id': 'example-001'
+        "threat_score": 0.85,
+        "anomaly_score": 0.72,
+        "src_port": 8080,
+        "dst_port": 443,
+        "packet_size": 1500,
+        "request_rate": 120,
+        "decision_id": "example-001",
     }
 
     # Get prediction
     # Convert instance to array (feature order matters!)
-    feature_order = ['threat_score', 'anomaly_score', 'src_port', 'dst_port', 'packet_size', 'request_rate']
+    feature_order = ["threat_score", "anomaly_score", "src_port", "dst_port", "packet_size", "request_rate"]
     instance_array = np.array([[instance[f] for f in feature_order]])
     prediction = model.predict_proba(instance_array)[0][1]
 
@@ -63,21 +63,18 @@ async def example_1_basic_lime():
     print(f"🎯 Prediction: {prediction:.2f} (threat probability)")
 
     # Initialize LIME
-    lime = CyberSecLIME({'num_samples': 1000})
+    lime = CyberSecLIME({"num_samples": 1000})
 
     # Generate explanation
     print("\n🔍 Generating LIME explanation...")
     explanation = await lime.explain(
-        model=model,
-        instance=instance,
-        prediction=prediction,
-        detail_level=DetailLevel.DETAILED
+        model=model, instance=instance, prediction=prediction, detail_level=DetailLevel.DETAILED
     )
 
     print(f"\n✅ Explanation generated in {explanation.latency_ms}ms")
     print(f"📝 Summary: {explanation.summary}")
     print(f"🎯 Confidence: {explanation.confidence:.2f}")
-    print(f"\n🔝 Top 5 Features:")
+    print("\n🔝 Top 5 Features:")
 
     for i, feature in enumerate(explanation.top_features[:5], 1):
         print(f"  {i}. {feature.feature_name}: {feature.importance:+.3f} (value: {feature.value})")
@@ -88,6 +85,7 @@ async def example_1_basic_lime():
 # ============================================================================
 # EXAMPLE 2: SHAP Explanation
 # ============================================================================
+
 
 async def example_2_shap_explanation():
     """Example 2: SHAP explanation with waterfall visualization."""
@@ -107,14 +105,14 @@ async def example_2_shap_explanation():
     model = SimpleThreatClassifier()
 
     instance = {
-        'threat_score': 0.85,
-        'anomaly_score': 0.72,
-        'src_port': 8080,
-        'dst_port': 443,
-        'decision_id': 'example-002'
+        "threat_score": 0.85,
+        "anomaly_score": 0.72,
+        "src_port": 8080,
+        "dst_port": 443,
+        "decision_id": "example-002",
     }
 
-    feature_order = ['threat_score', 'anomaly_score', 'src_port', 'dst_port']
+    feature_order = ["threat_score", "anomaly_score", "src_port", "dst_port"]
     instance_array = np.array([[instance[f] for f in feature_order]])
     prediction = model.predict_proba(instance_array)[0][1]
 
@@ -122,15 +120,12 @@ async def example_2_shap_explanation():
     print(f"🎯 Prediction: {prediction:.2f}")
 
     # Initialize SHAP
-    shap = CyberSecSHAP({'algorithm': 'kernel'})
+    shap = CyberSecSHAP({"algorithm": "kernel"})
 
     # Generate explanation
     print("\n🔍 Generating SHAP explanation...")
     explanation = await shap.explain(
-        model=model,
-        instance=instance,
-        prediction=prediction,
-        detail_level=DetailLevel.DETAILED
+        model=model, instance=instance, prediction=prediction, detail_level=DetailLevel.DETAILED
     )
 
     print(f"\n✅ Explanation generated in {explanation.latency_ms}ms")
@@ -138,8 +133,8 @@ async def example_2_shap_explanation():
 
     # Display waterfall data
     if explanation.visualization_data:
-        waterfall = explanation.visualization_data['waterfall_data']
-        base_value = explanation.visualization_data['base_value']
+        waterfall = explanation.visualization_data["waterfall_data"]
+        base_value = explanation.visualization_data["base_value"]
 
         print(f"\n📊 SHAP Waterfall (base value: {base_value:.3f}):")
         print(f"  {'Feature':<20} {'SHAP Value':>12} {'Cumulative':>12}")
@@ -154,6 +149,7 @@ async def example_2_shap_explanation():
 # ============================================================================
 # EXAMPLE 3: Counterfactual Explanation
 # ============================================================================
+
 
 async def example_3_counterfactual():
     """Example 3: Counterfactual explanation for alternative scenarios."""
@@ -173,14 +169,14 @@ async def example_3_counterfactual():
 
     # High threat instance
     instance = {
-        'threat_score': 0.95,  # Very high
-        'anomaly_score': 0.88,  # Very high
-        'src_port': 1337,
-        'dst_port': 22,
-        'decision_id': 'example-003'
+        "threat_score": 0.95,  # Very high
+        "anomaly_score": 0.88,  # Very high
+        "src_port": 1337,
+        "dst_port": 22,
+        "decision_id": "example-003",
     }
 
-    feature_order = ['threat_score', 'anomaly_score', 'src_port', 'dst_port']
+    feature_order = ["threat_score", "anomaly_score", "src_port", "dst_port"]
     instance_array = np.array([[instance[f] for f in feature_order]])
     prediction = model.predict_proba(instance_array)[0][1]
 
@@ -188,29 +184,23 @@ async def example_3_counterfactual():
     print(f"🎯 Original Prediction: {prediction:.2f} (HIGH THREAT)")
 
     # Initialize Counterfactual Generator
-    cf_gen = CounterfactualGenerator({
-        'num_candidates': 20,
-        'max_iterations': 500
-    })
+    cf_gen = CounterfactualGenerator({"num_candidates": 20, "max_iterations": 500})
 
     # Generate counterfactual
     print("\n🔍 Generating counterfactual explanation...")
     print("   Finding minimal changes to flip prediction to LOW THREAT...")
 
     explanation = await cf_gen.explain(
-        model=model,
-        instance=instance,
-        prediction=prediction,
-        detail_level=DetailLevel.DETAILED
+        model=model, instance=instance, prediction=prediction, detail_level=DetailLevel.DETAILED
     )
 
     print(f"\n✅ Counterfactual generated in {explanation.latency_ms}ms")
     print(f"🎯 Confidence: {explanation.confidence:.2f}")
-    print(f"\n💡 Counterfactual Scenario:")
+    print("\n💡 Counterfactual Scenario:")
     print(f"   {explanation.counterfactual}")
 
-    if explanation.metadata.get('num_changes', 0) > 0:
-        print(f"\n📋 Required Changes:")
+    if explanation.metadata.get("num_changes", 0) > 0:
+        print("\n📋 Required Changes:")
         for i, feature in enumerate(explanation.top_features, 1):
             print(f"  {i}. {feature.description}")
 
@@ -220,6 +210,7 @@ async def example_3_counterfactual():
 # ============================================================================
 # EXAMPLE 4: Using Explanation Engine (Unified Interface)
 # ============================================================================
+
 
 async def example_4_explanation_engine():
     """Example 4: Using ExplanationEngine for unified XAI."""
@@ -238,14 +229,14 @@ async def example_4_explanation_engine():
     model = SimpleThreatClassifier()
 
     instance = {
-        'threat_score': 0.78,
-        'anomaly_score': 0.65,
-        'src_port': 8080,
-        'dst_port': 443,
-        'decision_id': 'example-004'
+        "threat_score": 0.78,
+        "anomaly_score": 0.65,
+        "src_port": 8080,
+        "dst_port": 443,
+        "decision_id": "example-004",
     }
 
-    feature_order = ['threat_score', 'anomaly_score', 'src_port', 'dst_port']
+    feature_order = ["threat_score", "anomaly_score", "src_port", "dst_port"]
     instance_array = np.array([[instance[f] for f in feature_order]])
     prediction = model.predict_proba(instance_array)[0][1]
 
@@ -253,11 +244,7 @@ async def example_4_explanation_engine():
     print(f"🎯 Prediction: {prediction:.2f}")
 
     # Initialize Explanation Engine
-    engine = ExplanationEngine({
-        'enable_cache': True,
-        'enable_tracking': True,
-        'default_explanation_type': 'lime'
-    })
+    engine = ExplanationEngine({"enable_cache": True, "enable_tracking": True, "default_explanation_type": "lime"})
 
     print("\n🔍 Generating multiple explanation types in parallel...")
 
@@ -267,7 +254,7 @@ async def example_4_explanation_engine():
         instance=instance,
         prediction=prediction,
         explanation_types=[ExplanationType.LIME, ExplanationType.SHAP],
-        detail_level=DetailLevel.SUMMARY
+        detail_level=DetailLevel.SUMMARY,
     )
 
     print(f"\n✅ Generated {len(explanations)} explanations")
@@ -286,11 +273,9 @@ async def example_4_explanation_engine():
     # Get top features (tracked across all explanations)
     if engine.tracker:
         top_features = engine.get_top_features(n=3)
-        print(f"\n🔝 Top Features (across all explanations):")
+        print("\n🔝 Top Features (across all explanations):")
         for i, feature in enumerate(top_features, 1):
-            print(f"   {i}. {feature['feature_name']}: "
-                  f"mean={feature['mean_importance']:.3f}, "
-                  f"trend={feature['trend']}")
+            print(f"   {i}. {feature['feature_name']}: mean={feature['mean_importance']:.3f}, trend={feature['trend']}")
 
     print("\n" + "=" * 80 + "\n")
 
@@ -298,6 +283,7 @@ async def example_4_explanation_engine():
 # ============================================================================
 # EXAMPLE 5: Feature Drift Detection
 # ============================================================================
+
 
 async def example_5_feature_drift():
     """Example 5: Detecting feature importance drift over time."""
@@ -317,7 +303,7 @@ async def example_5_feature_drift():
             return np.column_stack([1 - threat_proba, threat_proba])
 
     # Initialize engine
-    engine = ExplanationEngine({'enable_tracking': True})
+    engine = ExplanationEngine({"enable_tracking": True})
 
     print("\n🔄 Simulating 100 explanations with stable model...")
 
@@ -326,32 +312,31 @@ async def example_5_feature_drift():
 
     for i in range(100):
         instance = {
-            'threat_score': np.random.uniform(0.5, 1.0),
-            'anomaly_score': np.random.uniform(0.5, 1.0),
-            'src_port': int(np.random.uniform(1024, 65535)),
-            'dst_port': 443
+            "threat_score": np.random.uniform(0.5, 1.0),
+            "anomaly_score": np.random.uniform(0.5, 1.0),
+            "src_port": int(np.random.uniform(1024, 65535)),
+            "dst_port": 443,
         }
 
-        feature_order = ['threat_score', 'anomaly_score', 'src_port', 'dst_port']
+        feature_order = ["threat_score", "anomaly_score", "src_port", "dst_port"]
         instance_array = np.array([[instance[f] for f in feature_order]])
         prediction = model_stable.predict_proba(instance_array)[0][1]
 
         await engine.explain(
-            model_stable, instance, prediction,
-            ExplanationType.LIME, DetailLevel.SUMMARY,
-            use_cache=False  # Disable cache for this simulation
+            model_stable,
+            instance,
+            prediction,
+            ExplanationType.LIME,
+            DetailLevel.SUMMARY,
+            use_cache=False,  # Disable cache for this simulation
         )
 
     print("✅ Generated 100 baseline explanations")
 
     # Check drift (should be none)
-    drift_result_baseline = engine.detect_drift(
-        feature_name='threat_score',
-        window_size=50,
-        threshold=0.2
-    )
+    drift_result_baseline = engine.detect_drift(feature_name="threat_score", window_size=50, threshold=0.2)
 
-    print(f"\n📊 Baseline Drift Check (threat_score):")
+    print("\n📊 Baseline Drift Check (threat_score):")
     print(f"   Drift detected: {drift_result_baseline['drift_detected']}")
 
     # Now simulate model change (drift)
@@ -361,36 +346,30 @@ async def example_5_feature_drift():
 
     for i in range(100):
         instance = {
-            'threat_score': np.random.uniform(0.5, 1.0),
-            'anomaly_score': np.random.uniform(0.5, 1.0),
-            'src_port': int(np.random.uniform(1024, 65535)),
-            'dst_port': 443
+            "threat_score": np.random.uniform(0.5, 1.0),
+            "anomaly_score": np.random.uniform(0.5, 1.0),
+            "src_port": int(np.random.uniform(1024, 65535)),
+            "dst_port": 443,
         }
 
-        feature_order = ['threat_score', 'anomaly_score', 'src_port', 'dst_port']
+        feature_order = ["threat_score", "anomaly_score", "src_port", "dst_port"]
         instance_array = np.array([[instance[f] for f in feature_order]])
         prediction = model_drifted.predict_proba(instance_array)[0][1]
 
         await engine.explain(
-            model_drifted, instance, prediction,
-            ExplanationType.LIME, DetailLevel.SUMMARY,
-            use_cache=False
+            model_drifted, instance, prediction, ExplanationType.LIME, DetailLevel.SUMMARY, use_cache=False
         )
 
     print("✅ Generated 100 drifted explanations")
 
     # Check drift again (should detect change)
-    drift_result_drifted = engine.detect_drift(
-        feature_name='threat_score',
-        window_size=50,
-        threshold=0.2
-    )
+    drift_result_drifted = engine.detect_drift(feature_name="threat_score", window_size=50, threshold=0.2)
 
-    print(f"\n📊 After Model Change (threat_score):")
+    print("\n📊 After Model Change (threat_score):")
     print(f"   Drift detected: {drift_result_drifted['drift_detected']}")
 
-    if drift_result_drifted['drift_detected']:
-        print(f"   ⚠️  DRIFT ALERT!")
+    if drift_result_drifted["drift_detected"]:
+        print("   ⚠️  DRIFT ALERT!")
         print(f"   Direction: {drift_result_drifted['direction']}")
         print(f"   Relative change: {drift_result_drifted['relative_change']:.1%}")
         print(f"   Severity: {drift_result_drifted['severity']}")
@@ -409,6 +388,7 @@ async def example_5_feature_drift():
 # ============================================================================
 # RUN ALL EXAMPLES
 # ============================================================================
+
 
 async def run_all_examples():
     """Run all examples sequentially."""

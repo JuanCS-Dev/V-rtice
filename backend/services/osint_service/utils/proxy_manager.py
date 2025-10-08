@@ -16,9 +16,7 @@ operations, especially when dealing with websites that employ anti-scraping
 measures, ensuring continuous data collection and operational resilience.
 """
 
-import asyncio
 from datetime import datetime, timedelta
-import random
 from typing import Any, Dict, List, Optional
 
 
@@ -41,9 +39,7 @@ class ProxyManager:
             proxy_list (Optional[List[str]]): A list of proxy URLs (e.g., 'http://user:pass@ip:port').
             rotation_interval_seconds (int): How often to rotate proxies.
         """
-        self.proxies = [
-            {"url": p, "last_used": None, "failures": 0} for p in (proxy_list or [])
-        ]
+        self.proxies = [{"url": p, "last_used": None, "failures": 0} for p in (proxy_list or [])]
         self.rotation_interval = timedelta(seconds=rotation_interval_seconds)
         self.current_proxy_index = 0
         self.last_rotation_time = datetime.now()
@@ -81,9 +77,7 @@ class ProxyManager:
         for proxy in self.proxies:
             if proxy["url"] == proxy_url:
                 proxy["failures"] += 1
-                print(
-                    f"[ProxyManager] Proxy {proxy_url} marked as failed. Total failures: {proxy['failures']}"
-                )
+                print(f"[ProxyManager] Proxy {proxy_url} marked as failed. Total failures: {proxy['failures']}")
                 # Optionally, remove proxy if failures exceed a threshold
                 break
 
@@ -110,9 +104,7 @@ class ProxyManager:
             "proxy_details": [
                 {
                     "url": p["url"],
-                    "last_used": (
-                        p["last_used"].isoformat() if p["last_used"] else "N/A"
-                    ),
+                    "last_used": (p["last_used"].isoformat() if p["last_used"] else "N/A"),
                     "failures": p["failures"],
                 }
                 for p in self.proxies

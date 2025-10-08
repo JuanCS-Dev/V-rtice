@@ -19,17 +19,17 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Callable
 from enum import Enum
-import logging
 
 from .base import (
-    HITLDecision,
     DecisionStatus,
-    RiskLevel,
     EscalationConfig,
+    HITLDecision,
+    RiskLevel,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,8 +39,10 @@ logger = logging.getLogger(__name__)
 # Escalation Types
 # ============================================================================
 
+
 class EscalationType(Enum):
     """Type of escalation."""
+
     TIMEOUT = "timeout"  # SLA timeout
     HIGH_RISK = "high_risk"  # Critical/High risk decision
     MULTIPLE_REJECTIONS = "multiple_rejections"  # Rejected multiple times
@@ -53,20 +55,22 @@ class EscalationType(Enum):
 # Escalation Data Classes
 # ============================================================================
 
+
 @dataclass
 class EscalationRule:
     """
     Rule for when to escalate a decision.
     """
+
     # Rule identifier
     rule_id: str
     rule_name: str
     escalation_type: EscalationType
 
     # Trigger conditions
-    risk_levels: List[RiskLevel] = field(default_factory=list)  # Empty = all levels
+    risk_levels: list[RiskLevel] = field(default_factory=list)  # Empty = all levels
     max_rejections: int = 2
-    timeout_threshold: Optional[timedelta] = None
+    timeout_threshold: timedelta | None = None
 
     # Escalation target
     target_role: str = "soc_supervisor"
@@ -103,14 +107,14 @@ class EscalationRule:
         if self.escalation_type == EscalationType.TIMEOUT:
             return decision.is_overdue()
 
-        elif self.escalation_type == EscalationType.HIGH_RISK:
+        if self.escalation_type == EscalationType.HIGH_RISK:
             return decision.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]
 
-        elif self.escalation_type == EscalationType.MULTIPLE_REJECTIONS:
+        if self.escalation_type == EscalationType.MULTIPLE_REJECTIONS:
             rejection_count = decision.metadata.get("rejection_count", 0)
             return rejection_count >= self.max_rejections
 
-        elif self.escalation_type == EscalationType.STALE_DECISION:
+        if self.escalation_type == EscalationType.STALE_DECISION:
             if self.timeout_threshold:
                 age = decision.get_age()
                 return age > self.timeout_threshold
@@ -124,6 +128,7 @@ class EscalationEvent:
     """
     Record of an escalation event.
     """
+
     # Event details
     event_id: str
     decision_id: str
@@ -136,7 +141,7 @@ class EscalationEvent:
     reason: str = ""
 
     # Triggered rule
-    rule_id: Optional[str] = None
+    rule_id: str | None = None
 
     # Notification status
     email_sent: bool = False
@@ -144,12 +149,13 @@ class EscalationEvent:
     slack_sent: bool = False
 
     # Metadata
-    metadata: Dict[str, any] = field(default_factory=dict)
+    metadata: dict[str, any] = field(default_factory=dict)
 
 
 # ============================================================================
 # Escalation Manager
 # ============================================================================
+
 
 class EscalationManager:
     """
@@ -168,7 +174,7 @@ class EscalationManager:
         "ceo",
     ]
 
-    def __init__(self, config: Optional[EscalationConfig] = None):
+    def __init__(self, config: EscalationConfig | None = None):
         """
         Initialize escalation manager.
 
@@ -179,14 +185,14 @@ class EscalationManager:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Escalation rules
-        self.rules: List[EscalationRule] = []
+        self.rules: list[EscalationRule] = []
         self._initialize_default_rules()
 
         # Escalation history
-        self.escalation_history: List[EscalationEvent] = []
+        self.escalation_history: list[EscalationEvent] = []
 
         # Notification handlers
-        self._notification_handlers: Dict[str, Callable] = {}
+        self._notification_handlers: dict[str, Callable] = {}
 
         # Metrics
         self.metrics = {
@@ -266,7 +272,7 @@ class EscalationManager:
         self.rules.sort(key=lambda r: r.priority, reverse=True)
         self.logger.info(f"Added escalation rule: {rule.rule_name}")
 
-    def check_for_escalation(self, decision: HITLDecision) -> Optional[EscalationRule]:
+    def check_for_escalation(self, decision: HITLDecision) -> EscalationRule | None:
         """
         Check if decision should be escalated.
 
@@ -282,10 +288,7 @@ class EscalationManager:
         # Check rules in priority order
         for rule in self.rules:
             if rule.matches(decision):
-                self.logger.info(
-                    f"Escalation rule matched: {rule.rule_name} "
-                    f"(decision={decision.decision_id})"
-                )
+                self.logger.info(f"Escalation rule matched: {rule.rule_name} (decision={decision.decision_id})")
                 return rule
 
         return None
@@ -295,8 +298,8 @@ class EscalationManager:
         decision: HITLDecision,
         escalation_type: EscalationType,
         reason: str,
-        target_role: Optional[str] = None,
-        triggered_rule: Optional[EscalationRule] = None,
+        target_role: str | None = None,
+        triggered_rule: EscalationRule | None = None,
     ) -> EscalationEvent:
         """
         Escalate decision to higher authority.
@@ -365,7 +368,7 @@ class EscalationManager:
         self,
         decision: HITLDecision,
         event: EscalationEvent,
-        rule: Optional[EscalationRule] = None,
+        rule: EscalationRule | None = None,
     ):
         """Send escalation notifications."""
         # Determine which notifications to send
@@ -385,9 +388,7 @@ class EscalationManager:
         if send_slack:
             event.slack_sent = self._send_slack_notification(decision, event)
 
-    def _send_email_notification(
-        self, decision: HITLDecision, event: EscalationEvent
-    ) -> bool:
+    def _send_email_notification(self, decision: HITLDecision, event: EscalationEvent) -> bool:
         """Send email notification."""
         handler = self._notification_handlers.get("email")
         if handler:
@@ -402,9 +403,7 @@ class EscalationManager:
             self.logger.debug("No email handler registered")
             return False
 
-    def _send_sms_notification(
-        self, decision: HITLDecision, event: EscalationEvent
-    ) -> bool:
+    def _send_sms_notification(self, decision: HITLDecision, event: EscalationEvent) -> bool:
         """Send SMS notification."""
         handler = self._notification_handlers.get("sms")
         if handler:
@@ -419,9 +418,7 @@ class EscalationManager:
             self.logger.debug("No SMS handler registered")
             return False
 
-    def _send_slack_notification(
-        self, decision: HITLDecision, event: EscalationEvent
-    ) -> bool:
+    def _send_slack_notification(self, decision: HITLDecision, event: EscalationEvent) -> bool:
         """Send Slack notification."""
         handler = self._notification_handlers.get("slack")
         if handler:
@@ -447,9 +444,7 @@ class EscalationManager:
         self._notification_handlers[channel] = handler
         self.logger.info(f"Registered notification handler for {channel}")
 
-    def get_escalation_target(
-        self, current_role: str, decision: HITLDecision
-    ) -> str:
+    def get_escalation_target(self, current_role: str, decision: HITLDecision) -> str:
         """
         Get next escalation target in chain.
 
@@ -463,7 +458,7 @@ class EscalationManager:
         # Use risk-based target if critical/high risk
         if decision.risk_level == RiskLevel.CRITICAL:
             return self.config.critical_risk_escalation
-        elif decision.risk_level == RiskLevel.HIGH:
+        if decision.risk_level == RiskLevel.HIGH:
             return self.config.high_risk_escalation
 
         # Otherwise, use escalation chain
@@ -473,27 +468,22 @@ class EscalationManager:
             current_index = chain.index(current_role)
             if current_index < len(chain) - 1:
                 return chain[current_index + 1]
-            else:
-                # Already at top of chain
-                return chain[-1]
+            # Already at top of chain
+            return chain[-1]
         except ValueError:
             # Current role not in chain, use default
             return self.config.get_escalation_target(decision.risk_level)
 
-    def get_metrics(self) -> Dict[str, any]:
+    def get_metrics(self) -> dict[str, any]:
         """Get escalation metrics."""
         return {
             **self.metrics,
             "escalation_rate": (
-                self.metrics["total_escalations"] / len(self.escalation_history)
-                if self.escalation_history
-                else 0.0
+                self.metrics["total_escalations"] / len(self.escalation_history) if self.escalation_history else 0.0
             ),
         }
 
-    def get_escalation_history(
-        self, decision_id: Optional[str] = None, limit: int = 100
-    ) -> List[EscalationEvent]:
+    def get_escalation_history(self, decision_id: str | None = None, limit: int = 100) -> list[EscalationEvent]:
         """
         Get escalation history.
 
@@ -505,9 +495,7 @@ class EscalationManager:
             List of escalation events
         """
         if decision_id:
-            events = [
-                e for e in self.escalation_history if e.decision_id == decision_id
-            ]
+            events = [e for e in self.escalation_history if e.decision_id == decision_id]
         else:
             events = self.escalation_history
 

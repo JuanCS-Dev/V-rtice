@@ -1,7 +1,6 @@
 """Database Actuator - PostgreSQL/pgBouncer Connection Pool Management"""
 
 import logging
-from typing import Any, Dict, List, Optional
 
 import asyncpg
 import psycopg2
@@ -25,9 +24,7 @@ class DatabaseActuator:
         self.dry_run_mode = dry_run_mode
         self.action_log = []
 
-    async def adjust_connection_pool(
-        self, database: str, pool_size: int, pool_mode: str = "transaction"
-    ) -> Dict:
+    async def adjust_connection_pool(self, database: str, pool_size: int, pool_mode: str = "transaction") -> dict:
         """Adjust pgBouncer connection pool size and mode.
 
         Args:
@@ -36,9 +33,7 @@ class DatabaseActuator:
             pool_mode: 'session', 'transaction', or 'statement'
         """
         if self.dry_run_mode:
-            logger.info(
-                f"DRY-RUN: Set {database} pool_size={pool_size}, pool_mode={pool_mode}"
-            )
+            logger.info(f"DRY-RUN: Set {database} pool_size={pool_size}, pool_mode={pool_mode}")
             self.action_log.append(
                 {
                     "action": "adjust_pool",
@@ -86,9 +81,7 @@ class DatabaseActuator:
                 }
             )
 
-            logger.info(
-                f"Pool adjusted: {database} -> {pool_size} connections ({pool_mode} mode)"
-            )
+            logger.info(f"Pool adjusted: {database} -> {pool_size} connections ({pool_mode} mode)")
 
             return {
                 "success": True,
@@ -101,7 +94,7 @@ class DatabaseActuator:
             logger.error(f"Pool adjustment error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def kill_idle_connections(self, idle_threshold_seconds: int = 300) -> Dict:
+    async def kill_idle_connections(self, idle_threshold_seconds: int = 300) -> dict:
         """Terminate idle connections to free resources.
 
         Args:
@@ -138,7 +131,7 @@ class DatabaseActuator:
             for row in idle_conns:
                 try:
                     # Validate PID is integer before using
-                    pid = int(row['pid'])
+                    pid = int(row["pid"])
                     await conn.execute("SELECT pg_terminate_backend($1)", pid)
                     killed_count += 1
                 except (ValueError, TypeError) as e:
@@ -170,7 +163,7 @@ class DatabaseActuator:
             logger.error(f"Connection termination error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def vacuum_analyze(self, table: str, analyze_only: bool = False) -> Dict:
+    async def vacuum_analyze(self, table: str, analyze_only: bool = False) -> dict:
         """Run VACUUM ANALYZE to reclaim space and update statistics.
 
         Args:
@@ -193,7 +186,7 @@ class DatabaseActuator:
 
         try:
             # Validate table name (alphanumeric + underscore only)
-            if not table or not table.replace('_', '').replace('.', '').isalnum():
+            if not table or not table.replace("_", "").replace(".", "").isalnum():
                 raise ValueError(f"Invalid table name: {table}. Must be alphanumeric with underscores/dots only.")
 
             # Use psycopg2 for VACUUM (asyncpg doesn't support it)
@@ -235,7 +228,7 @@ class DatabaseActuator:
             logger.error(f"VACUUM error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def get_database_stats(self) -> Dict:
+    async def get_database_stats(self) -> dict:
         """Get database performance statistics."""
         try:
             conn = await asyncpg.connect(self.db_url)
@@ -319,7 +312,7 @@ class DatabaseActuator:
             logger.error(f"Stats retrieval error: {e}")
             return {"success": False, "error": str(e)}
 
-    async def adjust_work_mem(self, work_mem_mb: int) -> Dict:
+    async def adjust_work_mem(self, work_mem_mb: int) -> dict:
         """Adjust work_mem for current session (affects sort/hash operations).
 
         Args:
@@ -370,6 +363,6 @@ class DatabaseActuator:
             logger.error(f"work_mem adjustment error: {e}")
             return {"success": False, "error": str(e)}
 
-    def get_action_log(self) -> List[Dict]:
+    def get_action_log(self) -> list[dict]:
         """Return action history for audit."""
         return self.action_log

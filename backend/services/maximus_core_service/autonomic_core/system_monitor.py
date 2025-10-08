@@ -9,13 +9,13 @@ the Homeostatic Control Loop (HCL) and Resource Analyzer, enabling informed
 decisions about system health and resource management.
 """
 
-import asyncio
-from datetime import datetime
 import time
-from typing import Any, Dict, Optional
+from datetime import datetime
+from typing import Any
+
+import psutil
 
 from autonomic_core.homeostatic_control import OperationalMode, SystemState
-import psutil
 
 
 class SystemMonitor:
@@ -46,16 +46,10 @@ class SystemMonitor:
         cpu_percent = psutil.cpu_percent(interval=0.1)
         memory_percent = psutil.virtual_memory().percent
         disk_io_rate = (
-            (psutil.disk_io_counters().read_bytes - self.last_disk_io.read_bytes)
-            / time_delta
-            if time_delta > 0
-            else 0
+            (psutil.disk_io_counters().read_bytes - self.last_disk_io.read_bytes) / time_delta if time_delta > 0 else 0
         )
         network_io_rate = (
-            (psutil.net_io_counters().bytes_recv - self.last_net_io.bytes_recv)
-            / time_delta
-            if time_delta > 0
-            else 0
+            (psutil.net_io_counters().bytes_recv - self.last_net_io.bytes_recv) / time_delta if time_delta > 0 else 0
         )
 
         self.last_disk_io = psutil.disk_io_counters()
@@ -75,7 +69,7 @@ class SystemMonitor:
             is_healthy=is_healthy,
         )
 
-    async def get_detailed_metrics(self) -> Dict[str, Any]:
+    async def get_detailed_metrics(self) -> dict[str, Any]:
         """Returns a more detailed set of system metrics for debugging or advanced monitoring."""
         # This would include more granular data from psutil
         return {"cpu": psutil.cpu_percent(), "memory": psutil.virtual_memory().percent}

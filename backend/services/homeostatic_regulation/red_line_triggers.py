@@ -76,9 +76,7 @@ class RedLineTriggers:
 
         # In a real system, this would directly call infrastructure APIs or other critical services
         # to perform the emergency action (e.g., call Kubernetes API to scale down, network firewall to isolate)
-        print(
-            f"🚨 [RedLineTriggers] Emergency action '{protocol['action']}' initiated."
-        )
+        print(f"🚨 [RedLineTriggers] Emergency action '{protocol['action']}' initiated.")
 
         return response_summary
 
@@ -90,9 +88,7 @@ class RedLineTriggers:
         """
         return {
             "status": "active",
-            "last_trigger": (
-                self.last_trigger_time.isoformat() if self.last_trigger_time else "N/A"
-            ),
+            "last_trigger": (self.last_trigger_time.isoformat() if self.last_trigger_time else "N/A"),
             "total_triggered_events": len(self.triggered_events),
             "available_protocols": list(self.emergency_protocols.keys()),
         }

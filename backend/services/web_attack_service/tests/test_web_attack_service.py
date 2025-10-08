@@ -13,24 +13,24 @@ Note: AICoPilot, BurpSuiteWrapper, and ZAPWrapper are mocked in tests to isolate
 API logic (test infrastructure mocking, not production code).
 """
 
+import sys
+from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
-from datetime import datetime
-import sys
 
 # Mock external dependencies before importing
-sys.modules['zapv2'] = Mock()
-sys.modules['google'] = Mock()
-sys.modules['google.generativeai'] = Mock()
-sys.modules['anthropic'] = Mock()
+sys.modules["zapv2"] = Mock()
+sys.modules["google"] = Mock()
+sys.modules["google.generativeai"] = Mock()
+sys.modules["anthropic"] = Mock()
 
 # Import the FastAPI app
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/web_attack_service")
 from api import app
 from models import *
-
 
 # ==================== FIXTURES ====================
 
@@ -45,51 +45,57 @@ async def client():
 @pytest_asyncio.fixture
 async def mock_ai_copilot():
     """Mock AICoPilot for testing."""
-    with patch('api.ai_copilot') as mock_ai:
-        mock_ai.generate_attack_vectors = AsyncMock(return_value={
-            "analysis": "Test analysis",
-            "attack_vectors": [],
-            "recommendations": ["Test recommendation"],
-            "provider_used": "gemini",
-            "tokens_used": 100,
-            "confidence": 0.95,
-            "timestamp": datetime.now()
-        })
+    with patch("api.ai_copilot") as mock_ai:
+        mock_ai.generate_attack_vectors = AsyncMock(
+            return_value={
+                "analysis": "Test analysis",
+                "attack_vectors": [],
+                "recommendations": ["Test recommendation"],
+                "provider_used": "gemini",
+                "tokens_used": 100,
+                "confidence": 0.95,
+                "timestamp": datetime.now(),
+            }
+        )
         yield mock_ai
 
 
 @pytest_asyncio.fixture
 async def mock_burp_wrapper():
     """Mock BurpSuiteWrapper for testing."""
-    with patch('api.burp_wrapper') as mock_burp:
-        mock_burp.scan = AsyncMock(return_value={
-            "scan_id": "burp-001",
-            "target_url": "http://target.com",
-            "scan_type": "active",
-            "vulnerabilities_found": 5,
-            "findings": [],
-            "requests_made": 150,
-            "pages_crawled": 20,
-            "scan_duration": 120.5,
-            "timestamp": datetime.now()
-        })
+    with patch("api.burp_wrapper") as mock_burp:
+        mock_burp.scan = AsyncMock(
+            return_value={
+                "scan_id": "burp-001",
+                "target_url": "http://target.com",
+                "scan_type": "active",
+                "vulnerabilities_found": 5,
+                "findings": [],
+                "requests_made": 150,
+                "pages_crawled": 20,
+                "scan_duration": 120.5,
+                "timestamp": datetime.now(),
+            }
+        )
         yield mock_burp
 
 
 @pytest_asyncio.fixture
 async def mock_zap_wrapper():
     """Mock ZAPWrapper for testing."""
-    with patch('api.zap_wrapper') as mock_zap:
-        mock_zap.scan = AsyncMock(return_value={
-            "scan_id": "zap-001",
-            "target_url": "http://target.com",
-            "scan_type": "active",
-            "alerts_count": 3,
-            "alerts": [],
-            "urls_found": 50,
-            "scan_duration": 90.0,
-            "timestamp": datetime.now()
-        })
+    with patch("api.zap_wrapper") as mock_zap:
+        mock_zap.scan = AsyncMock(
+            return_value={
+                "scan_id": "zap-001",
+                "target_url": "http://target.com",
+                "scan_type": "active",
+                "alerts_count": 3,
+                "alerts": [],
+                "urls_found": 50,
+                "scan_duration": 90.0,
+                "timestamp": datetime.now(),
+            }
+        )
         yield mock_zap
 
 
@@ -103,10 +109,10 @@ def create_burp_scan_request(target_url="http://target.com", scan_type="active")
             "max_crawl_time": 600,
             "audit_checks": ["sql_injection", "cross_site_scripting"],
             "thread_count": 10,
-            "throttle_ms": 0
+            "throttle_ms": 0,
         },
         "enable_ai_copilot": True,
-        "ai_provider": "auto"
+        "ai_provider": "auto",
     }
 
 
@@ -115,15 +121,11 @@ def create_zap_scan_request(target_url="http://target.com", scan_type="active"):
     return {
         "target_url": target_url,
         "scan_type": scan_type,
-        "policy": {
-            "policy_name": "API-Security",
-            "attack_strength": "MEDIUM",
-            "alert_threshold": "MEDIUM"
-        },
+        "policy": {"policy_name": "API-Security", "attack_strength": "MEDIUM", "alert_threshold": "MEDIUM"},
         "context_name": "default",
         "max_children": 0,
         "recurse": True,
-        "subtree_only": False
+        "subtree_only": False,
     }
 
 
@@ -135,7 +137,7 @@ def create_ai_copilot_request():
         "attack_type": "sql_injection",
         "provider": "auto",
         "temperature": 0.7,
-        "max_tokens": 1000
+        "max_tokens": 1000,
     }
 
 
@@ -189,7 +191,7 @@ class TestBurpScanEndpoint:
     async def test_burp_scan_success(self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper):
         """Test successful Burp Suite scan."""
         # Ensure burp_wrapper is available
-        with patch('api.burp_wrapper', mock_burp_wrapper):
+        with patch("api.burp_wrapper", mock_burp_wrapper):
             payload = create_burp_scan_request()
             response = await client.post("/api/v1/scan/burp", json=payload)
 
@@ -205,7 +207,7 @@ class TestBurpScanEndpoint:
     async def test_burp_scan_not_configured(self, client):
         """Test Burp scan when wrapper is not configured."""
         # Ensure burp_wrapper is None
-        with patch('api.burp_wrapper', None):
+        with patch("api.burp_wrapper", None):
             payload = create_burp_scan_request()
             response = await client.post("/api/v1/scan/burp", json=payload)
 
@@ -215,7 +217,7 @@ class TestBurpScanEndpoint:
 
     async def test_burp_scan_with_authentication(self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper):
         """Test Burp scan with authentication credentials."""
-        with patch('api.burp_wrapper', mock_burp_wrapper):
+        with patch("api.burp_wrapper", mock_burp_wrapper):
             payload = create_burp_scan_request()
             payload["auth_type"] = "basic"
             payload["auth_credentials"] = {"username": "admin", "password": "secret"}
@@ -225,7 +227,7 @@ class TestBurpScanEndpoint:
 
     async def test_burp_scan_with_custom_config(self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper):
         """Test Burp scan with custom configuration."""
-        with patch('api.burp_wrapper', mock_burp_wrapper):
+        with patch("api.burp_wrapper", mock_burp_wrapper):
             payload = create_burp_scan_request()
             payload["config"]["crawl_depth"] = 5
             payload["config"]["thread_count"] = 20
@@ -235,8 +237,7 @@ class TestBurpScanEndpoint:
 
     async def test_burp_scan_ai_copilot_integration(self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper):
         """Test Burp scan with AI copilot enabled."""
-        with patch('api.burp_wrapper', mock_burp_wrapper), \
-             patch('api.ai_copilot', mock_ai_copilot):
+        with patch("api.burp_wrapper", mock_burp_wrapper), patch("api.ai_copilot", mock_ai_copilot):
             payload = create_burp_scan_request()
             payload["enable_ai_copilot"] = True
 
@@ -256,7 +257,7 @@ class TestZAPScanEndpoint:
 
     async def test_zap_scan_success(self, client, mock_zap_wrapper, mock_ai_copilot, mock_burp_wrapper):
         """Test successful ZAP scan."""
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             payload = create_zap_scan_request()
             response = await client.post("/api/v1/scan/zap", json=payload)
 
@@ -271,7 +272,7 @@ class TestZAPScanEndpoint:
 
     async def test_zap_scan_not_configured(self, client):
         """Test ZAP scan when wrapper is not configured."""
-        with patch('api.zap_wrapper', None):
+        with patch("api.zap_wrapper", None):
             payload = create_zap_scan_request()
             response = await client.post("/api/v1/scan/zap", json=payload)
 
@@ -281,7 +282,7 @@ class TestZAPScanEndpoint:
 
     async def test_zap_scan_with_policy(self, client, mock_zap_wrapper, mock_ai_copilot, mock_burp_wrapper):
         """Test ZAP scan with custom policy."""
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             payload = create_zap_scan_request()
             payload["policy"]["attack_strength"] = "HIGH"
             payload["policy"]["alert_threshold"] = "LOW"
@@ -291,7 +292,7 @@ class TestZAPScanEndpoint:
 
     async def test_zap_scan_with_context(self, client, mock_zap_wrapper, mock_ai_copilot, mock_burp_wrapper):
         """Test ZAP scan with context configuration."""
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             payload = create_zap_scan_request()
             payload["context_name"] = "custom_context"
             payload["include_in_context"] = ["http://target.com/api/*"]
@@ -302,7 +303,7 @@ class TestZAPScanEndpoint:
 
     async def test_zap_scan_with_authentication(self, client, mock_zap_wrapper, mock_ai_copilot, mock_burp_wrapper):
         """Test ZAP scan with authentication."""
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             payload = create_zap_scan_request()
             payload["auth_method"] = "form"
             payload["login_url"] = "http://target.com/login"
@@ -314,7 +315,7 @@ class TestZAPScanEndpoint:
 
     async def test_zap_scan_passive_mode(self, client, mock_zap_wrapper, mock_ai_copilot, mock_burp_wrapper):
         """Test ZAP scan in passive mode."""
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             payload = create_zap_scan_request(scan_type="passive")
             response = await client.post("/api/v1/scan/zap", json=payload)
             assert response.status_code == 200
@@ -329,7 +330,7 @@ class TestAIPayloadGenerationEndpoint:
 
     async def test_generate_payloads_success(self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper):
         """Test successful AI payload generation."""
-        with patch('api.ai_copilot', mock_ai_copilot):
+        with patch("api.ai_copilot", mock_ai_copilot):
             payload = create_ai_copilot_request()
             response = await client.post("/api/v1/ai/generate-payloads", json=payload)
 
@@ -344,7 +345,7 @@ class TestAIPayloadGenerationEndpoint:
 
     async def test_generate_payloads_not_available(self, client):
         """Test AI payload generation when copilot not available."""
-        with patch('api.ai_copilot', None):
+        with patch("api.ai_copilot", None):
             payload = create_ai_copilot_request()
             response = await client.post("/api/v1/ai/generate-payloads", json=payload)
 
@@ -352,11 +353,13 @@ class TestAIPayloadGenerationEndpoint:
             data = response.json()
             assert "not available" in data["detail"].lower()
 
-    async def test_generate_payloads_different_attack_types(self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper):
+    async def test_generate_payloads_different_attack_types(
+        self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper
+    ):
         """Test payload generation for different attack types."""
         attack_types = ["sql_injection", "cross_site_scripting", "command_injection", "server_side_request_forgery"]
 
-        with patch('api.ai_copilot', mock_ai_copilot):
+        with patch("api.ai_copilot", mock_ai_copilot):
             for attack_type in attack_types:
                 payload = create_ai_copilot_request()
                 payload["attack_type"] = attack_type
@@ -364,18 +367,22 @@ class TestAIPayloadGenerationEndpoint:
                 response = await client.post("/api/v1/ai/generate-payloads", json=payload)
                 assert response.status_code == 200
 
-    async def test_generate_payloads_with_temperature(self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper):
+    async def test_generate_payloads_with_temperature(
+        self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper
+    ):
         """Test payload generation with different temperature settings."""
-        with patch('api.ai_copilot', mock_ai_copilot):
+        with patch("api.ai_copilot", mock_ai_copilot):
             payload = create_ai_copilot_request()
             payload["temperature"] = 0.9
 
             response = await client.post("/api/v1/ai/generate-payloads", json=payload)
             assert response.status_code == 200
 
-    async def test_generate_payloads_with_max_tokens(self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper):
+    async def test_generate_payloads_with_max_tokens(
+        self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper
+    ):
         """Test payload generation with max tokens limit."""
-        with patch('api.ai_copilot', mock_ai_copilot):
+        with patch("api.ai_copilot", mock_ai_copilot):
             payload = create_ai_copilot_request()
             payload["max_tokens"] = 2000
 
@@ -408,7 +415,7 @@ class TestRequestValidation:
         """Test AI copilot without vulnerability_context."""
         payload = {
             "request_structure": {},
-            "attack_type": "sql_injection"
+            "attack_type": "sql_injection",
             # Missing vulnerability_context
         }
 
@@ -419,7 +426,7 @@ class TestRequestValidation:
         """Test AI copilot without attack_type."""
         payload = {
             "vulnerability_context": {},
-            "request_structure": {}
+            "request_structure": {},
             # Missing attack_type
         }
 
@@ -452,14 +459,14 @@ class TestEdgeCases:
 
     async def test_burp_scan_with_minimal_config(self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper):
         """Test Burp scan with minimal configuration."""
-        with patch('api.burp_wrapper', mock_burp_wrapper):
+        with patch("api.burp_wrapper", mock_burp_wrapper):
             payload = {"target_url": "http://target.com"}
             response = await client.post("/api/v1/scan/burp", json=payload)
             assert response.status_code == 200
 
     async def test_zap_scan_with_minimal_config(self, client, mock_zap_wrapper, mock_ai_copilot, mock_burp_wrapper):
         """Test ZAP scan with minimal configuration."""
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             payload = {"target_url": "http://target.com"}
             response = await client.post("/api/v1/scan/zap", json=payload)
             assert response.status_code == 200
@@ -468,7 +475,7 @@ class TestEdgeCases:
         """Test Burp scan with different scan types."""
         scan_types = ["active", "passive", "spider", "ajax_spider"]
 
-        with patch('api.burp_wrapper', mock_burp_wrapper):
+        with patch("api.burp_wrapper", mock_burp_wrapper):
             for scan_type in scan_types:
                 payload = create_burp_scan_request(scan_type=scan_type)
                 response = await client.post("/api/v1/scan/burp", json=payload)
@@ -478,29 +485,31 @@ class TestEdgeCases:
         """Test ZAP scan with different scan types."""
         scan_types = ["active", "passive", "spider", "ajax_spider", "api_scan"]
 
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             for scan_type in scan_types:
                 payload = create_zap_scan_request(scan_type=scan_type)
                 response = await client.post("/api/v1/scan/zap", json=payload)
                 assert response.status_code == 200
 
-    async def test_burp_scan_with_special_characters_in_url(self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper):
+    async def test_burp_scan_with_special_characters_in_url(
+        self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper
+    ):
         """Test Burp scan with special characters in URL."""
-        with patch('api.burp_wrapper', mock_burp_wrapper):
+        with patch("api.burp_wrapper", mock_burp_wrapper):
             payload = create_burp_scan_request(target_url="http://example.com/path?param=value&foo=bar")
             response = await client.post("/api/v1/scan/burp", json=payload)
             assert response.status_code == 200
 
     async def test_zap_scan_with_https_url(self, client, mock_zap_wrapper, mock_ai_copilot, mock_burp_wrapper):
         """Test ZAP scan with HTTPS URL."""
-        with patch('api.zap_wrapper', mock_zap_wrapper):
+        with patch("api.zap_wrapper", mock_zap_wrapper):
             payload = create_zap_scan_request(target_url="https://secure.example.com")
             response = await client.post("/api/v1/scan/zap", json=payload)
             assert response.status_code == 200
 
     async def test_ai_temperature_boundary_values(self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper):
         """Test AI payload generation with boundary temperature values."""
-        with patch('api.ai_copilot', mock_ai_copilot):
+        with patch("api.ai_copilot", mock_ai_copilot):
             # Min temperature (0.0)
             payload_min = create_ai_copilot_request()
             payload_min["temperature"] = 0.0
@@ -515,7 +524,7 @@ class TestEdgeCases:
 
     async def test_ai_max_tokens_boundary_values(self, client, mock_ai_copilot, mock_burp_wrapper, mock_zap_wrapper):
         """Test AI payload generation with boundary max_tokens values."""
-        with patch('api.ai_copilot', mock_ai_copilot):
+        with patch("api.ai_copilot", mock_ai_copilot):
             # Min tokens (100)
             payload_min = create_ai_copilot_request()
             payload_min["max_tokens"] = 100
@@ -528,9 +537,11 @@ class TestEdgeCases:
             response_max = await client.post("/api/v1/ai/generate-payloads", json=payload_max)
             assert response_max.status_code == 200
 
-    async def test_burp_scan_with_complex_auth_structure(self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper):
+    async def test_burp_scan_with_complex_auth_structure(
+        self, client, mock_burp_wrapper, mock_ai_copilot, mock_zap_wrapper
+    ):
         """Test Burp scan with complex authentication structure."""
-        with patch('api.burp_wrapper', mock_burp_wrapper):
+        with patch("api.burp_wrapper", mock_burp_wrapper):
             payload = create_burp_scan_request()
             payload["auth_type"] = "bearer"
             payload["auth_credentials"] = {"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}

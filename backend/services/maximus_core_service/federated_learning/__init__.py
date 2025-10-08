@@ -43,46 +43,40 @@ Version: 1.0.0
 License: Part of VÉRTICE Ethical AI Platform
 """
 
-from .base import (
-    FLRound,
-    ModelUpdate,
-    FLConfig,
-    FLMetrics,
-    ClientInfo,
-    AggregationStrategy,
-    FLStatus,
-)
-
 from .aggregation import (
+    AggregationResult,
+    DPAggregator,
     FedAvgAggregator,
     SecureAggregator,
-    DPAggregator,
-    AggregationResult,
 )
-
-from .fl_coordinator import (
-    FLCoordinator,
-    CoordinatorConfig,
+from .base import (
+    AggregationStrategy,
+    ClientInfo,
+    FLConfig,
+    FLMetrics,
+    FLRound,
+    FLStatus,
+    ModelUpdate,
 )
-
-from .fl_client import (
-    FLClient,
-    ClientConfig,
-)
-
-from .model_adapters import (
-    BaseModelAdapter,
-    ThreatClassifierAdapter,
-    MalwareDetectorAdapter,
-    ModelType,
-)
-
 from .communication import (
+    EncryptedMessage,
     FLCommunicationChannel,
     MessageType,
-    EncryptedMessage,
 )
-
+from .fl_client import (
+    ClientConfig,
+    FLClient,
+)
+from .fl_coordinator import (
+    CoordinatorConfig,
+    FLCoordinator,
+)
+from .model_adapters import (
+    BaseModelAdapter,
+    MalwareDetectorAdapter,
+    ModelType,
+    ThreatClassifierAdapter,
+)
 from .storage import (
     FLModelRegistry,
     FLRoundHistory,

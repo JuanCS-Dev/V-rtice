@@ -21,7 +21,6 @@ Version: 1.0.0
 """
 
 import asyncio
-from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import aiohttp
@@ -30,7 +29,6 @@ import pytest_asyncio
 
 from active_immune_core.agents.base import AgenteImunologicoBase
 from active_immune_core.agents.models import AgentStatus, AgentType
-
 
 # ==================== TEST AGENT ====================
 
@@ -142,9 +140,7 @@ class TestPrometheusMetrics:
                 await asyncio.sleep(0.1)
 
                 # ASSERT: Metrics incremented (lines 162-163 covered)
-                mock_agents_active.labels.assert_called_with(
-                    type=AgentType.MACROFAGO, status="patrulhando"
-                )
+                mock_agents_active.labels.assert_called_with(type=AgentType.MACROFAGO, status="patrulhando")
                 mock_agents_total.labels.assert_called_with(type=AgentType.MACROFAGO)
 
         # Cleanup
@@ -162,9 +158,7 @@ class TestPrometheusMetrics:
             await running_agent.parar()
 
             # ASSERT: Metric decremented (line 219 covered)
-            mock_agents_active.labels.assert_called_with(
-                type=AgentType.MACROFAGO, status="patrulhando"
-            )
+            mock_agents_active.labels.assert_called_with(type=AgentType.MACROFAGO, status="patrulhando")
 
     @pytest.mark.asyncio
     async def test_apoptose_increments_apoptosis_metric(self, running_agent: ConcreteTestAgent):
@@ -209,9 +203,7 @@ class TestPrometheusMetrics:
             await running_agent.neutralizar({"id": "threat_456"}, metodo="isolate")
 
             # ASSERT: Metric incremented (line 468 covered)
-            mock_threats_neutralized.labels.assert_called_with(
-                agent_type=AgentType.MACROFAGO, method="isolate"
-            )
+            mock_threats_neutralized.labels.assert_called_with(agent_type=AgentType.MACROFAGO, method="isolate")
 
 
 # ==================== EXCEPTION HANDLING TESTS ====================
@@ -241,6 +233,7 @@ class TestInvestigationExceptions:
     @pytest.mark.asyncio
     async def test_investigar_returns_error_dict_on_exception(self, running_agent: ConcreteTestAgent):
         """Test investigar() returns error dict on exception (lines 389-391)"""
+
         # ARRANGE: Make investigation throw exception
         async def failing_investigation(alvo):
             raise ValueError("Investigation failed")
@@ -262,6 +255,7 @@ class TestNeutralizationExceptions:
     @pytest.mark.asyncio
     async def test_neutralizar_returns_false_on_exception(self, running_agent: ConcreteTestAgent):
         """Test neutralizar() returns False on exception (lines 476-478)"""
+
         # ARRANGE: Make neutralization throw exception
         async def failing_neutralization(alvo, metodo):
             raise RuntimeError("Neutralization error")
@@ -298,6 +292,7 @@ class TestMemoryCreationExceptions:
     @pytest.mark.asyncio
     async def test_criar_memoria_handles_timeout(self, running_agent: ConcreteTestAgent):
         """Test _criar_memoria() handles asyncio.TimeoutError (line 530)"""
+
         # ARRANGE: Mock HTTP session with timeout
         async def timeout_post(*args, **kwargs):
             raise asyncio.TimeoutError("Memory service timeout")
@@ -382,6 +377,7 @@ class TestEthicalAIExceptions:
     @pytest.mark.asyncio
     async def test_validate_ethical_handles_client_error(self, running_agent: ConcreteTestAgent):
         """Test _validate_ethical() handles aiohttp.ClientError (lines 686-687)"""
+
         # ARRANGE: Mock HTTP session with ClientError
         async def client_error_post(*args, **kwargs):
             raise aiohttp.ClientError("Ethical AI unreachable")
@@ -397,6 +393,7 @@ class TestEthicalAIExceptions:
     @pytest.mark.asyncio
     async def test_validate_ethical_handles_timeout(self, running_agent: ConcreteTestAgent):
         """Test _validate_ethical() handles asyncio.TimeoutError (lines 690-691)"""
+
         # ARRANGE: Mock HTTP session with timeout
         async def timeout_post(*args, **kwargs):
             raise asyncio.TimeoutError()

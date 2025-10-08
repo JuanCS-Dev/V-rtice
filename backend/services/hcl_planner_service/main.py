@@ -12,15 +12,15 @@ for translating HCL analysis into actionable plans for the HCL Executor Service,
 ensuring Maximus AI's adaptive self-management.
 """
 
-import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException
-from fuzzy_controller import FuzzyController
-from pydantic import BaseModel
-from rl_agent import RLAgent
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from fuzzy_controller import FuzzyController
+from rl_agent import RLAgent
 
 app = FastAPI(title="Maximus HCL Planner Service", version="1.0.0")
 
@@ -77,9 +77,7 @@ async def generate_resource_plan(request: PlanRequest) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary containing the generated resource plan.
     """
-    print(
-        f"[API] Generating plan based on analysis: {request.analysis_result.get('overall_health_score')}"
-    )
+    print(f"[API] Generating plan based on analysis: {request.analysis_result.get('overall_health_score')}")
 
     plan_id = f"plan-{datetime.now().strftime('%Y%m%d%H%M%S')}"
     actions: List[Dict[str, Any]] = []
@@ -100,9 +98,7 @@ async def generate_resource_plan(request: PlanRequest) -> Dict[str, Any]:
             request.current_state, request.analysis_result, request.operational_goals
         )
         actions.extend(rl_recommendations)
-        plan_details += (
-            "RL agent recommended further actions due to intervention requirement."
-        )
+        plan_details += "RL agent recommended further actions due to intervention requirement."
 
     return {
         "timestamp": datetime.now().isoformat(),

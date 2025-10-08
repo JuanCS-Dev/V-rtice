@@ -12,7 +12,6 @@ Tests cover production implementation:
 """
 
 import asyncio
-from datetime import datetime
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -21,7 +20,6 @@ import pytest_asyncio
 
 from active_immune_core.agents.base import AgenteImunologicoBase
 from active_immune_core.agents.models import AgentStatus, AgentType
-
 
 # ==================== CONCRETE TEST AGENT ====================
 
@@ -388,10 +386,7 @@ async def test_neutralizar_blocked_by_ethical_ai(running_agent: ConcreteTestAgen
     # Mock ethical AI rejection
     mock_response = AsyncMock()
     mock_response.status = 200
-    mock_response.json = AsyncMock(return_value={
-        "decisao": "BLOQUEADO",
-        "justificativa": "Insufficient evidence"
-    })
+    mock_response.json = AsyncMock(return_value={"decisao": "BLOQUEADO", "justificativa": "Insufficient evidence"})
 
     mock_ctx = AsyncMock()
     mock_ctx.__aenter__.return_value = mock_response
@@ -576,10 +571,7 @@ async def test_validate_ethical_blocked(running_agent: ConcreteTestAgent):
 
     mock_response = AsyncMock()
     mock_response.status = 200
-    mock_response.json = AsyncMock(return_value={
-        "decisao": "BLOQUEADO",
-        "justificativa": "Insufficient evidence"
-    })
+    mock_response.json = AsyncMock(return_value={"decisao": "BLOQUEADO", "justificativa": "Insufficient evidence"})
 
     mock_ctx = AsyncMock()
     mock_ctx.__aenter__.return_value = mock_response
@@ -833,6 +825,7 @@ async def test_repr(agent: ConcreteTestAgent):
 @pytest.mark.asyncio
 async def test_patrol_loop_handles_exception():
     """Test patrol loop handles exceptions from patrulhar()."""
+
     class FailingAgent(ConcreteTestAgent):
         async def patrulhar(self):
             raise ValueError("Patrol error")

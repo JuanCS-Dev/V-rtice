@@ -23,14 +23,14 @@ PRODUCTION-READY: Real services, no mocks, graceful degradation.
 import asyncio
 import hashlib
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
 from .base import AgenteImunologicoBase
-from .models import AgentStatus, AgentType
+from .models import AgentType
 
 logger = logging.getLogger(__name__)
 
@@ -247,8 +247,7 @@ class CelulaDendritica(AgenteImunologicoBase):
         await self.safe_append_antigen(antigen)
 
         logger.info(
-            f"Dendritic {self.state.id[:8]} captured antigen "
-            f"(type={antigen.threat_type}, confidence={confidence:.2f})"
+            f"Dendritic {self.state.id[:8]} captured antigen (type={antigen.threat_type}, confidence={confidence:.2f})"
         )
 
         # Process antigen immediately
@@ -265,9 +264,7 @@ class CelulaDendritica(AgenteImunologicoBase):
         signature = self._extract_pattern_signature(antigen.raw_data)
 
         # Create peptide (simplified: hash of signature)
-        peptide_sequence = hashlib.sha256(
-            str(signature).encode()
-        ).hexdigest()[:16]
+        peptide_sequence = hashlib.sha256(str(signature).encode()).hexdigest()[:16]
 
         # Create MHC-I peptide (for Cytotoxic T)
         peptide_i = ProcessedPeptide(
@@ -289,10 +286,7 @@ class CelulaDendritica(AgenteImunologicoBase):
         )
         await self.safe_append_peptide(peptide_ii)
 
-        logger.debug(
-            f"Dendritic {self.state.id[:8]} processed antigen "
-            f"(MHC-I + MHC-II peptides created)"
-        )
+        logger.debug(f"Dendritic {self.state.id[:8]} processed antigen (MHC-I + MHC-II peptides created)")
 
     def _extract_pattern_signature(self, event: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -334,8 +328,7 @@ class CelulaDendritica(AgenteImunologicoBase):
         self.maturation_state = DendriticState.MATURE
 
         logger.info(
-            f"Dendritic {self.state.id[:8]} migrated to {self.current_lymphnode} "
-            "(mature state: ready to present)"
+            f"Dendritic {self.state.id[:8]} migrated to {self.current_lymphnode} (mature state: ready to present)"
         )
 
     # ==================== ANTIGEN PRESENTATION ====================
@@ -424,14 +417,10 @@ class CelulaDendritica(AgenteImunologicoBase):
                     if USE_THREAD_SAFE_OPERATIONS:
                         async with self._antigens_lock:
                             antigen = next(
-                                (a for a in self.captured_antigens if a.antigen_id == peptide.antigen_id),
-                                None
+                                (a for a in self.captured_antigens if a.antigen_id == peptide.antigen_id), None
                             )
                     else:
-                        antigen = next(
-                            (a for a in self.captured_antigens if a.antigen_id == peptide.antigen_id),
-                            None
-                        )
+                        antigen = next((a for a in self.captured_antigens if a.antigen_id == peptide.antigen_id), None)
 
                     await self._cytokine_messenger.send_cytokine(
                         tipo="ANTIGEN_PRESENTATION",  # Helper T subscribes to this
@@ -508,7 +497,7 @@ class CelulaDendritica(AgenteImunologicoBase):
                 "is_threat": True,
                 "confidence": confidence,
                 "metodo": "antigen_capture",
-                "detalhes": f"Antigen captured for MHC presentation",
+                "detalhes": "Antigen captured for MHC presentation",
             }
         else:
             return {
@@ -531,9 +520,7 @@ class CelulaDendritica(AgenteImunologicoBase):
         Returns:
             True (antigen presented to T cells for action)
         """
-        logger.info(
-            f"Dendritic {self.state.id[:8]} presenting antigen for T cell neutralization"
-        )
+        logger.info(f"Dendritic {self.state.id[:8]} presenting antigen for T cell neutralization")
 
         # Dendritic Cells delegate to T cells
         # Create presentation from target

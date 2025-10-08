@@ -5,9 +5,9 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, HttpUrl, validator
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class AttackEngine(str, Enum):
@@ -136,9 +136,7 @@ class BurpVulnerability(BaseModel):
     evidence: Optional[str] = None
 
     # AI-generated insights
-    ai_analysis: Optional[Dict] = Field(
-        default=None, description="AI Co-Pilot analysis"
-    )
+    ai_analysis: Optional[Dict] = Field(default=None, description="AI Co-Pilot analysis")
     ai_recommendations: Optional[List[str]] = None
 
     timestamp: datetime
@@ -173,15 +171,11 @@ class ZAPScanPolicy(BaseModel):
     policy_name: str = Field(default="API-Security", description="Scan policy name")
 
     # Attack strength
-    attack_strength: str = Field(
-        default="MEDIUM", description="LOW, MEDIUM, HIGH, INSANE"
-    )
+    attack_strength: str = Field(default="MEDIUM", description="LOW, MEDIUM, HIGH, INSANE")
     alert_threshold: str = Field(default="MEDIUM", description="OFF, LOW, MEDIUM, HIGH")
 
     # Scan rules
-    enabled_scanners: List[int] = Field(
-        default=[], description="Scanner IDs (empty = all)"
-    )
+    enabled_scanners: List[int] = Field(default=[], description="Scanner IDs (empty = all)")
 
 
 class ZAPScanRequest(BaseModel):
@@ -334,9 +328,7 @@ class FuzzingConfig(BaseModel):
 
     # AI fuzzing
     ai_provider: AIProvider = AIProvider.AUTO
-    context_aware: bool = Field(
-        default=True, description="Use AI for context-aware fuzzing"
-    )
+    context_aware: bool = Field(default=True, description="Use AI for context-aware fuzzing")
 
     # Performance
     concurrent_requests: int = Field(default=10, ge=1, le=100)
@@ -350,9 +342,7 @@ class FuzzingRequest(BaseModel):
     config: FuzzingConfig = FuzzingConfig()
 
     # Vulnerability focus
-    target_vulns: List[VulnerabilityType] = Field(
-        default=[VulnerabilityType.SQLI, VulnerabilityType.XSS]
-    )
+    target_vulns: List[VulnerabilityType] = Field(default=[VulnerabilityType.SQLI, VulnerabilityType.XSS])
 
 
 class FuzzingResult(BaseModel):

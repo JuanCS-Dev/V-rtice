@@ -18,16 +18,15 @@ Date: 2025-10-06
 License: Proprietary - VÉRTICE Platform
 """
 
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Optional, Set
 import hashlib
 import json
 import logging
 import os
 import shutil
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from pathlib import Path
 
 from .base import (
     ComplianceConfig,
@@ -50,7 +49,7 @@ class EvidenceItem:
     file_size: int = 0
     collected_from: str = ""  # Source path/system
     integrity_verified: bool = False
-    verification_timestamp: Optional[datetime] = None
+    verification_timestamp: datetime | None = None
 
     def verify_integrity(self, file_path: str) -> bool:
         """
@@ -74,12 +73,11 @@ class EvidenceItem:
             self.integrity_verified = True
             self.verification_timestamp = datetime.utcnow()
             return True
-        else:
-            logger.warning(
-                f"Evidence integrity check failed for {self.evidence.evidence_id}: "
-                f"expected {self.evidence.file_hash}, got {current_hash}"
-            )
-            return False
+        logger.warning(
+            f"Evidence integrity check failed for {self.evidence.evidence_id}: "
+            f"expected {self.evidence.file_hash}, got {current_hash}"
+        )
+        return False
 
     @staticmethod
     def _calculate_file_hash(file_path: str) -> str:
@@ -101,11 +99,11 @@ class EvidencePackage:
     regulation_type: RegulationType = RegulationType.ISO_27001
     created_at: datetime = field(default_factory=datetime.utcnow)
     created_by: str = "evidence_collector"
-    control_ids: List[str] = field(default_factory=list)
-    evidence_items: List[EvidenceItem] = field(default_factory=list)
-    package_path: Optional[str] = None
+    control_ids: list[str] = field(default_factory=list)
+    evidence_items: list[EvidenceItem] = field(default_factory=list)
+    package_path: str | None = None
     total_size_bytes: int = 0
-    manifest: Dict[str, any] = field(default_factory=dict)
+    manifest: dict[str, any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Calculate package metadata."""
@@ -135,13 +133,9 @@ class EvidencePackage:
             ],
         }
 
-    def get_evidence_for_control(self, control_id: str) -> List[EvidenceItem]:
+    def get_evidence_for_control(self, control_id: str) -> list[EvidenceItem]:
         """Get all evidence for specific control."""
-        return [
-            item
-            for item in self.evidence_items
-            if item.evidence.control_id == control_id
-        ]
+        return [item for item in self.evidence_items if item.evidence.control_id == control_id]
 
 
 class EvidenceCollector:
@@ -151,7 +145,7 @@ class EvidenceCollector:
     Collects evidence from multiple sources and organizes by control.
     """
 
-    def __init__(self, config: Optional[ComplianceConfig] = None):
+    def __init__(self, config: ComplianceConfig | None = None):
         """
         Initialize evidence collector.
 
@@ -159,7 +153,7 @@ class EvidenceCollector:
             config: Compliance configuration
         """
         self.config = config or ComplianceConfig()
-        self._evidence_cache: Dict[str, List[EvidenceItem]] = {}  # control_id -> evidence
+        self._evidence_cache: dict[str, list[EvidenceItem]] = {}  # control_id -> evidence
 
         # Ensure storage paths exist
         os.makedirs(self.config.evidence_storage_path, exist_ok=True)
@@ -173,7 +167,7 @@ class EvidenceCollector:
         title: str,
         description: str,
         expiration_days: int = 90,
-    ) -> Optional[EvidenceItem]:
+    ) -> EvidenceItem | None:
         """
         Collect log file as evidence.
 
@@ -241,7 +235,7 @@ class EvidenceCollector:
         title: str,
         description: str,
         expiration_days: int = 180,
-    ) -> Optional[EvidenceItem]:
+    ) -> EvidenceItem | None:
         """
         Collect configuration file as evidence.
 
@@ -309,7 +303,7 @@ class EvidenceCollector:
         title: str,
         description: str,
         expiration_days: int = 90,
-    ) -> Optional[EvidenceItem]:
+    ) -> EvidenceItem | None:
         """
         Collect test results as evidence.
 
@@ -377,7 +371,7 @@ class EvidenceCollector:
         title: str,
         description: str,
         expiration_days: int = 365,
-    ) -> Optional[EvidenceItem]:
+    ) -> EvidenceItem | None:
         """
         Collect document as evidence (policy, procedure, manual, etc).
 
@@ -445,7 +439,7 @@ class EvidenceCollector:
         policy_path: str,
         title: str,
         description: str,
-    ) -> Optional[EvidenceItem]:
+    ) -> EvidenceItem | None:
         """
         Collect organizational policy as evidence.
 
@@ -509,7 +503,7 @@ class EvidenceCollector:
 
         return evidence_item
 
-    def get_evidence_for_control(self, control_id: str) -> List[Evidence]:
+    def get_evidence_for_control(self, control_id: str) -> list[Evidence]:
         """
         Get all collected evidence for a control.
 
@@ -524,22 +518,19 @@ class EvidenceCollector:
 
         return [item.evidence for item in self._evidence_cache[control_id]]
 
-    def get_all_evidence(self) -> Dict[str, List[Evidence]]:
+    def get_all_evidence(self) -> dict[str, list[Evidence]]:
         """
         Get all collected evidence organized by control.
 
         Returns:
             Dict mapping control_id -> evidence list
         """
-        return {
-            control_id: [item.evidence for item in items]
-            for control_id, items in self._evidence_cache.items()
-        }
+        return {control_id: [item.evidence for item in items] for control_id, items in self._evidence_cache.items()}
 
     def create_evidence_package(
         self,
         regulation_type: RegulationType,
-        control_ids: Optional[List[str]] = None,
+        control_ids: list[str] | None = None,
     ) -> EvidencePackage:
         """
         Create evidence package for audit.
@@ -563,11 +554,7 @@ class EvidenceCollector:
             ]
             included_controls = control_ids
         else:
-            evidence_items = [
-                item
-                for items in self._evidence_cache.values()
-                for item in items
-            ]
+            evidence_items = [item for items in self._evidence_cache.values() for item in items]
             included_controls = list(self._evidence_cache.keys())
 
         # Create package
@@ -627,7 +614,7 @@ class EvidenceCollector:
             logger.error(f"Failed to export evidence package: {e}")
             return False
 
-    def verify_all_evidence(self) -> Dict[str, bool]:
+    def verify_all_evidence(self) -> dict[str, bool]:
         """
         Verify integrity of all collected evidence.
 
@@ -636,7 +623,7 @@ class EvidenceCollector:
         """
         logger.info("Verifying integrity of all collected evidence")
 
-        results: Dict[str, bool] = {}
+        results: dict[str, bool] = {}
 
         for items in self._evidence_cache.values():
             for item in items:
@@ -649,7 +636,7 @@ class EvidenceCollector:
 
         return results
 
-    def get_expired_evidence(self) -> List[Evidence]:
+    def get_expired_evidence(self) -> list[Evidence]:
         """
         Get all evidence that has expired.
 

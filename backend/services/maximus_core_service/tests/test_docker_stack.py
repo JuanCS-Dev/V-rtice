@@ -9,35 +9,30 @@ Date: 2025-10-06
 """
 
 import subprocess
-import time
 import sys
+import time
+
 import requests
-from typing import Optional
 
 
 class Colors:
     """Terminal color codes."""
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    ENDC = '\033[0m'
+
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    ENDC = "\033[0m"
 
 
 def run_command(cmd: list[str], capture: bool = True) -> tuple[int, str]:
     """Run a shell command and return (return_code, output)."""
     try:
         if capture:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             return result.returncode, result.stdout + result.stderr
-        else:
-            result = subprocess.run(cmd, timeout=30)
-            return result.returncode, ""
+        result = subprocess.run(cmd, timeout=30)
+        return result.returncode, ""
     except subprocess.TimeoutExpired:
         return 1, "Command timed out"
     except Exception as e:
@@ -73,17 +68,18 @@ def test_docker_compose_file_exists():
     # Validate it's valid YAML
     try:
         import yaml
-        with open(compose_file, 'r') as f:
+
+        with open(compose_file) as f:
             config = yaml.safe_load(f)
 
         # Check required services
-        required_services = ['redis', 'postgres', 'hsas_service', 'maximus_core']
-        if 'services' not in config:
+        required_services = ["redis", "postgres", "hsas_service", "maximus_core"]
+        if "services" not in config:
             print(f"{Colors.RED}✗ No services defined in docker-compose{Colors.ENDC}")
             return False
 
         for service in required_services:
-            if service not in config['services']:
+            if service not in config["services"]:
                 print(f"{Colors.RED}✗ Required service '{service}' not found{Colors.ENDC}")
                 return False
 
@@ -111,17 +107,17 @@ def test_env_file_exists():
         return False
 
     # Read and check for required variables
-    with open(env_example, 'r') as f:
+    with open(env_example) as f:
         content = f.read()
 
     required_vars = [
-        'LLM_PROVIDER',
-        'GEMINI_API_KEY',
-        'ANTHROPIC_API_KEY',
-        'POSTGRES_USER',
-        'POSTGRES_PASSWORD',
-        'HSAS_SERVICE_URL',
-        'REDIS_URL'
+        "LLM_PROVIDER",
+        "GEMINI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "HSAS_SERVICE_URL",
+        "REDIS_URL",
     ]
 
     missing_vars = []
@@ -140,7 +136,7 @@ def test_env_file_exists():
 def test_docker_stack_can_start():
     """Test that Docker stack can be started (structure validation only)."""
     # Check if Docker is installed
-    returncode, _ = run_command(['docker', '--version'])
+    returncode, _ = run_command(["docker", "--version"])
     if returncode != 0:
         print(f"{Colors.YELLOW}⚠  Docker not installed, skipping stack start test{Colors.ENDC}")
         return True
@@ -149,14 +145,14 @@ def test_docker_stack_can_start():
     compose_cmd = None
 
     # Try docker-compose (v1)
-    returncode, _ = run_command(['docker-compose', '--version'])
+    returncode, _ = run_command(["docker-compose", "--version"])
     if returncode == 0:
-        compose_cmd = ['docker-compose']
+        compose_cmd = ["docker-compose"]
     else:
         # Try docker compose (v2)
-        returncode, _ = run_command(['docker', 'compose', 'version'])
+        returncode, _ = run_command(["docker", "compose", "version"])
         if returncode == 0:
-            compose_cmd = ['docker', 'compose']
+            compose_cmd = ["docker", "compose"]
 
     if compose_cmd is None:
         print(f"{Colors.YELLOW}⚠  Docker Compose not installed, skipping stack start test{Colors.ENDC}")
@@ -164,9 +160,7 @@ def test_docker_stack_can_start():
 
     # Validate docker-compose config (doesn't start containers)
     print(f"{Colors.BLUE}  Validating docker-compose configuration...{Colors.ENDC}")
-    returncode, output = run_command(
-        compose_cmd + ['-f', 'docker-compose.maximus.yml', 'config']
-    )
+    returncode, output = run_command(compose_cmd + ["-f", "docker-compose.maximus.yml", "config"])
 
     if returncode != 0:
         print(f"{Colors.RED}✗ docker-compose config validation failed:{Colors.ENDC}")
@@ -180,9 +174,9 @@ def test_docker_stack_can_start():
 # Test runner
 def run_all_tests():
     """Run all docker stack tests."""
-    print(f"\n{Colors.BLUE}{'='*80}{Colors.ENDC}")
+    print(f"\n{Colors.BLUE}{'=' * 80}{Colors.ENDC}")
     print(f"{Colors.BLUE}MAXIMUS AI 3.0 - Docker Stack Test Suite{Colors.ENDC}")
-    print(f"{Colors.BLUE}{'='*80}{Colors.ENDC}\n")
+    print(f"{Colors.BLUE}{'=' * 80}{Colors.ENDC}\n")
 
     tests = [
         ("Docker Compose File Exists", test_docker_compose_file_exists),
@@ -206,13 +200,13 @@ def run_all_tests():
         print()
 
     # Summary
-    print(f"{Colors.BLUE}{'='*80}{Colors.ENDC}")
+    print(f"{Colors.BLUE}{'=' * 80}{Colors.ENDC}")
     print(f"Test Results: {passed}/{passed + failed} passed")
     if failed == 0:
         print(f"{Colors.GREEN}✅ ALL TESTS PASSED{Colors.ENDC}")
     else:
         print(f"{Colors.RED}❌ {failed} tests failed{Colors.ENDC}")
-    print(f"{Colors.BLUE}{'='*80}{Colors.ENDC}\n")
+    print(f"{Colors.BLUE}{'=' * 80}{Colors.ENDC}\n")
 
     return failed == 0
 

@@ -10,9 +10,8 @@ Orchestrates:
 """
 
 import asyncio
-from datetime import datetime
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from bertimbau_emotion_classifier import bertimbau_classifier
 from cialdini_analyzer import cialdini_analyzer
@@ -57,9 +56,7 @@ class EmotionalManipulationModule:
             logger.info("🚀 Initializing emotional manipulation detection models...")
 
             # Initialize models in parallel
-            await asyncio.gather(
-                bertimbau_classifier.initialize(), roberta_detector.initialize()
-            )
+            await asyncio.gather(bertimbau_classifier.initialize(), roberta_detector.initialize())
 
             self._models_initialized = True
             logger.info("✅ Emotional manipulation detection models initialized")
@@ -96,9 +93,7 @@ class EmotionalManipulationModule:
             emotional_trajectory = trajectory_data
 
         # Manipulation signals from emotions
-        emotion_signals = bertimbau_classifier.detect_emotional_manipulation_signals(
-            emotion_profile
-        )
+        emotion_signals = bertimbau_classifier.detect_emotional_manipulation_signals(emotion_profile)
 
         # ========== LAYER 2: PROPAGANDA DETECTION (RoBERTa) ==========
 
@@ -108,14 +103,10 @@ class EmotionalManipulationModule:
         propaganda_spans = roberta_detector.merge_overlapping_spans(propaganda_spans)
 
         # Calculate propaganda density
-        propaganda_density = roberta_detector.calculate_propaganda_density(
-            text, propaganda_spans
-        )
+        propaganda_density = roberta_detector.calculate_propaganda_density(text, propaganda_spans)
 
         # Detect multi-technique patterns
-        propaganda_patterns = roberta_detector.detect_multi_technique_patterns(
-            propaganda_spans
-        )
+        propaganda_patterns = roberta_detector.detect_multi_technique_patterns(propaganda_spans)
 
         # ========== LAYER 3: PERSUASION PRINCIPLES (Cialdini) ==========
 
@@ -194,16 +185,12 @@ class EmotionalManipulationModule:
         """
 
         # 1. Emotion-based score (25%)
-        emotion_score = bertimbau_classifier.calculate_manipulation_score(
-            emotion_profile, emotion_signals
-        )
+        emotion_score = bertimbau_classifier.calculate_manipulation_score(emotion_profile, emotion_signals)
 
         # 2. Propaganda score (30%)
         if propaganda_spans:
             # Average propaganda confidence
-            propaganda_confidence = sum(
-                span.confidence for span in propaganda_spans
-            ) / len(propaganda_spans)
+            propaganda_confidence = sum(span.confidence for span in propaganda_spans) / len(propaganda_spans)
 
             # Combine density + confidence
             propaganda_score = propaganda_density * 0.6 + propaganda_confidence * 0.4
@@ -213,14 +200,10 @@ class EmotionalManipulationModule:
         # 3. Persuasion principles score (25%)
         if cialdini_principles:
             # Average manipulation intent
-            avg_manipulation_intent = sum(
-                p.manipulation_intent for p in cialdini_principles
-            ) / len(cialdini_principles)
+            avg_manipulation_intent = sum(p.manipulation_intent for p in cialdini_principles) / len(cialdini_principles)
 
             # Number of principles (diversity penalty)
-            principle_diversity = min(
-                1.0, len(set(p.principle for p in cialdini_principles)) / 6.0
-            )
+            principle_diversity = min(1.0, len(set(p.principle for p in cialdini_principles)) / 6.0)
 
             cialdini_score = avg_manipulation_intent * 0.7 + principle_diversity * 0.3
         else:
@@ -230,12 +213,7 @@ class EmotionalManipulationModule:
         dark_triad_score = dark_triad.aggregate_score
 
         # Weighted combination
-        final_score = (
-            emotion_score * 0.25
-            + propaganda_score * 0.30
-            + cialdini_score * 0.25
-            + dark_triad_score * 0.20
-        )
+        final_score = emotion_score * 0.25 + propaganda_score * 0.30 + cialdini_score * 0.25 + dark_triad_score * 0.20
 
         # Boosters for severe cases
         boosters = 0.0
@@ -256,9 +234,7 @@ class EmotionalManipulationModule:
 
         return final_score
 
-    def analyze_emotional_arc(
-        self, trajectory: List[Tuple[int, EmotionCategory]]
-    ) -> Dict[str, Any]:
+    def analyze_emotional_arc(self, trajectory: List[Tuple[int, EmotionCategory]]) -> Dict[str, Any]:
         """
         Analyze emotional arc for manipulation patterns.
 
@@ -279,9 +255,7 @@ class EmotionalManipulationModule:
         emotions = [e for _, e in trajectory]
 
         # Detect emotion changes
-        changes = sum(
-            1 for i in range(len(emotions) - 1) if emotions[i] != emotions[i + 1]
-        )
+        changes = sum(1 for i in range(len(emotions) - 1) if emotions[i] != emotions[i + 1])
 
         volatility = changes / (len(emotions) - 1) if len(emotions) > 1 else 0
 
@@ -290,9 +264,7 @@ class EmotionalManipulationModule:
         manipulation_indicator = 0.0
 
         # Fear -> Scarcity arc (urgency manipulation)
-        fear_indices = [
-            i for i, (_, e) in enumerate(trajectory) if e == EmotionCategory.FEAR
-        ]
+        fear_indices = [i for i, (_, e) in enumerate(trajectory) if e == EmotionCategory.FEAR]
         if fear_indices and len(trajectory) > 0:
             # Check if fear is followed by urgency/excitement
             for idx in fear_indices:
@@ -335,19 +307,14 @@ class EmotionalManipulationModule:
         }
 
     @staticmethod
-    def _get_dominant_emotions(
-        emotions: List[EmotionCategory], top_k: int = 3
-    ) -> List[Tuple[EmotionCategory, float]]:
+    def _get_dominant_emotions(emotions: List[EmotionCategory], top_k: int = 3) -> List[Tuple[EmotionCategory, float]]:
         """Get top-K dominant emotions with frequencies."""
         from collections import Counter
 
         emotion_counts = Counter(emotions)
         total = len(emotions)
 
-        dominant = [
-            (emotion, count / total)
-            for emotion, count in emotion_counts.most_common(top_k)
-        ]
+        dominant = [(emotion, count / total) for emotion, count in emotion_counts.most_common(top_k)]
 
         return dominant
 

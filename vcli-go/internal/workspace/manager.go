@@ -231,8 +231,12 @@ func (m *Manager) renderHeader() string {
 		}
 	}
 
-	// Padding
-	tabs.WriteString(strings.Repeat(" ", m.width-len(tabs.String())-6))
+	// Padding (prevent negative count)
+	paddingCount := m.width - len(tabs.String()) - 6
+	if paddingCount < 0 {
+		paddingCount = 0
+	}
+	tabs.WriteString(strings.Repeat(" ", paddingCount))
 	tabs.WriteString("  ║\n")
 	tabs.WriteString("╠══════════════════════════════════════════════════════════════════════════════╣")
 

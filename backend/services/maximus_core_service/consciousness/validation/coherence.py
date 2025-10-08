@@ -46,7 +46,6 @@ properties necessary for phenomenal experience.
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
 
 import numpy as np
 
@@ -86,7 +85,7 @@ class ESGTCoherenceMetrics:
     sync_latency_ms: float = 0.0  # Phase 2 duration
     broadcast_latency_ms: float = 0.0  # Phase 3 duration
     total_duration_ms: float = 0.0  # Full event duration
-    time_to_coherence_ms: Optional[float] = None  # Time to reach r ≥ 0.70
+    time_to_coherence_ms: float | None = None  # Time to reach r ≥ 0.70
 
     # Spatial metrics
     participating_nodes: int = 0
@@ -99,7 +98,7 @@ class ESGTCoherenceMetrics:
     passes_gwd_criteria: bool = False  # All criteria met
 
     # Violations
-    violations: List[str] = field(default_factory=list)
+    violations: list[str] = field(default_factory=list)
 
     # Metadata
     event_id: str = ""
@@ -125,8 +124,8 @@ class GWDCompliance:
     duration_pass: bool = False  # 100-300ms
     stability_pass: bool = False  # CV < 0.20
 
-    violations: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    violations: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     def get_summary(self) -> str:
         """Generate human-readable compliance summary."""
@@ -344,12 +343,11 @@ class CoherenceValidator:
         """Classify coherence quality level."""
         if coherence < 0.30:
             return CoherenceQuality.POOR
-        elif coherence < 0.70:
+        if coherence < 0.70:
             return CoherenceQuality.MODERATE
-        elif coherence < 0.90:
+        if coherence < 0.90:
             return CoherenceQuality.GOOD
-        else:
-            return CoherenceQuality.EXCELLENT
+        return CoherenceQuality.EXCELLENT
 
     def _check_gwd_criteria(self, metrics: ESGTCoherenceMetrics) -> bool:
         """Quick check if all GWD criteria met."""

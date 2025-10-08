@@ -8,15 +8,16 @@ Integrates:
 """
 
 import asyncio
-from dataclasses import dataclass
 import logging
-from typing import Any, Dict, List, Optional, Set
+from dataclasses import dataclass
+from typing import List, Optional, Set
 
-from cache_manager import cache_manager, CacheCategory
-from config import get_settings
-from dbpedia_client import dbpedia_client
 import spacy
 from spacy.language import Language
+
+from cache_manager import CacheCategory, cache_manager
+from config import get_settings
+from dbpedia_client import dbpedia_client
 from utils import hash_text
 from wikidata_client import wikidata_client
 
@@ -185,10 +186,7 @@ class EntityLinker:
             if entity.confidence >= min_confidence:
                 linked_entities.append(entity)
 
-        logger.info(
-            f"Linked {len(linked_entities)}/{len(entities)} entities "
-            f"(threshold={min_confidence})"
-        )
+        logger.info(f"Linked {len(linked_entities)}/{len(entities)} entities (threshold={min_confidence})")
 
         # STEP 3: Enrich with Wikidata metadata (optional)
         if enrich_with_metadata and linked_entities:
@@ -288,10 +286,7 @@ class EntityLinker:
                 entity.wikidata_id = wikidata_id
                 entity.confidence = confidence
 
-                logger.debug(
-                    f"Linked '{entity.text}' → {wikidata_id} "
-                    f"(confidence={confidence:.3f})"
-                )
+                logger.debug(f"Linked '{entity.text}' → {wikidata_id} (confidence={confidence:.3f})")
             else:
                 # Fallback: search Wikidata directly
                 wikidata_id = await self._search_wikidata(entity.text, entity.label)
@@ -299,9 +294,7 @@ class EntityLinker:
                 if wikidata_id:
                     entity.wikidata_id = wikidata_id
                     entity.confidence = 0.6  # Lower confidence for search-based
-                    logger.debug(
-                        f"Linked '{entity.text}' → {wikidata_id} via Wikidata search"
-                    )
+                    logger.debug(f"Linked '{entity.text}' → {wikidata_id} via Wikidata search")
 
         except Exception as e:
             logger.warning(f"Disambiguation failed for '{entity.text}': {e}")
@@ -352,9 +345,7 @@ class EntityLinker:
             logger.warning(f"Wikidata ID resolution failed for {dbpedia_uri}: {e}")
             return None
 
-    async def _search_wikidata(
-        self, entity_text: str, entity_type: str
-    ) -> Optional[str]:
+    async def _search_wikidata(self, entity_text: str, entity_type: str) -> Optional[str]:
         """
         Search Wikidata for entity (fallback when Spotlight fails).
 
@@ -366,9 +357,7 @@ class EntityLinker:
             Wikidata Q-ID or None
         """
         try:
-            results = await wikidata_client.search(
-                query=entity_text, language="pt", limit=5
-            )
+            results = await wikidata_client.search(query=entity_text, language="pt", limit=5)
 
             if not results:
                 return None
@@ -449,18 +438,14 @@ class EntityLinker:
 
                 aliases_str = binding.get("aliases", {}).get("value", "")
                 if aliases_str:
-                    entity.aliases = [
-                        a.strip() for a in aliases_str.split("|") if a.strip()
-                    ]
+                    entity.aliases = [a.strip() for a in aliases_str.split("|") if a.strip()]
 
         except Exception as e:
             logger.warning(f"Metadata fetch failed for {entity.wikidata_id}: {e}")
 
         return entity
 
-    def get_entities_by_type(
-        self, entities: List[Entity], entity_types: List[str]
-    ) -> List[Entity]:
+    def get_entities_by_type(self, entities: List[Entity], entity_types: List[str]) -> List[Entity]:
         """
         Filter entities by type.
 
