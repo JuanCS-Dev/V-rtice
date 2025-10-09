@@ -102,6 +102,11 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 
 	var output strings.Builder
 
+	// Top border with gradient
+	topBorder := "╔══════════════════════════════════════════════════════════════════════════════╗"
+	output.WriteString(visual.GradientText(topBorder, gradient))
+	output.WriteString("\n")
+
 	// ASCII Logo - VCLI GO
 	// All lines: exactly 56 chars (aligned left, padded right)
 	asciiArt := []string{
@@ -113,28 +118,36 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 		"  ╚═══╝   ╚═════╝╚══════╝╚═╝       ╚═════╝  ╚═════╝  ",
 	}
 
-	// Center each line in 80-char width for perfect alignment
+	// Render each line with gradient and box border
 	for _, line := range asciiArt {
 		gradientLine := visual.GradientText(line, gradient)
-		// Center the 56-char line in 80-char terminal
-		padding := (80 - 56) / 2
-		centeredLine := strings.Repeat(" ", padding) + gradientLine
-		output.WriteString(centeredLine)
+		// Box char + padding + line + padding + box char = 80 chars
+		// ║ (1) + space (1) + line (56) + padding to 78 + ║ (1) = 80
+		boxedLine := b.styles.Accent.Render("║") + " " + gradientLine + strings.Repeat(" ", 21) + b.styles.Accent.Render("║")
+		output.WriteString(boxedLine)
 		output.WriteString("\n")
 	}
 
-	// MAXIMUS branding - centered with gradient
-	output.WriteString("\n")
+	// MAXIMUS branding - centered with gradient and box
+	output.WriteString(b.styles.Accent.Render("║") + strings.Repeat(" ", 78) + b.styles.Accent.Render("║") + "\n")
 	maximusText := "MAXIMUS CONSCIOUS AI"
 	gradientMaximus := visual.GradientText(maximusText, gradient)
-	maximusPadding := (80 - len(maximusText)) / 2
-	output.WriteString(strings.Repeat(" ", maximusPadding) + gradientMaximus + "\n")
+	maximusPadding := (76 - len(maximusText)) / 2 // 78 - 2 for borders
+	maximusLine := b.styles.Accent.Render("║") + strings.Repeat(" ", maximusPadding) + gradientMaximus + strings.Repeat(" ", 78-maximusPadding-len(maximusText)) + b.styles.Accent.Render("║")
+	output.WriteString(maximusLine + "\n")
 
-	// Authorship - centered
-	author := "Created by Juan Carlos e Anthropic Claude"
+	// Authorship - centered and shortened to fit
+	output.WriteString(b.styles.Accent.Render("║") + strings.Repeat(" ", 78) + b.styles.Accent.Render("║") + "\n")
+	author := "by Juan Carlos & Claude"
 	styledAuthor := b.styles.Muted.Italic(true).Render(author)
-	authorPadding := (80 - len(author)) / 2
-	output.WriteString(strings.Repeat(" ", authorPadding) + styledAuthor + "\n\n")
+	authorPadding := (76 - len(author)) / 2
+	authorLine := b.styles.Accent.Render("║") + strings.Repeat(" ", authorPadding) + styledAuthor + strings.Repeat(" ", 78-authorPadding-len(author)) + b.styles.Accent.Render("║")
+	output.WriteString(authorLine + "\n")
+
+	// Bottom border with gradient
+	bottomBorder := "╚══════════════════════════════════════════════════════════════════════════════╝"
+	output.WriteString(visual.GradientText(bottomBorder, gradient))
+	output.WriteString("\n\n")
 
 	return output.String()
 }

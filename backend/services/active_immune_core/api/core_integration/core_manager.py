@@ -17,6 +17,7 @@ Version: 1.0.0
 """
 
 import logging
+import os
 from datetime import datetime
 from threading import Lock
 from typing import Any, Dict, Optional
@@ -203,6 +204,9 @@ class CoreManager:
 
             # Initialize Lymphnode
             logger.info("Initializing Lymphnode...")
+            shared_secret = os.getenv("VERTICE_LYMPHNODE_SHARED_SECRET")
+            if not shared_secret:
+                raise CoreManagerError("VERTICE_LYMPHNODE_SHARED_SECRET not configured")
             self._lymphnode = LinfonodoDigital(
                 lymphnode_id=lymphnode_id,
                 nivel="regional",
@@ -210,6 +214,7 @@ class CoreManager:
                 kafka_bootstrap=kafka_bootstrap,
                 redis_url=redis_url,
                 agent_factory=self._agent_factory,
+                shared_secret=shared_secret,
             )
             logger.info("✓ Lymphnode initialized")
 

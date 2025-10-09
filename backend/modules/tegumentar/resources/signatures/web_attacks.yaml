@@ -1,0 +1,21 @@
+signatures:
+  - name: sql_injection_union_select
+    pattern: "(?i)(union\\s+select|select\\s+.*\\s+from)"
+    severity: high
+    action: block
+  - name: log4shell_exploit
+    pattern: "\\$\\{jndi:(ldap|rmi|dns)://"
+    severity: critical
+    action: block
+  - name: command_injection
+    pattern: "(;|&&|\\|\\|)\\s*(rm|wget|curl|nc|bash)"
+    severity: high
+    action: block
+  - name: xslt_external_entity
+    pattern: "<!ENTITY\\s+%\\s+\\w+\\s+SYSTEM\\s+['\"]"
+    severity: medium
+    action: inspect
+  - name: powershell_encoded_command
+    pattern: "powershell\\s+-enc\\s+[A-Za-z0-9+/=]+"
+    severity: high
+    action: block

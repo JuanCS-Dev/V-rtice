@@ -1,0 +1,205 @@
+"""Stateful connection tracking for the derme layer."""
+
+from __future__ import annotations
+
+import asyncio
+import enum
+import logging
+import time
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Tuple
+
+import asyncpg
+
+from ..config import TegumentarSettings, get_settings
+
+logger = logging.getLogger(__name__)
+
+
+class InspectorAction(str, enum.Enum):
+    PASS = "pass"
+    INSPECT_DEEP = "inspect_deep"
+    DROP = "drop"
+
+
+@dataclass(slots=True)
+class FlowObservation:
+    src_ip: str
+    dst_ip: str
+    src_port: int
+    dst_port: int
+    protocol: str
+    flags: Optional[str]
+    payload_size: int
+    timestamp: float = field(default_factory=time.time)
+
+
+@dataclass(slots=True)
+class ConnectionState:
+    packets: int = 0
+    bytes: int = 0
+    last_seen: float = field(default_factory=time.time)
+    syn_seen: bool = False
+    established: bool = False
+
+
+@dataclass(slots=True)
+class InspectorDecision:
+    action: InspectorAction
+    reason: str
+    connection_state: ConnectionState
+
+
+class StatefulInspector:
+    """Maintains connection state and flags anomalies for DPI escalation."""
+
+    def __init__(self, settings: Optional[TegumentarSettings] = None):
+        self._settings = settings or get_settings()
+        self._pool: Optional[asyncpg.Pool] = None
+        self._state: Dict[Tuple[str, str, int, int, str], ConnectionState] = {}
+        self._lock = asyncio.Lock()
+
+    async def startup(self) -> None:
+        if self._pool is None:
+            self._pool = await asyncpg.create_pool(self._settings.postgres_dsn, min_size=2, max_size=10)
+            await self._initialise_schema()
+            logger.info("Stateful inspector connected to PostgreSQL at %s", self._settings.postgres_dsn)
+
+    async def shutdown(self) -> None:
+        if self._pool:
+            await self._pool.close()
+            self._pool = None
+
+    async def process(self, observation: FlowObservation) -> InspectorDecision:
+        """Update connection state and return the required action."""
+
+        key = (observation.src_ip, observation.dst_ip, observation.src_port, observation.dst_port, observation.protocol)
+
+        async with self._lock:
+            state = self._state.get(key)
+            if state is None:
+                state = ConnectionState()
+                self._state[key] = state
+
+            state.packets += 1
+            state.bytes += observation.payload_size
+            state.last_seen = observation.timestamp
+
+            if observation.protocol == "TCP":
+                if observation.flags and "S" in observation.flags:
+                    state.syn_seen = True
+                if observation.flags and "A" in observation.flags and state.syn_seen:
+                    state.established = True
+
+        decision = self._evaluate(key, state, observation)
+
+        if decision.action != InspectorAction.PASS:
+            await self._persist_state(key, state, decision)
+
+        await self._evict_idle_connections()
+        return decision
+
+    async def _persist_state(
+        self,
+        key: Tuple[str, str, int, int, str],
+        state: ConnectionState,
+        decision: InspectorDecision,
+    ) -> None:
+        if not self._pool:
+            return
+
+        src_ip, dst_ip, src_port, dst_port, protocol = key
+        async with self._pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO tegumentar_sessions (src_ip, dst_ip, src_port, dst_port, protocol,
+                                                 packets, bytes, last_decision, last_seen)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9))
+                ON CONFLICT (src_ip, dst_ip, src_port, dst_port, protocol)
+                DO UPDATE SET packets = $6,
+                              bytes = $7,
+                              last_decision = $8,
+                              last_seen = to_timestamp($9)
+                """,
+                src_ip,
+                dst_ip,
+                src_port,
+                dst_port,
+                protocol,
+                state.packets,
+                state.bytes,
+                decision.action.value,
+                state.last_seen,
+            )
+
+    def _evaluate(
+        self,
+        key: Tuple[str, str, int, int, str],
+        state: ConnectionState,
+        observation: FlowObservation,
+    ) -> InspectorDecision:
+        if observation.protocol == "TCP":
+            if state.packets == 1 and not observation.flags:
+                return InspectorDecision(
+                    action=InspectorAction.INSPECT_DEEP,
+                    reason="TCP packet without flags (possible evasion)",
+                    connection_state=state,
+                )
+
+            if observation.flags and "S" in observation.flags and state.packets > 10 and not state.established:
+                return InspectorDecision(
+                    action=InspectorAction.DROP,
+                    reason="Repeated SYN without ACK (potential SYN flood)",
+                    connection_state=state,
+                )
+
+        if state.bytes > 10_000_000 and (time.time() - state.last_seen) < 5:
+            return InspectorDecision(
+                action=InspectorAction.INSPECT_DEEP,
+                reason="High throughput connection, escalate for DPI",
+                connection_state=state,
+            )
+
+        return InspectorDecision(
+            action=InspectorAction.PASS,
+            reason="No anomaly detected",
+            connection_state=state,
+        )
+
+    async def _evict_idle_connections(self) -> None:
+        now = time.time()
+        expired_keys = [
+            key for key, state in self._state.items() if now - state.last_seen > 300
+        ]
+        for key in expired_keys:
+            self._state.pop(key, None)
+
+    async def _initialise_schema(self) -> None:
+        if not self._pool:
+            return
+
+        async with self._pool.acquire() as conn:
+            await conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tegumentar_sessions (
+                    src_ip inet NOT NULL,
+                    dst_ip inet NOT NULL,
+                    src_port integer NOT NULL,
+                    dst_port integer NOT NULL,
+                    protocol text NOT NULL,
+                    packets bigint NOT NULL,
+                    bytes bigint NOT NULL,
+                    last_decision text NOT NULL,
+                    last_seen timestamp with time zone NOT NULL,
+                    PRIMARY KEY (src_ip, dst_ip, src_port, dst_port, protocol)
+                );
+                """
+            )
+
+
+__all__ = [
+    "FlowObservation",
+    "InspectorAction",
+    "InspectorDecision",
+    "StatefulInspector",
+]

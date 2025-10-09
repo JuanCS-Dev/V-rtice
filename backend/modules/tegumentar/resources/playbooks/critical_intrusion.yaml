@@ -1,0 +1,40 @@
+phases:
+  - name: hemostasis
+    steps:
+      - type: command
+        command: ["nft", "add", "rule", "inet", "tegumentar_epiderme", "edge_filter", "ip", "saddr", "{src_ip}", "drop"]
+      - type: http
+        method: post
+        url: "http://localhost:8612/audit/events"
+        body:
+          source: "tegumentar"
+          event: "hemostasis"
+          details:
+            src_ip: "{src_ip}"
+  - name: inflammation
+    steps:
+      - type: http
+        method: post
+        url: "http://localhost:8004/api/actions"
+        body:
+          action: "scale_service"
+          parameters:
+            service: "immune-response"
+            replicas: 3
+      - type: sleep
+        seconds: 3
+  - name: proliferation
+    steps:
+      - type: command
+        command: ["systemctl", "restart", "tegumentar-sensor.service"]
+      - type: http
+        method: post
+        url: "http://localhost:8003/api/planner/playbook"
+        body:
+          name: "deploy_countermeasures"
+  - name: remodeling
+    steps:
+      - type: command
+        command: ["tc", "qdisc", "replace", "dev", "{interface}", "root", "tbf", "rate", "500mbit", "burst", "64kbit", "latency", "300ms"]
+      - type: sleep
+        seconds: 2

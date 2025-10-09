@@ -14,6 +14,7 @@ import pytest
 from httpx import AsyncClient
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_lymphnode_metrics_flow(client: AsyncClient):
     """Test lymphnode metrics retrieval."""
@@ -52,6 +53,7 @@ async def test_lymphnode_metrics_flow(client: AsyncClient):
         pytest.fail(f"Unexpected status code: {response.status_code}")
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_homeostatic_state_flow(client: AsyncClient):
     """Test homeostatic state retrieval."""

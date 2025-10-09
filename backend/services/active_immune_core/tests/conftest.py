@@ -1,12 +1,15 @@
 """Pytest configuration and fixtures"""
 
 import asyncio
+import os
 from typing import Callable
 
 import pytest
 from fastapi.testclient import TestClient
 
 from active_immune_core.main import app
+
+os.environ.setdefault("VERTICE_LYMPHNODE_SHARED_SECRET", "test-shared-secret")
 
 # ==================== ASYNC HELPERS ====================
 

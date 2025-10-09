@@ -58,7 +58,7 @@ type Suggestion struct {
 func NewModel(rootCmd *cobra.Command, version, buildDate string) Model {
 	// Create text input
 	ti := textinput.New()
-	ti.Placeholder = "Type a command... (or /help)"
+	ti.Placeholder = "Type / for commands or start typing..."
 	ti.Focus()
 	ti.CharLimit = 256
 	ti.Width = InitialWidth - 10

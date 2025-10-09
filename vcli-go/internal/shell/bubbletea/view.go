@@ -164,9 +164,9 @@ func (m Model) renderToolbar() string {
 		key  string
 		desc string
 	}{
+		{"/", "Commands"},
 		{"Tab", "Complete"},
 		{"↑↓", "Navigate"},
-		{"Ctrl+K", "Palette"},
 		{"Ctrl+D", "Exit"},
 	}
 

@@ -69,19 +69,23 @@ def test_reset_instance():
     assert instance1 is not instance2
 
 
-# ==================== INITIALIZATION TESTS (DEGRADED MODE) ====================
+# ==================== INITIALIZATION TESTS (UNIT - NO SERVICES) ====================
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_initialize_success():
     """
-    Test initialization always succeeds (components don't connect yet).
-
-    NO MOCKS - uses real component classes.
+    Test initialization succeeds even with invalid URLs (degraded mode).
+    
+    This is a UNIT test - no external services required.
+    Components are created but not connected yet (connection happens on start()).
+    
+    NO MOCKS - uses real component classes with invalid URLs.
     """
     core = CoreManager.get_instance()
 
-    # Initialize (will succeed - components created but not connected)
+    # Initialize with invalid URLs (will succeed - connection happens on start())
     result = await core.initialize(
         kafka_bootstrap="localhost:9999",  # Invalid port (won't connect yet)
         redis_url="redis://localhost:9999",  # Invalid port (won't connect yet)
@@ -95,38 +99,49 @@ async def test_initialize_success():
     assert core.is_available
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_start_with_invalid_config_succeeds_gracefully():
     """
-    Test start with invalid config succeeds via graceful degradation.
-
-    NO MOCKS - uses invalid addresses.
-    Components (Lymphnode, Controller) have their own graceful degradation
-    and continue running even without Kafka/Postgres!
-
-    This is CORRECT behavior - the Core is resilient!
+    Test that start() with invalid config succeeds via internal graceful degradation.
+    
+    This is a UNIT test - tests graceful degradation behavior.
+    
+    NOTE: Components (Lymphnode, HomeController) have internal graceful degradation
+    and continue running even without Kafka/Redis. The Core may start successfully
+    even with invalid URLs because components handle degradation internally.
+    
+    This is CORRECT behavior - the system is resilient!
+    
+    NO MOCKS - uses real CoreManager with invalid URLs.
     """
     core = CoreManager.get_instance()
 
-    # Initialize (succeeds)
+    # Initialize with invalid config
     await core.initialize(
-        kafka_bootstrap="localhost:9999",
-        redis_url="redis://localhost:9999",
+        kafka_bootstrap="localhost:9999",  # Invalid
+        redis_url="redis://localhost:9999",  # Invalid
         enable_degraded_mode=True,
     )
 
-    # Start (succeeds - components degrade gracefully internally)
+    # Start should succeed (components degrade internally)
     result = await core.start()
-
-    # Core starts successfully (components handle degradation internally)
+    
+    # Core starts successfully (components handle connection failures gracefully)
     assert result is True
     assert core.is_started
-    # Core may or may not be marked degraded (depends on internal component status)
+    # Note: is_degraded status depends on internal component behavior
+    # The Core itself remains available even if some components can't connect
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_initialize_already_initialized():
-    """Test that re-initialization is safe"""
+    """
+    Test that re-initialization is idempotent and safe.
+    
+    NO MOCKS - tests real CoreManager behavior.
+    """
     core = CoreManager.get_instance()
 
     # First init
@@ -139,13 +154,14 @@ async def test_initialize_already_initialized():
     # Second init (should warn but not fail)
     result2 = await core.initialize()
 
-    assert result1 is True  # Init succeeds
-    assert result2 is True  # Still succeeds
+    assert result1 is True
+    assert result2 is True  # Idempotent - succeeds
 
 
-# ==================== START/STOP TESTS ====================
+# ==================== START/STOP TESTS (UNIT) ====================
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_start_not_initialized():
     """Test start fails if not initialized"""
@@ -155,9 +171,14 @@ async def test_start_not_initialized():
         await core.start()
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_start_after_init_succeeds():
-    """Test start after initialization succeeds (graceful degradation)"""
+    """
+    Test start after initialization succeeds (with degradation).
+    
+    This is a UNIT test - uses invalid URLs, tests degradation behavior.
+    """
     core = CoreManager.get_instance()
 
     # Initialize
@@ -183,6 +204,23 @@ async def test_stop_not_started():
     await core.stop()
 
 
+    assert result is True
+    assert core.is_started
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_stop_not_started():
+    """Test stop without start is safe (no-op)"""
+    core = CoreManager.get_instance()
+
+    # Stop without starting (should be safe no-op)
+    await core.stop()
+
+    assert not core.is_started
+
+
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_stop_handles_errors_gracefully():
     """
@@ -205,9 +243,10 @@ async def test_stop_handles_errors_gracefully():
     await core.stop()
 
 
-# ==================== COMPONENT ACCESS TESTS ====================
+# ==================== COMPONENT ACCESS TESTS (UNIT) ====================
 
 
+@pytest.mark.unit
 def test_component_access_not_initialized():
     """Test component access before initialization"""
     core = CoreManager.get_instance()
@@ -217,9 +256,14 @@ def test_component_access_not_initialized():
     assert core.homeostatic_controller is None
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_component_access_after_init():
-    """Test component access after initialization"""
+    """
+    Test component access after initialization.
+    
+    Components are created even with invalid config.
+    """
     core = CoreManager.get_instance()
 
     await core.initialize(
@@ -234,9 +278,10 @@ async def test_component_access_after_init():
     assert core.homeostatic_controller is not None
 
 
-# ==================== STATUS TESTS ====================
+# ==================== STATUS TESTS (UNIT) ====================
 
 
+@pytest.mark.unit
 def test_status_initial():
     """Test initial status"""
     core = CoreManager.get_instance()
@@ -248,9 +293,14 @@ def test_status_initial():
     assert core.uptime_seconds is None
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_status_after_start_with_graceful_degradation():
-    """Test status after start with graceful degradation"""
+    """
+    Test status after start with graceful degradation.
+    
+    With invalid URLs, Core starts but may be degraded.
+    """
     core = CoreManager.get_instance()
 
     await core.initialize(
@@ -266,6 +316,7 @@ async def test_status_after_start_with_graceful_degradation():
     # Components degrade internally but Core continues
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_get_status_dict():
     """Test get_status() returns comprehensive info"""
@@ -291,6 +342,7 @@ async def test_get_status_dict():
     assert status["initialized"] is True
 
 
+@pytest.mark.unit
 def test_repr():
     """Test string representation"""
     core = CoreManager.get_instance()
@@ -302,145 +354,89 @@ def test_repr():
     assert "available=" in repr_str
 
 
-# ==================== INTEGRATION TESTS (REAL CORE) ====================
+# ==================== INTEGRATION TESTS (REAL SERVICES) ====================
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_initialize_with_real_services():
+async def test_initialize_with_real_services(core_manager_initialized):
     """
-    Test successful initialization with REAL Kafka/Redis.
+    Test successful initialization with REAL Kafka/Redis/PostgreSQL.
 
-    Requires: Kafka on localhost:9092, Redis on localhost:6379
-    Skips if services unavailable.
+    Uses core_manager_initialized fixture which:
+    - Skips if services unavailable
+    - Provides fully initialized CoreManager
+    - Cleans up after test
 
     NO MOCKS - this is a REAL integration test!
     """
-    import socket
+    core = core_manager_initialized
 
-    # Check if services available
-    def check_port(host: str, port: int) -> bool:
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
-            result = sock.connect_ex((host, port))
-            sock.close()
-            return result == 0
-        except Exception:
-            return False
-
-    if not (check_port("localhost", 9092) and check_port("localhost", 6379)):
-        pytest.skip("Kafka/Redis not available for integration tests")
-
-    core = CoreManager.get_instance()
-
-    # Initialize with real services
-    success = await core.initialize(
-        kafka_bootstrap="localhost:9092",
-        redis_url="redis://localhost:6379",
-        enable_degraded_mode=False,
-    )
-
-    assert success is True
+    # Verify initialization succeeded
     assert core.is_initialized
-    assert not core.is_degraded
+    assert not core.is_started  # Initialized but not started yet
     assert core.is_available
 
-    # Verify components were created
+    # Components should be created
     assert core.agent_factory is not None
     assert core.lymphnode is not None
     assert core.homeostatic_controller is not None
-
-    await core.stop()
+    assert core.clonal_selection is not None
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_full_lifecycle_with_real_services():
+async def test_full_lifecycle_with_real_services(core_manager_started):
     """
-    Test complete lifecycle with REAL Core.
+    Test full lifecycle with REAL services.
 
-    Requires: Kafka + Redis running
+    Uses core_manager_started fixture which:
+    - Skips if services unavailable
+    - Provides fully initialized AND started CoreManager
+    - Cleans up after test
 
-    NO MOCKS - End-to-end integration test!
+    NO MOCKS - full integration test!
     """
-    import socket
+    core = core_manager_started
 
-    def check_port(host: str, port: int) -> bool:
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
-            result = sock.connect_ex((host, port))
-            sock.close()
-            return result == 0
-        except Exception:
-            return False
-
-    if not (check_port("localhost", 9092) and check_port("localhost", 6379)):
-        pytest.skip("Kafka/Redis not available for integration tests")
-
-    core = CoreManager.get_instance()
-
-    # Initialize
-    await core.initialize(
-        kafka_bootstrap="localhost:9092",
-        redis_url="redis://localhost:6379",
-        enable_degraded_mode=False,
-    )
-
-    # Initial state
+    # Verify full startup
     assert core.is_initialized
-    assert not core.is_started
-
-    # Start
-    start_result = await core.start()
-    assert start_result is True
     assert core.is_started
+    assert core.is_available
+    assert not core.is_degraded  # Should not be degraded with real services
 
-    # Check status
+    # Uptime should be tracked
+    assert core.uptime_seconds is not None
+    assert core.uptime_seconds >= 0
+
+    # Status dict should be comprehensive
     status = core.get_status()
+    assert status["initialized"] is True
     assert status["started"] is True
     assert status["available"] is True
-    assert status["uptime_seconds"] is not None
-
-    # Stop
-    await core.stop()
-    assert not core.is_started
-
-    # Final status
-    final_status = core.get_status()
-    assert final_status["started"] is False
-    assert final_status["uptime_seconds"] is None
 
 
-# ==================== HELPER FUNCTIONS ====================
-
-
-@pytest.mark.asyncio
-async def test_check_services_available():
+@pytest.mark.unit
+def test_check_services_available():
     """
-    Helper test: Check if Kafka/Redis are available for integration tests.
-
+    Test the utility function that checks service availability.
+    
     This is informational - helps debug why integration tests skip.
     """
-    import socket
-
-    def check_port(host: str, port: int) -> bool:
-        """Check if port is open"""
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
-            result = sock.connect_ex((host, port))
-            sock.close()
-            return result == 0
-        except Exception:
-            return False
-
-    kafka_available = check_port("localhost", 9092)
-    redis_available = check_port("localhost", 6379)
-
-    logger.info(f"Kafka available: {kafka_available}")
-    logger.info(f"Redis available: {redis_available}")
-
-    # This test always passes - just informational
+    from api.core_integration.conftest import (
+        check_kafka_available,
+        check_redis_available,
+        check_postgres_available,
+    )
+    
+    # Just run the checks (don't assert - may or may not be available)
+    kafka = check_kafka_available()
+    redis = check_redis_available()
+    postgres = check_postgres_available()
+    
+    # Log for information
+    logger.info(f"Service availability: Kafka={kafka}, Redis={redis}, PostgreSQL={postgres}")
+    
+    # Always passes - this is informational only
     assert True
+

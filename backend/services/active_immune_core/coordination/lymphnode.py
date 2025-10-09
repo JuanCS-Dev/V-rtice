@@ -24,9 +24,12 @@ PRODUCTION-READY: Real Kafka, Redis, no mocks, graceful degradation.
 import asyncio
 import json
 import logging
+import os
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
+
+import secrets
 
 import redis.asyncio as aioredis
 from aiokafka import AIOKafkaConsumer
@@ -114,7 +117,12 @@ class LinfonodoDigital:
         self.redis_url = redis_url
 
         # Authentication / shared secret
-        self._expected_token = shared_secret or "trusted-helper-t"
+        expected_secret = shared_secret or os.getenv("VERTICE_LYMPHNODE_SHARED_SECRET")
+        if not expected_secret:
+            raise ValueError(
+                "LinfonodoDigital requires a shared_secret (pass via constructor or VERTICE_LYMPHNODE_SHARED_SECRET env var)"
+            )
+        self._expected_token = expected_secret
         self._failure_window_seconds = 120.0
         self._failure_threshold = 5
         self._failure_timestamps: List[float] = []
@@ -160,12 +168,19 @@ class LinfonodoDigital:
             escalation_priority_threshold=9,
         )
 
+        # Rate limiting shared with orchestrator
+        self._clonal_limiter = ClonalExpansionRateLimiter(
+            max_clones_per_minute=200,
+            max_per_specialization=50,
+            max_total_agents=1000,
+        )
+
         # Agent orchestrator (FASE 3 - Dependency Injection)
         self._agent_orchestrator = AgentOrchestrator(
             lymphnode_id=self.id,
             area=self.area,
             factory=self.factory,
-            rate_limiter=None,  # Will use AgentOrchestrator's internal rate limiter
+            rate_limiter=self._clonal_limiter,
             redis_client=None,  # Will be set later when Redis connects
         )
 
@@ -178,13 +193,6 @@ class LinfonodoDigital:
         self.total_neutralizacoes = self._lymphnode_metrics.total_neutralizacoes
         self.total_clones_criados = self._lymphnode_metrics.total_clones_criados
         self.total_clones_destruidos = self._lymphnode_metrics.total_clones_destruidos
-
-        # Rate limiting
-        self._clonal_limiter = ClonalExpansionRateLimiter(
-            max_clones_per_minute=200,
-            max_per_specialization=50,
-            max_total_agents=1000,
-        )
 
         # ESGT Integration (consciousness ignition)
         self.esgt_subscriber: Optional["ESGTSubscriber"] = None
@@ -230,8 +238,9 @@ class LinfonodoDigital:
 
     def validate_token(self, token: str | None) -> None:
         if not token:
+            self._register_failure()
             raise LymphnodeConnectionError("Missing immunological token")
-        if token != self._expected_token:
+        if not secrets.compare_digest(token, self._expected_token):
             self._register_failure()
             raise LymphnodeConnectionError("Invalid helper T token")
         self._register_success()
@@ -412,9 +421,11 @@ class LinfonodoDigital:
                 decode_responses=True,
             )
             logger.info(f"Lymphnode {self.id} connected to Redis")
+            self._agent_orchestrator.redis_client = self._redis_client
         except (ConnectionError, TimeoutError) as e:
             logger.warning(f"Redis connection failed: {e} (graceful degradation)")
             self._redis_client = None
+            self._agent_orchestrator.redis_client = None
         except Exception as e:
             logger.error(f"Unexpected Redis error: {e}")
             raise LymphnodeConnectionError(f"Redis initialization failed: {e}")
@@ -451,6 +462,7 @@ class LinfonodoDigital:
         if self._redis_client:
             await self._redis_client.close()
             self._redis_client = None
+        self._agent_orchestrator.redis_client = None
 
         logger.info(f"Lymphnode {self.id} stopped")
 
@@ -611,20 +623,7 @@ class LinfonodoDigital:
                 if not self._running:
                     break
 
-                citocina = msg.value
-
-                # VALIDATION: Validate cytokine via CytokineAggregator (FASE 3)
-                citocina_dict = await self._cytokine_aggregator.validate_and_parse(citocina)
-                if not citokina_dict:
-                    continue
-
-                # Filter by area via CytokineAggregator (FASE 3)
-                if await self._cytokine_aggregator.should_process_for_area(citocina_dict):
-                    # Add to buffer (THREAD-SAFE)
-                    await self.cytokine_buffer.append(citocina_dict)
-
-                    # Process at regional level
-                    await self._processar_citocina_regional(citocina_dict)
+                await self._handle_cytokine_message(msg.value)
 
         except (ConnectionError, TimeoutError) as e:
             logger.error(f"Kafka connection error: {e}")
@@ -636,6 +635,33 @@ class LinfonodoDigital:
         finally:
             if consumer:
                 await consumer.stop()
+
+    async def _handle_cytokine_message(self, raw_cytokine: Dict[str, Any]) -> bool:
+        """
+        Validate, filter, and process a single cytokine message.
+
+        Args:
+            raw_cytokine: Raw cytokine payload from Kafka
+
+        Returns:
+            True if the cytokine was processed for this lymphnode, False otherwise.
+        """
+        # VALIDATION: Validate cytokine via CytokineAggregator (FASE 3)
+        citocina_dict = await self._cytokine_aggregator.validate_and_parse(raw_cytokine)
+        if not citocina_dict:
+            return False
+
+        # Filter by area via CytokineAggregator (FASE 3)
+        if not await self._cytokine_aggregator.should_process_for_area(citocina_dict):
+            return False
+
+        # Add to buffer (THREAD-SAFE)
+        await self.cytokine_buffer.append(citocina_dict)
+
+        # Process at regional level
+        await self._processar_citocina_regional(citocina_dict)
+
+        return True
 
     async def _processar_citocina_regional(self, citocina: Dict[str, Any]) -> None:
         """

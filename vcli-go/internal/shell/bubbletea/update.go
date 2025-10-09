@@ -60,6 +60,18 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		// For now, just show a message
 		// TODO: Open palette
 		return m, nil
+	
+	case tea.KeyRunes:
+		// Special handling for '/' key to trigger autocomplete
+		if len(msg.Runes) > 0 && msg.Runes[0] == '/' {
+			// Let the default handler add the '/'
+			var cmd tea.Cmd
+			m.textInput, cmd = m.textInput.Update(msg)
+			// Then trigger autocomplete immediately
+			m.updateAutocomplete()
+			m.showSuggestions = true
+			return m, cmd
+		}
 
 	case tea.KeyEnter:
 		// Hide welcome banner on first interaction
@@ -133,15 +145,30 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 func (m *Model) updateAutocomplete() {
 	text := m.textInput.Value()
 
-	// Don't show suggestions if empty or ends with space
-	if text == "" || strings.HasSuffix(text, " ") {
+	// Don't show suggestions if empty
+	if text == "" {
 		m.suggestions = make([]Suggestion, 0)
 		m.suggestCursor = -1
 		m.showSuggestions = false
 		return
 	}
 
-	// Get suggestions from completer
+	// Special handling for slash commands
+	if strings.HasPrefix(text, "/") {
+		// Show slash command suggestions
+		m.updateSlashCommands(text)
+		return
+	}
+
+	// Don't show suggestions if ends with space (for regular commands)
+	if strings.HasSuffix(text, " ") {
+		m.suggestions = make([]Suggestion, 0)
+		m.suggestCursor = -1
+		m.showSuggestions = false
+		return
+	}
+
+	// Get suggestions from completer for regular commands
 	promptSuggestions := m.completer.CompleteText(text)
 
 	// Convert to our Suggestion type
@@ -163,8 +190,62 @@ func (m *Model) updateAutocomplete() {
 	}
 }
 
+// updateSlashCommands updates suggestions for slash commands
+func (m *Model) updateSlashCommands(text string) {
+	// Remove leading slash
+	query := strings.TrimPrefix(text, "/")
+	
+	// Define available slash commands
+	slashCommands := []struct {
+		cmd  string
+		desc string
+		icon string
+	}{
+		{"help", "Show available commands", "❓"},
+		{"clear", "Clear the screen", "🧹"},
+		{"exit", "Exit the shell", "👋"},
+		{"version", "Show version information", "ℹ️"},
+		{"k8s", "Kubernetes operations", "⎈"},
+		{"maximus", "MAXIMUS AI operations", "🧠"},
+		{"immune", "Immune system operations", "🛡️"},
+		{"orchestrate", "Orchestration operations", "🚀"},
+		{"data", "Data operations", "💾"},
+		{"investigate", "Investigation operations", "🔍"},
+		{"threat", "Threat operations", "⚠️"},
+		{"ethical", "Ethical AI operations", "⚖️"},
+		{"gateway", "Gateway operations", "🚪"},
+		{"stream", "Streaming operations", "📡"},
+	}
+
+	// Filter commands based on query
+	m.suggestions = make([]Suggestion, 0)
+	for _, cmd := range slashCommands {
+		if query == "" || strings.HasPrefix(cmd.cmd, query) {
+			m.suggestions = append(m.suggestions, Suggestion{
+				Text:        "/" + cmd.cmd,
+				Description: cmd.desc,
+				Icon:        cmd.icon,
+			})
+		}
+	}
+
+	// Show suggestions if we have any
+	m.showSuggestions = len(m.suggestions) > 0
+
+	// Reset cursor if suggestions changed
+	if m.suggestCursor >= len(m.suggestions) {
+		m.suggestCursor = -1
+	}
+}
+
 // executeCommand executes a command via the executor
 func (m *Model) executeCommand(cmd string) {
+	// Handle slash commands specially
+	if strings.HasPrefix(cmd, "/") {
+		// Remove leading slash and execute as normal command
+		cmd = strings.TrimPrefix(cmd, "/")
+	}
+	
 	// Use existing executor
 	m.executor.Execute(cmd)
 }
