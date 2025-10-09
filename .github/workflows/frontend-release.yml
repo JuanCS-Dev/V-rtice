@@ -1,0 +1,81 @@
+name: Frontend Release Liturgia
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Cenário de benchmarks (baseline, stress...)"
+        required: false
+        default: baseline
+
+jobs:
+  release-frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BENCH_TARGET_BASE_URL: ${{ secrets.BENCH_TARGET_BASE_URL }}
+      BENCH_TARGET_WS_URL: ${{ secrets.BENCH_TARGET_WS_URL }}
+      BENCH_TARGET_GRPC_ADDR: ${{ secrets.BENCH_TARGET_GRPC_ADDR }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+      SCENARIO: ${{ github.event.inputs.scenario || 'baseline' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install & build frontend
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+          npm test -- --run
+
+      - name: Generate SBOM
+        run: |
+          mkdir -p artifacts/frontend
+          ./scripts/release/generate-sbom.sh frontend sbom-frontend.json
+          mv sbom-frontend.json artifacts/frontend/
+
+      - name: Vulnerability scan
+        run: |
+          ./scripts/release/vulnerability-scan.sh artifacts/frontend/sbom-frontend.json vuln-frontend.json
+          mv vuln-frontend.json artifacts/frontend/
+
+      - name: Sign artefacts
+        run: |
+          ./scripts/release/sign-artifact.sh frontend --attest artifacts/frontend/sbom-frontend.json
+
+      - name: Generate release notes
+        run: |
+          VERSION="${{ github.sha }}"
+          OWNER="${{ github.actor }}"
+          python scripts/release/generate-release-notes.py             --component frontend             --version "$VERSION"             --sbom artifacts/frontend/sbom-frontend.json             --vuln artifacts/frontend/vuln-frontend.json             --output artifacts/frontend/release-notes.md             --owner "$OWNER"
+
+      - name: Upload release artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-release-artifacts
+          path: artifacts/frontend
+          retention-days: 14
+
+      - name: Benchmark smoke (opcional)
+        run: |
+          ./tests/performance/run-benchmarks.sh --rest
+
+      - name: Checklist resumo
+        run: |
+          cat <<'MARKDOWN' >> $GITHUB_STEP_SUMMARY
+## Frontend Release Liturgia
+- ✅ Build/test executados
+- ✅ SBOM: artifacts/frontend/sbom-frontend.json
+- ✅ Vulnerability scan: artifacts/frontend/vuln-frontend.json
+- ✅ Assinatura cosign
+- ✅ Artefatos anexados
+MARKDOWN

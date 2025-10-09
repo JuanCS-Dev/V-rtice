@@ -1,0 +1,54 @@
+name: Performance Benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Cenário (baseline, stress, spike, soak)"
+        required: false
+        default: baseline
+  schedule:
+    - cron: '0 3 * * 1'  # Segunda-feira 03:00 UTC
+
+jobs:
+  run-benchmarks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      BENCH_TARGET_BASE_URL: ${{ secrets.BENCH_TARGET_BASE_URL }}
+      BENCH_TARGET_WS_URL: ${{ secrets.BENCH_TARGET_WS_URL }}
+      BENCH_TARGET_GRPC_ADDR: ${{ secrets.BENCH_TARGET_GRPC_ADDR }}
+      SCENARIO: ${{ github.event.inputs.scenario || 'baseline' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y golang jq python3-pip
+          pip install yq isodate
+          go install github.com/rakyll/hey@latest
+          go install github.com/bojand/ghz/cmd/ghz@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Run benchmarks
+        run: |
+          chmod +x tests/performance/run-benchmarks.sh
+          ./tests/performance/run-benchmarks.sh
+
+      - name: Upload raw reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-reports
+          path: tests/performance/reports
+          retention-days: 7
+
+      - name: Commit benchmark summary
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "cGPT Bench Bot"
+          git config user.email "bench@vertice.dev"
+          git add docs/performance/MAXIMUS_LATENCY_BENCHMARKS.md
+          git commit -m "chore(benchmarks): update latency baseline" || echo "Nenhuma mudança para commitar"
+          git push || echo "Execução sem push (permissão ausente)"

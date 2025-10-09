@@ -62,7 +62,7 @@ check_dependencies() {
         print_success "Locust: $(locust --version)"
         LOCUST_AVAILABLE=true
     else
-        print_warning "Locust not installed (pip install locust)"
+        print_warning "Locust not installed (uv tool install locust)"
         LOCUST_AVAILABLE=false
     fi
 
@@ -305,7 +305,7 @@ case "$TEST_TYPE" in
     locust)
         if [ "$LOCUST_AVAILABLE" != true ]; then
             print_error "Locust is not installed"
-            print_info "Install with: pip install locust"
+            print_info "Install with: uv tool install locust"
             exit 1
         fi
         if ! check_service_health "$HOST"; then
@@ -317,7 +317,7 @@ case "$TEST_TYPE" in
     locust-headless)
         if [ "$LOCUST_AVAILABLE" != true ]; then
             print_error "Locust is not installed"
-            print_info "Install with: pip install locust"
+            print_info "Install with: uv tool install locust"
             exit 1
         fi
         if ! check_service_health "$HOST"; then

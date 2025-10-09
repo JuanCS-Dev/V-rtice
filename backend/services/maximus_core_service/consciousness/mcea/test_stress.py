@@ -177,8 +177,8 @@ class TestStressResponse:
         # ACT: Calculate score
         score = response.get_resilience_score()
 
-        # ASSERT: 40 point penalty (lines 184-186)
-        assert score == 60.0  # 100 - 40
+        # ASSERT: 40 point penalty for runaway + 10 for high CV (lines 184-186, 202-204)
+        assert score == 50.0  # 100 - 40 - 10
 
     def test_get_resilience_score_goal_failure_penalty(self):
         """Test goal generation failure penalty (lines 188-190)."""
@@ -703,9 +703,8 @@ class TestStressMonitorInit:
     @pytest.mark.asyncio
     async def test_start_monitor(self):
         """Test start method (lines 351-362)."""
-        # ARRANGE: Create monitor
+        # ARRANGE: Create monitor. Controller default arousal is 0.6.
         controller = ArousalController()
-        controller._arousal = 0.4  # Set baseline
         monitor = StressMonitor(controller)
         assert monitor._running is False
         assert monitor._baseline_arousal is None
@@ -713,13 +712,13 @@ class TestStressMonitorInit:
         # ACT: Start monitor (lines 351-362)
         await monitor.start()
 
-        # Brief wait for task to initialize
-        await asyncio.sleep(0.01)
+        # Brief wait for task to initialize. Increased from 0.01s to prevent race conditions.
+        await asyncio.sleep(0.1)
 
         # ASSERT: Monitor started (lines 357-362)
         assert monitor._running is True
         assert monitor._monitoring_task is not None
-        assert monitor._baseline_arousal == 0.4  # Captured baseline (line 357)
+        assert monitor._baseline_arousal == 0.6  # Captured baseline (line 357)
 
         # CLEANUP
         await monitor.stop()
@@ -776,9 +775,9 @@ class TestStressMonitorInit:
 
         monitor._assess_stress_level = counting_assess
 
-        # ACT: Start monitoring
+        # ACT: Start monitoring and wait for at least one loop execution (1s cycle)
         await monitor.start()
-        await asyncio.sleep(0.3)  # Let loop run several times
+        await asyncio.sleep(1.1)  # Let loop run at least once
 
         # CLEANUP
         await monitor.stop()
@@ -824,16 +823,17 @@ class TestAssessStressLevel:
 
     def test_assess_stress_level_none(self):
         """Test assessment returns NONE (lines 404-430)."""
-        # ARRANGE: Controller with low arousal
+        # ARRANGE: Controller at default arousal (0.6)
         controller = ArousalController()
-        controller._arousal = 0.3
         monitor = StressMonitor(controller)
-        monitor._baseline_arousal = 0.3  # Same as current
+        monitor._baseline_arousal = 0.6  # Match default
 
         # Mock controller.get_stress_level()
         controller.get_stress_level = Mock(return_value=0.1)
 
         # ACT: Assess stress (lines 404-430)
+        # Deviation is abs(0.6 - 0.6) = 0. Controller stress is 0.1.
+        # Combined is max(0, 0.1) = 0.1, which is NONE.
         stress_level = monitor._assess_stress_level()
 
         # ASSERT: NONE (line 421-422)

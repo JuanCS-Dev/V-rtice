@@ -1,0 +1,6 @@
+{
+  "test": "Memory Baseline",
+  "available_mb": 9583,
+  "threshold_mb": 512,
+  "passed": true
+}

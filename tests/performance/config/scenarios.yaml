@@ -1,0 +1,61 @@
+# Cenários oficiais de benchmark (Adendo 3)
+# Autor: Juan Carlo de Souza (JuanCS-DEV @github)
+# Email: juan.brainfarma@gmail.com
+# Colaboração: OpenAI (cGPT)
+
+baseline:
+  description: "Carga leve representando uso normal do cockpit"
+  rest:
+    duration: 5m
+    warmup: 30s
+    users: [1, 5, 10]
+    endpoints:
+      - GET /consciousness/status
+      - GET /consciousness/metrics
+  websocket:
+    duration: 5m
+    vus: 10
+    messageInterval: 1s
+  grpc:
+    duration: 5m
+    concurrency: [1, 5]
+
+stress:
+  description: "Carga elevada contínua para detectar gargalos"
+  rest:
+    duration: 10m
+    warmup: 1m
+    users: [20, 50, 100]
+  websocket:
+    duration: 10m
+    vus: 100
+    messageInterval: 500ms
+  grpc:
+    duration: 10m
+    concurrency: [10, 25]
+
+spike:
+  description: "Picos repentinos simulando incidentes"
+  rest:
+    duration: 5m
+    pattern: "0→100 usuários em 30s"
+  websocket:
+    duration: 5m
+    spikeUsers: 200
+    spikeDuration: 15s
+  grpc:
+    duration: 5m
+    spikeConcurrency: 50
+
+soak:
+  description: "Teste de longa duração para detectar leaks"
+  rest:
+    duration: 60m
+    users: [20]
+  websocket:
+    duration: 60m
+    vus: 50
+    messageInterval: 1s
+  grpc:
+    duration: 60m
+    concurrency: [10]

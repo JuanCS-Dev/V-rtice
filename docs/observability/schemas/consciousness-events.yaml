@@ -1,0 +1,426 @@
+# Schemas de Eventos de Consciência - MAXIMUS
+# Autor: Juan Carlo de Souza (JuanCS-DEV @github)
+# Email: juan.brainfarma@gmail.com
+# Data: 2024-10-08
+# Status: Production Schema v1.0
+
+---
+# Schema para dopamine_spike_events
+# Protocolo: gRPC streaming via neuromodulation service
+dopamine_spike_event:
+  type: object
+  required:
+    - event_id
+    - timestamp
+    - dopamine_level
+    - spike_magnitude
+    - arousal_context
+  properties:
+    event_id:
+      type: string
+      format: uuid
+      description: "Identificador único do evento de spike"
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    
+    timestamp:
+      type: string
+      format: date-time
+      description: "Momento do spike (ISO 8601 UTC)"
+      example: "2024-10-08T14:30:00.123Z"
+    
+    dopamine_level:
+      type: number
+      format: float
+      minimum: 0.0
+      maximum: 1.0
+      description: "Nível normalizado de dopamina (0.0-1.0)"
+      example: 0.85
+    
+    spike_magnitude:
+      type: number
+      format: float
+      minimum: 0.0
+      description: "Magnitude do spike em desvios padrão"
+      example: 2.5
+    
+    arousal_context:
+      type: object
+      description: "Contexto de arousal durante o spike"
+      required:
+        - arousal_level
+        - valence
+      properties:
+        arousal_level:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: "Nível de arousal no momento"
+          example: 0.78
+        
+        valence:
+          type: string
+          enum: [positive, neutral, negative]
+          description: "Valência emocional do contexto"
+          example: "positive"
+    
+    trigger:
+      type: object
+      description: "Gatilho que causou o spike"
+      properties:
+        type:
+          type: string
+          enum: [reward, prediction_error, novelty, goal_achievement, external]
+          description: "Tipo de gatilho"
+          example: "goal_achievement"
+        
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: "Confiança na identificação do gatilho"
+          example: 0.92
+        
+        source_component:
+          type: string
+          description: "Componente que gerou o gatilho"
+          example: "MMEI"
+    
+    duration_ms:
+      type: integer
+      description: "Duração estimada do spike em milissegundos"
+      example: 250
+    
+    related_esgt_events:
+      type: array
+      items:
+        type: string
+        format: uuid
+      description: "IDs de eventos ESGT relacionados"
+      example: ["660e8400-e29b-41d4-a716-446655440001"]
+    
+    trace_id:
+      type: string
+      format: uuid
+      description: "ID de rastreamento distribuído"
+      example: "770e8400-e29b-41d4-a716-446655440002"
+
+---
+# Schema para consciousness.esgt.ignition
+# Protocolo: NATS JetStream event bus
+consciousness_esgt_ignition:
+  type: object
+  required:
+    - event_id
+    - timestamp
+    - ignition_type
+    - coherence
+    - phi_proxy
+  properties:
+    event_id:
+      type: string
+      format: uuid
+      description: "Identificador único do evento de ignição"
+      example: "880e8400-e29b-41d4-a716-446655440003"
+    
+    timestamp:
+      type: string
+      format: date-time
+      description: "Momento da ignição ESGT (ISO 8601 UTC)"
+      example: "2024-10-08T14:30:05.456Z"
+    
+    ignition_type:
+      type: string
+      enum: [full_ignition, partial_ignition, attempted_ignition, ignition_failure]
+      description: "Tipo de evento de ignição"
+      example: "full_ignition"
+    
+    coherence:
+      type: number
+      format: float
+      minimum: 0.0
+      maximum: 1.0
+      description: "Coerência global do workspace (GWT metric)"
+      example: 0.89
+    
+    phi_proxy:
+      type: number
+      format: float
+      minimum: 0.0
+      description: "Proxy de Φ (Integrated Information Theory)"
+      example: 0.87
+    
+    participating_nodes:
+      type: array
+      items:
+        type: object
+        properties:
+          node_id:
+            type: string
+            description: "ID do nó TIG participante"
+            example: "tig-node-01"
+          
+          contribution:
+            type: number
+            format: float
+            minimum: 0.0
+            maximum: 1.0
+            description: "Contribuição do nó para a ignição"
+            example: 0.15
+      description: "Nós TIG que participaram da ignição"
+    
+    broadcast_content:
+      type: object
+      description: "Conteúdo broadcast no Global Workspace"
+      properties:
+        content_type:
+          type: string
+          enum: [percept, memory, prediction, goal, emotion]
+          description: "Tipo de conteúdo consciente"
+          example: "percept"
+        
+        representation:
+          type: string
+          description: "Representação simbólica do conteúdo"
+          example: "high_priority_threat_detected"
+        
+        salience:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: "Saliência do conteúdo"
+          example: 0.95
+    
+    duration_ms:
+      type: integer
+      description: "Duração da ignição em milissegundos"
+      example: 180
+    
+    energy_consumption:
+      type: number
+      format: float
+      description: "Energia metabólica estimada (unidades arbitrárias)"
+      example: 45.2
+    
+    synchronization_quality:
+      type: object
+      description: "Qualidade da sincronização PTP entre nós"
+      properties:
+        jitter_ns:
+          type: integer
+          description: "Jitter máximo em nanosegundos"
+          example: 48
+        
+        offset_ns:
+          type: integer
+          description: "Offset médio em nanosegundos"
+          example: 12
+    
+    related_dopamine_events:
+      type: array
+      items:
+        type: string
+        format: uuid
+      description: "IDs de eventos de dopamina relacionados"
+      example: ["550e8400-e29b-41d4-a716-446655440000"]
+    
+    trace_id:
+      type: string
+      format: uuid
+      description: "ID de rastreamento distribuído"
+      example: "990e8400-e29b-41d4-a716-446655440004"
+    
+    metadata:
+      type: object
+      description: "Metadados adicionais"
+      properties:
+        consciousness_cycle:
+          type: integer
+          description: "Número do ciclo de consciência"
+          example: 1247
+        
+        system_load:
+          type: number
+          format: float
+          description: "Carga do sistema (0.0-1.0)"
+          example: 0.62
+
+---
+# Schema para stream.connected_clients
+# Protocolo: Custom exporter (SSE/WebSocket)
+stream_connected_clients:
+  type: object
+  required:
+    - timestamp
+    - total_connections
+    - connections_by_type
+  properties:
+    timestamp:
+      type: string
+      format: date-time
+      description: "Momento da medição"
+      example: "2024-10-08T14:30:10.789Z"
+    
+    total_connections:
+      type: integer
+      minimum: 0
+      description: "Total de conexões ativas"
+      example: 42
+    
+    connections_by_type:
+      type: object
+      description: "Conexões por tipo de stream"
+      properties:
+        websocket:
+          type: integer
+          minimum: 0
+          description: "Conexões WebSocket ativas"
+          example: 28
+        
+        sse:
+          type: integer
+          minimum: 0
+          description: "Conexões SSE (Server-Sent Events) ativas"
+          example: 14
+    
+    connections_by_service:
+      type: object
+      description: "Conexões por serviço"
+      properties:
+        maximus_consciousness:
+          type: integer
+          minimum: 0
+          example: 15
+        
+        immune_core_events:
+          type: integer
+          minimum: 0
+          example: 12
+        
+        vcli_telemetry:
+          type: integer
+          minimum: 0
+          example: 10
+        
+        governance_decisions:
+          type: integer
+          minimum: 0
+          example: 5
+    
+    bandwidth_usage:
+      type: object
+      description: "Uso de banda por tipo"
+      properties:
+        websocket_mbps:
+          type: number
+          format: float
+          description: "Banda WebSocket em Mbps"
+          example: 2.5
+        
+        sse_mbps:
+          type: number
+          format: float
+          description: "Banda SSE em Mbps"
+          example: 0.8
+    
+    trace_id:
+      type: string
+      format: uuid
+      description: "ID de rastreamento distribuído"
+      example: "aa0e8400-e29b-41d4-a716-446655440005"
+
+---
+# Schema para alert.acked
+# Protocolo: REST callback (HTTPS)
+alert_acknowledgement:
+  type: object
+  required:
+    - alert_id
+    - ack_timestamp
+    - acked_by
+    - correlation_id
+  properties:
+    alert_id:
+      type: string
+      format: uuid
+      description: "ID do alerta original"
+      example: "bb0e8400-e29b-41d4-a716-446655440006"
+    
+    ack_timestamp:
+      type: string
+      format: date-time
+      description: "Momento do acknowledgement"
+      example: "2024-10-08T14:30:15.123Z"
+    
+    acked_by:
+      type: object
+      description: "Identificação de quem reconheceu"
+      required:
+        - user_id
+        - user_name
+      properties:
+        user_id:
+          type: string
+          description: "ID do usuário ou sistema"
+          example: "operator-001"
+        
+        user_name:
+          type: string
+          description: "Nome do usuário ou sistema"
+          example: "Juan Carlo (Operator)"
+        
+        source:
+          type: string
+          enum: [human, automated, maximus]
+          description: "Fonte do acknowledgement"
+          example: "human"
+    
+    correlation_id:
+      type: string
+      format: uuid
+      description: "ID de correlação com alerta original"
+      example: "cc0e8400-e29b-41d4-a716-446655440007"
+    
+    response_action:
+      type: object
+      description: "Ação tomada em resposta"
+      properties:
+        action_type:
+          type: string
+          enum: [investigate, escalate, resolve, false_positive, defer]
+          description: "Tipo de ação"
+          example: "investigate"
+        
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          description: "Prioridade da ação"
+          example: "high"
+        
+        estimated_resolution_time:
+          type: string
+          format: date-time
+          description: "Tempo estimado de resolução"
+          example: "2024-10-08T15:30:00.000Z"
+    
+    notes:
+      type: string
+      description: "Notas do operador"
+      example: "Investigating potential threat. Coordinating with MAXIMUS."
+    
+    trace_id:
+      type: string
+      format: uuid
+      description: "ID de rastreamento distribuído"
+      example: "dd0e8400-e29b-41d4-a716-446655440008"
+
+---
+# Metadata do documento
+schema_version: "1.0.0"
+last_updated: "2024-10-08T14:30:00Z"
+author: "Juan Carlo de Souza (JuanCS-DEV)"
+email: "juan.brainfarma@gmail.com"
+doutrina_vertice_compliance: true
+consciousness_project: "MAXIMUS"

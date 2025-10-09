@@ -1,0 +1,26 @@
+{
+  "scenario": "baseline",
+  "timestamp": "2025-10-09T01:00:19-03:00",
+  "benchmarks": {
+    "cli_execution": {
+  "test": "CLI Execution",
+  "iterations": 10,
+  "avg_latency_ms": 12,
+  "p95_latency_ms": 14,
+  "threshold_ms": 500,
+  "passed": true
+},
+    "sbom_generation": {
+  "test": "SBOM Generation",
+  "duration_seconds": 2,
+  "threshold_seconds": 30,
+  "passed": true
+},
+    "memory_baseline": {
+  "test": "Memory Baseline",
+  "available_mb": 9583,
+  "threshold_mb": 512,
+  "passed": true
+}
+  }
+}

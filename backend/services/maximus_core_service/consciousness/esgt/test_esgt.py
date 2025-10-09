@@ -53,6 +53,7 @@ from consciousness.esgt.spm import (
     SimpleSPM,
     SimpleSPMConfig,
 )
+from consciousness.mea import AttentionState, BoundaryAssessment, FirstPersonPerspective, IntrospectiveSummary
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
 from consciousness.tig.sync import PTPCluster
 
@@ -357,6 +358,58 @@ async def test_event_history_tracking(esgt_coordinator):
     assert len(esgt_coordinator.event_history) >= initial_history_len + 1, (
         f"Event history should have grown from {initial_history_len}, got {len(esgt_coordinator.event_history)}"
     )
+
+
+def test_salience_from_attention(esgt_coordinator):
+    """Ensure salience mapping from MEA attention state meets thresholds."""
+    attention_state = AttentionState(
+        focus_target="threat:alpha",
+        modality_weights={"visual": 0.6, "auditory": 0.2, "interoceptive": 0.2},
+        confidence=0.85,
+        salience_order=[("threat:alpha", 0.82), ("alert:beta", 0.46)],
+        baseline_intensity=0.55,
+    )
+    boundary = BoundaryAssessment(
+        strength=0.70,
+        stability=0.88,
+        proprioception_mean=0.60,
+        exteroception_mean=0.40,
+    )
+
+    salience = esgt_coordinator.compute_salience_from_attention(
+        attention_state=attention_state,
+        boundary=boundary,
+        arousal_level=0.75,
+    )
+
+    assert isinstance(salience, SalienceScore)
+    assert salience.compute_total() >= 0.6
+    assert salience.confidence == pytest.approx(attention_state.confidence, rel=1e-6)
+
+
+def test_content_from_attention(esgt_coordinator):
+    """Ensure ESGT content payload includes self narrative details."""
+    attention_state = AttentionState(
+        focus_target="maintenance",
+        modality_weights={"proprioceptive": 0.5, "visual": 0.3, "interoceptive": 0.2},
+        confidence=0.72,
+        salience_order=[("maintenance", 0.65)],
+        baseline_intensity=0.58,
+    )
+    summary = IntrospectiveSummary(
+        narrative="Eu reposiciono foco para manutenção preventiva.",
+        confidence=0.70,
+        boundary_stability=0.90,
+        focus_target=attention_state.focus_target,
+        perspective=FirstPersonPerspective(viewpoint=(0.0, 0.0, 1.0), orientation=(0.0, 0.1, 0.0)),
+    )
+
+    content = esgt_coordinator.build_content_from_attention(attention_state, summary=summary)
+
+    assert content["focus_target"] == "maintenance"
+    assert content["self_narrative"].startswith("Eu reposiciono foco")
+    assert "perspective" in content
+    assert content["modalities"]["proprioceptive"] == pytest.approx(0.5, rel=1e-6)
 
     # At least one event should have completed successfully
     successful_events = [e for e in events if e.was_successful()]

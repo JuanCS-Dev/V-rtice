@@ -684,5 +684,168 @@ class TestCompleteFailureScenarios:
         assert metrics["connectivity"] < 1.0
 
 
+
+# ============================================================================
+# PARTE 8: Advanced Behavior and Metrics - Validação Fenomenológica
+# ============================================================================
+
+
+class TestTIGAdvancedBehaviorAndMetrics:
+    """
+    Tests advanced TIG behaviors and IIT metric validation.
+
+    This goes beyond simple hardening and validates the core logic
+    that enables consciousness-relevant dynamics.
+    """
+
+    @pytest.fixture
+    def config(self):
+        # A config that is known to produce a valid, testable fabric
+        return TopologyConfig(node_count=16, min_degree=4, rewiring_probability=0.6)
+
+    @pytest_asyncio.fixture
+    async def fabric(self, config):
+        """Create and initialize a larger TIG Fabric for more complex tests."""
+        fabric = TIGFabric(config)
+        await fabric.initialize()
+        yield fabric
+        if fabric._running:
+            await fabric.stop()
+
+    def test_tig_connection_get_effective_capacity(self):
+        """Test TIGConnection's effective capacity calculation."""
+        from consciousness.tig.fabric import TIGConnection
+
+        conn = TIGConnection(
+            remote_node_id="node-b",
+            bandwidth_bps=10_000_000_000,
+            latency_us=5.0,
+            packet_loss=0.1,
+            weight=0.8,
+        )
+
+        # Expected calculation:
+        # loss_factor = 1.0 - 0.1 = 0.9
+        # latency_factor = 1.0 / (1.0 + 5.0 / 1000.0) = 1.0 / 1.005
+        # expected_capacity = 10e9 * 0.9 * (1/1.005) * 0.8
+        expected_capacity = 10_000_000_000 * 0.9 * (1 / 1.005) * 0.8
+        assert abs(conn.get_effective_capacity() - expected_capacity) < 1.0
+
+        # Test inactive connection
+        conn.active = False
+        assert conn.get_effective_capacity() == 0.0
+
+    @pytest.mark.asyncio
+    async def test_node_clustering_coefficient(self, fabric):
+        """Test TIGNode's clustering coefficient calculation."""
+        # Find a node with a reasonable number of neighbors to test
+        node_to_test = None
+        for node in fabric.nodes.values():
+            if node.get_degree() > 2:
+                node_to_test = node
+                break
+        
+        assert node_to_test is not None, "Test requires a node with at least 3 neighbors"
+
+        # The actual value depends on the generated graph, but we can assert its properties
+        cc = node_to_test.get_clustering_coefficient(fabric)
+        assert 0.0 <= cc <= 1.0
+
+    @pytest.mark.asyncio
+    async def test_topology_repair_creates_bypass_connections(self, fabric):
+        """Verify that topology repair correctly creates bypass connections."""
+        # Find a node to isolate with at least 2 neighbors
+        node_to_isolate = None
+        neighbors_of_isolated = []
+        for node in fabric.nodes.values():
+            if node.get_degree() >= 2:
+                node_to_isolate = node
+                neighbors_of_isolated = list(node.connections.keys())
+                break
+        
+        assert node_to_isolate is not None, "Could not find a suitable node to isolate for the test."
+
+        # Ensure neighbors are not connected to each other initially (if possible)
+        n1_id, n2_id = neighbors_of_isolated[0], neighbors_of_isolated[1]
+        n1 = fabric.get_node(n1_id)
+        
+        # Manually remove the edge if it exists to create a clear test case
+        if n2_id in n1.connections:
+            del n1.connections[n2_id]
+            n2 = fabric.get_node(n2_id)
+            del n2.connections[n1_id]
+
+        # Isolate the node, which should trigger the repair mechanism
+        await fabric._isolate_dead_node(node_to_isolate.id)
+
+        # Verify that a bypass connection was created between the neighbors
+        n1_reloaded = fabric.get_node(n1_id)
+        assert n2_id in n1_reloaded.connections
+        
+        n2_reloaded = fabric.get_node(n2_id)
+        assert n1_id in n2_reloaded.connections
+
+    @pytest.mark.asyncio
+    async def test_esgt_mode_transition(self, fabric):
+        """Test enter_esgt_mode and exit_esgt_mode transitions."""
+        from consciousness.tig.fabric import NodeState
+        # 1. Check initial state
+        a_node = list(fabric.nodes.values())[0]
+        initial_weight = list(a_node.connections.values())[0].weight
+        assert a_node.node_state == NodeState.ACTIVE
+
+        # 2. Enter ESGT mode
+        await fabric.enter_esgt_mode()
+        for node in fabric.nodes.values():
+            assert node.node_state == NodeState.ESGT_MODE
+            for conn in node.connections.values():
+                # Weight should be increased
+                assert conn.weight > initial_weight
+
+        # 3. Exit ESGT mode
+        await fabric.exit_esgt_mode()
+        for node in fabric.nodes.values():
+            assert node.node_state == NodeState.ACTIVE
+            for conn in node.connections.values():
+                # Weight should be restored
+                assert conn.weight == initial_weight
+
+    @pytest.mark.asyncio
+    async def test_iit_compliance_validation_on_good_fabric(self, fabric):
+        """
+        Test that a well-configured fabric passes IIT compliance validation.
+        This serves as a critical regression test for the topology generation.
+        """
+        # The fixture fabric is configured to be compliant.
+        # The initialize method already runs the validation.
+        metrics = fabric.get_metrics()
+        is_compliant, violations = metrics.validate_iit_compliance()
+
+        # Assert that there are no violations
+        assert is_compliant is True, f"IIT compliance failed with violations: {violations}"
+        assert len(violations) == 0
+
+    @pytest.mark.asyncio
+    async def test_iit_compliance_fails_on_bad_fabric(self):
+        """Test that a poorly-configured fabric fails IIT compliance."""
+        from consciousness.tig.fabric import TIGFabric
+        # Create a disconnected graph (violates multiple IIT principles)
+        bad_config = TopologyConfig(node_count=20, min_degree=1, rewiring_probability=0.0)
+        bad_fabric = TIGFabric(bad_config)
+        
+        # We don't need to fully initialize, just compute metrics on the bad graph
+        bad_fabric._generate_scale_free_base()
+        bad_fabric._instantiate_nodes()
+        bad_fabric._establish_connections()
+        bad_fabric._compute_metrics()
+
+        metrics = bad_fabric.get_metrics()
+        is_compliant, violations = metrics.validate_iit_compliance()
+
+        assert is_compliant is False
+        assert len(violations) > 0
+        print(f"Detected expected violations: {violations}")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short", "--asyncio-mode=auto"])

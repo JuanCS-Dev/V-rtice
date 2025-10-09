@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Doutrina loader command for Codex CLI.
+# Prints the full Vértice Doctrine and signals acceptance.
+
+set -euo pipefail
+
+DOCTRINE_PATH="$(dirname "$0")/.claude/DOUTRINA_VERTICE.md"
+
+if [[ ! -f "$DOCTRINE_PATH" ]]; then
+  echo "❌ Doutrina não encontrada em $DOCTRINE_PATH" >&2
+  exit 1
+fi
+
+cat "$DOCTRINE_PATH"
+
+echo ""
+echo "MAXIMUS Consciousness Development Session Initiated"
+echo "Doutrina Vértice: LOADED ✓"
+echo "Executor (Codex) declara: Doutrina carregada e aceita nesta sessão."

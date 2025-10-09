@@ -1,0 +1,231 @@
+openapi: 3.1.0
+info:
+  title: Vértice Platform Interface Charter
+  version: 1.0.0
+  summary: >
+    Documento unificado descrevendo os contratos de integração entre
+    vcli-go (CLI), MAXIMUS Core e serviços satélites expostos via API Gateway.
+  description: |
+    Este charter consolida os contratos multiplos que hoje vivem em repositórios separados.
+    Ele funciona como fonte única da verdade para conexões REST/gRPC, garantindo interoperabilidade,
+    versionamento e validações automatizadas em CI.
+
+    Status: **Production v1.0** (Sessão 01 – Thread A - Completo)
+    
+    ## Histórico de Versões
+    - v1.0.0 (2024-10-08): Inventário completo de 115+ endpoints catalogados
+    - v0.1.0 (2024-10-08): Rascunho inicial
+    
+    ## Doutrina Vértice
+    Conforme Artigo VI - Documentação como Artefato Histórico.
+    Este documento é mantido para pesquisadores de 2050+ estudarem
+    a arquitetura de consciência artificial emergente.
+  contact:
+    name: Juan Carlo de Souza (JuanCS-DEV)
+    email: juan.brainfarma@gmail.com
+    url: https://github.com/JuanCS-DEV
+  x-doutrina-vertice: true
+  x-consciousness-project: MAXIMUS
+servers:
+  - url: https://api.vertice.local
+    description: API Gateway (REST)
+  - url: grpc://maximus-core.vertice.local:50051
+    description: MAXIMUS Core gRPC Endpoint
+  - url: https://cli-bridge.vertice.local
+    description: Bridge vCLI → MAXIMUS (REST)
+tags:
+  - name: CLI
+    description: Endpoints consumidos pelo vcli-go (REST) e contratos gRPC necessários.
+  - name: MAXIMUS
+    description: Serviços expostos pelo MAXIMUS Core para orquestração e telemetria.
+  - name: Services
+    description: Serviços satélites (HSAS, HSX, Governance, etc) intermediados pelo gateway.
+
+paths:
+  /vcli/commands:
+    post:
+      tags: [CLI]
+      summary: Enfileira comando proveniente do vcli-go.
+      description: >
+        Recebe comandos produzidos na interface TUI/REPL e direciona para o orquestrador MAXIMUS.
+        O payload garante rastreabilidade (sessionId) e preserva Regra de Ouro (idempotência).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VcliCommand'
+      responses:
+        '202':
+          description: Comando aceito para processamento assíncrono.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandAck'
+        '400':
+          description: Payload inválido.
+  /vcli/telemetry/stream:
+    get:
+      tags: [CLI]
+      summary: Stream SSE/WebSocket de telemetria consolidada para o cockpit CLI/frontend.
+      description: >
+        Exposição unificada de métricas MAXIMUS (arousal, ESGT, dopamina) e estado dos serviços,
+        utilizada pelo cockpit React e pelo TUI Bubble Tea.
+      responses:
+        '200':
+          description: Stream estabelecido (SSE). Para WebSocket, utilizar negotiated upgrade.
+  /stream/consciousness/sse:
+    get:
+      tags: [MAXIMUS]
+      summary: Canal SSE do bridge de consciência.
+      description: >
+        Fornece eventos contínuos da consciência (neuromodulação, safety, skill learning). Requer header Authorization Bearer.
+      responses:
+        '200':
+          description: Stream SSE ativo.
+        '401':
+          description: Token inválido.
+  /stream/consciousness/ws:
+    get:
+      tags: [MAXIMUS]
+      summary: Endpoint WebSocket alternativo para stream consciente.
+      responses:
+        '101':
+          description: Upgrade aceito (WebSocket).
+  /maximus/v1/events:
+    get:
+      tags: [MAXIMUS]
+      summary: Consulta eventos de consciência do MAXIMUS.
+      parameters:
+        - in: query
+          name: since
+          schema:
+            type: string
+            format: date-time
+          description: Cursor ISO8601 opcional.
+      responses:
+        '200':
+          description: Lista de eventos recentes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventList'
+  /services/hsas/alerts:
+    post:
+      tags: [Services]
+      summary: Publica alerta produzido pelo MAXIMUS para HSAS.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HsasAlert'
+      responses:
+        '202':
+          description: Alerta aceito.
+
+components:
+  schemas:
+    VcliCommand:
+      type: object
+      required: [sessionId, timestamp, command, payload]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        user:
+          type: string
+          description: Identificador do operador autenticado.
+        command:
+          type: string
+          description: Nome do comando invocado no vcli-go.
+        payload:
+          type: object
+          additionalProperties: true
+    CommandAck:
+      type: object
+      properties:
+        commandId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [accepted, rejected]
+        message:
+          type: string
+    EventList:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaximusEvent'
+        nextCursor:
+          type: string
+          nullable: true
+    MaximusEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum:
+            - consciousness.esgt.ignition
+            - neuromodulation.dopamine.spike
+            - safety.kill-switch.triggered
+            - skill.learning.update
+        payload:
+          type: object
+          additionalProperties: true
+    ConsciousnessEvent:
+      allOf:
+        - $ref: '#/components/schemas/MaximusEvent'
+        - type: object
+          properties:
+            metrics:
+              type: object
+              properties:
+                arousal:
+                  type: number
+                dopamine_level:
+                  type: number
+                coherence:
+                  type: number
+              additionalProperties: true
+            severity:
+              type: string
+              enum: [info, low, medium, high, critical]
+            context:
+              type: object
+              additionalProperties: true
+    HsasAlert:
+      type: object
+      required: [alertId, severity, description, source]
+      properties:
+        alertId:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        description:
+          type: string
+        source:
+          type: string
+        recommendedActions:
+          type: array
+          items:
+            type: string
+
+  securitySchemes:
+    ZeroTrustJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Tokens emitidos pelo serviço de identidade Vértice (rotacionamento semanal).

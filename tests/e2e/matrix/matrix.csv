@@ -1,0 +1,5 @@
+scenario,description,environment,toolchain,status,notes
+E2E-CLI-STREAM,CLI consumir streaming consciente,staging,uv,TBD,
+E2E-KILL-SWITCH,Violação safety com kill switch stg,staging,legacy,TBD,
+E2E-FRONT-DASH,Frontend atualiza dashboards,staging,uv,TBD,
+E2E-LEGACY-COMP,Safety legacy suite,local,legacy,TBD,

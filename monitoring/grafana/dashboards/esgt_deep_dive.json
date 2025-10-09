@@ -1,0 +1,248 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(248, 113, 113, 1)",
+        "name": "ESGT Incidents",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(maximus_esgt_success_ratio{environment=~\"$environment\"})",
+          "legendFormat": "Success Ratio",
+          "refId": "A"
+        },
+        {
+          "expr": "1 - avg(maximus_esgt_success_ratio{environment=~\"$environment\"})",
+          "legendFormat": "Failure Ratio",
+          "refId": "B"
+        }
+      ],
+      "title": "ESGT Success vs Failure",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (failure_reason) (increase(maximus_esgt_failure_total{environment=~\"$environment\"}[10m]))",
+          "legendFormat": "{{failure_reason}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Failure Reasons (10m)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "heatmap"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "calculate": false,
+        "color": {
+          "mode": "sqrt"
+        },
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "xAxis": {
+          "show": true
+        },
+        "yAxis": {
+          "decimals": 0,
+          "format": "short",
+          "show": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(maximus_esgt_salience_component_bucket{environment=~\"$environment\"}[5m])))",
+          "legendFormat": "Median salience",
+          "refId": "A"
+        }
+      ],
+      "title": "Salience Component Heatmap",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(maximus_esgt_coherence{environment=~\"$environment\"})",
+          "legendFormat": "Avg Coherence",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(maximus_esgt_duration_seconds_bucket{environment=~\"$environment\"}[5m])))",
+          "legendFormat": "Duration P95",
+          "refId": "B"
+        }
+      ],
+      "title": "Coherence & Duration",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["esgt", "consciousness"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "prod",
+          "value": "prod"
+        },
+        "hide": 0,
+        "label": "Environment",
+        "name": "environment",
+        "options": [],
+        "query": "label_values(environment)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Module",
+        "name": "module",
+        "options": [],
+        "query": "label_values(module)",
+        "refresh": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "ESGT Deep Dive",
+  "uid": "esgt-deep-dive",
+  "version": 1,
+  "weekStart": ""
+}

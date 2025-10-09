@@ -50,10 +50,7 @@ from consciousness.validation.coherence import (
     CoherenceValidator,
     ESGTCoherenceMetrics,
 )
-from consciousness.validation.metacognition import (
-    MetacognitionValidator,
-    SelfModelMetrics,
-)
+from consciousness.validation.metacognition import MetacognitionMetrics, MetacognitionValidator
 from consciousness.validation.phi_proxies import (
     PhiProxyMetrics,
     PhiProxyValidator,
@@ -67,5 +64,5 @@ __all__ = [
     "CoherenceValidator",
     "ESGTCoherenceMetrics",
     "MetacognitionValidator",
-    "SelfModelMetrics",
+    "MetacognitionMetrics",
 ]

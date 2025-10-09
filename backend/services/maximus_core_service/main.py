@@ -202,4 +202,10 @@ async def process_query_endpoint(request: QueryRequest) -> dict[str, Any]:
 if __name__ == "__main__":
     # This block is for local development and running the FastAPI app directly.
     # In a production Docker environment, uvicorn is typically run via command line.
+
+    # Start Prometheus metrics server
+    from prometheus_client import start_http_server
+    start_http_server(8001)
+    print("📈 Prometheus metrics server started on port 8001")
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

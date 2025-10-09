@@ -554,12 +554,12 @@ class TestGenerateGoals:
         config = GoalGenerationConfig(max_concurrent_goals=2)
         generator = AutonomousGoalGenerator(config=config)
 
-        # Add 2 existing active goals
-        goal1 = Goal(goal_type=GoalType.REST)
-        goal2 = Goal(goal_type=GoalType.REPAIR)
+        # Add 2 existing active goals (with proper source_need to prevent premature satisfaction)
+        goal1 = Goal(goal_type=GoalType.REST, source_need="rest_need", need_value=0.70, target_need_value=0.30)
+        goal2 = Goal(goal_type=GoalType.REPAIR, source_need="repair_need", need_value=0.60, target_need_value=0.20)
         generator._active_goals = [goal1, goal2]
 
-        # High needs
+        # High needs (above target, so goals remain active)
         needs = AbstractNeeds(rest_need=0.80, repair_need=0.80, efficiency_need=0.80)
 
         # ACT: Try to generate more goals (should be blocked)
@@ -708,8 +708,8 @@ class TestUpdateActiveGoals:
         goal.created_at = time.time()
         generator._active_goals = [goal]
 
-        # Still high need
-        needs = AbstractNeeds(rest_need=0.70)  # > 0.30 target
+        # Need above target but below threshold (doesn't trigger new goal generation)
+        needs = AbstractNeeds(rest_need=0.50)  # > 0.30 target, but < 0.60 threshold
 
         # ACT: Update
         generator.generate_goals(needs)

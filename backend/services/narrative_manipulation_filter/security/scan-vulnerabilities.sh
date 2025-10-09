@@ -72,7 +72,7 @@ scan_python_dependencies() {
     cd "$PROJECT_ROOT"
 
     # pip-audit
-    if check_tool "pip-audit" "Install with: pip install pip-audit"; then
+    if check_tool "pip-audit" "Install with: uv tool install pip-audit"; then
         print_info "Running pip-audit..."
         if pip-audit --desc --format json --output "$RESULTS_DIR/pip-audit.json" 2>&1 | tee "$RESULTS_DIR/pip-audit.log"; then
             print_success "pip-audit scan complete"
@@ -82,7 +82,7 @@ scan_python_dependencies() {
     fi
 
     # safety
-    if check_tool "safety" "Install with: pip install safety"; then
+    if check_tool "safety" "Install with: uv tool install safety"; then
         print_info "Running safety check..."
         if safety check --json --output "$RESULTS_DIR/safety.json" 2>&1 | tee "$RESULTS_DIR/safety.log"; then
             print_success "safety check complete"
@@ -114,7 +114,7 @@ scan_code_security() {
     cd "$PROJECT_ROOT"
 
     # bandit
-    if check_tool "bandit" "Install with: pip install bandit"; then
+    if check_tool "bandit" "Install with: uv tool install bandit"; then
         print_info "Running bandit security scanner..."
 
         if bandit -r . \
@@ -135,7 +135,7 @@ scan_code_security() {
     fi
 
     # ruff with security rules
-    if check_tool "ruff" "Install with: pip install ruff"; then
+    if check_tool "ruff" "Install with: uv tool install ruff"; then
         print_info "Running ruff linter with security rules..."
 
         if ruff check . --select S --output-format json > "$RESULTS_DIR/ruff-security.json" 2>&1; then
@@ -152,7 +152,7 @@ scan_secrets() {
     cd "$PROJECT_ROOT"
 
     # detect-secrets
-    if check_tool "detect-secrets" "Install with: pip install detect-secrets"; then
+    if check_tool "detect-secrets" "Install with: uv tool install detect-secrets"; then
         print_info "Scanning for secrets..."
 
         if detect-secrets scan --all-files --exclude-files 'venv/.*|build/.*|\.git/.*' > "$RESULTS_DIR/secrets-baseline.json"; then

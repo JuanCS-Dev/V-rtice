@@ -1,0 +1,252 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(129, 140, 248, 1)",
+        "name": "State Transitions",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "max(maximus_arousal_level{environment=~\"$environment\"})",
+          "legendFormat": "Arousal Level",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(maximus_arousal_baseline{environment=~\"$environment\"})",
+          "legendFormat": "Baseline",
+          "refId": "B"
+        }
+      ],
+      "title": "Arousal Timeline",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "increase(maximus_arousal_state_seconds_total{environment=~\"$environment\",state=\"baseline\"}[1h])",
+          "legendFormat": "Baseline",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(maximus_arousal_state_seconds_total{environment=~\"$environment\",state=\"focused\"}[1h])",
+          "legendFormat": "Focused",
+          "refId": "B"
+        },
+        {
+          "expr": "increase(maximus_arousal_state_seconds_total{environment=~\"$environment\",state=\"alert\"}[1h])",
+          "legendFormat": "Alert",
+          "refId": "C"
+        },
+        {
+          "expr": "increase(maximus_arousal_state_seconds_total{environment=~\"$environment\",state=\"critical\"}[1h])",
+          "legendFormat": "Critical",
+          "refId": "D"
+        }
+      ],
+      "title": "Time in State (last hour)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (transition) (increase(maximus_arousal_state_transition_total{environment=~\"$environment\"}[30m]))",
+          "legendFormat": "{{transition}}",
+          "refId": "A"
+        }
+      ],
+      "title": "State Transitions (30m)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(maximus_arousal_component_need_ratio{environment=~\"$environment\"})",
+          "legendFormat": "Needs Contribution",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(maximus_arousal_component_stress_ratio{environment=~\"$environment\"})",
+          "legendFormat": "Stress Contribution",
+          "refId": "B"
+        }
+      ],
+      "title": "Contributions (Needs vs Stress)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["arousal", "consciousness"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "prod",
+          "value": "prod"
+        },
+        "hide": 0,
+        "label": "Environment",
+        "name": "environment",
+        "options": [],
+        "query": "label_values(environment)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "State",
+        "name": "state",
+        "options": [],
+        "query": "label_values(maximus_arousal_state_seconds_total, state)",
+        "refresh": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Arousal Dynamics",
+  "uid": "arousal-dynamics",
+  "version": 1,
+  "weekStart": ""
+}

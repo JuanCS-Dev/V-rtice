@@ -1,0 +1,33 @@
+version: '3.9'
+
+# Ambiente isolado para benchmarks de latência
+# Autor: Juan Carlo de Souza (JuanCS-DEV @github)
+# Colaboração: OpenAI (cGPT)
+
+services:
+  k6:
+    image: grafana/k6:0.48.0
+    entrypoint: ["sleep", "infinity"]
+    volumes:
+      - ../:/workspace
+    working_dir: /workspace/tests/performance
+    environment:
+      - K6_WEB_DASHBOARD=false
+  hey:
+    image: rakyll/hey:latest
+    entrypoint: ["sleep", "infinity"]
+    volumes:
+      - ../:/workspace
+    working_dir: /workspace/tests/performance
+  ghz:
+    image: ghcr.io/bojand/ghz:latest
+    entrypoint: ["sleep", "infinity"]
+    volumes:
+      - ../:/workspace
+    working_dir: /workspace/tests/performance
+  collector:
+    image: curlimages/curl:8.6.0
+    entrypoint: ["sleep", "infinity"]
+    volumes:
+      - ../:/workspace
+    working_dir: /workspace/tests/performance

@@ -1,0 +1,295 @@
+name: Interface Charter Validation
+
+# Workflow para validação automática do Interface Charter (OpenAPI 3.1)
+# Conforme Doutrina Vértice - Artigo VIII: Princípio da Validação Contínua
+#
+# Autor: Juan Carlo de Souza (JuanCS-DEV @github)
+# Email: juan.brainfarma@gmail.com
+# Data: 2024-10-08
+
+on:
+  pull_request:
+    paths:
+      - 'docs/contracts/**'
+      - 'docs/cGPT/session-01/thread-a/lint/**'
+      - '.github/workflows/interface-charter-validation.yml'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'docs/contracts/**'
+      - 'docs/cGPT/session-01/thread-a/lint/**'
+
+jobs:
+  validate-charter:
+    name: Validate Interface Charter
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install Spectral CLI
+        run: |
+          npm install -g @stoplight/spectral-cli
+          spectral --version
+
+      - name: Validate Interface Charter exists
+        run: |
+          if [ ! -f "docs/contracts/interface-charter.yaml" ]; then
+            echo "❌ Error: Interface Charter not found"
+            exit 1
+          fi
+          echo "✅ Interface Charter found"
+
+      - name: Validate Spectral ruleset exists
+        run: |
+          if [ ! -f "docs/cGPT/session-01/thread-a/lint/spectral.yaml" ]; then
+            echo "❌ Error: Spectral ruleset not found"
+            exit 1
+          fi
+          echo "✅ Spectral ruleset found"
+
+      - name: Run Spectral Lint
+        id: spectral
+        run: |
+          echo "🔍 Running Spectral validation on Interface Charter..."
+          spectral lint \
+            docs/contracts/interface-charter.yaml \
+            --ruleset docs/cGPT/session-01/thread-a/lint/spectral.yaml \
+            --format pretty \
+            --output spectral-report.txt || true
+          
+          # Always show the report
+          cat spectral-report.txt
+          
+          # Check if there are errors
+          if grep -q "error" spectral-report.txt; then
+            echo "❌ Spectral found errors"
+            echo "spectral_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          elif grep -q "warning" spectral-report.txt; then
+            echo "⚠️ Spectral found warnings"
+            echo "spectral_status=warning" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Spectral validation passed"
+            echo "spectral_status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Spectral Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spectral-report
+          path: spectral-report.txt
+          retention-days: 30
+
+      - name: Validate OpenAPI Structure
+        run: |
+          echo "🔍 Validating OpenAPI 3.1 structure..."
+          
+          # Check required fields
+          echo "Checking info section..."
+          grep -q "title:" docs/contracts/interface-charter.yaml || (echo "❌ Missing title" && exit 1)
+          grep -q "version:" docs/contracts/interface-charter.yaml || (echo "❌ Missing version" && exit 1)
+          grep -q "contact:" docs/contracts/interface-charter.yaml || (echo "❌ Missing contact" && exit 1)
+          
+          echo "Checking servers section..."
+          grep -q "servers:" docs/contracts/interface-charter.yaml || (echo "❌ Missing servers" && exit 1)
+          
+          echo "Checking paths section..."
+          grep -q "paths:" docs/contracts/interface-charter.yaml || (echo "❌ Missing paths" && exit 1)
+          
+          echo "✅ OpenAPI structure validation passed"
+
+      - name: Check Doutrina Vértice Compliance
+        run: |
+          echo "🔍 Checking Doutrina Vértice compliance markers..."
+          
+          # Check for author information
+          if ! grep -q "Juan Carlo de Souza" docs/contracts/interface-charter.yaml; then
+            echo "⚠️ Warning: Author information not found"
+          else
+            echo "✅ Author information present"
+          fi
+          
+          # Check for Doutrina Vértice marker
+          if grep -q "x-doutrina-vertice" docs/contracts/interface-charter.yaml; then
+            echo "✅ Doutrina Vértice marker found"
+          else
+            echo "⚠️ Warning: Doutrina Vértice marker not found"
+          fi
+          
+          # Check for MAXIMUS consciousness marker
+          if grep -q "x-consciousness-project" docs/contracts/interface-charter.yaml; then
+            echo "✅ Consciousness project marker found"
+          else
+            echo "⚠️ Warning: Consciousness project marker not found"
+          fi
+
+      - name: Generate validation summary
+        if: always()
+        run: |
+          echo "## Interface Charter Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**File**: \`docs/contracts/interface-charter.yaml\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f spectral-report.txt ]; then
+            echo "### Spectral Report" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat spectral-report.txt >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "_Conforme Doutrina Vértice - Artigo VIII: Validação Contínua_" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            let report = '## 🔍 Interface Charter Validation Results\n\n';
+            
+            if (fs.existsSync('spectral-report.txt')) {
+              const spectralReport = fs.readFileSync('spectral-report.txt', 'utf8');
+              report += '### Spectral Lint Report\n\n';
+              report += '```\n' + spectralReport + '\n```\n\n';
+            }
+            
+            report += '---\n';
+            report += '_Automated validation by Interface Charter CI/CD_\n';
+            report += '_Doutrina Vértice - Artigo VIII: Validação Contínua_';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+  validate-endpoint-inventory:
+    name: Validate Endpoint Inventory
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Endpoint Inventory exists
+        run: |
+          if [ ! -f "docs/contracts/endpoint-inventory.md" ]; then
+            echo "⚠️ Warning: Endpoint Inventory not found"
+            exit 0
+          fi
+          echo "✅ Endpoint Inventory found"
+
+      - name: Validate Inventory completeness
+        run: |
+          echo "🔍 Validating Endpoint Inventory completeness..."
+          
+          # Check for key sections
+          sections=(
+            "MAXIMUS Core Service"
+            "Active Immune Core"
+            "vcli-go Bridge"
+            "Frontend API Gateway"
+            "Serviços Satélites"
+            "Protocolos de Streaming"
+            "Schemas de Mensagens"
+          )
+          
+          missing=0
+          for section in "${sections[@]}"; do
+            if grep -q "$section" docs/contracts/endpoint-inventory.md; then
+              echo "✅ Section found: $section"
+            else
+              echo "❌ Missing section: $section"
+              ((missing++))
+            fi
+          done
+          
+          if [ $missing -gt 0 ]; then
+            echo "⚠️ Warning: $missing section(s) missing"
+          else
+            echo "✅ All required sections present"
+          fi
+
+      - name: Check for author information
+        run: |
+          if grep -q "Juan Carlo de Souza" docs/contracts/endpoint-inventory.md; then
+            echo "✅ Author information present"
+          else
+            echo "⚠️ Warning: Author information not found"
+          fi
+
+  validate-sync:
+    name: Validate Charter-Inventory Sync
+    runs-on: ubuntu-latest
+    needs: [validate-charter, validate-endpoint-inventory]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check files exist
+        run: |
+          files=(
+            "docs/contracts/interface-charter.yaml"
+            "docs/contracts/endpoint-inventory.md"
+          )
+          
+          for file in "${files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✅ Found: $file"
+            else
+              echo "❌ Missing: $file"
+              exit 1
+            fi
+          done
+
+      - name: Compare versions
+        run: |
+          echo "🔍 Checking version consistency..."
+          
+          # Extract version from charter
+          charter_version=$(grep "version:" docs/contracts/interface-charter.yaml | head -1 | awk '{print $2}')
+          echo "Charter version: $charter_version"
+          
+          # Check if inventory mentions the same version
+          if grep -q "$charter_version" docs/contracts/endpoint-inventory.md; then
+            echo "✅ Versions are synchronized"
+          else
+            echo "⚠️ Warning: Version mismatch between charter and inventory"
+          fi
+
+      - name: Final summary
+        if: always()
+        run: |
+          echo "## 🎯 Validation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All Interface Charter validations completed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Files Validated" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ \`docs/contracts/interface-charter.yaml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ \`docs/contracts/endpoint-inventory.md\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Autor**: Juan Carlo de Souza (JuanCS-DEV)" >> $GITHUB_STEP_SUMMARY
+          echo "**Doutrina Vértice**: Compliance ✅" >> $GITHUB_STEP_SUMMARY

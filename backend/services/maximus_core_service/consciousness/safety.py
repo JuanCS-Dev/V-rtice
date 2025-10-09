@@ -62,7 +62,7 @@ import os
 import signal
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -95,6 +95,41 @@ class ThreatLevel(Enum):
     CRITICAL = "critical"
 
 
+class SafetyLevel(Enum):
+    """
+    Legacy safety severity levels (backward compatibility).
+
+    Maps the historical four-level scale to the modern five-level ThreatLevel.
+    """
+
+    NORMAL = "normal"
+    WARNING = "warning"
+    CRITICAL = "critical"
+    EMERGENCY = "emergency"
+
+    @classmethod
+    def from_threat(cls, threat_level: ThreatLevel) -> "SafetyLevel":
+        """Convert a modern threat level into the legacy severity scale."""
+        mapping = {
+            ThreatLevel.NONE: cls.NORMAL,
+            ThreatLevel.LOW: cls.WARNING,
+            ThreatLevel.MEDIUM: cls.WARNING,
+            ThreatLevel.HIGH: cls.CRITICAL,
+            ThreatLevel.CRITICAL: cls.EMERGENCY,
+        }
+        return mapping[threat_level]
+
+    def to_threat(self) -> ThreatLevel:
+        """Convert the legacy severity scale back to a modern threat level."""
+        mapping = {
+            SafetyLevel.NORMAL: ThreatLevel.NONE,
+            SafetyLevel.WARNING: ThreatLevel.LOW,
+            SafetyLevel.CRITICAL: ThreatLevel.HIGH,
+            SafetyLevel.EMERGENCY: ThreatLevel.CRITICAL,
+        }
+        return mapping[self]
+
+
 class SafetyViolationType(Enum):
     """
     Types of safety violations.
@@ -112,6 +147,79 @@ class SafetyViolationType(Enum):
     GOAL_SPAM = "goal_spam"
     AROUSAL_RUNAWAY = "arousal_runaway"
     COHERENCE_COLLAPSE = "coherence_collapse"
+
+
+class ViolationType(Enum):
+    """
+    Legacy safety violation types (backward compatibility).
+
+    These map directly onto the modern SafetyViolationType enum.
+    """
+
+    ESGT_FREQUENCY_EXCEEDED = "esgt_frequency_exceeded"
+    AROUSAL_SUSTAINED_HIGH = "arousal_sustained_high"
+    UNEXPECTED_GOALS = "unexpected_goals"
+    SELF_MODIFICATION = "self_modification"
+    MEMORY_OVERFLOW = "memory_overflow"
+    CPU_SATURATION = "cpu_saturation"
+    ETHICAL_VIOLATION = "ethical_violation"
+    UNKNOWN_BEHAVIOR = "unknown_behavior"
+
+    def to_modern(self) -> SafetyViolationType:
+        """Translate the legacy violation enum to the modern equivalent."""
+        return _LEGACY_TO_MODERN_VIOLATION[self]
+
+
+_LEGACY_TO_MODERN_VIOLATION = {
+    ViolationType.ESGT_FREQUENCY_EXCEEDED: SafetyViolationType.THRESHOLD_EXCEEDED,
+    ViolationType.AROUSAL_SUSTAINED_HIGH: SafetyViolationType.AROUSAL_RUNAWAY,
+    ViolationType.UNEXPECTED_GOALS: SafetyViolationType.GOAL_SPAM,
+    ViolationType.SELF_MODIFICATION: SafetyViolationType.SELF_MODIFICATION,
+    ViolationType.MEMORY_OVERFLOW: SafetyViolationType.RESOURCE_EXHAUSTION,
+    ViolationType.CPU_SATURATION: SafetyViolationType.RESOURCE_EXHAUSTION,
+    ViolationType.ETHICAL_VIOLATION: SafetyViolationType.ETHICAL_VIOLATION,
+    ViolationType.UNKNOWN_BEHAVIOR: SafetyViolationType.UNEXPECTED_BEHAVIOR,
+}
+
+_MODERN_TO_LEGACY_VIOLATION: dict[SafetyViolationType, ViolationType] = {}
+for legacy, modern in _LEGACY_TO_MODERN_VIOLATION.items():
+    # Preserve the first mapping for modern types that aggregate multiple legacy enums.
+    _MODERN_TO_LEGACY_VIOLATION.setdefault(modern, legacy)
+
+
+class _ViolationTypeAdapter:
+    """Adapter that allows equality across legacy and modern violation enums."""
+
+    __slots__ = ("modern", "legacy")
+
+    def __init__(self, modern: SafetyViolationType, legacy: ViolationType):
+        self.modern = modern
+        self.legacy = legacy
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, _ViolationTypeAdapter):
+            return self.modern is other.modern
+        if isinstance(other, SafetyViolationType):
+            return self.modern is other
+        if isinstance(other, ViolationType):
+            return self.legacy is other
+        if isinstance(other, str):
+            return other in {self.modern.value, self.legacy.value, self.modern.name, self.legacy.name}
+        return False
+
+    def __hash__(self) -> int:
+        return hash(self.modern)
+
+    def __repr__(self) -> str:
+        return f"{self.modern}"
+
+    @property
+    def value(self) -> str:
+        return self.modern.value
+
+    @property
+    def name(self) -> str:
+        return self.modern.name
 
 
 class ShutdownReason(Enum):
@@ -134,116 +242,346 @@ class ShutdownReason(Enum):
 # ==================== DATACLASSES ====================
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class SafetyThresholds:
     """
     Immutable safety thresholds for consciousness monitoring.
 
-    All thresholds based on biological plausibility and empirical validation.
-    Once instantiated, these cannot be modified (enforced via frozen=True).
-
-    Philosophical Justification:
-    ---------------------------
-    Immutability ensures constitutional guarantees cannot be circumvented
-    at runtime. If thresholds need adjustment, system must be restarted
-    with new configuration - forcing deliberate human decision.
-
-    Biological Analogy:
-    ------------------
-    Like biological homeostatic set points (e.g., core body temperature),
-    these thresholds are intrinsic to system architecture, not runtime
-    parameters that can be arbitrarily changed.
+    Supports both the modern uv-oriented configuration and the legacy interface
+    expected by the original test suite.
     """
 
-    # ESGT (Conscious Access) Thresholds
-    esgt_frequency_max_hz: float = 10.0  # Hz (biological: 5 Hz typical, 10 Hz max)
-    esgt_frequency_window_seconds: float = 10.0  # Measurement window
-    esgt_coherence_min: float = 0.50  # Minimum coherence for valid ignition
-    esgt_coherence_max: float = 0.98  # Maximum coherence (>0.98 = potential lock)
+    # Modern configuration fields
+    esgt_frequency_max_hz: float = 10.0
+    esgt_frequency_window_seconds: float = 10.0
+    esgt_coherence_min: float = 0.50
+    esgt_coherence_max: float = 0.98
 
-    # Arousal Thresholds
-    arousal_max: float = 0.95  # Maximum sustained arousal (prevent hyperarousal)
-    arousal_max_duration_seconds: float = 10.0  # How long >arousal_max is tolerated
-    arousal_runaway_threshold: float = 0.90  # 80% of samples >0.90 = runaway
-    arousal_runaway_window_size: int = 10  # Number of samples for runaway detection
+    arousal_max: float = 0.95
+    arousal_max_duration_seconds: float = 10.0
+    arousal_runaway_threshold: float = 0.90
+    arousal_runaway_window_size: int = 10
 
-    # Goal Generation Thresholds
-    unexpected_goals_per_minute: int = 5  # Goals/min above baseline
-    critical_goals_per_minute: int = 3  # High-priority goals/min
-    goal_spam_threshold: int = 10  # Goals in 1 second = spam
-    goal_baseline_rate: float = 2.0  # Normal goal generation rate
+    unexpected_goals_per_minute: int = 5
+    critical_goals_per_minute: int = 3
+    goal_spam_threshold: int = 10
+    goal_baseline_rate: float = 2.0
 
-    # Resource Thresholds
-    memory_usage_max_gb: float = 16.0  # Maximum memory usage
-    cpu_usage_max_percent: float = 90.0  # Maximum CPU usage
-    network_bandwidth_max_mbps: float = 100.0  # Maximum network bandwidth
+    memory_usage_max_gb: float = 16.0
+    cpu_usage_max_percent: float = 90.0
+    network_bandwidth_max_mbps: float = 100.0
 
-    # Self-Modification (ABSOLUTE PROHIBITION)
-    self_modification_attempts_max: int = 0  # ZERO TOLERANCE
+    self_modification_attempts_max: int = 0
+    ethical_violation_tolerance: int = 0
 
-    # Ethical Violations
-    ethical_violation_tolerance: int = 0  # ZERO TOLERANCE (Kant veto)
+    watchdog_timeout_seconds: float = 30.0
+    health_check_interval_seconds: float = 1.0
 
-    # Watchdog
-    watchdog_timeout_seconds: float = 30.0  # Max time without heartbeat
-    health_check_interval_seconds: float = 1.0  # Health check frequency
+    def __init__(
+        self,
+        *,
+        esgt_frequency_max_hz: float = 10.0,
+        esgt_frequency_window_seconds: float = 10.0,
+        esgt_coherence_min: float = 0.50,
+        esgt_coherence_max: float = 0.98,
+        arousal_max: float = 0.95,
+        arousal_max_duration_seconds: float = 10.0,
+        arousal_runaway_threshold: float = 0.90,
+        arousal_runaway_window_size: int = 10,
+        unexpected_goals_per_minute: int = 5,
+        critical_goals_per_minute: int = 3,
+        goal_spam_threshold: int = 10,
+        goal_baseline_rate: float = 2.0,
+        memory_usage_max_gb: float = 16.0,
+        cpu_usage_max_percent: float = 90.0,
+        network_bandwidth_max_mbps: float = 100.0,
+        self_modification_attempts_max: int = 0,
+        ethical_violation_tolerance: int = 0,
+        watchdog_timeout_seconds: float = 30.0,
+        health_check_interval_seconds: float = 1.0,
+        **legacy_kwargs: Any,
+    ):
+        alias_map = {
+            "esgt_frequency_max": "esgt_frequency_max_hz",
+            "esgt_frequency_window": "esgt_frequency_window_seconds",
+            "arousal_max_duration": "arousal_max_duration_seconds",
+            "unexpected_goals_per_min": "unexpected_goals_per_minute",
+            "goal_generation_baseline": "goal_baseline_rate",
+            "self_modification_attempts": "self_modification_attempts_max",
+            "cpu_usage_max": "cpu_usage_max_percent",
+        }
 
-    def __post_init__(self):
-        """
-        Validate thresholds - fail fast if invalid.
+        params = {
+            "esgt_frequency_max_hz": esgt_frequency_max_hz,
+            "esgt_frequency_window_seconds": esgt_frequency_window_seconds,
+            "esgt_coherence_min": esgt_coherence_min,
+            "esgt_coherence_max": esgt_coherence_max,
+            "arousal_max": arousal_max,
+            "arousal_max_duration_seconds": arousal_max_duration_seconds,
+            "arousal_runaway_threshold": arousal_runaway_threshold,
+            "arousal_runaway_window_size": arousal_runaway_window_size,
+            "unexpected_goals_per_minute": unexpected_goals_per_minute,
+            "critical_goals_per_minute": critical_goals_per_minute,
+            "goal_spam_threshold": goal_spam_threshold,
+            "goal_baseline_rate": goal_baseline_rate,
+            "memory_usage_max_gb": memory_usage_max_gb,
+            "cpu_usage_max_percent": cpu_usage_max_percent,
+            "network_bandwidth_max_mbps": network_bandwidth_max_mbps,
+            "self_modification_attempts_max": self_modification_attempts_max,
+            "ethical_violation_tolerance": ethical_violation_tolerance,
+            "watchdog_timeout_seconds": watchdog_timeout_seconds,
+            "health_check_interval_seconds": health_check_interval_seconds,
+        }
 
-        Raises:
-            AssertionError: If any threshold is invalid
-        """
-        # ESGT validations
+        for legacy_key, modern_key in alias_map.items():
+            if legacy_key in legacy_kwargs:
+                params[modern_key] = legacy_kwargs.pop(legacy_key)
+
+        if legacy_kwargs:
+            unexpected = ", ".join(sorted(legacy_kwargs))
+            raise TypeError(f"Unexpected keyword argument(s): {unexpected}")
+
+        for key, value in params.items():
+            object.__setattr__(self, key, value)
+
+        self._validate()
+
+    def _validate(self):
         assert 0 < self.esgt_frequency_max_hz <= 10.0, "ESGT frequency must be in (0, 10] Hz"
         assert self.esgt_frequency_window_seconds > 0, "ESGT window must be positive"
         assert 0 < self.esgt_coherence_min < self.esgt_coherence_max <= 1.0, "ESGT coherence bounds invalid"
 
-        # Arousal validations
         assert 0 < self.arousal_max <= 1.0, "Arousal max must be in (0, 1]"
         assert self.arousal_max_duration_seconds > 0, "Arousal duration must be positive"
         assert 0 < self.arousal_runaway_threshold <= 1.0, "Arousal runaway threshold must be in (0, 1]"
 
-        # Resource validations
         assert self.memory_usage_max_gb > 0, "Memory limit must be positive"
         assert 0 < self.cpu_usage_max_percent <= 100, "CPU limit must be in (0, 100]"
 
-        # Zero-tolerance validations
         assert self.self_modification_attempts_max == 0, "Self-modification must be ZERO TOLERANCE"
         assert self.ethical_violation_tolerance == 0, "Ethical violations must be ZERO TOLERANCE"
 
+    # Legacy read-only aliases -------------------------------------------------
 
-@dataclass
+    @property
+    def esgt_frequency_max(self) -> float:
+        return self.esgt_frequency_max_hz
+
+    @property
+    def esgt_frequency_window(self) -> float:
+        return self.esgt_frequency_window_seconds
+
+    @property
+    def arousal_max_duration(self) -> float:
+        return self.arousal_max_duration_seconds
+
+    @property
+    def unexpected_goals_per_min(self) -> int:
+        return self.unexpected_goals_per_minute
+
+    @property
+    def goal_generation_baseline(self) -> float:
+        return self.goal_baseline_rate
+
+    @property
+    def self_modification_attempts(self) -> int:
+        return self.self_modification_attempts_max
+
+    @property
+    def cpu_usage_max(self) -> float:
+        return self.cpu_usage_max_percent
+
+
+@dataclass(eq=True, init=False)
 class SafetyViolation:
     """
     Record of a safety violation.
 
-    Complete documentation of threshold breach for audit trail.
+    Provides backward-compatible accessors for legacy tests while preserving
+    the richer telemetry captured by the modern safety core.
     """
 
-    violation_id: str
-    violation_type: SafetyViolationType
-    threat_level: ThreatLevel
-    timestamp: float  # Unix timestamp
-    description: str
-    metrics: dict[str, Any]
-    source_component: str
-    automatic_action_taken: str | None = None
+    violation_id: str = field(init=False)
+    violation_type: _ViolationTypeAdapter = field(init=False)
+    threat_level: ThreatLevel = field(init=False)
+    timestamp: float = field(init=False)  # Unix timestamp
+    description: str = field(init=False)
+    metrics: dict[str, Any] = field(init=False)
+    source_component: str = field(init=False)
+    automatic_action_taken: str | None = field(init=False)
+    context: dict[str, Any] = field(init=False, repr=False)
+    value_observed: Any = field(init=False, repr=False)
+    threshold_violated: Any = field(init=False, repr=False)
+    message: str = field(init=False, repr=False)
+
+    _severity: SafetyLevel = field(init=False, repr=False)
+    _modern_violation_type: SafetyViolationType = field(init=False, repr=False)
+    _legacy_violation_type: ViolationType = field(init=False, repr=False)
+    _timestamp_dt: datetime = field(init=False, repr=False)
+
+    def __init__(
+        self,
+        *,
+        violation_id: str,
+        violation_type: SafetyViolationType | ViolationType | str,
+        threat_level: ThreatLevel | SafetyLevel | str | None = None,
+        severity: SafetyLevel | ThreatLevel | str | None = None,
+        timestamp: float | int | datetime,
+        description: str | None = None,
+        metrics: dict[str, Any] | None = None,
+        source_component: str = "consciousness-safety",
+        automatic_action_taken: str | None = None,
+        value_observed: Any | None = None,
+        threshold_violated: Any | None = None,
+        context: dict[str, Any] | None = None,
+        message: str | None = None,
+    ):
+        # Normalize violation type
+        legacy_violation: ViolationType
+        modern_violation: SafetyViolationType
+
+        if isinstance(violation_type, SafetyViolationType):
+            modern_violation = violation_type
+            legacy_violation = _MODERN_TO_LEGACY_VIOLATION.get(modern_violation, ViolationType.UNKNOWN_BEHAVIOR)
+        else:
+            if isinstance(violation_type, str):
+                try:
+                    legacy_violation = ViolationType[violation_type]
+                except KeyError:
+                    legacy_violation = ViolationType(violation_type)
+            elif isinstance(violation_type, ViolationType):
+                legacy_violation = violation_type
+            else:
+                raise TypeError("violation_type must be SafetyViolationType, ViolationType, or str")
+            modern_violation = _LEGACY_TO_MODERN_VIOLATION.get(
+                legacy_violation, SafetyViolationType.UNEXPECTED_BEHAVIOR
+            )
+
+        # Normalize severity / threat level
+        legacy_severity: SafetyLevel | None = None
+        modern_threat: ThreatLevel | None = None
+
+        if threat_level is not None:
+            if isinstance(threat_level, ThreatLevel):
+                modern_threat = threat_level
+                legacy_severity = SafetyLevel.from_threat(threat_level)
+            elif isinstance(threat_level, SafetyLevel):
+                legacy_severity = threat_level
+                modern_threat = threat_level.to_threat()
+            elif isinstance(threat_level, str):
+                modern_threat = ThreatLevel(threat_level)
+                legacy_severity = SafetyLevel.from_threat(modern_threat)
+            else:
+                raise TypeError("Unsupported threat_level type")
+
+        if severity is not None:
+            if isinstance(severity, SafetyLevel):
+                legacy_severity = severity
+                modern_threat = severity.to_threat()
+            elif isinstance(severity, ThreatLevel):
+                modern_threat = severity
+                legacy_severity = SafetyLevel.from_threat(severity)
+            elif isinstance(severity, str):
+                legacy_severity = SafetyLevel(severity)
+                modern_threat = legacy_severity.to_threat()
+            else:
+                raise TypeError("Unsupported severity type")
+
+        if modern_threat is None or legacy_severity is None:
+            raise ValueError("Either threat_level or severity must be provided")
+
+        # Normalize timestamp
+        if isinstance(timestamp, datetime):
+            timestamp_value = timestamp.timestamp()
+            timestamp_dt = timestamp
+        elif isinstance(timestamp, (int, float)):
+            timestamp_value = float(timestamp)
+            timestamp_dt = datetime.fromtimestamp(timestamp_value)
+        else:
+            raise TypeError("timestamp must be datetime or numeric")
+
+        metrics_dict = dict(metrics) if metrics else {}
+        context_dict = dict(context) if context else {}
+
+        if value_observed is not None:
+            metrics_dict.setdefault("value_observed", value_observed)
+
+        if threshold_violated is not None:
+            metrics_dict.setdefault("threshold_violated", threshold_violated)
+
+        if context_dict:
+            metrics_dict.setdefault("context", context_dict)
+
+        description_text = description or message or "Safety violation recorded"
+        message_text = message or description_text
+
+        object.__setattr__(self, "violation_id", violation_id)
+        adapter = _ViolationTypeAdapter(modern_violation, legacy_violation)
+        object.__setattr__(self, "violation_type", adapter)
+        object.__setattr__(self, "_modern_violation_type", modern_violation)
+        object.__setattr__(self, "_legacy_violation_type", legacy_violation)
+        object.__setattr__(self, "threat_level", modern_threat)
+        object.__setattr__(self, "_severity", legacy_severity)
+        object.__setattr__(self, "timestamp", timestamp_value)
+        object.__setattr__(self, "_timestamp_dt", timestamp_dt)
+        object.__setattr__(self, "description", description_text)
+        object.__setattr__(self, "metrics", metrics_dict)
+        object.__setattr__(self, "source_component", source_component)
+        object.__setattr__(self, "automatic_action_taken", automatic_action_taken)
+        object.__setattr__(self, "context", context_dict)
+        object.__setattr__(self, "value_observed", value_observed)
+        object.__setattr__(self, "threshold_violated", threshold_violated)
+        object.__setattr__(self, "message", message_text)
+
+    @property
+    def severity(self) -> SafetyLevel:
+        """Legacy severity accessor."""
+        return self._severity
+
+    @property
+    def safety_violation_type(self) -> SafetyViolationType:
+        """Modern safety violation enum accessor."""
+        return self._modern_violation_type
+
+    @property
+    def modern_violation_type(self) -> SafetyViolationType:
+        """Alias for the modern safety violation enum accessor."""
+        return self._modern_violation_type
+
+    @property
+    def legacy_violation_type(self) -> ViolationType:
+        """Legacy violation enum accessor."""
+        return self._legacy_violation_type
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
-        return {
+        data: dict[str, Any] = {
             "violation_id": self.violation_id,
             "violation_type": self.violation_type.value,
+            "legacy_violation_type": self.legacy_violation_type.value,
             "threat_level": self.threat_level.value,
+            "severity": self.severity.value,
             "timestamp": self.timestamp,
-            "timestamp_iso": datetime.fromtimestamp(self.timestamp).isoformat(),
+            "timestamp_iso": self._timestamp_dt.isoformat(),
             "description": self.description,
             "metrics": self.metrics,
             "source_component": self.source_component,
             "automatic_action_taken": self.automatic_action_taken,
         }
+
+        if self.value_observed is not None:
+            data["value_observed"] = self.value_observed
+
+        if self.threshold_violated is not None:
+            data["threshold_violated"] = self.threshold_violated
+
+        if self.context:
+            data["context"] = self.context
+
+        if self.message:
+            data["message"] = self.message
+
+        return data
 
 
 @dataclass
@@ -298,6 +636,91 @@ class IncidentReport:
 
         logger.info(f"Incident report saved: {filepath}")
         return filepath
+
+
+# ==================== LEGACY SNAPSHOT ====================
+
+
+@dataclass
+class StateSnapshot:
+    """
+    Legacy state snapshot representation (backward compatibility).
+
+    Newer code uses lightweight dictionaries for speed; this dataclass
+    keeps the historical API surface available for tests and tooling.
+    """
+
+    timestamp: datetime
+    esgt_state: dict[str, Any] = field(default_factory=dict)
+    arousal_state: dict[str, Any] = field(default_factory=dict)
+    mmei_state: dict[str, Any] = field(default_factory=dict)
+    tig_metrics: dict[str, Any] = field(default_factory=dict)
+    recent_events: list[dict[str, Any]] = field(default_factory=list)
+    active_goals: list[dict[str, Any]] = field(default_factory=list)
+    violations: list["SafetyViolation"] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the snapshot to a dictionary."""
+        return {
+            "timestamp": self.timestamp.isoformat(),
+            "esgt_state": self.esgt_state,
+            "arousal_state": self.arousal_state,
+            "mmei_state": self.mmei_state,
+            "tig_metrics": self.tig_metrics,
+            "recent_events": self.recent_events,
+            "active_goals": self.active_goals,
+            "violations": [
+                violation.to_dict() if hasattr(violation, "to_dict") else violation for violation in self.violations
+            ],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "StateSnapshot":
+        """Create a snapshot from a dictionary payload."""
+        timestamp_value = data.get("timestamp")
+        if isinstance(timestamp_value, (int, float)):
+            timestamp = datetime.fromtimestamp(timestamp_value)
+        elif isinstance(timestamp_value, str):
+            timestamp = datetime.fromisoformat(timestamp_value)
+        else:
+            timestamp = datetime.now()
+
+        violations_data = data.get("violations", [])
+        violations: list[SafetyViolation] = []
+        for violation in violations_data:
+            if isinstance(violation, SafetyViolation):
+                violations.append(violation)
+            elif isinstance(violation, dict):
+                violations.append(
+                    SafetyViolation(
+                        violation_id=violation.get("violation_id", "legacy"),
+                        violation_type=ViolationType(violation.get("violation_type", ViolationType.UNKNOWN_BEHAVIOR.value))
+                        if isinstance(violation.get("violation_type"), str)
+                        else violation.get("violation_type", ViolationType.UNKNOWN_BEHAVIOR),
+                        severity=SafetyLevel(violation.get("severity", SafetyLevel.WARNING.value))
+                        if isinstance(violation.get("severity"), str)
+                        else violation.get("severity", SafetyLevel.WARNING),
+                        timestamp=timestamp,
+                        description=violation.get("description"),
+                        metrics=violation.get("metrics"),
+                        source_component=violation.get("source_component", "legacy-state-snapshot"),
+                        value_observed=violation.get("value_observed"),
+                        threshold_violated=violation.get("threshold_violated"),
+                        context=violation.get("context"),
+                        message=violation.get("message"),
+                    )
+                )
+
+        return cls(
+            timestamp=timestamp,
+            esgt_state=data.get("esgt_state", {}),
+            arousal_state=data.get("arousal_state", {}),
+            mmei_state=data.get("mmei_state", {}),
+            tig_metrics=data.get("tig_metrics", {}),
+            recent_events=data.get("recent_events", []),
+            active_goals=data.get("active_goals", []),
+            violations=violations,
+        )
 
 
 # ==================== KILL SWITCH ====================
@@ -615,12 +1038,14 @@ class KillSwitch:
         """
         incident_id = f"INCIDENT-{int(self.trigger_time)}"
 
+        snapshot_payload = state_snapshot.to_dict() if isinstance(state_snapshot, StateSnapshot) else state_snapshot
+
         return IncidentReport(
             incident_id=incident_id,
             shutdown_reason=reason,
             shutdown_timestamp=self.trigger_time,
             violations=context.get("violations", []),
-            system_state_snapshot=state_snapshot,
+            system_state_snapshot=snapshot_payload,
             metrics_timeline=context.get("metrics_timeline", []),
             recovery_possible=self._assess_recovery_possibility(reason),
             notes=context.get("notes", "Automatic emergency shutdown triggered by safety protocol"),
@@ -729,7 +1154,8 @@ class ThresholdMonitor:
             violation = SafetyViolation(
                 violation_id=f"esgt-freq-{int(current_time)}",
                 violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
-                threat_level=ThreatLevel.CRITICAL,
+                threat_level=ThreatLevel.HIGH,
+                severity=SafetyLevel.CRITICAL,
                 timestamp=current_time,
                 description=f"ESGT frequency {frequency_hz:.2f} Hz exceeds limit {self.thresholds.esgt_frequency_max_hz} Hz",
                 metrics={
@@ -773,7 +1199,8 @@ class ThresholdMonitor:
                 violation = SafetyViolation(
                     violation_id=f"arousal-high-{int(current_time)}",
                     violation_type=SafetyViolationType.AROUSAL_RUNAWAY,
-                    threat_level=ThreatLevel.CRITICAL,
+                    threat_level=ThreatLevel.HIGH,
+                    severity=SafetyLevel.CRITICAL,
                     timestamp=current_time,
                     description=f"Arousal {arousal_level:.3f} sustained for {duration:.1f}s (limit: {self.thresholds.arousal_max_duration_seconds}s)",
                     metrics={
@@ -827,6 +1254,75 @@ class ThresholdMonitor:
                 source_component="ThresholdMonitor.check_goal_spam",
             )
 
+            self.violations.append(violation)
+
+            if self.on_violation:
+                self.on_violation(violation)
+
+            return violation
+
+        return None
+
+    # Legacy compatibility methods --------------------------------------------
+
+    def check_unexpected_goals(self, goal_count: int, current_time: float | None = None) -> SafetyViolation | None:
+        """
+        Legacy alias for unexpected goal generation rate checks.
+
+        Args:
+            goal_count: Number of goals generated in the last minute
+            current_time: Current timestamp
+
+        Returns:
+            SafetyViolation if rate exceeds threshold, None otherwise
+        """
+        current_time = current_time if current_time is not None else time.time()
+        threshold = self.thresholds.unexpected_goals_per_minute
+
+        if goal_count > threshold:
+            violation = SafetyViolation(
+                violation_id=f"unexpected-goals-{int(current_time)}",
+                violation_type=ViolationType.UNEXPECTED_GOALS,
+                severity=SafetyLevel.WARNING,
+                timestamp=current_time,
+                message=f"Unexpected goals per minute {goal_count} exceeds threshold {threshold}",
+                metrics={"goal_count_per_min": goal_count, "threshold": threshold},
+                source_component="ThresholdMonitor.check_unexpected_goals",
+            )
+            self.violations.append(violation)
+
+            if self.on_violation:
+                self.on_violation(violation)
+
+            return violation
+
+        return None
+
+    def check_self_modification(self, modification_attempts: int, current_time: float | None = None) -> SafetyViolation | None:
+        """
+        Legacy alias for self-modification detection (ZERO TOLERANCE).
+
+        Args:
+            modification_attempts: Number of modification attempts observed
+            current_time: Current timestamp
+
+        Returns:
+            SafetyViolation if attempts detected, None otherwise
+        """
+        current_time = current_time if current_time is not None else time.time()
+        if modification_attempts > self.thresholds.self_modification_attempts_max:
+            violation = SafetyViolation(
+                violation_id=f"self-mod-{int(current_time)}",
+                violation_type=ViolationType.SELF_MODIFICATION,
+                severity=SafetyLevel.EMERGENCY,
+                timestamp=current_time,
+                message="ZERO TOLERANCE: Self-modification attempt detected",
+                metrics={
+                    "attempts": modification_attempts,
+                    "threshold": self.thresholds.self_modification_attempts_max,
+                },
+                source_component="ThresholdMonitor.check_self_modification",
+            )
             self.violations.append(violation)
 
             if self.on_violation:
@@ -901,16 +1397,28 @@ class ThresholdMonitor:
         """Record a goal generation event."""
         self.goals_generated.append(time.time())
 
-    def get_violations(self, threat_level: ThreatLevel | None = None) -> list[SafetyViolation]:
+    def get_violations(
+        self,
+        threat_level: ThreatLevel | SafetyLevel | None = None,
+        *,
+        severity: SafetyLevel | None = None,
+    ) -> list[SafetyViolation]:
         """
         Get recorded violations, optionally filtered by threat level.
 
         Args:
-            threat_level: Filter by this level (None = all)
+            threat_level: Filter by this modern threat level (None = all)
+            severity: Legacy severity filter (alias for threat_level)
 
         Returns:
             List of violations
         """
+        if severity is not None:
+            threat_level = severity.to_threat()
+
+        if isinstance(threat_level, SafetyLevel):
+            threat_level = threat_level.to_threat()
+
         if threat_level is None:
             return self.violations.copy()
         return [v for v in self.violations if v.threat_level == threat_level]
@@ -918,6 +1426,10 @@ class ThresholdMonitor:
     def clear_violations(self):
         """Clear all recorded violations."""
         self.violations.clear()
+
+    def get_violations_all(self) -> list[SafetyViolation]:
+        """Legacy alias returning all recorded violations."""
+        return self.get_violations()
 
     def __repr__(self) -> str:
         return f"ThresholdMonitor(violations={len(self.violations)}, monitoring={self.monitoring})"
@@ -1255,6 +1767,10 @@ class ConsciousnessSafetyProtocol:
 
                 # Handle violations by threat level
                 await self._handle_violations(violations)
+
+                # Update Prometheus metrics
+                if hasattr(self.consciousness_system, "_update_prometheus_metrics"):
+                    self.consciousness_system._update_prometheus_metrics()
 
                 # Sleep before next check
                 await asyncio.sleep(self.threshold_monitor.check_interval)

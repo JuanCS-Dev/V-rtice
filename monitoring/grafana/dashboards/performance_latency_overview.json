@@ -1,0 +1,111 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(59, 130, 246, 1)",
+        "name": "Benchmark Runs",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["performance", "benchmark"],
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(environment)",
+        "current": {"text": "staging", "value": "staging"}
+      }
+    ]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "Performance Latency Overview",
+  "uid": "perf-latency-overview",
+  "version": 1,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "continuous-GrYlRd"}, "unit": "ms"},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "options": {
+        "legend": {"displayMode": "table", "placement": "bottom"},
+        "tooltip": {"mode": "single"}
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, endpoint) (rate(perf_rest_latency_bucket{environment=~\"$environment\"}[5m])))",
+          "legendFormat": "{{endpoint}}",
+          "refId": "A"
+        }
+      ],
+      "title": "REST p95 Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "ms"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(perf_ws_latency_bucket{environment=~\"$environment\"}[5m]))",
+          "legendFormat": "WebSocket p95",
+          "refId": "A"
+        }
+      ],
+      "title": "WebSocket Message Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "ms"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 3,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(perf_grpc_latency_bucket{environment=~\"$environment\"}[5m])))",
+          "legendFormat": "gRPC p95",
+          "refId": "A"
+        }
+      ],
+      "title": "gRPC Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "req/s"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 4,
+      "targets": [
+        {
+          "expr": "sum(rate(perf_rest_requests_total{environment=~\"$environment\"}[1m]))",
+          "legendFormat": "REST req/s",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(perf_ws_messages_total{environment=~\"$environment\"}[1m]))",
+          "legendFormat": "WS msgs/s",
+          "refId": "B"
+        }
+      ],
+      "title": "Throughput",
+      "type": "timeseries"
+    }
+  ]
+}

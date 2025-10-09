@@ -1,0 +1,375 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(56, 189, 248, 1)",
+        "name": "Deploy Activity",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "iteration": 1710000000000,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgb(34,197,94)",
+                "value": null
+              },
+              {
+                "color": "rgb(250,204,21)",
+                "value": 0.75
+              },
+              {
+                "color": "rgb(248,113,113)",
+                "value": 0.9
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "max(maximus_arousal_level{environment=~\"$environment\"})",
+          "interval": "",
+          "legendFormat": "Arousal",
+          "refId": "A"
+        }
+      ],
+      "title": "Arousal Level",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "1/min"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 8,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(maximus_esgt_ignition_events_total{environment=~\"$environment\"}[1m])",
+          "legendFormat": "ESGT Ignitions",
+          "refId": "A"
+        }
+      ],
+      "title": "ESGT Activity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(maximus_phi_proxy{environment=~\"$environment\"})",
+          "legendFormat": "Φ proxy",
+          "refId": "A"
+        }
+      ],
+      "title": "System Health (Φ Proxy)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 7
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "max(maximus_tig_nodes_active{environment=~\"$environment\"})",
+          "legendFormat": "Nodes Active",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(maximus_tig_connectivity_ratio{environment=~\"$environment\"})",
+          "legendFormat": "Connectivity Ratio",
+          "refId": "B"
+        }
+      ],
+      "title": "TIG Fabric Metrics",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 10,
+        "x": 8,
+        "y": 7
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(maximus_esgt_success_ratio{environment=~\"$environment\"})",
+          "legendFormat": "Success Ratio",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(maximus_esgt_avg_coherence{environment=~\"$environment\"})",
+          "legendFormat": "Avg Coherence",
+          "refId": "B"
+        }
+      ],
+      "title": "ESGT Performance",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 7
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "expr": "topk(10, increase(consciousness_event_total{environment=~\"$environment\"}[10m]))",
+          "format": "time_series",
+          "legendFormat": "{{eventType}}",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "10m",
+      "title": "Recent Consciousness Events (10m)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["consciousness", "vertice"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "prod",
+          "value": "prod"
+        },
+        "hide": 0,
+        "label": "Environment",
+        "name": "environment",
+        "options": [],
+        "query": "label_values(environment)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Service",
+        "name": "service",
+        "options": [],
+        "query": "label_values(service_name)",
+        "refresh": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "5s",
+          "value": "5s"
+        },
+        "hide": 0,
+        "label": "Interval",
+        "name": "interval",
+        "options": [
+          {"text": "1s", "value": "1s"},
+          {"text": "5s", "value": "5s"},
+          {"text": "10s", "value": "10s"},
+          {"text": "30s", "value": "30s"},
+          {"text": "1m", "value": "1m"},
+          {"text": "5m", "value": "5m"}
+        ],
+        "type": "interval"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Consciousness Overview",
+  "uid": "conscious-overview",
+  "version": 1,
+  "weekStart": ""
+}

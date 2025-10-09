@@ -520,6 +520,7 @@ class StressMonitor:
 
         # Tracking arrays
         arousal_samples: list[float] = []
+        stress_phase_arousal_samples: list[float] = []
         stress_start = time.time()
 
         # STRESS PHASE
@@ -530,6 +531,7 @@ class StressMonitor:
             # Sample arousal
             current_arousal = self.arousal_controller.get_current_arousal().arousal
             arousal_samples.append(current_arousal)
+            stress_phase_arousal_samples.append(current_arousal)
 
             # Update peak
             response.peak_arousal = max(response.peak_arousal, current_arousal)
@@ -572,7 +574,7 @@ class StressMonitor:
             response.arousal_stability_cv = float(np.std(arousal_samples) / np.mean(arousal_samples))
 
         # Detect breakdown conditions
-        response.arousal_runaway_detected = self._detect_arousal_runaway(arousal_samples)
+        response.arousal_runaway_detected = self._detect_arousal_runaway(stress_phase_arousal_samples)
         response.goal_generation_failure = False  # Would need goal generator integration
         response.coherence_collapse = False  # Would need ESGT integration
 

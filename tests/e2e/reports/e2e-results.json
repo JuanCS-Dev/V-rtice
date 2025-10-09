@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-10-09T00:59:44-03:00",
+  "total_tests": 4,
+  "passed": 4,
+  "failed": 0,
+  "success_rate": 100,
+  "details": {
+    "sbom": "PASS",
+    "vuln_report": "PASS",
+    "binary": "PASS",
+    "latency": "PASS:20ms"
+  }
+}

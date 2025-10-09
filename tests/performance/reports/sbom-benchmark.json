@@ -1,0 +1,6 @@
+{
+  "test": "SBOM Generation",
+  "duration_seconds": 2,
+  "threshold_seconds": 30,
+  "passed": true
+}

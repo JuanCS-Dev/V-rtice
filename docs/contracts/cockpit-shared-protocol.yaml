@@ -1,0 +1,709 @@
+# Cockpit Shared Protocol v1.0
+# ================================
+#
+# Protocolo compartilhado entre TUI (vcli-go) e Frontend (React) para
+# comunicação unificada com MAXIMUS Consciousness System.
+#
+# Autor: Juan Carlo de Souza (JuanCS-DEV @github)
+# Email: juan.brainfarma@gmail.com
+# Data: 2024-10-08
+# Status: v1.0 - Production Ready
+#
+# Conforme Doutrina Vértice:
+# - Artigo II: NO MOCK, NO PLACEHOLDER - Schemas reais de produção
+# - Artigo VII: Foco Absoluto no Blueprint
+
+version: "1.0.0"
+protocol_name: "Cockpit Shared Protocol"
+description: "Unified data structures for MAXIMUS Consciousness Cockpit (TUI + Frontend)"
+
+# =============================================================================
+# BASE TYPES & ENUMS
+# =============================================================================
+
+enums:
+  arousal_level:
+    description: "Classification of arousal level (MCEA - Modular Conscious Excitability Architecture)"
+    values:
+      - asleep        # arousal < 0.1
+      - drowsy        # 0.1 <= arousal < 0.3
+      - awake         # 0.3 <= arousal < 0.6
+      - alert         # 0.6 <= arousal < 0.8
+      - hyperaroused  # arousal >= 0.8
+  
+  system_health:
+    description: "Overall health status of consciousness system"
+    values:
+      - healthy
+      - degraded
+      - critical
+      - unknown
+  
+  esgt_reason:
+    description: "Reason for ESGT ignition failure (if applicable)"
+    values:
+      - low_salience      # Total salience below threshold
+      - suppressed        # Actively suppressed by control
+      - insufficient_phi  # Phi below minimum
+      - timeout          # Processing timeout
+      - null             # Success case
+
+# =============================================================================
+# CORE STRUCTURES
+# =============================================================================
+
+structures:
+  
+  # ---------------------------------------------------------------------------
+  # ConsciousnessState - Complete snapshot of consciousness system
+  # ---------------------------------------------------------------------------
+  consciousness_state:
+    description: "Complete consciousness state snapshot"
+    protocol: REST GET
+    endpoint: /api/consciousness/state
+    
+    fields:
+      timestamp:
+        type: string
+        format: ISO8601
+        description: "Timestamp of snapshot (UTC)"
+        example: "2024-10-08T14:30:45.123Z"
+        required: true
+      
+      esgt_active:
+        type: boolean
+        description: "Whether ESGT ignition is currently active"
+        example: true
+        required: true
+      
+      arousal_level:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        description: "Current arousal level (MCEA)"
+        example: 0.72
+        required: true
+      
+      arousal_classification:
+        type: string
+        enum: arousal_level
+        description: "Human-readable arousal classification"
+        example: "alert"
+        required: true
+      
+      tig_metrics:
+        type: object
+        description: "TIG (Thalamocortical Information Gateway) topology metrics"
+        required: true
+        fields:
+          nodes_active:
+            type: integer
+            description: "Number of active TIG nodes"
+            example: 8
+          
+          connectivity:
+            type: number
+            format: float64
+            range: [0.0, 1.0]
+            description: "Global connectivity ratio"
+            example: 0.87
+          
+          integration:
+            type: number
+            format: float64
+            range: [0.0, 1.0]
+            description: "Information integration level"
+            example: 0.76
+          
+          phi_proxy:
+            type: number
+            format: float64
+            description: "Phi proxy (simplified IIT measure)"
+            example: 2.34
+            optional: true
+      
+      esgt_stats:
+        type: object
+        description: "ESGT ignition statistics"
+        required: false
+        fields:
+          total_ignitions:
+            type: integer
+            description: "Total ESGT ignitions since start"
+            example: 142
+          
+          success_rate:
+            type: number
+            format: float64
+            range: [0.0, 1.0]
+            description: "Success rate of ignitions"
+            example: 0.89
+          
+          last_ignition:
+            type: string
+            format: ISO8601
+            description: "Timestamp of last successful ignition"
+            example: "2024-10-08T14:28:12.456Z"
+            optional: true
+      
+      recent_events_count:
+        type: integer
+        description: "Number of events in recent buffer"
+        example: 12
+        required: true
+      
+      system_health:
+        type: string
+        enum: system_health
+        description: "Overall system health"
+        example: "healthy"
+        required: true
+      
+      coherence:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        description: "Global coherence of consciousness state"
+        example: 0.82
+        required: false
+  
+  # ---------------------------------------------------------------------------
+  # ESGTEvent - ESGT ignition event (success or failure)
+  # ---------------------------------------------------------------------------
+  esgt_event:
+    description: "Emergent Synchronous Global Thalamocortical (ESGT) ignition event"
+    protocol: REST GET / WebSocket stream
+    endpoint: /api/consciousness/esgt/events
+    
+    fields:
+      event_id:
+        type: string
+        format: uuid
+        description: "Unique event identifier"
+        example: "550e8400-e29b-41d4-a716-446655440000"
+        required: true
+      
+      timestamp:
+        type: string
+        format: ISO8601
+        description: "Event timestamp (UTC)"
+        example: "2024-10-08T14:30:45.789Z"
+        required: true
+      
+      success:
+        type: boolean
+        description: "Whether ignition was successful"
+        example: true
+        required: true
+      
+      salience:
+        type: object
+        description: "Salience components that triggered (or attempted) ignition"
+        required: true
+        fields:
+          novelty:
+            type: number
+            format: float64
+            range: [0.0, 1.0]
+            description: "Novelty factor"
+            example: 0.78
+          
+          relevance:
+            type: number
+            format: float64
+            range: [0.0, 1.0]
+            description: "Relevance to current goals"
+            example: 0.85
+          
+          urgency:
+            type: number
+            format: float64
+            range: [0.0, 1.0]
+            description: "Urgency level"
+            example: 0.62
+          
+          total:
+            type: number
+            format: float64
+            range: [0.0, 3.0]
+            description: "Sum of salience factors"
+            example: 2.25
+      
+      coherence:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        description: "Coherence during ignition (only if success=true)"
+        example: 0.89
+        required: false
+      
+      duration_ms:
+        type: number
+        format: float64
+        description: "Duration of ignition in milliseconds (only if success=true)"
+        example: 245.7
+        required: false
+      
+      nodes_participating:
+        type: integer
+        description: "Number of TIG nodes that participated"
+        example: 7
+        required: true
+      
+      reason:
+        type: string
+        enum: esgt_reason
+        description: "Reason for failure (only if success=false)"
+        example: "low_salience"
+        required: false
+      
+      context:
+        type: object
+        description: "Additional context (free-form)"
+        example: { "source": "perception", "stimulus_id": "stim_123" }
+        required: false
+  
+  # ---------------------------------------------------------------------------
+  # ArousalState - Current arousal state (MCEA)
+  # ---------------------------------------------------------------------------
+  arousal_state:
+    description: "Current arousal state from MCEA (Modular Conscious Excitability Architecture)"
+    protocol: REST GET / WebSocket stream
+    endpoint: /api/consciousness/arousal
+    
+    fields:
+      arousal:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        description: "Current arousal level"
+        example: 0.72
+        required: true
+      
+      level:
+        type: string
+        enum: arousal_level
+        description: "Human-readable classification"
+        example: "alert"
+        required: true
+      
+      baseline:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        description: "Baseline arousal (resting state)"
+        example: 0.45
+        required: true
+      
+      need_contribution:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        description: "Contribution from homeostatic needs"
+        example: 0.15
+        required: true
+      
+      stress_contribution:
+        type: number
+        format: float64
+        range: [-0.5, 0.5]
+        description: "Contribution from stress (can be negative)"
+        example: 0.08
+        required: true
+      
+      timestamp:
+        type: string
+        format: ISO8601
+        description: "Timestamp of measurement"
+        example: "2024-10-08T14:30:45.123Z"
+        required: true
+      
+      trends:
+        type: object
+        description: "Recent trends (optional)"
+        required: false
+        fields:
+          direction:
+            type: string
+            enum: ["increasing", "decreasing", "stable"]
+            description: "Trend direction"
+            example: "increasing"
+          
+          rate:
+            type: number
+            format: float64
+            description: "Rate of change per minute"
+            example: 0.02
+  
+  # ---------------------------------------------------------------------------
+  # ConsciousnessMetrics - System-wide metrics
+  # ---------------------------------------------------------------------------
+  consciousness_metrics:
+    description: "Aggregated system metrics"
+    protocol: REST GET
+    endpoint: /api/consciousness/metrics
+    
+    fields:
+      tig_metrics:
+        type: object
+        description: "TIG topology metrics"
+        required: true
+        fields:
+          nodes_active:
+            type: integer
+            example: 8
+          
+          connectivity:
+            type: number
+            format: float64
+            example: 0.87
+          
+          integration:
+            type: number
+            format: float64
+            example: 0.76
+          
+          phi_proxy:
+            type: number
+            format: float64
+            example: 2.34
+            optional: true
+      
+      esgt_stats:
+        type: object
+        description: "ESGT statistics"
+        required: true
+        fields:
+          total_ignitions:
+            type: integer
+            example: 142
+          
+          success_rate:
+            type: number
+            format: float64
+            example: 0.89
+          
+          avg_coherence:
+            type: number
+            format: float64
+            example: 0.85
+          
+          avg_duration_ms:
+            type: number
+            format: float64
+            example: 234.5
+      
+      performance:
+        type: object
+        description: "Performance metrics"
+        required: false
+        fields:
+          cpu_usage:
+            type: number
+            format: float64
+            range: [0.0, 1.0]
+            example: 0.42
+          
+          memory_mb:
+            type: number
+            format: float64
+            example: 512.3
+          
+          events_per_second:
+            type: number
+            format: float64
+            example: 12.4
+
+# =============================================================================
+# STREAMING PROTOCOL
+# =============================================================================
+
+streaming:
+  
+  # WebSocket streaming endpoint
+  websocket:
+    endpoint: ws://localhost:8001/ws/consciousness
+    protocol: WebSocket
+    description: "Real-time consciousness updates"
+    
+    message_types:
+      
+      # Arousal update (sent every ~1 second)
+      arousal_update:
+        type: arousal_state
+        frequency: "~1s"
+        description: "Periodic arousal level updates"
+      
+      # ESGT event (sent on ignition)
+      esgt_event:
+        type: esgt_event
+        frequency: "event-driven"
+        description: "ESGT ignition events"
+      
+      # State snapshot (sent every ~5 seconds)
+      state_snapshot:
+        type: consciousness_state
+        frequency: "~5s"
+        description: "Full state snapshots"
+    
+    message_format:
+      type:
+        type: string
+        enum: ["arousal_update", "esgt_event", "state_snapshot"]
+        description: "Message type discriminator"
+      
+      data:
+        type: object
+        description: "Message payload (structure depends on type)"
+  
+  # Server-Sent Events (alternative to WebSocket)
+  sse:
+    endpoint: http://localhost:8001/api/consciousness/stream
+    protocol: SSE
+    description: "Server-Sent Events for consciousness updates"
+    
+    event_types:
+      - arousal_update
+      - esgt_event
+      - state_snapshot
+    
+    format: "data: {json_payload}\n\n"
+
+# =============================================================================
+# CONTROL OPERATIONS
+# =============================================================================
+
+operations:
+  
+  # Manual ESGT trigger
+  trigger_esgt:
+    method: POST
+    endpoint: /api/consciousness/esgt/trigger
+    description: "Manually trigger ESGT ignition"
+    
+    request_body:
+      novelty:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        required: true
+      
+      relevance:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        required: true
+      
+      urgency:
+        type: number
+        format: float64
+        range: [0.0, 1.0]
+        required: true
+      
+      context:
+        type: object
+        description: "Optional context"
+        required: false
+    
+    response:
+      success:
+        type: boolean
+        description: "Whether trigger was successful"
+      
+      event:
+        type: esgt_event
+        description: "The resulting event"
+        required: false
+      
+      error:
+        type: string
+        description: "Error message if failed"
+        required: false
+  
+  # Arousal adjustment
+  adjust_arousal:
+    method: POST
+    endpoint: /api/consciousness/arousal/adjust
+    description: "Adjust arousal level"
+    
+    request_body:
+      delta:
+        type: number
+        format: float64
+        range: [-0.5, 0.5]
+        description: "Change in arousal"
+        required: true
+      
+      duration_seconds:
+        type: number
+        format: float64
+        range: [0.1, 60.0]
+        description: "Duration of adjustment"
+        default: 5.0
+        required: false
+      
+      source:
+        type: string
+        description: "Source identifier"
+        default: "manual"
+        required: false
+    
+    response:
+      success:
+        type: boolean
+      
+      new_arousal:
+        type: number
+        format: float64
+        description: "New arousal level"
+        required: false
+      
+      error:
+        type: string
+        required: false
+
+# =============================================================================
+# TYPE MAPPINGS
+# =============================================================================
+
+type_mappings:
+  
+  # TypeScript (Frontend)
+  typescript:
+    number_float64: "number"
+    integer: "number"
+    boolean: "boolean"
+    string: "string"
+    object: "Record<string, any>"
+    array: "Array<T>"
+    ISO8601: "string"  # Can use Date in runtime
+    uuid: "string"
+  
+  # Go (vcli-go)
+  go:
+    number_float64: "float64"
+    integer: "int"
+    boolean: "bool"
+    string: "string"
+    object: "map[string]interface{}"
+    array: "[]T"
+    ISO8601: "string"  # Can use time.Time in runtime
+    uuid: "string"
+  
+  # Python (Backend)
+  python:
+    number_float64: "float"
+    integer: "int"
+    boolean: "bool"
+    string: "str"
+    object: "dict"
+    array: "list"
+    ISO8601: "str"  # Can use datetime in runtime
+    uuid: "str"
+
+# =============================================================================
+# VERSIONING & COMPATIBILITY
+# =============================================================================
+
+versioning:
+  current_version: "1.0.0"
+  
+  compatibility:
+    description: "Backward compatibility rules"
+    rules:
+      - "MINOR version: additive changes only (new optional fields)"
+      - "MAJOR version: breaking changes (field removal, type changes)"
+      - "PATCH version: documentation/clarification only"
+  
+  changelog:
+    v1.0.0:
+      date: "2024-10-08"
+      changes:
+        - "Initial protocol definition"
+        - "Unified structures from Frontend + vcli-go"
+        - "Added streaming specifications"
+        - "Documented control operations"
+
+# =============================================================================
+# VALIDATION RULES
+# =============================================================================
+
+validation_rules:
+  
+  - name: "arousal_range"
+    description: "Arousal must be between 0.0 and 1.0"
+    rule: "0.0 <= arousal <= 1.0"
+  
+  - name: "salience_components_range"
+    description: "Each salience component must be between 0.0 and 1.0"
+    rule: "0.0 <= novelty,relevance,urgency <= 1.0"
+  
+  - name: "timestamp_format"
+    description: "Timestamps must be ISO 8601 with milliseconds"
+    rule: "YYYY-MM-DDTHH:MM:SS.sssZ"
+  
+  - name: "event_id_format"
+    description: "Event IDs must be valid UUIDs"
+    rule: "UUID v4 format"
+  
+  - name: "required_fields"
+    description: "All fields marked required:true must be present"
+    rule: "Check presence before parsing"
+
+# =============================================================================
+# IMPLEMENTATION NOTES
+# =============================================================================
+
+implementation_notes:
+  
+  frontend:
+    language: "TypeScript/JavaScript"
+    location: "frontend/src/api/consciousness.js"
+    notes:
+      - "Use fetch API for REST calls"
+      - "Use WebSocket API for streaming"
+      - "Implement automatic reconnection"
+      - "Buffer events during disconnection"
+  
+  vcli_go:
+    language: "Go"
+    location: "vcli-go/internal/maximus/consciousness_client.go"
+    notes:
+      - "Use net/http for REST calls"
+      - "Use gorilla/websocket for streaming"
+      - "Implement exponential backoff for retries"
+      - "Use channels for event distribution"
+  
+  backend:
+    language: "Python"
+    location: "backend/services/maximus_core_service/consciousness/"
+    notes:
+      - "Use FastAPI for endpoints"
+      - "Use Pydantic for validation"
+      - "Stream via SSE or WebSocket"
+      - "Ensure thread-safety for state access"
+
+# =============================================================================
+# COMPLIANCE
+# =============================================================================
+
+compliance:
+  doutrina_vertice:
+    article_ii: "NO MOCK, NO PLACEHOLDER - Real schemas from production"
+    article_iii: "Confiança Zero - All fields validated"
+    article_vi: "Magnitude Histórica - Documented for posterity"
+    article_vii: "Foco Absoluto no Blueprint - Aligned with roadmap"
+  
+  status: "100% compliant"
+
+# =============================================================================
+# METADATA
+# =============================================================================
+
+metadata:
+  author: "Juan Carlo de Souza"
+  github: "JuanCS-DEV"
+  email: "juan.brainfarma@gmail.com"
+  created: "2024-10-08"
+  version: "1.0.0"
+  status: "production-ready"

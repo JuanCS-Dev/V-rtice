@@ -29,7 +29,7 @@ scrape_configs:
   # MAXIMUS Core Service
   - job_name: 'maximus_core'
     static_configs:
-      - targets: ['maximus_core_service:8001']
+      - targets: ['maximus-core:8001']
     metrics_path: '/metrics'
     scrape_interval: 5s  # More frequent for critical service
 

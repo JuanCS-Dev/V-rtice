@@ -1,0 +1,119 @@
+name: Release Liturgia
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: "Componente para release (vcli-go, frontend, maximus, docs)"
+        required: true
+        default: vcli-go
+      scenario:
+        description: "Cenário (baseline, stress) para benchmarks opcionais"
+        required: false
+        default: baseline
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BENCH_TARGET_BASE_URL: ${{ secrets.BENCH_TARGET_BASE_URL }}
+      BENCH_TARGET_WS_URL: ${{ secrets.BENCH_TARGET_WS_URL }}
+      BENCH_TARGET_GRPC_ADDR: ${{ secrets.BENCH_TARGET_GRPC_ADDR }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+      SCENARIO: ${{ github.event.inputs.scenario }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        if: inputs.component == 'vcli-go'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: go
+      - name: Setup Node
+        if: inputs.component == 'frontend'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Run component tests
+        run: |
+          case "${{ inputs.component }}" in
+            vcli-go)
+              cd vcli-go
+              go test ./...
+              go build ./...
+              cd -
+              ;;
+            frontend)
+              cd frontend
+              npm install
+              npm run build
+              npm test -- --run
+              cd -
+              ;;
+            maximus)
+              cd backend/services/maximus_core_service
+              make test || python -m pytest
+              cd -
+              ;;
+            docs)
+              echo "No tests for docs"
+              ;;
+            *)
+              echo "Componente desconhecido" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Generate SBOM
+        run: |
+          TARGET_DIR="${{ inputs.component }}"
+          OUTPUT="sbom-${{ inputs.component }}.json"
+          mkdir -p artifacts/${{ inputs.component }}
+          mv "$OUTPUT" artifacts/${{ inputs.component }}/
+          ./scripts/release/generate-sbom.sh "$TARGET_DIR" "$OUTPUT"
+
+      - name: Vulnerability scan
+        run: |
+          ./scripts/release/vulnerability-scan.sh "sbom-${{ inputs.component }}.json" "vuln-${{ inputs.component }}.json"
+          mv "vuln-${{ inputs.component }}.json" artifacts/${{ inputs.component }}/
+
+      - name: Sign artefacts
+        run: |
+          if [[ "${{ inputs.component }}" == "vcli-go" ]]; then
+            ARTIFACT="vcli-go"
+          elif [[ "${{ inputs.component }}" == "frontend" ]]; then
+            ARTIFACT="frontend"
+          else
+            ARTIFACT="${{ inputs.component }}"
+          fi
+          ./scripts/release/sign-artifact.sh "$ARTIFACT" --attest "sbom-${{ inputs.component }}.json"
+
+      - name: Run performance smoke (opcional)
+        if: inputs.component == 'vcli-go'
+        run: |
+          ./tests/performance/run-benchmarks.sh --rest
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ inputs.component }}
+          path: |
+            artifacts/${{ inputs.component }}
+          retention-days: 14
+
+      - name: Checklist resumo
+        run: |
+          cat <<'MARKDOWN' >> $GITHUB_STEP_SUMMARY
+## Release Liturgia – ${{ inputs.component }}
+- ✅ Testes executados
+- ✅ SBOM: sbom-${{ inputs.component }}.json
+- ✅ Vulnerability scan: vuln-${{ inputs.component }}.json
+- ✅ Assinatura cosign
+- ✅ Registros anexados como artefatos
+MARKDOWN

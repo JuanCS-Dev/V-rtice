@@ -24,6 +24,7 @@ PRODUCTION-READY: Real Kafka, Redis, no mocks, graceful degradation.
 import asyncio
 import json
 import logging
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
@@ -92,6 +93,7 @@ class LinfonodoDigital:
         kafka_bootstrap: str = "localhost:9092",
         redis_url: str = "redis://localhost:6379",
         agent_factory: Optional[AgentFactory] = None,
+        shared_secret: Optional[str] = None,
     ):
         """
         Initialize Digital Lymphnode.
@@ -110,6 +112,12 @@ class LinfonodoDigital:
 
         self.kafka_bootstrap = kafka_bootstrap
         self.redis_url = redis_url
+
+        # Authentication / shared secret
+        self._expected_token = shared_secret or "trusted-helper-t"
+        self._failure_window_seconds = 120.0
+        self._failure_threshold = 5
+        self._failure_timestamps: List[float] = []
 
         # Agent factory (for cloning)
         self.factory = agent_factory or AgentFactory(
@@ -191,6 +199,42 @@ class LinfonodoDigital:
         self._redis_client: Optional[aioredis.Redis] = None
 
         logger.info(f"Lymphnode {self.id} ({self.nivel}) initialized for {self.area}")
+
+    # ------------------------------------------------------------------
+    # Security helpers
+    # ------------------------------------------------------------------
+    def _prune_failures(self, now: float) -> None:
+        cutoff = now - self._failure_window_seconds
+        while self._failure_timestamps and self._failure_timestamps[0] < cutoff:
+            self._failure_timestamps.pop(0)
+
+    def _register_failure(self) -> None:
+        now = time.time()
+        self._prune_failures(now)
+        self._failure_timestamps.append(now)
+        if len(self._failure_timestamps) >= self._failure_threshold:
+            logger.warning(
+                "Lymphnode %s entering quarantine mode: %s failures in %.1fs",
+                self.id,
+                len(self._failure_timestamps),
+                self._failure_window_seconds,
+            )
+
+    def _register_success(self) -> None:
+        self._failure_timestamps.clear()
+
+    def is_quarantined(self) -> bool:
+        now = time.time()
+        self._prune_failures(now)
+        return len(self._failure_timestamps) >= self._failure_threshold
+
+    def validate_token(self, token: str | None) -> None:
+        if not token:
+            raise LymphnodeConnectionError("Missing immunological token")
+        if token != self._expected_token:
+            self._register_failure()
+            raise LymphnodeConnectionError("Invalid helper T token")
+        self._register_success()
 
     async def get_homeostatic_state(self) -> HomeostaticState:
         """

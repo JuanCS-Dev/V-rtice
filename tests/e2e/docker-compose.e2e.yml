@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  api_gateway:
+    image: vertice/api-gateway:latest
+    depends_on:
+      - maximus
+      - hsas
+    environment:
+      - MAXIMUS_URL=http://maximus:8150
+      - HSAS_URL=http://hsas:8023
+  maximus:
+    image: vertice/maximus-core:latest
+  frontend:
+    image: vertice/frontend:latest
+  hsas:
+    image: vertice/hsas-mock:latest
+  cli:
+    image: vertice/vcli-go:latest

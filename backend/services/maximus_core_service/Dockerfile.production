@@ -4,7 +4,7 @@
 # ============================================================================
 # Stage 1: Builder
 # ============================================================================
-FROM python:3.11-slim as builder
+FROM vertice/python311-uv:latest as builder
 
 WORKDIR /build
 
@@ -15,9 +15,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+# Copy dependency manifests first for better caching
+COPY pyproject.toml requirements.txt ./
+
+# Create virtualenv and install dependencies via uv
+RUN python -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    uv pip sync requirements.txt
 
 # ============================================================================
 # Stage 2: Runtime
@@ -33,14 +37,14 @@ RUN useradd --create-home --uid 1000 --shell /bin/bash maximus
 
 WORKDIR /app
 
-# Copy Python dependencies from builder
-COPY --from=builder --chown=maximus:maximus /root/.local /home/maximus/.local
+# Copy Python dependencies from builder virtualenv
+COPY --from=builder --chown=maximus:maximus /opt/venv /opt/venv
 
 # Copy application code
 COPY --chown=maximus:maximus . .
 
-# Set PATH for user-installed packages
-ENV PATH=/home/maximus/.local/bin:$PATH
+# Activate virtualenv binaries by default
+ENV PATH=/opt/venv/bin:$PATH
 
 # Create necessary directories
 RUN mkdir -p /app/models /app/logs && \

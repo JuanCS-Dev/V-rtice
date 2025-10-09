@@ -57,7 +57,7 @@ LOCK_FILES=$(find . -name "requirements*.lock" -type f | grep -v venv | grep -v 
 if [ -z "$LOCK_FILES" ]; then
     echo -e "${YELLOW}⚠️  No lock files found!${NC}"
     echo "Expected: requirements.txt.lock"
-    echo "Run: pip-compile requirements.txt --output-file requirements.txt.lock"
+    echo "Run: uv pip compile requirements.txt -o requirements.txt.lock"
     exit 1
 fi
 
@@ -106,8 +106,8 @@ PIP_AUDIT_OUTPUT_FILE="/tmp/pip-audit-report-$(date +%s).txt"
 
 # Check if pip-audit is installed
 if ! command -v pip-audit &> /dev/null; then
-    echo -e "${YELLOW}⚠️  pip-audit not installed, installing...${NC}"
-    pip install pip-audit
+    echo -e "${YELLOW}⚠️  pip-audit not installed, installing via uv tool...${NC}"
+    uv tool install pip-audit
 fi
 
 for lock_file in $LOCK_FILES; do
@@ -184,7 +184,7 @@ else
     echo "Action required:"
     echo "  1. Review vulnerability reports above"
     echo "  2. Update affected packages in requirements.txt"
-    echo "  3. Regenerate lock file: pip-compile requirements.txt --output-file requirements.txt.lock"
+    echo "  3. Regenerate lock file: uv pip compile requirements.txt -o requirements.txt.lock"
     echo "  4. Re-run audit: bash scripts/dependency-audit.sh"
     echo ""
     echo "Reports saved:"

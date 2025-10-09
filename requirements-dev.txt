@@ -165,3 +165,4 @@ docker-compose>=1.29.2
 
 # Python-dotenv - .env file support
 python-dotenv>=1.0.1
+prometheus-client

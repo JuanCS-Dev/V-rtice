@@ -29,14 +29,14 @@ cd "$PROJECT_ROOT"
 if [ ! -f "requirements.txt.lock" ]; then
     echo -e "${RED}❌ Lock file not found!${NC}"
     echo "Expected: requirements.txt.lock"
-    echo "Run: pip-compile requirements.txt --output-file requirements.txt.lock"
+    echo "Run: uv pip compile requirements.txt -o requirements.txt.lock"
     exit 1
 fi
 
 # Generate current dependency snapshot
 echo -e "${BLUE}📸 Generating current dependency snapshot...${NC}"
 CURRENT_SNAPSHOT="/tmp/current-dependencies-$(date +%s).txt"
-pip list --format=freeze | sort > "$CURRENT_SNAPSHOT"
+uv pip list --format=freeze | sort > "$CURRENT_SNAPSHOT"
 
 # Extract packages from lock file (remove comments and empty lines)
 LOCK_SNAPSHOT="/tmp/lock-file-packages-$(date +%s).txt"
@@ -149,9 +149,9 @@ echo ""
 echo "To fix:"
 echo "  1. Review changes in requirements.txt"
 echo "  2. Regenerate lock file:"
-echo "     pip-compile requirements.txt --output-file requirements.txt.lock --upgrade"
+echo "     uv pip compile requirements.txt -o requirements.txt.lock --upgrade"
 echo "  3. Install from lock file:"
-echo "     pip install -r requirements.txt.lock --no-deps"
+echo "     uv pip sync requirements.txt.lock"
 echo "  4. Re-run drift check:"
 echo "     bash scripts/check-dependency-drift.sh"
 echo ""

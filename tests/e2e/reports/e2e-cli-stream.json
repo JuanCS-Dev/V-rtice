@@ -1,0 +1,9 @@
+{
+  "scenario": "E2E-CLI-STREAM",
+  "target": "http://localhost:8150/health",
+  "http_status": "000000",
+  "latency_ms": 0,
+  "status": "fail",
+  "message": "Request failed",
+  "timestamp": "2025-10-09T03:59:09Z"
+}

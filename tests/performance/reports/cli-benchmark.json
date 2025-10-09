@@ -1,0 +1,8 @@
+{
+  "test": "CLI Execution",
+  "iterations": 10,
+  "avg_latency_ms": 12,
+  "p95_latency_ms": 14,
+  "threshold_ms": 500,
+  "passed": true
+}

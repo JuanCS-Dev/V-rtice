@@ -22,10 +22,20 @@ Version: 2.0.0 - FASE VII Week 9-10 (Safety Integration)
 from dataclasses import dataclass
 from typing import Any
 
+from prometheus_client import Gauge
+
 from consciousness.esgt.coordinator import ESGTCoordinator, TriggerConditions
 from consciousness.mcea.controller import ArousalConfig, ArousalController
 from consciousness.safety import ConsciousnessSafetyProtocol, SafetyThresholds, SafetyViolation
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
+
+# Prometheus Metrics
+consciousness_tig_node_count = Gauge("consciousness_tig_node_count", "Number of nodes in the TIG fabric")
+consciousness_tig_edges = Gauge("consciousness_tig_edge_count", "Number of edges in the TIG fabric")
+consciousness_esgt_frequency = Gauge("consciousness_esgt_frequency", "Current frequency of the ESGT coordinator")
+consciousness_arousal_level = Gauge("consciousness_arousal_level", "Current arousal level of the MCEA controller")
+consciousness_kill_switch_active = Gauge("consciousness_kill_switch_active", "Status of the Safety Core kill switch (0=OK, 1=ENGAGED)")
+consciousness_violations_total = Gauge("consciousness_violations_total", "Number of active safety violations")
 
 
 @dataclass
@@ -240,6 +250,25 @@ class ConsciousnessSystem:
         system_dict["metrics"] = metrics
 
         return system_dict
+
+    def _update_prometheus_metrics(self) -> None:
+        """Update Prometheus metrics with the latest system state."""
+        metrics = self.get_system_dict().get("metrics", {})
+
+        # Update gauges
+        consciousness_tig_node_count.set(metrics.get("tig_node_count", 0))
+        consciousness_tig_edges.set(metrics.get("tig_edge_count", 0))
+        consciousness_esgt_frequency.set(metrics.get("esgt_frequency", 0.0))
+        consciousness_arousal_level.set(metrics.get("arousal_level", 0.0))
+
+        # Update safety-specific metrics
+        if self.safety_protocol:
+            kill_switch_status = 1 if self.safety_protocol.kill_switch.is_triggered() else 0
+            consciousness_kill_switch_active.set(kill_switch_status)
+            consciousness_violations_total.set(len(self.safety_protocol.threshold_monitor.get_violations()))
+        else:
+            consciousness_kill_switch_active.set(0)
+            consciousness_violations_total.set(0)
 
     def is_healthy(self) -> bool:
         """Check if system is healthy.

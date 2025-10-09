@@ -24,6 +24,7 @@ from consciousness.safety import (
     AnomalyDetector,
     ConsciousnessSafetyProtocol,
     KillSwitch,
+    ThreatLevel,
     SafetyLevel,
     SafetyThresholds,
     SafetyViolation,

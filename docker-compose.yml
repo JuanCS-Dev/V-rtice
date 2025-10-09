@@ -83,7 +83,7 @@ services:
       - ssl_monitor_service
       - maximus_orchestrator_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -97,7 +97,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -115,7 +115,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -130,7 +130,7 @@ services:
     volumes:
       - qdrant-data:/qdrant/storage
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -144,7 +144,7 @@ services:
   #   volumes:
   #     - cuckoo-data:/cuckoo
   #   networks:
-  #     - vertice-network
+  #     - maximus-network
   #   restart: unless-stopped
   #   privileged: true
 
@@ -159,7 +159,7 @@ services:
       - ./backend/services/sinesp_service:/code
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   cyber_service:
@@ -174,7 +174,7 @@ services:
       - "8103:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   domain_service:
@@ -186,7 +186,7 @@ services:
       - "8104:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   ip_intelligence_service:
@@ -200,12 +200,12 @@ services:
       - CACHE_TTL_SECONDS=86400
     command: uvicorn main:app --host 0.0.0.0 --port 80
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   network_monitor_service:
     build: ./backend/services/network_monitor_service
-    container_name: vertice-network-monitor
+    container_name: maximus-network-monitor
     volumes:
       - ./backend/services/network_monitor_service:/app
     ports:
@@ -215,7 +215,7 @@ services:
       - NET_ADMIN
       - NET_RAW
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   nmap_service:
@@ -230,7 +230,7 @@ services:
       - NET_ADMIN
       - NET_RAW
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   osint-service:
@@ -252,7 +252,7 @@ services:
       - osint-data:/app/data
     command: uvicorn api:app --host 0.0.0.0 --port 8007 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   maximus_predict:
@@ -268,7 +268,7 @@ services:
       - PYTHONUNBUFFERED=1
     command: uvicorn api:app --host 0.0.0.0 --port 80 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -283,7 +283,7 @@ services:
       - "8109:8000" # Expondo numa porta externa livre
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -308,7 +308,7 @@ services:
     depends_on:
       - redis
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -326,7 +326,7 @@ services:
       - NET_ADMIN
       - NET_RAW
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -341,7 +341,7 @@ services:
       - "8112:80"
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ... (Prometheus e Grafana permanecem iguais) ...
@@ -358,7 +358,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   grafana:
@@ -371,7 +371,7 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -392,7 +392,7 @@ services:
       - GREYNOISE_API_KEY=${GREYNOISE_API_KEY}
       - OTX_API_KEY=${OTX_API_KEY}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   malware_analysis_service:
@@ -407,7 +407,7 @@ services:
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
       - HYBRID_ANALYSIS_API_KEY=${HYBRID_ANALYSIS_API_KEY}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   ssl_monitor_service:
@@ -419,7 +419,7 @@ services:
       - ./backend/services/ssl_monitor_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8015 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -434,7 +434,7 @@ services:
       - ./backend/services/adr_core_service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8030 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -459,7 +459,7 @@ services:
       - adr_core_service
       - maximus_core_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   maximus_orchestrator_service:
@@ -486,7 +486,7 @@ services:
       - ip_intelligence_service
       - nmap_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -497,6 +497,7 @@ services:
     container_name: maximus-core
     ports:
       - "8150:8000"
+      - "8151:8001"
     volumes:
       - ./backend/services/maximus_core_service:/app
     command: python main.py
@@ -529,7 +530,7 @@ services:
       - maximus_predict
       - osint-service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================================================================
@@ -549,7 +550,7 @@ services:
     depends_on:
       - postgres
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8612/health', timeout=5)"]
@@ -581,7 +582,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # Kafka for HCL event streaming
@@ -613,7 +614,7 @@ services:
       retries: 10
       start_period: 20s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # HCL Knowledge Base API
@@ -638,7 +639,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # HCL Monitor (System metrics collection)
@@ -667,7 +668,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     privileged: true
     volumes:
@@ -702,7 +703,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # HCL Planner (Fuzzy Logic + RL)
@@ -735,7 +736,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # HCL Executor (Kubernetes actions)
@@ -771,7 +772,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================================================================
@@ -800,7 +801,7 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # hPC - Hierarchical Predictive Coding (Bayesian inference)
@@ -828,7 +829,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================================================================
@@ -856,7 +857,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # MAXIMUS ORÁCULO - Self-Improvement Engine
@@ -882,7 +883,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -908,7 +909,7 @@ services:
     depends_on:
       - redis
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -936,7 +937,7 @@ services:
       - immunis_dendritic_service
       - immunis_bcell_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   immunis_macrophage_service:
@@ -951,7 +952,7 @@ services:
       - CUCKOO_API_URL=${CUCKOO_API_URL:-http://cuckoo:8090}
       - CUCKOO_API_KEY=${CUCKOO_API_KEY:-}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   immunis_neutrophil_service:
@@ -963,7 +964,7 @@ services:
       - ./backend/services/immunis_neutrophil_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8013 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   immunis_dendritic_service:
@@ -975,7 +976,7 @@ services:
       - ./backend/services/immunis_dendritic_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8014 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   immunis_bcell_service:
@@ -987,7 +988,7 @@ services:
       - ./backend/services/immunis_bcell_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8016 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   immunis_helper_t_service:
@@ -999,7 +1000,7 @@ services:
       - ./backend/services/immunis_helper_t_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8017 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   immunis_cytotoxic_t_service:
@@ -1011,7 +1012,7 @@ services:
       - ./backend/services/immunis_cytotoxic_t_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8018 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   immunis_nk_cell_service:
@@ -1023,7 +1024,7 @@ services:
       - ./backend/services/immunis_nk_cell_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8019 --reload
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -1050,7 +1051,7 @@ services:
     depends_on:
       - postgres
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   hcl_executor_service:
@@ -1065,7 +1066,7 @@ services:
       - KUBERNETES_SERVICE_HOST=${KUBERNETES_SERVICE_HOST:-}
       - KUBERNETES_SERVICE_PORT=${KUBERNETES_SERVICE_PORT:-}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8021/health')"]
@@ -1089,7 +1090,7 @@ services:
       - qdrant
       - postgres
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8022/health')"]
@@ -1109,7 +1110,7 @@ services:
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8023/health')"]
@@ -1130,7 +1131,7 @@ services:
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8024/health')"]
@@ -1153,7 +1154,7 @@ services:
       - ./backend/services/auditory_cortex_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8007
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   visual_cortex_service:
@@ -1165,7 +1166,7 @@ services:
       - ./backend/services/visual_cortex_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8006
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   somatosensory_service:
@@ -1177,7 +1178,7 @@ services:
       - ./backend/services/somatosensory_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8008
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   chemical_sensing_service:
@@ -1189,7 +1190,7 @@ services:
       - ./backend/services/chemical_sensing_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8009
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   vestibular_service:
@@ -1201,7 +1202,7 @@ services:
       - ./backend/services/vestibular_service:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8010
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   prefrontal_cortex_service:
@@ -1225,7 +1226,7 @@ services:
       - chemical_sensing_service
       - vestibular_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   digital_thalamus_service:
@@ -1249,7 +1250,7 @@ services:
       - chemical_sensing_service
       - vestibular_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   narrative_manipulation_filter:
@@ -1261,7 +1262,7 @@ services:
       - ./backend/services/narrative_manipulation_filter:/app
     command: uvicorn api:app --host 0.0.0.0 --port 8013
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8013/health/simple', timeout=5)"]
@@ -1292,7 +1293,7 @@ services:
       - digital_thalamus_service
       - narrative_manipulation_filter
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   homeostatic_regulation:
@@ -1324,7 +1325,7 @@ services:
       - narrative_manipulation_filter
       - ai_immune_system
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -1348,7 +1349,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   hpc_service:
@@ -1367,7 +1368,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -1424,7 +1425,7 @@ services:
       - sinesp_service
       - seriema_graph
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8028/health')"]
@@ -1453,7 +1454,7 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
 
   # ============================
@@ -1463,7 +1464,7 @@ services:
 
   network_recon_service:
     build: ./backend/services/network_recon_service
-    container_name: vertice-network-recon
+    container_name: maximus-network-recon
     ports:
       - "8532:8032"  # Service API
       - "9032:9032"  # Prometheus metrics
@@ -1503,7 +1504,7 @@ services:
       - digital_thalamus_service
       - homeostatic_regulation
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8032/health"]
@@ -1548,7 +1549,7 @@ services:
       - chemical_sensing_service
       - ai_immune_system
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8033/health"]
@@ -1595,7 +1596,7 @@ services:
       - auditory_cortex_service
       - somatosensory_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8034/health"]
@@ -1649,7 +1650,7 @@ services:
       - somatosensory_service
       - prefrontal_cortex_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8035/health"]
@@ -1712,7 +1713,7 @@ services:
       - prefrontal_cortex_service
       - ai_immune_system
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8036/health"]
@@ -1778,7 +1779,7 @@ services:
       - bas_service
       - prefrontal_cortex_service
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8037/health"]
@@ -1814,7 +1815,7 @@ services:
       - BOT_DETECTION_THRESHOLD=0.6
       - ATTRIBUTION_MIN_CONFIDENCE=0.7
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8015/health"]
@@ -1847,7 +1848,7 @@ services:
       - MIN_PATTERN_HISTORY=5
       - PERIODICITY_DETECTION_THRESHOLD=0.7
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8016/health"]
@@ -1884,7 +1885,7 @@ services:
       - ENABLE_EVIDENCE_CHAIN=true
       - ENABLE_AUTO_RECOMMENDATIONS=true
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8017/health"]
@@ -1922,7 +1923,7 @@ services:
       - MAX_ENTITY_PROFILES=10000
       - PROFILE_CLEANUP_INTERVAL_HOURS=24
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8018/health')"]
@@ -1958,7 +1959,7 @@ services:
       - ENABLE_AUTO_CONSOLIDATION=true
       - CONSOLIDATION_BATCH_SIZE=1000
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8019/health')"]
@@ -1997,7 +1998,7 @@ services:
       - MAX_ANTIBODY_POOL_SIZE=1000
       - MATURATION_CYCLE_INTERVAL_HOURS=12
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8020/health')"]
@@ -2023,7 +2024,7 @@ services:
       - ENABLE_NORADRENALINE=true
       - ENABLE_ACETYLCHOLINE=true
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8033/health')"]
@@ -2049,7 +2050,7 @@ services:
       - ENABLE_RISK_ASSESSMENT=true
       - MAX_PLAN_DEPTH=10
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8042/health')"]
@@ -2073,7 +2074,7 @@ services:
       - HEARTBEAT_TIMEOUT=60.0
       - ENABLE_MULTI_TENANT=true
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8051/health')"]
@@ -2099,7 +2100,7 @@ services:
       - SERVICE_NAME=hsas_service
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
@@ -2121,7 +2122,7 @@ services:
       - SERVICE_NAME=edge_agent_service
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8021/health"]
@@ -2143,7 +2144,7 @@ services:
       - SERVICE_NAME=maximus_eureka
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8200/health')"]
@@ -2166,7 +2167,7 @@ services:
   #     - SERVICE_NAME=maximus_oraculo
   #     - LOG_LEVEL=${LOG_LEVEL:-INFO}
   #   networks:
-  #     - vertice-network
+  #     - maximus-network
   #   restart: unless-stopped
   #   healthcheck:
   #     test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8201/health')"]
@@ -2191,7 +2192,7 @@ services:
       - CHROME_BIN=/usr/bin/chromium
       - CHROMEDRIVER_PATH=/usr/bin/chromedriver
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
@@ -2213,7 +2214,7 @@ services:
       - SERVICE_NAME=reflex_triage_engine
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     networks:
-      - vertice-network
+      - maximus-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8012/health"]
@@ -2226,12 +2227,9 @@ services:
 # NETWORKS
 # ============================
 networks:
-  vertice-network:
+  maximus-network:
+    name: maximus-ai-network
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
 # ============================
 # VOLUMES
 # ============================
