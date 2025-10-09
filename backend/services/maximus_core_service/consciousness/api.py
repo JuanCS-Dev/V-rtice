@@ -1,24 +1,29 @@
 """Consciousness System API
 
-FastAPI endpoints for consciousness monitoring dashboard.
+FastAPI endpoints for consciência monitoring dashboard incluindo streaming
+em tempo real via WebSocket e Server-Sent Events (SSE).
 
-Exposes real-time consciousness state, ESGT events, arousal levels,
-and control endpoints for manual system interaction.
+Expose:
+    - Estado atual (REST)
+    - Eventos ESGT, ajustes de arousal (REST)
+    - Stream contínuo para cockpit/TUI (`/stream/sse`, `/ws`)
 
 Integration:
     from consciousness.api import create_consciousness_api
     app.include_router(create_consciousness_api(consciousness_system))
 
-Authors: Juan & Claude Code
-Version: 1.0.0 - FASE V Sprint 2
+Autores: Juan & Claude Code
+Versão: 1.1.0 - Sprint 2.2 (Streaming)
 """
 
 import asyncio
+import json
 from dataclasses import asdict
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from consciousness.prometheus_metrics import get_metrics_handler
@@ -116,8 +121,9 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
     """
     router = APIRouter(prefix="/api/consciousness", tags=["consciousness"])
 
-    # WebSocket connections for real-time streaming
+    # WebSocket connections + SSE subscribers
     active_connections: list[WebSocket] = []
+    sse_subscribers: list[asyncio.Queue[dict[str, Any]]] = []
 
     # Event history (last 100 events)
     event_history: list[dict[str, Any]] = []
@@ -133,8 +139,9 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
         if len(event_history) > MAX_HISTORY:
             event_history.pop(0)
 
-    async def broadcast_to_websockets(message: dict[str, Any]) -> None:
-        """Broadcast message to all connected WebSocket clients."""
+    async def broadcast_to_consumers(message: dict[str, Any]) -> None:
+        """Broadcast mensagem para WebSockets e SSE subscribers."""
+        # Broadcast via WebSocket
         dead_connections = []
         for connection in active_connections:
             try:
@@ -145,6 +152,22 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
         # Remove dead connections
         for connection in dead_connections:
             active_connections.remove(connection)
+
+        # Propagar para SSE subscribers
+        if sse_subscribers:
+            serialized = message | {"timestamp": message.get("timestamp", datetime.now().isoformat())}
+            for queue in list(sse_subscribers):
+                try:
+                    queue.put_nowait(serialized)
+                except asyncio.QueueFull:
+                    try:
+                        queue.get_nowait()
+                    except asyncio.QueueEmpty:
+                        pass
+                    try:
+                        queue.put_nowait(serialized)
+                    except asyncio.QueueFull:
+                        continue
 
     # ==================== REST ENDPOINTS ====================
 
@@ -263,7 +286,7 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
             add_event_to_history(event)
 
             # Broadcast to WebSocket clients
-            await broadcast_to_websockets(
+            await broadcast_to_consumers(
                 {
                     "type": "esgt_event",
                     "event": asdict(event) if hasattr(event, "__dataclass_fields__") else dict(event),
@@ -305,7 +328,7 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
             new_state = arousal.get_current_arousal()
 
             # Broadcast to WebSocket clients
-            await broadcast_to_websockets(
+            await broadcast_to_consumers(
                 {
                     "type": "arousal_change",
                     "arousal": new_state.arousal,
@@ -456,8 +479,57 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
 
     # ==================== PROMETHEUS METRICS ENDPOINT (FASE VII) ====================
 
-    # Add Prometheus /metrics endpoint
     router.add_route("/metrics", get_metrics_handler(), methods=["GET"])
+
+    # ==================== SSE STREAM ====================
+
+    async def _sse_event_stream(request: Request, queue: asyncio.Queue[dict[str, Any]]):
+        """Gerador SSE que transmite eventos enquanto a conexão permanecer ativa."""
+
+        heartbeat_interval = 15.0
+        last_heartbeat = asyncio.get_event_loop().time()
+
+        try:
+            while True:
+                if await request.is_disconnected():
+                    break
+
+                try:
+                    message = await asyncio.wait_for(queue.get(), timeout=heartbeat_interval)
+                except asyncio.TimeoutError:
+                    now_iso = datetime.now().isoformat()
+                    message = {"type": "heartbeat", "timestamp": now_iso}
+
+                payload = f"data: {json.dumps(message)}\n\n"
+                yield payload.encode("utf-8")
+
+                last_heartbeat = asyncio.get_event_loop().time()
+
+                # Enforce heartbeat in case of quiet stream
+                if asyncio.get_event_loop().time() - last_heartbeat >= heartbeat_interval:
+                    heartbeat = {"type": "heartbeat", "timestamp": datetime.now().isoformat()}
+                    yield f"data: {json.dumps(heartbeat)}\n\n".encode("utf-8")
+        finally:
+            if queue in sse_subscribers:
+                sse_subscribers.remove(queue)
+
+    @router.get("/stream/sse")
+    async def stream_sse(request: Request):
+        """Endpoint SSE para cockpit e frontend React."""
+        queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=250)
+        sse_subscribers.append(queue)
+
+        initial_state = {
+            "type": "connection_ack",
+            "timestamp": datetime.now().isoformat(),
+            "recent_events": len(event_history),
+        }
+        queue.put_nowait(initial_state)
+
+        return StreamingResponse(
+            _sse_event_stream(request, queue),
+            media_type="text/event-stream",
+        )
 
     # ==================== WEBSOCKET ENDPOINT ====================
 
@@ -502,5 +574,46 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
             print(f"WebSocket error: {e}")
             if websocket in active_connections:
                 active_connections.remove(websocket)
+
+    # ==================== BACKGROUND BROADCAST LOOP ====================
+
+    async def _periodic_state_broadcast():
+        """Envia snapshot periódico do estado para consumidores."""
+        while True:
+            await asyncio.sleep(5.0)
+            try:
+                if not consciousness_system:
+                    continue
+
+                tig = consciousness_system.get("tig")
+                esgt = consciousness_system.get("esgt")
+                arousal = consciousness_system.get("arousal")
+
+                arousal_state = None
+                if arousal and hasattr(arousal, "get_current_arousal"):
+                    arousal_state = arousal.get_current_arousal()
+
+                snapshot = {
+                    "type": "state_snapshot",
+                    "timestamp": datetime.now().isoformat(),
+                    "arousal": getattr(arousal_state, "arousal", None),
+                    "esgt_active": getattr(esgt, "_running", False),
+                    "events_count": len(event_history),
+                }
+                await broadcast_to_consumers(snapshot)
+            except Exception:
+                continue
+
+    background_tasks: list[asyncio.Task] = []
+
+    @router.on_event("startup")
+    async def _start_background_tasks():
+        background_tasks.append(asyncio.create_task(_periodic_state_broadcast()))
+
+    @router.on_event("shutdown")
+    async def _stop_background_tasks():
+        for task in background_tasks:
+            task.cancel()
+        background_tasks.clear()
 
     return router

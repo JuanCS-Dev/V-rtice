@@ -814,6 +814,7 @@ func runPredictHealth(cmd *cobra.Command, args []string) error {
 
 var (
 	consciousnessEndpoint string
+	consciousnessStreamURL string
 	esgtLimit             int
 	esgtNovelty           float64
 	esgtRelevance         float64
@@ -1085,6 +1086,9 @@ func runConsciousnessMetrics(cmd *cobra.Command, args []string) error {
 
 func runConsciousnessWatch(cmd *cobra.Command, args []string) error {
 	client := maximus.NewConsciousnessClient(consciousnessEndpoint)
+	if consciousnessStreamURL != "" {
+		client.WithStreamURL(consciousnessStreamURL)
+	}
 	styles := visual.DefaultStyles()
 
 	// Print header
@@ -1342,6 +1346,7 @@ func init() {
 
 	// Consciousness flags
 	maximusConsciousnessCmd.PersistentFlags().StringVar(&consciousnessEndpoint, "consciousness-endpoint", "http://localhost:8022", "Consciousness API endpoint")
+	maximusConsciousnessCmd.PersistentFlags().StringVar(&consciousnessStreamURL, "consciousness-stream-url", "", "Override streaming endpoint (SSE/WebSocket)")
 
 	// ESGT flags
 	consciousnessESGTEventsCmd.Flags().IntVar(&esgtLimit, "limit", 20, "Maximum number of events (1-100)")

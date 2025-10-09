@@ -16,7 +16,17 @@
  * REGRA: NO MOCK, NO PLACEHOLDER - Dados REAIS via API
  */
 
-const CONSCIOUSNESS_BASE_URL = 'http://localhost:8001/api/consciousness';
+const env = typeof import.meta !== 'undefined' ? import.meta.env : process.env;
+
+const resolveBase = (value, fallback) => {
+  if (!value) return fallback;
+  return value.endsWith('/') ? value.slice(0, -1) : value;
+};
+
+const CONSCIOUSNESS_BASE_URL = `${resolveBase(env?.VITE_CONSCIOUSNESS_API_URL || env?.VITE_API_URL || 'http://localhost:8001', 'http://localhost:8001')}/api/consciousness`;
+const CONSCIOUSNESS_GATEWAY_URL = resolveBase(env?.VITE_API_GATEWAY_URL || env?.VITE_API_URL || 'http://localhost:8000', 'http://localhost:8000');
+
+const getApiKey = () => env?.VITE_API_KEY || (typeof localStorage !== 'undefined' ? localStorage.getItem('MAXIMUS_API_KEY') : '') || '';
 
 /**
  * ============================================================================
@@ -176,7 +186,9 @@ export const getConsciousnessMetrics = async () => {
  * @returns {WebSocket} Conexão WebSocket
  */
 export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
-  const wsUrl = 'ws://localhost:8001/api/consciousness/ws';
+  const apiKey = getApiKey();
+  const wsBase = CONSCIOUSNESS_GATEWAY_URL.replace(/^http/, 'ws');
+  const wsUrl = `${wsBase}/stream/consciousness/ws${apiKey ? `?api_key=${apiKey}` : ''}`;
 
   try {
     const ws = new WebSocket(wsUrl);
@@ -198,19 +210,6 @@ export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
       console.error('❌ WebSocket error:', error);
       if (onError) onError(error);
     };
-
-    ws.onclose = () => {
-      console.log('🔌 Consciousness WebSocket disconnected');
-    };
-
-    // Heartbeat/ping para manter conexão viva
-    const pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'ping' }));
-      } else {
-        clearInterval(pingInterval);
-      }
-    }, 25000); // 25s (antes do timeout de 30s do servidor)
 
     return ws;
   } catch (error) {

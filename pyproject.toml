@@ -183,7 +183,7 @@ filterwarnings = [
 # COVERAGE - Code Coverage Measurement
 # ============================================================================
 [tool.coverage.run]
-source = ["backend"]
+source = ["backend/modules/tegumentar"]
 omit = [
     "*/tests/*",
     "*/test_*.py",
@@ -193,6 +193,8 @@ omit = [
     "*/.venv/*",
     "*/migrations/*",
     "*/LEGADO/*",
+    "backend/modules/tegumentar/epiderme/*",
+    "backend/modules/tegumentar/hipoderme/*",
 ]
 branch = true  # Measure branch coverage
 

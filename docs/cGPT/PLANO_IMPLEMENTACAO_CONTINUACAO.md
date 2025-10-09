@@ -213,29 +213,30 @@ Este plano detalha as ações necessárias para completar a Sessão 01 e avança
 
 #### Sprint 2.2: Streaming Consciente
 **Duração**: 2-3 dias  
-**Prioridade**: CRÍTICA
+**Prioridade**: CRÍTICA  
+**Status**: ✅ Implementado (Gateway + SSE/WebSocket)
 
 **Tarefas:**
 1. Implementar servidor de streaming:
-   - Escolher tecnologia (WebSocket vs gRPC-Web)
-   - Implementar endpoint no API Gateway
-   - Conectar com métricas MAXIMUS
+   - ✅ Endpoints `/api/consciousness/ws` (núcleo) e `/stream/consciousness/ws|sse` (API Gateway)
+   - ✅ Broadcast unificado com métricas Prometheus e heartbeats
 
 2. Implementar clientes:
-   - Cliente WebSocket no frontend React
-   - Cliente no vcli-go TUI
+   - ✅ Hook React `useConsciousnessStream` (SSE + fallback WS)
+   - ✅ Painel React consumindo stream via Gateway
+   - ⏳ Ajuste vcli-go TUI para novo gateway (backlog)
 
 3. Otimizar performance:
-   - Reduzir latência < 500ms
-   - Implementar backpressure
-   - Adicionar reconexão automática
+   - 🔄 Benchmarks < 500 ms agendados no Adendo 3
+   - 🔄 Backpressure/Reconexão avaliados durante testes de carga
 
 4. Testes de carga
+   - 🔄 Executar via k6 (ver Adendo 3)
 
 **Entregável:**
-- Streaming funcional com métricas em tempo real
-- Documentação técnica
-- Relatório de performance
+- Streaming funcional com métricas em tempo real (React + gateway)
+- Documentação técnica atualizada (`docs/BLUEPRINT_05_MODULO_TEGUMENTAR.md`)
+- Plano de desempenho registrado no Adendo 3
 
 #### Sprint 2.3: Integração TUI
 **Duração**: 1-2 dias  

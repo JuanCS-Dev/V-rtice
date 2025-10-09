@@ -15,6 +15,10 @@
   - Arquitetura gRPC → Bridge → SSE/WebSocket.
   - Contrato de payload unificado (eventType, metrics, context).
   - Métricas do bridge (connected_clients, delivery_latency, etc.).
+- **Streaming Implementado**:
+  - Gateway `/stream/consciousness/{sse,ws}` + broadcast unificado.
+  - Hook `useConsciousnessStream` (SSE + fallback WebSocket) integrado ao dashboard React.
+  - Métricas Prometheus expostas `tegumentar_*`, plano de staging documentado.
 - **Guia de Integração UX** (`docs/cGPT/session-02/thread-a/COCKPIT_INTEGRATION_GUIDE.md`):
   - Componentes: Pulse Bar, Safety Sentinel, Skill Matrix, Event Timeline.
   - Estados (normal, aviso, crítico, offline) e fallbacks.

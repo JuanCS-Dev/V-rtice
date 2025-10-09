@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -15,6 +17,7 @@ import (
 // ConsciousnessClient handles communication with MAXIMUS Consciousness API
 type ConsciousnessClient struct {
 	baseURL    string
+	streamURL  string
 	httpClient *http.Client
 }
 
@@ -24,12 +27,24 @@ func NewConsciousnessClient(baseURL string) *ConsciousnessClient {
 		baseURL = "http://localhost:8022"
 	}
 
+	streamURL := os.Getenv("MAXIMUS_CONSCIOUSNESS_STREAM_URL")
+	if streamURL == "" {
+		streamURL = os.Getenv("MAXIMUS_STREAM_URL")
+	}
+	streamURL = strings.TrimSuffix(streamURL, "/")
+
 	return &ConsciousnessClient{
-		baseURL: baseURL,
+		baseURL:   strings.TrimSuffix(baseURL, "/"),
+		streamURL: streamURL,
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
 	}
+}
+
+// WithStreamURL overrides the stream endpoint used for WebSocket connections
+func (c *ConsciousnessClient) WithStreamURL(url string) {
+    c.streamURL = strings.TrimSuffix(url, "/")
 }
 
 // ==================== RESPONSE TYPES ====================
@@ -330,19 +345,10 @@ type EventCallback func(event *WSEvent) error
 
 // ConnectWebSocket connects to the consciousness WebSocket endpoint
 func (c *ConsciousnessClient) ConnectWebSocket(callback EventCallback) error {
-	// Parse base URL and convert to WebSocket URL
-	parsedURL, err := url.Parse(c.baseURL)
+	wsURL, err := c.buildWebSocketURL()
 	if err != nil {
-		return fmt.Errorf("invalid base URL: %w", err)
+		return err
 	}
-
-	// Convert http:// to ws://
-	wsScheme := "ws"
-	if parsedURL.Scheme == "https" {
-		wsScheme = "wss"
-	}
-
-	wsURL := fmt.Sprintf("%s://%s/api/consciousness/ws", wsScheme, parsedURL.Host)
 
 	// Connect to WebSocket
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
@@ -368,6 +374,66 @@ func (c *ConsciousnessClient) ConnectWebSocket(callback EventCallback) error {
 			return fmt.Errorf("callback error: %w", err)
 		}
 	}
+}
+
+func getStreamingAPIKey() string {
+	if key := os.Getenv("MAXIMUS_API_KEY"); key != "" {
+		return key
+	}
+	return os.Getenv("API_KEY")
+}
+
+func (c *ConsciousnessClient) buildWebSocketURL() (string, error) {
+    if c.streamURL != "" {
+        wsURL := c.streamURL
+        if !strings.HasPrefix(wsURL, "ws") {
+            if strings.HasPrefix(wsURL, "https://") {
+                wsURL = "wss://" + wsURL[len("https://"):]
+            } else if strings.HasPrefix(wsURL, "http://") {
+                wsURL = "ws://" + wsURL[len("http://"):]
+            }
+        }
+        if !strings.Contains(wsURL, "/stream/consciousness") && !strings.Contains(wsURL, "/ws") {
+            wsURL = strings.TrimSuffix(wsURL, "/") + "/stream/consciousness/ws"
+        }
+        if apiKey := getStreamingAPIKey(); apiKey != "" && !strings.Contains(wsURL, "api_key=") {
+            delimiter := "?"
+            if strings.Contains(wsURL, "?") {
+                delimiter = "&"
+            }
+            wsURL = fmt.Sprintf("%s%sapi_key=%s", wsURL, delimiter, apiKey)
+        }
+        return wsURL, nil
+    }
+
+    parsedURL, err := url.Parse(c.baseURL)
+    if err != nil {
+        return "", fmt.Errorf("invalid base URL: %w", err)
+    }
+
+    wsScheme := "ws"
+    if parsedURL.Scheme == "https" {
+        wsScheme = "wss"
+    }
+
+    path := strings.TrimSuffix(parsedURL.Path, "/")
+    if path == "" {
+        path = "/stream/consciousness/ws"
+    } else {
+        path = fmt.Sprintf("%s/ws", path)
+    }
+
+    wsURL := fmt.Sprintf("%s://%s%s", wsScheme, parsedURL.Host, path)
+
+    if apiKey := getStreamingAPIKey(); apiKey != "" {
+        delimiter := "?"
+        if strings.Contains(wsURL, "?") {
+            delimiter = "&"
+        }
+        wsURL = fmt.Sprintf("%s%sapi_key=%s", wsURL, delimiter, apiKey)
+    }
+
+    return wsURL, nil
 }
 
 // ParseESGTEvent parses ESGT event data from WebSocket event

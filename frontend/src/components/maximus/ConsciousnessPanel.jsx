@@ -11,11 +11,11 @@
  * - Manual consciousness control
  *
  * Design Philosophy: Consciousness as Observable Phenomenon
- * Port: 8001 (maximus_core_service)
+ * Stream via API Gateway (`/stream/consciousness/{sse,ws}`)
  * REGRA: NO MOCK, NO PLACEHOLDER - Dados REAIS via WebSocket + API
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import {
   getConsciousnessState,
@@ -24,11 +24,11 @@ import {
   getConsciousnessMetrics,
   triggerESGT,
   adjustArousal,
-  connectConsciousnessWebSocket,
   formatArousalLevel,
   formatEventTime
 } from '../../api/consciousness';
 import { SafetyMonitorWidget } from './widgets/SafetyMonitorWidget';
+import { useConsciousnessStream } from '../../hooks/useConsciousnessStream';
 import './ConsciousnessPanel.css';
 
 export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
@@ -46,7 +46,7 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
   // ═══════════════════════════════════════════════════════════════════════
   const [selectedView, setSelectedView] = useState('overview'); // overview, events, control
   const [isLoading, setIsLoading] = useState(true);
-  const [wsConnected, setWsConnected] = useState(false);
+  const [streamStatus, setStreamStatus] = useState({ connected: false, type: 'idle' });
   const [lastUpdate, setLastUpdate] = useState(null);
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -59,7 +59,6 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
   const [arousalDuration, setArousalDuration] = useState(5.0);
   const [triggerResult, setTriggerResult] = useState(null);
 
-  const wsRef = useRef(null);
   const eventsEndRef = useRef(null);
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -68,22 +67,17 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
 
   useEffect(() => {
     loadInitialData();
-    connectWebSocket();
-
-    // Polling de backup (caso WebSocket falhe)
+    // Polling de backup (caso stream falhe)
     const interval = setInterval(() => {
-      if (!wsConnected) {
+      if (!isConnected) {
         loadInitialData();
       }
     }, 5000);
 
     return () => {
       clearInterval(interval);
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
     };
-  }, []);
+  }, [isConnected]);
 
   const loadInitialData = async () => {
     setIsLoading(true);
@@ -120,16 +114,7 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
   // WEBSOCKET - Real-time Updates
   // ═══════════════════════════════════════════════════════════════════════
 
-  const connectWebSocket = () => {
-    const ws = connectConsciousnessWebSocket(handleWebSocketMessage, handleWebSocketError);
-    if (ws) {
-      wsRef.current = ws;
-      ws.addEventListener('open', () => setWsConnected(true));
-      ws.addEventListener('close', () => setWsConnected(false));
-    }
-  };
-
-  const handleWebSocketMessage = (message) => {
+  const handleStreamMessage = useCallback((message) => {
     setLastUpdate(new Date());
 
     switch (message.type) {
@@ -160,14 +145,23 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
         break;
 
       default:
-        console.log('📨 Unknown WebSocket message:', message);
+        console.log('📨 Unknown stream message:', message);
     }
-  };
+  }, []);
 
-  const handleWebSocketError = (error) => {
-    console.error('❌ WebSocket error:', error);
-    setWsConnected(false);
-  };
+  const handleStreamError = useCallback((error) => {
+    console.error('❌ Consciousness stream error:', error);
+  }, []);
+
+  const { connectionType, isConnected } = useConsciousnessStream({
+    enabled: true,
+    onMessage: handleStreamMessage,
+    onError: handleStreamError
+  });
+
+  useEffect(() => {
+    setStreamStatus({ connected: !!isConnected && connectionType !== 'idle', type: connectionType });
+  }, [connectionType, isConnected]);
 
   const addNewEvent = (event) => {
     setESGTEvents(prev => {
@@ -226,7 +220,7 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
         <div className="header-left">
           <h2 className="consciousness-title">
             🧠 Consciousness Monitor
-            <span className={`status-dot ${wsConnected ? 'connected' : 'disconnected'}`}></span>
+            <span className={`status-dot ${streamStatus.connected ? 'connected' : 'disconnected'}`}></span>
           </h2>
           <p className="consciousness-subtitle">
             Real-time artificial consciousness state
@@ -409,8 +403,8 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
               </div>
               <div className="stat-row">
                 <span className="stat-label">WebSocket:</span>
-                <span className={`stat-value ${wsConnected ? 'success' : 'error'}`}>
-                  {wsConnected ? '🟢 Connected' : '🔴 Disconnected'}
+                <span className={`stat-value ${streamStatus.connected ? 'success' : 'error'}`}>
+                  {streamStatus.connected ? `🟢 Connected (${streamStatus.type.toUpperCase()})` : '🔴 Disconnected'}
                 </span>
               </div>
             </div>
@@ -693,8 +687,8 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
               </div>
               <div className="info-item">
                 <span className="info-label">WebSocket:</span>
-                <span className={`info-value ${wsConnected ? 'success' : 'error'}`}>
-                  {wsConnected ? '🟢 Connected' : '🔴 Disconnected'}
+                <span className={`info-value ${streamStatus.connected ? 'success' : 'error'}`}>
+                  {streamStatus.connected ? `🟢 Connected (${streamStatus.type.toUpperCase()})` : '🔴 Disconnected'}
                 </span>
               </div>
               <div className="info-item">

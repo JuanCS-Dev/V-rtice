@@ -13,11 +13,13 @@ complexity of the underlying microservices architecture.
 import os
 from typing import Dict
 
+import asyncio
 import httpx
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import APIKeyHeader
+from starlette.websockets import WebSocketDisconnect
 
 app = FastAPI(title="Maximus API Gateway", version="1.0.0")
 
@@ -27,6 +29,8 @@ CHEMICAL_SENSING_SERVICE_URL = os.getenv("CHEMICAL_SENSING_SERVICE_URL", "http:/
 SOMATOSENSORY_SERVICE_URL = os.getenv("SOMATOSENSORY_SERVICE_URL", "http://localhost:8002")
 VISUAL_CORTEX_SERVICE_URL = os.getenv("VISUAL_CORTEX_SERVICE_URL", "http://localhost:8003")
 AUDITORY_CORTEX_SERVICE_URL = os.getenv("AUDITORY_CORTEX_SERVICE_URL", "http://localhost:8004")
+
+CONSCIOUSNESS_SERVICE_BASE = os.getenv("CONSCIOUSNESS_SERVICE_URL", MAXIMUS_CORE_SERVICE_URL)
 
 # API Key for authentication (simple example)
 API_KEY_NAME = "X-API-Key"
@@ -148,6 +152,68 @@ async def route_auditory_cortex_service(path: str, request: Request, api_key: st
     return await _proxy_request(AUDITORY_CORTEX_SERVICE_URL, path, request)
 
 
+@app.get("/stream/consciousness/sse")
+async def stream_consciousness_sse(request: Request):
+    """Proxy SSE stream da consciência para consumidores externos."""
+    if not _is_valid_api_key(request.headers.get(API_KEY_NAME), request.query_params.get("api_key")):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    backend_url = f"{CONSCIOUSNESS_SERVICE_BASE}/api/consciousness/stream/sse"
+
+    async def event_generator():
+        async with httpx.AsyncClient(timeout=None) as client:
+            headers = _extract_forward_headers(request)
+            async with client.stream("GET", backend_url, headers=headers) as resp:
+                resp.raise_for_status()
+                async for chunk in resp.aiter_bytes():
+                    if await request.is_disconnected():
+                        break
+                    yield chunk
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@app.websocket("/stream/consciousness/ws")
+async def stream_consciousness_ws(websocket: WebSocket):
+    """Proxy WebSocket stream da consciência."""
+    api_key = websocket.headers.get(API_KEY_NAME) or websocket.query_params.get("api_key")
+    if not _is_valid_api_key(api_key, None):
+        await websocket.close(code=1008)
+        return
+
+    await websocket.accept()
+
+    backend_ws_url = _build_consciousness_ws_url(CONSCIOUSNESS_SERVICE_BASE)
+    headers = {}
+
+    async with httpx.AsyncClient(timeout=None) as client:
+        try:
+            async with client.websocket_connect(backend_ws_url, headers=headers) as backend_ws:
+
+                async def client_to_backend():
+                    try:
+                        while True:
+                            message = await websocket.receive_text()
+                            await backend_ws.send_text(message)
+                    except WebSocketDisconnect:
+                        await backend_ws.aclose()
+                    except Exception:
+                        await backend_ws.aclose()
+
+                async def backend_to_client():
+                    try:
+                        while True:
+                            message = await backend_ws.receive_text()
+                            await websocket.send_text(message)
+                    except (httpx.WebSocketReadError, httpx.WebSocketDisconnect):
+                        await websocket.close()
+                    except Exception:
+                        await websocket.close()
+
+                await asyncio.gather(client_to_backend(), backend_to_client())
+        except Exception:
+            await websocket.close()
+
+
 async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResponse:
     """Proxies the incoming request to the specified backend service.
 
@@ -189,6 +255,32 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
                 status_code=e.response.status_code,
                 detail=f"Backend service error: {e.response.text}",
             )
+
+
+def _extract_forward_headers(request: Request) -> Dict[str, str]:
+    """Replica headers relevantes para downstream (exclui host)."""
+    return {
+        k: v
+        for k, v in request.headers.items()
+        if k.lower() not in {"host", "content-length", "accept-encoding"}
+    }
+
+
+def _build_consciousness_ws_url(base_url: str) -> str:
+    """Converte URL HTTP → WS/WSS preservando path."""
+    if base_url.startswith("https://"):
+        ws_base = "wss://" + base_url[len("https://") :]
+    elif base_url.startswith("http://"):
+        ws_base = "ws://" + base_url[len("http://") :]
+    else:
+        ws_base = base_url
+    return f"{ws_base}/api/consciousness/ws"
+
+
+def _is_valid_api_key(header_value: str | None, query_value: str | None) -> bool:
+    """Valida API key via header ou query string."""
+    key = header_value or query_value
+    return key == VALID_API_KEY if VALID_API_KEY else True
 
 
 if __name__ == "__main__":
