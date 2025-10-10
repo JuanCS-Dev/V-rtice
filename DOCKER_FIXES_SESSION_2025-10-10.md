@@ -27,9 +27,11 @@ backend/services/hcl_monitor_service/requirements.txt # Adicionar psutil
 
 ## Status Atual
 
-- ⏳ Build em andamento: maximus_core_service + hcl_monitor_service
-- 📊 18 serviços ainda em restart loop (outros problemas)
-- ✅ 2 serviços sendo corrigidos nesta sessão
+- ✅ Build completo: maximus_core_service + hcl_monitor_service
+- ✅ **maximus-core**: UP and RUNNING (consciousness initializing)
+- ✅ **hcl-monitor**: UP and RUNNING (collecting metrics, health 200 OK)
+- ⚠️ 16 serviços ainda em restart loop (problemas similares esperados)
+- 📊 Desbl oqueio parcial - load testing pode começar com 2 serviços funcionais
 
 ## Próximos Passos
 
