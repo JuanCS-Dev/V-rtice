@@ -1,0 +1,89 @@
+=== predictive-threat-hunting-service ===
+Logs:
+  File "/app/api.py", line 17, in <module>
+  File "/app/predictive_core.py", line 18, in <module>
+ModuleNotFoundError: No module named 'numpy'
+Container ID:
+f34185dfdc30
+
+=== autonomous-investigation-service ===
+Logs:
+  File "/app/api.py", line 17, in <module>
+  File "/app/investigation_core.py", line 16, in <module>
+ModuleNotFoundError: No module named 'numpy'
+Container ID:
+adaeb53c010b
+
+=== memory-consolidation-service ===
+Logs:
+  File "/app/api.py", line 18, in <module>
+  File "/app/consolidation_core.py", line 30, in <module>
+ModuleNotFoundError: No module named 'numpy'
+Container ID:
+ab388db4fc80
+
+=== adaptive-immunity-service ===
+Logs:
+  File "/app/api.py", line 18, in <module>
+  File "/app/adaptive_core.py", line 31, in <module>
+ModuleNotFoundError: No module named 'numpy'
+Container ID:
+cd50d7864570
+
+=== narrative-analysis-service ===
+Logs:
+  File "/app/api.py", line 18, in <module>
+  File "/app/narrative_core.py", line 36, in <module>
+ModuleNotFoundError: No module named 'numpy'
+Container ID:
+4effd1dcb706
+
+=== vertice-narrative-filter ===
+Logs:
+  File "/app/api.py", line 19, in <module>
+  File "/app/cache_manager.py", line 14, in <module>
+ModuleNotFoundError: No module named 'redis'
+Container ID:
+5225aefbae9b
+
+=== hcl-analyzer ===
+Logs:
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/app/main.py", line 18, in <module>
+Container ID:
+9699c408eec1
+178fc7b47346
+
+=== rte-service ===
+Logs:
+  File "/app/main.py", line 23, in <module>
+  File "/app/fast_ml.py", line 23, in <module>
+ModuleNotFoundError: No module named 'numpy'
+Container ID:
+0167c7203ee0
+
+=== maximus-oraculo ===
+Logs:
+ERROR:    Error loading ASGI app. Could not import module "main".
+ERROR:    Error loading ASGI app. Could not import module "main".
+ERROR:    Error loading ASGI app. Could not import module "main".
+Container ID:
+ccb5e6a03ff8
+
+=== maximus-eureka ===
+Logs:
+ERROR:    Error loading ASGI app. Could not import module "main".
+ERROR:    Error loading ASGI app. Could not import module "main".
+ERROR:    Error loading ASGI app. Could not import module "main".
+Container ID:
+355349d69676
+
+=== hpc-service ===
+Logs:
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/app/main.py", line 17, in <module>
+Container ID:
+88cd6d7e3bbf
+
