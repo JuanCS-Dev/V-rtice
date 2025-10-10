@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package platelet;
+
+option go_package = "github.com/verticedev/coagulation/proto/platelet";
+
+// PlateletService defines P2P communication between platelet agents.
+//
+// Biological Analogy: Platelets communicate via chemical signals (ADP, TXA2)
+// to coordinate aggregation. This service enables digital equivalents.
+service PlateletService {
+  // ActivationSignal broadcasts platelet activation to peers.
+  // Like ADP/TXA2 release triggering nearby platelet recruitment.
+  rpc ActivationSignal(ActivationRequest) returns (ActivationResponse);
+  
+  // HealthCheck queries peer platelet health status.
+  // Used by Protein C/S regulation to determine healthy vs compromised.
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // AggregateStatus subscribes to real-time aggregation updates.
+  // Server-streaming for continuous platelet state monitoring.
+  rpc AggregateStatus(AggregateRequest) returns (stream AggregateUpdate);
+}
+
+// ActivationRequest sent when platelet activates.
+message ActivationRequest {
+  string agent_id = 1;
+  string breach_id = 2;
+  double anomaly_score = 3;
+  double severity = 4;
+  string location = 5; // hostname/IP
+  int64 timestamp = 6;
+  
+  // Phenomenology metadata
+  double emotional_valence = 7; // -1.0 to 1.0
+  string cascade_stage = 8; // "initiation", "amplification", etc.
+}
+
+// ActivationResponse acknowledges signal receipt.
+message ActivationResponse {
+  bool acknowledged = 1;
+  string peer_id = 2;
+  PlateletState peer_state = 3;
+  string message = 4;
+}
+
+// HealthCheckRequest queries peer health.
+message HealthCheckRequest {
+  string requester_id = 1;
+  string target_id = 2; // Empty = broadcast to all
+}
+
+// HealthCheckResponse returns health status.
+message HealthCheckResponse {
+  string agent_id = 1;
+  bool is_healthy = 2;
+  double health_score = 3; // 0.0-1.0
+  PlateletState state = 4;
+  int64 timestamp = 5;
+  
+  // Detailed health indicators
+  HealthIndicators indicators = 6;
+}
+
+// HealthIndicators provide detailed system health.
+message HealthIndicators {
+  double cpu_usage = 1; // 0.0-1.0
+  double memory_usage = 2; // 0.0-1.0
+  int32 process_anomalies = 3;
+  int32 network_anomalies = 4;
+  int32 file_anomalies = 5;
+  bool integrity_ok = 6;
+}
+
+// AggregateRequest starts aggregation monitoring.
+message AggregateRequest {
+  string subscriber_id = 1;
+  string breach_id = 2; // Filter by breach_id
+}
+
+// AggregateUpdate streams aggregation state changes.
+message AggregateUpdate {
+  string breach_id = 1;
+  int32 aggregated_count = 2; // Number of aggregated platelets
+  repeated string agent_ids = 3;
+  double combined_severity = 4;
+  AggregationState state = 5;
+  int64 timestamp = 6;
+}
+
+// PlateletState represents agent state.
+enum PlateletState {
+  STATE_UNKNOWN = 0;
+  STATE_RESTING = 1;
+  STATE_ACTIVATED = 2;
+  STATE_AGGREGATED = 3;
+}
+
+// AggregationState represents collective state.
+enum AggregationState {
+  AGGREGATION_NONE = 0;
+  AGGREGATION_FORMING = 1;
+  AGGREGATION_STABLE = 2;
+  AGGREGATION_DISSOLVING = 3;
+}
+
+// Anomaly message for detailed anomaly reporting.
+message Anomaly {
+  string id = 1;
+  string type = 2; // "process", "network", "file"
+  string value = 3;
+  double score = 4;
+  string description = 5;
+  int64 timestamp = 6;
+  map<string, string> metadata = 7;
+}
