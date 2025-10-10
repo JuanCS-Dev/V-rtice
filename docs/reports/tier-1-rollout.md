@@ -432,6 +432,6 @@ cryptography==43.0.1
 ---
 
 **Related Documents**:
-- [DEPENDENCY_GOVERNANCE_FRAMEWORK.md](./DEPENDENCY_GOVERNANCE_FRAMEWORK.md)
-- [DEPENDENCY_FRAMEWORK_ROLLOUT_GUIDE.md](./DEPENDENCY_FRAMEWORK_ROLLOUT_GUIDE.md)
+- [DEPENDENCY_GOVERNANCE_FRAMEWORK.md](../../docs/architecture/dependency-governance-framework.md)
+- [DEPENDENCY_FRAMEWORK_ROLLOUT_GUIDE.md](../../docs/guides/dependency-framework-rollout.md)
 - [active_immune_core/DEPENDENCY_GOVERNANCE_IMPLEMENTATION_REPORT.md](./backend/services/active_immune_core/DEPENDENCY_GOVERNANCE_IMPLEMENTATION_REPORT.md)

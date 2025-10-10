@@ -510,9 +510,9 @@ DOUTRINA VÉRTICE: ✅ 100% COMPLIANT
 ---
 
 **Related Documents**:
-- [DEPENDENCY_GOVERNANCE_FRAMEWORK.md](./DEPENDENCY_GOVERNANCE_FRAMEWORK.md) - Framework overview
-- [DEPENDENCY_FRAMEWORK_COMPLETE_REPORT.md](./DEPENDENCY_FRAMEWORK_COMPLETE_REPORT.md) - Full rollout report
-- [DEPENDENCY_FRAMEWORK_VALIDATION_REPORT.md](./DEPENDENCY_FRAMEWORK_VALIDATION_REPORT.md) - Validation results
+- [DEPENDENCY_GOVERNANCE_FRAMEWORK.md](../../docs/architecture/dependency-governance-framework.md) - Framework overview
+- [DEPENDENCY_FRAMEWORK_COMPLETE_REPORT.md](../../docs/reports/dependency-framework-complete.md) - Full rollout report
+- [DEPENDENCY_FRAMEWORK_VALIDATION_REPORT.md](../../docs/reports/validations/dependency-framework-validation.md) - Validation results
 - [DEPENDENCY_POLICY.md](./backend/services/active_immune_core/DEPENDENCY_POLICY.md) - Governance policy
 - [DEPENDENCY_EMERGENCY_RUNBOOK.md](./backend/services/active_immune_core/DEPENDENCY_EMERGENCY_RUNBOOK.md) - P0 procedures
 

@@ -350,9 +350,9 @@ make build
 - [Integration Example](backend/services/maximus_core_service/consciousness/integration_example.py)
 
 ### Ethical AI
-- [Ethical AI Executive Summary](ETHICAL_AI_EXECUTIVE_SUMMARY.md)
-- [PHASE 4.1 Differential Privacy](PHASE_4_1_DP_COMPLETE.md)
-- [PHASE 5 Human-in-the-Loop](PHASE_5_HITL_COMPLETE.md)
+- [Ethical AI Executive Summary](docs/reports/ethical-ai-executive-summary.md)
+- [PHASE 4.1 Differential Privacy](docs/phases/completed/phase-4-1-differential-privacy.md)
+- [PHASE 5 Human-in-the-Loop](docs/phases/completed/phase-5-human-in-the-loop.md)
 
 ### vCLI Go
 - [vCLI Go 2.0 README](vcli-go/README.md)

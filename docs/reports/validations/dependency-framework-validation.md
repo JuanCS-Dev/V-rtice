@@ -583,8 +583,8 @@ The framework is **PRODUCTION-READY** and successfully detecting vulnerabilities
 ---
 
 **Related Documents**:
-- [DEPENDENCY_GOVERNANCE_FRAMEWORK.md](./DEPENDENCY_GOVERNANCE_FRAMEWORK.md)
-- [DEPENDENCY_FRAMEWORK_COMPLETE_REPORT.md](./DEPENDENCY_FRAMEWORK_COMPLETE_REPORT.md)
+- [DEPENDENCY_GOVERNANCE_FRAMEWORK.md](../../../docs/architecture/dependency-governance-framework.md)
+- [DEPENDENCY_FRAMEWORK_COMPLETE_REPORT.md](../../../docs/reports/dependency-framework-complete.md)
 - [DEPENDENCY_POLICY.md](./backend/services/active_immune_core/DEPENDENCY_POLICY.md)
 - [DEPENDENCY_EMERGENCY_RUNBOOK.md](./backend/services/active_immune_core/DEPENDENCY_EMERGENCY_RUNBOOK.md)
 
