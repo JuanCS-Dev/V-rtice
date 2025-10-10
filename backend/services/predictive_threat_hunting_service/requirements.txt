@@ -51,3 +51,4 @@ typing-inspection==0.4.2
 uvicorn==0.37.0
     # via predictive-threat-hunting-service (pyproject.toml)
 numpy>=1.24.0
+scipy>=1.11.0

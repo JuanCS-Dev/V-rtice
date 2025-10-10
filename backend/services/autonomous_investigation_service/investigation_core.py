@@ -46,6 +46,7 @@ class TTP(Enum):
     # Discovery
     NETWORK_SCANNING = "T1046"
     # Lateral Movement
+    LATERAL_MOVEMENT = "T1021"  # Alias for REMOTE_SERVICES
     REMOTE_SERVICES = "T1021"
     # Collection
     DATA_STAGED = "T1074"
