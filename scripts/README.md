@@ -1,275 +1,147 @@
-# 🛠️ VÉRTICE - Scripts de Gerenciamento
+# 📜 Scripts Collection
 
-Scripts utilitários para gerenciar o ambiente Vértice/Maximus AI sem dor de cabeça.
-
----
-
-## 🚀 SOLUÇÃO DEFINITIVA PARA CONFLITOS DE PORTA
-
-### Problema Resolvido
-✅ **NUNCA MAIS** conflitos de porta ao iniciar o Vértice
-✅ Detecção automática de portas em uso
-✅ Liberação automática com confirmação
-✅ Validação antes de iniciar serviços
-✅ Health checks integrados
+Organized automation scripts for setup, deployment, maintenance, and testing.
 
 ---
 
-## 📁 Scripts Disponíveis
+## 📂 Structure
 
-### 1. `vertice-start.sh` ⭐ **RECOMENDADO**
-
-**O QUE FAZ**: Wrapper inteligente que substitui `docker compose up`
-
-**USO**:
-```bash
-# Uso normal - inicia tudo com validação
-./scripts/vertice-start.sh
-
-# Modo força - reinicia tudo
-./scripts/vertice-start.sh --force
-
-# Só verifica portas, não inicia
-./scripts/vertice-start.sh --check
 ```
-
-**FLUXO**:
-1. ✅ Verifica todas as portas críticas
-2. ✅ Libera automaticamente se houver conflito
-3. ✅ Para containers existentes
-4. ✅ Inicia serviços
-5. ✅ Aguarda inicialização
-6. ✅ Executa health check
-7. ✅ Mostra status final
-
-**OUTPUT ESPERADO**:
-```
-╔════════════════════════════════════════════════════════════════╗
-║          🚀 VÉRTICE/MAXIMUS AI - STARTER v2.0 🤖              ║
-╚════════════════════════════════════════════════════════════════╝
-
-▶ Passo 1/5: Validação de Portas
-
-✓ Porta 8099 disponível
-✓ Porta 8001 disponível
-✓ Todas as portas estão livres!
-
-▶ Passo 2/5: Parando Containers Existentes
-...
-
-✓ VÉRTICE INICIADO COM SUCESSO!
+scripts/
+├── setup/          # Initial setup and configuration
+├── deployment/     # Build and deployment scripts
+├── maintenance/    # System maintenance and fixes
+│   ├── cleanup/    # Cleanup automation
+│   └── backup/     # Backup scripts
+└── testing/        # Test and validation scripts
 ```
 
 ---
 
-### 2. `port-manager.sh` - Gerenciador Avançado
+## 🚀 Setup Scripts
 
-**O QUE FAZ**: Ferramenta completa de gerenciamento de portas
+**[setup-cli.sh](./setup/setup-cli.sh)**  
+Initialize CLI environment and dependencies.
 
-**USO**:
-```bash
-# Menu interativo
-./scripts/port-manager.sh
+**[setup-vertice-cli.sh](./setup/setup-vertice-cli.sh)**  
+Setup Vértice-specific CLI tools.
 
-# Comandos diretos
-./scripts/port-manager.sh check    # Verifica conflitos
-./scripts/port-manager.sh free     # Libera portas
-./scripts/port-manager.sh report   # Gera relatório
-./scripts/port-manager.sh start    # Inicia com validação
-./scripts/port-manager.sh health   # Health check
-```
-
-**FUNCIONALIDADES**:
-- 🔍 Detecta todas as 30+ portas críticas
-- 🔨 Libera portas em conflito (com confirmação)
-- 📊 Gera relatório detalhado com timestamp
-- 🚀 Inicia serviços com validação completa
-- 🏥 Health check de serviços críticos
-- 💬 Menu interativo user-friendly
-
-**EXEMPLO DE RELATÓRIO**:
-```
-═══════════════════════════════════════════════════════════
-  VÉRTICE - RELATÓRIO DE PORTAS
-  Gerado em: 2025-10-04 01:30:00
-═══════════════════════════════════════════════════════════
-
-[LIVRE]   Porta 8099 - API Gateway
-[LIVRE]   Porta 8001 - Maximus Core
-[OCUPADA] Porta 8016 - Maximus Orchestrator
-          Processo: 12345|python|uvicorn main:app
-...
-```
+**[create-main-files.sh](./setup/create-main-files.sh)**  
+Generate main project structure files.
 
 ---
 
-## 🎯 CASOS DE USO
+## 📦 Deployment Scripts
 
-### Cenário 1: Iniciar o Vértice (Uso Diário)
-```bash
-# EM VEZ DE: docker compose up -d
-# USE:
-./scripts/vertice-start.sh
-```
+**[build-categoria-a.sh](./deployment/build-categoria-a.sh)**  
+Build Category A services (core consciousness).
 
-**Vantagens**:
-- Resolve conflitos automaticamente
-- Valida tudo antes de iniciar
-- Mostra status claro
-
-### Cenário 2: Debugar Problemas de Porta
-```bash
-./scripts/port-manager.sh check
-```
-
-Mostra exatamente qual processo está usando cada porta.
-
-### Cenário 3: Liberar Portas Manualmente
-```bash
-./scripts/port-manager.sh free
-```
-
-Libera TODAS as portas do Vértice de uma vez.
-
-### Cenário 4: Gerar Relatório para Documentação
-```bash
-./scripts/port-manager.sh report
-```
-
-Cria arquivo `port-report-TIMESTAMP.txt` com estado completo.
-
-### Cenário 5: Verificar se Serviços Estão Rodando
-```bash
-./scripts/port-manager.sh health
-```
-
-Testa conexão HTTP com serviços críticos.
+**[start-maximus-ai3.sh](./deployment/start-maximus-ai3.sh)**  
+Launch MAXIMUS AI v3 system.
 
 ---
 
-## 🔧 INSTALAÇÃO
+## 🔧 Maintenance Scripts
 
-### 1. Scripts já estão prontos!
-Não precisa instalar nada, basta executar:
+**[quick-fix-docker.sh](./maintenance/quick-fix-docker.sh)**  
+Rapid Docker issue resolution.
 
-```bash
-cd /home/juan/vertice-dev
-./scripts/vertice-start.sh
-```
+**[mass-fix.sh](./maintenance/mass-fix.sh)**  
+Batch fixing across multiple services.
 
-### 2. (Opcional) Criar Alias Global
+**[fix-all-numpy.sh](./maintenance/fix-all-numpy.sh)**  
+Resolve NumPy-related issues across project.
 
-Adicione ao seu `~/.bashrc` ou `~/.zshrc`:
-
-```bash
-# Vértice Shortcuts
-alias vertice-start='/home/juan/vertice-dev/scripts/vertice-start.sh'
-alias vertice-ports='/home/juan/vertice-dev/scripts/port-manager.sh'
-alias vertice-check='/home/juan/vertice-dev/scripts/port-manager.sh check'
-alias vertice-health='/home/juan/vertice-dev/scripts/port-manager.sh health'
-```
-
-Depois execute:
-```bash
-source ~/.bashrc
-```
-
-Agora você pode usar em qualquer lugar:
-```bash
-vertice-start
-vertice-check
-vertice-health
-```
+### Cleanup
+**[gemini-cleanup-executor.sh](./maintenance/cleanup/gemini-cleanup-executor.sh)**  
+Automated cleanup using Gemini AI.
 
 ---
 
-## 📋 PORTAS GERENCIADAS
+## 🧪 Testing Scripts
 
-O script monitora **30+ portas críticas**:
+**[diagnose-all.sh](./testing/diagnose-all.sh)**  
+Comprehensive system diagnostics.
 
-| Range | Categoria | Exemplos |
-|-------|-----------|----------|
-| 8001-8037 | Core & Arsenal | Maximus Core, Offensive Tools |
-| 6000-6999 | Databases | Redis, PostgreSQL, Qdrant |
-| 3000-9999 | Monitoring | Grafana, Prometheus |
+**[validate-maximus.sh](./testing/validate-maximus.sh)**  
+MAXIMUS system validation suite.
 
-Ver lista completa em: `/PORTAS_E_SERVICOS_MAPEAMENTO.md`
-
----
-
-## 🛡️ SEGURANÇA
-
-**Scripts são seguros**:
-- ✅ Sempre pedem confirmação antes de matar processos
-- ✅ Mostram qual processo será morto
-- ✅ Não alteram configurações do sistema
-- ✅ Apenas liberam portas do Vértice (lista definida)
-- ✅ Logs completos de todas as ações
-
-**Nunca matam**:
-- Processos de sistema
-- Serviços não relacionados ao Vértice
-- Processos sem confirmação (exceto no modo --force)
+**[verify-ethical-ai.sh](./testing/verify-ethical-ai.sh)**  
+Ethical AI framework verification.
 
 ---
 
-## 🐛 TROUBLESHOOTING
+## 📝 Script Standards
 
-### "Permission denied"
+All scripts follow these principles:
+
+### Header Template
 ```bash
-chmod +x scripts/*.sh
+#!/bin/bash
+# Purpose: Clear one-line description
+# Usage: ./script.sh [args]
+# Author: MAXIMUS Team
+# Date: YYYY-MM-DD
+# Requires: List dependencies
+
+set -e  # Exit on error
+set -u  # Exit on undefined variable
 ```
 
-### "docker: command not found"
-Instale Docker e Docker Compose.
+### Quality Requirements
+- ✅ Error handling (`set -e`, checks)
+- ✅ Usage documentation
+- ✅ Dependency validation
+- ✅ Logging/output
+- ✅ Exit codes (0=success)
 
-### "Port still in use after free"
-```bash
-# Tente manualmente
-lsof -ti:8001 | xargs kill -9
-```
-
-### "Health check failed"
-Serviço pode estar iniciando ainda. Aguarde 30s e tente:
-```bash
-./scripts/port-manager.sh health
-```
+### No Placeholders
+- ❌ No `TODO` comments
+- ❌ No incomplete logic
+- ✅ Every script is production-ready
+- ✅ Every script is tested
 
 ---
 
-## 📚 DOCUMENTAÇÃO RELACIONADA
+## 🎯 Usage Guidelines
 
-- `/PORTAS_E_SERVICOS_MAPEAMENTO.md` - Lista completa de portas
-- `/docker-compose.yml` - Configuração de serviços
-- `/MAXIMUS_AI_FRONTEND_INTEGRATION_COMPLETE.md` - Integração frontend
+### Running Scripts
 
----
-
-## 🎉 BENEFÍCIOS
-
-**ANTES** (docker compose tradicional):
 ```bash
-$ docker compose up -d
-Error: port 8001 already allocated
-$ # 😤 Frustração, debugar manualmente, kill -9, tentar de novo...
+# Always check help/usage first
+./scripts/setup/setup-cli.sh --help
+
+# Make executable if needed
+chmod +x scripts/setup/setup-cli.sh
+
+# Run with proper permissions
+./scripts/deployment/build-categoria-a.sh
 ```
 
-**DEPOIS** (com scripts):
-```bash
-$ ./scripts/vertice-start.sh
-✓ Porta 8001 disponível
-✓ Porta 8016 disponível
-✓ Todas as portas estão livres!
-✓ VÉRTICE INICIADO COM SUCESSO!
-# 😎 Tudo funciona de primeira!
-```
+### Safety Practices
+1. **Read the script** before running
+2. **Understand what it does**
+3. **Check prerequisites**
+4. **Have backups** (especially maintenance scripts)
+5. **Test in dev first** (never prod first)
 
 ---
 
-**NUNCA MAIS** conflitos de porta! 🎯✨
+## 🏆 Script Principles
+
+### "Automate the Boring Stuff"
+If it's done more than twice, script it.
+
+### "Make it Obvious"
+Script names and purposes should be crystal clear.
+
+### "Fail Loudly"
+Errors should be impossible to miss.
+
+### "Document by Doing"
+Scripts themselves are documentation of processes.
 
 ---
 
-**Criado em**: 04 de Outubro de 2025
-**Versão**: 2.0
-**Autor**: Claude (Anthropic)
+**Status**: 🟢 Active | **Total**: 13 scripts  
+**Philosophy**: Automation with safety, clarity with power 🔧
