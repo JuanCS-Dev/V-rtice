@@ -46,6 +46,9 @@ type Collector struct {
 //
 // Returns initialized collector with consciousness-aware metrics.
 func NewCollector(component, subsystem string) *Collector {
+	// Use component-specific names to avoid registry conflicts in tests
+	namePrefix := component + "_" + subsystem
+	
 	return &Collector{
 		component: component,
 		
@@ -53,13 +56,13 @@ func NewCollector(component, subsystem string) *Collector {
 		BreachesDetected: promauto.NewCounter(prometheus.CounterOpts{
 			Namespace: "coagulation",
 			Subsystem: subsystem,
-			Name:      "breaches_detected_total",
+			Name:      namePrefix + "_breaches_detected_total",
 			Help:      "Total number of breaches detected",
 		}),
 		DetectionLatency: promauto.NewHistogram(prometheus.HistogramOpts{
 			Namespace: "coagulation",
 			Subsystem: subsystem,
-			Name:      "detection_latency_seconds",
+			Name:      namePrefix + "_detection_latency_seconds",
 			Help:      "Latency from breach occurrence to detection",
 			Buckets:   prometheus.ExponentialBuckets(0.001, 2, 10), // 1ms to 1s
 		}),
