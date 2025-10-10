@@ -1,0 +1,134 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: coagulation-alerts
+  namespace: coagulation
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+  - name: coagulation-detection
+    interval: 30s
+    rules:
+    - alert: HighDetectionLatency
+      expr: histogram_quantile(0.99, rate(coagulation_detection_latency_seconds_bucket[5m])) > 0.1
+      for: 2m
+      labels:
+        severity: warning
+        component: detection
+      annotations:
+        summary: "Detection latency exceeds 100ms (P99)"
+        description: "Detection latency is {{ $value }}s (target: <0.1s)"
+    
+    - alert: BreachDetectionSurge
+      expr: rate(coagulation_breaches_detected_total[5m]) > 10
+      for: 1m
+      labels:
+        severity: critical
+        component: detection
+      annotations:
+        summary: "Surge in breach detections"
+        description: "{{ $value }} breaches/sec detected (potential attack)"
+  
+  - name: coagulation-cascade
+    interval: 30s
+    rules:
+    - alert: LowAmplificationRatio
+      expr: histogram_quantile(0.50, rate(coagulation_amplification_ratio_bucket[5m])) < 1000
+      for: 5m
+      labels:
+        severity: warning
+        component: cascade
+      annotations:
+        summary: "Cascade amplification below target"
+        description: "Amplification ratio {{ $value }} (target: >1000x)"
+    
+    - alert: CascadeStalled
+      expr: rate(coagulation_cascade_activations_total[5m]) == 0 AND rate(coagulation_breaches_detected_total[5m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+        component: cascade
+      annotations:
+        summary: "Cascade not activating despite breaches"
+        description: "Breaches detected but cascade not triggered"
+  
+  - name: coagulation-containment
+    interval: 30s
+    rules:
+    - alert: HighContainmentLatency
+      expr: histogram_quantile(0.99, rate(coagulation_containment_latency_seconds_bucket[5m])) > 1.0
+      for: 2m
+      labels:
+        severity: warning
+        component: containment
+      annotations:
+        summary: "Containment latency exceeds 1s (P99)"
+        description: "Containment taking {{ $value }}s (target: <1s)"
+    
+    - alert: QuarantineFailures
+      expr: rate(coagulation_quarantines_applied_total[5m]) < rate(coagulation_cascade_activations_total[5m]) * 0.9
+      for: 2m
+      labels:
+        severity: critical
+        component: containment
+      annotations:
+        summary: "Quarantine application failing"
+        description: "Only {{ $value }}% of cascades resulting in quarantine"
+  
+  - name: coagulation-regulation
+    interval: 30s
+    rules:
+    - alert: HighFalsePositiveRate
+      expr: rate(coagulation_false_positives_total[10m]) / rate(coagulation_breaches_detected_total[10m]) > 0.01
+      for: 5m
+      labels:
+        severity: warning
+        component: regulation
+      annotations:
+        summary: "False positive rate exceeds 1%"
+        description: "{{ $value | humanizePercentage }} false positive rate"
+    
+    - alert: RegulationIneffective
+      expr: rate(coagulation_regulation_inhibitions_total[5m]) == 0 AND rate(coagulation_cascade_activations_total[5m]) > 1
+      for: 10m
+      labels:
+        severity: warning
+        component: regulation
+      annotations:
+        summary: "Protein C/S not regulating cascades"
+        description: "No regulation inhibitions despite cascade activity"
+  
+  - name: coagulation-consciousness
+    interval: 30s
+    rules:
+    - alert: SystemHealthDegraded
+      expr: coagulation_system_health_score < 0.7
+      for: 5m
+      labels:
+        severity: warning
+        component: consciousness
+      annotations:
+        summary: "System health degraded"
+        description: "Health score {{ $value }} (threshold: 0.7)"
+    
+    - alert: SystemHealthCritical
+      expr: coagulation_system_health_score < 0.5
+      for: 2m
+      labels:
+        severity: critical
+        component: consciousness
+      annotations:
+        summary: "System health CRITICAL"
+        description: "Health score {{ $value }} - immediate attention required"
+    
+    - alert: NegativeEmotionalValence
+      expr: coagulation_emotional_valence < -0.8
+      for: 5m
+      labels:
+        severity: info
+        component: consciousness
+      annotations:
+        summary: "System experiencing negative emotional state"
+        description: "Emotional valence {{ $value }} (persistent distress)"

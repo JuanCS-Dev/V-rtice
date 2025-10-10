@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-config
+  namespace: coagulation
+data:
+  nats.conf: |
+    # NATS JetStream Configuration for Coagulation Protocol
+    port: 4222
+    monitor_port: 8222
+    
+    # JetStream enabled
+    jetstream {
+      store_dir: /data/jetstream
+      max_mem: 1Gi
+      max_file: 10Gi
+    }
+    
+    # Cluster settings
+    cluster {
+      name: coagulation-cluster
+      port: 6222
+    }
+    
+    # Logging
+    debug: false
+    trace: false
+    logtime: true
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats
+  namespace: coagulation
+  labels:
+    app: nats
+    component: eventbus
+spec:
+  serviceName: nats
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nats
+  template:
+    metadata:
+      labels:
+        app: nats
+        component: eventbus
+    spec:
+      containers:
+      - name: nats
+        image: nats:2.10-alpine
+        ports:
+        - containerPort: 4222
+          name: client
+        - containerPort: 8222
+          name: monitor
+        - containerPort: 6222
+          name: cluster
+        volumeMounts:
+        - name: config
+          mountPath: /etc/nats
+        - name: data
+          mountPath: /data
+        command:
+        - nats-server
+        - -c
+        - /etc/nats/nats.conf
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8222
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8222
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: nats-config
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats
+  namespace: coagulation
+  labels:
+    app: nats
+spec:
+  selector:
+    app: nats
+  ports:
+  - name: client
+    port: 4222
+    targetPort: 4222
+  - name: monitor
+    port: 8222
+    targetPort: 8222
+  - name: cluster
+    port: 6222
+    targetPort: 6222
+  clusterIP: None
