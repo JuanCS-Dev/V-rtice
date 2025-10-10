@@ -101,3 +101,20 @@ func (l *Logger) LogRegulationInhibition(breachID string, reason string, targetS
 		zap.String("regulator", "protein_c_s"),
 	)
 }
+
+// Helper functions for structured logging fields
+func String(key, val string) zap.Field {
+	return zap.String(key, val)
+}
+
+func Int(key string, val int) zap.Field {
+	return zap.Int(key, val)
+}
+
+func Float64(key string, val float64) zap.Field {
+	return zap.Float64(key, val)
+}
+
+func Error(err error) zap.Field {
+	return zap.Error(err)
+}
