@@ -469,8 +469,8 @@ git commit -am "revert(deps): rollback dependency framework from <service-name>"
 ## References
 
 - **[DEPENDENCY_GOVERNANCE_FRAMEWORK.md](../../docs/architecture/dependency-governance-framework.md)** - Complete framework overview
-- **[backend/services/active_immune_core/DEPENDENCY_GOVERNANCE_IMPLEMENTATION_REPORT.md](./backend/services/active_immune_core/DEPENDENCY_GOVERNANCE_IMPLEMENTATION_REPORT.md)** - Implementation details
-- **[scripts/rollout-dependency-framework.sh](./scripts/rollout-dependency-framework.sh)** - Rollout automation script
+- **[DEPENDENCY_GOVERNANCE_IMPLEMENTATION_REPORT.md](../../backend/services/active_immune_core/DEPENDENCY_GOVERNANCE_IMPLEMENTATION_REPORT.md)** - Implementation details
+- **[rollout-dependency-framework.sh](../../scripts/deployment/rollout-dependency-framework.sh)** - Rollout automation script
 
 ---
 

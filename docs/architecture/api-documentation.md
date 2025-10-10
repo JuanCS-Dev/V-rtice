@@ -41,7 +41,7 @@ register_error_handlers(app)
 
 ### For Existing Services
 
-See the [template file](templates/fastapi_service_template.py) for a complete example with:
+See the [template file](../templates/fastapi_service_template.py) for a complete example with:
 - Request/response models
 - Endpoint documentation
 - Tags and descriptions
@@ -275,7 +275,7 @@ register_error_handlers(app)
 4. **Add response examples**
 5. **Add request validation**
 
-See the [template](templates/fastapi_service_template.py) for complete example.
+See the [template](../templates/fastapi_service_template.py) for complete example.
 
 ---
 

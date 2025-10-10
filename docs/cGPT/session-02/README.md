@@ -137,8 +137,6 @@ Ver relatório completo: [SPRINT_2.1_PROGRESS.md](SPRINT_2.1_PROGRESS.md)
 - [Protocolo Compartilhado YAML](../../contracts/cockpit-shared-protocol.yaml)
 - [Tipos TypeScript](../../../frontend/src/types/consciousness.ts)
 - [Tipos Go](../../../vcli-go/internal/maximus/types.go)
-- [Blueprint Principal](../blueprint.md)
-- [Roadmap Sessão 02](../roadmap.md)
 
 ### Compliance
 - ✅ Artigo II: NO MOCK, NO PLACEHOLDER
