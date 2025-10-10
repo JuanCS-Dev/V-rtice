@@ -25,6 +25,16 @@ def extract_links(content: str, file_path: Path) -> List[Tuple[str, int]]:
     # Match [text](path) - ignore external URLs
     pattern = r'\[([^\]]+)\]\(([^)]+)\)'
     
+    # False positive patterns to ignore
+    false_positives = [
+        r'^\?:',  # Regex patterns like [?:[a-zA-Z...]]
+        r'^\.\.\.?$',  # Placeholder ellipsis [...]
+        r'^\*\*\w+',  # Code examples like [**tool_input]
+        r'^path$',  # Generic [path] placeholder
+        r'^/\.github/workflows/templates/',  # Template paths that may not exist
+        r'^/docker/base/',  # Docker template paths
+    ]
+    
     for line_num, line in enumerate(content.split('\n'), 1):
         for match in re.finditer(pattern, line):
             link_text = match.group(1)
@@ -33,8 +43,16 @@ def extract_links(content: str, file_path: Path) -> List[Tuple[str, int]]:
             # Skip external URLs
             if link_path.startswith(('http://', 'https://', 'mailto:', '#')):
                 continue
-                
-            links.append((link_path, line_num))
+            
+            # Skip false positives
+            is_false_positive = False
+            for fp_pattern in false_positives:
+                if re.match(fp_pattern, link_path):
+                    is_false_positive = True
+                    break
+            
+            if not is_false_positive:
+                links.append((link_path, line_num))
     
     return links
 

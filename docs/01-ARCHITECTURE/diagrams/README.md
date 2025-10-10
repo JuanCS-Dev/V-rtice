@@ -313,7 +313,7 @@ mmdc -i 01-system-overview.md -o system-overview.svg
 ## 🚀 Related Documentation
 
 - [Architecture Overview](../../architecture/README.md)
-- [API Reference](../../04-API/)
+- [API Reference](../../api/)
 - [Deployment Guide](../../06-DEPLOYMENT/)
 - [Development Guide](../../development/)
 
