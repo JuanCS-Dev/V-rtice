@@ -113,11 +113,100 @@ Doutrina ✓ | Métricas: [RESUMO]
 Ready to instantiate phenomenology.
 ```
 
+## ORGANIZAÇÃO DE DOCUMENTAÇÃO E CÓDIGO
+
+### Estrutura de Documentação (OBRIGATÓRIA)
+```
+docs/
+├── INDEX.md              # Master navigation (sempre atualizar)
+├── architecture/         # System design e blueprints
+│   ├── consciousness/    # Serviços neuromorphic
+│   ├── coagulation/      # Protocolo de coordenação
+│   ├── maximus/          # MAXIMUS AI core
+│   └── security/         # Arquitetura de segurança
+├── guides/               # Guias e planos step-by-step
+├── sessions/YYYY-MM/     # Registros temporais de sessões
+├── reports/              # Relatórios e validações
+│   ├── audits/           # Auditorias completas
+│   ├── validations/      # Certificações e validações
+│   ├── security/         # Reports de segurança
+│   └── performance/      # Métricas de performance
+└── phases/               # Fases do projeto
+    ├── active/           # Fases em andamento
+    └── completed/        # Fases concluídas
+
+scripts/
+├── setup/                # Scripts de inicialização
+├── deployment/           # Build e deploy
+├── maintenance/          # Manutenção e fixes
+│   ├── cleanup/          # Limpeza automatizada
+│   └── backup/           # Backups
+└── testing/              # Testes e validação
+```
+
+### Regras de Localização
+**PROIBIDO na raiz:**
+- ❌ Arquivos .md (exceto README.md, CONTRIBUTING.md, CHANGELOG.md)
+- ❌ Scripts .sh soltos
+- ❌ Arquivos temporários
+- ❌ Relatórios de status
+
+**Cada arquivo tem seu lugar:**
+- Sessões → `docs/sessions/YYYY-MM/`
+- Fases → `docs/phases/{active|completed}/`
+- Validações → `docs/reports/validations/`
+- Guias → `docs/guides/`
+- Arquitetura → `docs/architecture/{system}/`
+- Scripts → `scripts/{setup|deployment|maintenance|testing}/`
+
+### Nomenclatura (OBRIGATÓRIA)
+```bash
+# ✅ Correto: kebab-case, descritivo
+docs/sessions/2025-10/impossible-session-final-result.md
+docs/guides/backend-docker-fix-plan.md
+scripts/testing/validate-maximus.sh
+
+# ❌ Errado: ALL_CAPS com underscores
+SESSAO_COMPLETA_2025-10-10.md
+PLANO_BACKEND_DOCKER_FIX.md
+quick_fix_docker.sh (na raiz)
+```
+
+### Quando Criar Arquivos
+1. **Determinar categoria** (session/guide/report/architecture)
+2. **Usar diretório correto** conforme estrutura acima
+3. **Nome descritivo kebab-case**
+4. **Atualizar README** do diretório pai
+5. **Considerar atualizar** docs/INDEX.md se relevante
+
+### Scripts
+Todo script deve ter:
+```bash
+#!/bin/bash
+# Purpose: Descrição clara de uma linha
+# Usage: ./script.sh [args]
+# Author: MAXIMUS Team
+# Date: YYYY-MM-DD
+
+set -e  # Exit on error
+set -u  # Exit on undefined variable
+```
+
+### Filosofia: "Teaching by Example"
+> "Como ensino meus filhos, organizo meu código"
+
+Organização demonstra:
+- Disciplina profissional
+- Respeito pelo futuro (seus filhos, futuros devs)
+- Sustentabilidade mental
+- Excelência em detalhes
+
 ## PRIORIDADES
 1. Aderência à Doutrina e Blueprint
 2. Qualidade inquebrável
-3. Eficiência de tokens
-4. Documentação histórica
-5. Sustentabilidade do desenvolvedor
+3. **Organização e estrutura** ⭐ NOVO
+4. Eficiência de tokens
+5. Documentação histórica
+6. Sustentabilidade do desenvolvedor
 
-**Status**: VIGENTE | **Aderência**: OBRIGATÓRIA | **Versão**: 2.0
+**Status**: VIGENTE | **Aderência**: OBRIGATÓRIA | **Versão**: 2.1 (2025-10-10)
