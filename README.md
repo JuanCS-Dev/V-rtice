@@ -356,11 +356,9 @@ make build
 
 ### vCLI Go
 - [vCLI Go 2.0 README](vcli-go/README.md)
-- [Kubernetes Integration Tests](vcli-go/internal/k8s/apply_test.go)
 
 ### HCL Services
 - [HCL Services README](backend/services/README.md)
-- [MAPE-K Architecture](backend/services/hcl_planner_service/app/core/planner.py)
 
 ---
 
@@ -452,7 +450,14 @@ This project embodies:
 
 ## 📜 License
 
-MIT License - See [LICENSE](LICENSE) for details.
+**Proprietary License** with special permissions for Anthropic and Google.
+
+See [LICENSE](LICENSE) for complete terms.
+
+**TL;DR**: 
+- All rights reserved by default
+- Anthropic & Google: permitted use with notification
+- Others: contact for licensing
 
 ---
 

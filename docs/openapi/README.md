@@ -256,7 +256,7 @@ All schemas follow the **OpenAPI 3.0** specification:
 - [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
 - [Swagger Editor](https://editor.swagger.io/)
 - [OpenAPI Generator](https://openapi-generator.tech/)
-- [Vértice API Documentation Guide](../API_DOCUMENTATION.md)
+- [Vértice API Documentation Guide](../architecture/api-documentation.md)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/features/#automatic-docs)
 
 ## Support

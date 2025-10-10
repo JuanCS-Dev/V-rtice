@@ -926,8 +926,8 @@ print(f"Pipeline took {duration:.2f}s")
 
 - [Ethical AI Blueprint](./ETHICAL_AI_BLUEPRINT.md)
 - [Ethical AI Roadmap](./ETHICAL_AI_ROADMAP.md)
-- [Ethical Policies](../../ETHICAL_POLICIES.md)
-- [Phase 0 Completion Report](../../PHASE_0_GOVERNANCE_COMPLETE.md)
+- [Ethical Policies](../architecture/ethical-policies.md)
+- [Phase 0 Governance Completion](../phases/completed/phase-0-governance.md)
 
 ---
 

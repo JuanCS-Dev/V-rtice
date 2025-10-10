@@ -470,7 +470,7 @@ my_counter.inc()
 
 ## 📚 References
 
-- [MAXIMUS_AI_ROADMAP_2025_REFACTORED.md](./MAXIMUS_AI_ROADMAP_2025_REFACTORED.md)
+- [MAXIMUS AI Roadmap](../../02-MAXIMUS-AI/MAXIMUS_AI_ROADMAP_2025_REFACTORED.md)
 - [Prometheus Documentation](https://prometheus.io/docs/)
 - [Grafana Documentation](https://grafana.com/docs/)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
