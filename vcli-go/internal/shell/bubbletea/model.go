@@ -22,29 +22,29 @@ const (
 // Model represents the bubble tea shell state
 type Model struct {
 	// Core components
-	textInput   textinput.Model
-	executor    *shell.Executor
-	completer   *shell.Completer
+	textInput textinput.Model
+	executor  *shell.Executor
+	completer *shell.Completer
 
 	// Autocomplete state
-	suggestions []Suggestion
-	suggestCursor int
+	suggestions     []Suggestion
+	suggestCursor   int
 	showSuggestions bool
 
 	// Visual state
 	width       int
 	height      int
 	statusline  string
-	showWelcome bool  // Show welcome banner on first render
+	showWelcome bool // Show welcome banner on first render
 
 	// Styling
-	styles      *visual.Styles
-	palette     *visual.VerticePalette
+	styles  *visual.Styles
+	palette *visual.VerticePalette
 
 	// Control
-	quitting    bool
-	version     string
-	buildDate   string
+	quitting  bool
+	version   string
+	buildDate string
 }
 
 // Suggestion represents an autocomplete suggestion
@@ -76,7 +76,7 @@ func NewModel(rootCmd *cobra.Command, version, buildDate string) Model {
 		showSuggestions: false,
 		width:           InitialWidth,
 		height:          InitialHeight,
-		showWelcome:     true,  // Show welcome banner on first render
+		showWelcome:     true, // Show welcome banner on first render
 		styles:          visual.DefaultStyles(),
 		palette:         visual.DefaultPalette(),
 		version:         version,

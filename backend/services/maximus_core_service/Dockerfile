@@ -67,7 +67,7 @@ COPY --chown=maximus:maximus . .
 # Configurar Python para produção
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app:/app/_demonstration
 
 # Mudar para usuário não-root
 USER maximus

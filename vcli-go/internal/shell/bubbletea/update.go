@@ -60,7 +60,7 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		// For now, just show a message
 		// TODO: Open palette
 		return m, nil
-	
+
 	case tea.KeyRunes:
 		// Special handling for '/' key to trigger autocomplete
 		if len(msg.Runes) > 0 && msg.Runes[0] == '/' {
@@ -194,7 +194,7 @@ func (m *Model) updateAutocomplete() {
 func (m *Model) updateSlashCommands(text string) {
 	// Remove leading slash
 	query := strings.TrimPrefix(text, "/")
-	
+
 	// Define available slash commands
 	slashCommands := []struct {
 		cmd  string
@@ -245,7 +245,7 @@ func (m *Model) executeCommand(cmd string) {
 		// Remove leading slash and execute as normal command
 		cmd = strings.TrimPrefix(cmd, "/")
 	}
-	
+
 	// Use existing executor
 	m.executor.Execute(cmd)
 }

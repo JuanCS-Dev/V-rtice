@@ -13,7 +13,7 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from maximus_integrated import MaximusIntegrated
+from _demonstration.maximus_integrated import MaximusIntegrated
 from pydantic import BaseModel
 
 from consciousness.api import create_consciousness_api

@@ -50,4 +50,3 @@ typing-inspection==0.4.2
     # via pydantic
 uvicorn==0.37.0
     # via hcl-kb-service (pyproject.toml)
-psutil==6.1.1
