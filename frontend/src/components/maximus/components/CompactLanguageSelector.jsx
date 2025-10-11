@@ -63,6 +63,7 @@ export const CompactLanguageSelector = () => {
         <div
           role="menu"
           aria-label="Language selection menu"
+          tabIndex={-1}
           style={{
             position: 'absolute',
             top: '40px',

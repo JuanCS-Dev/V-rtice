@@ -20,6 +20,8 @@ from strategies.base_strategy import (
     StrategyNotApplicableError,
 )
 from strategies.strategy_selector import StrategySelector, NoStrategyAvailableError
+from strategies.dependency_upgrade import DependencyUpgradeStrategy
+from strategies.code_patch_llm import CodePatchLLMStrategy
 
 __all__ = [
     "BaseStrategy",
@@ -28,4 +30,6 @@ __all__ = [
     "StrategyNotApplicableError",
     "StrategySelector",
     "NoStrategyAvailableError",
+    "DependencyUpgradeStrategy",
+    "CodePatchLLMStrategy",
 ]

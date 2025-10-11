@@ -127,8 +127,7 @@ export const AskMaximusButton = ({
           role="presentation"
         >
           <div 
-            className="ask-maximus-modal" 
-            onClick={(e) => e.stopPropagation()}
+            className="ask-maximus-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="ask-maximus-title"

@@ -32,20 +32,7 @@ const DEFAULT_OPTIONS = {
 };
 
 export const useWebSocket = (url, options = {}) => {
-  const opts = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [
-    options.reconnect,
-    options.reconnectInterval,
-    options.maxReconnectAttempts,
-    options.heartbeatInterval,
-    options.heartbeatMessage,
-    options.onOpen,
-    options.onClose,
-    options.onMessage,
-    options.onError,
-    options.fallbackToPolling,
-    options.pollingInterval,
-    options.debug
-  ]);
+  const opts = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [options]);
 
   const [data, setData] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
