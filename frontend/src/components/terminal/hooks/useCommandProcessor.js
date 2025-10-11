@@ -69,12 +69,12 @@ const MAIN_MENU_TEXT = `
  * Manages command processing, menu navigation, and result formatting.
  */
 export const useCommandProcessor = (terminal) => {
-  const { user, getAuthToken } = useContext(AuthContext);
+  const { user: _user, getAuthToken } = useContext(AuthContext);
   const [menuContext, setMenuContext] = useState('main');
   const [isAIChatMode, setIsAIChatMode] = useState(false);
   const [aiChatHistory, setAiChatHistory] = useState([]);
 
-  const { executeCommand } = useTerminalCommands();
+  const { executeCommand: _executeCommand } = useTerminalCommands();
   const { processNaturalLanguage } = useNaturalLanguage();
 
   const write = useCallback((text) => terminal.current?.write(text), [terminal]);
@@ -90,7 +90,7 @@ export const useCommandProcessor = (terminal) => {
     writeln(MAIN_MENU_TEXT);
   }, [writeln]);
 
-  const processAIChat = useCallback(async (input) => {
+  const processAIChat = useCallback(async (_input) => {
     // AI chat processing logic from the original file...
     // ...
     writeln(`\r\n\x1b[1;32mAurora>\x1b[0m `);
@@ -111,7 +111,7 @@ export const useCommandProcessor = (terminal) => {
       return;
     }
 
-    const [cmd, ...args] = command.trim().split(/\s+/);
+    const [cmd, ..._args] = command.trim().split(/\s+/);
 
     switch (cmd.toLowerCase()) {
       case 'clear':

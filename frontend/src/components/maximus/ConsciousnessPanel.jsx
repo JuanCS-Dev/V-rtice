@@ -40,7 +40,7 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
   const [esgtEvents, setESGTEvents] = useState([]);
   const [arousalState, setArousalState] = useState(null);
   const [tigMetrics, setTigMetrics] = useState({});
-  const [_esgtMetrics, _setESGTMetrics] = useState({});
+  const [esgtMetrics, setESGTMetrics] = useState({});
 
   // ═══════════════════════════════════════════════════════════════════════
   // STATE - UI Controls

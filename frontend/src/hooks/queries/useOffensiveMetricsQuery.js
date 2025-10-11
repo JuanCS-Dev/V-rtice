@@ -110,7 +110,7 @@ export const useOffensiveMetricsQuery = (options = {}) => {
  * Hook to manually refetch offensive metrics
  */
 export const useRefetchOffensiveMetrics = () => {
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   return () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.offensiveMetrics });
@@ -121,6 +121,6 @@ export const useRefetchOffensiveMetrics = () => {
  * Hook to get cached offensive metrics without fetching
  */
 export const useCachedOffensiveMetrics = () => {
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   return queryClient.getQueryData(queryKeys.offensiveMetrics);
 };

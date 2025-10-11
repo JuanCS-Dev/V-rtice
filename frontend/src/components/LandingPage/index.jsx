@@ -383,12 +383,12 @@ export const LandingPage = ({ setCurrentView }) => {
             tabIndex={0}
             onClick={(e) => {
               if (e.target.classList.contains('login-modal-content')) {
-                setShowLogin(false);
+                setShowLoginModal(false);
               }
             }}
             onKeyDown={(e) => {
               if (e.key === 'Escape' || e.key === 'Enter') {
-                setShowLogin(false);
+                setShowLoginModal(false);
               }
             }}
             style={{
