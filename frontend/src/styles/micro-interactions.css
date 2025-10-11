@@ -1,0 +1,568 @@
+/**
+ * Micro-interactions & Interactive Element Styles
+ * MAXIMUS Vértice - Frontend Phase 3
+ * 
+ * Purpose: Add soul to the interface. Every interaction provides feedback.
+ * Principles:
+ * - Tactile: User feels the interface responding
+ * - Purposeful: Feedback matches action significance
+ * - Accessible: Works with keyboard, respects motion preferences
+ */
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+/* Base button micro-interactions */
+button,
+.btn,
+[role="button"] {
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-base);
+  cursor: pointer;
+}
+
+/* Hover state - lift & glow */
+button:not(:disabled):hover,
+.btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15),
+              0 0 20px var(--color-primary, rgba(0, 123, 255, 0.3));
+  transition: var(--transition-fast);
+}
+
+/* Active state - press down */
+button:not(:disabled):active,
+.btn:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+  transition: var(--transition-instant);
+}
+
+/* Ripple effect on click */
+button::after,
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
+  opacity: 0;
+}
+
+button:active::after,
+.btn:active::after {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+  animation: ripple 0.6s ease-out;
+}
+
+/* Disabled state */
+button:disabled,
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ========================================
+   CARDS
+   ======================================== */
+
+.card,
+.module-card,
+[class*="card"] {
+  transition: var(--transition-base);
+  will-change: transform, box-shadow;
+}
+
+/* Hover elevation */
+.card:hover,
+.module-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2),
+              0 0 30px var(--color-primary, rgba(0, 123, 255, 0.2));
+}
+
+/* Hacker theme - border glow */
+[data-theme="matrix-green"] .card:hover,
+[data-theme="cyber-blue"] .card:hover,
+[data-theme="purple-haze"] .card:hover,
+[data-theme="red-alert"] .card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3),
+              0 0 40px var(--color-primary),
+              inset 0 0 20px rgba(var(--color-primary-rgb, 0, 123, 255), 0.1);
+}
+
+/* Enterprise theme - subtle shadow */
+[data-theme="windows11"] .card:hover,
+[data-theme="stealth"] .card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1),
+              0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* ========================================
+   FORMS & INPUTS
+   ======================================== */
+
+input,
+textarea,
+select {
+  transition: var(--transition-base);
+  will-change: border-color, box-shadow;
+}
+
+/* Focus state - branded glow */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 0, 123, 255), 0.2),
+              0 0 20px rgba(var(--color-primary-rgb, 0, 123, 255), 0.3);
+  animation: focus-pulse 0.3s ease-out;
+}
+
+@keyframes focus-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb, 0, 123, 255), 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 0, 123, 255), 0.2);
+  }
+}
+
+/* Error state - shake animation */
+input.error,
+textarea.error,
+input:invalid,
+textarea:invalid {
+  border-color: var(--color-error, #ff0a54);
+  animation: shake 0.5s ease-in-out;
+}
+
+input.error:focus,
+textarea.error:focus {
+  box-shadow: 0 0 0 3px rgba(255, 10, 84, 0.2),
+              0 0 20px rgba(255, 10, 84, 0.3);
+}
+
+/* Success state - checkmark animation */
+input.success,
+textarea.success {
+  border-color: var(--color-success, #00ff88);
+}
+
+input.success:focus,
+textarea.success:focus {
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2),
+              0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+/* Placeholder animation */
+input::placeholder,
+textarea::placeholder {
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* ========================================
+   LINKS
+   ======================================== */
+
+a {
+  position: relative;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+/* Underline animation */
+a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width var(--duration-normal) var(--ease-decelerate);
+}
+
+a:hover::after,
+a:focus::after {
+  width: 100%;
+}
+
+/* ========================================
+   CHECKBOXES & RADIOS
+   ======================================== */
+
+input[type="checkbox"],
+input[type="radio"] {
+  transition: var(--transition-base);
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  animation: bounce-in 0.3s var(--ease-bounce);
+}
+
+/* ========================================
+   SWITCHES & TOGGLES
+   ======================================== */
+
+.switch,
+[role="switch"] {
+  transition: background-color var(--duration-normal) var(--ease-standard);
+}
+
+.switch::before,
+[role="switch"]::before {
+  transition: transform var(--duration-normal) var(--ease-bounce);
+}
+
+.switch:checked::before,
+[role="switch"][aria-checked="true"]::before {
+  animation: bounce-in 0.3s var(--ease-bounce);
+}
+
+/* ========================================
+   MODALS & OVERLAYS
+   ======================================== */
+
+.modal,
+.overlay,
+[role="dialog"] {
+  animation: fade-in-scale 0.3s var(--ease-decelerate);
+}
+
+@keyframes fade-in-scale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-backdrop {
+  animation: fadeIn var(--duration-normal) var(--ease-standard);
+}
+
+/* Modal exit animation */
+.modal.closing,
+[role="dialog"].closing {
+  animation: fade-out-scale 0.2s var(--ease-accelerate) forwards;
+}
+
+@keyframes fade-out-scale {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* ========================================
+   DROPDOWNS & MENUS
+   ======================================== */
+
+.dropdown-menu,
+[role="menu"] {
+  animation: slide-down 0.2s var(--ease-decelerate);
+  transform-origin: top;
+}
+
+.dropdown-item,
+[role="menuitem"] {
+  transition: var(--transition-fast);
+}
+
+.dropdown-item:hover,
+[role="menuitem"]:hover {
+  background-color: rgba(var(--color-primary-rgb, 0, 123, 255), 0.1);
+  padding-left: 1.5rem;
+}
+
+/* ========================================
+   TOOLTIPS
+   ======================================== */
+
+.tooltip,
+[role="tooltip"] {
+  animation: tooltip-appear 0.15s var(--ease-decelerate);
+  transform-origin: bottom;
+}
+
+@keyframes tooltip-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ========================================
+   LOADING STATES
+   ======================================== */
+
+/* Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse loading */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* Progress bar */
+.progress-bar {
+  animation: progress-fill 2s var(--ease-decelerate) forwards;
+}
+
+/* ========================================
+   ALERTS & NOTIFICATIONS
+   ======================================== */
+
+.alert,
+.notification,
+.toast {
+  animation: slide-in-right 0.3s var(--ease-decelerate);
+}
+
+/* Success alert - checkmark */
+.alert.success::before,
+.notification.success::before {
+  animation: success-checkmark 0.5s var(--ease-decelerate);
+}
+
+/* Error alert - shake */
+.alert.error,
+.notification.error {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Warning alert - pulse */
+.alert.warning,
+.notification.warning {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   LISTS & TABLES
+   ======================================== */
+
+/* Staggered list entrance */
+.list-item {
+  animation: slide-in-left 0.3s var(--ease-decelerate) backwards;
+}
+
+.list-item:nth-child(1) { animation-delay: 0ms; }
+.list-item:nth-child(2) { animation-delay: 50ms; }
+.list-item:nth-child(3) { animation-delay: 100ms; }
+.list-item:nth-child(4) { animation-delay: 150ms; }
+.list-item:nth-child(5) { animation-delay: 200ms; }
+.list-item:nth-child(6) { animation-delay: 250ms; }
+.list-item:nth-child(7) { animation-delay: 300ms; }
+.list-item:nth-child(8) { animation-delay: 350ms; }
+
+/* Table row hover */
+tr {
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+tr:hover {
+  background-color: rgba(var(--color-primary-rgb, 0, 123, 255), 0.05);
+}
+
+/* ========================================
+   TABS
+   ======================================== */
+
+.tab {
+  position: relative;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+/* Active tab indicator */
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+  animation: tab-indicator-slide 0.3s var(--ease-decelerate);
+}
+
+@keyframes tab-indicator-slide {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* ========================================
+   SCROLL BEHAVIORS
+   ======================================== */
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Scroll-triggered fade-in */
+.fade-in-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s var(--ease-decelerate),
+              transform 0.6s var(--ease-decelerate);
+}
+
+.fade-in-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========================================
+   FOCUS-VISIBLE (Keyboard Navigation)
+   ======================================== */
+
+/* Only show focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+  animation: focus-pulse 0.3s ease-out;
+}
+
+/* Remove default focus outline */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ========================================
+   PAGE TRANSITIONS
+   ======================================== */
+
+/* Page enter */
+.page-enter {
+  animation: page-fade-in 0.5s var(--ease-decelerate);
+}
+
+@keyframes page-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page exit */
+.page-exit {
+  animation: page-fade-out 0.3s var(--ease-accelerate) forwards;
+}
+
+@keyframes page-fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Apply on hover parent to reveal child */
+.reveal-on-hover {
+  overflow: hidden;
+}
+
+.reveal-on-hover > * {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--duration-normal) var(--ease-decelerate),
+              transform var(--duration-normal) var(--ease-decelerate);
+}
+
+.reveal-on-hover:hover > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Glow on hover */
+.glow-on-hover {
+  transition: var(--transition-shadow);
+}
+
+.glow-on-hover:hover {
+  box-shadow: 0 0 20px var(--color-primary),
+              0 0 40px var(--color-primary);
+}
+
+/* Scale on hover */
+.scale-on-hover {
+  transition: var(--transition-transform);
+}
+
+.scale-on-hover:hover {
+  transform: scale(1.05);
+}
+
+/* Rotate on hover */
+.rotate-on-hover {
+  transition: var(--transition-transform);
+}
+
+.rotate-on-hover:hover {
+  transform: rotate(5deg);
+}

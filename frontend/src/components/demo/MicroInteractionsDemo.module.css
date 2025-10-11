@@ -1,0 +1,229 @@
+/* Demo Component Styles */
+
+.demo {
+  min-height: 100vh;
+  padding: 2rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent, #8B5CF6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeIn 0.6s var(--ease-decelerate);
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+  animation: slideInUp 0.6s var(--ease-decelerate);
+  animation-delay: 0.2s;
+  animation-fill-mode: backwards;
+}
+
+.grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  padding: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  animation: slide-in-left 0.4s var(--ease-decelerate);
+  animation-fill-mode: backwards;
+}
+
+.section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+}
+
+.section h4 {
+  margin-bottom: 1rem;
+  color: var(--color-text-secondary);
+}
+
+/* Buttons */
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.btnPrimary,
+.btnSecondary,
+.btnError,
+.btnWarning,
+.btnInfo {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.btnPrimary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btnSecondary {
+  background: var(--color-text-secondary);
+  color: white;
+}
+
+.btnError {
+  background: var(--color-error);
+  color: white;
+}
+
+.btnWarning {
+  background: var(--color-warning);
+  color: var(--color-bg-primary);
+}
+
+.btnInfo {
+  background: var(--color-info);
+  color: var(--color-bg-primary);
+}
+
+/* Cards */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1.5rem;
+  background: var(--color-bg-primary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--color-primary);
+}
+
+/* Loading */
+.loadingGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.spinnerRow {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Skeleton */
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 500px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.input {
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+}
+
+.inputError {
+  border-color: var(--color-error);
+}
+
+.inputSuccess {
+  border-color: var(--color-success);
+}
+
+/* Overlay */
+.overlayContent {
+  padding: 2rem;
+  background: var(--color-bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+/* Staggered List */
+.staggeredList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.listItem {
+  padding: 1rem;
+  background: var(--color-bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  animation: slide-in-left 0.3s var(--ease-decelerate) backwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .demo {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .section {
+    padding: 1rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}
