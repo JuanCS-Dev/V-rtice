@@ -1,0 +1,42 @@
+{
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "roc_auc": 1.0,
+  "support_train": 12,
+  "support_test": 3,
+  "confusion_matrix": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      2
+    ]
+  ],
+  "feature_importance": {
+    "lines_added": 0.2332857142857143,
+    "lines_removed": 0.10343809523809522,
+    "files_modified": 0.012761904761904763,
+    "complexity_delta": 0.25085714285714283,
+    "has_input_validation": 0.2287619047619048,
+    "has_sanitization": 0.02947619047619048,
+    "has_encoding": 0.05547619047619048,
+    "has_parameterization": 0.08152108843537414,
+    "cwe_CWE-78": 0.002380952380952381,
+    "cwe_CWE-79": 0.002040816326530612,
+    "cwe_CWE-89": 0.0
+  },
+  "class_distribution": {
+    "train": {
+      "0": 6,
+      "1": 6
+    },
+    "test": {
+      "1": 2,
+      "0": 1
+    }
+  }
+}

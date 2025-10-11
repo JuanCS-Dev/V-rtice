@@ -1,0 +1,16 @@
+lines_added,lines_removed,files_modified,complexity_delta,has_input_validation,has_sanitization,has_encoding,has_parameterization,patch_validated,cwe_CWE-78,cwe_CWE-79,cwe_CWE-89
+5,2,1,2.0,1,1,0,1,1,False,False,True
+3,1,1,1.0,1,0,0,1,1,False,False,True
+8,3,2,3.0,1,1,1,1,1,False,False,True
+1,0,1,0.0,0,0,0,0,0,False,False,True
+2,1,1,0.0,0,1,0,0,0,False,False,True
+4,2,1,1.0,1,1,1,0,1,False,True,False
+3,1,1,1.0,0,1,1,0,1,False,True,False
+2,0,1,0.0,0,1,0,0,0,False,True,False
+1,0,1,0.0,0,0,0,0,0,False,True,False
+6,2,1,2.0,1,1,1,0,1,True,False,False
+1,0,1,0.0,0,0,0,0,0,True,False,False
+10,5,3,4.0,1,1,1,1,1,False,False,True
+7,3,2,2.0,1,1,1,0,1,False,True,False
+2,1,1,0.0,0,0,0,0,0,False,False,True
+3,1,1,0.0,0,0,0,0,0,False,True,False
