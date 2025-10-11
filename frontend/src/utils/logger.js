@@ -32,25 +32,25 @@ class Logger {
 
   debug(...args) {
     if (this.level <= LOG_LEVELS.DEBUG) {
-      logger.debug('[DEBUG]', ...args);
+      console.debug('[DEBUG]', ...args);
     }
   }
 
   info(...args) {
     if (this.level <= LOG_LEVELS.INFO) {
-      logger.info('[INFO]', ...args);
+      console.info('[INFO]', ...args);
     }
   }
 
   warn(...args) {
     if (this.level <= LOG_LEVELS.WARN) {
-      logger.warn('[WARN]', ...args);
+      console.warn('[WARN]', ...args);
     }
   }
 
   error(...args) {
     if (this.level <= LOG_LEVELS.ERROR) {
-      logger.error('[ERROR]', ...args);
+      console.error('[ERROR]', ...args);
     }
   }
 
@@ -66,7 +66,7 @@ class Logger {
   // Table logging for structured data
   table(data) {
     if (this.level <= LOG_LEVELS.INFO) {
-      logger.table(data);
+      console.table(data);
     }
   }
 

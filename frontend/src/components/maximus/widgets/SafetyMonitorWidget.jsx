@@ -549,7 +549,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         {selectedView === 'overview' && (
           <>
             {renderMetricsGrid()}
-            {renderViolationsByeverity()}
+            {renderViolationsByseverity()}
           </>
         )}
 
