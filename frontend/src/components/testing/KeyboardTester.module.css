@@ -1,0 +1,313 @@
+/* Keyboard Tester Styles */
+
+.tester {
+  min-height: 100vh;
+  padding: 2rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent, #8B5CF6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.btnStart,
+.btnStop,
+.btnClear {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.btnStart {
+  background: var(--color-success, #00ff88);
+  color: var(--color-bg-primary);
+}
+
+.btnStop {
+  background: var(--color-error, #ff0a54);
+  color: white;
+}
+
+.btnClear {
+  background: var(--color-text-secondary);
+  color: white;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.recording {
+  font-weight: 700;
+  color: var(--color-error);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section {
+  padding: 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  animation: slide-in-left 0.4s var(--ease-decelerate);
+}
+
+.section h3 {
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+/* Test Results */
+.testList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.testItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-bg-primary);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: var(--transition-base);
+}
+
+.testItem.pass {
+  border-color: var(--color-success);
+}
+
+.testItem.fail {
+  border-color: var(--color-error);
+  animation: shake 0.5s ease-in-out;
+}
+
+.testItem.pending {
+  border-color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.testIcon {
+  font-size: 1.5rem;
+}
+
+.testName {
+  flex: 1;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.testStatus {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Logs */
+.log {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.log::-webkit-scrollbar {
+  width: 8px;
+}
+
+.log::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+  border-radius: 4px;
+}
+
+.log::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.logEntry,
+.focusEntry {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: var(--color-bg-primary);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  animation: slide-in-right 0.2s var(--ease-decelerate);
+}
+
+.logKey {
+  padding: 0.25rem 0.5rem;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 4px;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: center;
+}
+
+.logCode {
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.logTarget {
+  color: var(--color-accent, #8B5CF6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+.logTime {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.focusIndex {
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 30px;
+}
+
+.focusTag {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.focusId {
+  color: var(--color-text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.focusTime {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+/* Instructions */
+.instructions,
+.tips {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.instructions h3,
+.tips h4 {
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+}
+
+.instructions ul,
+.tips ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.instructions li,
+.tips li {
+  line-height: 1.6;
+}
+
+kbd {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tester {
+    padding: 1rem;
+  }
+
+  .header h2 {
+    font-size: 1.75rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .logTarget {
+    max-width: 100px;
+  }
+}
