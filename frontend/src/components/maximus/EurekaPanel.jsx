@@ -19,10 +19,52 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
+import { useAPVStream } from '../../hooks/useAPVStream';
 import './Panels.css';
 import './AdaptiveImmunity.css';
 
 export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
+  // WEBSOCKET STREAM - Real-time APV updates
+  const {
+    status: wsStatus,
+    apvs: liveApvs,
+    metrics: liveMetrics,
+    isConnected,
+    error: wsError,
+    reconnectAttempts
+  } = useAPVStream({
+    autoConnect: true,
+    onApv: (apv) => {
+      logger.info('[Eureka] New APV received via WebSocket:', apv);
+      // Add to pending list
+      setPendingApvs(prev => [apv, ...prev]);
+    },
+    onPatch: (patch) => {
+      logger.info('[Eureka] Patch update received:', patch);
+      // Update remediation history
+      setRemediationHistory(prev => [patch, ...prev]);
+    },
+    onMetrics: (metrics) => {
+      logger.info('[Eureka] Metrics update received:', metrics);
+      // Update stats from metrics
+      if (metrics.eureka) {
+        setStats(prev => ({ ...prev, ...metrics.eureka }));
+      }
+    },
+    onConnect: () => {
+      logger.info('[Eureka] ✅ WebSocket connected');
+      setAiStatus?.(prev => ({ ...prev, eurekaStream: 'connected' }));
+    },
+    onDisconnect: () => {
+      logger.warn('[Eureka] ⚠️ WebSocket disconnected');
+      setAiStatus?.(prev => ({ ...prev, eurekaStream: 'disconnected' }));
+    },
+    onError: (error) => {
+      logger.error('[Eureka] ❌ WebSocket error:', error);
+      setAiStatus?.(prev => ({ ...prev, eurekaStream: 'error' }));
+    }
+  });
+
   // STATE
   const [viewMode, setViewMode] = useState('dashboard');
   const [stats, setStats] = useState({
