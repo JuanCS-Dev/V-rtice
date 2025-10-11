@@ -134,6 +134,8 @@ class TwoPhaseSimulator:
     Simulates attacks against vulnerable and patched versions to
     empirically validate patch effectiveness.
     
+    Phase 4.1 Enhancement: Parallel execution for multiple exploits.
+    
     Usage:
         >>> simulator = TwoPhaseSimulator()
         >>> result = await simulator.execute_wargaming(
@@ -145,12 +147,20 @@ class TwoPhaseSimulator:
         ...     print("Patch validated! Safe to deploy.")
         >>> else:
         ...     print("Patch validation failed! Do not deploy.")
+        
+        # Parallel execution (new in Phase 4.1)
+        >>> results = await simulator.execute_wargaming_parallel(
+        ...     apv=apv_object,
+        ...     patch=patch_object,
+        ...     exploits=[exploit1, exploit2, exploit3]
+        ... )
     """
     
     def __init__(
         self,
         timeout_seconds: int = 300,  # 5 min max
-        cleanup_on_complete: bool = True
+        cleanup_on_complete: bool = True,
+        max_parallel_exploits: int = 5  # Phase 4.1: parallel limit
     ):
         """
         Initialize simulator.
@@ -158,13 +168,15 @@ class TwoPhaseSimulator:
         Args:
             timeout_seconds: Max total execution time
             cleanup_on_complete: Cleanup temp files after execution
+            max_parallel_exploits: Max number of exploits to run simultaneously
         """
         self.timeout_seconds = timeout_seconds
         self.cleanup_on_complete = cleanup_on_complete
+        self.max_parallel_exploits = max_parallel_exploits
         
         logger.info(
             f"Initialized TwoPhaseSimulator: timeout={timeout_seconds}s, "
-            f"cleanup={cleanup_on_complete}"
+            f"cleanup={cleanup_on_complete}, max_parallel={max_parallel_exploits}"
         )
     
     async def execute_wargaming(
@@ -414,6 +426,110 @@ class TwoPhaseSimulator:
                 exploit.exploit_id,
                 str(e)
             )
+    
+    async def execute_wargaming_parallel(
+        self,
+        apv: "APV",
+        patch: "Patch",
+        exploits: List["ExploitScript"],
+        target_base_url: str = "http://localhost:8080"
+    ) -> List[WargamingResult]:
+        """
+        Execute wargaming for multiple exploits in parallel.
+        
+        Phase 4.1 Enhancement: Reduces total execution time by running
+        multiple exploits simultaneously (up to max_parallel_exploits limit).
+        
+        Args:
+            apv: APV object (vulnerability info)
+            patch: Patch object (fix to test)
+            exploits: List of exploit scripts to execute
+            target_base_url: Base URL for target application
+        
+        Returns:
+            List of WargamingResults (one per exploit)
+        
+        Performance:
+            - Single exploit: ~5 min
+            - 3 exploits parallel: ~5 min (vs 15 min sequential)
+            - 5 exploits parallel: ~5 min (vs 25 min sequential)
+        
+        Example:
+            >>> simulator = TwoPhaseSimulator(max_parallel_exploits=3)
+            >>> results = await simulator.execute_wargaming_parallel(
+            ...     apv=apv,
+            ...     patch=patch,
+            ...     exploits=[sqli_exploit, xss_exploit, cmdi_exploit]
+            ... )
+            >>> validated_count = sum(1 for r in results if r.patch_validated)
+            >>> print(f"{validated_count}/{len(results)} patches validated")
+        """
+        logger.info(
+            f"Starting parallel wargaming: {len(exploits)} exploits, "
+            f"max_parallel={self.max_parallel_exploits}"
+        )
+        
+        # Limit parallelism
+        semaphore = asyncio.Semaphore(self.max_parallel_exploits)
+        
+        async def execute_with_semaphore(exploit: "ExploitScript") -> WargamingResult:
+            """Execute single wargaming with semaphore control"""
+            async with semaphore:
+                logger.info(f"Starting wargaming for exploit: {exploit.exploit_id}")
+                result = await self.execute_wargaming(
+                    apv=apv,
+                    patch=patch,
+                    exploit=exploit,
+                    target_base_url=target_base_url
+                )
+                logger.info(
+                    f"Completed wargaming for {exploit.exploit_id}: "
+                    f"validated={result.patch_validated}"
+                )
+                return result
+        
+        # Execute all exploits in parallel (with semaphore limiting)
+        start_time = datetime.now()
+        
+        try:
+            tasks = [execute_with_semaphore(exploit) for exploit in exploits]
+            results = await asyncio.gather(*tasks, return_exceptions=False)
+            
+            total_duration = (datetime.now() - start_time).total_seconds()
+            validated_count = sum(1 for r in results if r.patch_validated)
+            
+            logger.info(
+                f"Parallel wargaming complete: {validated_count}/{len(results)} "
+                f"validated in {total_duration:.1f}s"
+            )
+            
+            return results
+        
+        except Exception as e:
+            logger.error(f"Parallel wargaming error: {e}", exc_info=True)
+            # Return error results for all exploits
+            return [
+                WargamingResult(
+                    apv_id=apv.apv_id,
+                    cve_id=apv.cve_id,
+                    exploit_id=exploit.exploit_id,
+                    phase_1_result=self._create_error_phase_result(
+                        WargamingPhase.PHASE_1_VULNERABLE,
+                        exploit.exploit_id,
+                        str(e)
+                    ),
+                    phase_2_result=self._create_error_phase_result(
+                        WargamingPhase.PHASE_2_PATCHED,
+                        exploit.exploit_id,
+                        str(e)
+                    ),
+                    status=WargamingStatus.ERROR,
+                    patch_validated=False,
+                    total_duration_seconds=(datetime.now() - start_time).total_seconds(),
+                    executed_at=start_time
+                )
+                for exploit in exploits
+            ]
     
     def _create_error_phase_result(
         self,
