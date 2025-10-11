@@ -1,0 +1,28 @@
+
+.container {
+  border: var(--border-1) solid rgba(0, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.2);
+  padding: var(--space-8);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.icon {
+  font-size: var(--text-6xl);
+}
+
+.title {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  margin: 0;
+}
+
+.description {
+  color: rgba(0, 255, 255, 0.7);
+  margin: 0;
+}

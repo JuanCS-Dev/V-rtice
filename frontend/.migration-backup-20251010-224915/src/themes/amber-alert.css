@@ -1,0 +1,39 @@
+/* Tema Amber Alert - Âmbar de Alerta */
+:root[data-theme="amber-alert"] {
+  /* Cores Primárias */
+  --primary-color: #ffb703;
+  --primary-dark: #fb8500;
+  --primary-light: #ffd60a;
+  --primary-glow: rgba(255, 183, 3, 0.3);
+
+  /* Cores de Fundo */
+  --bg-primary: #1a0f00;
+  --bg-secondary: #2d1b00;
+  --bg-tertiary: #3d2700;
+  --bg-overlay: rgba(26, 15, 0, 0.8);
+
+  /* Cores de Texto */
+  --text-primary: #ffb703;
+  --text-secondary: #fb8500;
+  --text-muted: rgba(255, 183, 3, 0.5);
+  --text-inverse: #1a0f00;
+
+  /* Bordas */
+  --border-color: rgba(255, 183, 3, 0.3);
+  --border-hover: #ffb703;
+
+  /* Estados */
+  --success: #06ffa5;
+  --warning: #ffb703;
+  --error: #dc2f02;
+  --info: #0096c7;
+
+  /* Sombras */
+  --shadow-sm: 0 0 10px rgba(255, 183, 3, 0.2);
+  --shadow-md: 0 0 20px rgba(255, 183, 3, 0.3);
+  --shadow-lg: 0 0 30px rgba(255, 183, 3, 0.4);
+
+  /* Efeitos */
+  --backdrop-blur: blur(10px);
+  --transition-speed: 0.3s;
+}

@@ -9,6 +9,7 @@ import { LandingPage } from './components/LandingPage';
 import { queryClient } from './config/queryClient';
 import { SkipLink } from './components/shared/SkipLink';
 import ThemeSelector from './components/ThemeSelector';
+import { useModuleNavigation } from './hooks/useModuleNavigation';
 import './i18n/config'; // Initialize i18n
 
 // Lazy load dashboards for code splitting
@@ -52,6 +53,9 @@ const DashboardLoader = () => {
 function App() {
   // 'main', 'admin', 'defensive', 'offensive', 'purple', 'osint', 'maximus'
   const [currentView, setCurrentView] = useState('main');
+  
+  // Enable keyboard navigation
+  useModuleNavigation(setCurrentView);
 
   const views = {
     admin: (

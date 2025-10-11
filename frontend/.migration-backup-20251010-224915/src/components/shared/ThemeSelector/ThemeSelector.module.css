@@ -1,0 +1,415 @@
+/**
+ * ThemeSelector Styles
+ * ====================
+ */
+
+/* ============================================================================
+   COMPACT VERSION (for header)
+   ============================================================================ */
+
+.compact {
+  position: relative;
+  display: inline-block;
+  z-index: 10000;
+  /* Prevent parent overflow from hiding dropdown */
+  overflow: visible !important;
+}
+
+.compactButton {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.compactButton:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+
+[data-theme="cyberpunk"] .compactButton:hover {
+  box-shadow: var(--glow-primary);
+}
+
+.themeIcon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.dropdown {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  min-width: 200px;
+  background: rgba(20, 25, 39, 0.95);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 255, 65, 0.2);
+  z-index: 99999;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+[data-theme="cyberpunk"] .dropdown {
+  box-shadow: var(--shadow-lg), var(--shadow-neon);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownItem {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background var(--transition-fast);
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+}
+
+.dropdownItem:hover {
+  background: var(--color-bg-hover);
+}
+
+.dropdownItem.active {
+  background: var(--color-accent-primary);
+  color: white;
+}
+
+[data-theme="windows11"] .dropdownItem.active {
+  background: var(--color-accent-primary);
+}
+
+.themePreview {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.previewDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+[data-theme="cyberpunk"] .previewDot {
+  box-shadow: 0 0 4px currentColor;
+}
+
+.themeName {
+  flex: 1;
+  text-align: left;
+}
+
+.checkmark {
+  color: white;
+  font-weight: bold;
+}
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0.5rem 0;
+}
+
+.modeIcon {
+  font-size: 1rem;
+}
+
+
+/* ============================================================================
+   FULL VERSION (for settings page)
+   ============================================================================ */
+
+.container {
+  padding: var(--spacing-lg);
+}
+
+.header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font-primary);
+}
+
+[data-theme="cyberpunk"] .title {
+  background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.themesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.themeCard {
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-align: left;
+}
+
+.themeCard:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+  transform: translateY(-2px);
+}
+
+[data-theme="cyberpunk"] .themeCard:hover {
+  box-shadow: var(--shadow-md), var(--shadow-neon);
+}
+
+[data-theme="windows11"] .themeCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.themeCard.selected {
+  border-color: var(--color-accent-primary);
+  background: var(--color-bg-hover);
+}
+
+[data-theme="cyberpunk"] .themeCard.selected {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+.cardHeader {
+  position: relative;
+  margin-bottom: var(--spacing-md);
+}
+
+.themePreviewLarge {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.previewSquare {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  position: relative;
+}
+
+.previewAccent {
+  width: 60%;
+  aspect-ratio: 1;
+  border: 3px solid;
+  border-radius: var(--radius-lg);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-normal);
+}
+
+.previewContent {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.previewLine {
+  height: 4px;
+  border-radius: 2px;
+  width: 70%;
+}
+
+.previewLine:last-child {
+  width: 50%;
+}
+
+.selectedBadge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  background: var(--color-accent-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scaleIn var(--transition-fast) ease-out;
+}
+
+[data-theme="cyberpunk"] .selectedBadge {
+  box-shadow: var(--glow-primary);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.checkmarkLarge {
+  color: white;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.cardDescription {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+
+/* ============================================================================
+   MODE TOGGLE
+   ============================================================================ */
+
+.modeToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.modeLabel {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.modeButton {
+  display: flex;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modeOption {
+  padding: 0.5rem 1rem;
+  border-radius: calc(var(--radius-md) - 0.25rem);
+  transition: all var(--transition-fast);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.modeOption.modeActive {
+  background: var(--color-accent-primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="cyberpunk"] .modeOption.modeActive {
+  box-shadow: var(--glow-primary);
+}
+
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+
+.footer {
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.currentTheme {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.currentTheme strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .themesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: var(--spacing-md);
+  }
+
+  .modeToggle {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modeButton {
+    width: 100%;
+  }
+}

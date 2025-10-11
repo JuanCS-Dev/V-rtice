@@ -99,8 +99,12 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
       </div>
 
       {/* Navegação Principal dos Módulos */}
-      <div className="px-4 py-3 bg-gradient-to-r from-gray-900/50 to-black/50 border-t border-green-400/20">
-        <div className="flex items-center justify-center space-x-3">
+      <nav 
+        className="px-4 py-3 bg-gradient-to-r from-gray-900/50 to-black/50 border-t border-green-400/20"
+        role="navigation"
+        aria-label="Módulos do Sistema"
+      >
+        <div className="flex items-center justify-center space-x-3 flex-wrap gap-y-2">
           <span className="text-green-400/70 text-xs font-bold tracking-widest mr-4">MÓDULOS DO SISTEMA:</span>
           {navigationModules.map(module => (
             <button
@@ -108,20 +112,23 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
               onClick={() => setCurrentView(module.id)}
               className={`
                 flex items-center space-x-2 px-4 py-2 rounded-lg border transition-all duration-300 transform
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black
                 ${getColorClasses(module.color, currentView === module.id)}
-                ${currentView === module.id ? 'scale-105 shadow-lg' : 'hover:scale-102'}
+                ${currentView === module.id ? 'scale-105 shadow-lg focus:ring-current' : 'hover:scale-102 focus:ring-white/50'}
               `}
               title={module.description}
+              aria-label={`${module.label}: ${module.description}`}
+              aria-current={currentView === module.id ? 'page' : undefined}
             >
-              <span className="text-lg">{module.icon}</span>
+              <span className="text-lg" aria-hidden="true">{module.icon}</span>
               <div className="text-left">
                 <div className="font-bold text-xs tracking-wider">{module.label}</div>
-                <div className="text-xs opacity-80 leading-tight">{module.description}</div>
+                <div className="text-xs opacity-80 leading-tight hidden sm:block">{module.description}</div>
               </div>
             </button>
           ))}
         </div>
-      </div>
+      </nav>
 
       {/* Barra de Consulta (apenas no módulo principal) */}
       {currentView === 'main' && (

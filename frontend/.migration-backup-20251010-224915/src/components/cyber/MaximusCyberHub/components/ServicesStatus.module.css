@@ -1,0 +1,66 @@
+
+.container {
+  background: rgba(0, 0, 0, 0.6);
+  border: var(--border-1) solid var(--color-cyber-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  margin-bottom: var(--space-2);
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.service {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+}
+
+.serviceInfo {
+  color: var(--color-text-secondary);
+}
+
+.icon {
+  font-size: var(--text-xs);
+  margin-right: var(--space-2);
+}
+
+.indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.indicator.running {
+  background: var(--color-warning);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.indicator.ready {
+  background: var(--color-success);
+}
+
+.indicator.failed {
+  background: var(--color-critical);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

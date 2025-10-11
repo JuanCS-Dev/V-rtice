@@ -16,6 +16,7 @@ import { OverviewModule } from './osint/OverviewModule';
 import { OSINTFooter } from './osint/OSINTFooter';
 import { AIProcessingOverlay } from './osint/AIProcessingOverlay';
 import SkipLink from './shared/SkipLink';
+import { Breadcrumb } from './shared/Breadcrumb';
 import { useClock } from '../hooks/useClock';
 import { useOSINTAlerts } from '../hooks/useOSINTAlerts';
 

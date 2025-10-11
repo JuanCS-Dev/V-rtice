@@ -1,0 +1,40 @@
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+}
+
+.statCard {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-cyber-primary);
+}
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.statCard.portScans {
+  border-color: var(--color-warning);
+}
+
+.statCard.suspiciousIPs {
+  border-color: var(--color-error);
+}
+
+.statCard.blockedAttempts {
+  border-color: var(--color-medium);
+}

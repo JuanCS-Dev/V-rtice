@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SystemSelfCheck from './admin/SystemSelfCheck';
 import SkipLink from './shared/SkipLink';
+import { Breadcrumb } from './shared/Breadcrumb';
 import useKeyboardNavigation from '../hooks/useKeyboardNavigation';
 import { useClock } from '../hooks/useClock';
 import { useAdminMetrics } from '../hooks/useAdminMetrics';
@@ -69,8 +70,8 @@ const AdminDashboard = ({ setCurrentView }) => {
           
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setCurrentView('operator')}
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-black font-bold px-6 py-2 rounded-lg transition-all duration-300 tracking-wider"
+              onClick={() => setCurrentView('main')}
+              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-black font-bold px-6 py-2 rounded-lg transition-all duration-300 tracking-wider focus:outline-none focus:ring-2 focus:ring-green-400"
               aria-label={t('navigation.back_to_hub')}
             >
               ← {t('common.back').toUpperCase()}
@@ -87,22 +88,37 @@ const AdminDashboard = ({ setCurrentView }) => {
           </div>
         </div>
 
+        {/* Breadcrumb Navigation */}
+        <div className="px-4 py-2 bg-gradient-to-r from-black/50 to-yellow-900/20 border-t border-yellow-400/10">
+          <Breadcrumb
+            items={[
+              { label: 'VÉRTICE', icon: '🏠', onClick: () => setCurrentView('main') },
+              { label: 'ADMINISTRAÇÃO', icon: '⚙️' },
+              { label: modules.find(m => m.id === activeModule)?.name.toUpperCase() || 'OVERVIEW', icon: modules.find(m => m.id === activeModule)?.icon }
+            ]}
+            className="text-yellow-400"
+          />
+        </div>
+
         {/* Navigation Modules */}
         <div className="p-4 bg-gradient-to-r from-yellow-900/20 to-orange-900/20">
-          <div className="flex space-x-2">
+          <div className="flex space-x-2" role="tablist">
             {modules.map((module, index) => (
               <button
                 key={module.id}
                 {...getItemProps(index, {
                   onClick: () => setActiveModule(module.id),
-                  className: `px-4 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 ${
+                  role: 'tab',
+                  'aria-selected': activeModule === module.id,
+                  'aria-controls': `panel-${module.id}`,
+                  className: `px-4 py-2 rounded-lg font-bold text-xs tracking-wider transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 ${
                     activeModule === module.id
                       ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-400/50'
                       : 'bg-black/30 text-yellow-400/70 border border-yellow-400/20 hover:bg-yellow-400/10 hover:text-yellow-400'
                   }`
                 })}
               >
-                <span className="mr-2">{module.icon}</span>
+                <span className="mr-2" aria-hidden="true">{module.icon}</span>
                 {module.name}
               </button>
             ))}
@@ -111,7 +127,12 @@ const AdminDashboard = ({ setCurrentView }) => {
       </header>
 
       {/* Main Content */}
-      <main id="main-content" className="flex-1 p-6 overflow-hidden">
+      <main 
+        id="main-content" 
+        className="flex-1 p-6 overflow-hidden"
+        role="tabpanel"
+        aria-labelledby={`tab-${activeModule}`}
+      >
         {renderModuleContent()}
       </main>
 

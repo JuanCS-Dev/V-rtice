@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Breadcrumb } from '../shared/Breadcrumb';
 import useKeyboardNavigation from '../../hooks/useKeyboardNavigation';
 
 const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModule }) => {
@@ -61,15 +62,34 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
         </div>
       </div>
 
+      {/* Breadcrumb Navigation */}
+      <div className="px-4 py-2 bg-gradient-to-r from-black/50 to-purple-900/20 border-t border-purple-400/10">
+        <Breadcrumb
+          items={[
+            { label: 'VÉRTICE', icon: '🏠', onClick: () => setCurrentView('main') },
+            { label: 'OSINT', icon: '🕵️' },
+            { label: modules.find(m => m.id === activeModule)?.name.toUpperCase() || 'OVERVIEW', icon: modules.find(m => m.id === activeModule)?.icon }
+          ]}
+          className="text-purple-400"
+        />
+      </div>
+
       {/* Navigation Modules */}
-      <div className="px-4 py-2 bg-black/30">
-        <div className="flex flex-wrap gap-2 justify-center items-center">
+      <nav 
+        className="px-4 py-2 bg-black/30"
+        role="navigation"
+        aria-label="Módulos OSINT"
+      >
+        <div className="flex flex-wrap gap-2 justify-center items-center" role="tablist">
           {modules.map((module, index) => (
             <button
               key={module.id}
               {...getItemProps(index, {
                 onClick: () => setActiveModule(module.id),
-                className: `px-3 py-1.5 rounded font-medium text-xs transition-all ${
+                role: 'tab',
+                'aria-selected': activeModule === module.id,
+                'aria-controls': `panel-${module.id}`,
+                className: `px-3 py-1.5 rounded font-medium text-xs transition-all focus:outline-none focus:ring-2 focus:ring-purple-400/50 ${
                   activeModule === module.id
                     ? module.isAI
                       ? 'bg-gradient-to-r from-black via-green-900/40 to-green-700/60 text-gray-200 border border-green-700/30'
@@ -84,13 +104,13 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
                 }`
               })}
             >
-              <span className="mr-1.5 text-[10px]">{module.icon}</span>
+              <span className="mr-1.5 text-[10px]" aria-hidden="true">{module.icon}</span>
               {module.name}
-              {module.isWorldClass && <span className="ml-1.5 text-[10px]">⭐</span>}
+              {module.isWorldClass && <span className="ml-1.5 text-[10px]" aria-hidden="true">⭐</span>}
             </button>
           ))}
         </div>
-      </div>
+      </nav>
     </header>
   );
 };

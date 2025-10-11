@@ -1,0 +1,60 @@
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-weight: var(--font-bold);
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-wider);
+  margin: 0;
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.toggleButton {
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--tracking-wider);
+  transition: all var(--duration-base) var(--ease-out);
+  border: none;
+  cursor: pointer;
+}
+
+.toggleButton.monitoringActive {
+  background: linear-gradient(to right, var(--color-error), var(--color-critical));
+  color: var(--text-primary);
+}
+
+.toggleButton.monitoringActive:hover {
+  background: linear-gradient(to right, var(--color-error), var(--color-critical));
+  opacity: 0.9;
+}
+
+.toggleButton.monitoringInactive {
+  background: linear-gradient(to right, var(--color-success), var(--color-info));
+  color: var(--bg-primary);
+}
+
+.toggleButton.monitoringInactive:hover {
+  background: linear-gradient(to right, var(--color-success), var(--color-info));
+  opacity: 0.9;
+}

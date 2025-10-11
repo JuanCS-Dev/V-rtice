@@ -1,0 +1,119 @@
+/**
+ * ModuleStatusCard Styles
+ * Shared module status card component
+ */
+
+.module-status-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.module-status-card:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  background: rgba(168, 85, 247, 0.05);
+}
+
+.module-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.module-status-name {
+  color: rgba(168, 85, 247, 0.7);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.module-status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot-online {
+  background: rgb(74, 222, 128);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+  animation: pulse-online 2s ease-in-out infinite;
+}
+
+.status-dot-offline {
+  background: rgb(248, 113, 113);
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+}
+
+.status-dot-degraded {
+  background: rgb(250, 204, 21);
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
+  animation: pulse-warning 1.5s ease-in-out infinite;
+}
+
+.status-dot-idle {
+  background: rgb(96, 165, 250);
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+}
+
+.status-dot-running {
+  background: rgb(192, 132, 252);
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+  animation: pulse-running 1s ease-in-out infinite;
+}
+
+.module-status-activity {
+  font-size: 0.75rem;
+  color: rgba(168, 85, 247, 0.5);
+  line-height: 1.4;
+}
+
+/* Animations */
+@keyframes pulse-online {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes pulse-running {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .module-status-card {
+    padding: 0.75rem;
+  }
+
+  .module-status-name {
+    font-size: 0.75rem;
+  }
+
+  .module-status-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .module-status-activity {
+    font-size: 0.625rem;
+  }
+}

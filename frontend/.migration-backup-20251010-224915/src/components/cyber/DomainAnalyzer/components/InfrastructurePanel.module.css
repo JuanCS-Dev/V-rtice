@@ -1,0 +1,67 @@
+
+.container {
+  border: var(--border-1) solid rgba(0, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.2);
+  padding: var(--space-4);
+}
+
+.title {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  color: rgba(0, 255, 255, 0.7);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.listItem {
+  color: var(--color-cyber-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.sslInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sslRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sslLabel {
+  color: rgba(0, 255, 255, 0.7);
+  font-size: var(--text-sm);
+}
+
+.sslValue {
+  color: var(--color-cyber-primary);
+  font-size: var(--text-sm);
+}

@@ -1,0 +1,518 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   STRATEGIC PLANNING WIDGET - Digital Prefrontal Cortex Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.strategic-planning-widget {
+  width: 100%;
+  padding: 2rem;
+  color: #e5e7eb;
+}
+
+.planning-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+/* View Navigation */
+.view-navigation {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.view-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.view-tab:hover {
+  color: #e5e7eb;
+  border-color: #374151;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.view-tab.active {
+  color: #3b82f6;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.view-icon {
+  font-size: 1.25rem;
+}
+
+.view-name {
+  font-size: 0.9rem;
+}
+
+.view-content {
+  min-height: 400px;
+}
+
+/* Overview */
+.planning-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.overview-card:hover {
+  border-color: #3b82f6;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-action {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card-action:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Recent Risks */
+.recent-risks {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 12px;
+}
+
+.risks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.risk-item {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 4px solid;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.risk-item:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateX(4px);
+}
+
+.risk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.risk-type {
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.risk-level-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.risk-score {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.risk-metrics {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Policies View */
+.policies-view,
+.resources-view,
+.risks-view,
+.approvals-view,
+.plans-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.policies-list,
+.resources-list,
+.approvals-list,
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.policy-card,
+.resource-card,
+.approval-card,
+.plan-card {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.policy-card:hover,
+.resource-card:hover,
+.approval-card:hover,
+.plan-card:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.policy-header,
+.approval-header,
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.policy-name,
+.plan-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.policy-enforcement,
+.approval-status,
+.plan-status {
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #374151, #1f2937);
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.policy-description,
+.plan-description {
+  font-size: 0.9rem;
+  color: #d1d5db;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}
+
+.policy-footer {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #374151;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+/* Resource Cards */
+.resource-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.resource-type-badge {
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.resource-priority {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.resource-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resource-allocation {
+  font-size: 1rem;
+  color: #e5e7eb;
+}
+
+.resource-utilization,
+.resource-dates {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+/* Risks Grid */
+.risks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.risk-card {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-top: 4px solid;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.risk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.risk-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.risk-threat-type {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.risk-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.risk-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.risk-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #3b82f6;
+  font-family: 'Courier New', monospace;
+}
+
+.risk-mitigation {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.risk-mitigation strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #60a5fa;
+}
+
+.risk-mitigation ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #d1d5db;
+}
+
+.risk-mitigation li {
+  margin-bottom: 0.25rem;
+}
+
+/* Approvals */
+.approvals-empty {
+  padding: 3rem;
+  text-align: center;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  color: #10b981;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.approval-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.approval-description {
+  font-size: 0.9rem;
+  color: #d1d5db;
+  margin: 0;
+}
+
+.approval-details {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.approval-submitted {
+  font-size: 0.8rem;
+  color: #6b7280;
+  padding-top: 0.75rem;
+  border-top: 1px solid #374151;
+}
+
+/* Plans */
+.plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.plan-horizon {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.plan-objectives strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #60a5fa;
+  font-size: 0.9rem;
+}
+
+.plan-objectives ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #d1d5db;
+}
+
+.plan-objectives li {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+/* Bio Inspiration */
+.bio-inspiration {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+}
+
+.bio-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3b82f6;
+  margin: 0 0 1rem 0;
+}
+
+.bio-inspiration p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #d1d5db;
+}
+
+.bio-inspiration strong {
+  color: #60a5fa;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .view-navigation {
+    overflow-x: scroll;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .risks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .risk-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

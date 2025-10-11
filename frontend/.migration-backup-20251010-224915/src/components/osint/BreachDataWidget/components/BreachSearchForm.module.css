@@ -1,0 +1,85 @@
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.queryTypeSelector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-3);
+}
+
+.typeButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.typeButton:hover:not(:disabled) {
+  border-color: var(--color-critical);
+  background: rgba(255, 0, 64, 0.1); /* --color-critical with alpha */
+}
+
+.typeButton.active {
+  background: rgba(255, 0, 64, 0.2);
+  border-color: var(--color-critical);
+  color: var(--color-critical);
+  font-weight: var(--font-bold);
+  box-shadow: 0 0 15px rgba(255, 0, 64, 0.3);
+}
+
+.typeButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.typeIcon {
+  font-size: var(--text-2xl);
+}
+
+.typeLabel {
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.searchForm {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.hint i {
+  color: var(--color-critical);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
