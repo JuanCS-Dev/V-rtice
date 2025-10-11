@@ -18,7 +18,7 @@ export const ThemeProvider = ({ children }) => {
   // Aplica tema inicial na montagem
   useEffect(() => {
     applyTheme(currentTheme);
-  }, []);
+  }, [currentTheme]);
 
   /**
    * Troca o tema ativo

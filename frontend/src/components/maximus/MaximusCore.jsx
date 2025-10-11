@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * MAXIMUS CORE - AI Chat & Orchestration Interface
  * ═══════════════════════════════════════════════════════════════════════════
@@ -16,7 +15,7 @@ import logger from '@/utils/logger';
  * Regra: NO MOCK, NO PLACEHOLDER - Dados REAIS via API
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   chatWithMaximus,
   getAIMemory,
@@ -68,7 +67,7 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
       content: '🤖 **Maximus AI Core Online**\n\nI have access to 45+ tools across offensive security, OSINT, cyber intelligence, and cognitive services. Ask me to:\n\n• Run security assessments\n• Investigate targets (OSINT)\n• Analyze threats\n• Execute MITRE ATT&CK simulations\n• Orchestrate multi-service workflows\n\nWhat would you like me to do?',
       timestamp: new Date().toISOString()
     }]);
-  }, []);
+  }, [loadMaximusHealth]);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -79,7 +78,7 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
   // DATA LOADING
   // ═══════════════════════════════════════════════════════════════════════
 
-  const loadMaximusHealth = async () => {
+  const loadMaximusHealth = useCallback(async () => {
     const health = await getMaximusHealth();
     if (health.success !== false) {
       setAiStatus(prev => ({
@@ -92,7 +91,7 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
         }
       }));
     }
-  };
+  }, []);
 
   const loadToolCatalog = async () => {
     const catalog = await getToolCatalog();

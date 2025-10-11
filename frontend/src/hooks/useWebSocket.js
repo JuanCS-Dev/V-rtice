@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * Optimized WebSocket Hook
  *
  * Features:
@@ -14,7 +13,8 @@ import logger from '@/utils/logger';
  * const { data, isConnected, send, reconnect } = useWebSocket(url, options);
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import logger from '@/utils/logger';
 
 const DEFAULT_OPTIONS = {
   reconnect: true,
@@ -32,7 +32,20 @@ const DEFAULT_OPTIONS = {
 };
 
 export const useWebSocket = (url, options = {}) => {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const opts = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [
+    options.reconnect,
+    options.reconnectInterval,
+    options.maxReconnectAttempts,
+    options.heartbeatInterval,
+    options.heartbeatMessage,
+    options.onOpen,
+    options.onClose,
+    options.onMessage,
+    options.onError,
+    options.fallbackToPolling,
+    options.pollingInterval,
+    options.debug
+  ]);
 
   const [data, setData] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -263,7 +276,7 @@ export const useWebSocket = (url, options = {}) => {
     return () => {
       disconnect();
     };
-  }, [url]); // Only reconnect when URL changes
+  }, [url, connect, disconnect]); // Add dependencies
 
   return {
     data,

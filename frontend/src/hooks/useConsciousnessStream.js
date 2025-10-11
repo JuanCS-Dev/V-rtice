@@ -62,7 +62,7 @@ export function useConsciousnessStream({ enabled = true, onMessage, onError } = 
     ws.onclose = () => {
       setIsConnected(false);
       reconnectTimer.current = setTimeout(() => {
-        startEventSource();
+        // Will call startEventSource inside effect
       }, 1000);
     };
 

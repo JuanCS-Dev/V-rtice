@@ -175,7 +175,7 @@ export const useTheme = () => {
   // Aplica tema inicial no mount
   useEffect(() => {
     applyTheme(theme, mode);
-  }, []); // Empty deps - só roda uma vez no mount
+  }, [applyTheme, theme, mode]);
 
   return {
     theme,

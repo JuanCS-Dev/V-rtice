@@ -54,6 +54,9 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
       {/* Dropdown Menu */}
       {isOpen && (
         <div
+          role="menu"
+          tabIndex={-1}
+          aria-label="Effect selection menu"
           style={{
             position: 'absolute',
             top: '40px',

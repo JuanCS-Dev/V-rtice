@@ -162,6 +162,15 @@ export const WebAttack = () => {
                 <div
                   key={idx}
                   onClick={() => getReport(scan.scan_id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      getReport(scan.scan_id);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`View scan report for ${scan.url}`}
                   className="bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-400/30 rounded-lg p-4 hover:border-orange-400 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center justify-between">

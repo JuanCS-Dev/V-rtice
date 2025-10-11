@@ -29,6 +29,17 @@ let toastId = 0;
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.map(toast => 
+      toast.id === id ? { ...toast, closing: true } : toast
+    ));
+
+    // Remove after animation
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 300);
+  }, []);
+
   const addToast = useCallback((message, options = {}) => {
     const id = toastId++;
     const toast = {
@@ -51,18 +62,7 @@ export const ToastProvider = ({ children }) => {
     }
 
     return id;
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    setToasts(prev => prev.map(toast => 
-      toast.id === id ? { ...toast, closing: true } : toast
-    ));
-
-    // Remove after animation
-    setTimeout(() => {
-      setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 300);
-  }, []);
+  }, [removeToast]);
 
   const success = useCallback((message, options) => {
     return addToast(message, { ...options, type: 'success' });

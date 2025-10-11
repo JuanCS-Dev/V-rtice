@@ -51,7 +51,7 @@ export const OnionTracer = ({
   const [status, setStatus] = useState('READY');
   const [statusMessage, setStatusMessage] = useState('Ready to trace...');
   const [progress, setProgress] = useState(0);
-  const [packets, setPackets] = useState([]);
+  const [_packets, setPackets] = useState([]);
   const [realIp, setRealIp] = useState(null);
 
   const traceIntervalRef = useRef(null);
@@ -60,7 +60,7 @@ export const OnionTracer = ({
   /**
    * Gera rota de nós Tor fake (mas realista)
    */
-  const generateOnionRoute = useCallback(() => {
+  const _generateOnionRoute = useCallback(() => {
     // Localizações reais de exit nodes Tor conhecidos
     const possibleNodes = [
       { city: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821, type: 'entry' },
@@ -252,7 +252,7 @@ export const OnionTracer = ({
       setNodes([]);
     }
 
-  }, [targetIp, onTraceComplete, generateOnionRoute]);
+  }, [targetIp, onTraceComplete]);
 
   /**
    * Para trace
@@ -273,13 +273,16 @@ export const OnionTracer = ({
    * Auto-start se configurado
    */
   useEffect(() => {
+    const traceInterval = traceIntervalRef.current;
+    const packetInterval = packetIntervalRef.current;
+    
     if (autoStart) {
       startTrace();
     }
 
     return () => {
-      if (traceIntervalRef.current) clearInterval(traceIntervalRef.current);
-      if (packetIntervalRef.current) clearInterval(packetIntervalRef.current);
+      if (traceInterval) clearInterval(traceInterval);
+      if (packetInterval) clearInterval(packetInterval);
     };
   }, [autoStart, startTrace]);
 

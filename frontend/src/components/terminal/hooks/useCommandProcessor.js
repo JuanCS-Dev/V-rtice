@@ -94,7 +94,7 @@ export const useCommandProcessor = (terminal) => {
     // AI chat processing logic from the original file...
     // ...
     writeln(`\r\n\x1b[1;32mAurora>\x1b[0m `);
-  }, [/* dependencies */]);
+  }, [writeln]);
 
   const processCommand = useCallback(async (command, writePrompt) => {
     writeln(''); // New line after command
