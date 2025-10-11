@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * IMMUNE ENHANCEMENT WIDGET - FASE 9 Immune Enhancement
  * ═══════════════════════════════════════════════════════════════════════════
@@ -47,7 +48,7 @@ export const ImmuneEnhancementWidget = () => {
       setFpResults(result);
     } catch (error) {
       setInputError(error.message);
-      console.error('FP suppression failed:', error);
+      logger.error('FP suppression failed:', error);
     } finally {
       setLoading(false);
     }
@@ -62,7 +63,7 @@ export const ImmuneEnhancementWidget = () => {
       });
       setConsolidationResults(result);
     } catch (error) {
-      console.error('Memory consolidation failed:', error);
+      logger.error('Memory consolidation failed:', error);
     } finally {
       setLoading(false);
     }
@@ -77,7 +78,7 @@ export const ImmuneEnhancementWidget = () => {
       });
       setLtmResults(result);
     } catch (error) {
-      console.error('LTM query failed:', error);
+      logger.error('LTM query failed:', error);
     } finally {
       setLoading(false);
     }

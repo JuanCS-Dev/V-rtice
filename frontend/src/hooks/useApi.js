@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 /**
  * Custom hook for handling API calls with loading and error states
@@ -12,9 +13,9 @@ import { useState, useCallback } from 'react';
  * const handleSearch = async () => {
  *   try {
  *     const result = await execute('CVE-2021-44228');
- *     console.log(result);
+ *     logger.debug(result);
  *   } catch (err) {
- *     console.error(err);
+ *     logger.error(err);
  *   }
  * };
  */

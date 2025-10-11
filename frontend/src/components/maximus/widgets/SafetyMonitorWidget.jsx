@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * SAFETY MONITOR WIDGET - Consciousness Safety Protocol Dashboard
  * ═══════════════════════════════════════════════════════════════════════════
@@ -111,7 +112,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         }
       },
       (error) => {
-        console.error('WebSocket error:', error);
+        logger.error('WebSocket error:', error);
         setWsConnected(false);
       }
     );

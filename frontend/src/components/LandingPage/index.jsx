@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * LANDING PAGE - PROJETO VÉRTICE
  * ================================
  * A CARA do sistema. Impressionante, impactante, REAL.
@@ -100,7 +101,7 @@ export const LandingPage = ({ setCurrentView }) => {
           }
         }
       } catch (error) {
-        console.error('Error fetching real threats:', error);
+        logger.error('Error fetching real threats:', error);
       }
     };
 

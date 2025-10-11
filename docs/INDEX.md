@@ -23,6 +23,7 @@ High-level system design and component blueprints.
 - [Core Complete Integration](./architecture/maximus/core-complete-integration.md)
 
 ### Security
+- **[Adaptive Immune System Blueprint](./architecture/security/adaptive-immune-system-blueprint.md)** 🆕
 - [Offensive Arsenal Frontend](./architecture/security/offensive-arsenal-frontend.md)
 
 ### Infrastructure
@@ -37,6 +38,12 @@ High-level system design and component blueprints.
 
 Step-by-step guides and plans for development and operations.
 
+### Immune System (NEW) 🆕
+- **[Executive Summary](./guides/immune-system-executive-summary.md)** - Quick overview (start here!)
+- **[Adaptive Immune System Roadmap](./guides/adaptive-immune-system-roadmap.md)** - 8-week implementation timeline
+- **[Immune System Implementation Plan](./guides/immune-system-implementation-plan.md)** - Detailed step-by-step execution guide
+
+### General Development
 - [11 Services Surgical Plan](./guides/11-services-surgical-plan.md)
 - [Backend Docker Fix Plan](./guides/backend-docker-fix-plan.md)
 - [Cleanup Organization Roadmap](./guides/cleanup-organization-roadmap.md)

@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * BACKGROUND EFFECTS - Sistema Escalável de Efeitos Visuais
  * ═══════════════════════════════════════════════════════════════════════════
@@ -42,15 +43,15 @@ export const MatrixRainEffect = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
-      console.log('⚠️ MatrixRain: Canvas ref não disponível');
+      logger.debug('⚠️ MatrixRain: Canvas ref não disponível');
       return;
     }
 
-    console.log('✅ MatrixRain: Iniciando efeito...', canvas.width, canvas.height);
+    logger.debug('✅ MatrixRain: Iniciando efeito...', canvas.width, canvas.height);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      console.log('⚠️ MatrixRain: Context 2D não disponível');
+      logger.debug('⚠️ MatrixRain: Context 2D não disponível');
       return;
     }
 
@@ -58,7 +59,7 @@ export const MatrixRainEffect = () => {
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      console.log('📐 MatrixRain: Canvas redimensionado:', canvas.width, 'x', canvas.height);
+      logger.debug('📐 MatrixRain: Canvas redimensionado:', canvas.width, 'x', canvas.height);
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -74,7 +75,7 @@ export const MatrixRainEffect = () => {
       drops[i] = Math.floor(Math.random() * -100);
     }
 
-    console.log('🔢 MatrixRain: Configurado com', columns, 'colunas');
+    logger.debug('🔢 MatrixRain: Configurado com', columns, 'colunas');
 
     // Função de desenho
     const draw = () => {
@@ -116,14 +117,14 @@ export const MatrixRainEffect = () => {
       draw();
       frameCount++;
       if (frameCount === 1) {
-        console.log('🎬 MatrixRain: Primeira animação renderizada');
+        logger.debug('🎬 MatrixRain: Primeira animação renderizada');
       }
     }, 50);
 
-    console.log('🔄 MatrixRain: Loop de animação iniciado');
+    logger.debug('🔄 MatrixRain: Loop de animação iniciado');
 
     return () => {
-      console.log('🛑 MatrixRain: Cleanup - parando animação');
+      logger.debug('🛑 MatrixRain: Cleanup - parando animação');
       clearInterval(interval);
       window.removeEventListener('resize', resizeCanvas);
     };
@@ -282,7 +283,7 @@ export const AVAILABLE_EFFECTS = [
 // COMPONENTE SELETOR DE EFEITOS
 // ═══════════════════════════════════════════════════════════════════════════
 export const EffectSelector = ({ currentEffect, onEffectChange }) => {
-  console.log('🎨 EffectSelector renderizando:', currentEffect);
+  logger.debug('🎨 EffectSelector renderizando:', currentEffect);
 
   return (
     <div style={{

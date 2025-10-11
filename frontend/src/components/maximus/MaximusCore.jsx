@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * MAXIMUS CORE - AI Chat & Orchestration Interface
  * ═══════════════════════════════════════════════════════════════════════════
@@ -166,7 +167,7 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
         throw new Error(response.error || 'Chat failed');
       }
     } catch (error) {
-      console.error('Chat error:', error);
+      logger.error('Chat error:', error);
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         role: 'system',

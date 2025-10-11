@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * CONSCIOUSNESS MONITORING PANEL - Real-time Artificial Consciousness
  * ═══════════════════════════════════════════════════════════════════════════
@@ -119,16 +120,16 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
 
     switch (message.type) {
       case 'initial_state':
-        console.log('🧠 Initial consciousness state received:', message);
+        logger.debug('🧠 Initial consciousness state received:', message);
         break;
 
       case 'esgt_event':
-        console.log('⚡ ESGT event received:', message.event);
+        logger.debug('⚡ ESGT event received:', message.event);
         addNewEvent(message.event);
         break;
 
       case 'arousal_change':
-        console.log('🌅 Arousal change received:', message);
+        logger.debug('🌅 Arousal change received:', message);
         setArousalState(prev => ({
           ...prev,
           arousal: message.arousal,
@@ -145,12 +146,12 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
         break;
 
       default:
-        console.log('📨 Unknown stream message:', message);
+        logger.debug('📨 Unknown stream message:', message);
     }
   }, []);
 
   const handleStreamError = useCallback((error) => {
-    console.error('❌ Consciousness stream error:', error);
+    logger.error('❌ Consciousness stream error:', error);
   }, []);
 
   const { connectionType, isConnected } = useConsciousnessStream({
@@ -202,9 +203,9 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
 
     if (result && !result.error) {
       // Update will come via WebSocket
-      console.log('✅ Arousal adjustment requested:', result);
+      logger.debug('✅ Arousal adjustment requested:', result);
     } else {
-      console.error('❌ Arousal adjustment failed:', result);
+      logger.error('❌ Arousal adjustment failed:', result);
     }
   };
 

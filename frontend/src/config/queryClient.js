@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * React Query Configuration
  *
  * Centralized configuration for API caching and data fetching
@@ -32,7 +33,7 @@ export const queryClient = new QueryClient({
       // Error handling
       onError: (error) => {
         if (process.env.NODE_ENV === 'development') {
-          console.error('[React Query] Error:', error);
+          logger.error('[React Query] Error:', error);
         }
       },
 
@@ -51,7 +52,7 @@ export const queryClient = new QueryClient({
       // Error handling
       onError: (error) => {
         if (process.env.NODE_ENV === 'development') {
-          console.error('[React Query] Mutation Error:', error);
+          logger.error('[React Query] Mutation Error:', error);
         }
       }
     }

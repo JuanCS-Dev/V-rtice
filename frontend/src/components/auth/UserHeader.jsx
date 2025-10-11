@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '@/utils/logger';
 import { useAuth } from '../../contexts/AuthContext';
 
 const UserHeader = () => {
@@ -13,7 +14,7 @@ const UserHeader = () => {
         const hasOffensive = await canAccessOffensive();
         setHasOffensiveAccess(hasOffensive);
       } catch (error) {
-        console.error('Failed to check permissions:', error);
+        logger.error('Failed to check permissions:', error);
       }
     };
 
@@ -27,7 +28,7 @@ const UserHeader = () => {
       await logout();
       window.location.reload();
     } catch (error) {
-      console.error('Logout failed:', error);
+      logger.error('Logout failed:', error);
     }
   };
 

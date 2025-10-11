@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * THREAT PREDICTION WIDGET - FASE 8 Enhanced Cognition
  * ═══════════════════════════════════════════════════════════════════════════
@@ -38,7 +39,7 @@ export const ThreatPredictionWidget = () => {
         setPredictions(result);
       }
     } catch (error) {
-      console.error('Prediction failed:', error);
+      logger.error('Prediction failed:', error);
     } finally {
       setLoading(false);
     }

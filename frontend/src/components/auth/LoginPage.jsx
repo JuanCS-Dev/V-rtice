@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '@/utils/logger';
 import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage = () => {
@@ -53,7 +54,7 @@ const LoginPage = () => {
       }
     } catch (err) {
       setError('Login failed. Please try again.');
-      console.error('Login error:', err);
+      logger.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }

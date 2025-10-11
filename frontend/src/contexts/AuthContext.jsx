@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import logger from '@/utils/logger';
 
 const AuthContext = createContext();
 
@@ -155,7 +156,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user: userData };
     } catch (error) {
-      console.error('Login failed:', error);
+      logger.error('Login failed:', error);
 
       // REGRA DE OURO: No fallback to mock in production
       // Return error instead - UI should show appropriate error message

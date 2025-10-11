@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useOffensiveMetrics Hook
  * Fetches real offensive operation metrics from backend services
  *
@@ -75,7 +76,7 @@ export const useOffensiveMetrics = () => {
     retry: 2, // Retry failed requests twice
     retryDelay: 1000,
     onError: (err) => {
-      console.error('Failed to fetch offensive metrics:', err);
+      logger.error('Failed to fetch offensive metrics:', err);
     }
   });
 

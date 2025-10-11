@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * DISTRIBUTED TOPOLOGY WIDGET - FASE 10 Distributed Organism
  * ═══════════════════════════════════════════════════════════════════════════
@@ -27,7 +28,7 @@ export const DistributedTopologyWidget = () => {
       const result = await getTopology();
       setTopology(result);
     } catch (error) {
-      console.error('Topology fetch failed:', error);
+      logger.error('Topology fetch failed:', error);
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,7 @@ export const DistributedTopologyWidget = () => {
       const result = await getGlobalMetrics(60);
       setGlobalMetrics(result);
     } catch (error) {
-      console.error('Metrics fetch failed:', error);
+      logger.error('Metrics fetch failed:', error);
     }
   };
 

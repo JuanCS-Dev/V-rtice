@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logger from '@/utils/logger';
 
 const GoogleModule = () => {
   const [searchType, setSearchType] = useState('person');
@@ -63,7 +64,7 @@ const GoogleModule = () => {
       }
     } catch (err) {
       setError('Erro de conexão com o serviço Google OSINT');
-      console.error('Erro:', err);
+      logger.error('Erro:', err);
     } finally {
       setSearching(false);
     }

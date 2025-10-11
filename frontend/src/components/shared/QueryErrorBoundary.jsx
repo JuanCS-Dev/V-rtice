@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * QueryErrorBoundary - Specialized Error Boundary for React Query
  *
  * Handles errors from useQuery/useMutation with:
@@ -39,9 +40,9 @@ class QueryErrorBoundaryComponent extends React.Component {
     // Log error to monitoring service
     // Error tracking service can be integrated here if needed
     if (process.env.NODE_ENV === 'production') {
-      console.error('QueryErrorBoundary caught:', error, errorInfo);
+      logger.error('QueryErrorBoundary caught:', error, errorInfo);
     } else {
-      console.error('QueryErrorBoundary caught:', error, errorInfo);
+      logger.error('QueryErrorBoundary caught:', error, errorInfo);
     }
   }
 

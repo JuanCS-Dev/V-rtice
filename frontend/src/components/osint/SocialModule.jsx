@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logger from '@/utils/logger';
 
 const SocialModule = () => {
   const [platform, setPlatform] = useState('instagram');
@@ -38,7 +39,7 @@ const SocialModule = () => {
       }
     } catch (err) {
       setError('Erro de conexão com o serviço OSINT');
-      console.error('Erro:', err);
+      logger.error('Erro:', err);
     } finally {
       setScraping(false);
     }

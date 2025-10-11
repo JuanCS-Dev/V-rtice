@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logger from '@/utils/logger';
 
 const UsernameModule = () => {
   const [username, setUsername] = useState('');
@@ -59,7 +60,7 @@ const UsernameModule = () => {
         throw new Error(`Erro HTTP: ${response.status}`);
       }
     } catch (error) {
-      console.error('Erro na busca:', error);
+      logger.error('Erro na busca:', error);
 
       // REGRA DE OURO: No mock fallback in production
       // Return empty results with error indicator

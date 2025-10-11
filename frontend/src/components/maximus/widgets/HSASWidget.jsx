@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * HSAS WIDGET - Hybrid Skill Acquisition System
  * ═══════════════════════════════════════════════════════════════════════════
@@ -38,7 +39,7 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
           setSkills(data.skills || []);
         }
       } catch (error) {
-        console.error('Failed to fetch skills:', error);
+        logger.error('Failed to fetch skills:', error);
       }
     };
 
@@ -57,7 +58,7 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
           setPrimitives(data.primitives || []);
         }
       } catch (error) {
-        console.error('Failed to fetch primitives:', error);
+        logger.error('Failed to fetch primitives:', error);
       }
     };
 
@@ -78,7 +79,7 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to fetch learning stats:', error);
+        logger.error('Failed to fetch learning stats:', error);
       }
     };
 
@@ -95,11 +96,11 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Mode changed:', data);
+        logger.debug('Mode changed:', data);
         setLearningMode(data.new_mode);
       }
     } catch (error) {
-      console.error('Failed to change mode:', error);
+      logger.error('Failed to change mode:', error);
     }
   };
 

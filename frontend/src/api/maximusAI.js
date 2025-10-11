@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * Maximus AI Core - API Client
  * =============================
@@ -41,7 +42,7 @@ export const analyzeWithAI = async (data, context = {}) => {
     if (!response.ok) throw new Error(`AI Analysis failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error in AI analysis:', error);
+    logger.error('Error in AI analysis:', error);
     return { success: false, error: error.message };
   }
 };
@@ -63,7 +64,7 @@ export const aiReason = async (query, reasoningType = 'chain_of_thought') => {
     if (!response.ok) throw new Error(`Reasoning failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error in AI reasoning:', error);
+    logger.error('Error in AI reasoning:', error);
     return { success: false, error: error.message };
   }
 };
@@ -92,7 +93,7 @@ export const callTool = async (toolName, params = {}, context = {}) => {
     if (!response.ok) throw new Error(`Tool call failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error calling tool:', error);
+    logger.error('Error calling tool:', error);
     return { success: false, error: error.message };
   }
 };
@@ -106,7 +107,7 @@ export const getToolCatalog = async () => {
     if (!response.ok) throw new Error(`Failed to get tools: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting tool catalog:', error);
+    logger.error('Error getting tool catalog:', error);
     return { success: false, error: error.message };
   }
 };
@@ -131,7 +132,7 @@ export const orchestrateWorkflow = async (workflowConfig) => {
     if (!response.ok) throw new Error(`Orchestration failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error in orchestration:', error);
+    logger.error('Error in orchestration:', error);
     return { success: false, error: error.message };
   }
 };
@@ -217,7 +218,7 @@ export const getAIMemory = async (sessionId = null, type = 'all') => {
     if (!response.ok) throw new Error(`Failed to get memory: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting AI memory:', error);
+    logger.error('Error getting AI memory:', error);
     return { success: false, error: error.message };
   }
 };
@@ -240,7 +241,7 @@ export const addToMemory = async (data, type = 'semantic', importance = 'medium'
     if (!response.ok) throw new Error(`Failed to add to memory: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error adding to memory:', error);
+    logger.error('Error adding to memory:', error);
     return { success: false, error: error.message };
   }
 };
@@ -290,7 +291,7 @@ export const chatWithMaximus = async (message, context = {}, onChunk = null) => 
     const data = await response.json();
     return { success: true, ...data };
   } catch (error) {
-    console.error('Error in chat:', error);
+    logger.error('Error in chat:', error);
     return { success: false, error: error.message };
   }
 };
@@ -302,7 +303,7 @@ export const connectMaximusStream = (onMessage, onError = null) => {
   const ws = new WebSocket(`ws://localhost:8001/ws/stream`);
 
   ws.onopen = () => {
-    console.log('🤖 Maximus AI Stream connected');
+    logger.debug('🤖 Maximus AI Stream connected');
   };
 
   ws.onmessage = (event) => {
@@ -310,17 +311,17 @@ export const connectMaximusStream = (onMessage, onError = null) => {
       const data = JSON.parse(event.data);
       onMessage(data);
     } catch (error) {
-      console.error('Error parsing WebSocket message:', error);
+      logger.error('Error parsing WebSocket message:', error);
     }
   };
 
   ws.onerror = (error) => {
-    console.error('WebSocket error:', error);
+    logger.error('WebSocket error:', error);
     if (onError) onError(error);
   };
 
   ws.onclose = () => {
-    console.log('🤖 Maximus AI Stream disconnected');
+    logger.debug('🤖 Maximus AI Stream disconnected');
   };
 
   return ws;
@@ -408,7 +409,7 @@ export const synthesizeIntelligence = async (sources, query = null) => {
     if (!response.ok) throw new Error(`Synthesis failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error synthesizing intelligence:', error);
+    logger.error('Error synthesizing intelligence:', error);
     return { success: false, error: error.message };
   }
 };
@@ -430,7 +431,7 @@ export const getAISuggestions = async (context, type = 'next_action') => {
     if (!response.ok) throw new Error(`Suggestions failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting suggestions:', error);
+    logger.error('Error getting suggestions:', error);
     return { success: false, error: error.message };
   }
 };
@@ -619,7 +620,7 @@ export const getMaximusHealth = async () => {
     if (!response.ok) throw new Error(`Health check failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Maximus health check failed:', error);
+    logger.error('Maximus health check failed:', error);
     return { success: false, error: error.message, status: 'offline' };
   }
 };
@@ -633,7 +634,7 @@ export const getAIStats = async () => {
     if (!response.ok) throw new Error(`Stats failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting AI stats:', error);
+    logger.error('Error getting AI stats:', error);
     return { success: false, error: error.message };
   }
 };

@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * Cyber Services API Client
  * ==========================
@@ -84,7 +85,7 @@ export const analyzeIP = async (ip) => {
       raw: data
     };
   } catch (error) {
-    console.error('Error analyzing IP:', error);
+    logger.error('Error analyzing IP:', error);
     return {
       success: false,
       error: error.message
@@ -112,7 +113,7 @@ export const analyzeMyIP = async () => {
       ...data
     };
   } catch (error) {
-    console.error('Error analyzing my IP:', error);
+    logger.error('Error analyzing my IP:', error);
     return {
       success: false,
       error: error.message
@@ -140,7 +141,7 @@ export const getMyIP = async () => {
       source: data.source
     };
   } catch (error) {
-    console.error('Error detecting my IP:', error);
+    logger.error('Error detecting my IP:', error);
     return {
       success: false,
       error: error.message
@@ -205,7 +206,7 @@ export const checkThreatIntelligence = async (target, targetType = 'auto') => {
       raw: data
     };
   } catch (error) {
-    console.error('Error checking threat intelligence:', error);
+    logger.error('Error checking threat intelligence:', error);
     return {
       success: false,
       error: error.message
@@ -245,7 +246,7 @@ export const traceOnionRoute = async (targetIp) => {
       encrypted: true
     };
   } catch (error) {
-    console.error('Error tracing onion route:', error);
+    logger.error('Error tracing onion route:', error);
     return {
       success: false,
       error: error.message
@@ -383,7 +384,7 @@ export const checkServicesHealth = async () => {
     });
     services.ipIntelligence = ipResp.ok;
   } catch (e) {
-    console.warn('IP Intelligence service unavailable');
+    logger.warn('IP Intelligence service unavailable');
   }
 
   try {
@@ -394,7 +395,7 @@ export const checkServicesHealth = async () => {
     });
     services.threatIntel = threatResp.ok;
   } catch (e) {
-    console.warn('Threat Intel service unavailable');
+    logger.warn('Threat Intel service unavailable');
   }
 
   try {
@@ -405,7 +406,7 @@ export const checkServicesHealth = async () => {
     });
     services.malwareAnalysis = malwareResp.ok;
   } catch (e) {
-    console.warn('Malware Analysis service unavailable');
+    logger.warn('Malware Analysis service unavailable');
   }
 
   try {
@@ -416,7 +417,7 @@ export const checkServicesHealth = async () => {
     });
     services.sslMonitor = sslResp.ok;
   } catch (e) {
-    console.warn('SSL Monitor service unavailable');
+    logger.warn('SSL Monitor service unavailable');
   }
 
   return services;

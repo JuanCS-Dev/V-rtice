@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 const getGatewayBase = () => {
   const env = import.meta?.env;
@@ -74,7 +75,7 @@ export function useConsciousnessStream({ enabled = true, onMessage, onError } = 
         const message = JSON.parse(event.data);
         handleMessage(message);
       } catch (err) {
-        console.error('Error parsing WebSocket message:', err);
+        logger.error('Error parsing WebSocket message:', err);
       }
     };
   }, [handleMessage, onError]);
@@ -108,7 +109,7 @@ export function useConsciousnessStream({ enabled = true, onMessage, onError } = 
           const message = JSON.parse(event.data);
           handleMessage(message);
         } catch (err) {
-          console.error('Error parsing SSE message:', err);
+          logger.error('Error parsing SSE message:', err);
         }
       };
     } catch (error) {

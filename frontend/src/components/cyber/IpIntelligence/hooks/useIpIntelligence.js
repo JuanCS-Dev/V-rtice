@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 import { analyzeIP, analyzeMyIP, checkThreatIntelligence } from '../../../../api/cyberServices';
 
 /**
@@ -71,7 +72,7 @@ export const useIpIntelligence = () => {
       const threatIntel = await checkThreatIntelligence(ipToAnalyze.trim(), 'ip');
 
       if (!threatIntel.success) {
-        console.warn('Threat Intel unavailable, using only IP analysis');
+        logger.warn('Threat Intel unavailable, using only IP analysis');
       }
 
       // ==========================================
@@ -141,7 +142,7 @@ export const useIpIntelligence = () => {
       setSearchHistory(prev => [ipToAnalyze, ...prev.filter(ip => ip !== ipToAnalyze)].slice(0, 10));
 
     } catch (error) {
-      console.error('Erro ao analisar IP:', error);
+      logger.error('Erro ao analisar IP:', error);
 
       // Fallback apenas se serviços estiverem offline
       const fallbackResult = {
@@ -202,7 +203,7 @@ export const useIpIntelligence = () => {
       await handleAnalyzeIP(detectedIP);
 
     } catch (error) {
-      console.error('Erro ao analisar meu IP:', error);
+      logger.error('Erro ao analisar meu IP:', error);
       alert(`Erro: ${error.message}`);
     } finally {
       setLoadingMyIp(false);

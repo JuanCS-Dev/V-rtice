@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * MAXIMUS AI DASHBOARD - O Cérebro do Vértice
  * ═══════════════════════════════════════════════════════════════════════════
@@ -43,7 +44,7 @@ export const MaximusDashboard = ({ setCurrentView }) => {
   const brainActivity = useBrainActivity();
 
   // Debug log
-  console.log('🧠 MAXIMUS Dashboard renderizando...', { backgroundEffect, activePanel });
+  logger.debug('🧠 MAXIMUS Dashboard renderizando...', { backgroundEffect, activePanel });
 
   const panels = [
     { id: 'core', name: t('dashboard.maximus.panels.core'), icon: '🤖', description: t('dashboard.maximus.panelDescriptions.core') },

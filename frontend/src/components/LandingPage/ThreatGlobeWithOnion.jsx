@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ThreatGlobe + OnionTracer - VERSÃO COMPLETA
  * ============================================
  * Mapa global COM animação OnionTracer integrada de verdade!
@@ -136,7 +137,7 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
     setTraceProgress(0);
     setCurrentHop(0);
 
-    console.log('[OnionTracer] Starting trace for:', targetIp);
+    logger.debug('[OnionTracer] Starting trace for:', targetIp);
 
     try {
       // Buscar rota completa do backend
@@ -150,7 +151,7 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
       const route = result.route;
       setCurrentRoute(route);
 
-      console.log('[OnionTracer] Route generated:', route.length, 'hops');
+      logger.debug('[OnionTracer] Route generated:', route.length, 'hops');
 
       // Limpar marcadores e paths antigos
       clearMap();
@@ -168,7 +169,7 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
           setIsTracing(false);
 
           const destination = route[route.length - 1];
-          console.log('[OnionTracer] Trace complete:', destination);
+          logger.debug('[OnionTracer] Trace complete:', destination);
 
           // Zoom out após 5s
           setTimeout(() => {
@@ -216,7 +217,7 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
       }, 2500); // 2.5s por hop
 
     } catch (error) {
-      console.error('[OnionTracer] Error:', error);
+      logger.error('[OnionTracer] Error:', error);
       setTraceStatus('ERROR');
       setIsTracing(false);
     }

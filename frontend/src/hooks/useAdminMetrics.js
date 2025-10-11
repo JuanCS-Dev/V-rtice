@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useAdminMetrics - Admin Dashboard Metrics Hook
  *
  * Fetches and parses Prometheus metrics from API Gateway.
@@ -32,7 +33,7 @@ export const useAdminMetrics = () => {
         const parsedData = parseMetrics(text);
         setMetrics(parsedData);
       } catch (error) {
-        console.error('Failed to fetch admin metrics:', error);
+        logger.error('Failed to fetch admin metrics:', error);
       } finally {
         setLoading(false);
       }

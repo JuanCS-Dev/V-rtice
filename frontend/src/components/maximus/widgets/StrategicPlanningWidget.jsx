@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * STRATEGIC PLANNING WIDGET - Digital Prefrontal Cortex
  * ═══════════════════════════════════════════════════════════════════════════
@@ -33,7 +34,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
           setActivePolicies(data.policies || []);
         }
       } catch (error) {
-        console.error('Failed to fetch policies:', error);
+        logger.error('Failed to fetch policies:', error);
       }
     };
 
@@ -52,7 +53,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
           setResources(data.allocations || []);
         }
       } catch (error) {
-        console.error('Failed to fetch resources:', error);
+        logger.error('Failed to fetch resources:', error);
       }
     };
 
@@ -72,7 +73,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to fetch risks:', error);
+        logger.error('Failed to fetch risks:', error);
       }
     };
 
@@ -91,7 +92,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
           setPendingApprovals(data.approvals || []);
         }
       } catch (error) {
-        console.error('Failed to fetch approvals:', error);
+        logger.error('Failed to fetch approvals:', error);
       }
     };
 
@@ -110,7 +111,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
           setStrategicPlans(data.plans || []);
         }
       } catch (error) {
-        console.error('Failed to fetch plans:', error);
+        logger.error('Failed to fetch plans:', error);
       }
     };
 

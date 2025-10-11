@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useKeyboardNavigation Hook
  *
  * Keyboard navigation support for complex components
@@ -14,7 +15,7 @@
  * @example
  * const { focusedIndex, handleKeyDown } = useKeyboardNavigation({
  *   itemCount: 5,
- *   onSelect: (index) => console.log('Selected:', index),
+ *   onSelect: (index) => logger.debug('Selected:', index),
  *   orientation: 'vertical'
  * });
  */

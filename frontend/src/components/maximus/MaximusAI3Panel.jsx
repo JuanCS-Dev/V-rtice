@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * MAXIMUS AI 3.0 PANEL - Neural Architecture Dashboard
  * ═══════════════════════════════════════════════════════════════════════════
@@ -61,7 +62,7 @@ export const MaximusAI3Panel = ({ aiStatus, setAiStatus }) => {
             };
           }
         } catch (error) {
-          console.error(`${service.name} health check failed:`, error);
+          logger.error(`${service.name} health check failed:`, error);
         }
         return {
           key: service.key,

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logger from '@/utils/logger';
 import axios from 'axios';
 
 const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
@@ -48,7 +49,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
       setResult(response.data.data);
       setResults(response.data.data);
     } catch (error) {
-      console.error('Erro na investigação:', error);
+      logger.error('Erro na investigação:', error);
 
       // Fallback com dados simulados se a API não estiver disponível
       const fallbackResult = {

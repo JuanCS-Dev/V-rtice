@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logger from '@/utils/logger';
 
 const EmailModule = () => {
   const [email, setEmail] = useState('');
@@ -34,7 +35,7 @@ const EmailModule = () => {
       }
     } catch (err) {
       setError('Erro de conexão com o serviço OSINT');
-      console.error('Erro:', err);
+      logger.error('Erro:', err);
     } finally {
       setAnalyzing(false);
     }

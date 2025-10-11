@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * OnionTracer Component - Hollywood-Style Onion Routing Animation
  * ================================================================
  *
@@ -241,7 +242,7 @@ export const OnionTracer = ({
       }, 2500); // 2.5s por hop para efeito cinematográfico
 
     } catch (error) {
-      console.error('Trace error:', error);
+      logger.error('Trace error:', error);
       setStatus('ERROR');
       setStatusMessage(`❌ Trace failed: ${error.message}`);
       setIsTracing(false);

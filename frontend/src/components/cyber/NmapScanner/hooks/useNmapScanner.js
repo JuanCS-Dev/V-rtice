@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 import { SCAN_PROFILES } from '../utils/scanUtils';
 
 const API_BASE = 'http://localhost:8000/api/nmap';
@@ -64,7 +65,7 @@ export const useNmapScanner = () => {
         const data = await response.json();
         setProfiles(data || DEFAULT_PROFILES);
       } catch (error) {
-        console.error('Erro ao carregar perfis:', error);
+        logger.error('Erro ao carregar perfis:', error);
         setProfiles(DEFAULT_PROFILES);
       }
     };
@@ -109,7 +110,7 @@ export const useNmapScanner = () => {
         ...prev.slice(0, 9)
       ]);
     } catch (error) {
-      console.error('Erro no scan:', error);
+      logger.error('Erro no scan:', error);
 
       // Fallback com dados simulados
       const fallback = generateFallbackResult(target, selectedProfile);

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 const API_BASE = 'http://localhost:8000/api/ip';
 
@@ -101,7 +102,7 @@ export const useIpAnalysis = () => {
       setAnalysisResult(formatted);
       addToHistory(trimmedIP);
     } catch (error) {
-      console.error('Erro ao conectar com o backend:', error);
+      logger.error('Erro ao conectar com o backend:', error);
 
       // Fallback se backend indisponível
       const fallback = generateFallbackData(trimmedIP);
@@ -151,7 +152,7 @@ export const useIpAnalysis = () => {
       setAnalysisResult(formatted);
       addToHistory(detectedIP);
     } catch (error) {
-      console.error('Erro na requisição:', error);
+      logger.error('Erro na requisição:', error);
       alert(`Erro de conexão: ${error.message}`);
     } finally {
       setLoadingMyIp(false);

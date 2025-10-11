@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 import {
   runAttackSimulation,
   listAttackTechniques,
@@ -35,7 +36,7 @@ export const useBAS = () => {
         setTechniques(result.techniques || result.data || []);
       }
     } catch (err) {
-      console.error('Error loading techniques:', err);
+      logger.error('Error loading techniques:', err);
       setError(err.message);
     }
   }, []);
@@ -51,7 +52,7 @@ export const useBAS = () => {
         setCoverage(result.coverage || result.data || result);
       }
     } catch (err) {
-      console.error('Error loading coverage:', err);
+      logger.error('Error loading coverage:', err);
       setError(err.message);
     }
   }, []);
@@ -90,7 +91,7 @@ export const useBAS = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error running simulation:', err);
+      logger.error('Error running simulation:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -129,7 +130,7 @@ export const useBAS = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error validating purple team:', err);
+      logger.error('Error validating purple team:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -155,7 +156,7 @@ export const useBAS = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error getting coverage:', err);
+      logger.error('Error getting coverage:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

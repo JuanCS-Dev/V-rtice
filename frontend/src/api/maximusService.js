@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * MAXIMUS API SERVICE
@@ -39,7 +40,7 @@ const apiRequest = async (endpoint, options = {}) => {
       message: data.message,
     };
   } catch (error) {
-    console.error(`MAXIMUS API Error [${endpoint}]:`, error);
+    logger.error(`MAXIMUS API Error [${endpoint}]:`, error);
     return {
       success: false,
       error: error.message,

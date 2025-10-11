@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useRealTimeExecutions Hook
  * Real-time monitoring of offensive operations (scans, exploits, attacks)
  *
@@ -63,7 +64,7 @@ export const useRealTimeExecutions = () => {
         setExecutions(wsData.executions.slice(0, 20));
       }
     } catch (err) {
-      console.error('Error processing execution data:', err);
+      logger.error('Error processing execution data:', err);
     }
   }, [wsData, addExecution]);
 

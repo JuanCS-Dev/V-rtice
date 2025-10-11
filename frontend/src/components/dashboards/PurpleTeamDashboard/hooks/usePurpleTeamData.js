@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * usePurpleTeamData Hook
  * Aggregates data from both red and blue team operations
  * Correlates attacks with detections to identify gaps
@@ -147,7 +148,7 @@ export const usePurpleTeamData = () => {
     retry: 2,
     retryDelay: 1000,
     onError: (err) => {
-      console.error('Failed to fetch purple team data:', err);
+      logger.error('Failed to fetch purple team data:', err);
     }
   });
 

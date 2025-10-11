@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 export const useNaturalLanguage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,7 +38,7 @@ export const useNaturalLanguage = () => {
       return result;
 
     } catch (error) {
-      console.error('Erro no processamento NLP:', error);
+      logger.error('Erro no processamento NLP:', error);
 
       // Fallback: tentar parsing básico
       const fallback = parseFallback(input);

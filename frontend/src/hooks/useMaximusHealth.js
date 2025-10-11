@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useMaximusHealth - MAXIMUS AI Health Check Hook
  *
  * Polls MAXIMUS core service health endpoint every 30s
@@ -37,7 +38,7 @@ export const useMaximusHealth = () => {
           }));
         }
       } catch (error) {
-        console.error('MAXIMUS health check failed:', error);
+        logger.error('MAXIMUS health check failed:', error);
         setAiStatus(prev => ({
           ...prev,
           core: { ...prev.core, status: 'offline' }

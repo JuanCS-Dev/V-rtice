@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * Vitest Setup File
  *
  * Global test configuration and mocks

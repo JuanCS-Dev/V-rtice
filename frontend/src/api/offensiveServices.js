@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * Offensive Security Arsenal - API Client
  * ========================================
@@ -48,7 +49,7 @@ export const scanNetwork = async (target, scanType = 'quick', ports = '1-1000') 
     if (!response.ok) throw new Error(`Network scan failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error in network scan:', error);
+    logger.error('Error in network scan:', error);
     return { success: false, error: error.message };
   }
 };
@@ -62,7 +63,7 @@ export const getScanStatus = async (scanId) => {
     if (!response.ok) throw new Error(`Failed to get scan status: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting scan status:', error);
+    logger.error('Error getting scan status:', error);
     return { success: false, error: error.message };
   }
 };
@@ -76,7 +77,7 @@ export const listScans = async (limit = 50) => {
     if (!response.ok) throw new Error(`Failed to list scans: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error listing scans:', error);
+    logger.error('Error listing scans:', error);
     return { success: false, error: error.message };
   }
 };
@@ -95,7 +96,7 @@ export const discoverHosts = async (network) => {
     if (!response.ok) throw new Error(`Host discovery failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error in host discovery:', error);
+    logger.error('Error in host discovery:', error);
     return { success: false, error: error.message };
   }
 };
@@ -115,7 +116,7 @@ export const searchCVE = async (cveId) => {
     if (!response.ok) throw new Error(`CVE search failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error searching CVE:', error);
+    logger.error('Error searching CVE:', error);
     return { success: false, error: error.message };
   }
 };
@@ -134,7 +135,7 @@ export const searchVulnerabilities = async (query, filters = {}) => {
     if (!response.ok) throw new Error(`Vulnerability search failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error searching vulnerabilities:', error);
+    logger.error('Error searching vulnerabilities:', error);
     return { success: false, error: error.message };
   }
 };
@@ -148,7 +149,7 @@ export const getExploits = async (cveId) => {
     if (!response.ok) throw new Error(`Exploit search failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting exploits:', error);
+    logger.error('Error getting exploits:', error);
     return { success: false, error: error.message };
   }
 };
@@ -164,7 +165,7 @@ export const correlateWithScan = async (scanId) => {
     if (!response.ok) throw new Error(`Correlation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error correlating vulnerabilities:', error);
+    logger.error('Error correlating vulnerabilities:', error);
     return { success: false, error: error.message };
   }
 };
@@ -193,7 +194,7 @@ export const scanWebTarget = async (url, scanProfile = 'full', authConfig = null
     if (!response.ok) throw new Error(`Web scan failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error in web scan:', error);
+    logger.error('Error in web scan:', error);
     return { success: false, error: error.message };
   }
 };
@@ -215,7 +216,7 @@ export const runWebTest = async (url, testType, params = {}) => {
     if (!response.ok) throw new Error(`Web test failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error running web test:', error);
+    logger.error('Error running web test:', error);
     return { success: false, error: error.message };
   }
 };
@@ -229,7 +230,7 @@ export const getWebScanReport = async (scanId) => {
     if (!response.ok) throw new Error(`Failed to get report: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting web scan report:', error);
+    logger.error('Error getting web scan report:', error);
     return { success: false, error: error.message };
   }
 };
@@ -259,7 +260,7 @@ export const createC2Session = async (framework, targetHost, payload, config = {
     if (!response.ok) throw new Error(`Session creation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error creating C2 session:', error);
+    logger.error('Error creating C2 session:', error);
     return { success: false, error: error.message };
   }
 };
@@ -274,7 +275,7 @@ export const listC2Sessions = async (framework = null) => {
     if (!response.ok) throw new Error(`Failed to list sessions: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error listing C2 sessions:', error);
+    logger.error('Error listing C2 sessions:', error);
     return { success: false, error: error.message };
   }
 };
@@ -296,7 +297,7 @@ export const executeC2Command = async (sessionId, command, args = []) => {
     if (!response.ok) throw new Error(`Command execution failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error executing C2 command:', error);
+    logger.error('Error executing C2 command:', error);
     return { success: false, error: error.message };
   }
 };
@@ -317,7 +318,7 @@ export const passSession = async (sessionId, targetFramework) => {
     if (!response.ok) throw new Error(`Session passing failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error passing session:', error);
+    logger.error('Error passing session:', error);
     return { success: false, error: error.message };
   }
 };
@@ -336,7 +337,7 @@ export const executeAttackChain = async (chainConfig) => {
     if (!response.ok) throw new Error(`Attack chain execution failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error executing attack chain:', error);
+    logger.error('Error executing attack chain:', error);
     return { success: false, error: error.message };
   }
 };
@@ -366,7 +367,7 @@ export const runAttackSimulation = async (techniqueId, targetHost, platform, par
     if (!response.ok) throw new Error(`Simulation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error running attack simulation:', error);
+    logger.error('Error running attack simulation:', error);
     return { success: false, error: error.message };
   }
 };
@@ -384,7 +385,7 @@ export const listAttackTechniques = async (tactic = null, platform = null) => {
     if (!response.ok) throw new Error(`Failed to list techniques: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error listing attack techniques:', error);
+    logger.error('Error listing attack techniques:', error);
     return { success: false, error: error.message };
   }
 };
@@ -406,7 +407,7 @@ export const validatePurpleTeam = async (simulationId, telemetrySources) => {
     if (!response.ok) throw new Error(`Purple team validation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error in purple team validation:', error);
+    logger.error('Error in purple team validation:', error);
     return { success: false, error: error.message };
   }
 };
@@ -421,7 +422,7 @@ export const getAttackCoverage = async (organizationId = null) => {
     if (!response.ok) throw new Error(`Failed to get coverage: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting attack coverage:', error);
+    logger.error('Error getting attack coverage:', error);
     return { success: false, error: error.message };
   }
 };
@@ -446,7 +447,7 @@ export const createWorkflow = async (workflowConfig) => {
     if (!response.ok) throw new Error(`Workflow creation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error creating workflow:', error);
+    logger.error('Error creating workflow:', error);
     return { success: false, error: error.message };
   }
 };
@@ -465,7 +466,7 @@ export const executeWorkflow = async (workflowId, context = {}) => {
     if (!response.ok) throw new Error(`Workflow execution failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error executing workflow:', error);
+    logger.error('Error executing workflow:', error);
     return { success: false, error: error.message };
   }
 };
@@ -479,7 +480,7 @@ export const getWorkflowStatus = async (executionId) => {
     if (!response.ok) throw new Error(`Failed to get workflow status: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error getting workflow status:', error);
+    logger.error('Error getting workflow status:', error);
     return { success: false, error: error.message };
   }
 };
@@ -493,7 +494,7 @@ export const listWorkflows = async () => {
     if (!response.ok) throw new Error(`Failed to list workflows: ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error('Error listing workflows:', error);
+    logger.error('Error listing workflows:', error);
     return { success: false, error: error.message };
   }
 };
@@ -525,7 +526,7 @@ export const checkOffensiveServicesHealth = async () => {
       });
       services[name] = response.ok;
     } catch (e) {
-      console.warn(`${name} service unavailable`);
+      logger.warn(`${name} service unavailable`);
       services[name] = false;
     }
   };

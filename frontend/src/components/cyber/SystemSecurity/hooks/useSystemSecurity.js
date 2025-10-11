@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -34,10 +35,10 @@ export const useSystemSecurity = () => {
       if (data.success) {
         setSecurityData(prev => ({ ...prev, [key]: data.data }));
       } else {
-        console.error(`Erro em ${endpoint}:`, data.errors);
+        logger.error(`Erro em ${endpoint}:`, data.errors);
       }
     } catch (error) {
-      console.error(`Erro ao buscar ${endpoint}:`, error);
+      logger.error(`Erro ao buscar ${endpoint}:`, error);
     } finally {
       setLoading(prev => ({ ...prev, [key]: false }));
     }

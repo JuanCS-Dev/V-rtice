@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 // Conecta-se ao backend real rodando no Docker
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -13,7 +14,7 @@ export const consultarPlacaApi = async (placa) => {
     return await response.json();
 
   } catch (error) {
-    console.error("Falha ao consultar a placa via API:", error);
+    logger.error("Falha ao consultar a placa via API:", error);
     // Propaga o erro para a UI tratar
     return { error: error.message };
   }

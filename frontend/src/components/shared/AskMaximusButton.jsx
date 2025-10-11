@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * ASK MAXIMUS BUTTON - Universal AI Assistant
  * ═══════════════════════════════════════════════════════════════════════════
@@ -87,7 +88,7 @@ export const AskMaximusButton = ({
         }
       });
     } catch (error) {
-      console.error('Ask Maximus error:', error);
+      logger.error('Ask Maximus error:', error);
       setAiResponse({
         response: `Error: ${error.message}`,
         isError: true,

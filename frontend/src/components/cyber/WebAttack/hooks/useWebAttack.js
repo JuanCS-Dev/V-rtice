@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 import {
   scanWebTarget,
   runWebTest,
@@ -47,7 +48,7 @@ export const useWebAttack = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error starting web scan:', err);
+      logger.error('Error starting web scan:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -72,7 +73,7 @@ export const useWebAttack = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error running web test:', err);
+      logger.error('Error running web test:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -99,7 +100,7 @@ export const useWebAttack = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error getting scan report:', err);
+      logger.error('Error getting scan report:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

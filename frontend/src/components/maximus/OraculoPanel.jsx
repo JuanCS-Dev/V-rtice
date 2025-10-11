@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * ORÁCULO PANEL - Self-Improvement Visualization
  * ═══════════════════════════════════════════════════════════════════════════
@@ -44,7 +45,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch Oráculo stats:', error);
+        logger.error('Failed to fetch Oráculo stats:', error);
       }
     };
 
@@ -65,7 +66,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch pending approvals:', error);
+        logger.error('Failed to fetch pending approvals:', error);
       }
     };
 
@@ -106,10 +107,10 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
           }
         }
       } else {
-        console.error('Analysis failed:', await response.text());
+        logger.error('Analysis failed:', await response.text());
       }
     } catch (error) {
-      console.error('Error running analysis:', error);
+      logger.error('Error running analysis:', error);
     } finally {
       setIsAnalyzing(false);
       setAiStatus(prev => ({
@@ -128,7 +129,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Suggestion approved:', result);
+        logger.debug('Suggestion approved:', result);
         // Refresh pending approvals
         const pendingResponse = await fetch('http://localhost:8099/api/v1/oraculo/pending-approvals');
         if (pendingResponse.ok) {
@@ -137,7 +138,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
         }
       }
     } catch (error) {
-      console.error('Error approving suggestion:', error);
+      logger.error('Error approving suggestion:', error);
     }
   };
 

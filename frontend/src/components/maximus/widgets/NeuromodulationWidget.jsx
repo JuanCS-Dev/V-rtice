@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * NEUROMODULATION WIDGET - Digital Neurotransmitters
  * ═══════════════════════════════════════════════════════════════════════════
@@ -41,7 +42,7 @@ export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to fetch neuromodulation stats:', error);
+        logger.error('Failed to fetch neuromodulation stats:', error);
       }
     };
 
@@ -60,7 +61,7 @@ export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
           setHistory(data.records || []);
         }
       } catch (error) {
-        console.error('Failed to fetch history:', error);
+        logger.error('Failed to fetch history:', error);
       }
     };
 
@@ -90,10 +91,10 @@ export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`Reset ${modulatorName}:`, data);
+        logger.debug(`Reset ${modulatorName}:`, data);
       }
     } catch (error) {
-      console.error(`Failed to reset ${modulatorName}:`, error);
+      logger.error(`Failed to reset ${modulatorName}:`, error);
     }
   };
 

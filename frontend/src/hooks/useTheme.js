@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useTheme Hook - Gerenciamento de temas
  * ======================================
  *
@@ -118,7 +119,7 @@ export const useTheme = () => {
     localStorage.setItem(THEME_KEY, newTheme);
     localStorage.setItem(MODE_KEY, newMode);
 
-    console.log(`[Theme] Applied: ${newTheme}${newTheme === 'windows11' ? ` (${newMode})` : ''}`);
+    logger.debug(`[Theme] Applied: ${newTheme}${newTheme === 'windows11' ? ` (${newMode})` : ''}`);
   }, []);
 
   /**
@@ -126,7 +127,7 @@ export const useTheme = () => {
    */
   const setTheme = useCallback((newTheme) => {
     if (!AVAILABLE_THEMES.find(t => t.id === newTheme)) {
-      console.warn(`[Theme] Invalid theme: ${newTheme}`);
+      logger.warn(`[Theme] Invalid theme: ${newTheme}`);
       return;
     }
 
@@ -139,7 +140,7 @@ export const useTheme = () => {
    */
   const setMode = useCallback((newMode) => {
     if (newMode !== 'light' && newMode !== 'dark') {
-      console.warn(`[Theme] Invalid mode: ${newMode}`);
+      logger.warn(`[Theme] Invalid mode: ${newMode}`);
       return;
     }
 

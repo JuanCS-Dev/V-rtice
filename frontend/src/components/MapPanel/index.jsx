@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * MapPanel - NOVO - Simples, Direto, Funcional
  *
  * Usa Leaflet puro (sem React-Leaflet) para máximo controle
@@ -27,7 +28,7 @@ const MapPanel = ({ dossierData }) => {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    console.log('[MAP] 🗺️ Criando mapa...');
+    logger.debug('[MAP] 🗺️ Criando mapa...');
 
     try {
       // Criar instância do mapa
@@ -48,7 +49,7 @@ const MapPanel = ({ dossierData }) => {
 
       // Aguardar mapa ficar pronto
       map.whenReady(() => {
-        console.log('[MAP] ✅ Mapa pronto!');
+        logger.debug('[MAP] ✅ Mapa pronto!');
         setTimeout(() => {
           map.invalidateSize();
           setLoading(false);
@@ -58,17 +59,17 @@ const MapPanel = ({ dossierData }) => {
       mapRef.current = map;
 
       // Eventos de debug
-      map.on('load', () => console.log('[MAP] 📍 Tiles carregados'));
-      map.on('zoomend', () => console.log('[MAP] 🔍 Zoom:', map.getZoom()));
+      map.on('load', () => logger.debug('[MAP] 📍 Tiles carregados'));
+      map.on('zoomend', () => logger.debug('[MAP] 🔍 Zoom:', map.getZoom()));
 
     } catch (error) {
-      console.error('[MAP] ❌ Erro ao criar mapa:', error);
+      logger.error('[MAP] ❌ Erro ao criar mapa:', error);
       setLoading(false);
     }
 
     // Cleanup
     return () => {
-      console.log('[MAP] 🧹 Limpando mapa...');
+      logger.debug('[MAP] 🧹 Limpando mapa...');
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -82,7 +83,7 @@ const MapPanel = ({ dossierData }) => {
 
     const { lat, lng } = dossierData.lastKnownLocation;
 
-    console.log('[MAP] 📍 Movendo para:', lat, lng);
+    logger.debug('[MAP] 📍 Movendo para:', lat, lng);
 
     // Remover marcador antigo
     if (markerRef.current) {

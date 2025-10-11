@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * Safety Protocol - API Client
  * ===============================
@@ -40,7 +41,7 @@ export const getSafetyStatus = async () => {
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error getting safety status:', error);
+    logger.error('❌ Error getting safety status:', error);
     return { success: false, error: error.message };
   }
 };
@@ -65,7 +66,7 @@ export const getSafetyViolations = async (limit = 100) => {
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error getting safety violations:', error);
+    logger.error('❌ Error getting safety violations:', error);
     return [];
   }
 };
@@ -99,7 +100,7 @@ export const executeEmergencyShutdown = async (reason, allowOverride = true) => 
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error executing emergency shutdown:', error);
+    logger.error('❌ Error executing emergency shutdown:', error);
     return { success: false, error: error.message };
   }
 };
@@ -120,7 +121,7 @@ export const connectSafetyWebSocket = (onMessage, onError) => {
     const ws = new WebSocket(`${WS_BASE_URL}/ws`);
 
     ws.onopen = () => {
-      console.log('🔌 Safety WebSocket connected');
+      logger.debug('🔌 Safety WebSocket connected');
     };
 
     ws.onmessage = (event) => {
@@ -128,27 +129,27 @@ export const connectSafetyWebSocket = (onMessage, onError) => {
         const data = JSON.parse(event.data);
         onMessage(data);
       } catch (error) {
-        console.error('❌ Error parsing WebSocket message:', error);
+        logger.error('❌ Error parsing WebSocket message:', error);
       }
     };
 
     ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error);
+      logger.error('❌ WebSocket error:', error);
       if (onError) onError(error);
     };
 
     ws.onclose = () => {
-      console.log('🔌 Safety WebSocket disconnected');
+      logger.debug('🔌 Safety WebSocket disconnected');
       // Auto-reconnect after 5 seconds
       setTimeout(() => {
-        console.log('🔄 Reconnecting Safety WebSocket...');
+        logger.debug('🔄 Reconnecting Safety WebSocket...');
         connectSafetyWebSocket(onMessage, onError);
       }, 5000);
     };
 
     return ws;
   } catch (error) {
-    console.error('❌ Error creating WebSocket connection:', error);
+    logger.error('❌ Error creating WebSocket connection:', error);
     if (onError) onError(error);
     return null;
   }

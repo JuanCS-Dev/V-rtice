@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
+import logger from '@/utils/logger';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
 const API_BASE = 'http://localhost:8000/api/social-eng';
@@ -42,10 +43,10 @@ export const useSocialEngineering = () => {
       if (response.ok) {
         setSocialEngData(prev => ({ ...prev, templates: data.templates || [] }));
       } else {
-        console.error('Erro ao carregar templates:', data.detail);
+        logger.error('Erro ao carregar templates:', data.detail);
       }
     } catch (error) {
-      console.error('Erro ao carregar templates:', error);
+      logger.error('Erro ao carregar templates:', error);
     } finally {
       setLoading(prev => ({ ...prev, templates: false }));
     }
@@ -82,7 +83,7 @@ export const useSocialEngineering = () => {
         return false;
       }
     } catch (error) {
-      console.error('Erro ao criar campanha:', error);
+      logger.error('Erro ao criar campanha:', error);
       alert('Erro ao criar campanha');
       return false;
     } finally {
@@ -117,7 +118,7 @@ export const useSocialEngineering = () => {
         return false;
       }
     } catch (error) {
-      console.error('Erro:', error);
+      logger.error('Erro:', error);
       alert('Erro ao criar treinamento');
       return false;
     } finally {

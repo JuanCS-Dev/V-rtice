@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * MaximusCore.jsx - AI Chat & Tool Execution Interface
  * ====================================================
  *
@@ -142,7 +143,7 @@ export const MaximusCore = () => {
         loadSuggestions({ last_message: inputMessage, ai_response: response });
       }
     } catch (error) {
-      console.error('Chat error:', error);
+      logger.error('Chat error:', error);
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         role: 'system',

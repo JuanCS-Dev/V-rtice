@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * Optimized WebSocket Hook
  *
  * Features:
@@ -48,7 +49,7 @@ export const useWebSocket = (url, options = {}) => {
   // Log helper
   const log = useCallback((...args) => {
     if (opts.debug) {
-      console.log('[useWebSocket]', ...args);
+      logger.debug('[useWebSocket]', ...args);
     }
   }, [opts.debug]);
 

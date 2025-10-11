@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import logger from '@/utils/logger';
 
 const INITIAL_SERVICES = {
   ip_intelligence: { name: 'IP Intelligence', status: 'ready', icon: '🌐', priority: 1 },
@@ -116,7 +117,7 @@ export const useMaximusHub = () => {
         }
 
       } catch (error) {
-        console.error('Polling error:', error);
+        logger.error('Polling error:', error);
         clearInterval(pollInterval);
         setIsAnalyzing(false);
       }
@@ -170,7 +171,7 @@ export const useMaximusHub = () => {
       pollInvestigationStatus(data.investigation_id);
 
     } catch (error) {
-      console.error('Error starting investigation:', error);
+      logger.error('Error starting investigation:', error);
       addStep({
         service: 'aurora',
         message: `❌ Erro ao iniciar investigação: ${error.message}`,

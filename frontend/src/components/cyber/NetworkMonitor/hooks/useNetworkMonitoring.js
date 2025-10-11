@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 /**
  * Custom hook for managing network monitoring logic and state.
@@ -81,7 +82,7 @@ export const useNetworkMonitoring = () => {
         blockedAttempts: data.total_alerts || 0
       }));
     } catch (error) {
-      console.error('Erro ao carregar dados de rede:', error);
+      logger.error('Erro ao carregar dados de rede:', error);
     }
   }, []);
 

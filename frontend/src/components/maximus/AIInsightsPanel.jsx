@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * AI INSIGHTS PANEL - Unified Intelligence Dashboard
  * ═══════════════════════════════════════════════════════════════════════════
@@ -305,7 +306,7 @@ export const AIInsightsPanel = ({ aiStatus, brainActivity }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log(`Executing workflow: ${workflow.id}`);
+                  logger.debug(`Executing workflow: ${workflow.id}`);
                 }}
                 style={{
                   width: '100%',

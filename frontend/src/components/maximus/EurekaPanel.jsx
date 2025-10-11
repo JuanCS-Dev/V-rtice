@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * EUREKA PANEL - Deep Malware Analysis Interface
  * ═══════════════════════════════════════════════════════════════════════════
@@ -41,7 +42,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch Eureka stats:', error);
+        logger.error('Failed to fetch Eureka stats:', error);
       }
     };
 
@@ -62,7 +63,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch patterns:', error);
+        logger.error('Failed to fetch patterns:', error);
       }
     };
 
@@ -110,7 +111,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
         alert(`Erro na análise: ${errorData.detail || 'Erro desconhecido'}`);
       }
     } catch (error) {
-      console.error('Error analyzing file:', error);
+      logger.error('Error analyzing file:', error);
       alert(`Erro: ${error.message}`);
     } finally {
       setIsAnalyzing(false);

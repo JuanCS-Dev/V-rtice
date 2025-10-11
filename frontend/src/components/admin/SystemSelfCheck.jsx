@@ -1,4 +1,5 @@
 // /home/juan/vertice-dev/frontend/src/components/admin/SystemSelfCheck.jsx
+import logger from '@/utils/logger';
 
 import React, { useState, useEffect } from 'react';
 
@@ -20,7 +21,7 @@ const SystemSelfCheck = () => {
       });
       return response.ok ? await response.json() : null;
     } catch (error) {
-      console.error('Network scan failed:', error);
+      logger.error('Network scan failed:', error);
       return null;
     }
   };
@@ -31,7 +32,7 @@ const SystemSelfCheck = () => {
       const response = await fetch('http://localhost:8000/cyber/port-analysis');
       return response.ok ? await response.json() : null;
     } catch (error) {
-      console.error('Port analysis failed:', error);
+      logger.error('Port analysis failed:', error);
       return null;
     }
   };
@@ -42,7 +43,7 @@ const SystemSelfCheck = () => {
       const response = await fetch('http://localhost:8000/cyber/file-integrity');
       return response.ok ? await response.json() : null;
     } catch (error) {
-      console.error('File integrity check failed:', error);
+      logger.error('File integrity check failed:', error);
       return null;
     }
   };
@@ -53,7 +54,7 @@ const SystemSelfCheck = () => {
       const response = await fetch('http://localhost:8000/cyber/process-analysis');
       return response.ok ? await response.json() : null;
     } catch (error) {
-      console.error('Process analysis failed:', error);
+      logger.error('Process analysis failed:', error);
       return null;
     }
   };
@@ -64,7 +65,7 @@ const SystemSelfCheck = () => {
       const response = await fetch('http://localhost:8000/cyber/certificate-check');
       return response.ok ? await response.json() : null;
     } catch (error) {
-      console.error('Certificate validation failed:', error);
+      logger.error('Certificate validation failed:', error);
       return null;
     }
   };
@@ -264,7 +265,7 @@ const SystemSelfCheck = () => {
       setLastScanTime(new Date());
       
     } catch (error) {
-      console.error('Security scan failed:', error);
+      logger.error('Security scan failed:', error);
       setScanResults({
         error: 'Falha na execução do scan de segurança',
         overallScore: 0,

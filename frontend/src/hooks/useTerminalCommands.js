@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 export const useTerminalCommands = () => {
   const [isExecuting, setIsExecuting] = useState(false);
@@ -98,7 +99,7 @@ export const useTerminalCommands = () => {
       return result;
 
     } catch (error) {
-      console.error('Erro ao executar comando:', error);
+      logger.error('Erro ao executar comando:', error);
       throw error;
     } finally {
       setIsExecuting(false);

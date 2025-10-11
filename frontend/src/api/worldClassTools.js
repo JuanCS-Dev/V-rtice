@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * World-Class Tools API Client
  *
@@ -34,7 +35,7 @@ export const executeTool = async (toolName, toolInput) => {
 
     return await response.json();
   } catch (error) {
-    console.error(`[WorldClassTools] Error executing ${toolName}:`, error);
+    logger.error(`[WorldClassTools] Error executing ${toolName}:`, error);
     throw error;
   }
 };
@@ -66,7 +67,7 @@ export const executeParallel = async (executions, failFast = false) => {
 
     return await response.json();
   } catch (error) {
-    console.error('[WorldClassTools] Error executing parallel:', error);
+    logger.error('[WorldClassTools] Error executing parallel:', error);
     throw error;
   }
 };
@@ -86,7 +87,7 @@ export const getToolCatalog = async () => {
 
     return await response.json();
   } catch (error) {
-    console.error('[WorldClassTools] Error fetching catalog:', error);
+    logger.error('[WorldClassTools] Error fetching catalog:', error);
     throw error;
   }
 };
@@ -106,7 +107,7 @@ export const getOrchestratorStats = async () => {
 
     return await response.json();
   } catch (error) {
-    console.error('[WorldClassTools] Error fetching stats:', error);
+    logger.error('[WorldClassTools] Error fetching stats:', error);
     throw error;
   }
 };

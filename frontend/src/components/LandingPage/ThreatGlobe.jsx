@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ThreatGlobe - Mapa Global Interativo de Ameaças
  * =================================================
  * VERSÃO IMPRESSIONANTE com animação OnionTracer integrada
@@ -63,7 +64,7 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       subdomains: 'abcd',
     });
 
-    tileLayer.on('tileerror', (error) => console.error('Tile error:', error));
+    tileLayer.on('tileerror', (error) => logger.error('Tile error:', error));
     tileLayer.addTo(map);
 
     mapInstanceRef.current = map;
@@ -111,10 +112,10 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
         lat = threat.geolocation.lat;
         lng = threat.geolocation.lng || threat.geolocation.lon;
 
-        console.log(`[ThreatGlobe] Using REAL geolocation for ${threat.ip}: ${lat}, ${lng} (${threat.geolocation.country})`);
+        logger.debug(`[ThreatGlobe] Using REAL geolocation for ${threat.ip}: ${lat}, ${lng} (${threat.geolocation.country})`);
       } else {
         // Fallback: posições em CIDADES REAIS conhecidas (sem oceanos!)
-        console.warn(`[ThreatGlobe] No geolocation for ${threat.ip}, using fallback city`);
+        logger.warn(`[ThreatGlobe] No geolocation for ${threat.ip}, using fallback city`);
         const fallbackCity = getRandomRealCity();
         lat = fallbackCity.lat;
         lng = fallbackCity.lng;

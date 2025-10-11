@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 /**
  * Hook customizado para chamadas API com retry, timeout e error handling
@@ -61,7 +62,7 @@ export const useApiCall = (options = {}) => {
 
     while (attempt < maxRetries) {
       try {
-        console.log(`[API Call] Attempt ${attempt + 1}/${maxRetries}: ${url}`);
+        logger.debug(`[API Call] Attempt ${attempt + 1}/${maxRetries}: ${url}`);
 
         const response = await fetchWithTimeout(url, fetchOptions);
 
@@ -83,17 +84,17 @@ export const useApiCall = (options = {}) => {
         const result = await response.json();
         setData(result);
         setLoading(false);
-        console.log(`[API Call] Success: ${url}`);
+        logger.debug(`[API Call] Success: ${url}`);
         return result;
 
       } catch (err) {
-        console.error(`[API Call] Error on attempt ${attempt + 1}:`, err);
+        logger.error(`[API Call] Error on attempt ${attempt + 1}:`, err);
         lastError = err;
         attempt++;
 
         // Se não é a última tentativa, espera antes de retry
         if (attempt < maxRetries) {
-          console.log(`[API Call] Retrying in ${retryDelay}ms...`);
+          logger.debug(`[API Call] Retrying in ${retryDelay}ms...`);
           await sleep(retryDelay * attempt); // Exponential backoff
         }
       }
@@ -109,7 +110,7 @@ export const useApiCall = (options = {}) => {
 
     setError(finalError);
     setLoading(false);
-    console.error(`[API Call] Failed after ${maxRetries} attempts:`, finalError);
+    logger.error(`[API Call] Failed after ${maxRetries} attempts:`, finalError);
 
     throw lastError;
   }, [maxRetries, retryDelay, timeout]);

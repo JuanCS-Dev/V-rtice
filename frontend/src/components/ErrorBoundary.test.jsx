@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ErrorBoundary Component Tests
  *
  * Tests for error boundary component

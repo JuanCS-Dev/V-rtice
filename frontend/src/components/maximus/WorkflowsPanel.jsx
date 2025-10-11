@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * WORKFLOWS PANEL - AI-Driven Automated Workflows
  * ═══════════════════════════════════════════════════════════════════════════
@@ -156,7 +157,7 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
         throw new Error(result.error || 'Workflow failed');
       }
     } catch (error) {
-      console.error('Workflow execution error:', error);
+      logger.error('Workflow execution error:', error);
       setActiveWorkflow({
         ...activeWorkflow,
         status: 'failed',

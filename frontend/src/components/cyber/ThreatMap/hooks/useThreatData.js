@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 import { checkThreatIntelligence, analyzeIP } from '../../../../api/cyberServices';
 
 /**
@@ -92,7 +93,7 @@ export const useThreatData = () => {
                   confidence: score > 70 ? 'high' : score > 40 ? 'medium' : 'low'
                 };
               } catch (error) {
-                console.error(`Failed to analyze ${ip}:`, error);
+                logger.error(`Failed to analyze ${ip}:`, error);
                 return null;
               }
             })
@@ -102,7 +103,7 @@ export const useThreatData = () => {
             setTimeout(() => reject(new Error('Batch timeout')), timeout)
           )
         ]).catch(err => {
-          console.warn('Batch failed:', err.message);
+          logger.warn('Batch failed:', err.message);
           return [];
         });
 
@@ -116,10 +117,10 @@ export const useThreatData = () => {
         }
       }
 
-      console.log(`Loaded ${threats.length} threats from real services`);
+      logger.debug(`Loaded ${threats.length} threats from real services`);
 
     } catch (err) {
-      console.error('Error fetching threats:', err);
+      logger.error('Error fetching threats:', err);
       setError(err.message || 'Erro ao carregar ameaças. Serviços de threat intelligence podem estar offline.');
 
       // Graceful degradation: retorna lista vazia em vez de mocks

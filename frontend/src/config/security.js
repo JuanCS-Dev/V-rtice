@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * Security Configuration
  *
@@ -335,7 +336,7 @@ export const logSecurityEvent = (eventType, details = {}) => {
 
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
-    console.warn('[Security Event]', event);
+    logger.warn('[Security Event]', event);
   }
 
   // Send to security logging endpoint

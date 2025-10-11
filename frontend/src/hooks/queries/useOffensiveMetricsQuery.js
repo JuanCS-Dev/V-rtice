@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useOffensiveMetricsQuery Hook
  *
  * React Query hook for offensive metrics with automatic caching
@@ -97,7 +98,7 @@ export const useOffensiveMetricsQuery = (options = {}) => {
 
     // Error callback
     onError: (error) => {
-      console.error('[useOffensiveMetricsQuery] Error:', error);
+      logger.error('[useOffensiveMetricsQuery] Error:', error);
       if (options.onError) {
         options.onError(error);
       }

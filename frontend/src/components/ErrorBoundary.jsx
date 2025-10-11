@@ -12,6 +12,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import logger from '@/utils/logger';
 import './shared/ErrorBoundary.css';
 
 class ErrorBoundary extends React.Component {
@@ -30,7 +31,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    logger.error('ErrorBoundary caught an error:', error, errorInfo);
 
     this.setState(prevState => ({
       error,
@@ -59,9 +60,9 @@ class ErrorBoundary extends React.Component {
 
     // Log para console em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
-      console.group('🚨 Error Boundary - Telemetry Data');
-      console.error('Error:', errorData);
-      console.groupEnd();
+      logger.group('🚨 Error Boundary - Telemetry Data');
+      logger.error('Error:', errorData);
+      logger.groupEnd();
     }
 
     // Enviar para endpoint de logging (se disponível)

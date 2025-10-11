@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * useDefensiveMetrics Hook
  * Fetch REAL defensive metrics from backend
  *
@@ -45,7 +46,7 @@ export const useDefensiveMetrics = () => {
     retry: 2,
     retryDelay: 1000,
     onError: (err) => {
-      console.error('Failed to fetch defensive metrics:', err);
+      logger.error('Failed to fetch defensive metrics:', err);
     }
   });
 

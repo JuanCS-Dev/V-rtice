@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '@/utils/logger';
 import * as offensiveServices from '../../../api/offensiveServices';
 
 /**
@@ -23,7 +24,7 @@ export const OffensiveGateway = () => {
         setWorkflows(result.workflows || []);
       }
     } catch (error) {
-      console.error('Failed to load workflows:', error);
+      logger.error('Failed to load workflows:', error);
     } finally {
       setIsLoading(false);
     }
@@ -37,7 +38,7 @@ export const OffensiveGateway = () => {
         setActiveTab('executions');
       }
     } catch (error) {
-      console.error('Workflow execution failed:', error);
+      logger.error('Workflow execution failed:', error);
     }
   };
 

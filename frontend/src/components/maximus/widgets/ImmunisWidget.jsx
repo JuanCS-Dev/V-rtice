@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * IMMUNIS WIDGET - Digital Immune System
  * ═══════════════════════════════════════════════════════════════════════════
@@ -33,7 +34,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
           setInnateStatus(data);
         }
       } catch (error) {
-        console.error('Failed to fetch innate status:', error);
+        logger.error('Failed to fetch innate status:', error);
       }
     };
 
@@ -53,7 +54,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to fetch adaptive status:', error);
+        logger.error('Failed to fetch adaptive status:', error);
       }
     };
 
@@ -72,7 +73,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
           setCytokineActivity(data);
         }
       } catch (error) {
-        console.error('Failed to fetch cytokine activity:', error);
+        logger.error('Failed to fetch cytokine activity:', error);
       }
     };
 
@@ -91,7 +92,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
           setAntibodies(data.antibodies || []);
         }
       } catch (error) {
-        console.error('Failed to fetch antibodies:', error);
+        logger.error('Failed to fetch antibodies:', error);
       }
     };
 
@@ -110,7 +111,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
           setMemoryCells(data.memory_cells || []);
         }
       } catch (error) {
-        console.error('Failed to fetch memory cells:', error);
+        logger.error('Failed to fetch memory cells:', error);
       }
     };
 

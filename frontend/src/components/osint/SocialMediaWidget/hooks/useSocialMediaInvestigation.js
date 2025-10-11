@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 import { socialMediaInvestigation } from '../../../../api/worldClassTools';
 
 /**
@@ -39,7 +40,7 @@ export const useSocialMediaInvestigation = () => {
         throw new Error('Resposta inválida do servidor');
       }
     } catch (err) {
-      console.error('Social Media Investigation Error:', err);
+      logger.error('Social Media Investigation Error:', err);
       setError(err.message || 'Erro ao investigar target. Verifique se o serviço está ativo.');
     } finally {
       setLoading(false);

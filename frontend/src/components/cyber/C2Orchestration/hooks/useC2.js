@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 import {
   createC2Session,
   listC2Sessions,
@@ -52,7 +53,7 @@ export const useC2 = () => {
         setActiveSessions(active);
       }
     } catch (err) {
-      console.error('Error loading sessions:', err);
+      logger.error('Error loading sessions:', err);
       setError(err.message);
     }
   }, []);
@@ -91,7 +92,7 @@ export const useC2 = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error creating session:', err);
+      logger.error('Error creating session:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -125,7 +126,7 @@ export const useC2 = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error executing command:', err);
+      logger.error('Error executing command:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -161,7 +162,7 @@ export const useC2 = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error passing session:', err);
+      logger.error('Error passing session:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -194,7 +195,7 @@ export const useC2 = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error executing attack chain:', err);
+      logger.error('Error executing attack chain:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

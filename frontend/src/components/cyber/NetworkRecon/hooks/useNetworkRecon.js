@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 import {
   scanNetwork,
   getScanStatus,
@@ -52,7 +53,7 @@ export const useNetworkRecon = () => {
         setActiveScans(active);
       }
     } catch (err) {
-      console.error('Error loading scans:', err);
+      logger.error('Error loading scans:', err);
       setError(err.message);
     }
   }, []);
@@ -87,7 +88,7 @@ export const useNetworkRecon = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error starting scan:', err);
+      logger.error('Error starting scan:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -125,7 +126,7 @@ export const useNetworkRecon = () => {
         }
       }
     } catch (err) {
-      console.error('Error updating scan status:', err);
+      logger.error('Error updating scan status:', err);
     }
   }, [currentScan]);
 
@@ -140,7 +141,7 @@ export const useNetworkRecon = () => {
         return result;
       }
     } catch (err) {
-      console.error('Error getting scan details:', err);
+      logger.error('Error getting scan details:', err);
       setError(err.message);
     }
   }, []);
@@ -162,7 +163,7 @@ export const useNetworkRecon = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('Error discovering hosts:', err);
+      logger.error('Error discovering hosts:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

@@ -1,4 +1,5 @@
 /**
+import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * MEMORY CONSOLIDATION WIDGET - Hippocampal Replay Engine
  * ═══════════════════════════════════════════════════════════════════════════
@@ -43,7 +44,7 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
           setBufferStats(data);
         }
       } catch (error) {
-        console.error('Failed to fetch buffer stats:', error);
+        logger.error('Failed to fetch buffer stats:', error);
       }
     };
 
@@ -64,7 +65,7 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to fetch consolidation stats:', error);
+        logger.error('Failed to fetch consolidation stats:', error);
       }
     };
 
@@ -83,11 +84,11 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`Mode transition:`, data);
+        logger.debug(`Mode transition:`, data);
         setCurrentMode(data.new_mode);
       }
     } catch (error) {
-      console.error(`Failed to switch to ${targetMode}:`, error);
+      logger.error(`Failed to switch to ${targetMode}:`, error);
     }
   };
 
@@ -104,10 +105,10 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Manual consolidation:', data);
+        logger.debug('Manual consolidation:', data);
       }
     } catch (error) {
-      console.error('Failed to trigger consolidation:', error);
+      logger.error('Failed to trigger consolidation:', error);
     }
   };
 

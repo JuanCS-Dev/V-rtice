@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import logger from '@/utils/logger';
 
 const API_BASE = 'http://localhost:8000/api/domain';
 
@@ -64,13 +65,13 @@ export const useDomainAnalysis = () => {
         setAnalysisResult(data.data);
         addToHistory(trimmedDomain);
       } else {
-        console.error('Erro na análise:', data.errors);
+        logger.error('Erro na análise:', data.errors);
         const fallback = generateFallbackData(trimmedDomain);
         setAnalysisResult(fallback);
         addToHistory(trimmedDomain);
       }
     } catch (error) {
-      console.error('Erro ao conectar com o backend:', error);
+      logger.error('Erro ao conectar com o backend:', error);
       const fallback = generateFallbackData(trimmedDomain);
       setAnalysisResult(fallback);
       addToHistory(trimmedDomain);

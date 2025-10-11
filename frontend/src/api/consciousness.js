@@ -1,3 +1,4 @@
+import logger from '@/utils/logger';
 /**
  * Consciousness System - API Client
  * ===================================
@@ -47,7 +48,7 @@ export const getConsciousnessState = async () => {
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error getting consciousness state:', error);
+    logger.error('❌ Error getting consciousness state:', error);
     return { success: false, error: error.message };
   }
 };
@@ -72,7 +73,7 @@ export const getESGTEvents = async (limit = 20) => {
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error getting ESGT events:', error);
+    logger.error('❌ Error getting ESGT events:', error);
     return [];
   }
 };
@@ -95,7 +96,7 @@ export const triggerESGT = async (salience) => {
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error triggering ESGT:', error);
+    logger.error('❌ Error triggering ESGT:', error);
     return { success: false, error: error.message };
   }
 };
@@ -119,7 +120,7 @@ export const getArousalState = async () => {
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error getting arousal state:', error);
+    logger.error('❌ Error getting arousal state:', error);
     return { success: false, error: error.message };
   }
 };
@@ -144,7 +145,7 @@ export const adjustArousal = async (delta, duration = 5.0, source = 'manual') =>
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error adjusting arousal:', error);
+    logger.error('❌ Error adjusting arousal:', error);
     return { success: false, error: error.message };
   }
 };
@@ -168,7 +169,7 @@ export const getConsciousnessMetrics = async () => {
 
     return await response.json();
   } catch (error) {
-    console.error('❌ Error getting consciousness metrics:', error);
+    logger.error('❌ Error getting consciousness metrics:', error);
     return { success: false, error: error.message };
   }
 };
@@ -194,7 +195,7 @@ export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      console.log('🧠 Consciousness WebSocket connected');
+      logger.debug('🧠 Consciousness WebSocket connected');
     };
 
     ws.onmessage = (event) => {
@@ -202,18 +203,18 @@ export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
         const message = JSON.parse(event.data);
         onMessage(message);
       } catch (error) {
-        console.error('❌ Error parsing WebSocket message:', error);
+        logger.error('❌ Error parsing WebSocket message:', error);
       }
     };
 
     ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error);
+      logger.error('❌ WebSocket error:', error);
       if (onError) onError(error);
     };
 
     return ws;
   } catch (error) {
-    console.error('❌ Error creating WebSocket:', error);
+    logger.error('❌ Error creating WebSocket:', error);
     if (onError) onError(error);
     return null;
   }
