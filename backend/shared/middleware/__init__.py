@@ -1,0 +1,26 @@
+"""
+Shared Middleware for Vértice Platform
+=======================================
+
+FastAPI middleware components for:
+- Rate limiting
+- Authentication (future)
+- Logging (future)
+- CORS (future)
+"""
+
+from .rate_limiter import (
+    RateLimiter,
+    RateLimitConfig,
+    TokenBucket,
+    rate_limit,
+    get_rate_limit_status,
+)
+
+__all__ = [
+    "RateLimiter",
+    "RateLimitConfig",
+    "TokenBucket",
+    "rate_limit",
+    "get_rate_limit_status",
+]
