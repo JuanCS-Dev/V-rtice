@@ -1,39 +1,316 @@
-/* Tema Windows 11 - Clean, Sóbrio, Profissional */
+/**
+ * 🪟 TEMA WINDOWS 11 - Enterprise Professional
+ * ============================================
+ * Microsoft Fluent Design 2.0 Inspired
+ * Clean, sober, corporate aesthetic
+ * Zero glows, zero neon, 100% professional
+ */
+
 :root[data-theme="windows11"] {
-  /* Cores Primárias */
-  --primary-color: #0078d4;
-  --primary-dark: #005a9e;
-  --primary-light: #50a6e8;
-  --primary-glow: rgba(0, 120, 212, 0.2);
+  /* ========================================
+     PRIMARY BRAND COLORS
+     ======================================== */
+  --primary-color: var(--primitive-blue-500);
+  --primary-dark: var(--primitive-blue-600);
+  --primary-light: var(--primitive-blue-400);
+  --primary-glow: rgba(0, 120, 212, 0.1);  /* Subtle, not neon */
 
-  /* Cores de Fundo */
-  --bg-primary: #f3f3f3;
-  --bg-secondary: #fafafa;
-  --bg-tertiary: #ffffff;
-  --bg-overlay: rgba(255, 255, 255, 0.9);
+  /* ========================================
+     BACKGROUND HIERARCHY
+     ======================================== */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: var(--primitive-gray-50);
+  --color-bg-tertiary: var(--primitive-gray-100);
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay: rgba(255, 255, 255, 0.95);
+  --color-bg-hover: rgba(0, 0, 0, 0.04);
+  --color-bg-active: rgba(0, 0, 0, 0.08);
+  
+  /* Legacy aliases for backward compatibility */
+  --bg-primary: #ffffff;
+  --bg-secondary: var(--primitive-gray-50);
+  --bg-tertiary: var(--primitive-gray-100);
+  --bg-overlay: rgba(255, 255, 255, 0.95);
 
-  /* Cores de Texto */
-  --text-primary: #1f1f1f;
-  --text-secondary: #616161;
-  --text-muted: rgba(31, 31, 31, 0.5);
+  /* ========================================
+     TEXT HIERARCHY
+     ======================================== */
+  --color-text-primary: var(--primitive-gray-900);
+  --color-text-secondary: var(--primitive-gray-600);
+  --color-text-tertiary: var(--primitive-gray-400);
+  --color-text-muted: var(--primitive-gray-500);
+  --color-text-disabled: var(--primitive-gray-300);
+  --color-text-inverse: #ffffff;
+  --color-text-link: var(--primitive-blue-500);
+  --color-text-link-hover: var(--primitive-blue-600);
+  
+  /* Legacy aliases */
+  --text-primary: var(--primitive-gray-900);
+  --text-secondary: var(--primitive-gray-600);
+  --text-muted: var(--primitive-gray-500);
   --text-inverse: #ffffff;
 
-  /* Bordas */
+  /* ========================================
+     SEMANTIC STATUS COLORS
+     ======================================== */
+  --color-accent-primary: var(--primitive-blue-500);
+  --color-accent-secondary: var(--primitive-blue-600);
+  --color-accent-success: var(--primitive-success-500);
+  --color-accent-warning: var(--primitive-warning-500);
+  --color-accent-danger: var(--primitive-error-500);
+  --color-accent-info: var(--primitive-info-500);
+  
+  /* Legacy aliases */
+  --success: var(--primitive-success-500);
+  --warning: var(--primitive-warning-500);
+  --error: var(--primitive-error-500);
+  --info: var(--primitive-info-500);
+  
+  /* With backgrounds for badges/alerts */
+  --color-success: var(--primitive-success-500);
+  --color-success-bg: var(--primitive-success-50);
+  --color-warning: var(--primitive-warning-500);
+  --color-warning-bg: var(--primitive-warning-50);
+  --color-critical: var(--primitive-error-500);
+  --color-critical-bg: var(--primitive-error-50);
+  --color-error: var(--primitive-error-500);
+  --color-error-bg: var(--primitive-error-50);
+
+  /* ========================================
+     BORDER SYSTEM
+     ======================================== */
+  --color-border: var(--color-border-default, rgba(0, 0, 0, 0.08));
+  --color-border-hover: var(--color-border-hover, rgba(0, 120, 212, 0.3));
+  --color-border-focus: var(--primitive-blue-500);
+  --color-border-strong: rgba(0, 0, 0, 0.12);
+  --color-border-subtle: rgba(0, 0, 0, 0.04);
+  
+  /* Legacy aliases */
   --border-color: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 120, 212, 0.3);
 
-  /* Estados */
-  --success: #107c10;
-  --warning: #ffb900;
-  --error: #d13438;
-  --info: #0078d4;
+  /* ========================================
+     ELEVATION / SHADOWS
+     ======================================== */
+  --shadow-sm: var(--primitive-shadow-sm);
+  --shadow-md: var(--primitive-shadow-default);
+  --shadow-lg: var(--primitive-shadow-lg);
+  --shadow-xl: var(--primitive-shadow-xl);
+  
+  /* NO NEON in enterprise - override with subtle shadows */
+  --shadow-neon: none;
+  --glow-primary: none;
+  --glow-secondary: none;
+  --glow-success: none;
+  --glow-danger: none;
 
-  /* Sombras */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+  /* ========================================
+     GLASS MORPHISM (MINIMAL)
+     ======================================== */
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: 0px;  /* No blur in enterprise - performance + clarity */
+  --backdrop-blur: blur(0px);
 
-  /* Efeitos */
-  --backdrop-blur: blur(30px);
-  --transition-speed: 0.2s;
+  /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+  --font-primary: var(--font-family-primary);
+  --font-mono: var(--font-family-mono);
+  --font-size-body: var(--font-size-base);
+  --font-weight-default: var(--font-weight-normal);
+
+  /* ========================================
+     SPACING
+     ======================================== */
+  --spacing-xs: var(--primitive-space-1);
+  --spacing-sm: var(--primitive-space-2);
+  --spacing-md: var(--primitive-space-4);
+  --spacing-lg: var(--primitive-space-6);
+  --spacing-xl: var(--primitive-space-8);
+
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+  --radius-sm: var(--primitive-radius-sm);
+  --radius-md: var(--primitive-radius-default);
+  --radius-lg: var(--primitive-radius-md);
+  --radius-xl: var(--primitive-radius-lg);
+
+  /* ========================================
+     TRANSITIONS
+     ======================================== */
+  --transition-fast: var(--primitive-duration-fast) var(--primitive-ease-out);
+  --transition-normal: var(--primitive-duration-normal) var(--primitive-ease-out);
+  --transition-slow: var(--primitive-duration-slow) var(--primitive-ease-in-out);
+  --transition-speed: var(--primitive-duration-normal);
+
+  /* ========================================
+     COMPONENT-SPECIFIC OVERRIDES
+     ======================================== */
+  
+  /* Buttons */
+  --button-bg-primary: var(--primitive-blue-500);
+  --button-bg-primary-hover: var(--primitive-blue-600);
+  --button-text-primary: #ffffff;
+  --button-border-radius: var(--primitive-radius-default);
+  --button-shadow: var(--primitive-shadow-sm);
+  --button-shadow-hover: var(--primitive-shadow-md);
+
+  /* Cards */
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.08);
+  --card-shadow: var(--primitive-shadow-sm);
+  --card-shadow-hover: var(--primitive-shadow-md);
+  --card-radius: var(--primitive-radius-lg);
+
+  /* Inputs */
+  --input-bg: #ffffff;
+  --input-border: rgba(0, 0, 0, 0.08);
+  --input-border-focus: var(--primitive-blue-500);
+  --input-text: var(--primitive-gray-900);
+  --input-placeholder: var(--primitive-gray-400);
+
+  /* Sidebar */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-item-hover: rgba(0, 0, 0, 0.04);
+  --sidebar-item-active: rgba(0, 120, 212, 0.1);
+  --sidebar-text-active: var(--primitive-blue-500);
+
+  /* Header */
+  --header-bg: #ffffff;
+  --header-border: rgba(0, 0, 0, 0.08);
+  --header-shadow: var(--primitive-shadow-sm);
+
+  /* Modal */
+  --modal-bg: #ffffff;
+  --modal-backdrop: rgba(0, 0, 0, 0.5);
+  --modal-shadow: var(--primitive-shadow-2xl);
+  --modal-radius: var(--primitive-radius-xl);
+
+  /* Charts - Professional palette */
+  --chart-primary: var(--primitive-blue-500);
+  --chart-secondary: var(--primitive-success-500);
+  --chart-tertiary: var(--primitive-warning-500);
+  --chart-quaternary: var(--primitive-error-500);
+  --chart-grid: rgba(0, 0, 0, 0.06);
+  --chart-text: var(--primitive-gray-600);
+
+  /* Analytics colors - professional */
+  --color-analytics-primary: var(--primitive-blue-500);
+  --color-analytics-secondary: #00b7c3;
+  --color-analytics-success: var(--primitive-success-500);
+  --color-analytics-warning: var(--primitive-warning-500);
+}
+
+
+/* ========================================
+   COMPONENT-LEVEL OVERRIDES
+   Force professional appearance
+   ======================================== */
+
+/* Remove ALL glows and neon effects */
+:root[data-theme="windows11"] *,
+:root[data-theme="windows11"] *::before,
+:root[data-theme="windows11"] *::after {
+  text-shadow: none !important;
+}
+
+:root[data-theme="windows11"] .glow,
+:root[data-theme="windows11"] [class*="glow"],
+:root[data-theme="windows11"] .neon,
+:root[data-theme="windows11"] [class*="neon"] {
+  box-shadow: var(--shadow-md) !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Cards - flat and professional */
+:root[data-theme="windows11"] .card,
+:root[data-theme="windows11"] [class*="card"],
+:root[data-theme="windows11"] [class*="Card"] {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+}
+
+:root[data-theme="windows11"] .card:hover,
+:root[data-theme="windows11"] [class*="card"]:hover,
+:root[data-theme="windows11"] [class*="Card"]:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0, 120, 212, 0.2);
+}
+
+/* Buttons - flat style */
+:root[data-theme="windows11"] button,
+:root[data-theme="windows11"] .button,
+:root[data-theme="windows11"] [class*="button"],
+:root[data-theme="windows11"] [class*="Button"] {
+  font-family: var(--font-primary);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+}
+
+/* Remove cyber/neon animations */
+:root[data-theme="windows11"] [class*="animate-"],
+:root[data-theme="windows11"] .animate-pulse,
+:root[data-theme="windows11"] .animate-neon {
+  animation: none !important;
+}
+
+/* Professional scrollbars */
+:root[data-theme="windows11"] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+:root[data-theme="windows11"] ::-webkit-scrollbar-track {
+  background: var(--primitive-gray-100);
+}
+
+:root[data-theme="windows11"] ::-webkit-scrollbar-thumb {
+  background: var(--primitive-gray-300);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--primitive-gray-100);
+}
+
+:root[data-theme="windows11"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--primitive-gray-400);
+}
+
+/* Tables - clean grid */
+:root[data-theme="windows11"] table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+}
+
+:root[data-theme="windows11"] th {
+  background: var(--primitive-gray-50);
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="windows11"] td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="windows11"] tr:hover {
+  background: var(--primitive-gray-50);
+}
+
+/* Badges - subtle */
+:root[data-theme="windows11"] .badge,
+:root[data-theme="windows11"] [class*="badge"],
+:root[data-theme="windows11"] [class*="Badge"] {
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
