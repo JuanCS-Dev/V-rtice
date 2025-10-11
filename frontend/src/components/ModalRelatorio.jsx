@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { handleKeyboardClick } from '../utils/accessibility';
 
 const ModalRelatorio = ({ dossierData, onClose }) => {
   const modalRef = useFocusTrap({
@@ -28,6 +29,7 @@ const ModalRelatorio = ({ dossierData, onClose }) => {
     <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
       onClick={onClose}
+      onKeyDown={handleKeyboardClick(onClose)}
       role="presentation"
     >
       <div

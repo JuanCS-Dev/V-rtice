@@ -13,6 +13,7 @@ import logger from '@/utils/logger';
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { handleKeyboardClick } from '../../utils/accessibility';
 import { ThreatGlobe } from './ThreatGlobe';
 // import { ThreatGlobeWithOnion } from './ThreatGlobeWithOnion';
 import { StatsPanel } from './StatsPanel';
@@ -367,6 +368,14 @@ export const LandingPage = ({ setCurrentView }) => {
               setEmail('');
             }
           }}
+          onKeyDown={handleKeyboardClick((e) => {
+            if (e.target.className.includes('login-modal-overlay')) {
+              setShowLoginModal(false);
+              setEmail('');
+            }
+          })}
+          role="presentation"
+          aria-label="Close login modal"
         >
           <div
             className="login-modal-content"

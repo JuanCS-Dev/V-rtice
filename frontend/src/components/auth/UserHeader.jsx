@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import logger from '@/utils/logger';
 import { useAuth } from '../../contexts/AuthContext';
+import { handleKeyboardClick } from '../../utils/accessibility';
 
 const UserHeader = () => {
   const { user, logout, canAccessOffensive } = useAuth();
@@ -163,6 +164,9 @@ const UserHeader = () => {
         <div
           className="fixed inset-0 z-40"
           onClick={() => setShowDropdown(false)}
+          onKeyDown={handleKeyboardClick(() => setShowDropdown(false))}
+          role="presentation"
+          aria-label="Close dropdown"
         />
       )}
     </div>
