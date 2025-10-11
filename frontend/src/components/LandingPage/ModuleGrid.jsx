@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { handleKeyboardClick } from '../../utils/accessibility';
 
 export const ModuleGrid = ({ setCurrentView }) => {
   const { t } = useTranslation();
@@ -59,6 +60,10 @@ export const ModuleGrid = ({ setCurrentView }) => {
     }
   ];
 
+  const handleModuleClick = (moduleId) => () => {
+    setCurrentView(moduleId);
+  };
+
   return (
     <div className="module-section">
       <h2 className="section-title">
@@ -71,10 +76,14 @@ export const ModuleGrid = ({ setCurrentView }) => {
           <div
             key={module.id}
             className={`module-card module-${module.color}`}
-            onClick={() => setCurrentView(module.id)}
+            onClick={handleModuleClick(module.id)}
+            onKeyDown={handleKeyboardClick(handleModuleClick(module.id))}
+            role="button"
+            tabIndex={0}
+            aria-label={`${t('navigation.access_module')} ${module.name}`}
           >
             <div className="module-header">
-              <span className="module-icon">{module.icon}</span>
+              <span className="module-icon" aria-hidden="true">{module.icon}</span>
               <h3 className="module-name">{module.name}</h3>
             </div>
 
@@ -90,7 +99,7 @@ export const ModuleGrid = ({ setCurrentView }) => {
 
             <div className="module-action">
               <span>{t('navigation.access_module').toUpperCase()}</span>
-              <i className="fas fa-arrow-right"></i>
+              <i className="fas fa-arrow-right" aria-hidden="true"></i>
             </div>
           </div>
         ))}

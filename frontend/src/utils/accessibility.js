@@ -271,6 +271,56 @@ export const isAriaHidden = (element) => {
  */
 
 /**
+ * Creates keyboard event handler that triggers on Enter or Space
+ * Use this for onClick elements that need keyboard support
+ * 
+ * @param {Function} callback - Function to call on activation
+ * @returns {Function} Keyboard event handler
+ * 
+ * @example
+ * <div 
+ *   onClick={handleClick}
+ *   onKeyDown={handleKeyboardClick(handleClick)}
+ *   role="button"
+ *   tabIndex={0}
+ * >
+ *   Click me
+ * </div>
+ */
+export const handleKeyboardClick = (callback) => (event) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault(); // Prevent space from scrolling
+    callback(event);
+  }
+};
+
+/**
+ * Creates props object for making a div behave like a button
+ * Includes role, tabIndex, and keyboard handlers
+ * 
+ * @param {Function} onClick - Click handler function
+ * @param {Object} options - Additional options
+ * @param {string} options.role - ARIA role (default: 'button')
+ * @param {number} options.tabIndex - Tab index (default: 0)
+ * @returns {Object} Props to spread on element
+ * 
+ * @example
+ * <div {...makeAccessibleButton(handleClick)}>
+ *   Click me
+ * </div>
+ */
+export const makeAccessibleButton = (onClick, options = {}) => {
+  const { role = 'button', tabIndex = 0 } = options;
+  
+  return {
+    role,
+    tabIndex,
+    onClick,
+    onKeyDown: handleKeyboardClick(onClick),
+  };
+};
+
+/**
  * Check if element is keyboard focusable
  */
 export const isFocusable = (element) => {
@@ -407,6 +457,8 @@ export default {
   focusElement,
   getFirstFocusable,
   trapFocus,
+  handleKeyboardClick,
+  makeAccessibleButton,
   getContrastRatio,
   meetsContrastAA,
   meetsContrastAAA,
