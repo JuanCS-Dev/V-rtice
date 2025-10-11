@@ -52,10 +52,11 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
     <div className="space-y-6">
       {/* Target Input */}
       <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-400/30 rounded-lg p-6">
-        <label className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
+        <label htmlFor="recon-target-input" className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
           🎯 TARGET
         </label>
         <input
+          id="recon-target-input"
           type="text"
           value={config.target}
           onChange={(e) => handleChange('target', e.target.value)}
@@ -70,10 +71,10 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
 
       {/* Scan Type Selection */}
       <div>
-        <label className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
+        <label htmlFor="scan-type-buttons" className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
           ⚙️ SCAN TYPE
         </label>
-        <div className="grid grid-cols-2 gap-4">
+        <div id="scan-type-buttons" className="grid grid-cols-2 gap-4" role="group" aria-label="Scan type selection">
           {scanTypes.map((type) => (
             <button
               key={type.id}

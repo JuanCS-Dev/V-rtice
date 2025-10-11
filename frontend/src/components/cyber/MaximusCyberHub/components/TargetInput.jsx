@@ -16,8 +16,9 @@ export const TargetInput = ({
     <div className={styles.container}>
       {/* Input de Target */}
       <div className={styles.section}>
-        <label className={styles.label}>Target</label>
+        <label htmlFor="target-input" className={styles.label}>Target</label>
         <Input
+          id="target-input"
           type="text"
           value={targetInput}
           onChange={(e) => setTargetInput(e.target.value)}
@@ -29,7 +30,7 @@ export const TargetInput = ({
 
       {/* Tipo de Investigação */}
       <div className={styles.section}>
-        <label className={styles.label}>Investigation Type</label>
+        <label htmlFor="investigation-type" className={styles.label}>Investigation Type</label>
         <div className={styles.types}>
           {INVESTIGATION_TYPES.map(type => (
             <button

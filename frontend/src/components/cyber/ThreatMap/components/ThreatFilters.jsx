@@ -34,11 +34,11 @@ export const ThreatFilters = ({ filters, onFiltersChange }) => {
     <div className={styles.container}>
       {/* Severity Filters */}
       <div className={styles.filterGroup}>
-        <label className={styles.filterLabel}>
-          <i className="fas fa-exclamation-triangle"></i>
+        <label htmlFor="severity-filters" className={styles.filterLabel}>
+          <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
           Severidade:
         </label>
-        <div className={styles.filterButtons}>
+        <div id="severity-filters" className={styles.filterButtons} role="group" aria-label="Severity filters">
           {SEVERITIES.map(severity => (
             <button
               key={severity.value}
@@ -58,11 +58,11 @@ export const ThreatFilters = ({ filters, onFiltersChange }) => {
 
       {/* Type Filters */}
       <div className={styles.filterGroup}>
-        <label className={styles.filterLabel}>
-          <i className="fas fa-shield-virus"></i>
+        <label htmlFor="threat-type-filters" className={styles.filterLabel}>
+          <i className="fas fa-shield-virus" aria-hidden="true"></i>
           Tipo de Ameaça:
         </label>
-        <div className={styles.filterButtons}>
+        <div id="threat-type-filters" className={styles.filterButtons} role="group" aria-label="Threat type filters">
           {THREAT_TYPES.map(type => (
             <button
               key={type.value}
