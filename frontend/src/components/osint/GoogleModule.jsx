@@ -225,10 +225,14 @@ const GoogleModule = () => {
         <div className="space-y-4 mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2">
+              <label 
+                htmlFor="investigation-type-select"
+                className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2"
+              >
                 TIPO DE INVESTIGAÇÃO
               </label>
               <select
+                id="investigation-type-select"
                 className="w-full bg-black/70 border border-purple-400/50 text-purple-400 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20"
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}

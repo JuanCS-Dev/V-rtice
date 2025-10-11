@@ -20,7 +20,6 @@ const ModalOcorrencias = ({ ocorrencias, onClose }) => {
       <div
         ref={modalRef}
         className="bg-gray-900 border border-green-400/50 w-full max-w-4xl h-[80vh] rounded-lg shadow-lg flex flex-col animate-slide-up"
-        onClick={e => e.stopPropagation()} // Impede que o clique dentro do modal o feche
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-occurrences-title"

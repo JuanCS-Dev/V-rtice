@@ -61,6 +61,8 @@ export const CompactLanguageSelector = () => {
       {/* Dropdown */}
       {isOpen && (
         <div
+          role="menu"
+          aria-label="Language selection menu"
           style={{
             position: 'absolute',
             top: '40px',

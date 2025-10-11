@@ -91,7 +91,7 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
         }
       }));
     }
-  }, []);
+  }, [setAiStatus]);
 
   const loadToolCatalog = async () => {
     const catalog = await getToolCatalog();

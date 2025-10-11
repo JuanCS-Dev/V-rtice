@@ -70,20 +70,20 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
     mapInstanceRef.current = map;
 
     // ResizeObserver para fix de tiles
+    const currentMapRef = mapRef.current;
     const resizeObserver = new ResizeObserver(() => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.invalidateSize();
       }
     });
 
-    resizeObserver.observe(mapRef.current);
+    resizeObserver.observe(currentMapRef);
 
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      const currentMapRef = mapRef.current;
       if (currentMapRef) {
         resizeObserver.unobserve(currentMapRef);
       }

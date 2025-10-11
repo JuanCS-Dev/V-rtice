@@ -83,13 +83,14 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
 
     mapInstanceRef.current = map;
 
+    const currentMapRef = mapRef.current;
     const resizeObserver = new ResizeObserver(() => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.invalidateSize();
       }
     });
 
-    resizeObserver.observe(mapRef.current);
+    resizeObserver.observe(currentMapRef);
 
     return () => {
       if (traceIntervalRef.current) clearInterval(traceIntervalRef.current);
@@ -97,7 +98,6 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      const currentMapRef = mapRef.current;
       if (currentMapRef) {
         resizeObserver.unobserve(currentMapRef);
       }

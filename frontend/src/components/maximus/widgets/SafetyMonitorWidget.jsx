@@ -17,7 +17,7 @@ import logger from '@/utils/logger';
  * Version: 1.0.0 - FASE VII Week 9-10
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 import {
   getSafetyStatus,
@@ -78,9 +78,9 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         wsRef.current.close();
       }
     };
-  }, []);
+  }, [loadSafetyData, connectWebSocket, wsConnected]);
 
-  const loadSafetyData = async () => {
+  const loadSafetyData = useCallback(async () => {
     setLoading(true);
 
     const [status, viols] = await Promise.all([
@@ -98,9 +98,9 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
 
     setLoading(false);
     setLastUpdate(new Date());
-  };
+  }, []);
 
-  const connectWebSocket = () => {
+  const connectWebSocket = useCallback(() => {
     wsRef.current = connectSafetyWebSocket(
       (message) => {
         setWsConnected(true);
@@ -115,7 +115,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         setWsConnected(false);
       }
     );
-  };
+  }, [loadSafetyData]);
 
   // ═══════════════════════════════════════════════════════════════════════
   // EMERGENCY SHUTDOWN HANDLERS
@@ -403,11 +403,26 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
     if (!showShutdownModal) return null;
 
     return (
-      <div className="modal-overlay" onClick={handleCloseShutdownModal}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div 
+        className="modal-overlay" 
+        onClick={handleCloseShutdownModal}
+        role="presentation"
+      >
+        <div 
+          className="modal-content"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="shutdown-modal-title"
+        >
           <div className="modal-header">
-            <h2 className="modal-title">🚨 Emergency Shutdown</h2>
-            <button className="modal-close" onClick={handleCloseShutdownModal}>×</button>
+            <h2 id="shutdown-modal-title" className="modal-title">🚨 Emergency Shutdown</h2>
+            <button 
+              className="modal-close" 
+              onClick={handleCloseShutdownModal}
+              aria-label="Close shutdown modal"
+            >
+              ×
+            </button>
           </div>
 
           <div className="modal-body">
