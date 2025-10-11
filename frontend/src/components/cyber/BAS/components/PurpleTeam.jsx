@@ -147,7 +147,14 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
               return (
                 <div
                   key={idx}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedSimulation(isExpanded ? null : idx)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setSelectedSimulation(isExpanded ? null : idx);
+                    }
+                  }}
                   className={`
                     bg-gradient-to-r from-${detectionStatus.color}-900/20 to-${detectionStatus.color}-900/10
                     border-2 border-${detectionStatus.color}-400/30 rounded-lg p-4

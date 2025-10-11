@@ -38,15 +38,25 @@ from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import KafkaError
 from pydantic import ValidationError
 
-# Import APV model from Oráculo (sibling service)
+# Setup Python path for cross-service imports
 import sys
+from pathlib import Path
 
-sys.path.insert(
-    0, str(Path(__file__).parent.parent.parent / "maximus_oraculo")
-)
+# Add both Oráculo (for APV) and Eureka (for eureka_models)
+current_file = Path(__file__).resolve()
+eureka_path = current_file.parent.parent
+oraculo_path = eureka_path.parent / "maximus_oraculo"
+
+for path in [oraculo_path, eureka_path]:
+    path_str = str(path)
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
+
+# Import APV from Oráculo
 from models.apv import APV
 
-from models.confirmation.confirmation_result import (
+# Import Eureka models
+from eureka_models.confirmation.confirmation_result import (
     ConfirmationResult,
     ConfirmationStatus,
 )

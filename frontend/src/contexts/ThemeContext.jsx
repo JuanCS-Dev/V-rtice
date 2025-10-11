@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // frontend/src/contexts/ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { themes, applyTheme, getCurrentTheme } from '../themes';

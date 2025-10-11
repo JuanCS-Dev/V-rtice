@@ -12,7 +12,7 @@ import logger from '@/utils/logger';
  * - Status em tempo real
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { traceOnionRoute } from '../../api/cyberServices';
@@ -47,7 +47,7 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
   };
 
   // Cores por tipo de nó
-  const getNodeColor = (type) => {
+  const getNodeColor = useCallback((type) => {
     const colors = {
       origin: '#00ff88',
       entry: '#00d9ff',
@@ -56,7 +56,7 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
       destination: '#ff3366'
     };
     return colors[type] || '#00d9ff';
-  };
+  }, []);
 
   // Inicializar mapa
   useEffect(() => {
@@ -97,8 +97,9 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      if (mapRef.current) {
-        resizeObserver.unobserve(mapRef.current);
+      const currentMapRef = mapRef.current;
+      if (currentMapRef) {
+        resizeObserver.unobserve(currentMapRef);
       }
     };
   }, []);
@@ -111,25 +112,24 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
     const maliciousThreat = realThreats.find(t => t.isMalicious);
     if (!maliciousThreat) return;
 
-    // Iniciar trace automaticamente a cada 30s
-    const autoTraceInterval = setInterval(() => {
+    // Função de trace auto
+    const autoTrace = () => {
       if (!isTracing) {
         startOnionTrace(maliciousThreat.ip);
       }
-    }, 30000); // 30s
+    };
+
+    // Iniciar trace automaticamente a cada 30s
+    const autoTraceInterval = setInterval(autoTrace, 30000); // 30s
 
     // Trace inicial após 3s
-    setTimeout(() => {
-      if (!isTracing) {
-        startOnionTrace(maliciousThreat.ip);
-      }
-    }, 3000);
+    setTimeout(autoTrace, 3000);
 
     return () => clearInterval(autoTraceInterval);
-  }, [realThreats, isTracing]);
+  }, [realThreats, isTracing, startOnionTrace]);
 
   // Função para iniciar trace OnionRouter
-  const startOnionTrace = async (targetIp) => {
+  const startOnionTrace = useCallback(async (targetIp) => {
     if (isTracing || !mapInstanceRef.current) return;
 
     setIsTracing(true);
@@ -221,10 +221,10 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
       setTraceStatus('ERROR');
       setIsTracing(false);
     }
-  };
+  }, [isTracing, clearMap, addNodeMarker, addAnimatedPath]);
 
   // Adicionar marcador de nó
-  const addNodeMarker = (node) => {
+  const addNodeMarker = useCallback((node) => {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
@@ -271,10 +271,10 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
     }, 800);
 
     markersRef.current.push(circle);
-  };
+  }, [getNodeColor]);
 
   // Adicionar path animado
-  const addAnimatedPath = (fromNode, toNode) => {
+  const addAnimatedPath = useCallback((fromNode, toNode) => {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
@@ -303,10 +303,10 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
     }, 50);
 
     pathsRef.current.push(path);
-  };
+  }, []);
 
   // Limpar mapa
-  const clearMap = () => {
+  const clearMap = useCallback(() => {
     if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
@@ -316,7 +316,7 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
 
     pathsRef.current.forEach(path => map.removeLayer(path));
     pathsRef.current = [];
-  };
+  }, []);
 
   // Plotar ameaças reais (estáticas)
   useEffect(() => {

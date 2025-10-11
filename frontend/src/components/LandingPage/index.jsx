@@ -379,6 +379,18 @@ export const LandingPage = ({ setCurrentView }) => {
         >
           <div
             className="login-modal-content"
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              if (e.target.classList.contains('login-modal-content')) {
+                setShowLogin(false);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' || e.key === 'Enter') {
+                setShowLogin(false);
+              }
+            }}
             style={{
               background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
               border: '2px solid #667eea',
@@ -421,7 +433,9 @@ export const LandingPage = ({ setCurrentView }) => {
 
             <form onSubmit={handleLogin}>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{
+                <label 
+                  htmlFor="email-input"
+                  style={{
                   display: 'block',
                   color: '#a8b2d1',
                   marginBottom: '8px',
@@ -431,6 +445,7 @@ export const LandingPage = ({ setCurrentView }) => {
                   Email Google
                 </label>
                 <input
+                  id="email-input"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

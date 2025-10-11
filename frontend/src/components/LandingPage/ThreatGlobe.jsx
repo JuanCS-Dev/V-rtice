@@ -22,7 +22,7 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
   const markersRef = useRef([]);
   const pathsRef = useRef([]);
 
-  const [activeTrace, setActiveTrace] = useState(null);
+  const [_activeTrace, _setActiveTrace] = useState(null);
   const [threatCount, setThreatCount] = useState(0);
 
   // Cores por severidade/reputation
@@ -83,8 +83,9 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      if (mapRef.current) {
-        resizeObserver.unobserve(mapRef.current);
+      const currentMapRef = mapRef.current;
+      if (currentMapRef) {
+        resizeObserver.unobserve(currentMapRef);
       }
     };
   }, []);

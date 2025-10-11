@@ -114,7 +114,14 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
           return (
             <div
               key={idx}
+              role="button"
+              tabIndex={0}
               onClick={() => setSelectedChain(selectedChain?.id === chain.id ? null : chain)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  setSelectedChain(selectedChain?.id === chain.id ? null : chain);
+                }
+              }}
               className={`
                 bg-gradient-to-br from-${color}-900/20 to-${color}-900/10
                 border-2 border-${color}-400/30 rounded-lg p-6

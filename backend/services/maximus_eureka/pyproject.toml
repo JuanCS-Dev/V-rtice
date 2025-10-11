@@ -49,3 +49,11 @@ addopts = [
     "--strict-markers",
 ]
 asyncio_mode = "auto"
+markers = [
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (require external services)",
+    "requires_kafka: Tests requiring Kafka broker",
+    "requires_redis: Tests requiring Redis",
+    "requires_astgrep: Tests requiring ast-grep CLI",
+    "slow: Slow-running tests",
+]

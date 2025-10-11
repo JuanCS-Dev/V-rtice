@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -6,6 +6,24 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { login, isAuthenticated } = useAuth();
+
+  const handleGoogleResponse = useCallback(async (response) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const result = await login(response.credential);
+
+      if (!result.success) {
+        setError(result.error || 'Login failed');
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
+      logger.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [login]);
 
   useEffect(() => {
     // Load Google Identity Services script
@@ -40,25 +58,7 @@ const LoginPage = () => {
         document.head.removeChild(script);
       }
     };
-  }, []);
-
-  const handleGoogleResponse = async (response) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const result = await login(response.credential);
-
-      if (!result.success) {
-        setError(result.error || 'Login failed');
-      }
-    } catch (err) {
-      setError('Login failed. Please try again.');
-      logger.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [handleGoogleResponse]);
 
   if (isAuthenticated) {
     return null; // Will be handled by App component routing

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Error Boundary Component
  * Catches React errors and prevents dashboard crashes

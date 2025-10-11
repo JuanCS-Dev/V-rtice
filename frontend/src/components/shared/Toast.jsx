@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Toast Notification System
  * MAXIMUS Vértice - Frontend Phase 3

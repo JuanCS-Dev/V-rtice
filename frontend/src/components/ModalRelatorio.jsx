@@ -36,6 +36,7 @@ const ModalRelatorio = ({ dossierData, onClose }) => {
         ref={modalRef}
         className="bg-gray-100 text-gray-800 font-sans w-full max-w-4xl h-[90vh] rounded-lg shadow-2xl flex flex-col animate-slide-up"
         onClick={e => e.stopPropagation()}
+        onKeyDown={handleKeyboardClick(e => e.stopPropagation())}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-report-title"

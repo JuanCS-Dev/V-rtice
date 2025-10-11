@@ -23,7 +23,7 @@ export const useBAS = () => {
   useEffect(() => {
     loadTechniques();
     loadCoverage();
-  }, []);
+  }, [loadTechniques, loadCoverage]);
 
   /**
    * Carrega técnicas MITRE ATT&CK disponíveis

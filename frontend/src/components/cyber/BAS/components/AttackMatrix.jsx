@@ -121,7 +121,14 @@ export const AttackMatrix = ({
                   return (
                     <div
                       key={idx}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setSimulationConfig({ ...simulationConfig, techniqueId: technique.id })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setSimulationConfig({ ...simulationConfig, techniqueId: technique.id });
+                        }
+                      }}
                       className={`
                         bg-gradient-to-r from-${color}-900/20 to-${color}-900/10
                         border-2 border-${color}-400/30 rounded-lg p-4
@@ -185,7 +192,7 @@ export const AttackMatrix = ({
 
                   {/* Platform */}
                   <div>
-                    <label className="text-cyan-400/60 text-xs mb-2 block">PLATFORM</label>
+                    <span className="text-cyan-400/60 text-xs mb-2 block">PLATFORM</span>
                     <div className="grid grid-cols-3 gap-2">
                       {platforms.map(platform => (
                         <button
