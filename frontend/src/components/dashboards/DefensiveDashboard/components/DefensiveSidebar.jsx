@@ -13,7 +13,7 @@ const SEVERITY_COLORS = {
   info: '#64748b'
 };
 
-const DefensiveSidebar = ({ alerts, metrics }) => {
+const DefensiveSidebar = ({ alerts }) => {
   return (
     <aside className="dashboard-sidebar">
       {/* Sidebar Header */}

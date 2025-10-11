@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import logger from '@/utils/logger';
 
 /**
  * Custom hook for handling API calls with loading and error states

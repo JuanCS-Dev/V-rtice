@@ -45,7 +45,6 @@ export const BAS = () => {
   ];
 
   const totalSimulations = simulations.length;
-  const successfulSimulations = simulations.filter(s => s.status === 'success').length;
   const detectedSimulations = simulations.filter(s => s.detected).length;
   const detectionRate = totalSimulations > 0 ? ((detectedSimulations / totalSimulations) * 100).toFixed(1) : 0;
 

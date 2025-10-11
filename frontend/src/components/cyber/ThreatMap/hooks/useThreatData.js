@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
-import { checkThreatIntelligence, analyzeIP } from '../../../../api/cyberServices';
+import { analyzeIP } from '../../../../api/cyberServices';
 
 /**
  * Custom hook for managing threat data - INTEGRADO COM SERVIÇOS REAIS

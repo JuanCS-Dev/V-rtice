@@ -282,7 +282,7 @@ const AlertItem = ({ alert }) => {
 };
 
 // Vista Detalhada de Métricas
-const MetricsDetailedView = ({ metrics, loading }) => {
+const MetricsDetailedView = ({ metrics }) => {
   return (
     <div className="space-y-6">
       <div className="border border-yellow-400/50 rounded-lg bg-yellow-400/5 p-6">
@@ -370,7 +370,7 @@ const MetricBar = ({ label, value, unit }) => {
 };
 
 // Vista de Logs do Sistema
-const SystemLogsView = ({ alerts }) => {
+const SystemLogsView = () => {
   const [logFilter, setLogFilter] = useState('all');
   
   const logEntries = [

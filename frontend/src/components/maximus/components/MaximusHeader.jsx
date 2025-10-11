@@ -22,7 +22,6 @@ export const MaximusHeader = ({
   setActivePanel,
   setCurrentView,
   getItemProps,
-  getStatusColor,
   backgroundEffect,
   onEffectChange
 }) => {

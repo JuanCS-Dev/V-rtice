@@ -4,7 +4,6 @@ import React, { useState } from 'react';
  * SessionManager - Gerenciamento de sessões C2
  */
 export const SessionManager = ({
-  sessions,
   activeSessions,
   sessionConfig,
   setSessionConfig,

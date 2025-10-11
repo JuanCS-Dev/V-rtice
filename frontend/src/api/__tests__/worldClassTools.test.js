@@ -5,7 +5,7 @@
  * Objetivo: Garantir que o API client funciona corretamente e mantém compatibilidade
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   executeTool,
   executeParallel,

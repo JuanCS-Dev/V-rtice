@@ -318,7 +318,7 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
           <div className="workflow-results">
             <h3 className="section-title">Recent Executions</h3>
             <div className="results-list">
-              {workflowResults.map((result, idx) => (
+              {workflowResults.map((result) => (
                 <div key={result.id} className="result-card">
                   <div className="result-header">
                     <div>

@@ -14,7 +14,6 @@ export const ScanForm = ({
   onScan,
   loading,
   scanHistory,
-  onSelectHistory
 }) => {
   useKeyPress('Enter', () => {
     if (target.trim() && !loading) {

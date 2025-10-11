@@ -6,7 +6,7 @@
 import React from 'react';
 import styles from './GapAnalysis.module.css';
 
-export const GapAnalysis = ({ gaps, attackData, defenseData, loading }) => {
+export const GapAnalysis = ({ gaps, attackData, loading }) => {
   return (
     <div className={styles.analysisContainer}>
       <div className={styles.header}>

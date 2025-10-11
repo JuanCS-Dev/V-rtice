@@ -5,7 +5,6 @@ import { handleKeyboardClick } from '../../utils/accessibility';
 
 const UserHeader = () => {
   const { user, logout, canAccessOffensive } = useAuth();
-  const [permissions, setPermissions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [hasOffensiveAccess, setHasOffensiveAccess] = useState(false);
 
@@ -36,6 +35,12 @@ const UserHeader = () => {
   if (!user) {
     return null;
   }
+
+  // Build permissions list from user data
+  const permissions = [];
+  if (user.role === 'admin') permissions.push('admin');
+  if (hasOffensiveAccess) permissions.push('offensive');
+  permissions.push('write', 'read'); // Default permissions
 
   const getPermissionBadgeColor = (permission) => {
     switch (permission) {

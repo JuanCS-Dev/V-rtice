@@ -257,7 +257,7 @@ export const analyzeTimeSeries = async (data, options = {}) => {
  * Graph Analysis
  * Análise de grafos (redes, relações)
  */
-export const analyzeGraph = async (nodes, edges, options = {}) => {
+export const analyzeGraph = async (nodes, edges) => {
   return executeTool('graph_analysis', {
     nodes,
     edges

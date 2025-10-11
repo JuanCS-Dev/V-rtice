@@ -21,21 +21,6 @@ import {
   chatWithMaximus,
   synthesizeIntelligence,
   getAISuggestions,
-  analyzeNarrative,
-  predictThreats,
-  huntProactively,
-  investigateIncident,
-  correlateCampaigns,
-  suppressFalsePositives,
-  getToleranceProfile,
-  consolidateMemory,
-  queryLongTermMemory,
-  diversifyAntibodies,
-  runAffinityMaturation,
-  getEdgeStatus,
-  coordinateMultiEdgeScan,
-  getGlobalMetrics,
-  getTopology,
   getMaximusHealth,
   getAIStats,
 } from '../maximusAI';
@@ -224,7 +209,7 @@ describe('maximusAI API Client', () => {
         json: async () => ({ success: true }),
       });
 
-      const result = await aiOSINTInvestigation('test@example.com', 'email');
+      await aiOSINTInvestigation('test@example.com', 'email');
 
       expect(global.fetch).toHaveBeenCalledWith(
         `${MAXIMUS_BASE_URL}/api/orchestrate`,
@@ -242,7 +227,7 @@ describe('maximusAI API Client', () => {
         json: async () => ({ success: true }),
       });
 
-      const result = await aiPurpleTeamExercise('T1190', '10.0.0.1', ['siem', 'edr']);
+      await aiPurpleTeamExercise('T1190', '10.0.0.1', ['siem', 'edr']);
 
       expect(global.fetch).toHaveBeenCalledWith(
         `${MAXIMUS_BASE_URL}/api/orchestrate`,

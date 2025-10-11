@@ -6,7 +6,7 @@
 import React from 'react';
 import styles from './ModuleContainer.module.css';
 
-export const ModuleContainer = ({ moduleName, children }) => {
+export const ModuleContainer = ({ children }) => {
   return (
     <div className={styles.container}>
       {children}

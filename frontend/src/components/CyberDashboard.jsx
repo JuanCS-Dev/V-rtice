@@ -24,7 +24,7 @@ const CyberDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeModule, setActiveModule] = useState('maximus'); // AI-FIRST: Maximus AI Core como landing page
   const [cyberAlerts, setCyberAlerts] = useState([]);
-  const [threatData, setThreatData] = useState({
+  const [threatData] = useState({
     totalThreats: 127,
     activeDomains: 23,
     suspiciousIPs: 45,

@@ -30,7 +30,6 @@ import {
   formatRelativeTime,
   calculateThresholdPercentage,
   isCriticalState,
-  isKillSwitchActive,
   formatUptime,
   validateShutdownReason
 } from '../../../api/safety';
