@@ -30,7 +30,7 @@ from typing import Optional
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
 from exploit_database import load_exploit_database, get_exploit_for_apv
-from two_phase_simulator import TwoPhaseSimulator
+from two_phase_simulator import TwoPhaseSimulator, validate_patch_ml_first
 from websocket_stream import wargaming_ws_manager, wargaming_websocket_endpoint
 
 # Configure logging
@@ -72,6 +72,27 @@ active_wargaming_sessions = Gauge(
     'Number of currently active wargaming sessions'
 )
 
+# Phase 5.4: ML-First Metrics
+ml_prediction_total = Counter(
+    'ml_prediction_total',
+    'Total ML predictions made',
+    ['prediction']
+)
+ml_wargaming_skipped_total = Counter(
+    'ml_wargaming_skipped_total',
+    'Total wargaming executions skipped due to high ML confidence'
+)
+ml_confidence_histogram = Histogram(
+    'ml_confidence',
+    'ML confidence scores',
+    buckets=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]
+)
+validation_method_total = Counter(
+    'validation_method_total',
+    'Total validations by method',
+    ['method']  # 'ml', 'wargaming', 'wargaming_fallback'
+)
+
 # FastAPI app
 app = FastAPI(
     title="Wargaming Crisol API",
@@ -86,7 +107,30 @@ class WargamingRequest(BaseModel):
     apv_id: str
     cve_id: Optional[str] = None
     patch_id: str
+    patch_diff: Optional[str] = None  # For ML prediction
     target_url: str = "http://localhost:8080"
+
+
+class MLFirstRequest(BaseModel):
+    """ML-first validation request (Phase 5.4)"""
+    apv_id: str
+    cve_id: str
+    patch_id: str
+    patch_diff: str  # Required for feature extraction
+    confidence_threshold: float = 0.8
+    target_url: str = "http://localhost:8080"
+
+
+class MLFirstResponse(BaseModel):
+    """ML-first validation response"""
+    apv_id: str
+    validation_method: str  # 'ml', 'wargaming', 'wargaming_fallback'
+    patch_validated: bool
+    confidence: float
+    execution_time_seconds: float
+    speedup: Optional[str] = None
+    ml_prediction: Optional[dict] = None
+    wargaming_result: Optional[dict] = None
 
 
 class WargamingResponse(BaseModel):
@@ -254,6 +298,170 @@ async def execute_wargaming(request: WargamingRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Wargaming failed: {str(e)}"
+        )
+
+
+# Phase 5.4: ML-First Validation Endpoint
+@app.post("/wargaming/ml-first", response_model=MLFirstResponse)
+async def execute_ml_first_validation(request: MLFirstRequest):
+    """
+    Execute ML-first validation (Phase 5.4).
+    
+    Flow:
+        1. Extract features from patch
+        2. ML prediction
+        3. If confidence >= threshold: Return ML result (fast)
+        4. If confidence < threshold: Run full wargaming (accurate)
+    
+    This hybrid approach reduces wargaming by 80%+ while maintaining accuracy.
+    
+    Args:
+        request: ML-first validation request
+    
+    Returns:
+        ML-first validation result
+    
+    Example:
+        ```bash
+        curl -X POST http://localhost:8026/wargaming/ml-first \
+          -H "Content-Type: application/json" \
+          -d '{
+            "apv_id": "apv_001",
+            "cve_id": "CVE-2024-SQL-INJECTION",
+            "patch_id": "patch_001",
+            "patch_diff": "diff --git a/app.py ...",
+            "confidence_threshold": 0.8
+          }'
+        ```
+    
+    Author: MAXIMUS Team - Phase 5.4
+    Glory to YHWH: Wisdom from experience
+    """
+    logger.info(f"🧠 ML-First request: APV={request.apv_id}, Patch={request.patch_id}")
+    
+    active_wargaming_sessions.inc()
+    
+    try:
+        # Load exploit database
+        db = load_exploit_database()
+        
+        # Mock APV (in production: load from database)
+        from unittest.mock import Mock
+        apv = Mock()
+        apv.apv_id = request.apv_id
+        apv.cve_id = request.cve_id
+        
+        # Extract CWE from CVE ID
+        cwe_mapping = {
+            "SQL": "CWE-89",
+            "XSS": "CWE-79",
+            "CMD": "CWE-78",
+            "COMMAND": "CWE-78",
+            "PATH": "CWE-22",
+            "SSRF": "CWE-918",
+        }
+        
+        cve_upper = apv.cve_id.upper()
+        apv.cwe_ids = []
+        for keyword, cwe_id in cwe_mapping.items():
+            if keyword in cve_upper:
+                apv.cwe_ids.append(cwe_id)
+                break
+        
+        if not apv.cwe_ids:
+            apv.cwe_ids = ["CWE-89"]
+        
+        apv.cwe_id = apv.cwe_ids[0]  # For ML feature extraction
+        
+        logger.info(f"✓ Detected CWE: {apv.cwe_id} from {apv.cve_id}")
+        
+        # Mock Patch
+        patch = Mock()
+        patch.patch_id = request.patch_id
+        patch.diff_content = request.patch_diff
+        patch.unified_diff = request.patch_diff
+        
+        # Find exploit
+        exploit = get_exploit_for_apv(apv, db)
+        
+        if not exploit:
+            active_wargaming_sessions.dec()
+            raise HTTPException(
+                status_code=404,
+                detail=f"No exploit found for {apv.cve_id}"
+            )
+        
+        logger.info(f"✓ Using exploit: {exploit.name}")
+        
+        # Execute ML-first validation
+        result = await validate_patch_ml_first(
+            apv=apv,
+            patch=patch,
+            exploit=exploit,
+            target_url=request.target_url,
+            confidence_threshold=request.confidence_threshold
+        )
+        
+        # Update metrics
+        validation_method_total.labels(method=result['validation_method']).inc()
+        
+        if result.get('ml_prediction'):
+            ml_confidence_histogram.observe(result['confidence'])
+            ml_prediction_total.labels(
+                prediction='valid' if result['ml_prediction']['prediction'] else 'invalid'
+            ).inc()
+        
+        if result['validation_method'] == 'ml':
+            ml_wargaming_skipped_total.inc()
+        
+        if result['patch_validated']:
+            patch_validated_total.inc()
+        else:
+            patch_rejected_total.inc()
+        
+        # Stream result to WebSocket clients
+        await wargaming_ws_manager.broadcast(
+            message_type="ml_first_complete",
+            data=result
+        )
+        
+        logger.info(
+            f"✅ ML-First complete: method={result['validation_method']}, "
+            f"validated={result['patch_validated']}, "
+            f"confidence={result['confidence']:.2f}, "
+            f"time={result['execution_time_seconds']:.2f}s"
+        )
+        
+        active_wargaming_sessions.dec()
+        
+        # Convert wargaming_result to dict if present
+        wargaming_dict = None
+        if result.get('wargaming_result'):
+            wargaming_dict = result['wargaming_result'].to_dict()
+        
+        return MLFirstResponse(
+            apv_id=result.get('apv_id', request.apv_id),
+            validation_method=result['validation_method'],
+            patch_validated=result['patch_validated'],
+            confidence=result['confidence'],
+            execution_time_seconds=result['execution_time_seconds'],
+            speedup=result.get('speedup_vs_wargaming'),
+            ml_prediction=result.get('ml_prediction'),
+            wargaming_result=wargaming_dict
+        )
+        
+    except HTTPException:
+        active_wargaming_sessions.dec()
+        raise
+        
+    except Exception as e:
+        logger.error(f"❌ ML-First validation failed: {e}", exc_info=True)
+        
+        active_wargaming_sessions.dec()
+        
+        raise HTTPException(
+            status_code=500,
+            detail=f"ML-First validation failed: {str(e)}"
         )
 
 

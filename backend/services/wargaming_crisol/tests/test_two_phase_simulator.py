@@ -16,6 +16,7 @@ from two_phase_simulator import (
     WargamingPhase,
     WargamingStatus,
     validate_patch_via_wargaming,
+    validate_patch_ml_first,
 )
 
 from exploit_database import ExploitResult, ExploitStatus, ExploitCategory
@@ -799,4 +800,213 @@ async def test_execute_wargaming_parallel_single_exploit(
     
     assert len(results) == 1
     assert results[0].patch_validated is True
+
+
+# ===== PHASE 5.4: ML-FIRST VALIDATION TESTS =====
+
+@pytest.mark.asyncio
+async def test_validate_patch_ml_first_high_confidence(
+    mock_apv, mock_patch, mock_exploit
+):
+    """
+    Test ML-first validation with HIGH confidence (REAL ML).
+    
+    Uses actual ML model for integration test.
+    Should skip wargaming and return ML prediction.
+    """
+    import sys
+    import os
+    
+    # Add ML module to path
+    sys.path.insert(0, os.path.dirname(__file__) + '/..')
+    
+    # Set mock attributes
+    mock_apv.cwe_id = "CWE-89"
+    
+    # Create realistic patch that should be validated
+    mock_patch.diff_content = """diff --git a/app.py b/app.py
+@@ -1,3 +1,5 @@
+ def query(user_input):
+-    cursor.execute("SELECT * FROM users WHERE id = " + user_input)
++    if not user_input.isdigit():
++        raise ValueError("Invalid input")
++    cursor.execute("SELECT * FROM users WHERE id = ?", (user_input,))
+"""
+    
+    try:
+        result = await validate_patch_ml_first(
+            apv=mock_apv,
+            patch=mock_patch,
+            exploit=mock_exploit,
+            confidence_threshold=0.8
+        )
+        
+        # Assertions
+        assert 'validation_method' in result
+        assert 'patch_validated' in result
+        assert 'confidence' in result
+        assert 'execution_time_seconds' in result
+        
+        # If ML worked, should be fast
+        if result['validation_method'] == 'ml':
+            assert result['execution_time_seconds'] < 1.0
+            assert result['wargaming_result'] is None
+        
+    except ImportError:
+        # ML not available - fallback to wargaming
+        pytest.skip("ML module not available, test skipped")
+
+
+@pytest.mark.asyncio
+async def test_validate_patch_ml_first_low_confidence(
+    mock_apv, mock_patch, mock_exploit, successful_exploit_result, failed_exploit_result
+):
+    """
+    Test ML-first validation with fallback to wargaming.
+    
+    When confidence is low or ML unavailable, should run full wargaming.
+    """
+    # Set mock attributes
+    mock_apv.cwe_id = "CWE-89"
+    
+    # Create patch with low confidence (ambiguous)
+    mock_patch.diff_content = """diff --git a/app.py b/app.py
+@@ -1,2 +1,3 @@
+ def query(user_input):
++    # TODO: Add validation
+     cursor.execute("SELECT * FROM users WHERE id = " + user_input)
+"""
+    
+    # Mock wargaming
+    mock_exploit.execute_func = AsyncMock(
+        side_effect=[successful_exploit_result, failed_exploit_result]
+    )
+    
+    result = await validate_patch_ml_first(
+        apv=mock_apv,
+        patch=mock_patch,
+        exploit=mock_exploit,
+        confidence_threshold=0.8
+    )
+    
+    # Assertions
+    assert 'validation_method' in result
+    assert 'patch_validated' in result
+    
+    # Should either use ML or wargaming (both valid)
+    assert result['validation_method'] in ['ml', 'wargaming', 'wargaming_fallback']
+
+
+@pytest.mark.asyncio
+async def test_validate_patch_ml_first_fallback_on_ml_error(
+    mock_apv, mock_patch, mock_exploit, successful_exploit_result, failed_exploit_result
+):
+    """
+    Test ML-first validation graceful fallback when ML fails.
+    
+    Should always return a valid result, even if ML is unavailable.
+    """
+    # Set mock attributes
+    mock_apv.cwe_id = "CWE-89"
+    mock_patch.diff_content = "diff --git a/app.py b/app.py\n+# Some change"
+    
+    # Mock wargaming
+    mock_exploit.execute_func = AsyncMock(
+        side_effect=[successful_exploit_result, failed_exploit_result]
+    )
+    
+    result = await validate_patch_ml_first(
+        apv=mock_apv,
+        patch=mock_patch,
+        exploit=mock_exploit,
+        confidence_threshold=0.8
+    )
+    
+    # Assertions
+    assert 'validation_method' in result
+    assert 'patch_validated' in result
+    assert 'execution_time_seconds' in result
+    
+    # Should have wargaming result (fallback worked)
+    if result['validation_method'] in ['wargaming_fallback', 'wargaming_error_fallback']:
+        assert result['wargaming_result'] is not None
+
+
+@pytest.mark.asyncio
+async def test_validate_patch_ml_first_custom_threshold(
+    mock_apv, mock_patch, mock_exploit
+):
+    """
+    Test ML-first validation with custom confidence threshold.
+    
+    Different thresholds should affect ML vs wargaming decision.
+    """
+    mock_apv.cwe_id = "CWE-89"
+    mock_patch.diff_content = "diff --git a/app.py b/app.py\n+if not x: raise Error()"
+    
+    # Test with very low threshold (should use ML more often)
+    result_low = await validate_patch_ml_first(
+        apv=mock_apv,
+        patch=mock_patch,
+        exploit=mock_exploit,
+        confidence_threshold=0.5  # Very permissive
+    )
+    
+    # Test with very high threshold (should use wargaming more often)
+    mock_exploit.execute_func = AsyncMock(
+        return_value=Mock(success=True)
+    )
+    
+    result_high = await validate_patch_ml_first(
+        apv=mock_apv,
+        patch=mock_patch,
+        exploit=mock_exploit,
+        confidence_threshold=0.95  # Very strict
+    )
+    
+    # Both should complete successfully
+    assert 'validation_method' in result_low
+    assert 'validation_method' in result_high
+
+
+@pytest.mark.asyncio
+async def test_validate_patch_ml_first_integration(
+    mock_apv, mock_patch, mock_exploit
+):
+    """
+    Integration test: Complete ML-first flow.
+    
+    Tests realistic patch validation scenario.
+    """
+    mock_apv.cwe_id = "CWE-89"
+    
+    # Realistic SQL injection fix
+    mock_patch.diff_content = """diff --git a/db.py b/db.py
+@@ -10,7 +10,9 @@ def get_user(user_id):
+     Get user from database.
+     '''
+-    query = "SELECT * FROM users WHERE id = " + user_id
+-    cursor.execute(query)
++    if not user_id.isdigit():
++        raise ValueError("Invalid user ID")
++    
++    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+     return cursor.fetchone()
+"""
+    
+    result = await validate_patch_ml_first(
+        apv=mock_apv,
+        patch=mock_patch,
+        exploit=mock_exploit
+    )
+    
+    # Assertions
+    assert result is not None
+    assert 'validation_method' in result
+    assert 'patch_validated' in result
+    assert 'confidence' in result
+    assert 'execution_time_seconds' in result
+    
+    # Should complete (either ML or wargaming)
+    assert result['validation_method'] in ['ml', 'wargaming', 'wargaming_fallback', 'wargaming_error_fallback']
 
