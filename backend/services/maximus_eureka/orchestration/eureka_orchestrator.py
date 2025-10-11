@@ -1,13 +1,15 @@
 """
-Eureka Orchestrator - Phase 2 Pipeline Coordinator.
+Eureka Orchestrator - Vulnerability Confirmation + Remediation Pipeline.
 
-Orchestrates the vulnerability confirmation pipeline:
+Orchestrates the complete vulnerability remediation pipeline:
 1. APV Consumer (Kafka) → receives APVs from Oráculo
 2. Vulnerability Confirmer (ast-grep) → confirms code-level presence
-3. Metrics Collection → tracks MTTR, success rates
+3. Strategy Selector → chooses remediation approach
+4. Patch Generator → creates fix via strategy
+5. Metrics Collection → tracks MTTR, success rates
 
-Phase 2 Scope: Consumer → Confirmation
-Phase 3 Will Add: Remediation Strategies
+Phase 2 Scope: Consumer → Confirmation ✅
+Phase 3 Scope: + Remediation Strategies ✅
 Phase 4 Will Add: Git Integration + PR Creation
 
 Architectural Philosophy:
@@ -17,15 +19,17 @@ Architectural Philosophy:
     Each component maintains single responsibility:
     - APVConsumer: Kafka message handling + deserialization
     - VulnerabilityConfirmer: Code analysis via ast-grep
+    - StrategySelector: Strategy selection logic
+    - RemediationStrategies: Patch generation (dependency upgrade, LLM, etc)
     - EurekaOrchestrator: Coordination + error handling + metrics
     
     This enables independent testing, scaling, and evolution of each component.
 
 Performance Targets:
-    - APV processing latency: < 10 seconds (confirmation only)
+    - APV processing latency: < 2min (confirmation + remediation)
     - Consumer lag: < 5 seconds
     - Memory footprint: < 1GB per orchestrator instance
-    - Throughput: ≥ 100 APVs/min
+    - Throughput: ≥ 50 APVs/min
 
 Author: MAXIMUS Team
 Date: 2025-01-10
@@ -55,6 +59,8 @@ from eureka_models.confirmation.confirmation_result import (
     ConfirmationResult,
     ConfirmationStatus,
 )
+from strategies import StrategySelector, NoStrategyAvailableError
+from eureka_models.patch import Patch, PatchStatus
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +70,7 @@ class EurekaMetrics:
     """
     Operational metrics for Eureka orchestrator.
     
-    Tracks pipeline performance and success rates across confirmation phase.
-    Phase 3 will add remediation metrics (patches generated, PRs created, etc).
+    Tracks pipeline performance across confirmation AND remediation phases.
     """
 
     # Counters
@@ -73,6 +78,12 @@ class EurekaMetrics:
     apvs_confirmed: int = 0
     apvs_false_positive: int = 0
     apvs_failed: int = 0
+    
+    # Phase 3: Remediation metrics
+    patches_generated: int = 0
+    patches_failed: int = 0
+    strategy_dependency_upgrade: int = 0
+    strategy_code_patch_llm: int = 0
 
     # Timing (seconds)
     total_processing_time: float = 0.0
@@ -108,6 +119,25 @@ class EurekaMetrics:
             self.apvs_false_positive += 1
         elif status == ConfirmationStatus.ERROR:
             self.apvs_failed += 1
+    
+    def record_patch(self, patch: Optional[Patch], strategy_used: str) -> void:
+        """
+        Record patch generation metrics.
+        
+        Args:
+            patch: Generated patch (None if failed)
+            strategy_used: Strategy that was used
+        """
+        if patch:
+            self.patches_generated += 1
+            
+            # Track strategy usage
+            if strategy_used == "dependency_upgrade":
+                self.strategy_dependency_upgrade += 1
+            elif strategy_used == "code_patch":
+                self.strategy_code_patch_llm += 1
+        else:
+            self.patches_failed += 1
 
     @property
     def avg_processing_time(self) -> float:
@@ -167,6 +197,7 @@ class EurekaOrchestrator:
         self,
         consumer_config: APVConsumerConfig,
         confirmer_config: ConfirmationConfig,
+        strategy_selector: Optional[StrategySelector] = None,
     ):
         """
         Initialize Eureka Orchestrator.
@@ -174,9 +205,11 @@ class EurekaOrchestrator:
         Args:
             consumer_config: Configuration for APV Kafka consumer
             confirmer_config: Configuration for vulnerability confirmer
+            strategy_selector: Strategy selector for remediation (optional)
         """
         self.consumer_config = consumer_config
         self.confirmer_config = confirmer_config
+        self.strategy_selector = strategy_selector
 
         # Components (initialized in start())
         self._consumer: Optional[APVConsumer] = None
@@ -187,6 +220,11 @@ class EurekaOrchestrator:
         self.metrics = EurekaMetrics()
 
         logger.info("Eureka Orchestrator initialized")
+        if strategy_selector:
+            strategies = [s.strategy_type.value for s in strategy_selector.get_strategies()]
+            logger.info(f"Remediation strategies enabled: {strategies}")
+        else:
+            logger.info("Remediation strategies DISABLED (confirmation only mode)")
 
     async def start(self) -> None:
         """
@@ -295,9 +333,48 @@ class EurekaOrchestrator:
                     },
                 )
 
-                # TODO Phase 3: Select and apply remediation strategy
-                # strategy = self._select_strategy(apv, confirmation)
-                # patch = await strategy.apply(apv, confirmation)
+                # Phase 3: Select and apply remediation strategy
+                if self.strategy_selector:
+                    try:
+                        logger.info(f"🎯 Selecting remediation strategy for {apv.cve_id}")
+                        strategy = await self.strategy_selector.select_strategy(apv, confirmation)
+                        
+                        logger.info(
+                            f"✅ Selected {strategy.strategy_type.value} for {apv.cve_id}"
+                        )
+                        
+                        # Generate patch
+                        patch = await strategy.apply_strategy(apv, confirmation)
+                        
+                        logger.info(
+                            f"🔧 Generated patch for {apv.cve_id}: "
+                            f"{len(patch.files_modified)} files, "
+                            f"confidence={patch.confidence_score:.2f}"
+                        )
+                        
+                        # Record patch metrics
+                        self.metrics.record_patch(patch, strategy.strategy_type.value)
+                        
+                        # TODO Phase 4: Apply patch to Git + create PR
+                        # git_service.apply_patch(patch)
+                        # pr_url = github_service.create_pr(patch)
+                        
+                    except NoStrategyAvailableError as e:
+                        logger.warning(
+                            f"⚠️ No remediation strategy available for {apv.cve_id}: {e}"
+                        )
+                        self.metrics.record_patch(None, "none")
+                        
+                    except Exception as e:
+                        logger.error(
+                            f"❌ Remediation failed for {apv.cve_id}: {e}",
+                            exc_info=True,
+                        )
+                        self.metrics.record_patch(None, "error")
+                else:
+                    logger.debug(
+                        f"Remediation disabled, skipping patch generation for {apv.cve_id}"
+                    )
 
             elif confirmation.status == ConfirmationStatus.FALSE_POSITIVE:
                 logger.info(
