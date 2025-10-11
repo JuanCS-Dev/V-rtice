@@ -895,6 +895,74 @@ button {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   WEBSOCKET STATUS INDICATOR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.banner-websocket-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 8px;
+  margin-right: 1rem;
+}
+
+.ws-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ws-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ws-indicator.connected {
+  color: #00ff88;
+}
+
+.ws-indicator.connecting {
+  color: #ffb703;
+}
+
+.ws-indicator.reconnecting {
+  color: #ff6600;
+}
+
+.ws-indicator.error,
+.ws-indicator.disconnected {
+  color: #ff0040;
+}
+
+.ws-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.ws-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Pulse animation for live dot */
+.ws-dot.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    ACCESSIBILITY
    ═══════════════════════════════════════════════════════════════════════════ */
 

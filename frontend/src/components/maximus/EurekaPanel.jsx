@@ -27,10 +27,10 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
   // WEBSOCKET STREAM - Real-time APV updates
   const {
     status: wsStatus,
-    apvs: liveApvs,
-    metrics: liveMetrics,
+    apvs: _liveApvs,
+    metrics: _liveMetrics,
     isConnected,
-    error: wsError,
+    error: _wsError,
     reconnectAttempts
   } = useAPVStream({
     autoConnect: true,
@@ -265,6 +265,16 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
           <div className="banner-text">
             <span className="banner-title">EUREKA - CÉLULAS T EFETORAS</span>
             <span className="banner-subtitle">Automated Vulnerability Response | Phases 3-5</span>
+          </div>
+          {/* WEBSOCKET STATUS INDICATOR */}
+          <div className="banner-websocket-status">
+            <span className="ws-label">Stream</span>
+            <div className={`ws-indicator ${wsStatus}`} title={wsStatus}>
+              {isConnected && <span className="ws-dot pulse-glow"></span>}
+              {wsStatus === 'reconnecting' && <span className="ws-text">Reconnecting... ({reconnectAttempts})</span>}
+              {wsStatus === 'error' && <span className="ws-text">Error</span>}
+              {wsStatus === 'connected' && <span className="ws-text">Live</span>}
+            </div>
           </div>
           <div className="banner-health">
             <span className="health-label">Health</span>

@@ -268,6 +268,7 @@ export const useAPVStream = ({
     return () => {
       disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoConnect]); // Only run once on mount
 
   // Return stream state and controls
