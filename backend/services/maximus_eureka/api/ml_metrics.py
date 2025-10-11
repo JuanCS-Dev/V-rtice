@@ -207,9 +207,8 @@ class MLMetricsResponse(BaseModel):
         ..., max_length=50, description="Last 50 predictions"
     )
     
-    class Config:
-        """Pydantic config."""
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "timeframe": "24h",
                 "generated_at": "2025-10-11T20:00:00Z",
@@ -259,6 +258,7 @@ class MLMetricsResponse(BaseModel):
                 ]
             }
         }
+    }
 
 
 @router.get("/ml-metrics", response_model=MLMetricsResponse)
