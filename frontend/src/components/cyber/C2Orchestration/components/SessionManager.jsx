@@ -79,7 +79,7 @@ export const SessionManager = ({
           <div className="space-y-4">
             {/* Framework Selection */}
             <div>
-              <label className="text-red-400/60 text-xs mb-2 block">FRAMEWORK</label>
+              <span className="text-red-400/60 text-xs mb-2 block">FRAMEWORK</span>
               <div className="flex gap-2">
                 {frameworks.map(fw => (
                   <button
@@ -187,7 +187,14 @@ export const SessionManager = ({
                 return (
                   <div
                     key={idx}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelectedSession(session)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedSession(session);
+                      }
+                    }}
                     className={`
                       bg-gradient-to-r from-${frameworkColor}-900/20 to-purple-900/20
                       border-2 border-${frameworkColor}-400/30 rounded-lg p-4

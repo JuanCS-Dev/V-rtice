@@ -24,7 +24,7 @@ export const useC2 = () => {
   // Carrega sessões ao montar
   useEffect(() => {
     loadSessions();
-  }, []);
+  }, [loadSessions]);
 
   // Polling para sessões ativas
   useEffect(() => {
@@ -35,7 +35,7 @@ export const useC2 = () => {
     }, 5000); // Poll a cada 5 segundos
 
     return () => clearInterval(interval);
-  }, [activeSessions]);
+  }, [activeSessions, loadSessions]);
 
   /**
    * Carrega lista de sessões

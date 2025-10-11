@@ -95,7 +95,14 @@ export const ScanHistory = ({ scans, onSelectScan }) => {
         {sortedScans.map((scan) => (
           <div
             key={scan.scan_id}
+            role="button"
+            tabIndex={0}
             onClick={() => onSelectScan(scan.scan_id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                onSelectScan(scan.scan_id);
+              }
+            }}
             className={`
               border rounded-lg p-4 cursor-pointer transition-all hover:shadow-lg
               ${

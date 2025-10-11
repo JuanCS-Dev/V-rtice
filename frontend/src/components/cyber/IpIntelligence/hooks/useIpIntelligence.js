@@ -23,7 +23,7 @@ export const useIpIntelligence = () => {
     }
   }, []);
 
-  const formatAnalysisResult = useCallback((data, ip) => {
+  const _formatAnalysisResult = useCallback((data, ip) => {
     return {
       ip: data.ip || ip,
       location: {

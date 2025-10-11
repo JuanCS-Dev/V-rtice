@@ -22,7 +22,7 @@ export const useNetworkRecon = () => {
   // Carrega lista de scans ao montar
   useEffect(() => {
     loadScans();
-  }, []);
+  }, [loadScans]);
 
   // Polling para scans ativos
   useEffect(() => {
@@ -35,7 +35,7 @@ export const useNetworkRecon = () => {
     }, 3000); // Poll a cada 3 segundos
 
     return () => clearInterval(interval);
-  }, [activeScans]);
+  }, [activeScans, updateScanStatus]);
 
   /**
    * Carrega lista de scans

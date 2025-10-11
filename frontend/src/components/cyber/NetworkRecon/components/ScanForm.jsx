@@ -106,9 +106,9 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
 
       {/* Port Configuration */}
       <div>
-        <label className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
+        <div className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
           🔌 PORT RANGE
-        </label>
+        </div>
         <div className="flex gap-2 mb-3">
           {portPresets.map((preset) => (
             <button
@@ -146,9 +146,9 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
 
       {/* Advanced Options */}
       <div className="bg-black/30 border border-cyan-400/20 rounded-lg p-4">
-        <label className="block text-cyan-400/70 font-bold mb-3 text-xs tracking-wider">
+        <div className="block text-cyan-400/70 font-bold mb-3 text-xs tracking-wider">
           🔧 ADVANCED OPTIONS
-        </label>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <label className="flex items-center gap-2 text-cyan-400/70 text-sm cursor-pointer">
             <input

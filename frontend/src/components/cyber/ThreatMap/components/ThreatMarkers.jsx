@@ -43,7 +43,7 @@ const ThreatMarkers = ({ threats, onThreatClick }) => {
   const map = useMap();
 
   // OTIMIZADO: Memoize cluster options
-  const clusterOptions = useMemo(() => ({
+  const _clusterOptions = useMemo(() => ({
     chunkedLoading: true,
     chunkInterval: 100,
     chunkDelay: 50,

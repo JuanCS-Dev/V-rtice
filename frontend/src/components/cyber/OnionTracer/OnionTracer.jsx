@@ -51,7 +51,7 @@ export const OnionTracer = ({
   const [status, setStatus] = useState('READY');
   const [statusMessage, setStatusMessage] = useState('Ready to trace...');
   const [progress, setProgress] = useState(0);
-  const [packets, setPackets] = useState([]);
+  const [_packets, _setPackets] = useState([]);
   const [realIp, setRealIp] = useState(null);
 
   const traceIntervalRef = useRef(null);

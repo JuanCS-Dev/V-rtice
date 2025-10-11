@@ -37,7 +37,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 
 # APV from Oráculo
 import sys
@@ -124,7 +124,7 @@ class EurekaMetrics:
             return 0.0
         return self.apvs_confirmed / total
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Export metrics as dictionary."""
         return {
             "apvs_received": self.apvs_received,
@@ -212,7 +212,7 @@ class EurekaOrchestrator:
 
             # Initialize consumer with our processing handler
             self._consumer = APVConsumer(
-                config=self.consumer_config, handler=self._process_apv
+                config=self.consumer_config, apv_handler=self._process_apv
             )
 
             self._running = True
@@ -273,6 +273,9 @@ class EurekaOrchestrator:
             )
 
             # Phase 2: Confirm vulnerability
+            if self._confirmer is None:
+                raise RuntimeError("Confirmer not initialized")
+            
             confirmation = await self._confirmer.confirm_vulnerability(apv)
 
             # Record metrics
@@ -323,7 +326,7 @@ class EurekaOrchestrator:
             )
             # Don't propagate - let consumer continue
 
-    def get_metrics(self) -> dict:
+    def get_metrics(self) -> dict[str, Any]:
         """
         Get current orchestrator metrics.
         

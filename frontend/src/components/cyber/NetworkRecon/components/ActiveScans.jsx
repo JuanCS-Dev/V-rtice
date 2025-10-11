@@ -28,8 +28,15 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
       {scans.map((scan) => (
         <div
           key={scan.scan_id}
+          role="button"
+          tabIndex={0}
           className="border-2 border-orange-400/50 rounded-lg p-6 bg-gradient-to-br from-orange-900/10 to-red-900/10 cursor-pointer hover:border-orange-400 transition-all"
           onClick={() => onSelectScan(scan.scan_id)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onSelectScan(scan.scan_id);
+            }
+          }}
         >
           <div className="flex items-center justify-between mb-4">
             <div>
