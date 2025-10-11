@@ -43,7 +43,7 @@ const DefensiveDashboard = ({ setCurrentView }) => {
 
   // Real data hooks (NO MOCKS)
   const { metrics, loading: metricsLoading } = useDefensiveMetrics();
-  const { alerts, addAlert } = useRealTimeAlerts();
+  const { alerts, addAlert: _addAlert } = useRealTimeAlerts();
 
   // Update clock
   useEffect(() => {

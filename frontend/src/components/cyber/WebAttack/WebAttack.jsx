@@ -12,12 +12,12 @@ import { useWebAttack } from './hooks/useWebAttack';
 export const WebAttack = () => {
   const [activeTab, setActiveTab] = useState('scan'); // 'scan' | 'results' | 'history'
   const {
-    currentScan,
+    currentScan: _currentScan,
     scans,
     isScanning,
     scanResults,
     startScan,
-    runTest,
+    runTest: _runTest,
     getReport,
   } = useWebAttack();
 

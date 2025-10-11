@@ -140,7 +140,7 @@ const fetchPurpleTeamData = async () => {
 };
 
 export const usePurpleTeamData = () => {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error: _error, refetch } = useQuery({
     queryKey: queryKeys.purpleCorrelations,
     queryFn: fetchPurpleTeamData,
     refetchInterval: 5000, // Poll every 5 seconds

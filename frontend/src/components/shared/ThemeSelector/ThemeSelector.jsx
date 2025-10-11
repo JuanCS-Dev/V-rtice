@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../../../hooks/useTheme';
 import styles from './ThemeSelector.module.css';
 
-export const ThemeSelector = ({ compact = false, showInHeader = false }) => {
+export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = false }) => {
   const {
     theme,
     mode,

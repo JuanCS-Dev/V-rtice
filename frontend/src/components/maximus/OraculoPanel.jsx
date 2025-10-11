@@ -15,7 +15,7 @@ import React, { useState, useEffect } from 'react';
 import './Panels.css';
 
 export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
-  const [suggestions, setSuggestions] = useState([]);
+  const [_suggestions, _setSuggestions] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [stats, setStats] = useState({
     totalSessions: 0,

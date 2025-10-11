@@ -39,7 +39,7 @@ export const AskMaximusButton = ({
   const [customPrompt, setCustomPrompt] = useState(prompt || '');
 
   // Rate limiting: 5 AI requests per minute
-  const { execute: executeWithRateLimit, remaining, resetIn } = useRateLimit('ask-maximus-ai', {
+  const { execute: executeWithRateLimit, remaining: _remaining, resetIn: _resetIn } = useRateLimit('ask-maximus-ai', {
     maxRequests: 5,
     windowMs: 60000, // 1 minute
     onLimitExceeded: ({ resetIn: reset }) => {

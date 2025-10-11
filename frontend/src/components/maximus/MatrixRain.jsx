@@ -21,7 +21,7 @@ export const MatrixRain = () => {
     // Characters for matrix effect (binary + hex)
     const chars = '01';
     const fontSize = 14;
-    const columns = canvas.width / fontSize;
+    const _columns = canvas.width / fontSize;
 
     // Cores do gradiente: azul → roxo (BEM sutis)
     const colors = [

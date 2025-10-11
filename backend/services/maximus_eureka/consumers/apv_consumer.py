@@ -275,7 +275,7 @@ class APVConsumer:
         """
         try:
             # Deserialize APV
-            apv = self._deserialize_apv(message.value)
+            apv = await self._deserialize_apv(message.value)
 
             # Idempotency check
             if await self._is_duplicate(apv.cve_id):

@@ -17,7 +17,7 @@ import './Panels.css';
 
 export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
   const [analysisMode, setAnalysisMode] = useState('upload'); // 'upload' or 'results'
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [_selectedFile, _setSelectedFile] = useState(null);
   const [filePath, setFilePath] = useState('');
   const [generatePlaybook, setGeneratePlaybook] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);

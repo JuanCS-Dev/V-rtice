@@ -25,7 +25,7 @@ export const MaximusHeader = ({
   backgroundEffect,
   onEffectChange
 }) => {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   // Format time
   const timeString = currentTime.toLocaleTimeString('pt-BR', {
