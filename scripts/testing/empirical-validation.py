@@ -18,15 +18,15 @@ from typing import List, Dict
 from pathlib import Path
 
 
-# Test CVEs with known exploits
+# Test CVEs with known exploits - UPDATED with real vulnerable targets
 TEST_CVES = [
     {
         "apv_id": "APV-SQL-001",
         "cve_id": "CVE-2024-SQL-INJECTION",
         "cwe_id": "CWE-89",
-        "description": "SQL Injection vulnerability",
+        "description": "SQL Injection vulnerability in DVWA",
         "patch_id": "PATCH-SQL-001",
-        "target_url": "http://localhost:8080",
+        "target_url": "http://localhost:8091",  # DVWA
         "expected_phase1": True,  # Exploit MUST succeed
         "expected_phase2": False,  # Exploit MUST fail after patch
     },
@@ -34,9 +34,9 @@ TEST_CVES = [
         "apv_id": "APV-XSS-001",
         "cve_id": "CVE-2024-XSS",
         "cwe_id": "CWE-79",
-        "description": "Cross-Site Scripting vulnerability",
+        "description": "Cross-Site Scripting in Juice Shop",
         "patch_id": "PATCH-XSS-001",
-        "target_url": "http://localhost:8080",
+        "target_url": "http://localhost:8093",  # Juice Shop
         "expected_phase1": True,
         "expected_phase2": False,
     },
@@ -46,7 +46,7 @@ TEST_CVES = [
         "cwe_id": "CWE-78",
         "description": "Command Injection vulnerability",
         "patch_id": "PATCH-CMD-001",
-        "target_url": "http://localhost:8080",
+        "target_url": "http://localhost:8094",  # Custom CMD Injection API
         "expected_phase1": True,
         "expected_phase2": False,
     },
@@ -56,7 +56,7 @@ TEST_CVES = [
         "cwe_id": "CWE-22",
         "description": "Path Traversal vulnerability",
         "patch_id": "PATCH-PATH-001",
-        "target_url": "http://localhost:8080",
+        "target_url": "http://localhost:8095",  # Custom Path Traversal API
         "expected_phase1": True,
         "expected_phase2": False,
     },
@@ -66,7 +66,7 @@ TEST_CVES = [
         "cwe_id": "CWE-918",
         "description": "Server-Side Request Forgery",
         "patch_id": "PATCH-SSRF-001",
-        "target_url": "http://localhost:8080",
+        "target_url": "http://localhost:8096",  # Custom SSRF API
         "expected_phase1": True,
         "expected_phase2": False,
     },
