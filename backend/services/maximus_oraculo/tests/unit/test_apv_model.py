@@ -504,7 +504,7 @@ class TestAPVComplexityCalculation:
         assert apv.remediation_complexity == RemediationComplexity.LOW
     
     def test_complexity_medium_multiple_packages(self):
-        """Test MEDIUM complexity: 2-3 packages affected."""
+        """Test MEDIUM complexity: 2-3 packages affected with fixes."""
         apv = APV(
             cve_id="CVE-2024-11002",
             published=datetime.now(),
@@ -516,12 +516,14 @@ class TestAPVComplexityCalculation:
                 {
                     "ecosystem": "PyPI",
                     "name": "lib1",
-                    "affected_versions": ["*"]
+                    "affected_versions": ["*"],
+                    "fixed_versions": ["1.0.0"]  # Has fix
                 },
                 {
                     "ecosystem": "PyPI",
                     "name": "lib2",
-                    "affected_versions": ["*"]
+                    "affected_versions": ["*"],
+                    "fixed_versions": ["2.0.0"]  # Has fix
                 }
             ],
             recommended_strategy="dependency_upgrade",
@@ -559,8 +561,8 @@ class TestAPVComputedProperties:
             cve_id="CVE-2024-12001",
             published=datetime.now(),
             modified=datetime.now(),
-            summary="Test",
-            details="Test details with sufficient length",
+            summary="Test vulnerability critical",
+            details="Test details with sufficient length for validation",
             priority="critical",
             affected_packages=[{"ecosystem": "PyPI", "name": "test", "affected_versions": ["*"]}],
             recommended_strategy="dependency_upgrade",
@@ -574,8 +576,8 @@ class TestAPVComputedProperties:
             cve_id="CVE-2024-12002",
             published=datetime.now(),
             modified=datetime.now(),
-            summary="Test",
-            details="Test details with sufficient length",
+            summary="Test vulnerability low priority",
+            details="Test details with sufficient length for validation",
             priority="low",
             affected_packages=[{"ecosystem": "PyPI", "name": "test", "affected_versions": ["*"]}],
             recommended_strategy="dependency_upgrade",
@@ -591,8 +593,8 @@ class TestAPVComputedProperties:
             cve_id="CVE-2024-12003",
             published=datetime.now(),
             modified=datetime.now(),
-            summary="Test",
-            details="Test details with sufficient length",
+            summary="Test vulnerability high priority",
+            details="Test details with sufficient length for validation",
             priority="high",
             affected_packages=[{"ecosystem": "PyPI", "name": "test", "affected_versions": ["*"]}],
             recommended_strategy="dependency_upgrade",
@@ -606,8 +608,8 @@ class TestAPVComputedProperties:
             cve_id="CVE-2024-12004",
             published=datetime.now(),
             modified=datetime.now(),
-            summary="Test",
-            details="Test details with sufficient length",
+            summary="Test vulnerability medium priority",
+            details="Test details with sufficient length for validation",
             priority="medium",
             affected_packages=[{"ecosystem": "PyPI", "name": "test", "affected_versions": ["*"]}],
             recommended_strategy="dependency_upgrade",
@@ -623,8 +625,8 @@ class TestAPVComputedProperties:
             cve_id="CVE-2024-12005",
             published=datetime.now(),
             modified=datetime.now(),
-            summary="Test",
-            details="Test details with sufficient length",
+            summary="Test vulnerability with automated fix",
+            details="Test details with sufficient length for validation",
             priority="high",
             affected_packages=[{"ecosystem": "PyPI", "name": "test", "affected_versions": ["*"], "fixed_versions": ["1.0.0"]}],
             recommended_strategy="dependency_upgrade",
@@ -638,8 +640,8 @@ class TestAPVComputedProperties:
             cve_id="CVE-2024-12006",
             published=datetime.now(),
             modified=datetime.now(),
-            summary="Test",
-            details="Test details with sufficient length",
+            summary="Test vulnerability needs manual review",
+            details="Test details with sufficient length for validation",
             priority="high",
             affected_packages=[{"ecosystem": "PyPI", "name": "test", "affected_versions": ["*"]}],
             recommended_strategy="manual_review",

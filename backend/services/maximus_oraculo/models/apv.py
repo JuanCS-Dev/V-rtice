@@ -18,7 +18,7 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator, computed_field
+from pydantic import BaseModel, Field, field_validator, model_validator, computed_field
 
 
 class PriorityLevel(str, Enum):
@@ -150,7 +150,7 @@ class AffectedPackage(BaseModel):
             raise ValueError(f"Ecosystem must be one of {valid}, got {v}")
         return v
     
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def has_fix(self) -> bool:
         """Check if fixed version is available."""
@@ -214,7 +214,7 @@ class APV(BaseModel):
     # ==================== SEVERITY & PRIORITY ====================
     
     cvss: Optional[CVSSScore] = Field(None, description="CVSS score")
-    priority: PriorityLevel = Field(default=PriorityLevel.MEDIUM, description="MAXIMUS calculated priority")
+    priority: Optional[PriorityLevel] = Field(None, description="MAXIMUS calculated priority")
     
     # ==================== AFFECTED PACKAGES ====================
     
@@ -233,12 +233,12 @@ class APV(BaseModel):
     
     # ==================== REMEDIATION ====================
     
-    recommended_strategy: RemediationStrategy = Field(
-        default=RemediationStrategy.MANUAL_REVIEW,
+    recommended_strategy: Optional[RemediationStrategy] = Field(
+        None,
         description="Recommended remediation strategy"
     )
-    remediation_complexity: RemediationComplexity = Field(
-        default=RemediationComplexity.MEDIUM,
+    remediation_complexity: Optional[RemediationComplexity] = Field(
+        None,
         description="Estimated remediation complexity"
     )
     remediation_notes: Optional[str] = Field(
@@ -260,156 +260,94 @@ class APV(BaseModel):
     
     # ==================== VALIDATORS ====================
     
-    @field_validator('priority', mode='before')
-    @classmethod
-    def calculate_priority(cls, v: Optional[str], info) -> str:
+    @model_validator(mode='after')
+    def calculate_smart_defaults(self) -> 'APV':
         """
-        Calculate priority if not explicitly set.
+        Calculate smart defaults for priority, strategy, and complexity.
         
-        Priority calculation algorithm:
-        1. CVSS >= 9.0 + public exploits → CRITICAL
-        2. CVSS >= 7.0 + affected_services > 3 → HIGH
-        3. CVSS >= 4.0 → MEDIUM
-        4. Else → LOW
+        This validator runs after all fields are validated and populated.
+        It intelligently calculates missing values (None) based on other fields.
         
-        Args:
-            v: Priority value (if already set)
-            info: Validation context with other fields
-            
+        Execution Order:
+        1. Complexity (independent)
+        2. Strategy (depends on complexity)
+        3. Priority (depends on CVSS)
+        
         Returns:
-            PriorityLevel value
+            Self with calculated fields
         """
-        if v:  # Already set manually
-            return v
-        
-        data = info.data
-        cvss = data.get('cvss')
-        
-        if not cvss:
-            return PriorityLevel.LOW
-        
-        score = cvss.base_score
-        context = data.get('maximus_context', {})
-        affected_count = len(context.get('affected_services', []))
-        has_exploit = context.get('exploit_available', False)
-        
-        # Priority logic
-        if score >= 9.0 and has_exploit:
-            return PriorityLevel.CRITICAL
-        elif score >= 9.0:
-            return PriorityLevel.CRITICAL
-        elif score >= 7.0 and affected_count > 3:
-            return PriorityLevel.HIGH
-        elif score >= 7.0:
-            return PriorityLevel.HIGH
-        elif score >= 4.0:
-            return PriorityLevel.MEDIUM
-        else:
-            return PriorityLevel.LOW
-    
-    @field_validator('recommended_strategy', mode='before')
-    @classmethod
-    def calculate_strategy(cls, v: Optional[str], info) -> str:
-        """
-        Calculate recommended remediation strategy if not set.
-        
-        Strategy selection algorithm:
-        1. Has fixed version available → DEPENDENCY_UPGRADE
-        2. Has ast-grep pattern + LLM confidence → CODE_PATCH
-        3. Zero-day without fix → COAGULATION_WAF
-        4. Complexity CRITICAL → MANUAL_REVIEW
-        
-        Args:
-            v: Strategy value (if already set)
-            info: Validation context
+        # Step 1: Calculate complexity FIRST (strategy depends on it)
+        if self.remediation_complexity is None:
+            num_packages = len(self.affected_packages)
+            breaking_changes = self.maximus_context.get('breaking_changes_likely', False)
+            has_patterns = len(self.ast_grep_patterns) > 0
+            has_fix = any(pkg.has_fix for pkg in self.affected_packages)
             
-        Returns:
-            RemediationStrategy value
-        """
-        if v:  # Already set
-            return v
+            if num_packages > 3:
+                self.remediation_complexity = RemediationComplexity.HIGH
+            elif breaking_changes:
+                self.remediation_complexity = RemediationComplexity.HIGH
+            elif not has_fix and not has_patterns:
+                self.remediation_complexity = RemediationComplexity.CRITICAL
+            elif num_packages > 1:
+                self.remediation_complexity = RemediationComplexity.MEDIUM
+            else:
+                self.remediation_complexity = RemediationComplexity.LOW
         
-        data = info.data
-        complexity = data.get('remediation_complexity', 'MEDIUM')
-        affected = data.get('affected_packages', [])
-        patterns = data.get('ast_grep_patterns', [])
+        # Step 2: Calculate strategy (depends on complexity)
+        if self.recommended_strategy is None:
+            # Critical complexity forces manual review
+            if self.remediation_complexity == RemediationComplexity.CRITICAL:
+                self.recommended_strategy = RemediationStrategy.MANUAL_REVIEW
+            else:
+                # Check if any package has fix
+                has_fix = any(pkg.has_fix for pkg in self.affected_packages)
+                
+                if has_fix:
+                    self.recommended_strategy = RemediationStrategy.DEPENDENCY_UPGRADE
+                elif self.ast_grep_patterns:
+                    self.recommended_strategy = RemediationStrategy.CODE_PATCH
+                else:
+                    self.recommended_strategy = RemediationStrategy.COAGULATION_WAF
         
-        # Critical complexity requires manual review
-        if complexity == 'CRITICAL':
-            return RemediationStrategy.MANUAL_REVIEW
+        # Step 3: Calculate priority (independent, based on CVSS)
+        if self.priority is None:
+            if self.cvss:
+                score = self.cvss.base_score
+                affected_count = len(self.affected_services)
+                has_exploit = self.maximus_context.get('exploit_available', False)
+                
+                if score >= 9.0:
+                    self.priority = PriorityLevel.CRITICAL
+                elif score >= 7.0 and affected_count > 3:
+                    self.priority = PriorityLevel.HIGH
+                elif score >= 7.0:
+                    self.priority = PriorityLevel.HIGH
+                elif score >= 4.0:
+                    self.priority = PriorityLevel.MEDIUM
+                else:
+                    self.priority = PriorityLevel.LOW
+            else:
+                # No CVSS, default to LOW
+                self.priority = PriorityLevel.LOW
         
-        # Check if any package has a fixed version
-        has_fixed = any(pkg.has_fix for pkg in affected if hasattr(pkg, 'has_fix'))
-        if has_fixed:
-            return RemediationStrategy.DEPENDENCY_UPGRADE
-        
-        # If has patterns, try code patch
-        if patterns:
-            return RemediationStrategy.CODE_PATCH
-        
-        # Fallback: WAF rule
-        return RemediationStrategy.COAGULATION_WAF
-    
-    @field_validator('remediation_complexity', mode='before')
-    @classmethod
-    def calculate_complexity(cls, v: Optional[str], info) -> str:
-        """
-        Calculate remediation complexity if not set.
-        
-        Complexity factors:
-        - Breaking changes in upgrade: HIGH
-        - Multiple affected packages: MEDIUM
-        - Single package upgrade: LOW
-        - Zero-day without pattern: CRITICAL
-        
-        Args:
-            v: Complexity value (if already set)
-            info: Validation context
-            
-        Returns:
-            RemediationComplexity value
-        """
-        if v:
-            return v
-        
-        data = info.data
-        affected = data.get('affected_packages', [])
-        context = data.get('maximus_context', {})
-        patterns = data.get('ast_grep_patterns', [])
-        
-        # Multiple packages = higher complexity
-        if len(affected) > 3:
-            return RemediationComplexity.HIGH
-        elif len(affected) > 1:
-            return RemediationComplexity.MEDIUM
-        
-        # Breaking changes flag
-        if context.get('breaking_changes_likely', False):
-            return RemediationComplexity.HIGH
-        
-        # Zero-day without pattern
-        has_fix = any(pkg.has_fix for pkg in affected if hasattr(pkg, 'has_fix'))
-        if not has_fix and not patterns:
-            return RemediationComplexity.CRITICAL
-        
-        # Default: simple single package upgrade
-        return RemediationComplexity.LOW
+        return self
     
     # ==================== COMPUTED FIELDS ====================
     
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def is_critical(self) -> bool:
         """Check if vulnerability is critical priority."""
         return self.priority == PriorityLevel.CRITICAL
     
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def requires_immediate_action(self) -> bool:
         """Check if requires immediate remediation (CRITICAL or HIGH)."""
         return self.priority in [PriorityLevel.CRITICAL, PriorityLevel.HIGH]
     
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def has_automated_fix(self) -> bool:
         """Check if automated fix is possible."""
@@ -418,11 +356,12 @@ class APV(BaseModel):
             RemediationStrategy.CODE_PATCH
         ]
     
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def affected_services(self) -> List[str]:
         """Extract affected services from context."""
-        return self.maximus_context.get('affected_services', [])
+        services = self.maximus_context.get('affected_services', [])
+        return services if isinstance(services, list) else []
     
     # ==================== METHODS ====================
     
@@ -449,11 +388,11 @@ class APV(BaseModel):
                 include={'cvss', 'ast_grep_patterns', 'affected_packages'}
             ),
             'apv_object': self.model_dump(mode='json'),
-            'priority': self.priority.value,
+            'priority': self.priority.value if self.priority else 'low',
             'source_feed': self.source_feed,
             'oraculo_version': self.oraculo_version,
             'affected_services': self.affected_services,
-            'remediation_strategy': self.recommended_strategy.value
+            'remediation_strategy': self.recommended_strategy.value if self.recommended_strategy else 'manual_review'
         }
     
     class Config:
