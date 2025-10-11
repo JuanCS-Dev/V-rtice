@@ -137,6 +137,8 @@ export const Clickable = ({
   };
 
   return (
+    // This is a reusable accessibility wrapper that adds keyboard support to non-interactive elements
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       role={role}
       tabIndex={tabIndex}
