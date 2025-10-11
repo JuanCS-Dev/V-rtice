@@ -40,7 +40,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
   const [pendingApvs, setPendingApvs] = useState([]);
   const [remediationHistory, setRemediationHistory] = useState([]);
   const [pullRequests, setPullRequests] = useState([]);
-  const [selectedApv, setSelectedApv] = useState(null);
+  const [_selectedApv, setSelectedApv] = useState(null);
   const [isRemediating, setIsRemediating] = useState(false);
   const [wargamingResults, setWargamingResults] = useState(null);
   const [liveWargaming, setLiveWargaming] = useState(null);
