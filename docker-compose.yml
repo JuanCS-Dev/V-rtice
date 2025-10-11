@@ -2223,6 +2223,186 @@ services:
       retries: 3
       start_period: 60s
 
+  # ============================
+  # ADAPTIVE IMMUNITY SYSTEM
+  # ============================
+  
+  # Zookeeper for Kafka coordination
+  zookeeper-immunity:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: maximus-zookeeper-immunity
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-immunity-data:/var/lib/zookeeper/data
+      - zookeeper-immunity-logs:/var/lib/zookeeper/log
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kafka for APV stream
+  kafka-immunity:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: maximus-kafka-immunity
+    depends_on:
+      zookeeper-immunity:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-immunity:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-immunity:9092,PLAINTEXT_HOST://localhost:9096
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168  # 7 days
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824  # 1GB
+    ports:
+      - "9096:9096"
+    volumes:
+      - kafka-immunity-data:/var/lib/kafka/data
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # PostgreSQL for APVs, patches, audit
+  postgres-immunity:
+    image: postgres:15-alpine
+    container_name: maximus-postgres-immunity
+    environment:
+      POSTGRES_DB: adaptive_immunity
+      POSTGRES_USER: maximus
+      POSTGRES_PASSWORD: ${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-immunity-data:/var/lib/postgresql/data
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maximus -d adaptive_immunity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Oráculo Threat Sentinel (APV Detection)
+  oraculo-threat-sentinel:
+    build:
+      context: ./backend/services
+      dockerfile: maximus_oraculo/Dockerfile
+    container_name: maximus-oraculo-threat-sentinel
+    depends_on:
+      kafka-immunity:
+        condition: service_healthy
+      postgres-immunity:
+        condition: service_healthy
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-immunity:9092
+      - POSTGRES_HOST=postgres-immunity
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=adaptive_immunity
+      - POSTGRES_USER=maximus
+      - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+      - OSV_API_KEY=${OSV_API_KEY}
+      - LOG_LEVEL=INFO
+    ports:
+      - "8024:8024"
+    volumes:
+      - ./backend/services/maximus_oraculo:/app
+      - oraculo_sessions:/app/sessions
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8024/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Eureka Confirmation Service
+  eureka-confirmation:
+    build:
+      context: ./backend/services
+      dockerfile: maximus_eureka/Dockerfile
+    container_name: maximus-eureka-confirmation
+    depends_on:
+      kafka-immunity:
+        condition: service_healthy
+      postgres-immunity:
+        condition: service_healthy
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-immunity:9092
+      - POSTGRES_HOST=postgres-immunity
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=adaptive_immunity
+      - POSTGRES_USER=maximus
+      - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./backend/services/maximus_eureka:/app
+      - eureka_reports:/app/reports
+    networks:
+      - maximus-network
+    restart: unless-stopped
+
+  # Wargaming Crisol (Patch Validation)
+  wargaming-crisol:
+    build:
+      context: ./backend/services
+      dockerfile: wargaming_crisol/Dockerfile
+    container_name: maximus-wargaming-crisol
+    depends_on:
+      - postgres-immunity
+    environment:
+      - POSTGRES_HOST=postgres-immunity
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=adaptive_immunity
+      - POSTGRES_USER=maximus
+      - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./backend/services/wargaming_crisol:/app
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker-in-Docker
+      - wargaming_logs:/app/logs
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    privileged: true  # Required for Docker-in-Docker
+
+  # Kafka UI for monitoring
+  kafka-ui-immunity:
+    image: provectuslabs/kafka-ui:latest
+    container_name: maximus-kafka-ui-immunity
+    depends_on:
+      - kafka-immunity
+    environment:
+      KAFKA_CLUSTERS_0_NAME: maximus-immunity
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-immunity:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-immunity:2181
+    ports:
+      - "8090:8080"
+    networks:
+      - maximus-network
+    restart: unless-stopped
+
 # ============================
 # NETWORKS
 # ============================
@@ -2296,6 +2476,17 @@ volumes:
   atomic_red_team:
     driver: local
   gateway_logs:
+    driver: local
+  # Adaptive Immunity System volumes
+  zookeeper-immunity-data:
+    driver: local
+  zookeeper-immunity-logs:
+    driver: local
+  kafka-immunity-data:
+    driver: local
+  postgres-immunity-data:
+    driver: local
+  wargaming_logs:
     driver: local
   # Sandbox (optional)
   # cuckoo-data:
