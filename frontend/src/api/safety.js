@@ -167,13 +167,13 @@ export const connectSafetyWebSocket = (onMessage, onError) => {
  */
 export const formatSeverity = (severity) => {
   const severityMap = {
-    normal: { label: 'Normal', color: '#4ade80' },      // green
-    warning: { label: 'Warning', color: '#fbbf24' },    // yellow
-    critical: { label: 'Critical', color: '#f97316' },  // orange
-    emergency: { label: 'EMERGENCY', color: '#ef4444' } // red
+    normal: { label: 'Normal', color: '#4ade80', className: 'text-success', borderClass: 'border-success' },
+    warning: { label: 'Warning', color: '#fbbf24', className: 'text-warning', borderClass: 'border-warning' },
+    critical: { label: 'Critical', color: '#f97316', className: 'text-high', borderClass: 'border-high' },
+    emergency: { label: 'EMERGENCY', color: '#ef4444', className: 'text-critical', borderClass: 'border-critical' }
   };
 
-  return severityMap[severity.toLowerCase()] || { label: severity, color: '#6b7280' };
+  return severityMap[severity.toLowerCase()] || { label: severity, color: '#6b7280', className: 'text-muted', borderClass: 'border-low' };
 };
 
 /**

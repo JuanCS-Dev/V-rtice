@@ -141,7 +141,7 @@ export const ImmuneEnhancementWidget = () => {
               }}
             />
             {inputError && (
-              <div style={{ color: '#ff4444', marginBottom: '12px', fontSize: '14px' }}>
+              <div className="text-critical" style={{ marginBottom: '12px', fontSize: '14px' }}>
                 ⚠️ {inputError}
               </div>
             )}

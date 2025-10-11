@@ -407,3 +407,117 @@
 .metrics-grid {
   margin-top: var(--spacing-md);
 }
+
+/* ========================================
+   LEGEND DOTS (for maps, charts, etc)
+   ======================================== */
+
+.legend-dot,
+.legend-dot-critical {
+  background: var(--color-critical);
+}
+
+.legend-dot-high {
+  background: var(--color-high);
+}
+
+.legend-dot-medium {
+  background: var(--color-medium);
+}
+
+.legend-dot-low {
+  background: var(--color-low);
+}
+
+.legend-dot-safe,
+.legend-dot-success {
+  background: var(--color-accent-success);
+}
+
+.legend-dot-info {
+  background: var(--color-accent-info);
+}
+
+.legend-dot-warning {
+  background: var(--color-accent-warning);
+}
+
+.legend-dot-tor {
+  background: var(--color-accent-info);
+}
+
+.legend-dot-malicious {
+  background: var(--color-critical);
+}
+
+/* ========================================
+   BORDER COLOR UTILITIES
+   ======================================== */
+
+.border-critical {
+  border-color: var(--color-critical);
+}
+
+.border-high {
+  border-color: var(--color-high);
+}
+
+.border-medium {
+  border-color: var(--color-medium);
+}
+
+.border-low {
+  border-color: var(--color-low);
+}
+
+.border-success {
+  border-color: var(--color-accent-success);
+}
+
+.border-warning {
+  border-color: var(--color-accent-warning);
+}
+
+.border-info {
+  border-color: var(--color-accent-info);
+}
+
+.border-error {
+  border-color: var(--color-accent-error);
+}
+
+/* ========================================
+   BACKGROUND COLOR UTILITIES
+   ======================================== */
+
+.bg-critical {
+  background-color: var(--color-critical);
+}
+
+.bg-high {
+  background-color: var(--color-high);
+}
+
+.bg-medium {
+  background-color: var(--color-medium);
+}
+
+.bg-low {
+  background-color: var(--color-low);
+}
+
+.bg-success {
+  background-color: var(--color-accent-success);
+}
+
+.bg-warning {
+  background-color: var(--color-accent-warning);
+}
+
+.bg-info {
+  background-color: var(--color-accent-info);
+}
+
+.bg-error {
+  background-color: var(--color-accent-error);
+}

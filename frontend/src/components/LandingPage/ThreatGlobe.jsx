@@ -332,19 +332,19 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       {/* Legend */}
       <div className="globe-legend">
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#ff0040' }}></span>
+          <span className="legend-dot legend-dot-critical"></span>
           <span>Malicious</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#ff6600' }}></span>
+          <span className="legend-dot legend-dot-high"></span>
           <span>Suspicious</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#ffaa00' }}></span>
+          <span className="legend-dot legend-dot-warning"></span>
           <span>Questionable</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#00ff88' }}></span>
+          <span className="legend-dot legend-dot-success"></span>
           <span>Clean</span>
         </div>
       </div>

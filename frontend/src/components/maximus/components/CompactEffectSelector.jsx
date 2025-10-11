@@ -129,7 +129,7 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
               <span style={{ fontSize: '1rem' }}>{effect.icon}</span>
               <span>{effect.title}</span>
               {currentEffect === effect.id && (
-                <span style={{ marginLeft: 'auto', color: '#10B981' }}>✓</span>
+                <span style={{ marginLeft: 'auto' }} className="text-success">✓</span>
               )}
             </button>
           ))}

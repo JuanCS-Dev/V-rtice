@@ -230,7 +230,7 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
         </div>
 
         <div className="header-right">
-          <div className="arousal-badge" style={{ borderColor: arousalInfo.color }}>
+          <div className={`arousal-badge ${arousalInfo.borderClass}`}>
             <span className="arousal-emoji">{arousalInfo.emoji}</span>
             <div className="arousal-info">
               <div className="arousal-label">{arousalInfo.label}</div>

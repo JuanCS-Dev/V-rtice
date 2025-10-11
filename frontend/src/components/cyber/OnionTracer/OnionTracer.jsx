@@ -473,23 +473,23 @@ export const OnionTracer = ({
         <h4 className={styles.legendTitle}>LEGEND</h4>
         <div className={styles.legendItems}>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#00ff88' }} />
+            <span className={`${styles.legendDot} legend-dot-success`} />
             <span className={styles.legendLabel}>Origin (You)</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#00d9ff' }} />
+            <span className={`${styles.legendDot} legend-dot-info`} />
             <span className={styles.legendLabel}>Entry Node</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#ffaa00' }} />
+            <span className={`${styles.legendDot} legend-dot-warning`} />
             <span className={styles.legendLabel}>Middle Relay</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#ff00aa' }} />
+            <span className={`${styles.legendDot} legend-dot-medium`} />
             <span className={styles.legendLabel}>Exit Node</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#ff3366' }} />
+            <span className={`${styles.legendDot} legend-dot-critical`} />
             <span className={styles.legendLabel}>Real Location</span>
           </div>
         </div>

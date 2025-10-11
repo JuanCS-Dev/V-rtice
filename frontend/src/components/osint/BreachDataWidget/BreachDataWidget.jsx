@@ -33,7 +33,7 @@ export const BreachDataWidget = () => {
   return (
     <Card
       title="BREACH DATA SEARCH"
-      badge={<span style={{color: 'var(--color-critical)'}}>12B+ RECORDS</span>}
+      badge={<span className="text-critical">12B+ RECORDS</span>}
       variant="critical"
     >
       <div className={styles.container}>
@@ -52,14 +52,14 @@ export const BreachDataWidget = () => {
             <div className={styles.statusBar}>
                 <div className={styles.statusItem}>
                     <span className={styles.label}>STATUS:</span>
-                    <span className={styles.value} style={{ color: result.status === 'success' ? 'var(--color-success)' : 'var(--color-error)' }}>
+                    <span className={`${styles.value} ${result.status === 'success' ? 'text-success' : 'text-error'}`}>
                     {result.status === 'success' ? '✓ SUCCESS' : '✗ FAILED'}
                     </span>
                 </div>
                 {confidenceBadge && (
                     <div className={styles.statusItem}>
                         <span className={styles.label}>CONFIDENCE:</span>
-                        <span className={styles.value} style={{ color: confidenceBadge.color }}>
+                        <span className={`${styles.value} ${confidenceBadge.className}`}>
                         {confidenceBadge.icon} {result.confidence.toFixed(1)}%
                         </span>
                     </div>
@@ -85,23 +85,23 @@ export const BreachDataWidget = () => {
                 </div>
                 <div className={styles.exposureSummary}>
                     <div className={styles.summaryStat}>
-                        <div className={styles.statIcon} style={{ color: 'var(--color-critical)' }}><i className="fas fa-database"></i></div>
+                        <div className={`${styles.statIcon} text-critical`}><i className="fas fa-database"></i></div>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>{result.breaches_found || 0}</span>
                             <span className={styles.statLabel}>Breaches</span>
                         </div>
                     </div>
                     <div className={styles.summaryStat}>
-                        <div className={styles.statIcon} style={{ color: 'var(--color-high)' }}><i className="fas fa-key"></i></div>
+                        <div className={`${styles.statIcon} text-high`}><i className="fas fa-key"></i></div>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>{result.total_exposures || 0}</span>
                             <span className={styles.statLabel}>Exposições</span>
                         </div>
                     </div>
                     <div className={styles.summaryStat}>
-                        <div className={styles.statIcon} style={{ color: result.credentials_exposed ? 'var(--color-critical)' : 'var(--color-success)' }}><i className={`fas ${result.credentials_exposed ? 'fa-unlock' : 'fa-lock'}`}></i></div>
+                        <div className={`${styles.statIcon} ${result.credentials_exposed ? 'text-critical' : 'text-success'}`}><i className={`fas ${result.credentials_exposed ? 'fa-unlock' : 'fa-lock'}`}></i></div>
                         <div className={styles.statContent}>
-                            <span className={styles.statValue} style={{ color: result.credentials_exposed ? 'var(--color-critical)' : 'var(--color-success)' }}>{result.credentials_exposed ? 'SIM' : 'NÃO'}</span>
+                            <span className={`${styles.statValue} ${result.credentials_exposed ? 'text-critical' : 'text-success'}`}>{result.credentials_exposed ? 'SIM' : 'NÃO'}</span>
                             <span className={styles.statLabel}>Credenciais Vazadas</span>
                         </div>
                     </div>

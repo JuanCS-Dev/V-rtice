@@ -384,6 +384,8 @@ export const LandingPage = ({ setCurrentView }) => {
             onClick={(e) => {
               if (e.target.classList.contains('login-modal-content')) {
                 setShowLoginModal(false);
+              } else {
+                e.stopPropagation();
               }
             }}
             onKeyDown={(e) => {
@@ -403,7 +405,6 @@ export const LandingPage = ({ setCurrentView }) => {
               position: 'relative',
               overflow: 'hidden'
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             <div style={{
               textAlign: 'center',

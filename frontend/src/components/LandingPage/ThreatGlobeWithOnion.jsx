@@ -410,23 +410,23 @@ export const ThreatGlobeWithOnion = ({ realThreats = [] }) => {
       {/* Legend */}
       <div className="globe-legend">
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#00ff88' }}></span>
+          <span className="legend-dot legend-dot-success"></span>
           <span>Origin</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#00d9ff' }}></span>
+          <span className="legend-dot legend-dot-info"></span>
           <span>Entry Node</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#ffaa00' }}></span>
+          <span className="legend-dot legend-dot-warning"></span>
           <span>Middle Relay</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#ff00aa' }}></span>
+          <span className="legend-dot legend-dot-medium"></span>
           <span>Exit Node</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#ff3366' }}></span>
+          <span className="legend-dot legend-dot-critical"></span>
           <span>Target</span>
         </div>
       </div>

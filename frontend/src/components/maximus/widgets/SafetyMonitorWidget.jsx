@@ -208,6 +208,8 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         value: violationsTotal,
         subtitle: 'All time',
         color: violationsTotal > 0 ? '#f97316' : '#4ade80',
+        borderClass: violationsTotal > 0 ? 'border-warning' : 'border-success',
+        textClass: violationsTotal > 0 ? 'text-warning' : 'text-success',
         icon: '⚠️'
       },
       {
@@ -215,6 +217,8 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         value: (violationsBySeverity.critical || 0) + (violationsBySeverity.emergency || 0),
         subtitle: 'High severity',
         color: violationsBySeverity.emergency > 0 ? '#ef4444' : '#fbbf24',
+        borderClass: violationsBySeverity.emergency > 0 ? 'border-critical' : 'border-warning',
+        textClass: violationsBySeverity.emergency > 0 ? 'text-critical' : 'text-warning',
         icon: '🚨'
       },
       {
@@ -222,6 +226,8 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         value: safetyStatus.kill_switch_active ? 'ACTIVE' : 'ARMED',
         subtitle: '<1s response',
         color: safetyStatus.kill_switch_active ? '#ef4444' : '#4ade80',
+        borderClass: safetyStatus.kill_switch_active ? 'border-critical' : 'border-success',
+        textClass: safetyStatus.kill_switch_active ? 'text-critical' : 'text-success',
         icon: '🔴'
       },
       {
@@ -229,6 +235,8 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         value: formatUptime(uptime),
         subtitle: 'System running',
         color: '#06b6d4',
+        borderClass: 'border-info',
+        textClass: 'text-info',
         icon: '⏱️'
       }
     ];
@@ -236,12 +244,12 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
     return (
       <div className="safety-metrics-grid">
         {metricsCards.map((card, index) => (
-          <div key={index} className="safety-metric-card" style={{ borderColor: card.color }}>
+          <div key={index} className={`safety-metric-card ${card.borderClass}`}>
             <div className="metric-header">
               <span className="metric-icon">{card.icon}</span>
               <span className="metric-title">{card.title}</span>
             </div>
-            <div className="metric-value" style={{ color: card.color }}>
+            <div className={`metric-value ${card.textClass}`}>
               {card.value}
             </div>
             <div className="metric-subtitle">{card.subtitle}</div>
@@ -325,11 +333,10 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
             return (
               <div
                 key={index}
-                className="violation-item"
-                style={{ borderLeftColor: severity.color }}
+                className={`violation-item ${severity.borderClass}`}
               >
                 <div className="violation-header">
-                  <span className="violation-severity" style={{ color: severity.color }}>
+                  <span className={`violation-severity ${severity.className}`}>
                     {severity.label.toUpperCase()}
                   </span>
                   <span className="violation-time" title={timestamp}>
