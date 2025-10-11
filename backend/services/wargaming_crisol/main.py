@@ -155,7 +155,29 @@ async def execute_wargaming(request: WargamingRequest):
         apv = Mock()
         apv.apv_id = request.apv_id
         apv.cve_id = request.cve_id or f"CVE-{request.apv_id}"
-        apv.cwe_ids = ["CWE-89"]  # Example
+        
+        # Extract CWE from CVE ID pattern (CVE-2024-SQL-INJECTION → CWE-89)
+        cwe_mapping = {
+            "SQL": "CWE-89",
+            "XSS": "CWE-79",
+            "CMD": "CWE-78",
+            "COMMAND": "CWE-78",
+            "PATH": "CWE-22",
+            "SSRF": "CWE-918",
+        }
+        
+        cve_upper = apv.cve_id.upper()
+        apv.cwe_ids = []
+        for keyword, cwe_id in cwe_mapping.items():
+            if keyword in cve_upper:
+                apv.cwe_ids.append(cwe_id)
+                break
+        
+        if not apv.cwe_ids:
+            # Fallback to CWE-89 if no match
+            apv.cwe_ids = ["CWE-89"]
+        
+        logger.info(f"✓ Detected CWE: {apv.cwe_ids[0]} from {apv.cve_id}")
         
         # Mock Patch
         patch = Mock()

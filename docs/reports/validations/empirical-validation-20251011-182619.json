@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-10-11T18:26:19.262227",
+  "total_tests": 5,
+  "successful": 0,
+  "failed": 5,
+  "success_rate": 0.0,
+  "avg_duration_seconds": 0.028772449493408202,
+  "results": [
+    {
+      "cve_id": "CVE-2024-SQL-INJECTION",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": true,
+      "duration_seconds": 0.034821271896362305,
+      "error": null
+    },
+    {
+      "cve_id": "CVE-2024-XSS",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": true,
+      "duration_seconds": 0.026839017868041992,
+      "error": null
+    },
+    {
+      "cve_id": "CVE-2024-CMD-INJECTION",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": true,
+      "duration_seconds": 0.029593467712402344,
+      "error": null
+    },
+    {
+      "cve_id": "CVE-2024-PATH-TRAVERSAL",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": true,
+      "duration_seconds": 0.026389598846435547,
+      "error": null
+    },
+    {
+      "cve_id": "CVE-2024-SSRF",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": true,
+      "duration_seconds": 0.026218891143798828,
+      "error": null
+    }
+  ]
+}
