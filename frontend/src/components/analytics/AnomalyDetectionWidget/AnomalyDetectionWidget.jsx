@@ -68,14 +68,14 @@ export const AnomalyDetectionWidget = () => {
                         <div className={styles.statusBar}>
                             <div className={styles.statusItem}>
                                 <span className={styles.label}>STATUS:</span>
-                                <span className={styles.value} style={{ color: result.status === 'success' ? 'var(--color-success)' : 'var(--color-error)' }}>
+                                <span className={`${styles.value} ${result.status === 'success' ? 'text-success' : 'text-error'}`}>
                                 {result.status === 'success' ? '✓ SUCCESS' : '✗ FAILED'}
                                 </span>
                             </div>
                             {confidenceBadge && (
                                 <div className={styles.statusItem}>
                                     <span className={styles.label}>CONFIDENCE:</span>
-                                    <span className={styles.value} style={{ color: confidenceBadge.color }}>
+                                    <span className={`${styles.value} ${confidenceBadge.className}`}>
                                     {confidenceBadge.icon} {result.confidence.toFixed(1)}%
                                     </span>
                                 </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import { handleKeyboardClick } from '../utils/accessibility';
 
 const ModalOcorrencias = ({ ocorrencias, onClose }) => {
   const modalRef = useFocusTrap({
@@ -15,16 +14,12 @@ const ModalOcorrencias = ({ ocorrencias, onClose }) => {
     // Overlay de fundo
     <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
-      onClick={onClose}
-      onKeyDown={handleKeyboardClick(onClose)}
       role="presentation"
     >
       {/* Container do Modal */}
       <div
         ref={modalRef}
         className="bg-gray-900 border border-green-400/50 w-full max-w-4xl h-[80vh] rounded-lg shadow-lg flex flex-col animate-slide-up"
-        onClick={e => e.stopPropagation()} // Impede que o clique dentro do modal o feche
-        onKeyDown={handleKeyboardClick(e => e.stopPropagation())}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-occurrences-title"

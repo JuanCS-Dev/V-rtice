@@ -117,19 +117,19 @@ const DefensiveSidebar = ({ alerts }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
             <span>Critical Alerts:</span>
-            <span style={{ color: '#ef4444', fontWeight: 'bold' }}>
+            <span className='text-danger font-bold'>
               {alerts.filter(a => a.severity === 'critical').length}
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
             <span>High Priority:</span>
-            <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>
+            <span className='text-warning font-bold'>
               {alerts.filter(a => a.severity === 'high').length}
             </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
             <span>Last Hour:</span>
-            <span style={{ color: '#00f0ff', fontWeight: 'bold' }}>
+            <span className='text-info font-bold'>
               {alerts.filter(a => {
                 const alertTime = new Date(a.timestamp);
                 const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);

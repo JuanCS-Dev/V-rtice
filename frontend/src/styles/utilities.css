@@ -1,0 +1,523 @@
+/**
+ * Utility Classes - VÉRTICE Platform
+ * ==================================
+ * Reusable utility classes following enterprise tokens
+ * NO inline styles - use these classes instead
+ */
+
+/* ========================================
+   TEXT COLOR UTILITIES (Semantic)
+   ======================================== */
+
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-tertiary {
+  color: var(--color-text-tertiary);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-disabled {
+  color: var(--color-text-disabled);
+}
+
+.text-inverse {
+  color: var(--color-text-inverse);
+}
+
+.text-link {
+  color: var(--color-text-link);
+}
+
+.text-link:hover {
+  color: var(--color-text-link-hover);
+}
+
+/* ========================================
+   STATUS COLOR UTILITIES
+   ======================================== */
+
+.text-success {
+  color: var(--color-accent-success);
+}
+
+.text-warning {
+  color: var(--color-accent-warning);
+}
+
+.text-danger,
+.text-error,
+.text-critical {
+  color: var(--color-accent-danger);
+}
+
+.text-info {
+  color: var(--color-accent-info);
+}
+
+.text-analytics-primary {
+  color: var(--color-analytics-primary);
+}
+
+/* Background variants */
+.bg-success {
+  background-color: var(--color-success-bg);
+  color: var(--color-accent-success);
+}
+
+.bg-warning {
+  background-color: var(--color-warning-bg);
+  color: var(--color-accent-warning);
+}
+
+.bg-danger,
+.bg-error,
+.bg-critical {
+  background-color: var(--color-critical-bg);
+  color: var(--color-accent-danger);
+}
+
+.bg-info {
+  background-color: var(--color-status-info-bg);
+  color: var(--color-accent-info);
+}
+
+/* ========================================
+   METRIC VALUE UTILITIES
+   Used for dashboard metrics
+   ======================================== */
+
+.metric-value-success {
+  color: var(--color-accent-success);
+  font-weight: var(--font-weight-semibold);
+}
+
+.metric-value-warning {
+  color: var(--color-accent-warning);
+  font-weight: var(--font-weight-semibold);
+}
+
+.metric-value-danger,
+.metric-value-error,
+.metric-value-critical {
+  color: var(--color-accent-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+.metric-value-info {
+  color: var(--color-accent-info);
+  font-weight: var(--font-weight-semibold);
+}
+
+.metric-value-primary {
+  color: var(--color-accent-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ========================================
+   BADGE UTILITIES
+   ======================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+
+.badge-success {
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-text);
+}
+
+.badge-warning {
+  background-color: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+}
+
+.badge-error,
+.badge-danger {
+  background-color: var(--badge-error-bg);
+  color: var(--badge-error-text);
+}
+
+.badge-info {
+  background-color: var(--badge-info-bg);
+  color: var(--badge-info-text);
+}
+
+/* ========================================
+   ICON COLOR UTILITIES
+   For stat icons, indicators, etc
+   ======================================== */
+
+.icon-success {
+  color: var(--color-accent-success);
+}
+
+.icon-warning {
+  color: var(--color-accent-warning);
+}
+
+.icon-danger,
+.icon-error,
+.icon-critical {
+  color: var(--color-accent-danger);
+}
+
+.icon-info {
+  color: var(--color-accent-info);
+}
+
+.icon-primary {
+  color: var(--color-accent-primary);
+}
+
+.icon-analytics {
+  color: var(--color-analytics-primary);
+}
+
+/* ========================================
+   CONFIDENCE BADGE COLORS
+   Dynamic confidence indicators
+   ======================================== */
+
+.confidence-high {
+  color: var(--color-accent-success);
+}
+
+.confidence-medium {
+  color: var(--color-accent-warning);
+}
+
+.confidence-low {
+  color: var(--color-accent-danger);
+}
+
+/* ========================================
+   THREAT LEVEL UTILITIES
+   ======================================== */
+
+.threat-critical {
+  color: var(--color-accent-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+.threat-high {
+  color: #ff6b35;  /* Orange-red */
+  font-weight: var(--font-weight-semibold);
+}
+
+.threat-medium {
+  color: var(--color-accent-warning);
+  font-weight: var(--font-weight-medium);
+}
+
+.threat-low {
+  color: var(--color-accent-info);
+}
+
+.threat-safe,
+.threat-clean {
+  color: var(--color-accent-success);
+}
+
+/* ========================================
+   MALICIOUS/BENIGN INDICATORS
+   ======================================== */
+
+.malicious {
+  color: var(--color-accent-danger);
+}
+
+.benign,
+.safe,
+.clean {
+  color: var(--color-accent-success);
+}
+
+.suspicious {
+  color: var(--color-accent-warning);
+}
+
+/* ========================================
+   SPACING UTILITIES
+   ======================================== */
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mt-5 { margin-top: var(--spacing-xl); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+.mb-5 { margin-bottom: var(--spacing-xl); }
+
+.ml-0 { margin-left: 0; }
+.ml-1 { margin-left: var(--spacing-xs); }
+.ml-2 { margin-left: var(--spacing-sm); }
+.ml-3 { margin-left: var(--spacing-md); }
+.ml-4 { margin-left: var(--spacing-lg); }
+
+.mr-0 { margin-right: 0; }
+.mr-1 { margin-right: var(--spacing-xs); }
+.mr-2 { margin-right: var(--spacing-sm); }
+.mr-3 { margin-right: var(--spacing-md); }
+.mr-4 { margin-right: var(--spacing-lg); }
+
+.m-0 { margin: 0; }
+.m-1 { margin: var(--spacing-xs); }
+.m-2 { margin: var(--spacing-sm); }
+.m-3 { margin: var(--spacing-md); }
+.m-4 { margin: var(--spacing-lg); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+
+/* ========================================
+   OPACITY UTILITIES
+   ======================================== */
+
+.opacity-0 { opacity: 0; }
+.opacity-10 { opacity: 0.1; }
+.opacity-20 { opacity: 0.2; }
+.opacity-30 { opacity: 0.3; }
+.opacity-40 { opacity: 0.4; }
+.opacity-50 { opacity: 0.5; }
+.opacity-60 { opacity: 0.6; }
+.opacity-70 { opacity: 0.7; }
+.opacity-80 { opacity: 0.8; }
+.opacity-90 { opacity: 0.9; }
+.opacity-100 { opacity: 1; }
+
+/* ========================================
+   FONT WEIGHT UTILITIES
+   ======================================== */
+
+.font-light { font-weight: var(--font-weight-light); }
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+/* ========================================
+   BORDER UTILITIES
+   ======================================== */
+
+.border-default {
+  border: 1px solid var(--color-border);
+}
+
+.border-strong {
+  border: 1px solid var(--color-border-strong);
+}
+
+.border-subtle {
+  border: 1px solid var(--color-border-subtle);
+}
+
+.border-hover:hover {
+  border-color: var(--color-border-hover);
+}
+
+.border-focus:focus {
+  border-color: var(--color-border-focus);
+  outline: none;
+}
+
+/* ========================================
+   SHADOW UTILITIES
+   ======================================== */
+
+.shadow-none {
+  box-shadow: var(--elevation-none);
+}
+
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md,
+.shadow {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+
+/* ========================================
+   TRANSITION UTILITIES
+   ======================================== */
+
+.transition-fast {
+  transition: all var(--transition-fast);
+}
+
+.transition-normal,
+.transition {
+  transition: all var(--transition-normal);
+}
+
+.transition-slow {
+  transition: all var(--transition-slow);
+}
+
+.transition-none {
+  transition: none;
+}
+
+/* ========================================
+   CURSOR UTILITIES
+   ======================================== */
+
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+.cursor-wait { cursor: wait; }
+
+/* ========================================
+   SPECIAL UTILITIES
+   ======================================== */
+
+/* Metrics grid - commonly used in dashboards */
+.metrics-grid {
+  margin-top: var(--spacing-md);
+}
+
+/* ========================================
+   LEGEND DOTS (for maps, charts, etc)
+   ======================================== */
+
+.legend-dot,
+.legend-dot-critical {
+  background: var(--color-critical);
+}
+
+.legend-dot-high {
+  background: var(--color-high);
+}
+
+.legend-dot-medium {
+  background: var(--color-medium);
+}
+
+.legend-dot-low {
+  background: var(--color-low);
+}
+
+.legend-dot-safe,
+.legend-dot-success {
+  background: var(--color-accent-success);
+}
+
+.legend-dot-info {
+  background: var(--color-accent-info);
+}
+
+.legend-dot-warning {
+  background: var(--color-accent-warning);
+}
+
+.legend-dot-tor {
+  background: var(--color-accent-info);
+}
+
+.legend-dot-malicious {
+  background: var(--color-critical);
+}
+
+/* ========================================
+   BORDER COLOR UTILITIES
+   ======================================== */
+
+.border-critical {
+  border-color: var(--color-critical);
+}
+
+.border-high {
+  border-color: var(--color-high);
+}
+
+.border-medium {
+  border-color: var(--color-medium);
+}
+
+.border-low {
+  border-color: var(--color-low);
+}
+
+.border-success {
+  border-color: var(--color-accent-success);
+}
+
+.border-warning {
+  border-color: var(--color-accent-warning);
+}
+
+.border-info {
+  border-color: var(--color-accent-info);
+}
+
+.border-error {
+  border-color: var(--color-accent-error);
+}
+
+/* ========================================
+   BACKGROUND COLOR UTILITIES
+   ======================================== */
+
+.bg-critical {
+  background-color: var(--color-critical);
+}
+
+.bg-high {
+  background-color: var(--color-high);
+}
+
+.bg-medium {
+  background-color: var(--color-medium);
+}
+
+.bg-low {
+  background-color: var(--color-low);
+}
+
+.bg-success {
+  background-color: var(--color-accent-success);
+}
+
+.bg-warning {
+  background-color: var(--color-accent-warning);
+}
+
+.bg-info {
+  background-color: var(--color-accent-info);
+}
+
+.bg-error {
+  background-color: var(--color-accent-error);
+}

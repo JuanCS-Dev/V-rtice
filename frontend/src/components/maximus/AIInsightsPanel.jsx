@@ -221,6 +221,16 @@ export const AIInsightsPanel = ({ aiStatus, brainActivity }) => {
               key={workflow.id}
               className={`workflow-card ${selectedWorkflow === workflow.id ? 'workflow-selected' : ''}`}
               onClick={() => setSelectedWorkflow(workflow.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedWorkflow(workflow.id);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-pressed={selectedWorkflow === workflow.id}
+              aria-label={`Select ${workflow.name} workflow`}
               style={{
                 background: 'rgba(30, 27, 75, 0.8)',
                 border: selectedWorkflow === workflow.id ? '2px solid #06B6D4' : '1px solid rgba(6, 182, 212, 0.3)',

@@ -65,16 +65,16 @@ export const DistributedTopologyWidget = () => {
     return () => clearInterval(interval);
   }, [autoRefresh, activeView]);
 
-  const getHealthColor = (health) => {
+  const getHealthClass = (health) => {
     switch (health) {
       case 'healthy':
-        return '#38ef7d';
+        return 'bg-success';
       case 'degraded':
-        return '#ffa500';
+        return 'bg-warning';
       case 'unhealthy':
-        return '#ff4444';
+        return 'bg-critical';
       default:
-        return '#707070';
+        return 'bg-low';
     }
   };
 
@@ -137,8 +137,7 @@ export const DistributedTopologyWidget = () => {
                     <div className="agent-header">
                       <span className="agent-id">{agent.id || `agent-${idx}`}</span>
                       <span
-                        className="health-indicator"
-                        style={{ backgroundColor: getHealthColor(agent.health) }}
+                        className={`health-indicator ${getHealthClass(agent.health)}`}
                       />
                     </div>
                     <div className="agent-info">

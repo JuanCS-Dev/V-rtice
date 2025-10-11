@@ -126,6 +126,16 @@ export const ScanResults = ({ results }) => {
               <div
                 key={idx}
                 onClick={() => setSelectedVuln(selectedVuln === idx ? null : idx)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedVuln(selectedVuln === idx ? null : idx);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-expanded={selectedVuln === idx}
+                aria-label={`${vuln.type} vulnerability - ${severity} severity`}
                 className={`
                   bg-gradient-to-r from-${color}-900/20 to-${color}-900/10 border-2 border-${color}-400/30
                   rounded-lg p-4 hover:border-${color}-400 transition-all cursor-pointer

@@ -129,15 +129,26 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
     );
   }
 
-  const getRiskLevelColor = (level) => {
-    const colors = {
-      critical: '#dc2626',
-      high: '#f59e0b',
-      medium: '#3b82f6',
-      low: '#10b981',
-      minimal: '#6b7280'
+  const getRiskLevelClass = (level) => {
+    const classes = {
+      critical: 'border-critical',
+      high: 'border-high',
+      medium: 'border-info',
+      low: 'border-success',
+      minimal: 'border-low'
     };
-    return colors[level.toLowerCase()] || '#6b7280';
+    return classes[level.toLowerCase()] || 'border-low';
+  };
+
+  const getRiskLevelBgClass = (level) => {
+    const classes = {
+      critical: 'bg-critical',
+      high: 'bg-high',
+      medium: 'bg-info',
+      low: 'bg-success',
+      minimal: 'bg-low'
+    };
+    return classes[level.toLowerCase()] || 'bg-low';
   };
 
   const renderOverview = () => {
@@ -209,10 +220,10 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
           <h3 className="section-title">⚠️ Top Risks</h3>
           <div className="risks-list">
             {risks.slice(0, 5).map(risk => (
-              <div key={risk.risk_id} className="risk-item" style={{ borderLeftColor: getRiskLevelColor(risk.risk_level) }}>
+              <div key={risk.risk_id} className={`risk-item ${getRiskLevelClass(risk.risk_level)}`}>
                 <div className="risk-header">
                   <span className="risk-type">{risk.threat_type}</span>
-                  <span className="risk-level-badge" style={{ backgroundColor: getRiskLevelColor(risk.risk_level) }}>
+                  <span className={`risk-level-badge ${getRiskLevelBgClass(risk.risk_level)}`}>
                     {risk.risk_level.toUpperCase()}
                   </span>
                 </div>
@@ -284,10 +295,10 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
       <h3 className="section-title">⚠️ Risk Assessments ({risks.length})</h3>
       <div className="risks-grid">
         {risks.map(risk => (
-          <div key={risk.risk_id} className="risk-card" style={{ borderTopColor: getRiskLevelColor(risk.risk_level) }}>
+          <div key={risk.risk_id} className={`risk-card ${getRiskLevelClass(risk.risk_level)}`}>
             <div className="risk-card-header">
               <h4 className="risk-threat-type">{risk.threat_type}</h4>
-              <span className="risk-level-badge" style={{ backgroundColor: getRiskLevelColor(risk.risk_level) }}>
+              <span className={`risk-level-badge ${getRiskLevelBgClass(risk.risk_level)}`}>
                 {risk.risk_level.toUpperCase()}
               </span>
             </div>

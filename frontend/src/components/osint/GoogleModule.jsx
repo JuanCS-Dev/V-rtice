@@ -225,10 +225,14 @@ const GoogleModule = () => {
         <div className="space-y-4 mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2">
+              <label 
+                htmlFor="investigation-type-select"
+                className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2"
+              >
                 TIPO DE INVESTIGAÇÃO
               </label>
               <select
+                id="investigation-type-select"
                 className="w-full bg-black/70 border border-purple-400/50 text-purple-400 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20"
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
@@ -242,10 +246,15 @@ const GoogleModule = () => {
             </div>
 
             <div>
-              <label className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2">
+              <div 
+                id="search-mode-group"
+                className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2"
+                role="group"
+                aria-label="Modo de busca"
+              >
                 MODO DE BUSCA
-              </label>
-              <div className="flex space-x-2">
+              </div>
+              <div className="flex space-x-2" role="group" aria-labelledby="search-mode-group">
                 <button
                   className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
                     !advanced
@@ -271,10 +280,14 @@ const GoogleModule = () => {
           </div>
 
           <div>
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2">
+            <label 
+              htmlFor="investigation-target-input"
+              className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2"
+            >
               ALVO DA INVESTIGAÇÃO
             </label>
             <input
+              id="investigation-target-input"
               className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono text-lg"
               placeholder={
                 advanced

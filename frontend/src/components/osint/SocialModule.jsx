@@ -146,11 +146,15 @@ const SocialModule = () => {
               <div className="bg-black/40 border border-purple-400/30 rounded-lg p-4">
                 <h4 className="text-purple-400 font-medium mb-2">🖼️ Foto do Perfil</h4>
                 <div className="flex items-center space-x-4">
+                  {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
                   <img
                     src={result.profile_data.profile_pic_url}
                     alt="Profile"
                     className="w-20 h-20 rounded-full border border-purple-400/30"
-                    onError={(e) => {e.target.style.display = 'none'}}
+                    onError={(e) => {
+                      const target = e.target;
+                      target.style.display = 'none';
+                    }}
                   />
                   <div className="text-xs text-purple-300 break-all">
                     {result.profile_data.profile_pic_url}

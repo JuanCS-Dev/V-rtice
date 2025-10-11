@@ -41,30 +41,30 @@ const DefensiveHeader = React.memo(({
       </div>
 
       {/* Real-time Metrics */}
-      <div className="metrics-grid" style={{ marginTop: '1rem' }}>
+      <div className="metrics-grid">
         <div className="metric-card">
-          <div className="metric-value" style={{ color: '#ef4444' }}>
+          <div className="metric-value metric-value-danger">
             {metricsLoading ? '...' : metrics.threats}
           </div>
           <div className="metric-label">{t('dashboard.defensive.metrics.threats')}</div>
         </div>
 
         <div className="metric-card">
-          <div className="metric-value" style={{ color: '#f59e0b' }}>
+          <div className="metric-value metric-value-warning">
             {metricsLoading ? '...' : metrics.suspiciousIPs}
           </div>
           <div className="metric-label">{t('dashboard.defensive.metrics.suspiciousIPs')}</div>
         </div>
 
         <div className="metric-card">
-          <div className="metric-value" style={{ color: '#f59e0b' }}>
+          <div className="metric-value metric-value-warning">
             {metricsLoading ? '...' : metrics.domains}
           </div>
           <div className="metric-label">{t('dashboard.defensive.metrics.domains')}</div>
         </div>
 
         <div className="metric-card">
-          <div className="metric-value" style={{ color: '#00f0ff' }}>
+          <div className="metric-value metric-value-info">
             {metricsLoading ? '...' : metrics.monitored}
           </div>
           <div className="metric-label">{t('dashboard.defensive.metrics.monitored')}</div>

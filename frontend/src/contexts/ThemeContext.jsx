@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 // frontend/src/contexts/ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { themes, applyTheme, getCurrentTheme } from '../themes';
+import { themes, themeCategories, applyTheme, getCurrentTheme } from '../themes';
 
 const ThemeContext = createContext(undefined);
 
@@ -14,11 +14,12 @@ const ThemeContext = createContext(undefined);
 export const ThemeProvider = ({ children }) => {
   const [currentTheme, setCurrentTheme] = useState(getCurrentTheme());
   const [availableThemes] = useState(themes);
+  const [categories] = useState(themeCategories);
 
   // Aplica tema inicial na montagem
   useEffect(() => {
     applyTheme(currentTheme);
-  }, []);
+  }, [currentTheme]);
 
   /**
    * Troca o tema ativo
@@ -41,11 +42,25 @@ export const ThemeProvider = ({ children }) => {
     return themes.find(t => t.id === currentTheme) || themes[0];
   };
 
+  /**
+   * Agrupa temas por categoria
+   * @returns {Object} Themes grouped by category
+   */
+  const getThemesByCategory = () => {
+    const grouped = {};
+    Object.keys(categories).forEach(catId => {
+      grouped[catId] = themes.filter(t => t.category === catId);
+    });
+    return grouped;
+  };
+
   const value = {
     currentTheme,
     availableThemes,
+    categories,
     changeTheme,
-    getThemeData
+    getThemeData,
+    getThemesByCategory
   };
 
   return (

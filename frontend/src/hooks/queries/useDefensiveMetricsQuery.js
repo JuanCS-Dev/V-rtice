@@ -100,7 +100,7 @@ export const useDefensiveMetricsQuery = (options = {}) => {
  * Hook to manually refetch defensive metrics
  */
 export const useRefetchDefensiveMetrics = () => {
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   return () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.defensiveMetrics });
@@ -111,6 +111,6 @@ export const useRefetchDefensiveMetrics = () => {
  * Hook to get cached defensive metrics without fetching
  */
 export const useCachedDefensiveMetrics = () => {
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   return queryClient.getQueryData(queryKeys.defensiveMetrics);
 };

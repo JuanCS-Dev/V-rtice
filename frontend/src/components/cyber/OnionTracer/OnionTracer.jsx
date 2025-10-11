@@ -51,7 +51,7 @@ export const OnionTracer = ({
   const [status, setStatus] = useState('READY');
   const [statusMessage, setStatusMessage] = useState('Ready to trace...');
   const [progress, setProgress] = useState(0);
-  const [_packets, _setPackets] = useState([]);
+  const [_packets, setPackets] = useState([]);
   const [realIp, setRealIp] = useState(null);
 
   const traceIntervalRef = useRef(null);
@@ -60,7 +60,7 @@ export const OnionTracer = ({
   /**
    * Gera rota de nós Tor fake (mas realista)
    */
-  const generateOnionRoute = useCallback(() => {
+  const _generateOnionRoute = useCallback(() => {
     // Localizações reais de exit nodes Tor conhecidos
     const possibleNodes = [
       { city: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821, type: 'entry' },
@@ -252,7 +252,7 @@ export const OnionTracer = ({
       setNodes([]);
     }
 
-  }, [targetIp, onTraceComplete, generateOnionRoute]);
+  }, [targetIp, onTraceComplete]);
 
   /**
    * Para trace
@@ -273,13 +273,16 @@ export const OnionTracer = ({
    * Auto-start se configurado
    */
   useEffect(() => {
+    const traceInterval = traceIntervalRef.current;
+    const packetInterval = packetIntervalRef.current;
+    
     if (autoStart) {
       startTrace();
     }
 
     return () => {
-      if (traceIntervalRef.current) clearInterval(traceIntervalRef.current);
-      if (packetIntervalRef.current) clearInterval(packetIntervalRef.current);
+      if (traceInterval) clearInterval(traceInterval);
+      if (packetInterval) clearInterval(packetInterval);
     };
   }, [autoStart, startTrace]);
 
@@ -453,7 +456,7 @@ export const OnionTracer = ({
                   {node.isMalicious !== undefined && (
                     <>
                       <br />
-                      <small style={{ color: node.isMalicious ? '#ff3366' : '#00ff88' }}>
+                      <small className={node.isMalicious ? 'malicious' : 'safe'}>
                         {node.isMalicious ? '⚠️ MALICIOUS' : '✓ CLEAN'}
                       </small>
                     </>
@@ -470,23 +473,23 @@ export const OnionTracer = ({
         <h4 className={styles.legendTitle}>LEGEND</h4>
         <div className={styles.legendItems}>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#00ff88' }} />
+            <span className={`${styles.legendDot} legend-dot-success`} />
             <span className={styles.legendLabel}>Origin (You)</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#00d9ff' }} />
+            <span className={`${styles.legendDot} legend-dot-info`} />
             <span className={styles.legendLabel}>Entry Node</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#ffaa00' }} />
+            <span className={`${styles.legendDot} legend-dot-warning`} />
             <span className={styles.legendLabel}>Middle Relay</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#ff00aa' }} />
+            <span className={`${styles.legendDot} legend-dot-medium`} />
             <span className={styles.legendLabel}>Exit Node</span>
           </div>
           <div className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ backgroundColor: '#ff3366' }} />
+            <span className={`${styles.legendDot} legend-dot-critical`} />
             <span className={styles.legendLabel}>Real Location</span>
           </div>
         </div>
@@ -532,7 +535,7 @@ export const OnionTracer = ({
                 <span className={styles.resultLabel}>Threat Score:</span>
                 <span
                   className={styles.resultValue}
-                  style={{ color: realIp.threatScore > 60 ? '#ff3366' : '#00ff88' }}
+                  className={realIp.threatScore > 60 ? 'threat-high' : 'threat-safe'}
                 >
                   {realIp.threatScore}/100
                 </span>
@@ -559,7 +562,7 @@ export const OnionTracer = ({
                 <span className={styles.resultLabel}>Status:</span>
                 <span
                   className={styles.resultValue}
-                  style={{ color: realIp.isMalicious ? '#ff3366' : '#00ff88', fontWeight: 'bold' }}
+                  className={realIp.isMalicious ? 'malicious font-bold' : 'safe font-bold'}
                 >
                   {realIp.isMalicious ? '⚠️ MALICIOUS DETECTED' : '✓ CLEAN'}
                 </span>

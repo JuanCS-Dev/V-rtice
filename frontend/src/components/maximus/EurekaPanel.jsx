@@ -1,478 +1,546 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
- * EUREKA PANEL - Deep Malware Analysis Interface
+ * 🦠 EUREKA PANEL - CÉLULAS T EFETORAS DO ACTIVE IMMUNE SYSTEM
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Interface para análise profunda de malware:
- * - Upload e análise de arquivos suspeitos
- * - Detecção de padrões maliciosos (40+ patterns)
- * - Extração de IOCs (IPs, domains, hashes, etc.)
- * - Geração de playbooks de resposta
- * - Visualização de resultados de análise
+ * BIOLOGICAL ANALOGY: Células T (T cells) do sistema imune adaptativo
+ * - Recebem antígenos processados de células dendríticas (Oráculo)
+ * - Diferenciam-se em células efetoras que eliminam patógenos
+ * - Geram resposta específica, precisa e memorizada
+ *
+ * DIGITAL IMPLEMENTATION: Resposta Automatizada de Vulnerabilidades
+ * 
+ * FASE 3: Formulação de Resposta
+ * FASE 4: Crisol de Wargaming  
+ * FASE 5: Interface HITL (Human-in-the-Loop)
+ *
+ * KPIs: Auto-Remediation 70%+, Patch Validation 100%, MTTP <15min
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 import './Panels.css';
+import './AdaptiveImmunity.css';
 
 export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
-  const [analysisMode, setAnalysisMode] = useState('upload'); // 'upload' or 'results'
-  const [_selectedFile, _setSelectedFile] = useState(null);
-  const [filePath, setFilePath] = useState('');
-  const [generatePlaybook, setGeneratePlaybook] = useState(true);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState(null);
+  // STATE
+  const [viewMode, setViewMode] = useState('dashboard');
   const [stats, setStats] = useState({
-    totalAnalyses: 0,
-    threatsDetected: 0,
-    playbooksGenerated: 0,
-    avgThreatScore: 0
+    totalRemediations: 0,
+    successfulPatches: 0,
+    prsGenerated: 0,
+    avgTimeToRemedy: 0,
+    autoRemediationRate: 0,
+    regressionTestPassRate: 0,
+    patchValidationRate: 0,
+    wargamingSuccessRate: 0,
+    falsePositiveRate: 0,
+    lastRemediationTime: null
   });
-  const [patterns, setPatterns] = useState([]);
+  const [pendingApvs, setPendingApvs] = useState([]);
+  const [remediationHistory, setRemediationHistory] = useState([]);
+  const [pullRequests, setPullRequests] = useState([]);
+  const [selectedApv, setSelectedApv] = useState(null);
+  const [isRemediating, setIsRemediating] = useState(false);
+  const [wargamingResults, setWargamingResults] = useState(null);
+  const [liveWargaming, setLiveWargaming] = useState(null);
 
-  // Fetch Eureka stats
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('http://localhost:8099/api/v1/eureka/stats');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success') {
-            setStats(data.data);
-          }
-        }
-      } catch (error) {
-        logger.error('Failed to fetch Eureka stats:', error);
+  // DATA FETCHING
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8024/api/v1/eureka/stats');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success') setStats(data.data);
       }
-    };
-
-    fetchStats();
-    const interval = setInterval(fetchStats, 15000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fetch available patterns
-  useEffect(() => {
-    const fetchPatterns = async () => {
-      try {
-        const response = await fetch('http://localhost:8099/api/v1/eureka/patterns');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success') {
-            setPatterns(data.data);
-          }
-        }
-      } catch (error) {
-        logger.error('Failed to fetch patterns:', error);
-      }
-    };
-
-    fetchPatterns();
-  }, []);
-
-  // Handle file analysis
-  const analyzeFile = async () => {
-    if (!filePath.trim()) {
-      alert('Por favor, especifique o caminho do arquivo');
-      return;
+    } catch (error) {
+      logger.error('[Eureka] Stats fetch failed:', error);
     }
+  }, []);
 
-    setIsAnalyzing(true);
+  const fetchPendingApvs = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8024/api/v1/eureka/pending-apvs');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success') setPendingApvs(data.data.apvs || []);
+      }
+    } catch (error) {
+      logger.error('[Eureka] APVs fetch failed:', error);
+    }
+  }, []);
+
+  const fetchHistory = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8024/api/v1/eureka/history?limit=50');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success') setRemediationHistory(data.data.history || []);
+      }
+    } catch (error) {
+      logger.error('[Eureka] History fetch failed:', error);
+    }
+  }, []);
+
+  const fetchPRs = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8024/api/v1/eureka/pull-requests?limit=20');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.status === 'success') setPullRequests(data.data.prs || []);
+      }
+    } catch (error) {
+      logger.error('[Eureka] PRs fetch failed:', error);
+    }
+  }, []);
+
+  // WEBSOCKET - Real-time wargaming updates
+  useEffect(() => {
+    let ws = null;
+    
+    const connect = () => {
+      try {
+        ws = new WebSocket('ws://localhost:8024/ws/wargaming');
+        ws.onopen = () => logger.info('[Eureka] WebSocket connected');
+        ws.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'wargaming_update') {
+            setLiveWargaming(msg.data);
+          }
+        };
+        ws.onclose = () => {
+          logger.warn('[Eureka] WebSocket closed - reconnecting...');
+          setTimeout(connect, 5000);
+        };
+      } catch (error) {
+        logger.error('[Eureka] WebSocket error:', error);
+      }
+    };
+    
+    connect();
+    return () => ws?.close();
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+    fetchPendingApvs();
+    fetchHistory();
+    fetchPRs();
+    
+    const intervals = [
+      setInterval(fetchStats, 10000),
+      setInterval(fetchPendingApvs, 15000),
+      setInterval(fetchHistory, 30000),
+      setInterval(fetchPRs, 20000)
+    ];
+    
+    return () => intervals.forEach(clearInterval);
+  }, [fetchStats, fetchPendingApvs, fetchHistory, fetchPRs]);
+
+  // ACTIONS
+  const triggerRemediation = async (apvId, options = {}) => {
+    setIsRemediating(true);
     setAiStatus(prev => ({
       ...prev,
-      eureka: { ...prev.eureka, status: 'running' }
+      eureka: { ...prev.eureka, status: 'running', currentTask: 'Remediating' }
     }));
 
     try {
-      const response = await fetch('http://localhost:8099/api/v1/eureka/analyze', {
+      const response = await fetch(`http://localhost:8024/api/v1/eureka/remediate/${apvId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          file_path: filePath,
-          generate_playbook: generatePlaybook
+          mode: options.mode || 'auto',
+          runWargaming: options.wargaming !== false,
+          generatePR: options.createPR !== false,
+          strategy: options.strategy || 'smart'
         })
       });
 
       if (response.ok) {
         const result = await response.json();
         if (result.status === 'success') {
-          setAnalysisResult(result.data);
-          setAnalysisMode('results');
-
-          // Refresh stats
-          const statsResponse = await fetch('http://localhost:8099/api/v1/eureka/stats');
-          if (statsResponse.ok) {
-            const statsData = await statsResponse.json();
-            setStats(statsData.data);
+          logger.success(`[Eureka] PR #${result.data.pr_number} created!`);
+          if (result.data.wargaming_results) {
+            setWargamingResults(result.data.wargaming_results);
           }
+          await Promise.all([fetchStats(), fetchPendingApvs(), fetchHistory(), fetchPRs()]);
         }
-      } else {
-        const errorData = await response.json();
-        alert(`Erro na análise: ${errorData.detail || 'Erro desconhecido'}`);
       }
     } catch (error) {
-      logger.error('Error analyzing file:', error);
-      alert(`Erro: ${error.message}`);
+      logger.error('[Eureka] Remediation failed:', error);
     } finally {
-      setIsAnalyzing(false);
+      setIsRemediating(false);
       setAiStatus(prev => ({
         ...prev,
-        eureka: { ...prev.eureka, status: 'idle', lastAnalysis: new Date().toLocaleTimeString() }
+        eureka: { ...prev.eureka, status: 'idle', lastRun: new Date().toLocaleTimeString() }
       }));
     }
   };
 
+  // UTILITIES
   const getSeverityColor = (severity) => {
-    switch (severity?.toLowerCase()) {
-      case 'critical': return 'severity-critical';
-      case 'high': return 'severity-high';
-      case 'medium': return 'severity-medium';
-      case 'low': return 'severity-low';
-      default: return 'severity-info';
-    }
+    const map = {
+      CRITICAL: 'severity-critical',
+      HIGH: 'severity-high',
+      MEDIUM: 'severity-medium',
+      LOW: 'severity-low'
+    };
+    return map[severity?.toUpperCase()] || 'severity-info';
   };
 
-  const getThreatScoreColor = (score) => {
-    if (score >= 80) return 'threat-critical';
-    if (score >= 60) return 'threat-high';
-    if (score >= 40) return 'threat-medium';
-    if (score >= 20) return 'threat-low';
-    return 'threat-minimal';
+  const getHealthScore = () => {
+    const scores = [
+      stats.autoRemediationRate >= 70 ? 100 : (stats.autoRemediationRate / 70) * 100,
+      stats.regressionTestPassRate >= 95 ? 100 : (stats.regressionTestPassRate / 95) * 100,
+      stats.patchValidationRate,
+      stats.wargamingSuccessRate,
+      stats.falsePositiveRate <= 2 ? 100 : (1 - stats.falsePositiveRate / 2) * 100
+    ];
+    return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
   };
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return 'Never';
+    return new Date(timestamp).toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  const healthScore = getHealthScore();
+  const healthColor = healthScore >= 90 ? 'health-excellent' : healthScore >= 70 ? 'health-good' : 'health-warning';
 
   return (
-    <div className="eureka-panel">
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* TOP SECTION - Stats */}
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      <div className="panel-top">
-        <div className="stats-grid">
-          <div className="stat-card stat-primary">
-            <div className="stat-icon">🔬</div>
-            <div className="stat-content">
-              <div className="stat-label">Análises Realizadas</div>
-              <div className="stat-value">{stats.totalAnalyses || 0}</div>
-            </div>
+    <div className="eureka-panel adaptive-immunity-panel">
+      {/* CLASSIFICATION BANNER */}
+      <div className="panel-classification-banner eureka-banner">
+        <div className="banner-content">
+          <span className="banner-icon">🦠</span>
+          <div className="banner-text">
+            <span className="banner-title">EUREKA - CÉLULAS T EFETORAS</span>
+            <span className="banner-subtitle">Automated Vulnerability Response | Phases 3-5</span>
           </div>
-
-          <div className="stat-card stat-danger">
-            <div className="stat-icon">⚠️</div>
-            <div className="stat-content">
-              <div className="stat-label">Ameaças Detectadas</div>
-              <div className="stat-value">{stats.threatsDetected || 0}</div>
-            </div>
-          </div>
-
-          <div className="stat-card stat-info">
-            <div className="stat-icon">📋</div>
-            <div className="stat-content">
-              <div className="stat-label">Playbooks Gerados</div>
-              <div className="stat-value">{stats.playbooksGenerated || 0}</div>
-            </div>
-          </div>
-
-          <div className="stat-card stat-warning">
-            <div className="stat-icon">📊</div>
-            <div className="stat-content">
-              <div className="stat-label">Score Médio de Ameaça</div>
-              <div className="stat-value">{stats.avgThreatScore || 0}</div>
+          <div className="banner-health">
+            <span className="health-label">Health</span>
+            <div className={`health-indicator ${healthColor}`}>
+              {healthScore}%
             </div>
           </div>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* MODE TOGGLE */}
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      <div className="mode-toggle">
-        <button
-          className={`mode-btn ${analysisMode === 'upload' ? 'mode-btn-active' : ''}`}
-          onClick={() => setAnalysisMode('upload')}
-        >
-          📤 Nova Análise
-        </button>
-        <button
-          className={`mode-btn ${analysisMode === 'results' ? 'mode-btn-active' : ''}`}
-          onClick={() => setAnalysisMode('results')}
-          disabled={!analysisResult}
-        >
-          📊 Resultados
-        </button>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* UPLOAD MODE */}
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {analysisMode === 'upload' && (
-        <div className="upload-section">
-          <div className="upload-card">
-            <div className="upload-header">
-              <h3>🔬 Análise Profunda de Malware</h3>
-              <p>Especifique o caminho do arquivo suspeito para análise completa</p>
-            </div>
-
-            <div className="upload-form">
-              <div className="form-group-full">
-                <label htmlFor="input-caminho-do-arquivo-ajeqz">Caminho do Arquivo</label>
-<input id="input-caminho-do-arquivo-ajeqz"
-                  type="text"
-                  value={filePath}
-                  onChange={(e) => setFilePath(e.target.value)}
-                  placeholder="/path/to/suspicious/file.exe"
-                  className="form-input"
-                />
-                <small className="form-hint">
-                  💡 Exemplo: /tmp/malware_sample.bin ou /home/user/suspicious.exe
-                </small>
-              </div>
-
-              <div className="form-group-checkbox">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={generatePlaybook}
-                    onChange={(e) => setGeneratePlaybook(e.target.checked)}
-                  />
-                  <span>Gerar Playbook de Resposta Automática (ADR-compatible)</span>
-                </label>
-              </div>
-
-              <button
-                onClick={analyzeFile}
-                disabled={isAnalyzing || !filePath.trim()}
-                className={`btn-analyze ${isAnalyzing ? 'btn-analyzing' : ''}`}
-              >
-                {isAnalyzing ? (
-                  <>
-                    <span className="spinner"></span>
-                    <span>Analisando Arquivo...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🚀</span>
-                    <span>Iniciar Análise EUREKA</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Analysis Pipeline Info */}
-            <div className="pipeline-info">
-              <h4>🔄 Pipeline de Análise:</h4>
-              <ol className="pipeline-steps">
-                <li>🔍 <strong>Pattern Detection:</strong> Escaneamento de 40+ padrões maliciosos</li>
-                <li>🌐 <strong>IOC Extraction:</strong> Extração de IPs, domains, hashes, CVEs, etc.</li>
-                <li>🎯 <strong>Classification:</strong> Identificação de família e tipo de malware</li>
-                <li>⚠️ <strong>Threat Scoring:</strong> Cálculo de score de ameaça (0-100)</li>
-                <li>📋 <strong>Playbook Generation:</strong> Geração de resposta automatizada</li>
-                <li>📊 <strong>Report:</strong> Relatório completo com evidências</li>
-              </ol>
-            </div>
-
-            {/* Detected Patterns Info */}
-            {patterns && patterns.total_patterns > 0 && (
-              <div className="patterns-info">
-                <h4>🎯 Padrões Disponíveis ({patterns.total_patterns}):</h4>
-                <div className="patterns-grid">
-                  {Object.entries(patterns.by_category || {}).map(([category, count]) => (
-                    <div key={category} className="pattern-badge">
-                      <span className="pattern-name">{category}</span>
-                      <span className="pattern-count">{count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+      {/* KPI METRICS */}
+      <div className="kpi-metrics-grid">
+        <div className="kpi-metric kpi-primary">
+          <div className="kpi-icon">🎯</div>
+          <div className="kpi-content">
+            <div className="kpi-label">Auto-Remediation Rate</div>
+            <div className="kpi-value">{stats.autoRemediationRate || 0}<span className="kpi-unit">%</span></div>
+            <div className="kpi-target">Target: ≥70% | Elite: ≥85%</div>
+          </div>
+          <div className={`kpi-status ${stats.autoRemediationRate >= 70 ? 'kpi-success' : 'kpi-warning'}`}>
+            {stats.autoRemediationRate >= 85 ? '🏆' : stats.autoRemediationRate >= 70 ? '✅' : '⚠️'}
           </div>
         </div>
-      )}
 
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* RESULTS MODE */}
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {analysisMode === 'results' && analysisResult && (
-        <div className="results-section">
-          {/* Classification & Threat Score */}
-          <div className="results-header-card">
-            <div className="classification-info">
-              <h3>🦠 Classificação do Malware</h3>
-              <div className="classification-details">
-                <div className="detail-item">
-                  <span className="detail-label">Família:</span>
-                  <span className="detail-value family-tag">{analysisResult.classification.family || 'Unknown'}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Tipo:</span>
-                  <span className="detail-value type-tag">{analysisResult.classification.type || 'Unknown'}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Severidade:</span>
-                  <span className={`detail-value severity-badge ${getSeverityColor(analysisResult.severity)}`}>
-                    {analysisResult.severity || 'UNKNOWN'}
-                  </span>
-                </div>
-              </div>
+        <div className="kpi-metric kpi-success">
+          <div className="kpi-icon">✅</div>
+          <div className="kpi-content">
+            <div className="kpi-label">Patch Validation</div>
+            <div className="kpi-value">{stats.patchValidationRate || 0}<span className="kpi-unit">%</span></div>
+            <div className="kpi-target">Target: 100%</div>
+          </div>
+          <div className={`kpi-status ${stats.patchValidationRate === 100 ? 'kpi-success' : 'kpi-danger'}`}>
+            {stats.patchValidationRate === 100 ? '✅' : '❌'}
+          </div>
+        </div>
+
+        <div className="kpi-metric kpi-info">
+          <div className="kpi-icon">🧪</div>
+          <div className="kpi-content">
+            <div className="kpi-label">Regression Tests</div>
+            <div className="kpi-value">{stats.regressionTestPassRate || 0}<span className="kpi-unit">%</span></div>
+            <div className="kpi-target">Target: &gt;95%</div>
+          </div>
+        </div>
+
+        <div className="kpi-metric kpi-warning">
+          <div className="kpi-icon">⚡</div>
+          <div className="kpi-content">
+            <div className="kpi-label">MTTP (Time To PR)</div>
+            <div className="kpi-value">{stats.avgTimeToRemedy || 0}<span className="kpi-unit">min</span></div>
+            <div className="kpi-target">Target: &lt;15min</div>
+          </div>
+        </div>
+
+        <div className="kpi-metric kpi-purple">
+          <div className="kpi-icon">🎮</div>
+          <div className="kpi-content">
+            <div className="kpi-label">Wargaming Success</div>
+            <div className="kpi-value">{stats.wargamingSuccessRate || 0}<span className="kpi-unit">%</span></div>
+            <div className="kpi-target">Target: 100%</div>
+          </div>
+        </div>
+
+        <div className="kpi-metric kpi-danger">
+          <div className="kpi-icon">🚨</div>
+          <div className="kpi-content">
+            <div className="kpi-label">False Positive Rate</div>
+            <div className="kpi-value">{stats.falsePositiveRate || 0}<span className="kpi-unit">%</span></div>
+            <div className="kpi-target">Target: &lt;2%</div>
+          </div>
+        </div>
+      </div>
+
+      {/* NAVIGATION */}
+      <div className="view-mode-nav">
+        {['dashboard', 'apvs', 'wargaming', 'history', 'prs'].map(mode => (
+          <button
+            key={mode}
+            className={`view-btn ${viewMode === mode ? 'view-btn-active' : ''}`}
+            onClick={() => setViewMode(mode)}
+            disabled={mode === 'wargaming' && !wargamingResults && !liveWargaming}
+          >
+            <span className="view-icon">
+              {mode === 'dashboard' && '📊'}
+              {mode === 'apvs' && '⚠️'}
+              {mode === 'wargaming' && '🎮'}
+              {mode === 'history' && '📜'}
+              {mode === 'prs' && '🔀'}
+            </span>
+            <span>
+              {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              {mode === 'apvs' && ` (${pendingApvs.length})`}
+              {mode === 'prs' && ` (${pullRequests.length})`}
+            </span>
+            {mode === 'wargaming' && liveWargaming && <span className="live-badge">LIVE</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* DASHBOARD VIEW */}
+      {viewMode === 'dashboard' && (
+        <div className="dashboard-view">
+          <div className="status-bar-live">
+            <div className="status-item">
+              <span className="status-label">Status:</span>
+              <span className={`status-value ${isRemediating ? 'status-active' : 'status-idle'}`}>
+                {isRemediating ? '⚡ ACTIVE' : '✓ IDLE'}
+              </span>
             </div>
-
-            <div className="threat-score-display">
-              <div className="score-label">THREAT SCORE</div>
-              <div className={`score-value ${getThreatScoreColor(analysisResult.threat_score)}`}>
-                {analysisResult.threat_score}
-                <span className="score-max">/100</span>
-              </div>
-              <div className="score-bar">
-                <div
-                  className={`score-fill ${getThreatScoreColor(analysisResult.threat_score)}`}
-                  style={{ width: `${analysisResult.threat_score}%` }}
-                ></div>
-              </div>
+            <div className="status-item">
+              <span className="status-label">Pending APVs:</span>
+              <span className={`status-value ${pendingApvs.length > 0 ? 'status-warning' : 'status-success'}`}>
+                {pendingApvs.length}
+              </span>
+            </div>
+            <div className="status-item">
+              <span className="status-label">Last Activity:</span>
+              <span className="status-value">{aiStatus.eureka?.lastRun || 'Never'}</span>
             </div>
           </div>
 
-          {/* Malicious Patterns Detected */}
-          {analysisResult.patterns_detected && analysisResult.patterns_detected.length > 0 && (
-            <div className="patterns-detected-card">
-              <h3>🎯 Padrões Maliciosos Detectados ({analysisResult.patterns_detected.length})</h3>
-              <div className="patterns-list">
-                {analysisResult.patterns_detected.map((pattern, index) => (
-                  <div key={index} className={`pattern-item ${getSeverityColor(pattern.severity)}`}>
-                    <div className="pattern-header">
-                      <span className="pattern-name">{pattern.name}</span>
-                      <span className={`pattern-severity ${getSeverityColor(pattern.severity)}`}>
-                        {pattern.severity}
+          {pendingApvs.length > 0 ? (
+            <div className="pending-apvs-preview">
+              <div className="preview-header">
+                <h3>⚠️ Pending APVs (Top 5)</h3>
+                <button onClick={() => setViewMode('apvs')} className="btn-view-all">
+                  View All ({pendingApvs.length}) →
+                </button>
+              </div>
+              <div className="apvs-preview-list">
+                {pendingApvs.slice(0, 5).map((apv, idx) => (
+                  <div key={apv.id || idx} className={`apv-preview-item ${getSeverityColor(apv.severity)}`}>
+                    <div className="apv-preview-header">
+                      <span className="apv-number">#{idx + 1}</span>
+                      <span className="apv-cve">{apv.cve_id}</span>
+                      <span className={`apv-severity-badge ${getSeverityColor(apv.severity)}`}>
+                        {apv.severity}
                       </span>
                     </div>
-                    <div className="pattern-details">
-                      <span className="pattern-category">📂 {pattern.category}</span>
-                      <span className="pattern-confidence">🎯 Confiança: {(pattern.confidence * 100).toFixed(0)}%</span>
-                      {pattern.mitre_technique && (
-                        <span className="pattern-mitre">🔗 MITRE: {pattern.mitre_technique}</span>
-                      )}
-                    </div>
-                    {pattern.matched_content && (
-                      <div className="pattern-match">
-                        <code>{pattern.matched_content.substring(0, 100)}...</code>
+                    <div className="apv-preview-body">
+                      <div className="apv-description-short">
+                        {apv.description?.substring(0, 120)}...
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* IOCs Extracted */}
-          {analysisResult.iocs && analysisResult.iocs.length > 0 && (
-            <div className="iocs-card">
-              <h3>🌐 Indicadores de Comprometimento (IOCs) - {analysisResult.iocs.length} encontrados</h3>
-              <div className="iocs-grid">
-                {analysisResult.iocs.map((ioc, index) => (
-                  <div key={index} className="ioc-item">
-                    <div className="ioc-type">{ioc.ioc_type}</div>
-                    <div className="ioc-value">{ioc.value}</div>
-                    <div className="ioc-confidence">
-                      Confiança: {(ioc.confidence * 100).toFixed(0)}%
+                      <div className="apv-meta-short">
+                        <span>📦 {apv.affected_packages?.length || 0} packages</span>
+                        <span>📊 CVSS: {apv.cvss_score || 'N/A'}</span>
+                      </div>
+                    </div>
+                    <div className="apv-preview-actions">
+                      <button
+                        onClick={() => triggerRemediation(apv.id)}
+                        disabled={isRemediating}
+                        className="btn-quick-remediate"
+                      >
+                        🚀 Auto-Remediate
+                      </button>
+                      <button onClick={() => setSelectedApv(apv)} className="btn-quick-details">
+                        👁️ Details
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          )}
-
-          {/* Playbook Generated */}
-          {analysisResult.response_playbook && (
-            <div className="playbook-card">
-              <h3>📋 Playbook de Resposta Gerado</h3>
-              <div className="playbook-info">
-                <div className="playbook-header">
-                  <span className="playbook-name">{analysisResult.response_playbook.name}</span>
-                  <span className="playbook-priority">{analysisResult.response_playbook.priority}</span>
-                </div>
-                <p className="playbook-description">{analysisResult.response_playbook.description}</p>
-
-                <div className="playbook-actions">
-                  <h4>Ações Automáticas ({analysisResult.response_playbook.actions?.length || 0}):</h4>
-                  <div className="actions-list">
-                    {analysisResult.response_playbook.actions?.map((action, index) => (
-                      <div key={index} className="action-item">
-                        <span className="action-type">{action.type}</span>
-                        <span className="action-desc">{action.description || action.action}</span>
-                        {action.requires_approval && (
-                          <span className="action-approval">⚠️ Requer Aprovação</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="playbook-mitre">
-                  <strong>MITRE ATT&CK:</strong>
-                  {analysisResult.response_playbook.mitre_techniques?.map((tech, i) => (
-                    <span key={i} className="mitre-tag">{tech}</span>
-                  ))}
-                </div>
-              </div>
-
-              <button className="btn-execute-playbook">
-                🚀 Enviar para ADR Core (Executar Resposta)
-              </button>
-            </div>
-          )}
-
-          {/* File Hashes */}
-          {analysisResult.file_hashes && (
-            <div className="hashes-card">
-              <h3>🔐 Hashes do Arquivo</h3>
-              <div className="hashes-list">
-                <div className="hash-item">
-                  <span className="hash-label">MD5:</span>
-                  <code className="hash-value">{analysisResult.file_hashes.md5}</code>
-                </div>
-                <div className="hash-item">
-                  <span className="hash-label">SHA1:</span>
-                  <code className="hash-value">{analysisResult.file_hashes.sha1}</code>
-                </div>
-                <div className="hash-item">
-                  <span className="hash-label">SHA256:</span>
-                  <code className="hash-value">{analysisResult.file_hashes.sha256}</code>
-                </div>
+          ) : (
+            <div className="empty-state-success">
+              <div className="empty-icon">✅</div>
+              <h3>No Pending APVs</h3>
+              <p>All threats remediated. System fully protected.</p>
+              <div className="empty-stats">
+                <span>Total: {stats.totalRemediations || 0}</span>
+                <span>Success Rate: {stats.autoRemediationRate || 0}%</span>
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="results-actions">
-            <button
-              onClick={() => {
-                setAnalysisMode('upload');
-                setAnalysisResult(null);
-                setFilePath('');
-              }}
-              className="btn-new-analysis"
-            >
-              🔬 Nova Análise
-            </button>
-            <button className="btn-export-report">
-              📄 Exportar Relatório
-            </button>
-            <button className="btn-share-threat-intel">
-              🌐 Compartilhar com Threat Intel
-            </button>
+          {/* Biological Analogy */}
+          <div className="biological-analogy-card">
+            <h4>🧬 Biological Analogy: T Cells</h4>
+            <div className="analogy-grid">
+              <div className="analogy-item">
+                <span className="analogy-icon">🔬</span>
+                <strong>Biology:</strong> Dendritic cells present antigens to naive T cells.
+                T cells activate, differentiate into effectors, and eliminate infected cells with surgical precision.
+              </div>
+              <div className="analogy-item">
+                <span className="analogy-icon">💻</span>
+                <strong>Digital:</strong> Oráculo detects CVEs (antigens) and generates APVs.
+                Eureka receives APVs, confirms vulnerability, generates patches, validates via wargaming, and creates automated PRs.
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Empty State */}
-      {analysisMode === 'results' && !analysisResult && (
-        <div className="results-empty">
-          <div className="empty-icon">🔬</div>
-          <h3>Nenhuma análise realizada ainda</h3>
-          <p>Execute uma análise para visualizar os resultados</p>
-          <button
-            onClick={() => setAnalysisMode('upload')}
-            className="btn-start-analysis"
-          >
-            Iniciar Primeira Análise
-          </button>
+      {/* APVS VIEW */}
+      {viewMode === 'apvs' && (
+        <div className="apvs-view">
+          <h3>⚠️ Pending APVs ({pendingApvs.length})</h3>
+          {pendingApvs.length === 0 ? (
+            <div className="empty-state">✅ No pending APVs</div>
+          ) : (
+            <div className="apvs-list">
+              {pendingApvs.map((apv, idx) => (
+                <div key={apv.id || idx} className={`apv-card ${getSeverityColor(apv.severity)}`}>
+                  <div className="apv-header">
+                    <span className="apv-cve">{apv.cve_id}</span>
+                    <span className={`apv-severity ${getSeverityColor(apv.severity)}`}>{apv.severity}</span>
+                  </div>
+                  <div className="apv-body">
+                    <p>{apv.description}</p>
+                    <div className="apv-meta">
+                      <span>📦 {apv.affected_packages?.join(', ')}</span>
+                      <span>🔢 {apv.affected_versions?.join(', ')}</span>
+                      <span>📊 CVSS: {apv.cvss_score}</span>
+                    </div>
+                  </div>
+                  <div className="apv-actions">
+                    <button onClick={() => triggerRemediation(apv.id)} disabled={isRemediating} className="btn-remediate">
+                      🚀 Auto-Remediate
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* WARGAMING VIEW */}
+      {viewMode === 'wargaming' && (wargamingResults || liveWargaming) && (
+        <div className="wargaming-view">
+          <h3>🎮 Wargaming Results</h3>
+          {liveWargaming && (
+            <div className="wargaming-live">
+              <div className="live-status">LIVE: {liveWargaming.phase} - {liveWargaming.progress}%</div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{width: `${liveWargaming.progress}%`}}></div>
+              </div>
+            </div>
+          )}
+          {wargamingResults && (
+            <div className="wargaming-results">
+              <div className="result-card">
+                <h4>Phase 1: Attack Vulnerable Version</h4>
+                <div className={`result-status ${wargamingResults.phase1_success ? 'success' : 'failed'}`}>
+                  {wargamingResults.phase1_success ? '✅ Attack Succeeded (Expected)' : '❌ Attack Failed (Unexpected)'}
+                </div>
+              </div>
+              <div className="result-card">
+                <h4>Phase 2: Attack Patched Version</h4>
+                <div className={`result-status ${!wargamingResults.phase2_success ? 'success' : 'failed'}`}>
+                  {!wargamingResults.phase2_success ? '✅ Attack Blocked (Expected)' : '❌ Attack Succeeded (CRITICAL)'}
+                </div>
+              </div>
+              <div className="result-card">
+                <h4>Regression Tests</h4>
+                <div className="test-results">
+                  Passed: {wargamingResults.tests_passed} / {wargamingResults.tests_total}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* HISTORY VIEW */}
+      {viewMode === 'history' && (
+        <div className="history-view">
+          <h3>📜 Remediation History ({remediationHistory.length})</h3>
+          <div className="history-list">
+            {remediationHistory.map((item, idx) => (
+              <div key={item.id || idx} className="history-item">
+                <div className="history-header">
+                  <span>{item.cve_id}</span>
+                  <span className={getSeverityColor(item.severity)}>{item.severity}</span>
+                  <span className={item.status === 'success' ? 'text-green-400' : 'text-red-400'}>
+                    {item.status}
+                  </span>
+                </div>
+                <div className="history-meta">
+                  <span>Strategy: {item.strategy}</span>
+                  <span>Time: {formatTime(item.timestamp)}</span>
+                  <span>Duration: {item.duration_minutes}min</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PRS VIEW */}
+      {viewMode === 'prs' && (
+        <div className="prs-view">
+          <h3>🔀 Pull Requests ({pullRequests.length})</h3>
+          <div className="prs-list">
+            {pullRequests.map((pr, idx) => (
+              <div key={pr.number || idx} className="pr-card">
+                <div className="pr-header">
+                  <span className="pr-number">PR #{pr.number}</span>
+                  <span className={`pr-status pr-${pr.state}`}>{pr.state}</span>
+                </div>
+                <div className="pr-body">
+                  <h4>{pr.title}</h4>
+                  <div className="pr-meta">
+                    <span>CVE: {pr.cve_id}</span>
+                    <span>Created: {formatTime(pr.created_at)}</span>
+                    {pr.merged_at && <span>Merged: {formatTime(pr.merged_at)}</span>}
+                  </div>
+                </div>
+                <div className="pr-actions">
+                  <a href={pr.html_url} target="_blank" rel="noopener noreferrer" className="btn-view-pr">
+                    View on GitHub →
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

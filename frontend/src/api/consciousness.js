@@ -232,14 +232,14 @@ export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
  */
 export const formatArousalLevel = (level) => {
   const levels = {
-    'SLEEPY': { emoji: '😴', color: '#64748B', label: 'Sleepy' },
-    'CALM': { emoji: '😌', color: '#06B6D4', label: 'Calm' },
-    'RELAXED': { emoji: '😊', color: '#10B981', label: 'Relaxed' },
-    'ALERT': { emoji: '😃', color: '#F59E0B', label: 'Alert' },
-    'EXCITED': { emoji: '🤩', color: '#EF4444', label: 'Excited' }
+    'SLEEPY': { emoji: '😴', color: '#64748B', className: 'text-muted', borderClass: 'border-low', label: 'Sleepy' },
+    'CALM': { emoji: '😌', color: '#06B6D4', className: 'text-info', borderClass: 'border-info', label: 'Calm' },
+    'RELAXED': { emoji: '😊', color: '#10B981', className: 'text-success', borderClass: 'border-success', label: 'Relaxed' },
+    'ALERT': { emoji: '😃', color: '#F59E0B', className: 'text-warning', borderClass: 'border-warning', label: 'Alert' },
+    'EXCITED': { emoji: '🤩', color: '#EF4444', className: 'text-critical', borderClass: 'border-critical', label: 'Excited' }
   };
 
-  return levels[level] || { emoji: '❓', color: '#6B7280', label: 'Unknown' };
+  return levels[level] || { emoji: '❓', color: '#6B7280', className: 'text-muted', borderClass: 'border-low', label: 'Unknown' };
 };
 
 /**

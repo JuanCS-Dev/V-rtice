@@ -175,7 +175,7 @@ const AnomalyDetectionWidget = () => {
               </div>
               <div className="status-item">
                 <span className="label">CONFIDENCE:</span>
-                <span className="value" style={{ color: confidenceBadge.color }}>
+                <span className={`value ${confidenceBadge.className}`}>
                   {confidenceBadge.icon} {result.confidence.toFixed(1)}%
                 </span>
               </div>
@@ -192,7 +192,7 @@ const AnomalyDetectionWidget = () => {
               </div>
               <div className="summary-grid">
                 <div className="summary-stat">
-                  <span className="stat-icon" style={{ color: '#ff0040' }}>
+                  <span className="stat-icon icon-danger">
                     <i className="fas fa-exclamation-circle"></i>
                   </span>
                   <div className="stat-content">
@@ -202,7 +202,7 @@ const AnomalyDetectionWidget = () => {
                 </div>
 
                 <div className="summary-stat">
-                  <span className="stat-icon" style={{ color: '#00aaff' }}>
+                  <span className="stat-icon icon-info">
                     <i className="fas fa-database"></i>
                   </span>
                   <div className="stat-content">
@@ -214,7 +214,7 @@ const AnomalyDetectionWidget = () => {
                 </div>
 
                 <div className="summary-stat">
-                  <span className="stat-icon" style={{ color: '#ffaa00' }}>
+                  <span className="stat-icon icon-warning">
                     <i className="fas fa-percentage"></i>
                   </span>
                   <div className="stat-content">

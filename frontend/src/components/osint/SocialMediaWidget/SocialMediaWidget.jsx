@@ -75,7 +75,7 @@ export const SocialMediaWidget = () => {
               {confidenceBadge && (
                 <div className={styles.statusItem}>
                     <span className={styles.label}>CONFIDENCE:</span>
-                    <span className={styles.value} style={{ color: confidenceBadge.color }}>
+                    <span className={`${styles.value} ${confidenceBadge.className}`}>
                     {confidenceBadge.icon} {result.confidence.toFixed(1)}%
                     </span>
                 </div>

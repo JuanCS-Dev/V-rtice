@@ -1,0 +1,454 @@
+/**
+ * 🏢 ENTERPRISE DESIGN TOKENS
+ * Microsoft Fluent Design 2.0 Inspired
+ * Professional, clean, corporate aesthetic
+ * 
+ * Architecture: 3-Layer Token System
+ * 1. Primitive - Raw values
+ * 2. Semantic - Design decisions
+ * 3. Component - Contextual application
+ */
+
+/* ========================================
+   LAYER 1: PRIMITIVE TOKENS (Raw Values)
+   ======================================== */
+
+:root {
+  /* === PRIMARY COLORS === */
+  --primitive-blue-50: #e6f3fa;
+  --primitive-blue-100: #b3dff5;
+  --primitive-blue-200: #80caf0;
+  --primitive-blue-300: #4db6eb;
+  --primitive-blue-400: #1aa1e6;
+  --primitive-blue-500: #0078d4;  /* Microsoft Blue */
+  --primitive-blue-600: #005a9e;
+  --primitive-blue-700: #004578;
+  --primitive-blue-800: #003052;
+  --primitive-blue-900: #001b2b;
+
+  /* === NEUTRAL COLORS (Grayscale) === */
+  --primitive-gray-50: #fafafa;
+  --primitive-gray-100: #f3f3f3;
+  --primitive-gray-200: #e5e5e5;
+  --primitive-gray-300: #d4d4d4;
+  --primitive-gray-400: #a3a3a3;
+  --primitive-gray-500: #737373;
+  --primitive-gray-600: #525252;
+  --primitive-gray-700: #404040;
+  --primitive-gray-800: #262626;
+  --primitive-gray-900: #171717;
+
+  /* === SEMANTIC COLORS === */
+  --primitive-success-50: #dff6dd;
+  --primitive-success-500: #107c10;  /* Green */
+  --primitive-success-700: #0b5a0b;
+
+  --primitive-warning-50: #fff4ce;
+  --primitive-warning-500: #ffb900;  /* Yellow */
+  --primitive-warning-700: #b38300;
+
+  --primitive-error-50: #fde7e9;
+  --primitive-error-500: #d13438;  /* Red */
+  --primitive-error-700: #922529;
+
+  --primitive-info-50: #e6f3fa;
+  --primitive-info-500: #0078d4;  /* Blue */
+  --primitive-info-700: #005a9e;
+
+  /* === SPACING SCALE (8px grid) === */
+  --primitive-space-0: 0;
+  --primitive-space-1: 0.25rem;   /* 4px */
+  --primitive-space-2: 0.5rem;    /* 8px */
+  --primitive-space-3: 0.75rem;   /* 12px */
+  --primitive-space-4: 1rem;      /* 16px */
+  --primitive-space-5: 1.25rem;   /* 20px */
+  --primitive-space-6: 1.5rem;    /* 24px */
+  --primitive-space-8: 2rem;      /* 32px */
+  --primitive-space-10: 2.5rem;   /* 40px */
+  --primitive-space-12: 3rem;     /* 48px */
+  --primitive-space-16: 4rem;     /* 64px */
+  --primitive-space-20: 5rem;     /* 80px */
+
+  /* === TYPOGRAPHY SCALE === */
+  --primitive-font-size-xs: 0.75rem;    /* 12px */
+  --primitive-font-size-sm: 0.875rem;   /* 14px */
+  --primitive-font-size-base: 1rem;     /* 16px */
+  --primitive-font-size-lg: 1.125rem;   /* 18px */
+  --primitive-font-size-xl: 1.25rem;    /* 20px */
+  --primitive-font-size-2xl: 1.5rem;    /* 24px */
+  --primitive-font-size-3xl: 1.875rem;  /* 30px */
+  --primitive-font-size-4xl: 2.25rem;   /* 36px */
+  --primitive-font-size-5xl: 3rem;      /* 48px */
+
+  /* === FONT WEIGHTS === */
+  --primitive-font-weight-light: 300;
+  --primitive-font-weight-normal: 400;
+  --primitive-font-weight-medium: 500;
+  --primitive-font-weight-semibold: 600;
+  --primitive-font-weight-bold: 700;
+
+  /* === LINE HEIGHTS === */
+  --primitive-leading-tight: 1.25;
+  --primitive-leading-normal: 1.5;
+  --primitive-leading-relaxed: 1.75;
+  --primitive-leading-loose: 2;
+
+  /* === SHADOWS (Elevation) === */
+  --primitive-shadow-none: none;
+  --primitive-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --primitive-shadow-default: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --primitive-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --primitive-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --primitive-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --primitive-shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+
+  /* === BORDER RADIUS === */
+  --primitive-radius-none: 0;
+  --primitive-radius-sm: 0.125rem;   /* 2px */
+  --primitive-radius-default: 0.25rem;  /* 4px */
+  --primitive-radius-md: 0.375rem;   /* 6px */
+  --primitive-radius-lg: 0.5rem;     /* 8px */
+  --primitive-radius-xl: 0.75rem;    /* 12px */
+  --primitive-radius-2xl: 1rem;      /* 16px */
+  --primitive-radius-full: 9999px;   /* Circular */
+
+  /* === TRANSITIONS === */
+  --primitive-duration-instant: 50ms;
+  --primitive-duration-fast: 100ms;
+  --primitive-duration-normal: 200ms;
+  --primitive-duration-slow: 300ms;
+  --primitive-duration-slowest: 500ms;
+
+  --primitive-ease-linear: linear;
+  --primitive-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --primitive-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --primitive-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === Z-INDEX LAYERS === */
+  --primitive-z-base: 0;
+  --primitive-z-dropdown: 1000;
+  --primitive-z-sticky: 1020;
+  --primitive-z-fixed: 1030;
+  --primitive-z-modal-backdrop: 1040;
+  --primitive-z-modal: 1050;
+  --primitive-z-popover: 1060;
+  --primitive-z-tooltip: 1070;
+  --primitive-z-notification: 1080;
+  --primitive-z-max: 9999;
+}
+
+
+/* ========================================
+   LAYER 2: SEMANTIC TOKENS (Design Decisions)
+   ======================================== */
+
+:root {
+  /* === BRAND COLORS === */
+  --color-brand-primary: var(--primitive-blue-500);
+  --color-brand-primary-dark: var(--primitive-blue-600);
+  --color-brand-primary-light: var(--primitive-blue-400);
+  --color-brand-primary-pale: var(--primitive-blue-50);
+
+  /* === BACKGROUND HIERARCHY === */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: var(--primitive-gray-50);
+  --color-bg-tertiary: var(--primitive-gray-100);
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay: rgba(255, 255, 255, 0.95);
+  --color-bg-hover: rgba(0, 0, 0, 0.04);
+  --color-bg-active: rgba(0, 0, 0, 0.08);
+  --color-bg-disabled: var(--primitive-gray-100);
+
+  /* === TEXT HIERARCHY === */
+  --color-text-primary: var(--primitive-gray-900);
+  --color-text-secondary: var(--primitive-gray-600);
+  --color-text-tertiary: var(--primitive-gray-400);
+  --color-text-muted: var(--primitive-gray-500);
+  --color-text-disabled: var(--primitive-gray-300);
+  --color-text-inverse: #ffffff;
+  --color-text-link: var(--primitive-blue-500);
+  --color-text-link-hover: var(--primitive-blue-600);
+
+  /* === BORDER COLORS === */
+  --color-border-default: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.12);
+  --color-border-subtle: rgba(0, 0, 0, 0.04);
+  --color-border-hover: rgba(0, 120, 212, 0.3);
+  --color-border-focus: var(--primitive-blue-500);
+  --color-border-disabled: var(--primitive-gray-200);
+
+  /* === INTERACTIVE STATES === */
+  --color-interactive-default: var(--primitive-blue-500);
+  --color-interactive-hover: var(--primitive-blue-600);
+  --color-interactive-active: var(--primitive-blue-700);
+  --color-interactive-disabled: var(--primitive-gray-300);
+
+  /* === SEMANTIC STATUS === */
+  --color-status-success: var(--primitive-success-500);
+  --color-status-success-bg: var(--primitive-success-50);
+  --color-status-warning: var(--primitive-warning-500);
+  --color-status-warning-bg: var(--primitive-warning-50);
+  --color-status-error: var(--primitive-error-500);
+  --color-status-error-bg: var(--primitive-error-50);
+  --color-status-info: var(--primitive-info-500);
+  --color-status-info-bg: var(--primitive-info-50);
+
+  /* === ACCENT COLORS === */
+  --color-accent-primary: var(--primitive-blue-500);
+  --color-accent-secondary: var(--primitive-blue-600);
+  --color-accent-success: var(--primitive-success-500);
+  --color-accent-warning: var(--primitive-warning-500);
+  --color-accent-danger: var(--primitive-error-500);
+  --color-accent-info: var(--primitive-info-500);
+
+  /* === ELEVATION/SHADOWS === */
+  --elevation-none: var(--primitive-shadow-none);
+  --elevation-raised: var(--primitive-shadow-default);
+  --elevation-floating: var(--primitive-shadow-lg);
+  --elevation-modal: var(--primitive-shadow-2xl);
+
+  /* === SPACING SYSTEM === */
+  --spacing-xs: var(--primitive-space-1);
+  --spacing-sm: var(--primitive-space-2);
+  --spacing-md: var(--primitive-space-4);
+  --spacing-lg: var(--primitive-space-6);
+  --spacing-xl: var(--primitive-space-8);
+  --spacing-2xl: var(--primitive-space-12);
+  --spacing-3xl: var(--primitive-space-16);
+
+  /* === TYPOGRAPHY SYSTEM === */
+  --font-family-primary: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  
+  --font-size-xs: var(--primitive-font-size-xs);
+  --font-size-sm: var(--primitive-font-size-sm);
+  --font-size-base: var(--primitive-font-size-base);
+  --font-size-lg: var(--primitive-font-size-lg);
+  --font-size-xl: var(--primitive-font-size-xl);
+  --font-size-2xl: var(--primitive-font-size-2xl);
+  --font-size-3xl: var(--primitive-font-size-3xl);
+
+  --font-weight-light: var(--primitive-font-weight-light);
+  --font-weight-normal: var(--primitive-font-weight-normal);
+  --font-weight-medium: var(--primitive-font-weight-medium);
+  --font-weight-semibold: var(--primitive-font-weight-semibold);
+  --font-weight-bold: var(--primitive-font-weight-bold);
+
+  --line-height-tight: var(--primitive-leading-tight);
+  --line-height-normal: var(--primitive-leading-normal);
+  --line-height-relaxed: var(--primitive-leading-relaxed);
+
+  /* === BORDER SYSTEM === */
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 4px;
+
+  --border-radius-sm: var(--primitive-radius-sm);
+  --border-radius-default: var(--primitive-radius-default);
+  --border-radius-md: var(--primitive-radius-md);
+  --border-radius-lg: var(--primitive-radius-lg);
+  --border-radius-xl: var(--primitive-radius-xl);
+  --border-radius-full: var(--primitive-radius-full);
+
+  /* === ANIMATION SYSTEM === */
+  --transition-instant: var(--primitive-duration-instant) var(--primitive-ease-out);
+  --transition-fast: var(--primitive-duration-fast) var(--primitive-ease-out);
+  --transition-normal: var(--primitive-duration-normal) var(--primitive-ease-out);
+  --transition-slow: var(--primitive-duration-slow) var(--primitive-ease-in-out);
+
+  /* === Z-INDEX SYSTEM === */
+  --z-base: var(--primitive-z-base);
+  --z-dropdown: var(--primitive-z-dropdown);
+  --z-sticky: var(--primitive-z-sticky);
+  --z-fixed: var(--primitive-z-fixed);
+  --z-modal-backdrop: var(--primitive-z-modal-backdrop);
+  --z-modal: var(--primitive-z-modal);
+  --z-popover: var(--primitive-z-popover);
+  --z-tooltip: var(--primitive-z-tooltip);
+}
+
+
+/* ========================================
+   LAYER 3: COMPONENT TOKENS (Contextual)
+   ======================================== */
+
+:root {
+  /* === BUTTON COMPONENT === */
+  --button-bg-primary: var(--color-interactive-default);
+  --button-bg-primary-hover: var(--color-interactive-hover);
+  --button-bg-primary-active: var(--color-interactive-active);
+  --button-bg-secondary: transparent;
+  --button-bg-secondary-hover: var(--color-bg-hover);
+  --button-text-primary: var(--color-text-inverse);
+  --button-text-secondary: var(--color-text-primary);
+  --button-border-radius: var(--border-radius-default);
+  --button-padding-x: var(--spacing-md);
+  --button-padding-y: var(--spacing-sm);
+  --button-font-weight: var(--font-weight-semibold);
+
+  /* === CARD COMPONENT === */
+  --card-bg: var(--color-bg-card);
+  --card-bg-hover: var(--color-bg-secondary);
+  --card-border: var(--color-border-default);
+  --card-border-hover: var(--color-border-hover);
+  --card-shadow: var(--elevation-raised);
+  --card-shadow-hover: var(--elevation-floating);
+  --card-radius: var(--border-radius-lg);
+  --card-padding: var(--spacing-lg);
+
+  /* === INPUT COMPONENT === */
+  --input-bg: var(--color-bg-primary);
+  --input-bg-disabled: var(--color-bg-disabled);
+  --input-border: var(--color-border-default);
+  --input-border-hover: var(--color-border-strong);
+  --input-border-focus: var(--color-border-focus);
+  --input-text: var(--color-text-primary);
+  --input-placeholder: var(--color-text-tertiary);
+  --input-radius: var(--border-radius-default);
+  --input-padding-x: var(--spacing-md);
+  --input-padding-y: var(--spacing-sm);
+
+  /* === SIDEBAR COMPONENT === */
+  --sidebar-bg: var(--color-bg-card);
+  --sidebar-border: var(--color-border-default);
+  --sidebar-item-bg: transparent;
+  --sidebar-item-bg-hover: var(--color-bg-hover);
+  --sidebar-item-bg-active: var(--color-bg-active);
+  --sidebar-item-text: var(--color-text-primary);
+  --sidebar-item-text-active: var(--color-accent-primary);
+  --sidebar-width: 16rem;
+  --sidebar-padding: var(--spacing-md);
+
+  /* === HEADER COMPONENT === */
+  --header-bg: var(--color-bg-elevated);
+  --header-border: var(--color-border-default);
+  --header-shadow: var(--elevation-raised);
+  --header-height: 4rem;
+  --header-padding-x: var(--spacing-xl);
+  --header-padding-y: var(--spacing-md);
+
+  /* === MODAL COMPONENT === */
+  --modal-bg: var(--color-bg-card);
+  --modal-backdrop: rgba(0, 0, 0, 0.5);
+  --modal-shadow: var(--elevation-modal);
+  --modal-radius: var(--border-radius-xl);
+  --modal-padding: var(--spacing-2xl);
+  --modal-max-width: 32rem;
+
+  /* === DROPDOWN COMPONENT === */
+  --dropdown-bg: var(--color-bg-card);
+  --dropdown-border: var(--color-border-default);
+  --dropdown-shadow: var(--elevation-floating);
+  --dropdown-radius: var(--border-radius-md);
+  --dropdown-item-bg-hover: var(--color-bg-hover);
+  --dropdown-padding: var(--spacing-sm);
+
+  /* === TABLE COMPONENT === */
+  --table-bg: var(--color-bg-card);
+  --table-border: var(--color-border-default);
+  --table-header-bg: var(--color-bg-secondary);
+  --table-row-hover: var(--color-bg-hover);
+  --table-row-stripe: var(--color-bg-tertiary);
+
+  /* === BADGE COMPONENT === */
+  --badge-success-bg: var(--color-status-success-bg);
+  --badge-success-text: var(--color-status-success);
+  --badge-warning-bg: var(--color-status-warning-bg);
+  --badge-warning-text: var(--color-status-warning);
+  --badge-error-bg: var(--color-status-error-bg);
+  --badge-error-text: var(--color-status-error);
+  --badge-info-bg: var(--color-status-info-bg);
+  --badge-info-text: var(--color-status-info);
+  --badge-radius: var(--border-radius-full);
+  --badge-padding-x: var(--spacing-sm);
+  --badge-padding-y: var(--spacing-xs);
+}
+
+
+/* ========================================
+   ENTERPRISE CHART PALETTE
+   ======================================== */
+
+:root {
+  /* Professional color palette for data visualization */
+  --chart-color-1: #0078d4;   /* Primary blue */
+  --chart-color-2: #107c10;   /* Success green */
+  --chart-color-3: #ffb900;   /* Warning yellow */
+  --chart-color-4: #d13438;   /* Error red */
+  --chart-color-5: #00b7c3;   /* Teal */
+  --chart-color-6: #8764b8;   /* Purple */
+  --chart-color-7: #f7630c;   /* Orange */
+  --chart-color-8: #ca5010;   /* Dark orange */
+  --chart-color-9: #038387;   /* Dark teal */
+  --chart-color-10: #004e8c;  /* Dark blue */
+
+  /* Chart backgrounds */
+  --chart-bg-primary: var(--color-bg-card);
+  --chart-bg-secondary: var(--color-bg-secondary);
+  --chart-grid-color: var(--color-border-subtle);
+  --chart-text-color: var(--color-text-secondary);
+  --chart-axis-color: var(--color-border-default);
+}
+
+
+/* ========================================
+   ACCESSIBILITY TOKENS
+   ======================================== */
+
+:root {
+  /* Focus indicators for keyboard navigation */
+  --focus-ring-color: var(--color-border-focus);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-style: solid;
+
+  /* Minimum contrast ratios (WCAG AA) */
+  --contrast-minimum: 4.5;  /* Normal text */
+  --contrast-large: 3.0;     /* Large text (18px+ or 14px+ bold) */
+
+  /* Motion reduction (respects prefers-reduced-motion) */
+  --motion-duration-default: var(--primitive-duration-normal);
+  --motion-duration-reduced: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-instant: 0ms;
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
+  }
+}
+
+
+/* ========================================
+   DOCUMENTATION & USAGE NOTES
+   ======================================== */
+
+/*
+ * Token Usage Guidelines:
+ * 
+ * 1. ALWAYS use component tokens in components
+ *    ✅ background: var(--card-bg);
+ *    ❌ background: var(--color-bg-card);
+ *    ❌ background: #ffffff;
+ * 
+ * 2. Use semantic tokens for custom components
+ *    ✅ color: var(--color-text-primary);
+ *    ❌ color: var(--primitive-gray-900);
+ * 
+ * 3. NEVER use primitive tokens directly in components
+ *    (except when creating new semantic/component tokens)
+ * 
+ * 4. Maintain 3-layer hierarchy:
+ *    Components → Semantic → Primitive
+ * 
+ * 5. Add new tokens following the pattern:
+ *    --[layer]-[category]-[property]-[variant]
+ * 
+ * Examples:
+ *   --primitive-blue-500         (Layer 1)
+ *   --color-text-primary          (Layer 2)
+ *   --button-bg-primary           (Layer 3)
+ */

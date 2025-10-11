@@ -61,6 +61,9 @@ export const CompactLanguageSelector = () => {
       {/* Dropdown */}
       {isOpen && (
         <div
+          role="menu"
+          aria-label="Language selection menu"
+          tabIndex={-1}
           style={{
             position: 'absolute',
             top: '40px',
@@ -130,7 +133,7 @@ export const CompactLanguageSelector = () => {
               <span style={{ fontSize: '1.25rem' }}>{lang.flag}</span>
               <span style={{ flex: 1 }}>{lang.name}</span>
               {currentLang.code === lang.code && (
-                <span style={{ color: '#10B981', fontSize: '0.9rem' }}>✓</span>
+                <span className="text-success" style={{ fontSize: '0.9rem' }}>✓</span>
               )}
             </button>
           ))}

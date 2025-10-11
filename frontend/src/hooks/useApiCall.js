@@ -25,7 +25,7 @@ export const useApiCall = (options = {}) => {
   /**
    * Executa fetch com timeout
    */
-  const fetchWithTimeout = async (url, options) => {
+  const fetchWithTimeout = useCallback(async (url, options) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -43,7 +43,7 @@ export const useApiCall = (options = {}) => {
       }
       throw err;
     }
-  };
+  }, [timeout]);
 
   /**
    * Sleep helper para retry delay
@@ -113,7 +113,7 @@ export const useApiCall = (options = {}) => {
     logger.error(`[API Call] Failed after ${maxRetries} attempts:`, finalError);
 
     throw lastError;
-  }, [maxRetries, retryDelay, timeout]);
+  }, [maxRetries, retryDelay, fetchWithTimeout]);
 
   /**
    * Reset do estado

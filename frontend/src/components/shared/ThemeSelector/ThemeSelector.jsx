@@ -54,16 +54,14 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
                 key={t.id}
                 className={`${styles.dropdownItem} ${theme === t.id ? styles.active : ''}`}
                 onClick={() => handleThemeChange(t.id)}
+                style={{
+                  '--preview-primary': t.preview.primary,
+                  '--preview-secondary': t.preview.secondary
+                }}
               >
                 <span className={styles.themePreview}>
-                  <span
-                    className={styles.previewDot}
-                    style={{ backgroundColor: t.preview.primary }}
-                  />
-                  <span
-                    className={styles.previewDot}
-                    style={{ backgroundColor: t.preview.secondary }}
-                  />
+                  <span className={styles.previewDot} style={{ backgroundColor: 'var(--preview-primary)' }} />
+                  <span className={styles.previewDot} style={{ backgroundColor: 'var(--preview-secondary)' }} />
                 </span>
                 <span className={styles.themeName}>{t.name}</span>
                 {theme === t.id && <span className={styles.checkmark}>✓</span>}
@@ -113,29 +111,27 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
             onClick={() => handleThemeChange(t.id)}
           >
             <div className={styles.cardHeader}>
-              <div className={styles.themePreviewLarge}>
-                <div
-                  className={styles.previewSquare}
-                  style={{ backgroundColor: t.preview.background }}
-                >
+              <div
+                className={styles.themePreviewLarge}
+                style={{
+                  '--preview-bg': t.preview.background,
+                  '--preview-primary': t.preview.primary,
+                  '--preview-secondary': t.preview.secondary
+                }}
+              >
+                <div className={styles.previewSquare} style={{ backgroundColor: 'var(--preview-bg)' }}>
                   <div
                     className={styles.previewAccent}
                     style={{
-                      borderColor: t.preview.primary,
+                      borderColor: 'var(--preview-primary)',
                       boxShadow: t.id === 'cyberpunk'
-                        ? `0 0 10px ${t.preview.primary}`
+                        ? `0 0 10px var(--preview-primary)`
                         : 'none'
                     }}
                   />
                   <div className={styles.previewContent}>
-                    <span
-                      className={styles.previewLine}
-                      style={{ backgroundColor: t.preview.primary }}
-                    />
-                    <span
-                      className={styles.previewLine}
-                      style={{ backgroundColor: t.preview.secondary }}
-                    />
+                    <span className={styles.previewLine} style={{ backgroundColor: 'var(--preview-primary)' }} />
+                    <span className={styles.previewLine} style={{ backgroundColor: 'var(--preview-secondary)' }} />
                   </div>
                 </div>
               </div>

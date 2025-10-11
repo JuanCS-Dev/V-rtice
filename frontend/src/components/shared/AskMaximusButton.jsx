@@ -118,11 +118,23 @@ export const AskMaximusButton = ({
 
       {/* Modal */}
       {showModal && (
-        <div className="ask-maximus-modal-overlay" onClick={handleClose}>
-          <div className="ask-maximus-modal" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="ask-maximus-modal-overlay" 
+          onClick={handleClose}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') handleClose();
+          }}
+          role="presentation"
+        >
+          <div 
+            className="ask-maximus-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ask-maximus-title"
+          >
             {/* Header */}
             <div className="modal-header">
-              <h3>🤖 Ask Maximus AI</h3>
+              <h3 id="ask-maximus-title">🤖 Ask Maximus AI</h3>
               <button className="modal-close" onClick={handleClose}>×</button>
             </div>
 
@@ -131,8 +143,9 @@ export const AskMaximusButton = ({
               {/* Prompt Input */}
               {!prompt && (
                 <div className="prompt-section">
-                  <label htmlFor="textarea-what-would-you-like-to-know-lsgy2">What would you like to know?</label>
-<textarea id="textarea-what-would-you-like-to-know-lsgy2"
+                  <label htmlFor="maximus-prompt-textarea">What would you like to know?</label>
+                  <textarea 
+                    id="maximus-prompt-textarea"
                     className="prompt-input"
                     placeholder="E.g., 'Analyze this data for threats', 'What should I do next?', 'Explain these results'..."
                     value={customPrompt}
@@ -145,16 +158,16 @@ export const AskMaximusButton = ({
 
               {prompt && (
                 <div className="prompt-section">
-                  <label>Question:</label>
-                  <div className="prompt-display">{prompt}</div>
+                  <label htmlFor="maximus-prompt-display">Question:</label>
+                  <div id="maximus-prompt-display" className="prompt-display">{prompt}</div>
                 </div>
               )}
 
               {/* Context Display */}
               {Object.keys(context).length > 0 && (
                 <div className="context-section">
-                  <label>Context provided:</label>
-                  <div className="context-display">
+                  <label htmlFor="maximus-context-display">Context provided:</label>
+                  <div id="maximus-context-display" className="context-display">
                     <pre>{JSON.stringify(context, null, 2).slice(0, 300)}...</pre>
                   </div>
                 </div>

@@ -331,14 +331,17 @@ const MetricsDetailedView = ({ metrics }) => {
       <div className="border border-yellow-400/30 rounded-lg bg-black/20 p-6">
         <h3 className="text-yellow-400 font-bold text-lg mb-4">GRÁFICO DE PERFORMANCE (24H)</h3>
         <div className="bg-black/40 rounded h-48 flex items-end justify-around p-4">
-          {Array.from({ length: 24 }, (_, i) => (
-            <div
-              key={i}
-              className="bg-yellow-400/50 w-4 rounded-t"
-              style={{ height: `${Math.random() * 80 + 20}%` }}
-              title={`${i}:00 - ${Math.floor(Math.random() * 100)}ms`}
-            ></div>
-          ))}
+          {Array.from({ length: 24 }, (_, i) => {
+            const randomHeight = Math.random() * 80 + 20;
+            return (
+              <div
+                key={i}
+                className="bg-yellow-400/50 w-4 rounded-t"
+                style={{ '--bar-height': `${randomHeight}%`, height: 'var(--bar-height)' }}
+                title={`${i}:00 - ${Math.floor(Math.random() * 100)}ms`}
+              ></div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -362,7 +365,7 @@ const MetricBar = ({ label, value, unit }) => {
       <div className="w-full bg-gray-700 rounded-full h-2">
         <div 
           className={`h-2 rounded-full ${getColor(value)}`}
-          style={{ width: `${value}%` }}
+          style={{ '--progress-width': `${value}%`, width: 'var(--progress-width)' }}
         ></div>
       </div>
     </div>

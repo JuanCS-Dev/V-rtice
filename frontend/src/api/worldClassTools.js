@@ -288,13 +288,14 @@ export const isResultActionable = (result) => {
 
 /**
  * Obtém badge de confidence level
+ * Retorna className para usar com utility classes
  */
 export const getConfidenceBadge = (confidence) => {
-  if (confidence >= 90) return { label: 'VERY HIGH', color: '#00ff00', icon: '🟢' };
-  if (confidence >= 75) return { label: 'HIGH', color: '#00ffff', icon: '🔵' };
-  if (confidence >= 50) return { label: 'MEDIUM', color: '#ffaa00', icon: '🟡' };
-  if (confidence >= 25) return { label: 'LOW', color: '#ff4000', icon: '🟠' };
-  return { label: 'VERY LOW', color: '#ff0040', icon: '🔴' };
+  if (confidence >= 90) return { label: 'VERY HIGH', className: 'confidence-high', icon: '🟢' };
+  if (confidence >= 75) return { label: 'HIGH', className: 'confidence-high', icon: '🔵' };
+  if (confidence >= 50) return { label: 'MEDIUM', className: 'confidence-medium', icon: '🟡' };
+  if (confidence >= 25) return { label: 'LOW', className: 'confidence-low', icon: '🟠' };
+  return { label: 'VERY LOW', className: 'confidence-low', icon: '🔴' };
 };
 
 /**

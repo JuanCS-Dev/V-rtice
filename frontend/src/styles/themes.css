@@ -9,6 +9,9 @@
  * 4. nord (futuro) - Paleta Nord minimalista
  */
 
+/* Import Enterprise Design Tokens */
+@import './tokens/enterprise-tokens.css';
+
 /* ============================================================================
    TEMA 1: CYBERPUNK (DEFAULT) - Current
    ============================================================================ */
