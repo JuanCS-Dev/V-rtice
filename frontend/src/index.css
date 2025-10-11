@@ -3,6 +3,9 @@
 /* Import Theme System - must come before Tailwind directives */
 @import './styles/themes.css';
 
+/* Import Utility Classes */
+@import './styles/utilities.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

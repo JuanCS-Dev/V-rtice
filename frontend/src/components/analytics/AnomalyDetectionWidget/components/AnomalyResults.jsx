@@ -18,21 +18,21 @@ const AnomalyResults = ({ result, dataInput }) => {
                 <h5><i className="fas fa-chart-bar"></i> Resumo da Análise</h5>
                 <div className={styles.summaryGrid}>
                     <div className={styles.summaryStat}>
-                        <span className={styles.statIcon} style={{ color: 'var(--color-critical)' }}><i className="fas fa-exclamation-circle"></i></span>
+                        <span className={`${styles.statIcon} icon-critical`}><i className="fas fa-exclamation-circle"></i></span>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>{result.anomalies_found || 0}</span>
                             <span className={styles.statLabel}>Anomalias Detectadas</span>
                         </div>
                     </div>
                     <div className={styles.summaryStat}>
-                        <span className={styles.statIcon} style={{ color: 'var(--color-analytics-primary)' }}><i className="fas fa-database"></i></span>
+                        <span className={`${styles.statIcon} icon-analytics`}><i className="fas fa-database"></i></span>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>{dataPointCount}</span>
                             <span className={styles.statLabel}>Pontos Analisados</span>
                         </div>
                     </div>
                     <div className={styles.summaryStat}>
-                        <span className={styles.statIcon} style={{ color: 'var(--color-warning)' }}><i className="fas fa-percentage"></i></span>
+                        <span className={`${styles.statIcon} icon-warning`}><i className="fas fa-percentage"></i></span>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>
                                 {result.anomalies_found && dataPointCount > 0
