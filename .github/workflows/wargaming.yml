@@ -1,0 +1,156 @@
+name: Wargaming Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'backend/services/auto_remediation/**'
+      - 'backend/services/oraculo_eureka/**'
+      - 'backend/services/wargaming_crisol/**'
+
+  workflow_dispatch:
+    inputs:
+      apv_id:
+        description: 'APV ID to validate'
+        required: true
+      patch_id:
+        description: 'Patch ID to validate'
+        required: true
+
+jobs:
+  wargaming-validation:
+    name: Two-Phase Wargaming Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+      
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+      
+      - name: Run Exploit Database Tests
+        run: |
+          cd backend/services/wargaming_crisol
+          pytest tests/test_exploit_database.py -v --tb=short
+      
+      - name: Run Two-Phase Simulator Tests
+        run: |
+          cd backend/services/wargaming_crisol
+          pytest tests/test_two_phase_simulator.py -v --tb=short
+      
+      - name: Load Exploit Database
+        id: load_exploits
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, 'backend/services/wargaming_crisol')
+          from exploit_database import load_exploit_database
+          
+          db = load_exploit_database()
+          stats = db.get_statistics()
+          print(f'Loaded {stats[\"total\"]} exploits')
+          print(f'CWE Coverage: {len(stats[\"cwe_coverage\"])}')
+          print(f'::set-output name=exploit_count::{stats[\"total\"]}')
+          "
+      
+      - name: Run Wargaming (if manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        id: wargaming
+        run: |
+          python scripts/run_wargaming.py \
+            --apv-id "${{ github.event.inputs.apv_id }}" \
+            --patch-id "${{ github.event.inputs.patch_id }}" \
+            --output /tmp/wargaming_result.json
+      
+      - name: Parse Wargaming Results
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          python -c "
+          import json
+          with open('/tmp/wargaming_result.json') as f:
+              result = json.load(f)
+          
+          print('=== WARGAMING RESULT ===')
+          print(f'APV: {result[\"apv_id\"]}')
+          print(f'CVE: {result[\"cve_id\"]}')
+          print(f'Exploit: {result[\"exploit_id\"]}')
+          print(f'Status: {result[\"status\"]}')
+          print(f'Patch Validated: {result[\"patch_validated\"]}')
+          print(f'Duration: {result[\"total_duration_seconds\"]}s')
+          print()
+          print(f'Phase 1: {\"✓\" if result[\"phase_1\"][\"phase_passed\"] else \"✗\"}')
+          print(f'Phase 2: {\"✓\" if result[\"phase_2\"][\"phase_passed\"] else \"✗\"}')
+          
+          # Fail if validation failed
+          if not result['patch_validated']:
+              print('ERROR: Patch validation failed!')
+              exit(1)
+          "
+      
+      - name: Run Regression Tests
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          cd backend
+          pytest tests/ -v --tb=short --maxfail=5
+      
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const exploitCount = '${{ steps.load_exploits.outputs.exploit_count }}';
+            
+            const body = `## 🎯 Wargaming Validation
+            
+            **Exploit Database**: ${exploitCount} exploits loaded ✅
+            
+            **Tests**: All wargaming tests passing ✅
+            
+            ℹ️ To run full wargaming validation, use workflow_dispatch with APV and Patch IDs.
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+      
+      - name: Upload Wargaming Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wargaming-results
+          path: |
+            /tmp/wargaming_result.json
+            /tmp/pytest_report.json
+          retention-days: 30
+      
+      - name: Notify Success
+        if: success() && github.event_name == 'workflow_dispatch'
+        run: |
+          echo "✅ Wargaming validation PASSED!"
+          echo "Patch is safe to deploy."
+      
+      - name: Notify Failure
+        if: failure()
+        run: |
+          echo "❌ Wargaming validation FAILED!"
+          echo "Do NOT deploy this patch!"
+          exit 1

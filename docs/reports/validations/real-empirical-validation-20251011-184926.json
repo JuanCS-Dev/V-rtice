@@ -1,0 +1,54 @@
+{
+  "timestamp": "2025-10-11T18:49:26.447062",
+  "total_tests": 2,
+  "completed": 2,
+  "skipped": 0,
+  "errors": 0,
+  "validated": 2,
+  "success_rate": 100.0,
+  "total_duration_seconds": 2.130617141723633,
+  "results": [
+    {
+      "test_name": "sql_injection",
+      "status": "completed",
+      "exploit_result": {
+        "exploit_id": "cwe_89_sql_injection",
+        "category": "sql_injection",
+        "status": "success",
+        "success": true,
+        "output": "Testing payload: 1' UNION SELECT NULL,NULL,NULL--...\n\u2713 SQL injection confirmed: 'union' found in response",
+        "error": null,
+        "duration_seconds": 0.03112006187438965,
+        "metadata": {
+          "payload": "1' UNION SELECT NULL,NULL,NULL--",
+          "indicator": "union",
+          "target_url": "http://localhost:9001/user"
+        }
+      },
+      "expected_vulnerable": true,
+      "validation_passed": true,
+      "duration_seconds": 0.06827759742736816
+    },
+    {
+      "test_name": "xss",
+      "status": "completed",
+      "exploit_result": {
+        "exploit_id": "cwe_79_xss",
+        "category": "xss",
+        "status": "success",
+        "success": true,
+        "output": "Testing XSS payload: <script>alert('XSS')</script>...\n\u2713 XSS vulnerability confirmed: payload reflected unescaped",
+        "error": null,
+        "duration_seconds": 0.02863764762878418,
+        "metadata": {
+          "payload": "<script>alert('XSS')</script>",
+          "target_url": "http://localhost:9002/search"
+        }
+      },
+      "expected_vulnerable": true,
+      "validation_passed": true,
+      "duration_seconds": 0.060009002685546875
+    }
+  ],
+  "overall_status": "\u2705 ALL TESTS PASSED"
+}

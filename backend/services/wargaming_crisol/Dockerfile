@@ -1,0 +1,29 @@
+# Wargaming Crisol Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies (including Docker CLI for Docker-in-Docker)
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY wargaming_crisol/requirements.txt /app/requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY wargaming_crisol /app
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Expose port
+EXPOSE 8026
+
+# Run application
+CMD ["python", "main.py"]

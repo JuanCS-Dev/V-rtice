@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-10-11T18:15:18.332530",
+  "total_tests": 5,
+  "successful": 0,
+  "failed": 5,
+  "success_rate": 0.0,
+  "avg_duration_seconds": 0.03522505760192871,
+  "results": [
+    {
+      "cve_id": "CVE-2024-SQL-INJECTION",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.05450916290283203,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: 'WargamingResult' object has no attribute 'phase_1'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-XSS",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.02932906150817871,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: 'WargamingResult' object has no attribute 'phase_1'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-CMD-INJECTION",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.02883768081665039,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: 'WargamingResult' object has no attribute 'phase_1'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-PATH-TRAVERSAL",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.03417706489562988,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: 'WargamingResult' object has no attribute 'phase_1'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-SSRF",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.02927231788635254,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: 'WargamingResult' object has no attribute 'phase_1'\"}"
+    }
+  ]
+}

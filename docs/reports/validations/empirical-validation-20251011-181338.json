@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-10-11T18:13:38.043498",
+  "total_tests": 5,
+  "successful": 0,
+  "failed": 5,
+  "success_rate": 0.0,
+  "avg_duration_seconds": 0.013273048400878906,
+  "results": [
+    {
+      "cve_id": "CVE-2024-SQL-INJECTION",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.0538487434387207,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: TwoPhaseSimulator.execute_wargaming() got an unexpected keyword argument 'target_url'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-XSS",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.0032880306243896484,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: TwoPhaseSimulator.execute_wargaming() got an unexpected keyword argument 'target_url'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-CMD-INJECTION",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.003057241439819336,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: TwoPhaseSimulator.execute_wargaming() got an unexpected keyword argument 'target_url'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-PATH-TRAVERSAL",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.003386974334716797,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: TwoPhaseSimulator.execute_wargaming() got an unexpected keyword argument 'target_url'\"}"
+    },
+    {
+      "cve_id": "CVE-2024-SSRF",
+      "success": false,
+      "patch_validated": false,
+      "phase_1_passed": false,
+      "phase_2_passed": false,
+      "duration_seconds": 0.002784252166748047,
+      "error": "HTTP 500: {\"detail\":\"Wargaming failed: TwoPhaseSimulator.execute_wargaming() got an unexpected keyword argument 'target_url'\"}"
+    }
+  ]
+}

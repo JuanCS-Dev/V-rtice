@@ -18,3 +18,22 @@ scrape_configs:
   - job_name: 'redis'
     static_configs:
       - targets: ['redis:6379']
+
+  # Adaptive Immunity System Metrics
+  - job_name: 'wargaming-crisol'
+    static_configs:
+      - targets: ['maximus-wargaming-crisol:8026']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  - job_name: 'maximus-eureka'
+    static_configs:
+      - targets: ['maximus-eureka:8036']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  - job_name: 'maximus-oraculo'
+    static_configs:
+      - targets: ['maximus-oraculo:8038']
+    metrics_path: /metrics
+    scrape_interval: 10s

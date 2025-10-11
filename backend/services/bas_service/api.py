@@ -15,13 +15,19 @@ of the Maximus AI system.
 """
 
 import asyncio
+import sys
+import time
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel
+
+# Add common modules to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from atomic_executor import AtomicExecutor
 from attack_techniques import AttackTechniques
@@ -29,7 +35,49 @@ from metrics import MetricsCollector
 from models import AttackResult, AttackSimulation, SimulationStatus
 from purple_team_engine import PurpleTeamEngine
 
+# Import observability
+try:
+    from backend.common.observability import (
+        setup_observability,
+        get_logger,
+        correlation_id_middleware,
+        create_metrics_endpoint,
+    )
+    OBSERVABILITY_AVAILABLE = True
+except ImportError:
+    OBSERVABILITY_AVAILABLE = False
+    print("⚠️  Observability module not available - running without metrics/structured logging")
+
+
+# Initialize observability
+if OBSERVABILITY_AVAILABLE:
+    obs_metrics = setup_observability(
+        service_name="bas_service",
+        version="1.0.0",
+        log_level="INFO",
+        log_format="json",
+        enable_business_metrics=True
+    )
+    logger = get_logger(__name__, service="bas")
+else:
+    # Fallback to print
+    obs_metrics = None
+    class MockLogger:
+        def info(self, msg, **kwargs): print(f"[INFO] {msg}")
+        def error(self, msg, **kwargs): print(f"[ERROR] {msg}")
+        def warning(self, msg, **kwargs): print(f"[WARN] {msg}")
+        def debug(self, msg, **kwargs): print(f"[DEBUG] {msg}")
+    logger = MockLogger()
+
+
 app = FastAPI(title="Maximus BAS Service", version="1.0.0")
+
+# Add correlation ID middleware
+if OBSERVABILITY_AVAILABLE:
+    @app.middleware("http")
+    async def add_correlation_id(request: Request, call_next):
+        return await correlation_id_middleware()(request, call_next)
+
 
 # Initialize BAS components
 atomic_executor = AtomicExecutor()
@@ -57,15 +105,15 @@ class StartSimulationRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the BAS Service."""
-    print("💥 Starting Maximus BAS Service...")
-    print("✅ Maximus BAS Service started successfully.")
+    logger.info("Starting Maximus BAS Service", extra={"version": "1.0.0"})
+    logger.info("BAS Service started successfully")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the BAS Service."""
-    print("👋 Shutting down Maximus BAS Service...")
-    print("🛑 Maximus BAS Service shut down.")
+    logger.info("Shutting down Maximus BAS Service")
+    logger.info("BAS Service shut down complete")
 
 
 @app.get("/health")
@@ -75,7 +123,20 @@ async def health_check() -> Dict[str, str]:
     Returns:
         Dict[str, str]: A dictionary indicating the service status.
     """
-    return {"status": "healthy", "message": "BAS Service is operational."}
+    if OBSERVABILITY_AVAILABLE and obs_metrics:
+        with obs_metrics.track_request("health"):
+            logger.debug("Health check called")
+            return {"status": "healthy", "message": "BAS Service is operational."}
+    else:
+        return {"status": "healthy", "message": "BAS Service is operational."}
+
+
+# Metrics endpoint
+if OBSERVABILITY_AVAILABLE and obs_metrics:
+    @app.get("/metrics")
+    async def metrics_endpoint():
+        """Prometheus metrics endpoint."""
+        return await create_metrics_endpoint(obs_metrics)()
 
 
 @app.post("/simulate", response_model=AttackSimulation)
@@ -88,19 +149,80 @@ async def start_simulation(request: StartSimulationRequest) -> AttackSimulation:
     Returns:
         AttackSimulation: The details of the started simulation.
     """
-    print(f"[API] Starting simulation: {request.attack_scenario} against {request.target_service}")
-    simulation_id = str(uuid.uuid4())
-    simulation = AttackSimulation(
-        id=simulation_id,
-        attack_scenario=request.attack_scenario,
-        target_service=request.target_service,
-        start_time=datetime.now().isoformat(),
-        status=SimulationStatus.RUNNING,
-        techniques_used=request.techniques or [],
-    )
-    # In a real scenario, this would trigger the PurpleTeamEngine to start the simulation
-    asyncio.create_task(purple_team_engine.run_simulation(simulation))
-    return simulation
+    start_time = time.time()
+    
+    # Track request with metrics
+    if OBSERVABILITY_AVAILABLE and obs_metrics:
+        context_manager = obs_metrics.track_request("simulate", method="POST")
+        context_manager.__enter__()
+    else:
+        context_manager = None
+    
+    try:
+        logger.info(
+            "Starting simulation",
+            extra={
+                "scenario": request.attack_scenario,
+                "target": request.target_service,
+                "duration": request.duration_seconds,
+                "techniques": request.techniques
+            }
+        )
+        
+        simulation_id = str(uuid.uuid4())
+        simulation = AttackSimulation(
+            id=simulation_id,
+            attack_scenario=request.attack_scenario,
+            target_service=request.target_service,
+            start_time=datetime.now().isoformat(),
+            status=SimulationStatus.RUNNING,
+            techniques_used=request.techniques or [],
+        )
+        
+        # In a real scenario, this would trigger the PurpleTeamEngine to start the simulation
+        asyncio.create_task(purple_team_engine.run_simulation(simulation))
+        
+        # Track business metric
+        if OBSERVABILITY_AVAILABLE and obs_metrics:
+            obs_metrics.track_business_operation(
+                operation_type="simulation_start",
+                status="success"
+            )
+        
+        logger.info(
+            "Simulation queued",
+            extra={"sim_id": simulation_id, "status": "running"}
+        )
+        
+        return simulation
+        
+    except Exception as e:
+        logger.error(
+            "Simulation failed to start",
+            extra={"error": str(e), "scenario": request.attack_scenario},
+            exc_info=True
+        )
+        
+        if OBSERVABILITY_AVAILABLE and obs_metrics:
+            obs_metrics.track_business_operation(
+                operation_type="simulation_start",
+                status="failure"
+            )
+        raise
+        
+    finally:
+        # Close context manager
+        if context_manager:
+            context_manager.__exit__(None, None, None)
+            
+            # Track total duration
+            duration = time.time() - start_time
+            if OBSERVABILITY_AVAILABLE and obs_metrics:
+                obs_metrics.track_business_operation(
+                    operation_type="simulation_lifecycle",
+                    status="completed",
+                    duration=duration
+                )
 
 
 @app.get("/simulation/{simulation_id}", response_model=AttackSimulation)
