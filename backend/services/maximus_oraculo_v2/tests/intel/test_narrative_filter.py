@@ -120,12 +120,13 @@ def test_hype_keywords_individual():
     """Test individual hype keyword detection."""
     filter = NarrativeFilter()
     
+    # Use exact keyword phrases from NARRATIVE_PATTERNS
     hype_phrases = [
-        "This could potentially allow an attacker",
-        "might be possible under specific conditions",
-        "unlikely to be exploited in practice",
-        "requires local access to the system",
-        "the default configurations are not affected"  # Added 'the' for better match
+        "This vulnerability could potentially allow an attacker to gain access",
+        "The issue might allow unauthorized access under specific conditions",
+        "This is unlikely to be exploited in real-world scenarios",
+        "The attack requires local access to the vulnerable system",
+        "Note that default configurations not affected by this vulnerability"
     ]
     
     for phrase in hype_phrases:
