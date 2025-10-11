@@ -27,10 +27,53 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
+import { useAPVStream } from '../../hooks/useAPVStream';
 import './Panels.css';
 import './AdaptiveImmunity.css';
 
 export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
+  // WEBSOCKET STREAM - Real-time APV detection
+  const {
+    status: wsStatus,
+    apvs: _liveApvs,
+    metrics: _liveMetrics,
+    isConnected,
+    error: _wsError,
+    reconnectAttempts
+  } = useAPVStream({
+    autoConnect: true,
+    onApv: (apv) => {
+      logger.info('[Oráculo] New vulnerability detected via WebSocket:', apv);
+      // Add to APV queue
+      setApvs(prev => [apv, ...prev].slice(0, 50)); // Keep last 50
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        totalVulnerabilities: prev.totalVulnerabilities + 1,
+        apvsGenerated: prev.apvsGenerated + 1,
+        criticalAPVs: apv.severity === 'CRITICAL' ? prev.criticalAPVs + 1 : prev.criticalAPVs
+      }));
+    },
+    onMetrics: (metrics) => {
+      logger.info('[Oráculo] Metrics update received:', metrics);
+      if (metrics.oraculo) {
+        setStats(prev => ({ ...prev, ...metrics.oraculo }));
+      }
+    },
+    onConnect: () => {
+      logger.info('[Oráculo] ✅ WebSocket connected');
+      setAiStatus?.(prev => ({ ...prev, oraculoStream: 'connected' }));
+    },
+    onDisconnect: () => {
+      logger.warn('[Oráculo] ⚠️ WebSocket disconnected');
+      setAiStatus?.(prev => ({ ...prev, oraculoStream: 'disconnected' }));
+    },
+    onError: (error) => {
+      logger.error('[Oráculo] ❌ WebSocket error:', error);
+      setAiStatus?.(prev => ({ ...prev, oraculoStream: 'error' }));
+    }
+  });
+
   // STATE
   const [viewMode, setViewMode] = useState('dashboard');
   const [stats, setStats] = useState({
@@ -193,6 +236,16 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
           <div className="banner-text">
             <span className="banner-title">ORÁCULO - CÉLULAS DENDRÍTICAS</span>
             <span className="banner-subtitle">Threat Intelligence Sentinel | Phases 1-2</span>
+          </div>
+          {/* WEBSOCKET STATUS INDICATOR */}
+          <div className="banner-websocket-status">
+            <span className="ws-label">Stream</span>
+            <div className={`ws-indicator ${wsStatus}`} title={wsStatus}>
+              {isConnected && <span className="ws-dot pulse-glow"></span>}
+              {wsStatus === 'reconnecting' && <span className="ws-text">Reconnecting... ({reconnectAttempts})</span>}
+              {wsStatus === 'error' && <span className="ws-text">Error</span>}
+              {wsStatus === 'connected' && <span className="ws-text">Live</span>}
+            </div>
           </div>
           <div className="banner-health">
             <span className="health-label">Coverage</span>

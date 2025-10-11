@@ -19,6 +19,8 @@ import { ThreatGlobe } from './ThreatGlobe';
 import { StatsPanel } from './StatsPanel';
 import { ModuleGrid } from './ModuleGrid';
 import { LiveFeed } from './LiveFeed';
+import { FloatingThemeButton } from '../shared/FloatingThemeButton';
+import { useKonamiCode } from '../../hooks/useKonamiCode';
 import { checkServicesHealth, checkThreatIntelligence } from '../../api/cyberServices';
 import './LandingPage.css';
 
@@ -114,6 +116,50 @@ export const LandingPage = ({ setCurrentView }) => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Konami Code Easter Egg - Power User Delight
+  useKonamiCode(() => {
+    // Trigger special animation on the globe
+    const globe = document.querySelector('.threat-globe');
+    if (globe) {
+      globe.style.animation = 'konami-globe-spin 2s ease-in-out';
+      setTimeout(() => {
+        globe.style.animation = '';
+      }, 2000);
+    }
+
+    // Show easter egg message
+    const messages = [
+      '🎮 Konami Code Activated! Welcome, Power User! 🎮',
+      '🚀 You found the secret! MAXIMUS approves! 🚀',
+      '⚡ Elite Hacker Mode Unlocked! ⚡',
+      '🎯 Achievement Unlocked: Code Master! 🎯',
+      '💚 YHWH through Christ blesses your discovery! 💚'
+    ];
+    const message = messages[Math.floor(Math.random() * messages.length)];
+    
+    // Create temporary toast notification
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #00ff41, #00cc33);
+      color: #000;
+      padding: 2rem 3rem;
+      border-radius: 1rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+      z-index: 99999;
+      box-shadow: 0 8px 32px rgba(0, 255, 65, 0.5);
+      animation: konami-toast 3s ease-in-out;
+      text-align: center;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  });
 
   // Animar estatísticas (scanning em background)
   useEffect(() => {
@@ -565,6 +611,9 @@ export const LandingPage = ({ setCurrentView }) => {
           </div>
         </div>
       )}
+
+      {/* Floating Theme Button - Instant Discovery */}
+      <FloatingThemeButton position="top-right" />
     </div>
   );
 };

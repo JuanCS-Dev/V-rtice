@@ -6,6 +6,10 @@
 /* Import Utility Classes */
 @import './styles/utilities.css';
 
+/* Import Mixins - PAGANI Quality */
+@import './styles/mixins/theme-transitions.css';
+@import './styles/mixins/micro-interactions.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -19,10 +19,52 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
+import { useAPVStream } from '../../hooks/useAPVStream';
 import './Panels.css';
 import './AdaptiveImmunity.css';
 
 export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
+  // WEBSOCKET STREAM - Real-time APV updates
+  const {
+    status: wsStatus,
+    apvs: _liveApvs,
+    metrics: _liveMetrics,
+    isConnected,
+    error: _wsError,
+    reconnectAttempts
+  } = useAPVStream({
+    autoConnect: true,
+    onApv: (apv) => {
+      logger.info('[Eureka] New APV received via WebSocket:', apv);
+      // Add to pending list
+      setPendingApvs(prev => [apv, ...prev]);
+    },
+    onPatch: (patch) => {
+      logger.info('[Eureka] Patch update received:', patch);
+      // Update remediation history
+      setRemediationHistory(prev => [patch, ...prev]);
+    },
+    onMetrics: (metrics) => {
+      logger.info('[Eureka] Metrics update received:', metrics);
+      // Update stats from metrics
+      if (metrics.eureka) {
+        setStats(prev => ({ ...prev, ...metrics.eureka }));
+      }
+    },
+    onConnect: () => {
+      logger.info('[Eureka] ✅ WebSocket connected');
+      setAiStatus?.(prev => ({ ...prev, eurekaStream: 'connected' }));
+    },
+    onDisconnect: () => {
+      logger.warn('[Eureka] ⚠️ WebSocket disconnected');
+      setAiStatus?.(prev => ({ ...prev, eurekaStream: 'disconnected' }));
+    },
+    onError: (error) => {
+      logger.error('[Eureka] ❌ WebSocket error:', error);
+      setAiStatus?.(prev => ({ ...prev, eurekaStream: 'error' }));
+    }
+  });
+
   // STATE
   const [viewMode, setViewMode] = useState('dashboard');
   const [stats, setStats] = useState({
@@ -40,7 +82,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
   const [pendingApvs, setPendingApvs] = useState([]);
   const [remediationHistory, setRemediationHistory] = useState([]);
   const [pullRequests, setPullRequests] = useState([]);
-  const [selectedApv, setSelectedApv] = useState(null);
+  const [_selectedApv, setSelectedApv] = useState(null);
   const [isRemediating, setIsRemediating] = useState(false);
   const [wargamingResults, setWargamingResults] = useState(null);
   const [liveWargaming, setLiveWargaming] = useState(null);
@@ -223,6 +265,16 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
           <div className="banner-text">
             <span className="banner-title">EUREKA - CÉLULAS T EFETORAS</span>
             <span className="banner-subtitle">Automated Vulnerability Response | Phases 3-5</span>
+          </div>
+          {/* WEBSOCKET STATUS INDICATOR */}
+          <div className="banner-websocket-status">
+            <span className="ws-label">Stream</span>
+            <div className={`ws-indicator ${wsStatus}`} title={wsStatus}>
+              {isConnected && <span className="ws-dot pulse-glow"></span>}
+              {wsStatus === 'reconnecting' && <span className="ws-text">Reconnecting... ({reconnectAttempts})</span>}
+              {wsStatus === 'error' && <span className="ws-text">Error</span>}
+              {wsStatus === 'connected' && <span className="ws-text">Live</span>}
+            </div>
           </div>
           <div className="banner-health">
             <span className="health-label">Health</span>
