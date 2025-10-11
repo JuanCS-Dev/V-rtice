@@ -944,6 +944,37 @@ class TIGFabric:
 
         return False
 
+    def _detect_network_partition(self) -> bool:
+        """
+        Detect if network is partitioned (graph disconnected).
+        
+        A network partition occurs when nodes split into isolated groups
+        that cannot communicate. This is detected via graph connectivity analysis.
+        
+        Returns:
+            True if network has 2+ disconnected components, False otherwise.
+        """
+        if len(self.nodes) < 2:
+            return False  # Cannot partition with <2 nodes
+        
+        # Build active connectivity graph (exclude isolated nodes)
+        active_nodes = [
+            node_id for node_id, health in self.node_health.items()
+            if not health.isolated and node_id in self.nodes
+        ]
+        
+        if len(active_nodes) < 2:
+            return False  # Not enough active nodes to partition
+        
+        # Create subgraph of active nodes
+        try:
+            active_graph = self.graph.subgraph(active_nodes)
+            num_components = nx.number_connected_components(active_graph)
+            return num_components > 1  # Partitioned if 2+ components
+        except Exception:
+            # If graph analysis fails, assume no partition (fail-safe)
+            return False
+
     def get_health_metrics(self) -> dict[str, Any]:
         """
         Get TIG health metrics for Safety Core integration.
@@ -958,6 +989,7 @@ class TIGFabric:
             - isolated_nodes: Nodes currently isolated
             - degraded_nodes: Nodes in degraded state
             - connectivity: Average connectivity ratio
+            - is_partitioned: Network partition detected
         """
         total_nodes = len(self.node_health)
         isolated_nodes = sum(1 for h in self.node_health.values() if h.isolated)
@@ -970,13 +1002,16 @@ class TIGFabric:
         else:
             connectivity = 0.0
 
+        # Detect network partition
+        is_partitioned = self._detect_network_partition()
+
         return {
             "total_nodes": total_nodes,
             "healthy_nodes": healthy_nodes,
             "isolated_nodes": isolated_nodes,
             "degraded_nodes": degraded_nodes,
             "connectivity": connectivity,
-            "is_partitioned": False,  # TODO: Implement partition detection
+            "is_partitioned": is_partitioned,
         }
 
     async def stop(self) -> None:
