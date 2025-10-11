@@ -27,13 +27,23 @@ from code_scanner import CodeScanner
 from oraculo import OraculoEngine
 from suggestion_generator import SuggestionGenerator
 
+# WebSocket support for Adaptive Immunity
+from api import websocket_router, initialize_stream_manager
+from websocket import APVStreamManager
+
 app = FastAPI(title="Maximus Oraculo Service", version="1.0.0")
+
+# Include WebSocket router
+app.include_router(websocket_router)
 
 # Initialize Oraculo components
 oraculo_engine = OraculoEngine()
 suggestion_generator = SuggestionGenerator()
 code_scanner = CodeScanner()
 auto_implementer = AutoImplementer()
+
+# WebSocket stream manager (initialized on startup)
+stream_manager: Optional[APVStreamManager] = None
 
 
 class PredictionRequest(BaseModel):
@@ -81,14 +91,33 @@ class ImplementationRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Oraculo Service."""
+    global stream_manager
+    
     print("🔮 Starting Maximus Oraculo Service...")
+    
+    # Initialize WebSocket APV Stream Manager
+    stream_manager = APVStreamManager(
+        kafka_bootstrap_servers="localhost:9092",
+        kafka_topic="maximus.adaptive-immunity.apv",
+    )
+    await stream_manager.start()
+    initialize_stream_manager(stream_manager)
+    
     print("✅ Maximus Oraculo Service started successfully.")
+    print("🌐 WebSocket endpoint: ws://localhost:8001/ws/adaptive-immunity")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Oraculo Service."""
+    global stream_manager
+    
     print("👋 Shutting down Maximus Oraculo Service...")
+    
+    # Stop stream manager
+    if stream_manager:
+        await stream_manager.stop()
+    
     print("🛑 Maximus Oraculo Service shut down.")
 
 
