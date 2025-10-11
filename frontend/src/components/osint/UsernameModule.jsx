@@ -108,8 +108,8 @@ const UsernameModule = () => {
         {/* Search Input */}
         <div className="space-y-4 mb-6">
           <div className="space-y-2">
-            <label className="text-purple-400/80 text-xs font-bold tracking-wider">USERNAME ALVO</label>
-            <input
+            <label htmlFor="input-username-alvo-fibyx" className="text-purple-400/80 text-xs font-bold tracking-wider">USERNAME ALVO</label>
+<input id="input-username-alvo-fibyx"
               className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono text-lg"
               placeholder="Digite o username..."
               value={username}

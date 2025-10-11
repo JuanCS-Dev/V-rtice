@@ -42,8 +42,8 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
         />
 
         <div className={styles.field}>
-          <label className={styles.label}>Template</label>
-          <select
+          <label htmlFor="select-template-cdc3b" className={styles.label}>Template</label>
+<select id="select-template-cdc3b"
             value={formData.template_id}
             onChange={(e) => setFormData({ ...formData, template_id: e.target.value })}
             className={styles.select}

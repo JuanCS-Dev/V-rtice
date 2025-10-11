@@ -213,8 +213,8 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
 
             <div className="upload-form">
               <div className="form-group-full">
-                <label>Caminho do Arquivo</label>
-                <input
+                <label htmlFor="input-caminho-do-arquivo-ajeqz">Caminho do Arquivo</label>
+<input id="input-caminho-do-arquivo-ajeqz"
                   type="text"
                   value={filePath}
                   onChange={(e) => setFilePath(e.target.value)}

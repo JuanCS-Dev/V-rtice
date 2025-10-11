@@ -106,8 +106,8 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
         {/* Input Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="space-y-1">
-            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Username</label>
-            <input
+            <label htmlFor="input-username-hsdk3" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Username</label>
+<input id="input-username-hsdk3"
               className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="john_doe_2024"
               value={targetData.username}
@@ -115,8 +115,8 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Email</label>
-            <input
+            <label htmlFor="input-email-pk67y" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Email</label>
+<input id="input-email-pk67y"
               className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="target@email.com"
               value={targetData.email}
@@ -124,8 +124,8 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Phone</label>
-            <input
+            <label htmlFor="input-phone-hr0u7" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Phone</label>
+<input id="input-phone-hr0u7"
               className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="+5562999999999"
               value={targetData.phone}
@@ -133,8 +133,8 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Name</label>
-            <input
+            <label htmlFor="input-name-nfgbz" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Name</label>
+<input id="input-name-nfgbz"
               className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="João Silva"
               value={targetData.name}
@@ -142,8 +142,8 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Location</label>
-            <input
+            <label htmlFor="input-location-jww46" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Location</label>
+<input id="input-location-jww46"
               className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="Goiânia, GO"
               value={targetData.location}
@@ -151,8 +151,8 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Context</label>
-            <input
+            <label htmlFor="input-context-2ndxh" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Context</label>
+<input id="input-context-2ndxh"
               className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
               placeholder="Security investigation"
               value={targetData.context}

@@ -207,8 +207,8 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
           <div className="control-form">
             <div className="form-row">
               <div className="form-group">
-                <label>Categoria de Foco</label>
-                <select
+                <label htmlFor="select-categoria-de-foco-u97eb">Categoria de Foco</label>
+<select id="select-categoria-de-foco-u97eb"
                   value={analysisConfig.focusCategory}
                   onChange={(e) => setAnalysisConfig({ ...analysisConfig, focusCategory: e.target.value })}
                   className="form-select"
@@ -222,8 +222,8 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
               </div>
 
               <div className="form-group">
-                <label>Máximo de Sugestões</label>
-                <input
+                <label htmlFor="input-m-ximo-de-sugest-es-whjen">Máximo de Sugestões</label>
+<input id="input-m-ximo-de-sugest-es-whjen"
                   type="number"
                   min="1"
                   max="20"
@@ -234,8 +234,8 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
               </div>
 
               <div className="form-group">
-                <label>Confiança Mínima</label>
-                <input
+                <label htmlFor="input-confian-a-m-nima-wzb2o">Confiança Mínima</label>
+<input id="input-confian-a-m-nima-wzb2o"
                   type="number"
                   min="0"
                   max="1"

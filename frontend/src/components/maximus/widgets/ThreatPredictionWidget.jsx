@@ -54,8 +54,8 @@ export const ThreatPredictionWidget = () => {
 
       <div className="widget-controls">
         <div className="control-group">
-          <label>Time Horizon (hours)</label>
-          <select value={timeHorizon} onChange={(e) => setTimeHorizon(Number(e.target.value))}>
+          <label htmlFor="select-time-horizon-hours-0p33e">Time Horizon (hours)</label>
+<select id="select-time-horizon-hours-0p33e" value={timeHorizon} onChange={(e) => setTimeHorizon(Number(e.target.value))}>
             <option value={12}>12h</option>
             <option value={24}>24h</option>
             <option value={48}>48h</option>
@@ -64,8 +64,8 @@ export const ThreatPredictionWidget = () => {
         </div>
 
         <div className="control-group">
-          <label>Min Confidence</label>
-          <select value={minConfidence} onChange={(e) => setMinConfidence(Number(e.target.value))}>
+          <label htmlFor="select-min-confidence-bs8yn">Min Confidence</label>
+<select id="select-min-confidence-bs8yn" value={minConfidence} onChange={(e) => setMinConfidence(Number(e.target.value))}>
             <option value={0.5}>50%</option>
             <option value={0.6}>60%</option>
             <option value={0.7}>70%</option>

@@ -89,8 +89,9 @@ const AnomalyDetectionWidget = () => {
         <div className="input-section">
           {/* Data Input */}
           <div className="form-group">
-            <label>Dados (separados por vírgula):</label>
+            <label htmlFor="anomaly-data-input">Dados (separados por vírgula):</label>
             <textarea
+              id="anomaly-data-input"
               className="analytics-textarea"
               placeholder="1.2, 1.3, 1.1, 15.7, 1.4, 1.3, 1.2, ..."
               value={dataInput}
@@ -105,8 +106,9 @@ const AnomalyDetectionWidget = () => {
 
           {/* Method Selection */}
           <div className="form-group">
-            <label>Método de Detecção:</label>
+            <label htmlFor="anomaly-method-select">Método de Detecção:</label>
             <select
+              id="anomaly-method-select"
               className="analytics-select"
               value={method}
               onChange={(e) => setMethod(e.target.value)}
@@ -120,8 +122,9 @@ const AnomalyDetectionWidget = () => {
 
           {/* Sensitivity Slider */}
           <div className="form-group">
-            <label>Sensibilidade: {(sensitivity * 100).toFixed(0)}%</label>
+            <label htmlFor="anomaly-sensitivity-slider">Sensibilidade: {(sensitivity * 100).toFixed(0)}%</label>
             <input
+              id="anomaly-sensitivity-slider"
               type="range"
               className="analytics-slider"
               min="0.01"

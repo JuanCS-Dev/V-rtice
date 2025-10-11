@@ -38,8 +38,8 @@ export const AwarenessForm = ({ onSubmit, loading }) => {
         />
 
         <div className={styles.field}>
-          <label className={styles.label}>Descrição</label>
-          <textarea
+          <label htmlFor="textarea-descri-o-1ytty" className={styles.label}>Descrição</label>
+<textarea id="textarea-descri-o-1ytty"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className={styles.textarea}
@@ -49,8 +49,8 @@ export const AwarenessForm = ({ onSubmit, loading }) => {
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Grupo Alvo</label>
-          <select
+          <label htmlFor="select-grupo-alvo-otmlo" className={styles.label}>Grupo Alvo</label>
+<select id="select-grupo-alvo-otmlo"
             value={formData.target_group}
             onChange={(e) => setFormData({ ...formData, target_group: e.target.value })}
             className={styles.select}
@@ -63,8 +63,8 @@ export const AwarenessForm = ({ onSubmit, loading }) => {
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Nível de Dificuldade</label>
-          <select
+          <label htmlFor="select-n-vel-de-dificuldade-ch0xx" className={styles.label}>Nível de Dificuldade</label>
+<select id="select-n-vel-de-dificuldade-ch0xx"
             value={formData.difficulty_level}
             onChange={(e) => setFormData({ ...formData, difficulty_level: e.target.value })}
             className={styles.select}

@@ -172,8 +172,8 @@ export const AttackMatrix = ({
                 <div className="space-y-4">
                   {/* Target Host */}
                   <div>
-                    <label className="text-cyan-400/60 text-xs mb-2 block">TARGET HOST</label>
-                    <input
+                    <label htmlFor="input-target-host-iga50" className="text-cyan-400/60 text-xs mb-2 block">TARGET HOST</label>
+<input id="input-target-host-iga50"
                       type="text"
                       value={simulationConfig.targetHost}
                       onChange={(e) => setSimulationConfig({ ...simulationConfig, targetHost: e.target.value })}

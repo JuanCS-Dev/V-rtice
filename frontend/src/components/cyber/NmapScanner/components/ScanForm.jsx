@@ -39,8 +39,8 @@ export const ScanForm = ({
         />
 
         <div className={styles.field}>
-          <label className={styles.label}>Perfil de Scan</label>
-          <select
+          <label htmlFor="select-perfil-de-scan-izv4s" className={styles.label}>Perfil de Scan</label>
+<select id="select-perfil-de-scan-izv4s"
             value={selectedProfile}
             onChange={(e) => setSelectedProfile(e.target.value)}
             className={styles.select}

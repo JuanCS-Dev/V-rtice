@@ -207,8 +207,8 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
 
           <div className="config-form">
             <div className="form-group">
-              <label className="form-label">Target</label>
-              <input
+              <label htmlFor="input-target-j0gb6" className="form-label">Target</label>
+<input id="input-target-j0gb6"
                 type="text"
                 className="form-input"
                 placeholder={currentWorkflow?.placeholder || 'Enter target...'}
@@ -221,8 +221,8 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
 
             {workflowType === 'full_assessment' && (
               <div className="form-group">
-                <label className="form-label">Scan Type</label>
-                <select
+                <label htmlFor="select-scan-type-fm3d8" className="form-label">Scan Type</label>
+<select id="select-scan-type-fm3d8"
                   className="form-select"
                   value={options.scanType || 'quick'}
                   onChange={(e) => setOptions({ ...options, scanType: e.target.value })}
@@ -238,8 +238,8 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
 
             {workflowType === 'osint_investigation' && (
               <div className="form-group">
-                <label className="form-label">Target Type</label>
-                <select
+                <label htmlFor="select-target-type-famq6" className="form-label">Target Type</label>
+<select id="select-target-type-famq6"
                   className="form-select"
                   value={options.type || 'email'}
                   onChange={(e) => setOptions({ ...options, type: e.target.value })}
@@ -256,8 +256,8 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
             {workflowType === 'purple_team' && (
               <>
                 <div className="form-group">
-                  <label className="form-label">Target Host</label>
-                  <input
+                  <label htmlFor="input-target-host-s4dp6" className="form-label">Target Host</label>
+<input id="input-target-host-s4dp6"
                     type="text"
                     className="form-input"
                     placeholder="10.0.0.1"

@@ -105,8 +105,8 @@ export const SessionManager = ({
 
             {/* Target Host */}
             <div>
-              <label className="text-red-400/60 text-xs mb-2 block">TARGET HOST</label>
-              <input
+              <label htmlFor="input-target-host-rpu34" className="text-red-400/60 text-xs mb-2 block">TARGET HOST</label>
+<input id="input-target-host-rpu34"
                 type="text"
                 value={sessionConfig.targetHost}
                 onChange={(e) => setSessionConfig({ ...sessionConfig, targetHost: e.target.value })}
@@ -117,8 +117,8 @@ export const SessionManager = ({
 
             {/* Payload */}
             <div>
-              <label className="text-red-400/60 text-xs mb-2 block">PAYLOAD</label>
-              <select
+              <label htmlFor="select-payload-izf64" className="text-red-400/60 text-xs mb-2 block">PAYLOAD</label>
+<select id="select-payload-izf64"
                 value={sessionConfig.payload}
                 onChange={(e) => setSessionConfig({ ...sessionConfig, payload: e.target.value })}
                 className="w-full bg-black/30 border border-red-400/30 rounded px-3 py-2 text-red-400 text-sm focus:outline-none focus:border-red-400 transition-all"
@@ -132,8 +132,8 @@ export const SessionManager = ({
             {/* LHOST / LPORT */}
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-red-400/60 text-xs mb-2 block">LHOST</label>
-                <input
+                <label htmlFor="input-lhost-v0xnz" className="text-red-400/60 text-xs mb-2 block">LHOST</label>
+<input id="input-lhost-v0xnz"
                   type="text"
                   value={sessionConfig.lhost}
                   onChange={(e) => setSessionConfig({ ...sessionConfig, lhost: e.target.value })}
@@ -142,8 +142,8 @@ export const SessionManager = ({
                 />
               </div>
               <div>
-                <label className="text-red-400/60 text-xs mb-2 block">LPORT</label>
-                <input
+                <label htmlFor="input-lport-l3muc" className="text-red-400/60 text-xs mb-2 block">LPORT</label>
+<input id="input-lport-l3muc"
                   type="text"
                   value={sessionConfig.lport}
                   onChange={(e) => setSessionConfig({ ...sessionConfig, lport: e.target.value })}

@@ -131,8 +131,8 @@ export const AskMaximusButton = ({
               {/* Prompt Input */}
               {!prompt && (
                 <div className="prompt-section">
-                  <label>What would you like to know?</label>
-                  <textarea
+                  <label htmlFor="textarea-what-would-you-like-to-know-lsgy2">What would you like to know?</label>
+<textarea id="textarea-what-would-you-like-to-know-lsgy2"
                     className="prompt-input"
                     placeholder="E.g., 'Analyze this data for threats', 'What should I do next?', 'Explain these results'..."
                     value={customPrompt}
