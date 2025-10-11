@@ -456,7 +456,7 @@ export const OnionTracer = ({
                   {node.isMalicious !== undefined && (
                     <>
                       <br />
-                      <small style={{ color: node.isMalicious ? '#ff3366' : '#00ff88' }}>
+                      <small className={node.isMalicious ? 'malicious' : 'safe'}>
                         {node.isMalicious ? '⚠️ MALICIOUS' : '✓ CLEAN'}
                       </small>
                     </>
@@ -535,7 +535,7 @@ export const OnionTracer = ({
                 <span className={styles.resultLabel}>Threat Score:</span>
                 <span
                   className={styles.resultValue}
-                  style={{ color: realIp.threatScore > 60 ? '#ff3366' : '#00ff88' }}
+                  className={realIp.threatScore > 60 ? 'threat-high' : 'threat-safe'}
                 >
                   {realIp.threatScore}/100
                 </span>
@@ -562,7 +562,7 @@ export const OnionTracer = ({
                 <span className={styles.resultLabel}>Status:</span>
                 <span
                   className={styles.resultValue}
-                  style={{ color: realIp.isMalicious ? '#ff3366' : '#00ff88', fontWeight: 'bold' }}
+                  className={realIp.isMalicious ? 'malicious font-bold' : 'safe font-bold'}
                 >
                   {realIp.isMalicious ? '⚠️ MALICIOUS DETECTED' : '✓ CLEAN'}
                 </span>
