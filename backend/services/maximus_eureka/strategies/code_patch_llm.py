@@ -229,7 +229,7 @@ class CodePatchLLMStrategy(BaseStrategy):
             files_modified: List[str] = []
             
             for location in confirmation.vulnerable_locations[:5]:  # Limit to first 5
-                logger.debug(f"Processing location: {location.file_path}:{location.line_number}")
+                logger.debug(f"Processing location: {location.file_path}:{location.line_start}")
                 
                 # Read file and extract context
                 file_path = self.codebase_root / location.file_path
@@ -276,8 +276,10 @@ class CodePatchLLMStrategy(BaseStrategy):
                 diff = self._extract_diff_from_response(response.content)
                 if diff:
                     location_patches.append(diff)
-                    if location.file_path not in files_modified:
-                        files_modified.append(location.file_path)
+                    # Convert Path to string for files_modified
+                    file_path_str = str(location.file_path)
+                    if file_path_str not in files_modified:
+                        files_modified.append(file_path_str)
                 else:
                     logger.warning(f"No valid diff found in LLM response for {location.file_path}")
             
@@ -336,14 +338,15 @@ class CodePatchLLMStrategy(BaseStrategy):
             lines = file_path.read_text().splitlines()
             
             # Calculate line ranges (1-indexed in location, 0-indexed in list)
-            line_idx = location.line_number - 1
-            start_idx = max(0, line_idx - self.context_lines)
-            end_idx = min(len(lines), line_idx + location.line_count + self.context_lines)
+            line_start_idx = location.line_start - 1
+            line_end_idx = location.line_end  # line_end is inclusive, so no -1 needed
+            start_idx = max(0, line_start_idx - self.context_lines)
+            end_idx = min(len(lines), line_end_idx + self.context_lines)
             
             # Extract sections
-            context_before = "\n".join(lines[start_idx:line_idx])
-            vulnerable_code = "\n".join(lines[line_idx:line_idx + location.line_count])
-            context_after = "\n".join(lines[line_idx + location.line_count:end_idx])
+            context_before = "\n".join(lines[start_idx:line_start_idx])
+            vulnerable_code = "\n".join(lines[line_start_idx:line_end_idx])
+            context_after = "\n".join(lines[line_end_idx:end_idx])
             
             return vulnerable_code, context_before, context_after
             

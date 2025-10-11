@@ -68,9 +68,10 @@ async def test_dependency_upgrade_can_handle_no_manifest(tmp_path, sample_apv_wi
 async def test_dependency_upgrade_apply_strategy_pyproject(tmp_path, sample_apv_with_fix):
     """Test apply_strategy generates correct diff for pyproject.toml."""
     # Create pyproject.toml with vulnerable package
+    # IMPORTANT: Use same package name as in fixture (test-package)
     pyproject_content = '''[tool.poetry.dependencies]
 python = "^3.11"
-requests = "^2.28.0"
+test-package = "^1.0.0"
 flask = "^2.0.0"
 '''
     (tmp_path / "pyproject.toml").write_text(pyproject_content)

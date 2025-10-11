@@ -120,7 +120,7 @@ class EurekaMetrics:
         elif status == ConfirmationStatus.ERROR:
             self.apvs_failed += 1
     
-    def record_patch(self, patch: Optional[Patch], strategy_used: str) -> void:
+    def record_patch(self, patch: Optional[Patch], strategy_used: str) -> None:
         """
         Record patch generation metrics.
         

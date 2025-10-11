@@ -141,27 +141,30 @@ async def test_code_patch_llm_confidence_calculation(tmp_path, sample_apv_with_p
         status=ConfirmationStatus.CONFIRMED,
         vulnerable_locations=[
             VulnerableLocation(
-                file_path="test1.py",
+                file_path=Path("test1.py"),
                 line_start=10,
                 line_end=10,
                 pattern_matched="test",
                 code_snippet="query = f'SELECT * FROM users WHERE id={id}'",
             ),
             VulnerableLocation(
-                file_path="test2.py",
-                line_number=20,
+                file_path=Path("test2.py"),
+                line_start=20,
+                line_end=20,
                 pattern_matched="test",
                 code_snippet="query = f'SELECT * FROM users WHERE id={id}'",
             ),
             VulnerableLocation(
-                file_path="test3.py",
-                line_number=30,
+                file_path=Path("test3.py"),
+                line_start=30,
+                line_end=30,
                 pattern_matched="test",
                 code_snippet="query = f'SELECT * FROM users WHERE id={id}'",
             ),
             VulnerableLocation(
-                file_path="test4.py",
-                line_number=40,
+                file_path=Path("test4.py"),
+                line_start=40,
+                line_end=40,
                 pattern_matched="test",
                 code_snippet="query = f'SELECT * FROM users WHERE id={id}'",
             ),
@@ -307,6 +310,7 @@ def sample_confirmation_with_locations():
         ConfirmationStatus,
         VulnerableLocation,
     )
+    from pathlib import Path
     
     return ConfirmationResult(
         apv_id="CVE-2024-99999",
@@ -314,11 +318,11 @@ def sample_confirmation_with_locations():
         status=ConfirmationStatus.CONFIRMED,
         vulnerable_locations=[
             VulnerableLocation(
-                file_path="test.py",
+                file_path=Path("test.py"),
                 line_start=10,
                 line_end=10,
-                pattern_matched="test",
                 code_snippet='query = f"SELECT * FROM users WHERE id={user_id}"',
+                pattern_matched='f-string SQL injection',
             )
         ],
     )
