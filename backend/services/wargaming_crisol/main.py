@@ -24,9 +24,10 @@ Glory to YHWH - Validator of protection
 import asyncio
 import logging
 import os
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Response
 from pydantic import BaseModel
 from typing import Optional
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
 from exploit_database import load_exploit_database, get_exploit_for_apv
 from two_phase_simulator import TwoPhaseSimulator
@@ -38,6 +39,38 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Prometheus Metrics
+wargaming_total = Counter(
+    'wargaming_executions_total',
+    'Total number of wargaming executions',
+    ['status']
+)
+patch_validated_total = Counter(
+    'patch_validated_total',
+    'Total number of patches validated successfully'
+)
+patch_rejected_total = Counter(
+    'patch_rejected_total',
+    'Total number of patches rejected'
+)
+wargaming_duration = Histogram(
+    'wargaming_duration_seconds',
+    'Duration of wargaming execution in seconds',
+    buckets=[10, 30, 60, 120, 300, 600]
+)
+exploit_success_rate = Gauge(
+    'exploit_phase1_success_rate',
+    'Success rate of Phase 1 exploit execution'
+)
+patch_validation_success_rate = Gauge(
+    'patch_validation_success_rate',
+    'Success rate of patch validation (Phase 2 fail)'
+)
+active_wargaming_sessions = Gauge(
+    'active_wargaming_sessions',
+    'Number of currently active wargaming sessions'
+)
 
 # FastAPI app
 app = FastAPI(
@@ -80,6 +113,16 @@ async def health():
     }
 
 
+# Prometheus metrics endpoint
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint"""
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST
+    )
+
+
 # WebSocket endpoint for real-time updates
 @app.websocket("/ws/wargaming")
 async def wargaming_websocket(websocket: WebSocket):
@@ -101,42 +144,54 @@ async def execute_wargaming(request: WargamingRequest):
     """
     logger.info(f"🎯 Wargaming request: APV={request.apv_id}, Patch={request.patch_id}")
     
-    # Load exploit database
-    db = load_exploit_database()
-    
-    # Mock APV (in production: load from database)
-    from unittest.mock import Mock
-    apv = Mock()
-    apv.apv_id = request.apv_id
-    apv.cve_id = request.cve_id or f"CVE-{request.apv_id}"
-    apv.cwe_ids = ["CWE-89"]  # Example
-    
-    # Mock Patch
-    patch = Mock()
-    patch.patch_id = request.patch_id
-    patch.unified_diff = "..."
-    
-    # Find exploit
-    exploit = get_exploit_for_apv(apv, db)
-    
-    if not exploit:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No exploit found for {apv.cve_id}"
-        )
-    
-    logger.info(f"✓ Using exploit: {exploit.name}")
-    
-    # Execute wargaming
-    simulator = TwoPhaseSimulator()
+    active_wargaming_sessions.inc()
     
     try:
-        result = await simulator.execute_wargaming(
-            apv=apv,
-            patch=patch,
-            exploit=exploit,
-            target_url=request.target_url
-        )
+        # Load exploit database
+        db = load_exploit_database()
+        
+        # Mock APV (in production: load from database)
+        from unittest.mock import Mock
+        apv = Mock()
+        apv.apv_id = request.apv_id
+        apv.cve_id = request.cve_id or f"CVE-{request.apv_id}"
+        apv.cwe_ids = ["CWE-89"]  # Example
+        
+        # Mock Patch
+        patch = Mock()
+        patch.patch_id = request.patch_id
+        patch.unified_diff = "..."
+        
+        # Find exploit
+        exploit = get_exploit_for_apv(apv, db)
+        
+        if not exploit:
+            active_wargaming_sessions.dec()
+            raise HTTPException(
+                status_code=404,
+                detail=f"No exploit found for {apv.cve_id}"
+            )
+        
+        logger.info(f"✓ Using exploit: {exploit.name}")
+        
+        # Execute wargaming
+        simulator = TwoPhaseSimulator()
+        
+        with wargaming_duration.time():
+            result = await simulator.execute_wargaming(
+                apv=apv,
+                patch=patch,
+                exploit=exploit,
+                target_base_url=request.target_url
+            )
+        
+        # Update metrics
+        wargaming_total.labels(status=result.status.value).inc()
+        
+        if result.patch_validated:
+            patch_validated_total.inc()
+        else:
+            patch_rejected_total.inc()
         
         # Stream result to WebSocket clients
         await wargaming_ws_manager.broadcast(
@@ -146,20 +201,30 @@ async def execute_wargaming(request: WargamingRequest):
         
         logger.info(f"✅ Wargaming complete: {result.summary()}")
         
+        active_wargaming_sessions.dec()
+        
         return WargamingResponse(
             apv_id=result.apv_id,
             cve_id=result.cve_id,
             exploit_id=result.exploit_id,
             patch_validated=result.patch_validated,
             status=result.status.value,
-            phase_1_passed=result.phase_1.phase_passed,
-            phase_2_passed=result.phase_2.phase_passed,
+            phase_1_passed=result.phase_1_result.phase_passed,
+            phase_2_passed=result.phase_2_result.phase_passed,
             total_duration_seconds=result.total_duration_seconds,
             message=result.summary()
         )
         
+    except HTTPException:
+        active_wargaming_sessions.dec()
+        raise
+        
     except Exception as e:
         logger.error(f"❌ Wargaming failed: {e}")
+        
+        # Update metrics
+        wargaming_total.labels(status="error").inc()
+        active_wargaming_sessions.dec()
         
         # Stream error
         await wargaming_ws_manager.stream_error(apv.apv_id, str(e))

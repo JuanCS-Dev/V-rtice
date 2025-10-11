@@ -2368,6 +2368,8 @@ services:
       context: ./backend/services
       dockerfile: wargaming_crisol/Dockerfile
     container_name: maximus-wargaming-crisol
+    ports:
+      - "8026:8026"
     depends_on:
       - postgres-immunity
     environment:
