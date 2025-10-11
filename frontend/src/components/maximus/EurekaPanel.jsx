@@ -1,34 +1,46 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
- * EUREKA PANEL - Deep Malware Analysis Interface
+ * EUREKA PANEL - Resposta Automatizada (Adaptive Immunity Fase 3-5)
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Interface para análise profunda de malware:
- * - Upload e análise de arquivos suspeitos
- * - Detecção de padrões maliciosos (40+ patterns)
- * - Extração de IOCs (IPs, domains, hashes, etc.)
- * - Geração de playbooks de resposta
- * - Visualização de resultados de análise
+ * EUREKA = CÉLULAS T EFETORAS do Active Immune System
+ * Biologia: Células T eliminam células infectadas com precisão cirúrgica
+ * Digital: Recebe APVs do Oráculo, gera contramedidas, valida e auto-remedeia
+ *
+ * FASES:
+ * 3. FORMULAÇÃO RESPOSTA: Confirma vuln (ast-grep), gera patch (LLM/upgrade)
+ * 4. CRISOL WARGAMING: Provisiona staging, testa regressão, simula ataque
+ * 5. INTERFACE HITL: Pull Request automatizado com validação completa
+ *
+ * MÉTRICAS:
+ * - Taxa Auto-Remediação: 70%+ target
+ * - Patch Validation Rate: 100% (two-phase attack simulation)
+ * - Regression Test Pass Rate: >95%
+ * - Mean Time To PR: <15min
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import logger from '@/utils/logger';
 import './Panels.css';
 
 export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
-  const [analysisMode, setAnalysisMode] = useState('upload'); // 'upload' or 'results'
-  const [_selectedFile, _setSelectedFile] = useState(null);
-  const [filePath, setFilePath] = useState('');
-  const [generatePlaybook, setGeneratePlaybook] = useState(true);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState(null);
+  // === STATE MANAGEMENT ===
+  const [viewMode, setViewMode] = useState('dashboard'); // dashboard | pending | history | wargaming
   const [stats, setStats] = useState({
-    totalAnalyses: 0,
-    threatsDetected: 0,
-    playbooksGenerated: 0,
-    avgThreatScore: 0
+    totalRemediations: 0,
+    successfulPatches: 0,
+    prsGenerated: 0,
+    avgTimeToRemedy: 0,
+    autoRemediationRate: 0,
+    regressionTestPassRate: 0,
+    patchValidationRate: 0,
+    lastRemediationTime: null
   });
-  const [patterns, setPatterns] = useState([]);
+  const [pendingApvs, setPendingApvs] = useState([]);
+  const [remediationHistory, setRemediationHistory] = useState([]);
+  const [selectedApv, setSelectedApv] = useState(null);
+  const [isRemediating, setIsRemediating] = useState(false);
+  const [wargamingResults, setWargamingResults] = useState(null);
 
   // Fetch Eureka stats
   useEffect(() => {
