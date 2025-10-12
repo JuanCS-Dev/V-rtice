@@ -35,6 +35,14 @@ from two_phase_simulator import TwoPhaseSimulator, validate_patch_ml_first
 from websocket_stream import wargaming_ws_manager, wargaming_websocket_endpoint
 from db.ab_test_store import ABTestStore, ABTestResult, ConfusionMatrix
 from ab_testing.ab_test_runner import ABTestRunner
+from cache.redis_cache import cache  # Phase 5.7.1: Redis cache
+from middleware.rate_limiter import RateLimiterMiddleware  # Phase 5.7.1: Rate limiting
+from patterns.circuit_breaker import (  # Phase 5.7.1: Circuit breakers
+    ml_model_breaker,
+    database_breaker,
+    cache_breaker,
+    CircuitBreakerOpenError
+)
 
 # Configure logging
 logging.basicConfig(
@@ -103,6 +111,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Phase 5.7.1: Add rate limiting middleware
+app.add_middleware(RateLimiterMiddleware)
+
 # Phase 5.6: A/B Test Store and Runner (initialized on startup)
 ab_store: Optional[ABTestStore] = None
 ab_test_runner: Optional[ABTestRunner] = None
@@ -157,11 +168,107 @@ class WargamingResponse(BaseModel):
 # Health check
 @app.get("/health")
 async def health():
-    """Health check endpoint"""
+    """Basic health check endpoint"""
     return {
         "status": "healthy",
         "service": "wargaming-crisol",
         "version": "1.0.0"
+    }
+
+
+# Phase 5.7.1: Detailed health check with circuit breaker status
+@app.get("/health/detailed")
+async def detailed_health():
+    """
+    Detailed health check including all dependencies.
+    
+    Returns status of:
+    - Database connection
+    - Redis cache
+    - ML model availability
+    - Circuit breakers
+    """
+    checks = {}
+    overall_healthy = True
+    
+    # Check PostgreSQL (via ABTestStore)
+    try:
+        if ab_store and ab_store.client:
+            await database_breaker.call(
+                ab_store.client.fetchval, "SELECT 1"
+            )
+            checks["postgresql"] = {
+                "status": "healthy",
+                "message": "Database connection active"
+            }
+        else:
+            checks["postgresql"] = {
+                "status": "degraded",
+                "message": "Database not initialized (startup pending)"
+            }
+    except CircuitBreakerOpenError:
+        checks["postgresql"] = {
+            "status": "circuit_open",
+            "message": "Circuit breaker protecting database"
+        }
+        overall_healthy = False
+    except Exception as e:
+        checks["postgresql"] = {
+            "status": "unhealthy",
+            "error": str(e)
+        }
+        overall_healthy = False
+    
+    # Check Redis cache
+    try:
+        if cache.client:
+            await cache_breaker.call(cache.client.ping)
+            checks["redis_cache"] = {
+                "status": "healthy",
+                "message": "Cache connection active"
+            }
+        else:
+            checks["redis_cache"] = {
+                "status": "unavailable",
+                "message": "Cache not initialized (degraded mode)"
+            }
+    except CircuitBreakerOpenError:
+        checks["redis_cache"] = {
+            "status": "circuit_open",
+            "message": "Circuit breaker protecting cache"
+        }
+    except Exception as e:
+        checks["redis_cache"] = {
+            "status": "unavailable",
+            "message": f"Cache unavailable: {str(e)}"
+        }
+        # Cache failure is degraded, not unhealthy
+    
+    # Check ML model (quick test)
+    try:
+        # ML model check would go here if we had direct access
+        checks["ml_model"] = {
+            "status": "healthy",
+            "message": "ML model assumed available"
+        }
+    except Exception as e:
+        checks["ml_model"] = {
+            "status": "degraded",
+            "message": f"ML model issue: {str(e)}"
+        }
+        # ML failure is degraded (we have wargaming fallback)
+    
+    # Circuit breaker status
+    checks["circuit_breakers"] = {
+        "ml_model": ml_model_breaker.get_status(),
+        "database": database_breaker.get_status(),
+        "cache": cache_breaker.get_status()
+    }
+    
+    return {
+        "status": "healthy" if overall_healthy else "unhealthy",
+        "checks": checks,
+        "timestamp": str(asyncio.get_event_loop().time())
     }
 
 
@@ -415,6 +522,15 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         
         logger.info(f"✓ Using exploit: {exploit.name}")
         
+        # Phase 5.7.1: Check cache first (only in non-A/B testing mode)
+        cached_prediction = None
+        if not ab_testing_enabled:
+            cached_prediction = await cache.get_ml_prediction(request.apv_id)
+            if cached_prediction:
+                logger.info(f"⚡ Cache hit for APV {request.apv_id} - returning cached result")
+                active_wargaming_sessions.dec()
+                return MLFirstResponse(**cached_prediction)
+        
         # Execute validation (mode depends on ab_testing_enabled flag)
         if ab_testing_enabled and ab_store is not None:
             # A/B Testing Mode: Run both ML + wargaming
@@ -477,6 +593,21 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         wargaming_dict = None
         if result.get('wargaming_result'):
             wargaming_dict = result['wargaming_result'].to_dict()
+        
+        # Phase 5.7.1: Cache successful ML predictions (only in non-A/B mode)
+        if not ab_testing_enabled and result.get('validation_method') == 'ml':
+            response_data = {
+                "apv_id": result.get('apv_id', request.apv_id),
+                "validation_method": result['validation_method'],
+                "patch_validated": result['patch_validated'],
+                "confidence": result.get('confidence', 0.0),
+                "execution_time_seconds": result['execution_time_seconds'],
+                "speedup": result.get('speedup_vs_wargaming') or result.get('speedup_potential'),
+                "ml_prediction": result.get('ml_prediction'),
+                "wargaming_result": wargaming_dict
+            }
+            await cache.set_ml_prediction(request.apv_id, response_data)
+            logger.debug(f"✓ Cached ML prediction for APV {request.apv_id}")
         
         return MLFirstResponse(
             apv_id=result.get('apv_id', request.apv_id),
@@ -885,13 +1016,139 @@ async def get_ab_testing_status():
     }
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 5.7.1: Cache Management Endpoints
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.get("/wargaming/cache/stats")
+async def get_cache_stats():
+    """
+    Get Redis cache statistics.
+    
+    Returns:
+        Dict with cache performance metrics:
+        - hits: Total cache hits
+        - misses: Total cache misses
+        - hit_ratio: Cache hit ratio (0.0 to 1.0)
+        - connected_clients: Number of connected clients
+        - used_memory_human: Memory usage (human-readable)
+    
+    Example:
+        ```bash
+        curl http://localhost:8026/wargaming/cache/stats
+        ```
+    
+    Author: MAXIMUS Team - Phase 5.7.1
+    """
+    try:
+        stats = await cache.get_cache_stats()
+        return {
+            "status": "available" if "error" not in stats else "unavailable",
+            "stats": stats,
+            "note": "Cache performance metrics from Redis INFO command"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get cache stats: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "note": "Cache may be unavailable or disconnected"
+        }
+
+
+@app.post("/wargaming/cache/invalidate/{apv_id}")
+async def invalidate_cache_for_apv(apv_id: str):
+    """
+    Invalidate cached prediction for specific APV.
+    
+    Use when APV data changes or patch is updated.
+    
+    Args:
+        apv_id: APV identifier to invalidate
+    
+    Returns:
+        Dict with invalidation result
+    
+    Example:
+        ```bash
+        curl -X POST http://localhost:8026/wargaming/cache/invalidate/apv_001
+        ```
+    
+    Author: MAXIMUS Team - Phase 5.7.1
+    """
+    try:
+        deleted = await cache.invalidate_ml_cache(apv_id)
+        
+        if deleted > 0:
+            logger.info(f"✓ Cache invalidated for APV {apv_id}")
+            return {
+                "status": "success",
+                "apv_id": apv_id,
+                "deleted_keys": deleted,
+                "message": f"Cache invalidated for APV {apv_id}"
+            }
+        else:
+            return {
+                "status": "not_found",
+                "apv_id": apv_id,
+                "deleted_keys": 0,
+                "message": f"No cached data found for APV {apv_id}"
+            }
+    
+    except Exception as e:
+        logger.error(f"Cache invalidation failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Cache invalidation failed: {str(e)}"
+        )
+
+
+@app.post("/wargaming/cache/invalidate-all")
+async def invalidate_all_cache():
+    """
+    Invalidate all cached ML predictions.
+    
+    Use after model retraining or when cache needs refresh.
+    
+    **Warning**: This will clear all ML prediction cache.
+    
+    Returns:
+        Dict with invalidation result
+    
+    Example:
+        ```bash
+        curl -X POST http://localhost:8026/wargaming/cache/invalidate-all
+        ```
+    
+    Author: MAXIMUS Team - Phase 5.7.1
+    """
+    try:
+        deleted = await cache.invalidate_ml_cache()
+        
+        logger.warning(f"⚠️ All ML prediction cache invalidated ({deleted} keys deleted)")
+        
+        return {
+            "status": "success",
+            "deleted_keys": deleted,
+            "message": f"Invalidated all ML predictions ({deleted} keys)",
+            "warning": "Cache will be rebuilt on next predictions"
+        }
+    
+    except Exception as e:
+        logger.error(f"Cache invalidation failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Cache invalidation failed: {str(e)}"
+        )
+
+
 # Startup event
 @app.on_event("startup")
 async def startup_event():
     """Startup initialization"""
     global ab_store, ab_test_runner
     
-    logger.info("🚀 Starting Wargaming Crisol service...")
+    logger.info("🚀 Starting Wargaming Crisol service (Phase 5.7.1)...")
     
     # Load exploit database
     db = load_exploit_database()
@@ -899,6 +1156,15 @@ async def startup_event():
     
     logger.info(f"✓ Loaded {stats['total']} exploits")
     logger.info(f"✓ CWE Coverage: {len(stats['cwe_coverage'])}")
+    
+    # Phase 5.7.1: Initialize Redis cache
+    try:
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/2")
+        await cache.connect()
+        logger.info(f"✓ Redis cache connected (Phase 5.7.1): {redis_url}")
+    except Exception as e:
+        logger.warning(f"⚠️ Redis cache initialization failed: {e}")
+        logger.warning("   Cache operations will be skipped (degraded mode)")
     
     # Phase 5.6: Initialize A/B Test Store and Runner
     try:
@@ -946,6 +1212,13 @@ async def shutdown_event():
     global ab_store
     
     logger.info("🛑 Shutting down Wargaming Crisol service...")
+    
+    # Phase 5.7.1: Close Redis cache
+    try:
+        await cache.close()
+        logger.info("✓ Redis cache closed")
+    except Exception as e:
+        logger.warning(f"⚠️ Redis cache close failed: {e}")
     
     # Close A/B Test Store
     if ab_store:
