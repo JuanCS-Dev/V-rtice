@@ -90,6 +90,19 @@ class IOC:
             normalized = normalized.rstrip("/")
         
         return normalized
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert IOC to dictionary for serialization."""
+        return {
+            "value": self.value,
+            "ioc_type": self.ioc_type.value,
+            "first_seen": self.first_seen.isoformat(),
+            "last_seen": self.last_seen.isoformat(),
+            "source": self.source,
+            "confidence": self.confidence,
+            "tags": self.tags,
+            "context": self.context,
+        }
 
 
 @dataclass
@@ -260,6 +273,7 @@ class ThreatIntelFusionEngine:
         llm_client: Any,  # openai.AsyncOpenAI
         model: str = "gpt-4o",
         max_related_iocs: int = 50,
+        registry: Optional[Any] = None,
     ):
         """Initialize fusion engine.
 
@@ -268,24 +282,41 @@ class ThreatIntelFusionEngine:
             llm_client: LLM client for narrative generation
             model: LLM model to use
             max_related_iocs: Max related IoCs to include
+            registry: Prometheus registry (optional, for testing)
         """
         self.sources = sources
         self.llm = llm_client
         self.model = model
         self.max_related_iocs = max_related_iocs
 
-        # Metrics
-        self.enrichments_total = Counter(
-            "threat_enrichments_total", "Total threat enrichments performed"
-        )
-        self.correlation_score = Histogram(
-            "threat_correlation_score", "Correlation confidence score"
-        )
-        self.source_queries = Counter(
-            "threat_intel_source_queries_total",
-            "Queries to threat intel sources",
-            ["source", "status"],
-        )
+        # Metrics - use provided registry or default
+        if registry is None:
+            from prometheus_client import REGISTRY as prom_registry
+            registry = prom_registry
+
+        try:
+            self.enrichments_total = Counter(
+                "threat_enrichments_total",
+                "Total threat enrichments performed",
+                registry=registry,
+            )
+            self.correlation_score = Histogram(
+                "threat_correlation_score",
+                "Correlation confidence score",
+                registry=registry,
+            )
+            self.source_queries = Counter(
+                "threat_intel_source_queries_total",
+                "Queries to threat intel sources",
+                ["source", "status"],
+                registry=registry,
+            )
+        except ValueError:
+            # Metrics already registered
+            logger.warning("Metrics already registered, reusing existing")
+            self.enrichments_total = None
+            self.correlation_score = None
+            self.source_queries = None
 
         logger.info(
             f"Fusion engine initialized with {len(sources)} sources, "
@@ -363,8 +394,10 @@ class ThreatIntelFusionEngine:
             )
 
             # Record metrics
-            self.enrichments_total.inc()
-            self.correlation_score.observe(enriched.confidence)
+            if self.enrichments_total:
+                self.enrichments_total.inc()
+            if self.correlation_score:
+                self.correlation_score.observe(enriched.confidence)
 
             logger.info(
                 f"Threat {enriched.threat_id} enriched: "
@@ -484,14 +517,16 @@ Output as JSON graph:
             try:
                 data = await connector.lookup(ioc)
                 results[source_type] = data
-                self.source_queries.labels(
-                    source=source_type.value, status="success"
-                ).inc()
+                if self.source_queries:
+                    self.source_queries.labels(
+                        source=source_type.value, status="success"
+                    ).inc()
             except Exception as e:
                 logger.warning(f"Source {source_type.value} query failed: {e}")
-                self.source_queries.labels(
-                    source=source_type.value, status="error"
-                ).inc()
+                if self.source_queries:
+                    self.source_queries.labels(
+                        source=source_type.value, status="error"
+                    ).inc()
 
         return results
 

@@ -22,6 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import yaml
+from prometheus_client import CollectorRegistry
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -36,6 +37,12 @@ from response.automated_response import (
     ResponseError,
     ThreatContext,
 )
+
+
+@pytest.fixture
+def isolated_registry():
+    """Create isolated Prometheus registry for testing."""
+    return CollectorRegistry()
 
 
 @pytest.fixture
@@ -89,22 +96,13 @@ def mock_hotl_gateway():
 
 
 @pytest.fixture
-def response_engine(playbook_dir, mock_hotl_gateway):
+def response_engine(playbook_dir, mock_hotl_gateway, isolated_registry):
     """Create response engine with mocked dependencies."""
-    # Clear Prometheus registry
-    from prometheus_client import REGISTRY
-
-    collectors = list(REGISTRY._collector_to_names.keys())
-    for collector in collectors:
-        try:
-            REGISTRY.unregister(collector)
-        except Exception:
-            pass
-
     return AutomatedResponseEngine(
         playbook_dir=playbook_dir,
         hotl_gateway=mock_hotl_gateway,
         dry_run=True,  # Dry run for tests
+        registry=isolated_registry,
     )
 
 
@@ -261,12 +259,15 @@ async def test_playbook_metrics(response_engine, sample_playbook_yaml, sample_th
 
 
 @pytest.mark.asyncio
-async def test_audit_logging(response_engine, playbook_dir, sample_threat_context):
+async def test_audit_logging(playbook_dir, sample_threat_context, isolated_registry):
     """Test audit log creation."""
     # Create audit log path
     audit_path = Path(playbook_dir) / "audit.log"
     engine = AutomatedResponseEngine(
-        playbook_dir=playbook_dir, audit_log_path=str(audit_path), dry_run=True
+        playbook_dir=playbook_dir,
+        audit_log_path=str(audit_path),
+        dry_run=True,
+        registry=isolated_registry,
     )
 
     # Create simple playbook

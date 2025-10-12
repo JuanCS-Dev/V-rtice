@@ -247,6 +247,7 @@ class AutomatedResponseEngine:
         executor_pool: Optional[Any] = None,
         audit_log_path: Optional[str] = None,
         dry_run: bool = False,
+        registry: Optional[Any] = None,
     ):
         """Initialize response engine.
 
@@ -256,6 +257,7 @@ class AutomatedResponseEngine:
             executor_pool: Executor pool for action execution
             audit_log_path: Path to audit log file
             dry_run: If True, simulate without executing
+            registry: Prometheus registry (optional, for testing)
 
         Raises:
             ValueError: If playbook_dir doesn't exist
@@ -275,25 +277,42 @@ class AutomatedResponseEngine:
         # HOTL pending approvals
         self.pending_approvals: Dict[str, PlaybookAction] = {}
 
-        # Metrics
-        self.playbooks_executed = Counter(
-            "response_playbooks_executed_total",
-            "Total playbooks executed",
-            ["playbook_id", "status"],
-        )
-        self.actions_executed = Counter(
-            "response_actions_executed_total",
-            "Total actions executed",
-            ["action_type", "status"],
-        )
-        self.hotl_requests = Counter(
-            "response_hotl_requests_total",
-            "HOTL approval requests",
-            ["action_type", "approved"],
-        )
-        self.execution_time = Histogram(
-            "response_execution_seconds", "Playbook execution time"
-        )
+        # Metrics - use provided registry or default
+        if registry is None:
+            from prometheus_client import REGISTRY as prom_registry
+            registry = prom_registry
+
+        try:
+            self.playbooks_executed = Counter(
+                "response_playbooks_executed_total",
+                "Total playbooks executed",
+                ["playbook_id", "status"],
+                registry=registry,
+            )
+            self.actions_executed = Counter(
+                "response_actions_executed_total",
+                "Total actions executed",
+                ["action_type", "status"],
+                registry=registry,
+            )
+            self.hotl_requests = Counter(
+                "response_hotl_requests_total",
+                "HOTL approval requests",
+                ["action_type", "approved"],
+                registry=registry,
+            )
+            self.execution_time = Histogram(
+                "response_execution_seconds",
+                "Playbook execution time",
+                registry=registry,
+            )
+        except ValueError:
+            # Metrics already registered, get existing ones
+            logger.warning("Metrics already registered, reusing existing")
+            self.playbooks_executed = None
+            self.actions_executed = None
+            self.hotl_requests = None
+            self.execution_time = None
 
         logger.info(
             f"Response engine initialized: playbook_dir={playbook_dir}, "
@@ -470,10 +489,12 @@ class AutomatedResponseEngine:
             )
 
             # Record metrics
-            self.playbooks_executed.labels(
-                playbook_id=playbook.playbook_id, status=status
-            ).inc()
-            self.execution_time.observe(execution_time)
+            if self.playbooks_executed:
+                self.playbooks_executed.labels(
+                    playbook_id=playbook.playbook_id, status=status
+                ).inc()
+            if self.execution_time:
+                self.execution_time.observe(execution_time)
 
             # Audit log
             await self._audit_log(
