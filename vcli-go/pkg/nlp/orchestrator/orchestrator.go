@@ -91,12 +91,12 @@ func DefaultConfig() Config {
 
 		// Component configs with safe defaults
 		AuthConfig:      nil, // Must be provided
-		AuthzConfig:     &authz.AuthorizerConfig{StrictMode: true},
-		SandboxConfig:   &sandbox.SandboxConfig{EnforceReadOnly: true},
+		AuthzConfig:     &authz.AuthorizerConfig{EnableRBAC: true, EnablePolicies: true, DenyByDefault: true},
+		SandboxConfig:   &sandbox.SandboxConfig{ForbiddenNamespaces: []string{"kube-system"}, Timeout: 60 * time.Second},
 		IntentConfig:    nil, // Created in NewOrchestrator
-		RateLimitConfig: &ratelimit.RateLimitConfig{DefaultRate: 60, DefaultBurst: 10},
-		BehaviorConfig:  &behavioral.AnalyzerConfig{AnomalyThreshold: 0.7},
-		AuditConfig:     &audit.AuditConfig{BufferSize: 1000},
+		RateLimitConfig: &ratelimit.RateLimitConfig{RequestsPerMinute: 60, BurstSize: 10, PerUser: true},
+		BehaviorConfig:  &behavioral.AnalyzerConfig{AnomalyThreshold: 0.7, TrackActions: true, TrackResources: true},
+		AuditConfig:     &audit.AuditConfig{MaxEvents: 1000, TamperProof: true},
 	}
 }
 
@@ -131,7 +131,7 @@ func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 
 	// Layer 2: Authorization
 	if cfg.AuthzConfig == nil {
-		cfg.AuthzConfig = &authz.AuthorizerConfig{StrictMode: true}
+		cfg.AuthzConfig = &authz.AuthorizerConfig{EnableRBAC: true, EnablePolicies: true, DenyByDefault: true}
 	}
 	authorizer, err := authz.NewAuthorizerWithConfig(cfg.AuthzConfig)
 	if err != nil {
@@ -140,7 +140,10 @@ func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 
 	// Layer 3: Sandboxing
 	if cfg.SandboxConfig == nil {
-		cfg.SandboxConfig = &sandbox.SandboxConfig{EnforceReadOnly: true}
+		cfg.SandboxConfig = &sandbox.SandboxConfig{
+			ForbiddenNamespaces: []string{"kube-system"},
+			Timeout:             60 * time.Second,
+		}
 	}
 	sandboxManager, err := sandbox.NewSandbox(cfg.SandboxConfig)
 	if err != nil {
@@ -156,21 +159,29 @@ func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 	// Layer 5: Rate Limiting
 	if cfg.RateLimitConfig == nil {
 		cfg.RateLimitConfig = &ratelimit.RateLimitConfig{
-			DefaultRate:  60,
-			DefaultBurst: 10,
+			RequestsPerMinute: 60,
+			BurstSize:         10,
+			PerUser:           true,
 		}
 	}
 	rateLimiter := ratelimit.NewRateLimiter(cfg.RateLimitConfig)
 
 	// Layer 6: Behavioral Analysis
 	if cfg.BehaviorConfig == nil {
-		cfg.BehaviorConfig = &behavioral.AnalyzerConfig{AnomalyThreshold: 0.7}
+		cfg.BehaviorConfig = &behavioral.AnalyzerConfig{
+			AnomalyThreshold: 0.7,
+			TrackActions:     true,
+			TrackResources:   true,
+		}
 	}
 	behaviorAnalyzer := behavioral.NewBehavioralAnalyzer(cfg.BehaviorConfig)
 
 	// Layer 7: Audit Logging
 	if cfg.AuditConfig == nil {
-		cfg.AuditConfig = &audit.AuditConfig{BufferSize: 1000}
+		cfg.AuditConfig = &audit.AuditConfig{
+			MaxEvents:   1000,
+			TamperProof: true,
+		}
 	}
 	auditLogger := audit.NewAuditLogger(cfg.AuditConfig)
 
@@ -376,11 +387,8 @@ func (o *Orchestrator) validateSandbox(ctx context.Context, authCtx *auth.AuthCo
 		return fmt.Errorf("sandbox validation failed: %s", namespaceResult.Reason)
 	}
 
-	// Add any warnings from sandbox
-	for _, warning := range namespaceResult.Warnings {
-		result.Warnings = append(result.Warnings, fmt.Sprintf("⚠️  Sandbox: %s", warning))
-	}
-
+	// Add any warnings from sandbox (sandbox doesn't have Warnings field)
+	// Just record the step
 	o.recordStep(result, "Sandboxing", true, "Operation within sandbox boundaries", duration)
 	return nil
 }
@@ -391,10 +399,9 @@ func (o *Orchestrator) validateIntent(ctx context.Context, authCtx *auth.AuthCon
 
 	// Build command intent for validation
 	cmdIntent := &intent.CommandIntent{
-		Command:    fmt.Sprintf("%s %s", intent.Verb, intent.Target),
-		UserID:     authCtx.UserID,
-		RiskScore:  result.RiskScore,
-		RequiresApproval: intent.RiskLevel == nlp.RiskLevelHIGH || intent.RiskLevel == nlp.RiskLevelCRITICAL,
+		Action:   intent.Verb,
+		Resource: intent.Target,
+		Target:   intent.Target,
 	}
 
 	// Validate intent (may prompt user for confirmation)
@@ -407,17 +414,18 @@ func (o *Orchestrator) validateIntent(ctx context.Context, authCtx *auth.AuthCon
 		return err
 	}
 
-	if !validation.Approved {
-		o.recordStep(result, "Intent Validation", false, validation.Reason, duration)
-		return fmt.Errorf("intent validation failed: %s", validation.Reason)
+	// Check if HITL required but not approved
+	if validation.RequiresHITL && validation.ConfirmationToken == nil {
+		o.recordStep(result, "Intent Validation", false, "HITL confirmation required", duration)
+		return fmt.Errorf("human-in-the-loop confirmation required")
 	}
 
-	message := "Intent validated"
-	if validation.Approved {
-		message = "Intent approved"
+	// Add warnings from validation
+	for _, warning := range validation.Warnings {
+		result.Warnings = append(result.Warnings, fmt.Sprintf("⚠️  %s", warning))
 	}
 
-	o.recordStep(result, "Intent Validation", true, message, duration)
+	o.recordStep(result, "Intent Validation", true, "Intent validated", duration)
 	return nil
 }
 
@@ -451,20 +459,21 @@ func (o *Orchestrator) analyzeBehavior(ctx context.Context, authCtx *auth.AuthCo
 
 	// Log anomalies as warnings (but don't block)
 	if anomalyResult.IsAnomaly {
-		result.Warnings = append(result.Warnings,
-			fmt.Sprintf("⚠️  Behavioral anomaly: %s (risk: %.2f)", 
-				anomalyResult.Reason, anomalyResult.RiskScore))
+		for _, reason := range anomalyResult.Reasons {
+			result.Warnings = append(result.Warnings,
+				fmt.Sprintf("⚠️  Behavioral anomaly: %s (score: %.2f)", reason, anomalyResult.Score))
+		}
 	}
 
 	// Block if risk score is critical
-	if anomalyResult.RiskScore > 0.9 && anomalyResult.IsAnomaly {
+	if anomalyResult.Score > 0.9 && anomalyResult.IsAnomaly {
 		o.recordStep(result, "Behavioral Analysis", false,
-			fmt.Sprintf("Critical behavioral risk: %.2f", anomalyResult.RiskScore), duration)
+			fmt.Sprintf("Critical behavioral risk: %.2f", anomalyResult.Score), duration)
 		return fmt.Errorf("critical behavioral anomalies detected")
 	}
 
 	o.recordStep(result, "Behavioral Analysis", true,
-		fmt.Sprintf("Risk score: %.2f, Anomaly: %v", anomalyResult.RiskScore, anomalyResult.IsAnomaly), duration)
+		fmt.Sprintf("Score: %.2f, Anomaly: %v", anomalyResult.Score, anomalyResult.IsAnomaly), duration)
 	return nil
 }
 
@@ -474,21 +483,18 @@ func (o *Orchestrator) logAudit(ctx context.Context, authCtx *auth.AuthContext, 
 
 	// Build audit event
 	event := &audit.AuditEvent{
-		ID:        result.AuditID,
+		EventID:   result.AuditID,
 		Timestamp: result.Timestamp,
 		UserID:    authCtx.UserID,
+		Username:  authCtx.Username,
+		SessionID: authCtx.SessionID,
 		Action:    intent.Verb,
 		Resource:  intent.Target,
-		Target:    intent.Domain,
+		Target:    intent.Target,
+		SourceIP:  authCtx.IPAddress,
+		UserAgent: authCtx.UserAgent,
 		Success:   result.Success,
 		RiskScore: result.RiskScore,
-		IPAddress: authCtx.IPAddress,
-		UserAgent: authCtx.UserAgent,
-		Details: map[string]string{
-			"original_input": intent.OriginalInput,
-			"confidence":     fmt.Sprintf("%.2f", intent.Confidence),
-			"risk_level":     string(intent.RiskLevel),
-		},
 	}
 
 	err := o.auditLogger.LogEvent(event)
