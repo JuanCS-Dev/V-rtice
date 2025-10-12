@@ -378,3 +378,169 @@ async def test_response_engine_initialization_invalid_dir():
     """Test initialization with invalid directory."""
     with pytest.raises(ValueError, match="Playbook directory not found"):
         AutomatedResponseEngine(playbook_dir="/nonexistent/dir")
+
+
+@pytest.mark.asyncio
+async def test_action_retry_exhausted(playbook_dir, isolated_registry):
+    """Test action failing after all retries exhausted."""
+    playbook = {
+        "id": "retry_test",
+        "name": "Retry Test",
+        "trigger": {"condition": "test"},
+        "actions": [
+            {
+                "id": "fail_action",
+                "type": "block_ip",
+                "retry_attempts": 2,
+                "parameters": {"source_ip": "1.2.3.4"},
+            }
+        ],
+    }
+    
+    playbook_file = Path(playbook_dir) / "retry_test.yaml"
+    with open(playbook_file, "w") as f:
+        yaml.dump(playbook, f)
+    
+    engine = AutomatedResponseEngine(
+        playbook_dir=playbook_dir,
+        registry=isolated_registry,
+    )
+    
+    # Mock action handler to always fail
+    async def failing_handler(action, context):
+        raise Exception("Simulated failure")
+    
+    engine._handle_block_ip = failing_handler
+    
+    context = ThreatContext(
+        threat_id="threat_retry",
+        event_id="evt_retry",
+        detection_result={},
+        source_ip="1.2.3.4",
+        severity="HIGH",
+    )
+    
+    playbook_obj = await engine.load_playbook("retry_test.yaml")
+    result = await engine.execute_playbook(playbook_obj, context)
+    
+    assert result.status == "FAILED"
+    assert len(result.errors) > 0
+
+
+@pytest.mark.asyncio
+async def test_partial_success_status(playbook_dir, isolated_registry):
+    """Test PARTIAL status when some actions fail."""
+    playbook = {
+        "id": "partial_test",
+        "name": "Partial Test",
+        "trigger": {"condition": "test"},
+        "rollback_on_failure": False,
+        "actions": [
+            {"id": "success_action", "type": "alert_soc", "parameters": {}},
+            {"id": "fail_action", "type": "block_ip", "retry_attempts": 1, "parameters": {"source_ip": "1.2.3.4"}},
+        ],
+    }
+    
+    playbook_file = Path(playbook_dir) / "partial_test.yaml"
+    with open(playbook_file, "w") as f:
+        yaml.dump(playbook, f)
+    
+    engine = AutomatedResponseEngine(
+        playbook_dir=playbook_dir,
+        registry=isolated_registry,
+    )
+    
+    async def failing_handler(action, context):
+        raise Exception("Action failed")
+    
+    engine._handle_block_ip = failing_handler
+    
+    context = ThreatContext(
+        threat_id="threat_partial",
+        event_id="evt_partial",
+        detection_result={},
+        source_ip="1.2.3.4",
+        severity="HIGH",
+    )
+    
+    playbook_obj = await engine.load_playbook("partial_test.yaml")
+    result = await engine.execute_playbook(playbook_obj, context)
+    
+    assert result.status == "PARTIAL"
+    # Check that we have successes and failures in action_results
+    assert len([r for r in result.action_results if r.get("status") == "success"]) > 0
+    assert len([r for r in result.action_results if r.get("status") == "failed"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_all_action_handlers(playbook_dir, isolated_registry):
+    """Test all action type handlers."""
+    engine = AutomatedResponseEngine(
+        playbook_dir=playbook_dir,
+        registry=isolated_registry,
+    )
+    
+    context = ThreatContext(
+        threat_id="threat_handlers",
+        event_id="evt_handlers",
+        detection_result={},
+        source_ip="1.2.3.4",
+        severity="HIGH",
+    )
+    
+    handlers = [
+        (ActionType.BLOCK_IP, {"source_ip": "1.2.3.4"}),
+        (ActionType.BLOCK_DOMAIN, {"domain": "evil.com"}),
+        (ActionType.ISOLATE_HOST, {"host_ip": "1.2.3.4"}),
+        (ActionType.DEPLOY_HONEYPOT, {"honeypot_type": "ssh"}),
+        (ActionType.RATE_LIMIT, {"target": "1.2.3.4", "rate": "10/min"}),
+        (ActionType.ALERT_SOC, {"message": "Test alert"}),
+        (ActionType.TRIGGER_CASCADE, {"zone": "dmz", "strength": "high"}),
+        (ActionType.COLLECT_FORENSICS, {"target": "host1", "artifacts": ["logs"]}),
+    ]
+    
+    for action_type, params in handlers:
+        action = PlaybookAction(
+            action_id=f"test_{action_type.value}",
+            action_type=action_type,
+            hotl_required=False,
+            timeout_seconds=10,
+            retry_attempts=1,
+            parameters=params,
+        )
+        
+        result = await engine._execute_action_type(action, context)
+        assert isinstance(result, dict)
+        assert len(result) > 0
+
+
+@pytest.mark.asyncio
+async def test_unknown_action_type(playbook_dir, isolated_registry):
+    """Test error handling for unknown action type."""
+    engine = AutomatedResponseEngine(
+        playbook_dir=playbook_dir,
+        registry=isolated_registry,
+    )
+    
+    context = ThreatContext(
+        threat_id="threat_unknown",
+        event_id="evt_unknown",
+        detection_result={},
+        source_ip="1.2.3.4",
+        severity="HIGH",
+    )
+    
+    action = PlaybookAction(
+        action_id="unknown_action",
+        action_type=None,
+        hotl_required=False,
+        timeout_seconds=10,
+        retry_attempts=1,
+        parameters={},
+    )
+    
+    action.action_type = MagicMock()
+    action.action_type.value = "unknown_type"
+    
+    with pytest.raises(ResponseError, match="No handler for action type"):
+        await engine._execute_action_type(action, context)

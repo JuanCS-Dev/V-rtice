@@ -487,6 +487,172 @@ class TestDetectionResultSerialization:
         assert result_dict["attacker_profile"]["skill_level"] == "intermediate"
 
 
+    @pytest.mark.asyncio
+    async def test_gather_context_with_history(self, sentinel_agent, sample_event):
+        """Test gathering context with history."""
+        # Mock history
+        mock_history = AsyncMock()
+        mock_history.get_recent_events.return_value = [
+            {"event_id": "evt_old_1", "source_ip": "192.168.1.100"}
+        ]
+        sentinel_agent.history = mock_history
+        
+        context = await sentinel_agent._gather_context(sample_event)
+        
+        assert "recent_events" in context
+        assert len(context["recent_events"]) > 0
+        mock_history.get_recent_events.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_gather_context_with_threat_intel(self, sentinel_agent, sample_event):
+        """Test gathering context with threat intel."""
+        # Mock threat intel
+        mock_intel = AsyncMock()
+        mock_intel.lookup_ip.return_value = {
+            "reputation": "malicious",
+            "category": "botnet"
+        }
+        sentinel_agent.threat_intel = mock_intel
+        
+        context = await sentinel_agent._gather_context(sample_event)
+        
+        assert "threat_intel" in context
+        assert context["threat_intel"]["reputation"] == "malicious"
+        mock_intel.lookup_ip.assert_called_once_with("192.168.1.100")
+
+    @pytest.mark.asyncio
+    async def test_gather_context_error_handling(self, sentinel_agent, sample_event):
+        """Test graceful handling of context gathering errors."""
+        # Mock history that throws error
+        mock_history = AsyncMock()
+        mock_history.get_recent_events.side_effect = Exception("DB error")
+        sentinel_agent.history = mock_history
+        
+        # Should not raise, just log warning
+        context = await sentinel_agent._gather_context(sample_event)
+        
+        assert "recent_events" in context
+        assert context["recent_events"] == []
+
+    @pytest.mark.asyncio
+    async def test_predict_attacker_intent_with_intel(
+        self, sentinel_agent, sample_event, mock_llm_client
+    ):
+        """Test attacker prediction with threat intel context."""
+        # Mock threat intel
+        mock_intel = AsyncMock()
+        mock_intel.get_relevant_intel.return_value = "Known APT28 infrastructure"
+        sentinel_agent.threat_intel = mock_intel
+        
+        event_chain = [sample_event]
+        
+        profile_response = {
+            "skill_level": "nation_state",
+            "tools_detected": ["custom_backdoor"],
+            "ttps": [],
+            "objectives": ["espionage"],
+            "next_move_prediction": "data exfiltration",
+            "confidence": 0.9,
+        }
+        
+        mock_response = AsyncMock()
+        mock_response.choices = [
+            MagicMock(message=MagicMock(content=json.dumps(profile_response)))
+        ]
+        mock_llm_client.chat.completions.create.return_value = mock_response
+        
+        profile = await sentinel_agent.predict_attacker_intent(event_chain)
+        
+        assert profile.skill_level == "nation_state"
+        mock_intel.get_relevant_intel.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_parse_llm_response_invalid_json(self, sentinel_agent, sample_event):
+        """Test error handling for invalid LLM response."""
+        invalid_response = {
+            "is_threat": True,
+            "severity": "INVALID_SEVERITY",  # Invalid enum value
+            "confidence": 0.8,
+            "mitre_techniques": [],
+            "threat_description": "Test",
+            "recommended_actions": [],
+            "reasoning": "Test",
+        }
+        
+        with pytest.raises(SentinelAnalysisError, match="Invalid LLM response format"):
+            await sentinel_agent._parse_llm_response(sample_event, invalid_response)
+
+    @pytest.mark.asyncio
+    async def test_triage_alert_with_history(
+        self, sentinel_agent, mock_llm_client
+    ):
+        """Test alert triage with historical context."""
+        alert = {
+            "alert_id": "alert_004",
+            "type": "scan_detected",
+        }
+        
+        # Mock history with similar alerts
+        mock_history = AsyncMock()
+        mock_history.find_similar_alerts.return_value = [
+            {"alert_id": "old_1", "false_positive": True},
+            {"alert_id": "old_2", "false_positive": True},
+            {"alert_id": "old_3", "false_positive": False},
+        ]
+        sentinel_agent.history = mock_history
+        
+        triage_response = {
+            "escalate": False,
+            "reasoning": "67% false positive rate historically",
+            "confidence": 0.8,
+        }
+        
+        mock_response = AsyncMock()
+        mock_response.choices = [
+            MagicMock(message=MagicMock(content=json.dumps(triage_response)))
+        ]
+        mock_llm_client.chat.completions.create.return_value = mock_response
+        
+        should_escalate = await sentinel_agent.triage_alert(alert)
+        
+        assert should_escalate is False
+        mock_history.find_similar_alerts.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_query_llm_json_decode_error(self, sentinel_agent, mock_llm_client):
+        """Test handling of invalid JSON from LLM."""
+        # Mock LLM returning invalid JSON
+        mock_response = AsyncMock()
+        mock_response.choices = [
+            MagicMock(message=MagicMock(content="not valid json"))
+        ]
+        mock_llm_client.chat.completions.create.return_value = mock_response
+        
+        with pytest.raises(SentinelAnalysisError, match="Invalid JSON from LLM"):
+            await sentinel_agent._query_llm("test prompt")
+
+    def test_parse_attacker_profile_invalid_data(self, sentinel_agent):
+        """Test parsing invalid attacker profile data."""
+        invalid_response = {
+            "skill_level": "advanced",
+            "tools_detected": ["tool1"],
+            "ttps": [
+                {
+                    "technique_id": "T1110",
+                    "tactic": "Credential Access",
+                    "technique_name": "Brute Force",
+                    "confidence": "invalid",  # Should be float
+                }
+            ],
+            "objectives": [],
+            "next_move_prediction": "",
+            "confidence": 0.8,
+        }
+        
+        with pytest.raises(SentinelAnalysisError):
+            sentinel_agent._parse_attacker_profile("192.168.1.1", invalid_response)
+
+
 @pytest.mark.integration
 class TestSentinelIntegration:
     """Integration tests (require actual LLM API)."""

@@ -103,6 +103,14 @@ class ClockOffset:
         Note: Hardware PTP achieves <100ns jitter, 0.95+ quality. Simulation uses
         relaxed thresholds while maintaining temporal coherence validation.
         """
+        # Extreme drift (>1000 ppm = 1ms/s) always disqualifies, regardless of jitter
+        if self.drift_ppm > 1000.0:
+            return False
+        
+        # Extreme offset (>1ms) also disqualifies
+        if abs(self.offset_ns) > 1_000_000:
+            return False
+            
         return self.jitter_ns < threshold_ns and self.quality > quality_threshold
 
 
@@ -281,7 +289,11 @@ class PTPSynchronizer:
             t1 = time.time_ns()
 
             if master_time_source:
-                master_time_ns = master_time_source()
+                # Support both sync and async time sources
+                if asyncio.iscoroutinefunction(master_time_source):
+                    master_time_ns = await master_time_source()
+                else:
+                    master_time_ns = master_time_source()
             else:
                 # In production, this would query actual master via network
                 # For now, simulate master time

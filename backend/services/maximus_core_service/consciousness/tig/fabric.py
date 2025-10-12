@@ -292,6 +292,7 @@ class TIGNode:
 
 
 @dataclass
+@dataclass
 class TopologyConfig:
     """
     Configuration for generating TIG fabric topology.
@@ -321,6 +322,37 @@ class TopologyConfig:
     clustering_target: float = 0.75
     enable_small_world_rewiring: bool = True
     rewiring_probability: float = 0.58  # CONSERVATIVE: Realistic density with IIT targets
+    
+    def __init__(self, 
+                 node_count: int = 16,
+                 num_nodes: int | None = None,  # Alias for compatibility
+                 min_degree: int = 5,
+                 avg_degree: int | None = None,  # Alias for min_degree
+                 target_density: float = 0.20,
+                 gamma: float = 2.5,
+                 clustering_target: float = 0.75,
+                 enable_small_world_rewiring: bool = True,
+                 rewiring_probability: float = 0.58,
+                 rewire_probability: float | None = None):  # Alias for rewiring_probability
+        # Support both node_count and num_nodes (alias)
+        if num_nodes is not None:
+            node_count = num_nodes
+        
+        # Support both min_degree and avg_degree (alias)
+        if avg_degree is not None:
+            min_degree = avg_degree
+        
+        # Support both rewiring_probability and rewire_probability (alias)
+        if rewire_probability is not None:
+            rewiring_probability = rewire_probability
+        
+        self.node_count = node_count
+        self.min_degree = min_degree
+        self.target_density = target_density
+        self.gamma = gamma
+        self.clustering_target = clustering_target
+        self.enable_small_world_rewiring = enable_small_world_rewiring
+        self.rewiring_probability = rewiring_probability
 
 
 @dataclass
@@ -355,6 +387,25 @@ class FabricMetrics:
 
     # Temporal
     last_update: float = field(default_factory=time.time)
+    
+    # Compatibility aliases for tests
+    @property
+    def eci(self) -> float:
+        """Alias for effective_connectivity_index."""
+        return self.effective_connectivity_index
+    
+    @property
+    def clustering_coefficient(self) -> float:
+        """Alias for avg_clustering_coefficient."""
+        return self.avg_clustering_coefficient
+    
+    @property
+    def connectivity_ratio(self) -> float:
+        """Compute connectivity ratio (edges / max possible edges)."""
+        if self.node_count < 2:
+            return 0.0
+        max_edges = self.node_count * (self.node_count - 1) / 2
+        return self.edge_count / max_edges if max_edges > 0 else 0.0
 
     def validate_iit_compliance(self) -> tuple[bool, list[str]]:
         """
