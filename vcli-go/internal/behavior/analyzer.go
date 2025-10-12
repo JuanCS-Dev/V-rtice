@@ -42,10 +42,13 @@ type Config struct {
 
 // BaselineStore interface for baseline persistence
 type BaselineStore interface {
-	Get(ctx context.Context, userID string) (*security.UserBaseline, error)
-	Save(ctx context.Context, baseline *security.UserBaseline) error
+	Get(ctx context.Context, userID string) (*Baseline, error)
+	Save(ctx context.Context, baseline *Baseline) error
 	Update(ctx context.Context, userID string, cmd *nlp.Command) error
 }
+
+// Baseline is an alias for security.UserBaseline
+type Baseline = security.UserBaseline
 
 // NewAnalyzer creates a new behavior analyzer
 func NewAnalyzer(store BaselineStore) *Analyzer {
@@ -88,7 +91,7 @@ func (a *Analyzer) Analyze(ctx context.Context, user *security.User, cmd *nlp.Co
 }
 
 // detectAnomalies detects behavioral anomalies
-func (a *Analyzer) detectAnomalies(ctx context.Context, user *security.User, cmd *nlp.Command, baseline *security.UserBaseline) []security.Anomaly {
+func (a *Analyzer) detectAnomalies(ctx context.Context, user *security.User, cmd *nlp.Command, baseline *Baseline) []security.Anomaly {
 	anomalies := make([]security.Anomaly, 0)
 	
 	// Skip if baseline is not stable yet
@@ -125,7 +128,7 @@ func (a *Analyzer) detectAnomalies(ctx context.Context, user *security.User, cmd
 }
 
 // detectTemporalAnomaly detects unusual access time/day
-func (a *Analyzer) detectTemporalAnomaly(user *security.User, baseline *security.UserBaseline) *security.Anomaly {
+func (a *Analyzer) detectTemporalAnomaly(user *security.User, baseline *Baseline) *security.Anomaly {
 	now := time.Now()
 	currentHour := now.Hour()
 	currentDay := int(now.Weekday())
@@ -177,7 +180,7 @@ func (a *Analyzer) detectTemporalAnomaly(user *security.User, baseline *security
 }
 
 // detectCommandAnomaly detects unusual commands
-func (a *Analyzer) detectCommandAnomaly(cmd *nlp.Command, baseline *security.UserBaseline) *security.Anomaly {
+func (a *Analyzer) detectCommandAnomaly(cmd *nlp.Command, baseline *Baseline) *security.Anomaly {
 	// Get command signature (simplified)
 	cmdSig := a.getCommandSignature(cmd)
 	
@@ -213,7 +216,7 @@ func (a *Analyzer) detectCommandAnomaly(cmd *nlp.Command, baseline *security.Use
 }
 
 // detectResourceAnomaly detects unusual resource access
-func (a *Analyzer) detectResourceAnomaly(cmd *nlp.Command, baseline *security.UserBaseline) *security.Anomaly {
+func (a *Analyzer) detectResourceAnomaly(cmd *nlp.Command, baseline *Baseline) *security.Anomaly {
 	namespace := a.extractNamespace(cmd)
 	resource := a.extractResource(cmd)
 	
@@ -263,7 +266,7 @@ func (a *Analyzer) detectResourceAnomaly(cmd *nlp.Command, baseline *security.Us
 }
 
 // detectNetworkAnomaly detects unusual network source
-func (a *Analyzer) detectNetworkAnomaly(user *security.User, baseline *security.UserBaseline) *security.Anomaly {
+func (a *Analyzer) detectNetworkAnomaly(user *security.User, baseline *Baseline) *security.Anomaly {
 	// Check if IP is typical
 	ipTypical := false
 	for _, ip := range baseline.TypicalIPs {
@@ -288,7 +291,7 @@ func (a *Analyzer) detectNetworkAnomaly(user *security.User, baseline *security.
 }
 
 // detectFrequencyAnomaly detects unusual activity frequency
-func (a *Analyzer) detectFrequencyAnomaly(cmd *nlp.Command, baseline *security.UserBaseline) *security.Anomaly {
+func (a *Analyzer) detectFrequencyAnomaly(cmd *nlp.Command, baseline *Baseline) *security.Anomaly {
 	// TODO: Implement frequency tracking
 	// For now, return nil
 	return nil
@@ -325,7 +328,7 @@ func (a *Analyzer) calculateRiskScore(anomalies []security.Anomaly, cmd *nlp.Com
 }
 
 // createNewBaseline creates a new baseline for a user
-func (a *Analyzer) createNewBaseline(userID string) *security.UserBaseline {
+func (a *Analyzer) createNewBaseline(userID string) *Baseline {
 	return &security.UserBaseline{
 		UserID:        userID,
 		TypicalHours:  []int{},
@@ -379,4 +382,14 @@ func (a *Analyzer) extractResource(cmd *nlp.Command) string {
 		return cmd.Path[2]
 	}
 	return "unknown"
+}
+
+// DefaultConfig returns default configuration
+func DefaultConfig() Config {
+	return Config{
+		AnomalyThreshold:  0.6,
+		HighRiskThreshold: 70,
+		MinSampleSize:     50,
+		UpdateInterval:    24 * time.Hour,
+	}
 }
