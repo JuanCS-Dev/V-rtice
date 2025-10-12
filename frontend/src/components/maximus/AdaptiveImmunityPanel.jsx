@@ -9,23 +9,23 @@
  * - Hybrid system balances speed (memory) vs accuracy (full activation)
  * - Continuous learning strengthens memory over time
  *
- * DIGITAL IMPLEMENTATION: ML-Powered Patch Validation
+ * DIGITAL IMPLEMENTATION: ML-Powered Patch Validation + HITL Oversight
  * 
- * PIPELINE: Oráculo→Eureka→Crisol→ML Prediction
+ * PIPELINE: Oráculo→Eureka→Crisol→ML Prediction→HITL Review
  * - Oráculo: Threat intelligence gathering (CVE detection)
  * - Eureka: Deep malware analysis (vulnerability confirmation)
  * - Crisol: Wargaming validation (attack simulation)
  * - ML: Fast prediction (learned patterns)
+ * - HITL: Human oversight for critical decisions
  *
- * METRICS TRACKED:
- * - ML vs Wargaming usage rate
- * - Confidence score distribution
- * - Time savings (ML <<100ms vs Wargaming ~5min)
- * - Accuracy metrics (when A/B testing active)
+ * TABS:
+ * - ML Monitoring: ML vs Wargaming metrics
+ * - HITL Review: Human-in-the-Loop patch approval (NEW!)
+ * - A/B Testing: Accuracy validation
  *
- * Phase: 5.5 - ML Monitoring Dashboard
- * Date: 2025-10-11
- * Glory to YHWH - Architect of adaptive intelligence
+ * Phase: 5.7 - HITL Integration
+ * Date: 2025-10-12
+ * Glory to YHWH - Architect of adaptive intelligence + human wisdom
  */
 
 import React, { useState } from 'react';
@@ -45,11 +45,13 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import logger from '@/utils/logger';
+import { HITLTab } from './hitl';
 
 export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
   const [timeRange, setTimeRange] = useState('24h'); // '1h', '24h', '7d', '30d'
+  const [activeTab, setActiveTab] = useState('ml'); // 'ml', 'hitl', 'ab-testing'
 
-  logger.debug('🧬 AdaptiveImmunityPanel rendering...', { timeRange });
+  logger.debug('🧬 AdaptiveImmunityPanel rendering...', { timeRange, activeTab });
 
   // Fetch ML stats
   const { data: mlStats, isLoading: statsLoading, error: statsError } = useQuery({
@@ -179,8 +181,55 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* Navigation Tabs - PAGANI STYLE */}
+      <div className="flex gap-2 border-b border-gray-800 pb-2">
+        <button
+          onClick={() => setActiveTab('ml')}
+          className={`px-6 py-3 rounded-t-lg font-bold transition-all ${
+            activeTab === 'ml'
+              ? 'bg-gradient-to-b from-cyan-600 to-cyan-700 text-white shadow-lg shadow-cyan-500/50 border-b-4 border-cyan-400'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200 border-b-2 border-transparent'
+          }`}
+        >
+          <span className="text-lg mr-2">📊</span>
+          ML Monitoring
+        </button>
+
+        <button
+          onClick={() => setActiveTab('hitl')}
+          className={`px-6 py-3 rounded-t-lg font-bold transition-all relative ${
+            activeTab === 'hitl'
+              ? 'bg-gradient-to-b from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/50 border-b-4 border-purple-400'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200 border-b-2 border-transparent'
+          }`}
+        >
+          <span className="text-lg mr-2">🎭</span>
+          HITL Review
+          {/* Pending badge (optional - would need live count) */}
+          {/* <span className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">3</span> */}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('ab-testing')}
+          className={`px-6 py-3 rounded-t-lg font-bold transition-all ${
+            activeTab === 'ab-testing'
+              ? 'bg-gradient-to-b from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50 border-b-4 border-blue-400'
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200 border-b-2 border-transparent'
+          }`}
+        >
+          <span className="text-lg mr-2">🧪</span>
+          A/B Testing
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'hitl' ? (
+        <HITLTab timeRange={timeRange} />
+      ) : activeTab === 'ml' ? (
+        <>
+          {/* ORIGINAL ML CONTENT GOES HERE */}
+          {/* KPI Cards */}
+          <div className="grid grid-cols-4 gap-4">
         <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/50 hover:border-cyan-500 transition-all">
           <div className="text-gray-400 text-sm font-semibold">Total Predictions</div>
           <div className="text-4xl font-bold text-cyan-400 my-2">
@@ -538,6 +587,21 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           </div>
         </div>
       </Card>
+      </>
+      ) : activeTab === 'ab-testing' ? (
+        <div className="space-y-6">
+          <Card className="p-8 bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-2 border-blue-500 text-center">
+            <div className="text-6xl mb-4">🧪</div>
+            <h3 className="text-2xl font-bold text-blue-400 mb-2">A/B Testing Dashboard</h3>
+            <p className="text-gray-400 mb-4">
+              Coming in Phase 5.8: Real-time comparison of ML vs Wargaming accuracy
+            </p>
+            <p className="text-sm text-gray-500">
+              This tab will display A/B test results, confusion matrices, and model performance metrics
+            </p>
+          </Card>
+        </div>
+      ) : null}
     </div>
   );
 };
