@@ -1,0 +1,186 @@
+# Docker Compose: Reactive Fabric Integration
+# Honeypot-based Threat Intelligence Layer
+# Part of MAXIMUS VÉRTICE - Projeto Tecido Reativo
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # REACTIVE FABRIC CORE SERVICE
+  # ============================================================================
+  reactive_fabric_core:
+    build: ./backend/services/reactive_fabric_core
+    container_name: reactive-fabric-core
+    ports:
+      - "8600:8600"  # Internal API (not exposed to internet)
+    environment:
+      - DATABASE_URL=postgresql://vertice:vertice_pass@postgres:5432/vertice
+      - KAFKA_BROKERS=kafka:9092
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+      - FORENSIC_CAPTURE_PATH=/forensics
+    volumes:
+      - ./backend/services/reactive_fabric_core:/app
+      - forensic_captures:/forensics:ro  # Read-only access to forensic data
+    networks:
+      - vertice_internal
+    depends_on:
+      - postgres
+      - kafka
+      - redis
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8600 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8600/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # ANALYSIS SERVICE
+  # ============================================================================
+  reactive_fabric_analysis:
+    build: ./backend/services/reactive_fabric_analysis
+    container_name: reactive-fabric-analysis
+    ports:
+      - "8601:8601"  # Internal API
+    environment:
+      - DATABASE_URL=postgresql://vertice:vertice_pass@postgres:5432/vertice
+      - KAFKA_BROKERS=kafka:9092
+      - LOG_LEVEL=INFO
+      - FORENSIC_CAPTURE_PATH=/forensics
+      - POLLING_INTERVAL=30  # Poll forensic captures every 30s
+    volumes:
+      - ./backend/services/reactive_fabric_analysis:/app
+      - forensic_captures:/forensics:ro  # Read-only access
+    networks:
+      - vertice_internal
+    depends_on:
+      - postgres
+      - kafka
+      - reactive_fabric_core
+    restart: unless-stopped
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8601 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8601/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # SSH HONEYPOT (Cowrie)
+  # ============================================================================
+  honeypot_ssh:
+    image: cowrie/cowrie:latest
+    container_name: reactive-fabric-honeypot-ssh
+    ports:
+      - "2222:2222"  # EXPOSED TO INTERNET
+    environment:
+      - HONEYPOT_ID=ssh_001
+      - HONEYPOT_TYPE=ssh
+    volumes:
+      - ./honeypots/ssh/config:/cowrie/etc
+      - ./honeypots/ssh/data:/cowrie/var
+      - forensic_captures:/forensics  # Write access to store captures
+    networks:
+      - reactive_fabric_dmz  # ISOLATED NETWORK
+    restart: unless-stopped
+    labels:
+      - "com.maximus.honeypot=true"
+      - "com.maximus.honeypot.type=ssh"
+      - "com.maximus.honeypot.id=ssh_001"
+
+  # ============================================================================
+  # WEB HONEYPOT (Apache + PHP + MySQL)
+  # ============================================================================
+  honeypot_web:
+    build: ./honeypots/web
+    container_name: reactive-fabric-honeypot-web
+    ports:
+      - "8080:80"   # EXPOSED TO INTERNET
+      - "8443:443"  # EXPOSED TO INTERNET (HTTPS)
+    environment:
+      - HONEYPOT_ID=web_001
+      - HONEYPOT_TYPE=web
+      - MYSQL_ROOT_PASSWORD=fake_root_pass_123
+      - MYSQL_DATABASE=fake_ecommerce
+      - MYSQL_USER=fake_admin
+      - MYSQL_PASSWORD=fake_pass_456
+    volumes:
+      - ./honeypots/web/htdocs:/var/www/html
+      - ./honeypots/web/logs:/var/log/apache2
+      - forensic_captures:/forensics
+    networks:
+      - reactive_fabric_dmz
+    restart: unless-stopped
+    labels:
+      - "com.maximus.honeypot=true"
+      - "com.maximus.honeypot.type=web"
+      - "com.maximus.honeypot.id=web_001"
+
+  # ============================================================================
+  # API HONEYPOT (FastAPI Fake)
+  # ============================================================================
+  honeypot_api:
+    build: ./honeypots/api
+    container_name: reactive-fabric-honeypot-api
+    ports:
+      - "8081:8081"  # EXPOSED TO INTERNET
+    environment:
+      - HONEYPOT_ID=api_001
+      - HONEYPOT_TYPE=api
+      - JWT_SECRET=fake_weak_secret_123
+      - DATABASE_URL=sqlite:///fake_users.db
+    volumes:
+      - ./honeypots/api:/app
+      - forensic_captures:/forensics
+    networks:
+      - reactive_fabric_dmz
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8081
+    labels:
+      - "com.maximus.honeypot=true"
+      - "com.maximus.honeypot.type=api"
+      - "com.maximus.honeypot.id=api_001"
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+volumes:
+  forensic_captures:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/forensic_captures
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+networks:
+  # DMZ Network (Isolated from production)
+  reactive_fabric_dmz:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1
+    internal: false  # Can access internet
+    labels:
+      - "com.maximus.network=reactive_fabric_dmz"
+      - "com.maximus.isolation=high"
+
+  # Internal Network (Connect to MAXIMUS core services)
+  vertice_internal:
+    external: true  # Use existing network from main docker-compose.yml
+
+# ============================================================================
+# NOTES
+# ============================================================================
+# 1. Honeypots (SSH, Web, API) are in ISOLATED network (reactive_fabric_dmz)
+# 2. Core and Analysis services connect to main vertice_internal network
+# 3. Data flow: Honeypots → Forensic Captures (volume) → Analysis → Kafka → Core
+# 4. ONE-WAY ONLY: Honeypots CANNOT access production services
+# 5. Forensic captures are shared via volume (data diode simulation)
+# 6. Ports 2222, 8080, 8081 are EXPOSED TO INTERNET (honeypot ports)
+# 7. Ports 8600, 8601 are INTERNAL ONLY (not exposed)

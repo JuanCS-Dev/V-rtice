@@ -23,6 +23,7 @@ from detection.encrypted_traffic_analyzer import (
     EncryptedTrafficAnalyzer,
     FlowAnalysisResult,
     FlowFeatureExtractor,
+    FlowFeatures,
     NetworkFlow,
     TrafficThreatType,
 )
