@@ -76,12 +76,11 @@ class OperationResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-class OffensiveTool(ABC):
+class LegacyOffensiveTool(ABC):
     """
-    Abstract base class for offensive security tools.
+    Legacy base class for offensive security tools (Target-based interface).
     
-    All offensive tools must inherit from this class and implement
-    the execute method.
+    Kept for backward compatibility.
     """
     
     def __init__(self, name: str, version: str) -> None:
@@ -135,7 +134,56 @@ class OffensiveTool(ABC):
         return uuid4()
 
 
-class ReconnaissanceTool(OffensiveTool):
+# New flexible base class
+class OffensiveTool(ABC):
+    """
+    Enhanced base class for offensive security tools.
+    
+    Supports flexible kwargs-based interface for orchestration.
+    """
+    
+    def __init__(self, name: str, category: str = "general", version: str = "1.0.0") -> None:
+        """
+        Initialize offensive tool.
+        
+        Args:
+            name: Tool name
+            category: Tool category
+            version: Tool version
+        """
+        self.name = name
+        self.category = category
+        self.version = version
+        self.operation_id: Optional[UUID] = None
+    
+    @abstractmethod
+    async def execute(self, **kwargs) -> 'ToolResult':
+        """
+        Execute tool operation.
+        
+        Args:
+            **kwargs: Tool-specific parameters
+            
+        Returns:
+            ToolResult with execution results
+        """
+        pass
+    
+    async def validate(self) -> bool:
+        """
+        Validate tool functionality.
+        
+        Returns:
+            True if tool is operational
+        """
+        return True
+    
+    def _generate_operation_id(self) -> UUID:
+        """Generate unique operation ID."""
+        return uuid4()
+
+
+class ReconnaissanceTool(LegacyOffensiveTool):
     """Base class for reconnaissance tools."""
     
     async def discover(self, target: Target) -> List[Dict[str, Any]]:
@@ -151,7 +199,7 @@ class ReconnaissanceTool(OffensiveTool):
         raise NotImplementedError("Subclass must implement discover()")
 
 
-class ExploitationTool(OffensiveTool):
+class ExploitationTool(LegacyOffensiveTool):
     """Base class for exploitation tools."""
     
     async def exploit(
@@ -172,7 +220,7 @@ class ExploitationTool(OffensiveTool):
         raise NotImplementedError("Subclass must implement exploit()")
 
 
-class PostExploitationTool(OffensiveTool):
+class PostExploitationTool(LegacyOffensiveTool):
     """Base class for post-exploitation tools."""
     
     async def maintain_access(self, target: Target) -> bool:
@@ -188,7 +236,7 @@ class PostExploitationTool(OffensiveTool):
         raise NotImplementedError("Subclass must implement maintain_access()")
 
 
-class IntelligenceTool(OffensiveTool):
+class IntelligenceTool(LegacyOffensiveTool):
     """Base class for intelligence gathering tools."""
     
     async def gather(
@@ -207,3 +255,45 @@ class IntelligenceTool(OffensiveTool):
             List of intelligence findings
         """
         raise NotImplementedError("Subclass must implement gather()")
+
+
+# ============================================================================
+# ENHANCED BASE CLASSES FOR ORCHESTRATION
+# ============================================================================
+
+@dataclass
+class ToolMetadata:
+    """
+    Metadata for tool execution.
+    
+    Attributes:
+        tool_name: Tool identifier
+        execution_time: Execution duration in seconds
+        success_rate: Historical success rate
+        confidence_score: Confidence in results (0.0-1.0)
+        resource_usage: Resource consumption metrics
+    """
+    tool_name: str
+    execution_time: float = 0.0
+    success_rate: float = 1.0
+    confidence_score: float = 0.8
+    resource_usage: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ToolResult:
+    """
+    Enhanced tool execution result.
+    
+    Attributes:
+        success: Operation success status
+        data: Result data
+        message: Human-readable message
+        metadata: Tool metadata
+        timestamp: Execution timestamp
+    """
+    success: bool
+    data: Any
+    message: str = ""
+    metadata: Optional[ToolMetadata] = None
+    timestamp: datetime = field(default_factory=datetime.utcnow)

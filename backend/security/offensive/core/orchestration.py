@@ -8,8 +8,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 import asyncio
-from ..base import OffensiveTool, ToolResult, ToolMetadata
-from ..exceptions import OffensiveToolError
+from .base import OffensiveTool, ToolResult, ToolMetadata
+from .exceptions import OffensiveToolError
 
 
 class OperationPhase(Enum):
