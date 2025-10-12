@@ -35,7 +35,7 @@ class TestTokenBucket:
         bucket = TokenBucket(capacity=10, refill_rate=1)
         bucket.consume(8)
         assert bucket.consume(5) is False  # Only 2 tokens left
-        assert bucket.tokens == 2  # Unchanged
+        assert bucket.tokens == pytest.approx(2, abs=0.01)  # Unchanged (tolerance for refill)
     
     def test_refill_mechanism(self):
         """Test tokens refill over time."""

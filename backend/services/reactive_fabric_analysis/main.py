@@ -46,11 +46,11 @@ CORE_SERVICE_URL = os.getenv("CORE_SERVICE_URL", "http://reactive_fabric_core:86
 
 # Global instances
 db: Optional[object] = None  # Database connection (shared with Core)
-parsers: list = []
+parsers: List[Any] = []
 ttp_mapper: Optional[TTPMapper] = None
 
 # Metrics
-metrics = {
+metrics: Dict[str, Any] = {
     "captures_processed_today": 0,
     "ttps_extracted_today": 0,
     "attacks_created_today": 0,
@@ -59,7 +59,7 @@ metrics = {
 
 
 # Background task for polling forensic captures
-async def forensic_polling_task():
+async def forensic_polling_task() -> None:
     """
     Production-ready forensic polling with full TTP extraction.
     
@@ -143,8 +143,11 @@ async def forensic_polling_task():
                     severity = _determine_severity(ttps)
                     
                     # Step 8: Create attack record via Core Service
+                    # Infer honeypot ID from capture file path
+                    honeypot_id = _infer_honeypot_from_path(capture_path)
+                    
                     attack = AttackCreate(
-                        honeypot_id="00000000-0000-0000-0000-000000000001",  # TODO: Get from DB
+                        honeypot_id=honeypot_id,
                         attacker_ip=parsed_data.get("attacker_ip", "unknown"),
                         attack_type=parsed_data.get("attack_type", "unknown"),
                         severity=severity,
@@ -214,6 +217,66 @@ async def scan_filesystem_for_captures() -> list:
                 pending.append(file)
     
     return pending
+
+
+def _infer_honeypot_from_path(file_path: Path) -> str:
+    """
+    Infer honeypot ID from forensic capture file path.
+    
+    Convention: /forensics/<honeypot_type>_<honeypot_id>/<capture_file>
+    Example: /forensics/cowrie_ssh_001/session.json → "ssh_001"
+    
+    Fallback: If path doesn't follow convention, extract from parent directory
+    or use filename pattern.
+    
+    Args:
+        file_path: Path to forensic capture file
+    
+    Returns:
+        Honeypot ID (e.g., "ssh_001", "web_002", "unknown")
+    
+    Raises:
+        ValueError: If path is invalid or cannot infer honeypot ID
+    """
+    try:
+        # Method 1: Extract from parent directory (preferred)
+        # Format: /forensics/<honeypot_dir>/<file>
+        if len(file_path.parts) >= 2:
+            parent_dir = file_path.parts[-2]  # e.g., "cowrie_ssh_001" or "forensics"
+            
+            # Check if parent is honeypot directory (contains underscore)
+            if "_" in parent_dir and parent_dir != "forensics":
+                # Extract ID from directory name
+                # "cowrie_ssh_001" → "ssh_001"
+                honeypot_id = parent_dir.split("_", 1)[1] if parent_dir.count("_") >= 1 else parent_dir
+                logger.debug("honeypot_id_inferred_from_directory", file=str(file_path), honeypot_id=honeypot_id)
+                return honeypot_id
+        
+        # Method 2: Extract from filename pattern
+        # Format: <honeypot_id>_session_20251012.json → "honeypot_id"
+        filename_parts = file_path.stem.split("_")
+        if len(filename_parts) >= 2:
+            # Assume first part is honeypot ID
+            potential_id = filename_parts[0]
+            if potential_id and potential_id != "session":
+                logger.debug("honeypot_id_inferred_from_filename", file=str(file_path), honeypot_id=potential_id)
+                return potential_id
+        
+        # Method 3: Fallback to "unknown"
+        logger.warning(
+            "honeypot_id_inference_failed_using_unknown",
+            file=str(file_path),
+            reason="Path doesn't follow expected convention"
+        )
+        return "unknown"
+    
+    except Exception as e:
+        logger.error(
+            "honeypot_id_inference_error",
+            file=str(file_path),
+            error=str(e)
+        )
+        return "unknown"
 
 
 def _determine_severity(ttps: list) -> AttackSeverity:

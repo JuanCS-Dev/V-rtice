@@ -56,7 +56,7 @@ class ForensicParser(ABC):
             FileNotFoundError: If file doesn't exist
             ParserError: If parsing fails
         """
-        pass
+        ...
     
     @abstractmethod
     def supports(self, file_path: Path) -> bool:
@@ -69,7 +69,7 @@ class ForensicParser(ABC):
         Returns:
             True if parser can handle this file type
         """
-        pass
+        ...
     
     def _determine_attack_type(self, data: Dict[str, Any]) -> str:
         """

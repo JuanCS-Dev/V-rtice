@@ -16,6 +16,7 @@ Refill rate = Immune response regulation
 """
 
 from fastapi import Request, HTTPException
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Dict, Tuple
 import time
@@ -144,14 +145,22 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
                     f"(limit: {capacity} req/min)"
                 )
                 
-                raise HTTPException(
+                # Return JSONResponse instead of raising (for middleware compatibility)
+                return JSONResponse(
                     status_code=429,
-                    detail={
-                        "error": "Rate limit exceeded",
-                        "endpoint": endpoint,
-                        "limit": f"{capacity} requests per minute",
-                        "retry_after": 60,  # seconds
-                        "message": "Too many requests. Please slow down."
+                    content={
+                        "detail": {
+                            "error": "Rate limit exceeded",
+                            "endpoint": endpoint,
+                            "limit": f"{capacity} requests per minute",
+                            "retry_after": 60,  # seconds
+                            "message": "Too many requests. Please slow down."
+                        }
+                    },
+                    headers={
+                        "X-RateLimit-Limit": str(capacity),
+                        "X-RateLimit-Remaining": "0",
+                        "Retry-After": "60"
                     }
                 )
         

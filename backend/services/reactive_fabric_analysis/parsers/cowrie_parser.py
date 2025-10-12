@@ -112,8 +112,13 @@ class CowrieJSONParser(ForensicParser):
                                     entry['timestamp'].replace('Z', '+00:00')
                                 )
                                 data['timestamps'].append(ts)
-                            except (ValueError, AttributeError):
-                                pass
+                            except (ValueError, AttributeError) as e:
+                                logger.debug(
+                                    "cowrie_timestamp_parse_error",
+                                    timestamp=entry.get('timestamp'),
+                                    error=str(e)
+                                )
+                                continue  # Skip malformed timestamp, continue parsing
                         
                         # Extract attacker IP (first occurrence)
                         if not data['attacker_ip'] and 'src_ip' in entry:

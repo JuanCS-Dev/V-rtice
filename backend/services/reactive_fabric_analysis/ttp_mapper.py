@@ -321,7 +321,7 @@ class TTPMapper:
         self,
         commands: List[str],
         attack_type: str,
-        credentials: Optional[List[tuple]] = None
+        credentials: Optional[List[tuple[str, str]]] = None
     ) -> List[str]:
         """
         Map observed commands and attack type to MITRE ATT&CK TTPs.
@@ -386,9 +386,9 @@ class TTPMapper:
         
         return mapping.get(attack_type, set())
     
-    def _map_by_credentials(self, credentials: List[tuple]) -> Set[str]:
+    def _map_by_credentials(self, credentials: List[tuple[str, str]]) -> Set[str]:
         """Map based on credential usage patterns."""
-        ttps = set()
+        ttps: Set[str] = set()
         
         # Check for common/default credentials
         common_users = {"root", "admin", "administrator", "user", "test"}
@@ -431,7 +431,7 @@ class TTPMapper:
         
         return ttps
     
-    def get_ttp_info(self, technique_id: str) -> Dict[str, str]:
+    def get_ttp_info(self, technique_id: str) -> Dict[str, Any]:
         """
         Get TTP information (name, tactic) for a given technique ID.
         
@@ -439,17 +439,21 @@ class TTPMapper:
             technique_id: MITRE technique ID (e.g., "T1110")
         
         Returns:
-            Dict with name and tactic, or unknown if not found
+            Dict with technique_id, name and tactic keys
         """
         ttp_info = self.TTP_PATTERNS.get(technique_id, {})
         
+        # Extract name and tactic (both are strings in TTP_PATTERNS)
+        name = ttp_info.get("name") if ttp_info else f"Unknown Technique {technique_id}"
+        tactic = ttp_info.get("tactic") if ttp_info else "Unknown"
+        
         return {
             "technique_id": technique_id,
-            "name": ttp_info.get("name", f"Unknown Technique {technique_id}"),
-            "tactic": ttp_info.get("tactic", "Unknown")
+            "name": name if isinstance(name, str) else str(name),
+            "tactic": tactic if isinstance(tactic, str) else str(tactic)
         }
     
-    def get_all_techniques(self) -> List[Dict[str, str]]:
+    def get_all_techniques(self) -> List[Dict[str, Any]]:
         """
         Get list of all techniques this mapper can identify.
         
@@ -459,8 +463,8 @@ class TTPMapper:
         return [
             {
                 "technique_id": tid,
-                "name": info["name"],
-                "tactic": info["tactic"]
+                "name": str(info.get("name", "Unknown")),
+                "tactic": str(info.get("tactic", "Unknown"))
             }
             for tid, info in self.TTP_PATTERNS.items()
         ]

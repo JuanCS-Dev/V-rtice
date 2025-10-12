@@ -18,7 +18,7 @@ import (
 	"github.com/verticedev/vcli-go/pkg/nlp/auth"
 	"github.com/verticedev/vcli-go/pkg/nlp/authz"
 	"github.com/verticedev/vcli-go/pkg/nlp/behavioral"
-	"github.com/verticedev/vcli-go/pkg/nlp/intent"
+	intentpkg "github.com/verticedev/vcli-go/pkg/nlp/intent"
 	"github.com/verticedev/vcli-go/pkg/nlp/ratelimit"
 	"github.com/verticedev/vcli-go/pkg/nlp/sandbox"
 )
@@ -37,7 +37,7 @@ type Orchestrator struct {
 	sandboxManager *sandbox.Sandbox
 
 	// Layer 4: Intent Validation - Did you really mean that?
-	intentValidator *intent.IntentValidator
+	intentValidator *intentpkg.IntentValidator
 
 	// Layer 5: Rate Limiting - How much can you do?
 	rateLimiter *ratelimit.RateLimiter
@@ -70,7 +70,7 @@ type Config struct {
 	AuthConfig      *auth.AuthConfig
 	AuthzConfig     *authz.AuthorizerConfig
 	SandboxConfig   *sandbox.SandboxConfig
-	IntentConfig    *intent.IntentValidator // No config struct, inject validator
+	IntentConfig    *intentpkg.IntentValidator // No config struct, inject validator
 	RateLimitConfig *ratelimit.RateLimitConfig
 	BehaviorConfig  *behavioral.AnalyzerConfig
 	AuditConfig     *audit.AuditConfig
@@ -152,7 +152,7 @@ func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 
 	// Layer 4: Intent Validation
 	if cfg.IntentConfig == nil {
-		cfg.IntentConfig = intent.NewIntentValidator()
+		cfg.IntentConfig = intentpkg.NewIntentValidator()
 	}
 	intentValidator := cfg.IntentConfig
 
@@ -398,7 +398,7 @@ func (o *Orchestrator) validateIntent(ctx context.Context, authCtx *auth.AuthCon
 	start := time.Now()
 
 	// Build command intent for validation
-	cmdIntent := &intent.CommandIntent{
+	cmdIntent := &intentpkg.CommandIntent{
 		Action:   intent.Verb,
 		Resource: intent.Target,
 		Target:   intent.Target,

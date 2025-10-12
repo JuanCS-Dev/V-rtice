@@ -39,9 +39,9 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 
 	// Layer 2: Authorization setup
 	authzConfig := &authz.AuthorizerConfig{
-		EnableRBAC:    true,
+		EnableRBAC:     true,
 		EnablePolicies: false, // Simplify for tests
-		DenyByDefault: false,
+		DenyByDefault:  false,  // Allow by default for tests
 	}
 
 	// Layer 3: Sandbox setup
@@ -95,8 +95,13 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 	require.NoError(t, err)
 	require.NotNil(t, orch)
 
+	// Assign operator role to test user (includes viewer + operational permissions)
+	rbac := orch.authorizer.GetRBACEngine()
+	err = rbac.AssignRole("test-user", "operator")
+	require.NoError(t, err)
+
 	// Create test auth context
-	session, err := sessionMgr.CreateSession("test-user", "tester", []string{"user"}, false)
+	session, err := sessionMgr.CreateSession("test-user", "tester", []string{"operator"}, false)
 	require.NoError(t, err)
 
 	authCtx := &auth.AuthContext{
@@ -104,7 +109,7 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 		Username:          "tester",
 		SessionID:         session.Claims.ID,
 		SessionToken:      session.Token,
-		Roles:             []string{"user"},
+		Roles:             []string{"operator"},
 		CreatedAt:         time.Now(),
 		ExpiresAt:         time.Now().Add(15 * time.Minute),
 		Verified:          true,
@@ -207,7 +212,6 @@ func TestExecute_Success(t *testing.T) {
 		OriginalInput: "list pods",
 		Verb:          "list",
 		Target:        "pods",
-		Domain:        "k8s",
 		Confidence:    0.95,
 		RiskLevel:     nlp.RiskLevelLOW,
 	}
@@ -243,7 +247,6 @@ func TestExecute_NilAuthContext(t *testing.T) {
 		OriginalInput: "list pods",
 		Verb:          "list",
 		Target:        "pods",
-		Domain:        "k8s",
 	}
 
 	ctx := context.Background()
@@ -266,7 +269,6 @@ func TestExecute_SkipValidation(t *testing.T) {
 		OriginalInput: "delete all pods",
 		Verb:          "delete",
 		Target:        "pods",
-		Domain:        "k8s",
 		RiskLevel:     nlp.RiskLevelCRITICAL,
 	}
 
@@ -293,7 +295,6 @@ func TestExecute_HighRisk(t *testing.T) {
 		OriginalInput: "delete deployment critical-service",
 		Verb:          "delete",
 		Target:        "deployment/critical-service",
-		Domain:        "k8s",
 		RiskLevel:     nlp.RiskLevelCRITICAL,
 	}
 
@@ -387,7 +388,6 @@ func TestValidateAuthorization(t *testing.T) {
 	intent := &nlp.Intent{
 		Verb:      "list",
 		Target:    "pods",
-		Domain:    "k8s",
 		RiskLevel: nlp.RiskLevelLOW,
 	}
 
@@ -441,7 +441,6 @@ func TestValidateIntent(t *testing.T) {
 		OriginalInput: "delete pod test",
 		Verb:          "delete",
 		Target:        "pod/test",
-		Domain:        "k8s",
 		RiskLevel:     nlp.RiskLevelHIGH,
 	}
 
@@ -519,7 +518,6 @@ func TestLogAudit(t *testing.T) {
 		OriginalInput: "list pods",
 		Verb:          "list",
 		Target:        "pods",
-		Domain:        "k8s",
 		Confidence:    0.95,
 		RiskLevel:     nlp.RiskLevelLOW,
 	}
@@ -566,7 +564,6 @@ func TestExecute_ContextTimeout(t *testing.T) {
 		OriginalInput: "list pods",
 		Verb:          "list",
 		Target:        "pods",
-		Domain:        "k8s",
 	}
 
 	ctx := context.Background()
@@ -589,7 +586,6 @@ func TestExecute_DryRun(t *testing.T) {
 		OriginalInput: "create deployment test",
 		Verb:          "create",
 		Target:        "deployment/test",
-		Domain:        "k8s",
 	}
 
 	ctx := context.Background()
@@ -633,7 +629,6 @@ func BenchmarkExecute_ReadOperation(b *testing.B) {
 		OriginalInput: "list pods",
 		Verb:          "list",
 		Target:        "pods",
-		Domain:        "k8s",
 		RiskLevel:     nlp.RiskLevelLOW,
 	}
 
@@ -653,7 +648,6 @@ func BenchmarkExecute_WriteOperation(b *testing.B) {
 		OriginalInput: "create pod test",
 		Verb:          "create",
 		Target:        "pod/test",
-		Domain:        "k8s",
 		RiskLevel:     nlp.RiskLevelMEDIUM,
 	}
 
