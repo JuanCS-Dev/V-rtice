@@ -1067,6 +1067,7 @@ class TIGFabric:
             "isolated_nodes": isolated_nodes,
             "degraded_nodes": degraded_nodes,
             "connectivity": connectivity,
+            "connectivity_ratio": self.metrics.connectivity_ratio,  # Graph-based connectivity
             "is_partitioned": is_partitioned,
         }
 

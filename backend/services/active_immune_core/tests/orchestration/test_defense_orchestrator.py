@@ -427,20 +427,30 @@ async def test_kafka_publishing_enrichment(
     mock_sentinel.analyze_event.return_value = sample_detection
     
     # Mock enrichment
+    now = datetime.utcnow()
+    primary_ioc = IOC(
+        ioc_type=IOCType.IP_ADDRESS,
+        value="1.2.3.4",
+        source="test",
+        first_seen=now,
+        last_seen=now,
+        confidence=0.9,
+    )
+    
     enrichment = EnrichedThreat(
         threat_id="t1",
-        iocs=[],
+        primary_ioc=primary_ioc,
         related_iocs=[],
-        severity=8,
-        confidence=0.9,
-        threat_actors=[],
+        threat_actor=None,
         campaigns=[],
         ttps=[],
-        threat_narrative="Test",
-        attack_chain=[],
-        risk_score=85,
-        recommended_actions=[],
-        sources_consulted=[],
+        attack_chain_stage="initial_access",
+        severity=8,
+        confidence=0.9,
+        narrative="Test narrative",
+        recommendations=["Block IP"],
+        sources=["test_source"],
+        enriched_at=datetime.utcnow(),
     )
     mock_fusion.correlate_indicators.return_value = enrichment
     
