@@ -406,7 +406,7 @@ class TTPMapper:
     
     def _map_by_command_heuristics(self, commands: List[str]) -> Set[str]:
         """Advanced heuristics for TTP identification."""
-        ttps = set()
+        ttps: Set[str] = set()
         
         if not commands:
             return ttps

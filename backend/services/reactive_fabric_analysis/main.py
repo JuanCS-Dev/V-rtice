@@ -8,12 +8,13 @@ Sprint 1: Real implementation - NO MOCK, NO PLACEHOLDER, NO TODO
 
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 import structlog
 import asyncio
 import httpx
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict, Any
 import os
 
 from backend.services.reactive_fabric_analysis.parsers import (
@@ -198,7 +199,7 @@ async def forensic_polling_task() -> None:
             await asyncio.sleep(POLLING_INTERVAL)
 
 
-async def scan_filesystem_for_captures() -> list:
+async def scan_filesystem_for_captures() -> List[Path]:
     """
     Scan forensic capture directory for unprocessed files.
     
@@ -279,7 +280,7 @@ def _infer_honeypot_from_path(file_path: Path) -> str:
         return "unknown"
 
 
-def _determine_severity(ttps: list) -> AttackSeverity:
+def _determine_severity(ttps: List[str]) -> AttackSeverity:
     """
     Determine attack severity based on TTPs.
     
@@ -306,7 +307,7 @@ def _determine_severity(ttps: list) -> AttackSeverity:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifecycle manager for FastAPI app."""
     global parsers, ttp_mapper
     
@@ -352,7 +353,7 @@ app = FastAPI(
 # ============================================================================
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> Dict[str, Any]:
     """Health check endpoint."""
     # Check if forensic directory is accessible
     forensic_accessible = FORENSIC_CAPTURE_PATH.exists()
@@ -374,7 +375,7 @@ async def health_check():
 
 
 @app.get("/")
-async def root():
+async def root() -> Dict[str, Any]:
     """Root endpoint."""
     return {
         "service": "Reactive Fabric Analysis",
@@ -387,7 +388,7 @@ async def root():
 
 
 @app.get("/api/v1/status", response_model=AnalysisStatus)
-async def get_status():
+async def get_status() -> AnalysisStatus:
     """
     Get analysis service status and statistics.
     
@@ -395,16 +396,16 @@ async def get_status():
     """
     return AnalysisStatus(
         status="operational",
-        captures_processed_today=metrics["captures_processed_today"],
-        ttps_extracted_today=metrics["ttps_extracted_today"],
-        attacks_created_today=metrics["attacks_created_today"],
+        captures_processed_today=int(metrics["captures_processed_today"]),
+        ttps_extracted_today=int(metrics["ttps_extracted_today"]),
+        attacks_created_today=int(metrics["attacks_created_today"]),
         last_processing=metrics["last_processing"],
         polling_interval_seconds=POLLING_INTERVAL
     )
 
 
 @app.get("/api/v1/techniques")
-async def list_techniques():
+async def list_techniques() -> Dict[str, Any]:
     """
     List all MITRE ATT&CK techniques this service can identify.
     
