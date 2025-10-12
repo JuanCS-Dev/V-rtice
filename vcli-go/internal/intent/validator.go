@@ -210,33 +210,39 @@ func (rt *ReverseTranslator) Translate(cmd *nlp.Command) string {
 
 // extractNamespace extracts namespace from command
 func (rt *ReverseTranslator) extractNamespace(cmd *nlp.Command) string {
-	for i, flag := range cmd.Flags {
-		if flag == "-n" || flag == "--namespace" {
-			if i+1 < len(cmd.Flags) {
-				return cmd.Flags[i+1]
-			}
-		}
+	if ns, exists := cmd.Flags["-n"]; exists {
+		return ns
+	}
+	if ns, exists := cmd.Flags["--namespace"]; exists {
+		return ns
 	}
 	return "default"
 }
 
 // extractLabels extracts label selectors
 func (rt *ReverseTranslator) extractLabels(cmd *nlp.Command) string {
-	for i, flag := range cmd.Flags {
-		if flag == "-l" || flag == "--selector" {
-			if i+1 < len(cmd.Flags) {
-				return cmd.Flags[i+1]
-			}
-		}
+	if labels, exists := cmd.Flags["-l"]; exists {
+		return labels
+	}
+	if labels, exists := cmd.Flags["--selector"]; exists {
+		return labels
 	}
 	return ""
 }
 
 // buildShellCommand builds the actual shell command
 func (rt *ReverseTranslator) buildShellCommand(cmd *nlp.Command) string {
-	parts := make([]string, 0, len(cmd.Path)+len(cmd.Flags))
+	parts := make([]string, 0, len(cmd.Path)+len(cmd.Flags)*2)
 	parts = append(parts, cmd.Path...)
-	parts = append(parts, cmd.Flags...)
+	
+	// Add flags
+	for key, value := range cmd.Flags {
+		parts = append(parts, key)
+		if value != "" {
+			parts = append(parts, value)
+		}
+	}
+	
 	return strings.Join(parts, " ")
 }
 
@@ -271,12 +277,10 @@ func (ia *ImpactAnalyzer) Analyze(ctx context.Context, cmd *nlp.Command) (*Impac
 	
 	verb := cmd.Path[1]
 	namespace := ""
-	for i, flag := range cmd.Flags {
-		if flag == "-n" || flag == "--namespace" {
-			if i+1 < len(cmd.Flags) {
-				namespace = cmd.Flags[i+1]
-			}
-		}
+	if ns, exists := cmd.Flags["-n"]; exists {
+		namespace = ns
+	} else if ns, exists := cmd.Flags["--namespace"]; exists {
+		namespace = ns
 	}
 	
 	switch verb {
@@ -316,6 +320,8 @@ type Impact struct {
 	Reversible        bool
 	EstimatedTime     string
 	Dependencies      []string // Dependent resources
+	Description       string   // Human-readable description
+	RiskScore         float64  // 0.0 - 1.0
 }
 
 // ConfirmationPrompt contains information for user confirmation
