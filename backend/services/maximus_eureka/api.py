@@ -27,6 +27,7 @@ from eureka import EurekaEngine
 from ioc_extractor import IoCExtractor
 from pattern_detector import PatternDetector
 from playbook_generator import PlaybookGenerator
+from middleware.rate_limiter import RateLimitMiddleware, SlidingWindowRateLimiter
 
 app = FastAPI(title="Maximus Eureka Service", version="1.0.0")
 
@@ -35,6 +36,25 @@ eureka_engine = EurekaEngine()
 pattern_detector = PatternDetector()
 ioc_extractor = IoCExtractor()
 playbook_generator = PlaybookGenerator()
+
+# ============================================================================
+# Rate Limiting Setup - Sprint 6 Issue #11
+# ============================================================================
+
+# Create rate limiter instance
+rate_limiter = SlidingWindowRateLimiter(
+    default_limit=100,  # 100 requests per minute default
+    window_seconds=60,
+    burst_limit=150  # Allow 150 requests burst (1.5x)
+)
+
+# Set per-endpoint limits (expensive operations get lower limits)
+rate_limiter.set_endpoint_limit("/api/insights/generate", limit=10, window_seconds=60)  # 10/min
+rate_limiter.set_endpoint_limit("/api/patterns/detect", limit=30, window_seconds=60)  # 30/min
+rate_limiter.set_endpoint_limit("/api/playbooks/generate", limit=20, window_seconds=60)  # 20/min
+
+# Add rate limiting middleware
+app.add_middleware(RateLimitMiddleware, limiter=rate_limiter)
 
 
 class InsightRequest(BaseModel):
@@ -159,6 +179,31 @@ async def extract_iocs_endpoint(data: dict[str, Any]) -> dict[str, Any]:
         "status": "success",
         "timestamp": datetime.now().isoformat(),
         "extracted_iocs": extracted_iocs,
+    }
+
+
+@app.get("/metrics/rate-limiter")
+async def rate_limiter_metrics() -> dict[str, Any]:
+    """
+    Get rate limiter metrics.
+    
+    Sprint 6 - Issue #11
+    
+    Returns:
+        Dict with rate limiter statistics:
+        - total_hits: Total requests processed
+        - total_blocks: Total requests blocked
+        - block_rate: Percentage of blocked requests
+        - active_clients: Number of unique clients tracked
+        - default_limit: Default rate limit
+        - window_seconds: Rate limit window
+        - burst_limit: Burst request limit
+    """
+    metrics = rate_limiter.get_metrics()
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "metrics": metrics,
     }
 
 
