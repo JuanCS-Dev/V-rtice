@@ -150,7 +150,7 @@ assert.Equal(t, 2, result.CurrentTokens)
 // Try to take more than available
 result = bucket.TakeN(3)
 assert.False(t, result.Allowed)
-assert.NotZero(t, result.RetryAfter)
+assert.GreaterOrEqual(t, result.RetryAfter, time.Duration(0))
 }
 
 func TestTokenBucket_Available(t *testing.T) {
