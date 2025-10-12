@@ -7,7 +7,9 @@ Sprint 1: Real implementation
 """
 
 from backend.services.reactive_fabric_analysis.parsers.base import ForensicParser
-from backend.services.reactive_fabric_analysis.parsers.cowrie_parser import CowrieJSONParser
+from backend.services.reactive_fabric_analysis.parsers.cowrie_parser import (
+    CowrieJSONParser,
+)
 
 __all__ = [
     "ForensicParser",

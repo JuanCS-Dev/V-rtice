@@ -15,6 +15,7 @@ from uuid import UUID
 
 class ProcessingStatus(str, Enum):
     """Forensic capture processing status."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -23,6 +24,7 @@ class ProcessingStatus(str, Enum):
 
 class AttackSeverity(str, Enum):
     """Attack severity levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -31,6 +33,7 @@ class AttackSeverity(str, Enum):
 
 class ForensicCapture(BaseModel):
     """Forensic capture model (from database)."""
+
     id: UUID
     honeypot_id: UUID
     filename: str
@@ -45,22 +48,25 @@ class ForensicCapture(BaseModel):
     ttps_extracted: int = 0
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    
+
     class Config:
         from_attributes = True
 
 
 class AttackCreate(BaseModel):
     """Model for creating an attack record."""
+
     honeypot_id: UUID
     attacker_ip: str = Field(..., description="Attacker IP address")
     attack_type: str = Field(..., description="Type of attack")
     severity: AttackSeverity
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
-    ttps: List[str] = Field(default_factory=list, description="MITRE ATT&CK technique IDs")
+    ttps: List[str] = Field(
+        default_factory=list, description="MITRE ATT&CK technique IDs"
+    )
     iocs: Dict[str, List[str]] = Field(
         default_factory=dict,
-        description="IoCs: {ips: [], domains: [], hashes: [], usernames: []}"
+        description="IoCs: {ips: [], domains: [], hashes: [], usernames: []}",
     )
     payload: Optional[str] = Field(None, description="Attack payload (sanitized)")
     captured_at: datetime
@@ -68,6 +74,7 @@ class AttackCreate(BaseModel):
 
 class AnalysisStatus(BaseModel):
     """Analysis service status."""
+
     status: str = "operational"
     captures_processed_today: int = 0
     ttps_extracted_today: int = 0
