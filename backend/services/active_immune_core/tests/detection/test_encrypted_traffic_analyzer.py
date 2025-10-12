@@ -530,22 +530,19 @@ class TestRealWorldScenarios:
             dst_port=443,
             protocol="TCP",
             start_time=datetime.utcnow(),
-
-        # Verify analysis completed
-        assert isinstance(result, FlowAnalysisResult)
-        assert result.flow_id == "cs_beacon"
-
-        # Verify analysis completed
-        assert isinstance(result, FlowAnalysisResult)
-        assert result.flow_id == "cs_beacon"
-
-        # Verify analysis completed
-        assert isinstance(result, FlowAnalysisResult)
-        assert result.flow_id == "cs_beacon"
+            byte_count=50000,
+            packet_count=100,
+            duration=60.0,
+            packet_sizes=[500] * 100,  # Consistent size (beacon characteristic)
+            inter_arrival_times=[60] * 100,  # Regular intervals (beacon)
+            tls_version="TLSv1.2",
         )
 
         result = await analyzer.analyze_flow(flow)
 
+        # Verify analysis completed
+        assert isinstance(result, FlowAnalysisResult)
+        assert result.flow_id == "cs_beacon"
         assert result.threat_type != TrafficThreatType.BENIGN
         assert result.threat_type == TrafficThreatType.C2_BEACONING
         assert result.confidence > 0.8

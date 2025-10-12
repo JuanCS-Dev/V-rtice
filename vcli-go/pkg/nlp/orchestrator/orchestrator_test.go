@@ -39,12 +39,14 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 
 	// Layer 2: Authorization setup
 	authzConfig := &authz.AuthorizerConfig{
-		StrictMode: false, // Permissive for tests
+		EnableRBAC:    true,
+		EnablePolicies: false, // Simplify for tests
+		DenyByDefault: false,
 	}
 
 	// Layer 3: Sandbox setup
 	sandboxConfig := &sandbox.SandboxConfig{
-		EnforceReadOnly: false, // Allow all for tests
+		AllowedNamespaces: []string{"default", "test"},
 	}
 
 	// Layer 4: Intent setup (no config, will be created)
@@ -52,18 +54,21 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 
 	// Layer 5: Rate limit setup
 	rateLimitConfig := &ratelimit.RateLimitConfig{
-		DefaultRate:  100, // Generous limit for tests
-		DefaultBurst: 20,
+		RequestsPerMinute: 100, // Generous limit for tests
+		BurstSize:         20,
+		PerUser:           true,
 	}
 
 	// Layer 6: Behavioral setup
 	behaviorConfig := &behavioral.AnalyzerConfig{
 		AnomalyThreshold: 0.9, // High threshold for tests
+		TrackActions:     true,
 	}
 
 	// Layer 7: Audit setup
 	auditConfig := &audit.AuditConfig{
-		BufferSize: 100,
+		MaxEvents:     100,
+		PersistEvents: false,
 	}
 
 	// Create orchestrator config
