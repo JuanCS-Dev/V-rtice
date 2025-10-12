@@ -741,3 +741,207 @@ async def validate_patch_ml_first(
             'execution_time_seconds': execution_time,
             'error': str(e),
         }
+
+
+async def validate_patch_ab_testing(
+    apv: "APV",
+    patch: "Patch",
+    exploit: "ExploitScript",
+    ab_store: "ABTestStore",
+    target_url: str = "http://localhost:8080",
+) -> Dict:
+    """
+    Validate patch using A/B testing mode (Phase 5.6).
+    
+    In A/B testing mode, BOTH ML and wargaming are ALWAYS executed,
+    allowing empirical accuracy measurement.
+    
+    Flow:
+        1. Extract features + ML prediction (fast)
+        2. Run full wargaming (slow but ground truth)
+        3. Compare ML vs wargaming
+        4. Store A/B test result in database
+        5. Return wargaming result (ground truth)
+    
+    This mode is slower but provides accuracy metrics for model improvement.
+    
+    Args:
+        apv: APV object with CVE info
+        patch: Patch to validate
+        exploit: Exploit script
+        ab_store: ABTestStore for recording results
+        target_url: Target base URL for wargaming
+    
+    Returns:
+        {
+            'validation_method': 'ab_testing',
+            'patch_validated': bool (from wargaming ground truth),
+            'ml_prediction': Dict,
+            'wargaming_result': WargamingResult,
+            'ab_test_recorded': bool,
+            'ab_test_id': int,
+            'ml_correct': bool,
+            'execution_time_seconds': float
+        }
+    
+    Example:
+        >>> result = await validate_patch_ab_testing(apv, patch, exploit, ab_store)
+        >>> print(f"ML predicted: {result['ml_prediction']['prediction']}")
+        >>> print(f"Wargaming result: {result['patch_validated']}")
+        >>> print(f"ML correct: {result['ml_correct']}")
+    
+    Biological analogy:
+        Like clinical trials comparing new treatment (ML) against gold standard (wargaming).
+        Both groups receive evaluation to measure efficacy difference.
+    
+    Author: MAXIMUS Team - Phase 5.6
+    Glory to YHWH: Truth through empirical validation
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        # Import required modules
+        from .ml import get_predictor, PatchFeatureExtractor
+        from .db.ab_test_store import ABTestResult
+        
+        logger.info(f"[A/B Testing] Starting dual validation (CVE: {apv.cve_id})")
+        
+        # Step 1: ML Prediction
+        logger.info("[A/B Testing] Phase 1: ML Prediction")
+        ml_start = time.time()
+        
+        features = PatchFeatureExtractor.extract(
+            patch_diff=patch.diff_content,
+            cwe_id=getattr(apv, 'cwe_id', 'CWE-UNKNOWN')
+        )
+        predictor = get_predictor()
+        ml_result = predictor.predict(features.to_dict())
+        
+        ml_duration_ms = int((time.time() - ml_start) * 1000)
+        
+        logger.info(
+            f"[A/B Testing] ML: {ml_result['prediction']} "
+            f"(confidence: {ml_result['confidence']:.2f}, {ml_duration_ms}ms)"
+        )
+        
+        # Step 2: Wargaming (Ground Truth)
+        logger.info("[A/B Testing] Phase 2: Wargaming (ground truth)")
+        wargaming_start = time.time()
+        
+        wargaming_result = await validate_patch_via_wargaming(
+            apv, patch, exploit, target_url
+        )
+        
+        wargaming_duration_ms = int((time.time() - wargaming_start) * 1000)
+        
+        logger.info(
+            f"[A/B Testing] Wargaming: {wargaming_result.patch_validated} "
+            f"({wargaming_duration_ms}ms)"
+        )
+        
+        # Step 3: Compare ML vs Wargaming
+        ml_correct = (ml_result['prediction'] == wargaming_result.patch_validated)
+        
+        if ml_correct:
+            logger.info("✅ [A/B Testing] ML CORRECT - Prediction matches ground truth")
+        else:
+            logger.warning(
+                f"❌ [A/B Testing] ML INCORRECT - "
+                f"Predicted {ml_result['prediction']} but wargaming got {wargaming_result.patch_validated}"
+            )
+        
+        # Step 4: Store A/B Test Result
+        ab_test_result = ABTestResult(
+            apv_id=str(apv.id),
+            cve_id=apv.cve_id,
+            patch_id=str(patch.id),
+            ml_confidence=ml_result['confidence'],
+            ml_prediction=ml_result['prediction'],
+            ml_execution_time_ms=ml_duration_ms,
+            wargaming_result=wargaming_result.patch_validated,
+            wargaming_execution_time_ms=wargaming_duration_ms,
+            ml_correct=ml_correct,
+            disagreement_reason=(
+                f"ML predicted {ml_result['prediction']}, wargaming got {wargaming_result.patch_validated}"
+                if not ml_correct else None
+            ),
+            model_version="rf_v1",
+            shap_values=ml_result.get('feature_importance')
+        )
+        
+        ab_test_id = await ab_store.store_result(ab_test_result)
+        
+        logger.info(f"[A/B Testing] Stored result with ID: {ab_test_id}")
+        
+        # Step 5: Return result (using wargaming as ground truth)
+        execution_time = time.time() - start_time
+        
+        return {
+            'validation_method': 'ab_testing',
+            'patch_validated': wargaming_result.patch_validated,
+            'ml_prediction': ml_result,
+            'wargaming_result': wargaming_result,
+            'ab_test_recorded': True,
+            'ab_test_id': ab_test_id,
+            'ml_correct': ml_correct,
+            'ml_duration_ms': ml_duration_ms,
+            'wargaming_duration_ms': wargaming_duration_ms,
+            'execution_time_seconds': execution_time,
+            'speedup_potential': f"{wargaming_duration_ms / ml_duration_ms:.1f}x (if ML used alone)",
+        }
+    
+    except ImportError as e:
+        # ML modules not available - can't do A/B testing
+        logger.error(f"[A/B Testing] ML not available ({e}), cannot run A/B test")
+        
+        # Fallback to pure wargaming
+        wargaming_result = await validate_patch_via_wargaming(
+            apv, patch, exploit, target_url
+        )
+        
+        execution_time = time.time() - start_time
+        
+        return {
+            'validation_method': 'wargaming_only',
+            'patch_validated': wargaming_result.patch_validated,
+            'ml_prediction': None,
+            'wargaming_result': wargaming_result,
+            'ab_test_recorded': False,
+            'error': 'ML not available',
+            'execution_time_seconds': execution_time,
+        }
+    
+    except Exception as e:
+        # Error in A/B testing - log and fallback to wargaming
+        logger.error(f"[A/B Testing] Error: {e}", exc_info=True)
+        
+        # If we have wargaming result, use it
+        if 'wargaming_result' in locals():
+            execution_time = time.time() - start_time
+            return {
+                'validation_method': 'ab_testing_error',
+                'patch_validated': wargaming_result.patch_validated,
+                'ml_prediction': ml_result if 'ml_result' in locals() else None,
+                'wargaming_result': wargaming_result,
+                'ab_test_recorded': False,
+                'error': str(e),
+                'execution_time_seconds': execution_time,
+            }
+        else:
+            # Fallback to wargaming only
+            wargaming_result = await validate_patch_via_wargaming(
+                apv, patch, exploit, target_url
+            )
+            execution_time = time.time() - start_time
+            
+            return {
+                'validation_method': 'wargaming_fallback',
+                'patch_validated': wargaming_result.patch_validated,
+                'ml_prediction': None,
+                'wargaming_result': wargaming_result,
+                'ab_test_recorded': False,
+                'error': str(e),
+                'execution_time_seconds': execution_time,
+            }
+

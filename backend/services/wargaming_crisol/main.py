@@ -104,6 +104,7 @@ app = FastAPI(
 
 # Phase 5.6: A/B Test Store (initialized on startup)
 ab_store: Optional[ABTestStore] = None
+ab_testing_enabled: bool = False  # Global flag for A/B testing mode
 
 
 # Request/Response models
@@ -310,15 +311,22 @@ async def execute_wargaming(request: WargamingRequest):
 @app.post("/wargaming/ml-first", response_model=MLFirstResponse)
 async def execute_ml_first_validation(request: MLFirstRequest):
     """
-    Execute ML-first validation (Phase 5.4).
+    Execute ML-first validation (Phase 5.4) with optional A/B testing (Phase 5.6).
     
-    Flow:
+    **Normal Mode** (ab_testing_enabled=False):
         1. Extract features from patch
         2. ML prediction
         3. If confidence >= threshold: Return ML result (fast)
         4. If confidence < threshold: Run full wargaming (accurate)
     
+    **A/B Testing Mode** (ab_testing_enabled=True):
+        1. ALWAYS run BOTH ML prediction AND wargaming
+        2. Compare ML vs wargaming (ground truth)
+        3. Store A/B test result for accuracy tracking
+        4. Return wargaming result
+    
     This hybrid approach reduces wargaming by 80%+ while maintaining accuracy.
+    A/B testing mode provides empirical accuracy data for model improvement.
     
     Args:
         request: ML-first validation request
@@ -339,10 +347,15 @@ async def execute_ml_first_validation(request: MLFirstRequest):
           }'
         ```
     
-    Author: MAXIMUS Team - Phase 5.4
-    Glory to YHWH: Wisdom from experience
+    Author: MAXIMUS Team - Phase 5.4 + 5.6
+    Glory to YHWH: Wisdom from experience, truth from empiricism
     """
-    logger.info(f"🧠 ML-First request: APV={request.apv_id}, Patch={request.patch_id}")
+    global ab_testing_enabled, ab_store
+    
+    logger.info(
+        f"🧠 ML-First request: APV={request.apv_id}, Patch={request.patch_id}, "
+        f"A/B Testing={'ACTIVE' if ab_testing_enabled else 'INACTIVE'}"
+    )
     
     active_wargaming_sessions.inc()
     
@@ -355,6 +368,7 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         apv = Mock()
         apv.apv_id = request.apv_id
         apv.cve_id = request.cve_id
+        apv.id = request.apv_id  # For A/B testing
         
         # Extract CWE from CVE ID
         cwe_mapping = {
@@ -383,6 +397,7 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         # Mock Patch
         patch = Mock()
         patch.patch_id = request.patch_id
+        patch.id = request.patch_id  # For A/B testing
         patch.diff_content = request.patch_diff
         patch.unified_diff = request.patch_diff
         
@@ -398,20 +413,37 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         
         logger.info(f"✓ Using exploit: {exploit.name}")
         
-        # Execute ML-first validation
-        result = await validate_patch_ml_first(
-            apv=apv,
-            patch=patch,
-            exploit=exploit,
-            target_url=request.target_url,
-            confidence_threshold=request.confidence_threshold
-        )
+        # Execute validation (mode depends on ab_testing_enabled flag)
+        if ab_testing_enabled and ab_store is not None:
+            # A/B Testing Mode: Run both ML + wargaming
+            from two_phase_simulator import validate_patch_ab_testing
+            
+            logger.info("🔬 [A/B Testing Mode] Running dual validation")
+            
+            result = await validate_patch_ab_testing(
+                apv=apv,
+                patch=patch,
+                exploit=exploit,
+                ab_store=ab_store,
+                target_url=request.target_url
+            )
+        else:
+            # Normal Mode: ML-first optimization
+            logger.info("⚡ [ML-First Mode] Running optimized validation")
+            
+            result = await validate_patch_ml_first(
+                apv=apv,
+                patch=patch,
+                exploit=exploit,
+                target_url=request.target_url,
+                confidence_threshold=request.confidence_threshold
+            )
         
         # Update metrics
         validation_method_total.labels(method=result['validation_method']).inc()
         
         if result.get('ml_prediction'):
-            ml_confidence_histogram.observe(result['confidence'])
+            ml_confidence_histogram.observe(result.get('confidence', 0.0))
             ml_prediction_total.labels(
                 prediction='valid' if result['ml_prediction']['prediction'] else 'invalid'
             ).inc()
@@ -431,9 +463,9 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         )
         
         logger.info(
-            f"✅ ML-First complete: method={result['validation_method']}, "
+            f"✅ Validation complete: method={result['validation_method']}, "
             f"validated={result['patch_validated']}, "
-            f"confidence={result['confidence']:.2f}, "
+            f"confidence={result.get('confidence', 0.0):.2f}, "
             f"time={result['execution_time_seconds']:.2f}s"
         )
         
@@ -448,9 +480,9 @@ async def execute_ml_first_validation(request: MLFirstRequest):
             apv_id=result.get('apv_id', request.apv_id),
             validation_method=result['validation_method'],
             patch_validated=result['patch_validated'],
-            confidence=result['confidence'],
+            confidence=result.get('confidence', 0.0),
             execution_time_seconds=result['execution_time_seconds'],
-            speedup=result.get('speedup_vs_wargaming'),
+            speedup=result.get('speedup_vs_wargaming') or result.get('speedup_potential'),
             ml_prediction=result.get('ml_prediction'),
             wargaming_result=wargaming_dict
         )
@@ -460,13 +492,13 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         raise
         
     except Exception as e:
-        logger.error(f"❌ ML-First validation failed: {e}", exc_info=True)
+        logger.error(f"❌ Validation failed: {e}", exc_info=True)
         
         active_wargaming_sessions.dec()
         
         raise HTTPException(
             status_code=500,
-            detail=f"ML-First validation failed: {str(e)}"
+            detail=f"Validation failed: {str(e)}"
         )
 
 
@@ -758,6 +790,97 @@ async def get_ml_accuracy(
             status_code=500,
             detail=f"Failed to retrieve ML accuracy: {str(e)}"
         )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 5.6: A/B Testing Control Endpoints
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.post("/wargaming/ab-testing/enable")
+async def enable_ab_testing():
+    """
+    Enable A/B testing mode.
+    
+    In A/B testing mode, ALL patch validations will run BOTH ML prediction
+    AND wargaming simulation, allowing empirical accuracy measurement.
+    
+    **Warning**: This increases validation time significantly as wargaming
+    is no longer bypassed even with high ML confidence.
+    
+    Returns:
+        Dict with status and message
+    """
+    global ab_testing_enabled, ab_store
+    
+    # Check if AB store is available
+    if ab_store is None:
+        raise HTTPException(
+            status_code=503,
+            detail="A/B Test Store not initialized. Cannot enable A/B testing."
+        )
+    
+    ab_testing_enabled = True
+    logger.info("🔬 A/B Testing ENABLED - All validations will run ML + Wargaming")
+    
+    return {
+        "ab_testing_enabled": True,
+        "message": "A/B testing activated. All validations will now compare ML vs wargaming.",
+        "warning": "This will increase validation time but provides accuracy metrics.",
+        "note": "Results will be stored in ml_ab_tests table for analysis."
+    }
+
+
+@app.post("/wargaming/ab-testing/disable")
+async def disable_ab_testing():
+    """
+    Disable A/B testing mode.
+    
+    Reverts to ML-first optimization where high-confidence ML predictions
+    skip wargaming simulation for speed.
+    
+    Returns:
+        Dict with status and message
+    """
+    global ab_testing_enabled
+    
+    ab_testing_enabled = False
+    logger.info("⚡ A/B Testing DISABLED - Reverting to ML-first optimization")
+    
+    return {
+        "ab_testing_enabled": False,
+        "message": "A/B testing deactivated. Reverting to ML-first mode.",
+        "note": "High-confidence ML predictions will now skip wargaming for speed."
+    }
+
+
+@app.get("/wargaming/ab-testing/status")
+async def get_ab_testing_status():
+    """
+    Get current A/B testing status.
+    
+    Returns:
+        Dict with:
+        - ab_testing_enabled: Whether A/B testing is active
+        - ab_store_available: Whether database connection is available
+        - description: Explanation of A/B testing
+        - ml_confidence_threshold: Current threshold for ML bypass
+    """
+    global ab_testing_enabled, ab_store
+    
+    return {
+        "ab_testing_enabled": ab_testing_enabled,
+        "ab_store_available": ab_store is not None,
+        "description": (
+            "A/B testing compares ML predictions against wargaming ground truth "
+            "for accuracy tracking and continuous learning."
+        ),
+        "ml_confidence_threshold": 0.8,
+        "mode": "ab_testing" if ab_testing_enabled else "ml_first",
+        "note": (
+            "Enable A/B testing during development/testing to collect accuracy data. "
+            "Disable in production for optimal performance."
+        )
+    }
 
 
 # Startup event
