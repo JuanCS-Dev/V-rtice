@@ -161,7 +161,7 @@ async def list_intelligence_reports(
     intelligence_type: Optional[IntelligenceType] = Query(None, description="Filter by type"),
     confidence: Optional[IntelligenceConfidence] = Query(None, description="Minimum confidence"),
     source: Optional[IntelligenceSource] = Query(None, description="Filter by source"),
-    apt_group: Optional[APTGroup] = Query(None, description="Filter by APT attribution"),
+    apt_group: Optional[str] = Query(None, description="Filter by APT attribution"),
     start_date: Optional[datetime] = Query(None, description="Reports after date"),
     end_date: Optional[datetime] = Query(None, description="Reports before date"),
     novel_ttps_only: bool = Query(False, description="Only reports with novel TTPs"),
@@ -392,7 +392,7 @@ async def register_ttp_pattern(
 async def list_ttp_patterns(
     mitre_tactic: Optional[str] = Query(None, description="Filter by MITRE tactic"),
     mitre_technique: Optional[str] = Query(None, description="Filter by MITRE technique"),
-    apt_group: Optional[APTGroup] = Query(None, description="Filter by APT group"),
+    apt_group: Optional[str] = Query(None, description="Filter by APT group"),
     novel_only: bool = Query(False, description="Only novel TTPs"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),

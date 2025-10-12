@@ -306,3 +306,40 @@ class ApproverProfile(BaseModel):
             datetime: lambda v: v.isoformat(),
             UUID: lambda v: str(v)
         }
+
+
+# ============================================================================
+# ALIASES FOR ROUTER COMPATIBILITY
+# ============================================================================
+
+# Type aliases to match router expectations
+HITLDecision = AuthorizationRequest
+HITLDecisionCreate = AuthorizationRequestCreate
+HITLDecisionUpdate = BaseModel  # Placeholder - create if needed
+HITLDecisionType = ActionType
+HITLDecisionStatus = DecisionStatus
+HITLDecisionOutcome = DecisionStatus
+HITLApprovalLevel = ActionLevel
+HITLAuditLog = BaseModel  # Placeholder - implement when needed
+
+
+__all__ = [
+    "ActionLevel",
+    "ActionType",
+    "DecisionStatus",
+    "DecisionRationale",
+    "AuthorizationRequest",
+    "AuthorizationRequestCreate",
+    "AuthorizationDecision",
+    "HITLMetrics",
+    "ApproverProfile",
+    # Aliases
+    "HITLDecision",
+    "HITLDecisionCreate",
+    "HITLDecisionUpdate",
+    "HITLDecisionType",
+    "HITLDecisionStatus",
+    "HITLDecisionOutcome",
+    "HITLApprovalLevel",
+    "HITLAuditLog",
+]
