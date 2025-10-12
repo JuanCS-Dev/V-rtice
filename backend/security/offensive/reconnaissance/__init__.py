@@ -11,11 +11,15 @@ Components:
     - OSINT Aggregator: Open-source intelligence gathering
 """
 
-from typing import List
+from .scanner import NetworkScanner, ScanResult, Port
+from .dns_enum import DNSEnumerator, DNSEnumerationResult, DNSRecord, SubdomainInfo
 
-__all__: List[str] = [
-    "network_scanner",
-    "dns_enumerator", 
-    "web_scanner",
-    "osint_aggregator"
+__all__ = [
+    "NetworkScanner",
+    "ScanResult",
+    "Port",
+    "DNSEnumerator",
+    "DNSEnumerationResult",
+    "DNSRecord",
+    "SubdomainInfo"
 ]
