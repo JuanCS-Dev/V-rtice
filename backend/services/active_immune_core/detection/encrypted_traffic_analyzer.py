@@ -282,6 +282,10 @@ class FlowFeatureExtractor:
             burstiness=burstiness,
         )
     
+    def extract_features(self, flow: NetworkFlow) -> FlowFeatures:
+        """Alias for extract (backward compatibility)."""
+        return self.extract(flow)
+    
     def _calculate_entropy(self, values: np.ndarray) -> float:
         """Calculate Shannon entropy of packet sizes.
         
@@ -371,6 +375,7 @@ class EncryptedTrafficAnalyzer:
         self,
         feature_extractor: Optional[FlowFeatureExtractor] = None,
         ml_models: Optional[Dict[str, Any]] = None,
+        models: Optional[Dict[str, Any]] = None,  # Backward compatibility
         confidence_threshold: float = 0.7
     ):
         """Initialize encrypted traffic analyzer.
@@ -378,10 +383,11 @@ class EncryptedTrafficAnalyzer:
         Args:
             feature_extractor: Feature extraction engine
             ml_models: Pre-trained ML models
+            models: Alias for ml_models (backward compatibility)
             confidence_threshold: Minimum confidence for threat detection
         """
         self.feature_extractor = feature_extractor or FlowFeatureExtractor()
-        self.ml_models = ml_models or {}
+        self.ml_models = ml_models or models or {}
         self.confidence_threshold = confidence_threshold
         
         # Metrics
@@ -400,21 +406,28 @@ class EncryptedTrafficAnalyzer:
         )
     
     def _init_metrics(self) -> Dict[str, Any]:
-        """Initialize Prometheus metrics."""
-        return {
-            "flows_analyzed": Counter(
+        """Initialize Prometheus metrics (singleton pattern)."""
+        # Check if metrics already exist
+        if not hasattr(EncryptedTrafficAnalyzer, '_metrics_initialized'):
+            EncryptedTrafficAnalyzer._flows_analyzed = Counter(
                 "traffic_analyzer_flows_total",
                 "Total flows analyzed"
-            ),
-            "threats_detected": Counter(
+            )
+            EncryptedTrafficAnalyzer._threats_detected = Counter(
                 "traffic_analyzer_threats_total",
                 "Threats detected",
                 ["threat_type"]
-            ),
-            "analysis_latency": Histogram(
+            )
+            EncryptedTrafficAnalyzer._analysis_latency = Histogram(
                 "traffic_analyzer_latency_seconds",
                 "Analysis latency"
-            ),
+            )
+            EncryptedTrafficAnalyzer._metrics_initialized = True
+        
+        return {
+            "flows_analyzed": EncryptedTrafficAnalyzer._flows_analyzed,
+            "threats_detected": EncryptedTrafficAnalyzer._threats_detected,
+            "analysis_latency": EncryptedTrafficAnalyzer._analysis_latency,
         }
     
     async def analyze_flow(
