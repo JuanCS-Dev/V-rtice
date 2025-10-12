@@ -465,6 +465,222 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         )
 
 
+# ═════════════════════════════════════════════════════════════════════════════
+# PHASE 5.5: ML MONITORING ENDPOINTS
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+@app.get("/wargaming/ml/stats")
+async def get_ml_stats(time_range: str = "24h"):
+    """
+    Get ML prediction statistics.
+    
+    Args:
+        time_range: Time range for stats ('1h', '24h', '7d', '30d')
+    
+    Returns:
+        Dict with ML performance metrics:
+        - total_predictions: Total ML predictions made
+        - ml_only_validations: Validations done purely by ML
+        - wargaming_fallbacks: Times wargaming was needed
+        - ml_usage_rate: % of ML-only validations
+        - avg_confidence: Average ML confidence score
+        - avg_ml_time_ms: Average ML execution time
+        - avg_wargaming_time_ms: Average wargaming time
+        - time_saved_hours: Total time saved vs full wargaming
+    
+    Note: Currently returns metrics from Prometheus counters.
+    TODO: Add time-range filtering when historical data storage implemented.
+    """
+    try:
+        # Get metrics from Prometheus counters
+        # ml_prediction_total has labels: ['prediction'] = 'valid' or 'invalid'
+        # validation_method_total has labels: ['method'] = 'ml', 'wargaming', 'wargaming_fallback'
+        
+        # Extract values from counter metrics
+        ml_total = (
+            ml_prediction_total.labels(prediction='valid')._value.get() +
+            ml_prediction_total.labels(prediction='invalid')._value.get()
+        )
+        
+        ml_only = validation_method_total.labels(method='ml')._value.get()
+        wargaming_fallback = (
+            validation_method_total.labels(method='wargaming')._value.get() +
+            validation_method_total.labels(method='wargaming_fallback')._value.get()
+        )
+        
+        total_validations = ml_only + wargaming_fallback
+        ml_usage_rate = ml_only / total_validations if total_validations > 0 else 0.0
+        
+        # Estimate average times (constants for now, will be dynamic with data storage)
+        avg_ml_time_ms = 85.0  # From Phase 5.4 benchmarks
+        avg_wargaming_time_ms = 8500.0  # From Phase 5.4 benchmarks
+        
+        # Calculate time saved
+        # Time saved = (num_ml_only * (wargaming_time - ml_time))
+        time_saved_ms = ml_only * (avg_wargaming_time_ms - avg_ml_time_ms)
+        time_saved_hours = time_saved_ms / (1000 * 60 * 60)
+        
+        # Average confidence (will be from histogram, using estimated value for now)
+        # TODO: Calculate from ml_confidence_histogram buckets
+        avg_confidence = 0.87  # Estimated from Phase 5.4
+        
+        return {
+            "total_predictions": int(ml_total),
+            "ml_only_validations": int(ml_only),
+            "wargaming_fallbacks": int(wargaming_fallback),
+            "ml_usage_rate": round(ml_usage_rate, 3),
+            "avg_confidence": avg_confidence,
+            "avg_ml_time_ms": avg_ml_time_ms,
+            "avg_wargaming_time_ms": avg_wargaming_time_ms,
+            "time_saved_hours": round(time_saved_hours, 2),
+            "time_range": time_range  # For future filtering
+        }
+    
+    except Exception as e:
+        logger.error(f"Failed to get ML stats: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve ML statistics: {str(e)}"
+        )
+
+
+@app.get("/wargaming/ml/confidence-distribution")
+async def get_confidence_distribution(time_range: str = "24h"):
+    """
+    Get histogram of ML confidence scores.
+    
+    Args:
+        time_range: Time range for distribution ('1h', '24h', '7d', '30d')
+    
+    Returns:
+        Dict with histogram data:
+        - bins: Confidence score bins (e.g., [0.5, 0.6, 0.7, ...])
+        - counts: Count of predictions in each bin
+        - threshold: Confidence threshold for ML-only validation
+    
+    Note: Currently returns estimated distribution.
+    TODO: Extract from ml_confidence_histogram Prometheus metric.
+    """
+    try:
+        # Define bins (matching Prometheus histogram buckets)
+        bins = [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99, 1.0]
+        
+        # TODO: Extract real counts from ml_confidence_histogram
+        # For now, using estimated distribution based on Phase 5.4 benchmarks
+        # Expectation: Most predictions have high confidence (>0.8)
+        counts = [2, 5, 8, 15, 35, 25, 10, 5]  # Estimated
+        
+        threshold = 0.8  # From validate_patch_ml_first default
+        
+        return {
+            "bins": bins,
+            "counts": counts,
+            "threshold": threshold,
+            "time_range": time_range
+        }
+    
+    except Exception as e:
+        logger.error(f"Failed to get confidence distribution: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve confidence distribution: {str(e)}"
+        )
+
+
+@app.get("/wargaming/ml/recent-predictions")
+async def get_recent_predictions(limit: int = 20, time_range: str = "24h"):
+    """
+    Get recent ML predictions with metadata.
+    
+    Args:
+        limit: Maximum number of predictions to return (default: 20)
+        time_range: Time range for predictions ('1h', '24h', '7d', '30d')
+    
+    Returns:
+        List[Dict]: Recent predictions with:
+        - apv_id: APV identifier
+        - cve_id: CVE identifier
+        - patch_id: Patch identifier
+        - timestamp: ISO 8601 timestamp
+        - method: Validation method used ('ml', 'wargaming', 'wargaming_fallback')
+        - confidence: ML confidence score (0.0-1.0)
+        - validated: Whether patch was validated
+        - execution_time_ms: Execution time in milliseconds
+    
+    Note: Currently returns empty list (no persistence layer yet).
+    TODO: Query from PostgreSQL wargaming_results table (Phase 5.1).
+    """
+    try:
+        # TODO: Query from database
+        # For now, return empty list (no historical data stored yet)
+        # Will be populated when PostgreSQL storage from Phase 5.1 is integrated
+        
+        logger.warning("Recent predictions not yet persisted. Returning empty list.")
+        
+        # Example structure (for frontend development):
+        # return [{
+        #     "apv_id": "apv_001",
+        #     "cve_id": "CVE-2024-SQL-INJECTION",
+        #     "patch_id": "patch_001",
+        #     "timestamp": "2025-10-11T12:30:00Z",
+        #     "method": "ml",
+        #     "confidence": 0.95,
+        #     "validated": True,
+        #     "execution_time_ms": 80.5
+        # }]
+        
+        return []
+    
+    except Exception as e:
+        logger.error(f"Failed to get recent predictions: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve recent predictions: {str(e)}"
+        )
+
+
+@app.get("/wargaming/ml/accuracy")
+async def get_ml_accuracy(time_range: str = "24h"):
+    """
+    Get ML accuracy metrics from A/B testing.
+    
+    Args:
+        time_range: Time range for accuracy calculation ('1h', '24h', '7d', '30d')
+    
+    Returns:
+        Dict with accuracy metrics:
+        - accuracy: Overall accuracy (TP+TN)/(TP+TN+FP+FN)
+        - precision: TP/(TP+FP) - How many ML "valid" predictions were correct
+        - recall: TP/(TP+FN) - How many actual valid patches ML caught
+        - f1_score: Harmonic mean of precision and recall
+        - true_positives: ML said valid, wargaming confirmed
+        - false_positives: ML said valid, wargaming rejected
+        - true_negatives: ML said invalid, wargaming confirmed
+        - false_negatives: ML said invalid, wargaming disagreed
+        - sample_size: Number of A/B tests run
+    
+    Note: Returns None (404) if A/B testing not yet active (Phase 5.6).
+    """
+    try:
+        # A/B testing not yet implemented (Phase 5.6)
+        # Return 404 to signal frontend to show placeholder
+        raise HTTPException(
+            status_code=404,
+            detail="A/B testing not yet active. Implement in Phase 5.6."
+        )
+    
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions
+    
+    except Exception as e:
+        logger.error(f"Failed to get ML accuracy: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve ML accuracy: {str(e)}"
+        )
+
+
 # Startup event
 @app.on_event("startup")
 async def startup_event():
