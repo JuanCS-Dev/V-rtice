@@ -128,6 +128,7 @@ class DefenseOrchestrator:
         response_engine: AutomatedResponseEngine,
         coagulation_cascade: Optional[Any] = None,
         event_bus: Optional[Any] = None,
+        kafka_producer: Optional[Any] = None,  # NEW: Kafka producer
         min_threat_confidence: float = 0.5,
         auto_response_threshold: str = "HIGH",
     ):
@@ -139,6 +140,7 @@ class DefenseOrchestrator:
             response_engine: Automated response executor
             coagulation_cascade: Coagulation cascade (optional)
             event_bus: Kafka/event bus for messaging
+            kafka_producer: Kafka producer for publishing events
             min_threat_confidence: Minimum confidence to respond
             auto_response_threshold: Min severity for auto-response
 
@@ -150,6 +152,7 @@ class DefenseOrchestrator:
         self.response = response_engine
         self.cascade = coagulation_cascade
         self.event_bus = event_bus
+        self.kafka_producer = kafka_producer  # NEW: Store Kafka producer
 
         self.min_confidence = min_threat_confidence
         self.auto_threshold = auto_response_threshold
@@ -254,6 +257,14 @@ class DefenseOrchestrator:
                 f"[{response_id}] Threat detected: severity={detection.severity.value}, "
                 f"confidence={detection.confidence.value}"
             )
+            
+            # Publish detection to Kafka
+            if self.kafka_producer:
+                try:
+                    await self.kafka_producer.publish_detection(detection)
+                    logger.debug(f"[{response_id}] Detection published to Kafka")
+                except Exception as e:
+                    logger.error(f"[{response_id}] Failed to publish detection: {e}")
 
             # Check if confidence meets threshold
             if detection.confidence.value < self.min_confidence:
@@ -282,6 +293,14 @@ class DefenseOrchestrator:
                         f"severity={enrichment.severity}/10, "
                         f"related_iocs={len(enrichment.related_iocs)}"
                     )
+                    
+                    # Publish enriched threat to Kafka
+                    if self.kafka_producer:
+                        try:
+                            await self.kafka_producer.publish_enriched_threat(enrichment)
+                            logger.debug(f"[{response_id}] Enrichment published to Kafka")
+                        except Exception as e:
+                            logger.error(f"[{response_id}] Failed to publish enrichment: {e}")
 
                 self.events_processed.labels(
                     phase="enrichment", status="success"
@@ -339,6 +358,14 @@ class DefenseOrchestrator:
             self.responses_executed.labels(
                 playbook_id=playbook.playbook_id, status=execution.status
             ).inc()
+            
+            # Publish response to Kafka
+            if self.kafka_producer:
+                try:
+                    await self.kafka_producer.publish_response(execution)
+                    logger.debug(f"[{response_id}] Response published to Kafka")
+                except Exception as e:
+                    logger.error(f"[{response_id}] Failed to publish response: {e}")
 
             logger.info(
                 f"[{response_id}] Playbook executed: status={execution.status}, "
