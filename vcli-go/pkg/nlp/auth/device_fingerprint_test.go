@@ -461,10 +461,10 @@ func TestIPAndUserAgentTracking(t *testing.T) {
 	t.Run("Track multiple user agents", func(t *testing.T) {
 		store := NewDeviceTrustStore()
 
-		info1 := &DeviceInfo{UserAgent: "Mozilla/5.0"}
+		info1 := &DeviceInfo{UserAgent: "Mozilla/5.0", IPAddress: "192.168.1.100"}
 		store.AddOrUpdateDevice("user123", "fp1", "Device", info1)
 
-		info2 := &DeviceInfo{UserAgent: "Chrome/95.0"}
+		info2 := &DeviceInfo{UserAgent: "Chrome/95.0", IPAddress: "192.168.1.100"}
 		store.AddOrUpdateDevice("user123", "fp1", "Device", info2)
 
 		device, _ := store.GetDevice("fp1")
