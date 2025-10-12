@@ -136,15 +136,19 @@ async def lifespan(app: FastAPI):
     
     # Initialize database
     db = Database(DATABASE_URL)
-    db_connected = await db.connect()
-    if not db_connected:
-        logger.error("database_connection_failed_startup")
+    try:
+        await db.connect()
+        logger.info("database_connected_successfully")
+    except Exception as e:
+        logger.error("database_connection_failed_startup", error=str(e))
     
     # Initialize Kafka producer
     kafka_producer = KafkaProducer(KAFKA_BROKERS)
-    kafka_connected = await kafka_producer.connect()
-    if not kafka_connected:
-        logger.error("kafka_connection_failed_startup")
+    try:
+        await kafka_producer.connect()
+        logger.info("kafka_connected_successfully")
+    except Exception as e:
+        logger.error("kafka_connection_failed_startup", error=str(e))
     
     # Initialize Docker client
     try:

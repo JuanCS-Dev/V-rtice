@@ -15,7 +15,7 @@ from models import (
 from uuid import uuid4
 
 
-def test_honeypot_base():
+def test_honeypot_base() -> None:
     """Test HoneypotBase model validation."""
     honeypot = HoneypotBase(
         honeypot_id="ssh_001",
@@ -29,7 +29,7 @@ def test_honeypot_base():
     assert honeypot.port == 2222
 
 
-def test_honeypot_stats():
+def test_honeypot_stats() -> None:
     """Test HoneypotStats model."""
     stats = HoneypotStats(
         honeypot_id="ssh_001",
@@ -47,7 +47,7 @@ def test_honeypot_stats():
     assert stats.critical_attacks == 1
 
 
-def test_attack_create():
+def test_attack_create() -> None:
     """Test AttackCreate model validation."""
     attack = AttackCreate(
         honeypot_id=uuid4(),
@@ -57,6 +57,7 @@ def test_attack_create():
         confidence=0.95,
         ttps=["T1110", "T1078"],
         iocs={"ips": ["45.142.120.15"], "usernames": ["admin", "root"]},
+        payload="",  # Add missing required field (empty string)
         captured_at=datetime.utcnow()
     )
     
@@ -66,7 +67,7 @@ def test_attack_create():
     assert attack.confidence == 0.95
 
 
-def test_threat_detected_message():
+def test_threat_detected_message() -> None:
     """Test ThreatDetectedMessage Kafka model."""
     msg = ThreatDetectedMessage(
         event_id="rf_attack_12345",
@@ -86,7 +87,7 @@ def test_threat_detected_message():
     assert "T1110" in msg.ttps
 
 
-def test_ttp_frequency():
+def test_ttp_frequency() -> None:
     """Test TTPFrequency model."""
     ttp = TTPFrequency(
         technique_id="T1110",
@@ -102,7 +103,7 @@ def test_ttp_frequency():
     assert ttp.affected_honeypots == 2
 
 
-def test_attack_severity_enum():
+def test_attack_severity_enum() -> None:
     """Test AttackSeverity enum."""
     assert AttackSeverity.LOW.value == "low"
     assert AttackSeverity.MEDIUM.value == "medium"
