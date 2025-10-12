@@ -1,0 +1,15 @@
+# Grafana Dashboards Provisioning
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: 1
+
+providers:
+  - name: 'HITL Dashboards'
+    orgId: 1
+    folder: 'MAXIMUS HITL'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

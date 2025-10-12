@@ -1,0 +1,15 @@
+# Grafana Datasources Configuration
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus-Staging
+    type: prometheus
+    access: proxy
+    url: http://prometheus-staging:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "30s"
+      httpMethod: "POST"
