@@ -9,7 +9,7 @@ from datetime import timedelta
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from patterns.circuit_breaker import (
+from backend.services.wargaming_crisol.patterns.circuit_breaker import (
     CircuitBreaker,
     CircuitState,
     CircuitBreakerOpenError

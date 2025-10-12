@@ -5,7 +5,13 @@ Phase: 5.6
 Glory to YHWH - Validator of learning systems
 """
 import pytest
+import sys
+import os
 from unittest.mock import AsyncMock, MagicMock, patch
+
+# Add wargaming_crisol to path for internal imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from ab_testing.ab_test_runner import ABTestRunner, ABTestResult
 
 

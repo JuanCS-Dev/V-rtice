@@ -28,7 +28,7 @@ current_dir = os.path.dirname(__file__)
 service_dir = os.path.abspath(os.path.join(current_dir, '../..'))
 sys.path.insert(0, service_dir)
 
-from cache.redis_cache import WarGamingCache
+from backend.services.wargaming_crisol.cache.redis_cache import WarGamingCache
 
 
 class TestWarGamingCacheConnection:
@@ -40,7 +40,7 @@ class TestWarGamingCacheConnection:
         cache = WarGamingCache()
         
         # Mock redis client
-        with patch('cache.redis_cache.redis') as mock_redis:
+        with patch('backend.services.wargaming_crisol.cache.redis_cache.redis') as mock_redis:
             mock_client = AsyncMock()
             mock_client.ping = AsyncMock(return_value=True)
             mock_redis.from_url = AsyncMock(return_value=mock_client)
@@ -56,7 +56,7 @@ class TestWarGamingCacheConnection:
         cache = WarGamingCache()
         
         # Mock connection failure
-        with patch('cache.redis_cache.redis') as mock_redis:
+        with patch('backend.services.wargaming_crisol.cache.redis_cache.redis') as mock_redis:
             mock_redis.from_url = AsyncMock(side_effect=Exception("Connection failed"))
             
             with pytest.raises(Exception, match="Connection failed"):
