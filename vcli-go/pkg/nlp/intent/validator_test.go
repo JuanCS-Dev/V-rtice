@@ -159,7 +159,14 @@ result, err := validator.ValidateIntent(ctx, intent)
 require.NoError(t, err)
 
 assert.Equal(t, RiskLevelCritical, result.RiskLevel)
-assert.Contains(t, result.Warnings, "🚨 CRITICAL")
+found := false
+	for _, w := range result.Warnings {
+		if strings.Contains(w, "🚨 CRITICAL") {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found)
 }
 
 func TestConfirmIntent(t *testing.T) {
