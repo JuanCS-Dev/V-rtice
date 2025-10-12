@@ -19,10 +19,11 @@
  */
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tantml/react-query';
 import { Card } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import logger from '@/utils/logger';
+import useHITLWebSocket from '@/hooks/useHITLWebSocket';
 import {
   fetchPendingPatches,
   fetchDecisionSummary,
@@ -43,6 +44,28 @@ export const HITLTab = ({ timeRange = '24h' }) => {
   const queryClient = useQueryClient();
 
   logger.debug('🎭 HITL Tab rendering', { filter, selectedPatch: selectedPatch?.decision_id });
+
+  // WebSocket for real-time updates
+  const {
+    connectionState,
+    isConnected,
+    connectionId,
+  } = useHITLWebSocket({
+    onNewPatch: (patchData) => {
+      logger.info('🔔 New patch received via WebSocket:', patchData.patch_id);
+      // Invalidate queries to refetch with new patch
+      queryClient.invalidateQueries(['hitl-pending']);
+      queryClient.invalidateQueries(['hitl-summary']);
+    },
+    onDecisionUpdate: (decisionData) => {
+      logger.info('🔔 Decision update via WebSocket:', decisionData.decision_id, decisionData.decision);
+      // Invalidate queries to reflect updated decision
+      queryClient.invalidateQueries(['hitl-pending']);
+      queryClient.invalidateQueries(['hitl-summary']);
+    },
+    autoConnect: true,
+    autoReconnect: true,
+  });
 
   // Fetch pending patches
   const {
@@ -152,6 +175,33 @@ export const HITLTab = ({ timeRange = '24h' }) => {
 
   return (
     <div className="space-y-6">
+      {/* Header with WebSocket Status */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-cyan-400">Human-in-the-Loop Review</h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Regulatory T-cells preventing auto-immune patch deployment
+          </p>
+        </div>
+        
+        {/* WebSocket Connection Indicator */}
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${
+            isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+          }`} />
+          <span className={`text-sm font-semibold ${
+            isConnected ? 'text-green-400' : 'text-red-400'
+          }`}>
+            {isConnected ? 'LIVE' : connectionState}
+          </span>
+          {connectionId && (
+            <span className="text-xs text-gray-600 ml-2">
+              {connectionId.slice(0, 8)}
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <DecisionStatsCards summary={summary} />
 
