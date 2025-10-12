@@ -34,6 +34,7 @@ from exploit_database import load_exploit_database, get_exploit_for_apv
 from two_phase_simulator import TwoPhaseSimulator, validate_patch_ml_first
 from websocket_stream import wargaming_ws_manager, wargaming_websocket_endpoint
 from db.ab_test_store import ABTestStore, ABTestResult, ConfusionMatrix
+from ab_testing.ab_test_runner import ABTestRunner
 
 # Configure logging
 logging.basicConfig(
@@ -102,8 +103,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Phase 5.6: A/B Test Store (initialized on startup)
+# Phase 5.6: A/B Test Store and Runner (initialized on startup)
 ab_store: Optional[ABTestStore] = None
+ab_test_runner: Optional[ABTestRunner] = None
 ab_testing_enabled: bool = False  # Global flag for A/B testing mode
 
 
@@ -887,7 +889,7 @@ async def get_ab_testing_status():
 @app.on_event("startup")
 async def startup_event():
     """Startup initialization"""
-    global ab_store
+    global ab_store, ab_test_runner
     
     logger.info("🚀 Starting Wargaming Crisol service...")
     
@@ -898,7 +900,7 @@ async def startup_event():
     logger.info(f"✓ Loaded {stats['total']} exploits")
     logger.info(f"✓ CWE Coverage: {len(stats['cwe_coverage'])}")
     
-    # Phase 5.6: Initialize A/B Test Store
+    # Phase 5.6: Initialize A/B Test Store and Runner
     try:
         # Build database URL from environment variables
         pg_host = os.getenv("POSTGRES_HOST", "localhost")
@@ -914,13 +916,25 @@ async def startup_event():
         
         logger.info(f"Connecting to PostgreSQL at {pg_host}:{pg_port}/{pg_db}")
         
+        # Initialize store
         ab_store = ABTestStore(db_url)
         await ab_store.connect()
         logger.info("✓ A/B Test Store initialized (Phase 5.6)")
+        
+        # Initialize runner
+        ab_test_rate = float(os.getenv("AB_TEST_RATE", "0.10"))  # 10% default
+        ab_test_runner = ABTestRunner(
+            ab_store=ab_store,
+            ab_test_rate=ab_test_rate,
+            model_version="rf_v1"
+        )
+        logger.info(f"✓ A/B Test Runner initialized (rate: {ab_test_rate*100:.1f}%)")
+        
     except Exception as e:
-        logger.warning(f"⚠️ Failed to initialize A/B Test Store: {e}")
+        logger.warning(f"⚠️ Failed to initialize A/B testing: {e}")
         logger.warning("   A/B testing endpoints will return 503")
         ab_store = None
+        ab_test_runner = None
     
     logger.info("🔥 Wargaming Crisol ready!")
 

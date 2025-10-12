@@ -87,16 +87,22 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
     retry: 2,
   });
 
-  // Fetch accuracy (if available - Phase 5.6)
-  const { data: accuracyData } = useQuery({
+  // Fetch accuracy (Phase 5.6 - A/B Testing)
+  const { data: accuracyData, isLoading: accuracyLoading, error: accuracyError } = useQuery({
     queryKey: ['ml-accuracy', timeRange],
     queryFn: async () => {
       const response = await fetch(`http://localhost:8026/wargaming/ml/accuracy?time_range=${timeRange}`);
-      if (!response.ok) return null; // A/B testing not active yet
+      if (!response.ok) {
+        if (response.status === 503 || response.status === 500) {
+          return null; // A/B testing store not available
+        }
+        throw new Error('Failed to fetch accuracy data');
+      }
       return response.json();
     },
-    refetchInterval: 60000,
-    retry: false, // Don't retry 404
+    refetchInterval: 60000, // 1min
+    retry: 1, // Retry once
+    enabled: true, // Always try to fetch
   });
 
   if (statsLoading || confLoading) {
@@ -316,36 +322,103 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           </div>
         </Card>
 
-        {/* Accuracy Metrics (if A/B testing active) */}
+        {/* Accuracy Metrics (Phase 5.6 - A/B Testing) */}
         <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700">
-          <h3 className="text-lg font-bold text-cyan-400 mb-4">
-            ML Accuracy Metrics
-          </h3>
-          {accuracyData ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center bg-green-900/30 border border-green-700 rounded-lg p-4">
-                <div className="text-5xl font-bold text-green-400">
-                  {(accuracyData.accuracy * 100).toFixed(1)}%
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-cyan-400">
+              🎯 ML Accuracy Metrics
+            </h3>
+            {accuracyData && (
+              <Badge className="bg-green-600 hover:bg-green-700 font-semibold">
+                {accuracyData.total_ab_tests} A/B Tests
+              </Badge>
+            )}
+          </div>
+          
+          {accuracyLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-cyan-400 animate-pulse">Loading A/B test results...</div>
+            </div>
+          ) : accuracyError ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="text-7xl mb-4">🔬</div>
+                <div className="text-red-400 text-lg">A/B Testing Unavailable</div>
+                <div className="text-gray-500 text-sm mt-2">
+                  Ensure PostgreSQL is running and A/B tests have been executed
                 </div>
-                <div className="text-gray-400 text-sm mt-2">Accuracy</div>
               </div>
-              <div className="text-center bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-                <div className="text-5xl font-bold text-blue-400">
-                  {(accuracyData.precision * 100).toFixed(1)}%
+            </div>
+          ) : accuracyData ? (
+            <div className="space-y-4">
+              {/* Confusion Matrix */}
+              <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-gray-300 mb-3">Confusion Matrix</h4>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div></div>
+                  <div className="text-center text-gray-400 font-semibold">Predicted Valid</div>
+                  <div className="text-center text-gray-400 font-semibold">Predicted Invalid</div>
+                  
+                  <div className="text-gray-400 font-semibold flex items-center">Actually Valid</div>
+                  <div className="text-center bg-green-900/30 border border-green-700 rounded p-3">
+                    <div className="text-2xl font-bold text-green-400">
+                      {accuracyData.confusion_matrix.true_positive}
+                    </div>
+                    <div className="text-gray-500 text-xs mt-1">TP</div>
+                  </div>
+                  <div className="text-center bg-yellow-900/30 border border-yellow-700 rounded p-3">
+                    <div className="text-2xl font-bold text-yellow-400">
+                      {accuracyData.confusion_matrix.false_negative}
+                    </div>
+                    <div className="text-gray-500 text-xs mt-1">FN</div>
+                  </div>
+                  
+                  <div className="text-gray-400 font-semibold flex items-center">Actually Invalid</div>
+                  <div className="text-center bg-red-900/30 border border-red-700 rounded p-3">
+                    <div className="text-2xl font-bold text-red-400">
+                      {accuracyData.confusion_matrix.false_positive}
+                    </div>
+                    <div className="text-gray-500 text-xs mt-1">FP</div>
+                  </div>
+                  <div className="text-center bg-cyan-900/30 border border-cyan-700 rounded p-3">
+                    <div className="text-2xl font-bold text-cyan-400">
+                      {accuracyData.confusion_matrix.true_negative}
+                    </div>
+                    <div className="text-gray-500 text-xs mt-1">TN</div>
+                  </div>
                 </div>
-                <div className="text-gray-400 text-sm mt-2">Precision</div>
               </div>
-              <div className="text-center bg-purple-900/30 border border-purple-700 rounded-lg p-4">
-                <div className="text-5xl font-bold text-purple-400">
-                  {(accuracyData.recall * 100).toFixed(1)}%
+              
+              {/* Metrics Cards */}
+              <div className="grid grid-cols-4 gap-3">
+                <div className="text-center bg-green-900/30 border border-green-700 rounded-lg p-3">
+                  <div className="text-3xl font-bold text-green-400">
+                    {(accuracyData.metrics.accuracy * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-gray-400 text-xs mt-1">Overall Accuracy</div>
+                  <div className="text-gray-600 text-xs mt-1">Total correctness</div>
                 </div>
-                <div className="text-gray-400 text-sm mt-2">Recall</div>
-              </div>
-              <div className="text-center bg-cyan-900/30 border border-cyan-700 rounded-lg p-4">
-                <div className="text-5xl font-bold text-cyan-400">
-                  {(accuracyData.f1_score * 100).toFixed(1)}%
+                <div className="text-center bg-blue-900/30 border border-blue-700 rounded-lg p-3">
+                  <div className="text-3xl font-bold text-blue-400">
+                    {(accuracyData.metrics.precision * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-gray-400 text-xs mt-1">Precision</div>
+                  <div className="text-gray-600 text-xs mt-1">When ML says "valid"</div>
                 </div>
-                <div className="text-gray-400 text-sm mt-2">F1 Score</div>
+                <div className="text-center bg-purple-900/30 border border-purple-700 rounded-lg p-3">
+                  <div className="text-3xl font-bold text-purple-400">
+                    {(accuracyData.metrics.recall * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-gray-400 text-xs mt-1">Recall</div>
+                  <div className="text-gray-600 text-xs mt-1">% truly valid caught</div>
+                </div>
+                <div className="text-center bg-cyan-900/30 border border-cyan-700 rounded-lg p-3">
+                  <div className="text-3xl font-bold text-cyan-400">
+                    {(accuracyData.metrics.f1_score * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-gray-400 text-xs mt-1">F1 Score</div>
+                  <div className="text-gray-600 text-xs mt-1">Harmonic mean</div>
+                </div>
               </div>
             </div>
           ) : (
@@ -354,7 +427,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
                 <div className="text-7xl mb-4">🔬</div>
                 <div className="text-gray-400 text-lg">A/B Testing Not Yet Active</div>
                 <div className="text-gray-500 text-sm mt-2">
-                  Enable in Phase 5.6 for accuracy tracking
+                  Run some ML validations to trigger A/B testing
                 </div>
                 <div className="mt-4 text-xs text-gray-600">
                   A/B testing will compare ML predictions vs wargaming ground truth
