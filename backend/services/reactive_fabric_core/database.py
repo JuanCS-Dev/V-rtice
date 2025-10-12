@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 import os
 
-from models import (
+from backend.services.reactive_fabric_core.models import (
     Honeypot, HoneypotCreate, HoneypotStats, HoneypotStatus,
     Attack, AttackCreate, AttackSummary,
     TTP, TTPCreate, TTPFrequency,

@@ -34,19 +34,19 @@ type Orchestrator struct {
 	authorizer *authz.Authorizer
 
 	// Layer 3: Sandboxing - Where can you operate?
-	sandboxManager *sandbox.Manager
+	sandboxManager *sandbox.Sandbox
 
 	// Layer 4: Intent Validation - Did you really mean that?
-	intentValidator *intent.Validator
+	intentValidator *intent.IntentValidator
 
 	// Layer 5: Rate Limiting - How much can you do?
-	rateLimiter *ratelimit.Limiter
+	rateLimiter *ratelimit.RateLimiter
 
 	// Layer 6: Behavioral Analysis - Is this normal for you?
-	behaviorAnalyzer *behavioral.Analyzer
+	behaviorAnalyzer *behavioral.BehavioralAnalyzer
 
 	// Layer 7: Audit Logging - What did you do?
-	auditLogger *audit.Logger
+	auditLogger *audit.AuditLogger
 }
 
 // Config holds orchestrator configuration
@@ -68,12 +68,12 @@ type Config struct {
 
 	// Component configurations (injected)
 	AuthConfig      *auth.AuthConfig
-	AuthzConfig     *authz.Config
-	SandboxConfig   *sandbox.Config
-	IntentConfig    *intent.Config
-	RateLimitConfig *ratelimit.Config
-	BehaviorConfig  *behavioral.Config
-	AuditConfig     *audit.Config
+	AuthzConfig     *authz.AuthorizerConfig
+	SandboxConfig   *sandbox.SandboxConfig
+	IntentConfig    *intent.IntentValidator // No config struct, inject validator
+	RateLimitConfig *ratelimit.RateLimitConfig
+	BehaviorConfig  *behavioral.AnalyzerConfig
+	AuditConfig     *audit.AuditConfig
 }
 
 // DefaultConfig returns production-safe defaults
@@ -91,12 +91,12 @@ func DefaultConfig() Config {
 
 		// Component configs with safe defaults
 		AuthConfig:      nil, // Must be provided
-		AuthzConfig:     &authz.Config{StrictMode: true},
-		SandboxConfig:   &sandbox.Config{EnforceReadOnly: true},
-		IntentConfig:    &intent.Config{RequireConfirmation: true},
-		RateLimitConfig: &ratelimit.Config{Algorithm: ratelimit.AlgorithmTokenBucket},
-		BehaviorConfig:  &behavioral.Config{AnomalyThreshold: 0.7},
-		AuditConfig:     &audit.Config{EnableRemote: false},
+		AuthzConfig:     &authz.AuthorizerConfig{StrictMode: true},
+		SandboxConfig:   &sandbox.SandboxConfig{EnforceReadOnly: true},
+		IntentConfig:    nil, // Created in NewOrchestrator
+		RateLimitConfig: &ratelimit.RateLimitConfig{DefaultRate: 60, DefaultBurst: 10},
+		BehaviorConfig:  &behavioral.AnalyzerConfig{AnomalyThreshold: 0.7},
+		AuditConfig:     &audit.AuditConfig{BufferSize: 1000},
 	}
 }
 
@@ -354,28 +354,53 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, authCtx *auth.
 	return nil
 }
 
-// validateIntent implements Layer 4 (HITL)
-func (o *Orchestrator) validateIntent(ctx context.Context, intent *nlp.Intent, result *ExecutionResult) error {
+// validateSandbox implements Layer 3 - ensures operation is within boundaries
+func (o *Orchestrator) validateSandbox(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
-	
-	// Create security context for validation
-	secCtx := &security.SecurityContext{
-		User: &security.User{
-			ID:       "dev-user",
-			Username: "developer",
-			Roles:    []string{"admin"},
-		},
-		IP:        "127.0.0.1",
-		Timestamp: time.Now(),
-		RiskScore: result.RiskScore,
+
+	// Build sandbox request
+	req := &sandbox.Request{
+		UserID:    authCtx.UserID,
+		Operation: intent.Verb,
+		Resource:  intent.Target,
+		Namespace: "default", // Could be from intent
 	}
-	
-	// Convert intent to command for validation
-	cmd := intentToCommand(intent)
-	
-	// Validate with user confirmation for destructive ops
-	err := o.intentValidator.Validate(ctx, secCtx, cmd, intent)
-	
+
+	// Validate sandbox constraints
+	validation := o.sandboxManager.Validate(ctx, req)
+
+	duration := time.Since(start)
+
+	if !validation.Allowed {
+		o.recordStep(result, "Sandboxing", false, validation.Reason, duration)
+		return fmt.Errorf("sandbox validation failed: %s", validation.Reason)
+	}
+
+	// Add any warnings from sandbox
+	for _, warning := range validation.Warnings {
+		result.Warnings = append(result.Warnings, fmt.Sprintf("⚠️  Sandbox: %s", warning))
+	}
+
+	o.recordStep(result, "Sandboxing", true, "Operation within sandbox boundaries", duration)
+	return nil
+}
+
+// validateIntent implements Layer 4 - HITL confirmation for risky operations
+func (o *Orchestrator) validateIntent(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
+	start := time.Now()
+
+	// Build validation request
+	req := &intent.ValidationRequest{
+		UserID:     authCtx.UserID,
+		Intent:     intent.OriginalInput,
+		Translation: fmt.Sprintf("%s %s on %s", intent.Verb, intent.Target, intent.Domain),
+		RiskLevel:  intent.RiskLevel,
+		RiskScore:  result.RiskScore,
+	}
+
+	// Validate intent (may prompt user for confirmation)
+	validation, err := o.intentValidator.Validate(ctx, req)
+
 	duration := time.Since(start)
 
 	if err != nil {
@@ -383,72 +408,95 @@ func (o *Orchestrator) validateIntent(ctx context.Context, intent *nlp.Intent, r
 		return err
 	}
 
-	o.recordStep(result, "Intent Validation", true, "User confirmed", duration)
+	if !validation.Approved {
+		o.recordStep(result, "Intent Validation", false, "User declined confirmation", duration)
+		return fmt.Errorf("user declined operation")
+	}
+
+	message := "Intent validated"
+	if validation.UserConfirmed {
+		message = "User confirmed operation"
+	}
+
+	o.recordStep(result, "Intent Validation", true, message, duration)
 	return nil
 }
 
-// checkRateLimit implements Layer 5
-func (o *Orchestrator) checkRateLimit(ctx context.Context, intent *nlp.Intent, result *ExecutionResult) error {
+// checkRateLimit implements Layer 5 - prevents abuse
+func (o *Orchestrator) checkRateLimit(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
-	
-	// TODO: Implement actual rate limiting via token bucket
-	// For now, always pass
-	
+
+	// Check rate limit for user
+	allowed, err := o.rateLimiter.Allow(ctx, authCtx.UserID, intent.Verb)
+
 	duration := time.Since(start)
-	o.recordStep(result, "Rate Limiting", true, 
+
+	if err != nil {
+		o.recordStep(result, "Rate Limiting", false, err.Error(), duration)
+		return fmt.Errorf("rate limit check failed: %w", err)
+	}
+
+	if !allowed {
+		o.recordStep(result, "Rate Limiting", false, "Rate limit exceeded", duration)
+		return fmt.Errorf("rate limit exceeded for user %s", authCtx.Username)
+	}
+
+	o.recordStep(result, "Rate Limiting", true,
 		fmt.Sprintf("Within limits (%d/min)", o.config.RateLimitPerMinute), duration)
 	return nil
 }
 
-// analyzeBehavior implements Layer 6
-func (o *Orchestrator) analyzeBehavior(ctx context.Context, intent *nlp.Intent, result *ExecutionResult) error {
+// analyzeBehavior implements Layer 6 - detects anomalies
+func (o *Orchestrator) analyzeBehavior(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
-	
-	// Create mock user and command
-	mockUser := &security.User{
-		ID:       "dev-user",
-		Username: "developer",
+
+	// Build analysis request
+	req := &behavioral.AnalysisRequest{
+		UserID:    authCtx.UserID,
+		Operation: intent.Verb,
+		Resource:  intent.Target,
+		Timestamp: time.Now(),
+		IPAddress: authCtx.IPAddress,
 	}
-	cmd := intentToCommand(intent)
-	
-	riskScore, anomalies := o.behaviorAnalyzer.Analyze(ctx, mockUser, cmd)
-	
+
+	// Analyze behavior
+	analysis := o.behaviorAnalyzer.Analyze(ctx, req)
+
 	duration := time.Since(start)
 
-	isAnomaly := len(anomalies) > 0
-	if isAnomaly {
-		// Don't block, but log warning
-		for _, anomaly := range anomalies {
-			result.Warnings = append(result.Warnings, 
-				fmt.Sprintf("⚠️  Behavioral anomaly: %s (severity: %.2f)", anomaly.Type, anomaly.Severity))
-		}
+	// Log anomalies as warnings (but don't block)
+	for _, anomaly := range analysis.Anomalies {
+		result.Warnings = append(result.Warnings,
+			fmt.Sprintf("⚠️  Behavioral anomaly: %s (severity: %.2f)", anomaly.Type, anomaly.Severity))
 	}
 
-	o.recordStep(result, "Behavioral Analysis", true, 
-		fmt.Sprintf("Risk score: %d, Anomalies: %d", riskScore, len(anomalies)), duration)
+	// Block if risk score is critical
+	if analysis.RiskScore > 0.9 && len(analysis.Anomalies) > 2 {
+		o.recordStep(result, "Behavioral Analysis", false,
+			fmt.Sprintf("Critical behavioral risk: %.2f", analysis.RiskScore), duration)
+		return fmt.Errorf("critical behavioral anomalies detected")
+	}
+
+	o.recordStep(result, "Behavioral Analysis", true,
+		fmt.Sprintf("Risk score: %.2f, Anomalies: %d", analysis.RiskScore, len(analysis.Anomalies)), duration)
 	return nil
 }
 
-// logAudit implements Layer 7
-func (o *Orchestrator) logAudit(ctx context.Context, intent *nlp.Intent, result *ExecutionResult) {
+// logAudit implements Layer 7 - immutable audit trail
+func (o *Orchestrator) logAudit(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) {
 	start := time.Now()
-	
-	entry := &security.AuditEntry{
+
+	// Build audit entry
+	entry := &audit.Entry{
 		ID:        result.AuditID,
 		Timestamp: result.Timestamp,
-		User: security.AuditUser{
-			ID:       "dev-user",
-			Username: "developer",
-			Email:    "dev@vertice.local",
-			Roles:    []string{"admin"},
-		},
-		Session: security.AuditSession{
-			ID:        "session-123",
-			IP:        "127.0.0.1",
-			UserAgent: "vcli-go/2.0",
-		},
-		RawInput:     intent.OriginalInput,
-		Intent:       fmt.Sprintf("%s %s", intent.Verb, intent.Target),
+		UserID:    authCtx.UserID,
+		Username:  authCtx.Username,
+		SessionID: authCtx.SessionID,
+		IPAddress: authCtx.IPAddress,
+		UserAgent: authCtx.UserAgent,
+		RawInput:  intent.OriginalInput,
+		Intent: fmt.Sprintf("%s %s on %s", intent.Verb, intent.Target, intent.Domain),
 		Command:      result.Command,
 		Confidence:   intent.Confidence,
 		Executed:     result.Success,
@@ -459,29 +507,31 @@ func (o *Orchestrator) logAudit(ctx context.Context, intent *nlp.Intent, result 
 			return "failed"
 		}(),
 		ExecutionOutput: result.Output,
-		RiskLevel:    string(intent.RiskLevel),
-		RiskScore:    result.RiskScore,
+		RiskLevel:       string(intent.RiskLevel),
+		RiskScore:       result.RiskScore,
+		Duration:        result.Duration,
 	}
 
 	err := o.auditLogger.Log(ctx, entry)
-	
+
 	duration := time.Since(start)
-	
+
 	if err != nil {
 		// Log error but don't fail the operation
-		result.Warnings = append(result.Warnings, 
+		result.Warnings = append(result.Warnings,
 			fmt.Sprintf("⚠️  Audit logging failed: %v", err))
+		o.recordStep(result, "Audit Logging", false, err.Error(), duration)
+	} else {
+		o.recordStep(result, "Audit Logging", true,
+			fmt.Sprintf("Logged to immutable store (ID: %s)", result.AuditID[:8]), duration)
 	}
-	
-	o.recordStep(result, "Audit Logging", true, 
-		fmt.Sprintf("Logged to immutable store (ID: %s)", result.AuditID[:8]), duration)
 }
 
-// executeDirectly executes without validation (dev mode only)
+// executeDirectly executes without validation (dev mode only - DANGEROUS)
 func (o *Orchestrator) executeDirectly(ctx context.Context, intent *nlp.Intent, result *ExecutionResult) (*ExecutionResult, error) {
 	result.Success = true
-	result.Command = fmt.Sprintf("vcli k8s %s %s", intent.Verb, intent.Target)
-	result.Output = "[DEV MODE] Direct execution"
+	result.Command = fmt.Sprintf("vcli %s", intent.OriginalInput)
+	result.Output = "[DEV MODE] Direct execution - SECURITY BYPASSED"
 	result.Duration = time.Since(result.Timestamp)
 	return result, nil
 }
@@ -498,182 +548,45 @@ func (o *Orchestrator) recordStep(result *ExecutionResult, layer string, passed 
 
 // Close cleans up orchestrator resources
 func (o *Orchestrator) Close() error {
-	// Close any open connections, files, etc.
-	// Note: auditLogger doesn't have Close method yet
-	return nil
-}
-
-// cliConfirmer implements HITL confirmation via CLI prompts
-type cliConfirmer struct {
-	verbose bool
-}
-
-func (c *cliConfirmer) Confirm(ctx context.Context, prompt *intent.ConfirmationPrompt) (bool, error) {
-	// TODO: Implement actual CLI prompt
-	// For now, auto-confirm in verbose mode
-	if c.verbose {
-		fmt.Printf("\n⚠️  Confirmation required for: %s\n", prompt.Translation)
-		fmt.Println("   [Auto-confirmed in dev mode]")
+	if o.auditLogger != nil {
+		return o.auditLogger.Close()
 	}
-	return true, nil
-}
-
-func (c *cliConfirmer) RequestSignature(ctx context.Context, cmd *nlp.Command) (string, error) {
-	// TODO: Implement actual signature request
-	return "mock-signature", nil
-}
-
-// mockSigner provides mock cryptographic signing
-type mockSigner struct{}
-
-func (m *mockSigner) Sign(data []byte) (string, error) {
-	return "mock-signature", nil
-}
-
-func (m *mockSigner) Verify(data []byte, signature string) (bool, error) {
-	return true, nil
-}
-
-// Mock stores for development (TODO: Replace with real implementations)
-type mockSessionStore struct{}
-
-func (m *mockSessionStore) Get(ctx context.Context, sessionID string) (*security.Session, error) {
-	return &security.Session{
-		ID:        sessionID,
-		UserID:    "dev-user",
-		Token:     "mock-token",
-		ExpiresAt: time.Now().Add(24 * time.Hour),
-		CreatedAt: time.Now(),
-	}, nil
-}
-
-func (m *mockSessionStore) Save(ctx context.Context, session *security.Session) error {
 	return nil
 }
 
-func (m *mockSessionStore) Delete(ctx context.Context, sessionID string) error {
-	return nil
-}
-
-func (m *mockSessionStore) UpdateActivity(ctx context.Context, sessionID string) error {
-	return nil
-}
-
-type mockMFAValidator struct{}
-
-func (m *mockMFAValidator) Verify(ctx context.Context, userID string, code string) (bool, error) {
-	return true, nil // Always pass in dev mode
-}
-
-func (m *mockMFAValidator) IsRequired(ctx context.Context, user *security.User) (bool, error) {
-	// In dev mode, MFA not required
-	return false, nil
-}
-
-type mockRoleStore struct{}
-
-func (m *mockRoleStore) GetRole(ctx context.Context, name string) (*security.Role, error) {
-	return &security.Role{
-		Name: "admin",
-		Permissions: []security.Permission{
-			{Resource: "*", Verbs: []string{"*"}, Namespace: "*"},
-		},
-	}, nil
-}
-
-func (m *mockRoleStore) GetUserRoles(ctx context.Context, userID string) ([]security.Role, error) {
-	return []security.Role{
-		{Name: "admin", Permissions: []security.Permission{{Resource: "*", Verbs: []string{"*"}}}},
-	}, nil
-}
-
-type mockPolicyStore struct{}
-
-func (m *mockPolicyStore) GetPolicies(ctx context.Context) ([]security.Policy, error) {
-	return []security.Policy{}, nil
-}
-
-type mockBaselineStore struct{}
-
-func (m *mockBaselineStore) Get(ctx context.Context, userID string) (*behavior.Baseline, error) {
-	return &behavior.Baseline{
-		UserID:        userID,
-		TopCommands:   []string{"get", "list"},
-		TopNamespaces: []string{"default"},
-		TopResources:  []string{"pods", "deployments"},
-		TypicalHours:  []int{8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18},
-		TypicalDays:   []int{1, 2, 3, 4, 5}, // Monday-Friday
-		CommandRatio: security.CommandRatio{
-			Read:   0.8,
-			Write:  0.15,
-			Delete: 0.05,
-		},
-		LastUpdated: time.Now(),
-		SampleSize:  100,
-	}, nil
-}
-
-func (m *mockBaselineStore) Save(ctx context.Context, baseline *behavior.Baseline) error {
-	return nil
-}
-
-func (m *mockBaselineStore) Update(ctx context.Context, userID string, cmd *nlp.Command) error {
-	return nil
-}
-
-type mockRemoteSyslog struct{}
-
-func (m *mockRemoteSyslog) Send(ctx context.Context, entry *security.AuditEntry) error {
-	return nil
-}
-
-// Helper functions
-
-// intentToCommand converts an Intent to a Command for authorization checking
-func intentToCommand(intent *nlp.Intent) *nlp.Command {
-	return &nlp.Command{
-		Path:  []string{"k8s", intent.Verb, intent.Target},
-		Flags: make(map[string]string),
-		Args:  []string{},
-	}
-}
-
-// calculateIntentRisk calculates risk score for an intent (0-100)
-func calculateIntentRisk(intent *nlp.Intent) int {
-	// Simple heuristic risk calculation
-	risk := 0
-	
+// calculateIntentRisk calculates risk score for an intent (0.0-1.0)
+func calculateIntentRisk(intent *nlp.Intent) float64 {
 	// Base risk by verb
+	var risk float64
 	switch intent.Verb {
-	case "get", "list", "describe":
-		risk = 10 // Low risk - read-only
-	case "create", "apply", "patch":
-		risk = 40 // Medium risk - modifications
-	case "delete", "scale":
-		risk = 70 // High risk - destructive
+	case "get", "list", "describe", "view", "show":
+		risk = 0.1 // Low risk - read-only
+	case "create", "apply", "patch", "update", "edit":
+		risk = 0.4 // Medium risk - modifications
+	case "delete", "remove", "destroy":
+		risk = 0.7 // High risk - destructive
+	case "exec", "port-forward", "proxy":
+		risk = 0.6 // Medium-high risk - access
 	default:
-		risk = 50 // Unknown - medium
+		risk = 0.5 // Unknown - assume medium
 	}
-	
-	// Increase risk based on risk level
+
+	// Adjust based on intent risk level
 	switch intent.RiskLevel {
 	case nlp.RiskLevelLOW:
 		// Keep base risk
 	case nlp.RiskLevelMEDIUM:
-		risk += 10
+		risk += 0.1
 	case nlp.RiskLevelHIGH:
-		risk += 20
+		risk += 0.2
 	case nlp.RiskLevelCRITICAL:
-		risk += 30
+		risk += 0.3
 	}
-	
-	// Cap at 100
-	if risk > 100 {
-		risk = 100
+
+	// Cap at 1.0
+	if risk > 1.0 {
+		risk = 1.0
 	}
-	
+
 	return risk
 }
-
-// SecurityContext needs to be added to pkg/security
-
