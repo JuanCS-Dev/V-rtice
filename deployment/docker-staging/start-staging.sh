@@ -38,7 +38,7 @@ if ! command -v docker &> /dev/null; then
 fi
 echo -e "${GREEN}✓ Docker found${NC}"
 
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+if ! docker compose version &> /dev/null; then
     echo -e "${RED}✗ Docker Compose not found${NC}"
     exit 1
 fi
@@ -50,19 +50,19 @@ cd "$(dirname "$0")/../.."
 # Stop any running staging containers
 echo ""
 echo -e "${YELLOW}Stopping any existing staging containers...${NC}"
-docker-compose -f docker-compose.hitl-staging.yml down 2>/dev/null || true
+docker compose -f docker-compose.hitl-staging.yml down 2>/dev/null || true
 echo -e "${GREEN}✓ Cleaned up${NC}"
 
 # Build images
 echo ""
 echo -e "${YELLOW}Building HITL backend image...${NC}"
-docker-compose -f docker-compose.hitl-staging.yml build hitl-backend-staging
+docker compose -f docker-compose.hitl-staging.yml build hitl-backend-staging
 echo -e "${GREEN}✓ Image built${NC}"
 
 # Start services
 echo ""
 echo -e "${YELLOW}Starting staging environment...${NC}"
-docker-compose -f docker-compose.hitl-staging.yml up -d
+docker compose -f docker-compose.hitl-staging.yml up -d
 
 # Wait for services to be healthy
 echo ""

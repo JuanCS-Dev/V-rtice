@@ -25,10 +25,10 @@ services:
       POSTGRES_PASSWORD: staging_password_change_in_prod
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
-      - "5434:5432"  # Different port to avoid conflict with dev
+      - "5435:5432"  # Changed to 5435 to avoid conflict
     volumes:
       - postgres-staging-data:/var/lib/postgresql/data
-      - ../backend/services/hitl_patch_service/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/services/hitl_patch_service/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     networks:
       - hitl-staging-network
     healthcheck:
@@ -49,7 +49,7 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
-      - "6380:6379"  # Different port to avoid conflict
+      - "6381:6379"  # Changed to 6381 to avoid conflict
     volumes:
       - redis-staging-data:/data
     networks:
@@ -68,7 +68,7 @@ services:
   # ═════════════════════════════════════════════════════════════════════════
   hitl-backend-staging:
     build:
-      context: ../backend/services/hitl_patch_service
+      context: ./backend/services/hitl_patch_service
       dockerfile: Dockerfile
     container_name: hitl-backend-staging
     restart: unless-stopped
@@ -98,7 +98,7 @@ services:
       REDIS_HOST: redis-staging
       REDIS_PORT: 6379
     ports:
-      - "8028:8027"  # Different external port for staging
+      - "8029:8027"  # Changed to 8029 to avoid conflict
     networks:
       - hitl-staging-network
     healthcheck:
@@ -127,9 +127,9 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
-      - "9091:9090"  # Different port for staging
+      - "9092:9090"  # Changed to 9092 to avoid conflict
     volumes:
-      - ./prometheus-staging.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deployment/docker-staging/prometheus-staging.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-staging-data:/prometheus
     networks:
       - hitl-staging-network
@@ -154,11 +154,11 @@ services:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
     ports:
-      - "3001:3000"  # Different port for staging
+      - "3002:3000"  # Changed to 3002 to avoid conflict
     volumes:
       - grafana-staging-data:/var/lib/grafana
-      - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
-      - ./grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./deployment/docker-staging/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./deployment/docker-staging/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
     networks:
       - hitl-staging-network
     depends_on:
@@ -175,9 +175,9 @@ services:
     container_name: hitl-nginx-staging
     restart: unless-stopped
     ports:
-      - "8080:80"  # Main staging entry point
+      - "8081:80"  # Changed to 8081 to avoid conflict
     volumes:
-      - ./nginx-staging.conf:/etc/nginx/nginx.conf:ro
+      - ./deployment/docker-staging/nginx-staging.conf:/etc/nginx/nginx.conf:ro
     networks:
       - hitl-staging-network
     depends_on:
