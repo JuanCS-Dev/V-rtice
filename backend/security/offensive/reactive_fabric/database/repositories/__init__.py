@@ -13,7 +13,7 @@ from sqlalchemy import select, update, delete, func, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from ..database.schemas import Base
+from ..schemas import Base
 
 
 ModelType = TypeVar("ModelType", bound=Base)

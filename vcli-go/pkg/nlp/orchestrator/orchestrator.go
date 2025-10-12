@@ -10,6 +10,7 @@ package orchestrator
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -339,8 +340,8 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, authCtx *auth.
 	// Map intent verb to authz Action
 	action := authz.Action(intent.Verb)
 	
-	// Map intent target to authz Resource
-	resource := authz.Resource(intent.Target)
+	// Map intent target to authz Resource (normalize plural to singular)
+	resource := normalizeResource(intent.Target)
 
 	// Check authorization
 	allowed, err := o.authorizer.CheckPermission(authCtx.UserID, resource, action)
@@ -371,6 +372,21 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, authCtx *auth.
 	o.recordStep(result, "Authorization", true,
 		fmt.Sprintf("Authorized (risk: %.2f)", riskScore), duration)
 	return nil
+}
+
+// normalizeResource converts plural resource names to singular form
+// and handles resource/name format (e.g., "deployment/test" → "deployment")
+func normalizeResource(target string) authz.Resource {
+	// Extract resource type from "resource/name" format
+	parts := strings.Split(target, "/")
+	resource := parts[0]
+	
+	// Simple pluralization rules
+	singular := resource
+	if len(resource) > 0 && resource[len(resource)-1] == 's' {
+		singular = resource[:len(resource)-1]
+	}
+	return authz.Resource(singular)
 }
 
 // validateSandbox implements Layer 3 - ensures operation is within boundaries

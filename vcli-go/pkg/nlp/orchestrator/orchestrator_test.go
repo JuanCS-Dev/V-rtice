@@ -101,18 +101,6 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 	err = rbac.AssignRole("test-user", "operator")
 	require.NoError(t, err)
 
-	// DEBUG: Verify role was assigned
-	roles := rbac.GetUserRoles("test-user")
-	if len(roles) == 0 {
-		t.Fatalf("No roles assigned to test-user!")
-	}
-	
-	// DEBUG: Test permission directly
-	allowed, perm := rbac.CheckPermission("test-user", authz.ResourcePod, authz.ActionList, "")
-	if !allowed {
-		t.Fatalf("Permission check failed! perm=%+v", perm)
-	}
-
 	// Create test auth context
 	session, err := sessionMgr.CreateSession("test-user", "tester", []string{"operator"}, false)
 	require.NoError(t, err)
@@ -300,6 +288,11 @@ func TestExecute_SkipValidation(t *testing.T) {
 func TestExecute_HighRisk(t *testing.T) {
 	orch, authCtx := setupTestOrchestrator(t)
 	defer orch.Close()
+
+	// Grant admin role for delete permission
+	rbac := orch.GetAuthorizer().GetRBACEngine()
+	err := rbac.AssignRole("test-user", "admin")
+	require.NoError(t, err)
 
 	// Lower risk threshold
 	orch.config.MaxRiskScore = 0.5
@@ -592,6 +585,11 @@ func TestExecute_DryRun(t *testing.T) {
 	orch, authCtx := setupTestOrchestrator(t)
 	defer orch.Close()
 
+	// Grant admin role for create permission
+	rbac := orch.GetAuthorizer().GetRBACEngine()
+	err := rbac.AssignRole("test-user", "admin")
+	require.NoError(t, err)
+
 	// Already in dry run mode from setup
 	assert.True(t, orch.config.DryRun)
 
@@ -609,7 +607,9 @@ func TestExecute_DryRun(t *testing.T) {
 
 	assert.True(t, result.Success)
 	assert.Contains(t, result.Output, "DRY RUN")
-	assert.Contains(t, result.Warnings, "Dry run mode")
+	// Check that warnings contain dry run message
+	assert.Len(t, result.Warnings, 1, "Should have one warning")
+	assert.Contains(t, result.Warnings[0], "Dry run mode")
 }
 
 // Helper functions

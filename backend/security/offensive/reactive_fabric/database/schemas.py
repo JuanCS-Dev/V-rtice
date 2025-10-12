@@ -80,7 +80,7 @@ class ThreatEventDB(Base):
     related_events = Column(ARRAY(UUID(as_uuid=True)), nullable=False, default=list)
     
     # Metadata
-    metadata = Column(JSONB, nullable=False, default=dict)
+    event_metadata = Column(JSONB, nullable=False, default=dict)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
@@ -159,7 +159,7 @@ class DeceptionAssetDB(Base):
     maintenance_notes = Column(Text, nullable=True)
     
     # Metadata
-    metadata = Column(JSONB, nullable=False, default=dict)
+    event_metadata = Column(JSONB, nullable=False, default=dict)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
@@ -221,7 +221,7 @@ class AssetInteractionEventDB(Base):
     
     # Forensics
     raw_log = Column(Text, nullable=True)
-    metadata = Column(JSONB, nullable=False, default=dict)
+    event_metadata = Column(JSONB, nullable=False, default=dict)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
@@ -344,7 +344,7 @@ class IntelligenceReportDB(Base):
     review_date = Column(DateTime(timezone=True), nullable=True)
     
     # Metadata
-    metadata = Column(JSONB, nullable=False, default=dict)
+    event_metadata = Column(JSONB, nullable=False, default=dict)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)

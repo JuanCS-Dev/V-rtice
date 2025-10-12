@@ -624,7 +624,7 @@ async def list_detection_rules(
     """
 )
 async def track_apt_campaign(
-    apt_group: APTGroup,
+    apt_group: str,
     start_date: Optional[datetime] = Query(None, description="Campaign start date"),
     end_date: Optional[datetime] = Query(None, description="Campaign end date"),
     service: IntelligenceService = Depends(get_intelligence_service)

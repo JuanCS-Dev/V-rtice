@@ -279,3 +279,38 @@ class IntelligenceMetrics(BaseModel):
         json_encoders = {
             datetime: lambda v: v.isoformat()
         }
+
+
+class DetectionRule(BaseModel):
+    """
+    Detection rule model for SIEM/IDS/IPS deployment.
+    
+    Supports multiple detection rule formats:
+    - Sigma (SIEM-agnostic)
+    - Snort/Suricata (Network IDS)
+    - YARA (Malware/File)
+    - KQL (Microsoft Sentinel)
+    """
+    
+    id: UUID = Field(default_factory=uuid4)
+    report_id: UUID = Field(description="Intelligence report source")
+    rule_format: str = Field(description="Rule format (sigma, snort, yara, kql)")
+    rule_name: str = Field(min_length=1, max_length=200)
+    rule_content: str = Field(description="Complete rule definition")
+    confidence: IntelligenceConfidence
+    severity: str = Field(description="Rule severity (critical, high, medium, low)")
+    mitre_techniques: List[str] = Field(default_factory=list)
+    tags: List[str] = Field(default_factory=list)
+    false_positive_notes: Optional[str] = None
+    deployed: bool = Field(default=False)
+    deployment_date: Optional[datetime] = None
+    deployed_to: Optional[List[str]] = Field(default=None, description="Deployed systems")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: str = Field(default="reactive_fabric_ai")
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+            UUID: lambda v: str(v)
+        }
+
