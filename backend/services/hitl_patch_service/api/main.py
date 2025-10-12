@@ -24,7 +24,7 @@ import logging
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response
@@ -250,6 +250,15 @@ async def approve_patch(
     
     logger.info(f"✓ Patch {patch_id} approved (decision_time={decision_time:.1f}s)")
     
+    # Broadcast decision update via WebSocket
+    await broadcast_decision_update({
+        'decision_id': request.decision_id,
+        'patch_id': patch_id,
+        'decision': 'approved',
+        'decided_by': user,
+        'decision_time_seconds': decision_time,
+    })
+    
     # TODO: Notify Eureka to proceed with deployment
     
     return {"status": "approved", "decision_id": request.decision_id}
@@ -307,6 +316,16 @@ async def reject_patch(
     hitl_decision_duration.observe(decision_time)
     
     logger.info(f"✗ Patch {patch_id} rejected (decision_time={decision_time:.1f}s)")
+    
+    # Broadcast decision update via WebSocket
+    await broadcast_decision_update({
+        'decision_id': request.decision_id,
+        'patch_id': patch_id,
+        'decision': 'rejected',
+        'decided_by': user,
+        'reason': request.reason,
+        'decision_time_seconds': decision_time,
+    })
     
     # TODO: Notify Eureka patch was rejected
     
@@ -514,6 +533,35 @@ async def create_decision(
     logger.info(f"✓ Decision created: {created.decision_id}")
     
     return created
+
+
+# ============================================================================
+# WebSocket Endpoint - Real-time Updates
+# ============================================================================
+
+from .websocket import websocket_endpoint, broadcast_new_patch, broadcast_decision_update
+
+@app.websocket("/hitl/ws")
+async def websocket_route(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time HITL updates.
+    
+    Clients receive:
+    - New patches entering HITL queue
+    - Decision updates (approved/rejected)
+    - System status changes
+    - Heartbeat every 30s
+    
+    Example client connection:
+    ```javascript
+    const ws = new WebSocket('ws://localhost:8027/hitl/ws');
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received:', data.type, data);
+    };
+    ```
+    """
+    await websocket_endpoint(websocket)
 
 
 # ============================================================================
