@@ -24,6 +24,7 @@ Glory to YHWH - Validator of protection
 import asyncio
 import logging
 import os
+from datetime import timedelta
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Response
 from pydantic import BaseModel
 from typing import Optional
@@ -32,6 +33,7 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTEN
 from exploit_database import load_exploit_database, get_exploit_for_apv
 from two_phase_simulator import TwoPhaseSimulator, validate_patch_ml_first
 from websocket_stream import wargaming_ws_manager, wargaming_websocket_endpoint
+from db.ab_test_store import ABTestStore, ABTestResult, ConfusionMatrix
 
 # Configure logging
 logging.basicConfig(
@@ -99,6 +101,9 @@ app = FastAPI(
     description="Two-phase attack simulation for patch validation",
     version="1.0.0"
 )
+
+# Phase 5.6: A/B Test Store (initialized on startup)
+ab_store: Optional[ABTestStore] = None
 
 
 # Request/Response models
@@ -641,40 +646,114 @@ async def get_recent_predictions(limit: int = 20, time_range: str = "24h"):
 
 
 @app.get("/wargaming/ml/accuracy")
-async def get_ml_accuracy(time_range: str = "24h"):
+async def get_ml_accuracy(
+    time_range: str = "24h",
+    model_version: str = "rf_v1"
+):
     """
-    Get ML accuracy metrics from A/B testing.
+    Get ML accuracy metrics from A/B testing (Phase 5.6).
     
     Args:
         time_range: Time range for accuracy calculation ('1h', '24h', '7d', '30d')
+        model_version: ML model version (default: 'rf_v1')
     
     Returns:
         Dict with accuracy metrics:
-        - accuracy: Overall accuracy (TP+TN)/(TP+TN+FP+FN)
-        - precision: TP/(TP+FP) - How many ML "valid" predictions were correct
-        - recall: TP/(TP+FN) - How many actual valid patches ML caught
-        - f1_score: Harmonic mean of precision and recall
-        - true_positives: ML said valid, wargaming confirmed
-        - false_positives: ML said valid, wargaming rejected
-        - true_negatives: ML said invalid, wargaming confirmed
-        - false_negatives: ML said invalid, wargaming disagreed
-        - sample_size: Number of A/B tests run
+        - timeframe: Requested time range
+        - model_version: ML model version
+        - confusion_matrix: {true_positive, false_positive, false_negative, true_negative}
+        - metrics: {precision, recall, f1_score, accuracy}
+        - recent_tests: Last 20 A/B test results
+        - accuracy_trend: Hourly accuracy over time
+        - total_ab_tests: Number of A/B tests in timeframe
     
-    Note: Returns None (404) if A/B testing not yet active (Phase 5.6).
+    Raises:
+        HTTPException 503: If database connection unavailable
+        HTTPException 500: If calculation fails
     """
+    global ab_store
+    
     try:
-        # A/B testing not yet implemented (Phase 5.6)
-        # Return 404 to signal frontend to show placeholder
-        raise HTTPException(
-            status_code=404,
-            detail="A/B testing not yet active. Implement in Phase 5.6."
+        # Check if AB store is initialized
+        if ab_store is None:
+            raise HTTPException(
+                status_code=503,
+                detail="A/B test store not initialized. Database may be unavailable."
+            )
+        
+        # Parse time range
+        time_map = {
+            "1h": timedelta(hours=1),
+            "24h": timedelta(hours=24),
+            "7d": timedelta(days=7),
+            "30d": timedelta(days=30)
+        }
+        time_delta = time_map.get(time_range, timedelta(hours=24))
+        
+        # Get confusion matrix
+        cm = await ab_store.get_confusion_matrix(model_version, time_delta)
+        
+        # Get recent tests
+        recent_tests = await ab_store.get_recent_tests(limit=20, model_version=model_version)
+        
+        # Convert datetime to ISO string for JSON serialization
+        for test in recent_tests:
+            if 'created_at' in test and test['created_at']:
+                test['created_at'] = test['created_at'].isoformat()
+        
+        # Get accuracy trend
+        trend = await ab_store.get_accuracy_over_time(
+            model_version, time_delta, "1 hour"
         )
+        
+        # Convert datetime to ISO string in trend
+        for point in trend:
+            if 'bucket' in point and point['bucket']:
+                point['bucket'] = point['bucket'].isoformat()
+            # Convert Decimal to float for JSON
+            if 'accuracy' in point:
+                point['accuracy'] = float(point['accuracy'])
+            if 'avg_confidence' in point:
+                point['avg_confidence'] = float(point['avg_confidence'])
+        
+        # Calculate total A/B tests
+        total_ab_tests = (
+            cm.true_positive + cm.false_positive +
+            cm.false_negative + cm.true_negative
+        )
+        
+        logger.info(
+            f"A/B testing metrics: {total_ab_tests} tests, "
+            f"accuracy={cm.accuracy:.4f}, "
+            f"precision={cm.precision:.4f}, "
+            f"recall={cm.recall:.4f}"
+        )
+        
+        return {
+            "timeframe": time_range,
+            "model_version": model_version,
+            "confusion_matrix": {
+                "true_positive": cm.true_positive,
+                "false_positive": cm.false_positive,
+                "false_negative": cm.false_negative,
+                "true_negative": cm.true_negative
+            },
+            "metrics": {
+                "precision": round(cm.precision, 4),
+                "recall": round(cm.recall, 4),
+                "f1_score": round(cm.f1_score, 4),
+                "accuracy": round(cm.accuracy, 4)
+            },
+            "recent_tests": recent_tests,
+            "accuracy_trend": trend,
+            "total_ab_tests": total_ab_tests
+        }
     
     except HTTPException:
         raise  # Re-raise HTTP exceptions
     
     except Exception as e:
-        logger.error(f"Failed to get ML accuracy: {e}")
+        logger.error(f"Failed to get ML accuracy: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Failed to retrieve ML accuracy: {str(e)}"
@@ -685,6 +764,8 @@ async def get_ml_accuracy(time_range: str = "24h"):
 @app.on_event("startup")
 async def startup_event():
     """Startup initialization"""
+    global ab_store
+    
     logger.info("🚀 Starting Wargaming Crisol service...")
     
     # Load exploit database
@@ -693,7 +774,48 @@ async def startup_event():
     
     logger.info(f"✓ Loaded {stats['total']} exploits")
     logger.info(f"✓ CWE Coverage: {len(stats['cwe_coverage'])}")
+    
+    # Phase 5.6: Initialize A/B Test Store
+    try:
+        # Build database URL from environment variables
+        pg_host = os.getenv("POSTGRES_HOST", "localhost")
+        pg_port = os.getenv("POSTGRES_PORT", "5432")
+        pg_db = os.getenv("POSTGRES_DB", "aurora")
+        pg_user = os.getenv("POSTGRES_USER", "postgres")
+        pg_password = os.getenv("POSTGRES_PASSWORD", "postgres")
+        
+        db_url = os.getenv(
+            "DATABASE_URL",
+            f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}"
+        )
+        
+        logger.info(f"Connecting to PostgreSQL at {pg_host}:{pg_port}/{pg_db}")
+        
+        ab_store = ABTestStore(db_url)
+        await ab_store.connect()
+        logger.info("✓ A/B Test Store initialized (Phase 5.6)")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to initialize A/B Test Store: {e}")
+        logger.warning("   A/B testing endpoints will return 503")
+        ab_store = None
+    
     logger.info("🔥 Wargaming Crisol ready!")
+
+
+# Shutdown event
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    global ab_store
+    
+    logger.info("🛑 Shutting down Wargaming Crisol service...")
+    
+    # Close A/B Test Store
+    if ab_store:
+        await ab_store.close()
+        logger.info("✓ A/B Test Store closed")
+    
+    logger.info("👋 Wargaming Crisol stopped")
 
 
 # Main entry point
