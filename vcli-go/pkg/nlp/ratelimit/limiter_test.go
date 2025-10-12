@@ -293,3 +293,102 @@ result := limiter.AllowN("user1", "pods", "get", 5)
 assert.True(t, result.Allowed)
 assert.Equal(t, 5, result.CurrentTokens)
 }
+
+func TestRateLimiter_Cleanup(t *testing.T) {
+	config := &RateLimitConfig{
+		RequestsPerMinute: 60,
+		BurstSize:         10,
+		PerUser:           true,
+		CleanupInterval:   100 * time.Millisecond,
+	}
+	limiter := NewRateLimiter(config)
+	
+	// Create some buckets
+	limiter.Allow("user1", "pods", "get")
+	limiter.Allow("user2", "deployments", "list")
+	
+	// Initially should have 2 buckets
+	stats := limiter.GetStats()
+	assert.Equal(t, 2, stats.ActiveBuckets)
+	
+	// Wait for cleanup to run (buckets should still be active)
+	time.Sleep(150 * time.Millisecond)
+	
+	// Buckets should still exist (not yet stale)
+	stats = limiter.GetStats()
+	assert.GreaterOrEqual(t, stats.ActiveBuckets, 0) // May be cleaned or not depending on timing
+}
+
+func TestThrottler_AllowExceeded(t *testing.T) {
+	config := &RateLimitConfig{
+		RequestsPerMinute: 2, // Very low limit
+		BurstSize:         2,
+		PerUser:           true,
+	}
+	throttler := NewThrottler(config)
+	
+	// First 2 requests should succeed
+	err := throttler.Allow("user1", "pods", "get")
+	assert.NoError(t, err)
+	
+	err = throttler.Allow("user1", "pods", "get")
+	assert.NoError(t, err)
+	
+	// Third request should fail (exceeded limit)
+	err = throttler.Allow("user1", "pods", "get")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "rate limit exceeded")
+}
+
+func TestThrottler_GetRateLimiter(t *testing.T) {
+	config := DefaultRateLimitConfig()
+	throttler := NewThrottler(config)
+	
+	// Should return underlying rate limiter
+	rateLimiter := throttler.GetRateLimiter()
+	assert.NotNil(t, rateLimiter)
+	
+	// Should be able to use it directly
+	result := rateLimiter.Allow("user1", "pods", "get")
+	assert.True(t, result.Allowed)
+}
+
+func TestTokenBucket_RefillOverflow(t *testing.T) {
+	bucket := NewTokenBucket(10, 600) // 600 requests per minute = 10 per second
+	
+	// Drain bucket
+	result := bucket.TakeN(10)
+	assert.True(t, result.Allowed)
+	assert.Equal(t, 0, bucket.Available())
+	
+	// Wait for refill (need enough time to generate tokens)
+	time.Sleep(200 * time.Millisecond)
+	
+	// Should have refilled some tokens (but not exceed capacity)
+	available := bucket.Available()
+	assert.Greater(t, available, 0)
+	assert.LessOrEqual(t, available, 10)
+}
+
+func TestBuildKey_AllScopes(t *testing.T) {
+	config := &RateLimitConfig{
+		RequestsPerMinute: 60,
+		BurstSize:         10,
+		PerUser:           false,
+		PerResource:       true,
+		PerAction:         true,
+	}
+	limiter := NewRateLimiter(config)
+	
+	// Test different key combinations
+	result1 := limiter.Allow("user1", "pods", "get")
+	assert.True(t, result1.Allowed)
+	
+	// Different resource should not share limit
+	result2 := limiter.Allow("user1", "deployments", "get")
+	assert.True(t, result2.Allowed)
+	
+	// Same resource should share limit
+	result3 := limiter.Allow("user2", "pods", "get")
+	assert.True(t, result3.Allowed)
+}

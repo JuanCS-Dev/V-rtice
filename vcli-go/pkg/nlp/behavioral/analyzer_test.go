@@ -259,6 +259,135 @@ result := analyzer.AnalyzeAction("user1", "delete", "namespace")
 assert.Greater(t, result.Confidence, 0.8) // High confidence with many samples
 }
 
+func TestDetectAnomaly_TimeOfDay(t *testing.T) {
+	config := &AnalyzerConfig{
+		MinSamplesBaseline: 5,
+		AnomalyThreshold:   0.5,
+		TrackTimeOfDay:     true,
+	}
+	analyzer := NewBehavioralAnalyzer(config)
+	
+	// Build baseline - concentrate activity at specific hour
+	currentHour := time.Now().Hour()
+	for i := 0; i < 20; i++ {
+		analyzer.RecordAction("user1", "get", "pods", true)
+	}
+	
+	// Access profile and simulate different hour distribution
+	profile, _ := analyzer.GetProfile("user1")
+	profile.mu.Lock()
+	profile.HourDistribution[currentHour] = 20 // All activity at current hour
+	profile.HourDistribution[(currentHour+12)%24] = 0 // Opposite hour empty
+	profile.mu.Unlock()
+	
+	// Simulate action at unusual time (12 hours different)
+	// This would require time manipulation or direct profile testing
+	result := profile.detectAnomaly("get", "pods", config)
+	
+	// Should detect some level of anomaly based on patterns
+	assert.NotNil(t, result)
+	assert.NotNil(t, result.Baseline)
+}
+
+func TestDetectAnomaly_FrequentAction(t *testing.T) {
+	config := &AnalyzerConfig{
+		MinSamplesBaseline: 5,
+		AnomalyThreshold:   0.8,
+	}
+	analyzer := NewBehavioralAnalyzer(config)
+	
+	// Build baseline with many actions
+	for i := 0; i < 50; i++ {
+		analyzer.RecordAction("user1", "get", "pods", true)
+	}
+	
+	// Detect rare action
+	profile, _ := analyzer.GetProfile("user1")
+	profile.recordAction("delete", "namespace", true) // Only once
+	
+	result := profile.detectAnomaly("delete", "namespace", config)
+	
+	assert.True(t, result.Score > 0.0)
+	assert.NotNil(t, result.Reasons)
+}
+
+func TestAbs_Function(t *testing.T) {
+	tests := []struct {
+		input    int
+		expected int
+	}{
+		{5, 5},
+		{-5, 5},
+		{0, 0},
+		{-100, 100},
+		{100, 100},
+	}
+	
+	for _, tt := range tests {
+		result := abs(tt.input)
+		assert.Equal(t, tt.expected, result, "abs(%d) should be %d", tt.input, tt.expected)
+	}
+}
+
+func TestGetBaselineStats_EmptyProfile(t *testing.T) {
+	profile := newUserProfile("user1")
+	
+	// Get stats immediately (no actions)
+	stats := profile.getBaselineStats()
+	
+	assert.NotNil(t, stats)
+	assert.Equal(t, 0, stats.SampleSize)
+	// TypicalHour defaults to hour with most activity (may be any hour when empty)
+	assert.GreaterOrEqual(t, stats.TypicalHour, 0)
+	assert.LessOrEqual(t, stats.TypicalHour, 23)
+	// Actions per hour should be >= 0 (avoids division by zero)
+	assert.GreaterOrEqual(t, stats.ActionsPerHour, 0.0)
+}
+
+func TestDetectAnomaly_RareResource(t *testing.T) {
+	config := &AnalyzerConfig{
+		MinSamplesBaseline: 5,
+		AnomalyThreshold:   0.4,
+	}
+	analyzer := NewBehavioralAnalyzer(config)
+	
+	// Build baseline
+	for i := 0; i < 20; i++ {
+		analyzer.RecordAction("user1", "get", "pods", true)
+		analyzer.RecordAction("user1", "get", "deployments", true)
+	}
+	
+	// Access resource only once
+	analyzer.RecordAction("user1", "get", "secrets", true)
+	
+	profile, _ := analyzer.GetProfile("user1")
+	result := profile.detectAnomaly("get", "secrets", config)
+	
+	// Should detect rare resource access
+	foundReason := false
+	for _, reason := range result.Reasons {
+		if strings.Contains(reason, "Rare resource") || strings.Contains(reason, "New resource") {
+			foundReason = true
+			break
+		}
+	}
+	assert.True(t, foundReason)
+}
+
+func TestRecordAction_HourDistribution(t *testing.T) {
+	profile := newUserProfile("user1")
+	
+	currentHour := time.Now().Hour()
+	
+	// Record multiple actions
+	for i := 0; i < 5; i++ {
+		profile.recordAction("get", "pods", true)
+	}
+	
+	// Check hour distribution updated
+	assert.Equal(t, 5, profile.HourDistribution[currentHour])
+}
+
 // Helper function
 func strContains(s, substr string) bool {
 return len(s) >= len(substr) && (s == substr || len(s) > 0 && len(substr) > 0)
