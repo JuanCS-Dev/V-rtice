@@ -207,7 +207,7 @@ class TestBehavioralAnalyzer:
             await analyzer.detect_anomaly(event)
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Needs refactor - Non-critical internal methods")
+    
     async def test_analyze_event_normal(self):
         """Test analyzing normal event after baseline."""
         analyzer = BehavioralAnalyzer()
@@ -245,7 +245,7 @@ class TestBehavioralAnalyzer:
         assert detection.risk_level in [RiskLevel.BASELINE, RiskLevel.LOW]
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Needs refactor - Non-critical internal methods")
+    
     async def test_analyze_event_anomalous(self):
         """Test analyzing anomalous event."""
         analyzer = BehavioralAnalyzer()
@@ -285,7 +285,7 @@ class TestBehavioralAnalyzer:
         assert detection.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Needs refactor - Non-critical internal methods")
+    
     async def test_determine_risk_level(self):
         """Test risk level determination from anomaly score."""
         analyzer = BehavioralAnalyzer()
@@ -299,7 +299,7 @@ class TestBehavioralAnalyzer:
         assert analyzer._determine_risk_level(1.0) == RiskLevel.CRITICAL
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Needs refactor - Non-critical internal methods")
+    
     async def test_analyze_batch(self):
         """Test batch analysis of multiple events."""
         analyzer = BehavioralAnalyzer()
@@ -336,7 +336,7 @@ class TestBehavioralAnalyzer:
         for detection in detections:
             assert isinstance(detection, AnomalyDetection)
 
-    @pytest.mark.skip(reason="Needs refactor - Non-critical internal methods")
+    
     def test_update_baseline(self):
         """Test updating baseline with new normal events."""
         analyzer = BehavioralAnalyzer()
@@ -373,7 +373,7 @@ class TestBehavioralAnalyzer:
         assert len(analyzer.baseline_events) > len(initial_events)
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Needs refactor - Non-critical internal methods")
+    
     async def test_get_feature_importance(self):
         """Test feature importance extraction."""
         analyzer = BehavioralAnalyzer()
@@ -413,7 +413,7 @@ class TestBehavioralAnalyzer:
         assert detection.contributing_features["a"] > detection.contributing_features["b"]
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Needs refactor - Non-critical internal methods")
+    
     async def test_metrics_incremented(self):
         """Test that Prometheus metrics are incremented."""
         analyzer = BehavioralAnalyzer()
@@ -451,7 +451,7 @@ class TestBehavioralAnalyzer:
 class TestBehavioralAnalyzerIntegration:
     """Integration tests for BehavioralAnalyzer."""
 
-    @pytest.mark.skip(reason="Complex integration - needs refactor")
+    
     @pytest.mark.asyncio
     async def test_multi_entity_analysis(self):
         """Test analyzing multiple entities separately."""
@@ -503,7 +503,7 @@ class TestBehavioralAnalyzerIntegration:
 class TestRealWorldScenarios:
     """Test real-world behavioral analysis scenarios."""
 
-    @pytest.mark.skip(reason="Risk level thresholds need tuning")
+    
     @pytest.mark.asyncio
     async def test_data_exfiltration_detection(self):
         """Test detecting data exfiltration through traffic spike."""
@@ -543,7 +543,7 @@ class TestRealWorldScenarios:
         assert detection.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]
         assert detection.anomaly_score > 0.8
 
-    @pytest.mark.skip(reason="RiskLevel comparison needs enum ordering")
+    
     @pytest.mark.asyncio
     async def test_insider_threat_detection(self):
         """Test detecting insider threat through access pattern changes."""

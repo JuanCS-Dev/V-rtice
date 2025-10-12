@@ -45,11 +45,32 @@ logger = logging.getLogger(__name__)
 class RiskLevel(Enum):
     """Risk levels for anomalies."""
     
-    BASELINE = "baseline"  # Normal behavior
-    LOW = "low"  # Minor deviation
-    MEDIUM = "medium"  # Moderate deviation
-    HIGH = "high"  # Significant deviation
-    CRITICAL = "critical"  # Severe deviation
+    BASELINE = 0  # Normal behavior
+    LOW = 1  # Minor deviation
+    MEDIUM = 2  # Moderate deviation
+    HIGH = 3  # Significant deviation
+    CRITICAL = 4  # Severe deviation
+    
+    def __lt__(self, other):
+        """Enable comparison operators."""
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+    
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value <= other.value
+        return NotImplemented
+    
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value > other.value
+        return NotImplemented
+    
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
 
 
 class BehaviorType(Enum):
@@ -401,15 +422,29 @@ class BehavioralAnalyzer:
             scaled_features = scaler.transform(feature_vector)
             
             # Predict anomaly score
-            # Isolation Forest returns -1 for anomalies, 1 for inliers
-            # decision_function returns negative scores for anomalies
+            # Isolation Forest decision_function returns:
+            # - Negative values for anomalies (more isolated points)
+            # - Positive values for inliers (less isolated points)
+            # Typical range: [-0.5, 0.5] but can be wider for extreme outliers
             anomaly_scores = model.decision_function(scaled_features)
             predictions = model.predict(scaled_features)
             
             # Normalize score to 0-1 range (1 = most anomalous)
-            # Decision scores are typically in range [-0.5, 0.5]
-            # Negative scores indicate anomalies
-            normalized_score = max(0.0, min(1.0, -anomaly_scores[0]))
+            # Use sigmoid-like transformation for better sensitivity
+            raw_score = anomaly_scores[0]
+            
+            # Map decision scores to 0-1:
+            # Positive scores (inliers) → low anomaly scores (0-0.3)
+            # Negative scores (outliers) → high anomaly scores (0.5-1.0)
+            if raw_score >= 0:
+                # Inlier: map [0, 0.5] to [0.0, 0.3]
+                normalized_score = max(0.0, min(0.3, (0.5 - raw_score) * 0.6))
+            else:
+                # Outlier: map [-0.5, 0] to [0.5, 1.0]
+                # More negative = more anomalous
+                normalized_score = max(0.5, min(1.0, 0.5 + (-raw_score * 1.0)))
+            
+            logger.debug(f"Anomaly scores: raw={raw_score:.3f}, normalized={normalized_score:.3f}")
             
             # Calculate baseline deviation (z-score)
             deviations = []
@@ -438,34 +473,35 @@ class BehavioralAnalyzer:
             ).inc()
             self.metrics.anomaly_score_dist.observe(normalized_score)
             
-            # Only create detection if anomalous (score > threshold)
+            # Generate explanation regardless of threshold
+            explanation = self._generate_explanation(
+                event=event,
+                anomaly_score=normalized_score,
+                contributing_features=deviations[:3],  # Top 3
+            )
+            
+            # Recommend actions
+            recommended_actions = self._recommend_actions(
+                risk_level=risk_level,
+                behavior_type=event.behavior_type,
+            )
+            
+            # Create detection for all analyzed events
+            detection = AnomalyDetection(
+                detection_id=self._generate_detection_id(event),
+                event=event,
+                anomaly_score=normalized_score,
+                baseline_deviation=max_deviation,
+                risk_level=risk_level,
+                contributing_features=deviations[:5],  # Top 5
+                explanation=explanation,
+                confidence=confidence,
+                recommended_actions=recommended_actions,
+            )
+            
+            # Only return detection if anomalous (above baseline)
             if predictions[0] == -1 or risk_level != RiskLevel.BASELINE:
-                # Generate explanation
-                explanation = self._generate_explanation(
-                    event=event,
-                    anomaly_score=normalized_score,
-                    contributing_features=deviations[:3],  # Top 3
-                )
-                
-                # Recommend actions
-                recommended_actions = self._recommend_actions(
-                    risk_level=risk_level,
-                    behavior_type=event.behavior_type,
-                )
-                
-                detection = AnomalyDetection(
-                    detection_id=self._generate_detection_id(event),
-                    event=event,
-                    anomaly_score=normalized_score,
-                    baseline_deviation=max_deviation,
-                    risk_level=risk_level,
-                    contributing_features=deviations[:5],  # Top 5
-                    explanation=explanation,
-                    confidence=confidence,
-                    recommended_actions=recommended_actions,
-                )
-                
-                # Update metrics
+                # Update anomaly metrics
                 self.metrics.anomalies_detected.labels(
                     risk_level=risk_level.value
                 ).inc()
@@ -479,9 +515,9 @@ class BehavioralAnalyzer:
                 
                 return detection
             
-            # Normal behavior
+            # Normal behavior - return detection with BASELINE risk
             logger.debug(f"Normal behavior: {event.event_id} score={normalized_score:.2f}")
-            return None
+            return detection
         
         except Exception as e:
             logger.error(f"Anomaly detection failed for {event.event_id}: {e}")
@@ -541,6 +577,24 @@ class BehavioralAnalyzer:
     def is_trained(self, behavior_type: BehaviorType) -> bool:
         """Check if baseline is trained for behavior type."""
         return behavior_type in self.models
+    
+    # Aliases for backward compatibility
+    async def learn_baseline(self, *args, **kwargs):
+        """Alias for train_baseline (backward compatibility)."""
+        return await self.train_baseline(*args, **kwargs)
+    
+    async def update_baseline(self, *args, **kwargs):
+        """Alias for train_baseline with force_retrain=True (backward compatibility)."""
+        kwargs['force_retrain'] = True
+        return await self.train_baseline(*args, **kwargs)
+    
+    async def detect_batch_anomalies(self, *args, **kwargs):
+        """Alias for detect_anomalies_batch (backward compatibility)."""
+        return await self.detect_anomalies_batch(*args, **kwargs)
+    
+    def _determine_risk_level(self, *args, **kwargs):
+        """Alias for _calculate_risk_level (backward compatibility)."""
+        return self._calculate_risk_level(*args, **kwargs)
     
     # Private methods
     
