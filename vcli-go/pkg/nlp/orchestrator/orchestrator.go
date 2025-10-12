@@ -18,7 +18,8 @@ import (
 	"github.com/verticedev/vcli-go/internal/authz"
 	"github.com/verticedev/vcli-go/internal/behavior"
 	"github.com/verticedev/vcli-go/internal/intent"
-	"github.com/verticedev/vcli-go/internal/nlp"
+	"github.com/verticedev/vcli-go/pkg/nlp"
+	"github.com/verticedev/vcli-go/pkg/security"
 )
 
 // Orchestrator coordinates the 7-layer security validation
@@ -57,7 +58,7 @@ type Config struct {
 	// Security config
 	RequireMFA         bool
 	RequireSignature   bool
-	MaxRiskScore       float64 // 0.0-1.0, reject if exceeded
+	MaxRiskScore       int // 0-100, reject if exceeded
 	RateLimitPerMinute int
 
 	// Timeouts
@@ -73,7 +74,7 @@ func DefaultConfig() Config {
 		Verbose:            false,
 		RequireMFA:         true,
 		RequireSignature:   true,
-		MaxRiskScore:       0.7, // Reject if >70% risk
+		MaxRiskScore:       70, // Reject if >70 (0-100)
 		RateLimitPerMinute: 60,
 		AuthTimeout:        10 * time.Second,
 		ValidationTotal:    30 * time.Second,
@@ -84,7 +85,7 @@ func DefaultConfig() Config {
 func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 	// Apply defaults for zero values
 	if cfg.MaxRiskScore == 0 {
-		cfg.MaxRiskScore = 0.7
+		cfg.MaxRiskScore = 70
 	}
 	if cfg.RateLimitPerMinute == 0 {
 		cfg.RateLimitPerMinute = 60
@@ -115,7 +116,6 @@ func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 
 	behaviorAnalyzer := behavior.NewAnalyzer(
 		&mockBaselineStore{},
-		behavior.DefaultConfig(),
 	)
 
 	auditLogger := audit.NewLogger(
@@ -144,7 +144,7 @@ type ExecutionResult struct {
 
 	// Security validation details
 	ValidationSteps []ValidationStep
-	RiskScore       float64
+	RiskScore       int // 0-100
 	RequiredMFA     bool
 	RequiredSign    bool
 
@@ -216,13 +216,13 @@ func (o *Orchestrator) Execute(ctx context.Context, intent *nlp.Intent) (*Execut
 	// === Execute Command ===
 	if o.config.DryRun {
 		result.Success = true
-		result.Command = fmt.Sprintf("vcli k8s %s %s", intent.Action, intent.Resource)
+		result.Command = fmt.Sprintf("vcli k8s %s %s", intent.Verb, intent.Target)
 		result.Output = "[DRY RUN] Command would execute here"
 		result.Warnings = append(result.Warnings, "Dry run mode - no actual execution")
 	} else {
 		// TODO: Execute actual command via cobra
 		result.Success = true
-		result.Command = fmt.Sprintf("vcli k8s %s %s", intent.Action, intent.Resource)
+		result.Command = fmt.Sprintf("vcli k8s %s %s", intent.Verb, intent.Target)
 		result.Output = "[SIMULATED] Command executed successfully"
 	}
 
@@ -240,12 +240,12 @@ func (o *Orchestrator) validateAuthentication(ctx context.Context, intent *nlp.I
 	// TODO: Get actual user from context
 	// For now, create a mock user
 	mockUser := &security.User{
-		ID:        "dev-user",
-		Username:  "developer",
-		Email:     "dev@vertice.local",
-		Roles:     []string{"admin"},
-		MFAEnabled: false,
-		LastLogin: time.Now(),
+		ID:          "dev-user",
+		Username:    "developer",
+		Email:       "dev@vertice.local",
+		Roles:       []string{"admin"},
+		MFAEnabled:  false,
+		LastLoginAt: time.Now(),
 	}
 	
 	err := o.authenticator.Validate(ctx, mockUser)
@@ -268,11 +268,11 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, intent *nlp.In
 	// Create security context
 	secCtx := &security.SecurityContext{
 		User: &security.User{
-			ID:        "dev-user",
-			Username:  "developer",
-			Roles:     []string{"admin"},
+			ID:       "dev-user",
+			Username: "developer",
+			Roles:    []string{"admin"},
 		},
-		IPAddress: "127.0.0.1",
+		IP:        "127.0.0.1",
 		Timestamp: time.Now(),
 	}
 
@@ -295,13 +295,13 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, intent *nlp.In
 
 	if riskScore > o.config.MaxRiskScore {
 		o.recordStep(result, "Authorization", false, 
-			fmt.Sprintf("Risk too high: %.2f > %.2f", riskScore, o.config.MaxRiskScore), 
+			fmt.Sprintf("Risk too high: %d > %d", riskScore, o.config.MaxRiskScore), 
 			duration)
 		return fmt.Errorf("operation risk exceeds threshold")
 	}
 
 	o.recordStep(result, "Authorization", true, 
-		fmt.Sprintf("Authorized (risk: %.2f)", riskScore), duration)
+		fmt.Sprintf("Authorized (risk: %d)", riskScore), duration)
 	return nil
 }
 
@@ -309,8 +309,23 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, intent *nlp.In
 func (o *Orchestrator) validateIntent(ctx context.Context, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
 	
+	// Create security context for validation
+	secCtx := &security.SecurityContext{
+		User: &security.User{
+			ID:       "dev-user",
+			Username: "developer",
+			Roles:    []string{"admin"},
+		},
+		IP:        "127.0.0.1",
+		Timestamp: time.Now(),
+		RiskScore: result.RiskScore,
+	}
+	
+	// Convert intent to command for validation
+	cmd := intentToCommand(intent)
+	
 	// Validate with user confirmation for destructive ops
-	err := o.intentValidator.Validate(ctx, intent)
+	err := o.intentValidator.Validate(ctx, secCtx, cmd, intent)
 	
 	duration := time.Since(start)
 
@@ -356,7 +371,7 @@ func (o *Orchestrator) analyzeBehavior(ctx context.Context, intent *nlp.Intent, 
 		// Don't block, but log warning
 		for _, anomaly := range anomalies {
 			result.Warnings = append(result.Warnings, 
-				fmt.Sprintf("⚠️  Behavioral anomaly: %s (severity: %d)", anomaly.Type, anomaly.Severity))
+				fmt.Sprintf("⚠️  Behavioral anomaly: %s (severity: %.2f)", anomaly.Type, anomaly.Severity))
 		}
 	}
 
@@ -371,13 +386,32 @@ func (o *Orchestrator) logAudit(ctx context.Context, intent *nlp.Intent, result 
 	
 	entry := &security.AuditEntry{
 		ID:        result.AuditID,
-		UserID:    "dev-user", // TODO: Get from context
-		Action:    intent.Verb,
-		Resource:  intent.Target,
-		Namespace: "", // TODO: Extract from intent
-		Success:   result.Success,
-		RiskScore: result.RiskScore,
 		Timestamp: result.Timestamp,
+		User: security.AuditUser{
+			ID:       "dev-user",
+			Username: "developer",
+			Email:    "dev@vertice.local",
+			Roles:    []string{"admin"},
+		},
+		Session: security.AuditSession{
+			ID:        "session-123",
+			IP:        "127.0.0.1",
+			UserAgent: "vcli-go/2.0",
+		},
+		RawInput:     intent.OriginalInput,
+		Intent:       fmt.Sprintf("%s %s", intent.Verb, intent.Target),
+		Command:      result.Command,
+		Confidence:   intent.Confidence,
+		Executed:     result.Success,
+		ExecutionStatus: func() string {
+			if result.Success {
+				return "success"
+			}
+			return "failed"
+		}(),
+		ExecutionOutput: result.Output,
+		RiskLevel:    string(intent.RiskLevel),
+		RiskScore:    result.RiskScore,
 	}
 
 	err := o.auditLogger.Log(ctx, entry)
@@ -397,7 +431,7 @@ func (o *Orchestrator) logAudit(ctx context.Context, intent *nlp.Intent, result 
 // executeDirectly executes without validation (dev mode only)
 func (o *Orchestrator) executeDirectly(ctx context.Context, intent *nlp.Intent, result *ExecutionResult) (*ExecutionResult, error) {
 	result.Success = true
-	result.Command = fmt.Sprintf("vcli k8s %s %s", intent.Action, intent.Resource)
+	result.Command = fmt.Sprintf("vcli k8s %s %s", intent.Verb, intent.Target)
 	result.Output = "[DEV MODE] Direct execution"
 	result.Duration = time.Since(result.Timestamp)
 	return result, nil
@@ -416,9 +450,7 @@ func (o *Orchestrator) recordStep(result *ExecutionResult, layer string, passed 
 // Close cleans up orchestrator resources
 func (o *Orchestrator) Close() error {
 	// Close any open connections, files, etc.
-	if o.auditLogger != nil {
-		return o.auditLogger.Close()
-	}
+	// Note: auditLogger doesn't have Close method yet
 	return nil
 }
 
@@ -431,7 +463,7 @@ func (c *cliConfirmer) Confirm(ctx context.Context, prompt *intent.ConfirmationP
 	// TODO: Implement actual CLI prompt
 	// For now, auto-confirm in verbose mode
 	if c.verbose {
-		fmt.Printf("\n⚠️  Confirmation required: %s\n", prompt.Message)
+		fmt.Printf("\n⚠️  Confirmation required for: %s\n", prompt.Translation)
 		fmt.Println("   [Auto-confirmed in dev mode]")
 	}
 	return true, nil
@@ -484,20 +516,25 @@ func (m *mockMFAValidator) Verify(ctx context.Context, userID string, code strin
 	return true, nil // Always pass in dev mode
 }
 
+func (m *mockMFAValidator) IsRequired(ctx context.Context, user *security.User) (bool, error) {
+	// In dev mode, MFA not required
+	return false, nil
+}
+
 type mockRoleStore struct{}
 
 func (m *mockRoleStore) GetRole(ctx context.Context, name string) (*security.Role, error) {
 	return &security.Role{
 		Name: "admin",
 		Permissions: []security.Permission{
-			{Action: "*", Resource: "*", Namespace: "*"},
+			{Resource: "*", Verbs: []string{"*"}, Namespace: "*"},
 		},
 	}, nil
 }
 
 func (m *mockRoleStore) GetUserRoles(ctx context.Context, userID string) ([]security.Role, error) {
 	return []security.Role{
-		{Name: "admin", Permissions: []security.Permission{{Action: "*", Resource: "*"}}},
+		{Name: "admin", Permissions: []security.Permission{{Resource: "*", Verbs: []string{"*"}}}},
 	}, nil
 }
 
@@ -511,15 +548,27 @@ type mockBaselineStore struct{}
 
 func (m *mockBaselineStore) Get(ctx context.Context, userID string) (*behavior.Baseline, error) {
 	return &behavior.Baseline{
-		UserID:         userID,
-		NormalActions:  map[string]int{"get": 100, "list": 80},
-		NormalHours:    []int{8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18},
-		AverageRisk:    0.2,
-		UpdatedAt:      time.Now(),
+		UserID:        userID,
+		TopCommands:   []string{"get", "list"},
+		TopNamespaces: []string{"default"},
+		TopResources:  []string{"pods", "deployments"},
+		TypicalHours:  []int{8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18},
+		TypicalDays:   []int{1, 2, 3, 4, 5}, // Monday-Friday
+		CommandRatio: security.CommandRatio{
+			Read:   0.8,
+			Write:  0.15,
+			Delete: 0.05,
+		},
+		LastUpdated: time.Now(),
+		SampleSize:  100,
 	}, nil
 }
 
 func (m *mockBaselineStore) Save(ctx context.Context, baseline *behavior.Baseline) error {
+	return nil
+}
+
+func (m *mockBaselineStore) Update(ctx context.Context, userID string, cmd *nlp.Command) error {
 	return nil
 }
 
@@ -540,21 +589,21 @@ func intentToCommand(intent *nlp.Intent) *nlp.Command {
 	}
 }
 
-// calculateIntentRisk calculates risk score for an intent
-func calculateIntentRisk(intent *nlp.Intent) float64 {
+// calculateIntentRisk calculates risk score for an intent (0-100)
+func calculateIntentRisk(intent *nlp.Intent) int {
 	// Simple heuristic risk calculation
-	risk := 0.0
+	risk := 0
 	
 	// Base risk by verb
 	switch intent.Verb {
 	case "get", "list", "describe":
-		risk = 0.1 // Low risk - read-only
+		risk = 10 // Low risk - read-only
 	case "create", "apply", "patch":
-		risk = 0.4 // Medium risk - modifications
+		risk = 40 // Medium risk - modifications
 	case "delete", "scale":
-		risk = 0.7 // High risk - destructive
+		risk = 70 // High risk - destructive
 	default:
-		risk = 0.5 // Unknown - medium
+		risk = 50 // Unknown - medium
 	}
 	
 	// Increase risk based on risk level
@@ -562,16 +611,16 @@ func calculateIntentRisk(intent *nlp.Intent) float64 {
 	case nlp.RiskLevelLOW:
 		// Keep base risk
 	case nlp.RiskLevelMEDIUM:
-		risk += 0.1
+		risk += 10
 	case nlp.RiskLevelHIGH:
-		risk += 0.2
+		risk += 20
 	case nlp.RiskLevelCRITICAL:
-		risk += 0.3
+		risk += 30
 	}
 	
-	// Cap at 1.0
-	if risk > 1.0 {
-		risk = 1.0
+	// Cap at 100
+	if risk > 100 {
+		risk = 100
 	}
 	
 	return risk

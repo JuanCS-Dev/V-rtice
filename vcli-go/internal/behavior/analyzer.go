@@ -262,6 +262,18 @@ func (a *Analyzer) detectResourceAnomaly(cmd *nlp.Command, baseline *Baseline) *
 		}
 	}
 	
+	// Low severity if accessing unusual resource type
+	if !resTypical {
+		return &security.Anomaly{
+			Type:      security.AnomalyTypeResource,
+			Severity:  0.4,
+			Message:   "Accessing unusual resource type",
+			Baseline:  baseline.TopResources,
+			Observed:  resource,
+			Timestamp: time.Now(),
+		}
+	}
+	
 	return nil
 }
 
@@ -367,12 +379,11 @@ func (a *Analyzer) isDeleteCommand(cmd *nlp.Command) bool {
 }
 
 func (a *Analyzer) extractNamespace(cmd *nlp.Command) string {
-	for i, flag := range cmd.Flags {
-		if flag == "-n" || flag == "--namespace" {
-			if i+1 < len(cmd.Flags) {
-				return cmd.Flags[i+1]
-			}
-		}
+	if ns, ok := cmd.Flags["-n"]; ok {
+		return ns
+	}
+	if ns, ok := cmd.Flags["--namespace"]; ok {
+		return ns
 	}
 	return "default"
 }

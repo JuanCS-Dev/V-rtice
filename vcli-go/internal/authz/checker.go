@@ -410,12 +410,11 @@ func (c *Checker) extractResourceAndVerb(cmd *nlp.Command) (string, string) {
 // extractNamespace extracts namespace from command
 func (c *Checker) extractNamespace(cmd *nlp.Command) string {
 	// Check flags for namespace
-	for i, flag := range cmd.Flags {
-		if flag == "-n" || flag == "--namespace" {
-			if i+1 < len(cmd.Flags) {
-				return cmd.Flags[i+1]
-			}
-		}
+	if ns, ok := cmd.Flags["-n"]; ok {
+		return ns
+	}
+	if ns, ok := cmd.Flags["--namespace"]; ok {
+		return ns
 	}
 	
 	// Default namespace
