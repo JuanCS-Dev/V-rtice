@@ -12,6 +12,8 @@ from pydantic import BaseModel, Field
 
 class ABTestResult(BaseModel):
     """Single A/B test result."""
+    model_config = {"protected_namespaces": ()}
+    
     apv_id: str
     cve_id: Optional[str] = None
     patch_id: str

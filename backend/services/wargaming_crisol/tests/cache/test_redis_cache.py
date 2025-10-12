@@ -28,7 +28,7 @@ current_dir = os.path.dirname(__file__)
 service_dir = os.path.abspath(os.path.join(current_dir, '../..'))
 sys.path.insert(0, service_dir)
 
-from backend.services.wargaming_crisol.cache.redis_cache import WarGamingCache
+from cache.redis_cache import WarGamingCache
 
 
 class TestWarGamingCacheConnection:

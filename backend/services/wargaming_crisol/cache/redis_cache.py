@@ -16,6 +16,7 @@ Digital equivalent: Redis cache for instant pattern recognition.
 from typing import Optional, Any, Dict
 import json
 import hashlib
+import os
 from datetime import timedelta
 import logging
 
@@ -39,13 +40,25 @@ class WarGamingCache:
     - Pattern-based retrieval similar to antigen recognition
     """
     
-    def __init__(self, redis_url: str = "redis://localhost:6379/2"):
+    def __init__(self, redis_url: Optional[str] = None):
         """
         Initialize cache client.
         
         Args:
-            redis_url: Redis connection URL with database selection
+            redis_url: Redis connection URL with database selection.
+                      If None, reads from REDIS_URL env var or defaults to redis-immunity:6379/2
         """
+        if redis_url is None:
+            redis_host = os.getenv("REDIS_HOST", "redis-immunity")
+            redis_port = os.getenv("REDIS_PORT", "6379")
+            redis_db = os.getenv("REDIS_DB", "2")
+            redis_password = os.getenv("REDIS_PASSWORD", "")
+            
+            if redis_password:
+                redis_url = f"redis://:{redis_password}@{redis_host}:{redis_port}/{redis_db}"
+            else:
+                redis_url = f"redis://{redis_host}:{redis_port}/{redis_db}"
+        
         self.redis_url = redis_url
         self.client: Optional[redis.Redis] = None
     

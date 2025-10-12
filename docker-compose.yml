@@ -2378,6 +2378,10 @@ services:
       - POSTGRES_DB=adaptive_immunity
       - POSTGRES_USER=maximus
       - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+      - REDIS_HOST=redis-immunity
+      - REDIS_PORT=6379
+      - REDIS_DB=2
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-maximus_immunity_redis}
       - DOCKER_HOST=unix:///var/run/docker.sock
       - LOG_LEVEL=INFO
     volumes:
@@ -2386,6 +2390,7 @@ services:
       - wargaming_logs:/app/logs
     networks:
       - maximus-network
+      - maximus-immunity-network
     restart: unless-stopped
     privileged: true  # Required for Docker-in-Docker
 
@@ -2412,6 +2417,8 @@ networks:
   maximus-network:
     name: maximus-ai-network
     driver: bridge
+  maximus-immunity-network:
+    external: true
 # ============================
 # VOLUMES
 # ============================

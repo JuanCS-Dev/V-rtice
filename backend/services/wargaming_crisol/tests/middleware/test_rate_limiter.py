@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from backend.services.wargaming_crisol.middleware.rate_limiter import TokenBucket, RateLimiterMiddleware
+from middleware.rate_limiter import TokenBucket, RateLimiterMiddleware
 
 
 class TestTokenBucket:
