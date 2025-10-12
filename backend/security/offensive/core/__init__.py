@@ -9,13 +9,31 @@ Provides:
     - Common exceptions
     - Shared utilities
     - Configuration management
+    - Orchestration engine
 """
 
-from typing import List
+from .base import OffensiveTool, ToolResult, ToolMetadata
+from .exceptions import OffensiveToolError
+from .config import OffensiveConfig
+from .orchestration import (
+    OrchestrationEngine,
+    Operation,
+    OperationStep,
+    OperationResult,
+    OperationPhase,
+    OperationStatus
+)
 
-__all__: List[str] = [
-    "base",
-    "exceptions",
-    "utils",
-    "config"
+__all__ = [
+    "OffensiveTool",
+    "ToolResult",
+    "ToolMetadata",
+    "OffensiveToolError",
+    "OffensiveConfig",
+    "OrchestrationEngine",
+    "Operation",
+    "OperationStep",
+    "OperationResult",
+    "OperationPhase",
+    "OperationStatus"
 ]

@@ -9,13 +9,21 @@ Components:
     - Threat Intel: Threat intelligence integration
     - Target Profiler: Target analysis and profiling
     - Credential Harvester: Credential discovery
+    - Data Exfiltrator: Sensitive data extraction
 """
 
-from typing import List
+from .exfiltration import (
+    DataExfiltrator,
+    DataClassification,
+    ExfiltrationMethod,
+    FileMetadata,
+    ExfiltrationResult
+)
 
-__all__: List[str] = [
-    "osint_collector",
-    "threat_intel",
-    "target_profiler",
-    "credential_harvester"
+__all__ = [
+    "DataExfiltrator",
+    "DataClassification",
+    "ExfiltrationMethod",
+    "FileMetadata",
+    "ExfiltrationResult"
 ]
