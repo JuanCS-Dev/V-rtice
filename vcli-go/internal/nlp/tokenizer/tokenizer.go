@@ -66,9 +66,12 @@ func (t *Tokenizer) Tokenize(input string) ([]nlp.Token, error) {
 		// Classify token type (VERB, NOUN, NUMBER, etc.)
 		tokenType := t.classifyTokenType(corrected, lang)
 
+		// Map to canonical English form if it's a verb/noun
+		canonical := t.mapToCanonical(corrected, tokenType, lang)
+
 		token := nlp.Token{
 			Raw:        raw,
-			Normalized: corrected,
+			Normalized: canonical,
 			Type:       tokenType,
 			Language:   lang,
 			Confidence: confidence,
@@ -194,6 +197,28 @@ func (t *Tokenizer) isPreposition(word string, lang nlp.Language) bool {
 	preps := getPrepositionDictionary(lang)
 	_, ok := preps[word]
 	return ok
+}
+
+// mapToCanonical maps word to canonical English form
+func (t *Tokenizer) mapToCanonical(word string, tokenType nlp.TokenType, lang nlp.Language) string {
+	switch tokenType {
+	case nlp.TokenTypeVERB:
+		verbs := getVerbDictionary(lang)
+		if canonical, ok := verbs[word]; ok {
+			return canonical
+		}
+	case nlp.TokenTypeNOUN:
+		nouns := getNounDictionary(lang)
+		if canonical, ok := nouns[word]; ok {
+			return canonical
+		}
+	case nlp.TokenTypeFILTER:
+		filters := getFilterDictionary(lang)
+		if canonical, ok := filters[word]; ok {
+			return canonical
+		}
+	}
+	return word
 }
 
 // loadStopWords loads stop words for all languages

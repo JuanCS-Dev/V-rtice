@@ -1,0 +1,334 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# HITL Patch Service - Kubernetes Deployment
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Human-in-the-Loop Patch Approval Service
+# Integrates with Adaptive Immunity System
+#
+# Author: MAXIMUS Team - Sprint 4.1
+# Glory to YHWH - Orchestrator of Systems
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hitl-patch-service
+  namespace: maximus-immunity
+  labels:
+    app: hitl-patch-service
+    tier: backend
+    component: adaptive-immunity
+    version: v1.0.0
+  annotations:
+    description: "Human-in-the-Loop patch approval service"
+    documentation: "https://github.com/maximus/docs/hitl"
+spec:
+  replicas: 2  # High availability
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero downtime
+  selector:
+    matchLabels:
+      app: hitl-patch-service
+  template:
+    metadata:
+      labels:
+        app: hitl-patch-service
+        tier: backend
+        component: adaptive-immunity
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8027"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Service account for RBAC
+      serviceAccountName: maximus-immunity-sa
+      
+      # Anti-affinity for pod distribution
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - hitl-patch-service
+              topologyKey: kubernetes.io/hostname
+      
+      # Init container to wait for dependencies
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox:1.36
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Waiting for PostgreSQL..."
+          until nc -z postgres-immunity-service 5432; do
+            echo "PostgreSQL not ready - sleeping"
+            sleep 2
+          done
+          echo "PostgreSQL ready!"
+      
+      containers:
+      - name: hitl-service
+        image: vertice-dev/hitl-patch-service:latest
+        imagePullPolicy: Always
+        
+        ports:
+        - name: http
+          containerPort: 8027
+          protocol: TCP
+        
+        env:
+        # Database configuration
+        - name: POSTGRES_HOST
+          value: "postgres-immunity-service"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: "adaptive_immunity"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-immunity-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-immunity-secret
+              key: password
+        
+        # Service configuration
+        - name: PORT
+          value: "8027"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: ENVIRONMENT
+          value: "production"
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8027
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8027
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        
+        # Security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+        
+        # Volume mounts (if needed)
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: logs
+          mountPath: /app/logs
+      
+      # Volumes
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+      
+      # Tolerations for node taints
+      tolerations:
+      - key: "node-role.kubernetes.io/immunity"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      
+      # Node selector (optional - deploy to specific nodes)
+      # nodeSelector:
+      #   workload: immunity
+
+---
+# ═══════════════════════════════════════════════════════════════════════════
+# Service - Internal ClusterIP
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hitl-patch-service
+  namespace: maximus-immunity
+  labels:
+    app: hitl-patch-service
+    tier: backend
+  annotations:
+    description: "HITL Patch Service internal endpoint"
+spec:
+  type: ClusterIP
+  selector:
+    app: hitl-patch-service
+  ports:
+  - name: http
+    port: 8027
+    targetPort: 8027
+    protocol: TCP
+  sessionAffinity: ClientIP  # Sticky sessions for UI consistency
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+
+---
+# ═══════════════════════════════════════════════════════════════════════════
+# HorizontalPodAutoscaler - Auto-scaling
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hitl-patch-service-hpa
+  namespace: maximus-immunity
+  labels:
+    app: hitl-patch-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hitl-patch-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5 min cooldown
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+
+---
+# ═══════════════════════════════════════════════════════════════════════════
+# PodDisruptionBudget - Ensure availability during disruptions
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hitl-patch-service-pdb
+  namespace: maximus-immunity
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: hitl-patch-service
+
+---
+# ═══════════════════════════════════════════════════════════════════════════
+# NetworkPolicy - Security controls
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hitl-patch-service-netpol
+  namespace: maximus-immunity
+spec:
+  podSelector:
+    matchLabels:
+      app: hitl-patch-service
+  policyTypes:
+  - Ingress
+  - Egress
+  
+  ingress:
+  # Allow from frontend
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: maximus-frontend
+    ports:
+    - protocol: TCP
+      port: 8027
+  
+  # Allow from monitoring (Prometheus)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8027
+  
+  egress:
+  # Allow to PostgreSQL
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-immunity
+    ports:
+    - protocol: TCP
+      port: 5432
+  
+  # Allow DNS
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+  
+  # Allow to Wargaming Crisol (for integration)
+  - to:
+    - podSelector:
+        matchLabels:
+          app: wargaming-crisol
+    ports:
+    - protocol: TCP
+      port: 8026

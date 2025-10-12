@@ -33,6 +33,11 @@ func (tc *TypoCorrector) Correct(word string, lang nlp.Language) (string, float6
 
 	dictionary := tc.getDictionary(lang)
 
+	// If word is already in dictionary, return as-is
+	if dictionary[word] {
+		return word, 1.0
+	}
+
 	minDistance := math.MaxInt32
 	bestMatch := word
 
@@ -44,13 +49,18 @@ func (tc *TypoCorrector) Correct(word string, lang nlp.Language) (string, float6
 		}
 	}
 
-	// Calculate confidence based on edit distance
-	confidence := 1.0
-	if minDistance > 0 {
-		confidence = 1.0 - (float64(minDistance) / float64(len(word)))
+	// Only apply correction if we found a match within threshold
+	// and the match is significantly better than original
+	if minDistance == 0 {
+		return bestMatch, 1.0
+	} else if minDistance <= tc.threshold && minDistance < len(word)/2 {
+		// Calculate confidence based on edit distance
+		confidence := 1.0 - (float64(minDistance) / float64(len(word)))
+		return bestMatch, confidence
 	}
 
-	return bestMatch, confidence
+	// No good match found, return original
+	return word, 1.0
 }
 
 // getDictionary returns all known words for language
@@ -66,6 +76,16 @@ func (tc *TypoCorrector) getDictionary(lang nlp.Language) map[string]bool {
 	}
 	for k := range getFilterDictionary(lang) {
 		dict[k] = true
+	}
+
+	// Add common namespace identifiers (should not be corrected)
+	commonNames := []string{
+		"prod", "production", "dev", "development", "staging", "stage",
+		"test", "testing", "qa", "uat", "demo",
+		"nginx", "redis", "postgres", "mysql", "mongo",
+	}
+	for _, name := range commonNames {
+		dict[name] = true
 	}
 
 	return dict

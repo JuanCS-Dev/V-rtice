@@ -1,0 +1,30 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# HITL Patch Service - Kustomization
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: maximus-immunity
+
+resources:
+  - config.yaml
+  - deployment.yaml
+  - ingress.yaml
+  - monitoring.yaml
+
+commonLabels:
+  project: maximus
+  component: adaptive-immunity
+  managed-by: kustomize
+
+configMapGenerator:
+  - name: hitl-build-info
+    literals:
+      - version=1.0.0
+      - build_date=2025-10-12
+      - git_commit=sprint-4.1
+
+images:
+  - name: vertice-dev/hitl-patch-service
+    newTag: v1.0.0
