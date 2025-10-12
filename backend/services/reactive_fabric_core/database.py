@@ -49,7 +49,7 @@ class Database:
             
             # Test connection
             if self.pool:
-                async with self.pool.acquire() as conn:
+                async with self._ensure_pool().acquire() as conn:
                     version = await conn.fetchval("SELECT version()")
                     logger.info("database_connected", postgres_version=version[:50])
         except Exception as e:
@@ -68,7 +68,7 @@ class Database:
             return False
         
         try:
-            async with self.pool.acquire() as conn:
+            async with self._ensure_pool().acquire() as conn:
                 await conn.fetchval("SELECT 1")
             return True
         except Exception as e:
@@ -88,7 +88,7 @@ class Database:
             WHERE honeypot_id = $1
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             row = await conn.fetchrow(query, honeypot_id)
             if row:
                 return Honeypot(**dict(row))
@@ -103,7 +103,7 @@ class Database:
             ORDER BY created_at ASC
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             rows = await conn.fetch(query)
             return [Honeypot(**dict(row)) for row in rows]
     
@@ -116,7 +116,7 @@ class Database:
             ORDER BY total_attacks DESC
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             rows = await conn.fetch(query)
             return [HoneypotStats(**dict(row)) for row in rows]
     
@@ -137,7 +137,7 @@ class Database:
         if last_health_check is None:
             last_health_check = datetime.utcnow()
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             result = await conn.fetchval(query, honeypot_id, status.value, last_health_check)
             return result is not None
     
@@ -151,7 +151,7 @@ class Database:
                       config, created_at, updated_at, last_health_check, metadata
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             try:
                 row = await conn.fetchrow(
                     query,
@@ -182,7 +182,7 @@ class Database:
                       confidence, ttps, iocs, payload, captured_at, processed_at, metadata
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             row = await conn.fetchrow(
                 query,
                 attack.honeypot_id,
@@ -210,7 +210,7 @@ class Database:
             LIMIT $1 OFFSET $2
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             rows = await conn.fetch(query, limit, offset)
             return [AttackSummary(**dict(row)) for row in rows]
     
@@ -218,8 +218,9 @@ class Database:
         """Count total attacks."""
         query = "SELECT COUNT(*) FROM reactive_fabric.attacks"
         
-        async with self.pool.acquire() as conn:
-            return await conn.fetchval(query)
+        async with self._ensure_pool().acquire() as conn:
+            result = await conn.fetchval(query)
+            return int(result) if result is not None else 0
     
     async def get_attacks_by_honeypot(
         self, 
@@ -237,7 +238,7 @@ class Database:
             LIMIT $2
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             rows = await conn.fetch(query, honeypot_id, limit)
             return [AttackSummary(**dict(row)) for row in rows]
     
@@ -251,16 +252,18 @@ class Database:
                 WHERE h.honeypot_id = $1
                   AND a.captured_at >= CURRENT_DATE
             """
-            async with self.pool.acquire() as conn:
-                return await conn.fetchval(query, honeypot_id)
+            async with self._ensure_pool().acquire() as conn:
+                result = await conn.fetchval(query, honeypot_id)
+                return int(result) if result is not None else 0
         else:
             query = """
                 SELECT COUNT(*)
                 FROM reactive_fabric.attacks
                 WHERE captured_at >= CURRENT_DATE
             """
-            async with self.pool.acquire() as conn:
-                return await conn.fetchval(query)
+            async with self._ensure_pool().acquire() as conn:
+                result = await conn.fetchval(query)
+                return int(result) if result is not None else 0
     
     # ========================================================================
     # TTP QUERIES
@@ -276,7 +279,7 @@ class Database:
             LIMIT $1
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             rows = await conn.fetch(query, limit)
             return [TTPFrequency(**dict(row)) for row in rows]
     
@@ -289,7 +292,7 @@ class Database:
             WHERE technique_id = $1
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             row = await conn.fetchrow(query, technique_id)
             if row:
                 return TTP(**dict(row))
@@ -305,7 +308,7 @@ class Database:
                       observed_count, first_observed, last_observed, metadata
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             try:
                 row = await conn.fetchrow(
                     query,
@@ -346,7 +349,7 @@ class Database:
         
         attack_ids = [attack_id] if attack_id else []
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             row = await conn.fetchrow(query, ioc_type, ioc_value, threat_level, attack_ids)
             if row:
                 return IOC(**dict(row))
@@ -371,7 +374,7 @@ class Database:
                       attacks_extracted, ttps_extracted, error_message, metadata
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             row = await conn.fetchrow(
                 query,
                 capture.honeypot_id,
@@ -398,7 +401,7 @@ class Database:
             LIMIT $1
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             rows = await conn.fetch(query, limit)
             return [ForensicCapture(**dict(row)) for row in rows]
     
@@ -422,7 +425,7 @@ class Database:
             RETURNING id
         """
         
-        async with self.pool.acquire() as conn:
+        async with self._ensure_pool().acquire() as conn:
             result = await conn.fetchval(
                 query, 
                 capture_id, 
@@ -447,13 +450,15 @@ class Database:
                 WHERE h.honeypot_id = $1
                   AND a.captured_at >= CURRENT_DATE
             """
-            async with self.pool.acquire() as conn:
-                return await conn.fetchval(query, honeypot_id)
+            async with self._ensure_pool().acquire() as conn:
+                result = await conn.fetchval(query, honeypot_id)
+                return int(result) if result is not None else 0
         else:
             query = """
                 SELECT COUNT(DISTINCT attacker_ip)
                 FROM reactive_fabric.attacks
                 WHERE captured_at >= CURRENT_DATE
             """
-            async with self.pool.acquire() as conn:
-                return await conn.fetchval(query)
+            async with self._ensure_pool().acquire() as conn:
+                result = await conn.fetchval(query)
+                return int(result) if result is not None else 0
