@@ -43,6 +43,7 @@ from patterns.circuit_breaker import (  # Phase 5.7.1: Circuit breakers
     cache_breaker,
     CircuitBreakerOpenError
 )
+from metrics import update_circuit_breaker_metrics  # Phase 5.7.2: Metrics
 
 # Configure logging
 logging.basicConfig(
@@ -1142,6 +1143,24 @@ async def invalidate_all_cache():
         )
 
 
+# Phase 5.7.2: Background task to update circuit breaker metrics
+async def update_circuit_breaker_metrics_loop():
+    """
+    Periodically update Prometheus metrics for circuit breakers.
+    
+    Updates every 10 seconds to keep metrics fresh.
+    """
+    while True:
+        try:
+            update_circuit_breaker_metrics(ml_model_breaker)
+            update_circuit_breaker_metrics(database_breaker)
+            update_circuit_breaker_metrics(cache_breaker)
+        except Exception as e:
+            logger.warning(f"Circuit breaker metrics update failed: {e}")
+        
+        await asyncio.sleep(10)  # Update every 10 seconds
+
+
 # Startup event
 @app.on_event("startup")
 async def startup_event():
@@ -1201,6 +1220,10 @@ async def startup_event():
         logger.warning("   A/B testing endpoints will return 503")
         ab_store = None
         ab_test_runner = None
+    
+    # Phase 5.7.2: Start background task for circuit breaker metrics
+    asyncio.create_task(update_circuit_breaker_metrics_loop())
+    logger.info("✓ Circuit breaker metrics updater started (Phase 5.7.2)")
     
     logger.info("🔥 Wargaming Crisol ready!")
 

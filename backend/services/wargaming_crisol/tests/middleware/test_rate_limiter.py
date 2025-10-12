@@ -3,9 +3,15 @@
 import pytest
 import asyncio
 import time
+import sys
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
-from ..middleware.rate_limiter import TokenBucket, RateLimiterMiddleware
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from middleware.rate_limiter import TokenBucket, RateLimiterMiddleware
 
 
 class TestTokenBucket:
