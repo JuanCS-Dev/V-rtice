@@ -30,7 +30,13 @@ class Database:
         self.database_url = database_url
         self.pool: Optional[asyncpg.Pool] = None
     
-    async def connect(self):
+    def _ensure_pool(self) -> asyncpg.Pool:
+        """Ensure pool is initialized, raise if not."""
+        if self.pool is None:
+            raise RuntimeError("Database pool not initialized. Call connect() first.")
+        return self.pool
+    
+    async def connect(self) -> None:
         """Initialize connection pool."""
         try:
             self.pool = await asyncpg.create_pool(
@@ -42,16 +48,15 @@ class Database:
             logger.info("database_pool_created", min_size=2, max_size=10)
             
             # Test connection
-            async with self.pool.acquire() as conn:
-                version = await conn.fetchval("SELECT version()")
-                logger.info("database_connected", postgres_version=version[:50])
-            
-            return True
+            if self.pool:
+                async with self.pool.acquire() as conn:
+                    version = await conn.fetchval("SELECT version()")
+                    logger.info("database_connected", postgres_version=version[:50])
         except Exception as e:
             logger.error("database_connection_failed", error=str(e))
-            return False
+            raise
     
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Close connection pool."""
         if self.pool:
             await self.pool.close()

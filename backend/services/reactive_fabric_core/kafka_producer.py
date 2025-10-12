@@ -9,7 +9,7 @@ import structlog
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import KafkaError
 import json
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 from models import ThreatDetectedMessage, HoneypotStatusMessage
@@ -29,7 +29,7 @@ class KafkaProducer:
         self.producer: Optional[AIOKafkaProducer] = None
         self._connected = False
     
-    async def connect(self):
+    async def connect(self) -> None:
         """Initialize Kafka producer."""
         try:
             self.producer = AIOKafkaProducer(
@@ -42,13 +42,12 @@ class KafkaProducer:
             await self.producer.start()
             self._connected = True
             logger.info("kafka_producer_started", bootstrap_servers=self.bootstrap_servers)
-            return True
         except Exception as e:
             logger.error("kafka_producer_start_failed", error=str(e))
             self._connected = False
-            return False
+            raise
     
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Stop Kafka producer."""
         if self.producer:
             await self.producer.stop()
@@ -174,7 +173,7 @@ class KafkaProducer:
             )
             return False
     
-    async def publish_raw(self, topic: str, message: dict, key: Optional[str] = None) -> bool:
+    async def publish_raw(self, topic: str, message: Dict[str, Any], key: Optional[str] = None) -> bool:
         """
         Publish raw message to any topic.
         
@@ -217,10 +216,10 @@ def create_threat_detected_message(
     attacker_ip: str,
     attack_type: str,
     severity: str,
-    ttps: list = None,
-    iocs: dict = None,
+    ttps: Optional[List[str]] = None,
+    iocs: Optional[Dict[str, Any]] = None,
     confidence: float = 1.0,
-    metadata: dict = None
+    metadata: Optional[Dict[str, Any]] = None
 ) -> ThreatDetectedMessage:
     """
     Helper function to create ThreatDetectedMessage.
