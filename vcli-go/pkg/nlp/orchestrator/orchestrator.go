@@ -574,3 +574,18 @@ func calculateIntentRisk(intent *nlp.Intent) float64 {
 
 	return risk
 }
+
+// GetAuthorizer returns the authorizer (for testing/advanced usage)
+func (o *Orchestrator) GetAuthorizer() *authz.Authorizer {
+	return o.authorizer
+}
+
+// GetAuthenticator returns the authenticator (for testing/advanced usage)
+func (o *Orchestrator) GetAuthenticator() *auth.Authenticator {
+	return o.authenticator
+}
+
+// GetSandbox returns the sandbox manager (for testing/advanced usage)
+func (o *Orchestrator) GetSandbox() *sandbox.Sandbox {
+	return o.sandboxManager
+}

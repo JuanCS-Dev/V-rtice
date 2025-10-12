@@ -96,9 +96,22 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 	require.NotNil(t, orch)
 
 	// Assign operator role to test user (includes viewer + operational permissions)
-	rbac := orch.authorizer.GetRBACEngine()
+	// MUST be done AFTER NewOrchestrator because it creates a new authorizer
+	rbac := orch.GetAuthorizer().GetRBACEngine()
 	err = rbac.AssignRole("test-user", "operator")
 	require.NoError(t, err)
+
+	// DEBUG: Verify role was assigned
+	roles := rbac.GetUserRoles("test-user")
+	if len(roles) == 0 {
+		t.Fatalf("No roles assigned to test-user!")
+	}
+	
+	// DEBUG: Test permission directly
+	allowed, perm := rbac.CheckPermission("test-user", authz.ResourcePod, authz.ActionList, "")
+	if !allowed {
+		t.Fatalf("Permission check failed! perm=%+v", perm)
+	}
 
 	// Create test auth context
 	session, err := sessionMgr.CreateSession("test-user", "tester", []string{"operator"}, false)
