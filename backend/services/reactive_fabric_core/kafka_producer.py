@@ -12,7 +12,10 @@ import json
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-from models import ThreatDetectedMessage, HoneypotStatusMessage
+from backend.services.reactive_fabric_core.models import (
+    ThreatDetectedMessage,
+    HoneypotStatusMessage
+)
 
 logger = structlog.get_logger()
 
@@ -238,7 +241,7 @@ def create_threat_detected_message(
     Returns:
         ThreatDetectedMessage instance
     """
-    from models import AttackSeverity
+    from backend.services.reactive_fabric_core.models import AttackSeverity
     
     return ThreatDetectedMessage(
         event_id=event_id,
@@ -272,7 +275,7 @@ def create_honeypot_status_message(
     Returns:
         HoneypotStatusMessage instance
     """
-    from models import HoneypotStatus
+    from backend.services.reactive_fabric_core.models import HoneypotStatus
     
     return HoneypotStatusMessage(
         honeypot_id=honeypot_id,

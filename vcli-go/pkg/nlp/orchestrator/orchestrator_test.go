@@ -38,35 +38,32 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 	}
 
 	// Layer 2: Authorization setup
-	authzConfig := &authz.Config{
+	authzConfig := &authz.AuthorizerConfig{
 		StrictMode: false, // Permissive for tests
 	}
 
 	// Layer 3: Sandbox setup
-	sandboxConfig := &sandbox.Config{
+	sandboxConfig := &sandbox.SandboxConfig{
 		EnforceReadOnly: false, // Allow all for tests
 	}
 
-	// Layer 4: Intent setup
-	intentConfig := &intent.Config{
-		RequireConfirmation: false, // Auto-approve for tests
-		AutoApprove:         true,
-	}
+	// Layer 4: Intent setup (no config, will be created)
+	intentValidator := intent.NewIntentValidator()
 
 	// Layer 5: Rate limit setup
-	rateLimitConfig := &ratelimit.Config{
-		Algorithm: ratelimit.AlgorithmTokenBucket,
-		Rate:      100, // Generous limit for tests
+	rateLimitConfig := &ratelimit.RateLimitConfig{
+		DefaultRate:  100, // Generous limit for tests
+		DefaultBurst: 20,
 	}
 
 	// Layer 6: Behavioral setup
-	behaviorConfig := &behavioral.Config{
+	behaviorConfig := &behavioral.AnalyzerConfig{
 		AnomalyThreshold: 0.9, // High threshold for tests
 	}
 
 	// Layer 7: Audit setup
-	auditConfig := &audit.Config{
-		EnableRemote: false, // Local only for tests
+	auditConfig := &audit.AuditConfig{
+		BufferSize: 100,
 	}
 
 	// Create orchestrator config
@@ -83,7 +80,7 @@ func setupTestOrchestrator(t *testing.T) (*Orchestrator, *auth.AuthContext) {
 		AuthConfig:         authConfig,
 		AuthzConfig:        authzConfig,
 		SandboxConfig:      sandboxConfig,
-		IntentConfig:       intentConfig,
+		IntentConfig:       intentValidator,
 		RateLimitConfig:    rateLimitConfig,
 		BehaviorConfig:     behaviorConfig,
 		AuditConfig:        auditConfig,

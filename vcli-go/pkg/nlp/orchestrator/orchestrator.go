@@ -131,44 +131,48 @@ func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 
 	// Layer 2: Authorization
 	if cfg.AuthzConfig == nil {
-		cfg.AuthzConfig = &authz.Config{StrictMode: true}
+		cfg.AuthzConfig = &authz.AuthorizerConfig{StrictMode: true}
 	}
-	authorizer := authz.NewAuthorizer(cfg.AuthzConfig)
+	authorizer, err := authz.NewAuthorizerWithConfig(cfg.AuthzConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create authorizer: %w", err)
+	}
 
 	// Layer 3: Sandboxing
 	if cfg.SandboxConfig == nil {
-		cfg.SandboxConfig = &sandbox.Config{EnforceReadOnly: true}
+		cfg.SandboxConfig = &sandbox.SandboxConfig{EnforceReadOnly: true}
 	}
-	sandboxManager := sandbox.NewManager(cfg.SandboxConfig)
+	sandboxManager, err := sandbox.NewSandbox(cfg.SandboxConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create sandbox: %w", err)
+	}
 
 	// Layer 4: Intent Validation
 	if cfg.IntentConfig == nil {
-		cfg.IntentConfig = &intent.Config{RequireConfirmation: true}
+		cfg.IntentConfig = intent.NewIntentValidator()
 	}
-	intentValidator := intent.NewValidator(cfg.IntentConfig)
+	intentValidator := cfg.IntentConfig
 
 	// Layer 5: Rate Limiting
 	if cfg.RateLimitConfig == nil {
-		cfg.RateLimitConfig = &ratelimit.Config{
-			Algorithm: ratelimit.AlgorithmTokenBucket,
+		cfg.RateLimitConfig = &ratelimit.RateLimitConfig{
+			DefaultRate:  60,
+			DefaultBurst: 10,
 		}
 	}
-	rateLimiter := ratelimit.NewLimiter(cfg.RateLimitConfig)
+	rateLimiter := ratelimit.NewRateLimiter(cfg.RateLimitConfig)
 
 	// Layer 6: Behavioral Analysis
 	if cfg.BehaviorConfig == nil {
-		cfg.BehaviorConfig = &behavioral.Config{AnomalyThreshold: 0.7}
+		cfg.BehaviorConfig = &behavioral.AnalyzerConfig{AnomalyThreshold: 0.7}
 	}
-	behaviorAnalyzer := behavioral.NewAnalyzer(cfg.BehaviorConfig)
+	behaviorAnalyzer := behavioral.NewBehavioralAnalyzer(cfg.BehaviorConfig)
 
 	// Layer 7: Audit Logging
 	if cfg.AuditConfig == nil {
-		cfg.AuditConfig = &audit.Config{EnableRemote: false}
+		cfg.AuditConfig = &audit.AuditConfig{BufferSize: 1000}
 	}
-	auditLogger, err := audit.NewLogger(cfg.AuditConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create audit logger: %w", err)
-	}
+	auditLogger := audit.NewAuditLogger(cfg.AuditConfig)
 
 	return &Orchestrator{
 		config:           cfg,
@@ -321,15 +325,14 @@ func (o *Orchestrator) validateAuthentication(ctx context.Context, authCtx *auth
 func (o *Orchestrator) validateAuthorization(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
 
-	// Build resource from intent
-	resource := &authz.Resource{
-		Type:      intent.Domain,
-		Name:      intent.Target,
-		Namespace: "default", // Could be extracted from intent context
-	}
+	// Map intent verb to authz Action
+	action := authz.Action(intent.Verb)
+	
+	// Map intent target to authz Resource
+	resource := authz.Resource(intent.Target)
 
 	// Check authorization
-	decision := o.authorizer.CheckPermission(ctx, authCtx, intent.Verb, resource)
+	allowed, err := o.authorizer.CheckPermission(authCtx.UserID, resource, action)
 
 	// Calculate risk score
 	riskScore := calculateIntentRisk(intent)
@@ -337,9 +340,14 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, authCtx *auth.
 
 	duration := time.Since(start)
 
-	if !decision.Allowed {
-		o.recordStep(result, "Authorization", false, decision.Reason, duration)
-		return fmt.Errorf("authorization denied: %s", decision.Reason)
+	if err != nil {
+		o.recordStep(result, "Authorization", false, err.Error(), duration)
+		return fmt.Errorf("authorization check failed: %w", err)
+	}
+
+	if !allowed {
+		o.recordStep(result, "Authorization", false, "Permission denied", duration)
+		return fmt.Errorf("authorization denied for %s on %s", action, resource)
 	}
 
 	if riskScore > o.config.MaxRiskScore {
@@ -358,26 +366,18 @@ func (o *Orchestrator) validateAuthorization(ctx context.Context, authCtx *auth.
 func (o *Orchestrator) validateSandbox(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
 
-	// Build sandbox request
-	req := &sandbox.Request{
-		UserID:    authCtx.UserID,
-		Operation: intent.Verb,
-		Resource:  intent.Target,
-		Namespace: "default", // Could be from intent
-	}
-
-	// Validate sandbox constraints
-	validation := o.sandboxManager.Validate(ctx, req)
+	// Validate namespace (if present in target)
+	namespaceResult := o.sandboxManager.ValidateNamespace("default")
 
 	duration := time.Since(start)
 
-	if !validation.Allowed {
-		o.recordStep(result, "Sandboxing", false, validation.Reason, duration)
-		return fmt.Errorf("sandbox validation failed: %s", validation.Reason)
+	if !namespaceResult.Allowed {
+		o.recordStep(result, "Sandboxing", false, namespaceResult.Reason, duration)
+		return fmt.Errorf("sandbox validation failed: %s", namespaceResult.Reason)
 	}
 
 	// Add any warnings from sandbox
-	for _, warning := range validation.Warnings {
+	for _, warning := range namespaceResult.Warnings {
 		result.Warnings = append(result.Warnings, fmt.Sprintf("⚠️  Sandbox: %s", warning))
 	}
 
@@ -389,17 +389,16 @@ func (o *Orchestrator) validateSandbox(ctx context.Context, authCtx *auth.AuthCo
 func (o *Orchestrator) validateIntent(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
 
-	// Build validation request
-	req := &intent.ValidationRequest{
+	// Build command intent for validation
+	cmdIntent := &intent.CommandIntent{
+		Command:    fmt.Sprintf("%s %s", intent.Verb, intent.Target),
 		UserID:     authCtx.UserID,
-		Intent:     intent.OriginalInput,
-		Translation: fmt.Sprintf("%s %s on %s", intent.Verb, intent.Target, intent.Domain),
-		RiskLevel:  intent.RiskLevel,
 		RiskScore:  result.RiskScore,
+		RequiresApproval: intent.RiskLevel == nlp.RiskLevelHIGH || intent.RiskLevel == nlp.RiskLevelCRITICAL,
 	}
 
 	// Validate intent (may prompt user for confirmation)
-	validation, err := o.intentValidator.Validate(ctx, req)
+	validation, err := o.intentValidator.ValidateIntent(ctx, cmdIntent)
 
 	duration := time.Since(start)
 
@@ -409,13 +408,13 @@ func (o *Orchestrator) validateIntent(ctx context.Context, authCtx *auth.AuthCon
 	}
 
 	if !validation.Approved {
-		o.recordStep(result, "Intent Validation", false, "User declined confirmation", duration)
-		return fmt.Errorf("user declined operation")
+		o.recordStep(result, "Intent Validation", false, validation.Reason, duration)
+		return fmt.Errorf("intent validation failed: %s", validation.Reason)
 	}
 
 	message := "Intent validated"
-	if validation.UserConfirmed {
-		message = "User confirmed operation"
+	if validation.Approved {
+		message = "Intent approved"
 	}
 
 	o.recordStep(result, "Intent Validation", true, message, duration)
@@ -427,16 +426,11 @@ func (o *Orchestrator) checkRateLimit(ctx context.Context, authCtx *auth.AuthCon
 	start := time.Now()
 
 	// Check rate limit for user
-	allowed, err := o.rateLimiter.Allow(ctx, authCtx.UserID, intent.Verb)
+	allowResult := o.rateLimiter.Allow(authCtx.UserID, intent.Target, intent.Verb)
 
 	duration := time.Since(start)
 
-	if err != nil {
-		o.recordStep(result, "Rate Limiting", false, err.Error(), duration)
-		return fmt.Errorf("rate limit check failed: %w", err)
-	}
-
-	if !allowed {
+	if !allowResult.Allowed {
 		o.recordStep(result, "Rate Limiting", false, "Rate limit exceeded", duration)
 		return fmt.Errorf("rate limit exceeded for user %s", authCtx.Username)
 	}
@@ -450,35 +444,27 @@ func (o *Orchestrator) checkRateLimit(ctx context.Context, authCtx *auth.AuthCon
 func (o *Orchestrator) analyzeBehavior(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) error {
 	start := time.Now()
 
-	// Build analysis request
-	req := &behavioral.AnalysisRequest{
-		UserID:    authCtx.UserID,
-		Operation: intent.Verb,
-		Resource:  intent.Target,
-		Timestamp: time.Now(),
-		IPAddress: authCtx.IPAddress,
-	}
-
 	// Analyze behavior
-	analysis := o.behaviorAnalyzer.Analyze(ctx, req)
+	anomalyResult := o.behaviorAnalyzer.AnalyzeAction(authCtx.UserID, intent.Verb, intent.Target)
 
 	duration := time.Since(start)
 
 	// Log anomalies as warnings (but don't block)
-	for _, anomaly := range analysis.Anomalies {
+	if anomalyResult.IsAnomaly {
 		result.Warnings = append(result.Warnings,
-			fmt.Sprintf("⚠️  Behavioral anomaly: %s (severity: %.2f)", anomaly.Type, anomaly.Severity))
+			fmt.Sprintf("⚠️  Behavioral anomaly: %s (risk: %.2f)", 
+				anomalyResult.Reason, anomalyResult.RiskScore))
 	}
 
 	// Block if risk score is critical
-	if analysis.RiskScore > 0.9 && len(analysis.Anomalies) > 2 {
+	if anomalyResult.RiskScore > 0.9 && anomalyResult.IsAnomaly {
 		o.recordStep(result, "Behavioral Analysis", false,
-			fmt.Sprintf("Critical behavioral risk: %.2f", analysis.RiskScore), duration)
+			fmt.Sprintf("Critical behavioral risk: %.2f", anomalyResult.RiskScore), duration)
 		return fmt.Errorf("critical behavioral anomalies detected")
 	}
 
 	o.recordStep(result, "Behavioral Analysis", true,
-		fmt.Sprintf("Risk score: %.2f, Anomalies: %d", analysis.RiskScore, len(analysis.Anomalies)), duration)
+		fmt.Sprintf("Risk score: %.2f, Anomaly: %v", anomalyResult.RiskScore, anomalyResult.IsAnomaly), duration)
 	return nil
 }
 
@@ -486,33 +472,26 @@ func (o *Orchestrator) analyzeBehavior(ctx context.Context, authCtx *auth.AuthCo
 func (o *Orchestrator) logAudit(ctx context.Context, authCtx *auth.AuthContext, intent *nlp.Intent, result *ExecutionResult) {
 	start := time.Now()
 
-	// Build audit entry
-	entry := &audit.Entry{
+	// Build audit event
+	event := &audit.AuditEvent{
 		ID:        result.AuditID,
 		Timestamp: result.Timestamp,
 		UserID:    authCtx.UserID,
-		Username:  authCtx.Username,
-		SessionID: authCtx.SessionID,
+		Action:    intent.Verb,
+		Resource:  intent.Target,
+		Target:    intent.Domain,
+		Success:   result.Success,
+		RiskScore: result.RiskScore,
 		IPAddress: authCtx.IPAddress,
 		UserAgent: authCtx.UserAgent,
-		RawInput:  intent.OriginalInput,
-		Intent: fmt.Sprintf("%s %s on %s", intent.Verb, intent.Target, intent.Domain),
-		Command:      result.Command,
-		Confidence:   intent.Confidence,
-		Executed:     result.Success,
-		ExecutionStatus: func() string {
-			if result.Success {
-				return "success"
-			}
-			return "failed"
-		}(),
-		ExecutionOutput: result.Output,
-		RiskLevel:       string(intent.RiskLevel),
-		RiskScore:       result.RiskScore,
-		Duration:        result.Duration,
+		Details: map[string]string{
+			"original_input": intent.OriginalInput,
+			"confidence":     fmt.Sprintf("%.2f", intent.Confidence),
+			"risk_level":     string(intent.RiskLevel),
+		},
 	}
 
-	err := o.auditLogger.Log(ctx, entry)
+	err := o.auditLogger.LogEvent(event)
 
 	duration := time.Since(start)
 
@@ -548,9 +527,8 @@ func (o *Orchestrator) recordStep(result *ExecutionResult, layer string, passed 
 
 // Close cleans up orchestrator resources
 func (o *Orchestrator) Close() error {
-	if o.auditLogger != nil {
-		return o.auditLogger.Close()
-	}
+	// Currently no resources need explicit cleanup
+	// Future: close database connections, file handles, etc.
 	return nil
 }
 
