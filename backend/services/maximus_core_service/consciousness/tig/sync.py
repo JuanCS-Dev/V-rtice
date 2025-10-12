@@ -360,11 +360,14 @@ class PTPSynchronizer:
 
             avg_jitter = np.mean(self.jitter_history) if self.jitter_history else jitter
 
-            # Calculate drift
+            # Calculate drift (rate of offset change over time)
             if self.last_sync_time > 0:
                 time_delta = (t2 / 1e9) - self.last_sync_time
-                if time_delta > 0:
-                    self.drift_ppm = (offset / 1e9) / time_delta * 1e6
+                if time_delta > 0.001:  # Only calculate if >1ms elapsed (avoid division artifacts)
+                    # Use filtered offset for more stable drift calculation
+                    self.drift_ppm = abs(filtered_offset / 1e9) / time_delta * 1e6
+                    # Cap drift_ppm to realistic bounds (even bad clocks < 100 ppm typically)
+                    self.drift_ppm = min(self.drift_ppm, 100.0)
 
             self.last_sync_time = t2 / 1e9
 
@@ -392,6 +395,10 @@ class PTPSynchronizer:
 
             return result
 
+        except asyncio.TimeoutError:
+            # Re-raise timeout errors (network partitions)
+            self.state = SyncState.FAULT
+            raise
         except Exception as e:
             self.state = SyncState.FAULT
             return SyncResult(success=False, message=f"Sync failed: {str(e)}")

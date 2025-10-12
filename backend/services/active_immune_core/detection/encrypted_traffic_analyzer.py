@@ -232,8 +232,8 @@ class FlowFeatureExtractor:
         Raises:
             ValueError: If flow has insufficient data
         """
-        if flow.packet_count < 2:
-            raise ValueError(f"Flow {flow.flow_id} has insufficient packets")
+        if flow.packet_count < 1:
+            raise ValueError(f"Flow {flow.flow_id} has no packets")
         
         # Basic features
         duration = flow.duration or 0.001  # Avoid division by zero
@@ -337,11 +337,20 @@ class FlowFeatureExtractor:
         
         Bursty traffic (high data in short time) may indicate exfiltration.
         """
-        if len(inter_arrival_times) < 2:
+        if len(inter_arrival_times) < 2 or len(packet_sizes) < 2:
+            return 0.0
+        
+        # Ensure arrays have compatible shapes by using min length
+        min_len = min(len(packet_sizes) - 1, len(inter_arrival_times) - 1)
+        if min_len < 1:
             return 0.0
         
         # Burstiness index: variance / mean ratio
-        bytes_per_interval = packet_sizes[:-1] / (inter_arrival_times + 0.001)
+        # Slice to ensure same shape (skip first element of both for sync)
+        sizes_slice = packet_sizes[1:min_len+1]
+        iats_slice = inter_arrival_times[1:min_len+1]
+        
+        bytes_per_interval = sizes_slice / (iats_slice + 0.001)
         
         mean_rate = np.mean(bytes_per_interval)
         var_rate = np.var(bytes_per_interval)
