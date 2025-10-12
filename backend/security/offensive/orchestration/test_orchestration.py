@@ -6,16 +6,20 @@ Validates attack chains, campaign management, and intelligence fusion.
 import pytest
 import asyncio
 from datetime import datetime, timedelta
-from backend.security.offensive.orchestration import (
+from .attack_chain import (
     AttackChain,
     AttackStage,
     StageType,
-    StageStatus,
+    StageStatus
+)
+from .campaign_manager import (
     CampaignManager,
     Campaign,
     CampaignTarget,
     CampaignStatus,
-    TargetPriority,
+    TargetPriority
+)
+from .intelligence_fusion import (
     IntelligenceFusion,
     IntelligenceSource,
     ThreatLevel
