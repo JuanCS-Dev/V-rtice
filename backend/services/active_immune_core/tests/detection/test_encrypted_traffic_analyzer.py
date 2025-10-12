@@ -114,9 +114,16 @@ class TestFlowFeatureExtractor:
 
         features = extractor.extract_features(flow)
 
-        assert isinstance(features, np.ndarray)
-        assert len(features) > 0
-        assert not np.isnan(features).any()  # No NaN values
+        # Should return FlowFeatures object
+        assert isinstance(features, FlowFeatures)
+        assert features.packet_count == 4
+        assert features.duration > 0
+        
+        # Convert to array for ML models
+        feature_array = features.to_array()
+        assert isinstance(feature_array, np.ndarray)
+        assert len(feature_array) > 0
+        assert not np.isnan(feature_array).any()  # No NaN values
 
     def test_extract_duration_feature(self):
         """Test duration feature extraction."""
