@@ -1,0 +1,107 @@
+# Data Exfiltration Block Playbook
+# Responds to suspected data exfiltration attempts
+
+id: data_exfiltration_block
+name: "Data Exfiltration Prevention"
+description: |
+  Immediate response to suspected data exfiltration.
+  Blocks traffic, collects evidence, and alerts team.
+
+trigger:
+  condition: "data_exfiltration_detected"
+  severity: "HIGH"
+  mitre_techniques:
+    - "T1048"  # Exfiltration Over Alternative Protocol
+    - "T1041"  # Exfiltration Over C2 Channel
+    - "T1567"  # Exfiltration Over Web Service
+
+max_parallel: 2  # Some actions can run in parallel
+rollback_on_failure: false
+
+actions:
+  # Parallel Group 1: Immediate blocking
+  - id: "block_destination_ip"
+    type: "block_ip"
+    hotl_required: false
+    timeout_seconds: 10
+    parameters:
+      source_ip: "{{event.payload.destination_ip}}"
+      direction: "outbound"
+      duration_seconds: 7200  # 2 hours
+      rule_priority: "high"
+
+  - id: "block_destination_domain"
+    type: "block_domain"
+    hotl_required: false
+    timeout_seconds: 10
+    parameters:
+      domain: "{{event.payload.destination_domain}}"
+      method: "dns_block"
+
+  # Step 2: Rate limit source
+  - id: "rate_limit_source_host"
+    type: "rate_limit"
+    hotl_required: false
+    timeout_seconds: 15
+    dependencies: ["block_destination_ip"]
+    parameters:
+      target: "{{event.source_ip}}"
+      rate: "1MB/minute"  # Drastically reduce bandwidth
+      duration_seconds: 3600
+
+  # Step 3: Collect evidence (HOTL required - privacy concerns)
+  - id: "collect_exfil_evidence"
+    type: "collect_forensics"
+    hotl_required: true
+    timeout_seconds: 60
+    dependencies: ["rate_limit_source_host"]
+    parameters:
+      target: "{{event.source_ip}}"
+      artifacts:
+        - "network_pcap"  # Packet capture
+        - "process_network_activity"
+        - "file_access_logs"
+        - "user_activity"
+      data_classification: "sensitive"
+      legal_hold: true
+
+  # Step 4: Alert with urgency
+  - id: "alert_data_protection_team"
+    type: "alert_soc"
+    hotl_required: false
+    timeout_seconds: 5
+    parameters:
+      severity: "HIGH"
+      message: |
+        ⚠️ Data Exfiltration Attempt BLOCKED
+        
+        Source: {{event.source_ip}}
+        Destination: {{event.payload.destination_ip}} ({{event.payload.destination_domain}})
+        Data Volume: {{event.payload.bytes_transferred}}
+        Protocol: {{event.payload.protocol}}
+        
+        Actions:
+        ✅ Destination blocked
+        ✅ Source rate limited
+        ⏳ Evidence collection pending HOTL (privacy)
+        
+        INVESTIGATE IMMEDIATELY - POTENTIAL DATA BREACH
+      channels:
+        - "slack_soc"
+        - "email_dpo"  # Data Protection Officer
+        - "pagerduty_high"
+
+metadata:
+  author: "MAXIMUS Team"
+  version: "1.0.0"
+  created_at: "2025-10-12"
+  compliance_note: |
+    Evidence collection requires HOTL due to:
+    - GDPR Article 32 (security of processing)
+    - Privacy implications of packet capture
+    - Potential PII in network traffic
+  mitre_defenses:
+    - "M1057"  # Data Loss Prevention
+    - "M1031"  # Network Intrusion Prevention
+    - "M1037"  # Filter Network Traffic
+  biological_analogy: "Plugging leak in containment (like platelet plug)"

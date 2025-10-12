@@ -6,7 +6,7 @@ PRODUCTION-READY - Comprehensive edge cases.
 """
 
 import pytest
-from backend.services.wargaming_crisol.ml.feature_extractor import (
+from ml.feature_extractor import (
     PatchFeatures,
     PatchFeatureExtractor,
 )

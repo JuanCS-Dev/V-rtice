@@ -1,0 +1,111 @@
+# Brute Force Response Playbook
+# Responds to SSH/RDP brute force attacks
+
+id: brute_force_response
+name: "Brute Force Attack Response"
+description: |
+  Automated response to brute force authentication attempts.
+  Blocks attacker IP, deploys honeypot for TTP collection,
+  and alerts SOC team.
+
+trigger:
+  condition: "brute_force_detected"
+  severity: "HIGH"
+  mitre_techniques:
+    - "T1110"  # Brute Force
+    - "T1110.001"  # Password Guessing
+    - "T1110.003"  # Password Spraying
+
+max_parallel: 0  # Sequential execution
+rollback_on_failure: false  # Continue even if some actions fail
+
+actions:
+  # Step 1: Immediate blocking (no HOTL required - HIGH severity)
+  - id: "block_attacker_ip"
+    type: "block_ip"
+    hotl_required: false
+    timeout_seconds: 10
+    retry_attempts: 3
+    parameters:
+      source_ip: "{{event.source_ip}}"
+      duration_seconds: 3600  # 1 hour block
+      rule_name: "auto_block_brute_force"
+    rollback_action:
+      type: "unblock_ip"
+      parameters:
+        source_ip: "{{event.source_ip}}"
+
+  # Step 2: Rate limit target service
+  - id: "rate_limit_service"
+    type: "rate_limit"
+    hotl_required: false
+    timeout_seconds: 15
+    dependencies: ["block_attacker_ip"]
+    parameters:
+      target: "{{event.target_ip}}"
+      port: "{{event.port}}"
+      rate: "5/minute"
+      duration_seconds: 3600
+
+  # Step 3: Deploy honeypot (requires HOTL - resource intensive)
+  - id: "deploy_ssh_honeypot"
+    type: "deploy_honeypot"
+    hotl_required: true
+    timeout_seconds: 60
+    dependencies: ["block_attacker_ip"]
+    parameters:
+      honeypot_type: "ssh"
+      fake_credentials:
+        - username: "admin"
+          password: "Admin123!"
+        - username: "root"
+          password: "root"
+      log_all_commands: true
+      network: "honeypot_dmz"
+
+  # Step 4: Collect forensics
+  - id: "collect_target_logs"
+    type: "collect_forensics"
+    hotl_required: false
+    timeout_seconds: 30
+    dependencies: ["rate_limit_service"]
+    parameters:
+      target: "{{event.target_ip}}"
+      artifacts:
+        - "auth_logs"
+        - "network_connections"
+        - "failed_login_attempts"
+      retention_days: 90
+
+  # Step 5: Alert SOC
+  - id: "alert_soc_team"
+    type: "alert_soc"
+    hotl_required: false
+    timeout_seconds: 5
+    parameters:
+      severity: "HIGH"
+      message: |
+        🚨 Brute Force Attack Detected & Blocked
+        
+        Source IP: {{event.source_ip}}
+        Target: {{event.target_ip}}:{{event.port}}
+        Failed Attempts: {{event.payload.attempts}}
+        
+        Actions Taken:
+        ✅ IP blocked for 1 hour
+        ✅ Service rate limited
+        ⏳ Honeypot deployment pending HOTL approval
+        ✅ Forensics collected
+      channels:
+        - "slack_soc"
+        - "email_oncall"
+
+metadata:
+  author: "MAXIMUS Team"
+  version: "1.0.0"
+  created_at: "2025-10-12"
+  last_updated: "2025-10-12"
+  mitre_defenses:
+    - "M1036"  # Account Use Policies
+    - "M1032"  # Multi-factor Authentication
+  biological_analogy: "Innate immune rapid response to pathogen"

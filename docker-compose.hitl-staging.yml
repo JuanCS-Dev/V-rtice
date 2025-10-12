@@ -175,7 +175,7 @@ services:
     container_name: hitl-nginx-staging
     restart: unless-stopped
     ports:
-      - "8081:80"  # Changed to 8081 to avoid conflict
+      - "8085:80"  # Changed to 8085 to avoid all conflicts
     volumes:
       - ./deployment/docker-staging/nginx-staging.conf:/etc/nginx/nginx.conf:ro
     networks:

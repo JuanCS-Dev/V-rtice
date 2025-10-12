@@ -7,11 +7,11 @@ Tests model loading, prediction, and integration.
 import pytest
 from pathlib import Path
 
-from backend.services.wargaming_crisol.ml.predictor import (
+from ml.predictor import (
     PatchValidityPredictor,
     get_predictor,
 )
-from backend.services.wargaming_crisol.ml.feature_extractor import (
+from ml.feature_extractor import (
     PatchFeatureExtractor,
 )
 

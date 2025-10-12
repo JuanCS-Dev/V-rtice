@@ -1,0 +1,127 @@
+# Lateral Movement Isolation Playbook
+# Responds to lateral movement attempts within network
+
+id: lateral_movement_isolation
+name: "Lateral Movement Containment"
+description: |
+  Isolates compromised hosts attempting lateral movement.
+  Prevents spread while collecting intelligence.
+
+trigger:
+  condition: "lateral_movement_detected"
+  severity: "HIGH"
+  mitre_techniques:
+    - "T1021"  # Remote Services
+    - "T1570"  # Lateral Tool Transfer
+    - "T1563"  # Remote Service Session Hijacking
+
+max_parallel: 0
+rollback_on_failure: true
+
+actions:
+  # Step 1: Isolate both source and destination
+  - id: "isolate_source_host"
+    type: "isolate_host"
+    hotl_required: false
+    timeout_seconds: 15
+    parameters:
+      host_ip: "{{event.source_ip}}"
+      isolation_level: "partial"  # Allow investigation access
+      allow_management: true
+
+  - id: "isolate_target_host"
+    type: "isolate_host"
+    hotl_required: false
+    timeout_seconds: 15
+    parameters:
+      host_ip: "{{event.target_ip}}"
+      isolation_level: "partial"
+      allow_management: true
+
+  # Step 2: Block credential reuse
+  - id: "revoke_compromised_credentials"
+    type: "execute_script"
+    hotl_required: true  # Impacts user access
+    timeout_seconds: 30
+    dependencies: ["isolate_source_host"]
+    parameters:
+      script: "revoke_user_sessions.sh"
+      args:
+        - "--user={{event.payload.username}}"
+        - "--force-logout"
+      target_host: "identity_server"
+
+  # Step 3: Scan for indicators
+  - id: "scan_zone_for_compromise"
+    type: "execute_script"
+    hotl_required: false
+    timeout_seconds: 120
+    dependencies: ["isolate_target_host"]
+    parameters:
+      script: "ioc_scan.sh"
+      args:
+        - "--zone={{event.payload.network_zone}}"
+        - "--iocs={{event.payload.iocs}}"
+        - "--depth=full"
+
+  # Step 4: Deploy additional monitoring
+  - id: "increase_zone_monitoring"
+    type: "execute_script"
+    hotl_required: false
+    timeout_seconds: 30
+    dependencies: ["scan_zone_for_compromise"]
+    parameters:
+      script: "deploy_sensors.sh"
+      args:
+        - "--zone={{event.payload.network_zone}}"
+        - "--sensor-type=network,endpoint"
+        - "--alert-threshold=low"
+
+  # Step 5: Trigger cascade if spread detected
+  - id: "trigger_cascade_if_spread"
+    type: "trigger_cascade"
+    hotl_required: true
+    timeout_seconds: 30
+    dependencies: ["scan_zone_for_compromise"]
+    parameters:
+      zone: "{{event.payload.network_zone}}"
+      strength: "moderate"
+      condition: "{{scan_results.compromised_hosts > 1}}"
+
+  # Step 6: Alert with context
+  - id: "alert_lateral_movement"
+    type: "alert_soc"
+    hotl_required: false
+    timeout_seconds: 5
+    parameters:
+      severity: "HIGH"
+      message: |
+        🚨 Lateral Movement Detected & Contained
+        
+        Attack Path: {{event.source_ip}} → {{event.target_ip}}
+        Method: {{event.payload.method}}
+        Credentials: {{event.payload.username}}
+        Zone: {{event.payload.network_zone}}
+        
+        Containment:
+        ✅ Both hosts isolated
+        ⏳ Credentials revoked (pending HOTL)
+        ✅ Zone scan initiated
+        ✅ Additional monitoring deployed
+        
+        ACTIVE BREACH - Assess scope immediately
+      channels:
+        - "slack_soc"
+        - "pagerduty_high"
+
+metadata:
+  author: "MAXIMUS Team"
+  version: "1.0.0"
+  created_at: "2025-10-12"
+  attack_kill_chain: "Actions on Objectives (lateral movement phase)"
+  mitre_defenses:
+    - "M1030"  # Network Segmentation
+    - "M1032"  # Multi-factor Authentication
+    - "M1026"  # Privileged Account Management
+    - "M1035"  # Limit Access to Resource Over Network
+  biological_analogy: "Quarantine infected cells to prevent spread"
