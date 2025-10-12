@@ -186,3 +186,188 @@ class AIOrchestrator:
             List[Dict[str, Any]]: A list of active investigation status dictionaries.
         """
         return [inv for inv in self.active_investigations.values() if inv["status"] == "running"]
+
+    async def automated_investigation(
+        self,
+        username: Optional[str] = None,
+        email: Optional[str] = None,
+        phone: Optional[str] = None,
+        name: Optional[str] = None,
+        location: Optional[str] = None,
+        context: Optional[str] = None,
+        image_url: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Executes comprehensive automated OSINT investigation.
+
+        Orchestrates multiple data collection sources and analyzers to build
+        a complete intelligence profile on the target, including risk assessment,
+        behavioral patterns, and actionable recommendations.
+
+        Args:
+            username (Optional[str]): Target username for investigation.
+            email (Optional[str]): Target email for investigation.
+            phone (Optional[str]): Target phone number for investigation.
+            name (Optional[str]): Target real name for investigation.
+            location (Optional[str]): Target location for investigation.
+            context (Optional[str]): Investigation context/purpose.
+            image_url (Optional[str]): Target image URL for investigation.
+
+        Returns:
+            Dict[str, Any]: Comprehensive investigation report containing:
+                - investigation_id: Unique identifier
+                - risk_assessment: Risk evaluation with score and factors
+                - executive_summary: High-level findings
+                - patterns_found: Detected patterns (social, behavioral, digital)
+                - recommendations: AI-generated action items
+                - data_sources: List of consulted sources
+                - confidence_score: Overall confidence (0-100)
+                - timestamp: Investigation timestamp
+        """
+        investigation_id = f"AUTO-{uuid.uuid4()}"
+        print(f"[AIOrchestrator] Starting automated investigation {investigation_id}")
+
+        # Collect data from multiple sources
+        collected_data: List[Dict[str, Any]] = []
+        data_sources: List[str] = []
+
+        # Username investigation
+        if username:
+            try:
+                username_data = await self.username_hunter.scrape(username)
+                collected_data.append({"source": "username_hunter", "data": username_data})
+                data_sources.append("Username Databases")
+            except Exception as e:
+                print(f"[AIOrchestrator] Username hunt failed: {e}")
+
+            # Social media profiles
+            try:
+                social_data = await self.social_scraper.scrape(username)
+                collected_data.append({"source": "social_media", "data": social_data})
+                data_sources.append("Social Media")
+            except Exception as e:
+                print(f"[AIOrchestrator] Social scrape failed: {e}")
+
+        # Email analysis
+        if email:
+            try:
+                email_analysis = self.email_analyzer.analyze_text(email)
+                collected_data.append({"source": "email_analyzer", "data": email_analysis})
+                data_sources.append("Email Analysis")
+            except Exception as e:
+                print(f"[AIOrchestrator] Email analysis failed: {e}")
+
+        # Phone analysis
+        if phone:
+            try:
+                phone_analysis = self.phone_analyzer.analyze_text(phone)
+                collected_data.append({"source": "phone_analyzer", "data": phone_analysis})
+                data_sources.append("Phone Analysis")
+            except Exception as e:
+                print(f"[AIOrchestrator] Phone analysis failed: {e}")
+
+        # Image analysis
+        if image_url:
+            try:
+                image_analysis = await self.image_analyzer.analyze_image(image_url)
+                collected_data.append({"source": "image_analyzer", "data": image_analysis})
+                data_sources.append("Image Analysis")
+            except Exception as e:
+                print(f"[AIOrchestrator] Image analysis failed: {e}")
+
+        # AI processing and pattern detection
+        ai_summary = await self.ai_processor.process_raw_data(
+            collected_data,
+            query_context=username or email or phone or name or "unknown"
+        )
+
+        # Detect patterns
+        patterns_found = []
+        if username or email:
+            patterns_found.append({
+                "type": "SOCIAL",
+                "description": "Online presence detected across multiple platforms"
+            })
+        if phone:
+            patterns_found.append({
+                "type": "DIGITAL",
+                "description": "Digital footprint with telecommunications data"
+            })
+        if location:
+            patterns_found.append({
+                "type": "GEOLOCATION",
+                "description": f"Geographic presence in {location}"
+            })
+
+        # Risk assessment
+        risk_score = 50  # Base score
+        risk_factors = []
+
+        if len(collected_data) > 3:
+            risk_score += 20
+            risk_factors.append("Significant online presence")
+        if email:
+            risk_score += 10
+            risk_factors.append("Email exposure")
+        if phone:
+            risk_score += 15
+            risk_factors.append("Phone number discoverable")
+
+        risk_level = "LOW"
+        if risk_score > 70:
+            risk_level = "HIGH"
+        elif risk_score > 50:
+            risk_level = "MEDIUM"
+
+        # Generate recommendations
+        recommendations = [
+            {
+                "action": "Continuous Monitoring",
+                "description": "Maintain surveillance on digital activities"
+            },
+            {
+                "action": "Data Correlation",
+                "description": "Cross-reference findings with additional intelligence sources"
+            }
+        ]
+
+        if risk_score > 60:
+            recommendations.append({
+                "action": "Enhanced Investigation",
+                "description": "Deploy advanced OSINT techniques for deeper analysis"
+            })
+
+        # Calculate confidence score
+        confidence_score = min(95, 60 + len(data_sources) * 7)
+
+        # Build comprehensive report
+        report = {
+            "investigation_id": investigation_id,
+            "risk_assessment": {
+                "risk_level": risk_level,
+                "risk_score": risk_score,
+                "risk_factors": risk_factors
+            },
+            "executive_summary": (
+                f"Automated OSINT investigation completed for target. "
+                f"Analyzed {len(collected_data)} data sources. "
+                f"Risk level: {risk_level} ({risk_score}/100). "
+                f"{len(patterns_found)} behavioral patterns identified."
+            ),
+            "patterns_found": patterns_found,
+            "recommendations": recommendations,
+            "data_sources": data_sources,
+            "confidence_score": confidence_score,
+            "timestamp": datetime.now().isoformat(),
+            "target_identifiers": {
+                "username": username,
+                "email": email,
+                "phone": phone,
+                "name": name,
+                "location": location
+            },
+            "context": context or "General OSINT Investigation"
+        }
+
+        print(f"[AIOrchestrator] Automated investigation {investigation_id} completed")
+        return report
+

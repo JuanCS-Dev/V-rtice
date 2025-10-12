@@ -93,7 +93,7 @@ func DefaultConfig() Config {
 		AuthConfig:      nil, // Must be provided
 		AuthzConfig:     &authz.AuthorizerConfig{EnableRBAC: true, EnablePolicies: true, DenyByDefault: true},
 		SandboxConfig:   &sandbox.SandboxConfig{ForbiddenNamespaces: []string{"kube-system"}, Timeout: 60 * time.Second},
-		IntentConfig:    nil, // Created in NewOrchestrator
+		IntentConfig:    intentpkg.NewIntentValidator(),
 		RateLimitConfig: &ratelimit.RateLimitConfig{RequestsPerMinute: 60, BurstSize: 10, PerUser: true},
 		BehaviorConfig:  &behavioral.AnalyzerConfig{AnomalyThreshold: 0.7, TrackActions: true, TrackResources: true},
 		AuditConfig:     &audit.AuditConfig{MaxEvents: 1000, TamperProof: true},

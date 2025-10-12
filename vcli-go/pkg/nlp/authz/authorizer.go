@@ -134,22 +134,35 @@ func (a *Authorizer) CheckPermission(userID string, resource Resource, action Ac
 		return false, errors.New("userID is required")
 	}
 
+	if a.rbac == nil {
+		return false, errors.New("RBAC engine not initialized")
+	}
+
 	allowed, _ := a.rbac.CheckPermission(userID, resource, action, "")
 	return allowed, nil
 }
 
 // AssignRole assigns a role to a user.
 func (a *Authorizer) AssignRole(userID string, role Role) error {
+	if a.rbac == nil {
+		return errors.New("RBAC engine not initialized")
+	}
 	return a.rbac.AssignRole(userID, role)
 }
 
 // RevokeRole removes a role from a user.
 func (a *Authorizer) RevokeRole(userID string, role Role) error {
+	if a.rbac == nil {
+		return errors.New("RBAC engine not initialized")
+	}
 	return a.rbac.RevokeRole(userID, role)
 }
 
 // GetUserRoles returns all roles for a user.
 func (a *Authorizer) GetUserRoles(userID string) []Role {
+	if a.rbac == nil {
+		return []Role{}
+	}
 	return a.rbac.GetUserRoles(userID)
 }
 
