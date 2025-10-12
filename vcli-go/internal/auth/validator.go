@@ -23,9 +23,6 @@ import (
 )
 
 var (
-	// ErrInvalidToken is returned when JWT token is invalid
-	ErrInvalidToken = errors.New("invalid authentication token")
-	
 	// ErrExpiredToken is returned when JWT token is expired
 	ErrExpiredToken = errors.New("authentication token expired")
 	
