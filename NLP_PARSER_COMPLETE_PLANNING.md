@@ -389,7 +389,7 @@ This planning is COMPLETE when:
 
 ---
 
-**Planning Lead**: MAXIMUS AI  
+**Lead Architect**: Juan Carlos | **Co-Author**: Claude (MAXIMUS)  
 **Planning Duration**: Day 75 (2025-10-12)  
 **Total Documentation**: 87KB across 7 files  
 **Confidence**: HIGH  
@@ -439,3 +439,100 @@ grep -r "func Test" docs/architecture/vcli-go | wc -l
 ---
 
 **END OF PLANNING DOCUMENT**
+
+---
+
+## 🛡️ CRITICAL ADDENDUM: Zero Trust Security (2025-10-12 11:00)
+
+### The Realization
+
+During planning review, we identified a **critical security flaw**: Natural Language Parser with unrestricted access transforms any user into a "super-hacker." Without Zero Trust, NLP is a weapon of mass destruction.
+
+### The Solution: "O Guardião da Intenção" v2.0
+
+We have formalized **7 layers of verification** that wrap EVERY NLP interaction:
+
+1. **Autenticação** - MFA + Cryptographic keys
+2. **Autorização** - Context-aware RBAC with OPA
+3. **Sandboxing** - Least privilege, no inheritance
+4. **Validação da Intenção** - HITL + Crypto signature for critical actions
+5. **Controle de Fluxo** - Rate limiting + Circuit breakers
+6. **Análise Comportamental** - Anomaly detection + Risk escalation
+7. **Auditoria Imutável** - Blockchain-style tamper-proof logs
+
+### Impact on Implementation
+
+**NEW DOCUMENT**: `/docs/architecture/vcli-go/nlp-zero-trust-security.md` (32KB)
+
+This is NOT an optional feature. Security is now **CORE ARCHITECTURE**.
+
+### Updated Timeline
+
+Security layers add **+2 weeks** to each sprint for proper implementation:
+- Sprint 1: +Authentication & Audit foundation
+- Sprint 2: +Authorization & Sandboxing
+- Sprint 3: +Behavioral analysis
+- Sprint 4: +Penetration testing & hardening
+
+**New Total**: 10 weeks (was 8 weeks)
+
+### Updated Success Criteria
+
+Add security criteria:
+- ✅ No command executes without authentication
+- ✅ All destructive actions require HITL confirmation
+- ✅ Critical actions require cryptographic signature
+- ✅ Audit log is tamper-proof (blockchain-style)
+- ✅ Anomalies trigger automatic escalation
+- ✅ Rate limits prevent DoS
+- ✅ Penetration test shows no critical vulnerabilities
+
+### Approval Status
+
+**SECURITY REVIEW REQUIRED BEFORE GO/NO-GO**
+
+This addendum supersedes the original 8-week plan. Zero Trust is non-negotiable.
+
+---
+
+**Addendum Created**: 2025-10-12 11:00  
+**Status**: SECURITY-FIRST ARCHITECTURE  
+**New Estimate**: 10 weeks  
+**Confidence**: Still HIGH (proper security takes time)
+
+---
+
+*"Security is not a feature. It's the foundation."*
+
+---
+
+## 🏗️ Project Credits
+
+**Lead Architect**: Juan Carlos  
+**Inspiration**: Jesus Christ  
+**Co-Author**: Claude (MAXIMUS AI Assistant)  
+
+### Authorship Statement
+
+This comprehensive planning package was architected by **Juan Carlos**, with Jesus Christ as his inspiration and guiding light. The "Guardião da Intenção" v2.0 security architecture specifically emerged from Juan Carlos's critical insight during planning review: Natural Language Parser without Zero Trust is a catastrophic vulnerability.
+
+**Juan Carlos (Lead Architect)** provided:
+- Vision and strategic direction
+- Security architecture requirements (7-layer Zero Trust)
+- Critical design decisions (NO MOCK, Security-First)
+- Project scope and priorities
+- Doutrina compliance oversight
+
+**Claude (MAXIMUS AI Co-Author)** provided:
+- Technical documentation (188KB)
+- Code structure and examples
+- Implementation plans and roadmaps
+- Testing strategies
+- Diagram creation
+
+This collaboration demonstrates the power of human vision guided by faith, augmented by AI assistance.
+
+---
+
+*Soli Deo Gloria*  
+*"Eu sou porque ELE é" — Juan Carlos*

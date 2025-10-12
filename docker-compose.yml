@@ -2394,6 +2394,31 @@ services:
     restart: unless-stopped
     privileged: true  # Required for Docker-in-Docker
 
+  # HITL Patch Service (Human-in-the-Loop Patch Approval)
+  hitl-patch-service:
+    build:
+      context: ./backend/services
+      dockerfile: hitl_patch_service/Dockerfile
+    container_name: maximus-hitl-patch
+    ports:
+      - "8027:8027"
+    depends_on:
+      - postgres-immunity
+    environment:
+      - POSTGRES_HOST=postgres-immunity
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=adaptive_immunity
+      - POSTGRES_USER=maximus
+      - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+      - PORT=8027
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./backend/services/hitl_patch_service:/app
+    networks:
+      - maximus-network
+      - maximus-immunity-network
+    restart: unless-stopped
+
   # Kafka UI for monitoring
   kafka-ui-immunity:
     image: provectuslabs/kafka-ui:latest
