@@ -294,12 +294,19 @@ async def health_check():
     # Check if forensic directory is accessible
     forensic_accessible = FORENSIC_CAPTURE_PATH.exists()
     
+    # Check if dependencies are initialized
+    dependencies_ready = bool(parsers and ttp_mapper)
+    
+    status = "healthy" if (forensic_accessible and dependencies_ready) else "degraded"
+    
     return {
-        "status": "healthy" if forensic_accessible else "degraded",
+        "status": status,
         "service": "reactive_fabric_analysis",
         "timestamp": datetime.utcnow().isoformat(),
         "version": "1.0.0",
-        "forensic_path_accessible": forensic_accessible
+        "forensic_path_accessible": forensic_accessible,
+        "parsers_initialized": len(parsers) if parsers else 0,
+        "ttp_mapper_initialized": bool(ttp_mapper)
     }
 
 
@@ -311,26 +318,42 @@ async def root():
         "status": "operational",
         "polling_interval": f"{POLLING_INTERVAL}s",
         "forensic_path": str(FORENSIC_CAPTURE_PATH),
+        "core_service_url": CORE_SERVICE_URL,
         "documentation": "/docs"
     }
 
 
-@app.get("/api/v1/status")
+@app.get("/api/v1/status", response_model=AnalysisStatus)
 async def get_status():
     """
     Get analysis service status and statistics.
     
-    Sprint 1 TODO:
-    - Return number of captures processed
-    - Return number of TTPs extracted
-    - Return last processing time
+    Returns processing metrics for today.
     """
+    return AnalysisStatus(
+        status="operational",
+        captures_processed_today=metrics["captures_processed_today"],
+        ttps_extracted_today=metrics["ttps_extracted_today"],
+        attacks_created_today=metrics["attacks_created_today"],
+        last_processing=metrics["last_processing"],
+        polling_interval_seconds=POLLING_INTERVAL
+    )
+
+
+@app.get("/api/v1/techniques")
+async def list_techniques():
+    """
+    List all MITRE ATT&CK techniques this service can identify.
+    
+    Returns:
+        List of techniques with IDs, names, and tactics
+    """
+    if not ttp_mapper:
+        raise HTTPException(status_code=503, detail="TTP Mapper not initialized")
+    
     return {
-        "status": "operational",
-        "captures_processed_today": 0,
-        "ttps_extracted_today": 0,
-        "last_processing": None,
-        "polling_interval_seconds": POLLING_INTERVAL
+        "techniques": ttp_mapper.get_all_techniques(),
+        "total": len(ttp_mapper.TTP_PATTERNS)
     }
 
 
