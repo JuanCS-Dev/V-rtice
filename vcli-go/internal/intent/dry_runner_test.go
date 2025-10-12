@@ -111,14 +111,14 @@ func TestDryRunner_CountResources(t *testing.T) {
 		{
 			name: "--all flag",
 			cmd: &nlp.Command{
-				Flags: map[string]string{"--all"},
+				Flags: map[string]string{"--all": ""},
 			},
 			expected: 10,
 		},
 		{
 			name: "label selector",
 			cmd: &nlp.Command{
-				Flags: map[string]string{"-l", "app=web"},
+				Flags: map[string]string{"-l": "app=web"},
 			},
 			expected: 5,
 		},
@@ -150,21 +150,21 @@ func TestDryRunner_ExtractNamespaces(t *testing.T) {
 		{
 			name: "explicit namespace",
 			cmd: &nlp.Command{
-				Flags: map[string]string{"-n", "kafka"},
+				Flags: map[string]string{"-n": "kafka"},
 			},
 			expected: []string{"kafka"},
 		},
 		{
 			name: "all namespaces",
 			cmd: &nlp.Command{
-				Flags: map[string]string{"--all-namespaces"},
+				Flags: map[string]string{"--all-namespaces": ""},
 			},
 			expected: []string{"ALL"},
 		},
 		{
 			name: "all namespaces short flag",
 			cmd: &nlp.Command{
-				Flags: map[string]string{"-A"},
+				Flags: map[string]string{"-A": ""},
 			},
 			expected: []string{"ALL"},
 		},
@@ -270,7 +270,7 @@ func TestDryRunner_CalculateRisk(t *testing.T) {
 			name: "delete in production",
 			cmd: &nlp.Command{
 				Path:  []string{"kubectl", "delete", "deployment"},
-				Flags: map[string]string{"-n", "production"},
+				Flags: map[string]string{"-n": "production"},
 			},
 			resourceCount: 1,
 			minRisk:       0.9,
@@ -372,7 +372,7 @@ func TestDryRunner_ExtractResource(t *testing.T) {
 			name: "resource in flags",
 			cmd: &nlp.Command{
 				Path:  []string{"kubectl", "get"},
-				Flags: map[string]string{"--resource", "deployments"},
+				Flags: map[string]string{"--resource": "deployments"},
 			},
 			expected: "deployments",
 		},

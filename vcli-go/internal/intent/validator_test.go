@@ -4,7 +4,6 @@ package intent
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -160,7 +159,7 @@ func TestValidator_Validate_CriticalRisk_RequiresSignature(t *testing.T) {
 	cmd := &nlp.Command{
 		Path:  []string{"kubectl", "delete", "namespace"},
 		Args:  []string{"production"},
-		Flags: map[string]string{"--force"},
+		Flags: map[string]string{"--force": ""},
 	}
 
 	intent := &nlp.Intent{
@@ -220,7 +219,7 @@ func TestReverseTranslator_Translate(t *testing.T) {
 			name: "simple get pods",
 			cmd: &nlp.Command{
 				Path:  []string{"kubectl", "get", "pods"},
-				Flags: map[string]string{"-n", "default"},
+				Flags: map[string]string{"-n": "default"},
 			},
 			shouldContain: []string{"listar", "pods"},
 		},
@@ -229,7 +228,7 @@ func TestReverseTranslator_Translate(t *testing.T) {
 			cmd: &nlp.Command{
 				Path:  []string{"kubectl", "delete", "pod"},
 				Args:  []string{"kafka-0"},
-				Flags: map[string]string{"-n", "kafka"},
+				Flags: map[string]string{"-n": "kafka"},
 			},
 			shouldContain: []string{"deletar", "pod", "kafka"},
 		},
@@ -238,7 +237,7 @@ func TestReverseTranslator_Translate(t *testing.T) {
 			cmd: &nlp.Command{
 				Path:  []string{"kubectl", "scale", "deployment"},
 				Args:  []string{"webapp"},
-				Flags: map[string]string{"--replicas", "5"},
+				Flags: map[string]string{"--replicas": "5"},
 			},
 			shouldContain: []string{"escalar", "deployment"},
 		},

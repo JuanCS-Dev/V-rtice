@@ -183,6 +183,11 @@ func (dr *DryRunner) isReversible(cmd *nlp.Command) bool {
 		return true
 	}
 
+	// Read operations are effectively reversible (no changes made)
+	if verb == "get" || verb == "list" || verb == "describe" || verb == "logs" {
+		return true
+	}
+
 	// Default to not reversible (be conservative)
 	return false
 }
