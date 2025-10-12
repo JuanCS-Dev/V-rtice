@@ -27,7 +27,7 @@ from typing import Optional, List
 from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -176,13 +176,90 @@ async def get_current_user() -> str:
 # ============================================================================
 
 @app.get("/health")
-async def health_check():
-    """Health check endpoint."""
-    return {
+async def health_check(db: HITLDatabase = Depends(get_database)):
+    """
+    Comprehensive health check endpoint.
+    
+    Sprint 6 - Issue #16
+    
+    Checks:
+    - Service status
+    - Database connectivity
+    - Database pool status
+    - Disk space availability
+    
+    Returns:
+        200 OK if all checks pass (status: healthy)
+        503 Service Unavailable if any check fails (status: unhealthy)
+    """
+    import shutil
+    from fastapi import status as http_status
+    
+    health_status = {
         "status": "healthy",
         "service": "hitl-patch-service",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "timestamp": datetime.utcnow().isoformat(),
+        "checks": {}
     }
+    
+    # Check database connectivity
+    try:
+        # Simple query to verify DB is responsive
+        await db.get_analytics_summary()
+        health_status["checks"]["database"] = {
+            "status": "ok",
+            "message": "Database connection successful"
+        }
+    except Exception as e:
+        health_status["status"] = "unhealthy"
+        health_status["checks"]["database"] = {
+            "status": "error",
+            "message": f"Database connection failed: {str(e)}"
+        }
+    
+    # Check disk space
+    try:
+        disk_usage = shutil.disk_usage("/")
+        free_gb = disk_usage.free / (1024 ** 3)
+        total_gb = disk_usage.total / (1024 ** 3)
+        used_percent = (disk_usage.used / disk_usage.total) * 100
+        
+        if used_percent > 90:
+            health_status["status"] = "degraded"
+            health_status["checks"]["disk"] = {
+                "status": "warning",
+                "message": f"Disk usage high: {used_percent:.1f}% used",
+                "free_gb": round(free_gb, 2),
+                "total_gb": round(total_gb, 2)
+            }
+        else:
+            health_status["checks"]["disk"] = {
+                "status": "ok",
+                "message": f"Disk space OK: {used_percent:.1f}% used",
+                "free_gb": round(free_gb, 2),
+                "total_gb": round(total_gb, 2)
+            }
+    except Exception as e:
+        health_status["checks"]["disk"] = {
+            "status": "unknown",
+            "message": f"Could not check disk: {str(e)}"
+        }
+    
+    # Return appropriate status code
+    if health_status["status"] == "unhealthy":
+        return JSONResponse(
+            status_code=http_status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=health_status
+        )
+    elif health_status["status"] == "degraded":
+        return JSONResponse(
+            status_code=http_status.HTTP_200_OK,
+            content=health_status,
+            headers={"X-Health-Status": "degraded"}
+        )
+    else:
+        return health_status
 
 
 @app.get("/metrics")

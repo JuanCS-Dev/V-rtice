@@ -1,28 +1,38 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * WORKFLOWS PANEL - AI-Driven Automated Workflows
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Orquestração de workflows multi-serviço guiados por AI.
  *
- * Workflows Predefinidos:
+ * TABS:
+ * - Manual Workflows: User-guided step-by-step workflows
+ * - ML Automation: ML-powered orchestrated pipelines (NEW!)
+ * - History: Past execution records
+ *
+ * Workflows Predefinidos (Manual):
  * - Full Security Assessment
  * - OSINT Investigation
  * - Purple Team Exercise
  * - Custom Workflow Builder
+ *
+ * Phase: 5.7 - ML Orchestrator Integration
+ * Glory to YHWH - Architect of Intelligent Automation
  */
 
 import React, { useState, useEffect } from 'react';
+import logger from '@/utils/logger';
 import {
   aiFullAssessment,
   aiOSINTInvestigation,
   aiPurpleTeamExercise,
   orchestrateWorkflow
 } from '../../api/maximusAI';
+import { MLAutomationTab } from './workflows/MLAutomationTab';
 import './WorkflowsPanel.css';
 
 export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
+  const [activeTab, setActiveTab] = useState('manual'); // 'manual', 'ml-automation', 'history'
   const [activeWorkflow, setActiveWorkflow] = useState(null);
   const [workflowResults, setWorkflowResults] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -31,6 +41,8 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
   const [target, setTarget] = useState('');
   const [workflowType, setWorkflowType] = useState('full_assessment');
   const [options, setOptions] = useState({});
+
+  logger.debug('🧬 WorkflowsPanel rendering', { activeTab });
 
   // Predefined workflows
   const workflows = [
@@ -178,8 +190,36 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="workflows-content">
+      {/* Tab Navigation */}
+      <div className="tab-navigation">
+        <button
+          className={`tab-button ${activeTab === 'manual' ? 'active' : ''}`}
+          onClick={() => setActiveTab('manual')}
+        >
+          🎯 Manual Workflows
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'ml-automation' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ml-automation')}
+        >
+          🤖 ML Automation
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          📜 History
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'ml-automation' && (
+        <MLAutomationTab />
+      )}
+
+      {activeTab === 'manual' && (
+        <div className="workflows-content">
+          {/* Manual Workflows - Original Content */}
         {/* Workflow Selector */}
         <div className="workflow-selector">
           <h3 className="section-title">Select Workflow</h3>
@@ -351,7 +391,52 @@ export const WorkflowsPanel = ({ aiStatus, setAiStatus }) => {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
+
+      {activeTab === 'history' && (
+        <div className="workflows-content">
+          <h3 className="section-title">📜 Workflow History</h3>
+          {workflowResults.length === 0 ? (
+            <div className="empty-state">
+              <p>No workflow history yet. Execute a workflow to see results here.</p>
+            </div>
+          ) : (
+            <div className="results-list">
+              {workflowResults.map((result) => (
+                <div key={result.id} className="result-card">
+                  <div className="result-header">
+                    <div>
+                      <span className="result-type">{workflows.find(w => w.id === result.type)?.icon} {workflows.find(w => w.id === result.type)?.name}</span>
+                      <span className="result-target">{result.target}</span>
+                    </div>
+                    <span className={`result-status status-${result.status}`}>
+                      {result.status}
+                    </span>
+                  </div>
+
+                  <div className="result-meta">
+                    <span className="result-time">
+                      {new Date(result.startTime).toLocaleString('pt-BR')}
+                    </span>
+                    {result.steps && result.steps.length > 0 && (
+                      <span className="result-steps">
+                        {result.steps.length} steps completed
+                      </span>
+                    )}
+                  </div>
+
+                  {result.result && result.result.summary && (
+                    <div className="result-summary">
+                      {result.result.summary}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
