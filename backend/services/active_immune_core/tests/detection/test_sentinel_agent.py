@@ -12,10 +12,15 @@ Date: 2025-10-12
 """
 
 import json
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from detection.sentinel_agent import (
     AttackerProfile,

@@ -14,6 +14,7 @@ Date: 2025-10-12
 
 import asyncio
 import json
+import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +22,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import yaml
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from response.automated_response import (
     ActionStatus,
