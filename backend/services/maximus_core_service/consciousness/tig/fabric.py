@@ -214,6 +214,11 @@ class TIGNode:
     # Performance metrics
     messages_processed: int = 0
     last_heartbeat: float = field(default_factory=time.time)
+    
+    @property
+    def neighbors(self) -> list[str]:
+        """Return list of active neighbor node IDs (compatibility property)."""
+        return [node_id for node_id, conn in self.connections.items() if conn.active]
 
     def get_degree(self) -> int:
         """Number of active connections (node degree in graph theory)."""

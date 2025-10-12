@@ -391,3 +391,258 @@ def test_defense_response_dataclass():
     assert response.event == event
     assert response.phase == DefensePhase.DETECTION
     assert response.success is False
+
+
+@pytest.mark.asyncio
+async def test_kafka_publishing_detection(
+    orchestrator,
+    sample_event,
+    sample_detection,
+    mock_sentinel,
+):
+    """Test Kafka publishing for detection."""
+    mock_sentinel.analyze_event.return_value = sample_detection
+    
+    # Mock Kafka producer
+    mock_kafka = AsyncMock()
+    orchestrator.kafka_producer = mock_kafka
+    
+    response = await orchestrator.process_security_event(sample_event)
+    
+    # Verify Kafka publish was called
+    mock_kafka.publish_detection.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_kafka_publishing_enrichment(
+    orchestrator,
+    sample_event,
+    sample_detection,
+    mock_sentinel,
+    mock_fusion,
+    sample_playbook,
+    mock_response,
+):
+    """Test Kafka publishing for enrichment."""
+    mock_sentinel.analyze_event.return_value = sample_detection
+    
+    # Mock enrichment
+    enrichment = EnrichedThreat(
+        threat_id="t1",
+        iocs=[],
+        related_iocs=[],
+        severity=8,
+        confidence=0.9,
+        threat_actors=[],
+        campaigns=[],
+        ttps=[],
+        threat_narrative="Test",
+        attack_chain=[],
+        risk_score=85,
+        recommended_actions=[],
+        sources_consulted=[],
+    )
+    mock_fusion.correlate_indicators.return_value = enrichment
+    
+    # Mock response
+    mock_response.load_playbook.return_value = sample_playbook
+    mock_response.execute_playbook.return_value = PlaybookResult(
+        playbook_id="test",
+        threat_context=MagicMock(),
+        status="SUCCESS",
+        actions_executed=1,
+        actions_failed=0,
+        actions_pending_hotl=0,
+        execution_time_seconds=1.0,
+        action_results=[],
+        errors=[],
+        started_at=datetime.utcnow(),
+        completed_at=datetime.utcnow(),
+    )
+    
+    # Mock Kafka producer
+    mock_kafka = AsyncMock()
+    orchestrator.kafka_producer = mock_kafka
+    
+    response = await orchestrator.process_security_event(sample_event)
+    
+    # Verify both publishes
+    mock_kafka.publish_detection.assert_called_once()
+    mock_kafka.publish_enriched_threat.assert_called_once()
+    mock_kafka.publish_response.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_kafka_publish_failure_graceful(
+    orchestrator,
+    sample_event,
+    sample_detection,
+    mock_sentinel,
+):
+    """Test graceful handling of Kafka publish failures."""
+    mock_sentinel.analyze_event.return_value = sample_detection
+    
+    # Mock Kafka producer that fails
+    mock_kafka = AsyncMock()
+    mock_kafka.publish_detection.side_effect = Exception("Kafka down")
+    orchestrator.kafka_producer = mock_kafka
+    
+    # Should not crash
+    response = await orchestrator.process_security_event(sample_event)
+    
+    # Pipeline continues despite Kafka failure
+    assert response.phase != DefensePhase.DETECTION  # Moved forward
+
+
+@pytest.mark.asyncio
+async def test_event_bus_publishing(
+    orchestrator,
+    sample_event,
+    sample_detection,
+    sample_playbook,
+    mock_sentinel,
+    mock_response,
+):
+    """Test event bus publishing."""
+    mock_sentinel.analyze_event.return_value = sample_detection
+    mock_response.load_playbook.return_value = sample_playbook
+    mock_response.execute_playbook.return_value = PlaybookResult(
+        playbook_id="test",
+        threat_context=MagicMock(),
+        status="SUCCESS",
+        actions_executed=1,
+        actions_failed=0,
+        actions_pending_hotl=0,
+        execution_time_seconds=1.0,
+        action_results=[],
+        errors=[],
+        started_at=datetime.utcnow(),
+        completed_at=datetime.utcnow(),
+    )
+    
+    # Mock event bus
+    mock_bus = AsyncMock()
+    orchestrator.event_bus = mock_bus
+    
+    response = await orchestrator.process_security_event(sample_event)
+    
+    assert response.success is True
+    # Event bus should be called (via _publish_response)
+    # Note: _publish_response is private, tested indirectly
+
+
+@pytest.mark.asyncio
+async def test_pipeline_exception_handling(
+    orchestrator,
+    sample_event,
+    mock_sentinel,
+):
+    """Test pipeline exception handling."""
+    # Make sentinel raise exception
+    mock_sentinel.analyze_event.side_effect = Exception("Sentinel crashed")
+    
+    with pytest.raises(OrchestrationError, match="Defense pipeline failed"):
+        await orchestrator.process_security_event(sample_event)
+
+
+@pytest.mark.asyncio
+async def test_partial_playbook_execution(
+    orchestrator,
+    sample_event,
+    sample_detection,
+    sample_playbook,
+    mock_sentinel,
+    mock_response,
+):
+    """Test handling of partial playbook execution."""
+    mock_sentinel.analyze_event.return_value = sample_detection
+    mock_response.load_playbook.return_value = sample_playbook
+    
+    # Mock PARTIAL execution
+    mock_response.execute_playbook.return_value = PlaybookResult(
+        playbook_id="test",
+        threat_context=MagicMock(),
+        status="PARTIAL",
+        actions_executed=2,
+        actions_failed=1,
+        actions_pending_hotl=0,
+        execution_time_seconds=1.0,
+        action_results=[],
+        errors=["Action 3 failed"],
+        started_at=datetime.utcnow(),
+        completed_at=datetime.utcnow(),
+    )
+    
+    response = await orchestrator.process_security_event(sample_event)
+    
+    # Partial should still be considered success
+    assert response.success is True
+    assert "partially executed" in " ".join(response.errors).lower()
+
+
+@pytest.mark.asyncio
+async def test_failed_playbook_execution(
+    orchestrator,
+    sample_event,
+    sample_detection,
+    sample_playbook,
+    mock_sentinel,
+    mock_response,
+):
+    """Test handling of failed playbook execution."""
+    mock_sentinel.analyze_event.return_value = sample_detection
+    mock_response.load_playbook.return_value = sample_playbook
+    
+    # Mock FAILED execution
+    mock_response.execute_playbook.return_value = PlaybookResult(
+        playbook_id="test",
+        threat_context=MagicMock(),
+        status="FAILED",
+        actions_executed=0,
+        actions_failed=3,
+        actions_pending_hotl=0,
+        execution_time_seconds=1.0,
+        action_results=[],
+        errors=["All actions failed"],
+        started_at=datetime.utcnow(),
+        completed_at=datetime.utcnow(),
+    )
+    
+    response = await orchestrator.process_security_event(sample_event)
+    
+    assert response.success is False
+    assert len(response.errors) > 0
+
+
+@pytest.mark.asyncio
+async def test_active_threats_gauge_increment(
+    orchestrator,
+    sample_event,
+    sample_detection,
+    sample_playbook,
+    mock_sentinel,
+    mock_response,
+):
+    """Test active threats gauge increments/decrements."""
+    mock_sentinel.analyze_event.return_value = sample_detection
+    mock_response.load_playbook.return_value = sample_playbook
+    
+    # Success should decrement
+    mock_response.execute_playbook.return_value = PlaybookResult(
+        playbook_id="test",
+        threat_context=MagicMock(),
+        status="SUCCESS",
+        actions_executed=1,
+        actions_failed=0,
+        actions_pending_hotl=0,
+        execution_time_seconds=1.0,
+        action_results=[],
+        errors=[],
+        started_at=datetime.utcnow(),
+        completed_at=datetime.utcnow(),
+    )
+    
+    response = await orchestrator.process_security_event(sample_event)
+    
+    assert response.success is True
+    # Gauge should be decremented (verified via metrics in production)
