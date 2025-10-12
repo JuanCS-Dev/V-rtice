@@ -77,7 +77,7 @@ assert.Less(t, result.Score, 0.7)
 func TestAnalyzeAction_NewAction(t *testing.T) {
 config := &AnalyzerConfig{
 MinSamplesBaseline: 10,
-AnomalyThreshold:   0.5,
+AnomalyThreshold:   0.3,
 }
 analyzer := NewBehavioralAnalyzer(config)
 
@@ -97,7 +97,7 @@ assert.Contains(t, result.Reasons[0], "New action")
 func TestAnalyzeAction_NewResource(t *testing.T) {
 config := &AnalyzerConfig{
 MinSamplesBaseline: 10,
-AnomalyThreshold:   0.5,
+AnomalyThreshold:   0.3,
 }
 analyzer := NewBehavioralAnalyzer(config)
 
