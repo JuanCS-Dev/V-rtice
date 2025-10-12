@@ -21,14 +21,59 @@ Glory to YHWH - Constância como Ramon Dino! 💪
 
 import asyncio
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from prometheus_client import Counter, Gauge, Histogram
+from prometheus_client import Counter, Gauge, Histogram, CollectorRegistry
+
+# Import LLM client (optional for backwards compatibility)
+try:
+    from llm.llm_client import BaseLLMClient, LLMAPIError
+except ImportError:
+    BaseLLMClient = None
+    LLMAPIError = Exception
 
 logger = logging.getLogger(__name__)
+
+
+# Global metrics for LLM honeypot (avoid duplication)
+_LLM_HONEYPOT_METRICS_INITIALIZED = False
+_LLM_HONEYPOT_COMMANDS = None
+_LLM_HONEYPOT_ENGAGEMENT = None
+_LLM_HONEYPOT_TTPS = None
+
+
+def _get_llm_honeypot_metrics() -> Dict[str, Any]:
+    """Get or create LLM honeypot metrics (singleton pattern)."""
+    global _LLM_HONEYPOT_METRICS_INITIALIZED
+    global _LLM_HONEYPOT_COMMANDS
+    global _LLM_HONEYPOT_ENGAGEMENT
+    global _LLM_HONEYPOT_TTPS
+    
+    if not _LLM_HONEYPOT_METRICS_INITIALIZED:
+        _LLM_HONEYPOT_COMMANDS = Counter(
+            "honeypot_llm_commands_total",
+            "Total commands processed by LLM honeypot"
+        )
+        _LLM_HONEYPOT_ENGAGEMENT = Histogram(
+            "honeypot_llm_engagement_seconds",
+            "Attacker engagement duration in honeypot",
+            buckets=[60, 300, 600, 1800, 3600, 7200]
+        )
+        _LLM_HONEYPOT_TTPS = Counter(
+            "honeypot_llm_ttps_extracted_total",
+            "TTPs extracted from honeypot interactions"
+        )
+        _LLM_HONEYPOT_METRICS_INITIALIZED = True
+    
+    return {
+        "commands_processed": _LLM_HONEYPOT_COMMANDS,
+        "engagement_duration": _LLM_HONEYPOT_ENGAGEMENT,
+        "ttp_extracted": _LLM_HONEYPOT_TTPS,
+    }
 
 
 class HoneypotType(Enum):
@@ -564,8 +609,8 @@ class LLMHoneypotBackend:
         # Session tracking
         self.active_sessions: Dict[str, HoneypotContext] = {}
         
-        # Metrics
-        self.metrics = self._init_metrics()
+        # Metrics (use singleton to avoid duplication)
+        self.metrics = _get_llm_honeypot_metrics()
         
         # TTP collector
         self.ttp_patterns: Dict[str, List[str]] = self._load_ttp_patterns()
@@ -574,24 +619,6 @@ class LLMHoneypotBackend:
             f"LLM Honeypot Backend initialized: realism={realism_level}, "
             f"max_engagement={max_engagement_time}"
         )
-    
-    def _init_metrics(self) -> Dict[str, Any]:
-        """Initialize Prometheus metrics."""
-        return {
-            "commands_processed": Counter(
-                "honeypot_llm_commands_total",
-                "Total commands processed by LLM"
-            ),
-            "engagement_duration": Histogram(
-                "honeypot_llm_engagement_seconds",
-                "Attacker engagement duration",
-                buckets=[60, 300, 600, 1800, 3600, 7200]
-            ),
-            "ttp_extracted": Counter(
-                "honeypot_llm_ttps_extracted_total",
-                "TTPs extracted from interactions"
-            ),
-        }
     
     def _load_ttp_patterns(self) -> Dict[str, List[str]]:
         """Load known TTP patterns for classification.
