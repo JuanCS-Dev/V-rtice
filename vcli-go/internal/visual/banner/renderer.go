@@ -104,7 +104,7 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 	var output strings.Builder
 
 	// Top border with gradient (86 chars total: 84 interior + 2 borders)
-	topBorder := "╔══════════════════════════════════════════════════════════════════════════════════════╗"
+	topBorder := "╔════════════════════════════════════════════════════════════════════════════════════╗"
 	output.WriteString(visual.GradientText(topBorder, gradient))
 	output.WriteString("\n")
 
@@ -157,7 +157,7 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 	output.WriteString(constLine + "\n")
 
 	// Bottom border with gradient
-	bottomBorder := "╚══════════════════════════════════════════════════════════════════════════════════════╝"
+	bottomBorder := "╚════════════════════════════════════════════════════════════════════════════════════╝"
 	output.WriteString(visual.GradientText(bottomBorder, gradient))
 	output.WriteString("\n\n")
 
