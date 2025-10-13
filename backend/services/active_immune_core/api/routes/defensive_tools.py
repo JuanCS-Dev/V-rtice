@@ -148,26 +148,26 @@ class TrafficPatternBatchRequest(BaseModel):
 
 class EncryptedTrafficAnomalyResponse(BaseModel):
     """Encrypted traffic anomaly result."""
-    is_anomalous: bool
-    anomaly_score: float
-    risk_level: str
+    is_threat: bool
+    threat_score: float
+    confidence_level: str
+    threat_types: List[str]
     explanation: str
     timestamp: datetime
     source_ip: str
     dest_ip: str
-    suspicious_indicators: List[str]
 
     class Config:
         json_schema_extra = {
             "example": {
-                "is_anomalous": True,
-                "anomaly_score": 0.92,
-                "risk_level": "critical",
-                "explanation": "Suspicious encrypted tunnel detected",
+                "is_threat": True,
+                "threat_score": 0.92,
+                "confidence_level": "HIGH",
+                "threat_types": ["data_exfiltration", "c2_communication"],
+                "explanation": "Suspicious encrypted tunnel detected with unusual patterns",
                 "timestamp": "2025-10-12T22:00:00Z",
                 "source_ip": "192.168.1.100",
-                "dest_ip": "203.0.113.42",
-                "suspicious_indicators": ["unusual_port", "deprecated_cipher", "high_entropy"]
+                "dest_ip": "203.0.113.42"
             }
         }
 
@@ -433,53 +433,53 @@ async def analyze_traffic_pattern(
     - Malicious encrypted tunnels
     - C2 communication patterns
     - Data exfiltration via encryption
-    - Deprecated/weak ciphers
+    - Unusual traffic behaviors
     """
     DEFENSIVE_REQUESTS.labels(tool="traffic", operation="analyze").inc()
     
     try:
         with DEFENSIVE_LATENCY.labels(tool="traffic", operation="analyze").time():
             # Convert to internal format
-            traffic_pattern = TrafficPattern(
+            network_flow = NetworkFlow(
                 source_ip=pattern.source_ip,
                 dest_ip=pattern.dest_ip,
                 source_port=pattern.source_port,
                 dest_port=pattern.dest_port,
                 protocol=pattern.protocol,
-                packet_size=pattern.packet_size,
-                encrypted=pattern.encrypted,
-                tls_version=pattern.tls_version,
-                cipher_suite=pattern.cipher_suite,
+                packet_count=pattern.packet_count,
+                byte_count=pattern.byte_count,
+                duration_seconds=pattern.duration_seconds,
+                flags=pattern.flags,
                 timestamp=pattern.timestamp
             )
             
             # Analyze
-            result = analyzer.analyze_pattern(traffic_pattern)
+            result = analyzer.analyze_flow(network_flow)
             
-            # Track anomalies
-            if result.is_anomalous:
+            # Track threats
+            if result.is_threat:
                 ANOMALIES_DETECTED.labels(
                     tool="traffic",
-                    risk_level=result.risk_level
+                    risk_level=result.confidence_level.value
                 ).inc()
                 
                 log.warning(
-                    "traffic_anomaly_detected",
+                    "traffic_threat_detected",
                     source=pattern.source_ip,
                     dest=pattern.dest_ip,
-                    score=result.anomaly_score,
-                    risk=result.risk_level
+                    score=result.threat_score,
+                    confidence=result.confidence_level.value
                 )
             
             return EncryptedTrafficAnomalyResponse(
-                is_anomalous=result.is_anomalous,
-                anomaly_score=result.anomaly_score,
-                risk_level=result.risk_level,
+                is_threat=result.is_threat,
+                threat_score=result.threat_score,
+                confidence_level=result.confidence_level.value,
+                threat_types=[t.value for t in result.threat_types],
                 explanation=result.explanation,
                 timestamp=result.timestamp,
                 source_ip=pattern.source_ip,
-                dest_ip=pattern.dest_ip,
-                suspicious_indicators=result.suspicious_indicators
+                dest_ip=pattern.dest_ip
             )
             
     except Exception as e:
@@ -511,43 +511,43 @@ async def analyze_traffic_batch(
     try:
         with DEFENSIVE_LATENCY.labels(tool="traffic", operation="batch_analyze").time():
             # Convert to internal format
-            patterns = [
-                TrafficPattern(
+            flows = [
+                NetworkFlow(
                     source_ip=p.source_ip,
                     dest_ip=p.dest_ip,
                     source_port=p.source_port,
                     dest_port=p.dest_port,
                     protocol=p.protocol,
-                    packet_size=p.packet_size,
-                    encrypted=p.encrypted,
-                    tls_version=p.tls_version,
-                    cipher_suite=p.cipher_suite,
+                    packet_count=p.packet_count,
+                    byte_count=p.byte_count,
+                    duration_seconds=p.duration_seconds,
+                    flags=p.flags,
                     timestamp=p.timestamp
                 )
                 for p in batch.patterns
             ]
             
             # Batch analyze
-            results = analyzer.analyze_batch(patterns)
+            results = analyzer.analyze_flows(flows)
             
-            # Track anomalies
+            # Track threats
             for result in results:
-                if result.is_anomalous:
+                if result.is_threat:
                     ANOMALIES_DETECTED.labels(
                         tool="traffic",
-                        risk_level=result.risk_level
+                        risk_level=result.confidence_level.value
                     ).inc()
             
             return [
                 EncryptedTrafficAnomalyResponse(
-                    is_anomalous=r.is_anomalous,
-                    anomaly_score=r.anomaly_score,
-                    risk_level=r.risk_level,
+                    is_threat=r.is_threat,
+                    threat_score=r.threat_score,
+                    confidence_level=r.confidence_level.value,
+                    threat_types=[t.value for t in r.threat_types],
                     explanation=r.explanation,
                     timestamp=r.timestamp,
-                    source_ip=patterns[i].source_ip,
-                    dest_ip=patterns[i].dest_ip,
-                    suspicious_indicators=r.suspicious_indicators
+                    source_ip=flows[i].source_ip,
+                    dest_ip=flows[i].dest_ip
                 )
                 for i, r in enumerate(results)
             ]

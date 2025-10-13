@@ -240,63 +240,86 @@ func FormatInvestigationReport(investigation *InvestigationResponse) string {
 	title := visual.GradientText("AUTONOMOUS INVESTIGATION REPORT", gradient)
 	output.WriteString(title + "\n\n")
 
-	// Investigation Overview
+	// Investigation Overview (flexible schema via Data)
 	output.WriteString(styles.Bold.Render("Investigation Overview") + "\n")
-	output.WriteString(fmt.Sprintf("  Investigation ID:    %s\n",
-		styles.Info.Render(investigation.InvestigationID)))
-	output.WriteString(fmt.Sprintf("  Incident ID:         %s\n",
-		styles.Secondary.Render(investigation.IncidentID)))
-	output.WriteString(fmt.Sprintf("  Status:              %s\n",
-		formatStatus(investigation.Status)))
-	output.WriteString(fmt.Sprintf("  Playbook Used:       %s\n",
-		styles.Accent.Render(investigation.PlaybookUsed)))
-
-	if investigation.DurationSeconds != nil {
-		output.WriteString(fmt.Sprintf("  Duration:            %s\n",
-			styles.Muted.Render(fmt.Sprintf("%.2f seconds", *investigation.DurationSeconds))))
+	
+	if investigationID, ok := investigation.Data["investigation_id"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Investigation ID:    %s\n",
+			styles.Info.Render(investigationID)))
+	}
+	
+	if incidentID, ok := investigation.Data["incident_id"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Incident ID:         %s\n",
+			styles.Secondary.Render(incidentID)))
+	}
+	
+	if status, ok := investigation.Data["status"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Status:              %s\n",
+			formatStatus(status)))
+	}
+	
+	if playbook, ok := investigation.Data["playbook_used"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Playbook Used:       %s\n",
+			styles.Accent.Render(playbook)))
 	}
 
-	output.WriteString(fmt.Sprintf("  Evidence Count:      %s\n",
-		styles.Bold.Render(fmt.Sprintf("%d", investigation.EvidenceCount))))
-	output.WriteString(fmt.Sprintf("  Confidence:          %s\n\n",
-		formatConfidence(investigation.ConfidenceScore, styles)))
+	if durationSec, ok := investigation.Data["duration_seconds"].(float64); ok {
+		output.WriteString(fmt.Sprintf("  Duration:            %s\n",
+			styles.Muted.Render(fmt.Sprintf("%.2f seconds", durationSec))))
+	}
+
+	if evidenceCount, ok := investigation.Data["evidence_count"].(float64); ok {
+		output.WriteString(fmt.Sprintf("  Evidence Count:      %s\n",
+			styles.Bold.Render(fmt.Sprintf("%d", int(evidenceCount)))))
+	}
+	
+	if confidence, ok := investigation.Data["confidence_score"].(float64); ok {
+		output.WriteString(fmt.Sprintf("  Confidence:          %s\n\n",
+			formatConfidence(confidence, styles)))
+	}
 
 	// Attribution
-	if investigation.AttributedActor != nil {
+	if attributedActor, ok := investigation.Data["attributed_actor"].(string); ok && attributedActor != "" {
 		output.WriteString(styles.Bold.Render("Attribution") + "\n")
-			output.WriteString(fmt.Sprintf("  Attributed Actor:    %s\n\n",
-			styles.Success.Render(*investigation.AttributedActor)))
+		output.WriteString(fmt.Sprintf("  Attributed Actor:    %s\n\n",
+			styles.Success.Render(attributedActor)))
 	}
 
 	// Findings
-	if len(investigation.Findings) > 0 {
+	if findingsRaw, ok := investigation.Data["findings"].([]interface{}); ok && len(findingsRaw) > 0 {
 		output.WriteString(styles.Bold.Render("Key Findings") + "\n")
-			for i, finding := range investigation.Findings {
-			output.WriteString(fmt.Sprintf("  %s %s\n",
+		for i, findingRaw := range findingsRaw {
+			if finding, ok := findingRaw.(string); ok {
+				output.WriteString(fmt.Sprintf("  %s %s\n",
 				styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
 				styles.Secondary.Render(finding)))
+			}
 		}
 		output.WriteString("\n")
 	}
 
 	// Related Campaigns
-	if len(investigation.RelatedCampaigns) > 0 {
+	if campaignsRaw, ok := investigation.Data["related_campaigns"].([]interface{}); ok && len(campaignsRaw) > 0 {
 		output.WriteString(styles.Bold.Render("Related Campaigns") + "\n")
-			for i, campaign := range investigation.RelatedCampaigns {
-			output.WriteString(fmt.Sprintf("  %s %s\n",
-				styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
-				styles.Warning.Render(campaign)))
+		for i, campaignRaw := range campaignsRaw {
+			if campaign, ok := campaignRaw.(string); ok {
+				output.WriteString(fmt.Sprintf("  %s %s\n",
+					styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
+					styles.Warning.Render(campaign)))
+			}
 		}
 		output.WriteString("\n")
 	}
 
 	// Recommendations
-	if len(investigation.Recommendations) > 0 {
+	if recsRaw, ok := investigation.Data["recommendations"].([]interface{}); ok && len(recsRaw) > 0 {
 		output.WriteString(styles.Bold.Render("Recommendations") + "\n")
-			for _, rec := range investigation.Recommendations {
-			output.WriteString(fmt.Sprintf("  %s %s\n",
-				styles.Success.Render(fmt.Sprintf("✓")),
-				styles.Secondary.Render(rec)))
+		for _, recRaw := range recsRaw {
+			if rec, ok := recRaw.(string); ok {
+				output.WriteString(fmt.Sprintf("  %s %s\n",
+					styles.Success.Render(fmt.Sprintf("✓")),
+					styles.Secondary.Render(rec)))
+			}
 		}
 		output.WriteString("\n")
 	}
@@ -316,22 +339,31 @@ func FormatServiceStatus(status *StatusResponse) string {
 	title := visual.GradientText("INVESTIGATION SERVICE STATUS", gradient)
 	output.WriteString(title + "\n\n")
 
-	// Service Info
+	// Service Info (flexible schema via Data)
 	output.WriteString(styles.Bold.Render("Service Information") + "\n")
-	output.WriteString(fmt.Sprintf("  Service:             %s\n",
-		styles.Info.Render(status.Service)))
+	
+	if service, ok := status.Data["service"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Service:             %s\n",
+			styles.Info.Render(service)))
+	}
+	
 	output.WriteString(fmt.Sprintf("  Status:              %s\n",
 		formatStatus(status.Status)))
-	output.WriteString(fmt.Sprintf("  Timestamp:           %s\n\n",
-		styles.Muted.Render(status.Timestamp)))
+	
+	if timestamp, ok := status.Data["timestamp"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Timestamp:           %s\n\n",
+			styles.Muted.Render(timestamp)))
+	}
 
 	// Components
-	if len(status.Components) > 0 {
+	if componentsRaw, ok := status.Data["components"].(map[string]interface{}); ok && len(componentsRaw) > 0 {
 		output.WriteString(styles.Bold.Render("Components") + "\n")
-			for name, details := range status.Components {
+		for name, detailsRaw := range componentsRaw {
 			componentStatus := "unknown"
-			if s, ok := details["status"].(string); ok {
-				componentStatus = s
+			if details, ok := detailsRaw.(map[string]interface{}); ok {
+				if s, ok := details["status"].(string); ok {
+					componentStatus = s
+				}
 			}
 			output.WriteString(fmt.Sprintf("  %s:  %s\n",
 				styles.Bold.Render(name),
