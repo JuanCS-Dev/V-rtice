@@ -1,0 +1,315 @@
+.container {
+  padding: 20px;
+  background: linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%);
+  border-radius: 12px;
+  border: 1px solid #ff4444;
+  box-shadow: 0 0 20px rgba(255, 68, 68, 0.2);
+  color: #ffffff;
+}
+
+.header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.header h2 {
+  font-size: 28px;
+  margin: 0 0 8px 0;
+  color: #ff4444;
+  text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.subtitle {
+  color: #888;
+  font-size: 14px;
+  margin: 0;
+}
+
+.toolInfo {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 24px;
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.infoLabel {
+  color: #888;
+  font-size: 14px;
+}
+
+.infoBadge,
+.riskBadge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.infoBadge {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+}
+
+.form {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 24px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #ff4444;
+  font-weight: 500;
+}
+
+.hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #ff4444;
+  box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #ff4444 0%, #cc3333 100%);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 68, 68, 0.4);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.5);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ff6666;
+}
+
+.errorIcon {
+  font-size: 20px;
+}
+
+.result {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.resultHeader {
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 4px solid #ff4444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resultHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.timing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.timingLabel {
+  font-size: 12px;
+  color: #888;
+}
+
+.timingValue {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ff4444;
+}
+
+.resultContent {
+  padding: 20px;
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.portsSection,
+.servicesSection {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.portsSection h4,
+.servicesSection h4 {
+  margin: 0 0 16px 0;
+  color: #ff4444;
+  font-size: 16px;
+}
+
+.portsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.portCard {
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.portNumber {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ff4444;
+  font-family: 'Courier New', monospace;
+}
+
+.portStatus {
+  font-size: 10px;
+  color: #00ff88;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.servicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.serviceCard {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.servicePort {
+  color: #ff4444;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+.serviceName {
+  color: #ffffff;
+}
+
+.timestamp {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: right;
+  color: #888;
+  font-size: 12px;
+}
+
+.label {
+  color: #888;
+  font-size: 14px;
+}
+
+.value {
+  color: #ffffff;
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 768px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .portsList {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}

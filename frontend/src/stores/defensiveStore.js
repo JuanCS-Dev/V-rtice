@@ -24,16 +24,24 @@ export const useDefensiveStore = create(
           threats: 0,
           suspiciousIPs: 0,
           domains: 0,
-          monitored: 0
+          monitored: 0,
+          behavioralAnomalies: 0,
+          encryptedThreats: 0
         },
         alerts: [],
         activeModule: 'threat-map',
         loading: {
           metrics: true,
-          alerts: false
+          alerts: false,
+          behavioral: false,
+          traffic: false
         },
         error: null,
         lastUpdate: null,
+        
+        // NEW: Defensive tools data
+        behavioralResults: [],
+        trafficResults: [],
 
         // Actions - Metrics
         setMetrics: (metrics) => set({
@@ -83,22 +91,54 @@ export const useDefensiveStore = create(
         setError: (error) => set({ error }),
         clearError: () => set({ error: null }),
 
+        // NEW: Actions - Behavioral Analyzer
+        addBehavioralResult: (result) => set((state) => ({
+          behavioralResults: [result, ...state.behavioralResults].slice(0, 50),
+          metrics: {
+            ...state.metrics,
+            behavioralAnomalies: result.is_anomalous 
+              ? state.metrics.behavioralAnomalies + 1 
+              : state.metrics.behavioralAnomalies
+          }
+        })),
+
+        clearBehavioralResults: () => set({ behavioralResults: [] }),
+
+        // NEW: Actions - Traffic Analyzer
+        addTrafficResult: (result) => set((state) => ({
+          trafficResults: [result, ...state.trafficResults].slice(0, 50),
+          metrics: {
+            ...state.metrics,
+            encryptedThreats: result.is_threat 
+              ? state.metrics.encryptedThreats + 1 
+              : state.metrics.encryptedThreats
+          }
+        })),
+
+        clearTrafficResults: () => set({ trafficResults: [] }),
+
         // Actions - Reset
         reset: () => set({
           metrics: {
             threats: 0,
             suspiciousIPs: 0,
             domains: 0,
-            monitored: 0
+            monitored: 0,
+            behavioralAnomalies: 0,
+            encryptedThreats: 0
           },
           alerts: [],
           activeModule: 'threat-map',
           loading: {
             metrics: true,
-            alerts: false
+            alerts: false,
+            behavioral: false,
+            traffic: false
           },
           error: null,
-          lastUpdate: null
+          lastUpdate: null,
+          behavioralResults: [],
+          trafficResults: []
         })
       }),
       {

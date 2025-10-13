@@ -23,16 +23,23 @@ export const useOffensiveStore = create(
           activeScans: 0,
           exploitsFound: 0,
           targets: 0,
-          c2Sessions: 0
+          c2Sessions: 0,
+          networkScans: 0,
+          payloadsGenerated: 0
         },
         executions: [],
-        activeModule: 'network-recon',
+        activeModule: 'network-scanner',
         loading: {
           metrics: true,
-          executions: false
+          executions: false,
+          scanner: false
         },
         error: null,
         lastUpdate: null,
+        
+        // NEW: Offensive tools data
+        scanResults: [],
+        payloads: [],
 
         // Actions - Metrics
         setMetrics: (metrics) => set({
@@ -99,22 +106,50 @@ export const useOffensiveStore = create(
         setError: (error) => set({ error }),
         clearError: () => set({ error: null }),
 
+        // NEW: Actions - Network Scanner
+        addScanResult: (result) => set((state) => ({
+          scanResults: [result, ...state.scanResults].slice(0, 50),
+          metrics: {
+            ...state.metrics,
+            networkScans: state.metrics.networkScans + 1,
+            activeScans: result.success ? state.metrics.activeScans + 1 : state.metrics.activeScans
+          }
+        })),
+
+        clearScanResults: () => set({ scanResults: [] }),
+
+        // NEW: Actions - Payload Generator
+        addPayload: (payload) => set((state) => ({
+          payloads: [payload, ...state.payloads].slice(0, 20),
+          metrics: {
+            ...state.metrics,
+            payloadsGenerated: state.metrics.payloadsGenerated + 1
+          }
+        })),
+
+        clearPayloads: () => set({ payloads: [] }),
+
         // Actions - Reset
         reset: () => set({
           metrics: {
             activeScans: 0,
             exploitsFound: 0,
             targets: 0,
-            c2Sessions: 0
+            c2Sessions: 0,
+            networkScans: 0,
+            payloadsGenerated: 0
           },
           executions: [],
-          activeModule: 'network-recon',
+          activeModule: 'network-scanner',
           loading: {
             metrics: true,
-            executions: false
+            executions: false,
+            scanner: false
           },
           error: null,
-          lastUpdate: null
+          lastUpdate: null,
+          scanResults: [],
+          payloads: []
         })
       }),
       {

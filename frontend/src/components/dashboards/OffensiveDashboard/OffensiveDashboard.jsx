@@ -36,6 +36,9 @@ const C2Orchestration = lazy(() => import('../../cyber/C2Orchestration/C2Orchest
 const BAS = lazy(() => import('../../cyber/BAS/BAS'));
 const OffensiveGateway = lazy(() => import('../../cyber/OffensiveGateway/OffensiveGateway'));
 
+// NEW: Offensive Arsenal Tools
+const NetworkScanner = lazy(() => import('../../cyber/NetworkScanner/NetworkScanner'));
+
 const LoadingFallback = () => {
   const { t } = useTranslation();
   return (
@@ -59,7 +62,8 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
   };
 
   const modules = [
-    { id: 'network-recon', name: t('dashboard.offensive.modules.networkRecon'), icon: '🔍', component: NetworkRecon },
+    { id: 'network-scanner', name: t('dashboard.offensive.modules.networkScanner', 'NETWORK SCANNER'), icon: '🔍', component: NetworkScanner },
+    { id: 'network-recon', name: t('dashboard.offensive.modules.networkRecon'), icon: '📡', component: NetworkRecon },
     { id: 'vuln-intel', name: t('dashboard.offensive.modules.vulnIntel'), icon: '🎯', component: VulnIntel },
     { id: 'web-attack', name: t('dashboard.offensive.modules.webAttack'), icon: '🌐', component: WebAttack },
     { id: 'c2-orchestration', name: t('dashboard.offensive.modules.c2Control'), icon: '⚡', component: C2Orchestration },

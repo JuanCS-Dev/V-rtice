@@ -1,0 +1,336 @@
+/**
+ * 🗺️ Decoy Bayou Map Styles
+ * Padrão PAGANI - Military-grade geospatial visualization
+ */
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(0, 0, 0, 0.95) 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ==================== CONTROLS ==================== */
+.controls {
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.controlLabel {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.select {
+  padding: 0.5rem 1rem;
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.select:hover {
+  border-color: rgba(220, 38, 38, 0.5);
+}
+
+.select:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #dc2626;
+}
+
+/* ==================== LEGEND ==================== */
+.legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-left: auto;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* ==================== MAP ==================== */
+.map {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #000000;
+}
+
+.mapSvg {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(20, 20, 20, 0.8) 0%, #000000 100%);
+}
+
+/* ==================== HONEYPOT MARKERS ==================== */
+.honeypotMarker {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.honeypotMarker:hover {
+  filter: brightness(1.3);
+}
+
+.markerLabel {
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+/* ==================== PULSE ANIMATION ==================== */
+.pulse {
+  animation: pulse-ring 2s ease-out infinite;
+  transform-origin: center;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* ==================== THREAT FLOWS ==================== */
+.threatFlow {
+  animation: flow 2s linear infinite;
+}
+
+@keyframes flow {
+  0% {
+    stroke-dasharray: 10 10;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 20;
+  }
+}
+
+/* ==================== DETAILS PANEL ==================== */
+.detailsPanel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 320px;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(15, 15, 15, 0.95) 100%);
+  border: 2px solid rgba(220, 38, 38, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.3s ease;
+  z-index: 10;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.detailsHeader {
+  padding: 1.5rem;
+  background: rgba(220, 38, 38, 0.1);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detailsTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+  background: rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: rgba(220, 38, 38, 0.3);
+  transform: rotate(90deg);
+}
+
+.detailsContent {
+  padding: 1.5rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.detailValue {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.detailValue.active {
+  color: #10b981;
+  text-transform: uppercase;
+}
+
+.detailValue.inactive {
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+/* ==================== STATS GRID ==================== */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.statBox {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #dc2626;
+  font-family: 'Courier New', monospace;
+}
+
+.statValue.critical {
+  color: #ff0040;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.statValue.high {
+  color: #ff4000;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .detailsPanel {
+    width: 280px;
+  }
+  
+  .legend {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .legend {
+    width: 100%;
+    margin-left: 0;
+  }
+  
+  .detailsPanel {
+    position: static;
+    width: 100%;
+    margin-top: 1rem;
+  }
+}

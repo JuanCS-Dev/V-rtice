@@ -23,11 +23,17 @@ import SystemSecurity from '../../cyber/SystemSecurity';
 import ExploitSearchWidget from '../../cyber/ExploitSearchWidget';
 import MaximusCyberHub from '../../cyber/MaximusCyberHub';
 
+// NEW: Active Immune Core defensive tools
+import BehavioralAnalyzer from '../../cyber/BehavioralAnalyzer/BehavioralAnalyzer';
+import EncryptedTrafficAnalyzer from '../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer';
+
 import '../../../styles/dashboards.css';
 import './DefensiveDashboard.module.css';
 
 const DEFENSIVE_MODULES = [
   { id: 'threats', name: 'THREAT MAP', icon: '🗺️', component: ThreatMap },
+  { id: 'behavioral', name: 'BEHAVIOR ANALYSIS', icon: '🧠', component: BehavioralAnalyzer },
+  { id: 'encrypted', name: 'TRAFFIC ANALYSIS', icon: '🔐', component: EncryptedTrafficAnalyzer },
   { id: 'domain', name: 'DOMAIN INTEL', icon: '🌐', component: DomainAnalyzer },
   { id: 'ip', name: 'IP ANALYSIS', icon: '🎯', component: IpIntelligence },
   { id: 'network', name: 'NET MONITOR', icon: '📡', component: NetworkMonitor },
