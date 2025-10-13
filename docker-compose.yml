@@ -2459,6 +2459,56 @@ services:
       - maximus-network
     restart: unless-stopped
 
+  # ============================
+  # ADAPTIVE IMMUNE SYSTEM - HITL API
+  # ============================
+  adaptive_immune_system:
+    build: ./backend/services/adaptive_immune_system
+    container_name: vertice-adaptive-immune
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./backend/services/adaptive_immune_system:/app
+    command: uvicorn hitl.api.main:app --host 0.0.0.0 --port 8003 --reload
+    environment:
+      # Application
+      - APP_NAME=Adaptive Immune System - HITL API
+      - APP_VERSION=1.0.0
+      - DEBUG=false
+      # Server
+      - HOST=0.0.0.0
+      - PORT=8003
+      # Database
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/adaptive_immune
+      # RabbitMQ (if using messaging - currently not required)
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
+      # GitHub (set these in .env file)
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_REPO_OWNER=${GITHUB_REPO_OWNER:-vertice-ai}
+      - GITHUB_REPO_NAME=${GITHUB_REPO_NAME:-adaptive-immune}
+      # CORS
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:8080
+      # Observability
+      - LOG_LEVEL=info
+      - PROMETHEUS_ENABLED=true
+      # Feature Flags
+      - WEBSOCKET_ENABLED=true
+      - WARGAMING_ENABLED=true
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
 # ============================
 # NETWORKS
 # ============================
