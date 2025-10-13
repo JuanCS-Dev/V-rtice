@@ -27,10 +27,13 @@ func (m Model) View() string {
 	// Warning if terminal is too small (below minimum)
 	if m.width < MinWidth || m.height < MinHeight {
 		warning := m.styles.Warning.Render(fmt.Sprintf(
-			"⚠️  Terminal too small! Minimum: %dx%d (current: %dx%d)",
+			"⚠️  Terminal too small! Resize to %dx%d for perfect alignment (current: %dx%d)",
 			MinWidth, MinHeight, m.width, m.height,
 		))
 		output.WriteString(warning)
+		output.WriteString("\n")
+		helpText := m.styles.Muted.Render("   Banner and UI elements require minimum width for optimal display.")
+		output.WriteString(helpText)
 		output.WriteString("\n\n")
 	}
 
@@ -208,20 +211,35 @@ func (m Model) renderWelcomeBanner() string {
 	output.WriteString(fmt.Sprintf("  %s\n", featuresTitle))
 	output.WriteString("\n")
 
-	// Essential features only - minimalist design (max 4 items per cognitive science)
-	features := []string{
-		"🧠 MAXIMUS Conscious AI integration",
-		"🛡️ Active Immune System protection",
-		"⎈ Real-time Kubernetes orchestration",
-		"🔍 AI-powered threat hunting",
+	// Essential features with dynamic health status
+	features := []struct {
+		icon string
+		text string
+		key  string
+	}{
+		{"🧠", "MAXIMUS Conscious AI integration", "maximus"},
+		{"🛡️", "Active Immune System protection", "immune"},
+		{"⎈", "Real-time Kubernetes orchestration", "kubernetes"},
+		{"🔍", "AI-powered threat hunting", "hunting"},
 	}
 
-	// Single column rendering - clean, scannable
+	// Single column rendering - clean, scannable with health status
 	featureStyle := lipgloss.NewStyle().
 		PaddingLeft(2)
 
 	for _, feature := range features {
-		featureText := m.styles.Muted.Render(feature)
+		// Check if capability is healthy
+		isHealthy := m.capabilitiesStatus[feature.key]
+
+		var featureText string
+		if isHealthy {
+			// Online: render with Success style (green)
+			featureText = m.styles.Success.Render(feature.icon + " " + feature.text)
+		} else {
+			// Offline: render with Muted style (gray)
+			featureText = m.styles.Muted.Render(feature.icon + " " + feature.text)
+		}
+
 		output.WriteString(featureStyle.Render(featureText) + "\n")
 	}
 

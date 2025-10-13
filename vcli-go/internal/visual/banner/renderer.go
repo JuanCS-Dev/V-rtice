@@ -141,17 +141,19 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 	maximusLine := b.styles.Accent.Render("║") + strings.Repeat(" ", maximusPadding) + gradientMaximus + strings.Repeat(" ", 78-maximusPadding-len(maximusText)) + b.styles.Accent.Render("║")
 	output.WriteString(maximusLine + "\n")
 
-	// CLI description - aligned left (mesmo estilo)
+	// CLI description - aligned left (usando runewidth para perfeição)
 	output.WriteString(b.styles.Accent.Render("║") + strings.Repeat(" ", 78) + b.styles.Accent.Render("║") + "\n")
-	cliDesc := "The Vértice Command Line Interface (vCLI)"
+	cliDesc := "The NEUROSHELL Command Line Interface"
 	styledDesc := b.styles.Muted.Render(cliDesc)
-	descLine := b.styles.Accent.Render("║") + " " + styledDesc + strings.Repeat(" ", 78-len(cliDesc)-1) + b.styles.Accent.Render("║")
+	cliDescWidth := runewidth.StringWidth(cliDesc)
+	descLine := b.styles.Accent.Render("║") + " " + styledDesc + strings.Repeat(" ", 78-cliDescWidth-1) + b.styles.Accent.Render("║")
 	output.WriteString(descLine + "\n")
 
-	// Constitution - aligned left (mesmo estilo)
+	// Constitution - aligned left (usando runewidth para perfeição)
 	constitution := "Governed by Constitution v2.6 | \"Intention is Sovereign.\""
 	styledConst := b.styles.Muted.Italic(true).Render(constitution)
-	constLine := b.styles.Accent.Render("║") + " " + styledConst + strings.Repeat(" ", 78-len(constitution)-1) + b.styles.Accent.Render("║")
+	constWidth := runewidth.StringWidth(constitution)
+	constLine := b.styles.Accent.Render("║") + " " + styledConst + strings.Repeat(" ", 78-constWidth-1) + b.styles.Accent.Render("║")
 	output.WriteString(constLine + "\n")
 
 	// Bottom border with gradient
