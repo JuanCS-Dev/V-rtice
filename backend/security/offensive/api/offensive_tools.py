@@ -15,8 +15,8 @@ from pydantic import BaseModel, Field, validator, IPvAnyAddress
 import structlog
 
 from ..core.tool_registry import registry, ToolCategory
-from ..core.base import ToolResult, OperationMode
-from ..core.maximus_adapter import MAXIMUSToolContext
+from ..core.base import ToolResult
+from ..core.maximus_adapter import MAXIMUSToolContext, OperationMode
 
 log = structlog.get_logger()
 
@@ -138,6 +138,73 @@ class PayloadGenerationRequest(BaseModel):
         if v not in valid_platforms:
             raise ValueError(f"Invalid platform. Must be one of: {valid_platforms}")
         return v
+
+
+class PrivilegeEscalationRequest(BaseModel):
+    """Privilege escalation request."""
+    target_system: str = Field(..., description="Target system info")
+    scan_type: str = Field(
+        default="comprehensive",
+        description="Scan type: quick, comprehensive"
+    )
+    context: ToolExecutionContext = Field(default_factory=ToolExecutionContext)
+
+
+class PersistenceRequest(BaseModel):
+    """Persistence mechanism request."""
+    target_platform: str = Field(..., description="Target platform")
+    persistence_type: str = Field(
+        ...,
+        description="Type: registry, service, scheduled_task, etc"
+    )
+    stealth_level: int = Field(default=2, ge=1, le=3)
+    context: ToolExecutionContext = Field(default_factory=ToolExecutionContext)
+
+
+class LateralMovementRequest(BaseModel):
+    """Lateral movement request."""
+    source_host: str = Field(..., description="Source host")
+    target_hosts: List[str] = Field(..., description="Target hosts")
+    method: str = Field(
+        default="smb",
+        description="Movement method: smb, wmi, ssh, rdp"
+    )
+    context: ToolExecutionContext = Field(default_factory=ToolExecutionContext)
+
+
+class CredentialHarvestRequest(BaseModel):
+    """Credential harvesting request."""
+    target_system: str = Field(..., description="Target system")
+    harvest_types: List[str] = Field(
+        default=["memory", "registry", "files"],
+        description="Types to harvest"
+    )
+    context: ToolExecutionContext = Field(default_factory=ToolExecutionContext)
+
+
+class DataExfiltrationRequest(BaseModel):
+    """Data exfiltration request."""
+    source_path: str = Field(..., description="Source data path")
+    exfil_method: str = Field(
+        default="https",
+        description="Exfiltration method: https, dns, smb"
+    )
+    encryption: bool = Field(default=True)
+    context: ToolExecutionContext = Field(default_factory=ToolExecutionContext)
+
+
+class PayloadExecutionRequest(BaseModel):
+    """Payload execution request."""
+    payload: str = Field(..., description="Payload to execute")
+    execution_method: str = Field(
+        default="direct",
+        description="Execution method: direct, reflective, process_injection"
+    )
+    target_process: Optional[str] = Field(
+        default=None,
+        description="Target process for injection"
+    )
+    context: ToolExecutionContext = Field(default_factory=ToolExecutionContext)
 
 
 class ToolResultResponse(BaseModel):
@@ -511,6 +578,413 @@ async def generate_payload(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Payload generation failed: {str(e)}"
+        )
+
+
+# ============================================================================
+# Post-Exploitation: Privilege Escalation
+# ============================================================================
+
+@router.post(
+    "/post-exploit/privilege-escalation",
+    response_model=ToolResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Identify privilege escalation vectors"
+)
+async def privilege_escalation(
+    request: PrivilegeEscalationRequest,
+    user_agent: Optional[str] = Header(None)
+) -> ToolResultResponse:
+    """
+    Identify privilege escalation opportunities.
+    
+    HIGH RISK: Requires authorization.
+    Scans for misconfigurations, vulnerable services, etc.
+    """
+    OFFENSIVE_REQUESTS.labels(
+        tool="privilege_escalation",
+        operation="scan",
+        mode=request.context.operation_mode
+    ).inc()
+    
+    if not request.context.authorization_token:
+        ETHICAL_BLOCKS.labels(tool="privilege_escalation", reason="no_auth_token").inc()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization required for privilege escalation"
+        )
+    
+    try:
+        with OFFENSIVE_LATENCY.labels(tool="privilege_escalation", operation="scan").time():
+            tool = registry.get_tool("privilege_escalation", with_maximus=True)
+            context = create_maximus_context(request.context, user_agent)
+            
+            result = await tool.execute(
+                target_system=request.target_system,
+                scan_type=request.scan_type,
+                context=context
+            )
+            
+            log.warning(
+                "privilege_escalation_scan",
+                target=request.target_system,
+                mode=request.context.operation_mode
+            )
+            
+            return convert_tool_result(
+                result,
+                "privilege_escalation",
+                request.context.operation_mode
+            )
+            
+    except PermissionError as e:
+        ETHICAL_BLOCKS.labels(tool="privilege_escalation", reason="unauthorized").inc()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        log.error("privilege_escalation_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Privilege escalation scan failed: {str(e)}"
+        )
+
+
+# ============================================================================
+# Post-Exploitation: Persistence
+# ============================================================================
+
+@router.post(
+    "/post-exploit/persistence",
+    response_model=ToolResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Establish persistence mechanism"
+)
+async def establish_persistence(
+    request: PersistenceRequest,
+    user_agent: Optional[str] = Header(None)
+) -> ToolResultResponse:
+    """
+    Establish persistence on compromised system.
+    
+    HIGH RISK: Requires authorization.
+    Creates mechanisms for maintaining access.
+    """
+    OFFENSIVE_REQUESTS.labels(
+        tool="persistence",
+        operation="establish",
+        mode=request.context.operation_mode
+    ).inc()
+    
+    if not request.context.authorization_token:
+        ETHICAL_BLOCKS.labels(tool="persistence", reason="no_auth_token").inc()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization required for persistence"
+        )
+    
+    try:
+        with OFFENSIVE_LATENCY.labels(tool="persistence", operation="establish").time():
+            tool = registry.get_tool("persistence", with_maximus=True)
+            context = create_maximus_context(request.context, user_agent)
+            
+            result = await tool.execute(
+                target_platform=request.target_platform,
+                persistence_type=request.persistence_type,
+                stealth_level=request.stealth_level,
+                context=context
+            )
+            
+            log.warning(
+                "persistence_established",
+                platform=request.target_platform,
+                type=request.persistence_type
+            )
+            
+            return convert_tool_result(
+                result,
+                "persistence",
+                request.context.operation_mode
+            )
+            
+    except PermissionError as e:
+        ETHICAL_BLOCKS.labels(tool="persistence", reason="unauthorized").inc()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        log.error("persistence_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Persistence establishment failed: {str(e)}"
+        )
+
+
+# ============================================================================
+# Post-Exploitation: Lateral Movement
+# ============================================================================
+
+@router.post(
+    "/post-exploit/lateral-movement",
+    response_model=ToolResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Execute lateral movement"
+)
+async def lateral_movement(
+    request: LateralMovementRequest,
+    user_agent: Optional[str] = Header(None)
+) -> ToolResultResponse:
+    """
+    Execute lateral movement to other systems.
+    
+    HIGH RISK: Requires authorization.
+    Moves across network using various methods.
+    """
+    OFFENSIVE_REQUESTS.labels(
+        tool="lateral_movement",
+        operation="move",
+        mode=request.context.operation_mode
+    ).inc()
+    
+    if not request.context.authorization_token:
+        ETHICAL_BLOCKS.labels(tool="lateral_movement", reason="no_auth_token").inc()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization required for lateral movement"
+        )
+    
+    try:
+        with OFFENSIVE_LATENCY.labels(tool="lateral_movement", operation="move").time():
+            tool = registry.get_tool("lateral_movement", with_maximus=True)
+            context = create_maximus_context(request.context, user_agent)
+            
+            result = await tool.execute(
+                source_host=request.source_host,
+                target_hosts=request.target_hosts,
+                method=request.method,
+                context=context
+            )
+            
+            log.warning(
+                "lateral_movement_executed",
+                source=request.source_host,
+                targets=request.target_hosts,
+                method=request.method
+            )
+            
+            return convert_tool_result(
+                result,
+                "lateral_movement",
+                request.context.operation_mode
+            )
+            
+    except PermissionError as e:
+        ETHICAL_BLOCKS.labels(tool="lateral_movement", reason="unauthorized").inc()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        log.error("lateral_movement_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lateral movement failed: {str(e)}"
+        )
+
+
+# ============================================================================
+# Post-Exploitation: Credential Harvesting
+# ============================================================================
+
+@router.post(
+    "/post-exploit/credential-harvest",
+    response_model=ToolResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Harvest credentials"
+)
+async def credential_harvest(
+    request: CredentialHarvestRequest,
+    user_agent: Optional[str] = Header(None)
+) -> ToolResultResponse:
+    """
+    Harvest credentials from compromised system.
+    
+    HIGH RISK: Requires authorization.
+    Extracts passwords, tokens, keys from various sources.
+    """
+    OFFENSIVE_REQUESTS.labels(
+        tool="credential_harvesting",
+        operation="harvest",
+        mode=request.context.operation_mode
+    ).inc()
+    
+    if not request.context.authorization_token:
+        ETHICAL_BLOCKS.labels(tool="credential_harvesting", reason="no_auth_token").inc()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization required for credential harvesting"
+        )
+    
+    try:
+        with OFFENSIVE_LATENCY.labels(tool="credential_harvesting", operation="harvest").time():
+            tool = registry.get_tool("credential_harvesting", with_maximus=True)
+            context = create_maximus_context(request.context, user_agent)
+            
+            result = await tool.execute(
+                target_system=request.target_system,
+                harvest_types=request.harvest_types,
+                context=context
+            )
+            
+            log.warning(
+                "credentials_harvested",
+                target=request.target_system,
+                types=request.harvest_types
+            )
+            
+            return convert_tool_result(
+                result,
+                "credential_harvesting",
+                request.context.operation_mode
+            )
+            
+    except PermissionError as e:
+        ETHICAL_BLOCKS.labels(tool="credential_harvesting", reason="unauthorized").inc()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        log.error("credential_harvest_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Credential harvesting failed: {str(e)}"
+        )
+
+
+# ============================================================================
+# Post-Exploitation: Data Exfiltration
+# ============================================================================
+
+@router.post(
+    "/post-exploit/data-exfiltration",
+    response_model=ToolResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Exfiltrate data"
+)
+async def data_exfiltration(
+    request: DataExfiltrationRequest,
+    user_agent: Optional[str] = Header(None)
+) -> ToolResultResponse:
+    """
+    Exfiltrate data from compromised system.
+    
+    HIGH RISK: Requires authorization.
+    Transfers data using covert channels.
+    """
+    OFFENSIVE_REQUESTS.labels(
+        tool="data_exfiltration",
+        operation="exfiltrate",
+        mode=request.context.operation_mode
+    ).inc()
+    
+    if not request.context.authorization_token:
+        ETHICAL_BLOCKS.labels(tool="data_exfiltration", reason="no_auth_token").inc()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization required for data exfiltration"
+        )
+    
+    try:
+        with OFFENSIVE_LATENCY.labels(tool="data_exfiltration", operation="exfiltrate").time():
+            tool = registry.get_tool("data_exfiltration", with_maximus=True)
+            context = create_maximus_context(request.context, user_agent)
+            
+            result = await tool.execute(
+                source_path=request.source_path,
+                exfil_method=request.exfil_method,
+                encryption=request.encryption,
+                context=context
+            )
+            
+            log.warning(
+                "data_exfiltrated",
+                source=request.source_path,
+                method=request.exfil_method
+            )
+            
+            return convert_tool_result(
+                result,
+                "data_exfiltration",
+                request.context.operation_mode
+            )
+            
+    except PermissionError as e:
+        ETHICAL_BLOCKS.labels(tool="data_exfiltration", reason="unauthorized").inc()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        log.error("data_exfiltration_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Data exfiltration failed: {str(e)}"
+        )
+
+
+# ============================================================================
+# Exploitation: Payload Execution
+# ============================================================================
+
+@router.post(
+    "/exploit/execute-payload",
+    response_model=ToolResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Execute payload"
+)
+async def execute_payload(
+    request: PayloadExecutionRequest,
+    user_agent: Optional[str] = Header(None)
+) -> ToolResultResponse:
+    """
+    Execute exploitation payload.
+    
+    HIGH RISK: Requires authorization.
+    Executes payload with specified method.
+    """
+    OFFENSIVE_REQUESTS.labels(
+        tool="payload_executor",
+        operation="execute",
+        mode=request.context.operation_mode
+    ).inc()
+    
+    if not request.context.authorization_token:
+        ETHICAL_BLOCKS.labels(tool="payload_executor", reason="no_auth_token").inc()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization required for payload execution"
+        )
+    
+    try:
+        with OFFENSIVE_LATENCY.labels(tool="payload_executor", operation="execute").time():
+            tool = registry.get_tool("payload_executor", with_maximus=True)
+            context = create_maximus_context(request.context, user_agent)
+            
+            result = await tool.execute(
+                payload=request.payload,
+                execution_method=request.execution_method,
+                target_process=request.target_process,
+                context=context
+            )
+            
+            log.warning(
+                "payload_executed",
+                method=request.execution_method,
+                target_process=request.target_process
+            )
+            
+            return convert_tool_result(
+                result,
+                "payload_executor",
+                request.context.operation_mode
+            )
+            
+    except PermissionError as e:
+        ETHICAL_BLOCKS.labels(tool="payload_executor", reason="unauthorized").inc()
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        log.error("payload_execution_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Payload execution failed: {str(e)}"
         )
 
 

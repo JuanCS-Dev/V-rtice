@@ -87,6 +87,30 @@ services:
     restart: unless-stopped
 
   # ============================
+  # OFFENSIVE TOOLS SERVICE
+  # ============================
+  offensive_tools_service:
+    build: ./backend/services/offensive_tools_service
+    container_name: vertice-offensive-tools
+    ports:
+      - "8010:8010"
+    environment:
+      - PORT=8010
+      - LOG_LEVEL=info
+      - CORS_ORIGINS=*
+    volumes:
+      - ./backend/security:/app/security:ro
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8010/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ============================
   # REDIS CACHE
   # ============================
   redis:
