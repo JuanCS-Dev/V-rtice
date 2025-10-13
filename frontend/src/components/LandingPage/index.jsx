@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * LANDING PAGE - PROJETO VÉRTICE
  * ================================
  * A CARA do sistema. Impressionante, impactante, REAL.
@@ -22,6 +21,7 @@ import { LiveFeed } from './LiveFeed';
 import { FloatingThemeButton } from '../shared/FloatingThemeButton';
 import { useKonamiCode } from '../../hooks/useKonamiCode';
 import { checkServicesHealth, checkThreatIntelligence } from '../../api/cyberServices';
+import logger from '../../utils/logger';
 import './LandingPage.css';
 
 export const LandingPage = ({ setCurrentView }) => {

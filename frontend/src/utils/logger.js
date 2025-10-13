@@ -58,7 +58,9 @@ class Logger {
   group(label, callback) {
     if (this.level <= LOG_LEVELS.INFO) {
       console.group(label);
-      callback();
+      if (typeof callback === 'function') {
+        callback();
+      }
       console.groupEnd();
     }
   }

@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * useTheme Hook - Gerenciamento de temas
  * ======================================
  *
@@ -7,6 +6,7 @@ import logger from '@/utils/logger';
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import logger from '../utils/logger';
 
 const THEME_KEY = 'vertice-theme';
 const MODE_KEY = 'vertice-theme-mode';

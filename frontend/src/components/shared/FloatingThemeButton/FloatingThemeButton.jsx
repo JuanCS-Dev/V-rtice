@@ -179,10 +179,4 @@ FloatingThemeButton.propTypes = {
   pulseDelay: PropTypes.number
 };
 
-FloatingThemeButton.defaultProps = {
-  position: 'top-right',
-  pulseOnMount: true,
-  pulseDelay: 3000
-};
-
 export default FloatingThemeButton;

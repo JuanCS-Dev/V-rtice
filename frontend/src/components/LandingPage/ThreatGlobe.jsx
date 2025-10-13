@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ThreatGlobe - Mapa Global Interativo de Ameaças
  * =================================================
  * VERSÃO IMPRESSIONANTE com animação OnionTracer integrada
@@ -15,6 +14,7 @@ import logger from '@/utils/logger';
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import logger from '../../utils/logger';
 
 export const ThreatGlobe = ({ realThreats = [] }) => {
   const mapRef = useRef(null);
@@ -349,7 +349,7 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .threat-marker {
           animation: pulse-marker 2s infinite;
         }

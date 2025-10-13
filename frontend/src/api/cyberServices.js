@@ -1,4 +1,3 @@
-import logger from '@/utils/logger';
 /**
  * Cyber Services API Client
  * ==========================
@@ -11,6 +10,8 @@ import logger from '@/utils/logger';
  *
  * Este módulo transforma visualizações cinematográficas em ferramentas REAIS.
  */
+
+import logger from '../utils/logger';
 
 const API_ENDPOINTS = {
   IP_INTELLIGENCE: 'http://localhost:8000/api/ip',
