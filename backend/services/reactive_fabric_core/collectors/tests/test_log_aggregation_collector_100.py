@@ -16,6 +16,7 @@ from ..log_aggregation_collector import (
     LogAggregationCollector,
     LogAggregationConfig
 )
+from ..base_collector import CollectedEvent
 
 
 class TestFullCoverage:
@@ -472,3 +473,149 @@ class TestFullCoverage:
             events.append(event)
 
         assert len(events) == 0
+
+    @pytest.mark.asyncio
+    async def test_collect_main_graylog_backend(self):
+        """Test main collect() method with Graylog backend (line 237)."""
+        config = LogAggregationConfig(backend_type="graylog")
+        collector = LogAggregationCollector(config)
+        await collector.initialize()
+
+        # Patch _collect_graylog directly to test the yield in collect()
+        async def mock_collect_graylog(from_time, to_time):
+            # Yield a test event
+            yield CollectedEvent(
+                collector_type="LogAggregation",
+                source="graylog:test",
+                severity="high",
+                raw_data={"message": "test"},
+                parsed_data={"pattern_name": "privilege_escalation"},
+                tags=["test"]
+            )
+
+        with patch.object(collector, '_collect_graylog', mock_collect_graylog):
+            events = []
+            async for event in collector.collect():
+                events.append(event)
+
+            # Should have one event that was yielded
+            assert len(events) == 1
+            assert events[0].parsed_data["pattern_name"] == "privilege_escalation"
+
+        await collector.cleanup()
+
+    @pytest.mark.asyncio
+    async def test_collect_main_exception_handling(self):
+        """Test exception handling in main collect() method (lines 242-244)."""
+        config = LogAggregationConfig(backend_type="elasticsearch")
+        collector = LogAggregationCollector(config)
+        await collector.initialize()
+
+        # Force an exception by patching the specific backend method
+        with patch.object(collector, '_collect_elasticsearch', side_effect=Exception("Test error")):
+            initial_errors = collector.metrics.errors_count
+
+            events = []
+            async for event in collector.collect():
+                events.append(event)
+
+            assert len(events) == 0
+            assert collector.metrics.errors_count == initial_errors + 1
+
+        await collector.cleanup()
+
+    @pytest.mark.asyncio
+    async def test_collect_graylog_http_error(self):
+        """Test Graylog collection with HTTP error response (line 485)."""
+        config = LogAggregationConfig(backend_type="graylog")
+        collector = LogAggregationCollector(config)
+        await collector.initialize()
+
+        # Mock response with non-200 status
+        mock_response = AsyncMock()
+        mock_response.status = 404  # This will trigger the early return on line 485
+        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+        mock_response.__aexit__ = AsyncMock(return_value=None)
+
+        with patch.object(collector.session, 'get', return_value=mock_response):
+            events = []
+            async for event in collector._collect_graylog(
+                datetime.utcnow() - timedelta(minutes=5),
+                datetime.utcnow()
+            ):
+                events.append(event)
+
+            assert len(events) == 0
+
+        await collector.cleanup()
+
+    @pytest.mark.asyncio
+    async def test_collect_graylog_successful_with_messages(self):
+        """Test Graylog collection success path with actual messages (lines 487-491)."""
+        config = LogAggregationConfig(backend_type="graylog")
+        collector = LogAggregationCollector(config)
+        await collector.initialize()
+
+        # Patch the session.get method to simulate successful response
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "messages": [
+                {
+                    "message": {
+                        "message": "malware detected on system",
+                        "timestamp": "2024-01-01T10:00:00Z"
+                    },
+                    "index": "graylog_0"
+                },
+                {
+                    "message": {
+                        "message": "port scan detected from 192.168.1.1",
+                        "timestamp": "2024-01-01T10:05:00Z"
+                    },
+                    "index": "graylog_0"
+                }
+            ]
+        })
+        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+        mock_response.__aexit__ = AsyncMock(return_value=None)
+
+        with patch.object(collector.session, 'get', return_value=mock_response) as mock_get:
+            events = []
+            async for event in collector._collect_graylog(
+                datetime.utcnow() - timedelta(minutes=5),
+                datetime.utcnow()
+            ):
+                events.append(event)
+
+            assert len(events) == 2
+            assert events[0].parsed_data["pattern_name"] == "malware_indicators"
+            assert events[1].parsed_data["pattern_name"] == "network_scanning"
+
+        await collector.cleanup()
+
+    @pytest.mark.asyncio
+    async def test_collect_graylog_json_parse_error(self):
+        """Test Graylog collection with invalid JSON response (lines 493-494)."""
+        config = LogAggregationConfig(backend_type="graylog")
+        collector = LogAggregationCollector(config)
+        await collector.initialize()
+
+        with aioresponses() as mock:
+            # Mock response with invalid JSON to trigger exception
+            mock.get(
+                "http://localhost:9200/api/search/universal/relative",
+                status=200,
+                body="Invalid JSON {["
+            )
+
+            events = []
+            async for event in collector._collect_graylog(
+                datetime.utcnow() - timedelta(minutes=5),
+                datetime.utcnow()
+            ):
+                events.append(event)
+
+            assert len(events) == 0
+
+        await collector.cleanup()
