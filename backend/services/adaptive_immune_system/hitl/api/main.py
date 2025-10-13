@@ -9,6 +9,8 @@ Features:
 - Metrics endpoint for Prometheus
 - Request logging middleware
 - Error handling middleware
+- Prometheus metrics collection
+- Distributed tracing (OpenTelemetry)
 
 Usage:
     uvicorn hitl.api.main:app --reload --port 8003
@@ -20,10 +22,18 @@ from typing import Any, Dict
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from .endpoints import apv_review_router, decisions_router
 from ..models import WebSocketMessage
+
+# Import monitoring modules
+try:
+    from ..monitoring import PrometheusMiddleware, metrics, setup_tracing
+    MONITORING_ENABLED = True
+except ImportError:
+    MONITORING_ENABLED = False
+    logging.warning("Monitoring modules not available - metrics disabled")
 
 # Configure logging
 logging.basicConfig(
@@ -44,6 +54,9 @@ app = FastAPI(
 
 # --- Middleware ---
 
+# Prometheus metrics middleware (must be first for accurate timing)
+if MONITORING_ENABLED:
+    app.add_middleware(PrometheusMiddleware)
 
 # CORS middleware (allow web frontend)
 app.add_middleware(
@@ -149,27 +162,30 @@ async def health_check() -> Dict[str, Any]:
 
 
 @app.get("/metrics", tags=["Metrics"])
-async def metrics() -> Dict[str, Any]:
+async def metrics_endpoint() -> Response:
     """
-    Metrics endpoint for Prometheus.
+    Metrics endpoint for Prometheus scraping.
 
-    In production: Use prometheus_client library.
+    Returns Prometheus-formatted metrics including:
+    - HTTP request metrics (RED method)
+    - Business metrics (reviews, decisions)
+    - System metrics (database, cache)
+    - SLO tracking metrics
 
     Returns:
-        Application metrics (requests, latency, errors)
+        Prometheus text format metrics
     """
-    # In production: Return Prometheus-formatted metrics
-    # from prometheus_client import generate_latest
-    # return Response(generate_latest(), media_type="text/plain")
-
-    return {
-        "http_requests_total": 12345,
-        "http_request_duration_seconds": 0.123,
-        "hitl_reviews_pending": 12,
-        "hitl_decisions_total": 487,
-        "hitl_decisions_approved": 342,
-        "hitl_decisions_rejected": 89,
-    }
+    if MONITORING_ENABLED:
+        return Response(
+            content=metrics.get_metrics(),
+            media_type=metrics.get_content_type()
+        )
+    else:
+        # Fallback if monitoring not enabled
+        return Response(
+            content="# Monitoring not enabled\n",
+            media_type="text/plain"
+        )
 
 
 # --- WebSocket ---
@@ -284,6 +300,19 @@ async def startup_event() -> None:
     logger.info("🚀 HITL API starting up...")
     logger.info("   📝 Docs: http://localhost:8003/hitl/docs")
     logger.info("   🔌 WebSocket: ws://localhost:8003/hitl/ws")
+    logger.info("   📊 Metrics: http://localhost:8003/metrics")
+
+    # Initialize tracing if enabled
+    if MONITORING_ENABLED:
+        setup_tracing(
+            service_name="hitl-api",
+            jaeger_host="localhost",
+            jaeger_port=6831
+        )
+        logger.info("   🔍 Tracing: http://localhost:16686 (Jaeger)")
+        logger.info("   ✅ Monitoring: ENABLED")
+    else:
+        logger.warning("   ⚠️  Monitoring: DISABLED")
 
     # In production: Initialize database pool, RabbitMQ connection, etc.
 

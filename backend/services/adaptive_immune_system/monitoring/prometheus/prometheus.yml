@@ -21,10 +21,10 @@ rule_files:
 
 # Scrape configurations
 scrape_configs:
-  # HITL API metrics
+  # HITL API metrics (running on host)
   - job_name: 'hitl-api'
     static_configs:
-      - targets: ['hitl-api:8000']
+      - targets: ['host.docker.internal:8003']
     metrics_path: '/metrics'
     scrape_interval: 10s
     scrape_timeout: 5s
@@ -63,8 +63,6 @@ scrape_configs:
       - targets: ['redis-exporter:9121']
     scrape_interval: 30s
 
-# Storage configuration
-storage:
-  tsdb:
-    retention.time: 30d
-    retention.size: 10GB
+# Note: Storage retention is configured via command-line flags:
+# --storage.tsdb.retention.time=30d
+# --storage.tsdb.retention.size=10GB

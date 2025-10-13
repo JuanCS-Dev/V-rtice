@@ -1,0 +1,44 @@
+# Minimal Monitoring Stack - Prometheus Only
+# Economical deployment for metrics collection
+# Usage: docker compose -f docker-compose.minimal.yml up -d
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+
+services:
+  # ============================================================================
+  # PROMETHEUS - Metrics collection and storage
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:v2.40.0
+    container_name: hitl-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:9090/-/healthy']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
