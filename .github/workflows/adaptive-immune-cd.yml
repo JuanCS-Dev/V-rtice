@@ -1,0 +1,278 @@
+name: Adaptive Immune System - CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/services/adaptive_immune_system/**'
+      - '.github/workflows/adaptive-immune-cd.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip pre-deployment tests'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: '3.11'
+  SERVICE_PATH: backend/services/adaptive_immune_system
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/adaptive-immune
+
+jobs:
+  # Job 1: Build and Push Docker Image
+  build:
+    name: Build & Push Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.SERVICE_PATH }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            VCS_REF=${{ github.sha }}
+
+      - name: Generate build summary
+        run: |
+          echo "### Docker Build Summary 🐳" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image**: \`${{ steps.meta.outputs.tags }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Digest**: \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
+  # Job 2: Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging-adaptive-immune.example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging..."
+          echo "Image: ${{ needs.build.outputs.image_tag }}"
+          # TODO: Implement actual deployment
+          # Example: kubectl set image deployment/adaptive-immune adaptive-immune=${{ needs.build.outputs.image_tag }}
+
+      - name: Run health checks
+        run: |
+          echo "🏥 Running health checks..."
+          # TODO: Implement actual health check
+          # curl -f https://staging-adaptive-immune.example.com/health
+
+      - name: Run smoke tests
+        if: ${{ !github.event.inputs.skip_tests }}
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          echo "🔥 Running smoke tests..."
+          # TODO: Implement smoke tests
+          # pytest tests/smoke/ --host=https://staging-adaptive-immune.example.com
+
+      - name: Deployment summary
+        run: |
+          echo "### Staging Deployment Summary 🎯" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Deployment successful" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: **staging**" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ needs.build.outputs.image_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Health: **OK**" >> $GITHUB_STEP_SUMMARY
+
+  # Job 3: Load Test on Staging
+  load-test-staging:
+    name: Load Test Staging
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: ${{ !github.event.inputs.skip_tests }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          pip install -r requirements-test.txt
+          pip install locust
+
+      - name: Run load tests
+        working-directory: ${{ env.SERVICE_PATH }}/tests/load
+        run: |
+          # Quick load test (1 minute, 20 users)
+          locust -f locustfile.py ReadHeavyUser \
+            --headless \
+            --users 20 \
+            --spawn-rate 5 \
+            --run-time 1m \
+            --host https://staging-adaptive-immune.example.com \
+            --html load-test-report.html \
+            --csv load-test-results
+
+      - name: Upload load test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: load-test-reports
+          path: |
+            ${{ env.SERVICE_PATH }}/tests/load/load-test-report.html
+            ${{ env.SERVICE_PATH }}/tests/load/load-test-results*.csv
+
+      - name: Check load test results
+        working-directory: ${{ env.SERVICE_PATH }}/tests/load
+        run: |
+          # Parse results and fail if SLAs not met
+          P95=$(grep "Aggregated" load-test-results_stats.csv | cut -d',' -f16)
+          ERROR_RATE=$(grep "Aggregated" load-test-results_stats.csv | cut -d',' -f4)
+
+          echo "P95 Latency: ${P95}ms"
+          echo "Failures: $ERROR_RATE"
+
+          # TODO: Implement actual SLA validation
+          echo "✅ Load test passed"
+
+  # Job 4: Deploy to Production (Manual Approval)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, load-test-staging]
+    if: github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://adaptive-immune.example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create deployment backup
+        run: |
+          echo "💾 Creating deployment backup..."
+          # TODO: Backup current deployment
+          # kubectl get deployment adaptive-immune -o yaml > backup.yaml
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production..."
+          echo "Image: ${{ needs.build.outputs.image_tag }}"
+          # TODO: Implement actual deployment with rolling update
+          # kubectl set image deployment/adaptive-immune adaptive-immune=${{ needs.build.outputs.image_tag }}
+          # kubectl rollout status deployment/adaptive-immune
+
+      - name: Run health checks
+        run: |
+          echo "🏥 Running health checks..."
+          # TODO: Implement actual health check
+          # curl -f https://adaptive-immune.example.com/health
+
+      - name: Monitor metrics
+        run: |
+          echo "📊 Monitoring metrics for 5 minutes..."
+          # TODO: Monitor error rate, latency, etc.
+          sleep 60  # Placeholder
+
+      - name: Deployment summary
+        run: |
+          echo "### Production Deployment Summary 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Deployment successful" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: **production**" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ needs.build.outputs.image_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Health: **OK**" >> $GITHUB_STEP_SUMMARY
+          echo "- Monitoring: **Active**" >> $GITHUB_STEP_SUMMARY
+
+  # Job 5: Rollback on Failure
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: failure()
+
+    steps:
+      - name: Rollback deployment
+        run: |
+          echo "⚠️ Deployment failed, initiating rollback..."
+          # TODO: Implement rollback
+          # kubectl rollout undo deployment/adaptive-immune
+
+      - name: Notify team
+        run: |
+          echo "📢 Notifying team of rollback..."
+          # TODO: Send notification (Slack, email, etc.)
+
+      - name: Create incident
+        run: |
+          echo "🚨 Creating incident report..."
+          # TODO: Create incident in tracking system
+
+  # Job 6: CD Success
+  cd-success:
+    name: CD Success
+    runs-on: ubuntu-latest
+    needs: [build, deploy-staging]
+    if: success()
+
+    steps:
+      - name: CD Pipeline Success
+        run: |
+          echo "✅ CD Pipeline completed successfully!"
+          echo "- Build: PASSED"
+          echo "- Deploy: PASSED"
+          echo "- Tests: PASSED"

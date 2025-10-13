@@ -1,0 +1,261 @@
+name: Adaptive Immune System - CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'reactive-fabric/**'
+    paths:
+      - 'backend/services/adaptive_immune_system/**'
+      - '.github/workflows/adaptive-immune-ci.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'backend/services/adaptive_immune_system/**'
+
+env:
+  PYTHON_VERSION: '3.11'
+  SERVICE_PATH: backend/services/adaptive_immune_system
+
+jobs:
+  # Job 1: Lint and Format Check
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black mypy
+          pip install -r requirements.txt
+
+      - name: Run Ruff linter
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: ruff check hitl/ --output-format=github
+
+      - name: Check Black formatting
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: black --check hitl/
+
+      - name: Run MyPy type checking
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: mypy hitl/ --ignore-missing-imports
+
+  # Job 2: Unit Tests
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: adaptive_immune_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-test-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-test-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run pytest with coverage
+        working-directory: ${{ env.SERVICE_PATH }}
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/adaptive_immune_test
+          REDIS_URL: redis://localhost:6379/0
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TESTING_MODE: true
+        run: |
+          pytest tests/ -v --cov=hitl --cov-report=xml --cov-report=term-missing --tb=short
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ${{ env.SERVICE_PATH }}/coverage.xml
+          flags: adaptive-immune
+          name: adaptive-immune-coverage
+
+  # Job 3: Security Scan
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety bandit pip-audit
+
+      - name: Run Safety check
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          safety check --file requirements.txt --json --output safety-report.json || true
+          cat safety-report.json
+
+      - name: Run Bandit security linter
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          bandit -r hitl/ -f json -o bandit-report.json || true
+          cat bandit-report.json
+
+      - name: Run pip-audit
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          pip-audit --requirement requirements.txt --format json --output pip-audit-report.json || true
+          cat pip-audit-report.json
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            ${{ env.SERVICE_PATH }}/safety-report.json
+            ${{ env.SERVICE_PATH }}/bandit-report.json
+            ${{ env.SERVICE_PATH }}/pip-audit-report.json
+
+      - name: Check for critical vulnerabilities
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          # Fail if high-severity Bandit issues found
+          HIGH_ISSUES=$(jq '[.results[] | select(.issue_severity == "HIGH")] | length' bandit-report.json)
+          if [ "$HIGH_ISSUES" -gt "0" ]; then
+            echo "❌ Found $HIGH_ISSUES high-severity security issues"
+            exit 1
+          fi
+          echo "✅ No high-severity security issues found"
+
+  # Job 4: Docker Build Test
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    needs: [test, security]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        working-directory: ${{ env.SERVICE_PATH }}
+        run: |
+          docker buildx build \
+            --tag adaptive-immune:test \
+            --load \
+            .
+
+      - name: Test Docker image
+        run: |
+          docker run --rm adaptive-immune:test python --version
+          docker run --rm adaptive-immune:test pip list
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: adaptive-immune:test
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Job 5: Integration Summary
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [lint, test, security, docker-build]
+    if: success()
+
+    steps:
+      - name: CI Pipeline Success
+        run: |
+          echo "✅ All CI checks passed!"
+          echo "- Lint: PASSED"
+          echo "- Tests: PASSED"
+          echo "- Security: PASSED"
+          echo "- Docker Build: PASSED"
+
+  ci-failure:
+    name: CI Failure Notification
+    runs-on: ubuntu-latest
+    needs: [lint, test, security, docker-build]
+    if: failure()
+
+    steps:
+      - name: CI Pipeline Failed
+        run: |
+          echo "❌ CI Pipeline FAILED"
+          echo "Check the logs above for details"
+          exit 1
