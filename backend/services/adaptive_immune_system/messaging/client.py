@@ -27,11 +27,15 @@ class RabbitMQClient:
     QUEUE_APV_DISPATCH = "oraculo.apv.dispatch"
     QUEUE_REMEDY_STATUS = "eureka.remedy.status"
     QUEUE_WARGAME_RESULTS = "wargaming.results"
+    QUEUE_HITL_NOTIFICATIONS = "hitl.notifications"
+    QUEUE_HITL_DECISIONS = "hitl.decisions"
 
     # Dead-letter queues
     DLQ_APV_DISPATCH = "oraculo.apv.dispatch.dlq"
     DLQ_REMEDY_STATUS = "eureka.remedy.status.dlq"
     DLQ_WARGAME_RESULTS = "wargaming.results.dlq"
+    DLQ_HITL_NOTIFICATIONS = "hitl.notifications.dlq"
+    DLQ_HITL_DECISIONS = "hitl.decisions.dlq"
 
     # Exchange
     EXCHANGE_NAME = "adaptive_immune_system"
@@ -112,6 +116,16 @@ class RabbitMQClient:
                 self.QUEUE_WARGAME_RESULTS,
                 self.DLQ_WARGAME_RESULTS,
                 "wargaming.results.#",
+            ),
+            (
+                self.QUEUE_HITL_NOTIFICATIONS,
+                self.DLQ_HITL_NOTIFICATIONS,
+                "hitl.notifications.#",
+            ),
+            (
+                self.QUEUE_HITL_DECISIONS,
+                self.DLQ_HITL_DECISIONS,
+                "hitl.decisions.#",
             ),
         ]
 
