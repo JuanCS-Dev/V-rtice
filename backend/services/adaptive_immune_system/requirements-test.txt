@@ -1,0 +1,34 @@
+# Testing & Validation Tools for FASE 3.11
+# Production Validation: Load, Stress, Security, Performance, Chaos
+
+# Load Testing
+locust==2.20.0              # HTTP load testing framework
+gevent==23.9.1              # Async greenlet-based concurrency
+websocket-client==1.7.0     # WebSocket client for testing
+
+# Security Scanning
+safety==3.0.1               # Dependency vulnerability scanner
+bandit==1.7.5               # Python security linter
+
+# Performance Profiling
+py-spy==0.3.14              # Sampling CPU profiler (Rust-based)
+memory-profiler==0.61.0     # Line-by-line memory usage
+pytest-benchmark==4.0.0     # Microbenchmarking
+
+# Testing Framework
+pytest==7.4.3               # Test framework
+pytest-asyncio==0.21.1      # Async test support
+pytest-cov==4.1.0           # Coverage plugin
+pytest-timeout==2.2.0       # Timeout plugin
+pytest-mock==3.12.0         # Mocking plugin
+
+# HTTP Testing
+httpx==0.25.2               # Async HTTP client
+requests==2.31.0            # Sync HTTP client (for Locust)
+
+# Database Testing
+asyncpg==0.29.0             # PostgreSQL async driver (already in main requirements)
+
+# Utilities
+faker==22.0.0               # Fake data generation
+psutil==5.9.7               # System monitoring
