@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	// MinWidth is the minimum terminal width for perfect banner alignment (86 chars for NEUROSHELL)
-	MinWidth = 88
+	// MinWidth is the minimum terminal width for NEUROSHELL banner (84 chars ASCII)
+	MinWidth = 86
 	// MinHeight is the minimum terminal height
 	MinHeight = 30
 	// InitialWidth is the initial/preferred terminal width

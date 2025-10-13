@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattn/go-runewidth"
 	"github.com/verticedev/vcli-go/internal/visual"
 )
 
@@ -103,12 +102,7 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 
 	var output strings.Builder
 
-	// Top border with gradient (86 chars total: 84 interior + 2 borders)
-	topBorder := "╔════════════════════════════════════════════════════════════════════════════════════╗"
-	output.WriteString(visual.GradientText(topBorder, gradient))
-	output.WriteString("\n")
-
-	// ASCII Logo - NEUROSHELL (mesmo estilo box drawing do original)
+	// ASCII Logo - NEUROSHELL (sem box, apenas o texto)
 	asciiArt := []string{
 		"███╗   ██╗███████╗██╗   ██╗██████╗  ██████╗ ███████╗██╗  ██╗███████╗██╗     ██╗     ",
 		"████╗  ██║██╔════╝██║   ██║██╔══██╗██╔═══██╗██╔════╝██║  ██║██╔════╝██║     ██║     ",
@@ -118,47 +112,31 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 		"╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝",
 	}
 
-	// Render each line with gradient and box border (using runewidth for perfect alignment)
-	const totalWidth = 84 // Interior width for NEUROSHELL ASCII (86 - 2 for borders)
+	// Render each line with gradient (sem box)
 	for _, line := range asciiArt {
 		gradientLine := visual.GradientText(line, gradient)
-		// Calculate visual width (runewidth handles box drawing chars correctly)
-		visualWidth := runewidth.StringWidth(line)
-		padding := totalWidth - visualWidth - 1 // -1 for leading space
-		if padding < 0 {
-			padding = 0
-		}
-		boxedLine := b.styles.Accent.Render("║") + " " + gradientLine + strings.Repeat(" ", padding) + b.styles.Accent.Render("║")
-		output.WriteString(boxedLine)
+		output.WriteString(gradientLine)
 		output.WriteString("\n")
 	}
 
-	// MAXIMUS branding - centered with gradient and box
-	output.WriteString(b.styles.Accent.Render("║") + strings.Repeat(" ", 84) + b.styles.Accent.Render("║") + "\n")
+	output.WriteString("\n")
+
+	// MAXIMUS branding - centered
 	maximusText := "MAXIMUS CONSCIOUS AI"
 	gradientMaximus := visual.GradientText(maximusText, gradient)
-	maximusPadding := (84 - len(maximusText)) / 2
-	maximusLine := b.styles.Accent.Render("║") + strings.Repeat(" ", maximusPadding) + gradientMaximus + strings.Repeat(" ", 84-maximusPadding-len(maximusText)) + b.styles.Accent.Render("║")
-	output.WriteString(maximusLine + "\n")
+	output.WriteString(gradientMaximus)
+	output.WriteString("\n\n")
 
-	// CLI description - aligned left (usando runewidth para perfeição)
-	output.WriteString(b.styles.Accent.Render("║") + strings.Repeat(" ", 84) + b.styles.Accent.Render("║") + "\n")
+	// CLI description
 	cliDesc := "The NEUROSHELL Command Line Interface"
 	styledDesc := b.styles.Muted.Render(cliDesc)
-	cliDescWidth := runewidth.StringWidth(cliDesc)
-	descLine := b.styles.Accent.Render("║") + " " + styledDesc + strings.Repeat(" ", 84-cliDescWidth-1) + b.styles.Accent.Render("║")
-	output.WriteString(descLine + "\n")
+	output.WriteString(styledDesc)
+	output.WriteString("\n")
 
-	// Constitution - aligned left (usando runewidth para perfeição)
+	// Constitution
 	constitution := "Governed by Constitution v2.6 | \"Intention is Sovereign.\""
 	styledConst := b.styles.Muted.Italic(true).Render(constitution)
-	constWidth := runewidth.StringWidth(constitution)
-	constLine := b.styles.Accent.Render("║") + " " + styledConst + strings.Repeat(" ", 84-constWidth-1) + b.styles.Accent.Render("║")
-	output.WriteString(constLine + "\n")
-
-	// Bottom border with gradient
-	bottomBorder := "╚════════════════════════════════════════════════════════════════════════════════════╝"
-	output.WriteString(visual.GradientText(bottomBorder, gradient))
+	output.WriteString(styledConst)
 	output.WriteString("\n\n")
 
 	return output.String()
