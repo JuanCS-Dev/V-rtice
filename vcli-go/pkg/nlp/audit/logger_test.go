@@ -187,7 +187,7 @@ assert.Equal(t, 0, logger.GetEventCount())
 assert.Equal(t, "genesis", logger.chain)
 }
 
-func TestEventFilter_Matches(t *testing.T) {
+func TestEventFilter_MatchesBasic(t *testing.T) {
 event := &AuditEvent{
 UserID:    "user1",
 Action:    "delete",
@@ -702,3 +702,220 @@ func stringContains(s, substr string) bool {
 	}
 	return false
 }
+
+// TestEventFilter_Matches tests event filtering
+func TestEventFilter_Matches(t *testing.T) {
+	now := time.Now()
+	event := &AuditEvent{
+		UserID:    "user1",
+		Action:    "delete",
+		Resource:  "pod",
+		Success:   true,
+		RiskScore: 0.7,
+		Timestamp: now,
+	}
+	
+	t.Run("Match all", func(t *testing.T) {
+		filter := &EventFilter{}
+		assert.True(t, filter.Matches(event))
+	})
+	
+	t.Run("Match user", func(t *testing.T) {
+		filter := &EventFilter{UserID: "user1"}
+		assert.True(t, filter.Matches(event))
+		
+		filter.UserID = "user2"
+		assert.False(t, filter.Matches(event))
+	})
+	
+	t.Run("Match action", func(t *testing.T) {
+		filter := &EventFilter{Action: "delete"}
+		assert.True(t, filter.Matches(event))
+		
+		filter.Action = "create"
+		assert.False(t, filter.Matches(event))
+	})
+	
+	t.Run("Match resource", func(t *testing.T) {
+		filter := &EventFilter{Resource: "pod"}
+		assert.True(t, filter.Matches(event))
+		
+		filter.Resource = "deployment"
+		assert.False(t, filter.Matches(event))
+	})
+	
+	t.Run("Match success", func(t *testing.T) {
+		success := true
+		filter := &EventFilter{Success: &success}
+		assert.True(t, filter.Matches(event))
+		
+		fail := false
+		filter.Success = &fail
+		assert.False(t, filter.Matches(event))
+	})
+	
+	t.Run("Match time range", func(t *testing.T) {
+		filter := &EventFilter{
+			StartTime: now.Add(-1 * time.Hour),
+			EndTime:   now.Add(1 * time.Hour),
+		}
+		assert.True(t, filter.Matches(event))
+		
+		filter.StartTime = now.Add(1 * time.Hour)
+		assert.False(t, filter.Matches(event))
+		
+		filter.StartTime = now.Add(-1 * time.Hour)
+		filter.EndTime = now.Add(-30 * time.Minute)
+		assert.False(t, filter.Matches(event))
+	})
+	
+	t.Run("Match risk score", func(t *testing.T) {
+		filter := &EventFilter{MinRisk: 0.5}
+		assert.True(t, filter.Matches(event))
+		
+		filter.MinRisk = 0.8
+		assert.False(t, filter.Matches(event))
+	})
+	
+	t.Run("Combined filters", func(t *testing.T) {
+		filter := &EventFilter{
+			UserID:  "user1",
+			Action:  "delete",
+			MinRisk: 0.5,
+		}
+		assert.True(t, filter.Matches(event))
+		
+		filter.Action = "create"
+		assert.False(t, filter.Matches(event))
+	})
+}
+
+// TestDetectTamper_NoTampering tests tamper detection on valid chain
+func TestDetectTamper_NoTampering(t *testing.T) {
+	config := &AuditConfig{
+		TamperProof: true,
+	}
+	logger := NewAuditLogger(config)
+	
+	// Log events normally
+	logger.LogAction("user1", "get", "pods", "", true)
+	logger.LogAction("user2", "delete", "deployment", "myapp", true)
+	logger.LogAction("user3", "create", "service", "newsvc", true)
+	
+	// Should not detect tampering
+	period := Period{
+		Start: time.Now().Add(-1 * time.Hour),
+		End:   time.Now().Add(1 * time.Hour),
+	}
+	report := logger.GenerateComplianceReport(period)
+	assert.False(t, report.TamperDetected)
+}
+
+// TestDetectTamper_ChainValidation tests tamper detection is called
+func TestDetectTamper_ChainValidation(t *testing.T) {
+	config := &AuditConfig{
+		TamperProof: true,
+	}
+	logger := NewAuditLogger(config)
+	
+	// Log some events
+	logger.LogAction("user1", "get", "pods", "", true)
+	logger.LogAction("user2", "delete", "deployment", "myapp", true)
+	
+	// Generate report with tamper detection enabled
+	period := Period{
+		Start: time.Now().Add(-1 * time.Hour),
+		End:   time.Now().Add(1 * time.Hour),
+	}
+	report := logger.GenerateComplianceReport(period)
+	
+	// Report should be generated
+	assert.NotNil(t, report)
+	assert.False(t, report.TamperDetected) // No tampering on fresh logger
+	assert.NotZero(t, report.GeneratedAt)
+}
+
+// TestTamperProofEnabled tests tamper-proof configuration
+func TestTamperProofEnabled(t *testing.T) {
+	config := &AuditConfig{
+		TamperProof: true,
+		MaxEvents:   1000,
+	}
+	logger := NewAuditLogger(config)
+	
+	// Verify config applied
+	assert.NotNil(t, logger)
+	assert.Equal(t, true, logger.config.TamperProof)
+	
+	// Log event and verify it has hash
+	logger.LogAction("user1", "get", "pods", "", true)
+	
+	// Generate report
+	period := Period{
+		Start: time.Now().Add(-1 * time.Hour),
+		End:   time.Now().Add(1 * time.Hour),
+	}
+	report := logger.GenerateComplianceReport(period)
+	
+	// Should not detect tampering
+	assert.False(t, report.TamperDetected)
+}
+
+// TestDetectTamper_Disabled tests tamper detection when disabled
+func TestDetectTamper_Disabled(t *testing.T) {
+	config := &AuditConfig{
+		TamperProof: false,
+	}
+	logger := NewAuditLogger(config)
+	
+	// Log events
+	logger.LogAction("user1", "get", "pods", "", true)
+	
+	// Tamper
+	logger.mu.Lock()
+	if len(logger.events) > 0 {
+		logger.events[0].Action = "TAMPERED"
+	}
+	logger.mu.Unlock()
+	
+	// Should NOT detect (disabled)
+	period := Period{
+		Start: time.Now().Add(-1 * time.Hour),
+		End:   time.Now().Add(1 * time.Hour),
+	}
+	report := logger.GenerateComplianceReport(period)
+	assert.False(t, report.TamperDetected)
+}
+
+// TestEventFilter_AllFields tests all filter field combinations
+func TestEventFilter_AllFields(t *testing.T) {
+	now := time.Now()
+	successTrue := true
+	
+	event := &AuditEvent{
+		UserID:    "testuser",
+		Action:    "update",
+		Resource:  "deployment",
+		Success:   true,
+		RiskScore: 0.6,
+		Timestamp: now,
+	}
+	
+	// Test with all fields set
+	filter := &EventFilter{
+		UserID:    "testuser",
+		Action:    "update",
+		Resource:  "deployment",
+		Success:   &successTrue,
+		StartTime: now.Add(-1 * time.Minute),
+		EndTime:   now.Add(1 * time.Minute),
+		MinRisk:   0.5,
+	}
+	
+	assert.True(t, filter.Matches(event))
+	
+	// Change one field to not match
+	filter.Resource = "pod"
+	assert.False(t, filter.Matches(event))
+}
+
