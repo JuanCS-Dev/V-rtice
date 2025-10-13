@@ -285,6 +285,7 @@ class LogAggregationCollector(BaseCollector):
             try:
                 async with self.session.post(url, json=query) as response:
                     if response.status != 200:
+                        self.metrics.errors_count += 1
                         continue
 
                     data = await response.json()
@@ -293,10 +294,12 @@ class LogAggregationCollector(BaseCollector):
                     for hit in hits:
                         event = await self._parse_elasticsearch_hit(hit)
                         if event:
+                            self.metrics.events_collected += 1
                             yield event
 
             except Exception as e:
                 logger.error(f"Error querying index {index}: {e}")
+                self.metrics.errors_count += 1
 
     async def _parse_elasticsearch_hit(
         self,
