@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/verticedev/vcli-go/internal/visual"
 )
 
@@ -107,22 +108,27 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 	output.WriteString(visual.GradientText(topBorder, gradient))
 	output.WriteString("\n")
 
-	// ASCII Logo - VÉRTICE (mesmo estilo box drawing do original)
+	// ASCII Logo - NEUROSHELL (mesmo estilo box drawing do original)
 	asciiArt := []string{
-		"██╗   ██╗███████╗██████╗ ████████╗██╗ ██████╗███████╗  ",
-		"██║   ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝  ",
-		"██║   ██║█████╗  ██████╔╝   ██║   ██║██║     ███████╗  ",
-		"╚██╗ ██╔╝██╔══╝  ██╔══██╗   ██║   ██║██║     ██╔════╝  ",
-		" ╚████╔╝ ███████╗██║  ██║   ██║   ██║╚██████╗███████╗  ",
-		"  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝╚══════╝  ",
+		"███╗   ██╗███████╗██╗   ██╗██████╗  ██████╗ ███████╗██╗  ██╗███████╗██╗     ██╗     ",
+		"████╗  ██║██╔════╝██║   ██║██╔══██╗██╔═══██╗██╔════╝██║  ██║██╔════╝██║     ██║     ",
+		"██╔██╗ ██║█████╗  ██║   ██║██████╔╝██║   ██║███████╗███████║█████╗  ██║     ██║     ",
+		"██║╚██╗██║██╔══╝  ██║   ██║██╔══██╗██║   ██║╚════██║██╔══██║██╔══╝  ██║     ██║     ",
+		"██║ ╚████║███████╗╚██████╔╝██║  ██║╚██████╔╝███████║██║  ██║███████╗███████╗███████╗",
+		"╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝",
 	}
 
-	// Render each line with gradient and box border
+	// Render each line with gradient and box border (using runewidth for perfect alignment)
+	const totalWidth = 78 // Interior width (80 - 2 for borders)
 	for _, line := range asciiArt {
 		gradientLine := visual.GradientText(line, gradient)
-		// Box char + padding + line + padding + box char = 80 chars
-		// ║ (1) + space (1) + line (56) + padding to 78 + ║ (1) = 80
-		boxedLine := b.styles.Accent.Render("║") + " " + gradientLine + strings.Repeat(" ", 21) + b.styles.Accent.Render("║")
+		// Calculate visual width (runewidth handles box drawing chars correctly)
+		visualWidth := runewidth.StringWidth(line)
+		padding := totalWidth - visualWidth - 1 // -1 for leading space
+		if padding < 0 {
+			padding = 0
+		}
+		boxedLine := b.styles.Accent.Render("║") + " " + gradientLine + strings.Repeat(" ", padding) + b.styles.Accent.Render("║")
 		output.WriteString(boxedLine)
 		output.WriteString("\n")
 	}
