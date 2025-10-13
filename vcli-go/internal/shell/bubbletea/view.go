@@ -177,6 +177,10 @@ func (m Model) renderToolbar() string {
 		formattedBindings = append(formattedBindings, key+": "+desc)
 	}
 
+	// Add authorship at the end
+	authorship := m.styles.Muted.Italic(true).Render("by: Juan Carlos & Claude")
+	formattedBindings = append(formattedBindings, authorship)
+
 	toolbar := strings.Join(formattedBindings, " │ ")
 
 	return separator + "\n" + toolbar

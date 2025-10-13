@@ -107,15 +107,14 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 	output.WriteString(visual.GradientText(topBorder, gradient))
 	output.WriteString("\n")
 
-	// ASCII Logo - VCLI GO
-	// All lines: exactly 56 chars (aligned left, padded right)
+	// ASCII Logo - VÉRTICE (mesmo estilo box drawing do original)
 	asciiArt := []string{
-		"██╗   ██╗ ██████╗██╗     ██╗       ██████╗  ██████╗  ",
-		"██║   ██║██╔════╝██║     ██║      ██╔════╝ ██╔═══██╗ ",
-		"██║   ██║██║     ██║     ██║█████╗██║  ███╗██║   ██║ ",
-		"╚██╗ ██╔╝██║     ██║     ██║╚════╝██║   ██║██║   ██║ ",
-		" ╚████╔╝ ╚██████╗███████╗██║      ╚██████╔╝╚██████╔╝ ",
-		"  ╚═══╝   ╚═════╝╚══════╝╚═╝       ╚═════╝  ╚═════╝  ",
+		"██╗   ██╗███████╗██████╗ ████████╗██╗ ██████╗███████╗  ",
+		"██║   ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔════╝██╔════╝  ",
+		"██║   ██║█████╗  ██████╔╝   ██║   ██║██║     ███████╗  ",
+		"╚██╗ ██╔╝██╔══╝  ██╔══██╗   ██║   ██║██║     ██╔════╝  ",
+		" ╚████╔╝ ███████╗██║  ██║   ██║   ██║╚██████╗███████╗  ",
+		"  ╚═══╝  ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝╚══════╝  ",
 	}
 
 	// Render each line with gradient and box border
@@ -136,13 +135,18 @@ func (b *BannerRenderer) RenderCompact(version, buildDate string) string {
 	maximusLine := b.styles.Accent.Render("║") + strings.Repeat(" ", maximusPadding) + gradientMaximus + strings.Repeat(" ", 78-maximusPadding-len(maximusText)) + b.styles.Accent.Render("║")
 	output.WriteString(maximusLine + "\n")
 
-	// Authorship - centered and shortened to fit
+	// CLI description - aligned left (mesmo estilo)
 	output.WriteString(b.styles.Accent.Render("║") + strings.Repeat(" ", 78) + b.styles.Accent.Render("║") + "\n")
-	author := "by Juan Carlos & Claude"
-	styledAuthor := b.styles.Muted.Italic(true).Render(author)
-	authorPadding := (76 - len(author)) / 2
-	authorLine := b.styles.Accent.Render("║") + strings.Repeat(" ", authorPadding) + styledAuthor + strings.Repeat(" ", 78-authorPadding-len(author)) + b.styles.Accent.Render("║")
-	output.WriteString(authorLine + "\n")
+	cliDesc := "The Vértice Command Line Interface (vCLI)"
+	styledDesc := b.styles.Muted.Render(cliDesc)
+	descLine := b.styles.Accent.Render("║") + " " + styledDesc + strings.Repeat(" ", 78-len(cliDesc)-1) + b.styles.Accent.Render("║")
+	output.WriteString(descLine + "\n")
+
+	// Constitution - aligned left (mesmo estilo)
+	constitution := "Governed by Constitution v2.6 | \"Intention is Sovereign.\""
+	styledConst := b.styles.Muted.Italic(true).Render(constitution)
+	constLine := b.styles.Accent.Render("║") + " " + styledConst + strings.Repeat(" ", 78-len(constitution)-1) + b.styles.Accent.Render("║")
+	output.WriteString(constLine + "\n")
 
 	// Bottom border with gradient
 	bottomBorder := "╚══════════════════════════════════════════════════════════════════════════════╝"
