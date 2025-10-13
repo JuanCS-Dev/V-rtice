@@ -6,7 +6,7 @@ Responsibilities:
 - Execute actions (merge PR, close PR, request changes)
 - Log decisions to database
 - Update APV status
-- Send notifications
+- Send notifications via RabbitMQ
 - Collect metrics
 """
 
@@ -23,6 +23,8 @@ from .models import (
     ReviewAction,
     ReviewContext,
 )
+from ..messaging.client import RabbitMQClient, get_rabbitmq_client
+from ..messaging.publisher import HITLDecisionPublisher
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,7 @@ class DecisionEngine:
         github_token: str,
         repository_owner: str,
         repository_name: str,
+        rabbitmq_client: Optional[RabbitMQClient] = None,
     ):
         """
         Initialize decision engine.
@@ -52,11 +55,23 @@ class DecisionEngine:
             github_token: GitHub Personal Access Token
             repository_owner: Repository owner
             repository_name: Repository name
+            rabbitmq_client: RabbitMQ client (optional, will get global instance if not provided)
         """
         self.github_token = github_token
         self.repository_owner = repository_owner
         self.repository_name = repository_name
         self.base_url = "https://api.github.com"
+
+        # Initialize HITL decision publisher
+        try:
+            if rabbitmq_client is None:
+                rabbitmq_client = get_rabbitmq_client()
+            self.decision_publisher = HITLDecisionPublisher(rabbitmq_client)
+            logger.info("✅ HITL decision publisher initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ HITL decision publisher initialization failed: {e}")
+            logger.warning("Decisions will not be published to RabbitMQ")
+            self.decision_publisher = None
 
         logger.info(f"DecisionEngine initialized: {repository_owner}/{repository_name}")
 
@@ -117,6 +132,41 @@ class DecisionEngine:
 
         # Log to database (would be implemented with SQLAlchemy)
         await self._log_decision(record, db_session)
+
+        # Publish decision to RabbitMQ for system execution
+        if self.decision_publisher:
+            try:
+                message_id = await self.decision_publisher.publish_decision(
+                    apv_id=record.apv_id,
+                    apv_code=record.apv_code,
+                    decision=record.decision,
+                    justification=record.justification,
+                    confidence=record.confidence,
+                    reviewer_name=record.reviewer_name,
+                    reviewer_email=record.reviewer_email,
+                    decision_id=record.decision_id,
+                    cve_id=record.cve_id,
+                    severity=record.severity,
+                    patch_strategy=record.patch_strategy,
+                    pr_number=context.pr_number,
+                    pr_url=context.pr_url,
+                    action_type=action.action_type,
+                    action_target_pr=action.target_pr,
+                    action_comment=action.comment,
+                    action_assignees=action.assignees,
+                    action_labels=action.labels,
+                    modifications=decision.modifications,
+                    requires_followup=(decision.decision == "escalate"),
+                    followup_reason=(
+                        "Escalated to lead - requires senior review"
+                        if decision.decision == "escalate"
+                        else None
+                    ),
+                )
+                logger.info(f"✅ Decision published to RabbitMQ (msg_id={message_id})")
+            except Exception as e:
+                logger.error(f"❌ Failed to publish decision to RabbitMQ: {e}")
+                # Don't fail the entire operation if publishing fails
 
         logger.info(
             f"Decision processed: {record.decision} → {record.action_taken}"

@@ -10,6 +10,7 @@ from .threat import ThreatModel, ThreatCreate, ThreatUpdate, ThreatResponse
 from .dependency import DependencyModel, DependencyCreate, DependencyUpdate, DependencyResponse
 from .remedy import RemedyModel, RemedyCreate, RemedyUpdate, RemedyResponse
 from .wargame import WargameRunModel, WargameRunCreate, WargameRunUpdate, WargameRunResponse
+from .hitl import HITLNotificationMessage, HITLDecisionMessage, HITLStatusUpdate
 
 __all__ = [
     # APV models
@@ -37,4 +38,8 @@ __all__ = [
     "WargameRunCreate",
     "WargameRunUpdate",
     "WargameRunResponse",
+    # HITL message models
+    "HITLNotificationMessage",
+    "HITLDecisionMessage",
+    "HITLStatusUpdate",
 ]

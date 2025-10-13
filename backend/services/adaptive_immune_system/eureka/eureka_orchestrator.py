@@ -35,6 +35,9 @@ from .vcs import (
     PRDescriptionGenerator,
     PRDescriptionContext,
 )
+from ..messaging.client import RabbitMQClient, get_rabbitmq_client
+from ..messaging.publisher import HITLNotificationPublisher
+from ..models.wargame import WargameReportMessage
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +162,9 @@ class EurekaOrchestrator:
             )
 
         self.pr_description_generator = PRDescriptionGenerator()
+
+        # HITL notification publisher (initialized after RabbitMQ connection)
+        self.hitl_publisher: Optional[HITLNotificationPublisher] = None
 
         logger.info("EurekaOrchestrator initialized")
 
@@ -471,9 +477,128 @@ class EurekaOrchestrator:
             logger.error(f"❌ Pipeline failed: {e}", exc_info=True)
             raise RuntimeError(f"APV processing failed: {e}")
 
+    async def handle_wargaming_result(
+        self,
+        wargame_report: WargameReportMessage,
+        apv_data: Dict[str, any],
+    ) -> None:
+        """
+        Handle wargaming result and publish HITL notification.
+
+        Called after wargaming completes to notify HITL console
+        that an APV is ready for human review.
+
+        Args:
+            wargame_report: Wargaming report message
+            apv_data: APV data including confirmation and remedy details
+
+        Raises:
+            RuntimeError: If HITL notification publishing fails
+        """
+        try:
+            logger.info(
+                f"📨 Handling wargaming result: {wargame_report.run_code} → {wargame_report.verdict}"
+            )
+
+            # Ensure HITL publisher is initialized
+            if not self.hitl_publisher:
+                rabbitmq_client = get_rabbitmq_client()
+                self.hitl_publisher = HITLNotificationPublisher(rabbitmq_client)
+
+            # Extract APV data
+            apv_id = apv_data["apv_id"]
+            apv_code = apv_data["apv_code"]
+            priority = apv_data.get("priority", 5)
+            cve_id = apv_data["cve_id"]
+            cve_title = apv_data.get("cve_title", f"Security fix for {cve_id}")
+            severity = apv_data["severity"]
+            cvss_score = apv_data.get("cvss_score")
+            package_name = apv_data.get("package_name", "unknown")
+            package_version = apv_data.get("package_version", "unknown")
+            package_ecosystem = apv_data.get("package_ecosystem", "unknown")
+
+            # Extract confirmation data
+            confirmation_confidence = apv_data.get("confirmation_confidence", 0.0)
+            false_positive_probability = apv_data.get("false_positive_probability", 0.0)
+            affected_files = apv_data.get("affected_files", [])
+
+            # Extract remedy data
+            patch_strategy = apv_data.get("patch_strategy", "unknown")
+            patch_description = apv_data.get("patch_description", "Patch generated")
+            pr_number = apv_data.get("pr_number")
+            pr_url = apv_data.get("pr_url")
+
+            # Extract validation data
+            validation_warnings = apv_data.get("validation_warnings", [])
+
+            # Determine urgency
+            requires_immediate_attention = severity in ("critical", "high")
+            escalation_reason = (
+                "Critical/High severity vulnerability requiring immediate review"
+                if requires_immediate_attention
+                else None
+            )
+
+            # Publish HITL notification
+            message_id = await self.hitl_publisher.publish_new_apv_notification(
+                apv_id=apv_id,
+                apv_code=apv_code,
+                priority=priority,
+                cve_id=cve_id,
+                cve_title=cve_title,
+                severity=severity,
+                cvss_score=cvss_score,
+                package_name=package_name,
+                package_version=package_version,
+                package_ecosystem=package_ecosystem,
+                patch_strategy=patch_strategy,
+                patch_description=patch_description,
+                pr_number=pr_number,
+                pr_url=pr_url,
+                confirmation_confidence=confirmation_confidence,
+                false_positive_probability=false_positive_probability,
+                wargame_verdict=wargame_report.verdict,
+                wargame_confidence=wargame_report.confidence_score,
+                wargame_run_url=wargame_report.evidence_url,
+                wargame_evidence=wargame_report.evidence,
+                affected_files=affected_files,
+                validation_warnings=validation_warnings,
+                requires_immediate_attention=requires_immediate_attention,
+                escalation_reason=escalation_reason,
+            )
+
+            logger.info(
+                f"✅ HITL notification published: {apv_code} (msg_id={message_id})"
+            )
+
+            # Send callback to Oráculo about HITL pending state
+            await self.callback_client.send_status_update(
+                apv_id=apv_id,
+                status="pending_hitl",
+                details={
+                    "wargame_verdict": wargame_report.verdict,
+                    "wargame_confidence": wargame_report.confidence_score,
+                    "hitl_notification_id": message_id,
+                },
+            )
+
+        except Exception as e:
+            logger.error(f"❌ Failed to handle wargaming result: {e}", exc_info=True)
+            raise RuntimeError(f"Wargaming result handling failed: {e}")
+
     async def start(self) -> None:
         """Start Eureka orchestrator (connect to RabbitMQ)."""
         await self.callback_client.connect()
+
+        # Initialize HITL publisher
+        try:
+            rabbitmq_client = get_rabbitmq_client()
+            self.hitl_publisher = HITLNotificationPublisher(rabbitmq_client)
+            logger.info("✅ HITL notification publisher initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ HITL publisher initialization failed: {e}")
+            logger.warning("HITL notifications will not be sent")
+
         logger.info("✅ Eureka orchestrator started")
 
     async def stop(self) -> None:
