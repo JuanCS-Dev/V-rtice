@@ -1,0 +1,21 @@
+# Monitoring dependencies for Adaptive Immune System - HITL API
+# Required for FASE 3.13 - Advanced Monitoring
+
+# Prometheus metrics
+prometheus-client==0.19.0
+
+# OpenTelemetry core
+opentelemetry-api==1.22.0
+opentelemetry-sdk==1.22.0
+
+# OpenTelemetry instrumentation
+opentelemetry-instrumentation==0.43b0
+opentelemetry-instrumentation-fastapi==0.43b0
+opentelemetry-instrumentation-httpx==0.43b0
+opentelemetry-instrumentation-sqlalchemy==0.43b0
+opentelemetry-instrumentation-redis==0.43b0
+
+# OpenTelemetry exporters
+opentelemetry-exporter-jaeger==1.22.0
+opentelemetry-exporter-otlp==1.22.0
+opentelemetry-exporter-prometheus==0.43b0
