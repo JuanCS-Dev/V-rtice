@@ -19,6 +19,28 @@ export const ModuleGrid = ({ setCurrentView }) => {
       features: t('modules.maximus.features', { returnObjects: true })
     },
     {
+      id: 'reactive-fabric',
+      name: t('modules.reactive_fabric.name', 'Reactive Fabric'),
+      description: t('modules.reactive_fabric.description', 'Sistema de Deception e Honeypots com Inteligência em Tempo Real'),
+      icon: '🕸️',
+      color: 'red',
+      features: t('modules.reactive_fabric.features', {
+        returnObjects: true,
+        defaultValue: ['Honeypot Monitoring', 'Threat Intelligence', 'Decoy Bayou Map', 'Real-time Alerts']
+      })
+    },
+    {
+      id: 'hitl-console',
+      name: t('modules.hitl_console.name', 'HITL Console'),
+      description: t('modules.hitl_console.description', 'Human-in-the-Loop Authorization para Respostas de Ameaças'),
+      icon: '🎯',
+      color: 'gradient-ai',
+      features: t('modules.hitl_console.features', {
+        returnObjects: true,
+        defaultValue: ['Threat Review', 'Decision Authorization', 'Real-time Alerts', 'Forensic Analysis']
+      })
+    },
+    {
       id: 'defensive',
       name: t('modules.defensive.name'),
       description: t('modules.defensive.description'),

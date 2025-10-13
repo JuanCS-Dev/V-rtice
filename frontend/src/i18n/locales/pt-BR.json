@@ -258,6 +258,26 @@
         "Logs",
         "Auditoria"
       ]
+    },
+    "reactive_fabric": {
+      "name": "REACTIVE FABRIC",
+      "description": "Sistema de Deception e Honeypots com Inteligência em Tempo Real",
+      "features": [
+        "Honeypot Monitoring",
+        "Threat Intelligence",
+        "Decoy Bayou Map",
+        "Real-time Alerts"
+      ]
+    },
+    "hitl_console": {
+      "name": "HITL CONSOLE",
+      "description": "Human-in-the-Loop Authorization para Respostas de Ameaças",
+      "features": [
+        "Threat Review",
+        "Decision Authorization",
+        "Real-time Alerts",
+        "Forensic Analysis"
+      ]
     }
   },
   "error": {

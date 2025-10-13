@@ -24,11 +24,13 @@ const OffensiveDashboard = lazy(() => import('./components/dashboards/OffensiveD
 const PurpleTeamDashboard = lazy(() => import('./components/dashboards/PurpleTeamDashboard/PurpleTeamDashboard'));
 const OSINTDashboard = lazy(() => import('./components/OSINTDashboard'));
 const MaximusDashboard = lazy(() => import('./components/maximus/MaximusDashboard'));
+const ReactiveFabricDashboard = lazy(() => import('./components/reactive-fabric/ReactiveFabricDashboard'));
+const HITLDecisionConsole = lazy(() => import('./components/reactive-fabric/HITLDecisionConsole'));
 
 function App() {
-  // 'main', 'admin', 'defensive', 'offensive', 'purple', 'osint', 'maximus'
+  // 'main', 'admin', 'defensive', 'offensive', 'purple', 'osint', 'maximus', 'reactive-fabric', 'hitl-console'
   const [currentView, setCurrentView] = useState('main');
-  
+
   // Enable keyboard navigation
   useModuleNavigation(setCurrentView);
 
@@ -61,6 +63,16 @@ function App() {
     maximus: (
       <ErrorBoundary context="maximus-dashboard" title="MAXIMUS AI Dashboard Error">
         <MaximusDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    'reactive-fabric': (
+      <ErrorBoundary context="reactive-fabric-dashboard" title="Reactive Fabric Dashboard Error">
+        <ReactiveFabricDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    'hitl-console': (
+      <ErrorBoundary context="hitl-console" title="HITL Console Error">
+        <HITLDecisionConsole setCurrentView={setCurrentView} />
       </ErrorBoundary>
     ),
   };
