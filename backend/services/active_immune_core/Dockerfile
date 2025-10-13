@@ -21,7 +21,7 @@ RUN python -m venv /opt/venv && \
 # ============================================================================
 # RUNTIME STAGE
 # ============================================================================
-FROM python:3.11-slim
+FROM python:3.11.14-slim
 
 LABEL maintainer="Juan & Claude <noreply@vertice.dev>"
 LABEL description="Active Immune Core - Autonomous threat detection"

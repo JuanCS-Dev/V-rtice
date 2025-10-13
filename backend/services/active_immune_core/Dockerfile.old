@@ -2,7 +2,7 @@
 # Multi-stage build for minimal image size
 
 # ==================== BUILDER STAGE ====================
-FROM python:3.11-slim as builder
+FROM python:3.11.14-slim as builder
 
 WORKDIR /build
 
@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir --no-deps -r requirements.txt.lock
 
 # ==================== RUNTIME STAGE ====================
-FROM python:3.11-slim
+FROM python:3.11.14-slim
 
 LABEL maintainer="Juan & Claude"
 LABEL description="Active Immune Core Service - Autonomous threat detection"

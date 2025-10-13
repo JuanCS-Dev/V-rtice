@@ -1,7 +1,7 @@
 # Active Immune Core Service - Development Dockerfile
 # Optimized for fast iteration with hot reload
 
-FROM python:3.11-slim
+FROM python:3.11.14-slim
 
 LABEL maintainer="Juan & Claude"
 LABEL description="Active Immune Core Service - Development Mode"
