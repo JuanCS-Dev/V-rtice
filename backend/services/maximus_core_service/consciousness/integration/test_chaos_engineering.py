@@ -97,7 +97,7 @@ async def test_single_node_failure_resilience(chaos_test_system):
     # Simulate single node failure
     node_ids = list(tig.nodes.keys())
     failed_node = tig.nodes[node_ids[0]]
-    failed_node.state = NodeState.FAILED
+    failed_node.state = NodeState.OFFLINE
 
     # System should still ignite with 7/8 nodes
     result2 = await esgt.initiate_esgt(salience=salience, content=content)
@@ -123,7 +123,7 @@ async def test_multiple_node_failure_tolerance(chaos_test_system):
     # Fail 3 nodes (5/8 remain = 62.5% quorum)
     node_ids = list(tig.nodes.keys())
     for i in range(3):
-        tig.nodes[node_ids[i]].state = NodeState.FAILED
+        tig.nodes[node_ids[i]].state = NodeState.OFFLINE
 
     # Should still operate with quorum
     result = await esgt.initiate_esgt(salience=salience, content=content)
@@ -147,7 +147,7 @@ async def test_cascading_failure_prevention(chaos_test_system):
     # Fail nodes one by one, verify no cascade
     node_ids = list(tig.nodes.keys())
     for fail_count in range(1, 4):
-        tig.nodes[node_ids[fail_count - 1]].state = NodeState.FAILED
+        tig.nodes[node_ids[fail_count - 1]].state = NodeState.OFFLINE
 
         result = await esgt.initiate_esgt(
             salience=salience, content={"cascade_test": fail_count}
@@ -174,7 +174,7 @@ async def test_node_recovery_after_failure(chaos_test_system):
     # Fail a node
     node_ids = list(tig.nodes.keys())
     node = tig.nodes[node_ids[0]]
-    node.state = NodeState.FAILED
+    node.state = NodeState.OFFLINE
 
     # Bring it back online
     recovery_start = time.time()
@@ -301,7 +301,7 @@ async def test_network_partition_clock_divergence(chaos_test_system):
     # Minority partition (3) should halt to prevent split-brain
     node_ids = list(tig.nodes.keys())
     for i in range(3):
-        tig.nodes[node_ids[i]].state = NodeState.FAILED  # Simulates partition
+        tig.nodes[node_ids[i]].state = NodeState.OFFLINE  # Simulates partition
 
     # Majority (5) should continue
     result = await esgt.initiate_esgt(salience=salience, content={"partition": True})
