@@ -17,15 +17,15 @@ import asyncio
 import docker
 from docker.errors import DockerException
 
-from backend.services.reactive_fabric_core.models import (
+from .models import (
     HoneypotListResponse, HoneypotStats, HoneypotStatus,
     AttackListResponse, AttackSummary, AttackCreate, AttackSeverity,
     TTPListResponse, TTPFrequency,
     HealthResponse,
     ThreatDetectedMessage
 )
-from backend.services.reactive_fabric_core.database import Database
-from backend.services.reactive_fabric_core.kafka_producer import (
+from .database import Database
+from .kafka_producer import (
     KafkaProducer,
     create_threat_detected_message
 )
@@ -97,7 +97,7 @@ async def honeypot_health_check_task():
                         
                         # Publish status change to Kafka
                         if kafka_producer:
-                            from backend.services.reactive_fabric_core.kafka_producer import (
+                            from .kafka_producer import (
                                 create_honeypot_status_message
                             )
                             status_msg = create_honeypot_status_message(

@@ -6,15 +6,15 @@ Part of MAXIMUS VÉRTICE - Projeto Tecido Reativo
 Sprint 1: Real implementation with PostgreSQL + Kafka
 """
 
-from backend.services.reactive_fabric_core.database import Database
-from backend.services.reactive_fabric_core.kafka_producer import (
+from .database import Database
+from .kafka_producer import (
     KafkaProducer,
     create_threat_detected_message,
     create_honeypot_status_message
 )
 
 # Re-export commonly used models
-from backend.services.reactive_fabric_core.models import (
+from .models import (
     # Enums
     HoneypotType,
     HoneypotStatus,
