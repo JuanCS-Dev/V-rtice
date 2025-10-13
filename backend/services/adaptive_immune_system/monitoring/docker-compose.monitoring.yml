@@ -1,0 +1,213 @@
+# Docker Compose for Complete Monitoring Stack
+# Includes: Prometheus, Grafana, Alertmanager, Jaeger
+# Usage: docker-compose -f docker-compose.monitoring.yml up -d
+
+version: '3.8'
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  alertmanager_data:
+
+services:
+  # ============================================================================
+  # PROMETHEUS - Metrics collection and storage
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:v2.40.0
+    container_name: hitl-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    depends_on:
+      - alertmanager
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:9090/-/healthy']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================================
+  # ALERTMANAGER - Alert routing and notifications
+  # ============================================================================
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: hitl-alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    ports:
+      - '9093:9093'
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    networks:
+      - monitoring
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:9093/-/healthy']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ============================================================================
+  # GRAFANA - Visualization and dashboards
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:9.3.0
+    container_name: hitl-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================================
+  # JAEGER - Distributed tracing
+  # ============================================================================
+  jaeger:
+    image: jaegertracing/all-in-one:1.40
+    container_name: hitl-jaeger
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - '5775:5775/udp'      # Accept zipkin.thrift over compact thrift protocol
+      - '6831:6831/udp'      # Accept jaeger.thrift over compact thrift protocol
+      - '6832:6832/udp'      # Accept jaeger.thrift over binary thrift protocol
+      - '5778:5778'          # Serve configs
+      - '16686:16686'        # Serve frontend
+      - '14250:14250'        # Accept model.proto (gRPC)
+      - '14268:14268'        # Accept jaeger.thrift directly from clients
+      - '14269:14269'        # Admin port: health check at /
+      - '9411:9411'          # Zipkin compatible endpoint
+      - '4317:4317'          # OTLP gRPC receiver
+      - '4318:4318'          # OTLP HTTP receiver
+    networks:
+      - monitoring
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:14269/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ============================================================================
+  # POSTGRES EXPORTER (Optional) - Database metrics
+  # ============================================================================
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.11.1
+    container_name: hitl-postgres-exporter
+    restart: unless-stopped
+    environment:
+      # Update with your PostgreSQL connection string
+      - DATA_SOURCE_NAME=postgresql://user:password@postgres:5432/dbname?sslmode=disable
+    ports:
+      - '9187:9187'
+    networks:
+      - monitoring
+    # Uncomment if you have postgres service
+    # depends_on:
+    #   - postgres
+
+  # ============================================================================
+  # REDIS EXPORTER (Optional) - Cache metrics
+  # ============================================================================
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.45.0
+    container_name: hitl-redis-exporter
+    restart: unless-stopped
+    environment:
+      # Update with your Redis connection string
+      - REDIS_ADDR=redis://redis:6379
+    ports:
+      - '9121:9121'
+    networks:
+      - monitoring
+    # Uncomment if you have redis service
+    # depends_on:
+    #   - redis
+
+  # ============================================================================
+  # NODE EXPORTER (Optional) - Host metrics
+  # ============================================================================
+  node-exporter:
+    image: prom/node-exporter:v1.5.0
+    container_name: hitl-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - '9100:9100'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - monitoring
+
+  # ============================================================================
+  # CADVISOR (Optional) - Container metrics
+  # ============================================================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.46.0
+    container_name: hitl-cadvisor
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - '8080:8080'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitoring
+    devices:
+      - /dev/kmsg

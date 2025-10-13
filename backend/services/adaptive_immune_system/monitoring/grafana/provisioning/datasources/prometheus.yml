@@ -1,0 +1,23 @@
+# Grafana Datasource Configuration
+# Auto-provisions Prometheus as the primary datasource
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s
+      queryTimeout: 60s
+      customQueryParameters: ''
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 2.40.0
+      cacheLevel: 'High'
+      incrementalQuerying: true
+      incrementalQueryOverlapWindow: 10m

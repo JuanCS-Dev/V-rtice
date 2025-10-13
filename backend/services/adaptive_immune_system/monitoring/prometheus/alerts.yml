@@ -1,0 +1,308 @@
+# Prometheus Alert Rules for HITL API
+# Defines critical, warning, and info level alerts for proactive monitoring
+
+groups:
+  # ============================================================================
+  # CRITICAL ALERTS - Require immediate action (PagerDuty)
+  # ============================================================================
+  - name: critical_alerts
+    interval: 30s
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m])
+            /
+            rate(http_requests_total[5m])
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          team: adaptive-immune
+        annotations:
+          summary: "High error rate detected (> 1%)"
+          description: "Error rate is {{ $value | humanizePercentage }} for endpoint {{ $labels.endpoint }}"
+          runbook_url: "https://docs.example.com/runbooks/high-error-rate"
+
+      # High latency alert
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 1.0
+        for: 5m
+        labels:
+          severity: critical
+          team: adaptive-immune
+        annotations:
+          summary: "High P95 latency detected (> 1s)"
+          description: "P95 latency is {{ $value }}s for endpoint {{ $labels.endpoint }}"
+          runbook_url: "https://docs.example.com/runbooks/high-latency"
+
+      # Service down alert
+      - alert: ServiceDown
+        expr: up{job="hitl-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: adaptive-immune
+        annotations:
+          summary: "HITL API service is down"
+          description: "Service {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://docs.example.com/runbooks/service-down"
+
+      # Database connection pool exhaustion
+      - alert: DatabaseConnectionPoolExhaustion
+        expr: |
+          (
+            db_connections_active / (db_connections_active + db_connections_idle)
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: adaptive-immune
+        annotations:
+          summary: "Database connection pool nearly exhausted (> 90%)"
+          description: "Connection pool utilization is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/db-connection-pool"
+
+      # Low availability
+      - alert: LowAvailability
+        expr: |
+          (
+            rate(slo_requests_good{slo_type="availability"}[5m])
+            /
+            rate(slo_requests_total[5m])
+          ) < 0.95
+        for: 1m
+        labels:
+          severity: critical
+          team: adaptive-immune
+        annotations:
+          summary: "Service availability below 95%"
+          description: "Current availability is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/low-availability"
+
+  # ============================================================================
+  # WARNING ALERTS - Require attention (Slack)
+  # ============================================================================
+  - name: warning_alerts
+    interval: 1m
+    rules:
+      # Elevated error rate
+      - alert: ElevatedErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[10m])
+            /
+            rate(http_requests_total[10m])
+          ) > 0.005
+        for: 10m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "Elevated error rate detected (> 0.5%)"
+          description: "Error rate is {{ $value | humanizePercentage }} for endpoint {{ $labels.endpoint }}"
+
+      # Elevated latency
+      - alert: ElevatedLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket[10m])
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "Elevated P95 latency detected (> 500ms)"
+          description: "P95 latency is {{ $value }}s for endpoint {{ $labels.endpoint }}"
+
+      # Error budget burning fast
+      - alert: ErrorBudgetBurningFast
+        expr: |
+          (
+            rate(slo_requests_bad{slo_type="availability"}[1h])
+            /
+            rate(slo_requests_total[1h])
+          ) > 0.002
+        for: 1h
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "Error budget burning at 2x rate"
+          description: "Current burn rate is {{ $value | humanizePercentage }} (threshold: 0.2%)"
+          runbook_url: "https://docs.example.com/runbooks/error-budget"
+
+      # High database query errors
+      - alert: HighDatabaseErrors
+        expr: rate(db_query_errors_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "High database query error rate"
+          description: "Database errors: {{ $value }} errors/sec for {{ $labels.query_type }}"
+
+      # Low cache hit ratio
+      - alert: LowCacheHitRatio
+        expr: cache_hit_ratio < 0.5
+        for: 15m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "Low cache hit ratio (< 50%)"
+          description: "Cache hit ratio is {{ $value | humanizePercentage }}"
+
+      # High cache eviction rate
+      - alert: HighCacheEvictionRate
+        expr: rate(cache_evictions_total[5m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "High cache eviction rate"
+          description: "Cache evictions: {{ $value }} evictions/sec"
+
+  # ============================================================================
+  # BUSINESS METRICS ALERTS
+  # ============================================================================
+  - name: business_alerts
+    interval: 1m
+    rules:
+      # Slow review decisions
+      - alert: SlowReviewDecisions
+        expr: |
+          histogram_quantile(0.95,
+            rate(review_decision_duration_seconds_bucket[10m])
+          ) > 60
+        for: 15m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "Review decisions taking too long (P95 > 60s)"
+          description: "P95 decision time is {{ $value }}s for {{ $labels.decision }}"
+
+      # High rejection rate
+      - alert: HighRejectionRate
+        expr: |
+          (
+            rate(review_decision_total{decision="rejected"}[30m])
+            /
+            rate(review_decision_total[30m])
+          ) > 0.5
+        for: 30m
+        labels:
+          severity: info
+          team: adaptive-immune
+        annotations:
+          summary: "High review rejection rate (> 50%)"
+          description: "Rejection rate is {{ $value | humanizePercentage }}"
+
+      # APV validation failures
+      - alert: HighAPVValidationFailures
+        expr: |
+          (
+            rate(apv_validation_total{result="failure"}[10m])
+            /
+            rate(apv_validation_total[10m])
+          ) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "High APV validation failure rate (> 20%)"
+          description: "Failure rate is {{ $value | humanizePercentage }} for {{ $labels.pattern_type }}"
+
+  # ============================================================================
+  # SLO ALERTS
+  # ============================================================================
+  - name: slo_alerts
+    interval: 1m
+    rules:
+      # Availability SLO breach (99.9% target)
+      - alert: AvailabilitySLOBreach
+        expr: |
+          (
+            (
+              sum(rate(slo_requests_good{slo_type="availability"}[30d]))
+              /
+              sum(rate(slo_requests_total[30d]))
+            ) < 0.999
+          )
+        for: 5m
+        labels:
+          severity: critical
+          team: adaptive-immune
+        annotations:
+          summary: "30-day availability below 99.9% SLO"
+          description: "Current availability: {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/slo-breach"
+
+      # Latency SLO breach (P95 < 500ms target)
+      - alert: LatencySLOBreach
+        expr: |
+          (
+            (
+              sum(rate(slo_requests_good{slo_type="latency"}[7d]))
+              /
+              sum(rate(slo_requests_total[7d]))
+            ) < 0.95
+          )
+        for: 5m
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "7-day latency SLO breach (< 95% under 500ms)"
+          description: "Current latency SLO: {{ $value | humanizePercentage }}"
+
+      # Error budget exhausted (< 10% remaining)
+      - alert: ErrorBudgetLow
+        expr: |
+          (
+            1 - (
+              sum(rate(slo_requests_good{slo_type="availability"}[30d]))
+              /
+              sum(rate(slo_requests_total[30d]))
+            )
+          ) / 0.001 > 0.9
+        for: 1h
+        labels:
+          severity: warning
+          team: adaptive-immune
+        annotations:
+          summary: "Error budget < 10% remaining"
+          description: "Error budget consumption: {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/error-budget"
+
+  # ============================================================================
+  # DEPLOYMENT ALERTS
+  # ============================================================================
+  - name: deployment_alerts
+    interval: 30s
+    rules:
+      # Recent deployment with high error rate
+      - alert: DeploymentErrorRateSpike
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m])
+            /
+            rate(http_requests_total[5m])
+          ) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          team: adaptive-immune
+        annotations:
+          summary: "Post-deployment error rate spike (> 5%)"
+          description: "Error rate jumped to {{ $value | humanizePercentage }} - consider rollback"
+          runbook_url: "https://docs.example.com/runbooks/deployment-rollback"

@@ -1,0 +1,230 @@
+# Alertmanager Configuration for HITL API
+# Routes alerts to appropriate channels based on severity and team
+
+global:
+  # Global configuration
+  resolve_timeout: 5m
+  # SMTP settings (configure for email alerts)
+  smtp_smarthost: 'smtp.example.com:587'
+  smtp_from: 'alertmanager@example.com'
+  smtp_auth_username: 'alertmanager@example.com'
+  smtp_auth_password: 'your-password-here'
+  smtp_require_tls: true
+
+  # Slack webhook (configure for Slack alerts)
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+  # PagerDuty integration key (configure for PagerDuty alerts)
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+
+# Templates for alert notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Alert routing tree
+route:
+  # Default receiver for alerts
+  receiver: 'team-adaptive-immune'
+
+  # Group alerts by these labels
+  group_by: ['alertname', 'cluster', 'service']
+
+  # How long to wait before sending first notification
+  group_wait: 10s
+
+  # How long to wait before sending notification about new alerts added to group
+  group_interval: 10s
+
+  # How long to wait before resending notification
+  repeat_interval: 3h
+
+  # Child routes (specific routing rules)
+  routes:
+    # Critical alerts -> PagerDuty
+    - match:
+        severity: critical
+      receiver: 'pagerduty-critical'
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 30m
+      continue: true  # Continue to also send to Slack
+
+    # Critical alerts -> Slack (immediate)
+    - match:
+        severity: critical
+      receiver: 'slack-critical'
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 1h
+
+    # Warning alerts -> Slack
+    - match:
+        severity: warning
+      receiver: 'slack-warnings'
+      group_wait: 30s
+      group_interval: 10m
+      repeat_interval: 3h
+
+    # Info alerts -> Email
+    - match:
+        severity: info
+      receiver: 'email-info'
+      group_wait: 5m
+      group_interval: 1h
+      repeat_interval: 24h
+
+    # Deployment alerts -> Slack deployment channel
+    - match_re:
+        alertname: 'Deployment.*'
+      receiver: 'slack-deployments'
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 15m
+
+    # SLO alerts -> PagerDuty + Slack
+    - match_re:
+        alertname: '.*SLO.*'
+      receiver: 'pagerduty-slo'
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 1h
+      continue: true
+
+    - match_re:
+        alertname: '.*SLO.*'
+      receiver: 'slack-slo'
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 1h
+
+# Inhibition rules (suppress certain alerts when others are firing)
+inhibit_rules:
+  # Inhibit warning alerts if critical alert is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+  # Inhibit all alerts if service is down
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match_re:
+      alertname: '.*'
+    equal: ['cluster', 'service']
+
+  # Inhibit HighLatency if HighErrorRate is firing
+  - source_match:
+      alertname: 'HighErrorRate'
+    target_match:
+      alertname: 'HighLatency'
+    equal: ['cluster', 'service']
+
+# Receivers (notification channels)
+receivers:
+  # Default team receiver (Slack + Email)
+  - name: 'team-adaptive-immune'
+    slack_configs:
+      - channel: '#adaptive-immune-alerts'
+        title: 'Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          {{ end }}
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+        send_resolved: true
+    email_configs:
+      - to: 'adaptive-immune-team@example.com'
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+
+  # Critical alerts -> PagerDuty
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: 'your-pagerduty-service-key-here'
+        description: '{{ .GroupLabels.alertname }} - {{ .CommonAnnotations.summary }}'
+        details:
+          firing: '{{ .Alerts.Firing | len }}'
+          resolved: '{{ .Alerts.Resolved | len }}'
+          group: '{{ .GroupLabels.alertname }}'
+        severity: '{{ .CommonLabels.severity }}'
+        client: 'Alertmanager'
+        client_url: '{{ template "pagerduty.default.clientURL" . }}'
+
+  # Critical alerts -> Slack
+  - name: 'slack-critical'
+    slack_configs:
+      - channel: '#adaptive-immune-critical'
+        title: 'CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          *Instance:* {{ .Labels.instance }}
+          {{ end }}
+        color: 'danger'
+        send_resolved: true
+        actions:
+          - type: button
+            text: 'View Runbook'
+            url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+          - type: button
+            text: 'View in Grafana'
+            url: 'http://grafana:3000/d/hitl-overview'
+
+  # Warning alerts -> Slack
+  - name: 'slack-warnings'
+    slack_configs:
+      - channel: '#adaptive-immune-warnings'
+        title: 'Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+        color: 'warning'
+        send_resolved: true
+
+  # Info alerts -> Email
+  - name: 'email-info'
+    email_configs:
+      - to: 'adaptive-immune-info@example.com'
+        headers:
+          Subject: '[INFO] {{ .GroupLabels.alertname }}'
+
+  # Deployment alerts -> Slack
+  - name: 'slack-deployments'
+    slack_configs:
+      - channel: '#adaptive-immune-deployments'
+        title: 'Deployment: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+        color: '#439FE0'
+        send_resolved: true
+
+  # SLO alerts -> PagerDuty
+  - name: 'pagerduty-slo'
+    pagerduty_configs:
+      - service_key: 'your-pagerduty-slo-key-here'
+        description: 'SLO Violation: {{ .GroupLabels.alertname }}'
+        severity: 'error'
+
+  # SLO alerts -> Slack
+  - name: 'slack-slo'
+    slack_configs:
+      - channel: '#adaptive-immune-slo'
+        title: 'SLO Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: 'danger'
+        send_resolved: true
