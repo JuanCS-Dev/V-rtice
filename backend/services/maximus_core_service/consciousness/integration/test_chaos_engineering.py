@@ -121,6 +121,7 @@ async def test_multiple_node_failure_tolerance(chaos_test_system):
     content = {"test": "multiple_failures"}
 
     # Fail 3 nodes (5/8 remain = 62.5% quorum)
+    node_ids = list(tig.nodes.keys())
     for i in range(3):
         tig.nodes[node_ids[i]].state = NodeState.FAILED
 
@@ -144,8 +145,9 @@ async def test_cascading_failure_prevention(chaos_test_system):
     salience = SalienceScore(novelty=0.85, relevance=0.9, urgency=0.8)
 
     # Fail nodes one by one, verify no cascade
+    node_ids = list(tig.nodes.keys())
     for fail_count in range(1, 4):
-        tig.nodes[fail_count - 1].state = NodeState.FAILED
+        tig.nodes[node_ids[fail_count - 1]].state = NodeState.FAILED
 
         result = await esgt.initiate_esgt(
             salience=salience, content={"cascade_test": fail_count}
@@ -170,7 +172,8 @@ async def test_node_recovery_after_failure(chaos_test_system):
     salience = SalienceScore(novelty=0.8, relevance=0.85, urgency=0.75)
 
     # Fail a node
-    node = tig.nodes[0]
+    node_ids = list(tig.nodes.keys())
+    node = tig.nodes[node_ids[0]]
     node.state = NodeState.FAILED
 
     # Bring it back online
@@ -296,6 +299,7 @@ async def test_network_partition_clock_divergence(chaos_test_system):
 
     # Simulate partition: 3 nodes vs 5 nodes
     # Minority partition (3) should halt to prevent split-brain
+    node_ids = list(tig.nodes.keys())
     for i in range(3):
         tig.nodes[node_ids[i]].state = NodeState.FAILED  # Simulates partition
 
