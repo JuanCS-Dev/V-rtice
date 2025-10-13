@@ -95,7 +95,8 @@ async def test_single_node_failure_resilience(chaos_test_system):
     assert hasattr(result, 'success')
 
     # Simulate single node failure
-    failed_node = tig.nodes[0]
+    node_ids = list(tig.nodes.keys())
+    failed_node = tig.nodes[node_ids[0]]
     failed_node.state = NodeState.FAILED
 
     # System should still ignite with 7/8 nodes
@@ -121,7 +122,7 @@ async def test_multiple_node_failure_tolerance(chaos_test_system):
 
     # Fail 3 nodes (5/8 remain = 62.5% quorum)
     for i in range(3):
-        tig.nodes[i].state = NodeState.FAILED
+        tig.nodes[node_ids[i]].state = NodeState.FAILED
 
     # Should still operate with quorum
     result = await esgt.initiate_esgt(salience=salience, content=content)
@@ -296,7 +297,7 @@ async def test_network_partition_clock_divergence(chaos_test_system):
     # Simulate partition: 3 nodes vs 5 nodes
     # Minority partition (3) should halt to prevent split-brain
     for i in range(3):
-        tig.nodes[i].state = NodeState.FAILED  # Simulates partition
+        tig.nodes[node_ids[i]].state = NodeState.FAILED  # Simulates partition
 
     # Majority (5) should continue
     result = await esgt.initiate_esgt(salience=salience, content={"partition": True})
