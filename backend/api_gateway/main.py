@@ -21,6 +21,9 @@ from slowapi.util import get_remote_address
 from starlette.responses import Response
 import structlog
 
+# Reactive Fabric Integration
+from reactive_fabric_integration import register_reactive_fabric_routes, get_reactive_fabric_info
+
 # Configuração de logs estruturados
 structlog.configure(
     processors=[
@@ -80,6 +83,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ============================
+# REACTIVE FABRIC INTEGRATION
+# ============================
+# Register Reactive Fabric routers (Phase 1: passive intelligence only)
+register_reactive_fabric_routes(app)
+log.info(
+    "reactive_fabric_integrated",
+    phase="1",
+    mode="passive_intelligence_only",
+    human_authorization="required"
+)
+
 
 # Middleware de monitoramento
 @app.middleware("http")
@@ -88,11 +103,8 @@ async def monitor_requests(request: Request, call_next):
     response = await call_next(request)
     process_time = time.time() - start_time
 
-    path_template = (
-        request.scope.get("route").path
-        if request.scope.get("route")
-        else request.url.path
-    )
+    route = request.scope.get("route")
+    path_template = route.path if route else request.url.path
     method = request.method
     status_code = response.status_code
 
@@ -228,7 +240,9 @@ async def verify_token(
 ) -> Dict[str, Any]:
     """Verify JWT token and return user info"""
     try:
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=["HS256"])
+        payload: Dict[str, Any] = jwt.decode(
+            credentials.credentials, JWT_SECRET, algorithms=["HS256"]
+        )
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
@@ -260,7 +274,7 @@ async def optional_auth(
 
     try:
         token = authorization.split(" ")[1]
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        payload: Dict[str, Any] = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         return payload
     except:
         return None
@@ -292,10 +306,11 @@ async def proxy_request(
                     headers["content-type"] = "text/plain"
                 else:
                     try:
-                        content = await request.json()
+                        json_content = await request.json()
+                        content = json_content
                     except json.JSONDecodeError:
                         log.warning("proxy_request_empty_body")
-                        content = {}
+                        content = None
 
             response = await client.request(
                 method=request.method,
@@ -337,7 +352,10 @@ async def proxy_request(
 # ============================
 @app.get("/", tags=["Root"])
 async def read_root():
-    return {"status": "API Gateway is running!"}
+    return {
+        "status": "API Gateway is running!",
+        "reactive_fabric": get_reactive_fabric_info()
+    }
 
 
 @app.get("/health", tags=["Health"])
@@ -349,8 +367,9 @@ async def health_check():
     - API Gateway status
     - Active Immune Core status
     - Redis connectivity
+    - Reactive Fabric status (Phase 1)
     """
-    health_status = {
+    health_status: Dict[str, Any] = {
         "status": "healthy",
         "message": "API Gateway is operational.",
         "timestamp": datetime.utcnow().isoformat(),
@@ -358,6 +377,7 @@ async def health_check():
             "api_gateway": "healthy",
             "redis": "unknown",
             "active_immune_core": "unknown",
+            "reactive_fabric": "healthy"  # Phase 1 always healthy (no external deps)
         }
     }
 
@@ -1538,6 +1558,127 @@ async def immune_get_metrics(request: Request):
         endpoint="/metrics",
         service_name="active-immune-core",
         timeout=10.0,
+    )
+
+
+# ============================
+# DEFENSIVE TOOLS ENDPOINTS
+# ============================
+
+@app.post("/api/defensive/behavioral/analyze", tags=["Defensive Tools"])
+@limiter.limit("100/minute")
+async def defensive_behavioral_analyze(request: Request):
+    """Analyze behavior event for anomalies"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/behavioral/analyze",
+        service_name="active-immune-core",
+        timeout=15.0,
+    )
+
+
+@app.post("/api/defensive/behavioral/analyze-batch", tags=["Defensive Tools"])
+@limiter.limit("20/minute")
+async def defensive_behavioral_analyze_batch(request: Request):
+    """Analyze batch of behavior events"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/behavioral/analyze-batch",
+        service_name="active-immune-core",
+        timeout=30.0,
+    )
+
+
+@app.post("/api/defensive/behavioral/train-baseline", tags=["Defensive Tools"])
+@limiter.limit("5/hour")
+async def defensive_behavioral_train(request: Request):
+    """Train behavioral baseline from normal activity"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/behavioral/train-baseline",
+        service_name="active-immune-core",
+        timeout=60.0,
+    )
+
+
+@app.get("/api/defensive/behavioral/baseline-status", tags=["Defensive Tools"])
+@limiter.limit("60/minute")
+async def defensive_behavioral_baseline_status(request: Request):
+    """Get baseline training status"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/behavioral/baseline-status",
+        service_name="active-immune-core",
+        timeout=5.0,
+    )
+
+
+@app.get("/api/defensive/behavioral/metrics", tags=["Defensive Tools"])
+@limiter.limit("60/minute")
+async def defensive_behavioral_metrics(request: Request):
+    """Get behavioral analyzer metrics"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/behavioral/metrics",
+        service_name="active-immune-core",
+        timeout=5.0,
+    )
+
+
+@app.post("/api/defensive/traffic/analyze", tags=["Defensive Tools"])
+@limiter.limit("100/minute")
+async def defensive_traffic_analyze(request: Request):
+    """Analyze encrypted traffic pattern for anomalies"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/traffic/analyze",
+        service_name="active-immune-core",
+        timeout=15.0,
+    )
+
+
+@app.post("/api/defensive/traffic/analyze-batch", tags=["Defensive Tools"])
+@limiter.limit("20/minute")
+async def defensive_traffic_analyze_batch(request: Request):
+    """Analyze batch of traffic patterns"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/traffic/analyze-batch",
+        service_name="active-immune-core",
+        timeout=30.0,
+    )
+
+
+@app.get("/api/defensive/traffic/metrics", tags=["Defensive Tools"])
+@limiter.limit("60/minute")
+async def defensive_traffic_metrics(request: Request):
+    """Get traffic analyzer metrics"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/traffic/metrics",
+        service_name="active-immune-core",
+        timeout=5.0,
+    )
+
+
+@app.get("/api/defensive/health", tags=["Defensive Tools"])
+@limiter.limit("60/minute")
+async def defensive_health_check(request: Request):
+    """Health check for defensive tools"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint="/api/defensive/health",
+        service_name="active-immune-core",
+        timeout=5.0,
     )
 
 

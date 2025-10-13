@@ -50,43 +50,12 @@ func (c *ConsciousnessClient) WithStreamURL(url string) {
 // ==================== RESPONSE TYPES ====================
 
 // ConsciousnessState represents complete consciousness state snapshot
-type ConsciousnessState struct {
-	Timestamp              string                 `json:"timestamp"`
-	ESGTActive             bool                   `json:"esgt_active"`
-	ArousalLevel           float64                `json:"arousal_level"`
-	ArousalClassification  string                 `json:"arousal_classification"`
-	TIGMetrics             map[string]interface{} `json:"tig_metrics"`
-	RecentEventsCount      int                    `json:"recent_events_count"`
-	SystemHealth           string                 `json:"system_health"`
-}
 
 // ESGTEvent represents an ESGT ignition event
-type ESGTEvent struct {
-	EventID             string             `json:"event_id"`
-	Timestamp           string             `json:"timestamp"`
-	Success             bool               `json:"success"`
-	Salience            map[string]float64 `json:"salience"`
-	Coherence           *float64           `json:"coherence"`
-	DurationMs          *float64           `json:"duration_ms"`
-	NodesParticipating  int                `json:"nodes_participating"`
-	Reason              *string            `json:"reason"`
-}
 
 // ArousalState represents current arousal state
-type ArousalState struct {
-	Arousal            float64 `json:"arousal"`
-	Level              string  `json:"level"`
-	Baseline           float64 `json:"baseline"`
-	NeedContribution   float64 `json:"need_contribution"`
-	StressContribution float64 `json:"stress_contribution"`
-	Timestamp          string  `json:"timestamp"`
-}
 
 // ConsciousnessMetrics represents system metrics
-type ConsciousnessMetrics struct {
-	TIGMetrics  map[string]interface{} `json:"tig_metrics"`
-	ESGTStats   map[string]interface{} `json:"esgt_stats"`
-}
 
 // ==================== REQUEST TYPES ====================
 

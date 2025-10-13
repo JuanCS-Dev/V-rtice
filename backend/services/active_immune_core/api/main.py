@@ -230,6 +230,7 @@ def create_app() -> FastAPI:
     from api.routes import agents, coordination, health, lymphnode, metrics
     from api.routes import websocket as websocket_events
     from api.websocket import router as websocket_router
+    from api.routes.defensive_tools import router as defensive_router
 
     app.include_router(health.router, prefix="/health", tags=["health"])
     app.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
@@ -238,6 +239,9 @@ def create_app() -> FastAPI:
     app.include_router(lymphnode.router, prefix="/lymphnode", tags=["lymphnode"])
     app.include_router(websocket_router, tags=["websocket"])
     app.include_router(websocket_events.router, tags=["websocket-events"])
+    app.include_router(defensive_router, prefix="/api", tags=["defensive-tools"])
+    
+    logger.info("✓ All routers registered including defensive tools")
 
     return app
 

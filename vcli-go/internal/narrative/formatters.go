@@ -37,10 +37,9 @@ func FormatAnalysisReport(report *CognitiveDefenseReport) string {
 
 	// Threat score with visual bar
 	threatBar := renderThreatBar(report.ThreatScore, palette)
-	severityStyle := getSeverityStyle(report.Severity, styles)
 	output.WriteString(fmt.Sprintf("Threat Score:     %.2f %s\n", report.ThreatScore, threatBar))
-	output.WriteString(fmt.Sprintf("Severity:         %s\n", severityStyle.Render(strings.ToUpper(string(report.Severity)))))
-	output.WriteString(fmt.Sprintf("Recommended:      %s\n", getActionStyle(report.RecommendedAction, styles).Render(strings.ToUpper(string(report.RecommendedAction)))))
+	output.WriteString(fmt.Sprintf("Severity:         %s\n", styles.Warning.Render(strings.ToUpper(report.Severity))))
+	output.WriteString(fmt.Sprintf("Recommended:      %s\n", styles.Success.Render(strings.ToUpper(report.RecommendedAction))))
 	output.WriteString(fmt.Sprintf("Confidence:       %.0f%%\n", report.Confidence*100))
 	output.WriteString("\n")
 
@@ -48,42 +47,58 @@ func FormatAnalysisReport(report *CognitiveDefenseReport) string {
 	output.WriteString(styles.Bold.Render("MODULE ANALYSIS"))
 	output.WriteString("\n\n")
 
-	// Module 1: Source Credibility
+	// Module 1: Source Credibility (flexible schema)
 	output.WriteString(styles.Info.Render("📰 Source Credibility"))
 	output.WriteString("\n")
-	credBar := renderScoreBar(report.CredibilityResult.CredibilityScore, 100, palette)
-	output.WriteString(fmt.Sprintf("  Score:    %.1f/100 %s\n", report.CredibilityResult.CredibilityScore, credBar))
-	output.WriteString(fmt.Sprintf("  Rating:   %s\n", getCredibilityStyle(report.CredibilityResult.Rating, styles).Render(strings.ToUpper(string(report.CredibilityResult.Rating)))))
-	output.WriteString(fmt.Sprintf("  Domain:   %s\n", styles.Muted.Render(report.CredibilityResult.Domain)))
+	credScore := report.GetCredibilityScore()
+	credBar := renderScoreBar(credScore, 100, palette)
+	output.WriteString(fmt.Sprintf("  Score:    %.1f/100 %s\n", credScore, credBar))
+	output.WriteString(fmt.Sprintf("  Rating:   %s\n", styles.Accent.Render(report.GetCredibilityRating())))
+	output.WriteString(fmt.Sprintf("  Domain:   %s\n", styles.Muted.Render(report.GetDomain())))
 	output.WriteString("\n")
 
-	// Module 2: Emotional Manipulation
+	// Module 2: Emotional Manipulation (flexible schema)
 	output.WriteString(styles.Info.Render("😡 Emotional Manipulation"))
 	output.WriteString("\n")
-	emotionBar := renderScoreBar(report.EmotionalResult.ManipulationScore, 1.0, palette)
-	output.WriteString(fmt.Sprintf("  Manipulation: %.2f %s\n", report.EmotionalResult.ManipulationScore, emotionBar))
-	output.WriteString(fmt.Sprintf("  Primary:      %s\n", styles.Accent.Render(string(report.EmotionalResult.EmotionProfile.PrimaryEmotion))))
-	output.WriteString(fmt.Sprintf("  Arousal:      %.2f  Valence: %.2f\n",
-		report.EmotionalResult.EmotionProfile.Arousal,
-		report.EmotionalResult.EmotionProfile.Valence))
+	if emotScore, ok := report.EmotionalResult["manipulation_score"].(float64); ok {
+		emotionBar := renderScoreBar(emotScore, 1.0, palette)
+		output.WriteString(fmt.Sprintf("  Manipulation: %.2f %s\n", emotScore, emotionBar))
+	}
+	if emotion, ok := report.EmotionalResult["primary_emotion"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Primary:      %s\n", styles.Accent.Render(emotion)))
+	}
+	// Arousal and valence from flexible schema
+	if arousal, ok := report.EmotionalResult["arousal"].(float64); ok {
+		if valence, ok2 := report.EmotionalResult["valence"].(float64); ok2 {
+			output.WriteString(fmt.Sprintf("  Arousal:      %.2f  Valence: %.2f\n", arousal, valence))
+		}
+	}
 	output.WriteString("\n")
 
-	// Module 3: Logical Fallacies
+	// Module 3: Logical Fallacies (flexible schema)
 	output.WriteString(styles.Info.Render("🧠 Logical Analysis"))
 	output.WriteString("\n")
-	fallacyBar := renderScoreBar(report.LogicalResult.FallacyScore, 1.0, palette)
-	coherenceBar := renderScoreBar(report.LogicalResult.CoherenceScore, 1.0, palette)
-	output.WriteString(fmt.Sprintf("  Fallacies:  %.2f %s\n", report.LogicalResult.FallacyScore, fallacyBar))
-	output.WriteString(fmt.Sprintf("  Coherence:  %.2f %s\n", report.LogicalResult.CoherenceScore, coherenceBar))
+	if fallacyScore, ok := report.LogicalResult["fallacy_score"].(float64); ok {
+		fallacyBar := renderScoreBar(fallacyScore, 1.0, palette)
+		output.WriteString(fmt.Sprintf("  Fallacies:  %.2f %s\n", fallacyScore, fallacyBar))
+	}
+	if coherenceScore, ok := report.LogicalResult["coherence_score"].(float64); ok {
+		coherenceBar := renderScoreBar(coherenceScore, 1.0, palette)
+		output.WriteString(fmt.Sprintf("  Coherence:  %.2f %s\n", coherenceScore, coherenceBar))
+	}
 	output.WriteString("\n")
 
-	// Module 4: Reality Distortion
+	// Module 4: Reality Distortion (flexible schema)
 	output.WriteString(styles.Info.Render("🔍 Reality Check"))
 	output.WriteString("\n")
-	distortionBar := renderScoreBar(report.RealityResult.DistortionScore, 1.0, palette)
-	factualityBar := renderScoreBar(report.RealityResult.FactualityScore, 1.0, palette)
-	output.WriteString(fmt.Sprintf("  Distortion: %.2f %s\n", report.RealityResult.DistortionScore, distortionBar))
-	output.WriteString(fmt.Sprintf("  Factuality: %.2f %s\n", report.RealityResult.FactualityScore, factualityBar))
+	if distortionScore, ok := report.RealityResult["distortion_score"].(float64); ok {
+		distortionBar := renderScoreBar(distortionScore, 1.0, palette)
+		output.WriteString(fmt.Sprintf("  Distortion: %.2f %s\n", distortionScore, distortionBar))
+	}
+	if factualityScore, ok := report.RealityResult["factuality_score"].(float64); ok {
+		factualityBar := renderScoreBar(factualityScore, 1.0, palette)
+		output.WriteString(fmt.Sprintf("  Factuality: %.2f %s\n", factualityScore, factualityBar))
+	}
 	output.WriteString("\n")
 
 	// Reasoning and Evidence
@@ -265,45 +280,7 @@ func renderScoreBar(score float64, max float64, palette *visual.VerticePalette) 
 }
 
 // getSeverityStyle returns appropriate style for severity level
-func getSeverityStyle(severity ManipulationSeverity, styles *visual.Styles) lipgloss.Style {
-	switch severity {
-	case SeverityCritical, SeverityHigh:
-		return styles.Error
-	case SeverityMedium:
-		return styles.Warning
-	case SeverityLow:
-		return styles.Accent
-	default:
-		return styles.Success
-	}
-}
 
 // getCredibilityStyle returns appropriate style for credibility rating
-func getCredibilityStyle(rating CredibilityRating, styles *visual.Styles) lipgloss.Style {
-	switch rating {
-	case RatingTrusted, RatingGenerallyReliable:
-		return styles.Success
-	case RatingProceedWithCaution:
-		return styles.Warning
-	case RatingUnreliable, RatingHighlyUnreliable:
-		return styles.Error
-	default:
-		return styles.Muted
-	}
-}
 
 // getActionStyle returns appropriate style for recommended action
-func getActionStyle(action CognitiveDefenseAction, styles *visual.Styles) lipgloss.Style {
-	switch action {
-	case ActionAllow:
-		return styles.Success
-	case ActionFlag:
-		return styles.Accent
-	case ActionQuarantine, ActionHumanReview:
-		return styles.Warning
-	case ActionBlock:
-		return styles.Error
-	default:
-		return styles.Muted
-	}
-}

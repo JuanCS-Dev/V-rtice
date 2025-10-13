@@ -20,15 +20,16 @@ import statistics
 from typing import List, Dict, Any
 from dataclasses import dataclass
 import pytest
+import pytest_asyncio
 import psutil
 import gc
 
 # Import consciousness components
-from consciousness.tig.core import TIGCore
-from consciousness.esgt.coordinator import ESGTCoordinator
-from consciousness.mea.attention_schema import AttentionSchema
-from consciousness.mcea.arousal_system import ArousalSystem
-from consciousness.mmei.interoceptive_monitor import InteroceptiveMonitor
+from consciousness.tig import TIGFabric
+from consciousness.esgt import ESGTCoordinator
+from consciousness.mea import AttentionSchemaModel
+from consciousness.mcea.controller import ArousalController
+from consciousness.mmei.monitor import InternalStateMonitor
 
 
 @dataclass
@@ -132,15 +133,15 @@ def profiler():
     p.reset()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def consciousness_pipeline():
     """Initialize full consciousness pipeline for testing."""
     # Initialize components
-    tig = TIGCore()
+    tig = TIGFabric(num_nodes=8)
     esgt = ESGTCoordinator()
-    mea = AttentionSchema()
-    mcea = ArousalSystem()
-    mmei = InteroceptiveMonitor()
+    mea = AttentionSchemaModel()
+    mcea = ArousalController()
+    mmei = InternalStateMonitor()
     
     # Return as dict for easy access
     pipeline = {
@@ -153,8 +154,9 @@ async def consciousness_pipeline():
     
     yield pipeline
     
-    # Cleanup
-    await esgt.shutdown()
+    # Cleanup (if methods exist)
+    if hasattr(esgt, 'shutdown'):
+        await esgt.shutdown()
 
 
 # ============================================================================

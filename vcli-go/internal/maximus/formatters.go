@@ -31,7 +31,7 @@ func FormatConsciousnessState(state *ConsciousnessState) string {
 	}
 	output.WriteString(fmt.Sprintf("System Health:    %s %s\n",
 		healthIcon,
-		healthColor.Render(state.SystemHealth)))
+		healthColor.Render(string(state.SystemHealth))))
 
 	// ESGT Status
 	esgtIcon := "⚡"
@@ -50,21 +50,30 @@ func FormatConsciousnessState(state *ConsciousnessState) string {
 	output.WriteString(fmt.Sprintf("Arousal Level:    %.2f %s (%s)\n",
 		state.ArousalLevel,
 		arousalBar,
-		styles.Accent.Render(state.ArousalClassification)))
+		styles.Accent.Render(string(state.ArousalClassification))))
 
 	// Recent Events
 	output.WriteString(fmt.Sprintf("Recent Events:    %s\n",
 		styles.Info.Render(fmt.Sprintf("%d events", state.RecentEventsCount))))
 
-	// TIG Metrics (if available)
-	if len(state.TIGMetrics) > 0 {
+	// TIG Metrics (struct not map)
+	if state.TIGMetrics.NodesActive > 0 {
 		output.WriteString("\n")
 		output.WriteString(styles.Accent.Render("TIG Metrics:"))
 		output.WriteString("\n")
-		for key, value := range state.TIGMetrics {
-			output.WriteString(fmt.Sprintf("  %s: %v\n",
-				styles.Muted.Render(key),
-				value))
+		output.WriteString(fmt.Sprintf("  %s: %d\n",
+			styles.Muted.Render("Nodes Active"),
+			state.TIGMetrics.NodesActive))
+		output.WriteString(fmt.Sprintf("  %s: %.2f\n",
+			styles.Muted.Render("Connectivity"),
+			state.TIGMetrics.Connectivity))
+		output.WriteString(fmt.Sprintf("  %s: %.2f\n",
+			styles.Muted.Render("Integration"),
+			state.TIGMetrics.Integration))
+		if state.TIGMetrics.PhiProxy > 0 {
+			output.WriteString(fmt.Sprintf("  %s: %.3f\n",
+				styles.Muted.Render("Φ Proxy"),
+				state.TIGMetrics.PhiProxy))
 		}
 	}
 
@@ -129,17 +138,17 @@ func formatESGTEvent(event ESGTEvent, styles *visual.Styles) string {
 		statusColor.Render("ESGT"),
 		styles.Info.Render(event.EventID)))
 
-	// Salience scores
+	// Salience scores (struct not map)
 	output.WriteString(fmt.Sprintf("  Salience: N:%.2f R:%.2f U:%.2f",
-		event.Salience["novelty"],
-		event.Salience["relevance"],
-		event.Salience["urgency"]))
+		event.Salience.Novelty,
+		event.Salience.Relevance,
+		event.Salience.Urgency))
 
-	// Coherence (if available)
-	if event.Coherence != nil {
-		coherenceBar := renderCoherenceBar(*event.Coherence)
+	// Coherence (if available - float64 not pointer)
+	if event.Coherence > 0 {
+		coherenceBar := renderCoherenceBar(event.Coherence)
 		output.WriteString(fmt.Sprintf(" | Coherence: %.2f %s",
-			*event.Coherence,
+			event.Coherence,
 			coherenceBar))
 	}
 
@@ -151,17 +160,17 @@ func formatESGTEvent(event ESGTEvent, styles *visual.Styles) string {
 			event.NodesParticipating))
 	}
 
-	if event.DurationMs != nil {
+	if event.DurationMs > 0 {
 		output.WriteString(fmt.Sprintf(" | Duration: %.1fms",
-			*event.DurationMs))
+			event.DurationMs))
 	}
 
 	output.WriteString("\n")
 
-	// Reason (if failed)
-	if event.Reason != nil && *event.Reason != "" {
+	// Reason (if failed) - ESGTReason is a string type
+	if !event.Success && event.Reason != "" && event.Reason != ESGTReasonNull {
 		output.WriteString(fmt.Sprintf("  Reason: %s\n",
-			styles.Error.Render(*event.Reason)))
+			styles.Error.Render(string(event.Reason))))
 	}
 
 	return output.String()
@@ -187,9 +196,9 @@ func FormatArousalState(arousal *ArousalState) string {
 		arousal.Arousal,
 		arousalBar))
 
-	// Classification
+	// Classification (ArousalLevel is a string type)
 	output.WriteString(fmt.Sprintf("Classification:   %s\n",
-		styles.Accent.Bold(true).Render(arousal.Level)))
+		styles.Accent.Bold(true).Render(string(arousal.Level))))
 
 	// Baseline
 	output.WriteString(fmt.Sprintf("Baseline:         %.3f\n",
@@ -222,27 +231,43 @@ func FormatMetrics(metrics *ConsciousnessMetrics) string {
 	output.WriteString(strings.Repeat("━", 80))
 	output.WriteString("\n\n")
 
-	// TIG Metrics
-	if len(metrics.TIGMetrics) > 0 {
-		output.WriteString(styles.Accent.Render("TIG Fabric Metrics:"))
-		output.WriteString("\n")
-		for key, value := range metrics.TIGMetrics {
-			output.WriteString(fmt.Sprintf("  %-25s %v\n",
-				styles.Muted.Render(key+":"),
-				value))
-		}
-		output.WriteString("\n")
+	// TIG Metrics (struct not map)
+	output.WriteString(styles.Accent.Render("TIG Fabric Metrics:"))
+	output.WriteString("\n")
+	output.WriteString(fmt.Sprintf("  %-25s %d\n",
+		styles.Muted.Render("Nodes Active:"),
+		metrics.TIGMetrics.NodesActive))
+	output.WriteString(fmt.Sprintf("  %-25s %.2f\n",
+		styles.Muted.Render("Connectivity:"),
+		metrics.TIGMetrics.Connectivity))
+	output.WriteString(fmt.Sprintf("  %-25s %.2f\n",
+		styles.Muted.Render("Integration:"),
+		metrics.TIGMetrics.Integration))
+	if metrics.TIGMetrics.PhiProxy > 0 {
+		output.WriteString(fmt.Sprintf("  %-25s %.3f\n",
+			styles.Muted.Render("Φ Proxy:"),
+			metrics.TIGMetrics.PhiProxy))
 	}
+	output.WriteString("\n")
 
-	// ESGT Stats
-	if len(metrics.ESGTStats) > 0 {
-		output.WriteString(styles.Accent.Render("ESGT Statistics:"))
-		output.WriteString("\n")
-		for key, value := range metrics.ESGTStats {
-			output.WriteString(fmt.Sprintf("  %-25s %v\n",
-				styles.Muted.Render(key+":"),
-				value))
-		}
+	// ESGT Stats (struct not map)
+	output.WriteString(styles.Accent.Render("ESGT Statistics:"))
+	output.WriteString("\n")
+	output.WriteString(fmt.Sprintf("  %-25s %d\n",
+		styles.Muted.Render("Total Ignitions:"),
+		metrics.ESGTStats.TotalIgnitions))
+	output.WriteString(fmt.Sprintf("  %-25s %.1f%%\n",
+		styles.Muted.Render("Success Rate:"),
+		metrics.ESGTStats.SuccessRate*100))
+	if metrics.ESGTStats.AvgCoherence > 0 {
+		output.WriteString(fmt.Sprintf("  %-25s %.2f\n",
+			styles.Muted.Render("Avg Coherence:"),
+			metrics.ESGTStats.AvgCoherence))
+	}
+	if metrics.ESGTStats.AvgDurationMs > 0 {
+		output.WriteString(fmt.Sprintf("  %-25s %.1fms\n",
+			styles.Muted.Render("Avg Duration:"),
+			metrics.ESGTStats.AvgDurationMs))
 	}
 
 	return output.String()

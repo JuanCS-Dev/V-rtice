@@ -68,52 +68,12 @@ type ThreatActorProfileResponse struct {
 }
 
 // AttributionResponse from /incident/attribute
-type AttributionResponse struct {
-	IncidentID          string   `json:"incident_id"`
-	AttributedActorID   *string  `json:"attributed_actor_id"`
-	AttributedActorName *string  `json:"attributed_actor_name"`
-	ConfidenceScore     float64  `json:"confidence_score"`
-	MatchingTTPs        []string `json:"matching_ttps"`
-	Timestamp           string   `json:"timestamp"`
-}
 
 // CampaignResponse from /campaign endpoints
-type CampaignResponse struct {
-	CampaignID       string   `json:"campaign_id"`
-	CampaignName     string   `json:"campaign_name"`
-	Incidents        []string `json:"incidents"`
-	AttributedActor  *string  `json:"attributed_actor"`
-	StartDate        string   `json:"start_date"`
-	LastActivity     string   `json:"last_activity"`
-	TTPs             []string `json:"ttps"`
-	Targets          []string `json:"targets"`
-	ConfidenceScore  float64  `json:"confidence_score"`
-	CampaignPattern  string   `json:"campaign_pattern"`
-	Timestamp        string   `json:"timestamp"`
-}
 
 // InvestigationResponse from /investigation endpoints
-type InvestigationResponse struct {
-	InvestigationID    string   `json:"investigation_id"`
-	IncidentID         string   `json:"incident_id"`
-	Status             string   `json:"status"`
-	Findings           []string `json:"findings"`
-	EvidenceCount      int      `json:"evidence_count"`
-	AttributedActor    *string  `json:"attributed_actor"`
-	RelatedCampaigns   []string `json:"related_campaigns"`
-	ConfidenceScore    float64  `json:"confidence_score"`
-	PlaybookUsed       string   `json:"playbook_used"`
-	DurationSeconds    *float64 `json:"duration_seconds"`
-	Recommendations    []string `json:"recommendations"`
-}
 
 // StatusResponse from /status
-type StatusResponse struct {
-	Service    string                            `json:"service"`
-	Status     string                            `json:"status"`
-	Components map[string]map[string]interface{} `json:"components"`
-	Timestamp  string                            `json:"timestamp"`
-}
 
 // ==================== API METHODS ====================
 

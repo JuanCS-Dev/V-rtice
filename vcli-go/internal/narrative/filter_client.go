@@ -15,48 +15,7 @@ type NarrativeFilterClient struct {
 	authToken  string
 }
 
-// Request/Response types
-type AnalysisRequest struct {
-	Text        string                 `json:"text"`
-	SourceURL   *string                `json:"source_url,omitempty"`
-	EnableTier2 bool                   `json:"enable_tier2"`
-	Priority    int                    `json:"priority"`
-	Metadata    map[string]interface{} `json:"metadata"`
-}
-
-type AnalysisResponse struct {
-	Success bool                   `json:"success"`
-	Report  *CognitiveDefenseReport `json:"report,omitempty"`
-	Error   *string                `json:"error,omitempty"`
-}
-
-type CognitiveDefenseReport struct {
-	AnalysisID         string                 `json:"analysis_id"`
-	Timestamp          string                 `json:"timestamp"`
-	Version            string                 `json:"version"`
-	Text               string                 `json:"text"`
-	SourceURL          *string                `json:"source_url,omitempty"`
-	ThreatScore        float64                `json:"threat_score"`
-	Severity           string                 `json:"severity"`
-	RecommendedAction  string                 `json:"recommended_action"`
-	Confidence         float64                `json:"confidence"`
-	Reasoning          string                 `json:"reasoning"`
-	Evidence           []string               `json:"evidence"`
-	ProcessingTimeMs   float64                `json:"processing_time_ms"`
-	ModelsUsed         []string               `json:"models_used"`
-	CredibilityResult  map[string]interface{} `json:"credibility_result"`
-	EmotionalResult    map[string]interface{} `json:"emotional_result"`
-	LogicalResult      map[string]interface{} `json:"logical_result"`
-	RealityResult      map[string]interface{} `json:"reality_result"`
-}
-
-type HealthCheckResponse struct {
-	Status       string            `json:"status"`
-	Version      string            `json:"version"`
-	Timestamp    string            `json:"timestamp"`
-	Services     map[string]bool   `json:"services"`
-	ModelsLoaded []string          `json:"models_loaded"`
-}
+// All types are now in types.go to avoid duplication
 
 type SimpleHealthResponse struct {
 	Status string `json:"status"`

@@ -30,48 +30,12 @@ type ThreatActorProfile struct {
 }
 
 // AttributionResponse represents attribution analysis response
-type AttributionResponse struct {
-	PrimaryAttribution string                       `json:"primary_attribution"`
-	Confidence         float64                      `json:"confidence"`
-	AlternativeActors  []map[string]interface{}     `json:"alternative_actors"`
-	Reasoning          string                       `json:"reasoning"`
-	MatchedIndicators  map[string][]string          `json:"matched_indicators"`
-	Timestamp          string                       `json:"timestamp"`
-}
 
 // CampaignResponse represents a campaign
-type CampaignResponse struct {
-	CampaignID   string                 `json:"campaign_id"`
-	Name         string                 `json:"name"`
-	FirstSeen    string                 `json:"first_seen"`
-	LastSeen     string                 `json:"last_seen"`
-	Incidents    []string               `json:"incidents"`
-	Actors       []string               `json:"actors"`
-	SharedTTPs   []string               `json:"shared_ttps"`
-	Confidence   float64                `json:"confidence"`
-	Description  string                 `json:"description,omitempty"`
-	Metadata     map[string]interface{} `json:"metadata,omitempty"`
-}
 
 // InvestigationResponse represents an investigation
-type InvestigationResponse struct {
-	InvestigationID string                 `json:"investigation_id"`
-	Status          string                 `json:"status"`
-	StartedAt       string                 `json:"started_at"`
-	CompletedAt     string                 `json:"completed_at,omitempty"`
-	Findings        map[string]interface{} `json:"findings,omitempty"`
-	Recommendations []string               `json:"recommendations,omitempty"`
-}
 
 // StatusResponse represents service status
-type StatusResponse struct {
-	Status           string `json:"status"`
-	ThreatActors     int    `json:"threat_actors"`
-	Incidents        int    `json:"incidents"`
-	Campaigns        int    `json:"campaigns"`
-	Investigations   int    `json:"investigations"`
-	Timestamp        string `json:"timestamp"`
-}
 
 // HealthResponse represents health check
 type HealthResponse struct {

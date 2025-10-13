@@ -30,123 +30,7 @@ func NewNarrativeClient(baseURL string) *NarrativeClient {
 }
 
 // ==================== RESPONSE TYPES ====================
-
-// ManipulationSeverity levels
-type ManipulationSeverity string
-
-const (
-	SeverityNone     ManipulationSeverity = "none"
-	SeverityLow      ManipulationSeverity = "low"
-	SeverityMedium   ManipulationSeverity = "medium"
-	SeverityHigh     ManipulationSeverity = "high"
-	SeverityCritical ManipulationSeverity = "critical"
-)
-
-// CredibilityRating levels
-type CredibilityRating string
-
-const (
-	RatingTrusted              CredibilityRating = "trusted"
-	RatingGenerallyReliable    CredibilityRating = "generally_reliable"
-	RatingProceedWithCaution   CredibilityRating = "proceed_with_caution"
-	RatingUnreliable           CredibilityRating = "unreliable"
-	RatingHighlyUnreliable     CredibilityRating = "highly_unreliable"
-)
-
-// CognitiveDefenseAction recommended actions
-type CognitiveDefenseAction string
-
-const (
-	ActionAllow           CognitiveDefenseAction = "allow"
-	ActionFlag            CognitiveDefenseAction = "flag"
-	ActionQuarantine      CognitiveDefenseAction = "quarantine"
-	ActionBlock           CognitiveDefenseAction = "block"
-	ActionHumanReview     CognitiveDefenseAction = "require_human_review"
-)
-
-// EmotionCategory types
-type EmotionCategory string
-
-// SourceCredibilityResult from Module 1
-type SourceCredibilityResult struct {
-	Domain                                string            `json:"domain"`
-	CredibilityScore                      float64           `json:"credibility_score"`
-	Rating                                CredibilityRating `json:"rating"`
-	DoesNotRepeatPublishFalseContent      float64           `json:"does_not_repeatedly_publish_false_content"`
-	GathersPresentsInfoResponsibly        float64           `json:"gathers_and_presents_info_responsibly"`
-	RegularlyCorrectsErrors               float64           `json:"regularly_corrects_errors"`
-	HandlesDifferenceBetweenNewsOpinion   float64           `json:"handles_difference_between_news_opinion"`
-	AvoidsDeceptiveHeadlines              float64           `json:"avoids_deceptive_headlines"`
-	WebsiteDisclosesOwnership             float64           `json:"website_discloses_ownership"`
-	ClearlyLabelsAdvertising              float64           `json:"clearly_labels_advertising"`
-	RevealsWhosInCharge                   float64           `json:"reveals_whos_in_charge"`
-	ProvidesNamesContentCreators          float64           `json:"provides_names_of_content_creators"`
-	HistoricalReliability                 float64           `json:"historical_reliability"`
-	TierUsed                              int               `json:"tier_used"`
-}
-
-// EmotionProfile from Module 2
-type EmotionProfile struct {
-	PrimaryEmotion EmotionCategory        `json:"primary_emotion"`
-	EmotionScores  map[string]float64     `json:"emotion_scores"`
-	Arousal        float64                `json:"arousal"`
-	Valence        float64                `json:"valence"`
-}
-
-// EmotionalManipulationResult from Module 2
-type EmotionalManipulationResult struct {
-	ManipulationScore float64        `json:"manipulation_score"`
-	EmotionProfile    EmotionProfile `json:"emotion_profile"`
-}
-
-// LogicalFallacyResult from Module 3
-type LogicalFallacyResult struct {
-	FallacyScore   float64 `json:"fallacy_score"`
-	CoherenceScore float64 `json:"coherence_score"`
-}
-
-// RealityDistortionResult from Module 4
-type RealityDistortionResult struct {
-	DistortionScore float64 `json:"distortion_score"`
-	FactualityScore float64 `json:"factuality_score"`
-}
-
-// CognitiveDefenseReport complete analysis report
-type CognitiveDefenseReport struct {
-	AnalysisID           string                       `json:"analysis_id"`
-	Timestamp            string                       `json:"timestamp"`
-	Version              string                       `json:"version"`
-	Text                 string                       `json:"text"`
-	SourceURL            *string                      `json:"source_url"`
-	CredibilityResult    SourceCredibilityResult      `json:"credibility_result"`
-	EmotionalResult      EmotionalManipulationResult  `json:"emotional_result"`
-	LogicalResult        LogicalFallacyResult         `json:"logical_result"`
-	RealityResult        RealityDistortionResult      `json:"reality_result"`
-	ThreatScore          float64                      `json:"threat_score"`
-	Severity             ManipulationSeverity         `json:"severity"`
-	RecommendedAction    CognitiveDefenseAction       `json:"recommended_action"`
-	Confidence           float64                      `json:"confidence"`
-	Reasoning            string                       `json:"reasoning"`
-	Evidence             []string                     `json:"evidence"`
-	ProcessingTimeMs     float64                      `json:"processing_time_ms"`
-	ModelsUsed           []string                     `json:"models_used"`
-}
-
-// AnalysisResponse from /api/analyze endpoint
-type AnalysisResponse struct {
-	Success bool                    `json:"success"`
-	Report  *CognitiveDefenseReport `json:"report"`
-	Error   *string                 `json:"error"`
-}
-
-// HealthCheckResponse from /health endpoint
-type HealthCheckResponse struct {
-	Status       string            `json:"status"` // healthy, degraded, unhealthy
-	Version      string            `json:"version"`
-	Timestamp    string            `json:"timestamp"`
-	Services     map[string]bool   `json:"services"`
-	ModelsLoaded []string          `json:"models_loaded"`
-}
+// All types moved to types.go to avoid duplication
 
 // CacheStats from /stats/cache
 type CacheStats struct {
@@ -169,12 +53,7 @@ type ServiceInfo struct {
 }
 
 // ==================== REQUEST TYPES ====================
-
-// AnalysisRequest for /api/analyze
-type AnalysisRequest struct {
-	Text      string  `json:"text"`
-	SourceURL *string `json:"source_url,omitempty"`
-}
+// Moved to types.go
 
 // ==================== API METHODS ====================
 

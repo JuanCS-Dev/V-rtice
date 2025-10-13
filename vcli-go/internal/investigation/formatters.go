@@ -90,34 +90,41 @@ func FormatAttributionReport(attribution *AttributionResponse) string {
 
 	// Incident Details
 	output.WriteString(styles.Bold.Render("Incident Information") + "\n\n")
+	
+	incidentID := attribution.GetIncidentID()
 	output.WriteString(fmt.Sprintf("  Incident ID:         %s\n",
-		styles.Info.Render(attribution.IncidentID)))
-	output.WriteString(fmt.Sprintf("  Timestamp:           %s\n",
-		styles.Muted.Render(attribution.Timestamp)))
+		styles.Info.Render(incidentID)))
 
 	// Attribution Result
-	if attribution.AttributedActorID != nil {
+	actorID := attribution.GetAttributedActorID()
+	actorName := attribution.GetAttributedActorName()
+	if actorID != "" {
 		output.WriteString(fmt.Sprintf("  Attributed Actor:    %s\n",
-			styles.Success.Render(*attribution.AttributedActorID)))
-		if attribution.AttributedActorName != nil {
+			styles.Success.Render(actorID)))
+		if actorName != "" && actorName != "Unknown" {
 			output.WriteString(fmt.Sprintf("  Actor Name:          %s\n",
-				styles.Bold.Render(*attribution.AttributedActorName)))
+				styles.Bold.Render(actorName)))
 		}
 	} else {
 		output.WriteString(fmt.Sprintf("  Attributed Actor:    %s\n",
 			styles.Muted.Render("No attribution")))
 	}
 
+	confidence := attribution.GetConfidenceScore()
 	output.WriteString(fmt.Sprintf("  Confidence:          %s\n\n",
-		formatConfidence(attribution.ConfidenceScore, styles)))
+		formatConfidence(confidence, styles)))
 
-	// Matching TTPs
-	if len(attribution.MatchingTTPs) > 0 {
-		output.WriteString(styles.Bold.Render("Matching TTPs") + "\n\n")
-		for i, ttp := range attribution.MatchingTTPs {
-			output.WriteString(fmt.Sprintf("  %s %s\n",
-				styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
-				styles.Secondary.Render(ttp)))
+	// Matching TTPs (from flexible data schema)
+	if attribution.Data != nil {
+		if ttps, ok := attribution.Data["matching_ttps"].([]interface{}); ok && len(ttps) > 0 {
+			output.WriteString(styles.Bold.Render("Matching TTPs") + "\n\n")
+			for i, ttp := range ttps {
+				if ttpStr, ok := ttp.(string); ok {
+					output.WriteString(fmt.Sprintf("  %s %s\n",
+						styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
+						styles.Secondary.Render(ttpStr)))
+				}
+			}
 		}
 		output.WriteString("\n")
 	}
@@ -137,59 +144,83 @@ func FormatCampaignReport(campaign *CampaignResponse) string {
 	title := visual.GradientText("CAMPAIGN ANALYSIS", gradient)
 	output.WriteString(title + "\n\n")
 
-	// Campaign Overview
+	// Campaign Overview (flexible schema via Data)
 	output.WriteString(styles.Bold.Render("Campaign Overview") + "\n")
-	output.WriteString(fmt.Sprintf("  Campaign ID:         %s\n",
-		styles.Info.Render(campaign.CampaignID)))
-	output.WriteString(fmt.Sprintf("  Campaign Name:       %s\n",
-		styles.Bold.Render(campaign.CampaignName)))
-
-	if campaign.AttributedActor != nil {
-		output.WriteString(fmt.Sprintf("  Attributed Actor:    %s\n",
-			styles.Success.Render(*campaign.AttributedActor)))
+	
+	if campaignID, ok := campaign.Data["campaign_id"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Campaign ID:         %s\n",
+			styles.Info.Render(campaignID)))
+	}
+	
+	if campaignName, ok := campaign.Data["campaign_name"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Campaign Name:       %s\n",
+			styles.Bold.Render(campaignName)))
 	}
 
-	output.WriteString(fmt.Sprintf("  Pattern:             %s\n",
-		styles.Accent.Render(campaign.CampaignPattern)))
-	output.WriteString(fmt.Sprintf("  Confidence:          %s\n\n",
-		formatConfidence(campaign.ConfidenceScore, styles)))
+	if attributedActor, ok := campaign.Data["attributed_actor"].(string); ok && attributedActor != "" {
+		output.WriteString(fmt.Sprintf("  Attributed Actor:    %s\n",
+			styles.Success.Render(attributedActor)))
+	}
+
+	if pattern, ok := campaign.Data["campaign_pattern"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Pattern:             %s\n",
+			styles.Accent.Render(pattern)))
+	}
+	
+	if confidence, ok := campaign.Data["confidence_score"].(float64); ok {
+		output.WriteString(fmt.Sprintf("  Confidence:          %s\n\n",
+			formatConfidence(confidence, styles)))
+	}
 
 	// Timeline
 	output.WriteString(styles.Bold.Render("Timeline") + "\n")
-	output.WriteString(fmt.Sprintf("  Start Date:          %s\n",
-		styles.Muted.Render(campaign.StartDate)))
-	output.WriteString(fmt.Sprintf("  Last Activity:       %s\n",
-		styles.Warning.Render(campaign.LastActivity)))
-	output.WriteString(fmt.Sprintf("  Incident Count:      %s\n\n",
-		styles.Accent.Render(fmt.Sprintf("%d", len(campaign.Incidents)))))
-
+	if startDate, ok := campaign.Data["start_date"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Start Date:          %s\n",
+			styles.Muted.Render(startDate)))
+	}
+	if lastActivity, ok := campaign.Data["last_activity"].(string); ok {
+		output.WriteString(fmt.Sprintf("  Last Activity:       %s\n",
+			styles.Warning.Render(lastActivity)))
+	}
+	
 	// Incidents
-	if len(campaign.Incidents) > 0 {
-		output.WriteString(styles.Bold.Render("Related Incidents") + "\n")
-			for i, incident := range campaign.Incidents {
-			output.WriteString(fmt.Sprintf("  %s %s\n",
-				styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
-				styles.Secondary.Render(incident)))
+	if incidentsRaw, ok := campaign.Data["incidents"].([]interface{}); ok {
+		output.WriteString(fmt.Sprintf("  Incident Count:      %s\n\n",
+			styles.Accent.Render(fmt.Sprintf("%d", len(incidentsRaw)))))
+			
+		if len(incidentsRaw) > 0 {
+			output.WriteString(styles.Bold.Render("Related Incidents") + "\n")
+			for i, incidentRaw := range incidentsRaw {
+				if incident, ok := incidentRaw.(string); ok {
+					output.WriteString(fmt.Sprintf("  %s %s\n",
+						styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
+						styles.Secondary.Render(incident)))
+				}
+			}
 		}
 		output.WriteString("\n")
 	}
 
-	// TTPs
-	if len(campaign.TTPs) > 0 {
+	// TTPs (flexible schema)
+	if ttpsRaw, ok := campaign.Data["ttps"].([]interface{}); ok && len(ttpsRaw) > 0 {
 		output.WriteString(styles.Bold.Render("Campaign TTPs") + "\n")
-			for i, ttp := range campaign.TTPs {
-			output.WriteString(fmt.Sprintf("  %s %s\n",
-				styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
-				styles.Secondary.Render(ttp)))
+		for i, ttpRaw := range ttpsRaw {
+			if ttp, ok := ttpRaw.(string); ok {
+				output.WriteString(fmt.Sprintf("  %s %s\n",
+					styles.Muted.Render(fmt.Sprintf("%2d.", i+1)),
+					styles.Secondary.Render(ttp)))
+			}
 		}
 		output.WriteString("\n")
 	}
 
-	// Targets
-	if len(campaign.Targets) > 0 {
+	// Targets (flexible schema)
+	if targetsRaw, ok := campaign.Data["targets"].([]interface{}); ok && len(targetsRaw) > 0 {
 		output.WriteString(styles.Bold.Render("Targeted Entities") + "\n")
-			for _, target := range campaign.Targets {
-			output.WriteString(fmt.Sprintf("  • %s\n", styles.Warning.Render(target)))
+		for _, targetRaw := range targetsRaw {
+			if target, ok := targetRaw.(string); ok {
+				output.WriteString(fmt.Sprintf("  • %s\n", styles.Warning.Render(target)))
+			}
 		}
 		output.WriteString("\n")
 	}
