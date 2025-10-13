@@ -8,3 +8,4 @@ export { default as DecoyBayouMap } from './DecoyBayouMap';
 export { default as IntelligenceFusionPanel } from './IntelligenceFusionPanel';
 export { default as ThreatTimelineWidget } from './ThreatTimelineWidget';
 export { default as HoneypotStatusGrid } from './HoneypotStatusGrid';
+export { default as HITLDecisionConsole } from './HITLDecisionConsole';
