@@ -1,0 +1,462 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "source": "Landing Page",
+    "date": "2025-10-14",
+    "description": "Visual design system standard extracted from Landing Page - SOURCE OF TRUTH"
+  },
+  "colors": {
+    "accent": {
+      "primary": "#8b5cf6",
+      "secondary": "#06b6d4",
+      "success": "#10b981",
+      "warning": "#f59e0b",
+      "danger": "#ef4444",
+      "info": "#3b82f6"
+    },
+    "background": {
+      "primary": "#0a0a0a",
+      "secondary": "#171717",
+      "tertiary": "#262626",
+      "elevated": "#1c1c1c",
+      "overlay": "rgba(10, 10, 10, 0.98)",
+      "hover": "rgba(139, 92, 246, 0.1)",
+      "active": "rgba(139, 92, 246, 0.2)"
+    },
+    "text": {
+      "primary": "#fafafa",
+      "secondary": "#d4d4d4",
+      "tertiary": "#a3a3a3",
+      "muted": "#737373",
+      "disabled": "#525252",
+      "inverse": "#0a0a0a"
+    },
+    "border": {
+      "primary": "rgba(139, 92, 246, 0.3)",
+      "secondary": "rgba(6, 182, 212, 0.3)",
+      "default": "rgba(255, 255, 255, 0.1)",
+      "hover": "rgba(139, 92, 246, 0.6)",
+      "focus": "#8b5cf6",
+      "strong": "rgba(255, 255, 255, 0.2)",
+      "subtle": "rgba(255, 255, 255, 0.05)"
+    },
+    "gradients": {
+      "primary": "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
+      "red": "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+      "green": "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+      "orange": "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+      "blue": "linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)",
+      "purple": "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": "'Orbitron', monospace",
+      "body": "'Courier New', monospace",
+      "sans": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+    },
+    "fontSize": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.25rem",
+      "5xl": "3rem",
+      "6xl": "3.75rem"
+    },
+    "fontWeight": {
+      "normal": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "extrabold": 800,
+      "black": 900
+    },
+    "lineHeight": {
+      "tight": 1.25,
+      "normal": 1.5,
+      "relaxed": 1.75,
+      "none": 1
+    },
+    "letterSpacing": {
+      "tighter": "-0.05em",
+      "tight": "-0.025em",
+      "normal": "0",
+      "wide": "0.025em",
+      "wider": "0.05em",
+      "widest": "0.1em"
+    }
+  },
+  "spacing": {
+    "0": "0",
+    "px": "1px",
+    "0.5": "0.125rem",
+    "1": "0.25rem",
+    "1.5": "0.375rem",
+    "2": "0.5rem",
+    "2.5": "0.625rem",
+    "3": "0.75rem",
+    "3.5": "0.875rem",
+    "4": "1rem",
+    "5": "1.25rem",
+    "6": "1.5rem",
+    "7": "1.75rem",
+    "8": "2rem",
+    "9": "2.25rem",
+    "10": "2.5rem",
+    "11": "2.75rem",
+    "12": "3rem",
+    "14": "3.5rem",
+    "16": "4rem",
+    "20": "5rem",
+    "24": "6rem",
+    "32": "8rem"
+  },
+  "borderRadius": {
+    "none": "0",
+    "sm": "0.125rem",
+    "base": "0.25rem",
+    "md": "0.375rem",
+    "lg": "0.5rem",
+    "xl": "0.75rem",
+    "2xl": "1rem",
+    "3xl": "1.5rem",
+    "full": "9999px"
+  },
+  "shadows": {
+    "sm": "0 1px 3px rgba(0, 0, 0, 0.2)",
+    "md": "0 4px 6px rgba(0, 0, 0, 0.3)",
+    "lg": "0 10px 15px rgba(0, 0, 0, 0.4)",
+    "xl": "0 20px 25px rgba(0, 0, 0, 0.5)",
+    "2xl": "0 25px 50px rgba(0, 0, 0, 0.6)",
+    "glow": {
+      "purple": "0 0 30px rgba(139, 92, 246, 0.8)",
+      "cyan": "0 0 20px rgba(6, 182, 212, 0.6)",
+      "red": "0 0 30px rgba(239, 68, 68, 1)",
+      "green": "0 0 20px rgba(16, 185, 129, 0.6)"
+    }
+  },
+  "transitions": {
+    "duration": {
+      "fast": "150ms",
+      "base": "200ms",
+      "slow": "300ms",
+      "slower": "500ms"
+    },
+    "timing": {
+      "easeIn": "cubic-bezier(0.4, 0, 1, 1)",
+      "easeOut": "cubic-bezier(0, 0, 0.2, 1)",
+      "easeInOut": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "easeBounce": "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+    }
+  },
+  "components": {
+    "button": {
+      "primary": {
+        "background": "var(--gradient-primary)",
+        "color": "#fff",
+        "padding": "var(--space-md) var(--space-lg)",
+        "borderRadius": "var(--radius-lg)",
+        "fontFamily": "'Courier New', monospace",
+        "fontWeight": 700,
+        "letterSpacing": "0.05em",
+        "textTransform": "uppercase",
+        "boxShadow": "var(--shadow-md)",
+        "hover": {
+          "boxShadow": "var(--shadow-glow-purple)",
+          "transform": "translateX(5px)"
+        }
+      },
+      "secondary": {
+        "background": "var(--color-bg-elevated)",
+        "color": "var(--color-accent-primary)",
+        "border": "1px solid var(--color-border-primary)",
+        "padding": "var(--space-md) var(--space-lg)",
+        "borderRadius": "var(--radius-lg)",
+        "fontFamily": "'Courier New', monospace",
+        "hover": {
+          "background": "var(--color-bg-active)",
+          "borderColor": "var(--color-accent-primary)"
+        }
+      }
+    },
+    "card": {
+      "base": {
+        "background": "var(--color-bg-elevated)",
+        "border": "1px solid var(--color-border-primary)",
+        "borderRadius": "var(--radius-2xl)",
+        "padding": "var(--space-xl)",
+        "boxShadow": "var(--shadow-lg)",
+        "backdropFilter": "blur(var(--blur-lg))",
+        "transition": "all var(--transition-base)",
+        "hover": {
+          "transform": "translateY(-10px) scale(1.02)",
+          "boxShadow": "var(--shadow-2xl)",
+          "borderColor": "var(--color-accent-primary)"
+        }
+      }
+    },
+    "badge": {
+      "featurePill": {
+        "padding": "var(--space-xs) var(--space-sm)",
+        "background": "var(--color-bg-secondary)",
+        "border": "1px solid var(--color-border-secondary)",
+        "borderRadius": "var(--radius-full)",
+        "color": "var(--color-text-tertiary)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": 500,
+        "fontFamily": "monospace",
+        "transition": "all var(--transition-fast)",
+        "hover": {
+          "borderColor": "var(--color-accent-primary)",
+          "color": "var(--color-accent-primary)"
+        }
+      },
+      "statusBadge": {
+        "padding": "var(--space-xs) var(--space-md)",
+        "background": "var(--color-accent-primary-light)",
+        "border": "1px solid var(--color-accent-primary)",
+        "borderRadius": "var(--radius-full)",
+        "color": "var(--color-accent-primary)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": 700,
+        "letterSpacing": "0.1em",
+        "textTransform": "uppercase",
+        "fontFamily": "monospace",
+        "boxShadow": "var(--shadow-glow-purple)"
+      }
+    },
+    "tag": {
+      "base": {
+        "padding": "var(--space-xs) var(--space-md)",
+        "background": "var(--color-bg-elevated)",
+        "border": "1px solid var(--color-border-primary)",
+        "borderRadius": "var(--radius-md)",
+        "color": "var(--color-text-secondary)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": 500,
+        "fontFamily": "monospace",
+        "transition": "all var(--transition-base)",
+        "hover": {
+          "background": "var(--color-accent-primary-light)",
+          "borderColor": "var(--color-accent-primary)",
+          "color": "var(--color-accent-primary)",
+          "transform": "translateY(-2px)",
+          "boxShadow": "var(--shadow-md)"
+        }
+      }
+    },
+    "icon": {
+      "base": {
+        "fontSize": "var(--text-5xl)",
+        "filter": "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))",
+        "transition": "transform var(--transition-base)",
+        "hover": {
+          "transform": "scale(1.15) rotate(5deg)"
+        }
+      },
+      "logo": {
+        "fontSize": "var(--text-4xl)",
+        "color": "var(--color-accent-primary)",
+        "filter": "drop-shadow(var(--shadow-glow-purple))",
+        "animation": "glow 3s ease-in-out infinite"
+      }
+    },
+    "title": {
+      "hero": {
+        "fontSize": "var(--text-6xl)",
+        "fontWeight": 900,
+        "lineHeight": 1,
+        "letterSpacing": "-0.05em",
+        "fontFamily": "'Orbitron', monospace",
+        "color": "var(--color-text-primary)",
+        "textTransform": "uppercase"
+      },
+      "section": {
+        "fontSize": "var(--text-4xl)",
+        "fontWeight": 800,
+        "fontFamily": "'Orbitron', monospace",
+        "color": "var(--color-text-primary)",
+        "letterSpacing": "-0.025em"
+      },
+      "card": {
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": 700,
+        "fontFamily": "'Orbitron', monospace",
+        "color": "var(--color-text-primary)",
+        "letterSpacing": "-0.025em"
+      }
+    },
+    "moduleCard": {
+      "base": {
+        "padding": "var(--space-xl)",
+        "background": "var(--color-bg-elevated)",
+        "border": "1px solid var(--color-border-primary)",
+        "borderRadius": "var(--radius-2xl)",
+        "boxShadow": "var(--shadow-lg)",
+        "transition": "all var(--transition-base)",
+        "cursor": "pointer",
+        "hover": {
+          "transform": "translateY(-10px) scale(1.02)",
+          "boxShadow": "var(--shadow-2xl)",
+          "borderColor": "var(--color-accent-primary)"
+        }
+      },
+      "icon": {
+        "fontSize": "var(--text-5xl)",
+        "filter": "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))",
+        "hover": {
+          "transform": "scale(1.15) rotate(5deg)"
+        }
+      },
+      "cta": {
+        "padding": "var(--space-md)",
+        "background": "var(--gradient-primary)",
+        "borderRadius": "var(--radius-lg)",
+        "color": "#fff",
+        "fontWeight": 700,
+        "fontFamily": "monospace",
+        "letterSpacing": "0.025em",
+        "boxShadow": "var(--shadow-md)",
+        "hover": {
+          "boxShadow": "var(--shadow-glow-purple)",
+          "transform": "translateX(5px)"
+        }
+      }
+    }
+  },
+  "animations": {
+    "pulse": {
+      "keyframes": "0%, 100% { opacity: 1; } 50% { opacity: 0.5; }",
+      "duration": "2s",
+      "timing": "cubic-bezier(0.4, 0, 0.6, 1)",
+      "iteration": "infinite"
+    },
+    "glow": {
+      "keyframes": "0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.8; filter: brightness(1.2); }",
+      "duration": "3s",
+      "timing": "ease-in-out",
+      "iteration": "infinite"
+    },
+    "fadeIn": {
+      "keyframes": "from { opacity: 0; } to { opacity: 1; }",
+      "duration": "0.8s",
+      "timing": "var(--transition-smooth)"
+    },
+    "slideInLeft": {
+      "keyframes": "from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); }",
+      "duration": "1s",
+      "timing": "var(--transition-smooth)"
+    },
+    "slideInRight": {
+      "keyframes": "from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); }",
+      "duration": "1s",
+      "timing": "var(--transition-smooth)"
+    },
+    "cardEntrance": {
+      "keyframes": "to { opacity: 1; transform: translateY(0); }",
+      "duration": "0.6s",
+      "timing": "var(--transition-smooth)",
+      "fillMode": "forwards"
+    }
+  },
+  "layout": {
+    "container": {
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px",
+      "2xl": "1536px"
+    },
+    "sidebar": {
+      "width": "320px"
+    },
+    "header": {
+      "height": "80px"
+    },
+    "footer": {
+      "height": "60px"
+    }
+  },
+  "breakpoints": {
+    "mobile": "640px",
+    "tablet": "768px",
+    "laptop": "1024px",
+    "desktop": "1280px",
+    "wide": "1536px"
+  },
+  "cssVariables": {
+    "required": [
+      "--color-accent-primary",
+      "--color-accent-secondary",
+      "--color-bg-elevated",
+      "--color-text-primary",
+      "--color-border-primary",
+      "--gradient-primary",
+      "--shadow-lg",
+      "--shadow-glow-purple",
+      "--radius-2xl",
+      "--space-xl",
+      "--transition-base"
+    ]
+  },
+  "rules": {
+    "colorUsage": {
+      "DO": [
+        "Use var(--color-accent-primary) for primary actions",
+        "Use var(--color-accent-secondary) for secondary accents",
+        "Use var(--gradient-primary) for hero CTAs",
+        "Use var(--shadow-glow-purple) for hover glows",
+        "Always reference design tokens, never hardcode colors"
+      ],
+      "DONT": [
+        "Never use hardcoded hex colors like #8b5cf6 directly",
+        "Never use rgba() without design token",
+        "Never create custom purple/cyan colors",
+        "Never mix color systems (red/cyan with purple/cyan)"
+      ]
+    },
+    "typography": {
+      "DO": [
+        "Use 'Orbitron' for display text (titles, headings)",
+        "Use 'Courier New' for body text",
+        "Use monospace for labels, tags, badges",
+        "Use letter-spacing: 0.05em for uppercase text",
+        "Use font-weight: 700 for emphasis"
+      ],
+      "DONT": [
+        "Never use 'Fira Code', 'JetBrains Mono', or other monospace",
+        "Never use Arial, Helvetica, or system fonts for body",
+        "Never use font sizes without design tokens"
+      ]
+    },
+    "spacing": {
+      "DO": [
+        "Use var(--space-*) for all padding/margin",
+        "Use 8px grid (multiples of var(--space-2))",
+        "Use var(--space-xl) for card padding",
+        "Use var(--space-md) for button padding"
+      ],
+      "DONT": [
+        "Never use hardcoded px values like '16px' or '1rem'",
+        "Never use arbitrary spacing values"
+      ]
+    },
+    "effects": {
+      "DO": [
+        "Cards: translateY(-10px) scale(1.02) on hover",
+        "Buttons: translateX(5px) + glow on hover",
+        "Icons: scale(1.15) rotate(5deg) on hover",
+        "Use var(--transition-base) for transitions"
+      ],
+      "DONT": [
+        "Never use instant transitions",
+        "Never use different hover effects for same component type",
+        "Never omit hover effects on interactive elements"
+      ]
+    }
+  }
+}
