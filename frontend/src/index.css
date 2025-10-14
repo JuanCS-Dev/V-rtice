@@ -18,10 +18,18 @@
 @tailwind utilities;
 
 body {
+  margin: 0;
+  padding: 0;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-primary);
   transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
 /* Hide scrollbar but keep functionality */
