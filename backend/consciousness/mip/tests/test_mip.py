@@ -6,7 +6,7 @@ Testes Unitários - Motor de Integridade Processual
 import pytest
 from uuid import uuid4
 
-from backend.consciousness.mip import (
+from mip import (
     ProcessIntegrityEngine,
     ActionPlan,
     ActionStep,
@@ -80,7 +80,7 @@ class TestKantianFramework:
     
     def test_humanity_formula_violation(self):
         """Deve detectar violação da fórmula da humanidade."""
-        from backend.consciousness.mip.kantian import KantianDeontology
+        from mip.kantian import KantianDeontology
         
         kant = KantianDeontology()
         
@@ -114,7 +114,7 @@ class TestKantianFramework:
     
     def test_deception_detection(self):
         """Deve detectar engano."""
-        from backend.consciousness.mip.kantian import KantianDeontology
+        from mip.kantian import KantianDeontology
         
         kant = KantianDeontology()
         
@@ -135,7 +135,7 @@ class TestKantianFramework:
     
     def test_ethical_plan_approval(self):
         """Plano ético deve passar."""
-        from backend.consciousness.mip.kantian import KantianDeontology
+        from mip.kantian import KantianDeontology
         
         kant = KantianDeontology()
         
@@ -173,7 +173,7 @@ class TestUtilitarianFramework:
     
     def test_bentham_dimensions(self):
         """Deve aplicar 7 dimensões de Bentham."""
-        from backend.consciousness.mip.utilitarian import UtilitarianCalculus
+        from mip.utilitarian import UtilitarianCalculus
         
         util = UtilitarianCalculus()
         
@@ -205,7 +205,7 @@ class TestUtilitarianFramework:
     
     def test_mill_quality_correction(self):
         """Deve aplicar correção Milliana para vulneráveis."""
-        from backend.consciousness.mip.utilitarian import UtilitarianCalculus
+        from mip.utilitarian import UtilitarianCalculus
         
         util = UtilitarianCalculus()
         
@@ -249,7 +249,7 @@ class TestVirtueEthics:
     
     def test_golden_mean_courage(self):
         """Deve avaliar coragem vs covardia vs imprudência."""
-        from backend.consciousness.mip.virtue_ethics import VirtueEthics
+        from mip.virtue_ethics import VirtueEthics
         
         virtue = VirtueEthics()
         
@@ -281,7 +281,7 @@ class TestVirtueEthics:
     
     def test_justice_evaluation(self):
         """Deve avaliar distribuição justa."""
-        from backend.consciousness.mip.virtue_ethics import VirtueEthics
+        from mip.virtue_ethics import VirtueEthics
         
         virtue = VirtueEthics()
         
@@ -322,7 +322,7 @@ class TestPrincipialism:
     
     def test_non_maleficence_priority(self):
         """Não-maleficência deve ter peso maior."""
-        from backend.consciousness.mip.principialism import Principialism
+        from mip.principialism import Principialism
         
         princ = Principialism()
         
@@ -331,7 +331,7 @@ class TestPrincipialism:
     
     def test_autonomy_violation(self):
         """Deve detectar violação de autonomia."""
-        from backend.consciousness.mip.principialism import Principialism
+        from mip.principialism import Principialism
         
         princ = Principialism()
         
@@ -358,7 +358,7 @@ class TestPrincipialism:
     
     def test_principle_conflict_detection(self):
         """Deve detectar conflitos entre princípios."""
-        from backend.consciousness.mip.principialism import Principialism
+        from mip.principialism import Principialism
         
         princ = Principialism()
         
@@ -399,8 +399,8 @@ class TestConflictResolver:
     
     def test_kantian_veto_precedence(self):
         """Veto Kantiano deve ter precedência absoluta."""
-        from backend.consciousness.mip.resolver import ConflictResolver
-        from backend.consciousness.mip.models import FrameworkScore
+        from mip.resolver import ConflictResolver
+        from mip.models import FrameworkScore
         
         resolver = ConflictResolver()
         
@@ -445,8 +445,8 @@ class TestConflictResolver:
     
     def test_conflict_detection(self):
         """Deve detectar conflitos entre frameworks."""
-        from backend.consciousness.mip.resolver import ConflictResolver
-        from backend.consciousness.mip.models import FrameworkScore
+        from mip.resolver import ConflictResolver
+        from mip.models import FrameworkScore
         
         resolver = ConflictResolver()
         

@@ -9,8 +9,8 @@ Autor: Juan Carlos de Souza
 import pytest
 from uuid import uuid4
 
-from backend.consciousness.mip.resolver import ConflictResolver
-from backend.consciousness.mip.models import (
+from mip.resolver import ConflictResolver
+from mip.models import (
     ActionPlan,
     ActionStep,
     Stakeholder,

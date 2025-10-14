@@ -10,13 +10,13 @@ Autor: Juan Carlos de Souza
 import pytest
 from uuid import uuid4
 
-from backend.consciousness.mip.frameworks import (
+from mip.frameworks import (
     KantianDeontology,
     UtilitarianCalculus,
     VirtueEthics,
     Principialism,
 )
-from backend.consciousness.mip.models import *
+from mip.models import *
 
 
 class TestKantianEdgeCases:

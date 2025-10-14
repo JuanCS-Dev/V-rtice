@@ -10,7 +10,7 @@ import pytest
 from uuid import uuid4
 from datetime import datetime
 
-from backend.consciousness.mip.infrastructure.knowledge_models import (
+from mip.infrastructure.knowledge_models import (
     Principle,
     Decision,
     Precedent,

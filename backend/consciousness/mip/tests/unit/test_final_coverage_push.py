@@ -11,10 +11,10 @@ import pytest
 from uuid import uuid4
 from datetime import datetime
 
-from backend.consciousness.mip.frameworks import *
-from backend.consciousness.mip.models import *
-from backend.consciousness.mip.resolver import ConflictResolver
-from backend.consciousness.mip.infrastructure.knowledge_models import *
+from mip.frameworks import *
+from mip.models import *
+from mip.resolver import ConflictResolver
+from mip.infrastructure.knowledge_models import *
 
 
 class TestVirtueEthicsFinalCoverage:

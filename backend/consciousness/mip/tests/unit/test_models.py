@@ -11,7 +11,7 @@ import pytest
 from uuid import UUID, uuid4
 from datetime import datetime
 
-from backend.consciousness.mip.models import (
+from mip.models import (
     ActionPlan,
     ActionStep,
     Stakeholder,

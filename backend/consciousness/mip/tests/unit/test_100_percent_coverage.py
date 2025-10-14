@@ -10,9 +10,9 @@ Autor: Juan Carlos de Souza
 import pytest
 from uuid import uuid4
 
-from backend.consciousness.mip.frameworks import *
-from backend.consciousness.mip.models import *
-from backend.consciousness.mip.resolver import ConflictResolver
+from mip.frameworks import *
+from mip.models import *
+from mip.resolver import ConflictResolver
 
 
 class TestKantianFullCoverage:
