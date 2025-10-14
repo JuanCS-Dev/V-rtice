@@ -166,15 +166,115 @@ async def shutdown_event():
 
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
-    """Performs a health check of the Maximus Core Service.
+async def health_check() -> dict[str, Any]:
+    """Performs a comprehensive health check of the Maximus Core Service.
+
+    Checks:
+    - MAXIMUS AI status
+    - Consciousness System health (TIG, ESGT, Arousal, Safety)
+    - PrefrontalCortex status (social cognition)
+    - ToM Engine status (with Redis cache if configured)
+    - Decision Queue status (HITL Governance)
 
     Returns:
-        Dict[str, str]: A dictionary indicating the service status.
+        Dict[str, Any]: Comprehensive health status with component breakdown
     """
-    if maximus_ai:
-        return {"status": "healthy", "message": "Maximus Core Service is operational."}
-    raise HTTPException(status_code=503, detail="Maximus AI not initialized.")
+    health_status = {
+        "status": "healthy",
+        "message": "Maximus Core Service is operational.",
+        "timestamp": __import__("time").time(),
+        "components": {}
+    }
+
+    # Check MAXIMUS AI
+    if not maximus_ai:
+        health_status["status"] = "degraded"
+        health_status["components"]["maximus_ai"] = {"status": "not_initialized"}
+    else:
+        health_status["components"]["maximus_ai"] = {"status": "healthy"}
+
+    # Check Consciousness System
+    if consciousness_system:
+        is_healthy = consciousness_system.is_healthy()
+        health_status["components"]["consciousness"] = {
+            "status": "healthy" if is_healthy else "unhealthy",
+            "running": consciousness_system._running,
+            "safety_enabled": consciousness_system.config.safety_enabled
+        }
+
+        # Add TIG Fabric status
+        if consciousness_system.tig_fabric:
+            tig_metrics = consciousness_system.tig_fabric.get_metrics()
+            health_status["components"]["tig_fabric"] = {
+                "status": "healthy",
+                "node_count": len(consciousness_system.tig_fabric.nodes),
+                "edge_count": consciousness_system.tig_fabric.edge_count,
+                "avg_latency_us": tig_metrics.avg_latency_us
+            }
+
+        # Add ESGT Coordinator status
+        if consciousness_system.esgt_coordinator:
+            health_status["components"]["esgt_coordinator"] = {
+                "status": "healthy" if consciousness_system.esgt_coordinator._running else "stopped",
+                "total_events": consciousness_system.esgt_coordinator.total_events,
+                "success_rate": consciousness_system.esgt_coordinator.get_success_rate()
+            }
+
+        # TRACK 1: Add PrefrontalCortex status
+        if consciousness_system.prefrontal_cortex:
+            pfc_status = await consciousness_system.prefrontal_cortex.get_status()
+            health_status["components"]["prefrontal_cortex"] = {
+                "status": "healthy",
+                "signals_processed": pfc_status["total_signals_processed"],
+                "actions_generated": pfc_status["total_actions_generated"],
+                "approval_rate": pfc_status["approval_rate"],
+                "metacognition": pfc_status["metacognition"]
+            }
+
+        # TRACK 1: Add ToM Engine status (including Redis cache)
+        if consciousness_system.tom_engine:
+            tom_stats = await consciousness_system.tom_engine.get_stats()
+            health_status["components"]["tom_engine"] = {
+                "status": "initialized" if consciousness_system.tom_engine._initialized else "not_initialized",
+                "total_agents": tom_stats["total_agents"],
+                "memory_beliefs": tom_stats["memory"]["total_beliefs"],
+                "contradictions": tom_stats["contradictions"],
+                "redis_cache": {
+                    "enabled": tom_stats["redis_cache"]["enabled"],
+                    "hit_rate": tom_stats["redis_cache"].get("hit_rate", 0.0) if tom_stats["redis_cache"]["enabled"] else None
+                }
+            }
+
+        # Add Safety Protocol status (if enabled)
+        if consciousness_system.config.safety_enabled and consciousness_system.safety_protocol:
+            safety_status = consciousness_system.get_safety_status()
+            health_status["components"]["safety_protocol"] = {
+                "status": "monitoring" if safety_status["monitoring_active"] else "inactive",
+                "kill_switch_triggered": safety_status["kill_switch_triggered"],
+                "active_violations": safety_status["active_violations"]
+            }
+    else:
+        health_status["components"]["consciousness"] = {"status": "not_initialized"}
+
+    # Check HITL Decision Queue
+    if decision_queue:
+        queue_stats = decision_queue.get_statistics()
+        health_status["components"]["decision_queue"] = {
+            "status": "healthy",
+            "pending_decisions": queue_stats["pending"],
+            "sla_violations": queue_stats["sla_violations_count"]
+        }
+    else:
+        health_status["components"]["decision_queue"] = {"status": "not_initialized"}
+
+    # Determine overall status
+    component_statuses = [c.get("status") for c in health_status["components"].values() if "status" in c]
+    if any(s in ["unhealthy", "not_initialized"] for s in component_statuses):
+        health_status["status"] = "degraded"
+    if not maximus_ai:
+        raise HTTPException(status_code=503, detail="Service degraded: MAXIMUS AI not initialized")
+
+    return health_status
 
 
 @app.post("/query")
