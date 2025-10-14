@@ -777,3 +777,116 @@ class TestEdgeCases:
         # Test normal path
         avg = verdict.average_confidence()
         assert avg == 0.95
+    
+    def test_verdict_validate_action_plan_id_invalid_uuid(self) -> None:
+        """Test validator for invalid UUID (lines 176-177)."""
+        kant = FrameworkVerdict(
+            framework_name=FrameworkName.KANTIAN,
+            decision=DecisionLevel.APPROVE,
+            confidence=0.95,
+            reasoning="Test reasoning with enough characters",
+        )
+        
+        # Use a string with 36 chars but invalid UUID format to trigger validator
+        with pytest.raises(ValidationError) as exc_info:
+            EthicalVerdict(
+                action_plan_id="11111111-1111-1111-1111-11111111111X",  # Invalid UUID (X at end)
+                final_decision=DecisionLevel.APPROVE,
+                confidence=0.95,
+                framework_verdicts={FrameworkName.KANTIAN: kant},
+                resolution_method="test",
+                primary_reasons=["Test reason"],
+                processing_time_ms=100.0,
+            )
+        
+        # Should trigger lines 176-177 (ValueError raised)
+        error_str = str(exc_info.value)
+        assert "action_plan_id" in error_str.lower() or "uuid" in error_str.lower()
+    
+    def test_verdict_validate_minimum_frameworks_empty(self) -> None:
+        """Test validator for empty framework_verdicts (line 185)."""
+        with pytest.raises(ValidationError) as exc_info:
+            EthicalVerdict(
+                action_plan_id="11111111-1111-1111-1111-111111111111",
+                final_decision=DecisionLevel.APPROVE,
+                confidence=0.95,
+                framework_verdicts={},  # Empty dict
+                resolution_method="test",
+                primary_reasons=["Test reason"],
+                processing_time_ms=100.0,
+            )
+        
+        # Should trigger line 185 (ValueError raised)
+        assert "framework" in str(exc_info.value).lower()
+    
+    def test_verdict_validate_primary_reasons_empty(self) -> None:
+        """Test validator for empty primary_reasons (line 193)."""
+        kant = FrameworkVerdict(
+            framework_name=FrameworkName.KANTIAN,
+            decision=DecisionLevel.APPROVE,
+            confidence=0.95,
+            reasoning="Test reasoning with enough characters",
+        )
+        
+        with pytest.raises(ValidationError) as exc_info:
+            EthicalVerdict(
+                action_plan_id="11111111-1111-1111-1111-111111111111",
+                final_decision=DecisionLevel.APPROVE,
+                confidence=0.95,
+                framework_verdicts={FrameworkName.KANTIAN: kant},
+                resolution_method="test",
+                primary_reasons=[],  # Empty list
+                processing_time_ms=100.0,
+            )
+        
+        # Should trigger line 193 (ValueError raised)
+        assert "reason" in str(exc_info.value).lower()
+    
+    def test_verdict_consensus_level_empty_frameworks_direct(self) -> None:
+        """Test consensus_level with no frameworks returns 0.0 (line 249)."""
+        # Create verdict with minimal setup then test empty scenario
+        kant = FrameworkVerdict(
+            framework_name=FrameworkName.KANTIAN,
+            decision=DecisionLevel.APPROVE,
+            confidence=0.95,
+            reasoning="Test reasoning with enough characters",
+        )
+        
+        verdict = EthicalVerdict(
+            action_plan_id="11111111-1111-1111-1111-111111111111",
+            final_decision=DecisionLevel.APPROVE,
+            confidence=0.95,
+            framework_verdicts={FrameworkName.KANTIAN: kant},
+            resolution_method="test",
+            primary_reasons=["Test reason"],
+            processing_time_ms=100.0,
+        )
+        
+        # Manually set to empty to test line 249 guard
+        verdict.framework_verdicts = {}
+        result = verdict.consensus_level()
+        assert result == 0.0  # Line 249: return 0.0
+    
+    def test_verdict_average_confidence_empty_frameworks_direct(self) -> None:
+        """Test average_confidence with no frameworks returns 0.0 (line 265)."""
+        kant = FrameworkVerdict(
+            framework_name=FrameworkName.KANTIAN,
+            decision=DecisionLevel.APPROVE,
+            confidence=0.95,
+            reasoning="Test reasoning with enough characters",
+        )
+        
+        verdict = EthicalVerdict(
+            action_plan_id="11111111-1111-1111-1111-111111111111",
+            final_decision=DecisionLevel.APPROVE,
+            confidence=0.95,
+            framework_verdicts={FrameworkName.KANTIAN: kant},
+            resolution_method="test",
+            primary_reasons=["Test reason"],
+            processing_time_ms=100.0,
+        )
+        
+        # Manually set to empty to test line 265 guard
+        verdict.framework_verdicts = {}
+        result = verdict.average_confidence()
+        assert result == 0.0  # Line 265: return 0.0

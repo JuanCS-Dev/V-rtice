@@ -548,6 +548,62 @@ class TestValidations:
             initiator="test_user",
             initiator_type=StakeholderType.HUMAN
         )
+        
+        # Test line 287: return None when step not found
+        result = plan.get_step_by_id("99999999-9999-9999-9999-999999999999")
+        assert result is None
+    
+    def test_get_execution_order_circular_dependency(self) -> None:
+        """Test get_execution_order detects circular dependencies (line 321)."""
+        # Create steps without circular dependencies first
+        step1 = ActionStep(
+            id="11111111-1111-1111-1111-111111111111",
+            description="Step one here",
+        )
+        step2 = ActionStep(
+            id="22222222-2222-2222-2222-222222222222",
+            description="Step two here",
+        )
+        plan = ActionPlan(
+            objective="Circular dependency test objective",
+            steps=[step1, step2],
+            initiator="test user",
+            initiator_type="human"
+        )
+        
+        # Manually create circular dependency after validation
+        step1.dependencies = ["22222222-2222-2222-2222-222222222222"]
+        step2.dependencies = ["11111111-1111-1111-1111-111111111111"]
+        
+        with pytest.raises(ValueError, match="circular dependency"):
+            plan.get_execution_order()
+    
+    def test_get_critical_path_step_found(self) -> None:
+        """Test get_critical_path backtracking logic (line 362-366)."""
+        # Create valid linear path
+        step1 = ActionStep(
+            id="11111111-1111-1111-1111-111111111111",
+            description="First step here",
+            estimated_duration_seconds=10.0,
+        )
+        step2 = ActionStep(
+            id="22222222-2222-2222-2222-222222222222",
+            description="Second step depends on first",
+            estimated_duration_seconds=20.0,
+            dependencies=["11111111-1111-1111-1111-111111111111"]
+        )
+        plan = ActionPlan(
+            objective="Critical path test objective",
+            steps=[step1, step2],
+            initiator="test user",
+            initiator_type="human"
+        )
+        
+        # This should work and test lines 362-366 (when critical_dep is found)
+        critical = plan.get_critical_path()
+        assert len(critical) == 2
+        assert critical[0].id == step1.id
+        assert critical[1].id == step2.id
         # Try to get a step that doesn't exist - should return None (line 287)
         result = plan.get_step_by_id("99999999-9999-9999-9999-999999999999")
         assert result is None  # Covers line 287

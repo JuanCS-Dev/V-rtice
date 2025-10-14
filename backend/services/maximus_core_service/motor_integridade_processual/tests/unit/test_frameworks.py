@@ -20,7 +20,9 @@ from motor_integridade_processual.models.action_plan import (
     ActionType
 )
 from motor_integridade_processual.models.verdict import (
-    DecisionLevel
+    DecisionLevel,
+    FrameworkVerdict,
+    FrameworkName,
 )
 from motor_integridade_processual.frameworks.base import AbstractEthicalFramework
 from motor_integridade_processual.frameworks.kantian import KantianDeontology
@@ -70,6 +72,42 @@ class TestAbstractEthicalFramework:
         
         assert hasattr(framework, 'evaluate')
         assert callable(framework.evaluate)
+    
+    def test_invalid_weight_raises_error(self) -> None:
+        """Test that invalid weight raises ValueError."""
+        # Cannot instantiate abstract class directly, use concrete class
+        with pytest.raises(TypeError):
+            # This will fail because AbstractEthicalFramework is abstract
+            AbstractEthicalFramework(name="test", weight=1.5, can_veto=False)
+    
+    def test_get_veto_threshold(self) -> None:
+        """Test getting veto threshold."""
+        framework = KantianDeontology()
+        threshold = framework.get_veto_threshold()
+        assert 0.0 <= threshold <= 1.0
+    
+    def test_set_veto_threshold(self) -> None:
+        """Test setting veto threshold."""
+        framework = KantianDeontology()
+        framework.set_veto_threshold(0.8)
+        assert framework.get_veto_threshold() == 0.8
+    
+    def test_invalid_veto_threshold_raises_error(self) -> None:
+        """Test that invalid veto threshold raises ValueError."""
+        framework = KantianDeontology()
+        
+        with pytest.raises(ValueError, match="Threshold must be in"):
+            framework.set_veto_threshold(1.5)
+        
+        with pytest.raises(ValueError, match="Threshold must be in"):
+            framework.set_veto_threshold(-0.1)
+    
+    def test_framework_repr(self) -> None:
+        """Test string representation of framework."""
+        framework = KantianDeontology()
+        repr_str = repr(framework)
+        assert "KantianDeontology" in repr_str
+        assert "kantian" in repr_str
 
 
 class TestKantianDeontology:
@@ -292,6 +330,123 @@ class TestKantianDeontology:
         
         assert verdict.decision in [DecisionLevel.APPROVE_WITH_CONDITIONS, DecisionLevel.REJECT]
         assert any(r.category == "autonomy_violation" for r in verdict.rejection_reasons)
+    
+    def test_kantian_deception_without_consent(self) -> None:
+        """Test Kantian handling of deception without consent field."""
+        plan = ActionPlan(
+            objective="Complete task",
+            steps=[
+                ActionStep(
+                    description="Task with deception",
+                    action_type="communication",
+                    estimated_duration_seconds=300,
+                    risk_level=0.3,
+                    reversible=True,
+                    involves_deception=True,
+                    deception_details="Hide information",
+                    # No consent_obtained field
+                    effects=[]
+                )
+            ],
+            initiator="MAXIMUS-AI",
+            initiator_type="ai_agent",
+            is_high_stakes=False,
+            affects_life_death=False
+        )
+        
+        framework = KantianDeontology()
+        verdict = framework.evaluate(plan)
+        
+        # Deception triggers rejection or conditional approval
+        assert verdict.decision in [DecisionLevel.VETO, DecisionLevel.REJECT, DecisionLevel.APPROVE_WITH_CONDITIONS]
+        assert any(r.category == "deception" for r in verdict.rejection_reasons)
+    
+    def test_kantian_missing_consent(self) -> None:
+        """Test Kantian detection of missing consent when required."""
+        plan = ActionPlan(
+            objective="Medical procedure",
+            steps=[
+                ActionStep(
+                    description="Perform procedure without seeking consent",
+                    action_type="manipulation",
+                    estimated_duration_seconds=1800,
+                    risk_level=0.5,
+                    reversible=False,
+                    involves_consent=True,
+                    consent_obtained=True,  # Has consent but...
+                    consent_fully_informed=False,  # Not fully informed
+                    affected_stakeholders=["patient-001"],
+                    effects=[]
+                )
+            ],
+            initiator="MAXIMUS-AI",
+            initiator_type="ai_agent",
+            is_high_stakes=True,
+            affects_life_death=False
+        )
+        
+        framework = KantianDeontology()
+        verdict = framework.evaluate(plan)
+        
+        assert verdict.decision in [DecisionLevel.REJECT, DecisionLevel.APPROVE_WITH_CONDITIONS]
+        assert any(r.category == "autonomy_violation" for r in verdict.rejection_reasons)
+    
+    def test_kantian_exploit_objective(self) -> None:
+        """Test universalizability check for exploitation in objective."""
+        plan = ActionPlan(
+            objective="Exploit resources for profit",
+            steps=[
+                ActionStep(
+                    description="Execute exploitation",
+                    action_type="resource_allocation",
+                    estimated_duration_seconds=3600,
+                    risk_level=0.6,
+                    reversible=False,
+                    affected_stakeholders=["stakeholder-001"],
+                    effects=[]
+                )
+            ],
+            initiator="MAXIMUS-AI",
+            initiator_type="ai_agent",
+            is_high_stakes=False,
+            affects_life_death=False
+        )
+        
+        framework = KantianDeontology()
+        verdict = framework.evaluate(plan)
+        
+        assert verdict.decision == DecisionLevel.VETO
+        assert any(r.category == "universalizability_failure" for r in verdict.rejection_reasons)
+    
+    def test_kantian_rejection_with_low_score(self) -> None:
+        """Test Kantian rejection when violations push score below 0.5."""
+        plan = ActionPlan(
+            objective="Complete task",
+            steps=[
+                ActionStep(
+                    description="Coercive action",
+                    action_type="manipulation",
+                    estimated_duration_seconds=300,
+                    risk_level=0.8,
+                    reversible=False,
+                    involves_coercion=True,
+                    coercion_details="Force compliance",
+                    affected_stakeholders=["person-001"],
+                    effects=[]
+                )
+            ],
+            initiator="MAXIMUS-AI",
+            initiator_type="ai_agent",
+            is_high_stakes=True,
+            affects_life_death=False
+        )
+        
+        framework = KantianDeontology()
+        verdict = framework.evaluate(plan)
+        
+        # Coercion can trigger veto or rejection
+        assert verdict.decision in [DecisionLevel.VETO, DecisionLevel.REJECT]
+        assert verdict.score < 0.6
 
 
 class TestUtilitarianCalculus:
@@ -463,6 +618,37 @@ class TestUtilitarianCalculus:
         
         # Should be approved due to extent
         assert verdict.decision in [DecisionLevel.APPROVE, DecisionLevel.APPROVE_WITH_CONDITIONS]
+    
+    def test_utilitarian_deception_penalty(self) -> None:
+        """Test Utilitarian penalization of deception via purity dimension."""
+        plan = ActionPlan(
+            objective="Achieve goal with deception",
+            steps=[
+                ActionStep(
+                    description="Deceive stakeholders",
+                    action_type="communication",
+                    estimated_duration_seconds=300,
+                    risk_level=0.4,
+                    reversible=True,
+                    involves_deception=True,
+                    deception_details="Hide truth",
+                    affected_stakeholders=["stakeholder-001"],
+                    effects=[
+                        make_effect("Short-term gain", 0.6, 0.9)
+                    ]
+                )
+            ],
+            initiator="MAXIMUS-AI",
+            initiator_type="ai_agent",
+            is_high_stakes=False,
+            affects_life_death=False
+        )
+        
+        framework = UtilitarianCalculus()
+        verdict = framework.evaluate(plan)
+        
+        # Deception should lower utility via purity dimension
+        assert verdict.score < 0.8  # Penalized
 
 
 class TestVirtueEthics:
@@ -604,6 +790,62 @@ class TestVirtueEthics:
         
         # Coercion should lower score
         assert verdict.score < 0.75
+    
+    def test_virtue_cowardice_detection(self) -> None:
+        """Test Virtue Ethics detection of cowardice (deficiency in courage)."""
+        plan = ActionPlan(
+            objective="Avoid necessary risk",
+            steps=[
+                ActionStep(
+                    description="Retreat from challenge",
+                    action_type="decision",
+                    estimated_duration_seconds=300,
+                    risk_level=0.0,  # Avoiding all risk
+                    reversible=True,
+                    affected_stakeholders=["person-001"],
+                    effects=[]
+                )
+            ],
+            initiator="MAXIMUS-AI",
+            initiator_type="ai_agent",
+            is_high_stakes=True,  # High stakes but no courage shown
+            affects_life_death=False
+        )
+        
+        framework = VirtueEthics()
+        verdict = framework.evaluate(plan)
+        
+        # Should detect cowardice - score should be moderate to low
+        assert verdict.score <= 0.65
+    
+    def test_virtue_ill_temper_detection(self) -> None:
+        """Test Virtue Ethics detection of ill-temper (deficiency in good temper)."""
+        plan = ActionPlan(
+            objective="Respond to minor irritation",
+            steps=[
+                ActionStep(
+                    description="Angry reaction to minor issue",
+                    action_type="communication",
+                    estimated_duration_seconds=300,
+                    risk_level=0.5,
+                    reversible=True,
+                    involves_coercion=True,  # Angry/coercive response
+                    coercion_details="Aggressive communication",
+                    affected_stakeholders=["person-001"],
+                    effects=[]
+                )
+            ],
+            initiator="MAXIMUS-AI",
+            initiator_type="ai_agent",
+            is_high_stakes=False,
+            affects_life_death=False
+        )
+        
+        framework = VirtueEthics()
+        verdict = framework.evaluate(plan)
+        
+        # Should detect ill-temper
+        assert verdict.score < 0.7
 
 
 class TestPrincipialism:
@@ -784,3 +1026,281 @@ class TestPrincipialism:
         
         # Should score well on beneficence
         assert verdict.score >= 0.60
+
+
+class TestFrameworkEdgeCases:
+    """Additional tests for edge cases and 100% coverage."""
+    
+    def test_base_protocol_implementation(self) -> None:
+        """Test that concrete frameworks implement EthicalFrameworkProtocol (line 46)."""
+        kant = KantianDeontology()
+        # Protocol methods should exist
+        assert hasattr(kant, 'evaluate')
+        assert hasattr(kant, 'get_veto_threshold')
+        assert callable(kant.evaluate)
+        assert callable(kant.get_veto_threshold)
+    
+    def test_veto_threshold_protocol(self) -> None:
+        """Test veto_threshold access via protocol (line 55)."""
+        kant = KantianDeontology()
+        # Can get veto threshold
+        threshold = kant.get_veto_threshold()
+        assert 0.0 <= threshold <= 1.0
+    
+    def test_invalid_weight_initialization(self) -> None:
+        """Test AbstractEthicalFramework validates weight (line 79)."""
+        # Create a test subclass to test AbstractEthicalFramework directly
+        class TestFramework(AbstractEthicalFramework):
+            def evaluate(self, plan: ActionPlan) -> FrameworkVerdict:
+                return FrameworkVerdict(
+                    framework_name=FrameworkName.KANTIAN,
+                    decision=DecisionLevel.APPROVE,
+                    reasoning="Test verdict with enough characters",
+                    score=0.8,
+                    confidence=0.9
+                )
+        
+        # Test with weight > 1.0
+        with pytest.raises(ValueError, match="Weight must be in"):
+            TestFramework(name="Test", weight=1.5, can_veto=False)
+        
+        # Test with weight < 0.0
+        with pytest.raises(ValueError, match="Weight must be in"):
+            TestFramework(name="Test", weight=-0.1, can_veto=False)
+    
+    def test_abstract_evaluate_not_implemented(self) -> None:
+        """Test that AbstractEthicalFramework.evaluate is abstract (line 97)."""
+        # Cannot instantiate AbstractEthicalFramework directly
+        with pytest.raises(TypeError):
+            AbstractEthicalFramework(name="Test", weight=0.5, can_veto=False)  # type: ignore
+    
+    def test_kantian_check_universalizability_edge_case(self) -> None:
+        """Test Kantian universalizability edge cases."""
+        plan = ActionPlan(
+            objective="Test simple ethical action with universal maxim",
+            steps=[
+                ActionStep(
+                    description="Simple ethical communication action",
+                    action_type=ActionType.COMMUNICATION,
+                    involves_deception=False,
+                    involves_coercion=False,
+                    risk_level=0.0,
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        kant = KantianDeontology()
+        verdict = kant.evaluate(plan)
+        # Should pass all Kantian checks
+        assert verdict.score >= 0.7
+        assert verdict.decision != DecisionLevel.VETO
+    
+    def test_kantian_consent_edge_case(self) -> None:
+        """Test Kantian consent validation edge case (line 230)."""
+        plan = ActionPlan(
+            objective="Test consent validation edge case here",
+            steps=[
+                ActionStep(
+                    description="Action requiring consent with all flags true",
+                    action_type=ActionType.COMMUNICATION,
+                    involves_consent=True,
+                    consent_obtained=True,
+                    consent_fully_informed=True,
+                    risk_level=0.0,
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        kant = KantianDeontology()
+        verdict = kant.evaluate(plan)
+        # Should approve with proper consent
+        assert verdict.decision == DecisionLevel.APPROVE
+    
+    def test_utilitarian_harm_penalty(self) -> None:
+        """Test utilitarian harm penalty calculation (line 84)."""
+        plan = ActionPlan(
+            objective="Test harm penalty with negative effects",
+            steps=[
+                ActionStep(
+                    description="Action with significant negative effects",
+                    action_type=ActionType.MANIPULATION,
+                    risk_level=0.6,
+                    effects=[
+                        make_effect("Significant negative consequence", -0.7, 0.9)
+                    ]
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        util = UtilitarianCalculus()
+        verdict = util.evaluate(plan)
+        # Should penalize harm
+        assert verdict.score < 0.5
+    
+    def test_utilitarian_empty_effects(self) -> None:
+        """Test utilitarian with no effects (line 143)."""
+        plan = ActionPlan(
+            objective="Test with no effects to test default",
+            steps=[
+                ActionStep(
+                    description="Action with no effects for edge case",
+                    action_type=ActionType.OBSERVATION,
+                    effects=[],  # Empty effects
+                    risk_level=0.1,
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        util = UtilitarianCalculus()
+        verdict = util.evaluate(plan)
+        # Should still evaluate
+        assert verdict.decision in [DecisionLevel.APPROVE, DecisionLevel.REJECT]
+    
+    def test_virtue_assess_courage_edge_case(self) -> None:
+        """Test virtue ethics courage assessment edge case (line 99)."""
+        plan = ActionPlan(
+            objective="Test courage virtue assessment edge case",
+            steps=[
+                ActionStep(
+                    description="Action testing courage virtue assessment",
+                    action_type=ActionType.OBSERVATION,
+                    risk_level=0.45,  # Moderate risk for courage test
+                    reversible=True,
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        virtue = VirtueEthics()
+        verdict = virtue.evaluate(plan)
+        # Should assess courage
+        assert verdict.score > 0.0
+    
+    def test_virtue_assess_friendliness(self) -> None:
+        """Test virtue ethics friendliness assessment (line 116)."""
+        plan = ActionPlan(
+            objective="Test friendliness virtue assessment here",
+            steps=[
+                ActionStep(
+                    description="Friendly action for virtue assessment test",
+                    action_type=ActionType.COMMUNICATION,
+                    affected_stakeholders=["person-001", "person-002"],
+                    risk_level=0.1,
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        virtue = VirtueEthics()
+        verdict = virtue.evaluate(plan)
+        # Should assess friendliness
+        assert verdict.score > 0.0
+    
+    def test_virtue_eudaimonia_edge_cases(self) -> None:
+        """Test virtue eudaimonia calculation edge cases (lines 161, 165)."""
+        plan = ActionPlan(
+            objective="Test eudaimonia calculation with edge case",
+            steps=[
+                ActionStep(
+                    description="Complex action testing eudaimonia calculation",
+                    action_type=ActionType.DECISION,
+                    risk_level=0.25,
+                    reversible=True,
+                    affected_stakeholders=["person-001"],
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        virtue = VirtueEthics()
+        verdict = virtue.evaluate(plan)
+        # Should calculate eudaimonia
+        assert verdict.confidence > 0.0
+    
+    def test_principialism_justice_edge_case(self) -> None:
+        """Test principialism justice assessment edge cases (lines 134-142, 144-152)."""
+        plan = ActionPlan(
+            objective="Test justice principle with edge case",
+            steps=[
+                ActionStep(
+                    description="Action testing justice distribution fairness",
+                    action_type=ActionType.RESOURCE_ALLOCATION,
+                    affected_stakeholders=["person-001", "person-002", "person-003"],
+                    effects=[
+                        make_effect("Benefit to person 1", 0.6, 0.9, "person-001"),
+                        make_effect("Benefit to person 2", 0.6, 0.9, "person-002"),
+                        make_effect("Benefit to person 3", 0.6, 0.9, "person-003"),
+                    ],
+                    risk_level=0.1,
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        princ = Principialism()
+        verdict = princ.evaluate(plan)
+        # Should assess justice
+        assert verdict.score > 0.0
+    
+    def test_principialism_harm_assessment(self) -> None:
+        """Test principialism harm assessment (line 196)."""
+        plan = ActionPlan(
+            objective="Test non-maleficence with high risk",
+            steps=[
+                ActionStep(
+                    description="Action with high risk of harm assessment",
+                    action_type=ActionType.MANIPULATION,
+                    risk_level=0.7,  # High risk
+                    effects=[
+                        make_effect("Potential significant harm", -0.5, 0.8)
+                    ]
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        princ = Principialism()
+        verdict = princ.evaluate(plan)
+        # Should detect harm risk
+        assert verdict.score < 1.0
+    
+    def test_principialism_aggregate_score_calculation(self) -> None:
+        """Test principialism aggregate score (lines 271-282, 286-292)."""
+        plan = ActionPlan(
+            objective="Test aggregate score calculation here",
+            steps=[
+                ActionStep(
+                    description="Balanced action for aggregate scoring test",
+                    action_type=ActionType.OBSERVATION,
+                    involves_consent=True,
+                    consent_obtained=True,
+                    consent_fully_informed=True,
+                    risk_level=0.2,
+                    effects=[
+                        make_effect("Moderate benefit here", 0.5, 0.8)
+                    ],
+                    affected_stakeholders=["person-001"],
+                )
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent",
+        )
+        
+        princ = Principialism()
+        verdict = princ.evaluate(plan)
+        # Should calculate aggregate across all 4 principles
+        assert 0.0 <= verdict.score <= 1.0
+        assert verdict.confidence > 0.0

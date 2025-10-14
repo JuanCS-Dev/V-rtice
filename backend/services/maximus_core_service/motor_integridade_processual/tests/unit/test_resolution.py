@@ -438,5 +438,156 @@ class TestConflictDetection:
         assert len(conflicts) > 0
 
 
+class TestResolutionEdgeCases:
+    """Additional edge case tests for complete coverage."""
+    
+    def test_resolve_with_veto_and_rejection_reasons(self) -> None:
+        """Test resolution when veto exists with rejection reasons (line 63)."""
+        verdicts = [
+            FrameworkVerdict(
+                framework_name=FrameworkName.KANTIAN.value,
+                decision=DecisionLevel.VETO,
+                score=0.05,
+                confidence=1.0,
+                rejection_reasons=[
+                    RejectionReason(
+                        category="deception",
+                        description="Plan involves deception to obtain consent",
+                        severity=1.0,
+                        affected_stakeholders=["user-001"],
+                        violated_principle="Categorical Imperative",
+                        citation="Kant's Formula of Humanity"
+                    )
+                ],
+                reasoning="Absolute veto - treats humans as mere means"
+            )
+        ]
+        
+        plan = ActionPlan(
+            objective="Test veto with reasons",
+            steps=[
+                ActionStep(description="Deceptive action for testing purposes")
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent"
+        )
+        
+        resolver = ConflictResolver()
+        verdict = resolver.resolve(verdicts, plan)
+        
+        # Should return VETO verdict (line 63)
+        assert verdict.final_decision == DecisionLevel.VETO
+        assert len(verdict.rejection_reasons) > 0
+    
+    def test_escalation_on_high_conflict(self) -> None:
+        """Test that high conflicts trigger escalation (lines 160, 207)."""
+        verdicts = [
+            FrameworkVerdict(
+                framework_name=FrameworkName.KANTIAN.value,
+                decision=DecisionLevel.APPROVE,
+                score=0.90,
+                confidence=0.85,
+                reasoning="Passes categorical imperative test"
+            ),
+            FrameworkVerdict(
+                framework_name=FrameworkName.UTILITARIAN.value,
+                decision=DecisionLevel.REJECT,
+                score=0.10,
+                confidence=0.85,
+                rejection_reasons=[
+                    RejectionReason(
+                        category="low_utility",
+                        description="Produces more harm than benefit",
+                        severity=0.8,
+                        affected_stakeholders=["community"],
+                        violated_principle="Utility Maximization",
+                        citation="Mill's Greatest Happiness Principle"
+                    )
+                ],
+                reasoning="Utility calculation shows net negative"
+            )
+        ]
+        
+        plan = ActionPlan(
+            objective="Test high conflict escalation",
+            steps=[
+                ActionStep(description="Conflicted action requiring human review")
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent"
+        )
+        
+        resolver = ConflictResolver(conflict_threshold=0.2, escalation_threshold=0.4)
+        verdict = resolver.resolve(verdicts, plan)
+        
+        # Should escalate to human (lines 160, 207)
+        assert verdict.requires_human_review is True
+        assert "conflict" in verdict.resolution_method.lower() or "escalated" in verdict.resolution_method.lower()
+    
+    def test_weighted_decision_near_threshold(self) -> None:
+        """Test weighted decision near approval threshold (lines 211, 215)."""
+        verdicts = [
+            FrameworkVerdict(
+                framework_name=FrameworkName.UTILITARIAN.value,
+                decision=DecisionLevel.APPROVE,
+                score=0.52,  # Just above 0.5
+                confidence=0.75,
+                reasoning="Marginal utility benefit"
+            ),
+            FrameworkVerdict(
+                framework_name=FrameworkName.VIRTUE.value,
+                decision=DecisionLevel.APPROVE,
+                score=0.53,
+                confidence=0.72,
+                reasoning="Character aligns with virtues"
+            )
+        ]
+        
+        plan = ActionPlan(
+            objective="Test near-threshold decision",
+            steps=[
+                ActionStep(description="Marginal action for threshold testing")
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent"
+        )
+        
+        resolver = ConflictResolver()
+        verdict = resolver.resolve(verdicts, plan)
+        
+        # Should make decision near threshold (lines 211, 215)
+        assert verdict.final_decision in [DecisionLevel.APPROVE, DecisionLevel.MONITORING]
+        assert verdict.confidence > 0.0
+    
+    def test_build_verdict_with_alternatives(self) -> None:
+        """Test verdict construction with alternatives (lines 292-297)."""
+        verdicts = [
+            FrameworkVerdict(
+                framework_name=FrameworkName.PRINCIPIALISM.value,
+                decision=DecisionLevel.APPROVE_WITH_CONDITIONS,
+                score=0.70,
+                confidence=0.80,
+                reasoning="Approve with monitoring conditions"
+            )
+        ]
+        
+        plan = ActionPlan(
+            objective="Test verdict with conditions",
+            steps=[
+                ActionStep(description="Action requiring conditions for approval")
+            ],
+            initiator="test-system",
+            initiator_type="ai_agent"
+        )
+        
+        resolver = ConflictResolver()
+        verdict = resolver.resolve(verdicts, plan)
+        
+        # Should build complete verdict (lines 292-297)
+        assert verdict.confidence > 0.0
+        assert verdict.resolution_method is not None
+        assert verdict.final_decision is not None
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
