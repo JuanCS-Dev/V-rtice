@@ -28,17 +28,17 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
   });
 
   return (
-    <header className="relative border-b border-purple-400/30 bg-black/50 backdrop-blur-sm">
+    <header className="relative border-b border-red-400/30 bg-black/50 backdrop-blur-sm">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 border-2 border-purple-400 rounded-lg flex items-center justify-center bg-purple-400/10">
-            <span className="text-purple-400 font-bold text-xl">🔍</span>
+          <div className="w-12 h-12 border-2 border-red-400 rounded-lg flex items-center justify-center bg-red-400/10">
+            <span className="text-red-400 font-bold text-xl">🔍</span>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-purple-400 tracking-wider">
+            <h1 className="text-2xl font-bold text-red-400 tracking-wider">
               {t('dashboard.osint.title')}
             </h1>
-            <p className="text-purple-400/70 text-sm tracking-widest">{t('dashboard.osint.subtitle')}</p>
+            <p className="text-red-400/70 text-sm tracking-widest">{t('dashboard.osint.subtitle')}</p>
           </div>
         </div>
 
@@ -52,10 +52,10 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
           </button>
 
           <div className="text-right">
-            <div className="text-purple-400 font-bold text-lg">
+            <div className="text-red-400 font-bold text-lg">
               {currentTime.toLocaleTimeString()}
             </div>
-            <div className="text-purple-400/70 text-sm">
+            <div className="text-red-400/70 text-sm">
               {currentTime.toLocaleDateString('pt-BR')}
             </div>
           </div>
@@ -63,14 +63,14 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
       </div>
 
       {/* Breadcrumb Navigation */}
-      <div className="px-4 py-1.5 bg-gradient-to-r from-black/50 to-purple-900/20 border-t border-purple-400/10">
+      <div className="px-4 py-1.5 bg-gradient-to-r from-black/50 to-red-900/20 border-t border-red-400/10">
         <Breadcrumb
           items={[
             { label: 'VÉRTICE', icon: '🏠', onClick: () => setCurrentView('main') },
             { label: 'OSINT', icon: '🕵️' },
             { label: modules.find(m => m.id === activeModule)?.name.toUpperCase() || 'OVERVIEW', icon: modules.find(m => m.id === activeModule)?.icon }
           ]}
-          className="text-purple-400"
+          className="text-red-400"
         />
       </div>
 
@@ -89,18 +89,18 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
                 role: 'tab',
                 'aria-selected': activeModule === module.id,
                 'aria-controls': `panel-${module.id}`,
-                className: `px-3 py-1.5 rounded font-medium text-xs transition-all focus:outline-none focus:ring-2 focus:ring-purple-400/50 ${
+                className: `px-3 py-1.5 rounded font-medium text-xs transition-all focus:outline-none focus:ring-2 focus:ring-red-400/50 ${
                   activeModule === module.id
                     ? module.isAI
                       ? 'bg-gradient-to-r from-black via-green-900/40 to-green-700/60 text-gray-200 border border-green-700/30'
                       : module.isWorldClass
-                        ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 text-gray-200 border border-purple-400/50'
-                        : 'bg-blue-950/30 text-blue-400 border border-blue-900/50'
+                        ? 'bg-gradient-to-r from-red-900/40 to-pink-900/40 text-gray-200 border border-red-400/50'
+                        : 'bg-orange-950/30 text-orange-400 border border-orange-900/50'
                     : module.isAI
                       ? 'bg-gray-800/50 text-gray-400 border border-gray-700 hover:border-green-700/30'
                       : module.isWorldClass
-                        ? 'bg-black/30 text-purple-400/70 border border-gray-700 hover:border-purple-400/50'
-                        : 'bg-black/30 text-gray-400 border border-gray-700 hover:border-blue-900/30'
+                        ? 'bg-black/30 text-red-400/70 border border-gray-700 hover:border-red-400/50'
+                        : 'bg-black/30 text-gray-400 border border-gray-700 hover:border-orange-900/30'
                 }`
               })}
             >

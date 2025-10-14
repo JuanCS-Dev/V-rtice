@@ -49,6 +49,11 @@ body {
   height: 100%;
 }
 
+main {
+  margin: 0;
+  padding: 0;
+}
+
 /* Hide scrollbar but keep functionality */
 @layer utilities {
   .scrollbar-hide {
