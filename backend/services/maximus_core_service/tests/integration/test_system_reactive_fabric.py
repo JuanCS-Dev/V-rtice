@@ -108,7 +108,7 @@ class TestReactiveFabricOperation:
 
         # Verify metrics collected from all subsystems
         assert metrics.tig_node_count == 20  # From config
-        assert metrics.esgt_total_events >= 0
+        assert metrics.esgt_event_count >= 0
         assert metrics.arousal_level > 0
         assert metrics.health_score > 0
 
@@ -255,10 +255,10 @@ class TestReactiveFabricIntegration:
 
         # Verify TIG metrics
         assert metrics.tig_node_count > 0
-        assert metrics.tig_edge_density >= 0
+        assert metrics.tig_edge_count >= 0
 
         # Verify ESGT metrics
-        assert metrics.esgt_total_events >= 0
+        assert metrics.esgt_event_count >= 0
         assert metrics.esgt_success_rate >= 0
 
         # Verify Arousal metrics
