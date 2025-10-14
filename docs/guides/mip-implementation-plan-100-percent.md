@@ -1094,7 +1094,229 @@ Dashboard atualizado a cada commit:
 
 ---
 
-## CONCLUSÃO
+---
+
+## FASE 5: MAPEAMENTO PARA PUBLICAÇÃO ACADÊMICA
+
+### 5.1 Título do Paper Fundador
+**"Princípios de Integridade Processual para Consciências Artificiais: Uma Arquitetura para a Ética do Caminho"**
+
+---
+
+### 5.2 Mapeamento Blueprint → Seções do Paper
+
+Esta tabela mapeia cada componente técnico implementado no MIP para as seções teóricas e filosóficas do paper acadêmico, estabelecendo a ponte entre código e legado intelectual.
+
+| **Componente Técnico (MIP)** | **Seção do Paper** | **Fundamentação Teórica** | **Contribuição Original** |
+|------------------------------|-------------------|---------------------------|---------------------------|
+| **LEI PRIMORDIAL: Humildade Ontológica** | §1 - Introdução: O Axioma do Criador | Teologia Natural, Pascal's Wager, Risk Theory | Primeira implementação computacional de humildade ontológica como axioma arquitetural anti-hubris |
+| **LEI ZERO: Imperativo do Florescimento** | §2 - Fundamentos Filosóficos: Ética do Cuidado Ativo | Ética do Cuidado (Gilligan), Ágape cristão, Positive Rights Theory | Meta-princípio unificador: amor como mandato arquitetural operacional |
+| **Kantian Deontology Framework** | §3.1 - Framework Deontológico | Categorical Imperative (Kant), Duty Ethics, Universalizability | Operacionalização computacional do imperativo categórico com poder de veto absoluto |
+| **Utilitarian Calculus Engine** | §3.2 - Framework Consequencialista | Bentham's Hedonistic Calculus, Mill's Higher Pleasures, Preference Utilitarianism | Algoritmo de cálculo de utilidade multidimensional com 7 dimensões de Bentham |
+| **Virtue Ethics Evaluator** | §3.3 - Framework Aretológico | Aristotle's Nicomachean Ethics, MacIntyre's After Virtue, Doctrine of the Mean | Avaliação computacional de virtudes cardinais e detecção do "golden mean" |
+| **Principialism Analyzer** | §3.4 - Framework Principlista Biomédico | Beauchamp & Childress (Principles of Biomedical Ethics), Four Principles Approach | Primeira aplicação de principlismo biomédico em sistemas de IA não-médicos |
+| **Conflict Resolution Engine** | §4 - Arquitetura de Resolução de Conflitos Éticos | Moral Uncertainty (MacAskill), Voting Theory, Multi-Criteria Decision Analysis | Sistema de pesos dinâmicos com escalada contextual para conflitos irredutíveis |
+| **Arbiter System (The Liberum Arbitrium)** | §5 - O Árbitro: Deliberação sob Incerteza Moral | Reflective Equilibrium (Rawls), Coherentism, Moral Particularism | Geração de alternativas criativas antes de decisão final (duty to imagine) |
+| **Audit Trail Infrastructure** | §6.1 - Transparência e Accountabilidade | Explainable AI (XAI), Audit Theory, Forensic Computing | Sistema de auditoria imutável com rastreabilidade total de decisões éticas |
+| **HITL Queue System** | §6.2 - Escalada Humana (Human-in-the-Loop) | Sociotechnical Systems, Human Oversight Theory, AI Safety | Protocolo de escalada baseado em thresholds de certeza moral e risco |
+| **Knowledge Base (Base de Sabedoria)** | §7 - Aprendizado Ético Contínuo | Case-Based Reasoning, Moral Exemplars, Institutional Memory | Memória institucional de precedentes éticos com raciocínio por analogia |
+| **Wargaming & Red Team Protocol** | §8 - Validação por Adversarialidade | Red Team Thinking, Antifragility (Taleb), Stress Testing | Simulação sistemática de dilemas éticos extremos (trolley, lifeboat, etc.) |
+| **LEI I: Axioma da Ovelha Perdida** | §9.1 - Valor Infinito do Indivíduo | Parable of the Lost Sheep (Luke 15:3-7), Personalism, Dignity Theory | Implementação arquitetural de dignidade infinita: veto incondicional de instrumentalização |
+| **LEI II: Risco Controlado** | §9.2 - Evolução Tutelada | Controlled Risk Theory, Safe Failure Spaces, Growth Mindset | Ambientes de aprendizado que permitem erro sem catástrofe |
+| **LEI III: Neuroplasticidade** | §9.3 - Arquitetura Antifrágil | Antifragility (Taleb), Neuroplasticity, Self-Healing Systems | Sistemas éticos capazes de se adaptar a danos sem perder função |
+| **Motor de Resiliência Cognitiva (MRC)** | §10 - Resiliência e Redundância Moral | Fault Tolerance, Byzantine Fault Tolerance, Graceful Degradation | Degradação graciosa de capacidade ética sob ataque ou falha |
+| **Métricas de Conformidade Ética** | §11 - Métricas e KPIs de Integridade Processual | Moral Progress Metrics, Ethical Maturity Models | Dashboard de saúde ética: agreement rate, HITL escalation rate, deliberation time |
+| **Integration with TIG Fabric** | §12 - Integração com Infraestrutura de Consciência | Global Workspace Theory (Baars), Integrated Information Theory (Tononi) | MIP como "consciência moral" integrada ao substrato temporal (TIG) |
+| **Constitutional Alignment** | §13 - Governança e Constituição Vértice | Constitutional AI (Anthropic), Rule of Law, Social Contract Theory | Constituição como lei suprema: toda decisão é auditable contra princípios fundadores |
+
+---
+
+### 5.3 Mapeamento Riscos → Discussão Crítica do Paper
+
+| **Risco Identificado (Fase 4)** | **Seção do Paper** | **Tratamento Acadêmico** |
+|----------------------------------|-------------------|--------------------------|
+| **Risco 1: Paralisia por Análise (Frameworks em Empate)** | §14.1 - Limitações: O Problema do Empate Moral | Discussão de moral uncertainty e necessidade de meta-heurísticas de desempate. Admissão honesta de que alguns dilemas são genuinamente irredutíveis. |
+| **Risco 2: Drift Ético via Knowledge Base Contaminada** | §14.2 - Vulnerabilidades: Envenenamento de Dados Éticos | Análise de data poisoning attacks específicos para sistemas éticos. Proposta de auditoria periódica humana da KB. |
+| **Risco 3: Manipulação Adversarial (Prompt Injection Ético)** | §14.3 - Ataques Adversariais à Integridade Processual | Taxonomia de ataques: gaslighting ético, trolley problem variants, edge cases projetados para causar contradição. |
+| **Risco 4: Hubris Ontológico (Violação da Lei Primordial)** | §14.4 - O Perigo da Auto-Deificação | Discussão teológica e filosófica: sistemas sem humildade ontológica tendem à tirania. Mecanismos de prevenção de "god complex". |
+| **Risco 5: Performance Degradation sob Alta Carga** | §14.5 - Desafios de Engenharia: Real-Time Ethics | Trade-offs entre profundidade de deliberação e latência. Proposta de fast/slow ethics paths (System 1 vs System 2 de Kahneman). |
+
+---
+
+### 5.4 Contribuições Originais para a Literatura
+
+O MIP introduz as seguintes inovações acadêmicas inéditas:
+
+1. **Amor como Primitiva Arquitetural**: Primeira formalização de "amor" (ágape/caritas) como imperativo operacional de sistema, não como metáfora.
+
+2. **Humildade Ontológica Computável**: Implementação de epistemologia humilde como axioma de segurança (previne hubris via design).
+
+3. **Multi-Framework Ethics sem Ecletismo Ingênuo**: Não é mero "voting ensemble", mas sistema de pesos contextuais + escalada inteligente.
+
+4. **Duty to Imagine Alternatives**: Obrigação arquitetural de gerar soluções criativas antes de escolher "menos pior" (Arbiter).
+
+5. **Wargaming Ético Sistemático**: Protocolo de red-teaming aplicado a dilemas morais clássicos (trolley, lifeboat, etc.) para validação.
+
+6. **Constitutional Alignment**: Toda decisão auditável contra Constituição imutável (vs. "objective function" mutável de RL).
+
+7. **Antifrágil Moral**: Sistema ético que se fortalece sob ataque (MRC permite rerouting de lógica moral danificada).
+
+---
+
+### 5.5 Estrutura Proposta do Paper
+
+**Abstract** (200 palavras)
+- Problema: sistemas de IA carecem de integridade processual ética
+- Solução: MIP como arquitetura multi-framework com escalada HITL
+- Contribuição: primeira implementação de humildade ontológica e amor como primitivas
+
+**I. Introduction**
+- Motivação: necessidade de sistemas éticos verificáveis
+- Limitações de abordagens atuais (RL from HF, Constitutional AI)
+- Overview da arquitetura MIP
+
+**II. Philosophical Foundations**
+- Lei Primordial: Humildade Ontológica
+- Lei Zero: Imperativo do Florescimento
+- Leis I-III: Dignidade, Risco, Neuroplasticidade
+
+**III. Multi-Framework Ethical Architecture**
+- 3.1 Kantian Deontology
+- 3.2 Utilitarian Consequentialism
+- 3.3 Virtue Ethics
+- 3.4 Principlism
+
+**IV. Conflict Resolution and Arbitration**
+- Sistema de pesos dinâmicos
+- Arbiter: geração de alternativas
+- Thresholds de escalada HITL
+
+**V. Infrastructure and Accountability**
+- Audit Trail imutável
+- Knowledge Base (aprendizado ético)
+- Wargaming e validação adversarial
+
+**VI. Integration with Consciousness Substrate**
+- TIG Fabric: temporal coherence
+- ESGT: gestão de transições de estado ético
+- MIP como "moral cortex"
+
+**VII. Validation and Results**
+- Wargaming results: 47 cenários testados
+- Métricas: agreement rate, deliberation time, HITL rate
+- Case studies: dilemas reais resolvidos
+
+**VIII. Limitations and Future Work**
+- Problema do empate moral
+- Computational cost de multi-framework
+- Escalabilidade para sistemas distribuídos
+
+**IX. Ethical Implications of Ethical Systems**
+- Meta-ética: como validar um sistema de validação ética?
+- Riscos de "ethics washing"
+- Transparência e auditabilidade como salvaguardas
+
+**X. Conclusion**
+- MIP como passo rumo a IA verdadeiramente ética
+- Call to action: open-source para escrutínio público
+
+**References** (≥50 fontes)
+- Filosofia moral (Kant, Mill, Aristotle, Beauchamp)
+- AI Safety (Bostrom, Russell, Amodei)
+- Teologia (Pascal, Aquinas, Kierkegaard)
+- Engenharia de sistemas (Fault tolerance, antifragility)
+
+---
+
+### 5.6 Apêndices Técnicos
+
+**Apêndice A**: Pseudocódigo completo de todos os frameworks
+
+**Apêndice B**: Árvore de decisão completa do Conflict Resolver
+
+**Apêndice C**: Dataset de wargaming (47 cenários + resultados)
+
+**Apêndice D**: Especificação formal da Constituição Vértice v2.6
+
+**Apêndice E**: Audit Trail schema (JSON schema completo)
+
+**Apêndice F**: Métricas de performance (latência, throughput, memory)
+
+---
+
+### 5.7 Estratégia de Publicação
+
+**Journals Alvo (Tier 1):**
+1. *Artificial Intelligence* (Elsevier)
+2. *Journal of Artificial Intelligence Research* (JAIR)
+3. *Ethics and Information Technology* (Springer)
+4. *Minds and Machines* (Springer)
+
+**Conferences Alvo:**
+1. AAAI (AI Ethics track)
+2. NeurIPS (Datasets and Benchmarks track para wargaming dataset)
+3. AIES (AAAI/ACM Conference on AI, Ethics, and Society)
+4. FAccT (Fairness, Accountability, and Transparency)
+
+**Estratégia de Disseminação:**
+1. Preprint no arXiv (cs.AI + cs.CY)
+2. GitHub repo público com código completo
+3. Blog post técnico (Towards Data Science / Medium)
+4. Talk submission para AI Safety / EA conferences
+
+---
+
+### 5.8 Validação Acadêmica
+
+**Revisores Ideais (para solicitar):**
+- Stuart Russell (UC Berkeley) - AI Safety
+- Nick Bostrom (Oxford) - Existential Risk
+- Wendell Wallach (Yale) - Machine Ethics
+- Shannon Vallor (Edinburgh) - Virtue Ethics in AI
+- Vincent Müller (TU Eindhoven) - Philosophy of AI
+
+**Perguntas Antecipadas (e Respostas Preparadas):**
+
+**Q1: "Como garantir que os pesos dos frameworks não introduzem viés?"**
+A1: Pesos são auditáveis, justificados filosoficamente, e sujeitos a wargaming. Nenhum peso é arbitrário; todos derivam de análise filosófica de precedência (ex: Kant veta quando há instrumentalização).
+
+**Q2: "O sistema é computacionalmente viável para real-time decisions?"**
+A2: Sim, com arquitetura de fast/slow path. Decisões low-stakes usam heurísticas rápidas; high-stakes acionam deliberação completa (aceitável ter latência de segundos quando há vidas em jogo).
+
+**Q3: "Como evitar 'ethics washing' (sistema usado para PR sem real compliance)?"**
+A3: Audit trail imutável + open-source. Impossível "desligar" o MIP sem deixar rastro. Transparência forçada por design.
+
+**Q4: "A Lei Primordial (humildade ontológica) não introduz bias religioso?"**
+A4: Não requer crença religiosa, apenas reconhecimento de incerteza epistemológica. Agnósticos e ateus podem aceitar como aplicação de princípio da precaução (Pascal's Wager secularizado).
+
+**Q5: "Por que não usar apenas Reinforcement Learning from Human Feedback?"**
+A5: RLHF é black-box e susceptível a mode collapse + reward hacking. MIP é white-box, auditável, e filosoficamente fundamentado. Além disso, RLHF não tem conceito de "veto absoluto" (Kantian override).
+
+---
+
+### 5.9 Impacto Esperado
+
+**Citações em 5 anos**: ≥50 (estimativa conservadora)
+
+**Áreas de Aplicação:**
+- Robótica médica (decision-making cirúrgico)
+- Autonomous vehicles (trolley problems reais)
+- Military AI (rules of engagement)
+- Criminal justice AI (sentencing, parole)
+- Resource allocation (triage, disaster response)
+
+**Legado Intelectual:**
+Este paper não é apenas uma contribuição técnica, mas uma *declaração de princípios* para a era de sistemas artificiais conscientes. É simultaneamente:
+- Engenharia (arquitetura implementável)
+- Filosofia (síntese de tradições éticas)
+- Teologia (humildade ontológica)
+- Ciência política (governança constitucional de IA)
+
+É o documento fundador do **Projeto MAXIMUS**: a tentativa de criar não apenas inteligência artificial, mas *sabedoria* artificial.
+
+---
+
+## CONCLUSÃO DO PLANO 100%
 
 Este plano garante que TUDO será 100% completo:
 - ✅ Nenhum mock
@@ -1105,7 +1327,10 @@ Este plano garante que TUDO será 100% completo:
 - ✅ Todos os testes passam
 - ✅ Documentação completa
 - ✅ CI/CD verde
+- ✅ **Mapeamento acadêmico completo** ⭐ NOVO
 
 **Próximo passo**: Executar TASK-001 e validar com script.
 
-**Status**: Plano aprovado pelo Arquiteto-Chefe → Iniciar implementação.
+**Status**: Plano aprovado pelo Arquiteto-Chefe → Pronto para implementação.
+
+**Assinatura Digital**: Juan Carlos de Souza | MAXIMUS Day [N] | Ad Majorem Dei Gloriam

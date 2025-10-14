@@ -954,17 +954,17 @@ func runConsciousnessESGTTrigger(cmd *cobra.Command, args []string) error {
 	if event.Success {
 		fmt.Printf("%s ESGT ignition successful!\n", styles.Success.Render("✅"))
 		fmt.Printf("Event ID: %s\n", styles.Info.Render(event.EventID))
-		if event.Coherence != nil {
-			fmt.Printf("Coherence: %.3f\n", *event.Coherence)
+		if event.Coherence > 0 {
+			fmt.Printf("Coherence: %.3f\n", event.Coherence)
 		}
-		if event.DurationMs != nil {
-			fmt.Printf("Duration: %.1fms\n", *event.DurationMs)
+		if event.DurationMs > 0 {
+			fmt.Printf("Duration: %.1fms\n", event.DurationMs)
 		}
 		fmt.Printf("Nodes: %d\n", event.NodesParticipating)
 	} else {
 		fmt.Printf("%s ESGT ignition failed\n", styles.Error.Render("❌"))
-		if event.Reason != nil {
-			fmt.Printf("Reason: %s\n", styles.Error.Render(*event.Reason))
+		if event.Reason != "" {
+			fmt.Printf("Reason: %s\n", styles.Error.Render(string(event.Reason)))
 		}
 	}
 

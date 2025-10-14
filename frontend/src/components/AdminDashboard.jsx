@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SystemSelfCheck from './admin/SystemSelfCheck';
+import { HITLConsole } from './admin/HITLConsole';
 import SkipLink from './shared/SkipLink';
 import { Breadcrumb } from './shared/Breadcrumb';
 import useKeyboardNavigation from '../hooks/useKeyboardNavigation';
@@ -23,7 +24,8 @@ const AdminDashboard = ({ setCurrentView }) => {
     { id: 'overview', name: t('dashboard.admin.modules.overview'), icon: '📊' },
     { id: 'metrics', name: t('dashboard.admin.modules.metrics'), icon: '📈' },
     { id: 'security', name: t('dashboard.admin.modules.security'), icon: '🛡️' },
-    { id: 'logs', name: t('dashboard.admin.modules.logs'), icon: '📋' }
+    { id: 'logs', name: t('dashboard.admin.modules.logs'), icon: '📋' },
+    { id: 'hitl', name: t('dashboard.admin.modules.hitl', 'HITL'), icon: '🛡️' }
   ];
 
   const { getItemProps } = useKeyboardNavigation({
@@ -41,6 +43,8 @@ const AdminDashboard = ({ setCurrentView }) => {
         return <MetricsDetailedView metrics={metrics} loading={loading} />;
       case 'logs':
         return <SystemLogsView alerts={systemAlerts} />;
+      case 'hitl':
+        return <HITLConsole />;
       default:
         return <OverviewModule metrics={metrics} loading={loading} alerts={systemAlerts} />;
     }

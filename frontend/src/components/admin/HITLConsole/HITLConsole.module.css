@@ -1,0 +1,216 @@
+/**
+ * HITL Console Styles - Yellow/Gold Theme
+ * Based on AdminDashboard's yellow theme for consistency
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(135deg, #000000 0%, #1a1a0a 50%, #000000 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scan Line Animation */
+.scanLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #fbbf24, transparent);
+  animation: scanLineMove 3s linear infinite;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+@keyframes scanLineMove {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Header */
+.header {
+  background: rgba(0, 0, 0, 0.7);
+  border-bottom: 2px solid rgba(251, 191, 36, 0.5);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  z-index: 100;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.headerIcon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6));
+}
+
+.headerTitle {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #fbbf24;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-size: 0.875rem;
+  color: rgba(251, 191, 36, 0.7);
+  letter-spacing: 0.2em;
+  margin: 0.25rem 0 0 0;
+}
+
+.headerStats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.statBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: rgba(251, 191, 36, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #fbbf24;
+}
+
+/* Main Content - 3 Column Grid */
+.mainContent {
+  display: grid;
+  grid-template-columns: 320px 1fr 380px;
+  gap: 1.5rem;
+  flex: 1;
+  padding: 1.5rem;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Queue Column (Left) */
+.queueColumn {
+  display: flex;
+  flex-direction: column;
+  background: rgba(251, 191, 36, 0.05);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.1);
+}
+
+/* Details Column (Center) */
+.detailsColumn {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  overflow: hidden;
+  backdrop-filter: blur(5px);
+}
+
+/* Decision Column (Right) */
+.decisionColumn {
+  display: flex;
+  flex-direction: column;
+  background: rgba(251, 191, 36, 0.08);
+  border: 2px solid rgba(251, 191, 36, 0.5);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+}
+
+/* Stats Section (Bottom) */
+.statsSection {
+  background: rgba(0, 0, 0, 0.7);
+  border-top: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1600px) {
+  .mainContent {
+    grid-template-columns: 280px 1fr 340px;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 1400px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .queueColumn,
+  .detailsColumn,
+  .decisionColumn {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+}
+
+/* Scrollbar Styling */
+.queueColumn::-webkit-scrollbar,
+.detailsColumn::-webkit-scrollbar,
+.decisionColumn::-webkit-scrollbar,
+.statsSection::-webkit-scrollbar {
+  width: 8px;
+}
+
+.queueColumn::-webkit-scrollbar-track,
+.detailsColumn::-webkit-scrollbar-track,
+.decisionColumn::-webkit-scrollbar-track,
+.statsSection::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.queueColumn::-webkit-scrollbar-thumb,
+.detailsColumn::-webkit-scrollbar-thumb,
+.decisionColumn::-webkit-scrollbar-thumb,
+.statsSection::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.4);
+  border-radius: 4px;
+}
+
+.queueColumn::-webkit-scrollbar-thumb:hover,
+.detailsColumn::-webkit-scrollbar-thumb:hover,
+.decisionColumn::-webkit-scrollbar-thumb:hover,
+.statsSection::-webkit-scrollbar-thumb:hover {
+  background: rgba(251, 191, 36, 0.6);
+}

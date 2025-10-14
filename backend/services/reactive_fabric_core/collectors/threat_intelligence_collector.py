@@ -659,10 +659,17 @@ class ThreatIntelligenceCollector(BaseCollector):
         now = datetime.utcnow()
         cutoff = now - timedelta(minutes=self.config.cache_ttl_minutes)
 
-        expired_keys = [
-            key for key, indicator in self.cache.items()
-            if indicator.last_seen < cutoff
-        ]
+        expired_keys = []
+        for key, indicator in self.cache.items():
+            # Handle both ThreatIndicator objects and dict entries
+            if isinstance(indicator, ThreatIndicator):
+                if indicator.last_seen < cutoff:
+                    expired_keys.append(key)
+            elif isinstance(indicator, dict):
+                # Handle dict entries (for testing compatibility)
+                timestamp = indicator.get("timestamp") or indicator.get("last_seen")
+                if timestamp and timestamp < cutoff:
+                    expired_keys.append(key)
 
         for key in expired_keys:
             del self.cache[key]

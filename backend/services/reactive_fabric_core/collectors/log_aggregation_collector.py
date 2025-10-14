@@ -538,3 +538,14 @@ class LogAggregationCollector(BaseCollector):
             await self.session.close()
             self.session = None
         logger.info(f"Cleaned up {self.config.backend_type} collector")
+
+    def __repr__(self) -> str:
+        """String representation of the log aggregation collector."""
+        return (
+            f"LogAggregationCollector("
+            f"backend={self.config.backend_type}, "
+            f"host={self.config.host}, "
+            f"health={self.metrics.health.value}, "
+            f"events={self.metrics.events_collected}, "
+            f"errors={self.metrics.errors_count})"
+        )

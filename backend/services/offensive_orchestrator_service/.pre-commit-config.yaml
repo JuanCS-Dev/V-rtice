@@ -1,0 +1,71 @@
+# Pre-commit hooks configuration for Offensive Orchestrator Service
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Code formatting
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        language_version: python3.11
+        args: [--line-length=100]
+
+  # Import sorting
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black, --line-length=100]
+
+  # Linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+  # Security scanning
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        args: [-r, ., -f, screen]
+        exclude: ^tests/
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+      - id: debug-statements
+
+# Run hooks on specific file changes
+default_language_version:
+  python: python3.11
+
+# Hook stages
+default_stages: [commit]
+
+# Exclude patterns
+exclude: |
+  (?x)^(
+      \.git/|
+      \.pytest_cache/|
+      __pycache__/|
+      htmlcov/|
+      \.coverage|
+      coverage\.xml|
+      \.env|
+      \.venv/|
+      venv/|
+      dist/|
+      build/|
+      *.egg-info/
+  )$

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HITL Integration Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #fbbf24;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #fbbf24;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            border: 1px solid #fbbf24;
+            padding: 15px;
+            margin: 20px 0;
+            background: rgba(251, 191, 36, 0.05);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid;
+        }
+        .success {
+            border-color: #00aa00;
+            background: rgba(0, 170, 0, 0.1);
+        }
+        .error {
+            border-color: #ff0040;
+            background: rgba(255, 0, 64, 0.1);
+        }
+        .loading {
+            border-color: #ffaa00;
+            background: rgba(255, 170, 0, 0.1);
+        }
+        button {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border: none;
+            color: #000;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+        pre {
+            background: #111;
+            padding: 10px;
+            overflow-x: auto;
+            border: 1px solid #333;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .stat-card {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid #fbbf24;
+            padding: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00aa00;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #fbbf24;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛡️ HITL CONSOLE - INTEGRATION TEST</h1>
+
+    <div class="test-section">
+        <h2>🔍 Health Check</h2>
+        <button onclick="testHealthCheck()">Test Health</button>
+        <div id="health-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Get Reviews List</h2>
+        <button onclick="testGetReviews()">Get All Reviews</button>
+        <button onclick="testGetReviewsFiltered()">Get Critical Reviews</button>
+        <div id="reviews-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Get Statistics</h2>
+        <button onclick="testGetStats()">Get Stats</button>
+        <div id="stats-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Submit Decision</h2>
+        <button onclick="testSubmitApprove()">Submit APPROVE</button>
+        <button onclick="testSubmitReject()">Submit REJECT</button>
+        <button onclick="testSubmitModify()">Submit MODIFY</button>
+        <button onclick="testSubmitEscalate()">Submit ESCALATE</button>
+        <div id="decision-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Run All Tests</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <div id="all-tests-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8003';
+        let availableAPVs = [];
+
+        function displayResult(elementId, status, message, data = null) {
+            const element = document.getElementById(elementId);
+            const className = status === 'success' ? 'success' : status === 'error' ? 'error' : 'loading';
+
+            let html = `<div class="test-result ${className}">
+                <strong>${status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳'}</strong> ${message}
+            `;
+
+            if (data) {
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+
+            html += '</div>';
+            element.innerHTML = html;
+        }
+
+        async function testHealthCheck() {
+            displayResult('health-result', 'loading', 'Testing health endpoint...');
+
+            try {
+                const response = await fetch(`${API_BASE}/hitl/health`);
+                const data = await response.json();
+
+                if (response.ok && data.status === 'healthy') {
+                    displayResult('health-result', 'success', `Health check passed! Mode: ${data.mode}`, data);
+                } else {
+                    displayResult('health-result', 'error', 'Health check failed', data);
+                }
+            } catch (error) {
+                displayResult('health-result', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        async function testGetReviews() {
+            displayResult('reviews-result', 'loading', 'Fetching reviews...');
+
+            try {
+                const response = await fetch(`${API_BASE}/hitl/reviews`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    availableAPVs = data.reviews || [];
+                    displayResult('reviews-result', 'success',
+                        `Found ${availableAPVs.length} reviews`,
+                        { total: data.total, count: availableAPVs.length, sample: availableAPVs.slice(0, 3) }
+                    );
+                } else {
+                    displayResult('reviews-result', 'error', 'Failed to fetch reviews', data);
+                }
+            } catch (error) {
+                displayResult('reviews-result', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        async function testGetReviewsFiltered() {
+            displayResult('reviews-result', 'loading', 'Fetching critical reviews...');
+
+            try {
+                const response = await fetch(`${API_BASE}/hitl/reviews?severity=critical&limit=10`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const criticalReviews = data.reviews || [];
+                    displayResult('reviews-result', 'success',
+                        `Found ${criticalReviews.length} critical reviews`,
+                        criticalReviews
+                    );
+                } else {
+                    displayResult('reviews-result', 'error', 'Failed to fetch filtered reviews', data);
+                }
+            } catch (error) {
+                displayResult('reviews-result', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        async function testGetStats() {
+            displayResult('stats-result', 'loading', 'Fetching statistics...');
+
+            try {
+                const response = await fetch(`${API_BASE}/hitl/reviews/stats`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const statsHtml = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${data.pending_reviews}</div>
+                                <div class="stat-label">Pending Reviews</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data.total_decisions}</div>
+                                <div class="stat-label">Total Decisions</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data.approved_count}</div>
+                                <div class="stat-label">Approved</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data.rejected_count}</div>
+                                <div class="stat-label">Rejected</div>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('stats-result').innerHTML =
+                        `<div class="test-result success"><strong>✅</strong> Statistics fetched successfully!</div>` + statsHtml;
+                } else {
+                    displayResult('stats-result', 'error', 'Failed to fetch stats', data);
+                }
+            } catch (error) {
+                displayResult('stats-result', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        async function submitDecision(decision, justification) {
+            if (availableAPVs.length === 0) {
+                await testGetReviews();
+            }
+
+            if (availableAPVs.length === 0) {
+                displayResult('decision-result', 'error', 'No APVs available for testing');
+                return;
+            }
+
+            const apv = availableAPVs[0];
+            displayResult('decision-result', 'loading', `Submitting ${decision} decision for ${apv.apv_code}...`);
+
+            try {
+                const response = await fetch(`${API_BASE}/hitl/decisions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        apv_id: apv.apv_id,
+                        decision: decision,
+                        justification: justification,
+                        confidence: 0.85,
+                        reviewer_name: 'Integration Test',
+                        reviewer_email: 'test@integration.local'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResult('decision-result', 'success',
+                        `${decision.toUpperCase()} decision submitted successfully!`,
+                        data
+                    );
+                } else {
+                    displayResult('decision-result', 'error', 'Failed to submit decision', data);
+                }
+            } catch (error) {
+                displayResult('decision-result', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        async function testSubmitApprove() {
+            await submitDecision('approve', 'Integration test: Patch is effective and all validations passed. Approving for merge.');
+        }
+
+        async function testSubmitReject() {
+            await submitDecision('reject', 'Integration test: Patch is insufficient based on wargaming results. Rejecting this change.');
+        }
+
+        async function testSubmitModify() {
+            await submitDecision('modify', 'Integration test: Patch needs modifications. Requesting additional validation before merge.');
+        }
+
+        async function testSubmitEscalate() {
+            await submitDecision('escalate', 'Integration test: Escalating to security lead for additional review due to complexity.');
+        }
+
+        async function runAllTests() {
+            const resultDiv = document.getElementById('all-tests-result');
+            resultDiv.innerHTML = '<div class="test-result loading"><strong>⏳</strong> Running all tests...</div>';
+
+            const results = [];
+
+            try {
+                // Test 1: Health Check
+                const healthResp = await fetch(`${API_BASE}/hitl/health`);
+                results.push({ name: 'Health Check', passed: healthResp.ok });
+
+                // Test 2: Get Reviews
+                const reviewsResp = await fetch(`${API_BASE}/hitl/reviews`);
+                results.push({ name: 'Get Reviews', passed: reviewsResp.ok });
+
+                // Test 3: Get Stats
+                const statsResp = await fetch(`${API_BASE}/hitl/reviews/stats`);
+                results.push({ name: 'Get Stats', passed: statsResp.ok });
+
+                // Test 4: Filter Reviews
+                const filteredResp = await fetch(`${API_BASE}/hitl/reviews?severity=critical`);
+                results.push({ name: 'Filter Reviews', passed: filteredResp.ok });
+
+                const passed = results.filter(r => r.passed).length;
+                const total = results.length;
+                const passRate = (passed / total * 100).toFixed(1);
+
+                let html = `<div class="test-result ${passed === total ? 'success' : 'error'}">
+                    <strong>${passed === total ? '✅' : '⚠️'}</strong>
+                    Test Results: ${passed}/${total} passed (${passRate}%)
+                    <ul>`;
+
+                results.forEach(r => {
+                    html += `<li>${r.passed ? '✅' : '❌'} ${r.name}</li>`;
+                });
+
+                html += '</ul></div>';
+                resultDiv.innerHTML = html;
+
+            } catch (error) {
+                displayResult('all-tests-result', 'error', `Error running tests: ${error.message}`);
+            }
+        }
+
+        // Auto-run health check on load
+        window.addEventListener('load', () => {
+            testHealthCheck();
+        });
+    </script>
+</body>
+</html>
