@@ -68,8 +68,8 @@ export const MaximusDashboard = ({ setCurrentView }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'online': return 'text-green-400';
-      case 'idle': return 'text-blue-400';
-      case 'running': return 'text-purple-400 animate-pulse';
+      case 'idle': return 'text-orange-400';
+      case 'running': return 'text-red-400 animate-pulse';
       case 'degraded': return 'text-yellow-400';
       case 'offline': return 'text-red-400';
       default: return 'text-gray-400';

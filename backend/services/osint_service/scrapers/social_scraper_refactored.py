@@ -348,7 +348,8 @@ class SocialScraperRefactored(BaseTool):
         Returns:
             Status dictionary with metrics and API health
         """
-        status = await super().get_status()
+        # Get base health check from BaseTool
+        status = await self.health_check()
 
         # Add scraper-specific stats
         status.update({

@@ -321,7 +321,7 @@
 
 .btn-service-details {
   padding: 0.75rem;
-  background: linear-gradient(135deg, #ef4444, #2563eb);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -332,7 +332,7 @@
 }
 
 .btn-service-details:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }

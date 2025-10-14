@@ -22,7 +22,7 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-4);
   padding: var(--space-4);
-  background: rgba(59, 130, 246, 0.05); /* --color-analytics-primary with alpha */
+  background: rgba(239, 68, 68, 0.05); /* --color-analytics-primary with alpha */
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
 }
@@ -78,7 +78,7 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-4);
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(239, 68, 68, 0.05);
     border-radius: var(--radius-md);
 }
 

@@ -15,6 +15,33 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from scrapers.social_scraper_refactored import SocialScraperRefactored
 
 
+@pytest.fixture(autouse=True)
+def mock_cache_globally(monkeypatch):
+    """Global fixture to mock cache operations (avoids Redis dependency in ALL tests)."""
+    async def get_mock(self, key):
+        return None
+
+    async def set_mock(self, key, value):
+        pass
+
+    # Patch CacheManager methods globally
+    from core.cache_manager import CacheManager
+    monkeypatch.setattr(CacheManager, "get", get_mock)
+    monkeypatch.setattr(CacheManager, "set", set_mock)
+
+
+@pytest.fixture
+def mock_cache():
+    """Fixture to mock cache operations (avoids Redis dependency in tests)."""
+    async def get_mock(key):
+        return None
+
+    async def set_mock(key, value):
+        pass
+
+    return {"get": AsyncMock(side_effect=get_mock), "set": AsyncMock(side_effect=set_mock)}
+
+
 class TestSocialScraperBasics:
     """Basic functionality tests."""
 
@@ -27,6 +54,20 @@ class TestSocialScraperBasics:
         assert scraper.total_queries == 0
         assert scraper.total_tweets_fetched == 0
         assert scraper.total_profiles_fetched == 0
+
+    @pytest.mark.asyncio
+    async def test_scraper_initialization_with_invalid_api_key(self, monkeypatch):
+        """Test scraper handles tweepy.Client initialization failure gracefully."""
+        # Mock tweepy.Client to raise exception
+        def mock_client_init(*args, **kwargs):
+            raise Exception("Invalid bearer token format")
+
+        monkeypatch.setattr("tweepy.Client", mock_client_init)
+
+        # Should not crash, but gracefully degrade
+        scraper = SocialScraperRefactored(api_key="invalid_token")
+
+        assert scraper.twitter_client is None  # Failed to initialize
 
     @pytest.mark.asyncio
     async def test_scraper_initialization_without_api_key(self):
@@ -62,9 +103,13 @@ class TestTwitterIntegration:
     """Twitter API integration tests."""
 
     @pytest.mark.asyncio
-    async def test_query_twitter_search_recent(self, mocker):
+    async def test_query_twitter_search_recent(self, mock_cache):
         """Test searching recent tweets."""
         scraper = SocialScraperRefactored(api_key="test_bearer_token")
+
+        # Mock cache to avoid Redis dependency
+        scraper.cache.get = mock_cache["get"]
+        scraper.cache.set = mock_cache["set"]
 
         # Mock Twitter API response
         mock_tweet = MagicMock()
@@ -112,9 +157,13 @@ class TestTwitterIntegration:
         assert scraper.total_tweets_fetched == 1
 
     @pytest.mark.asyncio
-    async def test_query_twitter_user_profile(self, mocker):
+    async def test_query_twitter_user_profile(self, mock_cache):
         """Test fetching Twitter user profile."""
         scraper = SocialScraperRefactored(api_key="test_bearer_token")
+
+        # Mock cache
+        scraper.cache.get = mock_cache["get"]
+        scraper.cache.set = mock_cache["set"]
 
         # Mock Twitter API response
         mock_user = MagicMock()
@@ -159,7 +208,7 @@ class TestTwitterIntegration:
         assert scraper.total_profiles_fetched == 1
 
     @pytest.mark.asyncio
-    async def test_query_twitter_user_not_found(self, mocker):
+    async def test_query_twitter_user_not_found(self):
         """Test handling user not found."""
         scraper = SocialScraperRefactored(api_key="test_bearer_token")
 
@@ -182,7 +231,7 @@ class TestTwitterIntegration:
         assert result["found"] is False
 
     @pytest.mark.asyncio
-    async def test_query_twitter_no_results(self, mocker):
+    async def test_query_twitter_no_results(self):
         """Test searching with no results."""
         scraper = SocialScraperRefactored(api_key="test_bearer_token")
 
@@ -246,7 +295,7 @@ class TestErrorHandling:
             )
 
     @pytest.mark.asyncio
-    async def test_twitter_api_error_handling(self, mocker):
+    async def test_twitter_api_error_handling(self):
         """Test handling Twitter API errors."""
         import tweepy
 
@@ -291,7 +340,7 @@ class TestParallelQueries:
     """Parallel query tests."""
 
     @pytest.mark.asyncio
-    async def test_query_all_platforms(self, mocker):
+    async def test_query_all_platforms(self):
         """Test querying all platforms in parallel."""
         scraper = SocialScraperRefactored(api_key="test_key")
 
@@ -325,12 +374,36 @@ class TestParallelQueries:
         twitter_data = result["platforms"]["twitter"]
         assert twitter_data["result_count"] == 1
 
+    @pytest.mark.asyncio
+    async def test_query_all_platforms_with_failure(self):
+        """Test parallel query handles platform failure gracefully."""
+        import tweepy
+
+        scraper = SocialScraperRefactored(api_key="test_key")
+
+        # Mock Twitter API to raise exception
+        scraper.twitter_client.search_recent_tweets = MagicMock(
+            side_effect=tweepy.errors.TweepyException("Rate limit exceeded")
+        )
+
+        # Execute parallel query - should handle exception gracefully
+        result = await scraper.query(
+            target="test query",
+            platform="all",
+            search_type="recent"
+        )
+
+        # Verify result structure (no platforms succeeded)
+        assert result["platform"] == "all"
+        assert "platforms" in result
+        assert len(result["platforms"]) == 0  # Twitter failed, so no platforms succeeded
+
 
 class TestCachingBehavior:
     """Caching behavior tests (inherited from BaseTool)."""
 
     @pytest.mark.asyncio
-    async def test_cached_query_not_called_twice(self, mocker):
+    async def test_cached_query_not_called_twice(self):
         """Test cached queries don't hit API twice."""
         scraper = SocialScraperRefactored(
             api_key="test_key",
@@ -359,7 +432,7 @@ class TestStatistics:
     """Statistics tracking tests."""
 
     @pytest.mark.asyncio
-    async def test_statistics_updated_after_queries(self, mocker):
+    async def test_statistics_updated_after_queries(self):
         """Test statistics are updated after queries."""
         scraper = SocialScraperRefactored(api_key="test_key")
 
@@ -444,7 +517,7 @@ class TestEdgeCases:
     """Edge case tests."""
 
     @pytest.mark.asyncio
-    async def test_username_with_at_symbol_stripped(self, mocker):
+    async def test_username_with_at_symbol_stripped(self):
         """Test username with @ symbol is properly stripped."""
         scraper = SocialScraperRefactored(api_key="test_key")
 
@@ -473,7 +546,7 @@ class TestEdgeCases:
         assert call_args.kwargs["username"] == "testuser"  # No @
 
     @pytest.mark.asyncio
-    async def test_max_results_capped_at_api_limit(self, mocker):
+    async def test_max_results_capped_at_api_limit(self):
         """Test max_results is capped at Twitter API limit (100)."""
         scraper = SocialScraperRefactored(api_key="test_key")
 
@@ -498,7 +571,7 @@ class TestEdgeCases:
         assert call_args.kwargs["max_results"] == 100  # Capped
 
     @pytest.mark.asyncio
-    async def test_empty_query_string(self, mocker):
+    async def test_empty_query_string(self):
         """Test handling empty query string."""
         scraper = SocialScraperRefactored(api_key="test_key")
 

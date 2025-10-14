@@ -90,10 +90,10 @@
 }
 
 .cyber {
-  background: rgba(0, 255, 255, 0.1);
+  background: rgba(239, 68, 68, 0.1);
   color: var(--color-cyber-primary);
   border-left-color: var(--color-cyber-primary);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
 }
 
 .osint {

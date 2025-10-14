@@ -11,12 +11,12 @@
 
 :root {
   /* DEFENSIVE - Blue/Cyan Theme */
-  --defensive-primary: #00f0ff;
+  --defensive-primary: #ef4444;
   --defensive-secondary: #0ea5e9;
   --defensive-accent: #38bdf8;
   --defensive-bg: linear-gradient(135deg, #0a1929 0%, #001e3c 100%);
-  --defensive-card-bg: rgba(0, 240, 255, 0.05);
-  --defensive-border: rgba(0, 240, 255, 0.3);
+  --defensive-card-bg: rgba(239, 68, 68, 0.05);
+  --defensive-border: rgba(239, 68, 68, 0.3);
 
   /* OFFENSIVE - Red/Orange Theme */
   --offensive-primary: #ff3860;
@@ -27,12 +27,12 @@
   --offensive-border: rgba(255, 56, 96, 0.3);
 
   /* PURPLE TEAM - Purple/Magenta Theme */
-  --purple-primary: #a855f7;
-  --purple-secondary: #c084fc;
+  --purple-primary: #ef4444;
+  --purple-secondary: #f87171;
   --purple-accent: #e879f9;
   --purple-bg: linear-gradient(135deg, #1e1b3d 0%, #2d1f4e 100%);
-  --purple-card-bg: rgba(168, 85, 247, 0.05);
-  --purple-border: rgba(168, 85, 247, 0.3);
+  --purple-card-bg: rgba(239, 68, 68, 0.05);
+  --purple-border: rgba(239, 68, 68, 0.3);
 
   /* COMMON COLORS */
   --bg-black: #0a0e1a;
@@ -45,12 +45,12 @@
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
-  --info: #3b82f6;
+  --info: #ef4444;
 
   /* GLOW EFFECTS */
-  --glow-defensive: 0 0 20px var(--defensive-primary), 0 0 40px rgba(0, 240, 255, 0.3);
+  --glow-defensive: 0 0 20px var(--defensive-primary), 0 0 40px rgba(239, 68, 68, 0.3);
   --glow-offensive: 0 0 20px var(--offensive-primary), 0 0 40px rgba(255, 56, 96, 0.3);
-  --glow-purple: 0 0 20px var(--purple-primary), 0 0 40px rgba(168, 85, 247, 0.3);
+  --glow-purple: 0 0 20px var(--purple-primary), 0 0 40px rgba(239, 68, 68, 0.3);
 
   /* TRANSITIONS */
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

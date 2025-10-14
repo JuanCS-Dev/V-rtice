@@ -39,7 +39,7 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   background: rgba(20, 25, 39, 0.9);
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
   color: #cbd5e0;
   font-family: 'Courier New', monospace;
@@ -50,8 +50,8 @@
 }
 
 .language-switcher-trigger:hover {
-  border-color: #00f0ff;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  border-color: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
   transform: translateY(-2px);
 }
 
@@ -62,7 +62,7 @@
 
 .language-code {
   font-weight: 600;
-  color: #00f0ff;
+  color: #ef4444;
 }
 
 .language-arrow {
@@ -93,7 +93,7 @@
   right: 0;
   min-width: 250px;
   background: rgba(20, 25, 39, 0.95);
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -146,11 +146,11 @@
 }
 
 .language-option:hover {
-  background: rgba(0, 240, 255, 0.1);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .language-option.current {
-  background: rgba(0, 240, 255, 0.15);
+  background: rgba(239, 68, 68, 0.15);
   cursor: default;
 }
 

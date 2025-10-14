@@ -21,8 +21,8 @@
 }
 
 .refreshButton:hover:not(:disabled) {
-  background: rgba(0, 255, 255, 0.1);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .refreshButton:disabled {
@@ -36,8 +36,8 @@
   height: 500px;
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: var(--border-2) solid rgba(0, 255, 255, 0.3);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  border: var(--border-2) solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 }
 
 .map {
@@ -78,7 +78,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   background: var(--bg-tertiary);
-  border: var(--border-1) solid rgba(0, 255, 255, 0.2);
+  border: var(--border-1) solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-md);
 }
 
@@ -128,7 +128,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4);
-  background: rgba(0, 255, 255, 0.1);
+  background: rgba(239, 68, 68, 0.1);
   border-bottom: var(--border-1) solid var(--color-cyber-primary);
 }
 
@@ -199,7 +199,7 @@
   background: var(--bg-tertiary);
   border: var(--border-1) solid var(--color-cyber-primary);
   border-radius: var(--radius-md);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
 }
 
 :global(.leaflet-popup-tip) {

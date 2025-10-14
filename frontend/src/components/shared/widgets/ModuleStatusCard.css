@@ -60,7 +60,7 @@
 
 .status-dot-running {
   background: rgb(248, 113, 113);
-  box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
   animation: pulse-running 1s ease-in-out infinite;
 }
 

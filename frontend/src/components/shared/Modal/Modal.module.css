@@ -75,7 +75,7 @@
 /* Variants */
 .cyber {
   border: var(--border-2) solid var(--color-cyber-primary);
-  box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.3);
 }
 
 .osint {

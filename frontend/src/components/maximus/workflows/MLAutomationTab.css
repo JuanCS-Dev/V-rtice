@@ -156,8 +156,8 @@
 .template-green { border-color: rgba(34, 197, 94, 0.3); }
 .template-green:hover { border-color: rgba(34, 197, 94, 0.7); box-shadow: 0 12px 32px rgba(34, 197, 94, 0.3); }
 
-.template-purple { border-color: rgba(168, 85, 247, 0.3); }
-.template-purple:hover { border-color: rgba(168, 85, 247, 0.7); box-shadow: 0 12px 32px rgba(168, 85, 247, 0.3); }
+.template-purple { border-color: rgba(239, 68, 68, 0.3); }
+.template-purple:hover { border-color: rgba(239, 68, 68, 0.7); box-shadow: 0 12px 32px rgba(239, 68, 68, 0.3); }
 
 /* Template Content */
 .template-icon {

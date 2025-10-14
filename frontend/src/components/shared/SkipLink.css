@@ -14,7 +14,7 @@
   z-index: 10000;
 
   padding: 0.75rem 1.5rem;
-  background: #00f0ff;
+  background: #ef4444;
   color: #0a1929;
 
   font-family: 'Courier New', monospace;
@@ -69,7 +69,7 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .skip-link {
-    background: #00f0ff;
+    background: #ef4444;
     color: #000;
     border-color: #fff;
   }

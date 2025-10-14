@@ -37,9 +37,9 @@
 
 /* Active States */
 .moduleActive.moduleCyber {
-  background: rgba(0, 255, 255, 0.1);
+  background: rgba(239, 68, 68, 0.1);
   color: var(--color-cyber-primary);
-  border-color: rgba(0, 255, 255, 0.5);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .moduleActive.moduleAI {
@@ -49,9 +49,9 @@
 }
 
 .moduleActive.moduleWorldClass {
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.4) 0%, rgba(168, 85, 247, 0.4) 100%);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.4) 0%, rgba(249, 115, 22, 0.4) 100%);
   color: var(--text-secondary);
-  border-color: rgba(0, 255, 255, 0.5);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .moduleActive.moduleOffensive {
@@ -72,7 +72,7 @@
 }
 
 .moduleInactive.moduleWorldClassInactive:hover {
-  border-color: rgba(0, 255, 255, 0.5);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .moduleInactive.moduleOffensiveInactive {
@@ -84,5 +84,5 @@
 }
 
 .moduleInactive:hover {
-  border-color: rgba(0, 255, 255, 0.3);
+  border-color: rgba(239, 68, 68, 0.3);
 }

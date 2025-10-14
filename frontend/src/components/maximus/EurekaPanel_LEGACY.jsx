@@ -301,8 +301,8 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
       case 'success': return 'text-green-400';
       case 'pending': return 'text-yellow-400';
       case 'failed': return 'text-red-400';
-      case 'in_progress': return 'text-blue-400 animate-pulse';
-      case 'wargaming': return 'text-purple-400 animate-pulse';
+      case 'in_progress': return 'text-orange-400 animate-pulse';
+      case 'wargaming': return 'text-red-400 animate-pulse';
       default: return 'text-gray-400';
     }
   };

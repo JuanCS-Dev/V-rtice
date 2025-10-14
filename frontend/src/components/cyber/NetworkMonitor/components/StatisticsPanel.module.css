@@ -11,7 +11,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   background: var(--bg-tertiary);
-  border: var(--border-1) solid rgba(0, 255, 255, 0.2);
+  border: var(--border-1) solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-md);
   transition: all var(--duration-base) var(--ease-out);
 }
@@ -19,7 +19,7 @@
 .statCard:hover {
   background: var(--bg-secondary);
   border-color: var(--color-cyber-primary);
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
   transform: translateY(-2px);
 }
 
@@ -29,7 +29,7 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: rgba(0, 255, 255, 0.1);
+  background: rgba(239, 68, 68, 0.1);
   border: var(--border-2) solid var(--color-cyber-primary);
   border-radius: var(--radius-md);
   color: var(--color-cyber-primary);

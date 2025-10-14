@@ -234,7 +234,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         title: 'Uptime',
         value: formatUptime(uptime),
         subtitle: 'System running',
-        color: '#06b6d4',
+        color: '#f97316',
         borderClass: 'border-info',
         textClass: 'text-info',
         icon: '⏱️'

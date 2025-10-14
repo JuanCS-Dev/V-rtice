@@ -312,7 +312,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
                 contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
                 labelStyle={{ color: '#9ca3af' }}
               />
-              <Bar dataKey="count" fill="#8b5cf6" />
+              <Bar dataKey="count" fill="#ef4444" />
             </BarChart>
           </ResponsiveContainer>
           <div className="text-center text-sm text-gray-400 mt-2">

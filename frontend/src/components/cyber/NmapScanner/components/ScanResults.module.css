@@ -33,7 +33,7 @@
   background: var(--bg-tertiary);
   padding: var(--space-3);
   border-radius: var(--radius-md);
-  border: var(--border-1) solid rgba(0, 255, 255, 0.3);
+  border: var(--border-1) solid rgba(239, 68, 68, 0.3);
 }
 
 .hostHeader {
@@ -83,7 +83,7 @@
 
 .portCard {
   background: rgba(0, 0, 0, 0.4);
-  border: var(--border-1) solid rgba(0, 255, 255, 0.2);
+  border: var(--border-1) solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-sm);
   padding: var(--space-2);
 }
@@ -117,7 +117,7 @@
   background: var(--bg-tertiary);
   padding: var(--space-3);
   border-radius: var(--radius-md);
-  border: var(--border-1) solid rgba(0, 255, 255, 0.3);
+  border: var(--border-1) solid rgba(239, 68, 68, 0.3);
 }
 
 .assessmentTitle {

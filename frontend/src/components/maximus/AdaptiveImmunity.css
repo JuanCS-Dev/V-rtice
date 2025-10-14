@@ -31,7 +31,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .panel-classification-banner {
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%);
   border: 2px solid rgba(239, 68, 68, 0.5);
   border-radius: 12px;
   padding: 1rem 1.5rem;
@@ -55,7 +55,7 @@
 }
 
 .oraculo-banner {
-  background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%);
   border-color: rgba(16, 185, 129, 0.5);
 }
 
@@ -140,7 +140,7 @@
 .health-good {
   border-color: #3B82F6;
   color: #3B82F6;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
 }
 
 .health-warning {
@@ -303,9 +303,9 @@
 }
 
 .kpi-status.kpi-info {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(239, 68, 68, 0.2);
   color: #3B82F6;
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -347,7 +347,7 @@
 }
 
 .view-btn-active {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.3) 100%);
   border-color: rgba(239, 68, 68, 0.6);
   color: #E2E8F0;
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
@@ -433,9 +433,9 @@
 }
 
 .status-idle {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(239, 68, 68, 0.2);
   color: #60A5FA;
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .status-active {
@@ -486,9 +486,9 @@
 }
 
 .severity-low {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(239, 68, 68, 0.2);
   color: #60A5FA;
-  border: 1px solid rgba(59, 130, 246, 0.5);
+  border: 1px solid rgba(239, 68, 68, 0.5);
 }
 
 .severity-info {

@@ -57,9 +57,9 @@ a:focus,
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 3px solid #00f0ff;
+  outline: 3px solid #ef4444;
   outline-offset: 2px;
-  border-color: #00f0ff;
+  border-color: #ef4444;
 }
 
 /* Remove default focus on mouse click, keep for keyboard */
@@ -76,7 +76,7 @@ a:focus-visible {
 
 /* Focus within (for containers) */
 .focus-within:focus-within {
-  outline: 2px solid #00f0ff;
+  outline: 2px solid #ef4444;
   outline-offset: 2px;
 }
 
@@ -96,7 +96,7 @@ a:focus-visible {
   --color-success: #10b981; /* 3.7:1 on dark bg (large text AA) */
   --color-warning: #f59e0b; /* 5.2:1 on dark bg (AA) */
   --color-error: #ef4444;   /* 4.9:1 on dark bg (AA) */
-  --color-info: #00f0ff;    /* 8.2:1 on dark bg (AAA) */
+  --color-info: #ef4444;    /* 8.2:1 on dark bg (AAA) */
 
   /* Focus colors */
   --color-focus: #f59e0b;
@@ -115,7 +115,7 @@ body {
 
 /* Links - minimum 4.5:1 */
 a {
-  color: #00f0ff; /* 8.2:1 on dark background */
+  color: #ef4444; /* 8.2:1 on dark background */
   text-decoration: underline;
 }
 
@@ -128,8 +128,8 @@ a:focus {
 /* Buttons - ensure high contrast */
 .btn {
   color: #0a1929;
-  background: #00f0ff;
-  border: 2px solid #00f0ff;
+  background: #ef4444;
+  border: 2px solid #ef4444;
 }
 
 .btn:hover,
@@ -141,12 +141,12 @@ a:focus {
 .btn-secondary {
   color: #ffffff;
   background: transparent;
-  border: 2px solid #00f0ff;
+  border: 2px solid #ef4444;
 }
 
 .btn-secondary:hover,
 .btn-secondary:focus {
-  background: rgba(0, 240, 255, 0.1);
+  background: rgba(239, 68, 68, 0.1);
   border-color: #33f3ff;
 }
 

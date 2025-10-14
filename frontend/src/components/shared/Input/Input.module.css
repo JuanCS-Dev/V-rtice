@@ -90,15 +90,15 @@
 /* Variants */
 .cyber {
   border: var(--border-2) solid var(--color-cyber-primary);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
 }
 
 .cyber:hover:not(.disabled) {
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 .cyber:focus-within {
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
   border-color: var(--color-cyber-secondary);
 }
 

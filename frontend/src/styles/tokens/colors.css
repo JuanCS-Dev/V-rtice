@@ -12,7 +12,7 @@
   --color-accent-success: #10b981;     /* Green - Success states */
   --color-accent-warning: #f59e0b;     /* Amber - Warnings */
   --color-accent-danger: #ef4444;      /* Red - Danger, errors */
-  --color-accent-info: #3b82f6;        /* Blue - Informational */
+  --color-accent-info: #ef4444;        /* Blue - Informational */
 
   /* ==================== LEGACY ALIASES (Backward Compatibility) ==================== */
   --color-cyber-primary: var(--color-accent-primary);
@@ -113,7 +113,7 @@
   --gradient-red: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   --gradient-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
   --gradient-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #f97316 100%);
+  --gradient-blue: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
   --gradient-purple: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
 
   /* Legacy aliases */

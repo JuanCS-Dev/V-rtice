@@ -191,14 +191,32 @@ class TestHealthEndpoint:
 class TestEvaluateEndpoint:
     """Testes para POST /evaluate."""
 
-    def test_evaluate_valid_plan(self, test_client_with_mocks, valid_action_plan, approved_verdict):
+    def test_evaluate_valid_plan(self, test_client_with_mocks, approved_verdict):
         """Deve avaliar plano válido e retornar verdict."""
         # Mock engine response
         app.state.engine.evaluate.return_value = approved_verdict
 
+        # Simple valid plan dict (not using fixture to avoid serialization issues)
+        plan_json = {
+            "name": "Test Plan",
+            "description": "Test",
+            "category": "defensive",
+            "steps": [{"sequence_number": 1, "description": "Test step", "action_type": "test"}],
+            "stakeholders": [{
+                "id": "user1",
+                "type": "human_individual",
+                "description": "Test",
+                "impact_magnitude": 0.5,
+                "autonomy_respected": True,
+                "vulnerability_level": 0.3
+            }],
+            "urgency": 0.5,
+            "risk_level": 0.3
+        }
+
         response = test_client_with_mocks.post(
             "/evaluate",
-            json={"plan": valid_action_plan.model_dump(mode="json")}
+            json={"plan": plan_json}
         )
 
         assert response.status_code == 200
@@ -221,14 +239,20 @@ class TestEvaluateEndpoint:
 
         assert response.status_code == 422  # Pydantic validation error
 
-    def test_evaluate_engine_error_returns_500(self, test_client_with_mocks, valid_action_plan):
+    def test_evaluate_engine_error_returns_500(self, test_client_with_mocks):
         """Erro no engine deve retornar 500."""
         # Mock engine para lançar exceção
         app.state.engine.evaluate.side_effect = Exception("Engine failure")
 
+        plan_json = {
+            "name": "Test", "description": "Test", "category": "defensive",
+            "steps": [{"sequence_number": 1, "description": "Test", "action_type": "test"}],
+            "urgency": 0.5, "risk_level": 0.3
+        }
+
         response = test_client_with_mocks.post(
             "/evaluate",
-            json={"plan": valid_action_plan.model_dump(mode="json")}
+            json={"plan": plan_json}
         )
 
         assert response.status_code == 500
@@ -236,14 +260,20 @@ class TestEvaluateEndpoint:
         assert "error" in data
 
     def test_evaluate_persists_decision_when_kb_available(
-        self, test_client_with_mocks, valid_action_plan, approved_verdict
+        self, test_client_with_mocks, approved_verdict
     ):
         """Deve persistir decisão quando KB disponível."""
         app.state.engine.evaluate.return_value = approved_verdict
 
+        plan_json = {
+            "name": "Test", "description": "Test", "category": "defensive",
+            "steps": [{"sequence_number": 1, "description": "Test", "action_type": "test"}],
+            "urgency": 0.5, "risk_level": 0.3
+        }
+
         response = test_client_with_mocks.post(
             "/evaluate",
-            json={"plan": valid_action_plan.model_dump(mode="json")}
+            json={"plan": plan_json}
         )
 
         assert response.status_code == 200
@@ -252,7 +282,7 @@ class TestEvaluateEndpoint:
         app.state.audit_service.log_decision.assert_called_once()
 
     def test_evaluate_handles_persistence_failure_gracefully(
-        self, test_client_with_mocks, valid_action_plan, approved_verdict
+        self, test_client_with_mocks, approved_verdict
     ):
         """Deve continuar mesmo se persistence falhar."""
         app.state.engine.evaluate.return_value = approved_verdict
@@ -260,24 +290,36 @@ class TestEvaluateEndpoint:
         # Mock audit service para falhar
         app.state.audit_service.log_decision.side_effect = Exception("Persistence error")
 
+        plan_json = {
+            "name": "Test", "description": "Test", "category": "defensive",
+            "steps": [{"sequence_number": 1, "description": "Test", "action_type": "test"}],
+            "urgency": 0.5, "risk_level": 0.3
+        }
+
         response = test_client_with_mocks.post(
             "/evaluate",
-            json={"plan": valid_action_plan.model_dump(mode="json")}
+            json={"plan": plan_json}
         )
 
         # Should still succeed (graceful degradation)
         assert response.status_code == 200
 
     def test_evaluate_skips_persistence_when_kb_unavailable(
-        self, test_client_with_mocks, valid_action_plan, approved_verdict
+        self, test_client_with_mocks, approved_verdict
     ):
         """Não deve tentar persistir quando KB indisponível."""
         app.state.kb_connected = False
         app.state.engine.evaluate.return_value = approved_verdict
 
+        plan_json = {
+            "name": "Test", "description": "Test", "category": "defensive",
+            "steps": [{"sequence_number": 1, "description": "Test", "action_type": "test"}],
+            "urgency": 0.5, "risk_level": 0.3
+        }
+
         response = test_client_with_mocks.post(
             "/evaluate",
-            json={"plan": valid_action_plan.model_dump(mode="json")}
+            json={"plan": plan_json}
         )
 
         assert response.status_code == 200
@@ -309,7 +351,7 @@ class TestPrinciplesEndpoints:
 
         mock_principle = Principle(
             name="Test Principle",
-            level=PrincipleLevel.LAW,
+            level=PrincipleLevel.FUNDAMENTAL,  # Fixed: LAW → FUNDAMENTAL
             description="Test description",
             severity=5,
             philosophical_foundation="Test foundation",
@@ -330,7 +372,7 @@ class TestPrinciplesEndpoints:
         """Deve permitir filtrar princípios por level."""
         app.state.kb_repo.list_principles.return_value = []
 
-        response = test_client_with_mocks.get("/principles?level=law")
+        response = test_client_with_mocks.get("/principles?level=fundamental")  # Fixed: law → fundamental
 
         assert response.status_code == 200
 
@@ -368,7 +410,7 @@ class TestPrinciplesEndpoints:
         mock_principle = Principle(
             id=test_id,
             name="Test Principle",
-            level=PrincipleLevel.LAW,
+            level=PrincipleLevel.FUNDAMENTAL,  # Fixed: LAW → FUNDAMENTAL
             description="Test",
             severity=5,
             philosophical_foundation="Test",

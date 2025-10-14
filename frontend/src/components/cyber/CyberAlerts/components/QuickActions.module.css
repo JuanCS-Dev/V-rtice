@@ -1,7 +1,7 @@
 
 .container {
   padding: var(--space-4);
-  border-top: var(--border-1) solid rgba(0, 255, 255, 0.3);
+  border-top: var(--border-1) solid rgba(239, 68, 68, 0.3);
 }
 
 .title {
