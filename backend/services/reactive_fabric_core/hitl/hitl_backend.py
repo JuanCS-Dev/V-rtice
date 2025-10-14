@@ -608,7 +608,10 @@ async def startup_event():
 # WEBSOCKET ENDPOINT
 # ============================================================================
 
-from .websocket_manager import manager, heartbeat_task, AlertType
+try:
+    from .websocket_manager import manager, heartbeat_task, AlertType
+except ImportError:
+    from websocket_manager import manager, heartbeat_task, AlertType
 
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
@@ -705,4 +708,6 @@ async def start_background_tasks():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    import os
+    port = int(os.getenv("HITL_PORT", "8002"))  # Default port 8002 (avoid conflicts)
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")

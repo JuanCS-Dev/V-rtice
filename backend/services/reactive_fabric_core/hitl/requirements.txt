@@ -1,0 +1,20 @@
+# HITL Console Backend Dependencies
+# Python 3.11+
+
+# FastAPI & Server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+websockets==12.0
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib==1.7.4
+bcrypt==3.2.2
+pyotp==2.9.0
+
+# Data Validation
+pydantic[email]==2.5.0
+
+# Datetime
+python-dateutil==2.8.2
