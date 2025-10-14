@@ -3,117 +3,155 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-mono);
-  font-weight: var(--font-bold);
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  border-radius: var(--radius-base);
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-full);
   white-space: nowrap;
-  transition: all var(--duration-base) var(--ease-out);
+  transition: all var(--transition-fast);
 }
 
 /* Sizes */
 .xs {
-  padding: var(--space-1) var(--space-1-5);
+  padding: var(--space-xs) var(--space-sm);
   font-size: var(--text-xs);
 }
 
 .sm {
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-xs) var(--space-sm);
   font-size: var(--text-xs);
 }
 
 .md {
-  padding: var(--space-1-5) var(--space-3);
+  padding: var(--space-xs) var(--space-md);
   font-size: var(--text-sm);
 }
 
 .lg {
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-sm) var(--space-lg);
   font-size: var(--text-base);
 }
 
-/* Pill variant */
+/* Pill variant (default style is already pill) */
 .pill {
   border-radius: var(--radius-full);
 }
 
-/* Variants */
+/* Variants (Landing Page Feature Pill Pattern) */
 .default {
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-  border: var(--border-1) solid var(--border-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+}
+
+.default:hover {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
 }
 
 .cyber {
-  background: rgba(0, 255, 255, 0.2);
-  color: var(--color-cyber-primary);
-  border: var(--border-1) solid var(--color-cyber-primary);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  background: var(--color-bg-secondary);
+  color: var(--color-accent-primary);
+  border: 1px solid var(--color-border-primary);
+}
+
+.cyber:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent-primary);
 }
 
 .osint {
-  background: rgba(168, 85, 247, 0.2);
-  color: var(--color-osint-primary);
-  border: var(--border-1) solid var(--color-osint-primary);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+  background: var(--color-bg-secondary);
+  color: var(--color-accent-primary);
+  border: 1px solid var(--color-border-primary);
+}
+
+.osint:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent-primary);
 }
 
 .analytics {
-  background: rgba(59, 130, 246, 0.2);
-  color: var(--color-analytics-primary);
-  border: var(--border-1) solid var(--color-analytics-primary);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+  background: var(--color-bg-secondary);
+  color: var(--color-accent-info);
+  border: 1px solid var(--color-border-secondary);
+}
+
+.analytics:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent-info);
 }
 
 .success {
-  background: rgba(16, 185, 129, 0.2);
+  background: var(--color-bg-secondary);
   color: var(--color-success);
-  border: var(--border-1) solid var(--color-success);
+  border: 1px solid var(--color-border-secondary);
+}
+
+.success:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--color-success);
 }
 
 .warning {
-  background: rgba(245, 158, 11, 0.2);
+  background: var(--color-bg-secondary);
   color: var(--color-warning);
-  border: var(--border-1) solid var(--color-warning);
+  border: 1px solid var(--color-border-secondary);
+}
+
+.warning:hover {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: var(--color-warning);
 }
 
 .error {
-  background: rgba(239, 68, 68, 0.2);
+  background: var(--color-bg-secondary);
   color: var(--color-error);
-  border: var(--border-1) solid var(--color-error);
+  border: 1px solid var(--color-border-secondary);
+}
+
+.error:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-error);
 }
 
 .info {
-  background: rgba(6, 182, 212, 0.2);
+  background: var(--color-bg-secondary);
   color: var(--color-info);
-  border: var(--border-1) solid var(--color-info);
+  border: 1px solid var(--color-border-secondary);
+}
+
+.info:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: var(--color-info);
 }
 
 /* Severity badges */
 .critical {
-  background: rgba(255, 0, 64, 0.2);
+  background: rgba(239, 68, 68, 0.2);
   color: var(--color-critical);
-  border: var(--border-1) solid var(--color-critical);
+  border: 1px solid var(--color-critical);
   animation: pulse 2s infinite;
 }
 
 .high {
-  background: rgba(255, 64, 0, 0.2);
+  background: rgba(245, 158, 11, 0.2);
   color: var(--color-high);
-  border: var(--border-1) solid var(--color-high);
+  border: 1px solid var(--color-high);
 }
 
 .medium {
-  background: rgba(255, 170, 0, 0.2);
+  background: rgba(245, 158, 11, 0.2);
   color: var(--color-medium);
-  border: var(--border-1) solid var(--color-medium);
+  border: 1px solid var(--color-medium);
 }
 
 .low {
-  background: rgba(0, 170, 0, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   color: var(--color-low);
-  border: var(--border-1) solid var(--color-low);
+  border: 1px solid var(--color-low);
 }
 
 @keyframes pulse {

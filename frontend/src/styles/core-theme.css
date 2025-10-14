@@ -1,0 +1,291 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * VÉRTICE CORE THEME
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Tema único fixo para toda a aplicação.
+ * SOURCE OF TRUTH: Landing Page + tokens/colors.css
+ * Version: 2.0 - Importa de tokens, não redefine
+ *
+ * "Eles infectam. Nós eliminamos."
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+
+:root {
+  /* ========================================
+     DASHBOARD SPECIFIC
+     ======================================== */
+  --dashboard-bg: linear-gradient(135deg, var(--color-bg-primary) 0%, #0a1c0a 100%);
+  --dashboard-text-color: var(--color-text-primary);
+
+  /* ========================================
+     STATUS COLORS (Dashboard Specific)
+     ======================================== */
+  --status-online-color: var(--color-success);
+  --status-offline-color: var(--color-error);
+  --status-idle-color: var(--color-warning);
+  --status-hostile-color: var(--color-error);
+  --status-eliminated-color: var(--color-success);
+
+  /* ========================================
+     HEADER & NAVIGATION
+     ======================================== */
+  --header-bg-gradient: linear-gradient(180deg, #171717 0%, #0a0a0a 100%);
+  --header-border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+  --header-shadow: 0 2px 10px rgba(220, 38, 38, 0.4);
+
+  --logo-gradient: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+  --logo-shadow: 0 0 30px rgba(220, 38, 38, 0.8);
+  --logo-pulse-color: rgba(220, 38, 38, 0.6);
+
+  --title-gradient: linear-gradient(90deg, #dc2626 0%, #f59e0b 100%);
+
+  --nav-bg: rgba(23, 23, 23, 0.95);
+  --nav-button-active-bg: rgba(220, 38, 38, 0.2);
+  --nav-button-active-border: 1px solid #dc2626;
+  --nav-button-active-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
+  --nav-button-inactive-bg: transparent;
+  --nav-button-inactive-border: 1px solid transparent;
+  --nav-button-hover-bg: rgba(220, 38, 38, 0.1);
+  --nav-underline: #dc2626;
+
+  /* ========================================
+     STATUS INDICATORS
+     ======================================== */
+  --status-bg: rgba(220, 38, 38, 0.1);
+  --status-border: 1px solid rgba(220, 38, 38, 0.3);
+
+  /* ========================================
+     BUTTONS
+     ======================================== */
+  --button-bg-primary: #dc2626;
+  --button-bg-primary-hover: #ef4444;
+  --button-text-primary: #fafafa;
+  --button-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+  --button-shadow-hover: 0 0 30px rgba(220, 38, 38, 0.8);
+
+  /* ========================================
+     CARDS
+     ======================================== */
+  --card-bg: #1c1c1c;
+  --card-border: rgba(220, 38, 38, 0.2);
+  --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 0 20px rgba(220, 38, 38, 0.4);
+
+  /* ========================================
+     ALERTS
+     ======================================== */
+  --alert-critical-bg: rgba(220, 38, 38, 0.2);
+  --alert-critical-border: #dc2626;
+  --alert-warning-bg: rgba(245, 158, 11, 0.2);
+  --alert-warning-border: #f59e0b;
+  --alert-success-bg: rgba(16, 185, 129, 0.2);
+  --alert-success-border: #10b981;
+
+  /* ========================================
+     EFFECTS
+     ======================================== */
+  --backdrop-blur: blur(10px);
+
+  /* ========================================
+     DASHBOARD SPECIFICS
+     ======================================== */
+  /* AdminDashboard */
+  --admin-primary: #fafafa;
+  --admin-accent: #dc2626;
+  --admin-subtitle: #d4d4d4;
+  --admin-border: rgba(220, 38, 38, 0.3);
+  --admin-border-subtle: rgba(220, 38, 38, 0.1);
+  --admin-logo-bg: rgba(220, 38, 38, 0.1);
+  --admin-breadcrumb-bg: rgba(220, 38, 38, 0.05);
+  --admin-nav-bg-from: rgba(23, 23, 23, 0.95);
+  --admin-nav-bg-to: rgba(23, 23, 23, 0.95);
+  --admin-module-active-bg: rgba(220, 38, 38, 0.2);
+  --admin-module-inactive-bg: transparent;
+  --admin-module-inactive-text: #a3a3a3;
+  --admin-module-hover-bg: rgba(220, 38, 38, 0.1);
+  --admin-focus-ring: rgba(220, 38, 38, 0.5);
+  --admin-section-bg: rgba(0, 0, 0, 0.2);
+  --admin-warning: #f59e0b;
+
+  /* OSINTDashboard */
+  --osint-primary: #fafafa;
+  --osint-accent: #dc2626;
+  --osint-border: rgba(220, 38, 38, 0.3);
+  --osint-sidebar-bg: #171717;
+
+  /* CyberDashboard */
+  --cyber-primary: #fafafa;
+  --cyber-accent: #dc2626;
+  --cyber-border: rgba(220, 38, 38, 0.3);
+  --cyber-sidebar-bg: #171717;
+  --cyber-subtitle: #d4d4d4;
+  --cyber-border-subtle: rgba(220, 38, 38, 0.1);
+  --cyber-card-bg: rgba(220, 38, 38, 0.02);
+  --cyber-module-bg: rgba(0, 0, 0, 0.2);
+  --cyber-glow: rgba(220, 38, 38, 0.3);
+
+  /* DefensiveDashboard */
+  --defensive-bg: linear-gradient(135deg, #0a0a0a 0%, #0a1c0a 100%);
+  --defensive-primary: #fafafa;
+}
+
+/* ========================================
+   GLOBAL BODY
+   ======================================== */
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: 'Courier New', 'Consolas', monospace;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove espaçamento padrão do root */
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* ========================================
+   LEAFLET MAP - FIX POPUPS
+   ======================================== */
+.leaflet-container {
+  background: #0a0a0a !important;
+  font-family: 'Courier New', monospace !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #171717 !important;
+  color: #fafafa !important;
+  border: 1px solid rgba(220, 38, 38, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3) !important;
+  border-radius: 4px !important;
+}
+
+.leaflet-popup-content {
+  background: transparent !important;
+  color: #fafafa !important;
+  margin: 12px !important;
+}
+
+.leaflet-popup-content-wrapper *,
+.leaflet-popup-content * {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.leaflet-popup-tip {
+  background: #171717 !important;
+}
+
+.leaflet-popup-close-button {
+  color: #dc2626 !important;
+  font-weight: bold !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #ef4444 !important;
+}
+
+.leaflet-tooltip {
+  background: #171717 !important;
+  color: #fafafa !important;
+  border: 1px solid rgba(220, 38, 38, 0.4) !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3) !important;
+}
+
+/* Threat popup específico */
+.threat-popup {
+  font-family: 'Courier New', monospace !important;
+  min-width: 220px;
+  background: transparent !important;
+  color: #fafafa !important;
+  padding: 0 !important;
+}
+
+.threat-popup-header {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(220, 38, 38, 0.6);
+  padding-bottom: 6px;
+  letter-spacing: 0.05em;
+  color: inherit !important;
+}
+
+.threat-popup-body {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #fafafa !important;
+}
+
+.threat-popup-body strong {
+  color: #dc2626 !important;
+  margin-right: 4px;
+}
+
+.threat-popup-geo {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.threat-popup-timestamp {
+  margin-top: 8px;
+  color: #737373 !important;
+  font-size: 10px;
+}
+
+/* ========================================
+   SCROLLBARS
+   ======================================== */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-track {
+  background: #171717;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+  border-radius: 6px;
+  border: 2px solid #171717;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.8);
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes tactical-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+    border-color: rgba(220, 38, 38, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(220, 38, 38, 1);
+    border-color: rgba(220, 38, 38, 1);
+  }
+}
+
+@keyframes critical-alert {
+  0%, 100% {
+    background: rgba(220, 38, 38, 0.2);
+  }
+  50% {
+    background: rgba(220, 38, 38, 0.4);
+  }
+}

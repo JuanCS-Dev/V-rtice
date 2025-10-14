@@ -1,14 +1,16 @@
 /**
- * PurpleTeamDashboard Styles - Purple Team Theme
+ * PurpleTeamDashboard Styles
+ * SOURCE OF TRUTH: Landing Page
+ * Version: 2.0 - Aligned with design system
  */
 
 .purpleDashboard {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #1a001a 0%, #000000 50%, #00001a 100%);
-  color: var(--purple-text-primary, #b366ff);
-  font-family: 'Fira Code', 'Courier New', monospace;
+  background: var(--dashboard-bg);
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
   overflow: hidden;
 }
 
@@ -32,9 +34,9 @@
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(179, 102, 255, 0.3);
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(179, 102, 255, 0.5);
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.5);
   }
 }

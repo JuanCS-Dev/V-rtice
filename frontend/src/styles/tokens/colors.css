@@ -1,21 +1,31 @@
 /**
  * Design Tokens - Colors
  * Projeto Vértice - Sistema de Cores Centralizado
+ * SOURCE OF TRUTH: Landing Page
+ * Version: 2.0 - Consolidated with Landing Page design system
  */
 
 :root {
-  /* ==================== PRIMARY COLORS ==================== */
-  --color-cyber-primary: #00ffff;
-  --color-cyber-secondary: #0088ff;
-  --color-cyber-accent: #00aaff;
+  /* ==================== PRIMARY ACCENT COLORS (Landing Page Standard) ==================== */
+  --color-accent-primary: #8b5cf6;     /* Purple - Primary actions, hover states */
+  --color-accent-secondary: #06b6d4;   /* Cyan - Secondary accents */
+  --color-accent-success: #10b981;     /* Green - Success states */
+  --color-accent-warning: #f59e0b;     /* Amber - Warnings */
+  --color-accent-danger: #ef4444;      /* Red - Danger, errors */
+  --color-accent-info: #3b82f6;        /* Blue - Informational */
 
-  --color-osint-primary: #a855f7;
-  --color-osint-secondary: #ec4899;
-  --color-osint-accent: #d946ef;
+  /* ==================== LEGACY ALIASES (Backward Compatibility) ==================== */
+  --color-cyber-primary: var(--color-accent-primary);
+  --color-cyber-secondary: var(--color-accent-secondary);
+  --color-cyber-accent: var(--color-accent-primary);
 
-  --color-analytics-primary: #3b82f6;
-  --color-analytics-secondary: #06b6d4;
-  --color-analytics-accent: #8b5cf6;
+  --color-osint-primary: var(--color-accent-primary);
+  --color-osint-secondary: var(--color-accent-danger);
+  --color-osint-accent: var(--color-accent-primary);
+
+  --color-analytics-primary: var(--color-accent-info);
+  --color-analytics-secondary: var(--color-accent-secondary);
+  --color-analytics-accent: var(--color-accent-primary);
 
   /* ==================== SEMANTIC COLORS ==================== */
   --color-success: #10b981;
@@ -35,55 +45,100 @@
   --color-info-dark: #0891b2;
 
   /* ==================== SEVERITY COLORS ==================== */
-  --color-critical: #ff0040;
-  --color-high: #ff4000;
-  --color-medium: #ffaa00;
-  --color-low: #00aa00;
-  --color-info-severity: #00aaff;
+  --color-critical: #ef4444;
+  --color-high: #f59e0b;
+  --color-medium: #f59e0b;
+  --color-low: #10b981;
+  --color-info-severity: #06b6d4;
 
   /* ==================== CONFIDENCE COLORS ==================== */
-  --color-confidence-very-high: #00ff00;
-  --color-confidence-high: #00ffff;
-  --color-confidence-medium: #ffaa00;
-  --color-confidence-low: #ff4000;
-  --color-confidence-very-low: #ff0040;
+  --color-confidence-very-high: #10b981;
+  --color-confidence-high: #06b6d4;
+  --color-confidence-medium: #f59e0b;
+  --color-confidence-low: #f59e0b;
+  --color-confidence-very-low: #ef4444;
 
-  /* ==================== BACKGROUND ==================== */
-  --bg-primary: #000000;
-  --bg-secondary: #0a0a0a;
-  --bg-tertiary: #1a1a1a;
-  --bg-quaternary: #2a2a2a;
-  --bg-overlay: rgba(0, 0, 0, 0.8);
-  --bg-overlay-light: rgba(0, 0, 0, 0.6);
-  --bg-glass: rgba(0, 0, 0, 0.5);
+  /* ==================== BACKGROUND (Landing Page Standard) ==================== */
+  --color-bg-primary: #0a0a0a;         /* Page background */
+  --color-bg-secondary: #171717;       /* Elevated sections */
+  --color-bg-tertiary: #262626;        /* Tertiary sections */
+  --color-bg-elevated: #1c1c1c;        /* Cards, modals */
+  --color-bg-overlay: rgba(10, 10, 10, 0.98);
+  --color-bg-hover: rgba(139, 92, 246, 0.1);
+  --color-bg-active: rgba(139, 92, 246, 0.2);
 
-  /* ==================== TEXT ==================== */
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-tertiary: rgba(255, 255, 255, 0.5);
-  --text-quaternary: rgba(255, 255, 255, 0.3);
-  --text-disabled: rgba(255, 255, 255, 0.2);
+  /* Legacy aliases */
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-bg-tertiary);
+  --bg-quaternary: var(--color-bg-elevated);
+  --bg-overlay: var(--color-bg-overlay);
+  --bg-overlay-light: rgba(10, 10, 10, 0.6);
+  --bg-glass: rgba(28, 28, 28, 0.5);
 
-  /* ==================== BORDERS ==================== */
-  --border-primary: rgba(255, 255, 255, 0.2);
-  --border-secondary: rgba(255, 255, 255, 0.1);
-  --border-tertiary: rgba(255, 255, 255, 0.05);
-  --border-focus: var(--color-cyber-primary);
+  /* ==================== TEXT (Landing Page Standard) ==================== */
+  --color-text-primary: #fafafa;       /* Main text */
+  --color-text-secondary: #d4d4d4;     /* Descriptions */
+  --color-text-tertiary: #a3a3a3;      /* Muted text */
+  --color-text-muted: #737373;         /* Timestamps */
+  --color-text-disabled: #525252;
+  --color-text-inverse: #0a0a0a;
+  --color-text-link: var(--color-accent-primary);
+  --color-text-link-hover: var(--color-accent-secondary);
 
-  /* ==================== GRADIENTS ==================== */
-  --gradient-cyber: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
-  --gradient-osint: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-  --gradient-analytics: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  --gradient-dark: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+  /* Legacy aliases */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --text-quaternary: var(--color-text-muted);
+  --text-disabled: var(--color-text-disabled);
 
-  /* ==================== SHADOWS ==================== */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  /* ==================== BORDERS (Landing Page Standard) ==================== */
+  --color-border-primary: rgba(139, 92, 246, 0.3);   /* Purple borders */
+  --color-border-secondary: rgba(6, 182, 212, 0.3);  /* Cyan borders */
+  --color-border-default: rgba(255, 255, 255, 0.1);  /* Default borders */
+  --color-border-hover: rgba(139, 92, 246, 0.6);
+  --color-border-focus: #8b5cf6;
+  --color-border-strong: rgba(255, 255, 255, 0.2);
+  --color-border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Legacy aliases */
+  --border-primary: var(--color-border-default);
+  --border-secondary: var(--color-border-subtle);
+  --border-tertiary: var(--color-border-subtle);
+  --border-focus: var(--color-border-focus);
+
+  /* ==================== GRADIENTS (Landing Page Standard) ==================== */
+  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  --gradient-red: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --gradient-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+
+  /* Legacy aliases */
+  --gradient-cyber: var(--gradient-primary);
+  --gradient-osint: var(--gradient-purple);
+  --gradient-analytics: var(--gradient-blue);
+  --gradient-success: var(--gradient-green);
+  --gradient-danger: var(--gradient-red);
+  --gradient-dark: linear-gradient(180deg, #0a0a0a 0%, #171717 100%);
+
+  /* ==================== SHADOWS (Landing Page Standard) ==================== */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.5);
-  --shadow-cyber: 0 0 20px rgba(0, 255, 255, 0.3);
-  --shadow-osint: 0 0 20px rgba(168, 85, 247, 0.3);
-  --shadow-glow: 0 0 30px currentColor;
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.6);
+
+  /* Glow effects */
+  --shadow-glow-purple: 0 0 30px rgba(139, 92, 246, 0.8);
+  --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.6);
+  --shadow-glow-red: 0 0 30px rgba(239, 68, 68, 1);
+  --shadow-glow-green: 0 0 20px rgba(16, 185, 129, 0.6);
+
+  /* Legacy aliases */
+  --shadow-cyber: var(--shadow-glow-cyan);
+  --shadow-osint: var(--shadow-glow-purple);
+  --shadow-glow: var(--shadow-glow-purple);
 }
