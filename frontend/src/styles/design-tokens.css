@@ -84,10 +84,10 @@
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
   /* Glow Effects - Cyberpunk Aesthetic */
-  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.2);
+  --shadow-glow-purple: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(249, 115, 22, 0.2);
   --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.2);
   --shadow-glow-green: 0 0 20px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.2);
-  --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.2);
+  --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(249, 115, 22, 0.2);
   --shadow-glow-yellow: 0 0 20px rgba(234, 179, 8, 0.5), 0 0 40px rgba(234, 179, 8, 0.2);
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -234,16 +234,16 @@
   --color-text-inverse: #0f172a;
 
   /* Borders */
-  --color-border-primary: rgba(148, 163, 184, 0.2);
-  --color-border-secondary: rgba(148, 163, 184, 0.1);
-  --color-border-focus: #8b5cf6;
+  --color-border-primary: rgba(239, 68, 68, 0.3);
+  --color-border-secondary: rgba(239, 68, 68, 0.1);
+  --color-border-focus: #ef4444;
   --color-border-error: #ef4444;
 
-  /* Accent Colors - Primary (Purple) */
-  --color-accent-primary: #8b5cf6;
-  --color-accent-primary-hover: #7c3aed;
-  --color-accent-primary-active: #6d28d9;
-  --color-accent-primary-light: rgba(139, 92, 246, 0.1);
+  /* Accent Colors - Primary (Red-Orange) */
+  --color-accent-primary: #ef4444;
+  --color-accent-primary-hover: #dc2626;
+  --color-accent-primary-active: #b91c1c;
+  --color-accent-primary-light: rgba(239, 68, 68, 0.1);
 
   /* Accent Colors - Secondary (Cyan) */
   --color-accent-secondary: #06b6d4;
@@ -281,15 +281,15 @@
    * Uso: background, background-image
    * Gradientes premium para hero sections e cards
    */
-  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
-  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #22c55e 100%);
+  --gradient-primary: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  --gradient-secondary: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
   --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
   --gradient-dark: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 27, 75, 0.98) 100%);
-  --gradient-cyberpunk: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #22c55e 100%);
+  --gradient-cyberpunk: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #fb923c 100%);
 
   /* Radial Gradients */
-  --gradient-radial-primary: radial-gradient(circle at center, #8b5cf6 0%, transparent 70%);
-  --gradient-radial-secondary: radial-gradient(circle at center, #06b6d4 0%, transparent 70%);
+  --gradient-radial-primary: radial-gradient(circle at center, #ef4444 0%, transparent 70%);
+  --gradient-radial-secondary: radial-gradient(circle at center, #f97316 0%, transparent 70%);
 
   /* ═══════════════════════════════════════════════════════════════════════
    * GRID SYSTEM - Layout Structure
