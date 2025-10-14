@@ -1,0 +1,101 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * COMPACT LANGUAGE SELECTOR - CSS MODULE
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Toggle Button */
+.toggle {
+  width: 42px;
+  height: 32px;
+  background: var(--status-bg);
+  border: var(--status-border);
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.toggle:hover {
+  background: var(--nav-button-hover-bg);
+  border-color: var(--color-accent-primary);
+}
+
+/* Dropdown Menu */
+.dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: var(--header-bg-gradient);
+  border: var(--header-border-bottom);
+  border-radius: 8px;
+  padding: 0.5rem;
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--header-shadow);
+  z-index: 10000;
+  min-width: 150px;
+}
+
+/* Dropdown Header */
+.dropdownHeader {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: var(--header-border-bottom);
+  font-family: monospace;
+}
+
+/* Language Button */
+.langButton {
+  width: 100%;
+  padding: 0.6rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s ease;
+  font-family: monospace;
+  text-align: left;
+}
+
+.langButton:hover {
+  background: var(--nav-button-hover-bg);
+  color: var(--color-text-primary);
+}
+
+.langButton.active {
+  background: var(--nav-button-active-bg);
+  color: var(--color-text-primary);
+}
+
+.flag {
+  font-size: 1.25rem;
+}
+
+.langName {
+  flex: 1;
+}
+
+.checkmark {
+  font-size: 0.9rem;
+  color: var(--status-online-color);
+}

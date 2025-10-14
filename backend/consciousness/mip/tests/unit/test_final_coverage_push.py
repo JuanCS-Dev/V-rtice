@@ -419,6 +419,52 @@ class TestKnowledgeModelsFinalCoverage:
                 case_name="",  # Empty
                 scenario_description="Test",
             )
+    
+    def test_principle_validation_empty_name(self):
+        """Test principle empty name validation (line 99)."""
+        with pytest.raises(ValueError, match="name"):
+            Principle(
+                name="",  # Empty
+                level=PrincipleLevel.DERIVED,
+                description="Test",
+                severity=5,
+            )
+    
+    def test_principle_validation_empty_description(self):
+        """Test principle empty description validation (line 101)."""
+        with pytest.raises(ValueError, match="description"):
+            Principle(
+                name="Test",
+                level=PrincipleLevel.DERIVED,
+                description="",  # Empty
+                severity=5,
+            )
+    
+    def test_precedent_validation_empty_scenario_description(self):
+        """Test precedent empty scenario_description validation (line 224)."""
+        with pytest.raises(ValueError, match="scenario_description"):
+            Precedent(
+                case_name="Test",
+                scenario_description="",  # Empty
+            )
+    
+    def test_concept_validation_empty_definition(self):
+        """Test concept empty definition validation (line 258)."""
+        with pytest.raises(ValueError, match="definition"):
+            Concept(
+                name="test",
+                definition="",  # Empty
+                framework_origin="Test",
+            )
+    
+    def test_concept_validation_empty_name(self):
+        """Test concept empty name validation (line 256)."""
+        with pytest.raises(ValueError, match="name"):
+            Concept(
+                name="",  # Empty
+                definition="Test definition",
+                framework_origin="Test",
+            )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,97 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * COMPACT EFFECT SELECTOR - CSS MODULE
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Toggle Button */
+.toggle {
+  width: 32px;
+  height: 32px;
+  background: var(--status-bg);
+  border: var(--status-border);
+  border-radius: 6px;
+  color: var(--color-accent-primary, #8B5CF6);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-family: monospace;
+}
+
+.toggle:hover {
+  background: var(--nav-button-hover-bg);
+  border-color: var(--color-accent-primary);
+}
+
+/* Dropdown Menu */
+.dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: var(--header-bg-gradient);
+  border: var(--header-border-bottom);
+  border-radius: 8px;
+  padding: 0.5rem;
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--header-shadow);
+  z-index: 10000;
+  min-width: 140px;
+}
+
+/* Dropdown Header */
+.dropdownHeader {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: var(--header-border-bottom);
+  font-family: monospace;
+}
+
+/* Effect Button */
+.effectButton {
+  width: 100%;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s ease;
+  font-family: monospace;
+  text-align: left;
+}
+
+.effectButton:hover {
+  background: var(--nav-button-hover-bg);
+  color: var(--color-text-primary);
+}
+
+.effectButton.active {
+  background: var(--nav-button-active-bg);
+  color: var(--color-text-primary);
+}
+
+.effectIcon {
+  font-size: 1rem;
+}
+
+.checkmark {
+  margin-left: auto;
+  color: var(--status-online-color);
+}
