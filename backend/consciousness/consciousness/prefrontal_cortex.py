@@ -92,12 +92,13 @@ class PrefrontalCortex:
     6. PFC: Integrate and decide
     """
 
-    def __init__(self, enable_mip: bool = True):
+    def __init__(self, enable_mip: bool = True, repository=None):
         """
         Initialize PFC with all subsystems.
 
         Args:
             enable_mip: Whether to enable MIP integration (default: True)
+            repository: DecisionRepository for persistence (optional)
         """
         # Initialize subsystems
         self.tom = ToMEngine()
@@ -109,7 +110,10 @@ class PrefrontalCortex:
         self.enable_mip = enable_mip
         self.mip = ProcessIntegrityEngine() if enable_mip else None
 
-        # Decision history
+        # Initialize persistence (optional)
+        self.repository = repository
+
+        # Decision history (in-memory)
         self._decisions: List[OrchestratedDecision] = []
 
         # Statistics
@@ -121,7 +125,8 @@ class PrefrontalCortex:
             "constitutional_violations": 0,
             "mip_evaluations": 0,
             "mip_approved": 0,
-            "mip_rejected": 0
+            "mip_rejected": 0,
+            "persisted_decisions": 0
         }
 
     def orchestrate_decision(
@@ -229,6 +234,14 @@ class PrefrontalCortex:
 
         if requires_escalation:
             self.stats["escalated"] += 1
+
+        # Persist to database if repository available
+        if self.repository:
+            try:
+                self.repository.save_decision(decision)
+                self.stats["persisted_decisions"] += 1
+            except Exception as e:
+                print(f"⚠️  Failed to persist decision: {e}")
 
         return decision
 
@@ -359,6 +372,14 @@ class PrefrontalCortex:
 
         if requires_escalation:
             self.stats["escalated"] += 1
+
+        # Persist to database if repository available
+        if self.repository:
+            try:
+                self.repository.save_decision(decision)
+                self.stats["persisted_decisions"] += 1
+            except Exception as e:
+                print(f"⚠️  Failed to persist decision: {e}")
 
         return decision
 
