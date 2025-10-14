@@ -4,25 +4,39 @@ HITL decision queue and workflow management
 """
 
 import logging
-from datetime import datetime
-from typing import List, Optional
+from datetime import datetime, timedelta
+from typing import List, Optional, Dict
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 
-from .hitl_backend import (
-    UserInDB,
-    DecisionRequest,
-    DecisionResponse,
-    DecisionCreate,
-    DecisionStatus,
-    DecisionPriority,
-    ActionType,
-    get_current_active_analyst,
-    get_current_user,
-    db
-)
+try:
+    from .hitl_backend import (
+        UserInDB,
+        DecisionRequest,
+        DecisionResponse,
+        DecisionCreate,
+        DecisionStatus,
+        DecisionPriority,
+        ActionType,
+        get_current_active_analyst,
+        get_current_user,
+        db
+    )
+except ImportError:
+    from hitl_backend import (
+        UserInDB,
+        DecisionRequest,
+        DecisionResponse,
+        DecisionCreate,
+        DecisionStatus,
+        DecisionPriority,
+        ActionType,
+        get_current_active_analyst,
+        get_current_user,
+        db
+    )
 
 logger = logging.getLogger(__name__)
 

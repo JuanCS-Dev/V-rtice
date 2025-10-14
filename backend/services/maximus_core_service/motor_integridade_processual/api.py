@@ -13,7 +13,7 @@ Autor: Juan Carlos de Souza
 Lei Governante: Constituição Vértice v2.6
 """
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 import time
 import logging
@@ -23,12 +23,17 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from motor_integridade_processual.models.action_plan import ActionPlan
-from motor_integridade_processual.models.verdict import EthicalVerdict, FrameworkName
+from motor_integridade_processual.models.verdict import EthicalVerdict, FrameworkName, DecisionLevel, FrameworkVerdict
 from motor_integridade_processual.frameworks.kantian import KantianDeontology
 from motor_integridade_processual.frameworks.utilitarian import UtilitarianCalculus
 from motor_integridade_processual.frameworks.virtue import VirtueEthics
 from motor_integridade_processual.frameworks.principialism import Principialism
 from motor_integridade_processual.resolution.conflict_resolver import ConflictResolver
+
+# CBR Engine Integration
+from justice.cbr_engine import CBREngine, CBRResult
+from justice.precedent_database import PrecedentDB, CasePrecedent
+import os
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -53,6 +58,16 @@ frameworks = {
 
 # Initialize resolver
 resolver = ConflictResolver()
+
+# Initialize CBR Engine for precedent-based reasoning
+db_url = os.getenv("DATABASE_URL", "postgresql://maximus:password@localhost/maximus")
+try:
+    precedent_db = PrecedentDB(db_url)
+    cbr_engine = CBREngine(precedent_db)
+    logger.info("CBR Engine initialized with precedent database")
+except Exception as e:
+    logger.warning(f"CBR Engine initialization failed: {e}. Continuing without precedents.")
+    cbr_engine = None
 
 # Metrics storage (in-memory for now)
 evaluation_count = 0
@@ -148,20 +163,24 @@ async def list_frameworks() -> List[FrameworkInfo]:
 @app.post("/evaluate", response_model=EvaluationResponse, status_code=status.HTTP_200_OK)
 async def evaluate_action_plan(request: EvaluationRequest) -> EvaluationResponse:
     """
-    Evaluate an action plan against ethical frameworks.
-    
+    Evaluate an action plan against ethical frameworks with precedent-based reasoning.
+
     Process:
-    1. Evaluate plan with each framework
-    2. Resolve conflicts between frameworks
-    3. Generate unified verdict
-    4. Update metrics
-    
+    1. Check CBR precedents (retrieve → reuse → revise)
+       - If high confidence (>0.8), use precedent directly
+       - Otherwise, fallback to frameworks
+    2. Evaluate plan with each framework (if no precedent)
+    3. Resolve conflicts between frameworks
+    4. Generate unified verdict
+    5. Store decision as new precedent (retain)
+    6. Update metrics
+
     Args:
         request: EvaluationRequest with action_plan
-        
+
     Returns:
         EvaluationResponse with verdict and timing
-        
+
     Raises:
         HTTPException: If evaluation fails
     """
@@ -171,44 +190,129 @@ async def evaluate_action_plan(request: EvaluationRequest) -> EvaluationResponse
     
     try:
         logger.info(f"Evaluating action plan: {request.action_plan.objective}")
-        
-        # Evaluate with each framework
-        framework_verdicts = []
-        for name, framework in frameworks.items():
+
+        # === PHASE 1: Try CBR (Precedent-Based Reasoning) ===
+        cbr_result = None
+        if cbr_engine is not None:
             try:
-                verdict = framework.evaluate(request.action_plan)
-                framework_verdicts.append(verdict)
-                logger.debug(f"{name.value}: {verdict.decision.value} (score: {verdict.score})")
+                # Convert action_plan to case dictionary
+                case_dict = {
+                    "objective": request.action_plan.objective,
+                    "action_type": getattr(request.action_plan, "action_type", "unknown"),
+                    "context": getattr(request.action_plan, "context", {}),
+                    "target": getattr(request.action_plan, "target", None),
+                }
+
+                # Execute full CBR cycle (retrieve → reuse → revise)
+                cbr_result = await cbr_engine.full_cycle(case_dict, validators=[])
+
+                if cbr_result and cbr_result.confidence > 0.8:
+                    logger.info(f"High-confidence precedent found (conf={cbr_result.confidence:.2f}), using directly")
+
+                    # Create verdict from precedent
+                    decision_map = {
+                        "approve": DecisionLevel.APPROVE,
+                        "approve_with_monitoring": DecisionLevel.APPROVE_WITH_MONITORING,
+                        "escalate": DecisionLevel.ESCALATE_TO_HUMAN,
+                        "reject": DecisionLevel.REJECT,
+                    }
+                    decision = decision_map.get(cbr_result.suggested_action, DecisionLevel.ESCALATE_TO_HUMAN)
+
+                    # Build precedent-based verdict
+                    final_verdict = EthicalVerdict(
+                        final_decision=decision,
+                        confidence_score=cbr_result.confidence,
+                        reasoning=cbr_result.rationale,
+                        framework_verdicts=[],
+                        minority_opinions=[],
+                        recommendations=[f"Based on precedent #{cbr_result.precedent_id}"],
+                        processing_time_ms=0.0,
+                    )
+
+                elif cbr_result:
+                    logger.info(f"Low-confidence precedent found (conf={cbr_result.confidence:.2f}), falling back to frameworks")
+                else:
+                    logger.info("No applicable precedent found, using frameworks")
+
             except Exception as e:
-                logger.error(f"Framework {name.value} evaluation failed: {e}")
+                logger.warning(f"CBR cycle failed: {e}, falling back to frameworks")
+                cbr_result = None
+
+        # === PHASE 2: Framework Evaluation (if no high-confidence precedent) ===
+        if cbr_result is None or cbr_result.confidence <= 0.8:
+            # Evaluate with each framework
+            framework_verdicts = []
+            for name, framework in frameworks.items():
+                try:
+                    verdict = framework.evaluate(request.action_plan)
+                    framework_verdicts.append(verdict)
+                    logger.debug(f"{name.value}: {verdict.decision.value} (score: {verdict.score})")
+                except Exception as e:
+                    logger.error(f"Framework {name.value} evaluation failed: {e}")
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail=f"Framework evaluation failed: {str(e)}"
+                    )
+
+            # Resolve conflicts
+            try:
+                final_verdict = resolver.resolve(framework_verdicts, request.action_plan)
+                logger.info(f"Final decision: {final_verdict.final_decision.value}")
+            except Exception as e:
+                logger.error(f"Conflict resolution failed: {e}")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Framework evaluation failed: {str(e)}"
+                    detail=f"Conflict resolution failed: {str(e)}"
                 )
-        
-        # Resolve conflicts
-        try:
-            final_verdict = resolver.resolve(framework_verdicts, request.action_plan)
-            logger.info(f"Final decision: {final_verdict.final_decision.value}")
-        except Exception as e:
-            logger.error(f"Conflict resolution failed: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Conflict resolution failed: {str(e)}"
-            )
         
         # Calculate evaluation time
         elapsed_time = (time.time() - start_time) * 1000  # ms
-        
+
         # Update metrics
         evaluation_count += 1
         evaluation_times.append(elapsed_time)
         decision_type = final_verdict.final_decision.value
         decision_counts[decision_type] = decision_counts.get(decision_type, 0) + 1
-        
+
         # Update verdict processing time
         final_verdict.processing_time_ms = elapsed_time
-        
+
+        # === PHASE 3: Retain (Store as new precedent) ===
+        if cbr_engine is not None:
+            try:
+                # Map DecisionLevel back to action string
+                action_map = {
+                    DecisionLevel.APPROVE: "approve",
+                    DecisionLevel.APPROVE_WITH_MONITORING: "approve_with_monitoring",
+                    DecisionLevel.ESCALATE_TO_HUMAN: "escalate",
+                    DecisionLevel.REJECT: "reject",
+                }
+                action_taken = action_map.get(final_verdict.final_decision, "unknown")
+
+                # Create precedent case
+                new_precedent = CasePrecedent(
+                    situation=case_dict if cbr_result else {
+                        "objective": request.action_plan.objective,
+                        "action_type": getattr(request.action_plan, "action_type", "unknown"),
+                        "context": getattr(request.action_plan, "context", {}),
+                    },
+                    action_taken=action_taken,
+                    rationale=final_verdict.reasoning,
+                    outcome=None,  # Will be updated later with feedback
+                    success=None,  # Will be updated with feedback (0.5 default)
+                    ethical_frameworks=[fv.framework_name for fv in final_verdict.framework_verdicts],
+                    constitutional_compliance={},  # Will be enhanced later
+                    embedding=None,  # Will be generated by PrecedentDB
+                )
+
+                # Store precedent
+                await cbr_engine.retain(new_precedent)
+                logger.info(f"Decision stored as precedent (action={action_taken})")
+
+            except Exception as e:
+                logger.warning(f"Failed to store precedent: {e}")
+                # Don't fail the request if precedent storage fails
+
         return EvaluationResponse(
             verdict=final_verdict,
             evaluation_time_ms=elapsed_time
@@ -277,6 +381,7 @@ async def startup_event():
     logger.info("=== MIP Service Starting ===")
     logger.info(f"Frameworks loaded: {len(frameworks)}")
     logger.info(f"Frameworks: {[f.value for f in frameworks.keys()]}")
+    logger.info(f"CBR Engine: {'✓ Active' if cbr_engine else '✗ Disabled'}")
     logger.info("=== MIP Service Ready ===")
 
 
