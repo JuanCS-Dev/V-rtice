@@ -10,6 +10,7 @@ Lei Governante: Constituição Vértice v2.6
 from typing import List, Dict, Optional, Tuple
 from motor_integridade_processual.models.verdict import (
     FrameworkVerdict,
+    FrameworkName,
     EthicalVerdict,
     DecisionLevel,
     RejectionReason
@@ -48,10 +49,10 @@ class ConflictResolver:
             conflict_threshold: Score variance threshold for conflict detection
         """
         self.weights = weights or {
-            "Kantian": 0.40,
-            "Utilitarian": 0.30,
-            "Virtue": 0.20,
-            "Principialism": 0.10
+            FrameworkName.KANTIAN.value: 0.40,
+            FrameworkName.UTILITARIAN.value: 0.30,
+            FrameworkName.VIRTUE_ETHICS.value: 0.20,
+            FrameworkName.PRINCIPIALISM.value: 0.10
         }
         self.escalation_threshold = escalation_threshold
         self.conflict_threshold = conflict_threshold
@@ -222,16 +223,21 @@ class ConflictResolver:
         plan: ActionPlan
     ) -> EthicalVerdict:
         """Build verdict for veto case."""
+        # Convert list to dict
+        verdicts_dict = {
+            FrameworkName(v.framework_name.value): v 
+            for v in all_verdicts
+        }
+        
         return EthicalVerdict(
             action_plan_id=str(plan.id),
             final_decision=DecisionLevel.VETO,
-            aggregate_score=0.0,
             confidence=1.0,  # Absolute certainty on veto
-            primary_reason=f"VETO by {veto_verdict.framework_name.value}: {veto_verdict.reasoning}",
-            framework_verdicts=all_verdicts,
-            requires_human_review=False,  # Veto is final
-            escalation_reason=None,
-            all_rejection_reasons=veto_verdict.rejection_reasons,
+            framework_verdicts=verdicts_dict,
+            resolution_method="kantian_veto",
+            primary_reasons=[f"VETO by {veto_verdict.framework_name.value}: {veto_verdict.reasoning}"],
+            requires_monitoring=False,
+            processing_time_ms=0.0,
             metadata={"veto_framework": veto_verdict.framework_name.value}
         )
     
@@ -244,21 +250,24 @@ class ConflictResolver:
         conflict_details: List[str]
     ) -> EthicalVerdict:
         """Build verdict for escalated case."""
-        all_reasons = []
-        for v in verdicts:
-            all_reasons.extend(v.rejection_reasons)
+        # Convert list to dict
+        verdicts_dict = {
+            FrameworkName(v.framework_name.value): v 
+            for v in verdicts
+        }
+        
+        escalation_reason = f"Conflicts: {conflict_details}. Confidence: {confidence:.2f}" if conflict_details else "Low confidence"
         
         return EthicalVerdict(
             action_plan_id=str(plan.id),
             final_decision=DecisionLevel.ESCALATE_TO_HITL,
-            aggregate_score=score,
             confidence=confidence,
-            primary_reason=f"Escalated: {'; '.join(conflict_details) if conflict_details else 'Low confidence'}",
-            framework_verdicts=verdicts,
-            requires_human_review=True,
-            escalation_reason=f"Conflicts: {conflict_details}. Confidence: {confidence:.2f}",
-            all_rejection_reasons=all_reasons if all_reasons else None,
-            metadata={"conflict_details": conflict_details}
+            framework_verdicts=verdicts_dict,
+            resolution_method="escalation",
+            primary_reasons=[escalation_reason],
+            requires_monitoring=True,
+            processing_time_ms=0.0,
+            metadata={"conflict_details": conflict_details, "aggregate_score": score}
         )
     
     def _build_final_verdict(
@@ -270,12 +279,11 @@ class ConflictResolver:
         has_conflict: bool
     ) -> EthicalVerdict:
         """Build final verdict based on aggregate score."""
-        all_reasons = []
-        all_conditions = []
-        
-        for v in verdicts:
-            all_reasons.extend(v.rejection_reasons)
-            all_conditions.extend(v.conditions)
+        # Convert list to dict
+        verdicts_dict = {
+            FrameworkName(v.framework_name.value): v 
+            for v in verdicts
+        }
         
         # Determine decision level
         if score >= 0.75:
@@ -291,13 +299,11 @@ class ConflictResolver:
         return EthicalVerdict(
             action_plan_id=str(plan.id),
             final_decision=decision,
-            aggregate_score=score,
             confidence=confidence,
-            primary_reason=reason,
-            framework_verdicts=verdicts,
-            requires_human_review=False,
-            escalation_reason=None,
-            all_rejection_reasons=all_reasons if all_reasons else None,
-            conditional_requirements=all_conditions if all_conditions else None,
-            metadata={"has_conflict": has_conflict}
+            framework_verdicts=verdicts_dict,
+            resolution_method="weighted_aggregation",
+            primary_reasons=[reason],
+            requires_monitoring=has_conflict,
+            processing_time_ms=0.0,
+            metadata={"aggregate_score": score, "has_conflict": has_conflict}
         )
