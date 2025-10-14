@@ -56,7 +56,7 @@
 
 .dashboardContent {
   flex: 1;
-  padding: var(--spacing-lg, 1.5rem);
+  padding: var(--space-xl);
   overflow-y: auto;
   overflow-x: hidden;
 }

@@ -71,10 +71,10 @@
 
 /* Empty State */
 .emptyState {
-  padding: 2rem 1rem;
+  padding: var(--space-2xl) var(--space-lg);
   text-align: center;
   opacity: 0.5;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
@@ -103,7 +103,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-md);
 }
 
 .alertType {
@@ -114,10 +114,10 @@
 }
 
 .alertSeverityBadge {
-  font-size: 0.65rem;
+  font-size: var(--text-xs);
   opacity: 0.6;
   font-weight: 600;
-  padding: 0.15rem 0.4rem;
+  padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   font-family: 'Courier New', monospace;
   letter-spacing: 0.05em;
@@ -132,14 +132,14 @@
 }
 
 .alertSource {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   opacity: 0.7;
   font-family: 'Courier New', monospace;
   color: var(--color-text-muted);
 }
 
 .alertTimestamp {
-  font-size: 0.65rem;
+  font-size: var(--text-xs);
   opacity: 0.5;
   text-align: right;
   margin-top: var(--space-xs);
@@ -231,7 +231,7 @@
 }
 
 .statsHeader {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   margin-bottom: var(--space-xs);
   opacity: 0.7;
   font-weight: 600;
@@ -297,11 +297,11 @@
   }
 
   .alertItem {
-    padding: 0.5rem;
+    padding: var(--space-md);
   }
 
   .title {
-    font-size: 1rem;
+    font-size: var(--text-base);
   }
 }
 

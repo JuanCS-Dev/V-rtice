@@ -10,7 +10,7 @@
   height: 100vh;
   width: 100vw;
   background: var(--dashboard-bg);
-  color: var(--osint-primary, var(--color-text-primary));
+  color: var(--color-text-primary);
   font-family: 'Courier New', monospace;
   overflow: hidden;
 }
@@ -27,7 +27,7 @@
   background: linear-gradient(
     to right,
     transparent,
-    var(--osint-accent, var(--color-accent-primary)),
+    var(--color-accent-primary),
     transparent
   );
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -48,8 +48,8 @@
    ============================================ */
 .sidebar {
   width: 320px;
-  border-right: 1px solid var(--osint-border, var(--header-border-bottom));
-  background: var(--osint-sidebar-bg, rgba(0, 0, 0, 0.3));
+  border-right: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
   backdrop-filter: var(--backdrop-blur);
   overflow-y: auto;
 }
@@ -59,7 +59,7 @@
    ============================================ */
 .contentArea {
   flex: 1;
-  padding: 1rem;
+  padding: var(--space-lg);
   overflow: hidden;
   position: relative;
 }
@@ -93,7 +93,7 @@
   .sidebar {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid var(--osint-border, var(--header-border-bottom));
+    border-bottom: 1px solid var(--color-border-primary);
     max-height: 300px;
   }
 }

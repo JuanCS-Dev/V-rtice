@@ -27,7 +27,7 @@
 
   /* Custom scrollbar */
   scrollbar-width: thin;
-  scrollbar-color: var(--color-cyber-primary) var(--bg-tertiary);
+  scrollbar-color: var(--color-accent-primary) var(--color-bg-tertiary);
 }
 
 .controlPanel::-webkit-scrollbar {
@@ -35,17 +35,17 @@
 }
 
 .controlPanel::-webkit-scrollbar-track {
-  background: var(--bg-tertiary);
+  background: var(--color-bg-tertiary);
   border-radius: var(--radius-sm);
 }
 
 .controlPanel::-webkit-scrollbar-thumb {
-  background: var(--color-cyber-primary);
+  background: var(--color-accent-primary);
   border-radius: var(--radius-sm);
 }
 
 .controlPanel::-webkit-scrollbar-thumb:hover {
-  background: var(--color-cyber-secondary);
+  background: var(--color-accent-secondary);
 }
 
 .timelinePanel {
