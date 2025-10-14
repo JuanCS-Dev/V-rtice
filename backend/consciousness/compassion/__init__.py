@@ -6,5 +6,13 @@ Detects suffering events and plans compassionate interventions.
 """
 
 from .event_detector import EventDetector, SufferingEvent, EventType
+from .compassion_planner import CompassionPlanner, CompassionPlan, InterventionType
 
-__all__ = ["EventDetector", "SufferingEvent", "EventType"]
+__all__ = [
+    "EventDetector",
+    "SufferingEvent",
+    "EventType",
+    "CompassionPlanner",
+    "CompassionPlan",
+    "InterventionType",
+]
