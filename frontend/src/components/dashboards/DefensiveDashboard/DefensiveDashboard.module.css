@@ -17,6 +17,9 @@
   position: relative;
   background: var(--dashboard-bg);
   color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
+  top: 0;
 }
 
 /* ============================================

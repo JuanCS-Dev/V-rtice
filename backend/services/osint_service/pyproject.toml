@@ -16,6 +16,9 @@ dependencies = [
     "aiohttp>=3.9.0",
     # SocialMediaScraper dependencies
     "tweepy>=4.14.0",
+    # ImageAnalyzer dependencies
+    "pillow>=10.0.0",
+    "imagehash>=4.3.0",
 ]
 
 [project.optional-dependencies]
