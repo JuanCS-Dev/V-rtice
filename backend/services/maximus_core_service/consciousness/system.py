@@ -35,6 +35,9 @@ from consciousness.metacognition.monitor import MetacognitiveMonitor
 from compassion.tom_engine import ToMEngine
 from motor_integridade_processual.arbiter.decision import DecisionArbiter
 
+# REACTIVE FABRIC: Sprint 3 - Data collection and orchestration
+from consciousness.reactive_fabric.orchestration import DataOrchestrator
+
 # Prometheus Metrics
 consciousness_tig_node_count = Gauge("consciousness_tig_node_count", "Number of nodes in the TIG fabric")
 consciousness_tig_edges = Gauge("consciousness_tig_edge_count", "Number of edges in the TIG fabric")
@@ -108,6 +111,9 @@ class ConsciousnessSystem:
         self.tom_engine: ToMEngine | None = None
         self.metacog_monitor: MetacognitiveMonitor | None = None
         self.prefrontal_cortex: PrefrontalCortex | None = None
+
+        # REACTIVE FABRIC: Data orchestration (Sprint 3)
+        self.orchestrator: DataOrchestrator | None = None
 
     async def start(self) -> None:
         """Start consciousness system.
@@ -199,6 +205,16 @@ class ConsciousnessSystem:
                 await self.safety_protocol.start_monitoring()
                 print("  ✅ Safety Protocol active (monitoring started)")
 
+            # 6. REACTIVE FABRIC: Initialize Data Orchestrator (Sprint 3)
+            print("  ├─ Creating Reactive Fabric Orchestrator...")
+            self.orchestrator = DataOrchestrator(
+                consciousness_system=self,
+                collection_interval_ms=100.0,  # 10 Hz collection
+                salience_threshold=0.65  # Match ESGT default
+            )
+            await self.orchestrator.start()
+            print("  ✅ Reactive Fabric active (data orchestration enabled)")
+
             self._running = True
             print("✅ Consciousness System fully operational")
 
@@ -230,6 +246,11 @@ class ConsciousnessSystem:
             if self.safety_protocol:
                 await self.safety_protocol.stop_monitoring()
                 print("  ✅ Safety Protocol stopped")
+
+            # REACTIVE FABRIC: Stop orchestrator before components
+            if self.orchestrator:
+                await self.orchestrator.stop()
+                print("  ✅ Reactive Fabric stopped")
 
             if self.esgt_coordinator:
                 await self.esgt_coordinator.stop()
@@ -332,6 +353,10 @@ class ConsciousnessSystem:
         # Check Safety Protocol if enabled
         if self.config.safety_enabled and self.safety_protocol:
             components_ok = components_ok and self.safety_protocol.monitoring_active
+
+        # REACTIVE FABRIC: Check orchestrator health
+        if self.orchestrator:
+            components_ok = components_ok and self.orchestrator._running
 
         return components_ok
 
