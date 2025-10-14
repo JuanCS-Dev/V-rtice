@@ -29,6 +29,12 @@ from consciousness.mcea.controller import ArousalConfig, ArousalController
 from consciousness.safety import ConsciousnessSafetyProtocol, SafetyThresholds, SafetyViolation
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
 
+# TRACK 1: PrefrontalCortex integration
+from consciousness.prefrontal_cortex import PrefrontalCortex
+from consciousness.metacognition.monitor import MetacognitiveMonitor
+from compassion.tom_engine import ToMEngine
+from motor_integridade_processual.arbiter.decision import DecisionArbiter
+
 # Prometheus Metrics
 consciousness_tig_node_count = Gauge("consciousness_tig_node_count", "Number of nodes in the TIG fabric")
 consciousness_tig_edges = Gauge("consciousness_tig_edge_count", "Number of edges in the TIG fabric")
@@ -98,6 +104,11 @@ class ConsciousnessSystem:
         self.arousal_controller: ArousalController | None = None
         self.safety_protocol: ConsciousnessSafetyProtocol | None = None
 
+        # TRACK 1: Social cognition components
+        self.tom_engine: ToMEngine | None = None
+        self.metacog_monitor: MetacognitiveMonitor | None = None
+        self.prefrontal_cortex: PrefrontalCortex | None = None
+
     async def start(self) -> None:
         """Start consciousness system.
 
@@ -127,7 +138,30 @@ class ConsciousnessSystem:
             await self.tig_fabric.enter_esgt_mode()
             print(f"  ✅ TIG Fabric initialized ({self.config.tig_node_count} nodes)")
 
-            # 2. Initialize ESGT Coordinator
+            # 2. TRACK 1: Initialize Social Cognition Components (ToM, Metacognition, PFC)
+            print("  ├─ Creating Social Cognition components (ToM, Metacognition, PFC)...")
+
+            # Initialize ToM Engine (with in-memory DB for now, can add Redis later)
+            self.tom_engine = ToMEngine(db_path=":memory:")
+            await self.tom_engine.initialize()
+            print("    ✅ ToM Engine initialized")
+
+            # Initialize Metacognition Monitor
+            self.metacog_monitor = MetacognitiveMonitor(window_size=100)
+            print("    ✅ Metacognition Monitor initialized")
+
+            # Initialize MIP DecisionArbiter for ethical evaluation
+            decision_arbiter = DecisionArbiter()
+
+            # Initialize PrefrontalCortex
+            self.prefrontal_cortex = PrefrontalCortex(
+                tom_engine=self.tom_engine,
+                decision_arbiter=decision_arbiter,
+                metacognition_monitor=self.metacog_monitor
+            )
+            print("  ✅ PrefrontalCortex initialized (social cognition enabled)")
+
+            # 3. Initialize ESGT Coordinator (with PFC integration)
             print("  ├─ Creating ESGT Coordinator...")
             triggers = TriggerConditions()
             triggers.min_salience = self.config.esgt_min_salience
@@ -136,12 +170,15 @@ class ConsciousnessSystem:
             triggers.min_available_nodes = self.config.esgt_min_available_nodes
 
             self.esgt_coordinator = ESGTCoordinator(
-                tig_fabric=self.tig_fabric, triggers=triggers, coordinator_id="production-esgt"
+                tig_fabric=self.tig_fabric,
+                triggers=triggers,
+                coordinator_id="production-esgt",
+                prefrontal_cortex=self.prefrontal_cortex  # TRACK 1: Wire PFC to ESGT
             )
             await self.esgt_coordinator.start()
-            print("  ✅ ESGT Coordinator started")
+            print("  ✅ ESGT Coordinator started (with PFC integration)")
 
-            # 3. Initialize Arousal Controller
+            # 4. Initialize Arousal Controller
             print("  ├─ Creating Arousal Controller...")
             arousal_config = ArousalConfig(
                 update_interval_ms=self.config.arousal_update_interval_ms,
@@ -153,7 +190,7 @@ class ConsciousnessSystem:
             await self.arousal_controller.start()
             print("  ✅ Arousal Controller started")
 
-            # 4. Initialize Safety Protocol (FASE VII)
+            # 5. Initialize Safety Protocol (FASE VII)
             if self.config.safety_enabled:
                 print("  ├─ Creating Safety Protocol...")
                 self.safety_protocol = ConsciousnessSafetyProtocol(
@@ -206,6 +243,11 @@ class ConsciousnessSystem:
                 await self.tig_fabric.exit_esgt_mode()
                 print("  ✅ TIG Fabric stopped")
 
+            # TRACK 1: Close ToM Engine
+            if self.tom_engine:
+                await self.tom_engine.close()
+                print("  ✅ ToM Engine closed")
+
             self._running = False
             print("✅ Consciousness System shut down")
 
@@ -231,6 +273,8 @@ class ConsciousnessSystem:
             "esgt": self.esgt_coordinator,
             "arousal": self.arousal_controller,
             "safety": self.safety_protocol,
+            "pfc": self.prefrontal_cortex,  # TRACK 1
+            "tom": self.tom_engine,  # TRACK 1
         }
 
         # Add aggregated metrics for safety monitoring

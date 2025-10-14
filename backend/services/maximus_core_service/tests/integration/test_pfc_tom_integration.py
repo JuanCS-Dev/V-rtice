@@ -32,16 +32,18 @@ async def tom_engine():
 
 @pytest.fixture
 def metacog_monitor():
-    """Create Metacognition Monitor for testing."""
+    """Create Metacognition Monitor for testing (synchronous)."""
     return MetacognitiveMonitor(window_size=50)
 
 
 @pytest.fixture
-def prefrontal_cortex(tom_engine, metacog_monitor):
+def prefrontal_cortex(tom_engine):
     """Create PrefrontalCortex with ToM and Metacognition."""
+    # Create metacognition monitor inline
+    metacog = MetacognitiveMonitor(window_size=50)
     return PrefrontalCortex(
         tom_engine=tom_engine,
-        metacognition_monitor=metacog_monitor
+        metacognition_monitor=metacog
     )
 
 

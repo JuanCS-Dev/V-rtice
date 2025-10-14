@@ -377,6 +377,7 @@ class ESGTCoordinator:
         triggers: TriggerConditions | None = None,
         kuramoto_config: OscillatorConfig | None = None,
         coordinator_id: str = "esgt-coordinator",
+        prefrontal_cortex: Any | None = None,
     ):
         self.coordinator_id = coordinator_id
         self.tig = tig_fabric
@@ -418,6 +419,10 @@ class ESGTCoordinator:
         from consciousness.tig.fabric import CircuitBreaker
 
         self.ignition_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=10.0)
+
+        # TRACK 1: PrefrontalCortex integration for social cognition
+        self.pfc = prefrontal_cortex
+        self.social_signals_processed = 0
 
     async def start(self) -> None:
         """Start ESGT coordinator."""
@@ -595,6 +600,13 @@ class ESGTCoordinator:
             # Enter ESGT mode on TIG fabric
             await self.tig.enter_esgt_mode()
 
+            # TRACK 1: Process social signals through PFC if available
+            pfc_response = await self.process_social_signal_through_pfc(content)
+            if pfc_response:
+                # Enrich content with compassionate action
+                content["pfc_action"] = pfc_response
+                print(f"🧠 PFC: Generated compassionate action - {pfc_response.get('action', 'unknown')}")
+
             # Global broadcast of conscious content
             message = {
                 "type": "esgt_content",
@@ -720,6 +732,87 @@ class ESGTCoordinator:
             }
 
         return content
+
+    async def process_social_signal_through_pfc(
+        self, content: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        """
+        Process social signals through PrefrontalCortex if available.
+
+        TRACK 1: Social Cognition Integration
+
+        Detects social content in ESGT broadcasts and routes them through
+        the PrefrontalCortex for Theory of Mind inference and compassionate
+        action generation.
+
+        Args:
+            content: ESGT content payload to check for social signals
+
+        Returns:
+            Compassionate response if social signal detected, None otherwise
+        """
+        if not self.pfc:
+            return None
+
+        # Detect social content types
+        content_type = content.get("type", "")
+        social_types = [
+            "social_interaction",
+            "user_message",
+            "distress",
+            "help_request",
+            "attention_focus",  # May contain social narrative
+        ]
+
+        if content_type not in social_types:
+            return None
+
+        # Extract social indicators
+        user_id = content.get("user_id", content.get("agent_id", "unknown"))
+
+        # Build context for PFC
+        context = {
+            "message": content.get("message", content.get("focus_target", "")),
+            "self_narrative": content.get("self_narrative", ""),
+            "confidence": content.get("confidence", 0.5),
+        }
+
+        # Determine signal type
+        signal_type = "message"
+        if content_type == "distress":
+            signal_type = "distress"
+        elif content_type == "help_request":
+            signal_type = "help_request"
+        elif content.get("self_narrative"):
+            # Check if narrative indicates distress
+            narrative = content.get("self_narrative", "").lower()
+            if any(word in narrative for word in ["confused", "stuck", "lost", "help", "unsure"]):
+                signal_type = "distress"
+
+        try:
+            # Process through PrefrontalCortex
+            response = await self.pfc.process_social_signal(
+                user_id=user_id,
+                context=context,
+                signal_type=signal_type
+            )
+
+            self.social_signals_processed += 1
+
+            # Return action if generated
+            if response.action:
+                return {
+                    "action": response.action,
+                    "confidence": response.confidence,
+                    "reasoning": response.reasoning,
+                    "tom_prediction": response.tom_prediction,
+                    "pfc_component": "PrefrontalCortex",
+                }
+
+        except Exception as e:
+            print(f"⚠️  PFC processing failed: {e}")
+
+        return None
 
     async def _check_triggers(self, salience: SalienceScore) -> tuple[bool, str]:
         """Check if all trigger conditions are met. Returns (success, failure_reason)."""
