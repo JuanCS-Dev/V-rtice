@@ -23,6 +23,15 @@ from .frameworks import (
 )
 from .resolver import ConflictResolver
 
+# Import DDL Engine from justice module
+import sys
+from pathlib import Path
+consciousness_path = Path(__file__).parent.parent
+if str(consciousness_path) not in sys.path:
+    sys.path.insert(0, str(consciousness_path))
+
+from justice.deontic_reasoner import DeonticReasoner
+
 
 class ProcessIntegrityEngine:
     """
@@ -47,34 +56,38 @@ class ProcessIntegrityEngine:
     def __init__(self, kb_repo=None):
         """
         Inicializa engine e frameworks.
-        
+
         Args:
             kb_repo: KnowledgeBaseRepository (opcional)
                     Se fornecido, decisões são persistidas no Neo4j
         """
+        # DDL Engine (camada constitucional)
+        self.ddl = DeonticReasoner()
+
         # Instancia frameworks
         self.kantian = KantianDeontology()
         self.utilitarian = UtilitarianCalculus()
         self.virtue = VirtueEthics()
         self.principialism = Principialism()
-        
+
         # Resolver de conflitos
         self.resolver = ConflictResolver()
-        
+
         # Knowledge Base (opcional)
         self.kb_repo = kb_repo
         self.kb_enabled = kb_repo is not None
-        
+
         # Audit trail (em produção, seria persistido)
         self.audit_trail: List[AuditTrailEntry] = []
-        
+
         # Estatísticas
         self.stats = {
             "total_evaluations": 0,
             "approved": 0,
             "rejected": 0,
             "escalated": 0,
-            "vetoed": 0
+            "vetoed": 0,
+            "constitutional_violations": 0
         }
     
     def evaluate(self, plan: ActionPlan) -> EthicalVerdict:
@@ -105,9 +118,35 @@ class ProcessIntegrityEngine:
         )
         
         try:
-            # FASE 1: Avaliação por cada framework
+            # FASE 0: Verificação constitucional (DDL)
             print(f"[MIP] Avaliando plano '{plan.name}' (ID: {plan.id})")
-            
+            print("[MIP]   → FASE 0: DDL (Lei Zero + Lei I)...")
+
+            ddl_result = self._check_constitutional_compliance(plan)
+            verdict.constitutional_compliance = {
+                "compliant": ddl_result.compliant,
+                "violations": [
+                    {
+                        "rule": v.constitutional_basis,
+                        "proposition": v.proposition,
+                        "priority": v.priority
+                    }
+                    for v in ddl_result.violations
+                ],
+                "explanation": ddl_result.explanation
+            }
+
+            # Se violar constituição, rejeita imediatamente
+            if not ddl_result.compliant:
+                verdict.status = VerdictStatus.REJECTED
+                verdict.summary = "Plano rejeitado por violação constitucional"
+                verdict.detailed_reasoning = ddl_result.explanation
+                self.stats["constitutional_violations"] += 1
+                self.stats["rejected"] += 1
+                self._finalize_verdict(verdict, start_time, plan)
+                return verdict
+
+            # FASE 1: Avaliação por cada framework
             # Kant (deontologia - pode vetar)
             print("[MIP]   → Kant (Deontologia)...")
             verdict.kantian_score = self.kantian.evaluate(plan)
@@ -274,6 +313,45 @@ class ProcessIntegrityEngine:
         else:
             return "Status desconhecido"
     
+    def _check_constitutional_compliance(self, plan: ActionPlan):
+        """
+        Verifica compliance com Lei Zero e Lei I via DDL Engine.
+
+        Args:
+            plan: ActionPlan a ser verificado
+
+        Returns:
+            ComplianceResult do DDL Engine
+        """
+        # Construir contexto para DDL
+        context = {
+            "plan_name": plan.name,
+            "plan_description": plan.description,
+            "risk_level": plan.risk_level,
+            "urgency": plan.urgency,
+            # Lei Zero: logging/transparency obligations
+            "fulfills_log_all_decisions": True,  # MIP sempre loga
+            "fulfills_provide_decision_rationale": True,  # MIP sempre fornece reasoning
+            "fulfills_track_data_provenance": True,  # ActionPlan tem provenance
+        }
+
+        # Check for explicit harm in plan description or steps
+        harm_keywords = ["destroy", "kill", "injure", "delete data", "remove"]
+        plan_text = f"{plan.description} {' '.join(s.description for s in plan.steps)}".lower()
+
+        has_explicit_harm = any(keyword in plan_text for keyword in harm_keywords)
+
+        # Only reject at constitutional level if HIGH RISK + EXPLICIT HARM
+        # This allows Kant to handle categorical violations (treats_as_means_only, etc.)
+        if plan.risk_level >= 8 and has_explicit_harm:
+            return self.ddl.check_compliance(
+                "cause_physical_harm",  # Will check forbidden rule
+                context=context
+            )
+
+        # No constitutional issues detected - defer to frameworks
+        return self.ddl.check_compliance("generic_action", context)
+
     def _plan_to_dict(self, plan: ActionPlan) -> dict:
         """Serializa plano para audit trail."""
         return {

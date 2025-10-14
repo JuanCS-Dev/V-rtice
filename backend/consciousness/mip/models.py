@@ -218,6 +218,9 @@ class EthicalVerdict:
     # Recomendações
     modifications_suggested: List[str] = field(default_factory=list)
     alternative_approaches: List[str] = field(default_factory=list)
+
+    # Compliance constitucional (DDL Engine)
+    constitutional_compliance: Optional[dict] = None
     
     # Auditoria
     evaluated_at: datetime = field(default_factory=datetime.utcnow)
