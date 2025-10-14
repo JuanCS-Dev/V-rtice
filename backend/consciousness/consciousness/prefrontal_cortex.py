@@ -27,6 +27,10 @@ from compassion.compassion_planner import CompassionPlanner, CompassionPlan
 from justice.deontic_reasoner import DeonticReasoner, ComplianceResult
 from .tom_engine import ToMEngine, UserMentalState
 
+# Import MIP for full ethical pipeline
+from mip.core import ProcessIntegrityEngine
+from mip.models import ActionPlan, ActionStep, Stakeholder, StakeholderType, ActionCategory, EthicalVerdict
+
 
 @dataclass
 class OrchestratedDecision:
@@ -38,6 +42,7 @@ class OrchestratedDecision:
     - Detected suffering events (Compassion)
     - Planned interventions (Compassion)
     - Constitutional compliance (Justice/DDL)
+    - Ethical evaluation (MIP)
     - Final decision and rationale
 
     Attributes:
@@ -47,6 +52,7 @@ class OrchestratedDecision:
         detected_events: Suffering events detected
         planned_interventions: Compassion plans created
         constitutional_check: DDL compliance result
+        ethical_verdict: MIP evaluation result (if plan generated)
         final_decision: What action to take
         rationale: Human-readable explanation
         requires_escalation: Whether to escalate to human
@@ -61,8 +67,9 @@ class OrchestratedDecision:
     detected_events: List[SufferingEvent]
     planned_interventions: List[CompassionPlan]
     constitutional_check: Optional[Dict]
-    final_decision: str
-    rationale: str
+    ethical_verdict: Optional[EthicalVerdict] = None
+    final_decision: str = ""
+    rationale: str = ""
     requires_escalation: bool = False
     confidence: float = 0.0
     timestamp: datetime = field(default_factory=datetime.utcnow)
@@ -81,16 +88,26 @@ class PrefrontalCortex:
     2. Compassion: Detect suffering events
     3. Compassion: Plan interventions
     4. Justice: Check constitutional compliance
-    5. PFC: Integrate and decide
+    5. MIP: Ethical evaluation (if action plan needed)
+    6. PFC: Integrate and decide
     """
 
-    def __init__(self):
-        """Initialize PFC with all subsystems."""
+    def __init__(self, enable_mip: bool = True):
+        """
+        Initialize PFC with all subsystems.
+
+        Args:
+            enable_mip: Whether to enable MIP integration (default: True)
+        """
         # Initialize subsystems
         self.tom = ToMEngine()
         self.compassion_detector = EventDetector()
         self.compassion_planner = CompassionPlanner()
         self.ddl = DeonticReasoner()
+
+        # Initialize MIP (optional)
+        self.enable_mip = enable_mip
+        self.mip = ProcessIntegrityEngine() if enable_mip else None
 
         # Decision history
         self._decisions: List[OrchestratedDecision] = []
@@ -101,7 +118,10 @@ class PrefrontalCortex:
             "escalated": 0,
             "interventions_planned": 0,
             "suffering_detected": 0,
-            "constitutional_violations": 0
+            "constitutional_violations": 0,
+            "mip_evaluations": 0,
+            "mip_approved": 0,
+            "mip_rejected": 0
         }
 
     def orchestrate_decision(
@@ -212,6 +232,136 @@ class PrefrontalCortex:
 
         return decision
 
+    def orchestrate_with_plan(
+        self,
+        user_id: UUID,
+        behavioral_signals: Dict[str, any],
+        action_plan: ActionPlan
+    ) -> OrchestratedDecision:
+        """
+        Orchestrate a complete decision WITH ActionPlan evaluation via MIP.
+
+        This is the FULL ETHICAL PIPELINE:
+        ToM → Compassion → DDL → MIP (multi-framework) → PFC
+
+        Args:
+            user_id: User identifier
+            behavioral_signals: Behavioral signals for ToM inference
+            action_plan: ActionPlan to be ethically evaluated
+
+        Returns:
+            OrchestratedDecision with full ethical pipeline results
+        """
+        # STEP 1: Infer user mental state (ToM)
+        mental_state = self.tom.infer_state(user_id, behavioral_signals)
+
+        # STEP 2: Detect suffering events (Compassion)
+        action_text = f"{action_plan.name}: {action_plan.description}"
+        suffering_event = self.compassion_detector.detect_from_text(
+            agent_id=user_id,
+            text=action_text,
+            context={"behavioral_signals": behavioral_signals, "action_plan": action_plan.name}
+        )
+
+        detected_events = [suffering_event] if suffering_event else []
+
+        # Also check behavioral metrics
+        behavioral_event = self.compassion_detector.detect_from_behavior(
+            agent_id=user_id,
+            metrics=behavioral_signals
+        )
+
+        if behavioral_event:
+            detected_events.append(behavioral_event)
+
+        # STEP 3: Plan interventions if suffering detected
+        planned_interventions = []
+        for event in detected_events:
+            plan = self.compassion_planner.plan_intervention(event)
+            planned_interventions.append(plan)
+            self.stats["interventions_planned"] += 1
+
+        if detected_events:
+            self.stats["suffering_detected"] += 1
+
+        # STEP 4: Check constitutional compliance (DDL) - Quick check
+        constitutional_check = self.ddl.check_compliance(
+            action=action_text,
+            context={
+                "user_id": str(user_id),
+                "emotional_state": mental_state.emotional_state.value,
+                "needs_assistance": mental_state.needs_assistance,
+                "plan_name": action_plan.name
+            }
+        )
+
+        constitutional_dict = {
+            "compliant": constitutional_check.compliant,
+            "violations": [
+                {
+                    "rule": v.constitutional_basis,
+                    "proposition": v.proposition
+                }
+                for v in constitutional_check.violations
+            ],
+            "explanation": constitutional_check.explanation
+        }
+
+        if not constitutional_check.compliant:
+            self.stats["constitutional_violations"] += 1
+
+        # STEP 5: MIP Evaluation (full multi-framework ethical analysis)
+        ethical_verdict = None
+        if self.enable_mip and self.mip:
+            print(f"\n[PFC] Sending plan '{action_plan.name}' to MIP for full ethical evaluation...")
+            ethical_verdict = self.mip.evaluate(action_plan)
+            self.stats["mip_evaluations"] += 1
+
+            # Track MIP statistics
+            if ethical_verdict.status.value == "approved":
+                self.stats["mip_approved"] += 1
+            elif ethical_verdict.status.value == "rejected":
+                self.stats["mip_rejected"] += 1
+
+        # STEP 6: Integrate and make final decision
+        final_decision, rationale, requires_escalation, confidence = self._integrate_decision_with_mip(
+            mental_state=mental_state,
+            detected_events=detected_events,
+            planned_interventions=planned_interventions,
+            constitutional_check=constitutional_check,
+            ethical_verdict=ethical_verdict,
+            action_description=action_text
+        )
+
+        # Create orchestrated decision with MIP verdict
+        decision = OrchestratedDecision(
+            decision_id=uuid4(),
+            user_id=user_id,
+            mental_state=mental_state,
+            detected_events=detected_events,
+            planned_interventions=planned_interventions,
+            constitutional_check=constitutional_dict,
+            ethical_verdict=ethical_verdict,
+            final_decision=final_decision,
+            rationale=rationale,
+            requires_escalation=requires_escalation,
+            confidence=confidence,
+            metadata={
+                "action_plan_id": str(action_plan.id),
+                "action_plan_name": action_plan.name,
+                "behavioral_signals": behavioral_signals,
+                "mip_enabled": self.enable_mip
+            }
+        )
+
+        self._decisions.append(decision)
+        self.stats["total_decisions"] += 1
+
+        if requires_escalation:
+            self.stats["escalated"] += 1
+
+        return decision
+
     def _integrate_decision(
         self,
         mental_state: UserMentalState,
@@ -300,6 +450,132 @@ class PrefrontalCortex:
             "No issues detected. Action appears appropriate.",
             False,
             0.80
+        )
+
+    def _integrate_decision_with_mip(
+        self,
+        mental_state: UserMentalState,
+        detected_events: List[SufferingEvent],
+        planned_interventions: List[CompassionPlan],
+        constitutional_check: ComplianceResult,
+        ethical_verdict: Optional[EthicalVerdict],
+        action_description: str
+    ) -> tuple[str, str, bool, float]:
+        """
+        Integrate all signals INCLUDING MIP verdict to make final decision.
+
+        Args:
+            mental_state: User mental state
+            detected_events: Detected suffering
+            planned_interventions: Planned compassion interventions
+            constitutional_check: Constitutional compliance
+            ethical_verdict: MIP ethical evaluation result
+            action_description: Action being evaluated
+
+        Returns:
+            (final_decision, rationale, requires_escalation, confidence)
+        """
+        requires_escalation = False
+        confidence = 0.8  # Base confidence
+
+        # PRIORITY 1: Constitutional violations block immediately
+        if not constitutional_check.compliant:
+            return (
+                "REJECT",
+                f"Action violates constitutional rules: {constitutional_check.explanation}",
+                True,  # Escalate to human
+                0.95
+            )
+
+        # PRIORITY 2: MIP verdict (if available)
+        if ethical_verdict:
+            status = ethical_verdict.status.value
+
+            if status == "rejected":
+                # MIP rejected the plan
+                rationale = f"Ethical evaluation REJECTED: {ethical_verdict.summary}"
+                if ethical_verdict.kantian_score and ethical_verdict.kantian_score.veto:
+                    rationale += " (Kantian veto)"
+                return (
+                    "REJECT",
+                    rationale,
+                    True,  # Escalate
+                    ethical_verdict.confidence
+                )
+
+            elif status in ["escalated", "requires_human"]:
+                # MIP escalated for human review
+                return (
+                    "ESCALATE",
+                    f"Ethical evaluation requires human review: {ethical_verdict.escalation_reason}",
+                    True,
+                    ethical_verdict.confidence
+                )
+
+            elif status == "approved":
+                # MIP approved - but still check compassion/ToM signals
+                # High-priority suffering overrides MIP approval
+                if planned_interventions:
+                    high_priority_plans = [p for p in planned_interventions if p.priority >= 8]
+                    if high_priority_plans:
+                        rationale = (
+                            f"MIP approved but detected {len(detected_events)} suffering event(s) "
+                            f"requiring {len(high_priority_plans)} high-priority intervention(s). "
+                        )
+                        return (
+                            "INTERVENE",
+                            rationale + "Compassionate intervention takes priority.",
+                            False,
+                            0.85
+                        )
+
+                # User needs assistance
+                if mental_state.needs_assistance:
+                    rationale = (
+                        f"MIP approved. User appears {mental_state.emotional_state.value} "
+                        f"(confidence: {mental_state.confidence:.2f}). "
+                    )
+
+                    if mental_state.emotional_state.value in ["confused", "frustrated"]:
+                        return (
+                            "ASSIST",
+                            rationale + "Offering proactive assistance.",
+                            False,
+                            0.75
+                        )
+
+                    if mental_state.emotional_state.value == "stressed":
+                        return (
+                            "MONITOR",
+                            rationale + "Monitoring situation.",
+                            False,
+                            0.70
+                        )
+
+                # Low-priority interventions
+                if planned_interventions:
+                    return (
+                        "INTERVENE_LOW_PRIORITY",
+                        f"MIP approved. Detected {len(detected_events)} event(s) with low-priority interventions.",
+                        False,
+                        0.75
+                    )
+
+                # All clear - MIP approved, no issues
+                return (
+                    "APPROVE",
+                    f"MIP APPROVED (score: {ethical_verdict.aggregate_score:.2f}, confidence: {ethical_verdict.confidence:.2f}). {ethical_verdict.summary}",
+                    False,
+                    ethical_verdict.confidence
+                )
+
+        # No MIP verdict - fall back to basic integration logic
+        return self._integrate_decision(
+            mental_state=mental_state,
+            detected_events=detected_events,
+            planned_interventions=planned_interventions,
+            constitutional_check=constitutional_check,
+            action_description=action_description
         )
 
     def get_decision(self, decision_id: UUID) -> Optional[OrchestratedDecision]:
