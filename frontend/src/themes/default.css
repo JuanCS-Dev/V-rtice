@@ -37,4 +37,48 @@
   /* Efeitos */
   --backdrop-blur: blur(10px);
   --transition-speed: 0.3s;
+
+  /* ========================================
+     COMPONENT VARIABLES - Unified
+     ======================================== */
+
+  /* MaximusHeader */
+  --header-bg-gradient: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 100%);
+  --header-border-bottom: 2px solid rgba(139, 92, 246, 0.4);
+  --header-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+
+  /* Logo */
+  --logo-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+  --logo-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+  --logo-pulse-color: #8B5CF6;
+
+  /* Title */
+  --title-gradient: linear-gradient(135deg, #8B5CF6, #06B6D4, #10B981);
+
+  /* Status Indicators */
+  --status-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+  --status-border: 1px solid rgba(139, 92, 246, 0.3);
+  --status-online-color: #10B981;
+  --status-offline-color: #EF4444;
+  --status-idle-color: #F59E0B;
+
+  /* Clock */
+  --clock-bg: rgba(6, 182, 212, 0.1);
+  --clock-border: 1px solid rgba(6, 182, 212, 0.3);
+  --clock-color: #06B6D4;
+
+  /* Navigation Bar */
+  --nav-bg: rgba(30, 27, 75, 0.3);
+  --nav-button-active-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%);
+  --nav-button-active-border: 1px solid #8B5CF6;
+  --nav-button-active-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  --nav-button-inactive-bg: rgba(15, 23, 42, 0.6);
+  --nav-button-inactive-border: 1px solid rgba(139, 92, 246, 0.2);
+  --nav-button-hover-bg: rgba(139, 92, 246, 0.15);
+  --nav-underline: linear-gradient(90deg, #8B5CF6, #06B6D4);
+
+  /* Back Button */
+  --back-button-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  --back-button-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  --back-button-color: #000;
 }

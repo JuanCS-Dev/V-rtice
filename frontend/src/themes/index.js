@@ -6,7 +6,6 @@ import './amber-alert.css';
 import './red-alert.css';
 import './stealth-mode.css';
 import './enterprise.css';
-import './enterprise-compat.css'; // Compatibility layer for Enterprise theme
 
 // Metadados dos temas para o seletor
 export const themes = [

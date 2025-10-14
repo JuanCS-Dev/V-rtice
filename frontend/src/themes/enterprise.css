@@ -203,28 +203,66 @@
   --color-analytics-secondary: #00b7c3;
   --color-analytics-success: var(--primitive-success-500);
   --color-analytics-warning: var(--primitive-warning-500);
+
+  /* ========================================
+     COMPONENT VARIABLES - Unified (Enterprise values)
+     ======================================== */
+
+  /* MaximusHeader - Flat & Clean */
+  --header-bg-gradient: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  --header-border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  /* Logo - Professional */
+  --logo-gradient: linear-gradient(135deg, #0078d4 0%, #00b7c3 100%);
+  --logo-shadow: 0 2px 8px rgba(0, 120, 212, 0.2);
+  --logo-pulse-color: transparent; /* No pulse in enterprise */
+
+  /* Title - Solid color */
+  --title-gradient: var(--primitive-blue-500);
+
+  /* Status Indicators - Subtle */
+  --status-bg: rgba(0, 120, 212, 0.05);
+  --status-border: 1px solid rgba(0, 120, 212, 0.15);
+  --status-online-color: #107c10;
+  --status-offline-color: #d13438;
+  --status-idle-color: #ffb900;
+
+  /* Clock - Professional */
+  --clock-bg: rgba(0, 120, 212, 0.05);
+  --clock-border: 1px solid rgba(0, 120, 212, 0.15);
+  --clock-color: #0078d4;
+
+  /* Navigation Bar - Flat */
+  --nav-bg: rgba(248, 249, 250, 0.95);
+  --nav-button-active-bg: rgba(0, 120, 212, 0.1);
+  --nav-button-active-border: 1px solid #0078d4;
+  --nav-button-active-shadow: none;
+  --nav-button-inactive-bg: transparent;
+  --nav-button-inactive-border: 1px solid transparent;
+  --nav-button-hover-bg: rgba(0, 120, 212, 0.05);
+  --nav-underline: #0078d4;
+
+  /* Back Button - Professional */
+  --back-button-gradient: #0078d4;
+  --back-button-shadow: 0 2px 6px rgba(0, 120, 212, 0.2);
+  --back-button-color: #ffffff;
 }
 
 
 /* ========================================
    COMPONENT-LEVEL OVERRIDES
-   Force professional appearance
+   Professional appearance WITHOUT breaking inline styles
    ======================================== */
 
-/* Remove ALL glows and neon effects */
-:root[data-theme="enterprise"] *,
-:root[data-theme="enterprise"] *::before,
-:root[data-theme="enterprise"] *::after {
-  text-shadow: none !important;
-}
-
+/* Remove glows ONLY from specific classes (not universal *) */
 :root[data-theme="enterprise"] .glow,
 :root[data-theme="enterprise"] [class*="glow"],
 :root[data-theme="enterprise"] .neon,
 :root[data-theme="enterprise"] [class*="neon"] {
-  box-shadow: var(--shadow-md) !important;
-  filter: none !important;
-  text-shadow: none !important;
+  box-shadow: var(--shadow-md);
+  filter: none;
+  text-shadow: none;
 }
 
 /* Cards - flat and professional */
