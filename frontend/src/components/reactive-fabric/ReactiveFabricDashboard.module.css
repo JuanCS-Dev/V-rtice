@@ -14,9 +14,9 @@
 
 /* ==================== HEADER ==================== */
 .header {
-  padding: 1.5rem 2rem;
+  padding: var(--space-xl) var(--space-2xl);
   background: rgba(0, 0, 0, 0.6);
-  border-bottom: 2px solid rgba(220, 38, 38, 0.3);
+  border-bottom: 2px solid var(--color-border-primary);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
@@ -29,52 +29,52 @@
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
 .title {
-  font-size: 1.75rem;
+  font-size: var(--text-3xl);
   font-weight: 700;
-  color: #dc2626;
+  color: var(--color-accent-primary);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
   margin: 0;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .titleIcon {
-  font-size: 2rem;
+  font-size: var(--text-4xl);
   animation: pulse 2s ease-in-out infinite;
 }
 
 .phase {
-  padding: 0.4rem 1rem;
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(153, 27, 27, 0.2) 100%);
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  border-radius: 6px;
-  font-size: 0.85rem;
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(109, 40, 217, 0.2) 100%);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: #fca5a5;
+  color: var(--color-text-secondary);
   letter-spacing: 0.05em;
 }
 
 .headerRight {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
 .statusBadge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
   font-weight: 600;
   color: #10b981;
 }
@@ -88,7 +88,7 @@
 }
 
 .lastUpdate {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--text-tertiary);
   font-family: 'Courier New', monospace;
 }
@@ -97,31 +97,31 @@
 .metricsBar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 1.5rem 2rem;
+  gap: var(--space-lg);
+  padding: var(--space-xl) var(--space-2xl);
   background: rgba(0, 0, 0, 0.4);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .metric {
-  padding: 1rem 1.5rem;
+  padding: var(--space-lg) var(--space-xl);
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
+  gap: var(--space-md);
+  transition: all var(--transition-base);
 }
 
 .metric:hover {
-  border-color: rgba(220, 38, 38, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  border-color: var(--color-border-hover);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: var(--shadow-2xl);
 }
 
 .metricLabel {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -129,73 +129,74 @@
 }
 
 .metricValue {
-  font-size: 2rem;
+  font-size: var(--text-4xl);
   font-weight: 700;
-  color: #dc2626;
+  color: var(--color-accent-primary);
   font-family: 'Courier New', monospace;
-  text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+  text-shadow: var(--shadow-glow-purple);
 }
 
 .metricValue.critical {
-  color: #ff0040;
+  color: var(--color-status-danger);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 /* ==================== NAVIGATION TABS ==================== */
 .tabNav {
   display: flex;
-  gap: 0.5rem;
-  padding: 1rem 2rem;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-2xl);
   background: rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow-x: auto;
 }
 
 .tab {
-  padding: 0.75rem 1.5rem;
+  padding: var(--space-md) var(--space-xl);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   white-space: nowrap;
 }
 
 .tab:hover {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: rgba(220, 38, 38, 0.3);
-  color: #dc2626;
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-primary);
+  color: var(--color-accent-primary);
+  transform: translateY(-2px);
 }
 
 .tabActive {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(153, 27, 27, 0.2) 100%);
-  border-color: rgba(220, 38, 38, 0.5);
-  color: #dc2626;
-  box-shadow: 0 0 15px rgba(220, 38, 38, 0.3);
+  background: var(--color-bg-active);
+  border-color: var(--color-border-hover);
+  color: var(--color-accent-primary);
+  box-shadow: var(--shadow-glow-purple);
 }
 
 /* ==================== MAIN CONTENT ==================== */
 .content {
   flex: 1;
-  padding: 2rem;
+  padding: var(--space-2xl);
   overflow: auto;
 }
 
 .overviewGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: var(--space-2xl);
   height: 100%;
 }
 
 .gridItem {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
   min-height: 400px;
 }
 
@@ -207,20 +208,20 @@
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
-  gap: 2rem;
+  gap: var(--space-2xl);
 }
 
 .spinner {
   width: 80px;
   height: 80px;
-  border: 4px solid rgba(220, 38, 38, 0.2);
-  border-top-color: #dc2626;
+  border: 4px solid rgba(139, 92, 246, 0.2);
+  border-top-color: var(--color-accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 .loadingText {
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   color: var(--text-secondary);
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -234,45 +235,45 @@
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
-  padding: 2rem;
+  padding: var(--space-2xl);
   text-align: center;
 }
 
 .errorIcon {
-  font-size: 5rem;
-  margin-bottom: 1rem;
+  font-size: var(--text-6xl);
+  margin-bottom: var(--space-lg);
   animation: shake 0.5s ease-in-out;
 }
 
 .errorTitle {
-  font-size: 2rem;
-  color: #dc2626;
-  margin-bottom: 1rem;
+  font-size: var(--text-4xl);
+  color: var(--color-status-danger);
+  margin-bottom: var(--space-lg);
   font-weight: 700;
 }
 
 .errorMessage {
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-2xl);
   font-family: 'Courier New', monospace;
 }
 
 .retryButton {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  padding: var(--space-lg) var(--space-2xl);
+  background: var(--gradient-red);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   color: white;
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
 }
 
 .retryButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+  box-shadow: var(--shadow-glow-red);
 }
 
 /* ==================== ANIMATIONS ==================== */
@@ -326,24 +327,24 @@
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-lg);
     align-items: flex-start;
   }
-  
+
   .headerRight {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .metricsBar {
     grid-template-columns: 1fr;
   }
-  
+
   .title {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
   }
-  
+
   .content {
-    padding: 1rem;
+    padding: var(--space-lg);
   }
 }

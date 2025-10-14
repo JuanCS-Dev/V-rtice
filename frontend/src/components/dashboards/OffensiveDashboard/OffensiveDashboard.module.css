@@ -27,7 +27,7 @@
   overflow: auto;
   padding: 0;
   position: relative;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-bg-secondary);
   border-right: 2px solid var(--color-border-primary);
 }
 
@@ -36,11 +36,11 @@
 }
 
 .moduleArea::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-bg-tertiary);
 }
 
 .moduleArea::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--color-accent-primary) 0%, #991b1b 100%);
+  background: linear-gradient(180deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%);
   border-radius: 5px;
 }
 
@@ -50,12 +50,12 @@
   align-items: center;
   justify-content: center;
   height: 400px;
-  gap: 1.5rem;
+  gap: var(--space-xl);
   color: var(--color-accent-primary);
 }
 
 .loadingModule p {
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
