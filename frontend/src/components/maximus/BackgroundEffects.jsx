@@ -1,6 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * BACKGROUND EFFECTS - Sistema Escalável de Efeitos Visuais
  * ═══════════════════════════════════════════════════════════════════════════
@@ -15,6 +14,7 @@ import logger from '@/utils/logger';
  */
 
 import React, { useEffect, useRef } from 'react';
+import logger from '@/utils/logger';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EFEITO 1: SCANLINE (Original - linha que desce)

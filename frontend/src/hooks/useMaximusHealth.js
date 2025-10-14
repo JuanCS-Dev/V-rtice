@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * useMaximusHealth - MAXIMUS AI Health Check Hook
  *
  * Polls MAXIMUS core service health endpoint every 30s
@@ -9,6 +8,7 @@ import logger from '@/utils/logger';
  */
 
 import { useState, useEffect } from 'react';
+import logger from '@/utils/logger';
 
 const MAXIMUS_CORE_URL = 'http://localhost:8099';
 const HEALTH_CHECK_INTERVAL = 30000; // 30s

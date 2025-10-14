@@ -44,8 +44,14 @@ class ProcessIntegrityEngine:
     5. Registra tudo em AuditTrail
     """
     
-    def __init__(self):
-        """Inicializa engine e frameworks."""
+    def __init__(self, kb_repo=None):
+        """
+        Inicializa engine e frameworks.
+        
+        Args:
+            kb_repo: KnowledgeBaseRepository (opcional)
+                    Se fornecido, decisões são persistidas no Neo4j
+        """
         # Instancia frameworks
         self.kantian = KantianDeontology()
         self.utilitarian = UtilitarianCalculus()
@@ -54,6 +60,10 @@ class ProcessIntegrityEngine:
         
         # Resolver de conflitos
         self.resolver = ConflictResolver()
+        
+        # Knowledge Base (opcional)
+        self.kb_repo = kb_repo
+        self.kb_enabled = kb_repo is not None
         
         # Audit trail (em produção, seria persistido)
         self.audit_trail: List[AuditTrailEntry] = []
