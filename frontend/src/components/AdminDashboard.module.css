@@ -1,0 +1,843 @@
+/* AdminDashboard.module.css - Enterprise Standard */
+
+/* ============================================
+   DASHBOARD CONTAINER
+   ============================================ */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100vw;
+  background: var(--dashboard-bg);
+  color: var(--admin-primary, var(--color-text-primary));
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+}
+
+/* ============================================
+   SCAN LINE ANIMATION
+   ============================================ */
+.scanLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--admin-accent, var(--color-accent-primary)),
+    transparent
+  );
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: 20;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.header {
+  position: relative;
+  border-bottom: 1px solid var(--admin-border, var(--header-border-bottom));
+  background: var(--header-bg-gradient);
+  backdrop-filter: var(--backdrop-blur);
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+}
+
+/* Branding */
+.branding {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoContainer {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--admin-accent, var(--color-accent-primary));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-logo-bg, rgba(255, 185, 0, 0.1));
+}
+
+.logoIcon {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.logoText h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--admin-primary, var(--color-text-primary));
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.logoText p {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backButton {
+  background: linear-gradient(to right, #059669, #047857);
+  color: #000;
+  font-weight: bold;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background: linear-gradient(to right, #10b981, #059669);
+  transform: translateY(-1px);
+}
+
+.backButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5);
+}
+
+.clockContainer {
+  text-align: right;
+}
+
+.clockTime {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.125rem;
+}
+
+.clockDate {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  font-size: 0.875rem;
+}
+
+/* ============================================
+   BREADCRUMB BAR
+   ============================================ */
+.breadcrumbBar {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.5),
+    var(--admin-breadcrumb-bg, rgba(255, 185, 0, 0.1))
+  );
+  border-top: 1px solid var(--admin-border-subtle, rgba(255, 185, 0, 0.1));
+}
+
+/* ============================================
+   NAVIGATION MODULES
+   ============================================ */
+.navBar {
+  padding: 1rem;
+  background: linear-gradient(
+    to right,
+    var(--admin-nav-bg-from, rgba(255, 185, 0, 0.1)),
+    var(--admin-nav-bg-to, rgba(255, 138, 0, 0.1))
+  );
+}
+
+.moduleList {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.moduleButton {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  border: 1px solid;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.moduleButton.active {
+  background: var(--admin-module-active-bg, rgba(255, 185, 0, 0.2));
+  color: var(--admin-accent, var(--color-accent-primary));
+  border-color: var(--admin-accent, var(--color-accent-primary));
+}
+
+.moduleButton.inactive {
+  background: var(--admin-module-inactive-bg, rgba(0, 0, 0, 0.3));
+  color: var(--admin-module-inactive-text, var(--color-text-secondary));
+  border-color: var(--admin-border-subtle, rgba(255, 185, 0, 0.2));
+}
+
+.moduleButton.inactive:hover {
+  background: var(--admin-module-hover-bg, rgba(255, 185, 0, 0.1));
+  color: var(--admin-accent, var(--color-accent-primary));
+}
+
+.moduleButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--admin-focus-ring, rgba(255, 185, 0, 0.5));
+}
+
+.moduleIcon {
+  pointer-events: none;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.mainContent {
+  flex: 1;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  border-top: 1px solid var(--admin-border, var(--header-border-bottom));
+  background: var(--header-bg-gradient);
+  backdrop-filter: var(--backdrop-blur);
+  padding: 0.5rem;
+}
+
+.footerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.footerMetrics {
+  display: flex;
+  gap: 1.5rem;
+  color: var(--admin-accent, var(--color-accent-primary));
+}
+
+.footerNotice {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+}
+
+/* ============================================
+   OVERVIEW MODULE
+   ============================================ */
+.overviewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Metrics Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.metricCard {
+  background: var(--status-bg);
+  border: 1px solid var(--admin-border, var(--status-border));
+  border-radius: 8px;
+  padding: 1.5rem;
+  backdrop-filter: var(--backdrop-blur);
+}
+
+.metricLabel {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricValue {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.metricValue.success {
+  color: var(--status-online-color);
+}
+
+.metricValue.warning {
+  color: var(--admin-warning, #f59e0b);
+}
+
+.metricValue.error {
+  color: var(--status-offline-color);
+}
+
+.metricSubtext {
+  font-size: 0.75rem;
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  margin-top: 0.25rem;
+}
+
+.metricSubtext.success {
+  color: var(--status-online-color);
+}
+
+.metricSubtext.error {
+  color: var(--status-offline-color);
+}
+
+/* Section Cards */
+.sectionCard {
+  border: 1px solid var(--admin-border, var(--header-border-bottom));
+  border-radius: 8px;
+  background: var(--admin-section-bg, rgba(0, 0, 0, 0.2));
+  backdrop-filter: var(--backdrop-blur);
+  padding: 1.5rem;
+}
+
+.sectionTitle {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+   SERVICE STATUS
+   ============================================ */
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.serviceCard {
+  background: var(--admin-service-bg, rgba(0, 0, 0, 0.4));
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.serviceCard.online {
+  border-color: var(--status-online-color);
+  color: var(--status-online-color);
+}
+
+.serviceCard.standby {
+  border-color: var(--admin-accent, var(--color-accent-primary));
+  color: var(--admin-accent, var(--color-accent-primary));
+}
+
+.serviceCard.offline {
+  border-color: var(--status-offline-color);
+  color: var(--status-offline-color);
+}
+
+.serviceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.serviceName {
+  font-weight: bold;
+}
+
+.serviceStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.statusDot.online {
+  background: var(--status-online-color);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.statusDot.standby {
+  background: var(--admin-accent, var(--color-accent-primary));
+}
+
+.statusDot.offline {
+  background: var(--status-offline-color);
+}
+
+.statusLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.servicePort {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.alertsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.alertsEmpty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--admin-subtitle, var(--color-text-secondary));
+}
+
+.alertsEmptyIcon {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.alertItem {
+  padding: 0.75rem;
+  border-radius: 4px;
+  border-left: 4px solid;
+}
+
+.alertItem.critical {
+  border-color: var(--status-offline-color);
+  background: var(--admin-alert-critical-bg, rgba(239, 68, 68, 0.1));
+  color: var(--status-offline-color);
+}
+
+.alertItem.high {
+  border-color: #fb923c;
+  background: var(--admin-alert-high-bg, rgba(251, 146, 60, 0.1));
+  color: #fb923c;
+}
+
+.alertItem.medium {
+  border-color: var(--admin-accent, var(--color-accent-primary));
+  background: var(--admin-alert-medium-bg, rgba(255, 185, 0, 0.1));
+  color: var(--admin-accent, var(--color-accent-primary));
+}
+
+.alertItem.info {
+  border-color: #60a5fa;
+  background: var(--admin-alert-info-bg, rgba(96, 165, 250, 0.1));
+  color: #60a5fa;
+}
+
+.alertHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.alertMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alertType {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: var(--admin-tag-bg, rgba(0, 0, 0, 0.5));
+}
+
+.alertTimestamp {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.alertSeverity {
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.alertMessage {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* ============================================
+   METRICS DETAILED VIEW
+   ============================================ */
+.metricsDetailed {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.metricsCard {
+  border: 1px solid var(--admin-border, var(--status-border));
+  border-radius: 8px;
+  background: var(--admin-metrics-bg, rgba(255, 185, 0, 0.05));
+  padding: 1.5rem;
+}
+
+.metricsTitle {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.metricsColumns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.metricsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metricsSectionTitle {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.125rem;
+}
+
+.metricBarContainer {
+  background: var(--admin-metric-bar-bg, rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--admin-border-subtle, rgba(255, 185, 0, 0.2));
+  border-radius: 4px;
+  padding: 0.75rem;
+}
+
+.metricBarHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.metricBarLabel {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  font-size: 0.875rem;
+}
+
+.metricBarValue {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-size: 0.875rem;
+}
+
+.metricBarTrack {
+  width: 100%;
+  background: #374151;
+  border-radius: 9999px;
+  height: 8px;
+}
+
+.metricBarFill {
+  height: 8px;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.metricBarFill.low {
+  background: var(--status-online-color);
+}
+
+.metricBarFill.medium {
+  background: #fb923c;
+}
+
+.metricBarFill.high {
+  background: var(--status-offline-color);
+}
+
+/* API Metrics */
+.apiMetricsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.apiMetricItem {
+  background: var(--admin-api-metric-bg, rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--admin-border-subtle, rgba(255, 185, 0, 0.2));
+  border-radius: 4px;
+  padding: 0.75rem;
+}
+
+.apiMetricRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.apiMetricLabel {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+}
+
+.apiMetricValue {
+  color: var(--admin-accent, var(--color-accent-primary));
+}
+
+.apiMetricValue.success {
+  color: var(--status-online-color);
+}
+
+/* Chart */
+.chartContainer {
+  border: 1px solid var(--admin-border, var(--header-border-bottom));
+  border-radius: 8px;
+  background: var(--admin-chart-bg, rgba(0, 0, 0, 0.2));
+  padding: 1.5rem;
+}
+
+.chartTitle {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.chartBars {
+  background: var(--admin-chart-bars-bg, rgba(0, 0, 0, 0.4));
+  border-radius: 4px;
+  height: 192px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 1rem;
+}
+
+.chartBar {
+  background: var(--admin-chart-bar-color, rgba(255, 185, 0, 0.5));
+  width: 16px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+/* ============================================
+   LOGS VIEW
+   ============================================ */
+.logsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.logsCard {
+  border: 1px solid var(--admin-border, var(--status-border));
+  border-radius: 8px;
+  background: var(--admin-logs-bg, rgba(255, 185, 0, 0.05));
+  padding: 1.5rem;
+}
+
+.logsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.logsTitle {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.logsFilter {
+  background: var(--admin-filter-bg, rgba(0, 0, 0, 0.7));
+  border: 1px solid var(--admin-border, var(--status-border));
+  color: var(--admin-accent, var(--color-accent-primary));
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.logsViewer {
+  background: var(--admin-logs-viewer-bg, rgba(0, 0, 0, 0.4));
+  border-radius: 4px;
+  padding: 1rem;
+  height: 384px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+}
+
+.logEntry {
+  display: flex;
+  gap: 1rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--admin-border-subtle, rgba(255, 185, 0, 0.1));
+}
+
+.logTime {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+}
+
+.logLevel {
+  width: 48px;
+}
+
+.logLevel.info {
+  color: #60a5fa;
+}
+
+.logLevel.warn {
+  color: #fb923c;
+}
+
+.logLevel.error {
+  color: var(--status-offline-color);
+}
+
+.logLevel.debug {
+  color: #9ca3af;
+}
+
+.logSource {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  width: 96px;
+}
+
+.logMessage {
+  color: var(--admin-accent, var(--color-accent-primary));
+  flex: 1;
+}
+
+/* ============================================
+   MAINTENANCE ACTIONS
+   ============================================ */
+.actionsCard {
+  border: 1px solid var(--admin-border, var(--header-border-bottom));
+  border-radius: 8px;
+  background: var(--admin-actions-bg, rgba(0, 0, 0, 0.2));
+  padding: 1.5rem;
+}
+
+.actionsTitle {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.actionsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.actionButton {
+  color: white;
+  font-weight: bold;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.actionButton.export {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+}
+
+.actionButton.export:hover {
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+}
+
+.actionButton.clear {
+  background: linear-gradient(to right, #ea580c, #c2410c);
+}
+
+.actionButton.clear:hover {
+  background: linear-gradient(to right, #f97316, #ea580c);
+}
+
+.actionButton.backup {
+  background: linear-gradient(to right, #7c3aed, #6d28d9);
+}
+
+.actionButton.backup:hover {
+  background: linear-gradient(to right, #8b5cf6, #7c3aed);
+}
+
+.actionButton.restart {
+  background: linear-gradient(to right, #dc2626, #b91c1c);
+}
+
+.actionButton.restart:hover {
+  background: linear-gradient(to right, #ef4444, #dc2626);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .servicesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .actionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .topBar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .metricsGrid,
+  .servicesGrid,
+  .actionsGrid,
+  .metricsColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .moduleList {
+    flex-wrap: wrap;
+  }
+}

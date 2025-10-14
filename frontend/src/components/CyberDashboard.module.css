@@ -1,0 +1,299 @@
+/* CyberDashboard.module.css - Enterprise Standard */
+
+/* ============================================
+   DASHBOARD CONTAINER
+   ============================================ */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100vw;
+  background: var(--dashboard-bg);
+  color: var(--cyber-primary, var(--color-text-primary));
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+}
+
+/* ============================================
+   SCAN LINE ANIMATION
+   ============================================ */
+.scanLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--cyber-accent, var(--color-accent-primary)),
+    transparent
+  );
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: 20;
+}
+
+/* ============================================
+   MAIN CONTENT LAYOUT
+   ============================================ */
+.mainLayout {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ============================================
+   SIDEBAR - Alerts
+   ============================================ */
+.sidebar {
+  width: 288px;
+  border-right: 1px solid var(--cyber-border, var(--header-border-bottom));
+  background: var(--cyber-sidebar-bg, rgba(0, 0, 0, 0.3));
+  backdrop-filter: var(--backdrop-blur);
+  overflow-y: auto;
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+.contentArea {
+  flex: 1;
+  padding: 1rem;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.contentInner {
+  height: 100%;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  border-top: 1px solid var(--cyber-border, var(--header-border-bottom));
+  background: var(--header-bg-gradient);
+  backdrop-filter: var(--backdrop-blur);
+  padding: 0.5rem;
+}
+
+.footerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.footerMetrics {
+  display: flex;
+  gap: 1.5rem;
+  color: var(--cyber-accent, var(--color-accent-primary));
+}
+
+.footerNotice {
+  color: var(--cyber-subtitle, var(--color-text-secondary));
+}
+
+/* ============================================
+   OVERVIEW MODULE
+   ============================================ */
+.overviewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.overviewCard {
+  border: 1px solid var(--cyber-border, var(--status-border));
+  border-radius: 8px;
+  background: var(--cyber-card-bg, rgba(220, 38, 38, 0.02));
+  padding: 1.5rem;
+}
+
+.overviewTitle {
+  color: var(--cyber-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+/* Metrics Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metricCard {
+  background: var(--status-bg);
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.metricCard.critical {
+  border-color: var(--status-offline-color);
+}
+
+.metricCard.warning {
+  border-color: var(--color-accent-warning);
+}
+
+.metricCard.alert {
+  border-color: var(--color-accent-warning);
+}
+
+.metricCard.info {
+  border-color: var(--cyber-accent, var(--color-accent-primary));
+}
+
+.metricValue {
+  font-size: 1.875rem;
+  font-weight: bold;
+}
+
+.metricValue.critical {
+  color: var(--status-offline-color);
+}
+
+.metricValue.warning {
+  color: var(--color-accent-warning);
+}
+
+.metricValue.alert {
+  color: var(--color-accent-warning);
+}
+
+.metricValue.info {
+  color: var(--cyber-accent, var(--color-accent-primary));
+}
+
+.metricLabel {
+  color: var(--cyber-subtitle, var(--color-text-secondary));
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Modules Status */
+.modulesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modulesTitle {
+  color: var(--cyber-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.modulesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.moduleCard {
+  background: var(--cyber-module-bg, rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--cyber-border-subtle, rgba(220, 38, 38, 0.1));
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.moduleCard.offensive {
+  border-color: var(--status-offline-color);
+}
+
+.moduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.moduleName {
+  color: var(--cyber-subtitle, var(--color-text-secondary));
+}
+
+.moduleName.offensive {
+  color: var(--status-offline-color);
+}
+
+.statusDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--status-online-color);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.statusDot.offensive {
+  background: var(--status-offline-color);
+}
+
+.moduleInfo {
+  font-size: 0.75rem;
+  color: var(--cyber-subtitle, var(--color-text-secondary));
+  margin-top: 0.25rem;
+}
+
+.moduleInfo.offensive {
+  color: var(--status-offline-color);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .metricsGrid,
+  .modulesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mainLayout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--cyber-border, var(--header-border-bottom));
+    max-height: 300px;
+  }
+
+  .metricsGrid,
+  .modulesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .footerContent {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footerMetrics {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

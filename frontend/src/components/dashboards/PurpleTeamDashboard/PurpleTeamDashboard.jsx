@@ -17,7 +17,7 @@ import { PurpleHeader } from './components/PurpleHeader';
 import { SplitView } from './components/SplitView';
 import { UnifiedTimeline } from './components/UnifiedTimeline';
 import { GapAnalysis } from './components/GapAnalysis';
-import { PurpleFooter } from './components/PurpleFooter';
+import { DashboardFooter } from '../../shared/DashboardFooter';
 import { usePurpleTeamData } from './hooks/usePurpleTeamData';
 import SkipLink from '../../shared/SkipLink';
 import styles from './PurpleTeamDashboard.module.css';
@@ -77,7 +77,19 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
         )}
       </div>
 
-      <PurpleFooter />
+      <DashboardFooter
+        moduleName="PURPLE TEAM OPERATIONS"
+        classification="CONFIDENCIAL"
+        statusItems={[
+          { label: 'RED TEAM', value: `${attackData.active.length} ACTIVE`, online: attackData.active.length > 0 },
+          { label: 'BLUE TEAM', value: `${defenseData.detections.length} DETECTIONS`, online: true },
+          { label: 'COVERAGE', value: `${gaps.coveragePercentage}%`, online: gaps.coveragePercentage > 80 }
+        ]}
+        metricsItems={[
+          { label: 'ATTACKS', value: attackData.active.length },
+          { label: 'CORRELATIONS', value: correlations.length }
+        ]}
+      />
     </div>
   );
 };

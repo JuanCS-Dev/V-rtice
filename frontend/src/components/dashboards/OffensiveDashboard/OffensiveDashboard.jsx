@@ -19,7 +19,7 @@ import React, { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OffensiveHeader } from './components/OffensiveHeader';
 import { OffensiveSidebar } from './components/OffensiveSidebar';
-import { OffensiveFooter } from './components/OffensiveFooter';
+import { DashboardFooter } from '../../shared/DashboardFooter';
 import { ModuleContainer } from './components/ModuleContainer';
 import { useOffensiveMetrics } from './hooks/useOffensiveMetrics';
 import { useRealTimeExecutions } from './hooks/useRealTimeExecutions';
@@ -107,7 +107,20 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
         </WidgetErrorBoundary>
       </div>
 
-      <OffensiveFooter />
+      <DashboardFooter
+        moduleName="OFFENSIVE OPERATIONS"
+        classification="TOP SECRET"
+        statusItems={[
+          { label: 'SYSTEM', value: 'ONLINE', online: true },
+          { label: 'MODE', value: 'RED TEAM', online: true },
+          { label: 'OPSEC', value: 'ENABLED', online: true }
+        ]}
+        metricsItems={[
+          { label: 'EXECUTIONS', value: executions.length },
+          { label: 'ACTIVE', value: currentModule?.name || 'N/A' }
+        ]}
+        showTimestamp={true}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
+import { DashboardFooter } from '../shared/DashboardFooter';
 import TerminalEmulator from './TerminalEmulator';
 import TerminalHeader from './TerminalHeader';
 import styles from './TerminalDashboard.module.css';
@@ -85,21 +86,19 @@ const TerminalDashboard = ({ setCurrentView }) => {
       </div>
 
       {/* Footer Bar */}
-      <div className={styles.footer}>
-        <div className={styles.footerLeft}>
-          <span className={styles.statusDot}></span>
-          <span>Vértice CLI v2.0</span>
-          <span className={styles.separator}>|</span>
-          <span>Sessão ativa: {new Date().toLocaleTimeString()}</span>
-        </div>
-        <div className={styles.footerRight}>
-          <span className={styles.label}>Theme:</span>
-          <span className={styles.value}>{terminalTheme}</span>
-          <span className={styles.separator}>|</span>
-          <span className={styles.label}>User:</span>
-          <span className={styles.valueYellow}>{user?.email || 'guest'}</span>
-        </div>
-      </div>
+      <DashboardFooter
+        moduleName="VÉRTICE CLI"
+        classification="CONFIDENCIAL"
+        statusItems={[
+          { label: 'SESSION', value: 'ACTIVE', online: true },
+          { label: 'THEME', value: terminalTheme.toUpperCase(), online: true },
+          { label: 'USER', value: user?.email || 'GUEST', online: true }
+        ]}
+        metricsItems={[
+          { label: 'VERSION', value: 'v2.0' }
+        ]}
+        showTimestamp={true}
+      />
     </div>
   );
 };

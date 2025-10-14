@@ -1,66 +1,23 @@
 /* eslint-disable react-refresh/only-export-components */
 // frontend/src/contexts/ThemeContext.jsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { themes, themeCategories, applyTheme, getCurrentTheme } from '../themes';
+import React, { createContext, useContext } from 'react';
 
 const ThemeContext = createContext(undefined);
 
 /**
- * ThemeProvider - Gerencia estado global de temas
- * 
- * Permite troca de temas em tempo real mantendo persistência via localStorage.
- * Fornece lista completa de temas disponíveis e tema atual.
+ * ThemeProvider - Mantém compatibilidade mas não faz nada
+ *
+ * Tema único fixo: Preto + Vermelho
  */
 export const ThemeProvider = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState(getCurrentTheme());
-  const [availableThemes] = useState(themes);
-  const [categories] = useState(themeCategories);
-
-  // Aplica tema inicial na montagem
-  useEffect(() => {
-    applyTheme(currentTheme);
-  }, [currentTheme]);
-
-  /**
-   * Troca o tema ativo
-   * @param {string} themeId - ID do tema a ser aplicado
-   */
-  const changeTheme = (themeId) => {
-    if (themes.find(t => t.id === themeId)) {
-      applyTheme(themeId);
-      setCurrentTheme(themeId);
-    } else {
-      console.warn(`[ThemeContext] Tema inválido: ${themeId}`);
-    }
-  };
-
-  /**
-   * Obtém metadados do tema atual
-   * @returns {Object} Objeto com dados do tema
-   */
-  const getThemeData = () => {
-    return themes.find(t => t.id === currentTheme) || themes[0];
-  };
-
-  /**
-   * Agrupa temas por categoria
-   * @returns {Object} Themes grouped by category
-   */
-  const getThemesByCategory = () => {
-    const grouped = {};
-    Object.keys(categories).forEach(catId => {
-      grouped[catId] = themes.filter(t => t.category === catId);
-    });
-    return grouped;
-  };
-
+  // Tema fixo - não há mais troca de temas
   const value = {
-    currentTheme,
-    availableThemes,
-    categories,
-    changeTheme,
-    getThemeData,
-    getThemesByCategory
+    currentTheme: 'core',
+    availableThemes: [],
+    categories: {},
+    changeTheme: () => {}, // No-op
+    getThemeData: () => ({ id: 'core', name: 'Core Theme' }),
+    getThemesByCategory: () => ({})
   };
 
   return (
@@ -71,16 +28,14 @@ export const ThemeProvider = ({ children }) => {
 };
 
 /**
- * Hook para acessar contexto de temas
- * @returns {Object} Contexto de temas
- * @throws {Error} Se usado fora do ThemeProvider
+ * Hook para acessar contexto de temas (compatibilidade)
  */
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  
+
   if (context === undefined) {
     throw new Error('useTheme deve ser usado dentro de ThemeProvider');
   }
-  
+
   return context;
 };

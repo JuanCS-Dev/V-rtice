@@ -25,14 +25,13 @@ import { ConsciousnessPanel } from './ConsciousnessPanel';
 import { AdaptiveImmunityPanel } from './AdaptiveImmunityPanel';
 import { BackgroundEffect } from './BackgroundEffects';
 import SkipLink from '../shared/SkipLink';
+import { DashboardFooter } from '../shared/DashboardFooter';
 import useKeyboardNavigation from '../../hooks/useKeyboardNavigation';
 import { useClock } from '../../hooks/useClock';
 import { useMaximusHealth } from '../../hooks/useMaximusHealth';
 import { useBrainActivity } from '../../hooks/useBrainActivity';
 import { MaximusHeader } from './components/MaximusHeader';
-import { MaximusActivityStream } from './components/MaximusActivityStream';
-import { MaximusClassificationBanner } from './components/MaximusClassificationBanner';
-import './MaximusDashboard.css';
+import styles from './MaximusDashboard.module.css';
 
 export const MaximusDashboard = ({ setCurrentView }) => {
   const { t } = useTranslation();
@@ -102,12 +101,16 @@ export const MaximusDashboard = ({ setCurrentView }) => {
     }
   };
 
+  // Calculate active brain activities
+  const activeBrainCount = brainActivity.filter(a => a.severity !== 'info').length;
+  const totalEvents = brainActivity.length;
+
   return (
-    <div className="maximus-dashboard" style={{ minHeight: '100vh', width: '100%' }}>
+    <div className={styles.maximusDashboard}>
       <SkipLink href="#main-content">{t('accessibility.skipToMain')}</SkipLink>
 
       {/* Animated Background Grid */}
-      <div className="maximus-grid-bg"></div>
+      <div className={styles.maximusGridBg}></div>
 
       {/* Background Effect (Scanline/Matrix/Particles) */}
       <BackgroundEffect effectId={backgroundEffect} />
@@ -127,15 +130,24 @@ export const MaximusDashboard = ({ setCurrentView }) => {
       />
 
       {/* MAIN CONTENT - Active Panel */}
-      <main id="main-content" className="maximus-main">
+      <main id="main-content" className={styles.maximusMain}>
         {renderActivePanel()}
       </main>
 
-      {/* FOOTER - AI Activity Stream */}
-      <MaximusActivityStream brainActivity={brainActivity} />
-
-      {/* Classification Banner */}
-      <MaximusClassificationBanner />
+      {/* FOOTER - Unified */}
+      <DashboardFooter
+        moduleName="MAXIMUS AI CORE"
+        classification="TOP SECRET"
+        statusItems={[
+          { label: 'AI STATUS', value: (aiStatus?.core?.status || 'OFFLINE').toUpperCase(), online: aiStatus?.core?.status === 'online' },
+          { label: 'BRAIN ACTIVITY', value: activeBrainCount > 0 ? 'PROCESSING' : 'IDLE', online: true }
+        ]}
+        metricsItems={[
+          { label: 'EVENTS', value: totalEvents },
+          { label: 'ACTIVE PANEL', value: activePanel.toUpperCase() }
+        ]}
+        showTimestamp={true}
+      />
     </div>
   );
 };

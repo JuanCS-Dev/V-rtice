@@ -136,24 +136,24 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
         className: 'threat-marker'
       }).addTo(map);
 
-      // Popup com dados REAIS
+      // Popup com dados REAIS - TACTICAL WARFARE THEME
       const popupContent = `
-        <div style="font-family: 'Courier New', monospace; min-width: 200px; background: #0a0e1a; color: #00ff88; padding: 10px;">
-          <div style="color: ${color}; font-weight: bold; font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid ${color}; padding-bottom: 5px;">
-            ⚠️ ${threat.type.toUpperCase() || 'THREAT'}
+        <div class="threat-popup">
+          <div class="threat-popup-header" style="color: ${color}; border-bottom-color: ${color};">
+            🎯 ${threat.type.toUpperCase() || 'HOSTIL'}
           </div>
-          <div style="font-size: 11px; line-height: 1.6;">
-            <div><strong style="color: #00d9ff;">IP:</strong> ${threat.ip}</div>
-            <div><strong style="color: #00d9ff;">Threat Score:</strong> ${threat.threatScore}/100</div>
-            <div><strong style="color: #00d9ff;">Reputation:</strong> ${threat.severity}</div>
+          <div class="threat-popup-body">
+            <div><strong>IP:</strong> ${threat.ip}</div>
+            <div><strong>Ameaça:</strong> ${threat.threatScore}/100</div>
+            <div><strong>Status:</strong> ${threat.severity}</div>
             ${threat.geolocation ? `
-              <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid #333;">
-                <div><strong style="color: #00d9ff;">Country:</strong> ${threat.geolocation.country}</div>
-                ${threat.geolocation.isp ? `<div><strong style="color: #00d9ff;">ISP:</strong> ${threat.geolocation.isp}</div>` : ''}
+              <div class="threat-popup-geo">
+                <div><strong>País:</strong> ${threat.geolocation.country}</div>
+                ${threat.geolocation.isp ? `<div><strong>ISP:</strong> ${threat.geolocation.isp}</div>` : ''}
               </div>
             ` : ''}
-            <div style="margin-top: 5px; color: #666; font-size: 10px;">
-              Detected: ${threat.timestamp}
+            <div class="threat-popup-timestamp">
+              Detectado: ${threat.timestamp}
             </div>
           </div>
         </div>
@@ -368,6 +368,48 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
           to {
             stroke-dashoffset: -1000;
           }
+        }
+
+        /* TACTICAL WARFARE - Threat Popup Styles */
+        .threat-popup {
+          font-family: 'Courier New', monospace;
+          min-width: 220px;
+          background: rgba(23, 23, 23, 0.98) !important;
+          color: #e5e5e5 !important;
+          padding: 12px;
+          border: 1px solid rgba(220, 38, 38, 0.4);
+          border-radius: 4px;
+        }
+
+        .threat-popup-header {
+          font-weight: bold;
+          font-size: 14px;
+          margin-bottom: 10px;
+          border-bottom: 1px solid;
+          padding-bottom: 6px;
+          letter-spacing: 0.05em;
+        }
+
+        .threat-popup-body {
+          font-size: 12px;
+          line-height: 1.8;
+        }
+
+        .threat-popup-body strong {
+          color: #dc2626;
+          margin-right: 4px;
+        }
+
+        .threat-popup-geo {
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .threat-popup-timestamp {
+          margin-top: 8px;
+          color: #737373;
+          font-size: 10px;
         }
       `}</style>
     </div>

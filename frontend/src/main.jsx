@@ -7,10 +7,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './index.css'
 import './styles/accessibility.css'; // WCAG 2.1 AA compliance styles
-import { initializeTheme } from './themes';
-
-// Initialize theme before rendering
-initializeTheme();
+import './styles/core-theme.css'; // CORE THEME: Preto + Vermelho único
 
 // The only change is removing the <React.StrictMode> wrapper.
 // This is often necessary for compatibility with libraries like Mapbox GL.

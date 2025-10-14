@@ -1,12 +1,14 @@
 /**
  * CompactEffectSelector - Discrete Visual Effect Selector for Header
  *
- * Ultra-compact selector for background effects (Matrix, Scanline, etc.)
- * Positioned discretely in the header next to clock.
+ * 🎯 ZERO INLINE STYLES - 100% CSS Module
+ * ✅ Theme-agnostic (Matrix + Enterprise)
+ * ✅ Matches MaximusHeader design
  */
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import styles from './CompactEffectSelector.module.css';
 
 const EFFECTS = [
   { id: 'matrix', icon: '⋮', title: 'Matrix Rain' },
@@ -19,34 +21,14 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      {/* Toggle Button - Discreto */}
+    <div className={styles.container}>
+      {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          width: '32px',
-          height: '32px',
-          background: 'rgba(139, 92, 246, 0.15)',
-          border: '1px solid rgba(139, 92, 246, 0.3)',
-          borderRadius: '6px',
-          color: '#8B5CF6',
-          fontSize: '0.9rem',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.3s ease',
-          fontFamily: 'monospace'
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.background = 'rgba(139, 92, 246, 0.25)';
-          e.target.style.borderColor = '#8B5CF6';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = 'rgba(139, 92, 246, 0.15)';
-          e.target.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-        }}
+        className={styles.toggle}
         title="Visual Effects"
+        aria-label="Visual effects selector"
+        aria-expanded={isOpen}
       >
         {EFFECTS.find(e => e.id === currentEffect)?.icon || '⋮'}
       </button>
@@ -57,32 +39,11 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
           role="menu"
           tabIndex={-1}
           aria-label="Effect selection menu"
-          style={{
-            position: 'absolute',
-            top: '40px',
-            right: 0,
-            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 27, 75, 0.98))',
-            border: '1px solid rgba(139, 92, 246, 0.4)',
-            borderRadius: '8px',
-            padding: '0.5rem',
-            backdropFilter: 'blur(15px)',
-            boxShadow: '0 8px 24px rgba(139, 92, 246, 0.3)',
-            zIndex: 10000,
-            minWidth: '140px'
-          }}
+          className={styles.dropdown}
           onMouseLeave={() => setIsOpen(false)}
         >
           {/* Header */}
-          <div style={{
-            fontSize: '0.6rem',
-            color: '#94A3B8',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-            marginBottom: '0.5rem',
-            paddingBottom: '0.5rem',
-            borderBottom: '1px solid rgba(139, 92, 246, 0.2)',
-            fontFamily: 'monospace'
-          }}>
+          <div className={styles.dropdownHeader}>
             🎨 Visual FX
           </div>
 
@@ -94,42 +55,14 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
                 onEffectChange(effect.id);
                 setIsOpen(false);
               }}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                background: currentEffect === effect.id
-                  ? 'rgba(139, 92, 246, 0.3)'
-                  : 'transparent',
-                border: 'none',
-                borderRadius: '4px',
-                color: currentEffect === effect.id ? '#E2E8F0' : '#94A3B8',
-                fontSize: '0.75rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                marginBottom: '0.25rem',
-                transition: 'all 0.2s ease',
-                fontFamily: 'monospace',
-                textAlign: 'left'
-              }}
-              onMouseEnter={(e) => {
-                if (currentEffect !== effect.id) {
-                  e.target.style.background = 'rgba(139, 92, 246, 0.15)';
-                  e.target.style.color = '#E2E8F0';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (currentEffect !== effect.id) {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = '#94A3B8';
-                }
-              }}
+              className={`${styles.effectButton} ${currentEffect === effect.id ? styles.active : ''}`}
+              role="menuitem"
+              aria-current={currentEffect === effect.id ? 'true' : undefined}
             >
-              <span style={{ fontSize: '1rem' }}>{effect.icon}</span>
+              <span className={styles.effectIcon}>{effect.icon}</span>
               <span>{effect.title}</span>
               {currentEffect === effect.id && (
-                <span style={{ marginLeft: 'auto' }} className="text-success">✓</span>
+                <span className={styles.checkmark}>✓</span>
               )}
             </button>
           ))}

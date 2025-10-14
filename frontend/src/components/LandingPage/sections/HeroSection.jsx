@@ -1,17 +1,18 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * HERO SECTION - Design PAGANI Level
+ * HERO SECTION - TACTICAL WARFARE COMMAND CENTER
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Inspiração: Pagani Huayra - Elegância Brutal
+ * MISSÃO: Arsenal digital contra criminosos e terroristas cibernéticos
+ * FILOSOFIA: Elegância brutal, precisão letal
  *
  * Features:
- * - Logo + Branding elegante
- * - Auth Badge integrado fluidamente
- * - Título IMPACTANTE com hierarquia clara
- * - Tags inline (não grid)
- * - Threat Globe posicionado artisticamente
- * - Tema-agnóstico (CSS Variables)
+ * - Logo + Branding de combate
+ * - Auth Badge integrado no comando
+ * - Título TÁTICO com hierarquia militar
+ * - Tags de capacidades ofensivas/defensivas
+ * - Threat Globe - Mapa de alvos
+ * - Tema Tactical Warfare (vermelho/preto)
  * - Responsivo mobile-first
  */
 
@@ -64,45 +65,45 @@ export const HeroSection = ({
           {/* Status Badge */}
           <div className={styles.statusBadge}>
             <span className={styles.pulseDot}></span>
-            <span>SISTEMA OPERACIONAL</span>
+            <span>ARSENAL ARMADO</span>
           </div>
 
           {/* Main Title - IMPACTANTE */}
           <h1 className={styles.title}>
-            <span className={styles.titleMain}>PROJETO</span>
+            <span className={styles.titleMain}>OPERAÇÃO</span>
             <span className={styles.titleHighlight}>VÉRTICE</span>
           </h1>
 
           {/* Subtitle */}
           <p className={styles.subtitle}>
-            Plataforma Unificada de Inteligência Criminal<br />
-            e Segurança Cibernética
+            Guerra Total Contra Criminosos e Terroristas Digitais<br />
+            Plataforma de Combate Cibernético
           </p>
 
           {/* Tags - Inline Flow */}
           <div className={styles.tags}>
             <span className={styles.tag}>
+              <span className={styles.tagIcon}>🎯</span>
+              <span>Target Lock</span>
+            </span>
+            <span className={styles.tag}>
+              <span className={styles.tagIcon}>🔫</span>
+              <span>Arsenal Ofensivo</span>
+            </span>
+            <span className={styles.tag}>
               <span className={styles.tagIcon}>🛡️</span>
-              <span>Cyber Security</span>
+              <span>Escudo Defensivo</span>
             </span>
             <span className={styles.tag}>
-              <span className={styles.tagIcon}>🕵️</span>
-              <span>OSINT</span>
-            </span>
-            <span className={styles.tag}>
-              <span className={styles.tagIcon}>⚔️</span>
-              <span>Offensive</span>
-            </span>
-            <span className={styles.tag}>
-              <span className={styles.tagIcon}>🤖</span>
-              <span>AI-Powered</span>
+              <span className={styles.tagIcon}>⚡</span>
+              <span>IA Tática</span>
             </span>
           </div>
 
           {/* Services Status */}
           <div className={styles.services}>
             <div className={styles.servicesHeader}>
-              <span className={styles.servicesTitle}>⚡ SERVIÇOS ATIVOS</span>
+              <span className={styles.servicesTitle}>⚡ SISTEMAS DE ARMAS</span>
               <span className={styles.servicesCount}>
                 {stats.servicesOnline}/{stats.totalServices}
               </span>

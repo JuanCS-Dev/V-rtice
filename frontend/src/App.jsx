@@ -7,7 +7,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
 import { queryClient } from './config/queryClient';
 import { SkipLink } from './components/shared/SkipLink';
-import ThemeSelector from './components/ThemeSelector';
 import { useModuleNavigation } from './hooks/useModuleNavigation';
 import { ToastProvider } from './components/shared/Toast';
 import { DashboardLoader } from './components/shared/LoadingStates';
@@ -82,7 +81,6 @@ function App() {
       <ToastProvider>
         <ErrorBoundary context="app-root" title="Application Error">
           <SkipLink href="#main-content" />
-          <ThemeSelector position="top-right" />
           <main id="main-content" role="main" className="page-enter">
             {currentView === 'main' ? (
               <LandingPage setCurrentView={setCurrentView} />

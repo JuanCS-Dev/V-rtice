@@ -1,15 +1,17 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * STATS SECTION - Métricas Elegantes com Animações
+ * STATS SECTION - TACTICAL METRICS & COMBAT INTELLIGENCE
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Design Philosophy:
- * - 4 cards horizontais elegantes
- * - Animação CountUp para números
- * - Micro-interações no hover
- * - Progress bars sutis
- * - Gradient borders dinâmicos
- * - Tema-agnóstico
+ * MISSÃO: Métricas operacionais de guerra cibernética
+ *
+ * Capacidades:
+ * - 4 painéis de inteligência tática
+ * - Animação CountUp para contadores de eliminações
+ * - Micro-interações de combate no hover
+ * - Progress bars de capacidade operacional
+ * - Borders com glow vermelho tático
+ * - Tema Tactical Warfare
  * - Mobile-responsive
  */
 
@@ -20,8 +22,8 @@ export const StatsSection = ({ stats }) => {
   const statCards = [
     {
       id: 'threats',
-      icon: '🛡️',
-      label: 'Threats Detected',
+      icon: '🎯',
+      label: 'Alvos Identificados',
       value: stats.threatsDetected,
       trend: '+12%',
       trendUp: true,
@@ -30,10 +32,10 @@ export const StatsSection = ({ stats }) => {
     },
     {
       id: 'monitoring',
-      icon: '👁️',
-      label: 'Active Monitoring',
+      icon: '🔭',
+      label: 'Vigilância Ativa',
       value: stats.activeMonitoring,
-      trend: 'Stable',
+      trend: 'Operacional',
       trendUp: null,
       color: 'info',
       progress: 95
@@ -41,7 +43,7 @@ export const StatsSection = ({ stats }) => {
     {
       id: 'networks',
       icon: '🌐',
-      label: 'Networks Scanned',
+      label: 'Redes Escaneadas',
       value: stats.networksScanned,
       trend: '+8%',
       trendUp: true,
@@ -51,9 +53,9 @@ export const StatsSection = ({ stats }) => {
     {
       id: 'uptime',
       icon: '⚡',
-      label: 'System Uptime',
+      label: 'Arsenal Online',
       value: stats.uptime,
-      trend: '30 days',
+      trend: '30 dias',
       trendUp: true,
       color: 'warning',
       progress: 99

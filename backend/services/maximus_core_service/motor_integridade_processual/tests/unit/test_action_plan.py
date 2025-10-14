@@ -506,3 +506,106 @@ class TestCriticalPath:
         # Critical path should go through the longer branch (step3)
         assert step3 in critical
         assert critical[-1].id == "44444444-4444-4444-4444-444444444444"
+
+
+class TestValidations:
+    """Tests for field validators and edge cases."""
+
+    def test_validate_dependencies_invalid_uuid(self) -> None:
+        """Test that invalid UUID in dependencies raises error (line 156-157)."""
+        with pytest.raises(ValidationError) as exc_info:
+            ActionStep(
+                description="Test with invalid dependency",
+                dependencies=["not-a-valid-uuid"]
+            )
+        errors = str(exc_info.value)
+        assert "Invalid UUID" in errors or "UUID" in errors
+
+    def test_validate_coercion_details_return_path(self) -> None:
+        """Test coercion_details validator returns value (line 176)."""
+        # When involves_coercion=False, validator should return v (line 176)
+        step = ActionStep(
+            description="Non-coercive action",
+            involves_coercion=False,
+            coercion_details=None
+        )
+        assert step.coercion_details is None  # Validator returned None successfully
+
+        # When involves_coercion=True and details provided, validator returns v
+        step2 = ActionStep(
+            description="Coercive action with details",
+            involves_coercion=True,
+            coercion_details="Legal requirement"
+        )
+        assert step2.coercion_details == "Legal requirement"
+
+    def test_get_step_by_id_not_found(self) -> None:
+        """Test get_step_by_id returns None when step doesn't exist (line 287)."""
+        step = ActionStep(description="Only step in plan")
+        plan = ActionPlan(
+            objective="Test plan for get_step_by_id edge case",
+            steps=[step],
+            initiator="test_user",
+            initiator_type=StakeholderType.HUMAN
+        )
+        # Try to get a step that doesn't exist - should return None (line 287)
+        result = plan.get_step_by_id("99999999-9999-9999-9999-999999999999")
+        assert result is None  # Covers line 287
+
+    def test_get_execution_order_with_valid_graph(self) -> None:
+        """Test execution order calculation (prepares for line 321 test)."""
+        step1_id = "11111111-1111-1111-1111-111111111111"
+        step2_id = "22222222-2222-2222-2222-222222222222"
+        
+        step1 = ActionStep(
+            id=step1_id,
+            description="First step",
+            dependencies=[]
+        )
+        step2 = ActionStep(
+            id=step2_id,
+            description="Second step depends on first",
+            dependencies=[step1_id]
+        )
+        plan = ActionPlan(
+            objective="Test execution order with valid dependencies",
+            steps=[step1, step2],
+            initiator="test_user",
+            initiator_type=StakeholderType.HUMAN
+        )
+        
+        # This should work fine - tests the success path
+        order = plan.get_execution_order()
+        assert len(order) == 2
+        assert order[0].id == step1_id
+        assert order[1].id == step2_id
+        # Line 321 is only reached if there's a circular dependency,
+        # but validator prevents that at ActionPlan creation
+
+    def test_get_critical_path_with_valid_dependencies(self) -> None:
+        """Test critical path calculation (line 366 context)."""
+        step1 = ActionStep(
+            id="11111111-1111-1111-1111-111111111111",
+            description="First step",
+            estimated_duration_seconds=10.0
+        )
+        step2 = ActionStep(
+            id="22222222-2222-2222-2222-222222222222",
+            description="Second step depends on first",
+            estimated_duration_seconds=20.0,
+            dependencies=["11111111-1111-1111-1111-111111111111"]
+        )
+        plan = ActionPlan(
+            objective="Test critical path calculation",
+            steps=[step1, step2],
+            initiator="test_user",
+            initiator_type=StakeholderType.HUMAN
+        )
+        
+        critical = plan.get_critical_path()
+        # Should include both steps
+        assert len(critical) >= 1
+        assert step2 in critical  # Longest duration
+        # Line 366 (break) occurs when critical_dep is None from get_step_by_id
+        # This is defensive coding for data integrity
+

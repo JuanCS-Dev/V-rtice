@@ -1,213 +1,220 @@
 /**
- * PurpleHeader Styles
+ * PurpleHeader Styles - Landing Page Pattern
+ * SOURCE OF TRUTH: Purple (#8b5cf6) + Cyan (#06b6d4)
  */
 
 .header {
-  background: linear-gradient(135deg, rgba(75, 0, 130, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%);
-  border-bottom: 2px solid rgba(179, 102, 255, 0.3);
-  box-shadow: 0 4px 20px rgba(128, 0, 255, 0.2);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+  border-bottom: 2px solid var(--color-border-primary);
+  box-shadow: 0 4px 20px var(--shadow-glow-purple);
 }
 
 .topBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  gap: 2rem;
+  padding: var(--space-lg) var(--space-2xl);
+  gap: var(--space-2xl);
 }
 
 .titleSection {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
 .backButton {
-  padding: 0.6rem 1.2rem;
-  background: rgba(179, 102, 255, 0.1);
-  border: 1px solid rgba(179, 102, 255, 0.3);
-  color: #b366ff;
-  font-size: 0.9rem;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-bg-hover);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-accent-primary);
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 4px;
-  font-family: 'Fira Code', monospace;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-md);
+  font-family: 'Courier New', monospace;
 }
 
 .backButton:hover {
-  background: rgba(179, 102, 255, 0.2);
-  border-color: #b366ff;
-  box-shadow: 0 0 15px rgba(179, 102, 255, 0.4);
-  transform: translateX(-3px);
+  background: var(--color-bg-active);
+  border-color: var(--color-accent-primary);
+  box-shadow: var(--shadow-glow-purple);
+  transform: translateX(-5px);
 }
 
 .title {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .icon {
-  font-size: 3rem;
-  filter: drop-shadow(0 0 10px rgba(179, 102, 255, 0.6));
+  font-size: var(--text-5xl);
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.6));
   animation: pulseGlow 3s ease-in-out infinite;
 }
 
 .title h1 {
-  font-size: 1.8rem;
+  font-size: var(--text-2xl);
   font-weight: 700;
-  color: #b366ff;
-  text-shadow: 0 0 20px rgba(179, 102, 255, 0.5);
+  color: var(--color-accent-primary);
+  text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
   letter-spacing: 0.05em;
   margin: 0;
+  font-family: 'Courier New', monospace;
 }
 
 .subtitle {
-  font-size: 0.85rem;
-  color: rgba(179, 102, 255, 0.6);
-  margin: 0.25rem 0 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin: var(--space-xs) 0 0 0;
   letter-spacing: 0.05em;
 }
 
 .metrics {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
 .metric {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.8rem 1.5rem;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 6px;
+  padding: var(--space-md) var(--space-xl);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
   min-width: 120px;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
 }
 
 .metric:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
 }
 
+/* Red Team metrics */
 .redMetric {
-  border: 1px solid rgba(255, 68, 68, 0.3);
+  border: 1px solid var(--color-border-primary);
 }
 
 .redMetric:hover {
-  border-color: #ff4444;
-  box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+  border-color: var(--color-accent-primary);
+  box-shadow: var(--shadow-glow-purple);
 }
 
+/* Blue Team metrics */
 .blueMetric {
-  border: 1px solid rgba(0, 191, 255, 0.3);
+  border: 1px solid var(--color-border-secondary);
 }
 
 .blueMetric:hover {
-  border-color: #00bfff;
-  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+  border-color: var(--color-accent-secondary);
+  box-shadow: var(--shadow-glow-cyan);
 }
 
+/* Purple Team metrics */
 .purpleMetric {
-  border: 1px solid rgba(179, 102, 255, 0.3);
+  border: 1px solid var(--color-border-primary);
 }
 
 .purpleMetric:hover {
-  border-color: #b366ff;
-  box-shadow: 0 0 15px rgba(179, 102, 255, 0.3);
+  border-color: var(--color-accent-primary);
+  box-shadow: var(--shadow-glow-purple);
 }
 
+/* Green (success) metrics */
 .greenMetric {
-  border: 1px solid rgba(0, 255, 127, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .greenMetric:hover {
-  border-color: #00ff7f;
-  box-shadow: 0 0 15px rgba(0, 255, 127, 0.3);
+  border-color: var(--color-success);
+  box-shadow: var(--shadow-glow-green);
 }
 
 .metricLabel {
-  font-size: 0.7rem;
-  color: rgba(179, 102, 255, 0.7);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .redMetric .metricValue {
-  color: #ff4444;
-  text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+  color: var(--color-accent-primary);
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 .blueMetric .metricValue {
-  color: #00bfff;
-  text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+  color: var(--color-accent-secondary);
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
 }
 
 .purpleMetric .metricValue {
-  color: #b366ff;
-  text-shadow: 0 0 10px rgba(179, 102, 255, 0.5);
+  color: var(--color-accent-primary);
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 .greenMetric .metricValue {
-  color: #00ff7f;
-  text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);
+  color: var(--color-success);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
 
 .metricValue {
-  font-size: 1.8rem;
+  font-size: var(--text-2xl);
   font-weight: 700;
-  margin-top: 0.3rem;
+  margin-top: var(--space-xs);
+  font-family: 'Orbitron', system-ui, sans-serif;
 }
 
 .viewNav {
   display: flex;
   gap: 0;
-  padding: 0 2rem;
-  border-top: 1px solid rgba(179, 102, 255, 0.1);
+  padding: 0 var(--space-2xl);
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .viewButton {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-xl);
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
-  color: rgba(179, 102, 255, 0.5);
-  font-size: 0.9rem;
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   white-space: nowrap;
-  font-family: 'Fira Code', monospace;
+  font-family: 'Courier New', monospace;
 }
 
 .viewButton:hover {
-  color: #b366ff;
-  background: rgba(179, 102, 255, 0.05);
+  color: var(--color-accent-primary);
+  background: var(--color-bg-hover);
 }
 
 .viewButton.active {
-  color: #b366ff;
-  border-bottom-color: #b366ff;
-  background: rgba(179, 102, 255, 0.1);
-  box-shadow: 0 -3px 10px rgba(179, 102, 255, 0.2);
+  color: var(--color-accent-primary);
+  border-bottom-color: var(--color-accent-primary);
+  background: var(--color-bg-active);
+  box-shadow: 0 -3px 10px rgba(139, 92, 246, 0.2);
 }
 
 .viewIcon {
-  font-size: 1.2rem;
+  font-size: var(--text-lg);
 }
 
 @keyframes pulseGlow {
   0%, 100% {
-    filter: drop-shadow(0 0 10px rgba(179, 102, 255, 0.6));
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.6));
   }
   50% {
-    filter: drop-shadow(0 0 20px rgba(179, 102, 255, 0.8));
+    filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8));
   }
 }
 

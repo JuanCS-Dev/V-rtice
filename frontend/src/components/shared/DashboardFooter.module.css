@@ -1,0 +1,183 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * UNIVERSAL DASHBOARD FOOTER - CSS MODULE
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Tema único: Preto + Vermelho
+ * Usa CSS Variables do core-theme.css
+ */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-primary);
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  gap: 1rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 10;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STATUS SECTION (LEFT)
+ * ═══════════════════════════════════════════════════════════════════════ */
+.statusContainer {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+/* Status Dot Indicator */
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-online-color);
+  box-shadow: 0 0 8px var(--status-online-color);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.statusDot.offline {
+  background: var(--status-offline-color);
+  box-shadow: 0 0 8px var(--status-offline-color);
+  animation: none;
+}
+
+/* Status Labels */
+.label {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * BRAND SECTION (CENTER)
+ * ═══════════════════════════════════════════════════════════════════════ */
+.brand {
+  opacity: 0.7;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * METRICS SECTION (RIGHT)
+ * ═══════════════════════════════════════════════════════════════════════ */
+.metrics {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.metricLabel {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.metricValue {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--color-accent-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ANIMATIONS
+ * ═══════════════════════════════════════════════════════════════════════ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * RESPONSIVE
+ * ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.65rem;
+  }
+
+  .statusContainer {
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .brand {
+    order: -1;
+    font-size: 0.65rem;
+  }
+
+  .metrics {
+    gap: 1rem;
+  }
+
+  .metricLabel {
+    font-size: 0.6rem;
+  }
+
+  .metricValue {
+    font-size: 0.8rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ACCESSIBILITY
+ * ═══════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .statusDot {
+    animation: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .footer {
+    border-top: 2px solid var(--color-accent-primary);
+  }
+
+  .statusDot {
+    box-shadow: 0 0 12px var(--status-online-color);
+  }
+
+  .metricValue {
+    text-shadow: 0 0 2px var(--color-accent-primary);
+  }
+}

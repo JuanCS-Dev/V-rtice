@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import CyberHeader from './cyber/CyberHeader';
+import { DashboardFooter } from './shared/DashboardFooter';
 import DomainAnalyzer from './cyber/DomainAnalyzer';
 import IpIntelligence from './cyber/IpIntelligence';
 import NetworkMonitor from './cyber/NetworkMonitor';
@@ -19,6 +20,7 @@ import WebAttack from './cyber/WebAttack';
 import C2Orchestration from './cyber/C2Orchestration';
 import BAS from './cyber/BAS';
 import OffensiveGateway from './cyber/OffensiveGateway';
+import styles from './CyberDashboard.module.css';
 
 const CyberDashboard = ({ setCurrentView }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -83,45 +85,46 @@ const CyberDashboard = ({ setCurrentView }) => {
   };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-gray-900 via-black to-blue-900 text-cyan-400 font-mono overflow-hidden flex flex-col">
+    <div className={styles.dashboard}>
       {/* Scan Line */}
-      <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse z-20"></div>
-      
-      <CyberHeader 
+      <div className={styles.scanLine}></div>
+
+      <CyberHeader
         currentTime={currentTime}
         setCurrentView={setCurrentView}
         activeModule={activeModule}
         setActiveModule={setActiveModule}
       />
 
-      <main className="flex-1 flex min-h-0">
+      <main className={styles.mainLayout}>
         {/* Sidebar de Alertas */}
-        <aside className="w-72 border-r border-cyan-400/30 bg-black/30 backdrop-blur-sm">
+        <aside className={styles.sidebar}>
           <CyberAlerts alerts={cyberAlerts} threatData={threatData} />
         </aside>
 
         {/* Área Principal */}
-        <div className="flex-1 p-4 overflow-hidden min-h-0">
-          <div className="h-full">
+        <div className={styles.contentArea}>
+          <div className={styles.contentInner}>
             {moduleComponents[activeModule]}
           </div>
         </div>
       </main>
 
       {/* Footer Cyber */}
-      <footer className="border-t border-cyan-400/30 bg-black/50 backdrop-blur-sm p-2">
-        <div className="flex justify-between items-center text-xs">
-          <div className="flex space-x-6">
-            <span className="text-cyan-400">CONEXÃO: SEGURA</span>
-            <span className="text-cyan-400">THREAT INTEL: ATIVO</span>
-            <span className="text-cyan-400">USUÁRIO: CYBER_OPS_001</span>
-            <span className="text-cyan-400">ALERTAS: {cyberAlerts.length}</span>
-          </div>
-          <div className="text-cyan-400/70">
-            MÓDULO CYBER-SECURITY | PROJETO VÉRTICE v2.0 | CLASSIFICAÇÃO: CONFIDENCIAL
-          </div>
-        </div>
-      </footer>
+      <DashboardFooter
+        moduleName="CYBER-SECURITY"
+        classification="CONFIDENCIAL"
+        statusItems={[
+          { label: 'CONNECTION', value: 'SECURE', online: true },
+          { label: 'THREAT INTEL', value: 'ACTIVE', online: true },
+          { label: 'USER', value: 'CYBER_OPS_001', online: true }
+        ]}
+        metricsItems={[
+          { label: 'ALERTS', value: cyberAlerts.length },
+          { label: 'THREATS', value: threatData.totalThreats },
+          { label: 'SUSPICIOUS IPS', value: threatData.suspiciousIPs }
+        ]}
+      />
     </div>
   );
 };
@@ -129,84 +132,84 @@ const CyberDashboard = ({ setCurrentView }) => {
 // Componente Overview
 const CyberOverview = ({ threatData }) => {
   return (
-    <div className="space-y-6">
-      <div className="border border-cyan-400/50 rounded-lg bg-cyan-400/5 p-6">
-        <h2 className="text-cyan-400 font-bold text-2xl mb-6 tracking-wider">
+    <div className={styles.overviewContainer}>
+      <div className={styles.overviewCard}>
+        <h2 className={styles.overviewTitle}>
           CENTRO DE OPERAÇÕES CYBER
         </h2>
-        
+
         {/* Métricas Principais */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
-          <div className="bg-black/50 border border-red-400/50 rounded-lg p-4 text-center">
-            <div className="text-red-400 text-3xl font-bold">{threatData.totalThreats}</div>
-            <div className="text-red-400/70 text-sm">AMEAÇAS ATIVAS</div>
+        <div className={styles.metricsGrid}>
+          <div className={`${styles.metricCard} ${styles.critical}`}>
+            <div className={`${styles.metricValue} ${styles.critical}`}>{threatData.totalThreats}</div>
+            <div className={styles.metricLabel}>AMEAÇAS ATIVAS</div>
           </div>
-          <div className="bg-black/50 border border-yellow-400/50 rounded-lg p-4 text-center">
-            <div className="text-yellow-400 text-3xl font-bold">{threatData.activeDomains}</div>
-            <div className="text-yellow-400/70 text-sm">DOMÍNIOS SUSPEITOS</div>
+          <div className={`${styles.metricCard} ${styles.warning}`}>
+            <div className={`${styles.metricValue} ${styles.warning}`}>{threatData.activeDomains}</div>
+            <div className={styles.metricLabel}>DOMÍNIOS SUSPEITOS</div>
           </div>
-          <div className="bg-black/50 border border-orange-400/50 rounded-lg p-4 text-center">
-            <div className="text-orange-400 text-3xl font-bold">{threatData.suspiciousIPs}</div>
-            <div className="text-orange-400/70 text-sm">IPs MALICIOSOS</div>
+          <div className={`${styles.metricCard} ${styles.alert}`}>
+            <div className={`${styles.metricValue} ${styles.alert}`}>{threatData.suspiciousIPs}</div>
+            <div className={styles.metricLabel}>IPS MALICIOSOS</div>
           </div>
-          <div className="bg-black/50 border border-cyan-400/50 rounded-lg p-4 text-center">
-            <div className="text-cyan-400 text-3xl font-bold">{threatData.networkAlerts}</div>
-            <div className="text-cyan-400/70 text-sm">ALERTAS DE REDE</div>
+          <div className={`${styles.metricCard} ${styles.info}`}>
+            <div className={`${styles.metricValue} ${styles.info}`}>{threatData.networkAlerts}</div>
+            <div className={styles.metricLabel}>ALERTAS DE REDE</div>
           </div>
         </div>
 
         {/* Status dos Módulos */}
-        <div className="space-y-4">
-          <h3 className="text-cyan-400 font-bold text-lg mb-4">STATUS DOS MÓDULOS</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-cyan-400/70">Domain Analyzer</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+        <div className={styles.modulesSection}>
+          <h3 className={styles.modulesTitle}>STATUS DOS MÓDULOS</h3>
+          <div className={styles.modulesGrid}>
+            <div className={styles.moduleCard}>
+              <div className={styles.moduleHeader}>
+                <span className={styles.moduleName}>Domain Analyzer</span>
+                <div className={styles.statusDot}></div>
               </div>
-              <div className="text-xs text-cyan-400/50 mt-1">Monitorando 1,247 domínios</div>
+              <div className={styles.moduleInfo}>Monitorando 1,247 domínios</div>
             </div>
-            <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-cyan-400/70">IP Intelligence</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <div className={styles.moduleCard}>
+              <div className={styles.moduleHeader}>
+                <span className={styles.moduleName}>IP Intelligence</span>
+                <div className={styles.statusDot}></div>
               </div>
-              <div className="text-xs text-cyan-400/50 mt-1">Analisando 5,832 IPs</div>
+              <div className={styles.moduleInfo}>Analisando 5,832 IPs</div>
             </div>
-            <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-cyan-400/70">Network Monitor</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <div className={styles.moduleCard}>
+              <div className={styles.moduleHeader}>
+                <span className={styles.moduleName}>Network Monitor</span>
+                <div className={styles.statusDot}></div>
               </div>
-              <div className="text-xs text-cyan-400/50 mt-1">Tempo real ativo</div>
+              <div className={styles.moduleInfo}>Tempo real ativo</div>
             </div>
-            <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-cyan-400/70">Nmap Scanner</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <div className={styles.moduleCard}>
+              <div className={styles.moduleHeader}>
+                <span className={styles.moduleName}>Nmap Scanner</span>
+                <div className={styles.statusDot}></div>
               </div>
-              <div className="text-xs text-cyan-400/50 mt-1">Pronto para varreduras</div>
+              <div className={styles.moduleInfo}>Pronto para varreduras</div>
             </div>
-            <div className="bg-black/30 border border-cyan-400/30 rounded p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-cyan-400/70">Threat Map</span>
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <div className={styles.moduleCard}>
+              <div className={styles.moduleHeader}>
+                <span className={styles.moduleName}>Threat Map</span>
+                <div className={styles.statusDot}></div>
               </div>
-              <div className="text-xs text-cyan-400/50 mt-1">Visualização global</div>
+              <div className={styles.moduleInfo}>Visualização global</div>
             </div>
-            <div className="bg-black/30 border border-red-400/30 rounded p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-red-400/70">Vulnerability Scanner ⚠️</span>
-                <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+            <div className={`${styles.moduleCard} ${styles.offensive}`}>
+              <div className={styles.moduleHeader}>
+                <span className={`${styles.moduleName} ${styles.offensive}`}>Vulnerability Scanner ⚠️</span>
+                <div className={`${styles.statusDot} ${styles.offensive}`}></div>
               </div>
-              <div className="text-xs text-red-400/50 mt-1">Ferramenta ofensiva ativa</div>
+              <div className={`${styles.moduleInfo} ${styles.offensive}`}>Ferramenta ofensiva ativa</div>
             </div>
-            <div className="bg-black/30 border border-red-400/30 rounded p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-red-400/70">Social Engineering ⚠️</span>
-                <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+            <div className={`${styles.moduleCard} ${styles.offensive}`}>
+              <div className={styles.moduleHeader}>
+                <span className={`${styles.moduleName} ${styles.offensive}`}>Social Engineering ⚠️</span>
+                <div className={`${styles.statusDot} ${styles.offensive}`}></div>
               </div>
-              <div className="text-xs text-red-400/50 mt-1">Campanhas disponíveis</div>
+              <div className={`${styles.moduleInfo} ${styles.offensive}`}>Campanhas disponíveis</div>
             </div>
           </div>
         </div>

@@ -13,12 +13,13 @@ import ReportsModule from './osint/ReportsModule';
 import SocialMediaWidget from './osint/SocialMediaWidget';
 import BreachDataWidget from './osint/BreachDataWidget';
 import { OverviewModule } from './osint/OverviewModule';
-import { OSINTFooter } from './osint/OSINTFooter';
+import { DashboardFooter } from './shared/DashboardFooter';
 import { AIProcessingOverlay } from './osint/AIProcessingOverlay';
 import SkipLink from './shared/SkipLink';
 import { Breadcrumb } from './shared/Breadcrumb';
 import { useClock } from '../hooks/useClock';
 import { useOSINTAlerts } from '../hooks/useOSINTAlerts';
+import styles from './OSINTDashboard.module.css';
 
 const OSINTDashboard = ({ setCurrentView }) => {
   const { t } = useTranslation();
@@ -52,11 +53,11 @@ const OSINTDashboard = ({ setCurrentView }) => {
   };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-gray-900 via-black to-purple-900 text-purple-400 font-mono overflow-hidden flex flex-col">
+    <div className={styles.dashboard}>
       <SkipLink href="#main-content">{t('accessibility.skipToMain')}</SkipLink>
 
       {/* Scan Line */}
-      <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse z-20"></div>
+      <div className={styles.scanLine}></div>
 
       <OSINTHeader
         currentTime={currentTime}
@@ -65,17 +66,17 @@ const OSINTDashboard = ({ setCurrentView }) => {
         setActiveModule={setActiveModule}
       />
 
-      <main className="flex-1 flex min-h-0" role="main">
+      <main className={styles.mainLayout} role="main">
         {/* Sidebar de Alertas OSINT */}
         <aside
-          className="w-80 border-r border-purple-400/30 bg-black/30 backdrop-blur-sm"
+          className={styles.sidebar}
           aria-label={t('accessibility.alertsSidebar')}
         >
           <OSINTAlerts alerts={osintAlerts} systemStats={systemStats} />
         </aside>
 
         {/* Área Principal */}
-        <div id="main-content" className="flex-1 p-4 overflow-hidden relative">
+        <div id="main-content" className={styles.contentArea}>
           {/* AI Processing Overlay */}
           <AIProcessingOverlay isVisible={isAIProcessing} />
 
@@ -84,7 +85,20 @@ const OSINTDashboard = ({ setCurrentView }) => {
       </main>
 
       {/* Footer OSINT */}
-      <OSINTFooter systemStats={systemStats} />
+      <DashboardFooter
+        moduleName="OSINT INTELLIGENCE"
+        classification="CONFIDENCIAL"
+        statusItems={[
+          { label: 'CONNECTION', value: 'SECURE', online: true },
+          { label: 'AURORA AI', value: 'ACTIVE', online: true },
+          { label: 'OPERATOR', value: 'OSINT_OPS_001', online: true }
+        ]}
+        metricsItems={[
+          { label: 'INVESTIGATIONS', value: systemStats.totalInvestigations },
+          { label: 'THREATS', value: systemStats.threatsDetected },
+          { label: 'AI ACCURACY', value: `${systemStats.aiAccuracy}%` }
+        ]}
+      />
     </div>
   );
 };

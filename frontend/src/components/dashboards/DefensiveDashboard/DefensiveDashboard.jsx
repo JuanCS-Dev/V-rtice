@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import DefensiveHeader from './components/DefensiveHeader';
 import DefensiveSidebar from './components/DefensiveSidebar';
-import DefensiveFooter from './components/DefensiveFooter';
+import { DashboardFooter } from '../../shared/DashboardFooter';
 import ModuleContainer from './components/ModuleContainer';
 import { useDefensiveMetrics } from './hooks/useDefensiveMetrics';
 import { useRealTimeAlerts } from './hooks/useRealTimeAlerts';
@@ -27,8 +27,7 @@ import MaximusCyberHub from '../../cyber/MaximusCyberHub';
 import BehavioralAnalyzer from '../../cyber/BehavioralAnalyzer/BehavioralAnalyzer';
 import EncryptedTrafficAnalyzer from '../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer';
 
-import '../../../styles/dashboards.css';
-import './DefensiveDashboard.module.css';
+import styles from './DefensiveDashboard.module.css';
 
 const DEFENSIVE_MODULES = [
   { id: 'threats', name: 'THREAT MAP', icon: '🗺️', component: ThreatMap },
@@ -61,9 +60,9 @@ const DefensiveDashboard = ({ setCurrentView }) => {
   const ActiveComponent = activeModuleData?.component;
 
   return (
-    <div className="dashboard-container dashboard-defensive">
+    <div className={styles.dashboardContainer}>
       {/* Scanline Effect */}
-      <div className="scanline-overlay"></div>
+      <div className={styles.scanlineOverlay}></div>
 
       {/* Header */}
       <DefensiveHeader
@@ -77,7 +76,7 @@ const DefensiveDashboard = ({ setCurrentView }) => {
       />
 
       {/* Main Content Area */}
-      <main className="dashboard-main">
+      <main className={styles.dashboardMain}>
         {/* Sidebar - Real-time Alerts */}
         <DefensiveSidebar
           alerts={alerts}
@@ -85,7 +84,7 @@ const DefensiveDashboard = ({ setCurrentView }) => {
         />
 
         {/* Active Module Content */}
-        <div className="dashboard-content">
+        <div className={styles.dashboardContent}>
           <ModuleContainer>
             {ActiveComponent ? <ActiveComponent /> : <div>Module not found</div>}
           </ModuleContainer>
@@ -93,9 +92,18 @@ const DefensiveDashboard = ({ setCurrentView }) => {
       </main>
 
       {/* Footer */}
-      <DefensiveFooter
-        alertsCount={alerts.length}
-        metrics={metrics}
+      <DashboardFooter
+        moduleName="DEFENSIVE OPERATIONS"
+        classification="CONFIDENCIAL"
+        statusItems={[
+          { label: 'CONNECTION', value: 'SECURE', online: true },
+          { label: 'THREAT INTEL', value: 'ACTIVE', online: true },
+          { label: 'SIEM', value: 'ONLINE', online: true }
+        ]}
+        metricsItems={[
+          { label: 'ALERTS', value: alerts.length },
+          { label: 'MONITORED', value: metrics?.monitored || 0 }
+        ]}
       />
     </div>
   );

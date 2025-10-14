@@ -1,60 +1,65 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CYBER HEADER - PRETO + VERMELHO ÚNICO
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 
 .header {
   position: relative;
-  border-bottom: var(--border-1) solid rgba(0, 255, 255, 0.3);
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border-primary);
+  background: var(--header-bg-gradient);
+  backdrop-filter: var(--backdrop-blur);
 }
 
 .topBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4);
+  padding: 0.5rem 1rem;
 }
 
 .branding {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 1rem;
 }
 
 .logo {
   width: 48px;
   height: 48px;
-  border: var(--border-2) solid var(--color-cyber-primary);
-  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-accent-primary);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 255, 255, 0.1);
+  background: var(--color-bg-hover);
 }
 
 .logo span {
-  color: var(--color-cyber-primary);
-  font-weight: var(--font-bold);
-  font-size: var(--text-xl);
+  color: var(--color-accent-primary);
+  font-weight: bold;
+  font-size: 1.25rem;
 }
 
 .title h1 {
-  font-size: var(--text-2xl);
-  font-weight: var(--font-bold);
-  color: var(--color-cyber-primary);
-  letter-spacing: var(--tracking-wider);
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-text-primary);
+  letter-spacing: 0.05em;
   margin: 0;
 }
 
 .title p {
-  color: rgba(0, 255, 255, 0.7);
-  font-size: var(--text-sm);
-  letter-spacing: var(--tracking-widest);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
   margin: 0;
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 1rem;
 }
 
 .clock {
@@ -62,12 +67,12 @@
 }
 
 .time {
-  color: var(--color-cyber-primary);
-  font-weight: var(--font-bold);
-  font-size: var(--text-lg);
+  color: var(--color-accent-primary);
+  font-weight: bold;
+  font-size: 1.125rem;
 }
 
 .date {
-  color: rgba(0, 255, 255, 0.7);
-  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
 }

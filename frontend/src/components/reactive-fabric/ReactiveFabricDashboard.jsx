@@ -13,6 +13,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './ReactiveFabricDashboard.module.css';
+import { DashboardFooter } from '../shared/DashboardFooter';
 import DecoyBayouMap from './DecoyBayouMap';
 import IntelligenceFusionPanel from './IntelligenceFusionPanel';
 import ThreatTimelineWidget from './ThreatTimelineWidget';
@@ -233,14 +234,14 @@ const ReactiveFabricDashboard = () => {
         )}
 
         {activeTab === 'decoy-bayou' && (
-          <DecoyBayouMap 
+          <DecoyBayouMap
             honeypots={honeypotData}
             threats={threatEvents}
           />
         )}
 
         {activeTab === 'intelligence' && (
-          <IntelligenceFusionPanel 
+          <IntelligenceFusionPanel
             fusionData={fusionIntel}
             events={threatEvents}
           />
@@ -250,6 +251,22 @@ const ReactiveFabricDashboard = () => {
           <ThreatTimelineWidget events={threatEvents} />
         )}
       </main>
+
+      {/* Footer */}
+      <DashboardFooter
+        moduleName="REACTIVE FABRIC"
+        classification="TOP SECRET"
+        statusItems={[
+          { label: 'HONEYPOTS', value: `${metrics.activeHoneypots} ACTIVE`, online: metrics.activeHoneypots > 0 },
+          { label: 'PHASE', value: 'INTELLIGENCE COLLECTION', online: true }
+        ]}
+        metricsItems={[
+          { label: 'INTERACTIONS', value: metrics.totalInteractions },
+          { label: 'ATTACKERS', value: metrics.uniqueAttackers },
+          { label: 'CRITICAL', value: metrics.criticalThreats }
+        ]}
+        showTimestamp={true}
+      />
     </div>
   );
 };

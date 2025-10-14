@@ -304,11 +304,57 @@
   font-family: 'Courier New', monospace;
 }
 
+/* Risk Level Badges */
+.riskBadge {
+  background: rgba(255, 170, 0, 0.2);
+  color: #ffaa00;
+}
+
+.riskBadge.low {
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+}
+
+.riskBadge.medium {
+  background: rgba(255, 170, 0, 0.2);
+  color: #ffaa00;
+}
+
+.riskBadge.high {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+}
+
+/* Operation Mode Colors */
+.select.defensive {
+  border-color: #00ff88;
+}
+
+.select.research {
+  border-color: #ffaa00;
+}
+
+.select.redTeam {
+  border-color: #ff0000;
+}
+
+.value.defensive {
+  color: #00ff88;
+}
+
+.value.research {
+  color: #ffaa00;
+}
+
+.value.redTeam {
+  color: #ff0000;
+}
+
 @media (max-width: 768px) {
   .formRow {
     grid-template-columns: 1fr;
   }
-  
+
   .portsList {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }

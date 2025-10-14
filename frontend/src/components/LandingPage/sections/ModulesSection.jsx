@@ -1,16 +1,18 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * MODULES SECTION - Premium Module Cards
+ * MODULES SECTION - TACTICAL ARSENAL & WEAPON SYSTEMS
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Design Philosophy:
+ * MISSÃO: Arsenal modular de sistemas de combate cibernético
+ *
+ * Capacidades:
  * - 3 colunas em desktop, 1 em mobile
- * - Hover com scale + glow effect
- * - Gradient backgrounds sutis
- * - Features como pills, não lista
- * - CTA button destacado
- * - Tema-agnóstico
- * - Micro-interactions
+ * - Hover com scale + glow vermelho tático
+ * - Gradient backgrounds de combate
+ * - Features como pills operacionais
+ * - CTA button de ativação de arma
+ * - Tema Tactical Warfare
+ * - Micro-interactions militares
  */
 
 import React from 'react';
@@ -103,11 +105,11 @@ export const ModulesSection = ({ setCurrentView }) => {
       {/* Section Header */}
       <header className={styles.header}>
         <h2 id="modules-title" className={styles.title}>
-          <span className={styles.titleIcon}>⚡</span>
-          <span>{t('navigation.available_modules')}</span>
+          <span className={styles.titleIcon}>🔫</span>
+          <span>ARSENAL DISPONÍVEL</span>
         </h2>
         <p className={styles.subtitle}>
-          Escolha um módulo para acessar funcionalidades especializadas
+          Selecione um sistema de armas para engajamento tático
         </p>
       </header>
 

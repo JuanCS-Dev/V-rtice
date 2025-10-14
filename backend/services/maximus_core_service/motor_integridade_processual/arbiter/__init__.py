@@ -1,8 +1,6 @@
-"""
-Decision Arbiter.
+"""Decision Arbiter."""
 
-Toma decisão final sobre aprovação/rejeição de action plans.
-Gera alternativas éticas quando planos são rejeitados.
-"""
+from motor_integridade_processual.arbiter.decision import DecisionArbiter
+from motor_integridade_processual.arbiter.alternatives import AlternativeSuggester
 
-__all__ = []
+__all__ = ["DecisionArbiter", "AlternativeSuggester"]

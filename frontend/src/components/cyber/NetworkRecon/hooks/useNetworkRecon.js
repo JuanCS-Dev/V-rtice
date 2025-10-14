@@ -19,24 +19,6 @@ export const useNetworkRecon = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState(null);
 
-  // Carrega lista de scans ao montar
-  useEffect(() => {
-    loadScans();
-  }, [loadScans]);
-
-  // Polling para scans ativos
-  useEffect(() => {
-    if (activeScans.length === 0) return;
-
-    const interval = setInterval(() => {
-      activeScans.forEach(scan => {
-        updateScanStatus(scan.scan_id);
-      });
-    }, 3000); // Poll a cada 3 segundos
-
-    return () => clearInterval(interval);
-  }, [activeScans, updateScanStatus]);
-
   /**
    * Carrega lista de scans
    */
@@ -57,6 +39,58 @@ export const useNetworkRecon = () => {
       setError(err.message);
     }
   }, []);
+
+  /**
+   * Atualiza status de scan específico
+   */
+  const updateScanStatus = useCallback(async (scanId) => {
+    try {
+      const result = await getScanStatus(scanId);
+
+      if (result.success) {
+        // Atualiza na lista
+        setScans(prev =>
+          prev.map(s =>
+            s.scan_id === scanId
+              ? { ...s, ...result }
+              : s
+          )
+        );
+
+        // Remove dos ativos se completou
+        if (result.status === 'completed' || result.status === 'failed') {
+          setActiveScans(prev =>
+            prev.filter(s => s.scan_id !== scanId)
+          );
+        }
+
+        // Atualiza current scan se for o mesmo
+        if (currentScan?.scan_id === scanId) {
+          setCurrentScan(prev => ({ ...prev, ...result }));
+        }
+      }
+    } catch (err) {
+      logger.error('Error updating scan status:', err);
+    }
+  }, [currentScan]);
+
+  // Carrega lista de scans ao montar
+  useEffect(() => {
+    loadScans();
+  }, [loadScans]);
+
+  // Polling para scans ativos
+  useEffect(() => {
+    if (activeScans.length === 0) return;
+
+    const interval = setInterval(() => {
+      activeScans.forEach(scan => {
+        updateScanStatus(scan.scan_id);
+      });
+    }, 3000); // Poll a cada 3 segundos
+
+    return () => clearInterval(interval);
+  }, [activeScans, updateScanStatus]);
 
   /**
    * Inicia novo scan
@@ -95,40 +129,6 @@ export const useNetworkRecon = () => {
       setIsScanning(false);
     }
   }, [loadScans]);
-
-  /**
-   * Atualiza status de scan específico
-   */
-  const updateScanStatus = useCallback(async (scanId) => {
-    try {
-      const result = await getScanStatus(scanId);
-
-      if (result.success) {
-        // Atualiza na lista
-        setScans(prev =>
-          prev.map(s =>
-            s.scan_id === scanId
-              ? { ...s, ...result }
-              : s
-          )
-        );
-
-        // Remove dos ativos se completou
-        if (result.status === 'completed' || result.status === 'failed') {
-          setActiveScans(prev =>
-            prev.filter(s => s.scan_id !== scanId)
-          );
-        }
-
-        // Atualiza current scan se for o mesmo
-        if (currentScan?.scan_id === scanId) {
-          setCurrentScan(prev => ({ ...prev, ...result }));
-        }
-      }
-    } catch (err) {
-      logger.error('Error updating scan status:', err);
-    }
-  }, [currentScan]);
 
   /**
    * Obtém detalhes completos de um scan

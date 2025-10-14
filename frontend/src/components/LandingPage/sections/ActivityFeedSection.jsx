@@ -1,16 +1,18 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * ACTIVITY FEED SECTION - Cinematographic Real-time Feed
+ * ACTIVITY FEED SECTION - TACTICAL OPERATIONS LOG
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Design Philosophy:
- * - Timeline vertical elegante
- * - Pulsos animados
- * - Auto-scroll suave
- * - Fade in/out de items
- * - Severity color coding
- * - Tema-agnóstico
- * - Live badge pulsante
+ * MISSÃO: Log operacional em tempo real de engajamentos de combate
+ *
+ * Capacidades:
+ * - Timeline vertical de operações
+ * - Pulsos táticos animados
+ * - Auto-scroll suave de intel
+ * - Fade in/out de relatórios
+ * - Severity color coding militar
+ * - Tema Tactical Warfare
+ * - Live badge de comando operacional
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -40,37 +42,37 @@ export const ActivityFeedSection = ({ realThreats = [] }) => {
     if (threat.isMalicious) {
       return {
         type: 'threat',
-        icon: '🚨',
-        title: 'AMEAÇA CRÍTICA',
+        icon: '🎯',
+        title: 'HOSTIL DETECTADO',
         message: threat.ip,
-        detail: `Score: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
+        detail: `Ameaça: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
         severity: 'critical'
       };
     } else if (threat.severity === 'suspicious') {
       return {
         type: 'warning',
         icon: '⚠️',
-        title: 'ATIVIDADE SUSPEITA',
+        title: 'ALVO SUSPEITO',
         message: threat.ip,
-        detail: `Score: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
+        detail: `Ameaça: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
         severity: 'high'
       };
     } else if (threat.severity === 'questionable') {
       return {
         type: 'info',
         icon: '🔍',
-        title: 'ANÁLISE CONCLUÍDA',
+        title: 'INTEL ADQUIRIDA',
         message: threat.ip,
-        detail: `Score: ${threat.threatScore}/100`,
+        detail: `Ameaça: ${threat.threatScore}/100`,
         severity: 'medium'
       };
     } else {
       return {
         type: 'success',
         icon: '✅',
-        title: 'IP VERIFICADO',
+        title: 'ZONA LIMPA',
         message: threat.ip,
-        detail: `Score: ${threat.threatScore}/100 - Limpo`,
+        detail: `Ameaça: ${threat.threatScore}/100 - Seguro`,
         severity: 'low'
       };
     }
@@ -79,11 +81,11 @@ export const ActivityFeedSection = ({ realThreats = [] }) => {
   // Atividades de background
   useEffect(() => {
     const backgroundActivities = [
-      { type: 'info', icon: '📡', title: 'SCAN INICIADO', message: '192.168.0.0/24', detail: 'Varredura de rede completa', severity: 'low' },
-      { type: 'success', icon: '🔐', title: 'CERTIFICADO RENOVADO', message: 'api.vertice.com', detail: 'SSL certificate válido', severity: 'low' },
-      { type: 'info', icon: '📊', title: 'BACKUP COMPLETO', message: 'prod-db-01', detail: 'Database snapshot criado', severity: 'low' },
-      { type: 'info', icon: '🔍', title: 'PORT SCAN COMPLETO', message: '10.0.0.0/8', detail: '65535 portas verificadas', severity: 'low' },
-      { type: 'success', icon: '🛡️', title: 'FIREWALL ATUALIZADO', message: 'fw-edge-01', detail: 'Novas regras aplicadas', severity: 'low' }
+      { type: 'info', icon: '🔭', title: 'RECON INICIADO', message: '192.168.0.0/24', detail: 'Varredura de zona tática', severity: 'low' },
+      { type: 'success', icon: '🔐', title: 'CERTIFICADO ARMADO', message: 'api.vertice.com', detail: 'SSL certificate válido', severity: 'low' },
+      { type: 'info', icon: '💾', title: 'BACKUP TÁTICO', message: 'prod-db-01', detail: 'Database snapshot seguro', severity: 'low' },
+      { type: 'info', icon: '🔍', title: 'PORT SCAN COMPLETO', message: '10.0.0.0/8', detail: '65535 portas analisadas', severity: 'low' },
+      { type: 'success', icon: '🛡️', title: 'ESCUDO ATUALIZADO', message: 'fw-edge-01', detail: 'Defesas reforçadas', severity: 'low' }
     ];
 
     const interval = setInterval(() => {
@@ -106,11 +108,11 @@ export const ActivityFeedSection = ({ realThreats = [] }) => {
       <header className={styles.header}>
         <h2 className={styles.title}>
           <span className={styles.titleIcon}>📡</span>
-          <span>LIVE ACTIVITY FEED</span>
+          <span>LOG OPERACIONAL</span>
         </h2>
         <div className={styles.liveBadge}>
           <span className={styles.liveDot}></span>
-          <span>LIVE</span>
+          <span>AO VIVO</span>
         </div>
       </header>
 
@@ -119,8 +121,8 @@ export const ActivityFeedSection = ({ realThreats = [] }) => {
         {activities.length === 0 ? (
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>📡</div>
-            <p className={styles.emptyText}>Aguardando atividades...</p>
-            <p className={styles.emptyHint}>Sistema monitorando ameaças globais</p>
+            <p className={styles.emptyText}>Aguardando operações...</p>
+            <p className={styles.emptyHint}>Arsenal monitorando alvos globais</p>
           </div>
         ) : (
           <div className={styles.timeline}>

@@ -29,7 +29,7 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
 
   return (
     <header className="relative border-b border-purple-400/30 bg-black/50 backdrop-blur-sm">
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 border-2 border-purple-400 rounded-lg flex items-center justify-center bg-purple-400/10">
             <span className="text-purple-400 font-bold text-xl">🔍</span>
@@ -63,7 +63,7 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
       </div>
 
       {/* Breadcrumb Navigation */}
-      <div className="px-4 py-2 bg-gradient-to-r from-black/50 to-purple-900/20 border-t border-purple-400/10">
+      <div className="px-4 py-1.5 bg-gradient-to-r from-black/50 to-purple-900/20 border-t border-purple-400/10">
         <Breadcrumb
           items={[
             { label: 'VÉRTICE', icon: '🏠', onClick: () => setCurrentView('main') },
@@ -75,8 +75,8 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
       </div>
 
       {/* Navigation Modules */}
-      <nav 
-        className="px-4 py-2 bg-black/30"
+      <nav
+        className="px-4 py-1.5 bg-black/30"
         role="navigation"
         aria-label="Módulos OSINT"
       >

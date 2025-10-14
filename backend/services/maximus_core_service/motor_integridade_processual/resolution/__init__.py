@@ -1,8 +1,6 @@
-"""
-Conflict Resolution Engine.
+"""Conflict Resolution Engine."""
 
-Resolve conflitos quando frameworks éticos discordam.
-Implementa precedência, weighted aggregation, e escalação para HITL.
-"""
+from motor_integridade_processual.resolution.conflict_resolver import ConflictResolver
+from motor_integridade_processual.resolution.rules import ResolutionRules
 
-__all__ = []
+__all__ = ["ConflictResolver", "ResolutionRules"]

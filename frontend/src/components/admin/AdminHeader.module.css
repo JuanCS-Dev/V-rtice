@@ -1,0 +1,261 @@
+/* AdminHeader.module.css - Enterprise Standard */
+
+/* ============================================
+   HEADER CONTAINER
+   ============================================ */
+.header {
+  position: relative;
+  border-bottom: 1px solid var(--admin-border, var(--header-border-bottom));
+  background: var(--header-bg-gradient);
+  backdrop-filter: var(--backdrop-blur);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   TOP BAR - Logo, Clock, Actions
+   ============================================ */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+}
+
+/* Branding Section */
+.branding {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoContainer {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--admin-accent, var(--color-accent-primary));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-logo-bg, rgba(255, 185, 0, 0.1));
+  position: relative;
+}
+
+.logoIcon {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+}
+
+.logoTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--admin-primary, var(--color-text-primary));
+  letter-spacing: 0.05em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.logoSubtitle {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Actions Section */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.clock {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+.clockTime {
+  color: var(--admin-accent, var(--color-accent-primary));
+  font-weight: bold;
+  font-size: 1.125rem;
+  line-height: 1.2;
+}
+
+.clockDate {
+  color: var(--admin-subtitle, var(--color-text-secondary));
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.backButton {
+  background: linear-gradient(to right, #059669, #047857);
+  color: #000;
+  font-weight: bold;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+}
+
+.backButton:hover {
+  background: linear-gradient(to right, #10b981, #059669);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.backButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+.backButton:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   BREADCRUMB BAR
+   ============================================ */
+.breadcrumbBar {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.5),
+    var(--admin-breadcrumb-bg, rgba(255, 185, 0, 0.1))
+  );
+  border-top: 1px solid var(--admin-border-subtle, rgba(255, 185, 0, 0.1));
+}
+
+.breadcrumb {
+  color: var(--admin-accent, var(--color-accent-primary));
+}
+
+/* ============================================
+   NAVIGATION BAR - Module Tabs
+   ============================================ */
+.navBar {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(
+    to right,
+    var(--admin-nav-bg-from, rgba(255, 185, 0, 0.1)),
+    var(--admin-nav-bg-to, rgba(255, 138, 0, 0.1))
+  );
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.navButton {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  border: 1px solid;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  font-family: inherit;
+}
+
+.navButton.active {
+  background: var(--admin-module-active-bg, rgba(255, 185, 0, 0.2));
+  color: var(--admin-accent, var(--color-accent-primary));
+  border-color: var(--admin-accent, var(--color-accent-primary));
+  box-shadow: 0 0 12px var(--admin-glow, rgba(255, 185, 0, 0.3));
+}
+
+.navButton.inactive {
+  background: var(--admin-module-inactive-bg, rgba(0, 0, 0, 0.3));
+  color: var(--admin-module-inactive-text, var(--color-text-secondary));
+  border-color: var(--admin-border-subtle, rgba(255, 185, 0, 0.2));
+}
+
+.navButton.inactive:hover {
+  background: var(--admin-module-hover-bg, rgba(255, 185, 0, 0.1));
+  color: var(--admin-accent, var(--color-accent-primary));
+  border-color: var(--admin-accent, var(--color-accent-primary));
+  transform: translateY(-1px);
+}
+
+.navButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--admin-focus-ring, rgba(255, 185, 0, 0.5));
+}
+
+.navButton:active {
+  transform: translateY(0);
+}
+
+.navIcon {
+  font-size: 1rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.navLabel {
+  pointer-events: none;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .topBar {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .actions {
+    order: 3;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .topBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .branding,
+  .actions {
+    justify-content: center;
+  }
+
+  .clock {
+    text-align: center;
+    padding-right: 0;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .navBar {
+    flex-direction: column;
+  }
+
+  .navButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -74,12 +74,21 @@ export const NetworkScanner = () => {
     }
   };
 
-  const getModeColor = (mode) => {
+  const getModeClass = (mode) => {
     switch (mode) {
-      case 'defensive': return '#00ff88';
-      case 'research': return '#ffaa00';
-      case 'red_team': return '#ff0000';
-      default: return '#888888';
+      case 'defensive': return styles.defensive;
+      case 'research': return styles.research;
+      case 'red_team': return styles.redTeam;
+      default: return '';
+    }
+  };
+
+  const getRiskClass = (riskLevel) => {
+    switch (riskLevel?.toLowerCase()) {
+      case 'low': return styles.low;
+      case 'medium': return styles.medium;
+      case 'high': return styles.high;
+      default: return '';
     }
   };
 
@@ -101,9 +110,7 @@ export const NetworkScanner = () => {
           </div>
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>Risk Level:</span>
-            <span className={styles.riskBadge} style={{ 
-              backgroundColor: toolInfo.risk_level === 'LOW' ? '#00ff88' : '#ffaa00'
-            }}>
+            <span className={`${styles.riskBadge} ${getRiskClass(toolInfo.risk_level)}`}>
               {toolInfo.risk_level}
             </span>
           </div>
@@ -164,8 +171,7 @@ export const NetworkScanner = () => {
             name="operationMode"
             value={formData.operationMode}
             onChange={handleChange}
-            className={styles.select}
-            style={{ borderColor: getModeColor(formData.operationMode) }}
+            className={`${styles.select} ${getModeClass(formData.operationMode)}`}
           >
             <option value="defensive">Defensive (Blue Team)</option>
             <option value="research">Research (Security Testing)</option>
@@ -226,10 +232,7 @@ export const NetworkScanner = () => {
             </div>
             <div className={styles.resultRow}>
               <span className={styles.label}>Mode:</span>
-              <span 
-                className={styles.value}
-                style={{ color: getModeColor(result.operation_mode) }}
-              >
+              <span className={`${styles.value} ${getModeClass(result.operation_mode)}`}>
                 {result.operation_mode}
               </span>
             </div>

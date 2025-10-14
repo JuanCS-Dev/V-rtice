@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * WidgetErrorBoundary - Lightweight Error Boundary for widgets/components
  *
  * Provides graceful degradation for individual widgets without
@@ -41,7 +40,7 @@ class WidgetErrorBoundaryComponent extends React.Component {
     this.setState({ errorInfo });
 
     // Log to console
-    logger.error(`Widget "${this.props.widgetName}" error:`, error, errorInfo);
+    console.error(`Widget "${this.props.widgetName}" error:`, error, errorInfo);
   }
 
   handleRetry = () => {
