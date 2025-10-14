@@ -1,0 +1,80 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LANDING PAGE STYLES - Main Container
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * FOOTER
+ * ═══════════════════════════════════════════════════════════════════════ */
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2xl);
+  padding: var(--space-xl) var(--space-md);
+  margin-top: var(--space-3xl);
+  background: var(--color-bg-elevated);
+  border-top: 1px solid var(--color-border-primary);
+}
+
+.footerItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  font-family: monospace;
+}
+
+.footerItem i {
+  color: var(--color-accent-primary);
+  font-size: var(--text-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * RESPONSIVE
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .footer {
+    gap: var(--space-lg);
+  }
+
+  .footerItem {
+    font-size: var(--text-xs);
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    justify-content: space-around;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .footerItem {
+    font-size: var(--text-xs);
+  }
+
+  .footerItem i {
+    font-size: var(--text-base);
+  }
+}

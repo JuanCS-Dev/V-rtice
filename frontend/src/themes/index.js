@@ -5,7 +5,7 @@ import './purple-haze.css';
 import './amber-alert.css';
 import './red-alert.css';
 import './stealth-mode.css';
-import './windows11.css';
+import './enterprise.css';
 
 // Metadados dos temas para o seletor
 export const themes = [
@@ -58,11 +58,11 @@ export const themes = [
     category: 'operational'
   },
   {
-    id: 'windows11',
-    name: 'Windows 11',
+    id: 'enterprise',
+    name: 'Enterprise',
     description: 'Clean, sóbrio e profissional',
     primary: '#0078d4',
-    icon: '🪟',
+    icon: '💼',
     category: 'enterprise'
   }
 ];
@@ -97,7 +97,7 @@ export const applyTheme = (themeId) => {
 
 // Função para obter o tema atual
 export const getCurrentTheme = () => {
-  return localStorage.getItem('vertice-theme') || 'default';
+  return localStorage.getItem('vertice-theme') || 'enterprise'; // Enterprise como padrão
 };
 
 // Função para inicializar o tema salvo

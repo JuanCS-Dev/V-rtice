@@ -63,6 +63,71 @@ export const ConsciousnessPanel = ({ aiStatus, setAiStatus }) => {
   const eventsEndRef = useRef(null);
 
   // ═══════════════════════════════════════════════════════════════════════
+  // WEBSOCKET CONNECTION
+  // ═══════════════════════════════════════════════════════════════════════
+
+  const handleStreamMessage = useCallback((message) => {
+    setLastUpdate(new Date());
+
+    switch (message.type) {
+      case 'initial_state':
+        logger.debug('🧠 Initial consciousness state received:', message);
+        break;
+
+      case 'esgt_event':
+        logger.debug('⚡ ESGT event received:', message.event);
+        addNewEvent(message.event);
+        break;
+
+      case 'arousal_change':
+        logger.debug('🌅 Arousal change received:', message);
+        setArousalState(prev => ({
+          ...prev,
+          arousal: message.arousal,
+          level: message.level
+        }));
+        break;
+
+      case 'heartbeat':
+        // Keepalive OK
+        break;
+
+      case 'pong':
+        // Ping response OK
+        break;
+
+      default:
+        logger.debug('📨 Unknown stream message:', message);
+    }
+  }, []);
+
+  const handleStreamError = useCallback((error) => {
+    logger.error('❌ Consciousness stream error:', error);
+  }, []);
+
+  const { connectionType, isConnected } = useConsciousnessStream({
+    enabled: true,
+    onMessage: handleStreamMessage,
+    onError: handleStreamError
+  });
+
+  useEffect(() => {
+    setStreamStatus({ connected: !!isConnected && connectionType !== 'idle', type: connectionType });
+  }, [connectionType, isConnected]);
+
+  const addNewEvent = (event) => {
+    setESGTEvents(prev => {
+      const newEvents = [event, ...prev];
+      return newEvents.slice(0, 100); // Keep last 100 events
+    });
+
+    // Auto-scroll to new event
+    setTimeout(() => {
+      eventsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════
   // INITIALIZATION & DATA LOADING
   // ═══════════════════════════════════════════════════════════════════════
 

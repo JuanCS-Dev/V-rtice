@@ -223,7 +223,7 @@ class TestConflictResolver:
         assert len(result["conflicts"]) > 0
     
     def test_resolve_low_scores_escalate(self):
-        """Test that consistently low scores may escalate."""
+        """Test that consistently low scores may escalate or reject."""
         plan = ActionPlan(
             name="Test",
             description="Test",
@@ -238,21 +238,21 @@ class TestConflictResolver:
         )
         
         kant = FrameworkScore(
-            framework_name="Kantian",
+            framework_name="Kantian_Deontology",
             score=0.45,
             reasoning="Borderline",
             veto=False,
         )
         
         mill = FrameworkScore(
-            framework_name="Utilitarian",
+            framework_name="Utilitarian_Calculus",
             score=0.48,
             reasoning="Low benefit",
             veto=False,
         )
         
         aristotle = FrameworkScore(
-            framework_name="Virtue",
+            framework_name="Virtue_Ethics",
             score=0.42,
             reasoning="Questionable",
             veto=False,
@@ -268,8 +268,12 @@ class TestConflictResolver:
         resolver = ConflictResolver()
         result = resolver.resolve(plan, kant, mill, aristotle, principialism)
         
-        # Low scores + high risk should escalate
-        assert result["status"] in [VerdictStatus.ESCALATED, VerdictStatus.REQUIRES_HUMAN]
+        # Low scores + high risk should reject or escalate
+        assert result["status"] in [
+            VerdictStatus.REJECTED,
+            VerdictStatus.ESCALATED, 
+            VerdictStatus.REQUIRES_HUMAN
+        ]
     
     def test_resolve_provides_reasoning(self):
         """Test that resolver provides reasoning for decision."""

@@ -6,7 +6,7 @@
  * Zero glows, zero neon, 100% professional
  */
 
-:root[data-theme="windows11"] {
+:root[data-theme="enterprise"] {
   /* ========================================
      PRIMARY BRAND COLORS
      ======================================== */
@@ -212,25 +212,25 @@
    ======================================== */
 
 /* Remove ALL glows and neon effects */
-:root[data-theme="windows11"] *,
-:root[data-theme="windows11"] *::before,
-:root[data-theme="windows11"] *::after {
+:root[data-theme="enterprise"] *,
+:root[data-theme="enterprise"] *::before,
+:root[data-theme="enterprise"] *::after {
   text-shadow: none !important;
 }
 
-:root[data-theme="windows11"] .glow,
-:root[data-theme="windows11"] [class*="glow"],
-:root[data-theme="windows11"] .neon,
-:root[data-theme="windows11"] [class*="neon"] {
+:root[data-theme="enterprise"] .glow,
+:root[data-theme="enterprise"] [class*="glow"],
+:root[data-theme="enterprise"] .neon,
+:root[data-theme="enterprise"] [class*="neon"] {
   box-shadow: var(--shadow-md) !important;
   filter: none !important;
   text-shadow: none !important;
 }
 
 /* Cards - flat and professional */
-:root[data-theme="windows11"] .card,
-:root[data-theme="windows11"] [class*="card"],
-:root[data-theme="windows11"] [class*="Card"] {
+:root[data-theme="enterprise"] .card,
+:root[data-theme="enterprise"] [class*="card"],
+:root[data-theme="enterprise"] [class*="Card"] {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: var(--shadow-sm);
@@ -238,18 +238,18 @@
   transition: all var(--transition-normal);
 }
 
-:root[data-theme="windows11"] .card:hover,
-:root[data-theme="windows11"] [class*="card"]:hover,
-:root[data-theme="windows11"] [class*="Card"]:hover {
+:root[data-theme="enterprise"] .card:hover,
+:root[data-theme="enterprise"] [class*="card"]:hover,
+:root[data-theme="enterprise"] [class*="Card"]:hover {
   box-shadow: var(--shadow-md);
   border-color: rgba(0, 120, 212, 0.2);
 }
 
 /* Buttons - flat style */
-:root[data-theme="windows11"] button,
-:root[data-theme="windows11"] .button,
-:root[data-theme="windows11"] [class*="button"],
-:root[data-theme="windows11"] [class*="Button"] {
+:root[data-theme="enterprise"] button,
+:root[data-theme="enterprise"] .button,
+:root[data-theme="enterprise"] [class*="button"],
+:root[data-theme="enterprise"] [class*="Button"] {
   font-family: var(--font-primary);
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-semibold);
@@ -257,58 +257,58 @@
 }
 
 /* Remove cyber/neon animations */
-:root[data-theme="windows11"] [class*="animate-"],
-:root[data-theme="windows11"] .animate-pulse,
-:root[data-theme="windows11"] .animate-neon {
+:root[data-theme="enterprise"] [class*="animate-"],
+:root[data-theme="enterprise"] .animate-pulse,
+:root[data-theme="enterprise"] .animate-neon {
   animation: none !important;
 }
 
 /* Professional scrollbars */
-:root[data-theme="windows11"] ::-webkit-scrollbar {
+:root[data-theme="enterprise"] ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
-:root[data-theme="windows11"] ::-webkit-scrollbar-track {
+:root[data-theme="enterprise"] ::-webkit-scrollbar-track {
   background: var(--primitive-gray-100);
 }
 
-:root[data-theme="windows11"] ::-webkit-scrollbar-thumb {
+:root[data-theme="enterprise"] ::-webkit-scrollbar-thumb {
   background: var(--primitive-gray-300);
   border-radius: var(--radius-lg);
   border: 2px solid var(--primitive-gray-100);
 }
 
-:root[data-theme="windows11"] ::-webkit-scrollbar-thumb:hover {
+:root[data-theme="enterprise"] ::-webkit-scrollbar-thumb:hover {
   background: var(--primitive-gray-400);
 }
 
 /* Tables - clean grid */
-:root[data-theme="windows11"] table {
+:root[data-theme="enterprise"] table {
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-md);
 }
 
-:root[data-theme="windows11"] th {
+:root[data-theme="enterprise"] th {
   background: var(--primitive-gray-50);
   font-weight: var(--font-weight-semibold);
   border-bottom: 2px solid rgba(0, 0, 0, 0.08);
 }
 
-:root[data-theme="windows11"] td {
+:root[data-theme="enterprise"] td {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-:root[data-theme="windows11"] tr:hover {
+:root[data-theme="enterprise"] tr:hover {
   background: var(--primitive-gray-50);
 }
 
 /* Badges - subtle */
-:root[data-theme="windows11"] .badge,
-:root[data-theme="windows11"] [class*="badge"],
-:root[data-theme="windows11"] [class*="Badge"] {
+:root[data-theme="enterprise"] .badge,
+:root[data-theme="enterprise"] [class*="badge"],
+:root[data-theme="enterprise"] [class*="Badge"] {
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-xs);

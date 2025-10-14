@@ -89,9 +89,10 @@
 
 
 /* ============================================================================
-   TEMA 2: WINDOWS 11 BORING MODE - Clean, Sóbrio, Profissional
+   TEMA 2: ENTERPRISE - Clean, Sóbrio, Profissional
    ============================================================================ */
-[data-theme="windows11"] {
+:root,
+[data-theme="enterprise"] {
   /* Colors - Fluent Design System */
   --color-bg-primary: #f3f3f3;
   --color-bg-secondary: #fafafa;
@@ -150,9 +151,9 @@
 
 
 /* ============================================================================
-   DARK MODE VARIANT - Windows 11 Dark
+   DARK MODE VARIANT - Enterprise Dark
    ============================================================================ */
-[data-theme="windows11"][data-mode="dark"] {
+[data-theme="enterprise"][data-mode="dark"] {
   /* Dark mode colors */
   --color-bg-primary: #202020;
   --color-bg-secondary: #2b2b2b;
@@ -297,34 +298,34 @@
   box-shadow: var(--glow-primary);
 }
 
-/* Windows 11 scrollbar */
-[data-theme="windows11"] ::-webkit-scrollbar {
+/* Enterprise scrollbar */
+[data-theme="enterprise"] ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
-[data-theme="windows11"] ::-webkit-scrollbar-track {
+[data-theme="enterprise"] ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-[data-theme="windows11"] ::-webkit-scrollbar-thumb {
+[data-theme="enterprise"] ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 6px;
   border: 3px solid transparent;
   background-clip: content-box;
 }
 
-[data-theme="windows11"] ::-webkit-scrollbar-thumb:hover {
+[data-theme="enterprise"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.35);
   background-clip: content-box;
 }
 
-[data-theme="windows11"][data-mode="dark"] ::-webkit-scrollbar-thumb {
+[data-theme="enterprise"][data-mode="dark"] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   background-clip: content-box;
 }
 
-[data-theme="windows11"][data-mode="dark"] ::-webkit-scrollbar-thumb:hover {
+[data-theme="enterprise"][data-mode="dark"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
   background-clip: content-box;
 }
@@ -348,7 +349,7 @@
   animation: neon-pulse 2s ease-in-out infinite;
 }
 
-/* Windows 11 fade animation */
+/* Enterprise fade animation */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -360,7 +361,7 @@
   }
 }
 
-[data-theme="windows11"] .animate-fade-in {
+[data-theme="enterprise"] .animate-fade-in {
   animation: fade-in var(--transition-normal) ease-out;
 }
 
@@ -375,7 +376,7 @@
     --spacing-xl: 1.5rem;
   }
 
-  [data-theme="windows11"] {
+  [data-theme="enterprise"] {
     --glass-blur: 20px; /* Less blur on mobile for performance */
   }
 }

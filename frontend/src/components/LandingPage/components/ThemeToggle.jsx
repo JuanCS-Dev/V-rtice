@@ -16,14 +16,16 @@ export const ThemeToggle = () => {
 
   const getThemeIcon = () => {
     switch (theme) {
+      case 'enterprise':
+        return '💼';
+      case 'default':
+        return '🟢';
+      case 'cyberpunk':
+        return '🌃';
       case 'dark':
         return '🌙';
       case 'light':
         return '☀️';
-      case 'win11':
-        return '🪟';
-      case 'cyberpunk':
-        return '🌃';
       default:
         return '🎨';
     }
