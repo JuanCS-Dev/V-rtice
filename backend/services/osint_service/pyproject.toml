@@ -19,6 +19,8 @@ dependencies = [
     # ImageAnalyzer dependencies
     "pillow>=10.0.0",
     "imagehash>=4.3.0",
+    # DiscordBot dependencies
+    "discord.py>=2.3.0",
 ]
 
 [project.optional-dependencies]
