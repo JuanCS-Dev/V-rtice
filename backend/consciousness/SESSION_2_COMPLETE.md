@@ -331,6 +331,120 @@ pfc = PrefrontalCortex(enable_mip=False)
 
 ---
 
+## 🔄 UPDATE: PERSISTENCE LAYER COMPLETE (2025-10-14)
+
+### Decision History & Audit Trail
+**Commits**:
+- `6e4312fa` - feat(consciousness): Add persistence layer for PFC decisions
+- `4dd2db2c` - feat(consciousness): Integrate persistence with PFC orchestration
+
+#### DecisionRepository (PostgreSQL)
+Complete persistence layer with connection pooling and comprehensive schema:
+
+```python
+from consciousness.persistence import DecisionRepository
+
+repo = DecisionRepository(
+    host="localhost",
+    database="vertice_consciousness"
+)
+repo.initialize()
+```
+
+#### Database Schema
+**Tables**:
+1. **decisions**: Main orchestrated decisions (final_decision, rationale, confidence)
+2. **mental_states**: ToM inferences (emotional_state, intent, needs_assistance)
+3. **suffering_events**: Compassion detections (event_type, severity, context)
+4. **compassion_plans**: Intervention plans (actions, priority, success_criteria)
+5. **constitutional_checks**: DDL compliance (violations, explanations)
+6. **ethical_verdicts**: MIP evaluations (framework scores, conflicts)
+
+**Features**:
+- Foreign key constraints with CASCADE delete
+- Indexes on decision_id, user_id, timestamp, escalation flag
+- JSONB columns for complex data (context, violations, conflicts)
+- Confidence/severity/priority range validation
+
+#### Repository Operations
+```python
+# Save complete decision
+decision_id = repo.save_decision(orchestrated_decision)
+
+# Retrieve by ID
+decision = repo.get_decision(decision_id)
+
+# Query by user
+user_decisions = repo.get_decisions_for_user(user_id, limit=10)
+
+# Get escalated decisions
+escalated = repo.get_escalated_decisions(since=datetime_1h_ago)
+```
+
+#### Query Service (Analytics)
+```python
+from consciousness.persistence import DecisionQueryService
+
+service = DecisionQueryService(repo)
+
+# Decision statistics
+stats = service.get_decision_statistics(user_id=user_id, since=last_week)
+# Returns: total_decisions, escalation_rate, approval_rate, avg_confidence
+
+# Suffering analytics
+analytics = service.get_suffering_analytics(since=last_24h)
+# Returns: by_type, total_events, affected_agents, critical_events
+```
+
+#### PFC Integration (Opt-in)
+```python
+# Without persistence (default)
+pfc = PrefrontalCortex(enable_mip=True)
+
+# With auto-persistence
+repo = DecisionRepository()
+repo.initialize()
+pfc = PrefrontalCortex(enable_mip=True, repository=repo)
+
+# All decisions auto-saved to database
+decision = pfc.orchestrate_decision(...)  # Automatically persisted
+```
+
+**Auto-Persistence Features**:
+- Graceful degradation (logs errors, doesn't block)
+- Statistics tracking: `persisted_decisions` counter
+- Applies to both `orchestrate_decision()` and `orchestrate_with_plan()`
+
+#### Dataclass Adaptations
+Automated field mapping for persistence:
+- `UserMentalState.inferred_at` → `mental_states.timestamp`
+- `SufferingEvent`: infer `detected_from` from context
+- `CompassionPlan.actions` → `description` (joined with ";")
+- `CompassionPlan.success_criteria` → `expected_outcome` (joined)
+
+#### Test Coverage
+- **16 unit tests** (DecisionRepository + QueryService) - All passing
+- **5 integration tests** (PFC + persistence) - All passing
+- **2 E2E tests** (requires real PostgreSQL) - Skipped by default
+- **Total consciousness tests**: **76 passed, 2 skipped**
+
+#### Lei II Compliance Enhanced
+Complete audit trail for all decisions:
+- Every decision persisted with full context
+- Query historical patterns and trends
+- Track escalations and interventions
+- Suffering event analytics
+- MIP evaluation history
+
+---
+
+### Updated Status
+- ✅ **Session 2 Next Step 1/4 COMPLETE** (PFC→MIP integration)
+- ✅ **Session 2 Next Step 2/4 COMPLETE** (Persistence layer)
+- ⏭️ Next: Add REST API endpoints for PFC
+
+---
+
 ## 🎯 CONCLUSION
 
 **SESSION 2: COMPLETE SUCCESS** 🏆
