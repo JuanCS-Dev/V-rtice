@@ -18,6 +18,8 @@ Governance: Constituição Vértice v2.5 - Padrão Pagani
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import logging
+import json
+import hashlib
 
 from compassion.social_memory_sqlite import (
     SocialMemorySQLite,
@@ -28,6 +30,14 @@ from compassion.confidence_tracker import ConfidenceTracker
 from compassion.contradiction_detector import ContradictionDetector
 
 logger = logging.getLogger(__name__)
+
+# Optional Redis import
+try:
+    import redis.asyncio as aioredis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    logger.warning("redis not available - ToM caching disabled")
 
 
 class ToMEngine:
@@ -54,6 +64,8 @@ class ToMEngine:
         cache_size: int = 100,
         decay_lambda: float = 0.01,
         contradiction_threshold: float = 0.5,
+        redis_url: Optional[str] = None,
+        redis_ttl: int = 60,
     ):
         """Initialize ToM Engine with all components.
 
@@ -62,6 +74,8 @@ class ToMEngine:
             cache_size: LRU cache capacity
             decay_lambda: Confidence decay rate per hour
             contradiction_threshold: Minimum delta for contradiction detection
+            redis_url: Redis URL for caching (e.g., "redis://localhost:6379")
+            redis_ttl: Redis cache TTL in seconds (default: 60)
         """
         # Social Memory (FASE 1)
         config = SocialMemorySQLiteConfig(db_path=db_path, cache_size=cache_size)
@@ -77,11 +91,22 @@ class ToMEngine:
             threshold=contradiction_threshold
         )
 
+        # Redis caching (optional)
+        self.redis_url = redis_url
+        self.redis_ttl = redis_ttl
+        self.redis: Optional[aioredis.Redis] = None
+        self._redis_enabled = False
+
+        # Cache statistics
+        self.cache_hits = 0
+        self.cache_misses = 0
+
         self._initialized = False
 
         logger.info(
             f"ToMEngine created: db={db_path}, cache={cache_size}, "
-            f"λ={decay_lambda}, threshold={contradiction_threshold}"
+            f"λ={decay_lambda}, threshold={contradiction_threshold}, "
+            f"redis={'enabled' if redis_url else 'disabled'}"
         )
 
     async def initialize(self) -> None:
@@ -91,6 +116,20 @@ class ToMEngine:
             return
 
         await self.social_memory.initialize()
+
+        # Initialize Redis if configured
+        if self.redis_url and REDIS_AVAILABLE:
+            try:
+                self.redis = aioredis.from_url(self.redis_url, decode_responses=True)
+                # Test connection
+                await self.redis.ping()
+                self._redis_enabled = True
+                logger.info(f"Redis cache enabled: {self.redis_url}, TTL={self.redis_ttl}s")
+            except Exception as e:
+                logger.warning(f"Redis connection failed: {e}, continuing without cache")
+                self.redis = None
+                self._redis_enabled = False
+
         self._initialized = True
 
         logger.info("ToMEngine initialized successfully")
@@ -101,6 +140,12 @@ class ToMEngine:
             return
 
         await self.social_memory.close()
+
+        # Close Redis connection
+        if self.redis:
+            await self.redis.close()
+            logger.info("Redis connection closed")
+
         self._initialized = False
 
         logger.info("ToMEngine closed")
@@ -187,21 +232,48 @@ class ToMEngine:
         """
         self._check_initialized()
 
+        # Try Redis cache first
+        if self._redis_enabled:
+            cache_key = f"tom:beliefs:{agent_id}:{include_confidence}"
+            try:
+                cached = await self.redis.get(cache_key)
+                if cached:
+                    self.cache_hits += 1
+                    return json.loads(cached)
+                else:
+                    self.cache_misses += 1
+            except Exception as e:
+                logger.debug(f"Redis cache read failed: {e}")
+                # Continue without cache
+
+        # Cache miss - compute from database
         try:
             beliefs = await self.social_memory.retrieve_patterns(agent_id)
         except PatternNotFoundError:
             return {}
 
         if not include_confidence:
-            return beliefs
+            result = beliefs
+        else:
+            # Add confidence scores
+            result = {}
+            for belief_key, value in beliefs.items():
+                confidence = self.confidence_tracker.calculate_confidence(
+                    agent_id, belief_key
+                )
+                result[belief_key] = {"value": value, "confidence": confidence}
 
-        # Add confidence scores
-        result = {}
-        for belief_key, value in beliefs.items():
-            confidence = self.confidence_tracker.calculate_confidence(
-                agent_id, belief_key
-            )
-            result[belief_key] = {"value": value, "confidence": confidence}
+        # Store in Redis cache
+        if self._redis_enabled and result:
+            cache_key = f"tom:beliefs:{agent_id}:{include_confidence}"
+            try:
+                await self.redis.setex(
+                    cache_key,
+                    self.redis_ttl,
+                    json.dumps(result)
+                )
+            except Exception as e:
+                logger.debug(f"Redis cache write failed: {e}")
 
         return result
 
@@ -277,7 +349,15 @@ class ToMEngine:
         total_agents = await self.social_memory.get_total_agents()
         contradiction_stats = self.contradiction_detector.get_stats()
 
-        return {
+        # Calculate Redis cache hit rate
+        total_cache_requests = self.cache_hits + self.cache_misses
+        cache_hit_rate = (
+            self.cache_hits / total_cache_requests
+            if total_cache_requests > 0
+            else 0.0
+        )
+
+        stats = {
             "total_agents": total_agents,
             "memory": {
                 "cache_hit_rate": memory_stats["cache_hit_rate"],
@@ -288,6 +368,20 @@ class ToMEngine:
                 "rate": contradiction_stats["global_contradiction_rate"],
             },
         }
+
+        # Add Redis cache stats if enabled
+        if self._redis_enabled:
+            stats["redis_cache"] = {
+                "enabled": True,
+                "hits": self.cache_hits,
+                "misses": self.cache_misses,
+                "hit_rate": cache_hit_rate,
+                "ttl_seconds": self.redis_ttl,
+            }
+        else:
+            stats["redis_cache"] = {"enabled": False}
+
+        return stats
 
     def __repr__(self) -> str:
         status = "INITIALIZED" if self._initialized else "NOT_INITIALIZED"
