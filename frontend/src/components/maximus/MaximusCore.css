@@ -5,8 +5,8 @@
  *
  * Design Philosophy: Cyberpunk Military Intelligence
  * Color Palette:
- * - Primary: Purple (var(--color-accent-primary) #8b5cf6)
- * - Secondary: Cyan (var(--color-accent-secondary) #06b6d4)
+ * - Primary: Purple (var(--color-accent-primary) #ef4444)
+ * - Secondary: Cyan (var(--color-accent-secondary) #f97316)
  * - Success: Green (#10b981)
  * - Warning: Orange (#f59e0b)
  * - Danger: Red (#ef4444)
@@ -136,7 +136,7 @@
 
 .panel-header {
   padding: var(--space-lg) var(--space-xl);
-  background: rgba(139, 92, 246, 0.05);
+  background: rgba(239, 68, 68, 0.05);
   border-bottom: 1px solid var(--color-border-primary);
 }
 
@@ -283,12 +283,12 @@
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
+  background: rgba(239, 68, 68, 0.3);
   border-radius: 4px;
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.5);
+  background: rgba(239, 68, 68, 0.5);
 }
 
 .chat-message {
@@ -314,8 +314,8 @@
 }
 
 .message-user {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
   border-left: 3px solid var(--color-accent-primary);
 }
 

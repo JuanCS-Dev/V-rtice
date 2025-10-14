@@ -32,8 +32,8 @@
 }
 
 .mode-badge.sleep {
-  border-color: #8b5cf6;
-  color: #8b5cf6;
+  border-color: #ef4444;
+  color: #ef4444;
   animation: pulse 3s ease-in-out infinite;
 }
 
@@ -206,15 +206,15 @@
 .priority-stats {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
 }
 
 .priority-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #a78bfa;
+  color: #fca5a5;
   margin: 0 0 1rem 0;
 }
 
@@ -378,8 +378,8 @@
 }
 
 .sleep-bar {
-  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+  background: linear-gradient(90deg, #ef4444, #fca5a5);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
 }
 
 .wake-bar {
@@ -413,7 +413,7 @@
 }
 
 .sleep-color {
-  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(90deg, #ef4444, #fca5a5);
 }
 
 .wake-color {
@@ -423,7 +423,7 @@
 /* Bio Inspiration */
 .bio-inspiration {
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(239, 68, 68, 0.1));
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 12px;
 }

@@ -23,7 +23,7 @@
   padding: var(--space-2xl);
   width: 90%;
   max-width: 480px;
-  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4), 0 0 100px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4), 0 0 100px rgba(239, 68, 68, 0.2);
   animation: modalSlideIn var(--transition-slow);
   position: relative;
   overflow: hidden;
@@ -83,7 +83,7 @@
 .input:focus {
   border-color: var(--color-accent-primary);
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 .input:disabled {
@@ -181,7 +181,7 @@
 
 .btnSubmit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
 }
 
 .btnCancel:disabled,

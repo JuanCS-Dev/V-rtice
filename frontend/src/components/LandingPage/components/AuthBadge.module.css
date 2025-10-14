@@ -89,7 +89,7 @@
 .loginBtn:hover,
 .loginBtn:focus-visible {
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
 }
 
 .loginBtn:active {

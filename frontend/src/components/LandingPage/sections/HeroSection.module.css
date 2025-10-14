@@ -173,7 +173,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-transform: uppercase;
-  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5));
+  filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.5));
   animation: glow 3s ease-in-out infinite;
 }
 

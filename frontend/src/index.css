@@ -17,9 +17,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════
+ * GLOBAL RESET - Remove espaço no topo e garantir 100% viewport
+ * ═══════════════════════════════════════════════════════════════════════ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-primary);
@@ -30,6 +46,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  height: 100%;
 }
 
 /* Hide scrollbar but keep functionality */

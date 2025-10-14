@@ -16,7 +16,7 @@
   background: var(--status-bg);
   border: var(--status-border);
   border-radius: 6px;
-  color: var(--color-accent-primary, #8B5CF6);
+  color: var(--color-accent-primary, #ef4444);
   font-size: 0.9rem;
   cursor: pointer;
   display: flex;

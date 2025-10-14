@@ -69,7 +69,7 @@
     box-shadow: var(--shadow-glow-purple);
   }
   50% {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 1);
+    box-shadow: 0 0 40px rgba(239, 68, 68, 1);
   }
 }
 

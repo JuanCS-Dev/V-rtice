@@ -8,7 +8,7 @@
   width: 100%;
   background: #0a0e1a;
   background-image:
-    radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 20% 50%, rgba(239, 68, 68, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 40% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 50%);
   color: #e0e6ed;
@@ -92,7 +92,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(139, 92, 246, 0.15));
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(239, 68, 68, 0.15));
   border: 1px solid rgba(0, 217, 255, 0.4);
   padding: 0.6rem 1.2rem;
   border-radius: 30px;
@@ -140,7 +140,7 @@
   font-weight: 900;
   margin: 0 0 1rem 0;
   line-height: 1.1;
-  background: linear-gradient(135deg, #00d9ff 0%, #8B5CF6 50%, #00ff88 100%);
+  background: linear-gradient(135deg, #00d9ff 0%, #ef4444 50%, #00ff88 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -178,7 +178,7 @@
 }
 
 .tag {
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(139, 92, 246, 0.1));
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(239, 68, 68, 0.1));
   border: 1px solid rgba(0, 217, 255, 0.3);
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
@@ -208,7 +208,7 @@
 }
 
 .tag:hover {
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(139, 92, 246, 0.2));
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(239, 68, 68, 0.2));
   border-color: #00d9ff;
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
@@ -322,7 +322,7 @@
   transform: translate(-50%, -50%);
   width: 120%;
   height: 120%;
-  border: 1px solid rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.08);
   border-radius: 50%;
   animation: rotate 30s linear infinite reverse;
 }
@@ -707,8 +707,8 @@
 
 /* Colors - Com gradiente AI único */
 .module-gradient-ai {
-  border-color: rgba(139, 92, 246, 0.4);
-  color: #8B5CF6;
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
 }
 
 .module-cyan {
@@ -747,9 +747,9 @@
 }
 
 .module-gradient-ai:hover {
-  border-color: #8B5CF6;
-  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(20, 25, 39, 0.8));
+  border-color: #ef4444;
+  box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4), 0 0 60px rgba(239, 68, 68, 0.2);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(20, 25, 39, 0.8));
 }
 
 .module-cyan:hover {
@@ -832,7 +832,7 @@
 }
 
 .feature-tag {
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(139, 92, 246, 0.08));
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(239, 68, 68, 0.08));
   border: 1px solid rgba(0, 217, 255, 0.2);
   padding: 0.4rem 1rem;
   border-radius: 6px;
@@ -844,7 +844,7 @@
 }
 
 .module-card:hover .feature-tag {
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(139, 92, 246, 0.15));
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(239, 68, 68, 0.15));
   border-color: rgba(0, 217, 255, 0.4);
   color: #e2e8f0;
   transform: translateY(-2px);

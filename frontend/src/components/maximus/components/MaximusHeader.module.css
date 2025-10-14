@@ -279,7 +279,7 @@
 
 .navButton:hover:not(.active) {
   background: var(--nav-button-hover-bg);
-  border-color: var(--color-accent-primary, #8B5CF6);
+  border-color: var(--color-accent-primary, #ef4444);
   color: var(--color-text-primary, #E2E8F0);
 }
 

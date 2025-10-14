@@ -97,8 +97,8 @@
 }
 
 .adaptive-column {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.1));
-  border-color: rgba(139, 92, 246, 0.5);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(124, 58, 237, 0.1));
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .column-title {
@@ -304,11 +304,11 @@
 
 .signal-effect {
   padding: 0.25rem 0.75rem;
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(239, 68, 68, 0.2);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #a78bfa;
+  color: #fca5a5;
   text-transform: uppercase;
 }
 
@@ -397,9 +397,9 @@
 }
 
 .memory-cell-card:hover {
-  border-color: #8b5cf6;
+  border-color: #ef4444;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .memory-header {
@@ -411,7 +411,7 @@
 
 .cell-type {
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -445,7 +445,7 @@
 .bio-inspiration {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(239, 68, 68, 0.1));
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 12px;
 }

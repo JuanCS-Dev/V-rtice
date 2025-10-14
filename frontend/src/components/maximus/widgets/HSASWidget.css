@@ -34,8 +34,8 @@
 }
 
 .learning-mode-badge[data-mode="model_based"] {
-  border-color: #8b5cf6;
-  color: #8b5cf6;
+  border-color: #ef4444;
+  color: #ef4444;
 }
 
 .learning-mode-badge[data-mode="hybrid"] {
@@ -119,8 +119,8 @@
 }
 
 .model-based-segment {
-  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
-  box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(90deg, #ef4444, #fca5a5);
+  box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.3);
 }
 
 .segment-label {
@@ -144,7 +144,7 @@
 }
 
 .model-based-color {
-  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(90deg, #ef4444, #fca5a5);
 }
 
 .legend-text {
