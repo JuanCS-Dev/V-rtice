@@ -68,7 +68,7 @@ export const OffensiveGateway = () => {
       color: 'red',
     },
     {
-      id: 'purple-team',
+      id: 'red-team',
       name: 'Purple Team Exercise',
       icon: '🟣',
       desc: 'BAS simulation → Detection correlation → Report',
@@ -80,22 +80,22 @@ export const OffensiveGateway = () => {
   return (
     <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
       {/* Header */}
-      <div className="border-b border-cyan-400/30 p-4 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-cyan-400 tracking-wider flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
               <span className="text-3xl">⚔️</span>
               OFFENSIVE GATEWAY
             </h2>
-            <p className="text-cyan-400/60 text-sm mt-1">
+            <p className="text-red-400/60 text-sm mt-1">
               Unified Orchestration | Multi-Service Workflows | Attack Chains | Port 8037
             </p>
           </div>
 
           <div className="flex gap-4">
-            <div className="bg-black/50 border border-cyan-400/30 rounded px-4 py-2">
-              <div className="text-cyan-400 text-xs">WORKFLOWS</div>
-              <div className="text-2xl font-bold text-cyan-400">{workflows.length || predefinedWorkflows.length}</div>
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">WORKFLOWS</div>
+              <div className="text-2xl font-bold text-red-400">{workflows.length || predefinedWorkflows.length}</div>
             </div>
             <div className="bg-black/50 border border-green-400/30 rounded px-4 py-2">
               <div className="text-green-400 text-xs">EXECUTIONS</div>
@@ -118,8 +118,8 @@ export const OffensiveGateway = () => {
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-2 rounded-t font-bold transition-all ${
                 activeTab === tab
-                  ? 'bg-cyan-400/20 text-cyan-400 border-b-2 border-cyan-400'
-                  : 'bg-black/30 text-cyan-400/50 hover:text-cyan-400'
+                  ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                  : 'bg-black/30 text-red-400/50 hover:text-red-400'
               }`}
             >
               {tab.toUpperCase()}
@@ -133,7 +133,7 @@ export const OffensiveGateway = () => {
         {activeTab === 'workflows' && (
           <div className="max-w-6xl mx-auto">
             <div className="mb-6">
-              <h3 className="text-cyan-400 font-bold text-xl mb-4 flex items-center gap-2">
+              <h3 className="text-red-400 font-bold text-xl mb-4 flex items-center gap-2">
                 <span>�</span>
                 PREDEFINED WORKFLOWS
               </h3>
@@ -174,7 +174,7 @@ export const OffensiveGateway = () => {
             {/* Custom Workflows */}
             {workflows.length > 0 && (
               <div>
-                <h3 className="text-cyan-400 font-bold text-xl mb-4 flex items-center gap-2">
+                <h3 className="text-red-400 font-bold text-xl mb-4 flex items-center gap-2">
                   <span>�</span>
                   CUSTOM WORKFLOWS
                 </h3>
@@ -182,16 +182,16 @@ export const OffensiveGateway = () => {
                   {workflows.map((workflow, idx) => (
                     <div
                       key={idx}
-                      className="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-400/30 rounded-lg p-4 hover:border-cyan-400 transition-all"
+                      className="bg-gradient-to-r from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-4 hover:border-red-400 transition-all"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="text-cyan-400 font-bold">{workflow.name}</h4>
-                          <p className="text-cyan-400/60 text-sm">{workflow.description}</p>
+                          <h4 className="text-red-400 font-bold">{workflow.name}</h4>
+                          <p className="text-red-400/60 text-sm">{workflow.description}</p>
                         </div>
                         <button
                           onClick={() => executeWorkflow(workflow.id)}
-                          className="px-6 py-2 bg-cyan-600 text-white font-bold rounded hover:bg-cyan-500 transition-all"
+                          className="px-6 py-2 bg-red-600 text-white font-bold rounded hover:bg-red-500 transition-all"
                         >
                           RUN
                         </button>
@@ -209,8 +209,8 @@ export const OffensiveGateway = () => {
             {executions.length === 0 ? (
               <div className="text-center py-20">
                 <div className="text-6xl mb-4 opacity-50">�</div>
-                <div className="text-cyan-400/50 text-xl font-bold">No Executions Yet</div>
-                <div className="text-cyan-400/30 text-sm mt-2">
+                <div className="text-red-400/50 text-xl font-bold">No Executions Yet</div>
+                <div className="text-red-400/30 text-sm mt-2">
                   Execute a workflow to see results here
                 </div>
               </div>
@@ -222,7 +222,7 @@ export const OffensiveGateway = () => {
                     execution.status === 'running'
                       ? 'border-orange-400/50 bg-gradient-to-r from-orange-900/20 to-red-900/20'
                       : execution.status === 'completed'
-                      ? 'border-green-400/50 bg-gradient-to-r from-green-900/20 to-cyan-900/20'
+                      ? 'border-green-400/50 bg-gradient-to-r from-green-900/20 to-orange-900/20'
                       : 'border-red-400/50 bg-gradient-to-r from-red-900/20 to-pink-900/20'
                   }`}
                 >
@@ -273,9 +273,9 @@ export const OffensiveGateway = () => {
                   {/* Results Summary */}
                   {execution.results && (
                     <div className="grid grid-cols-4 gap-3 mt-4">
-                      <div className="bg-black/50 border border-cyan-400/30 rounded p-3 text-center">
-                        <div className="text-cyan-400 text-xl font-bold">{execution.results.hosts_scanned || 0}</div>
-                        <div className="text-cyan-400/60 text-xs">Hosts Scanned</div>
+                      <div className="bg-black/50 border border-red-400/30 rounded p-3 text-center">
+                        <div className="text-red-400 text-xl font-bold">{execution.results.hosts_scanned || 0}</div>
+                        <div className="text-red-400/60 text-xs">Hosts Scanned</div>
                       </div>
                       <div className="bg-black/50 border border-orange-400/30 rounded p-3 text-center">
                         <div className="text-orange-400 text-xl font-bold">{execution.results.vulns_found || 0}</div>
@@ -299,15 +299,15 @@ export const OffensiveGateway = () => {
 
         {activeTab === 'builder' && (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-400/30 rounded-lg p-8 text-center">
+            <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-8 text-center">
               <div className="text-6xl mb-4">='</div>
-              <h3 className="text-cyan-400 font-bold text-2xl mb-4">
+              <h3 className="text-red-400 font-bold text-2xl mb-4">
                 Workflow Builder
               </h3>
-              <p className="text-cyan-400/60 mb-6">
+              <p className="text-red-400/60 mb-6">
                 Visual workflow builder for creating custom multi-service attack chains
               </p>
-              <button className="px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg">
+              <button className="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-lg hover:from-red-500 hover:to-orange-500 transition-all shadow-lg">
                 =� LAUNCH BUILDER (COMING SOON)
               </button>
             </div>
@@ -316,8 +316,8 @@ export const OffensiveGateway = () => {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-cyan-400/30 bg-black/50 p-3">
-        <div className="flex justify-between text-xs text-cyan-400/60">
+      <div className="border-t border-red-400/30 bg-black/50 p-3">
+        <div className="flex justify-between text-xs text-red-400/60">
           <div className="flex gap-4">
             <span>STATUS: {isLoading ? '=� LOADING' : '=� READY'}</span>
             <span>SERVICES: 6 Connected</span>

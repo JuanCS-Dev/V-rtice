@@ -30,8 +30,8 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
               px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2
               ${
                 searchType === type.id
-                  ? 'bg-purple-400/20 text-purple-400 border-2 border-purple-400'
-                  : 'bg-black/30 text-purple-400/50 border-2 border-purple-400/20 hover:text-purple-400'
+                  ? 'bg-red-400/20 text-red-400 border-2 border-red-400'
+                  : 'bg-black/30 text-red-400/50 border-2 border-red-400/20 hover:text-red-400'
               }
             `}
           >
@@ -51,13 +51,13 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={activeSearchType?.placeholder || 'Enter search query...'}
-          className="w-full bg-gradient-to-r from-purple-900/20 to-pink-900/20 border-2 border-purple-400/30 rounded-lg pl-16 pr-32 py-4 text-purple-400 font-mono text-lg focus:outline-none focus:border-purple-400 transition-all placeholder-purple-400/30"
+          className="w-full bg-gradient-to-r from-red-900/20 to-pink-900/20 border-2 border-red-400/30 rounded-lg pl-16 pr-32 py-4 text-red-400 font-mono text-lg focus:outline-none focus:border-red-400 transition-all placeholder-red-400/30"
           disabled={isLoading}
         />
         <button
           type="submit"
           disabled={isLoading || !query.trim()}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-400/20"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold rounded-lg hover:from-red-500 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-400/20"
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
 
       {/* Quick Searches */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-purple-400/50 text-sm">Quick search:</span>
+        <span className="text-red-400/50 text-sm">Quick search:</span>
         {[
           { label: 'CVE-2024-21412', type: 'cve' },
           { label: 'Apache Log4j', type: 'product' },
@@ -88,7 +88,7 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
               setSearchType(quick.type);
               setQuery(quick.label);
             }}
-            className="px-3 py-1 bg-black/30 text-purple-400/70 text-xs rounded border border-purple-400/20 hover:border-purple-400 hover:text-purple-400 transition-all"
+            className="px-3 py-1 bg-black/30 text-red-400/70 text-xs rounded border border-red-400/20 hover:border-red-400 hover:text-red-400 transition-all"
           >
             {quick.label}
           </button>

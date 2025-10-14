@@ -54,8 +54,8 @@ export const AttackMatrix = ({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left: Tactics Selection */}
       <div className="space-y-4">
-        <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-2 border-purple-400/40 rounded-lg p-6">
-          <h3 className="text-purple-400 font-bold text-lg mb-4 flex items-center gap-2">
+        <div className="bg-gradient-to-br from-red-900/30 to-pink-900/30 border-2 border-red-400/40 rounded-lg p-6">
+          <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2">
             <span className="text-2xl">🎯</span>
             MITRE ATT&CK TACTICS
           </h3>
@@ -73,17 +73,17 @@ export const AttackMatrix = ({
                     w-full p-3 rounded-lg border-2 transition-all text-left
                     ${isSelected
                       ? `bg-${color}-400/20 border-${color}-400`
-                      : 'bg-black/30 border-purple-400/20 hover:border-purple-400'
+                      : 'bg-black/30 border-red-400/20 hover:border-red-400'
                     }
                   `}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{tactic.icon}</span>
                     <div className="flex-1">
-                      <div className={`font-bold text-sm ${isSelected ? `text-${color}-400` : 'text-purple-400/80'}`}>
+                      <div className={`font-bold text-sm ${isSelected ? `text-${color}-400` : 'text-red-400/80'}`}>
                         {tactic.name}
                       </div>
-                      <div className="text-purple-400/50 text-xs font-mono">
+                      <div className="text-red-400/50 text-xs font-mono">
                         {tactic.id}
                       </div>
                     </div>
@@ -100,15 +100,15 @@ export const AttackMatrix = ({
         {selectedTactic ? (
           <>
             {/* Techniques List */}
-            <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-400/30 rounded-lg p-6">
+            <div className="bg-gradient-to-br from-red-900/20 to-pink-900/20 border border-red-400/30 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-purple-400 font-bold text-lg flex items-center gap-2">
+                <h3 className="text-red-400 font-bold text-lg flex items-center gap-2">
                   <span className="text-2xl">{selectedTactic.icon}</span>
                   {selectedTactic.name} Techniques
                 </h3>
-                <div className="bg-black/50 border border-purple-400/30 rounded px-3 py-1">
-                  <span className="text-purple-400 font-bold">{tacticTechniques.length}</span>
-                  <span className="text-purple-400/60 text-xs ml-1">techniques</span>
+                <div className="bg-black/50 border border-red-400/30 rounded px-3 py-1">
+                  <span className="text-red-400 font-bold">{tacticTechniques.length}</span>
+                  <span className="text-red-400/60 text-xs ml-1">techniques</span>
                 </div>
               </div>
 
@@ -152,12 +152,12 @@ export const AttackMatrix = ({
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-purple-400/20">
+                      <div className="flex items-center justify-between pt-2 border-t border-red-400/20">
                         <span className={`px-2 py-1 bg-${color}-400/10 border border-${color}-400/30 rounded text-${color}-400 text-xs font-bold`}>
                           {technique.severity.toUpperCase()}
                         </span>
                         {isSelected && (
-                          <span className="text-purple-400/60 text-xs">
+                          <span className="text-red-400/60 text-xs">
                             Click to deselect
                           </span>
                         )}
@@ -170,8 +170,8 @@ export const AttackMatrix = ({
 
             {/* Simulation Configuration */}
             {simulationConfig.techniqueId && (
-              <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-2 border-cyan-400/30 rounded-lg p-6">
-                <h3 className="text-cyan-400 font-bold text-lg mb-4 flex items-center gap-2">
+              <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border-2 border-red-400/30 rounded-lg p-6">
+                <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2">
                   <span className="text-2xl">⚙️</span>
                   SIMULATION CONFIGURATION
                 </h3>
@@ -179,20 +179,20 @@ export const AttackMatrix = ({
                 <div className="space-y-4">
                   {/* Target Host */}
                   <div>
-                    <label htmlFor="input-target-host-iga50" className="text-cyan-400/60 text-xs mb-2 block">TARGET HOST</label>
+                    <label htmlFor="input-target-host-iga50" className="text-red-400/60 text-xs mb-2 block">TARGET HOST</label>
 <input id="input-target-host-iga50"
                       type="text"
                       value={simulationConfig.targetHost}
                       onChange={(e) => setSimulationConfig({ ...simulationConfig, targetHost: e.target.value })}
                       placeholder="192.168.1.100"
-                      className="w-full bg-black/30 border border-cyan-400/30 rounded px-4 py-2 text-cyan-400 font-mono focus:outline-none focus:border-cyan-400 transition-all"
+                      className="w-full bg-black/30 border border-red-400/30 rounded px-4 py-2 text-red-400 font-mono focus:outline-none focus:border-red-400 transition-all"
                       disabled={isSimulating}
                     />
                   </div>
 
                   {/* Platform */}
                   <div>
-                    <span className="text-cyan-400/60 text-xs mb-2 block">PLATFORM</span>
+                    <span className="text-red-400/60 text-xs mb-2 block">PLATFORM</span>
                     <div className="grid grid-cols-3 gap-2">
                       {platforms.map(platform => (
                         <button
@@ -202,14 +202,14 @@ export const AttackMatrix = ({
                           className={`
                             p-3 rounded border-2 transition-all
                             ${simulationConfig.platform === platform.id
-                              ? 'bg-cyan-400/20 border-cyan-400'
-                              : 'bg-black/30 border-cyan-400/20 hover:border-cyan-400'
+                              ? 'bg-red-400/20 border-red-400'
+                              : 'bg-black/30 border-red-400/20 hover:border-red-400'
                             }
                             ${isSimulating ? 'opacity-50 cursor-not-allowed' : ''}
                           `}
                         >
                           <div className="text-2xl mb-1">{platform.icon}</div>
-                          <div className={`text-xs font-bold ${simulationConfig.platform === platform.id ? 'text-cyan-400' : 'text-cyan-400/60'}`}>
+                          <div className={`text-xs font-bold ${simulationConfig.platform === platform.id ? 'text-red-400' : 'text-red-400/60'}`}>
                             {platform.name}
                           </div>
                         </button>
@@ -221,7 +221,7 @@ export const AttackMatrix = ({
                   <button
                     onClick={handleRunSimulation}
                     disabled={isSimulating || !simulationConfig.targetHost}
-                    className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl shadow-purple-400/30 flex items-center justify-center gap-3"
+                    className="w-full py-4 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold text-lg rounded-lg hover:from-red-500 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl shadow-red-400/30 flex items-center justify-center gap-3"
                   >
                     {isSimulating ? (
                       <>
@@ -242,10 +242,10 @@ export const AttackMatrix = ({
         ) : (
           <div className="text-center py-20">
             <div className="text-6xl mb-4 opacity-50">🎯</div>
-            <div className="text-purple-400/50 text-xl font-bold">
+            <div className="text-red-400/50 text-xl font-bold">
               Select a Tactic
             </div>
-            <div className="text-purple-400/30 text-sm mt-2">
+            <div className="text-red-400/30 text-sm mt-2">
               Choose a MITRE ATT&CK tactic to view available techniques
             </div>
           </div>

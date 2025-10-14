@@ -47,14 +47,14 @@ export const NetworkRecon = () => {
   return (
     <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
       {/* Header */}
-      <div className="border-b border-cyan-400/30 p-4 bg-gradient-to-r from-cyan-900/20 to-blue-900/20">
+      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-cyan-400 tracking-wider flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
               <span className="text-3xl">🔍</span>
               NETWORK RECONNAISSANCE
             </h2>
-            <p className="text-cyan-400/60 text-sm mt-1">
+            <p className="text-red-400/60 text-sm mt-1">
               Masscan + Nmap + Service Detection | Port 8032
             </p>
           </div>
@@ -74,9 +74,9 @@ export const NetworkRecon = () => {
             />
 
             {/* Stats Cards */}
-            <div className="bg-black/50 border border-cyan-400/30 rounded px-4 py-2">
-              <div className="text-cyan-400 text-xs">ACTIVE SCANS</div>
-              <div className="text-2xl font-bold text-cyan-400">
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">ACTIVE SCANS</div>
+              <div className="text-2xl font-bold text-red-400">
                 {activeScans.length}
               </div>
             </div>
@@ -88,9 +88,9 @@ export const NetworkRecon = () => {
               </div>
             </div>
 
-            <div className="bg-black/50 border border-purple-400/30 rounded px-4 py-2">
-              <div className="text-purple-400 text-xs">TOTAL HOSTS</div>
-              <div className="text-2xl font-bold text-purple-400">
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">TOTAL HOSTS</div>
+              <div className="text-2xl font-bold text-red-400">
                 {scans.reduce((acc, s) => acc + (s.hosts_found || 0), 0)}
               </div>
             </div>
@@ -103,8 +103,8 @@ export const NetworkRecon = () => {
             onClick={() => setActiveTab('scan')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'scan'
-                ? 'bg-cyan-400/20 text-cyan-400 border-b-2 border-cyan-400'
-                : 'bg-black/30 text-cyan-400/50 hover:text-cyan-400'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
           >
             🎯 NEW SCAN
@@ -130,8 +130,8 @@ export const NetworkRecon = () => {
             onClick={() => setActiveTab('history')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'history'
-                ? 'bg-purple-400/20 text-purple-400 border-b-2 border-purple-400'
-                : 'bg-black/30 text-purple-400/50 hover:text-purple-400'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
           >
             📚 HISTORY
@@ -139,7 +139,7 @@ export const NetworkRecon = () => {
 
           <button
             onClick={refreshScans}
-            className="ml-auto px-4 py-2 bg-black/30 text-cyan-400/70 hover:text-cyan-400 rounded-t border border-cyan-400/30 hover:border-cyan-400 transition-all"
+            className="ml-auto px-4 py-2 bg-black/30 text-red-400/70 hover:text-red-400 rounded-t border border-red-400/30 hover:border-red-400 transition-all"
           >
             🔄 REFRESH
           </button>
@@ -181,8 +181,8 @@ export const NetworkRecon = () => {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-cyan-400/30 bg-black/50 p-3">
-        <div className="flex justify-between items-center text-xs text-cyan-400/60">
+      <div className="border-t border-red-400/30 bg-black/50 p-3">
+        <div className="flex justify-between items-center text-xs text-red-400/60">
           <div className="flex gap-4">
             <span>STATUS: {isScanning ? '🟢 SCANNING' : '🔵 READY'}</span>
             <span>ENGINE: Masscan v1.3.2 + Nmap v7.94</span>

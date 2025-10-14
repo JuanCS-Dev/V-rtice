@@ -19,7 +19,7 @@
   width: 100%;
   padding: var(--space-3) var(--space-4);
   background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(168, 85, 247, 0.5);
+  border: 1px solid rgba(239, 68, 68, 0.5);
   border-radius: var(--radius-md);
   color: #fff;
   font-family: var(--font-mono);
@@ -29,13 +29,13 @@
 }
 
 .input::placeholder {
-  color: rgba(168, 85, 247, 0.5);
+  color: rgba(239, 68, 68, 0.5);
   font-family: var(--font-mono);
 }
 
 .input:focus {
   border-color: var(--color-osint-primary);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
   background: rgba(0, 0, 0, 0.7);
 }
 
@@ -94,10 +94,10 @@
 }
 
 .platformButton.active {
-  background: rgba(168, 85, 247, 0.2); /* --color-osint-primary with alpha */
+  background: rgba(239, 68, 68, 0.2); /* --color-osint-primary with alpha */
   border-color: var(--color-osint-primary);
   color: var(--color-osint-primary);
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 .platformButton:disabled {

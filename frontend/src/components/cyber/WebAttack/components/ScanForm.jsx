@@ -130,8 +130,8 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
       </div>
 
       {/* Authentication (Optional) */}
-      <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-2 border-cyan-400/30 rounded-lg p-6">
-        <div className="text-cyan-400 font-bold text-sm flex items-center gap-2 mb-4">
+      <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border-2 border-red-400/30 rounded-lg p-6">
+        <div className="text-red-400 font-bold text-sm flex items-center gap-2 mb-4">
           <span className="text-xl">🔐</span>
           AUTHENTICATION (Optional)
         </div>
@@ -140,13 +140,13 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           <input
             type="text"
             placeholder="Username"
-            className="bg-black/30 border border-cyan-400/30 rounded px-4 py-2 text-cyan-400 placeholder-cyan-400/30 focus:outline-none focus:border-cyan-400 transition-all"
+            className="bg-black/30 border border-red-400/30 rounded px-4 py-2 text-red-400 placeholder-red-400/30 focus:outline-none focus:border-red-400 transition-all"
             disabled={isScanning}
           />
           <input
             type="password"
             placeholder="Password"
-            className="bg-black/30 border border-cyan-400/30 rounded px-4 py-2 text-cyan-400 placeholder-cyan-400/30 focus:outline-none focus:border-cyan-400 transition-all"
+            className="bg-black/30 border border-red-400/30 rounded px-4 py-2 text-red-400 placeholder-red-400/30 focus:outline-none focus:border-red-400 transition-all"
             disabled={isScanning}
           />
         </div>

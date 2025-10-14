@@ -47,12 +47,12 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
         inactive: 'bg-green-500/10 text-green-400 border-green-400/30 hover:bg-green-500/20 hover:border-green-400'
       },
       cyan: {
-        active: 'bg-cyan-500 text-black border-cyan-400',
-        inactive: 'bg-cyan-500/10 text-cyan-400 border-cyan-400/30 hover:bg-cyan-500/20 hover:border-cyan-400'
+        active: 'bg-red-500 text-black border-red-400',
+        inactive: 'bg-red-500/10 text-red-400 border-red-400/30 hover:bg-red-500/20 hover:border-red-400'
       },
       purple: {
-        active: 'bg-purple-500 text-white border-purple-400',
-        inactive: 'bg-purple-500/10 text-purple-400 border-purple-400/30 hover:bg-purple-500/20 hover:border-purple-400'
+        active: 'bg-red-500 text-white border-red-400',
+        inactive: 'bg-red-500/10 text-red-400 border-red-400/30 hover:bg-red-500/20 hover:border-red-400'
       },
       orange: {
         active: 'bg-orange-500 text-white border-orange-400',
@@ -132,7 +132,7 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
 
       {/* Barra de Consulta (apenas no módulo principal) */}
       {currentView === 'main' && (
-        <div className="p-4 bg-gradient-to-r from-green-900/20 to-blue-900/20">
+        <div className="p-4 bg-gradient-to-r from-green-900/20 to-orange-900/20">
           <div className="flex items-center space-x-4">
             <div className="flex-1 relative">
               <input

@@ -62,7 +62,7 @@ export const PendingPatchCard = ({ patch, isSelected, onSelect }) => {
         getSeverityColor(patch.severity)
       } ${
         isSelected 
-          ? 'border-4 border-cyan-400 shadow-2xl shadow-cyan-500/50 scale-105' 
+          ? 'border-4 border-red-400 shadow-2xl shadow-red-500/50 scale-105' 
           : 'border-2 hover:border-opacity-100'
       }`}
     >
@@ -143,11 +143,11 @@ export const PendingPatchCard = ({ patch, isSelected, onSelect }) => {
         </div>
 
         {isSelected ? (
-          <span className="text-xs font-bold text-cyan-400 animate-pulse">
+          <span className="text-xs font-bold text-red-400 animate-pulse">
             SELECTED ▼
           </span>
         ) : (
-          <span className="text-xs text-gray-500 group-hover:text-cyan-400 transition-colors">
+          <span className="text-xs text-gray-500 group-hover:text-red-400 transition-colors">
             Click to review →
           </span>
         )}

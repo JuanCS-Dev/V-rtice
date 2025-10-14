@@ -108,7 +108,7 @@
   background: var(--bg-secondary);
   border-left-color: var(--color-osint-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 }
 
 .platformHeader {

@@ -97,20 +97,20 @@ const UsernameModule = () => {
 
   return (
     <div className="space-y-6">
-      <div className="border border-purple-400/50 rounded-lg bg-purple-400/5 p-6">
-        <h2 className="text-purple-400 font-bold text-2xl mb-4 tracking-wider">
+      <div className="border border-red-400/50 rounded-lg bg-red-400/5 p-6">
+        <h2 className="text-red-400 font-bold text-2xl mb-4 tracking-wider">
           👤 USERNAME HUNTER
         </h2>
-        <p className="text-purple-400/70 text-sm mb-6">
+        <p className="text-red-400/70 text-sm mb-6">
           Busca avançada de usernames em múltiplas plataformas sociais e profissionais
         </p>
 
         {/* Search Input */}
         <div className="space-y-4 mb-6">
           <div className="space-y-2">
-            <label htmlFor="input-username-alvo-fibyx" className="text-purple-400/80 text-xs font-bold tracking-wider">USERNAME ALVO</label>
+            <label htmlFor="input-username-alvo-fibyx" className="text-red-400/80 text-xs font-bold tracking-wider">USERNAME ALVO</label>
 <input id="input-username-alvo-fibyx"
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono text-lg"
+              className="w-full bg-black/70 border border-red-400/50 text-red-400 placeholder-red-400/50 p-3 rounded-lg focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 font-mono text-lg"
               placeholder="Digite o username..."
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -119,7 +119,7 @@ const UsernameModule = () => {
           </div>
 
           <button
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider disabled:opacity-50"
             onClick={handleSearch}
             disabled={searching}
           >
@@ -129,9 +129,9 @@ const UsernameModule = () => {
 
         {/* Results */}
         {results && (
-          <div className="bg-black/50 border border-purple-400/30 rounded-lg p-6 max-h-[600px] overflow-y-auto" style={{
+          <div className="bg-black/50 border border-red-400/30 rounded-lg p-6 max-h-[600px] overflow-y-auto" style={{
             scrollbarWidth: 'thin',
-            scrollbarColor: '#a855f7 rgba(0,0,0,0.3)'
+            scrollbarColor: '#ef4444 rgba(0,0,0,0.3)'
           }}>
             <style jsx>{`
               div::-webkit-scrollbar {
@@ -142,16 +142,16 @@ const UsernameModule = () => {
                 border-radius: 4px;
               }
               div::-webkit-scrollbar-thumb {
-                background: #a855f7;
+                background: #ef4444;
                 border-radius: 4px;
               }
               div::-webkit-scrollbar-thumb:hover {
-                background: #c084fc;
+                background: #f87171;
               }
             `}</style>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-purple-400 font-bold text-lg">RESULTADOS DA BUSCA</h3>
-              <div className="text-purple-400/60 text-sm">
+              <h3 className="text-red-400 font-bold text-lg">RESULTADOS DA BUSCA</h3>
+              <div className="text-red-400/60 text-sm">
                 Encontrado em {results.total_found} plataforma(s) | Confiança: {results.confidence_score}%
               </div>
             </div>
@@ -187,7 +187,7 @@ const UsernameModule = () => {
 
             {/* Action Buttons */}
             <div className="flex space-x-2 mt-6">
-              <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-2 px-4 rounded text-sm hover:from-blue-500 hover:to-blue-600 transition-all">
+              <button className="flex-1 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold py-2 px-4 rounded text-sm hover:from-orange-500 hover:to-orange-600 transition-all">
                 📊 ANÁLISE DETALHADA
               </button>
               <button className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-2 px-4 rounded text-sm hover:from-green-500 hover:to-green-600 transition-all">
@@ -201,11 +201,11 @@ const UsernameModule = () => {
         )}
 
         {/* Popular Platforms Info */}
-        <div className="mt-6 bg-purple-400/10 border border-purple-400/30 rounded-lg p-4">
-          <h4 className="text-purple-400 font-bold mb-3">PLATAFORMAS MONITORADAS</h4>
+        <div className="mt-6 bg-red-400/10 border border-red-400/30 rounded-lg p-4">
+          <h4 className="text-red-400 font-bold mb-3">PLATAFORMAS MONITORADAS</h4>
           <div className="grid grid-cols-4 gap-2 text-xs">
             {['Twitter/X', 'Instagram', 'Facebook', 'LinkedIn', 'GitHub', 'Reddit', 'Discord', 'TikTok', 'YouTube', 'Telegram', 'WhatsApp', 'Snapchat'].map((platform, idx) => (
-              <div key={idx} className="bg-black/30 p-2 rounded text-center text-purple-400/70">
+              <div key={idx} className="bg-black/30 p-2 rounded text-center text-red-400/70">
                 {platform}
               </div>
             ))}

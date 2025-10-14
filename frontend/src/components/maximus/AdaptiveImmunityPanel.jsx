@@ -112,7 +112,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
       <div className="flex items-center justify-center h-full bg-gray-900">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse">🧬</div>
-          <div className="text-cyan-400 text-xl">Loading Adaptive Immunity metrics...</div>
+          <div className="text-red-400 text-xl">Loading Adaptive Immunity metrics...</div>
           <div className="text-gray-500 text-sm mt-2">Initializing ML monitoring</div>
         </div>
       </div>
@@ -152,9 +152,9 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
   return (
     <div className="adaptive-immunity-panel p-6 space-y-6 bg-gray-900 min-h-screen text-white">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-cyan-800 pb-4">
+      <div className="flex items-center justify-between border-b border-red-800 pb-4">
         <div>
-          <h2 className="text-3xl font-bold text-cyan-400 flex items-center gap-3">
+          <h2 className="text-3xl font-bold text-red-400 flex items-center gap-3">
             <span className="text-4xl">🧬</span>
             Adaptive Immunity System
           </h2>
@@ -171,7 +171,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
               onClick={() => setTimeRange(range)}
               className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                 timeRange === range 
-                  ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/50' 
+                  ? 'bg-red-600 text-white shadow-lg shadow-red-500/50' 
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
               }`}
             >
@@ -187,7 +187,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           onClick={() => setActiveTab('ml')}
           className={`px-6 py-3 rounded-t-lg font-bold transition-all ${
             activeTab === 'ml'
-              ? 'bg-gradient-to-b from-cyan-600 to-cyan-700 text-white shadow-lg shadow-cyan-500/50 border-b-4 border-cyan-400'
+              ? 'bg-gradient-to-b from-red-600 to-red-700 text-white shadow-lg shadow-red-500/50 border-b-4 border-red-400'
               : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200 border-b-2 border-transparent'
           }`}
         >
@@ -199,7 +199,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           onClick={() => setActiveTab('hitl')}
           className={`px-6 py-3 rounded-t-lg font-bold transition-all relative ${
             activeTab === 'hitl'
-              ? 'bg-gradient-to-b from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/50 border-b-4 border-purple-400'
+              ? 'bg-gradient-to-b from-red-600 to-orange-700 text-white shadow-lg shadow-red-500/50 border-b-4 border-red-400'
               : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200 border-b-2 border-transparent'
           }`}
         >
@@ -213,7 +213,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           onClick={() => setActiveTab('ab-testing')}
           className={`px-6 py-3 rounded-t-lg font-bold transition-all ${
             activeTab === 'ab-testing'
-              ? 'bg-gradient-to-b from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/50 border-b-4 border-blue-400'
+              ? 'bg-gradient-to-b from-orange-600 to-orange-700 text-white shadow-lg shadow-orange-500/50 border-b-4 border-orange-400'
               : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200 border-b-2 border-transparent'
           }`}
         >
@@ -230,9 +230,9 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           {/* ORIGINAL ML CONTENT GOES HERE */}
           {/* KPI Cards */}
           <div className="grid grid-cols-4 gap-4">
-        <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/50 hover:border-cyan-500 transition-all">
+        <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-red-500/50 hover:border-red-500 transition-all">
           <div className="text-gray-400 text-sm font-semibold">Total Predictions</div>
-          <div className="text-4xl font-bold text-cyan-400 my-2">
+          <div className="text-4xl font-bold text-red-400 my-2">
             {mlStats?.total_predictions || 0}
           </div>
           <div className="text-xs text-gray-500">
@@ -250,9 +250,9 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           </div>
         </Card>
 
-        <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-purple-500/50 hover:border-purple-500 transition-all">
+        <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-red-500/50 hover:border-red-500 transition-all">
           <div className="text-gray-400 text-sm font-semibold">Avg Confidence</div>
-          <div className="text-4xl font-bold text-purple-400 my-2">
+          <div className="text-4xl font-bold text-red-400 my-2">
             {((mlStats?.avg_confidence || 0) * 100).toFixed(1)}%
           </div>
           <div className="text-xs text-gray-500">
@@ -275,7 +275,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
       <div className="grid grid-cols-2 gap-4">
         {/* Pie Chart: Validation Method Mix */}
         <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700">
-          <h3 className="text-lg font-bold text-cyan-400 mb-4">
+          <h3 className="text-lg font-bold text-red-400 mb-4">
             Validation Method Distribution
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -301,7 +301,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
 
         {/* Bar Chart: Confidence Distribution */}
         <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700">
-          <h3 className="text-lg font-bold text-cyan-400 mb-4">
+          <h3 className="text-lg font-bold text-red-400 mb-4">
             ML Confidence Score Distribution
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -325,7 +325,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
       <div className="grid grid-cols-2 gap-4">
         {/* Time Savings Chart */}
         <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700">
-          <h3 className="text-lg font-bold text-cyan-400 mb-4">
+          <h3 className="text-lg font-bold text-red-400 mb-4">
             Execution Time Comparison
           </h3>
           <div className="space-y-6">
@@ -361,9 +361,9 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
               </div>
             </div>
 
-            <div className="text-center bg-cyan-900/30 border border-cyan-700 rounded-lg p-4 mt-6">
+            <div className="text-center bg-red-900/30 border border-red-700 rounded-lg p-4 mt-6">
               <div className="text-sm text-gray-400 mb-1">Speedup Factor</div>
-              <div className="text-4xl font-bold text-cyan-400">
+              <div className="text-4xl font-bold text-red-400">
                 ⚡ {speedupFactor}x
               </div>
               <div className="text-xs text-gray-500 mt-1">faster with ML</div>
@@ -374,7 +374,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
         {/* Accuracy Metrics (Phase 5.6 - A/B Testing) */}
         <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-cyan-400">
+            <h3 className="text-lg font-bold text-red-400">
               🎯 ML Accuracy Metrics
             </h3>
             {accuracyData && (
@@ -386,7 +386,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
           
           {accuracyLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="text-cyan-400 animate-pulse">Loading A/B test results...</div>
+              <div className="text-red-400 animate-pulse">Loading A/B test results...</div>
             </div>
           ) : accuracyError ? (
             <div className="flex items-center justify-center h-full">
@@ -429,8 +429,8 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
                     </div>
                     <div className="text-gray-500 text-xs mt-1">FP</div>
                   </div>
-                  <div className="text-center bg-cyan-900/30 border border-cyan-700 rounded p-3">
-                    <div className="text-2xl font-bold text-cyan-400">
+                  <div className="text-center bg-red-900/30 border border-red-700 rounded p-3">
+                    <div className="text-2xl font-bold text-red-400">
                       {accuracyData.confusion_matrix.true_negative}
                     </div>
                     <div className="text-gray-500 text-xs mt-1">TN</div>
@@ -447,22 +447,22 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
                   <div className="text-gray-400 text-xs mt-1">Overall Accuracy</div>
                   <div className="text-gray-600 text-xs mt-1">Total correctness</div>
                 </div>
-                <div className="text-center bg-blue-900/30 border border-blue-700 rounded-lg p-3">
-                  <div className="text-3xl font-bold text-blue-400">
+                <div className="text-center bg-orange-900/30 border border-orange-700 rounded-lg p-3">
+                  <div className="text-3xl font-bold text-orange-400">
                     {(accuracyData.metrics.precision * 100).toFixed(1)}%
                   </div>
                   <div className="text-gray-400 text-xs mt-1">Precision</div>
                   <div className="text-gray-600 text-xs mt-1">When ML says "valid"</div>
                 </div>
-                <div className="text-center bg-purple-900/30 border border-purple-700 rounded-lg p-3">
-                  <div className="text-3xl font-bold text-purple-400">
+                <div className="text-center bg-red-900/30 border border-red-700 rounded-lg p-3">
+                  <div className="text-3xl font-bold text-red-400">
                     {(accuracyData.metrics.recall * 100).toFixed(1)}%
                   </div>
                   <div className="text-gray-400 text-xs mt-1">Recall</div>
                   <div className="text-gray-600 text-xs mt-1">% truly valid caught</div>
                 </div>
-                <div className="text-center bg-cyan-900/30 border border-cyan-700 rounded-lg p-3">
-                  <div className="text-3xl font-bold text-cyan-400">
+                <div className="text-center bg-red-900/30 border border-red-700 rounded-lg p-3">
+                  <div className="text-3xl font-bold text-red-400">
                     {(accuracyData.metrics.f1_score * 100).toFixed(1)}%
                   </div>
                   <div className="text-gray-400 text-xs mt-1">F1 Score</div>
@@ -489,7 +489,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
 
       {/* Recent Predictions Table */}
       <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700">
-        <h3 className="text-lg font-bold text-cyan-400 mb-4">
+        <h3 className="text-lg font-bold text-red-400 mb-4">
           Recent Predictions (Last 20)
         </h3>
         {predLoading ? (
@@ -518,12 +518,12 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
                       {new Date(pred.timestamp).toLocaleTimeString()}
                     </td>
                     <td className="p-3">
-                      <code className="text-cyan-400 text-xs bg-cyan-900/30 px-2 py-1 rounded">
+                      <code className="text-red-400 text-xs bg-red-900/30 px-2 py-1 rounded">
                         {pred.cve_id}
                       </code>
                     </td>
                     <td className="p-3">
-                      <code className="text-purple-400 text-xs bg-purple-900/30 px-2 py-1 rounded">
+                      <code className="text-red-400 text-xs bg-red-900/30 px-2 py-1 rounded">
                         {pred.patch_id}
                       </code>
                     </td>
@@ -569,7 +569,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
       </Card>
 
       {/* System Status Footer */}
-      <Card className="p-4 bg-gradient-to-r from-cyan-900/30 to-green-900/30 border-2 border-cyan-500/50">
+      <Card className="p-4 bg-gradient-to-r from-red-900/30 to-green-900/30 border-2 border-red-500/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="text-green-400 animate-pulse text-2xl">● ACTIVE</div>
@@ -590,9 +590,9 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
       </>
       ) : activeTab === 'ab-testing' ? (
         <div className="space-y-6">
-          <Card className="p-8 bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-2 border-blue-500 text-center">
+          <Card className="p-8 bg-gradient-to-br from-orange-900/20 to-red-900/20 border-2 border-orange-500 text-center">
             <div className="text-6xl mb-4">🧪</div>
-            <h3 className="text-2xl font-bold text-blue-400 mb-2">A/B Testing Dashboard</h3>
+            <h3 className="text-2xl font-bold text-orange-400 mb-2">A/B Testing Dashboard</h3>
             <p className="text-gray-400 mb-4">
               Coming in Phase 5.8: Real-time comparison of ML vs Wargaming accuracy
             </p>

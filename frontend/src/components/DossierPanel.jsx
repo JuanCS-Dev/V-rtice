@@ -69,12 +69,12 @@ const DossierPanel = ({ loading, error, dossierData, onVerOcorrencias, onMarcarS
         {/* 2. CONECTAR BOTÃO: Adicionar o onClick aqui */}
         <button 
           onClick={onGerarRelatorio}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-2 px-4 rounded hover:from-blue-500 hover:to-blue-600 transition-all">
+          className="w-full bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold py-2 px-4 rounded hover:from-orange-500 hover:to-orange-600 transition-all">
           📊 GERAR RELATÓRIO COMPLETO
         </button>
         <button 
           onClick={onVerOcorrencias}
-          className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded hover:from-purple-500 hover:to-purple-600 transition-all"
+          className="w-full bg-gradient-to-r from-red-600 to-orange-700 text-white font-bold py-2 px-4 rounded hover:from-red-500 hover:to-orange-600 transition-all"
         >
           🔍 HISTÓRICO DE OCORRÊNCIAS
         </button>

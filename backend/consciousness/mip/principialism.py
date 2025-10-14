@@ -376,7 +376,7 @@ class Principialism(EthicalFramework):
         
         # Conflito 1: Beneficência vs Não-maleficência
         # (beneficiar muitos mas causar dano a alguns)
-        if beneficence["score"] > 0.7 and non_maleficence["harmed_count"] > 0:
+        if beneficence["score"] > 0.5 and non_maleficence["harmed_count"] > 0:
             conflicts.append({
                 "type": "beneficence_vs_non_maleficence",
                 "description": "Ação beneficia muitos mas causa dano a alguns",

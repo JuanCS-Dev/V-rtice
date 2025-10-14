@@ -151,7 +151,7 @@ export const HITLTab = ({ timeRange = '24h' }) => {
       <div className="flex items-center justify-center min-h-[600px]">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse">🎭</div>
-          <div className="text-cyan-400 text-xl font-semibold">Loading HITL Queue...</div>
+          <div className="text-red-400 text-xl font-semibold">Loading HITL Queue...</div>
           <div className="text-gray-500 text-sm mt-2">Fetching pending patches</div>
         </div>
       </div>
@@ -178,7 +178,7 @@ export const HITLTab = ({ timeRange = '24h' }) => {
       {/* Header with WebSocket Status */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-cyan-400">Human-in-the-Loop Review</h2>
+          <h2 className="text-2xl font-bold text-red-400">Human-in-the-Loop Review</h2>
           <p className="text-gray-500 text-sm mt-1">
             Regulatory T-cells preventing auto-immune patch deployment
           </p>
@@ -206,7 +206,7 @@ export const HITLTab = ({ timeRange = '24h' }) => {
       <DecisionStatsCards summary={summary} />
 
       {/* Filter Bar */}
-      <Card className="p-4 bg-gray-800/50 border border-cyan-500/30">
+      <Card className="p-4 bg-gray-800/50 border border-red-500/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="text-gray-400 text-sm font-semibold">FILTER BY PRIORITY:</span>
@@ -217,7 +217,7 @@ export const HITLTab = ({ timeRange = '24h' }) => {
                   onClick={() => setFilter(filterOption)}
                   className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                     filter === filterOption
-                      ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/50'
+                      ? 'bg-red-600 text-white shadow-lg shadow-red-500/50'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
                   }`}
                 >
@@ -260,10 +260,10 @@ export const HITLTab = ({ timeRange = '24h' }) => {
 
       {/* Decision Panel (appears when patch selected) */}
       {selectedPatch && (
-        <Card className="p-6 bg-gradient-to-br from-cyan-900/20 to-purple-900/20 border-2 border-cyan-500 shadow-2xl shadow-cyan-500/30 sticky bottom-4">
+        <Card className="p-6 bg-gradient-to-br from-red-900/20 to-orange-900/20 border-2 border-red-500 shadow-2xl shadow-red-500/30 sticky bottom-4">
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-cyan-400 mb-2">
+              <h3 className="text-xl font-bold text-red-400 mb-2">
                 Review Patch: {selectedPatch.patch_id}
               </h3>
               <p className="text-gray-400 text-sm mb-4">
@@ -275,7 +275,7 @@ export const HITLTab = ({ timeRange = '24h' }) => {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Add optional comment (visible in audit trail)..."
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none resize-none"
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:outline-none resize-none"
                 rows={3}
               />
             </div>

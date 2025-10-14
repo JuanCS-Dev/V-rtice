@@ -51,8 +51,8 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
   return (
     <div className="space-y-6">
       {/* Target Input */}
-      <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-400/30 rounded-lg p-6">
-        <label htmlFor="recon-target-input" className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
+      <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-6">
+        <label htmlFor="recon-target-input" className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
           🎯 TARGET
         </label>
         <input
@@ -61,17 +61,17 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           value={config.target}
           onChange={(e) => handleChange('target', e.target.value)}
           placeholder="192.168.1.0/24, 10.0.0.1, example.com"
-          className="w-full bg-black/50 border border-cyan-400/30 rounded px-4 py-3 text-cyan-400 font-mono focus:outline-none focus:border-cyan-400 transition-all"
+          className="w-full bg-black/50 border border-red-400/30 rounded px-4 py-3 text-red-400 font-mono focus:outline-none focus:border-red-400 transition-all"
           disabled={isScanning}
         />
-        <p className="text-cyan-400/50 text-xs mt-2">
+        <p className="text-red-400/50 text-xs mt-2">
           IP, CIDR range, or hostname
         </p>
       </div>
 
       {/* Scan Type Selection */}
       <div>
-        <label htmlFor="scan-type-buttons" className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
+        <label htmlFor="scan-type-buttons" className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
           ⚙️ SCAN TYPE
         </label>
         <div id="scan-type-buttons" className="grid grid-cols-2 gap-4" role="group" aria-label="Scan type selection">
@@ -106,7 +106,7 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
 
       {/* Port Configuration */}
       <div>
-        <div className="block text-cyan-400 font-bold mb-3 text-sm tracking-wider">
+        <div className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
           🔌 PORT RANGE
         </div>
         <div className="flex gap-2 mb-3">
@@ -123,8 +123,8 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
                 px-4 py-2 rounded text-sm font-bold transition-all
                 ${
                   config.ports === preset.value
-                    ? 'bg-cyan-400/20 text-cyan-400 border border-cyan-400'
-                    : 'bg-black/30 text-cyan-400/50 border border-cyan-400/20 hover:text-cyan-400'
+                    ? 'bg-red-400/20 text-red-400 border border-red-400'
+                    : 'bg-black/30 text-red-400/50 border border-red-400/20 hover:text-red-400'
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
@@ -139,35 +139,35 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           value={config.ports}
           onChange={(e) => handleChange('ports', e.target.value)}
           placeholder="1-1000, 8000-9000, 80,443"
-          className="w-full bg-black/50 border border-cyan-400/30 rounded px-4 py-2 text-cyan-400 font-mono text-sm focus:outline-none focus:border-cyan-400 transition-all"
+          className="w-full bg-black/50 border border-red-400/30 rounded px-4 py-2 text-red-400 font-mono text-sm focus:outline-none focus:border-red-400 transition-all"
           disabled={isScanning}
         />
       </div>
 
       {/* Advanced Options */}
-      <div className="bg-black/30 border border-cyan-400/20 rounded-lg p-4">
-        <div className="block text-cyan-400/70 font-bold mb-3 text-xs tracking-wider">
+      <div className="bg-black/30 border border-red-400/20 rounded-lg p-4">
+        <div className="block text-red-400/70 font-bold mb-3 text-xs tracking-wider">
           🔧 ADVANCED OPTIONS
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <label className="flex items-center gap-2 text-cyan-400/70 text-sm cursor-pointer">
+          <label className="flex items-center gap-2 text-red-400/70 text-sm cursor-pointer">
             <input
               type="checkbox"
               checked={config.serviceDetection}
               onChange={(e) => handleChange('serviceDetection', e.target.checked)}
               disabled={isScanning}
-              className="w-4 h-4 accent-cyan-400"
+              className="w-4 h-4 accent-red-400"
             />
             Service Detection
           </label>
 
-          <label className="flex items-center gap-2 text-cyan-400/70 text-sm cursor-pointer">
+          <label className="flex items-center gap-2 text-red-400/70 text-sm cursor-pointer">
             <input
               type="checkbox"
               checked={config.osDetection}
               onChange={(e) => handleChange('osDetection', e.target.checked)}
               disabled={isScanning}
-              className="w-4 h-4 accent-cyan-400"
+              className="w-4 h-4 accent-red-400"
             />
             OS Detection
           </label>
@@ -183,10 +183,10 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           ${
             isScanning
               ? 'bg-orange-400/20 text-orange-400 border-2 border-orange-400 cursor-wait'
-              : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-2 border-cyan-400 hover:border-cyan-300'
+              : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white border-2 border-red-400 hover:border-red-300'
           }
           disabled:opacity-50 disabled:cursor-not-allowed
-          shadow-lg shadow-cyan-400/20
+          shadow-lg shadow-red-400/20
         `}
       >
         {isScanning ? (
@@ -203,7 +203,7 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
       </button>
 
       {!config.target && (
-        <p className="text-center text-cyan-400/50 text-sm">
+        <p className="text-center text-red-400/50 text-sm">
           Enter a target to begin reconnaissance
         </p>
       )}

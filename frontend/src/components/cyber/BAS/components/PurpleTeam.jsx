@@ -33,21 +33,21 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Purple Team Overview */}
-      <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-400/30 rounded-lg p-6">
+      <div className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-400/30 rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-purple-400 font-bold text-2xl flex items-center gap-3">
+            <h3 className="text-red-400 font-bold text-2xl flex items-center gap-3">
               <span className="text-3xl">🟣</span>
               PURPLE TEAM VALIDATION
             </h3>
-            <p className="text-purple-400/60 text-sm mt-1">
+            <p className="text-red-400/60 text-sm mt-1">
               Correlate attack simulations with defensive telemetry
             </p>
           </div>
 
           <div className="text-right">
-            <div className="text-purple-400/60 text-xs mb-1">OVERALL DETECTION RATE</div>
-            <div className="text-5xl font-bold text-purple-400">
+            <div className="text-red-400/60 text-xs mb-1">OVERALL DETECTION RATE</div>
+            <div className="text-5xl font-bold text-red-400">
               {detectionRate}%
             </div>
           </div>
@@ -55,9 +55,9 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
 
         {/* Detection Stats */}
         <div className="grid grid-cols-4 gap-4">
-          <div className="bg-black/30 border border-purple-400/20 rounded p-4 text-center">
-            <div className="text-purple-400/60 text-xs mb-2">TOTAL SIMULATIONS</div>
-            <div className="text-3xl font-bold text-purple-400">
+          <div className="bg-black/30 border border-red-400/20 rounded p-4 text-center">
+            <div className="text-red-400/60 text-xs mb-2">TOTAL SIMULATIONS</div>
+            <div className="text-3xl font-bold text-red-400">
               {simulations.length}
             </div>
           </div>
@@ -86,8 +86,8 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
       </div>
 
       {/* Telemetry Sources */}
-      <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-400/30 rounded-lg p-6">
-        <h3 className="text-cyan-400 font-bold text-lg mb-4 flex items-center gap-2">
+      <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-6">
+        <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2">
           <span className="text-2xl">🔍</span>
           TELEMETRY SOURCES
         </h3>
@@ -100,7 +100,7 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
                 flex items-center gap-3 p-4 rounded-lg border-2 transition-all cursor-pointer
                 ${telemetrySources[source.id]
                   ? `bg-${source.color}-400/20 border-${source.color}-400`
-                  : 'bg-black/30 border-cyan-400/20 hover:border-cyan-400'
+                  : 'bg-black/30 border-red-400/20 hover:border-red-400'
                 }
               `}
             >
@@ -113,11 +113,11 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-2xl">{source.icon}</span>
-                  <div className={`font-bold ${telemetrySources[source.id] ? `text-${source.color}-400` : 'text-cyan-400/60'}`}>
+                  <div className={`font-bold ${telemetrySources[source.id] ? `text-${source.color}-400` : 'text-red-400/60'}`}>
                     {source.name}
                   </div>
                 </div>
-                <div className={`text-xs ${telemetrySources[source.id] ? `text-${source.color}-400/70` : 'text-cyan-400/40'}`}>
+                <div className={`text-xs ${telemetrySources[source.id] ? `text-${source.color}-400/70` : 'text-red-400/40'}`}>
                   {source.description}
                 </div>
               </div>
@@ -130,9 +130,9 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
       </div>
 
       {/* Simulations List */}
-      <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-400/30 rounded-lg p-6">
+      <div className="bg-gradient-to-br from-red-900/20 to-pink-900/20 border border-red-400/30 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-purple-400 font-bold text-lg flex items-center gap-2">
+          <h3 className="text-red-400 font-bold text-lg flex items-center gap-2">
             <span className="text-2xl">📊</span>
             SIMULATION RESULTS
           </h3>
@@ -189,7 +189,7 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
                             handleValidate(simulation);
                           }}
                           disabled={isSimulating}
-                          className="px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-xs rounded hover:from-purple-500 hover:to-pink-500 transition-all disabled:opacity-50"
+                          className="px-4 py-1 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold text-xs rounded hover:from-red-500 hover:to-pink-500 transition-all disabled:opacity-50"
                         >
                           VALIDATE
                         </button>
@@ -199,38 +199,38 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
 
                   {/* Metadata */}
                   <div className="grid grid-cols-4 gap-2 text-xs">
-                    <div className="bg-black/30 border border-purple-400/20 rounded px-2 py-1">
-                      <span className="text-purple-400/60">Target:</span>
-                      <span className="text-purple-400 ml-1">{simulation.target_host || 'N/A'}</span>
+                    <div className="bg-black/30 border border-red-400/20 rounded px-2 py-1">
+                      <span className="text-red-400/60">Target:</span>
+                      <span className="text-red-400 ml-1">{simulation.target_host || 'N/A'}</span>
                     </div>
-                    <div className="bg-black/30 border border-purple-400/20 rounded px-2 py-1">
-                      <span className="text-purple-400/60">Platform:</span>
-                      <span className="text-purple-400 ml-1">{simulation.platform || 'N/A'}</span>
+                    <div className="bg-black/30 border border-red-400/20 rounded px-2 py-1">
+                      <span className="text-red-400/60">Platform:</span>
+                      <span className="text-red-400 ml-1">{simulation.platform || 'N/A'}</span>
                     </div>
-                    <div className="bg-black/30 border border-purple-400/20 rounded px-2 py-1">
-                      <span className="text-purple-400/60">Status:</span>
-                      <span className="text-purple-400 ml-1">{simulation.status || 'completed'}</span>
+                    <div className="bg-black/30 border border-red-400/20 rounded px-2 py-1">
+                      <span className="text-red-400/60">Status:</span>
+                      <span className="text-red-400 ml-1">{simulation.status || 'completed'}</span>
                     </div>
-                    <div className="bg-black/30 border border-purple-400/20 rounded px-2 py-1">
-                      <span className="text-purple-400/60">Time:</span>
-                      <span className="text-purple-400 ml-1">{simulation.timestamp || 'N/A'}</span>
+                    <div className="bg-black/30 border border-red-400/20 rounded px-2 py-1">
+                      <span className="text-red-400/60">Time:</span>
+                      <span className="text-red-400 ml-1">{simulation.timestamp || 'N/A'}</span>
                     </div>
                   </div>
 
                   {/* Expanded Details */}
                   {isExpanded && simulation.telemetry && (
-                    <div className="mt-4 pt-4 border-t border-purple-400/20 space-y-2">
-                      <div className="text-purple-400/60 text-xs font-bold mb-2">TELEMETRY CORRELATION</div>
+                    <div className="mt-4 pt-4 border-t border-red-400/20 space-y-2">
+                      <div className="text-red-400/60 text-xs font-bold mb-2">TELEMETRY CORRELATION</div>
                       {Object.entries(simulation.telemetry).map(([source, data], telIdx) => (
-                        <div key={telIdx} className="bg-black/30 border border-purple-400/20 rounded p-3">
+                        <div key={telIdx} className="bg-black/30 border border-red-400/20 rounded p-3">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="text-purple-400 font-bold text-sm">{source.toUpperCase()}</div>
+                            <div className="text-red-400 font-bold text-sm">{source.toUpperCase()}</div>
                             <span className={`text-xs ${data.detected ? 'text-green-400' : 'text-red-400'}`}>
                               {data.detected ? '✅ Detected' : '❌ Not Detected'}
                             </span>
                           </div>
                           {data.logs && (
-                            <div className="text-purple-400/70 text-xs font-mono">
+                            <div className="text-red-400/70 text-xs font-mono">
                               {data.logs}
                             </div>
                           )}
@@ -240,7 +240,7 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
                   )}
 
                   {/* Expand Indicator */}
-                  <div className="text-purple-400/50 text-xs text-center mt-3">
+                  <div className="text-red-400/50 text-xs text-center mt-3">
                     {isExpanded ? '▲ Click to collapse' : '▼ Click for details'}
                   </div>
                 </div>
@@ -250,10 +250,10 @@ export const PurpleTeam = ({ simulations, onValidate, isSimulating, detectionRat
         ) : (
           <div className="text-center py-20">
             <div className="text-6xl mb-4 opacity-50">🟣</div>
-            <div className="text-purple-400/50 text-xl font-bold">
+            <div className="text-red-400/50 text-xl font-bold">
               No Simulations Yet
             </div>
-            <div className="text-purple-400/30 text-sm mt-2">
+            <div className="text-red-400/30 text-sm mt-2">
               Run attack simulations to validate detection capabilities
             </div>
           </div>

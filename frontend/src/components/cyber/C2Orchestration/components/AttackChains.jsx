@@ -208,8 +208,8 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
       </div>
 
       {/* Create Custom Chain */}
-      <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-2 border-purple-400/30 rounded-lg p-6">
-        <h3 className="text-purple-400 font-bold text-lg mb-4 flex items-center gap-2">
+      <div className="bg-gradient-to-br from-red-900/20 to-pink-900/20 border-2 border-red-400/30 rounded-lg p-6">
+        <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2">
           <span className="text-2xl">🔧</span>
           CREATE CUSTOM ATTACK CHAIN
         </h3>
@@ -220,17 +220,17 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
             placeholder="Chain name..."
             value={customChain.name}
             onChange={(e) => setCustomChain({ ...customChain, name: e.target.value })}
-            className="bg-black/30 border border-purple-400/30 rounded px-4 py-2 text-purple-400 placeholder-purple-400/30 focus:outline-none focus:border-purple-400 transition-all"
+            className="bg-black/30 border border-red-400/30 rounded px-4 py-2 text-red-400 placeholder-red-400/30 focus:outline-none focus:border-red-400 transition-all"
           />
           <button
             disabled={!customChain.name}
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded hover:from-purple-500 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold rounded hover:from-red-500 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             CREATE CHAIN
           </button>
         </div>
 
-        <div className="mt-4 text-center text-purple-400/50 text-sm">
+        <div className="mt-4 text-center text-red-400/50 text-sm">
           Custom chain builder coming soon...
         </div>
       </div>

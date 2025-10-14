@@ -109,15 +109,15 @@
 
 .osint {
   border: var(--border-2) solid var(--color-osint-primary);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
 }
 
 .osint:hover:not(.disabled) {
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 .osint:focus-within {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
   border-color: var(--color-osint-secondary);
 }
 
@@ -128,15 +128,15 @@
 
 .analytics {
   border: var(--border-2) solid var(--color-analytics-primary);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
 }
 
 .analytics:hover:not(.disabled) {
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 .analytics:focus-within {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
   border-color: var(--color-analytics-secondary);
 }
 

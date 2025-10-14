@@ -42,23 +42,23 @@ export const VulnIntel = () => {
   return (
     <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
       {/* Header */}
-      <div className="border-b border-purple-400/30 p-4 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-pink-900/20">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-purple-400 tracking-wider flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
               <span className="text-3xl">🔐</span>
               VULNERABILITY INTELLIGENCE
             </h2>
-            <p className="text-purple-400/60 text-sm mt-1">
+            <p className="text-red-400/60 text-sm mt-1">
               CVE Database + Exploit Search + Correlation Engine | Port 8033
             </p>
           </div>
 
           <div className="flex items-center gap-4">
             {/* Stats Cards */}
-            <div className="bg-black/50 border border-purple-400/30 rounded px-4 py-2">
-              <div className="text-purple-400 text-xs">CVE DATABASE</div>
-              <div className="text-2xl font-bold text-purple-400">
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">CVE DATABASE</div>
+              <div className="text-2xl font-bold text-red-400">
                 240K+
               </div>
             </div>
@@ -85,8 +85,8 @@ export const VulnIntel = () => {
             onClick={() => setActiveTab('search')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'search'
-                ? 'bg-purple-400/20 text-purple-400 border-b-2 border-purple-400'
-                : 'bg-black/30 text-purple-400/50 hover:text-purple-400'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
           >
             🔍 CVE SEARCH
@@ -107,8 +107,8 @@ export const VulnIntel = () => {
             onClick={() => setActiveTab('correlation')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'correlation'
-                ? 'bg-cyan-400/20 text-cyan-400 border-b-2 border-cyan-400'
-                : 'bg-black/30 text-cyan-400/50 hover:text-cyan-400'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
           >
             🎯 CORRELATION
@@ -138,10 +138,10 @@ export const VulnIntel = () => {
             {!currentCVE && vulnerabilities.length === 0 && !isLoading && (
               <div className="text-center py-20">
                 <div className="text-6xl mb-4 opacity-50">🔐</div>
-                <div className="text-purple-400/50 text-xl font-bold">
+                <div className="text-red-400/50 text-xl font-bold">
                   Search CVE Database
                 </div>
-                <div className="text-purple-400/30 text-sm mt-2">
+                <div className="text-red-400/30 text-sm mt-2">
                   Enter a CVE ID, product name, or vendor to begin
                 </div>
               </div>
@@ -159,17 +159,17 @@ export const VulnIntel = () => {
 
         {activeTab === 'correlation' && (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-400/30 rounded-lg p-8 text-center">
+            <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-8 text-center">
               <div className="text-6xl mb-4">🎯</div>
-              <h3 className="text-cyan-400 font-bold text-2xl mb-4">
+              <h3 className="text-red-400 font-bold text-2xl mb-4">
                 Scan Correlation Engine
               </h3>
-              <p className="text-cyan-400/60 mb-6">
+              <p className="text-red-400/60 mb-6">
                 Correlate discovered services from network scans with known vulnerabilities
               </p>
               <button
                 onClick={() => correlateWithScan('latest')}
-                className="px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg shadow-cyan-400/20"
+                className="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-lg hover:from-red-500 hover:to-orange-500 transition-all shadow-lg shadow-red-400/20"
               >
                 Correlate Latest Scan
               </button>
@@ -179,8 +179,8 @@ export const VulnIntel = () => {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-purple-400/30 bg-black/50 p-3">
-        <div className="flex justify-between items-center text-xs text-purple-400/60">
+      <div className="border-t border-red-400/30 bg-black/50 p-3">
+        <div className="flex justify-between items-center text-xs text-red-400/60">
           <div className="flex gap-4">
             <span>STATUS: {isLoading ? '🟡 SEARCHING' : '🟢 READY'}</span>
             <span>SOURCES: NVD, MITRE, ExploitDB, GitHub</span>

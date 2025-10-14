@@ -51,30 +51,30 @@ export const BAS = () => {
   return (
     <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
       {/* Header */}
-      <div className="border-b border-purple-400/30 p-4 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-pink-900/20">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-purple-400 tracking-wider flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
               <span className="text-3xl">🎭</span>
               BREACH & ATTACK SIMULATION
             </h2>
-            <p className="text-purple-400/60 text-sm mt-1">
+            <p className="text-red-400/60 text-sm mt-1">
               MITRE ATT&CK Framework | Purple Team Validation | Coverage Analysis | Port 8036
             </p>
           </div>
 
           <div className="flex items-center gap-4">
             {/* Stats Cards */}
-            <div className="bg-black/50 border border-purple-400/30 rounded px-4 py-2">
-              <div className="text-purple-400 text-xs">TECHNIQUES</div>
-              <div className="text-2xl font-bold text-purple-400">
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">TECHNIQUES</div>
+              <div className="text-2xl font-bold text-red-400">
                 {techniques.length || '200+'}
               </div>
             </div>
 
-            <div className="bg-black/50 border border-cyan-400/30 rounded px-4 py-2">
-              <div className="text-cyan-400 text-xs">SIMULATIONS</div>
-              <div className="text-2xl font-bold text-cyan-400">
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">SIMULATIONS</div>
+              <div className="text-2xl font-bold text-red-400">
                 {totalSimulations}
               </div>
             </div>
@@ -101,8 +101,8 @@ export const BAS = () => {
             onClick={() => setActiveTab('matrix')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'matrix'
-                ? 'bg-purple-400/20 text-purple-400 border-b-2 border-purple-400'
-                : 'bg-black/30 text-purple-400/50 hover:text-purple-400'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
           >
             🎯 ATT&CK MATRIX
@@ -123,8 +123,8 @@ export const BAS = () => {
             onClick={() => setActiveTab('coverage')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'coverage'
-                ? 'bg-cyan-400/20 text-cyan-400 border-b-2 border-cyan-400'
-                : 'bg-black/30 text-cyan-400/50 hover:text-cyan-400'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
           >
             📊 COVERAGE
@@ -132,7 +132,7 @@ export const BAS = () => {
 
           <button
             onClick={refreshTechniques}
-            className="ml-auto px-4 py-2 bg-black/30 text-purple-400/70 hover:text-purple-400 rounded-t border border-purple-400/30 hover:border-purple-400 transition-all"
+            className="ml-auto px-4 py-2 bg-black/30 text-red-400/70 hover:text-red-400 rounded-t border border-red-400/30 hover:border-red-400 transition-all"
           >
             🔄 REFRESH
           </button>
@@ -166,17 +166,17 @@ export const BAS = () => {
 
         {activeTab === 'coverage' && (
           <div className="max-w-6xl mx-auto">
-            <div className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-400/30 rounded-lg p-8">
-              <h3 className="text-cyan-400 font-bold text-2xl mb-6 flex items-center gap-3">
+            <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-8">
+              <h3 className="text-red-400 font-bold text-2xl mb-6 flex items-center gap-3">
                 <span className="text-3xl">📊</span>
                 ATT&CK COVERAGE ANALYSIS
               </h3>
 
               {/* Coverage Grid */}
               <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="bg-black/30 border border-cyan-400/20 rounded p-4 text-center">
-                  <div className="text-cyan-400/60 text-xs mb-2">TOTAL TECHNIQUES</div>
-                  <div className="text-4xl font-bold text-cyan-400">
+                <div className="bg-black/30 border border-red-400/20 rounded p-4 text-center">
+                  <div className="text-red-400/60 text-xs mb-2">TOTAL TECHNIQUES</div>
+                  <div className="text-4xl font-bold text-red-400">
                     {coverage?.total || 200}
                   </div>
                 </div>
@@ -198,13 +198,13 @@ export const BAS = () => {
 
               {/* Tactic Breakdown */}
               <div className="space-y-3">
-                <div className="text-cyan-400 font-bold mb-3">COVERAGE BY TACTIC</div>
+                <div className="text-red-400 font-bold mb-3">COVERAGE BY TACTIC</div>
                 {tactics.map((tactic, idx) => {
                   const tacticCoverage = Math.floor(Math.random() * 100); // Mock data
                   const color = tactic.color;
 
                   return (
-                    <div key={idx} className="bg-black/30 border border-cyan-400/20 rounded p-3">
+                    <div key={idx} className="bg-black/30 border border-red-400/20 rounded p-3">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-xl">{tactic.icon}</span>
@@ -231,7 +231,7 @@ export const BAS = () => {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => getCoverage()}
-                  className="px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg shadow-cyan-400/20"
+                  className="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-lg hover:from-red-500 hover:to-orange-500 transition-all shadow-lg shadow-red-400/20"
                 >
                   📊 GENERATE FULL COVERAGE REPORT
                 </button>
@@ -242,8 +242,8 @@ export const BAS = () => {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-purple-400/30 bg-black/50 p-3">
-        <div className="flex justify-between items-center text-xs text-purple-400/60">
+      <div className="border-t border-red-400/30 bg-black/50 p-3">
+        <div className="flex justify-between items-center text-xs text-red-400/60">
           <div className="flex gap-4">
             <span>STATUS: {isSimulating ? '🟣 SIMULATING' : '🟢 READY'}</span>
             <span>FRAMEWORK: MITRE ATT&CK v14.0</span>

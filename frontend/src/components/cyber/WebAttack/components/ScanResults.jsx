@@ -65,16 +65,16 @@ export const ScanResults = ({ results }) => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-900/30 to-blue-900/30 border-2 border-yellow-400/40 rounded-lg p-4">
+        <div className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-2 border-yellow-400/40 rounded-lg p-4">
           <div className="text-yellow-400/60 text-xs mb-1">MEDIUM</div>
           <div className="text-4xl font-bold text-yellow-400">
             {vulnerabilities.filter(v => v.severity === 'MEDIUM').length}
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-900/30 to-gray-900/30 border-2 border-blue-400/40 rounded-lg p-4">
-          <div className="text-blue-400/60 text-xs mb-1">LOW / INFO</div>
-          <div className="text-4xl font-bold text-blue-400">
+        <div className="bg-gradient-to-br from-orange-900/30 to-gray-900/30 border-2 border-orange-400/40 rounded-lg p-4">
+          <div className="text-orange-400/60 text-xs mb-1">LOW / INFO</div>
+          <div className="text-4xl font-bold text-orange-400">
             {vulnerabilities.filter(v => v.severity === 'LOW' || v.severity === 'INFO').length}
           </div>
         </div>
@@ -204,8 +204,8 @@ export const ScanResults = ({ results }) => {
 
                     {/* References */}
                     {vuln.references && vuln.references.length > 0 && (
-                      <div className="bg-black/50 border border-cyan-400/20 rounded p-3">
-                        <div className="text-cyan-400/60 text-xs font-bold mb-2">REFERENCES</div>
+                      <div className="bg-black/50 border border-red-400/20 rounded p-3">
+                        <div className="text-red-400/60 text-xs font-bold mb-2">REFERENCES</div>
                         <div className="space-y-1">
                           {vuln.references.map((ref, refIdx) => (
                             <a
@@ -213,7 +213,7 @@ export const ScanResults = ({ results }) => {
                               href={ref}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="block text-cyan-400/80 text-xs hover:text-cyan-400 transition-all"
+                              className="block text-red-400/80 text-xs hover:text-red-400 transition-all"
                             >
                               {ref}
                             </a>

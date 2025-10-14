@@ -26,11 +26,11 @@ const ReportsModule = ({ results }) => {
 
   return (
     <div className="space-y-6">
-      <div className="border border-purple-400/50 rounded-lg bg-purple-400/5 p-6">
-        <h2 className="text-purple-400 font-bold text-2xl mb-4 tracking-wider">
+      <div className="border border-red-400/50 rounded-lg bg-red-400/5 p-6">
+        <h2 className="text-red-400 font-bold text-2xl mb-4 tracking-wider">
           📊 RELATÓRIOS OSINT
         </h2>
-        <p className="text-purple-400/70 text-sm mb-6">
+        <p className="text-red-400/70 text-sm mb-6">
           Geração de relatórios completos de investigação e análise de dados
         </p>
 
@@ -50,7 +50,7 @@ const ReportsModule = ({ results }) => {
                   📄 EXPORTAR PDF
                 </button>
                 <button
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 text-sm"
+                  className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 text-sm"
                   onClick={exportJSON}
                 >
                   💾 EXPORTAR JSON
@@ -65,23 +65,23 @@ const ReportsModule = ({ results }) => {
             </div>
 
             {/* Preview dos dados */}
-            <div className="bg-black/50 border border-purple-400/30 rounded-lg p-4">
-              <h4 className="text-purple-400 font-bold mb-3">PREVIEW DO RELATÓRIO</h4>
+            <div className="bg-black/50 border border-red-400/30 rounded-lg p-4">
+              <h4 className="text-red-400 font-bold mb-3">PREVIEW DO RELATÓRIO</h4>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <strong className="text-purple-400">Nível de Risco:</strong>
+                  <strong className="text-red-400">Nível de Risco:</strong>
                   <span className="ml-2 text-white/80">{results.risk_assessment?.risk_level || 'N/A'}</span>
                 </div>
                 <div>
-                  <strong className="text-purple-400">Score de Risco:</strong>
+                  <strong className="text-red-400">Score de Risco:</strong>
                   <span className="ml-2 text-white/80">{results.risk_assessment?.risk_score || 'N/A'}</span>
                 </div>
                 <div>
-                  <strong className="text-purple-400">Padrões Encontrados:</strong>
+                  <strong className="text-red-400">Padrões Encontrados:</strong>
                   <span className="ml-2 text-white/80">{results.patterns_found?.length || 0}</span>
                 </div>
                 <div>
-                  <strong className="text-purple-400">Recomendações:</strong>
+                  <strong className="text-red-400">Recomendações:</strong>
                   <span className="ml-2 text-white/80">{results.recommendations?.length || 0}</span>
                 </div>
               </div>
@@ -101,24 +101,24 @@ const ReportsModule = ({ results }) => {
         )}
 
         {/* Tipos de Relatórios Disponíveis */}
-        <div className="bg-purple-400/10 border border-purple-400/30 rounded-lg p-4 mt-6">
-          <h4 className="text-purple-400 font-bold mb-3">TIPOS DE RELATÓRIOS DISPONÍVEIS</h4>
+        <div className="bg-red-400/10 border border-red-400/30 rounded-lg p-4 mt-6">
+          <h4 className="text-red-400 font-bold mb-3">TIPOS DE RELATÓRIOS DISPONÍVEIS</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="bg-black/30 p-3 rounded">
-              <strong className="text-purple-400">📄 Relatório Executivo PDF</strong>
-              <p className="text-purple-400/70 mt-1">Relatório completo formatado para apresentação</p>
+              <strong className="text-red-400">📄 Relatório Executivo PDF</strong>
+              <p className="text-red-400/70 mt-1">Relatório completo formatado para apresentação</p>
             </div>
             <div className="bg-black/30 p-3 rounded">
-              <strong className="text-purple-400">💾 Dados Estruturados JSON</strong>
-              <p className="text-purple-400/70 mt-1">Dados brutos para análise técnica</p>
+              <strong className="text-red-400">💾 Dados Estruturados JSON</strong>
+              <p className="text-red-400/70 mt-1">Dados brutos para análise técnica</p>
             </div>
             <div className="bg-black/30 p-3 rounded">
-              <strong className="text-purple-400">📈 Análise Visual</strong>
-              <p className="text-purple-400/70 mt-1">Gráficos e visualizações dos dados</p>
+              <strong className="text-red-400">📈 Análise Visual</strong>
+              <p className="text-red-400/70 mt-1">Gráficos e visualizações dos dados</p>
             </div>
             <div className="bg-black/30 p-3 rounded">
-              <strong className="text-purple-400">🔄 Relatório Dinâmico</strong>
-              <p className="text-purple-400/70 mt-1">Dashboard interativo com filtros</p>
+              <strong className="text-red-400">🔄 Relatório Dinâmico</strong>
+              <p className="text-red-400/70 mt-1">Dashboard interativo com filtros</p>
             </div>
           </div>
         </div>

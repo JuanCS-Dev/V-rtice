@@ -34,7 +34,7 @@ export const C2Orchestration = () => {
   return (
     <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
       {/* Header */}
-      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-purple-900/20">
+      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
@@ -55,16 +55,16 @@ export const C2Orchestration = () => {
               </div>
             </div>
 
-            <div className="bg-black/50 border border-purple-400/30 rounded px-4 py-2">
-              <div className="text-purple-400 text-xs">COBALT STRIKE</div>
-              <div className="text-2xl font-bold text-purple-400">
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">COBALT STRIKE</div>
+              <div className="text-2xl font-bold text-red-400">
                 {sessions.filter(s => s.framework === 'cobalt_strike').length}
               </div>
             </div>
 
-            <div className="bg-black/50 border border-cyan-400/30 rounded px-4 py-2">
-              <div className="text-cyan-400 text-xs">METASPLOIT</div>
-              <div className="text-2xl font-bold text-cyan-400">
+            <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
+              <div className="text-red-400 text-xs">METASPLOIT</div>
+              <div className="text-2xl font-bold text-red-400">
                 {sessions.filter(s => s.framework === 'metasploit').length}
               </div>
             </div>

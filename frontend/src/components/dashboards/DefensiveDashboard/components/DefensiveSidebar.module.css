@@ -179,17 +179,17 @@
 }
 
 .alertItem.medium {
-  border-left-color: var(--severity-medium, #3b82f6);
+  border-left-color: var(--severity-medium, #ef4444);
 }
 
 .alertItem.medium .alertType {
-  color: var(--severity-medium, #3b82f6);
+  color: var(--severity-medium, #ef4444);
 }
 
 .alertItem.medium .alertSeverityBadge {
-  background: rgba(59, 130, 246, 0.2);
-  color: var(--severity-medium, #3b82f6);
-  border: 1px solid rgba(59, 130, 246, 0.4);
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--severity-medium, #ef4444);
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .alertItem.low {

@@ -97,8 +97,8 @@
 }
 
 .osint {
-  background: rgba(168, 85, 247, 0.1);
+  background: rgba(239, 68, 68, 0.1);
   color: var(--color-osint-primary);
   border-left-color: var(--color-osint-primary);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
 }

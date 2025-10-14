@@ -21,9 +21,9 @@ export const DecisionStatsCards = ({ summary }) => {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Patches */}
-      <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/50 hover:border-cyan-500 transition-all cursor-pointer group">
+      <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-red-500/50 hover:border-red-500 transition-all cursor-pointer group">
         <div className="text-gray-400 text-sm font-semibold mb-2">Total Decisions</div>
-        <div className="text-4xl font-bold text-cyan-400 mb-1 group-hover:scale-110 transition-transform">
+        <div className="text-4xl font-bold text-red-400 mb-1 group-hover:scale-110 transition-transform">
           {summary.total_patches}
         </div>
         <div className="text-xs text-gray-500">
@@ -54,9 +54,9 @@ export const DecisionStatsCards = ({ summary }) => {
       </Card>
 
       {/* Avg Decision Time */}
-      <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-purple-500/50 hover:border-purple-500 transition-all cursor-pointer group">
+      <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-red-500/50 hover:border-red-500 transition-all cursor-pointer group">
         <div className="text-gray-400 text-sm font-semibold mb-2">Avg Decision Time</div>
-        <div className="text-4xl font-bold text-purple-400 mb-1 group-hover:scale-110 transition-transform">
+        <div className="text-4xl font-bold text-red-400 mb-1 group-hover:scale-110 transition-transform">
           {avgDecisionTimeMin}m
         </div>
         <div className="text-xs text-gray-500">
@@ -82,9 +82,9 @@ export const DecisionStatsCards = ({ summary }) => {
 
       {/* ML Accuracy */}
       {summary.ml_accuracy !== null && (
-        <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-blue-500/30 hover:border-blue-500/60 transition-all">
+        <Card className="p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-orange-500/30 hover:border-orange-500/60 transition-all">
           <div className="text-gray-400 text-xs font-semibold mb-1">ML Accuracy</div>
-          <div className="text-2xl font-bold text-blue-400">
+          <div className="text-2xl font-bold text-orange-400">
             {(summary.ml_accuracy * 100).toFixed(1)}%
           </div>
         </Card>

@@ -73,9 +73,9 @@
 }
 
 .immune-stat-card:hover {
-  border-color: #3b82f6;
+  border-color: #ef4444;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 /* Immunity Comparison */
@@ -156,7 +156,7 @@
 .btn-view-details {
   width: 100%;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #ef4444, #2563eb);
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -169,7 +169,7 @@
 .btn-view-details:hover {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* Innate View */
@@ -203,7 +203,7 @@
 }
 
 .stat-card:hover {
-  border-color: #3b82f6;
+  border-color: #ef4444;
   transform: translateY(-2px);
 }
 
@@ -213,7 +213,7 @@
 }
 
 .stat-card span {
-  color: #3b82f6;
+  color: #ef4444;
   font-size: 1.25rem;
   font-weight: 700;
   font-family: 'Courier New', monospace;
@@ -281,20 +281,20 @@
   padding: 1rem;
   background: linear-gradient(135deg, #1f2937, #111827);
   border: 1px solid #374151;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #ef4444;
   border-radius: 4px;
   transition: all 0.3s ease;
 }
 
 .cytokine-signal-item:hover {
-  border-left-color: #60a5fa;
-  background: rgba(59, 130, 246, 0.1);
+  border-left-color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
   transform: translateX(4px);
 }
 
 .signal-type {
   font-weight: 700;
-  color: #3b82f6;
+  color: #ef4444;
 }
 
 .signal-path {
@@ -445,15 +445,15 @@
 .bio-inspiration {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(239, 68, 68, 0.1));
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.1));
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 12px;
 }
 
 .bio-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: #ef4444;
   margin: 0 0 1rem 0;
 }
 
@@ -469,7 +469,7 @@
 }
 
 .bio-inspiration strong {
-  color: #60a5fa;
+  color: #f87171;
 }
 
 /* Responsive */

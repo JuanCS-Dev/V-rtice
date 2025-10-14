@@ -71,13 +71,13 @@ const GoogleModule = () => {
   };
 
   const getResultTypeColor = (url) => {
-    if (url.includes('linkedin.com')) return 'border-blue-400 bg-blue-400/10';
-    if (url.includes('facebook.com')) return 'border-blue-600 bg-blue-600/10';
-    if (url.includes('twitter.com') || url.includes('x.com')) return 'border-cyan-400 bg-cyan-400/10';
+    if (url.includes('linkedin.com')) return 'border-orange-400 bg-orange-400/10';
+    if (url.includes('facebook.com')) return 'border-orange-600 bg-orange-600/10';
+    if (url.includes('twitter.com') || url.includes('x.com')) return 'border-red-400 bg-red-400/10';
     if (url.includes('instagram.com')) return 'border-pink-400 bg-pink-400/10';
     if (url.includes('.pdf')) return 'border-red-400 bg-red-400/10';
     if (url.includes('.doc')) return 'border-yellow-400 bg-yellow-400/10';
-    return 'border-purple-400 bg-purple-400/10';
+    return 'border-red-400 bg-red-400/10';
   };
 
   const formatDomain = (url) => {
@@ -92,11 +92,11 @@ const GoogleModule = () => {
     if (!results || !results.results) return null;
 
     return (
-      <div className="space-y-4 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#a855f7 rgba(0,0,0,0.3)'}}>
-        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#a855f7;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#c084fc}`}</style>
+      <div className="space-y-4 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#ef4444 rgba(0,0,0,0.3)'}}>
+        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#f87171}`}</style>
         <div className="flex justify-between items-center">
-          <h3 className="text-purple-400 font-bold text-lg">🔍 Resultados Google OSINT</h3>
-          <div className="text-purple-400/60 text-sm">
+          <h3 className="text-red-400 font-bold text-lg">🔍 Resultados Google OSINT</h3>
+          <div className="text-red-400/60 text-sm">
             {results.total_results} resultado(s) encontrado(s)
           </div>
         </div>
@@ -108,13 +108,13 @@ const GoogleModule = () => {
               className={`p-4 rounded-lg border transition-all hover:scale-[1.01] ${getResultTypeColor(result.url)}`}
             >
               <div className="flex justify-between items-start mb-2">
-                <h4 className="text-purple-300 font-medium text-sm leading-tight">
+                <h4 className="text-red-300 font-medium text-sm leading-tight">
                   {result.title}
                 </h4>
-                <span className="text-xs text-purple-400/60 ml-2">#{result.position}</span>
+                <span className="text-xs text-red-400/60 ml-2">#{result.position}</span>
               </div>
 
-              <p className="text-purple-200 text-xs mb-2 line-clamp-2">
+              <p className="text-red-200 text-xs mb-2 line-clamp-2">
                 {result.snippet}
               </p>
 
@@ -123,11 +123,11 @@ const GoogleModule = () => {
                   href={result.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-purple-400 hover:text-purple-300 underline break-all flex-1 mr-2"
+                  className="text-red-400 hover:text-red-300 underline break-all flex-1 mr-2"
                 >
                   {formatDomain(result.url)}
                 </a>
-                <span className="text-purple-400/50 whitespace-nowrap">
+                <span className="text-red-400/50 whitespace-nowrap">
                   {new Date(result.found_timestamp).toLocaleTimeString()}
                 </span>
               </div>
@@ -142,62 +142,62 @@ const GoogleModule = () => {
     if (!results || !results.results_by_type) return null;
 
     return (
-      <div className="space-y-6 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#a855f7 rgba(0,0,0,0.3)'}}>
-        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#a855f7;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#c084fc}`}</style>
+      <div className="space-y-6 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#ef4444 rgba(0,0,0,0.3)'}}>
+        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#f87171}`}</style>
         <div className="flex justify-between items-center">
-          <h3 className="text-purple-400 font-bold text-lg">🎯 Busca Avançada</h3>
-          <div className="text-purple-400/60 text-sm">
+          <h3 className="text-red-400 font-bold text-lg">🎯 Busca Avançada</h3>
+          <div className="text-red-400/60 text-sm">
             {results.summary?.total_results} resultado(s) | {results.execution_time}s
           </div>
         </div>
 
         {/* Estatísticas */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-black/40 border border-purple-400/30 rounded-lg p-3 text-center">
-            <div className="text-purple-400 text-xl font-bold">{results.summary?.total_results || 0}</div>
-            <div className="text-purple-400/70 text-xs">Total Resultados</div>
+          <div className="bg-black/40 border border-red-400/30 rounded-lg p-3 text-center">
+            <div className="text-red-400 text-xl font-bold">{results.summary?.total_results || 0}</div>
+            <div className="text-red-400/70 text-xs">Total Resultados</div>
           </div>
-          <div className="bg-black/40 border border-purple-400/30 rounded-lg p-3 text-center">
-            <div className="text-purple-400 text-xl font-bold">{results.summary?.domains_found?.length || 0}</div>
-            <div className="text-purple-400/70 text-xs">Domínios</div>
+          <div className="bg-black/40 border border-red-400/30 rounded-lg p-3 text-center">
+            <div className="text-red-400 text-xl font-bold">{results.summary?.domains_found?.length || 0}</div>
+            <div className="text-red-400/70 text-xs">Domínios</div>
           </div>
-          <div className="bg-black/40 border border-purple-400/30 rounded-lg p-3 text-center">
-            <div className="text-purple-400 text-xl font-bold">{results.summary?.file_types_found?.length || 0}</div>
-            <div className="text-purple-400/70 text-xs">Tipos de Arquivo</div>
+          <div className="bg-black/40 border border-red-400/30 rounded-lg p-3 text-center">
+            <div className="text-red-400 text-xl font-bold">{results.summary?.file_types_found?.length || 0}</div>
+            <div className="text-red-400/70 text-xs">Tipos de Arquivo</div>
           </div>
         </div>
 
         {/* Resultados por tipo */}
         {Object.entries(results.results_by_type).map(([type, typeResults]) => (
-          <div key={type} className="bg-black/30 border border-purple-400/30 rounded-lg p-4">
+          <div key={type} className="bg-black/30 border border-red-400/30 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-3">
-              <span className="text-purple-400 font-medium capitalize">
+              <span className="text-red-400 font-medium capitalize">
                 {searchTypes[type]?.icon} {searchTypes[type]?.label || type}
               </span>
-              <span className="text-purple-400/60 text-sm">({typeResults.length} resultados)</span>
+              <span className="text-red-400/60 text-sm">({typeResults.length} resultados)</span>
             </div>
 
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {typeResults.slice(0, 10).map((result, index) => (
-                <div key={index} className="bg-purple-400/10 border border-purple-400/20 rounded p-3">
+                <div key={index} className="bg-red-400/10 border border-red-400/20 rounded p-3">
                   <div className="flex justify-between items-start mb-1">
-                    <h5 className="text-purple-300 font-medium text-sm">{result.title}</h5>
-                    <span className="text-xs text-purple-400/60">#{result.position}</span>
+                    <h5 className="text-red-300 font-medium text-sm">{result.title}</h5>
+                    <span className="text-xs text-red-400/60">#{result.position}</span>
                   </div>
 
-                  <p className="text-purple-200 text-xs mb-2">{result.snippet}</p>
+                  <p className="text-red-200 text-xs mb-2">{result.snippet}</p>
 
                   <div className="flex justify-between items-center text-xs">
                     <a
                       href={result.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-purple-400 hover:text-purple-300 underline"
+                      className="text-red-400 hover:text-red-300 underline"
                     >
                       {formatDomain(result.url)}
                     </a>
                     {result.dork_pattern && (
-                      <span className="text-purple-400/50 font-mono text-xs">
+                      <span className="text-red-400/50 font-mono text-xs">
                         {result.dork_pattern.replace(result.target || query, '***')}
                       </span>
                     )}
@@ -213,11 +213,11 @@ const GoogleModule = () => {
 
   return (
     <div className="space-y-6">
-      <div className="border border-purple-400/50 rounded-lg bg-purple-400/5 p-6">
-        <h2 className="text-purple-400 font-bold text-2xl mb-4 tracking-wider">
+      <div className="border border-red-400/50 rounded-lg bg-red-400/5 p-6">
+        <h2 className="text-red-400 font-bold text-2xl mb-4 tracking-wider">
           🔍 GOOGLE OSINT INVESTIGATOR
         </h2>
-        <p className="text-purple-400/70 text-sm mb-6">
+        <p className="text-red-400/70 text-sm mb-6">
           Investigação avançada através do Google com Google Dorks e técnicas OSINT
         </p>
 
@@ -227,13 +227,13 @@ const GoogleModule = () => {
             <div>
               <label 
                 htmlFor="investigation-type-select"
-                className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2"
+                className="text-red-400/80 text-xs font-bold tracking-wider block mb-2"
               >
                 TIPO DE INVESTIGAÇÃO
               </label>
               <select
                 id="investigation-type-select"
-                className="w-full bg-black/70 border border-purple-400/50 text-purple-400 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20"
+                className="w-full bg-black/70 border border-red-400/50 text-red-400 p-3 rounded-lg focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20"
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
               >
@@ -248,7 +248,7 @@ const GoogleModule = () => {
             <div>
               <div 
                 id="search-mode-group"
-                className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2"
+                className="text-red-400/80 text-xs font-bold tracking-wider block mb-2"
                 role="group"
                 aria-label="Modo de busca"
               >
@@ -258,8 +258,8 @@ const GoogleModule = () => {
                 <button
                   className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
                     !advanced
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                      : 'bg-black/50 border border-purple-400/30 text-purple-400 hover:bg-purple-400/10'
+                      ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white'
+                      : 'bg-black/50 border border-red-400/30 text-red-400 hover:bg-red-400/10'
                   }`}
                   onClick={() => setAdvanced(false)}
                 >
@@ -269,7 +269,7 @@ const GoogleModule = () => {
                   className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
                     advanced
                       ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white'
-                      : 'bg-black/50 border border-purple-400/30 text-purple-400 hover:bg-purple-400/10'
+                      : 'bg-black/50 border border-red-400/30 text-red-400 hover:bg-red-400/10'
                   }`}
                   onClick={() => setAdvanced(true)}
                 >
@@ -282,13 +282,13 @@ const GoogleModule = () => {
           <div>
             <label 
               htmlFor="investigation-target-input"
-              className="text-purple-400/80 text-xs font-bold tracking-wider block mb-2"
+              className="text-red-400/80 text-xs font-bold tracking-wider block mb-2"
             >
               ALVO DA INVESTIGAÇÃO
             </label>
             <input
               id="investigation-target-input"
-              className="w-full bg-black/70 border border-purple-400/50 text-purple-400 placeholder-purple-400/50 p-3 rounded-lg focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 font-mono text-lg"
+              className="w-full bg-black/70 border border-red-400/50 text-red-400 placeholder-red-400/50 p-3 rounded-lg focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 font-mono text-lg"
               placeholder={
                 advanced
                   ? 'Digite o alvo para investigação profunda...'
@@ -301,7 +301,7 @@ const GoogleModule = () => {
           </div>
 
           <button
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider disabled:opacity-50"
             onClick={handleSearch}
             disabled={searching}
           >
@@ -322,38 +322,38 @@ const GoogleModule = () => {
 
         {/* Results Display */}
         {results && (
-          <div className="bg-black/50 border border-purple-400/30 rounded-lg p-6">
+          <div className="bg-black/50 border border-red-400/30 rounded-lg p-6">
             {advanced ? renderAdvancedResults() : renderBasicResults()}
           </div>
         )}
 
         {/* Dork Examples */}
-        <div className="mt-6 bg-purple-400/10 border border-purple-400/30 rounded-lg p-4">
-          <h4 className="text-purple-400 font-bold mb-3">🧰 GOOGLE DORKS DISPONÍVEIS</h4>
+        <div className="mt-6 bg-red-400/10 border border-red-400/30 rounded-lg p-4">
+          <h4 className="text-red-400 font-bold mb-3">🧰 GOOGLE DORKS DISPONÍVEIS</h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-purple-400 font-mono">site:linkedin.com</span>
-              <p className="text-purple-300">Busca em LinkedIn</p>
+              <span className="text-red-400 font-mono">site:linkedin.com</span>
+              <p className="text-red-300">Busca em LinkedIn</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-purple-400 font-mono">filetype:pdf</span>
-              <p className="text-purple-300">Arquivos PDF</p>
+              <span className="text-red-400 font-mono">filetype:pdf</span>
+              <p className="text-red-300">Arquivos PDF</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-purple-400 font-mono">intext:"email"</span>
-              <p className="text-purple-300">Texto específico</p>
+              <span className="text-red-400 font-mono">intext:"email"</span>
+              <p className="text-red-300">Texto específico</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-purple-400 font-mono">cache:site.com</span>
-              <p className="text-purple-300">Cache do Google</p>
+              <span className="text-red-400 font-mono">cache:site.com</span>
+              <p className="text-red-300">Cache do Google</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-purple-400 font-mono">"index of"</span>
-              <p className="text-purple-300">Diretórios abertos</p>
+              <span className="text-red-400 font-mono">"index of"</span>
+              <p className="text-red-300">Diretórios abertos</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-purple-400 font-mono">intitle:"login"</span>
-              <p className="text-purple-300">Páginas de login</p>
+              <span className="text-red-400 font-mono">intitle:"login"</span>
+              <p className="text-red-300">Páginas de login</p>
             </div>
           </div>
         </div>

@@ -115,8 +115,8 @@ export const WebAttack = () => {
             onClick={() => setActiveTab('history')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'history'
-                ? 'bg-purple-400/20 text-purple-400 border-b-2 border-purple-400'
-                : 'bg-black/30 text-purple-400/50 hover:text-purple-400'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
           >
             📚 HISTORY

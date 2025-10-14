@@ -290,7 +290,7 @@ const SystemSelfCheck = () => {
       case 'critical': return 'border-red-400 bg-red-400/10 text-red-400';
       case 'high': return 'border-orange-400 bg-orange-400/10 text-orange-400';
       case 'medium': return 'border-yellow-400 bg-yellow-400/10 text-yellow-400';
-      case 'low': return 'border-blue-400 bg-blue-400/10 text-blue-400';
+      case 'low': return 'border-orange-400 bg-orange-400/10 text-orange-400';
       default: return 'border-gray-400 bg-gray-400/10 text-gray-400';
     }
   };
@@ -462,7 +462,7 @@ const SystemSelfCheck = () => {
             <div className="space-y-2">
               {scanResults.recommendations.map((rec, index) => (
                 <div key={index} className="bg-black/40 border border-yellow-400/20 rounded p-3 flex items-center">
-                  <span className="text-blue-400 mr-3">📋</span>
+                  <span className="text-orange-400 mr-3">📋</span>
                   <span className="text-yellow-400">{rec}</span>
                 </div>
               ))}
@@ -475,7 +475,7 @@ const SystemSelfCheck = () => {
             <div className="grid grid-cols-4 gap-4">
               <button 
                 onClick={exportReport}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 px-4 rounded hover:from-blue-500 hover:to-blue-600 transition-all"
+                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold py-3 px-4 rounded hover:from-orange-500 hover:to-orange-600 transition-all"
               >
                 📊 EXPORTAR RELATÓRIO
               </button>
@@ -488,7 +488,7 @@ const SystemSelfCheck = () => {
               <button className="bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold py-3 px-4 rounded hover:from-orange-500 hover:to-orange-600 transition-all">
                 🔧 ENVIAR PARA SSP-GO
               </button>
-              <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-3 px-4 rounded hover:from-purple-500 hover:to-purple-600 transition-all">
+              <button className="bg-gradient-to-r from-red-600 to-orange-700 text-white font-bold py-3 px-4 rounded hover:from-red-500 hover:to-orange-600 transition-all">
                 ⏰ AGENDAR AUTO-SCAN
               </button>
             </div>
@@ -505,7 +505,7 @@ const SystemSelfCheck = () => {
           
           <div className="grid grid-cols-3 gap-6 mt-8">
             <div className="bg-black/40 border border-yellow-400/20 rounded p-4">
-              <div className="text-blue-400 text-2xl mb-2">🔍</div>
+              <div className="text-orange-400 text-2xl mb-2">🔍</div>
               <h4 className="text-yellow-400 font-bold text-sm">SCAN REAL</h4>
               <p className="text-yellow-400/70 text-xs mt-1">Portas, processos e arquivos reais do sistema</p>
             </div>
@@ -517,7 +517,7 @@ const SystemSelfCheck = () => {
             </div>
             
             <div className="bg-black/40 border border-yellow-400/20 rounded p-4">
-              <div className="text-purple-400 text-2xl mb-2">⚡</div>
+              <div className="text-red-400 text-2xl mb-2">⚡</div>
               <h4 className="text-yellow-400 font-bold text-sm">RELATÓRIO REAL</h4>
               <p className="text-yellow-400/70 text-xs mt-1">Dados reais para auditoria SSP-GO</p>
             </div>

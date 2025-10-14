@@ -72,9 +72,9 @@
 }
 
 .btn-mode:hover:not(:disabled) {
-  border-color: #3b82f6;
+  border-color: #ef4444;
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
 }
 
 .btn-mode.active {
@@ -139,7 +139,7 @@
 }
 
 .buffer-stat-card:hover {
-  border-color: #3b82f6;
+  border-color: #ef4444;
   transform: translateY(-2px);
 }
 
@@ -155,7 +155,7 @@
 .stat-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: #ef4444;
   font-family: 'Courier New', monospace;
   margin-bottom: 0.25rem;
 }
@@ -264,7 +264,7 @@
 }
 
 .consolidation-card:hover {
-  border-color: #3b82f6;
+  border-color: #ef4444;
   transform: translateY(-2px);
 }
 
@@ -288,7 +288,7 @@
 .card-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: #ef4444;
   font-family: 'Courier New', monospace;
   margin-bottom: 0.75rem;
 }
@@ -423,15 +423,15 @@
 /* Bio Inspiration */
 .bio-inspiration {
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(239, 68, 68, 0.1));
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.1));
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 12px;
 }
 
 .bio-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: #ef4444;
   margin: 0 0 1rem 0;
 }
 
@@ -449,7 +449,7 @@
 }
 
 .bio-content strong {
-  color: #60a5fa;
+  color: #f87171;
 }
 
 /* Responsive */

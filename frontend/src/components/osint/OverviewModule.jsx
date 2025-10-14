@@ -25,8 +25,8 @@ const OSINT_MODULES = [
 export const OverviewModule = ({ stats }) => {
   return (
     <div className="space-y-6">
-      <div className="border border-purple-400/50 rounded-lg bg-purple-400/5 p-6">
-        <h2 className="text-purple-400 font-bold text-2xl mb-6 tracking-wider">
+      <div className="border border-red-400/50 rounded-lg bg-red-400/5 p-6">
+        <h2 className="text-red-400 font-bold text-2xl mb-6 tracking-wider">
           CENTRO DE OPERAÇÕES OSINT
         </h2>
 
@@ -44,15 +44,15 @@ export const OverviewModule = ({ stats }) => {
             <div className="text-orange-400 text-3xl font-bold">{stats.threatsDetected}</div>
             <div className="text-orange-400/70 text-sm">AMEAÇAS DETECTADAS</div>
           </div>
-          <div className="bg-black/50 border border-purple-400/50 rounded-lg p-4 text-center">
-            <div className="text-purple-400 text-3xl font-bold">{stats.dataPoints}K</div>
-            <div className="text-purple-400/70 text-sm">PONTOS DE DADOS</div>
+          <div className="bg-black/50 border border-red-400/50 rounded-lg p-4 text-center">
+            <div className="text-red-400 text-3xl font-bold">{stats.dataPoints}K</div>
+            <div className="text-red-400/70 text-sm">PONTOS DE DADOS</div>
           </div>
         </div>
 
         {/* Status dos Módulos OSINT */}
         <div className="space-y-4">
-          <h3 className="text-purple-400 font-bold text-lg mb-4">STATUS DOS MÓDULOS OSINT</h3>
+          <h3 className="text-red-400 font-bold text-lg mb-4">STATUS DOS MÓDULOS OSINT</h3>
           <div className="grid grid-cols-3 gap-4">
             {OSINT_MODULES.map((module, idx) => (
               <ModuleStatusCard

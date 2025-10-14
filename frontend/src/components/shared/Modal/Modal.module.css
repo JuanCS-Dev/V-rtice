@@ -80,12 +80,12 @@
 
 .osint {
   border: var(--border-2) solid var(--color-osint-primary);
-  box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.3);
 }
 
 .analytics {
   border: var(--border-2) solid var(--color-analytics-primary);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 40px rgba(239, 68, 68, 0.3);
 }
 
 .default {

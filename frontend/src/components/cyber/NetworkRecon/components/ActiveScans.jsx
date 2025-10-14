@@ -9,8 +9,8 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="text-6xl mb-4 opacity-50">⚡</div>
-          <div className="text-cyan-400/50 text-xl font-bold">No Active Scans</div>
-          <div className="text-cyan-400/30 text-sm mt-2">
+          <div className="text-red-400/50 text-xl font-bold">No Active Scans</div>
+          <div className="text-red-400/30 text-sm mt-2">
             Start a new scan to see real-time progress here
           </div>
         </div>

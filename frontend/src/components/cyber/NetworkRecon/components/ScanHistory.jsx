@@ -12,8 +12,8 @@ export const ScanHistory = ({ scans, onSelectScan }) => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="text-6xl mb-4 opacity-50">📚</div>
-          <div className="text-purple-400/50 text-xl font-bold">No Scan History</div>
-          <div className="text-purple-400/30 text-sm mt-2">
+          <div className="text-red-400/50 text-xl font-bold">No Scan History</div>
+          <div className="text-red-400/30 text-sm mt-2">
             Completed scans will appear here
           </div>
         </div>
@@ -48,8 +48,8 @@ export const ScanHistory = ({ scans, onSelectScan }) => {
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded font-bold text-sm transition-all ${
               filter === 'all'
-                ? 'bg-purple-400/20 text-purple-400 border border-purple-400'
-                : 'bg-black/30 text-purple-400/50 border border-purple-400/20 hover:text-purple-400'
+                ? 'bg-red-400/20 text-red-400 border border-red-400'
+                : 'bg-black/30 text-red-400/50 border border-red-400/20 hover:text-red-400'
             }`}
           >
             All ({scans.length})
@@ -77,11 +77,11 @@ export const ScanHistory = ({ scans, onSelectScan }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-purple-400/70 text-sm">Sort by:</span>
+          <span className="text-red-400/70 text-sm">Sort by:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="bg-black/50 border border-purple-400/30 rounded px-3 py-2 text-purple-400 text-sm font-bold focus:outline-none focus:border-purple-400"
+            className="bg-black/50 border border-red-400/30 rounded px-3 py-2 text-red-400 text-sm font-bold focus:outline-none focus:border-red-400"
           >
             <option value="date">Date</option>
             <option value="hosts">Hosts Found</option>
@@ -184,7 +184,7 @@ export const ScanHistory = ({ scans, onSelectScan }) => {
       {filteredScans.length === 0 && (
         <div className="text-center py-12">
           <div className="text-4xl mb-3 opacity-50">🔍</div>
-          <div className="text-purple-400/50">
+          <div className="text-red-400/50">
             No scans found with filter: <span className="font-bold">{filter}</span>
           </div>
         </div>

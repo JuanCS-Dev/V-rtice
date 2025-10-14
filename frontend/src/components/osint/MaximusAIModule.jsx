@@ -95,7 +95,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
 
   return (
     <div className="space-y-6">
-      <div className="border border-cyan-500/30 rounded-lg bg-black/40 p-6">
+      <div className="border border-red-500/30 rounded-lg bg-black/40 p-6">
         <h2 className="text-white font-semibold text-xl mb-2 tracking-wide">
           AURORA AI
         </h2>
@@ -108,7 +108,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
           <div className="space-y-1">
             <label htmlFor="input-username-hsdk3" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Username</label>
 <input id="input-username-hsdk3"
-              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-red-500/50 focus:outline-none transition-colors font-mono"
               placeholder="john_doe_2024"
               value={targetData.username}
               onChange={(e) => setTargetData({...targetData, username: e.target.value})}
@@ -117,7 +117,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
           <div className="space-y-1">
             <label htmlFor="input-email-pk67y" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Email</label>
 <input id="input-email-pk67y"
-              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-red-500/50 focus:outline-none transition-colors font-mono"
               placeholder="target@email.com"
               value={targetData.email}
               onChange={(e) => setTargetData({...targetData, email: e.target.value})}
@@ -126,7 +126,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
           <div className="space-y-1">
             <label htmlFor="input-phone-hr0u7" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Phone</label>
 <input id="input-phone-hr0u7"
-              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-red-500/50 focus:outline-none transition-colors font-mono"
               placeholder="+5562999999999"
               value={targetData.phone}
               onChange={(e) => setTargetData({...targetData, phone: e.target.value})}
@@ -135,7 +135,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
           <div className="space-y-1">
             <label htmlFor="input-name-nfgbz" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Name</label>
 <input id="input-name-nfgbz"
-              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-red-500/50 focus:outline-none transition-colors font-mono"
               placeholder="João Silva"
               value={targetData.name}
               onChange={(e) => setTargetData({...targetData, name: e.target.value})}
@@ -144,7 +144,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
           <div className="space-y-1">
             <label htmlFor="input-location-jww46" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Location</label>
 <input id="input-location-jww46"
-              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-red-500/50 focus:outline-none transition-colors font-mono"
               placeholder="Goiânia, GO"
               value={targetData.location}
               onChange={(e) => setTargetData({...targetData, location: e.target.value})}
@@ -153,7 +153,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
           <div className="space-y-1">
             <label htmlFor="input-context-2ndxh" className="text-gray-400 text-[10px] font-medium tracking-wider uppercase">Context</label>
 <input id="input-context-2ndxh"
-              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-cyan-500/50 focus:outline-none transition-colors font-mono"
+              className="w-full bg-black/60 border border-gray-700 text-gray-300 placeholder-gray-600 px-3 py-2 rounded text-sm focus:border-red-500/50 focus:outline-none transition-colors font-mono"
               placeholder="Security investigation"
               value={targetData.context}
               onChange={(e) => setTargetData({...targetData, context: e.target.value})}
@@ -183,7 +183,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
             <div className="text-gray-300 text-xs mb-2 font-mono">{aiPhase}</div>
             <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green-600 to-cyan-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-green-600 to-red-500 transition-all duration-500"
                 style={{ width: `${aiProgress}%` }}
               />
             </div>
@@ -222,8 +222,8 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
 
             {/* Executive Summary */}
             {result.executive_summary && (
-              <div className="bg-blue-950/20 border border-blue-900/30 rounded p-3 mb-3">
-                <h4 className="text-cyan-400 font-medium text-xs mb-2 uppercase tracking-wider">Executive Summary</h4>
+              <div className="bg-orange-950/20 border border-orange-900/30 rounded p-3 mb-3">
+                <h4 className="text-red-400 font-medium text-xs mb-2 uppercase tracking-wider">Executive Summary</h4>
                 <p className="text-gray-400 text-xs leading-relaxed">{result.executive_summary}</p>
               </div>
             )}

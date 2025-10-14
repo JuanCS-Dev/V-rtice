@@ -70,7 +70,7 @@ export const SessionManager = ({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left: Create Session */}
       <div className="lg:col-span-1 space-y-4">
-        <div className="bg-gradient-to-br from-red-900/30 to-purple-900/30 border-2 border-red-400/40 rounded-lg p-6">
+        <div className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-2 border-red-400/40 rounded-lg p-6">
           <h3 className="text-red-400 font-bold text-lg mb-4 flex items-center gap-2">
             <span className="text-2xl">🎮</span>
             CREATE SESSION
@@ -156,7 +156,7 @@ export const SessionManager = ({
             <button
               onClick={handleCreateSession}
               disabled={isExecuting || !sessionConfig.targetHost || !sessionConfig.lhost}
-              className="w-full py-3 bg-gradient-to-r from-red-600 to-purple-600 text-white font-bold rounded hover:from-red-500 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-400/20"
+              className="w-full py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded hover:from-red-500 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-400/20"
             >
               {isExecuting ? '⚙️ CREATING...' : '🚀 CREATE SESSION'}
             </button>
@@ -166,7 +166,7 @@ export const SessionManager = ({
 
       {/* Center: Active Sessions */}
       <div className="lg:col-span-2 space-y-4">
-        <div className="bg-gradient-to-br from-red-900/20 to-purple-900/20 border border-red-400/30 rounded-lg p-6">
+        <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-red-400 font-bold text-lg flex items-center gap-2">
               <span className="text-2xl">⚡</span>
@@ -196,7 +196,7 @@ export const SessionManager = ({
                       }
                     }}
                     className={`
-                      bg-gradient-to-r from-${frameworkColor}-900/20 to-purple-900/20
+                      bg-gradient-to-r from-${frameworkColor}-900/20 to-orange-900/20
                       border-2 border-${frameworkColor}-400/30 rounded-lg p-4
                       hover:border-${frameworkColor}-400 transition-all cursor-pointer
                       ${isSelected ? `ring-2 ring-${frameworkColor}-400/50` : ''}
@@ -235,7 +235,7 @@ export const SessionManager = ({
                               e.stopPropagation();
                               onPassSession(session.session_id, 'metasploit');
                             }}
-                            className="px-3 py-1 bg-cyan-400/20 border border-cyan-400/40 rounded text-cyan-400 text-xs font-bold hover:bg-cyan-400/30 transition-all"
+                            className="px-3 py-1 bg-red-400/20 border border-red-400/40 rounded text-red-400 text-xs font-bold hover:bg-red-400/30 transition-all"
                           >
                             → MSF
                           </button>
@@ -273,7 +273,7 @@ export const SessionManager = ({
 
         {/* Command Execution */}
         {selectedSession && (
-          <div className="bg-gradient-to-br from-green-900/20 to-blue-900/20 border border-green-400/30 rounded-lg p-6">
+          <div className="bg-gradient-to-br from-green-900/20 to-orange-900/20 border border-green-400/30 rounded-lg p-6">
             <h3 className="text-green-400 font-bold text-lg mb-4 flex items-center gap-2">
               <span className="text-2xl">💻</span>
               EXECUTE COMMAND
@@ -308,7 +308,7 @@ export const SessionManager = ({
                 <button
                   onClick={handleExecuteCommand}
                   disabled={!command.trim()}
-                  className="px-6 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white font-bold rounded hover:from-green-500 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-gradient-to-r from-green-600 to-orange-600 text-white font-bold rounded hover:from-green-500 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   EXECUTE
                 </button>

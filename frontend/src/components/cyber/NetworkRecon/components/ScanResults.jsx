@@ -17,7 +17,7 @@ export const ScanResults = ({ scan }) => {
       case 'failed':
         return 'text-red-400 border-red-400';
       default:
-        return 'text-cyan-400 border-cyan-400';
+        return 'text-red-400 border-red-400';
     }
   };
 
@@ -30,9 +30,9 @@ export const ScanResults = ({ scan }) => {
       case 'medium':
         return 'text-yellow-400 bg-yellow-400/20 border-yellow-400';
       case 'low':
-        return 'text-blue-400 bg-blue-400/20 border-blue-400';
+        return 'text-orange-400 bg-orange-400/20 border-orange-400';
       default:
-        return 'text-cyan-400 bg-cyan-400/20 border-cyan-400';
+        return 'text-red-400 bg-red-400/20 border-red-400';
     }
   };
 
@@ -74,7 +74,7 @@ export const ScanResults = ({ scan }) => {
             </div>
             <div className="w-full bg-black/50 rounded-full h-2">
               <div
-                className="bg-gradient-to-r from-cyan-400 to-blue-400 h-2 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-red-400 to-orange-400 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${scan.progress}%` }}
               />
             </div>
@@ -107,7 +107,7 @@ export const ScanResults = ({ scan }) => {
       {/* Hosts Results */}
       {scan.hosts && scan.hosts.length > 0 && (
         <div>
-          <h4 className="text-cyan-400 font-bold mb-3 flex items-center gap-2">
+          <h4 className="text-red-400 font-bold mb-3 flex items-center gap-2">
             <span>🖥️</span>
             DISCOVERED HOSTS ({scan.hosts.length})
           </h4>
@@ -116,23 +116,23 @@ export const ScanResults = ({ scan }) => {
             {scan.hosts.map((host, idx) => (
               <div
                 key={idx}
-                className="border border-cyan-400/30 rounded-lg bg-black/20 overflow-hidden"
+                className="border border-red-400/30 rounded-lg bg-black/20 overflow-hidden"
               >
                 {/* Host Header */}
                 <button
                   onClick={() => setExpandedHost(expandedHost === idx ? null : idx)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-cyan-400/5 transition-all"
+                  className="w-full p-4 flex items-center justify-between hover:bg-red-400/5 transition-all"
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-2xl">
                       {host.status === 'up' ? '🟢' : '🔴'}
                     </div>
                     <div className="text-left">
-                      <div className="font-bold text-cyan-400 font-mono">
+                      <div className="font-bold text-red-400 font-mono">
                         {host.ip || host.hostname}
                       </div>
                       {host.hostname && host.ip && (
-                        <div className="text-xs text-cyan-400/50 font-mono">
+                        <div className="text-xs text-red-400/50 font-mono">
                           {host.ip}
                         </div>
                       )}
@@ -141,16 +141,16 @@ export const ScanResults = ({ scan }) => {
 
                   <div className="flex items-center gap-6">
                     <div className="text-right">
-                      <div className="text-sm text-cyan-400/70">
+                      <div className="text-sm text-red-400/70">
                         {host.open_ports?.length || 0} open ports
                       </div>
                       {host.os_guess && (
-                        <div className="text-xs text-cyan-400/50">
+                        <div className="text-xs text-red-400/50">
                           {host.os_guess}
                         </div>
                       )}
                     </div>
-                    <div className="text-cyan-400 text-xl">
+                    <div className="text-red-400 text-xl">
                       {expandedHost === idx ? '▼' : '▶'}
                     </div>
                   </div>
@@ -158,25 +158,25 @@ export const ScanResults = ({ scan }) => {
 
                 {/* Expanded Host Details */}
                 {expandedHost === idx && host.open_ports && (
-                  <div className="border-t border-cyan-400/30 bg-black/30 p-4">
-                    <h5 className="text-cyan-400 font-bold text-sm mb-3">
+                  <div className="border-t border-red-400/30 bg-black/30 p-4">
+                    <h5 className="text-red-400 font-bold text-sm mb-3">
                       OPEN PORTS & SERVICES
                     </h5>
                     <div className="space-y-2">
                       {host.open_ports.map((port, portIdx) => (
                         <div
                           key={portIdx}
-                          className="bg-black/50 border border-cyan-400/20 rounded p-3 flex items-center justify-between"
+                          className="bg-black/50 border border-red-400/20 rounded p-3 flex items-center justify-between"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="font-mono font-bold text-cyan-400">
+                            <div className="font-mono font-bold text-red-400">
                               {port.port}/{port.protocol}
                             </div>
-                            <div className="text-cyan-400/70">
+                            <div className="text-red-400/70">
                               {port.service || 'unknown'}
                             </div>
                             {port.version && (
-                              <div className="text-cyan-400/50 text-sm">
+                              <div className="text-red-400/50 text-sm">
                                 v{port.version}
                               </div>
                             )}
@@ -193,20 +193,20 @@ export const ScanResults = ({ scan }) => {
 
                     {/* Additional Info */}
                     {(host.mac_address || host.vendor) && (
-                      <div className="mt-4 pt-4 border-t border-cyan-400/20">
+                      <div className="mt-4 pt-4 border-t border-red-400/20">
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           {host.mac_address && (
                             <div>
-                              <span className="text-cyan-400/50">MAC: </span>
-                              <span className="text-cyan-400 font-mono">
+                              <span className="text-red-400/50">MAC: </span>
+                              <span className="text-red-400 font-mono">
                                 {host.mac_address}
                               </span>
                             </div>
                           )}
                           {host.vendor && (
                             <div>
-                              <span className="text-cyan-400/50">Vendor: </span>
-                              <span className="text-cyan-400">
+                              <span className="text-red-400/50">Vendor: </span>
+                              <span className="text-red-400">
                                 {host.vendor}
                               </span>
                             </div>

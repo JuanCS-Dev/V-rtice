@@ -27,11 +27,11 @@ export const AIProcessingOverlay = ({ isVisible }) => {
         <div className="text-6xl animate-spin mb-4" aria-hidden="true">
           🧠
         </div>
-        <div className="text-purple-400 text-xl font-bold mb-4 tracking-wider">
+        <div className="text-red-400 text-xl font-bold mb-4 tracking-wider">
           {t('dashboard.osint.processing')}
         </div>
-        <div className="w-80 h-2 bg-purple-400/20 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-purple-400 to-pink-400 animate-pulse"></div>
+        <div className="w-80 h-2 bg-red-400/20 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-red-400 to-pink-400 animate-pulse"></div>
         </div>
       </div>
     </div>
