@@ -1,0 +1,343 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * THREAT GLOBE STYLES
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Interactive map with real-time threat visualization
+ * Leaflet.js integration with cyber-aesthetic overlays
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * MAIN CONTAINER
+ * ═══════════════════════════════════════════════════════════════════════ */
+.threatGlobe {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--color-bg-primary, #0a0e1a);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * LEAFLET OVERRIDES - Critical for visibility
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Ensure Leaflet container fills space */
+.threatGlobe :global(.leaflet-container) {
+  width: 100% !important;
+  height: 100% !important;
+  background: var(--color-bg-primary, #0a0e1a) !important;
+  z-index: 1 !important;
+  border-radius: var(--radius-2xl);
+}
+
+/* Ensure tiles are visible */
+.threatGlobe :global(.leaflet-tile-pane) {
+  z-index: 200 !important;
+  opacity: 1 !important;
+}
+
+.threatGlobe :global(.leaflet-tile-container) {
+  z-index: 200 !important;
+  opacity: 1 !important;
+}
+
+.threatGlobe :global(.leaflet-tile) {
+  opacity: 1 !important;
+  filter: brightness(1.2) contrast(1.1) !important;
+  visibility: visible !important;
+  image-rendering: -webkit-optimize-contrast !important;
+}
+
+.threatGlobe :global(.leaflet-layer) {
+  opacity: 1 !important;
+  z-index: 200 !important;
+}
+
+/* Remove Leaflet attribution - we have our own */
+.threatGlobe :global(.leaflet-control-attribution) {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * GLOBE OVERLAY - Top right counter
+ * ═══════════════════════════════════════════════════════════════════════ */
+.globeOverlay {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  pointer-events: none;
+}
+
+/* Threat Counter Box */
+.threatCounter {
+  background: rgba(10, 14, 26, 0.95);
+  border: 1px solid var(--color-danger, #ff0040);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  backdrop-filter: blur(var(--blur-lg));
+  box-shadow:
+    0 0 20px rgba(255, 0, 64, 0.3),
+    var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  animation: slideInRight 0.8s var(--transition-smooth);
+}
+
+.counterValue {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-black);
+  color: var(--color-danger, #ff0040);
+  font-family: 'Orbitron', monospace;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(255, 0, 64, 0.5);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.counterLabel {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  font-family: monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * GLOBE STATUS - "Scanning" indicator
+ * ═══════════════════════════════════════════════════════════════════════ */
+.globeStatus {
+  background: rgba(10, 14, 26, 0.95);
+  border: 1px solid var(--color-accent-primary, #8b5cf6);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(var(--blur-lg));
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  box-shadow:
+    0 0 15px rgba(139, 92, 246, 0.3),
+    var(--shadow-md);
+  animation: slideInRight 1s var(--transition-smooth);
+}
+
+.statusPulse {
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent-primary, #8b5cf6);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 10px var(--color-accent-primary, #8b5cf6);
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.statusText {
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  color: var(--color-accent-primary, #8b5cf6);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  font-family: monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * GLOBE LEGEND - Bottom left severity colors
+ * ═══════════════════════════════════════════════════════════════════════ */
+.globeLegend {
+  position: absolute;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  z-index: 1000;
+  background: rgba(10, 14, 26, 0.95);
+  border: 1px solid var(--color-border-primary, rgba(255, 255, 255, 0.1));
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--blur-lg));
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  pointer-events: none;
+  animation: slideInLeft 1.2s var(--transition-smooth);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary, #94a3b8);
+  font-family: monospace;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  border: 2px solid #fff;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.legendDotCritical {
+  background: #ff0040;
+  color: #ff0040;
+}
+
+.legendDotHigh {
+  background: #ff6600;
+  color: #ff6600;
+}
+
+.legendDotWarning {
+  background: #ffaa00;
+  color: #ffaa00;
+}
+
+.legendDotSuccess {
+  background: #00ff88;
+  color: #00ff88;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ANIMATIONS
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * RESPONSIVE DESIGN
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .globeOverlay {
+    top: var(--space-sm);
+    right: var(--space-sm);
+  }
+
+  .threatCounter {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .counterValue {
+    font-size: var(--text-3xl);
+  }
+
+  .globeLegend {
+    bottom: var(--space-sm);
+    left: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .legendItem {
+    font-size: 10px;
+  }
+
+  .legendDot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .globeStatus {
+    display: none; /* Hide status on very small screens */
+  }
+
+  .globeLegend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .counterLabel {
+    display: none; /* Hide label on mobile to save space */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ACCESSIBILITY
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .threatCounter,
+  .globeStatus,
+  .globeLegend,
+  .statusPulse,
+  .counterValue {
+    animation: none;
+  }
+
+  .threatGlobe :global(.threat-marker),
+  .threatGlobe :global(.trace-path) {
+    animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * THEME OVERRIDES - Enterprise Theme Compatibility
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Enterprise theme needs adjusted colors */
+:root[data-theme="enterprise"] .threatGlobe {
+  background: #f8f9fa;
+}
+
+:root[data-theme="enterprise"] .threatGlobe :global(.leaflet-container) {
+  background: #f8f9fa !important;
+}
+
+:root[data-theme="enterprise"] .threatCounter,
+:root[data-theme="enterprise"] .globeStatus,
+:root[data-theme="enterprise"] .globeLegend {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--color-border-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+:root[data-theme="enterprise"] .statusText,
+:root[data-theme="enterprise"] .legendItem {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="enterprise"] .counterValue {
+  color: var(--color-danger);
+  text-shadow: none;
+}

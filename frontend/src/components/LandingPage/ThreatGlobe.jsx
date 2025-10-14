@@ -15,6 +15,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import logger from '../../utils/logger';
+import styles from './ThreatGlobe.module.css';
 
 export const ThreatGlobe = ({ realThreats = [] }) => {
   const mapRef = useRef(null);
@@ -303,7 +304,7 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
   };
 
   return (
-    <div className="threat-globe">
+    <div className={styles.threatGlobe}>
       <div
         ref={mapRef}
         style={{
@@ -316,35 +317,35 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       />
 
       {/* Overlay com contador */}
-      <div className="globe-overlay">
-        <div className="threat-counter">
-          <span className="counter-value">{threatCount}</span>
-          <span className="counter-label">Ameaças Detectadas</span>
+      <div className={styles.globeOverlay}>
+        <div className={styles.threatCounter}>
+          <span className={styles.counterValue}>{threatCount}</span>
+          <span className={styles.counterLabel}>Ameaças Detectadas</span>
         </div>
 
         {/* Status indicator */}
-        <div className="globe-status">
-          <span className="status-pulse"></span>
-          <span className="status-text">SCANNING GLOBAL THREATS</span>
+        <div className={styles.globeStatus}>
+          <span className={styles.statusPulse}></span>
+          <span className={styles.statusText}>SCANNING GLOBAL THREATS</span>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="globe-legend">
-        <div className="legend-item">
-          <span className="legend-dot legend-dot-critical"></span>
+      <div className={styles.globeLegend}>
+        <div className={styles.legendItem}>
+          <span className={`${styles.legendDot} ${styles.legendDotCritical}`}></span>
           <span>Malicious</span>
         </div>
-        <div className="legend-item">
-          <span className="legend-dot legend-dot-high"></span>
+        <div className={styles.legendItem}>
+          <span className={`${styles.legendDot} ${styles.legendDotHigh}`}></span>
           <span>Suspicious</span>
         </div>
-        <div className="legend-item">
-          <span className="legend-dot legend-dot-warning"></span>
+        <div className={styles.legendItem}>
+          <span className={`${styles.legendDot} ${styles.legendDotWarning}`}></span>
           <span>Questionable</span>
         </div>
-        <div className="legend-item">
-          <span className="legend-dot legend-dot-success"></span>
+        <div className={styles.legendItem}>
+          <span className={`${styles.legendDot} ${styles.legendDotSuccess}`}></span>
           <span>Clean</span>
         </div>
       </div>

@@ -471,6 +471,27 @@ class TestFrameworkScore:
         
         assert score.score is None
         assert score.veto is True
+    
+    def test_framework_score_validation_invalid_score(self):
+        """Test score validation."""
+        with pytest.raises(ValueError, match="score"):
+            FrameworkScore(
+                framework_name="Test",
+                score=1.5,  # Invalid
+                reasoning="Test",
+                veto=False,
+            )
+    
+    def test_framework_score_validation_invalid_confidence(self):
+        """Test confidence validation."""
+        with pytest.raises(ValueError, match="confidence"):
+            FrameworkScore(
+                framework_name="Test",
+                score=0.8,
+                reasoning="Test",
+                veto=False,
+                confidence=1.5,  # Invalid
+            )
 
 
 class TestEthicalVerdict:
@@ -508,6 +529,30 @@ class TestEthicalVerdict:
         assert verdict.confidence == 0.90
         assert verdict.kantian_score.score == 0.9
         assert verdict.utilitarian_score.score == 0.8
+    
+    def test_verdict_to_dict(self):
+        """Test verdict serialization to dict."""
+        kantian = FrameworkScore(
+            framework_name="Kantian_Deontology",
+            score=0.9,
+            reasoning="Good",
+            veto=False,
+        )
+        
+        verdict = EthicalVerdict(
+            plan_id=uuid4(),
+            status=VerdictStatus.APPROVED,
+            aggregate_score=0.85,
+            confidence=0.90,
+            kantian_score=kantian,
+            summary="Test",
+        )
+        
+        data = verdict.to_dict()
+        assert "id" in data
+        assert "plan_id" in data
+        assert data["status"] == "approved"
+        assert data["kantian"]["score"] == 0.9
     
     def test_verdict_status_types(self):
         """Test all verdict status types."""
