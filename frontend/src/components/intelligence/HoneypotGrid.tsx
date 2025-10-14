@@ -50,12 +50,12 @@ const statusConfig = {
 };
 
 const typeConfig = {
-  ssh: { label: 'SSH', color: 'text-blue-600 dark:text-blue-400' },
+  ssh: { label: 'SSH', color: 'text-orange-600 dark:text-orange-400' },
   http: { label: 'HTTP', color: 'text-green-600 dark:text-green-400' },
   mysql: { label: 'MySQL', color: 'text-orange-600 dark:text-orange-400' },
-  ftp: { label: 'FTP', color: 'text-purple-600 dark:text-purple-400' },
+  ftp: { label: 'FTP', color: 'text-red-600 dark:text-red-400' },
   smb: { label: 'SMB', color: 'text-pink-600 dark:text-pink-400' },
-  rdp: { label: 'RDP', color: 'text-indigo-600 dark:text-indigo-400' },
+  rdp: { label: 'RDP', color: 'text-red-600 dark:text-red-400' },
 };
 
 /**

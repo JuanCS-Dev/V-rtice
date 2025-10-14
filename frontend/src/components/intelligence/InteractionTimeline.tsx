@@ -25,7 +25,7 @@ interface InteractionTimelineProps {
 }
 
 const severityConfig = {
-  low: { color: 'bg-blue-500', variant: 'secondary' as const },
+  low: { color: 'bg-orange-500', variant: 'secondary' as const },
   medium: { color: 'bg-yellow-500', variant: 'secondary' as const },
   high: { color: 'bg-orange-500', variant: 'destructive' as const },
   critical: { color: 'bg-red-600', variant: 'destructive' as const },

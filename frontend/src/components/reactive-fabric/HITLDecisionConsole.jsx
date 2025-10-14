@@ -37,7 +37,7 @@ import styles from './HITLDecisionConsole.module.css';
 const PRIORITY_CONFIG = {
   CRITICAL: { color: '#dc2626', icon: '🔴', label: 'CRITICAL', soundAlert: true },
   HIGH: { color: '#f59e0b', icon: '🟠', label: 'HIGH', soundAlert: false },
-  MEDIUM: { color: '#3b82f6', icon: '🔵', label: 'MEDIUM', soundAlert: false },
+  MEDIUM: { color: '#f97316', icon: '🟠', label: 'MEDIUM', soundAlert: false },
   LOW: { color: '#10b981', icon: '🟢', label: 'LOW', soundAlert: false },
 };
 

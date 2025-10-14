@@ -76,9 +76,9 @@ export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
   };
 
   const getModulatorColor = (percentage) => {
-    if (percentage < 30) return '#3b82f6'; // Blue - Low
+    if (percentage < 30) return '#f97316'; // Orange - Low
     if (percentage < 70) return '#10b981'; // Green - Normal
-    return '#f59e0b'; // Orange - High
+    return '#ef4444'; // Red - High
   };
 
   const resetModulator = async (modulatorName) => {
