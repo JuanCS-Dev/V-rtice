@@ -260,7 +260,7 @@ class PrefrontalCortex:
             "user_id": user_id,
             "distress_level": distress_score,
             "beliefs": beliefs,
-            "needs_help": distress_score > 0.5,
+            "needs_help": distress_score >= 0.5,  # >= for boundary case
             "context": context
         }
 
