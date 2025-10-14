@@ -1,0 +1,108 @@
+# PFC Consciousness - Full Stack Deployment
+# Includes: PFC API + PostgreSQL + (optional) MIP API
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # PostgreSQL Database
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: consciousness-db
+    environment:
+      POSTGRES_DB: vertice_consciousness
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - consciousness-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # PFC Consciousness API
+  # ============================================================================
+  pfc-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pfc-consciousness-api
+    environment:
+      # Database
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: vertice_consciousness
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_password}
+
+      # API Configuration
+      API_HOST: 0.0.0.0
+      API_PORT: 8001
+      API_WORKERS: 4
+      LOG_LEVEL: info
+
+      # MIP Integration
+      MIP_ENABLED: ${MIP_ENABLED:-true}
+
+      # CORS
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - consciousness-network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+  # ============================================================================
+  # PGAdmin (Optional - for database management)
+  # ============================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: consciousness-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@vertice.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - consciousness-network
+    restart: unless-stopped
+    profiles:
+      - tools
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  consciousness-network:
+    driver: bridge
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  postgres_data:
+    driver: local
