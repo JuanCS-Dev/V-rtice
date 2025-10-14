@@ -1,0 +1,75 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * THEME TOGGLE STYLES - Compact Theme Switcher
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+.toggle {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(var(--blur-md));
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle:hover,
+.toggle:focus-visible {
+  background: var(--color-accent-primary-light);
+  border-color: var(--color-accent-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.toggle:active {
+  transform: translateY(0);
+}
+
+.icon {
+  font-size: var(--text-xl);
+  transition: transform var(--transition-base);
+}
+
+.toggle:hover .icon {
+  transform: scale(1.1) rotate(15deg);
+}
+
+.toggle:active .icon {
+  transform: scale(0.95);
+}
+
+/* Accessibility */
+.toggle:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .toggle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .icon {
+    font-size: var(--text-lg);
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .icon {
+    transition: none;
+  }
+
+  .toggle:hover .icon {
+    transform: none;
+  }
+}
