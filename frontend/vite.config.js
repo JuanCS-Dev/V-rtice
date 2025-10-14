@@ -19,6 +19,10 @@ export default defineConfig({
       { find: '@', replacement: path.resolve(__dirname, 'src') }
     ]
   },
+  define: {
+    // Provide process.env compatibility for libraries that use it
+    'process.env': {},
+  },
   test: {
     globals: true,
     environment: 'jsdom',

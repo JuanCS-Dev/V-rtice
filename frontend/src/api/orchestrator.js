@@ -35,7 +35,7 @@
  * Development: Use localhost:8125
  */
 const ORCHESTRATOR_API_BASE =
-  process.env.NEXT_PUBLIC_ORCHESTRATOR_API ||
+  import.meta.env.VITE_ORCHESTRATOR_API ||
   (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
     ? `${window.location.protocol}//${window.location.hostname}:8125`
     : 'http://localhost:8125');

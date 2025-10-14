@@ -59,10 +59,10 @@ class ErrorBoundary extends React.Component {
     // (Sentry integration can be added later if needed)
 
     // Log para console em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      logger.group('🚨 Error Boundary - Telemetry Data');
-      logger.error('Error:', errorData);
-      logger.groupEnd();
+    if (import.meta.env.DEV) {
+      logger.group('🚨 Error Boundary - Telemetry Data', () => {
+        logger.error('Error:', errorData);
+      });
     }
 
     // Enviar para endpoint de logging (se disponível)
@@ -115,7 +115,7 @@ class ErrorBoundary extends React.Component {
               {this.props.message || 'Ocorreu um erro inesperado. Nossa equipe foi notificada.'}
             </p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <details className="error-boundary-details">
                 <summary>Detalhes do Erro (Dev Only)</summary>
                 <pre className="error-boundary-stack">

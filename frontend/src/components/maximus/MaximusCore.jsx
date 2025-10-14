@@ -25,6 +25,7 @@ import {
   getMaximusHealth
 } from '../../api/maximusAI';
 import { escapeHTML } from '../../utils/security';
+import logger from '../../utils/logger';
 import './MaximusCore.css';
 
 export const MaximusCore = ({ aiStatus, setAiStatus }) => {
@@ -53,29 +54,7 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
   const chatEndRef = useRef(null);
 
   // ═══════════════════════════════════════════════════════════════════════
-  // INITIALIZATION
-  // ═══════════════════════════════════════════════════════════════════════
-  useEffect(() => {
-    loadMaximusHealth();
-    loadToolCatalog();
-    loadMemory();
-
-    // Welcome message
-    setMessages([{
-      id: Date.now(),
-      role: 'assistant',
-      content: '🤖 **Maximus AI Core Online**\n\nI have access to 45+ tools across offensive security, OSINT, cyber intelligence, and cognitive services. Ask me to:\n\n• Run security assessments\n• Investigate targets (OSINT)\n• Analyze threats\n• Execute MITRE ATT&CK simulations\n• Orchestrate multi-service workflows\n\nWhat would you like me to do?',
-      timestamp: new Date().toISOString()
-    }]);
-  }, [loadMaximusHealth]);
-
-  // Auto-scroll chat
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, currentStreamingMessage]);
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // DATA LOADING
+  // DATA LOADING (Must be declared before useEffect that uses them)
   // ═══════════════════════════════════════════════════════════════════════
 
   const loadMaximusHealth = useCallback(async () => {
@@ -113,6 +92,28 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
       setSuggestions(sugg.suggestions.slice(0, 3));
     }
   };
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // INITIALIZATION
+  // ═══════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    loadMaximusHealth();
+    loadToolCatalog();
+    loadMemory();
+
+    // Welcome message
+    setMessages([{
+      id: Date.now(),
+      role: 'assistant',
+      content: '🤖 **Maximus AI Core Online**\n\nI have access to 45+ tools across offensive security, OSINT, cyber intelligence, and cognitive services. Ask me to:\n\n• Run security assessments\n• Investigate targets (OSINT)\n• Analyze threats\n• Execute MITRE ATT&CK simulations\n• Orchestrate multi-service workflows\n\nWhat would you like me to do?',
+      timestamp: new Date().toISOString()
+    }]);
+  }, [loadMaximusHealth]);
+
+  // Auto-scroll chat
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, currentStreamingMessage]);
 
   // ═══════════════════════════════════════════════════════════════════════
   // CHAT HANDLERS

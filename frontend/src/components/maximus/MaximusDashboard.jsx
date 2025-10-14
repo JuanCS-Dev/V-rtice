@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * MAXIMUS AI DASHBOARD - O Cérebro do Vértice
  * ═══════════════════════════════════════════════════════════════════════════
@@ -13,6 +12,7 @@ import logger from '@/utils/logger';
  */
 
 import React, { useState } from 'react';
+import logger from '@/utils/logger';
 import { useTranslation } from 'react-i18next';
 import { OraculoPanel } from './OraculoPanel';
 import { EurekaPanel } from './EurekaPanel';
