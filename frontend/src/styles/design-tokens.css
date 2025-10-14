@@ -1,0 +1,487 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DESIGN TOKENS - Sistema de Design Unificado Vértice
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Design Philosophy: PAGANI LEVEL
+ * - Elegância Brutal - Clean mas impactante
+ * - Consistência - Tokens únicos para toda plataforma
+ * - Tema-Agnóstico - Variáveis que funcionam com qualquer tema
+ * - Performance - CSS Variables otimizadas para GPU
+ *
+ * Inspired by: Pagani Huayra, Military Intelligence UI, Cyberpunk Aesthetics
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════
+   * SPACING SCALE - Fibonacci Sequence
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: padding, margin, gap
+   * Fibonacci garante harmonia visual natural
+   */
+  --space-xs: 0.25rem;      /* 4px  - micro spacing */
+  --space-sm: 0.5rem;       /* 8px  - small elements */
+  --space-md: 1rem;         /* 16px - base spacing */
+  --space-lg: 1.5rem;       /* 24px - section spacing */
+  --space-xl: 2.5rem;       /* 40px - large sections */
+  --space-2xl: 4rem;        /* 64px - hero spacing */
+  --space-3xl: 6.5rem;      /* 104px - dramatic spacing */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * TYPOGRAPHY SCALE - Modular Scale (1.25 ratio)
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: font-size
+   * Escala modular cria hierarquia visual clara
+   */
+  --text-xs: 0.75rem;       /* 12px - captions, badges */
+  --text-sm: 0.875rem;      /* 14px - small body text */
+  --text-base: 1rem;        /* 16px - body text */
+  --text-lg: 1.125rem;      /* 18px - large body */
+  --text-xl: 1.25rem;       /* 20px - subtitle */
+  --text-2xl: 1.5rem;       /* 24px - heading 3 */
+  --text-3xl: 1.875rem;     /* 30px - heading 2 */
+  --text-4xl: 2.25rem;      /* 36px - heading 1 */
+  --text-5xl: 3rem;         /* 48px - hero title */
+  --text-6xl: 4rem;         /* 64px - display title */
+
+  /* Font Weights */
+  --font-thin: 100;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * SHADOW SYSTEM - Elevation & Depth
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: box-shadow
+   * Sistema de elevação progressiva para hierarquia visual
+   */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Glow Effects - Cyberpunk Aesthetic */
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.2);
+  --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.2);
+  --shadow-glow-green: 0 0 20px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.2);
+  --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.2);
+  --shadow-glow-yellow: 0 0 20px rgba(234, 179, 8, 0.5), 0 0 40px rgba(234, 179, 8, 0.2);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * TRANSITION SYSTEM - Animation Timing
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: transition
+   * Curvas de easing para animações naturais
+   */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slower: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Special Easings */
+  --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-elastic: 600ms cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * BORDER RADIUS - Rounded Corners
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: border-radius
+   * Sistema de arredondamento progressivo
+   */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;     /* 4px */
+  --radius-base: 0.5rem;    /* 8px */
+  --radius-md: 0.75rem;     /* 12px */
+  --radius-lg: 1rem;        /* 16px */
+  --radius-xl: 1.5rem;      /* 24px */
+  --radius-2xl: 2rem;       /* 32px */
+  --radius-full: 9999px;    /* Circular */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * BREAKPOINTS - Responsive Design
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: @media queries
+   * Mobile-first approach
+   */
+  --breakpoint-sm: 640px;   /* Mobile landscape */
+  --breakpoint-md: 768px;   /* Tablet */
+  --breakpoint-lg: 1024px;  /* Laptop */
+  --breakpoint-xl: 1280px;  /* Desktop */
+  --breakpoint-2xl: 1536px; /* Large desktop */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * Z-INDEX SCALE - Layering System
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: z-index
+   * Sistema de camadas consistente
+   */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+  --z-notification: 1700;
+  --z-max: 9999;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * OPACITY SCALE - Transparency Levels
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: opacity, rgba()
+   * Níveis de transparência padronizados
+   */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-100: 1;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * BLUR EFFECTS - Backdrop & Gaussian
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: backdrop-filter, filter
+   * Efeitos de vidro e desfoque
+   */
+  --blur-none: 0;
+  --blur-sm: 4px;
+  --blur-base: 8px;
+  --blur-md: 12px;
+  --blur-lg: 16px;
+  --blur-xl: 24px;
+  --blur-2xl: 40px;
+  --blur-3xl: 64px;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * ANIMATIONS - Keyframes & Timing
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: animation
+   * Durações padrão para animações
+   */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+  --duration-slowest: 1000ms;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * CONTAINER WIDTHS - Max Width System
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: max-width
+   * Sistema de largura máxima para containers
+   */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+  --container-full: 100%;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * SEMANTIC COLOR TOKENS - Theme-Agnostic
+   * ═══════════════════════════════════════════════════════════════════════
+   * IMPORTANTE: Estes valores serão SOBRESCRITOS por cada tema!
+   * Servem como fallback caso tema não defina
+   *
+   * Cada tema (dark.css, win11.css, etc) deve definir estes mesmos tokens
+   * com valores específicos para aquele tema.
+   */
+
+  /* Backgrounds */
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #334155;
+  --color-bg-elevated: #475569;
+  --color-bg-overlay: rgba(15, 23, 42, 0.95);
+
+  /* Text Colors */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #0f172a;
+
+  /* Borders */
+  --color-border-primary: rgba(148, 163, 184, 0.2);
+  --color-border-secondary: rgba(148, 163, 184, 0.1);
+  --color-border-focus: #8b5cf6;
+  --color-border-error: #ef4444;
+
+  /* Accent Colors - Primary (Purple) */
+  --color-accent-primary: #8b5cf6;
+  --color-accent-primary-hover: #7c3aed;
+  --color-accent-primary-active: #6d28d9;
+  --color-accent-primary-light: rgba(139, 92, 246, 0.1);
+
+  /* Accent Colors - Secondary (Cyan) */
+  --color-accent-secondary: #06b6d4;
+  --color-accent-secondary-hover: #0891b2;
+  --color-accent-secondary-active: #0e7490;
+  --color-accent-secondary-light: rgba(6, 182, 212, 0.1);
+
+  /* Semantic Colors - Success */
+  --color-success: #22c55e;
+  --color-success-hover: #16a34a;
+  --color-success-light: rgba(34, 197, 94, 0.1);
+  --color-success-text: #4ade80;
+
+  /* Semantic Colors - Danger */
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-danger-light: rgba(239, 68, 68, 0.1);
+  --color-danger-text: #f87171;
+
+  /* Semantic Colors - Warning */
+  --color-warning: #eab308;
+  --color-warning-hover: #ca8a04;
+  --color-warning-light: rgba(234, 179, 8, 0.1);
+  --color-warning-text: #facc15;
+
+  /* Semantic Colors - Info */
+  --color-info: #3b82f6;
+  --color-info-hover: #2563eb;
+  --color-info-light: rgba(59, 130, 246, 0.1);
+  --color-info-text: #60a5fa;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * GRADIENTS - Premium Visual Effects
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: background, background-image
+   * Gradientes premium para hero sections e cards
+   */
+  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #22c55e 100%);
+  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  --gradient-dark: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 27, 75, 0.98) 100%);
+  --gradient-cyberpunk: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #22c55e 100%);
+
+  /* Radial Gradients */
+  --gradient-radial-primary: radial-gradient(circle at center, #8b5cf6 0%, transparent 70%);
+  --gradient-radial-secondary: radial-gradient(circle at center, #06b6d4 0%, transparent 70%);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * GRID SYSTEM - Layout Structure
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: grid-template-columns, gap
+   * Sistema de grid responsivo
+   */
+  --grid-cols-1: repeat(1, minmax(0, 1fr));
+  --grid-cols-2: repeat(2, minmax(0, 1fr));
+  --grid-cols-3: repeat(3, minmax(0, 1fr));
+  --grid-cols-4: repeat(4, minmax(0, 1fr));
+  --grid-cols-6: repeat(6, minmax(0, 1fr));
+  --grid-cols-12: repeat(12, minmax(0, 1fr));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ANIMATION KEYFRAMES - Global Animations
+ * ═══════════════════════════════════════════════════════════════════════
+ * Animações reutilizáveis para toda plataforma
+ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * UTILITY CLASSES - Quick Styling
+ * ═══════════════════════════════════════════════════════════════════════
+ * Classes utilitárias para aplicar tokens rapidamente
+ */
+
+/* Spacing Utilities */
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+.p-2xl { padding: var(--space-2xl); }
+
+.m-xs { margin: var(--space-xs); }
+.m-sm { margin: var(--space-sm); }
+.m-md { margin: var(--space-md); }
+.m-lg { margin: var(--space-lg); }
+.m-xl { margin: var(--space-xl); }
+.m-2xl { margin: var(--space-2xl); }
+
+/* Text Utilities */
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-base { font-size: var(--text-base); }
+.text-lg { font-size: var(--text-lg); }
+.text-xl { font-size: var(--text-xl); }
+.text-2xl { font-size: var(--text-2xl); }
+.text-3xl { font-size: var(--text-3xl); }
+.text-4xl { font-size: var(--text-4xl); }
+.text-5xl { font-size: var(--text-5xl); }
+.text-6xl { font-size: var(--text-6xl); }
+
+/* Shadow Utilities */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-base { box-shadow: var(--shadow-base); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+.shadow-2xl { box-shadow: var(--shadow-2xl); }
+
+/* Border Radius Utilities */
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-base { border-radius: var(--radius-base); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+.rounded-2xl { border-radius: var(--radius-2xl); }
+.rounded-full { border-radius: var(--radius-full); }
+
+/* Transition Utilities */
+.transition-fast { transition: all var(--transition-fast); }
+.transition-base { transition: all var(--transition-base); }
+.transition-slow { transition: all var(--transition-slow); }
+.transition-bounce { transition: all var(--transition-bounce); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * END OF DESIGN TOKENS
+ * ═══════════════════════════════════════════════════════════════════════
+ */

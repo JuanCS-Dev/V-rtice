@@ -1,0 +1,543 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * HERO SECTION STYLES - PAGANI Level Design
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Design Philosophy:
+ * - Elegância Brutal - Clean mas impactante
+ * - Hierarquia Clara - Visual flow natural
+ * - Tema-Agnóstico - CSS Variables everywhere
+ * - Mobile-First - Responsivo nato
+ * - Performance - GPU-accelerated animations
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * HERO CONTAINER
+ * ═══════════════════════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  width: 100%;
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+  overflow: hidden;
+
+  /* Performance optimization */
+  contain: layout style paint;
+  will-change: opacity;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * HEADER BAR - Logo + Auth
+ * ═══════════════════════════════════════════════════════════════════════ */
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--blur-lg));
+  box-shadow: var(--shadow-md);
+  animation: slideInDown 0.6s var(--transition-smooth);
+}
+
+/* Branding - Logo + Text */
+.branding {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.logoIcon {
+  font-size: var(--text-4xl);
+  color: var(--color-accent-primary);
+  filter: drop-shadow(var(--shadow-glow-purple));
+  animation: glow 3s ease-in-out infinite;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logoTitle {
+  font-size: var(--text-xl);
+  font-weight: var(--font-extrabold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--tracking-wider);
+  font-family: 'Orbitron', monospace;
+  text-transform: uppercase;
+}
+
+.logoVersion {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-accent-secondary);
+  letter-spacing: var(--tracking-wide);
+  font-family: monospace;
+}
+
+/* Header Actions - Auth + Theme */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * HERO CONTENT - Two Columns Layout
+ * ═══════════════════════════════════════════════════════════════════════ */
+.heroContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xl);
+  align-items: center;
+  flex: 1;
+  animation: fadeIn 0.8s var(--transition-smooth);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * LEFT COLUMN - Title, Tags, Services
+ * ═══════════════════════════════════════════════════════════════════════ */
+.heroLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-xl) 0;
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-accent-primary-light);
+  border: 1px solid var(--color-accent-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-accent-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  font-family: monospace;
+  width: fit-content;
+  box-shadow: var(--shadow-glow-purple);
+  animation: slideInLeft 0.8s var(--transition-smooth);
+}
+
+.pulseDot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent-primary);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 10px var(--color-accent-primary);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Main Title - IMPACTANTE */
+.title {
+  font-size: var(--text-6xl);
+  font-weight: var(--font-black);
+  line-height: var(--leading-none);
+  letter-spacing: var(--tracking-tighter);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  animation: slideInLeft 1s var(--transition-smooth);
+  font-family: 'Orbitron', monospace;
+}
+
+.titleMain {
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+}
+
+.titleHighlight {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5));
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: var(--text-lg);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 600px;
+  animation: slideInLeft 1.2s var(--transition-smooth);
+}
+
+/* Tags - Inline Flow */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  animation: slideInLeft 1.4s var(--transition-smooth);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  font-family: monospace;
+  transition: all var(--transition-base);
+  cursor: default;
+}
+
+.tag:hover {
+  background: var(--color-accent-primary-light);
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.tagIcon {
+  font-size: var(--text-base);
+}
+
+/* Services Status */
+.services {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--blur-md));
+  animation: slideInLeft 1.6s var(--transition-smooth);
+}
+
+.servicesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.servicesTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  font-family: monospace;
+}
+
+.servicesCount {
+  font-size: var(--text-xl);
+  font-weight: var(--font-extrabold);
+  color: var(--color-accent-secondary);
+  font-family: monospace;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+}
+
+.serviceItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-base);
+  transition: all var(--transition-fast);
+}
+
+.serviceItem.online {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+}
+
+.serviceItem.online .serviceDot {
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+}
+
+.serviceItem.offline {
+  border-color: var(--color-danger);
+  background: var(--color-danger-light);
+  opacity: var(--opacity-60);
+}
+
+.serviceItem.offline .serviceDot {
+  background: var(--color-danger);
+  box-shadow: 0 0 8px var(--color-danger);
+}
+
+.serviceDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.serviceName {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-tertiary);
+  font-family: monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * RIGHT COLUMN - Threat Globe
+ * ═══════════════════════════════════════════════════════════════════════ */
+.heroRight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: slideInRight 1s var(--transition-smooth);
+}
+
+.globeContainer {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-2xl);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-2xl), var(--shadow-glow-purple);
+  overflow: hidden;
+  backdrop-filter: blur(var(--blur-lg));
+
+  /* Glow effect */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-2xl);
+    opacity: var(--opacity-20);
+    z-index: -1;
+    filter: blur(20px);
+    animation: glow 3s ease-in-out infinite;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * RESPONSIVE DESIGN - Mobile First
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Tablet - Stack columns */
+@media (max-width: 1024px) {
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .heroRight {
+    order: -1; /* Globe first on mobile */
+  }
+
+  .title {
+    font-size: var(--text-5xl);
+  }
+
+  .globeContainer {
+    max-width: 500px;
+  }
+}
+
+/* Mobile - Compact layout */
+@media (max-width: 640px) {
+  .hero {
+    padding: var(--space-md) var(--space-sm);
+    min-height: auto;
+  }
+
+  .headerBar {
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .title {
+    font-size: var(--text-4xl);
+  }
+
+  .subtitle {
+    font-size: var(--text-base);
+  }
+
+  .tags {
+    gap: var(--space-xs);
+  }
+
+  .tag {
+    font-size: var(--text-xs);
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .servicesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .globeContainer {
+    max-width: 100%;
+  }
+}
+
+/* Extra Small - Ultra compact */
+@media (max-width: 375px) {
+  .title {
+    font-size: var(--text-3xl);
+  }
+
+  .logoTitle {
+    font-size: var(--text-lg);
+  }
+
+  .logoIcon {
+    font-size: var(--text-3xl);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ANIMATIONS
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * DARK MODE OPTIMIZATIONS
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  .hero {
+    /* Increase contrast for dark backgrounds */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ACCESSIBILITY
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Reduce motion for users with vestibular disorders */
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  .headerBar,
+  .heroContent,
+  .heroLeft > *,
+  .heroRight,
+  .pulseDot,
+  .titleHighlight,
+  .globeContainer::before {
+    animation: none;
+  }
+
+  .tag,
+  .serviceItem {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tag,
+  .serviceItem,
+  .headerBar,
+  .services,
+  .globeContainer {
+    border-width: 2px;
+  }
+}
