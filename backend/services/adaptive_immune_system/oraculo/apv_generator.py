@@ -17,6 +17,8 @@ from sqlalchemy.orm import Session
 from ..database import DatabaseClient
 from ..database.models import APV, Dependency, Threat
 from ..models.apv import APVCreate, APVDispatchMessage
+from ..messaging.client import RabbitMQClient, get_rabbitmq_client
+from ..messaging.publisher import APVPublisher
 from packaging import version as pkg_version
 
 logger = logging.getLogger(__name__)
@@ -132,17 +134,38 @@ class APVGenerator:
     - Deduplication by CVE + dependency
     """
 
-    def __init__(self, db_client: DatabaseClient):
+    def __init__(
+        self,
+        db_client: DatabaseClient,
+        rabbitmq_client: Optional[RabbitMQClient] = None,
+        auto_publish: bool = True,
+    ):
         """
         Initialize APV generator.
 
         Args:
             db_client: Database client instance
+            rabbitmq_client: RabbitMQ client (optional, will get global instance if not provided)
+            auto_publish: Automatically publish APVs to Eureka via RabbitMQ
         """
         self.db_client = db_client
         self.signature_generator = VulnerableCodeSignature()
+        self.auto_publish = auto_publish
 
-        logger.info("APVGenerator initialized")
+        # Initialize APV publisher
+        self.apv_publisher: Optional[APVPublisher] = None
+        if auto_publish:
+            try:
+                if rabbitmq_client is None:
+                    rabbitmq_client = get_rabbitmq_client()
+                self.apv_publisher = APVPublisher(rabbitmq_client)
+                logger.info("✅ APV publisher initialized")
+            except Exception as e:
+                logger.warning(f"⚠️ APV publisher initialization failed: {e}")
+                logger.warning("APVs will not be automatically published to RabbitMQ")
+                self.apv_publisher = None
+
+        logger.info(f"APVGenerator initialized (auto_publish={auto_publish})")
 
     def generate_apvs(
         self,
@@ -419,6 +442,33 @@ class APVGenerator:
         session.add(apv)
         session.commit()
         session.refresh(apv)
+
+        # Publish APV to Eureka via RabbitMQ
+        if self.apv_publisher:
+            try:
+                # Create dispatch message
+                dispatch_message = self.create_dispatch_message(apv)
+
+                # Publish asynchronously (blocking for now, can be made async later)
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # If loop already running, schedule as task
+                    asyncio.create_task(self.apv_publisher.dispatch_apv(dispatch_message))
+                else:
+                    # Otherwise run synchronously
+                    loop.run_until_complete(self.apv_publisher.dispatch_apv(dispatch_message))
+
+                logger.info(f"✅ APV published to RabbitMQ: {apv.apv_code}")
+
+                # Update APV status to dispatched
+                apv.status = "dispatched"
+                apv.dispatched_at = datetime.utcnow()
+                session.commit()
+
+            except Exception as e:
+                logger.error(f"❌ Failed to publish APV to RabbitMQ: {e}")
+                # Don't fail APV creation if publishing fails
 
         return apv
 

@@ -36,8 +36,9 @@ from .vcs import (
     PRDescriptionContext,
 )
 from ..messaging.client import RabbitMQClient, get_rabbitmq_client
-from ..messaging.publisher import HITLNotificationPublisher
+from ..messaging.publisher import HITLNotificationPublisher, RemedyStatusPublisher
 from ..models.wargame import WargameReportMessage
+from ..models.apv import APVStatusUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -163,8 +164,9 @@ class EurekaOrchestrator:
 
         self.pr_description_generator = PRDescriptionGenerator()
 
-        # HITL notification publisher (initialized after RabbitMQ connection)
+        # RabbitMQ publishers (initialized after RabbitMQ connection)
         self.hitl_publisher: Optional[HITLNotificationPublisher] = None
+        self.status_publisher: Optional[RemedyStatusPublisher] = None
 
         logger.info("EurekaOrchestrator initialized")
 
@@ -590,14 +592,21 @@ class EurekaOrchestrator:
         """Start Eureka orchestrator (connect to RabbitMQ)."""
         await self.callback_client.connect()
 
-        # Initialize HITL publisher
+        # Initialize RabbitMQ publishers
         try:
             rabbitmq_client = get_rabbitmq_client()
+
+            # HITL notification publisher
             self.hitl_publisher = HITLNotificationPublisher(rabbitmq_client)
             logger.info("✅ HITL notification publisher initialized")
+
+            # Status publisher (replaces callback_client for status updates)
+            self.status_publisher = RemedyStatusPublisher(rabbitmq_client)
+            logger.info("✅ Remedy status publisher initialized")
+
         except Exception as e:
-            logger.warning(f"⚠️ HITL publisher initialization failed: {e}")
-            logger.warning("HITL notifications will not be sent")
+            logger.warning(f"⚠️ RabbitMQ publishers initialization failed: {e}")
+            logger.warning("Will fall back to callback_client for status updates")
 
         logger.info("✅ Eureka orchestrator started")
 

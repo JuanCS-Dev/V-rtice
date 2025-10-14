@@ -35,6 +35,9 @@ from .verdict_calculator import (
     VerdictCalculator,
     VerdictScore,
 )
+from ..messaging.client import RabbitMQClient, get_rabbitmq_client
+from ..messaging.publisher import WargameReportPublisher
+from ..models.wargame import WargameReportMessage
 
 logger = logging.getLogger(__name__)
 
@@ -89,14 +92,22 @@ class WargameOrchestrator:
     - Result reporting via RabbitMQ
     """
 
-    def __init__(self, config: WargameConfig):
+    def __init__(
+        self,
+        config: WargameConfig,
+        rabbitmq_client: Optional[RabbitMQClient] = None,
+        auto_publish: bool = True,
+    ):
         """
         Initialize wargame orchestrator.
 
         Args:
             config: WargameConfig
+            rabbitmq_client: RabbitMQ client (optional, will get global instance if not provided)
+            auto_publish: Automatically publish wargaming results to Eureka via RabbitMQ
         """
         self.config = config
+        self.auto_publish = auto_publish
 
         # Initialize components
         self.workflow_generator = WorkflowGenerator(
@@ -117,7 +128,20 @@ class WargameOrchestrator:
             hitl_threshold=config.hitl_threshold,
         )
 
-        logger.info("WargameOrchestrator initialized")
+        # Initialize wargame report publisher
+        self.wargame_publisher: Optional[WargameReportPublisher] = None
+        if auto_publish:
+            try:
+                if rabbitmq_client is None:
+                    rabbitmq_client = get_rabbitmq_client()
+                self.wargame_publisher = WargameReportPublisher(rabbitmq_client)
+                logger.info("✅ Wargame report publisher initialized")
+            except Exception as e:
+                logger.warning(f"⚠️ Wargame publisher initialization failed: {e}")
+                logger.warning("Wargame results will not be automatically published to RabbitMQ")
+                self.wargame_publisher = None
+
+        logger.info(f"WargameOrchestrator initialized (auto_publish={auto_publish})")
 
     async def run_wargame(
         self,
@@ -245,6 +269,37 @@ class WargameOrchestrator:
                 f"hitl={verdict_score.should_trigger_hitl}, "
                 f"auto_merge={auto_merge_approved}"
             )
+
+            # Publish wargaming result to Eureka via RabbitMQ
+            if self.wargame_publisher:
+                try:
+                    # Create wargame report message
+                    from datetime import datetime
+                    import uuid
+
+                    report_message = WargameReportMessage(
+                        message_id=str(uuid.uuid4()),
+                        remedy_id=apv_code,  # Using APV code as remedy ID
+                        run_code=f"WAR-{apv_code}",
+                        timestamp=datetime.utcnow(),
+                        verdict=verdict_score.verdict,
+                        confidence_score=verdict_score.confidence,
+                        exploit_before_status="vulnerable" if evidence.exploit_before_patch_succeeded else "safe",
+                        exploit_after_status="fixed" if not evidence.exploit_after_patch_succeeded else "vulnerable",
+                        evidence_url=workflow_run_url,
+                        evidence=evidence.model_dump() if hasattr(evidence, 'model_dump') else {},
+                        should_trigger_hitl=verdict_score.should_trigger_hitl,
+                        auto_merge_approved=auto_merge_approved,
+                    )
+
+                    # Publish
+                    await self.wargame_publisher.publish_report(report_message)
+
+                    logger.info(f"✅ Wargame result published to RabbitMQ: {apv_code}")
+
+                except Exception as e:
+                    logger.error(f"❌ Failed to publish wargame result to RabbitMQ: {e}")
+                    # Don't fail wargaming if publishing fails
 
             return report
 
