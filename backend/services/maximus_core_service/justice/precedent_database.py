@@ -105,8 +105,9 @@ class PrecedentDB:
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
 
-        # Embedder will be set later to avoid circular import
-        self.embedder = None
+        # Initialize embedder
+        from justice.embeddings import CaseEmbedder
+        self.embedder = CaseEmbedder()
 
     async def store(self, case: CasePrecedent) -> CasePrecedent:
         """Store a case precedent in the database.
