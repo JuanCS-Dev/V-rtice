@@ -445,6 +445,190 @@ Complete audit trail for all decisions:
 
 ---
 
+## 🔄 UPDATE: REST API COMPLETE (2025-10-14)
+
+### PFC Consciousness API
+**Commit**: `38f7481c` - feat(consciousness): Add REST API for PFC decision orchestration
+
+#### FastAPI Application
+Complete REST API with lifecycle management, health checks, and real-time streaming:
+
+```bash
+# Run API server
+cd backend/consciousness/consciousness/api
+python app.py
+
+# API available at:
+# - Docs: http://localhost:8001/docs
+# - ReDoc: http://localhost:8001/redoc
+```
+
+#### Endpoints (10 total)
+
+**Health & Info**:
+- `GET /` - Root endpoint (service info)
+- `GET /health` - Health check (PFC + persistence + MIP status)
+
+**Orchestration**:
+- `POST /orchestrate` - Basic decision (ToM + Compassion + DDL)
+- `POST /orchestrate-with-plan` - Full pipeline (ToM + Compassion + DDL + MIP)
+
+**Decision Queries**:
+- `GET /decisions/{decision_id}` - Get decision by ID
+- `GET /decisions/user/{user_id}` - User decision history (paginated)
+- `GET /decisions/escalated` - Escalated decisions (requires persistence)
+
+**Analytics**:
+- `GET /statistics` - Decision statistics (total, escalation rate, MIP metrics)
+- `GET /analytics/suffering` - Suffering analytics (requires persistence)
+
+**Real-time**:
+- `WS /ws/decisions` - WebSocket for real-time decision streaming
+
+#### Request/Response Examples
+
+**Basic Orchestration**:
+```python
+POST /orchestrate
+{
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
+  "behavioral_signals": {
+    "error_count": 2,
+    "retry_count": 1,
+    "task_success": false
+  },
+  "action_description": "User experiencing errors"
+}
+
+# Response:
+{
+  "decision_id": "...",
+  "user_id": "...",
+  "final_decision": "INTERVENE",
+  "rationale": "...",
+  "requires_escalation": false,
+  "confidence": 0.85,
+  "timestamp": "2025-10-14T20:00:00Z",
+  "mental_state": {
+    "emotional_state": "stressed",
+    "needs_assistance": true
+  },
+  "detected_events": [...],
+  "planned_interventions": [...]
+}
+```
+
+**Full Pipeline with MIP**:
+```python
+POST /orchestrate-with-plan
+{
+  "user_id": "...",
+  "behavioral_signals": {...},
+  "action_plan": {
+    "name": "Deploy feature",
+    "description": "...",
+    "category": "reactive",
+    "steps": [...],
+    "stakeholders": [...],
+    "urgency": 0.5,
+    "risk_level": 0.3
+  }
+}
+
+# Response includes ethical_verdict_summary
+{
+  ...
+  "ethical_verdict_summary": "approved (score: 0.87)"
+}
+```
+
+#### Features
+
+**Auto-Initialization**:
+- PFC initialized with MIP enabled
+- Persistence layer auto-connected (if available)
+- Graceful degradation without database
+
+**WebSocket Streaming**:
+```javascript
+// Connect to decision stream
+const ws = new WebSocket('ws://localhost:8001/ws/decisions');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type === 'decision') {
+    console.log('New decision:', data.decision_id);
+  }
+};
+```
+
+**Error Handling**:
+- HTTP exception handler (4xx errors)
+- General exception handler (500 errors)
+- Validation errors (422 Unprocessable Entity)
+
+**CORS Middleware**:
+- Configured for all origins (customize for production)
+
+#### Test Coverage
+- **17 API tests** (all passing)
+- **2 E2E tests** (skipped, require PostgreSQL)
+- Test categories:
+  - Health endpoints (2 tests)
+  - Orchestration (4 tests)
+  - Decision queries (4 tests)
+  - Statistics (2 tests)
+  - WebSocket (2 tests)
+  - Error handling (3 tests)
+  - Persistence integration (2 tests, skipped)
+
+**Total consciousness tests**: **93 passed, 4 skipped**
+
+#### Integration
+
+**Standalone Mode**:
+```python
+# Works without database
+uvicorn app:app --port 8001
+# Uses in-memory decision history
+```
+
+**With Persistence**:
+```python
+# Auto-connects to PostgreSQL
+# Enables:
+# - /decisions/escalated
+# - /analytics/suffering
+# - Persistent decision history
+```
+
+**Client Libraries**:
+```python
+import httpx
+
+# Orchestrate decision
+async with httpx.AsyncClient() as client:
+    response = await client.post(
+        "http://localhost:8001/orchestrate",
+        json={
+            "user_id": str(user_id),
+            "behavioral_signals": signals,
+            "action_description": description
+        }
+    )
+    decision = response.json()
+```
+
+---
+
+### Updated Status
+- ✅ **Session 2 Next Step 1/4 COMPLETE** (PFC→MIP integration)
+- ✅ **Session 2 Next Step 2/4 COMPLETE** (Persistence layer)
+- ✅ **Session 2 Next Step 3/4 COMPLETE** (REST API endpoints)
+- ⏭️ Next: Deploy to production environment
+
+---
+
 ## 🎯 CONCLUSION
 
 **SESSION 2: COMPLETE SUCCESS** 🏆
