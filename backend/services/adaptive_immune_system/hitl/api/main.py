@@ -11,14 +11,16 @@ Features:
 - Error handling middleware
 - Prometheus metrics collection
 - Distributed tracing (OpenTelemetry)
+- Real-time RabbitMQ notification consumer
 
 Usage:
     uvicorn hitl.api.main:app --reload --port 8003
 """
 
+import asyncio
 import logging
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,6 +36,16 @@ try:
 except ImportError:
     MONITORING_ENABLED = False
     logging.warning("Monitoring modules not available - metrics disabled")
+
+# Import RabbitMQ modules for notification consumption
+try:
+    from ..messaging.client import get_rabbitmq_client
+    from ..messaging.consumer import HITLNotificationConsumer
+    from ..models.hitl import HITLNotificationMessage
+    RABBITMQ_ENABLED = True
+except ImportError:
+    RABBITMQ_ENABLED = False
+    logging.warning("RabbitMQ modules not available - WebSocket notifications disabled")
 
 # Configure logging
 logging.basicConfig(
@@ -291,6 +303,86 @@ async def broadcast_event(event_type: str, data: Dict[str, Any]) -> None:
     logger.info(f"Broadcasted event: {event_type}")
 
 
+# --- RabbitMQ Notification Consumer ---
+
+
+async def handle_notification_broadcast(notification: HITLNotificationMessage) -> None:
+    """
+    Handle incoming HITL notification and broadcast to WebSocket clients.
+
+    Args:
+        notification: HITLNotificationMessage from RabbitMQ
+
+    This callback is invoked by HITLNotificationConsumer for each message.
+    """
+    logger.info(
+        f"📨 Broadcasting HITL notification: {notification.apv_code} "
+        f"(severity={notification.severity}, verdict={notification.wargame_verdict})"
+    )
+
+    try:
+        # Broadcast to all connected WebSocket clients
+        await broadcast_event(
+            event_type="new_review",
+            data={
+                "apv_id": notification.apv_id,
+                "apv_code": notification.apv_code,
+                "cve_id": notification.cve_id,
+                "severity": notification.severity,
+                "wargame_verdict": notification.wargame_verdict,
+                "wargame_confidence": notification.wargame_confidence,
+                "requires_immediate_attention": notification.requires_immediate_attention,
+                "pr_url": notification.pr_url,
+                "repository_name": notification.repository_name,
+                "affected_files": notification.affected_files,
+                "remediation_type": notification.remediation_type,
+                "priority": notification.priority,
+                "timestamp": notification.timestamp.isoformat(),
+            },
+        )
+
+        logger.info(f"✅ Notification broadcasted: {notification.apv_code}")
+
+    except Exception as e:
+        logger.error(
+            f"❌ Failed to broadcast notification {notification.apv_code}: {e}",
+            exc_info=True,
+        )
+
+
+async def consume_hitl_notifications() -> None:
+    """
+    Background task to consume HITL notifications from RabbitMQ.
+
+    Runs indefinitely, consuming messages and broadcasting via WebSocket.
+    Gracefully handles errors and continues consuming.
+    """
+    if not RABBITMQ_ENABLED:
+        logger.warning("⚠️ RabbitMQ not available - WebSocket notifications disabled")
+        return
+
+    logger.info("🔔 Starting HITL notification consumer...")
+
+    try:
+        # Get RabbitMQ client
+        rabbitmq_client = get_rabbitmq_client()
+
+        # Create consumer with broadcast callback
+        consumer = HITLNotificationConsumer(
+            client=rabbitmq_client,
+            callback=handle_notification_broadcast,
+        )
+
+        # Start consuming (runs indefinitely)
+        await consumer.start()
+
+        logger.info("✅ HITL notification consumer started")
+
+    except Exception as e:
+        logger.error(f"❌ Failed to start HITL notification consumer: {e}", exc_info=True)
+        logger.warning("⚠️ WebSocket notifications will not be available")
+
+
 # --- Startup/Shutdown Events ---
 
 
@@ -313,6 +405,13 @@ async def startup_event() -> None:
         logger.info("   ✅ Monitoring: ENABLED")
     else:
         logger.warning("   ⚠️  Monitoring: DISABLED")
+
+    # Start RabbitMQ notification consumer (background task)
+    if RABBITMQ_ENABLED:
+        asyncio.create_task(consume_hitl_notifications())
+        logger.info("   🔔 HITL notifications: ENABLED")
+    else:
+        logger.warning("   ⚠️  HITL notifications: DISABLED")
 
     # In production: Initialize database pool, RabbitMQ connection, etc.
 
