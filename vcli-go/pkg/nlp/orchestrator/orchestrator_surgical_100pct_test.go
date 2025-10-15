@@ -240,7 +240,8 @@ func TestCalculateIntentRisk_CapAt1Point0(t *testing.T) {
 			}
 
 			risk := calculateIntentRisk(intent)
-			assert.Equal(t, tc.expected, risk)
+			// Use InDelta for floating point comparison (tolerance: 0.0001)
+			assert.InDelta(t, tc.expected, risk, 0.0001)
 			assert.LessOrEqual(t, risk, 1.0, "Risk should never exceed 1.0")
 		})
 	}

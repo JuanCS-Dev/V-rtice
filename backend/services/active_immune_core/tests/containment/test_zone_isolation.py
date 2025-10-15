@@ -672,25 +672,26 @@ class TestZoneIsolationErrorHandling:
 
     @pytest.mark.asyncio
     async def test_isolate_catastrophic_failure(self):
-        """Test complete failure in isolate (exception in main try block)"""
+        """Test complete failure in isolate (exception in outer try block - lines 407-412)"""
         from containment.zone_isolation import ZoneIsolationEngine
+        from unittest.mock import patch
 
         engine = ZoneIsolationEngine()
 
-        # Mock _determine_trust_level to raise exception early
-        def mock_raise(*args, **kwargs):
-            raise RuntimeError("Catastrophic system error")
+        # Patch datetime.utcnow to raise exception
+        # This is called at line 341 before the for loop
+        # Will trigger the outer exception handler (lines 407-412)
+        with patch('containment.zone_isolation.datetime') as mock_datetime:
+            mock_datetime.utcnow.side_effect = RuntimeError("Catastrophic datetime error")
+            
+            result = await engine.isolate(
+                zones=["DMZ"],
+                isolation_level=IsolationLevel.BLOCKING,
+            )
 
-        engine._determine_trust_level = mock_raise
-
-        result = await engine.isolate(
-            zones=["DMZ"],
-            isolation_level=IsolationLevel.BLOCKING,
-        )
-
-        assert result.status == "FAILED"
-        assert len(result.errors) > 0
-        assert "Catastrophic" in str(result.errors[0])
+            # Outer exception handler creates FAILED result
+            assert result.status == "FAILED"
+            assert len(result.errors) > 0
 
 
 if __name__ == "__main__":

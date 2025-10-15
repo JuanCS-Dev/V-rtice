@@ -158,7 +158,7 @@ profile.RecentActions = []ActionRecord{
 {Action: "get", Timestamp: now.Add(-10 * time.Minute)}, // Outside window
 }
 
-count := profile.countRecentActions("get", 5*time.Minute)
+count := profile.countRecentActions("get", 5*time.Minute, now)
 assert.Equal(t, 2, count)
 }
 
