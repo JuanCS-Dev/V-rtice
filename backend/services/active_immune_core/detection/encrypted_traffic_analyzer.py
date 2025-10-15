@@ -443,6 +443,20 @@ class EncryptedTrafficAnalyzer:
             "analysis_latency": EncryptedTrafficAnalyzer._analysis_latency,
         }
     
+    def extract_features(self, flow: NetworkFlow) -> FlowFeatures:
+        """Extract features from network flow.
+        
+        Wrapper method for backward compatibility with tests.
+        Delegates to internal feature extractor.
+        
+        Args:
+            flow: Network flow to analyze
+            
+        Returns:
+            Extracted flow features
+        """
+        return self.feature_extractor.extract(flow)
+    
     async def analyze_flow(
         self,
         network_flow: NetworkFlow
