@@ -418,6 +418,88 @@ class TestEmergencyCircuitBreaker:
         assert breaker.trigger_count == 3
         assert len(breaker.incidents) == 3
 
+    def test_get_incident_history(self):
+        """Test get_incident_history() returns recent incidents correctly."""
+        breaker = EmergencyCircuitBreaker()
+
+        # Create 5 violations
+        violations = []
+        for i in range(5):
+            violation = ViolationReport(
+                level=ViolationLevel.CRITICAL,
+                violation_type=ViolationType.LEI_I,
+                violated_law=f"Lei I - Incident {i}",
+                description=f"Test violation {i}",
+                action={},
+                context={},
+                recommendation="STOP",
+                evidence=[f"evidence {i}"]
+            )
+            violations.append(violation)
+            breaker.trigger(violation)
+
+        # Get last 3 incidents
+        history = breaker.get_incident_history(limit=3)
+
+        # Should return 3 most recent, in reverse order
+        assert len(history) == 3
+        assert history[0]["violated_law"] == "Lei I - Incident 4"  # Most recent first
+        assert history[1]["violated_law"] == "Lei I - Incident 3"
+        assert history[2]["violated_law"] == "Lei I - Incident 2"
+
+        # Check structure
+        for incident in history:
+            assert "violated_law" in incident
+            assert "level" in incident
+            assert "type" in incident
+            assert "description" in incident
+            assert "evidence_count" in incident
+
+    def test_reset_with_valid_authorization(self):
+        """Test reset() with valid authorization clears state."""
+        breaker = EmergencyCircuitBreaker()
+
+        # Trigger violation
+        violation = ViolationReport(
+            level=ViolationLevel.CRITICAL,
+            violation_type=ViolationType.LEI_I,
+            violated_law="Lei I",
+            description="Test",
+            action={},
+            context={},
+            recommendation="STOP",
+            evidence=["test"]
+        )
+        breaker.trigger(violation)
+
+        # Verify triggered
+        assert breaker.triggered is True
+        assert breaker.safe_mode is True
+
+        # Reset with authorization
+        breaker.reset("HUMAN_AUTH_RESET_2025")
+
+        # Verify reset
+        assert breaker.triggered is False
+        assert breaker.safe_mode is False
+        # Audit trail NOT reset
+        assert breaker.trigger_count == 1
+        assert len(breaker.incidents) == 1
+
+    def test_reset_rejects_empty_authorization(self):
+        """Test reset() rejects empty authorization."""
+        breaker = EmergencyCircuitBreaker()
+        breaker.enter_safe_mode()
+
+        with pytest.raises(ValueError, match="Authorization required"):
+            breaker.reset("")
+
+        with pytest.raises(ValueError, match="Authorization required"):
+            breaker.reset("   ")
+
+        # Should still be in safe mode
+        assert breaker.safe_mode is True
+
     def test_get_status_returns_correct_info(self):
         """get_status() returns correct circuit breaker status."""
         breaker = EmergencyCircuitBreaker()
@@ -551,3 +633,55 @@ class TestIntegrationScenarios:
         assert metrics["lei_i_violations"] == 3
         assert metrics["critical_violations"] == 4
         assert metrics["violation_rate"] == pytest.approx(66.67, rel=0.1)
+
+    def test_validate_action_with_none_context(self):
+        """Test validate_action with explicit None context (covers line 162)."""
+        validator = ConstitutionalValidator()
+
+        action = {
+            "type": "benign_action",
+            "decision": "help_user"
+        }
+
+        # Explicitly pass None as context
+        verdict = validator.validate_action(action, context=None)
+
+        assert verdict.level == ViolationLevel.NONE
+        assert verdict.recommendation == "PROCEED"
+        # Context should be initialized to empty dict
+        assert verdict.context == {}
+
+    def test_reset_metrics_clears_all_state(self):
+        """Test reset_metrics() clears all validator state (covers lines 439-442)."""
+        validator = ConstitutionalValidator()
+
+        # Trigger some violations
+        for _ in range(3):
+            validator.validate_action(
+                {"type": "utilitarian_optimization", "abandons": True},
+                {"vulnerable_affected": True}
+            )
+
+        # Verify state before reset
+        metrics_before = validator.get_metrics()
+        assert metrics_before["total_validations"] == 3
+        assert metrics_before["total_violations"] == 3
+        assert metrics_before["lei_i_violations"] == 3
+        assert metrics_before["critical_violations"] == 3
+
+        # Reset
+        validator.reset_metrics()
+
+        # Verify state after reset
+        metrics_after = validator.get_metrics()
+        assert metrics_after["total_validations"] == 0
+        assert metrics_after["total_violations"] == 0
+        assert metrics_after["lei_i_violations"] == 0
+        assert metrics_after["critical_violations"] == 0
+        assert metrics_after["violation_rate"] == 0.0
+
+        # Verify internal state cleared
+        assert validator.violation_count == 0
+        assert len(validator.critical_violations) == 0
+        assert len(validator.lei_i_violations) == 0
+        assert validator.total_validations == 0

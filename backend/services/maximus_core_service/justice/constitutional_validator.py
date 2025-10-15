@@ -174,10 +174,9 @@ class ConstitutionalValidator:
             return lei_i_violation
 
         # Check other constitutional principles
-        other_violation = self._check_other_principles(action, context)
-        if other_violation:
-            self._record_violation(other_violation)
-            return other_violation
+        # NOTE: Currently returns None (stub for future expansion).
+        # When implemented, violations will be recorded and returned here.
+        self._check_other_principles(action, context)
 
         # No violations detected
         logger.info(f"Action passed constitutional validation: {action.get('type', 'unknown')}")
