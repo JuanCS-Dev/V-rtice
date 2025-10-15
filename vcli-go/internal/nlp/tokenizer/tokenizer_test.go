@@ -235,3 +235,186 @@ func BenchmarkLevenshteinDistance(b *testing.B) {
 		_ = levenshteinDistance(s1, s2)
 	}
 }
+
+// NEW TESTS FOR 100% COVERAGE
+
+// TestDictionaries_UnknownLanguage tests default cases in dictionary functions
+func TestDictionaries_UnknownLanguage(t *testing.T) {
+	unknownLang := nlp.Language("unknown")
+
+	verbDict := getVerbDictionary(unknownLang)
+	if len(verbDict) != 0 {
+		t.Errorf("getVerbDictionary(unknown) should return empty map, got %d entries", len(verbDict))
+	}
+
+	nounDict := getNounDictionary(unknownLang)
+	if len(nounDict) != 0 {
+		t.Errorf("getNounDictionary(unknown) should return empty map, got %d entries", len(nounDict))
+	}
+
+	filterDict := getFilterDictionary(unknownLang)
+	if len(filterDict) != 0 {
+		t.Errorf("getFilterDictionary(unknown) should return empty map, got %d entries", len(filterDict))
+	}
+
+	prepDict := getPrepositionDictionary(unknownLang)
+	if len(prepDict) != 0 {
+		t.Errorf("getPrepositionDictionary(unknown) should return empty map, got %d entries", len(prepDict))
+	}
+}
+
+// TestTokenizer_ClassifyUnknownToken tests classifyTokenType default case
+func TestTokenizer_ClassifyUnknownToken(t *testing.T) {
+	tokenizer := NewTokenizer()
+
+	// Token that's not in any dictionary - should be classified as IDENTIFIER
+	input := "xyz123abc"
+	tokens, err := tokenizer.Tokenize(input)
+
+	if err != nil {
+		t.Fatalf("Tokenize() error = %v", err)
+	}
+
+	if len(tokens) == 0 {
+		t.Fatal("Expected at least one token")
+	}
+
+	// Unknown word should be classified as IDENTIFIER
+	if tokens[0].Type != nlp.TokenTypeIDENTIFIER {
+		t.Errorf("Unknown token type = %q, want %q", tokens[0].Type, nlp.TokenTypeIDENTIFIER)
+	}
+}
+
+// TestTypoCorrector_NoCorrection tests typo corrector when no correction needed
+func TestTypoCorrector_NoCorrection(t *testing.T) {
+	corrector := NewTypoCorrector()
+
+	// Test exact match (no correction needed) - already covered but let's be explicit
+	word := "pods"
+	corrected, confidence := corrector.Correct(word, nlp.LanguageEN)
+
+	if corrected != word {
+		t.Errorf("Correct(%q) = %q, want %q (no correction)", word, corrected, word)
+	}
+
+	if confidence != 1.0 {
+		t.Errorf("Confidence for exact match = %f, want 1.0", confidence)
+	}
+}
+
+// TestTypoCorrector_UnknownLanguage tests typo corrector with unsupported language
+func TestTypoCorrector_UnknownLanguage(t *testing.T) {
+	corrector := NewTypoCorrector()
+
+	unknownLang := nlp.Language("unknown")
+	word := "poods"
+
+	// Should return original word when language dictionary is empty
+	corrected, confidence := corrector.Correct(word, unknownLang)
+
+	if corrected != word {
+		t.Errorf("Correct(%q, unknown) = %q, want %q (unchanged)", word, corrected, word)
+	}
+
+	if confidence != 1.0 {
+		t.Errorf("Confidence for unknown language = %f, want 1.0", confidence)
+	}
+}
+
+// TestTypoCorrector_ShortWord tests typo corrector with word < 3 characters (line 30-32)
+func TestTypoCorrector_ShortWord(t *testing.T) {
+	corrector := NewTypoCorrector()
+
+	// Words shorter than 3 chars should be returned unchanged
+	shortWords := []string{"a", "ab", ""}
+
+	for _, word := range shortWords {
+		corrected, confidence := corrector.Correct(word, nlp.LanguageEN)
+
+		if corrected != word {
+			t.Errorf("Correct(%q) = %q, want %q (short word unchanged)", word, corrected, word)
+		}
+
+		if confidence != 1.0 {
+			t.Errorf("Confidence for short word %q = %f, want 1.0", word, confidence)
+		}
+	}
+}
+
+// TestTypoCorrector_ConfidenceCalculation tests confidence scoring (line 56-60)
+func TestTypoCorrector_ConfidenceCalculation(t *testing.T) {
+	corrector := NewTypoCorrector()
+
+	// Test a typo that should be corrected with confidence < 1.0
+	// "poods" is close to "pods" but should have confidence based on edit distance
+	word := "poods"
+	corrected, confidence := corrector.Correct(word, nlp.LanguageEN)
+
+	// Should be corrected to "pods"
+	if corrected != "pods" {
+		t.Errorf("Correct(%q) = %q, want %q", word, corrected, "pods")
+	}
+
+	// Confidence should be < 1.0 (since there was an edit)
+	if confidence >= 1.0 || confidence <= 0.0 {
+		t.Errorf("Confidence = %f, want between 0 and 1 (exclusive)", confidence)
+	}
+}
+
+// TestTokenizer_PrepositionClassification tests classifyTokenType with prepositions (line 156-158)
+func TestTokenizer_PrepositionClassification(t *testing.T) {
+	tokenizer := NewTokenizer()
+
+	// Test Portuguese preposition "para" which is NOT a stop word
+	input := "para production"
+	tokens, err := tokenizer.Tokenize(input)
+
+	if err != nil {
+		t.Fatalf("Tokenize() error = %v", err)
+	}
+
+	// Should get at least "para" as a preposition
+	found := false
+	for _, tok := range tokens {
+		if tok.Type == nlp.TokenTypePREP {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Error("Expected to find a preposition token in 'para production'")
+	}
+
+	// Test classifyTokenType directly to ensure PREP classification works
+	tokenType := tokenizer.classifyTokenType("with", nlp.LanguageEN)
+
+	if tokenType != nlp.TokenTypePREP {
+		t.Errorf("classifyTokenType('with', EN) = %q, want %q", tokenType, nlp.TokenTypePREP)
+	}
+
+	// Test Portuguese preposition
+	tokenType2 := tokenizer.classifyTokenType("para", nlp.LanguagePTBR)
+
+	if tokenType2 != nlp.TokenTypePREP {
+		t.Errorf("classifyTokenType('para', PT-BR) = %q, want %q", tokenType2, nlp.TokenTypePREP)
+	}
+}
+
+// TestTypoCorrector_NoMatchBeyondThreshold tests when no correction is found
+func TestTypoCorrector_NoMatchBeyondThreshold(t *testing.T) {
+	corrector := NewTypoCorrector()
+
+	// Test a word that's too different from anything in dictionary
+	// Should return original word with confidence 1.0 (no correction applied)
+	word := "xyzabc123"
+	corrected, confidence := corrector.Correct(word, nlp.LanguageEN)
+
+	if corrected != word {
+		t.Errorf("Correct(%q) = %q, want %q (no match beyond threshold)", word, corrected, word)
+	}
+
+	if confidence != 1.0 {
+		t.Errorf("Confidence for no match = %f, want 1.0", confidence)
+	}
+}

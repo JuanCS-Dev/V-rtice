@@ -51,9 +51,8 @@ func (tc *TypoCorrector) Correct(word string, lang nlp.Language) (string, float6
 
 	// Only apply correction if we found a match within threshold
 	// and the match is significantly better than original
-	if minDistance == 0 {
-		return bestMatch, 1.0
-	} else if minDistance <= tc.threshold && minDistance < len(word)/2 {
+	// NOTE: minDistance == 0 case is already handled at line 37-39 (dictionary lookup)
+	if minDistance <= tc.threshold && minDistance < len(word)/2 {
 		// Calculate confidence based on edit distance
 		confidence := 1.0 - (float64(minDistance) / float64(len(word)))
 		return bestMatch, confidence

@@ -8,10 +8,10 @@ from coagulation.restoration import RestorationEngine, HealthCheck
 
 
 class TestIdentifyUnhealthyReason:
-    """Target: Line 214 - _identify_unhealthy_reason with no failed checks"""
+    """Target: Line 232 - _identify_unhealthy_reason with no failed checks"""
     
     def test_identify_reason_no_failed_checks(self):
-        """Line 214: Return 'Unknown' when no checks failed"""
+        """Line 232: Return 'Unknown' when no checks failed"""
         engine = RestorationEngine()
         
         # All checks passed
@@ -20,13 +20,13 @@ class TestIdentifyUnhealthyReason:
             HealthCheck(check_name="test2", passed=True, details="OK"),
         ]
         
-        reason = engine._identify_unhealthy_reason(checks)
+        reason = engine.health_validator._identify_unhealthy_reason(checks)
         
-        # Line 214: return "Unknown"
+        # Line 232: return "Unknown"
         assert reason == "Unknown"
     
     def test_identify_reason_with_failed_checks(self):
-        """Contrast: With failed checks, line 215 executes"""
+        """Contrast: With failed checks, line 233 executes"""
         engine = RestorationEngine()
         
         checks = [
@@ -34,6 +34,6 @@ class TestIdentifyUnhealthyReason:
             HealthCheck(check_name="test2", passed=True, details="OK"),
         ]
         
-        reason = engine._identify_unhealthy_reason(checks)
+        reason = engine.health_validator._identify_unhealthy_reason(checks)
         
         assert "test1" in reason
