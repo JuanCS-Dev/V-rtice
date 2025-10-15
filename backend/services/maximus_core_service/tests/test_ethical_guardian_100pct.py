@@ -694,3 +694,195 @@ class TestFinalLines:
 
 
 print("\n# ===== COVERAGE TARGET: 100% =====")
+"""
+Ethical Guardian - FINAL PUSH TO 100%
+Targeting the last 35 missing statements with surgical precision
+
+Focus: Exception handling branches and edge cases
+"""
+
+import pytest
+from unittest.mock import Mock, patch, AsyncMock, PropertyMock
+
+from ethical_guardian import (
+    EthicalGuardian,
+    EthicalDecisionResult,
+    EthicalDecisionType,
+)
+
+from governance import PolicyType
+from ethics import EthicalVerdict
+from hitl import RiskLevel
+from xai import ExplanationType
+
+
+@pytest.fixture
+def mocks():
+    with patch('ethical_guardian.PolicyEngine') as m_pol, \
+         patch('ethical_guardian.AuditLogger', side_effect=ImportError) as m_aud, \
+         patch('ethical_guardian.EthicalIntegrationEngine') as m_eth, \
+         patch('ethical_guardian.ExplanationEngine') as m_xai, \
+         patch('ethical_guardian.BiasDetector') as m_bias, \
+         patch('ethical_guardian.FairnessMonitor') as m_fair, \
+         patch('ethical_guardian.PrivacyAccountant') as m_priv, \
+         patch('ethical_guardian.RiskAssessor') as m_risk, \
+         patch('ethical_guardian.HITLDecisionFramework') as m_hitl, \
+         patch('ethical_guardian.ComplianceEngine') as m_comp:
+        yield {}
+
+
+def setup_passing(g):
+    m = Mock(); m.is_compliant = True; m.violations = []; m.warnings = []
+    g.policy_engine.enforce_policy = Mock(return_value=m)
+    m = Mock(); m.final_decision = "APPROVED"; m.final_confidence = 0.95; m.framework_results = {}
+    g.ethics_engine.evaluate = AsyncMock(return_value=m)
+    m = Mock(); m.explanation_type = ExplanationType.LIME; m.summary = "Test"; m.feature_importances = []
+    g.xai_engine.explain = AsyncMock(return_value=m)
+    m = Mock(); m.bias_detected = False
+    g.bias_detector.detect_statistical_parity_bias = Mock(return_value=m)
+    type(g.privacy_budget).budget_exhausted = PropertyMock(return_value=False)
+    m = Mock(); m.risk_level = RiskLevel.LOW
+    g.risk_assessor.assess_risk = Mock(return_value=m)
+    m = Mock(); m.is_compliant = True; m.compliance_percentage = 100; m.total_controls = 10; m.passed_controls = 10
+    g.compliance_engine.check_compliance = Mock(return_value=m)
+
+
+class TestFinalMissingLines:
+    """Target the exact missing lines with precision"""
+    
+    @pytest.mark.asyncio
+    async def test_fairness_exception_non_critical(self, mocks):
+        """Fairness exception but not critical (lines 546-549)"""
+        g = EthicalGuardian()
+        setup_passing(g)
+        
+        # Make fairness check raise exception AFTER approval decision
+        g.bias_detector.detect_statistical_parity_bias = Mock(side_effect=Exception("Fairness error"))
+        
+        r = await g.validate_action(
+            "classify",  # ML action
+            {"predictions": [1], "protected_attributes": {"geo": [1]}},
+            "actor"
+        )
+        
+        # Should proceed with warning, fairness=None
+        assert r.fairness is None  # Lines 546-549
+        assert r.is_approved  # Should still approve (exception not critical)
+    
+    @pytest.mark.asyncio
+    async def test_privacy_exception_non_critical(self, mocks):
+        """Privacy exception but not critical (lines 567-569)"""
+        g = EthicalGuardian()
+        setup_passing(g)
+        
+        # Make privacy budget throw exception
+        type(g.privacy_budget).budget_exhausted = PropertyMock(side_effect=Exception("Privacy error"))
+        
+        r = await g.validate_action("action", {}, "actor")
+        
+        # Should proceed with privacy=None
+        assert r.privacy is None  # Lines 567-569
+    
+    @pytest.mark.asyncio
+    async def test_fl_exception_non_critical(self, mocks):
+        """FL exception but not critical (lines 573-577)"""
+        g = EthicalGuardian()
+        setup_passing(g)
+        
+        # Override _fl_check to raise exception
+        async def fl_error(*args):
+            raise Exception("FL error")
+        g._fl_check = fl_error
+        
+        r = await g.validate_action("train", {}, "actor")
+        
+        # Should proceed with fl=None
+        assert r.fl is None  # Lines 573-577
+    
+    @pytest.mark.asyncio
+    async def test_xai_exception_warning(self, mocks):
+        """XAI exception logged as warning (lines 527-529)"""
+        g = EthicalGuardian()
+        setup_passing(g)
+        
+        # XAI raises exception
+        g.xai_engine.explain = AsyncMock(side_effect=Exception("XAI exploded"))
+        
+        r = await g.validate_action("action", {}, "actor")
+        
+        # Should proceed with xai=None
+        assert r.xai is None  # Lines 527-529
+    
+    @pytest.mark.asyncio
+    async def test_to_dict_full(self):
+        """EthicalDecisionResult.to_dict with all fields (line 227+)"""
+        from ethical_guardian import (
+            GovernanceCheckResult, EthicsCheckResult, XAICheckResult,
+            ComplianceCheckResult, FairnessCheckResult, PrivacyCheckResult,
+            FLCheckResult, HITLCheckResult
+        )
+        
+        r = EthicalDecisionResult(
+            decision_id="test",
+            decision_type=EthicalDecisionType.APPROVED,
+            action="test",
+            actor="actor",
+            is_approved=True,
+            total_duration_ms=100.0
+        )
+        
+        # Add all sub-results
+        r.governance = GovernanceCheckResult(
+            is_compliant=True, policies_checked=[PolicyType.ETHICAL_USE], duration_ms=10
+        )
+        r.ethics = EthicsCheckResult(
+            verdict=EthicalVerdict.APPROVED, confidence=0.95, duration_ms=50
+        )
+        r.xai = XAICheckResult(
+            explanation_type="lime", summary="test", feature_importances=[], duration_ms=20
+        )
+        r.fairness = FairnessCheckResult(
+            fairness_ok=True, bias_detected=False, protected_attributes_checked=[],
+            fairness_metrics={}, bias_severity="low", duration_ms=10
+        )
+        r.privacy = PrivacyCheckResult(
+            privacy_budget_ok=True, privacy_level="medium", total_epsilon=3.0,
+            used_epsilon=1.0, remaining_epsilon=2.0, total_delta=1e-5,
+            used_delta=0.0, remaining_delta=1e-5, budget_exhausted=False,
+            queries_executed=10, duration_ms=5
+        )
+        r.fl = FLCheckResult(fl_ready=True, fl_status="idle", duration_ms=5)
+        r.hitl = HITLCheckResult(
+            requires_human_review=False, automation_level="full",
+            risk_level="low", confidence_threshold_met=True, duration_ms=10
+        )
+        r.compliance = ComplianceCheckResult(
+            regulations_checked=[], overall_compliant=True, duration_ms=10
+        )
+        
+        d = r.to_dict()
+        
+        # Verify all fields present
+        assert 'governance' in d
+        assert 'ethics' in d
+        assert 'xai' in d  # Line 227 and related
+    
+    @pytest.mark.asyncio
+    async def test_get_statistics_with_data(self, mocks):
+        """get_statistics after validations (line 1229)"""
+        g = EthicalGuardian()
+        setup_passing(g)
+        
+        # Run some validations
+        await g.validate_action("test1", {}, "actor")
+        await g.validate_action("test2", {}, "actor")
+        
+        stats = g.get_statistics()
+        
+        # Line 1229: return statement
+        assert stats['total_validations'] == 2
+        assert stats['total_approved'] == 2
+        assert 'avg_duration_ms' in stats
+
+
+print("\n# ===== FINAL PUSH: 100% TARGET =====")
