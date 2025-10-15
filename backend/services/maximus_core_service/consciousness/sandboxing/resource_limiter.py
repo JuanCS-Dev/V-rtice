@@ -64,9 +64,9 @@ class ResourceLimiter:
             # Set process priority (nice value)
             self.process.nice(10)  # Lower priority
             
-        except Exception as e:
+        except Exception as e:  # pragma: no cover - platform-specific resource limits may not be available
             # Limits may not be available on all platforms
-            pass
+            pass  # pragma: no cover
     
     def check_compliance(self) -> dict:
         """

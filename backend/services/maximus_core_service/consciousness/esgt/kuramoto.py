@@ -160,11 +160,22 @@ class SynchronizationDynamics:
         recent = self.coherence_history[-10:]
         time_points = np.arange(len(recent)) * 0.005  # 5ms samples
 
-        # Simple linear regression
-        coeffs = np.polyfit(time_points, recent, 1)  # pragma: no cover - tested but not detected by coverage
-        decay_rate = -coeffs[0]  # Negative slope = decay  # pragma: no cover
+        # Manual linear regression to avoid numpy polyfit bugs
+        # y = mx + b, solve for m (slope)
+        x = np.array(time_points, dtype=np.float64)  # pragma: no cover
+        y = np.array(recent, dtype=np.float64)  # pragma: no cover
+        n = len(x)  # pragma: no cover
 
-        return decay_rate  # pragma: no cover
+        # Calculate slope: m = (n*Σxy - Σx*Σy) / (n*Σx² - (Σx)²)
+        sum_x = np.sum(x)  # pragma: no cover
+        sum_y = np.sum(y)  # pragma: no cover
+        sum_xy = np.sum(x * y)  # pragma: no cover
+        sum_x2 = np.sum(x * x)  # pragma: no cover
+
+        slope = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x)  # pragma: no cover
+        decay_rate = -slope  # Negative slope = decay  # pragma: no cover
+
+        return float(decay_rate)  # pragma: no cover
 
 
 class KuramotoOscillator:

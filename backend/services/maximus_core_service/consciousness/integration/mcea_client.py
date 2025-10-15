@@ -62,9 +62,7 @@ class MCEAClient:
 
                 # Parse arousal state
                 arousal_state = ArousalState(
-                    arousal=data.get("arousal", 0.5),
-                    level=ArousalLevel(data.get("level", "relaxed")),
-                    threshold=data.get("threshold", 0.70),
+                    arousal=data.get("arousal", 0.5)
                 )
 
                 # Cache successful result
@@ -94,11 +92,7 @@ class MCEAClient:
             return self._last_arousal
         # After 3 failures, assume MCEA down - use baseline
         logger.warning("MCEA service persistently unavailable, using baseline arousal")
-        return ArousalState(
-            arousal=0.5,
-            level=ArousalLevel.RELAXED,
-            threshold=0.70,
-        )
+        return ArousalState(arousal=0.5)
 
     def get_last_arousal(self) -> ArousalState | None:
         """Get last successfully fetched arousal (cached)."""

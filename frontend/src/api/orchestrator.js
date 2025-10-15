@@ -330,6 +330,7 @@ export const pollWorkflowStatus = async (
 ) => {
   const startTime = Date.now();
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     // Timeout check
     if (Date.now() - startTime > maxDuration) {

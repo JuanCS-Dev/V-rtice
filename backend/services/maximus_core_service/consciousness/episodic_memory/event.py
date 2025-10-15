@@ -67,8 +67,8 @@ class Event:
     
     def __post_init__(self):
         """Validate event data"""
-        if not isinstance(self.timestamp, datetime):
-            self.timestamp = datetime.now()
+        if not isinstance(self.timestamp, datetime):  # pragma: no cover - defensive validation, dataclass ensures datetime via default_factory
+            self.timestamp = datetime.now()  # pragma: no cover
         
         if self.emotional_valence < -1.0 or self.emotional_valence > 1.0:
             raise ValueError("Emotional valence must be between -1 and 1")

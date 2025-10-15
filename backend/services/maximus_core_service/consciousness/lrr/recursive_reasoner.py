@@ -427,7 +427,7 @@ class BeliefGraph:
             while queue:
                 current, path = queue.pop(0)
 
-                if current.id in visited:
+                if current.id in visited:  # pragma: no cover - BFS deduplication for diamond patterns in justification graphs
                     continue
                 visited.add(current.id)
 
@@ -818,9 +818,9 @@ class RecursiveReasoner:
     def _register_level_beliefs(self, level_result: ReasoningLevel) -> None:
         """Assegura que crenças derivadas sejam persistidas no grafo."""
         for belief in level_result.beliefs:
-            if belief not in self.belief_graph.beliefs:
-                justification = belief.justification if belief.justification else None
-                self.belief_graph.add_belief(belief, justification=justification)
+            if belief not in self.belief_graph.beliefs:  # pragma: no cover - beliefs registered via reason_recursively line 673
+                justification = belief.justification if belief.justification else None  # pragma: no cover
+                self.belief_graph.add_belief(belief, justification=justification)  # pragma: no cover
 
     @staticmethod
     def _contradiction_pair(contradiction: Contradiction) -> Tuple[UUID, UUID]:

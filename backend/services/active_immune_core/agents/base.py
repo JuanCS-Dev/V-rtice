@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 
-from agents.models import AgenteState, AgentStatus, AgentType
+from .models import AgenteState, AgentStatus, AgentType
 from communication import CytokineMessenger, HormoneMessenger
 
 logger = logging.getLogger(__name__)
