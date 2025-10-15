@@ -226,7 +226,7 @@ class IntegrationService:
         """
         recon_mission = ReconMission(
             id=f"recon_{int(datetime.now().timestamp())}",
-            targets=[{"identifier": t, "target_type": "ip"} for t in campaign.scope],
+            targets=[],  # Will be set below
             phases=[ReconPhase.PASSIVE, ReconPhase.ACTIVE],
             constraints=campaign.constraints,
             status="pending",
@@ -235,10 +235,11 @@ class IntegrationService:
         
         # Convert targets to proper format
         from agents.recon.agent import Target
-        recon_mission.targets = [
+        targets_list: List[Any] = [
             Target(identifier=t, target_type="ip", metadata={})
             for t in campaign.scope
         ]
+        recon_mission.targets = targets_list
         
         results = await self.recon_agent.execute_mission(recon_mission)
         return results
@@ -304,7 +305,7 @@ class IntegrationService:
         """
         # Extract compromised hosts
         exploits = exploit_results.get("exploits", [])
-        compromised_hosts = []
+        compromised_hosts: List[CompromisedHost] = []
         
         for exploit in exploits:
             if exploit.get("status") == "success":
