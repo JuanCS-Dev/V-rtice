@@ -77,6 +77,8 @@ class DataOrchestrator:
         consciousness_system: Any,
         collection_interval_ms: float = 100.0,
         salience_threshold: float = 0.65,
+        event_buffer_size: int = 1000,
+        decision_history_size: int = 100,
     ):
         """Initialize data orchestrator.
 
@@ -84,6 +86,8 @@ class DataOrchestrator:
             consciousness_system: ConsciousnessSystem instance
             collection_interval_ms: How often to collect data (default 100ms)
             salience_threshold: Minimum salience to trigger ESGT (default 0.65)
+            event_buffer_size: Maximum events in ring buffer (default 1000)
+            decision_history_size: Maximum decisions to retain (default 100)
         """
         self.system = consciousness_system
         self.collection_interval_ms = collection_interval_ms
@@ -91,7 +95,7 @@ class DataOrchestrator:
 
         # Collectors
         self.metrics_collector = MetricsCollector(consciousness_system)
-        self.event_collector = EventCollector(consciousness_system, max_events=1000)
+        self.event_collector = EventCollector(consciousness_system, max_events=event_buffer_size)
 
         # Orchestration state
         self._running = False
@@ -102,9 +106,9 @@ class DataOrchestrator:
         self.total_triggers_generated = 0
         self.total_triggers_executed = 0
 
-        # Decision history (last 100 decisions)
+        # Decision history (configurable size)
         self.decision_history: List[OrchestrationDecision] = []
-        self.MAX_HISTORY = 100
+        self.MAX_HISTORY = decision_history_size
 
         logger.info(
             f"DataOrchestrator initialized: "
@@ -290,8 +294,8 @@ class DataOrchestrator:
 
                 event_novelties.append(event.novelty * weight)
 
-            if event_novelties:
-                novelty = sum(event_novelties) / len(event_novelties)
+            # Calculate average novelty (guaranteed non-empty due to events check)
+            novelty = sum(event_novelties) / len(event_novelties)
 
         # Factor 2: Low ESGT frequency = higher novelty for new events
         if metrics.esgt_frequency_hz < 1.0:

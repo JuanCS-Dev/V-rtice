@@ -1,0 +1,911 @@
+{
+  "metadata": {
+    "generated_at": "2025-10-14T18:45:00Z",
+    "codebase_root": "/home/juan/vertice-dev/backend/services/maximus_core_service",
+    "total_modules": 42,
+    "integration_score": 0.45,
+    "total_loc": 54234,
+    "governance_version": "Constituição Vértice v2.6"
+  },
+  "consciousness": {
+    "tig": {
+      "nome": "TIG - Thalamocortical Information Gateway",
+      "path": "consciousness/tig/fabric.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic", "networkx"],
+      "exports": ["TIGFabric", "TopologyConfig", "NodeState"],
+      "integra_com": ["ESGTCoordinator", "ArousalController"],
+      "integration_status": "CONECTADO",
+      "config_required": {
+        "tig_node_count": "int (default: 100)",
+        "tig_target_density": "float (default: 0.25)"
+      },
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.95,
+      "loc": 847
+    },
+    "esgt": {
+      "nome": "ESGT - Emergent Synchronous Global Thalamocortical",
+      "path": "consciousness/esgt/coordinator.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic", "TIGFabric"],
+      "exports": ["ESGTCoordinator", "TriggerConditions", "SalienceDetector"],
+      "integra_com": ["TIGFabric", "ArousalController", "MCEA"],
+      "integration_status": "CONECTADO",
+      "config_required": {
+        "esgt_min_salience": "float (default: 0.65)",
+        "esgt_refractory_period_ms": "float (default: 200.0)",
+        "esgt_max_frequency_hz": "float (default: 5.0)"
+      },
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.93,
+      "loc": 1342
+    },
+    "mcea": {
+      "nome": "MCEA - Multiple Cognitive Equilibrium Attractor (Arousal Control)",
+      "path": "consciousness/mcea/controller.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic"],
+      "exports": ["ArousalController", "ArousalConfig", "StressMonitor"],
+      "integra_com": ["ESGTCoordinator", "ConsciousnessSystem"],
+      "integration_status": "CONECTADO",
+      "config_required": {
+        "arousal_baseline": "float (default: 0.60)",
+        "arousal_min": "float (default: 0.10)",
+        "arousal_max": "float (default: 0.95)"
+      },
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.92,
+      "loc": 678
+    },
+    "mmei": {
+      "nome": "MMEI - Meta-Motivational Evaluator & Internal Monitor",
+      "path": "consciousness/mmei/monitor.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic"],
+      "exports": ["InternalMonitor", "GoalManager", "MetricTracker"],
+      "integra_com": ["ConsciousnessSystem"],
+      "integration_status": "PARCIAL",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.88,
+      "loc": 542
+    },
+    "mea": {
+      "nome": "MEA - Metacognitive & Embodied Attention (Attention Schema)",
+      "path": "consciousness/mea/attention_schema.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["AttentionSchemaModel", "BoundaryDetector", "SelfModel"],
+      "integra_com": ["ConsciousnessSystem"],
+      "integration_status": "PARCIAL",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.85,
+      "loc": 487
+    },
+    "lrr": {
+      "nome": "LRR - Logical Recursive Reasoner",
+      "path": "consciousness/lrr/recursive_reasoner.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["RecursiveReasoner", "ContradictionDetector", "IntrospectionEngine"],
+      "integra_com": ["ConsciousnessSystem"],
+      "integration_status": "PARCIAL",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.87,
+      "loc": 623
+    },
+    "neuromodulation": {
+      "nome": "Neuromodulation System (Digital Neurotransmitters)",
+      "path": "consciousness/neuromodulation/coordinator_hardened.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic"],
+      "exports": ["NeuromodulationCoordinator", "DopamineModulator", "SerotoninModulator", "AcetylcholineModulator", "NorepinephrineModulator"],
+      "integra_com": ["ConsciousnessSystem"],
+      "integration_status": "PARCIAL",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.94,
+      "loc": 1247
+    },
+    "predictive_coding": {
+      "nome": "Predictive Coding Hierarchy (5 Layers)",
+      "path": "consciousness/predictive_coding/hierarchy_hardened.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic"],
+      "exports": ["PredictiveHierarchy", "Layer1Sensory", "Layer2Behavioral", "Layer3Operational", "Layer4Tactical", "Layer5Strategic"],
+      "integra_com": ["ConsciousnessSystem"],
+      "integration_status": "PARCIAL",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.91,
+      "loc": 1834
+    },
+    "episodic_memory": {
+      "nome": "Episodic Memory System",
+      "path": "consciousness/episodic_memory/core.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["EpisodicMemory", "Event", "MemoryBuffer"],
+      "integra_com": ["ConsciousnessSystem"],
+      "integration_status": "PARCIAL",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.82,
+      "loc": 412
+    },
+    "safety_protocol": {
+      "nome": "Consciousness Safety Protocol (Kill Switch + Monitoring)",
+      "path": "consciousness/safety.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic", "ConsciousnessSystem"],
+      "exports": ["ConsciousnessSafetyProtocol", "KillSwitch", "ThresholdMonitor", "AnomalyDetector"],
+      "integra_com": ["ConsciousnessSystem", "TIG", "ESGT", "MCEA"],
+      "integration_status": "CONECTADO",
+      "config_required": {
+        "safety_enabled": "bool (default: true)",
+        "safety_thresholds": "SafetyThresholds (optional)"
+      },
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.97,
+      "loc": 1523
+    },
+    "integration_layer": {
+      "nome": "Consciousness Integration Bridges",
+      "path": "consciousness/integration/",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio"],
+      "exports": ["ESGTSubscriber", "MCEAClient", "MEABridge", "MMEIClient", "SensoryESGTBridge"],
+      "integra_com": ["All consciousness modules"],
+      "integration_status": "PARCIAL",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": false,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.76,
+      "loc": 892
+    }
+  },
+  "mip": {
+    "decision_arbiter": {
+      "nome": "Decision Arbiter",
+      "path": "motor_integridade_processual/arbiter/decision.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "frameworks"],
+      "exports": ["DecisionEngine", "Alternative"],
+      "integra_com": ["Frameworks", "ConflictResolver"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.95,
+      "loc": 342
+    },
+    "kantian_framework": {
+      "nome": "Kantian Deontology Framework",
+      "path": "motor_integridade_processual/frameworks/kantian.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "base"],
+      "exports": ["KantianDeontology"],
+      "integra_com": ["DecisionArbiter", "ConflictResolver"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.98,
+      "loc": 287
+    },
+    "utilitarian_framework": {
+      "nome": "Utilitarian Calculus Framework",
+      "path": "motor_integridade_processual/frameworks/utilitarian.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "base"],
+      "exports": ["UtilitarianCalculus"],
+      "integra_com": ["DecisionArbiter", "ConflictResolver"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.96,
+      "loc": 245
+    },
+    "virtue_framework": {
+      "nome": "Virtue Ethics Framework",
+      "path": "motor_integridade_processual/frameworks/virtue.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "base"],
+      "exports": ["VirtueEthics"],
+      "integra_com": ["DecisionArbiter", "ConflictResolver"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.94,
+      "loc": 213
+    },
+    "principialism_framework": {
+      "nome": "Principialism Framework (Biomedical Ethics)",
+      "path": "motor_integridade_processual/frameworks/principialism.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "base"],
+      "exports": ["Principialism"],
+      "integra_com": ["DecisionArbiter", "ConflictResolver"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.97,
+      "loc": 298
+    },
+    "conflict_resolver": {
+      "nome": "Conflict Resolver (Framework Aggregation)",
+      "path": "motor_integridade_processual/resolution/conflict_resolver.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["ConflictResolver", "ResolutionRule"],
+      "integra_com": ["DecisionArbiter", "All Frameworks"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.93,
+      "loc": 412
+    },
+    "hitl_queue": {
+      "nome": "HITL Queue (Human-in-the-Loop)",
+      "path": "motor_integridade_processual/infrastructure/hitl_queue.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic"],
+      "exports": ["HITLQueue", "HITLDecision"],
+      "integra_com": ["DecisionArbiter", "AuditTrail"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.89,
+      "loc": 356
+    },
+    "audit_trail": {
+      "nome": "Audit Trail (Decision Logging)",
+      "path": "motor_integridade_processual/infrastructure/audit_trail.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "datetime"],
+      "exports": ["AuditTrail", "AuditEntry"],
+      "integra_com": ["DecisionArbiter", "HITLQueue"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.91,
+      "loc": 287
+    },
+    "mip_api": {
+      "nome": "MIP FastAPI Service",
+      "path": "motor_integridade_processual/api.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["fastapi", "pydantic", "uvicorn"],
+      "exports": ["app", "EvaluationRequest", "EvaluationResponse"],
+      "integra_com": ["All MIP components"],
+      "integration_status": "CONECTADO",
+      "endpoints": [
+        "POST /evaluate",
+        "GET /health",
+        "GET /frameworks",
+        "GET /metrics"
+      ],
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.87,
+      "loc": 288
+    }
+  },
+  "cpf": {
+    "tom_engine": {
+      "nome": "ToM Engine (Theory of Mind)",
+      "path": "compassion/tom_engine.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "pydantic", "SocialMemory", "ConfidenceTracker", "ContradictionDetector"],
+      "exports": ["ToMEngine"],
+      "integra_com": [],
+      "integration_status": "ISOLADO",
+      "config_required": {
+        "db_path": "str (default: ':memory:')",
+        "cache_size": "int (default: 100)",
+        "decay_lambda": "float (default: 0.01)"
+      },
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.96,
+      "loc": 294
+    },
+    "social_memory": {
+      "nome": "Social Memory (SQLite)",
+      "path": "compassion/social_memory_sqlite.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["asyncio", "aiosqlite", "pydantic"],
+      "exports": ["SocialMemorySQLite", "SocialMemorySQLiteConfig"],
+      "integra_com": ["ToMEngine"],
+      "integration_status": "CONECTADO",
+      "config_required": {
+        "db_path": "str (default: ':memory:')"
+      },
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.93,
+      "loc": 487
+    },
+    "confidence_tracker": {
+      "nome": "Confidence Tracker (Temporal Decay)",
+      "path": "compassion/confidence_tracker.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["datetime"],
+      "exports": ["ConfidenceTracker"],
+      "integra_com": ["ToMEngine"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.94,
+      "loc": 142
+    },
+    "contradiction_detector": {
+      "nome": "Contradiction Detector (Belief Validation)",
+      "path": "compassion/contradiction_detector.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": [],
+      "exports": ["ContradictionDetector"],
+      "integra_com": ["ToMEngine"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.92,
+      "loc": 123
+    },
+    "sally_anne_benchmark": {
+      "nome": "Sally-Anne Test Dataset (ToM Validation)",
+      "path": "compassion/sally_anne_dataset.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": [],
+      "exports": ["SallyAnneDataset"],
+      "integra_com": ["ToMEngine"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.89,
+      "loc": 87
+    },
+    "compassion_planner": {
+      "nome": "Compassion Planner",
+      "path": "N/A",
+      "status": "AUSENTE",
+      "dependencies": [],
+      "exports": [],
+      "integra_com": [],
+      "integration_status": "N/A",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": false,
+        "lei_i_compliant": false,
+        "padrao_pagani": false,
+        "validation_status": "FAIL"
+      },
+      "test_coverage": 0.0,
+      "loc": 0
+    },
+    "deontic_reasoner": {
+      "nome": "Deontic Reasoner (DDL Engine)",
+      "path": "N/A",
+      "status": "AUSENTE",
+      "dependencies": [],
+      "exports": [],
+      "integra_com": [],
+      "integration_status": "N/A",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": false,
+        "lei_i_compliant": false,
+        "padrao_pagani": false,
+        "validation_status": "FAIL"
+      },
+      "test_coverage": 0.0,
+      "loc": 0
+    },
+    "metacognition": {
+      "nome": "Metacognition System",
+      "path": "consciousness/validation/metacognition.py",
+      "status": "PARCIAL",
+      "dependencies": [],
+      "exports": ["MetacognitionValidator"],
+      "integra_com": [],
+      "integration_status": "ISOLADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.78,
+      "loc": 234
+    }
+  },
+  "guardians": {
+    "article_ii_guardian": {
+      "nome": "Article II Guardian (Prior Legislation)",
+      "path": "governance/guardian/article_ii_guardian.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["ArticleIIGuardian"],
+      "integra_com": ["GuardianCoordinator"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.91,
+      "loc": 178
+    },
+    "article_iii_guardian": {
+      "nome": "Article III Guardian (Universal Protection)",
+      "path": "governance/guardian/article_iii_guardian.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["ArticleIIIGuardian"],
+      "integra_com": ["GuardianCoordinator"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.89,
+      "loc": 165
+    },
+    "article_iv_guardian": {
+      "nome": "Article IV Guardian (Bias Mitigation)",
+      "path": "governance/guardian/article_iv_guardian.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["ArticleIVGuardian"],
+      "integra_com": ["GuardianCoordinator"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.87,
+      "loc": 142
+    },
+    "article_v_guardian": {
+      "nome": "Article V Guardian (Transparency)",
+      "path": "governance/guardian/article_v_guardian.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["ArticleVGuardian"],
+      "integra_com": ["GuardianCoordinator"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.92,
+      "loc": 156
+    },
+    "guardian_coordinator": {
+      "nome": "Guardian Coordinator",
+      "path": "governance/guardian/coordinator.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "all guardians"],
+      "exports": ["GuardianCoordinator"],
+      "integra_com": ["All Guardians", "GovernanceEngine"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.85,
+      "loc": 234
+    },
+    "governance_engine": {
+      "nome": "Governance Engine (HITL Decision Management)",
+      "path": "governance/governance_engine.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic", "datetime"],
+      "exports": ["GovernanceEngine", "Decision", "DecisionStatus"],
+      "integra_com": ["GuardianCoordinator", "main.py"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.79,
+      "loc": 279
+    },
+    "hitl_interface": {
+      "nome": "HITL Interface (Operator Dashboard)",
+      "path": "governance/hitl_interface.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["HITLInterface"],
+      "integra_com": ["GovernanceEngine"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.82,
+      "loc": 198
+    },
+    "ethics_review_board": {
+      "nome": "Ethics Review Board",
+      "path": "governance/ethics_review_board.py",
+      "status": "IMPLEMENTADO",
+      "dependencies": ["pydantic"],
+      "exports": ["EthicsReviewBoard"],
+      "integra_com": ["GovernanceEngine"],
+      "integration_status": "CONECTADO",
+      "config_required": {},
+      "governance": {
+        "lei_zero_compliant": true,
+        "lei_i_compliant": true,
+        "padrao_pagani": true,
+        "validation_status": "PASS"
+      },
+      "test_coverage": 0.84,
+      "loc": 213
+    }
+  },
+  "infrastructure": {
+    "database": {
+      "nome": "Database Layer",
+      "technologies": ["PostgreSQL", "SQLite", "aiosqlite"],
+      "status": "IMPLEMENTADO",
+      "usage": [
+        "ToM Engine: SQLite (social memory)",
+        "Audit Trail: PostgreSQL (expected)",
+        "HITL Queue: PostgreSQL (expected)"
+      ],
+      "integration_status": "PARCIAL",
+      "config_required": {
+        "POSTGRES_URL": "required for production",
+        "DB_POOL_SIZE": "optional"
+      }
+    },
+    "message_bus": {
+      "nome": "Message Bus",
+      "technologies": ["Redis (mentioned in K8s)"],
+      "status": "PARCIAL",
+      "usage": [
+        "K8s config references Redis",
+        "Actual usage: LIMITED"
+      ],
+      "integration_status": "PARCIAL",
+      "config_required": {
+        "REDIS_URL": "optional (default: redis://localhost:6379)"
+      }
+    },
+    "orchestration": {
+      "nome": "Orchestration Layer",
+      "technologies": [],
+      "status": "AUSENTE",
+      "usage": [],
+      "integration_status": "AUSENTE",
+      "config_required": {}
+    },
+    "monitoring": {
+      "nome": "Monitoring & Observability",
+      "technologies": ["Prometheus", "prometheus_client"],
+      "status": "IMPLEMENTADO",
+      "usage": [
+        "Consciousness metrics: consciousness/prometheus_metrics.py",
+        "MIP metrics: motor_integridade_processual/infrastructure/metrics.py",
+        "Prometheus server: port 8001 (main.py)"
+      ],
+      "integration_status": "CONECTADO",
+      "config_required": {}
+    },
+    "api_layer": {
+      "nome": "API Layer (FastAPI)",
+      "technologies": ["FastAPI", "uvicorn"],
+      "status": "IMPLEMENTADO",
+      "usage": [
+        "Main API: main.py (port 8000)",
+        "Consciousness API: consciousness/api.py",
+        "MIP API: motor_integridade_processual/api.py",
+        "Governance API: governance_sse/"
+      ],
+      "integration_status": "CONECTADO",
+      "config_required": {}
+    },
+    "k8s_deployment": {
+      "nome": "Kubernetes Deployment",
+      "technologies": ["Kubernetes", "Docker"],
+      "status": "IMPLEMENTADO",
+      "usage": [
+        "k8s/deployment.yaml",
+        "k8s/all-in-one.yaml"
+      ],
+      "integration_status": "CONECTADO",
+      "config_required": {}
+    }
+  },
+  "integration_matrix": {
+    "ToMEngine → ESGTCoordinator": {
+      "status": "MISSING",
+      "blocker": "Hook não implementado em ESGTCoordinator",
+      "impact": "HIGH",
+      "fix_effort_hours": 2
+    },
+    "ToMEngine → CompassionPlanner": {
+      "status": "MISSING",
+      "blocker": "CompassionPlanner não existe",
+      "impact": "HIGH",
+      "fix_effort_hours": 80
+    },
+    "MIP → ToMEngine": {
+      "status": "MISSING",
+      "blocker": "MIP não consulta ToM para inferência social",
+      "impact": "MEDIUM",
+      "fix_effort_hours": 8
+    },
+    "MIP → DDLEngine": {
+      "status": "MISSING",
+      "blocker": "DDL Engine não implementado",
+      "impact": "CRITICAL",
+      "fix_effort_hours": 120
+    },
+    "Consciousness → MIP": {
+      "status": "MISSING",
+      "blocker": "Consciência não valida ética de decisões",
+      "impact": "MEDIUM",
+      "fix_effort_hours": 16
+    },
+    "Guardiões → MIP": {
+      "status": "PARTIAL",
+      "blocker": "Interface via ethical_guardian.py, mas pipeline incompleto",
+      "impact": "LOW",
+      "fix_effort_hours": 4
+    },
+    "TIG → ESGT": {
+      "status": "OK",
+      "blocker": null,
+      "impact": null,
+      "fix_effort_hours": 0
+    },
+    "ESGT → MCEA": {
+      "status": "OK",
+      "blocker": null,
+      "impact": null,
+      "fix_effort_hours": 0
+    },
+    "ESGT → SafetyProtocol": {
+      "status": "OK",
+      "blocker": null,
+      "impact": null,
+      "fix_effort_hours": 0
+    },
+    "MIP_Frameworks → ConflictResolver": {
+      "status": "OK",
+      "blocker": null,
+      "impact": null,
+      "fix_effort_hours": 0
+    },
+    "ConflictResolver → HITLQueue": {
+      "status": "OK",
+      "blocker": null,
+      "impact": null,
+      "fix_effort_hours": 0
+    },
+    "HITLQueue → AuditTrail": {
+      "status": "OK",
+      "blocker": null,
+      "impact": null,
+      "fix_effort_hours": 0
+    }
+  },
+  "gaps_critical": [
+    {
+      "gap": "ToM Engine isolado (não conectado ao ESGT)",
+      "impact": "HIGH",
+      "blocker_for": ["ADW", "Compassion Proativa", "Inferência Social em Tempo Real"],
+      "fix_effort_hours": 2,
+      "priority": "P0"
+    },
+    {
+      "gap": "DDL Engine ausente (Deontic Logic para MIP)",
+      "impact": "CRITICAL",
+      "blocker_for": ["Validação Constitucional", "Hierarquia de Leis", "Compliance Automático"],
+      "fix_effort_hours": 120,
+      "priority": "P0"
+    },
+    {
+      "gap": "Compassion Planner ausente",
+      "impact": "HIGH",
+      "blocker_for": ["Planejamento Compassivo", "Intervenções Proativas", "ADW Completo"],
+      "fix_effort_hours": 80,
+      "priority": "P0"
+    },
+    {
+      "gap": "MIP não consulta ToM para contexto social",
+      "impact": "MEDIUM",
+      "blocker_for": ["Decisões Éticas Contextualizadas", "ADW"],
+      "fix_effort_hours": 8,
+      "priority": "P1"
+    },
+    {
+      "gap": "Consciousness não valida ética de ações",
+      "impact": "MEDIUM",
+      "blocker_for": ["Pipeline Completo Consciência→MIP→Ação"],
+      "fix_effort_hours": 16,
+      "priority": "P1"
+    },
+    {
+      "gap": "CBR Engine ausente (Case-Based Reasoning)",
+      "impact": "LOW",
+      "blocker_for": ["Aprendizado de Precedentes", "Decisões Baseadas em Casos"],
+      "fix_effort_hours": 40,
+      "priority": "P2"
+    },
+    {
+      "gap": "Orquestração ausente (Celery/Temporal)",
+      "impact": "MEDIUM",
+      "blocker_for": ["Workflows Assíncronos Complexos", "ADW Escalável"],
+      "fix_effort_hours": 24,
+      "priority": "P1"
+    },
+    {
+      "gap": "Sovereign Gates ausentes",
+      "impact": "LOW",
+      "blocker_for": ["Controle de Acesso Fino ao CPF"],
+      "fix_effort_hours": 16,
+      "priority": "P2"
+    }
+  ],
+  "governance_status": {
+    "total_violations": 3,
+    "lei_zero_violations": 0,
+    "lei_i_violations": 0,
+    "pagani_violations": 1,
+    "missing_governance": [
+      "compassion_planner (AUSENTE)",
+      "deontic_reasoner (AUSENTE)",
+      "cbr_engine (AUSENTE)"
+    ],
+    "compliant_modules": 35,
+    "total_modules": 38
+  }
+}

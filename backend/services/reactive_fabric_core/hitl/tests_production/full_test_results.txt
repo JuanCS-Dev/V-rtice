@@ -1,0 +1,399 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-8.4.2, pluggy-1.6.0 -- /home/juan/vertice-dev/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/juan/vertice-dev/backend/services/reactive_fabric_core/hitl/tests_production
+configfile: pytest.ini
+plugins: cov-7.0.0, asyncio-1.2.0, anyio-3.7.1, vcr-1.0.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 62 items
+
+test_backend_production.py::TestAuthenticationErrors::test_login_success PASSED [  1%]
+test_backend_production.py::TestAuthenticationErrors::test_login_invalid_username FAILED [  3%]
+test_backend_production.py::TestAuthenticationErrors::test_login_invalid_password FAILED [  4%]
+test_backend_production.py::TestAuthenticationErrors::test_login_inactive_user FAILED [  6%]
+test_backend_production.py::TestAuthenticationErrors::test_login_missing_username PASSED [  8%]
+test_backend_production.py::TestAuthenticationErrors::test_login_missing_password PASSED [  9%]
+test_backend_production.py::TestAuthenticationErrors::test_register_duplicate_username FAILED [ 11%]
+test_backend_production.py::TestAuthenticationErrors::test_register_without_admin_token PASSED [ 12%]
+test_backend_production.py::TestAuthenticationErrors::test_register_with_analyst_token PASSED [ 14%]
+test_backend_production.py::TestAuthenticationErrors::test_register_with_viewer_token PASSED [ 16%]
+test_backend_production.py::TestAuthenticationErrors::test_auth_me_without_token PASSED [ 17%]
+test_backend_production.py::TestAuthenticationErrors::test_auth_me_invalid_token PASSED [ 19%]
+test_backend_production.py::TestAuthenticationErrors::test_auth_me_expired_token PASSED [ 20%]
+test_backend_production.py::TestAuthenticationErrors::test_2fa_setup_success FAILED [ 22%]
+test_backend_production.py::TestAuthenticationErrors::test_2fa_setup_without_token PASSED [ 24%]
+test_backend_production.py::TestAuthenticationErrors::test_2fa_verify_without_setup FAILED [ 25%]
+test_backend_production.py::TestAuthenticationErrors::test_2fa_verify_invalid_code FAILED [ 27%]
+test_backend_production.py::TestAuthenticationErrors::test_register_invalid_email PASSED [ 29%]
+test_backend_production.py::TestAuthenticationErrors::test_register_invalid_role PASSED [ 30%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_submit_decision_success PASSED [ 32%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_submit_decision_without_token PASSED [ 33%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_submit_decision_duplicate FAILED [ 35%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_submit_decision_invalid_priority PASSED [ 37%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_submit_decision_missing_required_fields PASSED [ 38%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_pending_decisions_without_token PASSED [ 40%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_pending_decisions_as_viewer ERROR [ 41%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_pending_decisions_with_filter ERROR [ 43%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_decision_not_found PASSED [ 45%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_decision_without_token PASSED [ 46%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_not_found ERROR [ 48%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_already_decided ERROR [ 50%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_without_token ERROR [ 51%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_as_viewer ERROR [ 53%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_without_reason ERROR [ 54%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_decision_response_not_found PASSED [ 56%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_decision_response_without_token PASSED [ 58%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_decision_not_found ERROR [ 59%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_decision_without_token ERROR [ 61%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_decision_as_viewer ERROR [ 62%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_stats_without_token PASSED [ 64%]
+test_backend_production.py::TestDecisionEndpointsErrors::test_get_stats_success ERROR [ 66%]
+test_backend_production.py::TestLoadAndPerformance::test_concurrent_decision_submissions PASSED [ 67%]
+test_backend_production.py::TestLoadAndPerformance::test_rapid_get_requests ERROR [ 69%]
+test_backend_production.py::TestLoadAndPerformance::test_mixed_load_scenario ERROR [ 70%]
+test_backend_production.py::TestLoadAndPerformance::test_stress_auth_endpoints FAILED [ 72%]
+test_backend_production.py::TestCANDIIntegration::test_full_apt_detection_workflow ERROR [ 74%]
+test_backend_production.py::TestCANDIIntegration::test_escalation_workflow ERROR [ 75%]
+test_backend_production.py::TestCANDIIntegration::test_rejection_workflow ERROR [ 77%]
+test_backend_production.py::TestEdgeCases::test_empty_pending_queue ERROR [ 79%]
+test_backend_production.py::TestEdgeCases::test_stats_with_no_decisions FAILED [ 80%]
+test_backend_production.py::TestEdgeCases::test_decision_with_very_long_fields PASSED [ 82%]
+test_backend_production.py::TestEdgeCases::test_decision_with_unicode_characters PASSED [ 83%]
+test_backend_production.py::TestEdgeCases::test_concurrent_decisions_different_analysts ERROR [ 85%]
+test_backend_production.py::TestEdgeCases::test_health_endpoint_without_auth PASSED [ 87%]
+test_backend_production.py::TestEdgeCases::test_status_endpoint_without_auth PASSED [ 88%]
+test_backend_production.py::TestEdgeCases::test_malformed_json FAILED    [ 90%]
+test_backend_production.py::TestEdgeCases::test_sql_injection_attempts PASSED [ 91%]
+test_backend_production.py::TestEdgeCases::test_xss_attempts_in_decision_notes ERROR [ 93%]
+test_backend_production.py::TestSystemEndpoints::test_health_check PASSED [ 95%]
+test_backend_production.py::TestSystemEndpoints::test_status_authenticated ERROR [ 96%]
+test_backend_production.py::TestSystemEndpoints::test_api_docs_accessible PASSED [ 98%]
+test_backend_production.py::TestSystemEndpoints::test_openapi_json_accessible PASSED [100%]
+
+==================================== ERRORS ====================================
+_ ERROR at setup of TestDecisionEndpointsErrors.test_get_pending_decisions_as_viewer _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:130: in viewer_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_ ERROR at setup of TestDecisionEndpointsErrors.test_get_pending_decisions_with_filter _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+__ ERROR at setup of TestDecisionEndpointsErrors.test_make_decision_not_found __
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_ ERROR at setup of TestDecisionEndpointsErrors.test_make_decision_already_decided _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_ ERROR at setup of TestDecisionEndpointsErrors.test_make_decision_without_token _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:168: in submitted_decision
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+__ ERROR at setup of TestDecisionEndpointsErrors.test_make_decision_as_viewer __
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:130: in viewer_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+__ ERROR at setup of TestDecisionEndpointsErrors.test_escalate_without_reason __
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_ ERROR at setup of TestDecisionEndpointsErrors.test_escalate_decision_not_found _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_ ERROR at setup of TestDecisionEndpointsErrors.test_escalate_decision_without_token _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:168: in submitted_decision
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_ ERROR at setup of TestDecisionEndpointsErrors.test_escalate_decision_as_viewer _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:130: in viewer_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_____ ERROR at setup of TestDecisionEndpointsErrors.test_get_stats_success _____
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_______ ERROR at setup of TestLoadAndPerformance.test_rapid_get_requests _______
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+______ ERROR at setup of TestLoadAndPerformance.test_mixed_load_scenario _______
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+___ ERROR at setup of TestCANDIIntegration.test_full_apt_detection_workflow ____
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_______ ERROR at setup of TestCANDIIntegration.test_escalation_workflow ________
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+________ ERROR at setup of TestCANDIIntegration.test_rejection_workflow ________
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+___________ ERROR at setup of TestEdgeCases.test_empty_pending_queue ___________
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_ ERROR at setup of TestEdgeCases.test_concurrent_decisions_different_analysts _
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_____ ERROR at setup of TestEdgeCases.test_xss_attempts_in_decision_notes ______
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:104: in analyst_token
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_______ ERROR at setup of TestSystemEndpoints.test_status_authenticated ________
+../../../../../.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:733: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+conftest.py:168: in submitted_decision
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+=================================== FAILURES ===================================
+_____________ TestAuthenticationErrors.test_login_invalid_username _____________
+test_backend_production.py:42: in test_login_invalid_username
+    assert "Invalid credentials" in response.json()["detail"]
+E   AssertionError: assert 'Invalid credentials' in 'Incorrect username or password'
+_____________ TestAuthenticationErrors.test_login_invalid_password _____________
+test_backend_production.py:51: in test_login_invalid_password
+    assert "Invalid credentials" in response.json()["detail"]
+E   AssertionError: assert 'Invalid credentials' in 'Incorrect username or password'
+______________ TestAuthenticationErrors.test_login_inactive_user _______________
+test_backend_production.py:70: in test_login_inactive_user
+    db.users["inactive_user"].is_active = False
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'inactive_user'
+__________ TestAuthenticationErrors.test_register_duplicate_username ___________
+test_backend_production.py:125: in test_register_duplicate_username
+    assert "already exists" in response.json()["detail"].lower()
+E   AssertionError: assert 'already exists' in 'username already registered'
+E    +  where 'username already registered' = <built-in method lower of str object at 0x70de03c27f50>()
+E    +    where <built-in method lower of str object at 0x70de03c27f50> = 'Username already registered'.lower
+_______________ TestAuthenticationErrors.test_2fa_setup_success ________________
+test_backend_production.py:214: in test_2fa_setup_success
+    assert "qr_code" in data
+E   AssertionError: assert 'qr_code' in {'backup_codes': ['4AD4FBF5', '353CF7F1', '191F386F', '0D1E22BD', 'FF6BB505', '035CEB8E', ...], 'qr_code_url': 'otpauth://totp/Reactive%20Fabric%20HITL:admin%40reactive-fabric.local?secret=2Q6TY7ZLMSBFP22OZLYRKRDBMOHPX3DA&issuer=Reactive%20Fabric%20HITL', 'secret': '2Q6TY7ZLMSBFP22OZLYRKRDBMOHPX3DA'}
+____________ TestAuthenticationErrors.test_2fa_verify_without_setup ____________
+test_backend_production.py:228: in test_2fa_verify_without_setup
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+____________ TestAuthenticationErrors.test_2fa_verify_invalid_code _____________
+test_backend_production.py:245: in test_2fa_verify_invalid_code
+    assert response.status_code == 401
+E   assert 422 == 401
+E    +  where 422 = <Response [422]>.status_code
+__________ TestDecisionEndpointsErrors.test_submit_decision_duplicate __________
+test_backend_production.py:313: in test_submit_decision_duplicate
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+______________ TestLoadAndPerformance.test_stress_auth_endpoints _______________
+test_backend_production.py:752: in test_stress_auth_endpoints
+    assert duration < 5, f"100 logins should complete in <5s (took {duration:.2f}s)"
+E   AssertionError: 100 logins should complete in <5s (took 20.22s)
+E   assert 20.22299337387085 < 5
+------------------------------ Captured log call -------------------------------
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+WARNING  urllib3.connectionpool:connectionpool.py:327 Connection pool is full, discarding connection: localhost. Connection pool size: 10
+__________________ TestEdgeCases.test_stats_with_no_decisions __________________
+test_backend_production.py:978: in test_stats_with_no_decisions
+    assert stats["total_pending"] == 0
+E   assert 52 == 0
+______________________ TestEdgeCases.test_malformed_json _______________________
+test_backend_production.py:1113: in test_malformed_json
+    response = client.post(
+conftest.py:32: in post
+    return self.session.post(f"{self.base_url}{path}", **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../../../.venv/lib/python3.11/site-packages/requests/sessions.py:637: in post
+    return self.request("POST", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: Session.request() got an unexpected keyword argument 'content'
+=============================== warnings summary ===============================
+test_backend_production.py::TestAuthenticationErrors::test_login_success
+  /home/juan/vertice-dev/.venv/lib/python3.11/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+test_backend_production.py::TestAuthenticationErrors::test_login_success
+  /home/juan/vertice-dev/backend/services/reactive_fabric_core/hitl/hitl_backend.py:596: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+test_backend_production.py::TestAuthenticationErrors::test_login_success
+test_backend_production.py::TestAuthenticationErrors::test_login_success
+  /home/juan/vertice-dev/.venv/lib/python3.11/site-packages/fastapi/applications.py:4547: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+test_backend_production.py::TestAuthenticationErrors::test_login_success
+  /home/juan/vertice-dev/backend/services/reactive_fabric_core/hitl/hitl_backend.py:893: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_backend_production.py::TestAuthenticationErrors::test_login_invalid_username
+FAILED test_backend_production.py::TestAuthenticationErrors::test_login_invalid_password
+FAILED test_backend_production.py::TestAuthenticationErrors::test_login_inactive_user
+FAILED test_backend_production.py::TestAuthenticationErrors::test_register_duplicate_username
+FAILED test_backend_production.py::TestAuthenticationErrors::test_2fa_setup_success
+FAILED test_backend_production.py::TestAuthenticationErrors::test_2fa_verify_without_setup
+FAILED test_backend_production.py::TestAuthenticationErrors::test_2fa_verify_invalid_code
+FAILED test_backend_production.py::TestDecisionEndpointsErrors::test_submit_decision_duplicate
+FAILED test_backend_production.py::TestLoadAndPerformance::test_stress_auth_endpoints
+FAILED test_backend_production.py::TestEdgeCases::test_stats_with_no_decisions
+FAILED test_backend_production.py::TestEdgeCases::test_malformed_json - TypeE...
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_get_pending_decisions_as_viewer
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_get_pending_decisions_with_filter
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_not_found
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_already_decided
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_without_token
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_make_decision_as_viewer
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_without_reason
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_decision_not_found
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_decision_without_token
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_escalate_decision_as_viewer
+ERROR test_backend_production.py::TestDecisionEndpointsErrors::test_get_stats_success
+ERROR test_backend_production.py::TestLoadAndPerformance::test_rapid_get_requests
+ERROR test_backend_production.py::TestLoadAndPerformance::test_mixed_load_scenario
+ERROR test_backend_production.py::TestCANDIIntegration::test_full_apt_detection_workflow
+ERROR test_backend_production.py::TestCANDIIntegration::test_escalation_workflow
+ERROR test_backend_production.py::TestCANDIIntegration::test_rejection_workflow
+ERROR test_backend_production.py::TestEdgeCases::test_empty_pending_queue - a...
+ERROR test_backend_production.py::TestEdgeCases::test_concurrent_decisions_different_analysts
+ERROR test_backend_production.py::TestEdgeCases::test_xss_attempts_in_decision_notes
+ERROR test_backend_production.py::TestSystemEndpoints::test_status_authenticated
+============ 11 failed, 31 passed, 5 warnings, 20 errors in 42.68s =============

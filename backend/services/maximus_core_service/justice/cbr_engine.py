@@ -85,11 +85,9 @@ class CBREngine:
         if not similar_cases:
             return None
 
-        # Use most similar case with highest success rate
-        best = max(
-            similar_cases,
-            key=lambda c: c.success if c.success is not None else 0.5
-        )
+        # Use most similar case (first in list from find_similar)
+        # Cases are already ordered by similarity from retrieve step
+        best = similar_cases[0]
 
         # Calculate confidence
         confidence = self._calculate_confidence(best, current)

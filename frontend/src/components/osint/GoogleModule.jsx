@@ -1,359 +1,332 @@
 import React, { useState } from 'react';
+import { scanWithGoogleDorks } from '@/api/worldClassTools';
 import logger from '@/utils/logger';
 
 const GoogleModule = () => {
-  const [searchType, setSearchType] = useState('person');
-  const [query, setQuery] = useState('');
-  const [advanced, setAdvanced] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [target, setTarget] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedEngines, setSelectedEngines] = useState([]);
+  const [maxResults, setMaxResults] = useState(10);
+  const [scanning, setScanning] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const searchTypes = {
-    person: { label: 'Pessoa', icon: '👤' },
-    email: { label: 'Email', icon: '📧' },
-    phone: { label: 'Telefone', icon: '📱' },
-    domain: { label: 'Domínio', icon: '🌐' },
-    document: { label: 'Documentos', icon: '📄' },
-    social: { label: 'Redes Sociais', icon: '📱' },
-    vulnerability: { label: 'Vulnerabilidades', icon: '🔴' }
+  const categories = [
+    { id: 'files', label: 'Arquivos Sensíveis', icon: '📄' },
+    { id: 'credentials', label: 'Credenciais', icon: '🔑' },
+    { id: 'directories', label: 'Diretórios', icon: '📁' },
+    { id: 'vulnerabilities', label: 'Vulnerabilidades', icon: '🔴' },
+    { id: 'configurations', label: 'Configurações', icon: '⚙️' },
+    { id: 'databases', label: 'Databases', icon: '💾' },
+    { id: 'backups', label: 'Backups', icon: '💿' },
+    { id: 'social', label: 'Social Media', icon: '📱' },
+  ];
+
+  const engines = [
+    { id: 'google', label: 'Google', icon: '🔍' },
+    { id: 'bing', label: 'Bing', icon: '🅱️' },
+    { id: 'duckduckgo', label: 'DuckDuckGo', icon: '🦆' },
+    { id: 'yandex', label: 'Yandex', icon: '🇷🇺' },
+  ];
+
+  const toggleCategory = (categoryId) => {
+    setSelectedCategories(prev =>
+      prev.includes(categoryId)
+        ? prev.filter(c => c !== categoryId)
+        : [...prev, categoryId]
+    );
   };
 
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      alert('Digite algo para buscar');
+  const toggleEngine = (engineId) => {
+    setSelectedEngines(prev =>
+      prev.includes(engineId)
+        ? prev.filter(e => e !== engineId)
+        : [...prev, engineId]
+    );
+  };
+
+  const handleScan = async () => {
+    if (!target.trim()) {
+      alert('Digite um domínio para escanear');
       return;
     }
 
-    setSearching(true);
+    setScanning(true);
     setError(null);
     setResults(null);
 
     try {
-      const endpoint = advanced ? '/api/google/search/advanced' : '/api/google/search/basic';
-      const payload = advanced ? {
-        target: query.trim(),
-        search_types: [searchType],
-        deep_search: true,
-        include_social_media: true,
-        max_results_per_type: 30
-      } : {
-        query: query.trim(),
-        search_type: searchType,
-        max_results: 50,
-        language: 'pt',
-        region: 'BR',
-        include_documents: true,
-        safe_search: true
-      };
-
-      const response = await fetch(`http://localhost:8013${endpoint.replace('/api/google', '/api')}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+      const response = await scanWithGoogleDorks(target.trim(), {
+        categories: selectedCategories.length > 0 ? selectedCategories : null,
+        engines: selectedEngines.length > 0 ? selectedEngines : null,
+        maxResultsPerDork: maxResults,
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.status === 'success') {
-        setResults(data.data);
+      if (response.status === 'success') {
+        setResults(response.data);
       } else {
-        setError(data.detail || 'Erro ao executar busca Google');
+        setError('Erro ao executar scan Google Dorks');
       }
     } catch (err) {
-      setError('Erro de conexão com o serviço Google OSINT');
-      logger.error('Erro:', err);
+      setError(`Erro: ${err.message}`);
+      logger.error('Google Dork Scan Error:', err);
     } finally {
-      setSearching(false);
+      setScanning(false);
     }
   };
 
-  const getResultTypeColor = (url) => {
-    if (url.includes('linkedin.com')) return 'border-orange-400 bg-orange-400/10';
-    if (url.includes('facebook.com')) return 'border-orange-600 bg-orange-600/10';
-    if (url.includes('twitter.com') || url.includes('x.com')) return 'border-red-400 bg-red-400/10';
-    if (url.includes('instagram.com')) return 'border-pink-400 bg-pink-400/10';
-    if (url.includes('.pdf')) return 'border-red-400 bg-red-400/10';
-    if (url.includes('.doc')) return 'border-yellow-400 bg-yellow-400/10';
-    return 'border-red-400 bg-red-400/10';
+  const getRiskColor = (score) => {
+    if (score >= 75) return 'text-red-400 border-red-400 bg-red-400/20';
+    if (score >= 50) return 'text-orange-400 border-orange-400 bg-orange-400/20';
+    if (score >= 25) return 'text-yellow-400 border-yellow-400 bg-yellow-400/20';
+    return 'text-green-400 border-green-400 bg-green-400/20';
   };
 
-  const formatDomain = (url) => {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return url;
-    }
-  };
-
-  const renderBasicResults = () => {
-    if (!results || !results.results) return null;
-
-    return (
-      <div className="space-y-4 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#ef4444 rgba(0,0,0,0.3)'}}>
-        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#f87171}`}</style>
-        <div className="flex justify-between items-center">
-          <h3 className="text-red-400 font-bold text-lg">🔍 Resultados Google OSINT</h3>
-          <div className="text-red-400/60 text-sm">
-            {results.total_results} resultado(s) encontrado(s)
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {results.results.map((result, index) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg border transition-all hover:scale-[1.01] ${getResultTypeColor(result.url)}`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="text-red-300 font-medium text-sm leading-tight">
-                  {result.title}
-                </h4>
-                <span className="text-xs text-red-400/60 ml-2">#{result.position}</span>
-              </div>
-
-              <p className="text-red-200 text-xs mb-2 line-clamp-2">
-                {result.snippet}
-              </p>
-
-              <div className="flex justify-between items-center text-xs">
-                <a
-                  href={result.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-red-400 hover:text-red-300 underline break-all flex-1 mr-2"
-                >
-                  {formatDomain(result.url)}
-                </a>
-                <span className="text-red-400/50 whitespace-nowrap">
-                  {new Date(result.found_timestamp).toLocaleTimeString()}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderAdvancedResults = () => {
-    if (!results || !results.results_by_type) return null;
-
-    return (
-      <div className="space-y-6 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#ef4444 rgba(0,0,0,0.3)'}}>
-        <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#f87171}`}</style>
-        <div className="flex justify-between items-center">
-          <h3 className="text-red-400 font-bold text-lg">🎯 Busca Avançada</h3>
-          <div className="text-red-400/60 text-sm">
-            {results.summary?.total_results} resultado(s) | {results.execution_time}s
-          </div>
-        </div>
-
-        {/* Estatísticas */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-black/40 border border-red-400/30 rounded-lg p-3 text-center">
-            <div className="text-red-400 text-xl font-bold">{results.summary?.total_results || 0}</div>
-            <div className="text-red-400/70 text-xs">Total Resultados</div>
-          </div>
-          <div className="bg-black/40 border border-red-400/30 rounded-lg p-3 text-center">
-            <div className="text-red-400 text-xl font-bold">{results.summary?.domains_found?.length || 0}</div>
-            <div className="text-red-400/70 text-xs">Domínios</div>
-          </div>
-          <div className="bg-black/40 border border-red-400/30 rounded-lg p-3 text-center">
-            <div className="text-red-400 text-xl font-bold">{results.summary?.file_types_found?.length || 0}</div>
-            <div className="text-red-400/70 text-xs">Tipos de Arquivo</div>
-          </div>
-        </div>
-
-        {/* Resultados por tipo */}
-        {Object.entries(results.results_by_type).map(([type, typeResults]) => (
-          <div key={type} className="bg-black/30 border border-red-400/30 rounded-lg p-4">
-            <div className="flex items-center space-x-2 mb-3">
-              <span className="text-red-400 font-medium capitalize">
-                {searchTypes[type]?.icon} {searchTypes[type]?.label || type}
-              </span>
-              <span className="text-red-400/60 text-sm">({typeResults.length} resultados)</span>
-            </div>
-
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {typeResults.slice(0, 10).map((result, index) => (
-                <div key={index} className="bg-red-400/10 border border-red-400/20 rounded p-3">
-                  <div className="flex justify-between items-start mb-1">
-                    <h5 className="text-red-300 font-medium text-sm">{result.title}</h5>
-                    <span className="text-xs text-red-400/60">#{result.position}</span>
-                  </div>
-
-                  <p className="text-red-200 text-xs mb-2">{result.snippet}</p>
-
-                  <div className="flex justify-between items-center text-xs">
-                    <a
-                      href={result.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-red-400 hover:text-red-300 underline"
-                    >
-                      {formatDomain(result.url)}
-                    </a>
-                    {result.dork_pattern && (
-                      <span className="text-red-400/50 font-mono text-xs">
-                        {result.dork_pattern.replace(result.target || query, '***')}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+  const getCategoryIcon = (category) => {
+    const cat = categories.find(c => c.id === category);
+    return cat ? cat.icon : '🔍';
   };
 
   return (
     <div className="space-y-6">
       <div className="border border-red-400/50 rounded-lg bg-red-400/5 p-6">
-        <h2 className="text-red-400 font-bold text-2xl mb-4 tracking-wider">
-          🔍 GOOGLE OSINT INVESTIGATOR
-        </h2>
-        <p className="text-red-400/70 text-sm mb-6">
-          Investigação avançada através do Google com Google Dorks e técnicas OSINT
-        </p>
-
-        {/* Configurações de busca */}
-        <div className="space-y-4 mb-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label 
-                htmlFor="investigation-type-select"
-                className="text-red-400/80 text-xs font-bold tracking-wider block mb-2"
-              >
-                TIPO DE INVESTIGAÇÃO
-              </label>
-              <select
-                id="investigation-type-select"
-                className="w-full bg-black/70 border border-red-400/50 text-red-400 p-3 rounded-lg focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20"
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value)}
-              >
-                {Object.entries(searchTypes).map(([key, type]) => (
-                  <option key={key} value={key}>
-                    {type.icon} {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <div 
-                id="search-mode-group"
-                className="text-red-400/80 text-xs font-bold tracking-wider block mb-2"
-                role="group"
-                aria-label="Modo de busca"
-              >
-                MODO DE BUSCA
-              </div>
-              <div className="flex space-x-2" role="group" aria-labelledby="search-mode-group">
-                <button
-                  className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
-                    !advanced
-                      ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white'
-                      : 'bg-black/50 border border-red-400/30 text-red-400 hover:bg-red-400/10'
-                  }`}
-                  onClick={() => setAdvanced(false)}
-                >
-                  📊 BÁSICO
-                </button>
-                <button
-                  className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
-                    advanced
-                      ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white'
-                      : 'bg-black/50 border border-red-400/30 text-red-400 hover:bg-red-400/10'
-                  }`}
-                  onClick={() => setAdvanced(true)}
-                >
-                  🎯 AVANÇADO
-                </button>
-              </div>
-            </div>
-          </div>
-
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <label 
-              htmlFor="investigation-target-input"
+            <h2 className="text-red-400 font-bold text-2xl tracking-wider flex items-center">
+              🌐 GOOGLE DORK SCANNER
+              <span className="ml-3 text-xs bg-gradient-to-r from-red-600 to-pink-600 text-white px-2 py-1 rounded">
+                ⭐ WORLD-CLASS
+              </span>
+            </h2>
+            <p className="text-red-400/70 text-sm mt-1">
+              Multi-Engine Dorking: Google, Bing, DuckDuckGo, Yandex | 1000+ Templates
+            </p>
+          </div>
+        </div>
+
+        {/* Configuration Panel */}
+        <div className="space-y-4 mb-6">
+          {/* Target Input */}
+          <div>
+            <label
+              htmlFor="target-domain-input"
               className="text-red-400/80 text-xs font-bold tracking-wider block mb-2"
             >
-              ALVO DA INVESTIGAÇÃO
+              🎯 TARGET DOMAIN
             </label>
             <input
-              id="investigation-target-input"
+              id="target-domain-input"
               className="w-full bg-black/70 border border-red-400/50 text-red-400 placeholder-red-400/50 p-3 rounded-lg focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 font-mono text-lg"
-              placeholder={
-                advanced
-                  ? 'Digite o alvo para investigação profunda...'
-                  : 'Digite sua query de busca...'
-              }
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="example.com"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleScan()}
             />
           </div>
 
+          {/* Categories Selection */}
+          <div>
+            <div className="text-red-400/80 text-xs font-bold tracking-wider mb-2">
+              📋 DORK CATEGORIES (deixe vazio para todas)
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => toggleCategory(cat.id)}
+                  className={`p-2 rounded border text-xs font-medium transition-all ${
+                    selectedCategories.includes(cat.id)
+                      ? 'bg-red-400/20 border-red-400 text-red-400'
+                      : 'bg-black/30 border-red-400/30 text-red-400/60 hover:border-red-400/50'
+                  }`}
+                >
+                  <span className="mr-1">{cat.icon}</span>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Engines Selection */}
+          <div>
+            <div className="text-red-400/80 text-xs font-bold tracking-wider mb-2">
+              🚀 SEARCH ENGINES (deixe vazio para todos)
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {engines.map((engine) => (
+                <button
+                  key={engine.id}
+                  onClick={() => toggleEngine(engine.id)}
+                  className={`p-2 rounded border text-xs font-medium transition-all ${
+                    selectedEngines.includes(engine.id)
+                      ? 'bg-orange-400/20 border-orange-400 text-orange-400'
+                      : 'bg-black/30 border-red-400/30 text-red-400/60 hover:border-orange-400/50'
+                  }`}
+                >
+                  <span className="mr-1">{engine.icon}</span>
+                  {engine.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Max Results */}
+          <div>
+            <label className="text-red-400/80 text-xs font-bold tracking-wider block mb-2">
+              📊 MAX RESULTS PER DORK: {maxResults}
+            </label>
+            <input
+              type="range"
+              min="5"
+              max="50"
+              step="5"
+              value={maxResults}
+              onChange={(e) => setMaxResults(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          {/* Scan Button */}
           <button
-            className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider disabled:opacity-50"
-            onClick={handleSearch}
-            disabled={searching}
+            className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleScan}
+            disabled={scanning}
           >
-            {searching ? (
-              advanced ? '🎯 INVESTIGANDO...' : '🔍 BUSCANDO...'
+            {scanning ? (
+              <>
+                <span className="animate-pulse">🔍 SCANNING...</span>
+              </>
             ) : (
-              advanced ? '🚀 INICIAR INVESTIGAÇÃO' : '🔍 EXECUTAR BUSCA'
+              '🚀 EXECUTE DORK SCAN'
             )}
           </button>
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className="mb-6 p-4 border border-red-400/50 rounded-lg bg-red-400/5">
+          <div className="mb-6 p-4 border border-red-400/50 rounded-lg bg-red-400/10">
             <p className="text-red-400">❌ {error}</p>
           </div>
         )}
 
         {/* Results Display */}
-        {results && (
+        {results && !scanning && (
           <div className="bg-black/50 border border-red-400/30 rounded-lg p-6">
-            {advanced ? renderAdvancedResults() : renderBasicResults()}
+            {/* Summary Stats */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="bg-black/40 border border-red-400/30 rounded-lg p-3 text-center">
+                <div className="text-red-400 text-2xl font-bold">{results.total_urls || 0}</div>
+                <div className="text-red-400/70 text-xs">URLs Found</div>
+              </div>
+              <div className="bg-black/40 border border-orange-400/30 rounded-lg p-3 text-center">
+                <div className="text-orange-400 text-2xl font-bold">{results.total_dorks_executed || 0}</div>
+                <div className="text-orange-400/70 text-xs">Dorks Executed</div>
+              </div>
+              <div className="bg-black/40 border border-yellow-400/30 rounded-lg p-3 text-center">
+                <div className="text-yellow-400 text-2xl font-bold">{results.engines_used?.length || 0}</div>
+                <div className="text-yellow-400/70 text-xs">Engines Used</div>
+              </div>
+              <div className={`rounded-lg p-3 text-center border ${getRiskColor(results.risk_score || 0)}`}>
+                <div className="text-2xl font-bold">{results.risk_score?.toFixed(1) || 0}</div>
+                <div className="text-xs opacity-70">Risk Score</div>
+              </div>
+            </div>
+
+            {/* Risk Assessment */}
+            {results.risk_score > 0 && (
+              <div className={`mb-6 p-4 rounded-lg border ${getRiskColor(results.risk_score)}`}>
+                <h4 className="font-bold mb-2">⚠️ RISK ASSESSMENT</h4>
+                <p className="text-sm opacity-90">
+                  {results.risk_score >= 75 && 'CRITICAL: Exposição severa detectada! Ação imediata necessária.'}
+                  {results.risk_score >= 50 && results.risk_score < 75 && 'HIGH: Várias exposições encontradas. Revisar urgentemente.'}
+                  {results.risk_score >= 25 && results.risk_score < 50 && 'MEDIUM: Algumas exposições detectadas. Investigar.'}
+                  {results.risk_score < 25 && 'LOW: Exposição mínima. Monitorar periodicamente.'}
+                </p>
+              </div>
+            )}
+
+            {/* Results by Category */}
+            {results.results_by_category && Object.keys(results.results_by_category).length > 0 ? (
+              <div className="space-y-4">
+                <h3 className="text-red-400 font-bold text-lg mb-3">📊 RESULTS BY CATEGORY</h3>
+                {Object.entries(results.results_by_category).map(([category, categoryResults]) => (
+                  <div key={category} className="bg-red-400/10 border border-red-400/30 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-red-400 font-medium capitalize flex items-center">
+                        <span className="mr-2">{getCategoryIcon(category)}</span>
+                        {category.replace(/_/g, ' ')}
+                      </h4>
+                      <span className="text-red-400/60 text-sm">
+                        {categoryResults.length} resultado(s)
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {categoryResults.slice(0, 20).map((result, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-black/40 border border-red-400/20 rounded p-3 hover:border-red-400/40 transition-all"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <a
+                              href={result.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-red-300 hover:text-red-200 text-sm break-all flex-1"
+                            >
+                              {result.url}
+                            </a>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-red-400/50 font-mono">
+                              Engine: {result.engine}
+                            </span>
+                            <span className="text-red-400/50">
+                              Dork: {result.dork_category}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-8 text-red-400/60">
+                <div className="text-4xl mb-2">✅</div>
+                <p>Nenhuma exposição crítica encontrada.</p>
+                <p className="text-xs mt-2">O domínio parece estar seguro contra Google Dorking básico.</p>
+              </div>
+            )}
+
+            {/* Execution Time */}
+            {results.execution_time && (
+              <div className="mt-6 text-center text-red-400/60 text-xs">
+                ⏱️ Execution Time: {results.execution_time}s
+              </div>
+            )}
           </div>
         )}
 
-        {/* Dork Examples */}
+        {/* Info Box */}
         <div className="mt-6 bg-red-400/10 border border-red-400/30 rounded-lg p-4">
-          <h4 className="text-red-400 font-bold mb-3">🧰 GOOGLE DORKS DISPONÍVEIS</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+          <h4 className="text-red-400 font-bold mb-3">🧰 SUPERIOR CAPABILITIES</h4>
+          <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-red-400 font-mono">site:linkedin.com</span>
-              <p className="text-red-300">Busca em LinkedIn</p>
+              <span className="text-red-400 font-bold">✅ Multi-Engine</span>
+              <p className="text-red-300">Google, Bing, DuckDuckGo, Yandex</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-red-400 font-mono">filetype:pdf</span>
-              <p className="text-red-300">Arquivos PDF</p>
+              <span className="text-red-400 font-bold">✅ 1000+ Templates</span>
+              <p className="text-red-300">8 categories, auto-generated dorks</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-red-400 font-mono">intext:"email"</span>
-              <p className="text-red-300">Texto específico</p>
+              <span className="text-red-400 font-bold">✅ Risk Scoring</span>
+              <p className="text-red-300">Intelligent 0-100 risk assessment</p>
             </div>
             <div className="bg-black/30 p-2 rounded">
-              <span className="text-red-400 font-mono">cache:site.com</span>
-              <p className="text-red-300">Cache do Google</p>
-            </div>
-            <div className="bg-black/30 p-2 rounded">
-              <span className="text-red-400 font-mono">"index of"</span>
-              <p className="text-red-300">Diretórios abertos</p>
-            </div>
-            <div className="bg-black/30 p-2 rounded">
-              <span className="text-red-400 font-mono">intitle:"login"</span>
-              <p className="text-red-300">Páginas de login</p>
+              <span className="text-red-400 font-bold">✅ CAPTCHA Detection</span>
+              <p className="text-red-300">Graceful anti-bot handling</p>
             </div>
           </div>
         </div>

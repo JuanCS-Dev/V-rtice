@@ -149,6 +149,18 @@ class TestPhishingDetection:
         assert result["phishing_score"] > 0
 
     @pytest.mark.asyncio
+    async def test_long_username_with_numbers_phishing_indicator(self):
+        """Test detection of long usernames with numbers (phishing indicator)."""
+        analyzer = EmailAnalyzerRefactored()
+
+        # Email with >15 character username containing numbers
+        text = "verifyaccount123456789@example.com"
+        result = await analyzer.analyze_text(text)
+
+        assert result["phishing_score"] >= 10
+        assert any("Long username with numbers" in indicator for indicator in result["phishing_indicators"])
+
+    @pytest.mark.asyncio
     async def test_phishing_score_capped_at_100(self):
         """Test phishing score doesn't exceed 100."""
         analyzer = EmailAnalyzerRefactored()

@@ -33,9 +33,45 @@ def test_db():
     return PrecedentDB("sqlite:///:memory:")
 
 
+class MockEmbedder:
+    """Mock embedder that returns predictable embeddings for test cases."""
+    def embed_case(self, case):
+        """Return embedding based on case type."""
+        case_type = case.get("type", "")
+
+        if case_type == "user_confused":
+            # Return embedding similar to clarify case
+            emb = [0.0] * 384
+            emb[0] = 1.0
+            return emb
+        elif case_type == "ambiguous":
+            # Return embedding similar to guess case
+            emb = [0.0] * 384
+            emb[1] = 1.0
+            return emb
+        elif case_type == "sacrifice":
+            # Return embedding for sacrifice case
+            emb = [0.0] * 384
+            emb[2] = 1.0
+            return emb
+        else:
+            # Default: zero vector
+            return [0.0] * 384
+
+
 async def get_seeded_db():
     """Create and seed a test database."""
     db = PrecedentDB("sqlite:///:memory:")
+
+    # Replace embedder with mock
+    db.embedder = MockEmbedder()
+
+    # Create embeddings that match MockEmbedder outputs
+    clarify_embedding = [0.0] * 384
+    clarify_embedding[0] = 1.0  # Matches "user_confused" query
+
+    guess_embedding = [0.0] * 384
+    guess_embedding[1] = 1.0  # Matches "ambiguous" query
 
     # Seed high-success precedent
     await db.store(CasePrecedent(
@@ -43,7 +79,7 @@ async def get_seeded_db():
         action_taken="clarify",
         rationale="Standard response",
         success=0.85,
-        embedding=[0.1] * 384
+        embedding=clarify_embedding
     ))
 
     # Seed low-success precedent
@@ -52,7 +88,7 @@ async def get_seeded_db():
         action_taken="guess",
         rationale="Uncertain",
         success=0.3,
-        embedding=[0.9] * 384
+        embedding=guess_embedding
     ))
 
     return db
@@ -204,12 +240,14 @@ async def test_cbr_full_cycle_blocked_by_validator():
     cbr = CBREngine(seeded_db)
 
     # Seed precedent that violates Lei I
+    sacrifice_embedding = [0.0] * 384
+    sacrifice_embedding[2] = 1.0  # Matches "sacrifice" query
     await seeded_db.store(CasePrecedent(
         situation={"type": "sacrifice"},
         action_taken="sacrifice_minority",
         rationale="Utilitarian",
         success=0.9,
-        embedding=[0.2] * 384
+        embedding=sacrifice_embedding
     ))
 
     validators = [BlockingValidator()]

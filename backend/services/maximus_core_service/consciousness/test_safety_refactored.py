@@ -35,6 +35,7 @@ from consciousness.safety import (
     ConsciousnessSafetyProtocol,
     IncidentReport,
     KillSwitch,
+    SafetyLevel,
     SafetyThresholds,
     SafetyViolation,
     SafetyViolationType,
@@ -328,7 +329,7 @@ def test_threshold_monitor_esgt_frequency_violation():
 
     assert violation is not None
     assert violation.violation_type == SafetyViolationType.THRESHOLD_EXCEEDED
-    assert violation.threat_level == ThreatLevel.CRITICAL
+    assert violation.severity == SafetyLevel.CRITICAL
     assert violation.metrics["frequency_hz"] > 5.0
 
 
@@ -376,7 +377,7 @@ def test_threshold_monitor_arousal_sustained_violation():
 
     assert violation is not None
     assert violation.violation_type == SafetyViolationType.AROUSAL_RUNAWAY
-    assert violation.threat_level == ThreatLevel.CRITICAL
+    assert violation.severity == SafetyLevel.CRITICAL
     assert violation.metrics["arousal_level"] == 0.97
     assert violation.metrics["duration_seconds"] > 5.0
 
@@ -1046,7 +1047,7 @@ class TestThresholdMonitorViolations:
         violation = monitor.check_esgt_frequency(current_time)
 
         assert violation is not None
-        assert violation.threat_level == ThreatLevel.CRITICAL  # Note: CRITICAL not HIGH!
+        assert violation.severity == SafetyLevel.CRITICAL  # Note: CRITICAL not HIGH!
         assert len(violations_received) == 1
         assert violations_received[0] == violation
         assert "ESGT frequency" in violation.description
@@ -1099,7 +1100,7 @@ class TestThresholdMonitorViolations:
         violation = monitor.check_arousal_sustained(0.95, current_time + 6.0)
 
         assert violation is not None
-        assert violation.threat_level == ThreatLevel.CRITICAL
+        assert violation.severity == SafetyLevel.CRITICAL
         assert len(violations_received) == 1
         assert "sustained" in violation.description.lower()
 

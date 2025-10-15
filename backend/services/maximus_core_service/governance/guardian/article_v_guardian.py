@@ -42,8 +42,23 @@ class ArticleVGuardian(GuardianAgent):
     - Violations of Two-Man Rule for critical actions
     """
 
-    def __init__(self):
-        """Initialize Article V Guardian."""
+    def __init__(
+        self,
+        autonomous_paths: list[str] | None = None,
+        powerful_paths: list[str] | None = None,
+        hitl_paths: list[str] | None = None,
+        process_paths: list[str] | None = None,
+        governance_paths: list[str] | None = None,
+    ):
+        """Initialize Article V Guardian.
+
+        Args:
+            autonomous_paths: Paths to check for autonomous systems (defaults to production paths)
+            powerful_paths: Paths to check for powerful operations (defaults to production paths)
+            hitl_paths: Paths to check for HITL controls (defaults to production paths)
+            process_paths: Paths to check for long-running processes (defaults to production paths)
+            governance_paths: Paths to check for Two-Man Rule (defaults to production paths)
+        """
         super().__init__(
             guardian_id="guardian-article-v",
             article=ConstitutionalArticle.ARTICLE_V,
@@ -89,6 +104,34 @@ class ArticleVGuardian(GuardianAgent):
             "review",
             "audit",
             "control",
+        ]
+
+        # Configurable paths (dependency injection for testability)
+        self.autonomous_paths = autonomous_paths or [
+            "/home/juan/vertice-dev/backend/services/maximus_core_service",
+            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
+            "/home/juan/vertice-dev/backend/services/active_immune_core",
+        ]
+
+        self.powerful_paths = powerful_paths or [
+            "/home/juan/vertice-dev/backend/services/maximus_core_service",
+            "/home/juan/vertice-dev/backend/security/offensive",
+        ]
+
+        self.hitl_paths = hitl_paths or [
+            "/home/juan/vertice-dev/backend/services/maximus_core_service",
+            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
+        ]
+
+        self.process_paths = process_paths or [
+            "/home/juan/vertice-dev/backend/services/maximus_core_service",
+            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
+            "/home/juan/vertice-dev/backend/services/active_immune_core",
+        ]
+
+        self.governance_paths = governance_paths or [
+            "/home/juan/vertice-dev/backend/services/maximus_core_service/governance",
+            "/home/juan/vertice-dev/backend/services/maximus_core_service/api",
         ]
 
     def get_monitored_systems(self) -> list[str]:
@@ -137,13 +180,7 @@ class ArticleVGuardian(GuardianAgent):
         """Check if autonomous systems have proper governance."""
         violations = []
 
-        paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
-            "/home/juan/vertice-dev/backend/services/active_immune_core",
-        ]
-
-        for base_path in paths:
+        for base_path in self.autonomous_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -212,13 +249,7 @@ class ArticleVGuardian(GuardianAgent):
         """Check implementation of Responsibility Doctrine (Anexo C)."""
         violations = []
 
-        # Check offensive/powerful capabilities
-        powerful_paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/security/offensive",
-        ]
-
-        for base_path in powerful_paths:
+        for base_path in self.powerful_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -303,12 +334,7 @@ class ArticleVGuardian(GuardianAgent):
             "await_approval",
         ]
 
-        paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
-        ]
-
-        for base_path in paths:
+        for base_path in self.hitl_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -381,13 +407,7 @@ class ArticleVGuardian(GuardianAgent):
             "circuit_breaker",
         ]
 
-        paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
-            "/home/juan/vertice-dev/backend/services/active_immune_core",
-        ]
-
-        for base_path in paths:
+        for base_path in self.process_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -454,12 +474,7 @@ class ArticleVGuardian(GuardianAgent):
             "cosign",
         ]
 
-        paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service/governance",
-            "/home/juan/vertice-dev/backend/services/maximus_core_service/api",
-        ]
-
-        for base_path in paths:
+        for base_path in self.governance_paths:
             if not Path(base_path).exists():
                 continue
 

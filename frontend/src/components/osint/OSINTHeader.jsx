@@ -11,12 +11,12 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
     { id: 'aurora', name: t('dashboard.osint.modules.aurora'), icon: '🧠', isAI: true },
     { id: 'socialmedia', name: t('dashboard.osint.modules.socialmedia'), icon: '🔎', isWorldClass: true },
     { id: 'breachdata', name: t('dashboard.osint.modules.breachdata'), icon: '💾', isWorldClass: true },
+    { id: 'google', name: t('dashboard.osint.modules.google'), icon: '🌎', isWorldClass: true },
+    { id: 'darkweb', name: t('dashboard.osint.modules.darkweb'), icon: '🌑', isWorldClass: true },
     { id: 'username', name: t('dashboard.osint.modules.username'), icon: '👤' },
     { id: 'email', name: t('dashboard.osint.modules.email'), icon: '📧' },
     { id: 'phone', name: t('dashboard.osint.modules.phone'), icon: '📱' },
     { id: 'social', name: t('dashboard.osint.modules.social'), icon: '🌐' },
-    { id: 'google', name: t('dashboard.osint.modules.google'), icon: '🌎' },
-    { id: 'darkweb', name: t('dashboard.osint.modules.darkweb'), icon: '🌑' },
     { id: 'reports', name: t('dashboard.osint.modules.reports'), icon: '📊' }
   ];
 

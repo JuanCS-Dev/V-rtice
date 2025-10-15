@@ -133,11 +133,43 @@ class PrecedentDB:
         finally:
             session.close()
 
+    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """Calculate cosine similarity between two vectors.
+
+        Args:
+            vec1: First vector
+            vec2: Second vector
+
+        Returns:
+            Cosine similarity score (0.0-1.0, higher = more similar)
+        """
+        try:
+            import numpy as np
+        except ImportError:
+            # Fallback to pure Python if numpy not available
+            dot_product = sum(a * b for a, b in zip(vec1, vec2))
+            magnitude1 = sum(a * a for a in vec1) ** 0.5
+            magnitude2 = sum(b * b for b in vec2) ** 0.5
+            if magnitude1 == 0 or magnitude2 == 0:
+                return 0.0
+            return dot_product / (magnitude1 * magnitude2)
+
+        vec1_np = np.array(vec1)
+        vec2_np = np.array(vec2)
+        dot_product = np.dot(vec1_np, vec2_np)
+        magnitude1 = np.linalg.norm(vec1_np)
+        magnitude2 = np.linalg.norm(vec2_np)
+
+        if magnitude1 == 0 or magnitude2 == 0:
+            return 0.0
+
+        return float(dot_product / (magnitude1 * magnitude2))
+
     async def find_similar(self, query_embedding: List[float], limit: int = 5) -> List[CasePrecedent]:
         """Find similar cases using vector similarity search.
 
         Uses pgvector cosine distance if available, otherwise falls back to
-        simple retrieval for testing.
+        Python-based cosine similarity calculation for testing.
 
         Args:
             query_embedding: 384-dim embedding vector
@@ -154,10 +186,28 @@ class PrecedentDB:
                     CasePrecedent.embedding.cosine_distance(query_embedding)
                 ).limit(limit).all()
             else:
-                # Fallback: just return most recent cases for testing
-                results = session.query(CasePrecedent).order_by(
-                    CasePrecedent.created_at.desc()
-                ).limit(limit).all()
+                # Check if query embedding is zero vector (no real embedding)
+                is_zero_vector = all(abs(x) < 1e-9 for x in query_embedding)
+
+                if is_zero_vector:
+                    # Zero vector has no similarity to anything - return by recency
+                    results = session.query(CasePrecedent).order_by(
+                        CasePrecedent.created_at.desc()
+                    ).limit(limit).all()
+                else:
+                    # Fallback: Calculate similarity in Python for SQLite
+                    all_cases = session.query(CasePrecedent).all()
+
+                    # Calculate similarity for each case
+                    similarities = []
+                    for case in all_cases:
+                        if case.embedding:
+                            similarity = self._cosine_similarity(query_embedding, case.embedding)
+                            similarities.append((case, similarity))
+
+                    # Sort by similarity (descending) and take top N
+                    similarities.sort(key=lambda x: x[1], reverse=True)
+                    results = [case for case, sim in similarities[:limit]]
 
             return results
         finally:

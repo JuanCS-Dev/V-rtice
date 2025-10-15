@@ -19,7 +19,7 @@ Authors: Juan & Claude Code
 Version: 2.0.0 - FASE VII Week 9-10 (Safety Integration)
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from prometheus_client import Gauge
@@ -48,6 +48,25 @@ consciousness_violations_total = Gauge("consciousness_violations_total", "Number
 
 
 @dataclass
+class ReactiveConfig:
+    """Configuration for Reactive Fabric (Sprint 3).
+
+    Controls data orchestration, metrics collection, and ESGT trigger generation.
+    """
+
+    # Data Orchestration
+    collection_interval_ms: float = 100.0  # 10 Hz default collection frequency
+    salience_threshold: float = 0.65  # Minimum salience to trigger ESGT
+
+    # Buffer Sizes
+    event_buffer_size: int = 1000  # Ring buffer for events
+    decision_history_size: int = 100  # Recent orchestration decisions
+
+    # Feature Flags
+    enable_data_orchestration: bool = True  # Enable/disable orchestrator
+
+
+@dataclass
 class ConsciousnessConfig:
     """Configuration for consciousness system.
 
@@ -73,6 +92,9 @@ class ConsciousnessConfig:
     # Safety Protocol (FASE VII)
     safety_enabled: bool = True
     safety_thresholds: SafetyThresholds | None = None
+
+    # Reactive Fabric (Sprint 3)
+    reactive: ReactiveConfig = field(default_factory=ReactiveConfig)
 
 
 class ConsciousnessSystem:
@@ -206,14 +228,17 @@ class ConsciousnessSystem:
                 print("  ✅ Safety Protocol active (monitoring started)")
 
             # 6. REACTIVE FABRIC: Initialize Data Orchestrator (Sprint 3)
-            print("  ├─ Creating Reactive Fabric Orchestrator...")
-            self.orchestrator = DataOrchestrator(
-                consciousness_system=self,
-                collection_interval_ms=100.0,  # 10 Hz collection
-                salience_threshold=0.65  # Match ESGT default
-            )
-            await self.orchestrator.start()
-            print("  ✅ Reactive Fabric active (data orchestration enabled)")
+            if self.config.reactive.enable_data_orchestration:
+                print("  ├─ Creating Reactive Fabric Orchestrator...")
+                self.orchestrator = DataOrchestrator(
+                    consciousness_system=self,
+                    collection_interval_ms=self.config.reactive.collection_interval_ms,
+                    salience_threshold=self.config.reactive.salience_threshold,
+                    event_buffer_size=self.config.reactive.event_buffer_size,
+                    decision_history_size=self.config.reactive.decision_history_size,
+                )
+                await self.orchestrator.start()
+                print(f"  ✅ Reactive Fabric active ({self.config.reactive.collection_interval_ms}ms interval)")
 
             self._running = True
             print("✅ Consciousness System fully operational")

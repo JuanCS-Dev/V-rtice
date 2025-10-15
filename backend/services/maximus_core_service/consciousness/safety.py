@@ -1957,12 +1957,13 @@ class ConsciousnessSafetyProtocol:
             if tig.get("connectivity", 1.0) < 0.50:
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        violation_id=f"tig-connectivity-{int(time.time())}",
+                        violation_type=SafetyViolationType.RESOURCE_EXHAUSTION,
                         threat_level=ThreatLevel.CRITICAL,
-                        message=f"TIG connectivity critically low: {tig['connectivity']:.1%}",
-                        value=tig["connectivity"],
-                        threshold=0.50,
-                        component="tig_fabric",
+                        timestamp=time.time(),
+                        description=f"TIG connectivity critically low: {tig['connectivity']:.1%}",
+                        metrics={"connectivity": tig["connectivity"], "threshold": 0.50},
+                        source_component="tig_fabric",
                     )
                 )
 
@@ -1970,12 +1971,13 @@ class ConsciousnessSafetyProtocol:
             if tig.get("is_partitioned", False):
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        violation_id=f"tig-partition-{int(time.time())}",
+                        violation_type=SafetyViolationType.UNEXPECTED_BEHAVIOR,
                         threat_level=ThreatLevel.HIGH,
-                        message="TIG network is partitioned",
-                        value=1.0,
-                        threshold=0.0,
-                        component="tig_fabric",
+                        timestamp=time.time(),
+                        description="TIG network is partitioned",
+                        metrics={"is_partitioned": True},
+                        source_component="tig_fabric",
                     )
                 )
 
@@ -1987,12 +1989,13 @@ class ConsciousnessSafetyProtocol:
             if esgt.get("degraded_mode", False):
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.ESGT_VIOLATION,
+                        violation_id=f"esgt-degraded-{int(time.time())}",
+                        violation_type=SafetyViolationType.UNEXPECTED_BEHAVIOR,
                         threat_level=ThreatLevel.MEDIUM,
-                        message="ESGT in degraded mode",
-                        value=1.0,
-                        threshold=0.0,
-                        component="esgt_coordinator",
+                        timestamp=time.time(),
+                        description="ESGT in degraded mode",
+                        metrics={"degraded_mode": True},
+                        source_component="esgt_coordinator",
                     )
                 )
 
@@ -2001,12 +2004,13 @@ class ConsciousnessSafetyProtocol:
             if freq > 9.0:  # Warning at 90% of hard limit
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.ESGT_VIOLATION,
+                        violation_id=f"esgt-freq-{int(time.time())}",
+                        violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
                         threat_level=ThreatLevel.HIGH,
-                        message=f"ESGT frequency approaching limit: {freq:.1f}Hz",
-                        value=freq,
-                        threshold=9.0,
-                        component="esgt_coordinator",
+                        timestamp=time.time(),
+                        description=f"ESGT frequency approaching limit: {freq:.1f}Hz",
+                        metrics={"frequency_hz": freq, "threshold": 9.0},
+                        source_component="esgt_coordinator",
                     )
                 )
 
@@ -2014,12 +2018,13 @@ class ConsciousnessSafetyProtocol:
             if esgt.get("circuit_breaker_state") == "open":
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.ESGT_VIOLATION,
+                        violation_id=f"esgt-breaker-{int(time.time())}",
+                        violation_type=SafetyViolationType.THRESHOLD_EXCEEDED,
                         threat_level=ThreatLevel.HIGH,
-                        message="ESGT circuit breaker is OPEN",
-                        value=1.0,
-                        threshold=0.0,
-                        component="esgt_coordinator",
+                        timestamp=time.time(),
+                        description="ESGT circuit breaker is OPEN",
+                        metrics={"circuit_breaker_state": "open"},
+                        source_component="esgt_coordinator",
                     )
                 )
 
@@ -2032,12 +2037,13 @@ class ConsciousnessSafetyProtocol:
             if overflow_events > 0:
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        violation_id=f"mmei-overflow-{int(time.time())}",
+                        violation_type=SafetyViolationType.RESOURCE_EXHAUSTION,
                         threat_level=ThreatLevel.HIGH,
-                        message=f"MMEI need overflow detected ({overflow_events} events)",
-                        value=overflow_events,
-                        threshold=0.0,
-                        component="mmei_monitor",
+                        timestamp=time.time(),
+                        description=f"MMEI need overflow detected ({overflow_events} events)",
+                        metrics={"overflow_events": overflow_events, "threshold": 0.0},
+                        source_component="mmei_monitor",
                     )
                 )
 
@@ -2046,12 +2052,13 @@ class ConsciousnessSafetyProtocol:
             if goals_rate_limited > 10:  # Threshold: >10 rate-limited goals
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.GOAL_VIOLATION,
+                        violation_id=f"mmei-ratelimit-{int(time.time())}",
+                        violation_type=SafetyViolationType.GOAL_SPAM,
                         threat_level=ThreatLevel.MEDIUM,
-                        message=f"MMEI excessive rate limiting ({goals_rate_limited} blocked)",
-                        value=goals_rate_limited,
-                        threshold=10.0,
-                        component="mmei_monitor",
+                        timestamp=time.time(),
+                        description=f"MMEI excessive rate limiting ({goals_rate_limited} blocked)",
+                        metrics={"goals_rate_limited": goals_rate_limited, "threshold": 10.0},
+                        source_component="mmei_monitor",
                     )
                 )
 
@@ -2063,12 +2070,13 @@ class ConsciousnessSafetyProtocol:
             if mcea.get("is_saturated", False):
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.AROUSAL_VIOLATION,
+                        violation_id=f"mcea-saturated-{int(time.time())}",
+                        violation_type=SafetyViolationType.AROUSAL_RUNAWAY,
                         threat_level=ThreatLevel.HIGH,
-                        message="MCEA arousal saturated (stuck at boundary)",
-                        value=mcea.get("current_arousal", 0.0),
-                        threshold=0.01,
-                        component="mcea_controller",
+                        timestamp=time.time(),
+                        description="MCEA arousal saturated (stuck at boundary)",
+                        metrics={"current_arousal": mcea.get("current_arousal", 0.0), "threshold": 0.01},
+                        source_component="mcea_controller",
                     )
                 )
 
@@ -2077,12 +2085,13 @@ class ConsciousnessSafetyProtocol:
             if oscillation_events > 0:
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.AROUSAL_VIOLATION,
+                        violation_id=f"mcea-oscillation-{int(time.time())}",
+                        violation_type=SafetyViolationType.AROUSAL_RUNAWAY,
                         threat_level=ThreatLevel.MEDIUM,
-                        message=f"MCEA arousal oscillation detected ({oscillation_events} events)",
-                        value=mcea.get("arousal_variance", 0.0),
-                        threshold=0.15,
-                        component="mcea_controller",
+                        timestamp=time.time(),
+                        description=f"MCEA arousal oscillation detected ({oscillation_events} events)",
+                        metrics={"arousal_variance": mcea.get("arousal_variance", 0.0), "threshold": 0.15},
+                        source_component="mcea_controller",
                     )
                 )
 
@@ -2091,12 +2100,13 @@ class ConsciousnessSafetyProtocol:
             if invalid_needs > 5:  # Threshold: >5 invalid inputs
                 violations.append(
                     SafetyViolation(
-                        violation_type=SafetyViolationType.RESOURCE_VIOLATION,
+                        violation_id=f"mcea-invalid-{int(time.time())}",
+                        violation_type=SafetyViolationType.UNEXPECTED_BEHAVIOR,
                         threat_level=ThreatLevel.MEDIUM,
-                        message=f"MCEA receiving invalid needs ({invalid_needs} rejected)",
-                        value=invalid_needs,
-                        threshold=5.0,
-                        component="mcea_controller",
+                        timestamp=time.time(),
+                        description=f"MCEA receiving invalid needs ({invalid_needs} rejected)",
+                        metrics={"invalid_needs_count": invalid_needs, "threshold": 5.0},
+                        source_component="mcea_controller",
                     )
                 )
 

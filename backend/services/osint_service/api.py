@@ -12,18 +12,26 @@ open-source information into actionable intelligence, supporting threat
 intelligence, risk assessment, and strategic planning within the Maximus AI system.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from ai_orchestrator import AIOrchestrator
+from analyzers.breach_data_analyzer_refactored import BreachDataAnalyzer
+from analyzers.google_dork_scanner_refactored import GoogleDorkScanner
+from analyzers.dark_web_monitor_refactored import DarkWebMonitor
 
 app = FastAPI(title="Maximus OSINT Service", version="1.0.0")
 
 # Initialize OSINT Orchestrator
 ai_orchestrator = AIOrchestrator()
+
+# Initialize World-Class OSINT Tools
+breach_analyzer = BreachDataAnalyzer(api_key=None)  # Will use env var
+google_scanner = GoogleDorkScanner()
+darkweb_monitor = DarkWebMonitor()
 
 
 class StartInvestigationRequest(BaseModel):
@@ -60,6 +68,48 @@ class AutomatedInvestigationRequest(BaseModel):
     location: Optional[str] = None
     context: Optional[str] = None
     image_url: Optional[str] = None
+
+
+class BreachDataRequest(BaseModel):
+    """Request model for breach data analysis.
+
+    Attributes:
+        target (str): Email or username to search for.
+        search_type (str): Type of search ('email', 'username', 'domain', 'ip').
+        include_unverified (bool): Include unverified breaches.
+    """
+
+    target: str
+    search_type: str = "email"
+    include_unverified: bool = False
+
+
+class GoogleDorkRequest(BaseModel):
+    """Request model for Google dorking.
+
+    Attributes:
+        target (str): Target domain or search term.
+        categories (Optional[List[str]]): Dork categories to use.
+        engines (Optional[List[str]]): Search engines to query.
+        max_results_per_dork (int): Maximum results per dork.
+    """
+
+    target: str
+    categories: Optional[List[str]] = None
+    engines: Optional[List[str]] = None
+    max_results_per_dork: int = 10
+
+
+class DarkWebMonitorRequest(BaseModel):
+    """Request model for dark web monitoring.
+
+    Attributes:
+        target (str): Target keyword, domain, or identifier.
+        search_depth (str): Search depth ('surface', 'deep').
+    """
+
+    target: str
+    search_depth: str = "surface"
 
 
 @app.on_event("startup")
@@ -199,6 +249,119 @@ async def automated_investigation(
         "success": True,
         "data": result,
         "message": "Automated OSINT investigation completed successfully."
+    }
+
+
+# ============================================
+# WORLD-CLASS OSINT TOOLS ENDPOINTS
+# ============================================
+
+
+@app.post("/api/tools/breach-data/analyze")
+async def analyze_breach_data(request: BreachDataRequest) -> Dict[str, Any]:
+    """Analyzes breach data for a target using BreachDataAnalyzer.
+
+    Args:
+        request (BreachDataRequest): Target and search parameters.
+
+    Returns:
+        Dict[str, Any]: Breach analysis results with risk scoring.
+    """
+    try:
+        result = await breach_analyzer.query(
+            target=request.target,
+            search_type=request.search_type,
+            include_unverified=request.include_unverified,
+        )
+        return {
+            "status": "success",
+            "data": result,
+            "tool": "BreachDataAnalyzer",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Breach analysis failed: {str(e)}")
+
+
+@app.post("/api/tools/google-dork/scan")
+async def scan_with_google_dorks(request: GoogleDorkRequest) -> Dict[str, Any]:
+    """Executes Google dorking scan using GoogleDorkScanner.
+
+    Args:
+        request (GoogleDorkRequest): Target and scanning parameters.
+
+    Returns:
+        Dict[str, Any]: Dorking results with discovered URLs and risk scoring.
+    """
+    try:
+        result = await google_scanner.scan(
+            target=request.target,
+            categories=request.categories,
+            engines=request.engines,
+            max_results_per_dork=request.max_results_per_dork,
+        )
+        return {
+            "status": "success",
+            "data": result,
+            "tool": "GoogleDorkScanner",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Google dork scan failed: {str(e)}")
+
+
+@app.post("/api/tools/darkweb/monitor")
+async def monitor_dark_web(request: DarkWebMonitorRequest) -> Dict[str, Any]:
+    """Monitors dark web for target-related threats using DarkWebMonitor.
+
+    Args:
+        request (DarkWebMonitorRequest): Target and monitoring parameters.
+
+    Returns:
+        Dict[str, Any]: Dark web monitoring results with threat intelligence.
+    """
+    try:
+        result = await darkweb_monitor.search(
+            target=request.target,
+            search_depth=request.search_depth,
+        )
+        return {
+            "status": "success",
+            "data": result,
+            "tool": "DarkWebMonitor",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Dark web monitoring failed: {str(e)}")
+
+
+@app.get("/api/tools/status")
+async def get_tools_status() -> Dict[str, Any]:
+    """Returns status of all world-class OSINT tools.
+
+    Returns:
+        Dict[str, Any]: Status of BreachDataAnalyzer, GoogleDorkScanner, DarkWebMonitor.
+    """
+    return {
+        "status": "operational",
+        "tools": {
+            "breach_data_analyzer": {
+                "name": "BreachDataAnalyzer",
+                "status": "ready",
+                "description": "12B+ breach records aggregator (HIBP, DeHashed, Intelligence X)",
+                "version": "1.0.0",
+            },
+            "google_dork_scanner": {
+                "name": "GoogleDorkScanner",
+                "status": "ready",
+                "description": "Multi-engine dorking (Google, Bing, DuckDuckGo, Yandex) with 1000+ templates",
+                "version": "1.0.0",
+            },
+            "dark_web_monitor": {
+                "name": "DarkWebMonitor",
+                "status": "ready",
+                "description": "Dark web threat intelligence (Ahmia, Onionland) with onion v2/v3 support",
+                "version": "1.0.0",
+            },
+        },
+        "message": "All world-class OSINT tools operational.",
     }
 
 

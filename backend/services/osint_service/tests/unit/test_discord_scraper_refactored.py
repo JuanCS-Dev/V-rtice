@@ -82,8 +82,8 @@ class TestInputValidation:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock client to avoid connection
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
         scraper.client = mock_client
         scraper._client_ready = True
 
@@ -100,12 +100,12 @@ class TestChannelHistoryScraping:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client and channel
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
         mock_client.user = MagicMock(name="TestBot")
 
-        # Mock channel
-        mock_channel = AsyncMock()
+        # Mock channel with history attribute
+        mock_channel = MagicMock()
         mock_channel.id = 123456
 
         # Mock messages
@@ -159,9 +159,9 @@ class TestChannelHistoryScraping:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
-        mock_client.get_channel.return_value = None
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
+        mock_client.get_channel = MagicMock(return_value=None)
 
         # Mock fetch_channel to raise NotFound
         import discord
@@ -183,12 +183,12 @@ class TestChannelHistoryScraping:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
 
         # Mock channel that raises Forbidden
         import discord
-        mock_channel = AsyncMock()
+        mock_channel = MagicMock()
 
         async def raise_forbidden(limit):
             raise discord.Forbidden(MagicMock(), "Missing permissions")
@@ -214,8 +214,8 @@ class TestGuildInfo:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client and guild
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
 
         mock_guild = MagicMock()
         mock_guild.id = 123456
@@ -252,8 +252,8 @@ class TestGuildInfo:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
         mock_client.get_guild.return_value = None
 
         # Mock fetch_guild to raise NotFound
@@ -280,8 +280,8 @@ class TestUserInfo:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client and user
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
 
         mock_user = MagicMock()
         mock_user.id = 123456
@@ -313,8 +313,8 @@ class TestUserInfo:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
         mock_client.get_user.return_value = None
 
         # Mock fetch_user to raise NotFound
@@ -341,8 +341,8 @@ class TestChannelInfo:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock Discord client and channel
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
 
         # Import discord.TextChannel for isinstance check
         import discord
@@ -380,12 +380,12 @@ class TestStatistics:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
         mock_client.user = MagicMock(name="TestBot")
 
         # Mock channel with messages
-        mock_channel = AsyncMock()
+        mock_channel = MagicMock()
         async def mock_history(limit):
             for i in range(3):
                 msg = MagicMock()
@@ -455,8 +455,9 @@ class TestClientManagement:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock client
-        mock_client = AsyncMock()
-        mock_client.is_closed.return_value = False
+        mock_client = MagicMock()
+        mock_client.is_closed = MagicMock(return_value=False)
+        mock_client.close = AsyncMock()
         scraper.client = mock_client
 
         # Close
@@ -471,7 +472,7 @@ class TestClientManagement:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock already closed client
-        mock_client = AsyncMock()
+        mock_client = MagicMock()
         mock_client.is_closed.return_value = True
         scraper.client = mock_client
 
@@ -491,11 +492,11 @@ class TestEdgeCases:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
 
         # Mock channel with complex message
-        mock_channel = AsyncMock()
+        mock_channel = MagicMock()
 
         async def mock_history(limit):
             msg = MagicMock()
@@ -531,10 +532,10 @@ class TestEdgeCases:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
 
-        mock_channel = AsyncMock()
+        mock_channel = MagicMock()
         async def mock_history(limit):
             return
             yield  # Empty generator
@@ -557,13 +558,14 @@ class TestEdgeCases:
         scraper = DiscordScraperRefactored(api_key="test_token")
 
         # Mock client
-        mock_client = AsyncMock()
-        mock_client.is_ready.return_value = True
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
 
-        # Mock voice channel (not text)
-        import discord
-        mock_channel = MagicMock(spec=discord.VoiceChannel)
+        # Mock voice channel (not text) - explicitly no history attribute
+        mock_channel = MagicMock()
         mock_channel.id = 123456
+        # Remove history attribute to simulate voice channel
+        del mock_channel.history
 
         mock_client.get_channel.return_value = mock_channel
 
@@ -573,3 +575,222 @@ class TestEdgeCases:
         # Should raise ValueError
         with pytest.raises(ValueError, match="not a text channel"):
             await scraper.query(target="123456", operation="channel_history")
+
+
+class TestClientInitialization:
+    """Client initialization and connection tests."""
+
+    @pytest.mark.asyncio
+    async def test_ensure_client_creates_new_client(self):
+        """Test _ensure_client creates Discord client when None."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Verify client is None initially
+        assert scraper.client is None
+
+        # Mock discord.Client to prevent real connection
+        import discord
+        with patch.object(discord, 'Client') as mock_client_class:
+            mock_instance = MagicMock()
+            mock_instance.is_ready = MagicMock(return_value=True)
+            mock_instance.user = MagicMock(name="TestBot")
+            mock_client_class.return_value = mock_instance
+
+            # Mock asyncio.create_task to prevent background task
+            with patch('asyncio.create_task'):
+                await scraper._ensure_client()
+
+        # Verify client was created
+        assert scraper.client is not None
+        assert scraper._client_ready is True
+
+    @pytest.mark.asyncio
+    async def test_ensure_client_reuses_existing_client(self):
+        """Test _ensure_client doesn't recreate when client exists."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Set up existing client
+        mock_client = MagicMock()
+        scraper.client = mock_client
+        scraper._client_ready = True
+
+        # Call _ensure_client
+        await scraper._ensure_client()
+
+        # Verify same client instance is used
+        assert scraper.client is mock_client
+
+    @pytest.mark.asyncio
+    async def test_wait_for_ready_timeout(self):
+        """Test _wait_for_ready raises TimeoutError on timeout."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Mock client that never becomes ready
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=False)
+        scraper.client = mock_client
+
+        # Should raise TimeoutError
+        with pytest.raises(TimeoutError, match="Discord client failed to connect"):
+            await scraper._wait_for_ready(timeout=0.1)
+
+    @pytest.mark.asyncio
+    async def test_wait_for_ready_success(self):
+        """Test _wait_for_ready succeeds when client becomes ready."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Mock client that becomes ready immediately
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
+        mock_client.user = MagicMock(name="TestBot")
+        scraper.client = mock_client
+
+        # Should succeed
+        await scraper._wait_for_ready(timeout=1)
+
+        # Verify client_ready flag set
+        assert scraper._client_ready is True
+
+
+class TestFetchFallbacks:
+    """Tests for fetch fallback paths (when get_* returns None)."""
+
+    @pytest.mark.asyncio
+    async def test_guild_fetch_fallback_success(self):
+        """Test guild_info uses fetch_guild when get_guild returns None."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Mock client
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
+        mock_client.get_guild.return_value = None  # Not in cache
+
+        # Mock fetch_guild to return guild
+        mock_guild = MagicMock()
+        mock_guild.id = 123456
+        mock_guild.name = "Fetched Guild"
+        mock_guild.description = "Fetched from API"
+        mock_guild.member_count = 50
+        mock_guild.created_at = datetime.now(timezone.utc)
+        mock_guild.owner_id = 999
+        mock_guild.icon = None
+        mock_guild.banner = None
+        mock_guild.text_channels = []
+        mock_guild.voice_channels = []
+        mock_guild.roles = []
+
+        async def mock_fetch_guild(guild_id):
+            return mock_guild
+
+        mock_client.fetch_guild = mock_fetch_guild
+        scraper.client = mock_client
+        scraper._client_ready = True
+
+        # Get guild info
+        result = await scraper.query(target="123456", operation="guild_info")
+
+        # Verify fetch was used
+        assert result["guild"]["name"] == "Fetched Guild"
+
+    @pytest.mark.asyncio
+    async def test_guild_fetch_fallback_forbidden(self):
+        """Test guild_info handles Forbidden on fetch_guild."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Mock client
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
+        mock_client.get_guild.return_value = None
+
+        # Mock fetch_guild to raise Forbidden
+        import discord
+        async def raise_forbidden(guild_id):
+            raise discord.Forbidden(MagicMock(), "Missing permissions")
+
+        mock_client.fetch_guild = raise_forbidden
+        scraper.client = mock_client
+        scraper._client_ready = True
+
+        # Should raise ValueError
+        with pytest.raises(ValueError, match="Bot lacks permission to access guild"):
+            await scraper.query(target="123456", operation="guild_info")
+
+    @pytest.mark.asyncio
+    async def test_channel_fetch_fallback_success(self):
+        """Test channel_info uses fetch_channel when get_channel returns None."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Mock client
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
+        mock_client.get_channel.return_value = None  # Not in cache
+
+        # Mock fetch_channel to return channel
+        mock_channel = MagicMock()
+        mock_channel.id = 123456
+        mock_channel.name = "fetched-channel"
+        mock_channel.type = MagicMock(__str__=lambda x: "voice")
+        mock_channel.created_at = datetime.now(timezone.utc)
+        # No topic attribute (voice channel) - explicitly delete to simulate
+        del mock_channel.topic
+
+        async def mock_fetch_channel(channel_id):
+            return mock_channel
+
+        mock_client.fetch_channel = mock_fetch_channel
+        scraper.client = mock_client
+        scraper._client_ready = True
+
+        # Get channel info
+        result = await scraper.query(target="123456", operation="channel_info")
+
+        # Verify fetch was used
+        assert result["channel"]["name"] == "fetched-channel"
+        assert result["channel"]["type"] == "voice"
+        assert "topic" not in result["channel"]  # Voice channel has no topic
+
+    @pytest.mark.asyncio
+    async def test_channel_fetch_fallback_forbidden(self):
+        """Test channel_info handles Forbidden on fetch_channel."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Mock client
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
+        mock_client.get_channel.return_value = None
+
+        # Mock fetch_channel to raise Forbidden
+        import discord
+        async def raise_forbidden(channel_id):
+            raise discord.Forbidden(MagicMock(), "Missing permissions")
+
+        mock_client.fetch_channel = raise_forbidden
+        scraper.client = mock_client
+        scraper._client_ready = True
+
+        # Should raise ValueError
+        with pytest.raises(ValueError, match="Bot lacks permission to access channel"):
+            await scraper.query(target="123456", operation="channel_info")
+
+    @pytest.mark.asyncio
+    async def test_channel_fetch_fallback_not_found(self):
+        """Test channel_info handles NotFound on fetch_channel."""
+        scraper = DiscordScraperRefactored(api_key="test_token")
+
+        # Mock client
+        mock_client = MagicMock()
+        mock_client.is_ready = MagicMock(return_value=True)
+        mock_client.get_channel.return_value = None
+
+        # Mock fetch_channel to raise NotFound
+        import discord
+        async def raise_not_found(channel_id):
+            raise discord.NotFound(MagicMock(), "Channel not found")
+
+        mock_client.fetch_channel = raise_not_found
+        scraper.client = mock_client
+        scraper._client_ready = True
+
+        # Should raise ValueError
+        with pytest.raises(ValueError, match="Channel.*not found"):
+            await scraper.query(target="999999", operation="channel_info")

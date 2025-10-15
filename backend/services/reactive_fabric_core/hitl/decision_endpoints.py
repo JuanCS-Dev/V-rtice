@@ -340,9 +340,6 @@ async def escalate_decision(
 # IMPORT IN MAIN APP
 # ============================================================================
 
-from typing import Dict
-from datetime import timedelta
-
 # Make sure to import this router in hitl_backend.py:
 # from .decision_endpoints import router as decision_router
 # app.include_router(decision_router)

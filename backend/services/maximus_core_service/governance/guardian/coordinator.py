@@ -86,12 +86,16 @@ class GuardianCoordinator:
     - Provide API for external systems
     """
 
-    def __init__(self):
-        """Initialize Guardian Coordinator."""
+    def __init__(self, guardians: dict[str, GuardianAgent] | None = None):
+        """Initialize Guardian Coordinator.
+
+        Args:
+            guardians: Optional dict of guardian agents. If not provided, creates default instances.
+        """
         self.coordinator_id = "guardian-coordinator-central"
 
         # Initialize all Guardian Agents
-        self.guardians: dict[str, GuardianAgent] = {
+        self.guardians: dict[str, GuardianAgent] = guardians or {
             "article_ii": ArticleIIGuardian(),
             "article_iii": ArticleIIIGuardian(),
             "article_iv": ArticleIVGuardian(),

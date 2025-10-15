@@ -43,8 +43,13 @@ class ArticleIVGuardian(GuardianAgent):
     - Missing resilience patterns
     """
 
-    def __init__(self):
-        """Initialize Article IV Guardian."""
+    def __init__(self, test_paths: list[str] | None = None, service_paths: list[str] | None = None):
+        """Initialize Article IV Guardian.
+
+        Args:
+            test_paths: Paths to check for chaos tests (defaults to production paths)
+            service_paths: Service paths to check for resilience (defaults to production paths)
+        """
         super().__init__(
             guardian_id="guardian-article-iv",
             article=ConstitutionalArticle.ARTICLE_IV,
@@ -59,6 +64,17 @@ class ArticleIVGuardian(GuardianAgent):
         self.chaos_experiments: list[dict[str, Any]] = []
         self.quarantined_features: dict[str, dict[str, Any]] = {}
         self.resilience_metrics: dict[str, float] = {}
+
+        # Configurable paths (dependency injection for testability)
+        self.test_paths = test_paths or [
+            "/home/juan/vertice-dev/backend/services/maximus_core_service/tests",
+            "/home/juan/vertice-dev/backend/services/reactive_fabric_core/tests",
+        ]
+
+        self.service_paths = service_paths or [
+            "/home/juan/vertice-dev/backend/services/maximus_core_service",
+            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
+        ]
 
         # Resilience patterns to check
         self.resilience_patterns = [
@@ -128,13 +144,7 @@ class ArticleIVGuardian(GuardianAgent):
         """Check for presence of chaos engineering tests."""
         violations = []
 
-        # Check for chaos test files
-        test_paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service/tests",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core/tests",
-        ]
-
-        for base_path in test_paths:
+        for base_path in self.test_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -213,12 +223,7 @@ class ArticleIVGuardian(GuardianAgent):
         """Check for implementation of resilience patterns."""
         violations = []
 
-        service_paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
-        ]
-
-        for base_path in service_paths:
+        for base_path in self.service_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -282,12 +287,7 @@ class ArticleIVGuardian(GuardianAgent):
             "preview",
         ]
 
-        paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
-        ]
-
-        for base_path in paths:
+        for base_path in self.service_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -372,12 +372,7 @@ class ArticleIVGuardian(GuardianAgent):
             "critical",
         ]
 
-        paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
-        ]
-
-        for base_path in paths:
+        for base_path in self.service_paths:
             if not Path(base_path).exists():
                 continue
 
@@ -433,12 +428,7 @@ class ArticleIVGuardian(GuardianAgent):
             "missing_timeouts": 0,
         }
 
-        paths = [
-            "/home/juan/vertice-dev/backend/services/maximus_core_service",
-            "/home/juan/vertice-dev/backend/services/reactive_fabric_core",
-        ]
-
-        for base_path in paths:
+        for base_path in self.service_paths:
             if not Path(base_path).exists():
                 continue
 

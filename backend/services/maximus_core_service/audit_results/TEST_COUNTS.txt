@@ -1,0 +1,221 @@
+Test Function Counts Per File:
+./attention_system/test_attention_integration.py: 0
+0 tests
+./autonomic_core/test_hcl_integration.py: 0
+0 tests
+./compassion/test_confidence_tracker.py: 0
+0 tests
+./compassion/test_contradiction_detector.py: 0
+0 tests
+./compassion/test_social_memory.py: 0
+0 tests
+./compassion/test_social_memory_simple.py: 0
+0 tests
+./compassion/test_tom_benchmark.py: 5 tests
+./compassion/test_tom_engine.py: 0
+0 tests
+./compliance/test_compliance.py: 23 tests
+./consciousness/episodic_memory/test_event.py: 6 tests
+./consciousness/episodic_memory/test_memory_buffer.py: 9 tests
+./consciousness/esgt/test_coordinator_hardening.py: 0
+0 tests
+./consciousness/esgt/test_esgt_additional.py: 0
+0 tests
+./consciousness/esgt/test_esgt_components.py: 0
+0 tests
+./consciousness/esgt/test_esgt_concurrent.py: 0
+0 tests
+./consciousness/esgt/test_esgt_degraded.py: 0
+0 tests
+./consciousness/esgt/test_esgt_edge_cases.py: 0
+0 tests
+./consciousness/esgt/test_esgt_final.py: 0
+0 tests
+./consciousness/esgt/test_esgt_node_dropout.py: 0
+0 tests
+./consciousness/esgt/test_esgt.py: 2 tests
+./consciousness/esgt/test_esgt_refractory.py: 0
+0 tests
+./consciousness/esgt/test_esgt_sync_failures.py: 0
+0 tests
+./consciousness/esgt/test_esgt_theory.py: 0
+0 tests
+./consciousness/integration/test_chaos_engineering.py: 0
+0 tests
+./consciousness/integration/test_circuit_breakers.py: 0
+0 tests
+./consciousness/integration/test_immune_consciousness_integration.py: 1 tests
+./consciousness/integration/test_mea_bridge.py: 0
+0 tests
+./consciousness/integration/test_performance_optimization.py: 1 tests
+./consciousness/integration/test_resilience_final.py: 0
+0 tests
+./consciousness/integration/test_retry_logic.py: 0
+0 tests
+./consciousness/integration/test_sensory_esgt_bridge.py: 0
+0 tests
+./consciousness/lrr/test_recursive_reasoner.py: 0
+0 tests
+./consciousness/mcea/test_mcea.py: 13 tests
+./consciousness/mcea/test_stress.py: 0
+0 tests
+./consciousness/mea/test_mea.py: 0
+0 tests
+./consciousness/mmei/test_goals.py: 0
+0 tests
+./consciousness/mmei/test_mmei_coverage_100pct.py: 0
+0 tests
+./consciousness/mmei/test_mmei.py: 24 tests
+./consciousness/neuromodulation/test_all_modulators_hardened.py: 36 tests
+./consciousness/neuromodulation/test_coordinator_hardened.py: 40 tests
+./consciousness/neuromodulation/test_dopamine_hardened.py: 39 tests
+./consciousness/neuromodulation/test_smoke_integration.py: 10 tests
+./consciousness/predictive_coding/test_all_layers_hardened.py: 12 tests
+./consciousness/predictive_coding/test_hierarchy_hardened.py: 5 tests
+./consciousness/predictive_coding/test_layer_base_hardened.py: 5 tests
+./consciousness/predictive_coding/test_smoke_integration.py: 1 tests
+./consciousness/reactive_fabric/tests/test_data_orchestrator.py: 0
+0 tests
+./consciousness/reactive_fabric/tests/test_event_collector.py: 0
+0 tests
+./consciousness/reactive_fabric/tests/test_metrics_collector.py: 0
+0 tests
+./consciousness/sandboxing/test_container.py: 8 tests
+./consciousness/sandboxing/test_kill_switch.py: 10 tests
+./consciousness/test_biomimetic_safety_bridge.py: 7 tests
+./consciousness/test_consciousness_integration.py: 1 tests
+./consciousness/test_edge_cases.py: 0
+0 tests
+./consciousness/test_end_to_end_validation.py: 0
+0 tests
+./consciousness/test_episodic_memory.py: 0
+0 tests
+./consciousness/test_performance.py: 0
+0 tests
+./consciousness/test_safety_integration.py: 4 tests
+./consciousness/test_safety.py: 28 tests
+./consciousness/test_safety_refactored.py: 33 tests
+./consciousness/test_stress_validation.py: 1 tests
+./consciousness/test_system_integration.py: 0
+0 tests
+./consciousness/tig/test_fabric_hardening.py: 0
+0 tests
+./consciousness/tig/test_sync.py: 0
+0 tests
+./consciousness/tig/test_tig_edge_cases.py: 0
+0 tests
+./consciousness/tig/test_tig.py: 0
+0 tests
+./consciousness/validation/test_metacognition.py: 2 tests
+./demo/test_demo_execution.py: 1 tests
+./ethics/quick_test.py: 0
+0 tests
+./fairness/test_fairness.py: 29 tests
+./federated_learning/test_federated_learning.py: 0
+0 tests
+./governance/guardian/test_guardians.py: 2 tests
+./governance_sse/test_integration.py: 1 tests
+./governance/test_governance.py: 18 tests
+./hitl/test_hitl.py: 0
+0 tests
+./justice/tests/test_cbr_edge_cases.py: 0
+0 tests
+./justice/tests/test_cbr_performance.py: 0
+0 tests
+./justice/tests/test_cbr.py: 1 tests
+./justice/tests/test_constitutional_validator.py: 0
+0 tests
+./justice/tests/test_embeddings.py: 7 tests
+./justice/tests/test_mip_integration.py: 2 tests
+./justice/tests/test_precedent_db.py: 1 tests
+./justice/tests/test_validators.py: 1 tests
+./motor_integridade_processual/tests/unit/test_action_plan.py: 3 tests
+./motor_integridade_processual/tests/unit/test_api.py: 0
+0 tests
+./motor_integridade_processual/tests/unit/test_arbiter.py: 0
+0 tests
+./motor_integridade_processual/tests/unit/test_frameworks.py: 0
+0 tests
+./motor_integridade_processual/tests/unit/test_resolution.py: 0
+0 tests
+./motor_integridade_processual/tests/unit/test_verdict.py: 0
+0 tests
+./neuromodulation/test_neuromodulation_integration.py: 5 tests
+./predictive_coding/test_predictive_coding_integration.py: 8 tests
+./privacy/test_privacy.py: 0
+0 tests
+./test_edge_cases.py: 0
+0 tests
+./test_ethical_ai_integration.py: 2 tests
+./test_governance_e2e.py: 0
+0 tests
+./test_maximus_e2e_integration.py: 8 tests
+./test_maximus_ethical_integration.py: 1 tests
+./test_maximus_integration.py: 0
+0 tests
+./test_neuromodulation_integration_simple.py: 6 tests
+./test_neuromodulation_maximus_integration.py: 3 tests
+./test_predictive_coding_maximus_integration.py: 6 tests
+./test_predictive_coding_structure.py: 8 tests
+./tests/benchmarks/test_e2e_consciousness_benchmark.py: 0
+0 tests
+./tests/benchmarks/test_esgt_latency_benchmark.py: 0
+0 tests
+./tests/benchmarks/test_mmei_mcea_pipeline_benchmark.py: 0
+0 tests
+./tests/e2e/test_pfc_complete.py: 0
+0 tests
+./tests/integration/test_pfc_tom_integration.py: 0
+0 tests
+./tests/integration/test_reactive_fabric.py: 0
+0 tests
+./tests/integration/test_system_reactive_fabric.py: 0
+0 tests
+./test_skill_learning_integration.py: 8 tests
+./test_sse_streaming.py: 0
+0 tests
+./tests/stress/test_concurrency_testing.py: 0
+0 tests
+./tests/stress/test_latency_testing.py: 0
+0 tests
+./tests/stress/test_load_testing.py: 0
+0 tests
+./tests/stress/test_memory_leak_testing.py: 0
+0 tests
+./tests/stress/test_recovery_testing.py: 0
+0 tests
+./tests/test_batch_predictor.py: 10 tests
+./tests/test_benchmark_suite.py: 7 tests
+./tests/test_distributed_trainer.py: 5 tests
+./tests/test_docker_stack.py: 3 tests
+./tests/test_gpu_trainer.py: 5 tests
+./tests/test_inference_engine.py: 10 tests
+./tests/test_metrics_export.py: 6 tests
+./tests/test_onnx_exporter.py: 6 tests
+./tests/test_performance_integration.py: 7 tests
+./tests/test_profiler.py: 7 tests
+./tests/test_pruner.py: 8 tests
+./tests/test_quantizer.py: 6 tests
+./test_stress_conditions.py: 0
+0 tests
+./tests/unit/test_data_orchestrator_coverage.py: 0
+0 tests
+./tests/unit/test_event_collector_coverage.py: 0
+0 tests
+./tests/unit/test_metrics_collector_coverage.py: 0
+0 tests
+./test_tui_integration.py: 0
+0 tests
+./test_workflow_complete.py: 0
+0 tests
+./test_world_class_tools.py: 0
+0 tests
+./training/tests/test_data_collection.py: 3 tests
+./training/tests/test_data_preprocessor.py: 3 tests
+./training/tests/test_dataset_builder.py: 3 tests
+./training/tests/test_data_validator.py: 2 tests
+./training/tests/test_layer_trainer.py: 2 tests
+./training/tests/test_model_registry.py: 2 tests
+./xai/test_xai.py: 4 tests
+Summary:
+Total test functions: 546

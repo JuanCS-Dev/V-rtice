@@ -187,8 +187,10 @@ export const scanContainer = async (image, options = {}) => {
 };
 
 // ============================================
-// OSINT TOOLS (2)
+// OSINT TOOLS (5) - World-Class Suite
 // ============================================
+
+const OSINT_SERVICE_URL = 'http://localhost:8036';
 
 /**
  * Social Media Deep Dive
@@ -211,6 +213,99 @@ export const searchBreachData = async (query, options = {}) => {
     query,
     query_type: options.queryType ?? 'email'
   });
+};
+
+/**
+ * Breach Data Analyzer (NEW - Direct OSINT Service)
+ * Superior aggregator: HIBP + DeHashed + Intelligence X
+ * 12B+ records with intelligent risk scoring
+ */
+export const analyzeBreachData = async (target, options = {}) => {
+  try {
+    const response = await fetch(`${OSINT_SERVICE_URL}/api/tools/breach-data/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        target,
+        search_type: options.searchType ?? 'email',
+        include_unverified: options.includeUnverified ?? false,
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    logger.error('[BreachDataAnalyzer] Error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Google Dork Scanner (NEW - Direct OSINT Service)
+ * Multi-engine dorking: Google, Bing, DuckDuckGo, Yandex
+ * 1000+ pre-built dork templates across 8 categories
+ */
+export const scanWithGoogleDorks = async (target, options = {}) => {
+  try {
+    const response = await fetch(`${OSINT_SERVICE_URL}/api/tools/google-dork/scan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        target,
+        categories: options.categories ?? null,  // null = all categories
+        engines: options.engines ?? null,  // null = all engines
+        max_results_per_dork: options.maxResultsPerDork ?? 10,
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    logger.error('[GoogleDorkScanner] Error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Dark Web Monitor (NEW - Direct OSINT Service)
+ * Dark web threat intelligence: Ahmia + Onionland
+ * Onion v2 (16 chars) + v3 (56 chars) support
+ */
+export const monitorDarkWeb = async (target, options = {}) => {
+  try {
+    const response = await fetch(`${OSINT_SERVICE_URL}/api/tools/darkweb/monitor`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        target,
+        search_depth: options.searchDepth ?? 'surface',
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    logger.error('[DarkWebMonitor] Error:', error);
+    throw error;
+  }
 };
 
 // ============================================
@@ -335,9 +430,12 @@ export default {
   analyzeJavaScript,
   scanContainer,
 
-  // OSINT
+  // OSINT (World-Class Suite)
   socialMediaInvestigation,
   searchBreachData,
+  analyzeBreachData,        // NEW: BreachDataAnalyzer
+  scanWithGoogleDorks,      // NEW: GoogleDorkScanner
+  monitorDarkWeb,           // NEW: DarkWebMonitor
 
   // Analytics
   recognizePatterns,

@@ -158,15 +158,12 @@ class GovernanceEngine:
 
             results.append(decision)
 
-            # Apply limit
-            if len(results) >= limit:
-                break
-
-        # Sort by priority and creation time
+        # Sort by priority and creation time BEFORE limiting
         priority_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
         results.sort(key=lambda d: (priority_order.get(d.priority, 4), d.created_at))
 
-        return results
+        # Apply limit AFTER sorting
+        return results[:limit]
 
     def get_decision(self, decision_id: str) -> Decision | None:
         """Get a specific decision by ID."""

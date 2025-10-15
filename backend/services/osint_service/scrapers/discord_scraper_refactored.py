@@ -228,7 +228,7 @@ class DiscordScraperRefactored(BaseTool):
                 channel = await self.client.fetch_channel(int(channel_id))
 
             # Check if channel has history method (duck typing for testability)
-            if not hasattr(channel, 'history'):
+            if not (hasattr(channel, 'history') and callable(getattr(channel, 'history', None))):
                 raise ValueError(f"Channel {channel_id} is not a text channel")
 
             messages = []
