@@ -291,7 +291,7 @@ Output as JSON."""
             json_start = analysis_text.find('{')
             json_end = analysis_text.rfind('}') + 1
             if json_start >= 0 and json_end > json_start:
-                analysis = json.loads(analysis_text[json_start:json_end])
+                analysis: Dict[str, Any] = json.loads(analysis_text[json_start:json_end])
             else:
                 analysis = {"raw_analysis": analysis_text}
                 

@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,7 @@ class HOTLDecisionSystem:
                 reason="Non-critical action"
             )
             request = ApprovalRequest(
-                id=f"req_{int(datetime.now().timestamp())}",
+                id=f"req_{uuid.uuid4().hex[:12]}",
                 action=action,
                 context=context,
                 risk_level=risk_level,
@@ -131,9 +132,9 @@ class HOTLDecisionSystem:
             self._log_decision(request, approval)
             return request
         
-        # Create approval request
+        # Create approval request with unique ID
         request = ApprovalRequest(
-            id=f"req_{int(datetime.now().timestamp())}",
+            id=f"req_{uuid.uuid4().hex[:12]}",
             action=action,
             context=context,
             risk_level=risk_level
