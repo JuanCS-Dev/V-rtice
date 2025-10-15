@@ -127,6 +127,9 @@ class FlowFeatures:
     These features are sufficient for ML-based threat detection.
     """
     
+    # Flow identification
+    flow_id: str
+    
     # Basic flow features
     duration: float
     packet_count: int
@@ -264,6 +267,7 @@ class FlowFeatureExtractor:
         burstiness = self._calculate_burstiness(sizes, iats)
         
         return FlowFeatures(
+            flow_id=flow.flow_id,
             duration=duration,
             packet_count=packet_count,
             total_bytes=total_bytes,
