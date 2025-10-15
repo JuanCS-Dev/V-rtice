@@ -118,39 +118,25 @@ class RestorationMetrics:
     def __init__(self):
         # Initialize metrics only once at class level
         if RestorationMetrics._restorations_total is None:
-            try:
-                RestorationMetrics._restorations_total = Counter(
-                    "restoration_total",
-                    "Total restoration attempts",
-                    ["status", "phase"],
-                )
-                RestorationMetrics._restoration_duration = Histogram(
-                    "restoration_duration_seconds",
-                    "Time to complete restoration",
-                    buckets=[10, 30, 60, 120, 300, 600],
-                )
-                RestorationMetrics._assets_restored = Counter(
-                    "restoration_assets_restored_total",
-                    "Total assets restored",
-                    ["asset_type"],
-                )
-                RestorationMetrics._rollbacks_total = Counter(
-                    "restoration_rollbacks_total", "Total rollbacks performed"
-                )
-            except ValueError:
-                # Metrics already registered, retrieve from registry
-                from prometheus_client import REGISTRY
-                for collector in list(REGISTRY._collector_to_names.keys()):
-                    if hasattr(collector, '_name'):
-                        if collector._name == 'restoration_total':
-                            RestorationMetrics._restorations_total = collector
-                        elif collector._name == 'restoration_duration_seconds':
-                            RestorationMetrics._restoration_duration = collector
-                        elif collector._name == 'restoration_assets_restored_total':
-                            RestorationMetrics._assets_restored = collector
-                        elif collector._name == 'restoration_rollbacks_total':
-                            RestorationMetrics._rollbacks_total = collector
-        
+            RestorationMetrics._restorations_total = Counter(
+                "restoration_total",
+                "Total restoration attempts",
+                ["status", "phase"],
+            )
+            RestorationMetrics._restoration_duration = Histogram(
+                "restoration_duration_seconds",
+                "Time to complete restoration",
+                buckets=[10, 30, 60, 120, 300, 600],
+            )
+            RestorationMetrics._assets_restored = Counter(
+                "restoration_assets_restored_total",
+                "Total assets restored",
+                ["asset_type"],
+            )
+            RestorationMetrics._rollbacks_total = Counter(
+                "restoration_rollbacks_total", "Total rollbacks performed"
+            )
+
         # Always assign instance attributes from class-level
         self.restorations_total = RestorationMetrics._restorations_total
         self.restoration_duration = RestorationMetrics._restoration_duration
