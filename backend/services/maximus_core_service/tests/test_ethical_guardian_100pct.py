@@ -1904,3 +1904,53 @@ class TestFinalBranches100:
             # If it's supervised, just verify the condition was added
             supervised_conditions = [c for c in r.conditions if "SUPERVISED" in c]
             assert len(supervised_conditions) > 0
+    
+    @pytest.mark.asyncio
+    async def test_branch_651_664_ethics_none_statistics_update(self, full_mocks):
+        """
+        Branch 651->664: result.ethics is None -> approved by default -> update statistics
+        CRITICAL: This is THE test for 100% coverage (last missing branch)
+        """
+        # Disable ALL checks except governance (to pass initial validation)
+        g = EthicalGuardian(
+            enable_ethics=False,  # CRITICAL: This makes result.ethics = None
+            enable_fairness=False,
+            enable_xai=False,
+            enable_privacy=False,
+            enable_fl=False,
+            enable_hitl=False,
+            enable_compliance=False
+        )
+        
+        # Setup governance to pass
+        m = Mock()
+        m.is_compliant = True
+        m.violations = []
+        m.warnings = []
+        g.policy_engine.enforce_policy = Mock(return_value=m)
+        
+        # Record initial stats
+        initial_approved = g.total_approved
+        initial_rejected = g.total_rejected
+        initial_total = g.total_validations
+        
+        # Execute validation
+        r = await g.validate_action("test_action", {}, "test_actor")
+        
+        # ASSERTIONS FOR BRANCH 651-656
+        assert r.ethics is None, "Ethics must be None (disabled)"
+        assert r.decision_type == EthicalDecisionType.APPROVED, "Should be APPROVED by default"
+        assert r.is_approved == True, "Should be approved"
+        assert "Approved by default (no ethical checks enabled)" in r.conditions
+        
+        # ASSERTIONS FOR BRANCH 664-667 (statistics update)
+        # Since is_approved=True, branch 664->665 is taken (total_approved++)
+        assert g.total_approved == initial_approved + 1, "total_approved should increment"
+        assert g.total_rejected == initial_rejected, "total_rejected should NOT change"
+        assert g.total_validations == initial_total + 1, "total_validations should increment"
+        
+        # This test GUARANTEES 100% branch coverage:
+        # - Line 651: elif result.ethics is None ✓
+        # - Line 654-656: Approve by default ✓  
+        # - Line 664: if result.is_approved ✓
+        # - Line 665: self.total_approved += 1 ✓
