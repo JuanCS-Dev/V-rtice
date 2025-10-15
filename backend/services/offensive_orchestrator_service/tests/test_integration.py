@@ -524,3 +524,43 @@ async def test_mission_postexploit_skipped_no_exploit() -> None:
     # Post-exploit should be skipped
     assert result["post_exploitation"]["status"] == "skipped"
     assert result["post_exploitation"]["reason"] == "Exploitation not completed"
+
+
+@pytest.mark.asyncio
+async def test_postexploit_pending_approval_path() -> None:
+    """Test post-exploit pending approval branch."""
+    from typing import Any
+    from hotl.decision_system import ApprovalRequest, ApprovalStatus
+    
+    service = IntegrationService(
+        anthropic_api_key="test_key",
+        config={"auto_approve": True}  # Auto-approve exploit
+    )
+    
+    # Mock HOTL to reject only the second (postexploit) approval
+    call_count = [0]
+    original_request = service.hotl_system.request_approval
+    
+    async def mock_request_approval(*args: Any, **kwargs: Any) -> ApprovalRequest:
+        call_count[0] += 1
+        result = await original_request(*args, **kwargs)
+        
+        # Reject only postexploit (second call)
+        if call_count[0] == 2:
+            result.status = ApprovalStatus.PENDING
+            result.approval = None
+        
+        return result
+    
+    service.hotl_system.request_approval = mock_request_approval  # type: ignore
+    
+    result = await service.execute_integrated_mission(
+        objective="Test",
+        scope=["target.com"],
+        constraints={}
+    )
+    
+    # Exploit should succeed, postexploit should be pending
+    if result["exploitation"]["status"] != "pending_approval":
+        assert result["post_exploitation"]["status"] == "pending_approval"
+        assert "approval_request_id" in result["post_exploitation"]
