@@ -109,25 +109,43 @@ class RestorationResult:
 class RestorationMetrics:
     """Prometheus metrics for restoration"""
 
+    _registry_initialized = False
+
     def __init__(self):
-        self.restorations_total = Counter(
-            "restoration_total",
-            "Total restoration attempts",
-            ["status", "phase"],
-        )
-        self.restoration_duration = Histogram(
-            "restoration_duration_seconds",
-            "Time to complete restoration",
-            buckets=[10, 30, 60, 120, 300, 600],
-        )
-        self.assets_restored = Counter(
-            "restoration_assets_restored_total",
-            "Total assets restored",
-            ["asset_type"],
-        )
-        self.rollbacks_total = Counter(
-            "restoration_rollbacks_total", "Total rollbacks performed"
-        )
+        # Use registry singleton pattern to avoid duplicates
+        if not RestorationMetrics._registry_initialized:
+            self.restorations_total = Counter(
+                "restoration_total",
+                "Total restoration attempts",
+                ["status", "phase"],
+            )
+            self.restoration_duration = Histogram(
+                "restoration_duration_seconds",
+                "Time to complete restoration",
+                buckets=[10, 30, 60, 120, 300, 600],
+            )
+            self.assets_restored = Counter(
+                "restoration_assets_restored_total",
+                "Total assets restored",
+                ["asset_type"],
+            )
+            self.rollbacks_total = Counter(
+                "restoration_rollbacks_total", "Total rollbacks performed"
+            )
+            RestorationMetrics._registry_initialized = True
+        else:
+            # Retrieve existing metrics from registry
+            from prometheus_client import REGISTRY
+            for collector in REGISTRY._collector_to_names:
+                if hasattr(collector, '_name'):
+                    if collector._name == 'restoration_total':
+                        self.restorations_total = collector
+                    elif collector._name == 'restoration_duration_seconds':
+                        self.restoration_duration = collector
+                    elif collector._name == 'restoration_assets_restored_total':
+                        self.assets_restored = collector
+                    elif collector._name == 'restoration_rollbacks_total':
+                        self.rollbacks_total = collector
 
 
 class HealthValidator:

@@ -144,14 +144,17 @@ class IntegrationService:
                 risk_level="high"
             )
             
+            exploit_results: Dict[str, Any] = {}
+            
             if approval_request.status.value == "approved":
                 exploit_results = await self._execute_exploitation(recon_results)
                 mission.exploit_results = exploit_results
             else:
-                mission.exploit_results = {
+                exploit_results = {
                     "status": "pending_approval",
                     "approval_request_id": approval_request.id
                 }
+                mission.exploit_results = exploit_results
             
             # Phase 4: Post-Exploitation (requires HOTL approval)
             if mission.exploit_results and mission.exploit_results.get("status") != "pending_approval":
@@ -167,14 +170,22 @@ class IntegrationService:
                     risk_level="critical"
                 )
                 
+                postexploit_results: Dict[str, Any] = {}
+                
                 if approval_request.status.value == "approved":
                     postexploit_results = await self._execute_postexploit(exploit_results)
                     mission.postexploit_results = postexploit_results
                 else:
-                    mission.postexploit_results = {
+                    postexploit_results = {
                         "status": "pending_approval",
                         "approval_request_id": approval_request.id
                     }
+                    mission.postexploit_results = postexploit_results
+            else:
+                postexploit_results = {
+                    "status": "skipped",
+                    "reason": "Exploitation not completed"
+                }
             
             # Phase 5: Analysis & Learning
             self.logger.info("Phase 5: Analysis & Learning")
