@@ -123,20 +123,13 @@ const ReviewQueue = ({
         )}
 
         {!loading && !error && reviews.map((review) => (
-          <div
+          <button
+            type="button"
             key={review.apv_id}
-            role="listitem"
             className={`${styles.queueItem} ${
               selectedAPV === review.apv_id ? styles.queueItemSelected : ''
             }`}
             onClick={() => onSelectAPV(review)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSelectAPV(review);
-              }
-            }}
-            tabIndex={0}
             aria-label={`Review ${review.apv_code} - ${review.severity} severity`}
           >
             {/* Header: Severity + APV Code */}
@@ -171,7 +164,7 @@ const ReviewQueue = ({
                 style={{ width: `${(review.confirmation_confidence * 100).toFixed(0)}%` }}
               />
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

@@ -252,7 +252,8 @@ export const useWebSocket = ({
     return () => {
       disconnect();
     };
-  }, [autoConnect]); // Only run on mount/unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoConnect]); // Only run on mount/unmount - connect/disconnect are stable
 
   /**
    * Ping interval to keep connection alive

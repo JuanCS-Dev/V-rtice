@@ -90,8 +90,9 @@ const DecoyBayouMap = ({ honeypots = [], threats = [] }) => {
       {/* Controls */}
       <div className={styles.controls}>
         <div className={styles.controlGroup}>
-          <label className={styles.controlLabel}>Time Window:</label>
-          <select 
+          <label htmlFor="time-window-select" className={styles.controlLabel}>Time Window:</label>
+          <select
+            id="time-window-select"
             className={styles.select}
             value={timeWindow}
             onChange={(e) => setTimeWindow(e.target.value)}

@@ -74,7 +74,7 @@ const HITLDecisionConsole = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
-  const [wsConnection, setWsConnection] = useState(null);
+  const [_wsConnection, setWsConnection] = useState(null);
 
   /**
    * Fetch pending decisions from HITL API
@@ -587,6 +587,9 @@ const DecisionCard = ({ decision, isSelected, onClick }) => {
     <div
       className={`${styles.decisionCard} ${isSelected ? styles.decisionCardSelected : ''}`}
       onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      role="button"
+      tabIndex={0}
       style={{ borderLeftColor: priorityConfig.color }}
     >
       <div className={styles.cardHeader}>
@@ -718,7 +721,7 @@ const DecisionDetails = ({ decision }) => {
  * Authorization Panel Component - Right panel
  */
 const AuthorizationPanel = ({
-  decision,
+  decision: _decision,
   notes,
   onNotesChange,
   onApprove,
@@ -735,8 +738,9 @@ const AuthorizationPanel = ({
 
       {/* Notes */}
       <div className={styles.authNotes}>
-        <label className={styles.notesLabel}>Decision Notes (Optional):</label>
+        <label htmlFor="decision-notes-textarea" className={styles.notesLabel}>Decision Notes (Optional):</label>
         <textarea
+          id="decision-notes-textarea"
           className={styles.notesTextarea}
           value={notes}
           onChange={(e) => onNotesChange(e.target.value)}
@@ -793,8 +797,17 @@ const AuthorizationPanel = ({
  */
 const ApprovalModal = ({ decision, notes, onConfirm, onCancel, isSubmitting }) => {
   return (
-    <div className={styles.modalOverlay} onClick={onCancel}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={styles.modalOverlay}
+      onClick={onCancel}
+      onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
+      role="presentation"
+    >
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+      >
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>⚠️ CONFIRM APPROVAL</h2>
         </div>
@@ -847,10 +860,19 @@ const ApprovalModal = ({ decision, notes, onConfirm, onCancel, isSubmitting }) =
 /**
  * Rejection Modal
  */
-const RejectionModal = ({ decision, reason, onReasonChange, onConfirm, onCancel, isSubmitting }) => {
+const RejectionModal = ({ decision: _decision, reason, onReasonChange, onConfirm, onCancel, isSubmitting }) => {
   return (
-    <div className={styles.modalOverlay} onClick={onCancel}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={styles.modalOverlay}
+      onClick={onCancel}
+      onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
+      role="presentation"
+    >
+      <div
+        className={styles.modal}
+        role="dialog"
+        aria-modal="true"
+      >
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>✗ REJECT DECISION</h2>
         </div>
@@ -866,6 +888,7 @@ const RejectionModal = ({ decision, reason, onReasonChange, onConfirm, onCancel,
             onChange={(e) => onReasonChange(e.target.value)}
             placeholder="Reason for rejection (e.g., 'False positive', 'Insufficient evidence', 'Alternative approach preferred')..."
             rows={4}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             disabled={isSubmitting}
           />

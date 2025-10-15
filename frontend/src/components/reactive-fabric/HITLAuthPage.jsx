@@ -34,7 +34,6 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const navigate = useNavigate();
 
@@ -68,7 +67,6 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
 
       // Check if 2FA is required
       if (data.requires_2fa) {
-        setRequiresTwoFactor(true);
         setAccessToken(data.access_token); // Partial token
         setStep('2fa');
       } else {
@@ -172,8 +170,9 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
             )}
 
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>USERNAME</label>
+              <label htmlFor="hitl-username" className={styles.formLabel}>USERNAME</label>
               <input
+                id="hitl-username"
                 type="text"
                 className={styles.formInput}
                 value={username}
@@ -181,13 +180,15 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
                 placeholder="analyst"
                 autoComplete="username"
                 required
+                // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>PASSWORD</label>
+              <label htmlFor="hitl-password" className={styles.formLabel}>PASSWORD</label>
               <input
+                id="hitl-password"
                 type="password"
                 className={styles.formInput}
                 value={password}
@@ -264,8 +265,9 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
             )}
 
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>2FA CODE</label>
+              <label htmlFor="hitl-2fa-code" className={styles.formLabel}>2FA CODE</label>
               <input
+                id="hitl-2fa-code"
                 type="text"
                 className={`${styles.formInput} ${styles.formInputCode}`}
                 value={twoFactorCode}
@@ -275,6 +277,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
                 pattern="[0-9]{6}"
                 autoComplete="one-time-code"
                 required
+                // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
             </div>

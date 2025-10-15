@@ -123,7 +123,7 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
   const [workflowHistory, setWorkflowHistory] = useState([]);
   const [showMetrics, setShowMetrics] = useState(true);
 
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   logger.debug('🎯 MLAutomationTab rendering', { selectedTemplate, activeWorkflow });
 
@@ -329,8 +329,9 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
             {/* Target Input */}
             {selectedTemplate.requiresTarget && (
               <div className="form-group">
-                <label className="form-label">Target</label>
+                <label htmlFor="workflow-target" className="form-label">Target</label>
                 <input
+                  id="workflow-target"
                   type="text"
                   className="form-input"
                   placeholder={selectedTemplate.targetPlaceholder}
@@ -342,51 +343,57 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
             )}
 
             {/* Parameters */}
-            {Object.entries(selectedTemplate.parameters || {}).map(([key, config]) => (
-              <div key={key} className="form-group">
-                <label className="form-label">{config.label}</label>
+            {Object.entries(selectedTemplate.parameters || {}).map(([key, config]) => {
+              const inputId = `workflow-param-${key}`;
+              return (
+                <div key={key} className="form-group">
+                  <label htmlFor={inputId} className="form-label">{config.label}</label>
 
-                {config.type === 'boolean' && (
-                  <label className="checkbox-label">
+                  {config.type === 'boolean' && (
+                    <label className="checkbox-label">
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        checked={parameters[key] || false}
+                        onChange={(e) => handleParameterChange(key, e.target.checked)}
+                        disabled={!!activeWorkflow}
+                      />
+                      <span>Enable</span>
+                    </label>
+                  )}
+
+                  {config.type === 'select' && (
+                    <select
+                      id={inputId}
+                      className="form-select"
+                      value={parameters[key] || config.default}
+                      onChange={(e) => handleParameterChange(key, e.target.value)}
+                      disabled={!!activeWorkflow}
+                    >
+                      {config.options.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {config.type === 'number' && (
                     <input
-                      type="checkbox"
-                      checked={parameters[key] || false}
-                      onChange={(e) => handleParameterChange(key, e.target.checked)}
+                      id={inputId}
+                      type="number"
+                      className="form-input"
+                      min={config.min}
+                      max={config.max}
+                      step={config.step}
+                      value={parameters[key] || config.default}
+                      onChange={(e) => handleParameterChange(key, parseFloat(e.target.value))}
                       disabled={!!activeWorkflow}
                     />
-                    <span>Enable</span>
-                  </label>
-                )}
-
-                {config.type === 'select' && (
-                  <select
-                    className="form-select"
-                    value={parameters[key] || config.default}
-                    onChange={(e) => handleParameterChange(key, e.target.value)}
-                    disabled={!!activeWorkflow}
-                  >
-                    {config.options.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                )}
-
-                {config.type === 'number' && (
-                  <input
-                    type="number"
-                    className="form-input"
-                    min={config.min}
-                    max={config.max}
-                    step={config.step}
-                    value={parameters[key] || config.default}
-                    onChange={(e) => handleParameterChange(key, parseFloat(e.target.value))}
-                    disabled={!!activeWorkflow}
-                  />
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
 
             {/* Start Button */}
             <button

@@ -132,7 +132,7 @@ export const ModulesSection = ({ setCurrentView }) => {
 // Sub-component: Module Card
 const ModuleCard = ({ module, index, onClick, t }) => {
   return (
-    <article
+    <div
       className={`${styles.card} ${styles[module.color]}`}
       onClick={onClick}
       onKeyDown={handleKeyboardClick(onClick)}
@@ -177,7 +177,7 @@ const ModuleCard = ({ module, index, onClick, t }) => {
 
       {/* Hover Effect */}
       <div className={styles.hoverGlow}></div>
-    </article>
+    </div>
   );
 };
 

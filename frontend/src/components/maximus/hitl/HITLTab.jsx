@@ -29,12 +29,11 @@ import {
   fetchDecisionSummary,
   approvePatch,
   rejectPatch,
-  addPatchComment,
 } from './api';
 import { PendingPatchCard } from './PendingPatchCard';
 import { DecisionStatsCards } from './DecisionStatsCards';
 
-export const HITLTab = ({ timeRange = '24h' }) => {
+export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
   const [selectedPatch, setSelectedPatch] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all', 'critical', 'high', 'medium', 'low'
   const [rejectReason, setRejectReason] = useState('');
@@ -329,6 +328,7 @@ export const HITLTab = ({ timeRange = '24h' }) => {
               placeholder="Reason for rejection (e.g., 'Patch introduces breaking changes', 'Security concerns', etc.)"
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:outline-none resize-none mb-4"
               rows={4}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
 

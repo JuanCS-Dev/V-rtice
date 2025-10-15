@@ -79,8 +79,8 @@ const HITLConsole = () => {
   const wsUrl = `${import.meta.env.VITE_HITL_API_URL.replace('http', 'ws')}/hitl/ws`;
   const {
     status: wsStatus,
-    isConnected: wsConnected,
-    clientId: wsClientId,
+    isConnected: _wsConnected,
+    clientId: _wsClientId,
   } = useWebSocket({
     url: wsUrl,
     channels: ['apvs', 'decisions', 'stats'],

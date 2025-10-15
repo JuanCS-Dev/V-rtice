@@ -284,7 +284,8 @@ export const useHITLWebSocket = ({
     return () => {
       disconnect();
     };
-  }, []); // Empty deps - only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run once on mount - connect/disconnect are stable
 
   return {
     // State
