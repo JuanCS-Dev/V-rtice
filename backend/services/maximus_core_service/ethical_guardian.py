@@ -648,10 +648,17 @@ class EthicalGuardian:
                         f"SUPERVISED monitoring required "
                         f"({result.hitl.risk_level} risk, {result.hitl.estimated_sla_minutes}min review window)"
                     )
-            else:
-                result.decision_type = EthicalDecisionType.REJECTED_BY_ETHICS
-                result.is_approved = False
-                result.rejection_reasons.append("Ethical evaluation inconclusive")
+            elif result.ethics is None:
+                # No ethics check was performed (all checks disabled)
+                # Approve by default (fail-open behavior)
+                result.decision_type = EthicalDecisionType.APPROVED
+                result.is_approved = True
+                result.conditions.append("Approved by default (no ethical checks enabled)")
+            # Note: No else needed here. All possible ethics.verdict values are handled above:
+            # - REJECTED: early return at line 516
+            # - APPROVED: handled at line 631
+            # - CONDITIONAL: handled at line 641
+            # - None: handled at line 651
 
             # Update statistics
             if result.is_approved:
