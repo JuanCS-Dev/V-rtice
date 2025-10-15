@@ -629,3 +629,23 @@ def test_repr(modulator_class):
     assert name.capitalize() in repr_str
     assert "Modulator" in repr_str
     assert "CLOSED" in repr_str  # circuit breaker state
+
+
+def test_apply_decay_no_op_when_elapsed_zero(modulator_class):
+    """_apply_decay() does nothing when elapsed time <= 0 (modulator_base.py:312)."""
+    ModClass, name, baseline, decay_rate = modulator_class
+    config = ModulatorConfig(baseline=0.5, decay_rate=0.1)
+    modulator = ModClass(config)
+
+    # Push away from baseline
+    modulator.modulate(delta=0.3, source="test")
+    level_before = modulator._level
+
+    # Manually set _last_update to future time (elapsed will be negative)
+    modulator._last_update = time.time() + 1.0  # 1 second in future
+
+    # Call _apply_decay (elapsed < 0, should trigger early return)
+    modulator._apply_decay()
+
+    # Level should be unchanged (early return triggered at line 312)
+    assert modulator._level == pytest.approx(level_before, abs=1e-6)

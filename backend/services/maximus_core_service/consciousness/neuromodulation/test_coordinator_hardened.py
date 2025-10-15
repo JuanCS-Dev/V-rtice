@@ -680,3 +680,21 @@ def test_max_simultaneous_modulations_enforced():
 
     with pytest.raises(ValueError, match="Too many simultaneous modulations"):
         coordinator.coordinate_modulation(requests)
+
+
+def test_unknown_modulator_skipped():
+    """Unknown modulator in request is logged and skipped (lines 207-208)."""
+    coordinator = NeuromodulationCoordinator()
+
+    # Request with invalid modulator name
+    requests = [
+        ModulationRequest("dopamine", delta=0.1, source="test"),
+        ModulationRequest("invalid_modulator_xyz", delta=0.2, source="test"),
+    ]
+
+    # Should not raise exception, invalid modulator skipped
+    results = coordinator.coordinate_modulation(requests)
+
+    # Only dopamine should be in results
+    assert "dopamine" in results
+    assert "invalid_modulator_xyz" not in results

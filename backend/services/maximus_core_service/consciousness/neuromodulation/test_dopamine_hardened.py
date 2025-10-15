@@ -668,3 +668,22 @@ def test_config_validation_min_max():
     """ModulatorConfig validates min < max."""
     with pytest.raises(AssertionError, match="Min.*must be <"):
         ModulatorConfig(min_level=0.5, max_level=0.3)
+
+
+def test_apply_decay_no_op_when_elapsed_zero():
+    """_apply_decay() does nothing when elapsed time <= 0 (line 314)."""
+    config = ModulatorConfig(baseline=0.5, decay_rate=0.1)
+    modulator = DopamineModulator(config)
+
+    # Push away from baseline
+    modulator.modulate(delta=0.3, source="test")
+    level_before = modulator._level
+
+    # Manually set _last_update to future time (elapsed will be negative)
+    modulator._last_update = time.time() + 1.0  # 1 second in future
+
+    # Call _apply_decay (elapsed < 0, should trigger early return)
+    modulator._apply_decay()
+
+    # Level should be unchanged (early return triggered at line 314)
+    assert modulator._level == pytest.approx(level_before, abs=1e-6)
