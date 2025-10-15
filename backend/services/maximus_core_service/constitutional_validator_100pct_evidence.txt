@@ -1,0 +1,692 @@
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.11.13, pytest-7.4.3, pluggy-1.6.0 -- /home/juan/.pyenv/versions/3.11.13/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /home/juan/vertice-dev/backend/services/maximus_core_service
+configfile: pytest.ini
+plugins: asyncio-0.21.1, locust-2.41.6, mock-3.12.0, cov-4.1.0, anyio-3.7.1, respx-0.22.0, httpx-0.35.0
+asyncio: mode=Mode.STRICT
+[1mcollecting ... [0mcollected 48 items
+
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_approves_decision_promoting_flourishing [32mPASSED[0m[33m [  2%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_blocks_decision_causing_permanent_harm [32mPASSED[0m[33m [  4%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_blocks_decision_causing_severe_harm [32mPASSED[0m[33m [  6%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_blocks_dignity_violation [32mPASSED[0m[33m [  8%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_allows_means_when_also_end [32mPASSED[0m[33m [ 10%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_blocks_autonomy_reduction_without_consent [32mPASSED[0m[33m [ 12%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_allows_autonomy_reduction_with_consent [32mPASSED[0m[33m [ 14%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_blocks_permanent_potential_damage [32mPASSED[0m[33m [ 16%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_lei_zero_multiple_violations_all_reported [32mPASSED[0m[33m [ 18%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_lei_zero_harm_without_critical_type [32mPASSED[0m[33m [ 20%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiZero::test_lei_zero_damages_potential_not_permanent [32mPASSED[0m[33m [ 22%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_blocks_utilitarian_sacrifice_one_for_many [32mPASSED[0m[33m [ 25%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_blocks_trolley_problem_vulnerable [32mPASSED[0m[33m [ 27%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_blocks_healthcare_triage_abandoning_vulnerable [32mPASSED[0m[33m [ 29%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_blocks_cost_benefit_abandoning_vulnerable [32mPASSED[0m[33m [ 31%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_blocks_maximize_utility_abandoning_minority [32mPASSED[0m[33m [ 33%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_monitors_utilitarian_without_vulnerable [32mPASSED[0m[33m [ 35%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_lei_i_evidence_includes_counts [32mPASSED[0m[33m [ 37%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorLeiI::test_lei_i_detects_various_utilitarian_patterns [32mPASSED[0m[33m [ 39%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorMetrics::test_metrics_initial_state [32mPASSED[0m[33m [ 41%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorMetrics::test_metrics_after_validations [32mPASSED[0m[33m [ 43%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorMetrics::test_metrics_lei_i_tracking [32mPASSED[0m[33m [ 45%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorMetrics::test_metrics_reset [32mPASSED[0m[33m [ 47%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorMetrics::test_violation_recorded_in_internal_lists [32mPASSED[0m[33m [ 50%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorMetrics::test_lei_i_violation_recorded_in_lei_i_list [32mPASSED[0m[33m [ 52%][0m
+tests/test_constitutional_validator_100pct.py::TestViolationReport::test_is_blocking_high_level [32mPASSED[0m[33m [ 54%][0m
+tests/test_constitutional_validator_100pct.py::TestViolationReport::test_is_blocking_critical_level [32mPASSED[0m[33m [ 56%][0m
+tests/test_constitutional_validator_100pct.py::TestViolationReport::test_not_blocking_medium_level [32mPASSED[0m[33m [ 58%][0m
+tests/test_constitutional_validator_100pct.py::TestViolationReport::test_not_blocking_low_level [32mPASSED[0m[33m [ 60%][0m
+tests/test_constitutional_validator_100pct.py::TestViolationReport::test_not_blocking_none_level [32mPASSED[0m[33m [ 62%][0m
+tests/test_constitutional_validator_100pct.py::TestViolationReport::test_requires_emergency_stop_critical [32mPASSED[0m[33m [ 64%][0m
+tests/test_constitutional_validator_100pct.py::TestViolationReport::test_not_requires_emergency_stop_high [32mPASSED[0m[33m [ 66%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalViolationException::test_exception_created_with_report [32mPASSED[0m[33m [ 68%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalViolationException::test_exception_raised_and_caught [32mPASSED[0m[33m [ 70%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalViolationException::test_exception_message_contains_evidence [32mPASSED[0m[33m [ 72%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorEdgeCases::test_empty_action [32mPASSED[0m[33m [ 75%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorEdgeCases::test_none_context [32mPASSED[0m[33m [ 77%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorEdgeCases::test_missing_context_fields [32mPASSED[0m[33m [ 79%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorEdgeCases::test_string_values_in_action [32mPASSED[0m[33m [ 81%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorEdgeCases::test_non_string_action_fields [32mPASSED[0m[33m [ 83%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorEdgeCases::test_affected_dict_missing_keys [32mPASSED[0m[33m [ 85%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorEdgeCases::test_multiple_validations_accumulate [32mPASSED[0m[33m [ 87%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorIntegrationScenarios::test_mip_decision_flow [32mPASSED[0m[33m [ 89%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorIntegrationScenarios::test_cbr_precedent_application [32mPASSED[0m[33m [ 91%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorIntegrationScenarios::test_emergency_triage_scenario [32mPASSED[0m[33m [ 93%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorIntegrationScenarios::test_resource_allocation_scenario [32mPASSED[0m[33m [ 95%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorPerformance::test_validates_quickly [32mPASSED[0m[33m [ 97%][0m
+tests/test_constitutional_validator_100pct.py::TestConstitutionalValidatorPerformance::test_handles_high_volume [32mPASSED[0m[33m [100%][0m/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/inorout.py:521: CoverageWarning: Module justice/constitutional_validator was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/fairness/example_usage.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: arc (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/fairness/mitigation.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/fairness/monitor.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/aggregation.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/communication.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/example_usage.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/fl_client.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/fl_coordinator.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/model_adapters.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/federated_learning/storage.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/gemini_client.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/generate_validation_report.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/audit_infrastructure.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/ethics_review_board.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/example_usage.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/governance_engine.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/guardian/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/guardian/article_ii_guardian.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/guardian/article_iii_guardian.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/guardian/article_iv_guardian.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/guardian/article_v_guardian.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/guardian/base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/guardian/coordinator.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/hitl_interface.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/policies.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance/policy_engine.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance_production_server.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance_sse/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance_sse/api_routes.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance_sse/event_broadcaster.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance_sse/sse_server.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/governance_sse/standalone_server.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/audit_trail.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/decision_framework.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/decision_queue.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/escalation_manager.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/example_usage.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/operator_interface.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/hitl/risk_assessor.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/immune_enhancement_tools.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/cbr_engine.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/constitutional_validator.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/embeddings.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/emergency_circuit_breaker.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/precedent_database.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/validators.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/main.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/memory_system.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/mip_client/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/mip_client/client.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/monitoring/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/monitoring/prometheus_exporter.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/api.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/arbiter/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/arbiter/alternatives.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/arbiter/decision.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/config.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/frameworks/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/frameworks/base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/frameworks/kantian.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/frameworks/principialism.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/frameworks/utilitarian.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/frameworks/virtue.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/infrastructure/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/infrastructure/audit_trail.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/infrastructure/hitl_queue.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/infrastructure/knowledge_base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/infrastructure/metrics.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/models/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/models/action_plan.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/models/audit.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/models/hitl.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/models/knowledge.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/models/verdict.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/resolution/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/resolution/conflict_resolver.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/resolution/rules.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/neuromodulation/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/neuromodulation/acetylcholine_system.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/neuromodulation/dopamine_system.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/neuromodulation/neuromodulation_controller.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/neuromodulation/norepinephrine_system.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/neuromodulation/serotonin_system.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/observability/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/observability/logger.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/observability/metrics.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/offensive_arsenal_tools.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/batch_predictor.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/benchmark_suite.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/distributed_trainer.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/gpu_trainer.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/inference_engine.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/onnx_exporter.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/profiler.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/pruner.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/performance/quantizer.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/hpc_network.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/layer1_sensory.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/layer2_behavioral.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/layer3_operational.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/layer4_tactical.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/layer5_strategic.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/privacy/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/privacy/base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/privacy/dp_aggregator.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/privacy/dp_mechanisms.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/privacy/example_usage.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/privacy/privacy_accountant.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/self_reflection.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/skill_learning/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/skill_learning/skill_learning_controller.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/tool_orchestrator.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/continuous_training.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/data_collection.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/data_preprocessor.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/data_validator.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/dataset_builder.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/evaluator.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/hyperparameter_tuner.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/layer_trainer.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/model_registry.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/training/train_layer1_vae.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/validate_regra_de_ouro.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/version.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/__init__.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/base.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/counterfactual.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/engine.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/example_usage.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/feature_tracker.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/lime_cybersec.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+/home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/report_core.py:113: CoverageWarning: Couldn't parse '/home/juan/vertice-dev/backend/services/maximus_core_service/xai/shap_cybersec.py': Couldn't use data file '/home/juan/vertice-dev/backend/services/maximus_core_service/.coverage': no such table: tracer (couldnt-parse); see https://coverage.readthedocs.io/en/7.10.7/messages.html#warning-couldnt-parse
+  coverage._warn(msg, slug="couldnt-parse")
+
+
+[33m=============================== warnings summary ===============================[0m
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] markers=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] console_output_style=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] filterwarnings=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli_format=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli_level=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli_date_format=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] timeout=' in config file pyproject.toml
+    warn(
+
+justice/precedent_database.py:46
+  /home/juan/vertice-dev/backend/services/maximus_core_service/justice/precedent_database.py:46: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform linux, python 3.11.13-final-0 ----------
+Name                                                               Stmts   Miss Branch BrPart   Cover   Missing
+---------------------------------------------------------------------------------------------------------------
+advanced_tools.py                                                     42     42     14      0   0.00%   14-151
+agent_templates.py                                                    20     20      6      0   0.00%   13-107
+attention_system/__init__.py                                           3      3      0      0   0.00%   18-27
+attention_system/attention_core.py                                   255    255     78      0   0.00%   11-652
+attention_system/salience_scorer.py                                  143    143     28      0   0.00%   7-338
+autonomic_core/__init__.py                                             2      2      0      0   0.00%   17-19
+autonomic_core/analyze/__init__.py                                     5      5      0      0   0.00%   11-16
+autonomic_core/analyze/anomaly_detector.py                            28     28      0      0   0.00%   3-61
+autonomic_core/analyze/degradation_detector.py                        25     25      6      0   0.00%   3-62
+autonomic_core/analyze/demand_forecaster.py                           63     63      6      0   0.00%   12-216
+autonomic_core/analyze/failure_predictor.py                           22     22      6      0   0.00%   3-52
+autonomic_core/execute/__init__.py                                     7      7      0      0   0.00%   14-21
+autonomic_core/execute/cache_actuator.py                             127    127     36      0   0.00%   3-325
+autonomic_core/execute/database_actuator.py                          116    116     20      0   0.00%   3-368
+autonomic_core/execute/docker_actuator.py                            113    113     32      0   0.00%   3-274
+autonomic_core/execute/kubernetes_actuator.py                         29     29      2      0   0.00%   3-55
+autonomic_core/execute/loadbalancer_actuator.py                      155    155     40      0   0.00%   3-389
+autonomic_core/execute/safety_manager.py                              32     32     10      0   0.00%   3-49
+autonomic_core/hcl_orchestrator.py                                   236    236     66      0   0.00%   7-508
+autonomic_core/homeostatic_control.py                                 38     38      4      0   0.00%   12-103
+autonomic_core/knowledge_base/__init__.py                              3      3      0      0   0.00%   8-11
+autonomic_core/knowledge_base/database_schema.py                      10     10      0      0   0.00%   3-58
+autonomic_core/knowledge_base/decision_api.py                         27     27      4      0   0.00%   3-62
+autonomic_core/monitor/__init__.py                                     4      4      0      0   0.00%   8-18
+autonomic_core/monitor/kafka_streamer.py                              62     62     10      0   0.00%   7-124
+autonomic_core/monitor/sensor_definitions.py                         174    174     12      0   0.00%   12-370
+autonomic_core/monitor/system_monitor.py                             109    109     22      0   0.00%   8-254
+autonomic_core/plan/__init__.py                                        4      4      0      0   0.00%   9-13
+autonomic_core/plan/fuzzy_controller.py                               52     52     12      0   0.00%   3-98
+autonomic_core/plan/mode_definitions.py                                3      3      0      0   0.00%   3-61
+autonomic_core/plan/rl_agent.py                                       25     25      4      0   0.00%   3-62
+autonomic_core/resource_analyzer.py                                   35     35      4      0   0.00%   12-113
+autonomic_core/resource_executor.py                                   45     45      6      0   0.00%   13-105
+autonomic_core/resource_planner.py                                    22     22      2      0   0.00%   13-79
+autonomic_core/system_monitor.py                                      27     27      0      0   0.00%   12-75
+compassion/__init__.py                                                 3      3      0      0   0.00%   16-19
+compassion/confidence_tracker.py                                      55     55     20      0   0.00%   19-179
+compassion/contradiction_detector.py                                  53     53     12      0   0.00%   16-182
+compassion/sally_anne_dataset.py                                      16     16      6      0   0.00%   16-252
+compassion/social_memory.py                                          142    142     28      0   0.00%   22-470
+compassion/social_memory_sqlite.py                                   155    155     28      0   0.00%   16-362
+compassion/tom_benchmark.py                                           52     52     10      0   0.00%   15-173
+compassion/tom_engine.py                                             135    135     26      0   0.00%   18-384
+compliance/__init__.py                                                10     10      0      0   0.00%   62-124
+compliance/base.py                                                   322    322     60      0   0.00%   19-524
+compliance/certifications.py                                         199    199     80      0   0.00%   17-554
+compliance/compliance_engine.py                                      196    196     46      0   0.00%   21-654
+compliance/evidence_collector.py                                     220    220     48      0   0.00%   21-662
+compliance/example_usage.py                                          199    199     32      0   0.00%   17-386
+compliance/gap_analyzer.py                                           151    151     66      0   0.00%   21-535
+compliance/monitoring.py                                             229    229     96      0   0.00%   21-586
+compliance/regulations.py                                             15     15      2      0   0.00%   22-961
+confidence_scoring.py                                                 18     18      6      0   0.00%   13-59
+consciousness/__init__.py                                              4      4      0      0   0.00%   76-83
+consciousness/api.py                                                 319    319     60      0   0.00%   19-800
+consciousness/autobiographical_narrative.py                           32     32      6      0   0.00%   9-56
+consciousness/biomimetic_safety_bridge.py                            164    164     34      0   0.00%   36-488
+consciousness/episodic_memory/__init__.py                              4      4      0      0   0.00%   6-12
+consciousness/episodic_memory/core.py                                 57     57      8      0   0.00%   10-164
+consciousness/episodic_memory/event.py                                59     59      6      0   0.00%   5-131
+consciousness/episodic_memory/memory_buffer.py                        97     97     36      0   0.00%   5-245
+consciousness/esgt/__init__.py                                         4      4      0      0   0.00%   74-91
+consciousness/esgt/arousal_integration.py                             82     82     12      0   0.00%   49-309
+consciousness/esgt/coordinator.py                                    376    376    100      0   0.00%   73-990
+consciousness/esgt/coordinator_old.py                                247    247     60      0   0.00%   73-640
+consciousness/esgt/kuramoto.py                                       166    166     46      0   0.00%   56-491
+consciousness/esgt/spm/__init__.py                                     5      5      0      0   0.00%   36-60
+consciousness/esgt/spm/base.py                                       121    121     26      0   0.00%   34-401
+consciousness/esgt/spm/metrics_monitor.py                            191    191     56      0   0.00%   51-499
+consciousness/esgt/spm/salience_detector.py                          187    187     60      0   0.00%   51-524
+consciousness/esgt/spm/simple.py                                     133    133     40      0   0.00%   28-396
+consciousness/integration/__init__.py                                  5      5      0      0   0.00%   8-13
+consciousness/integration/esgt_subscriber.py                          36     36     10      0   0.00%   7-91
+consciousness/integration/mcea_client.py                              38     38      4      0   0.00%   7-109
+consciousness/integration/mea_bridge.py                               40     40      0      0   0.00%   8-117
+consciousness/integration/mmei_client.py                              38     38      4      0   0.00%   7-107
+consciousness/integration/sensory_esgt_bridge.py                      86     86     20      0   0.00%   47-426
+consciousness/integration_example.py                                 314    314     36      0   0.00%   66-689
+consciousness/lrr/__init__.py                                          6      6      0      0   0.00%   29-74
+consciousness/lrr/contradiction_detector.py                          154    154     48      0   0.00%   9-346
+consciousness/lrr/introspection_engine.py                             64     64     18      0   0.00%   8-126
+consciousness/lrr/meta_monitor.py                                    107    107     34      0   0.00%   8-222
+consciousness/lrr/recursive_reasoner.py                              400    400    132      0   0.00%   31-996
+consciousness/mcea/__init__.py                                         3      3      0      0   0.00%   91-103
+consciousness/mcea/controller.py                                     295    295     78      0   0.00%   93-842
+consciousness/mcea/controller_old.py                                 215    215     50      0   0.00%   93-607
+consciousness/mcea/stress.py                                         244    244     72      0   0.00%   102-668
+consciousness/mea/__init__.py                                          5      5      0      0   0.00%   7-12
+consciousness/mea/attention_schema.py                                103    103     18      0   0.00%   16-237
+consciousness/mea/boundary_detector.py                                50     50     10      0   0.00%   9-108
+consciousness/mea/prediction_validator.py                             38     38      8      0   0.00%   9-100
+consciousness/mea/self_model.py                                       57     57      6      0   0.00%   9-118
+consciousness/metacognition/__init__.py                                2      2      0      0   0.00%   3-5
+consciousness/metacognition/monitor.py                                45     45     10      0   0.00%   18-159
+consciousness/mmei/__init__.py                                         3      3      0      0   0.00%   59-72
+consciousness/mmei/goals.py                                          198    198     50      0   0.00%   89-610
+consciousness/mmei/monitor.py                                        303    303     74      0   0.00%   77-921
+consciousness/mmei/monitor_old.py                                    202    202     50      0   0.00%   77-626
+consciousness/neuromodulation/__init__.py                              0      0      0      0 100.00%
+consciousness/neuromodulation/acetylcholine_hardened.py                9      9      2      0   0.00%   35-84
+consciousness/neuromodulation/coordinator_hardened.py                122    122     28      0   0.00%   32-405
+consciousness/neuromodulation/dopamine_hardened.py                   108    108     14      0   0.00%   32-376
+consciousness/neuromodulation/modulator_base.py                      114    114     14      0   0.00%   31-368
+consciousness/neuromodulation/norepinephrine_hardened.py               9      9      2      0   0.00%   35-84
+consciousness/neuromodulation/serotonin_hardened.py                    9      9      2      0   0.00%   35-84
+consciousness/predictive_coding/__init__.py                            0      0      0      0 100.00%
+consciousness/predictive_coding/hierarchy_hardened.py                180    180     42      0   0.00%   38-457
+consciousness/predictive_coding/layer1_sensory_hardened.py            28     28      2      0   0.00%   28-159
+consciousness/predictive_coding/layer2_behavioral_hardened.py         30     30      2      0   0.00%   28-165
+consciousness/predictive_coding/layer3_operational_hardened.py        40     40      8      0   0.00%   28-176
+consciousness/predictive_coding/layer4_tactical_hardened.py           53     53     14      0   0.00%   28-223
+consciousness/predictive_coding/layer5_strategic_hardened.py          69     69     12      0   0.00%   28-306
+consciousness/predictive_coding/layer_base_hardened.py               131    131     18      0   0.00%   36-353
+consciousness/prefrontal_cortex.py                                   104    104     28      0   0.00%   22-387
+consciousness/prometheus_metrics.py                                   78     78     18      0   0.00%   27-278
+consciousness/reactive_fabric/__init__.py                              4      4      0      0   0.00%   14-18
+consciousness/reactive_fabric/collectors/__init__.py                   3      3      0      0   0.00%   9-12
+consciousness/reactive_fabric/collectors/event_collector.py          152    152     34      0   0.00%   20-404
+consciousness/reactive_fabric/collectors/metrics_collector.py        146    146     34      0   0.00%   21-305
+consciousness/reactive_fabric/orchestration/__init__.py                2      2      0      0   0.00%   9-11
+consciousness/reactive_fabric/orchestration/data_orchestrator.py     180    180     64      0   0.00%   24-556
+consciousness/safety.py                                              785    785    260      0   0.00%   58-2117
+consciousness/sandboxing/__init__.py                                 111    111     18      0   0.00%   5-239
+consciousness/sandboxing/kill_switch.py                               95     95     12      0   0.00%   5-256
+consciousness/sandboxing/resource_limiter.py                          37     37      6      0   0.00%   5-104
+consciousness/system.py                                              177    177     38      0   0.00%   22-428
+consciousness/temporal_binding.py                                     27     27      6      0   0.00%   9-68
+consciousness/tig/__init__.py                                          3      3      0      0   0.00%   77-90
+consciousness/tig/fabric.py                                          454    454    164      0   0.00%   30-1117
+consciousness/tig/fabric_old.py                                      258    258     92      0   0.00%   30-675
+consciousness/tig/sync.py                                            227    227     74      0   0.00%   43-611
+consciousness/validate_tig_metrics.py                                 38     38      4      0   0.00%   6-55
+consciousness/validation/__init__.py                                   4      4      0      0   0.00%   49-60
+consciousness/validation/coherence.py                                147    147     42      0   0.00%   46-405
+consciousness/validation/metacognition.py                             56     56     14      0   0.00%   3-99
+consciousness/validation/phi_proxies.py                              152    152     42      0   0.00%   64-488
+distributed_organism_tools.py                                         55     55      8      0   0.00%   9-156
+enhanced_cognition_tools.py                                           67     67     10      0   0.00%   9-244
+ethical_guardian.py                                                  454    454    118      0   0.00%   17-1229
+ethical_tool_wrapper.py                                              109    109     26      0   0.00%   19-332
+ethics/__init__.py                                                     8      8      0      0   0.00%   28-62
+ethics/base.py                                                       108    108     40      0   0.00%   7-294
+ethics/config.py                                                      19     19      0      0   0.00%   7-220
+ethics/consequentialist_engine.py                                    128    128     56      0   0.00%   12-392
+ethics/example_usage.py                                               98     98      6      0   0.00%   7-216
+ethics/integration_engine.py                                         156    156     56      0   0.00%   15-447
+ethics/kantian_checker.py                                            135    135     76      0   0.00%   12-423
+ethics/principialism.py                                              147    147     80      0   0.00%   13-376
+ethics/quick_test.py                                                 113    113     10      0   0.00%   8-224
+ethics/virtue_ethics.py                                              142    142     84      0   0.00%   13-391
+fairness/__init__.py                                                   8      8      0      0   0.00%   23-32
+fairness/base.py                                                      89     89     14      0   0.00%   7-192
+fairness/bias_detector.py                                            193    193     64      0   0.00%   14-580
+fairness/constraints.py                                              144    144     28      0   0.00%   7-454
+fairness/example_usage.py                                            200    200     36      0   0.00%   7-375
+fairness/mitigation.py                                               225    225     50      0   0.00%   13-692
+fairness/monitor.py                                                  195    195     72      0   0.00%   14-577
+federated_learning/__init__.py                                         9      9      0      0   0.00%   46-121
+federated_learning/aggregation.py                                    152    152     40      0   0.00%   14-441
+federated_learning/base.py                                           152    152     38      0   0.00%   11-363
+federated_learning/communication.py                                   90     90     16      0   0.00%   14-380
+federated_learning/example_usage.py                                  148    148     16      0   0.00%   18-356
+federated_learning/fl_client.py                                      108    108     18      0   0.00%   15-382
+federated_learning/fl_coordinator.py                                 173    173     52      0   0.00%   15-499
+federated_learning/model_adapters.py                                  91     91     28      0   0.00%   19-429
+federated_learning/storage.py                                        180    180     52      0   0.00%   14-549
+gemini_client.py                                                     103    103     30      0   0.00%   15-361
+generate_validation_report.py                                        164    164     20      0   0.00%   13-273
+governance/__init__.py                                                 8      8      0      0   0.00%   17-64
+governance/audit_infrastructure.py                                   104    104     20      0   0.00%   13-537
+governance/base.py                                                   272    272     14      0   0.00%   13-561
+governance/ethics_review_board.py                                    148    148     44      0   0.00%   14-602
+governance/example_usage.py                                           86     86      6      0   0.00%   15-228
+governance/governance_engine.py                                      109    109     18      0   0.00%   12-276
+governance/guardian/__init__.py                                        7      7      0      0   0.00%   15-31
+governance/guardian/article_ii_guardian.py                           171    171     92      0   0.00%   16-561
+governance/guardian/article_iii_guardian.py                          186    186     88      0   0.00%   15-602
+governance/guardian/article_iv_guardian.py                           193    193     88      0   0.00%   15-652
+governance/guardian/article_v_guardian.py                            208    208     98      0   0.00%   15-697
+governance/guardian/base.py                                          211    211     30      0   0.00%   17-613
+governance/guardian/coordinator.py                                   214    214     64      0   0.00%   14-661
+governance/hitl_interface.py                                          65     65     26      0   0.00%   12-241
+governance/policies.py                                                64     64      6      0   0.00%   17-418
+governance/policy_engine.py                                          173    173    150      0   0.00%   17-465
+governance_production_server.py                                       63     63      2      0   0.00%   13-171
+governance_sse/__init__.py                                             4      4      0      0   0.00%   25-29
+governance_sse/api_routes.py                                         185    185     18      0   0.00%   21-616
+governance_sse/event_broadcaster.py                                  102    102     26      0   0.00%   15-380
+governance_sse/sse_server.py                                         168    168     32      0   0.00%   23-537
+governance_sse/standalone_server.py                                   37     37      0      0   0.00%   12-137
+hitl/__init__.py                                                      10     10      0      0   0.00%   74-123
+hitl/audit_trail.py                                                  184    184     50      0   0.00%   24-569
+hitl/base.py                                                         226    226     34      0   0.00%   11-513
+hitl/decision_framework.py                                           173    173     38      0   0.00%   20-555
+hitl/decision_queue.py                                               211    211     54      0   0.00%   20-550
+hitl/escalation_manager.py                                           180    180     48      0   0.00%   22-503
+hitl/example_usage.py                                                191    191      8      0   0.00%   17-427
+hitl/operator_interface.py                                           202    202     56      0   0.00%   22-585
+hitl/risk_assessor.py                                                234    234     82      0   0.00%   22-565
+immune_enhancement_tools.py                                           78     78     12      0   0.00%   9-236
+justice/__init__.py                                                    5      0      0      0 100.00%
+justice/cbr_engine.py                                                 44     44     12      0   0.00%   24-184
+justice/constitutional_validator.py                                  122      0     36      0 100.00%
+justice/embeddings.py                                                 16      6      0      0  62.50%   49, 61-69, 84-95
+justice/emergency_circuit_breaker.py                                  84     69      8      0  16.30%   58-61, 72-99, 110-116, 130-147, 162-188, 202-229, 242-259, 270-272, 292-299
+justice/precedent_database.py                                         65     35     10      0  40.00%   106-112, 124-136, 150-157, 183-216
+justice/validators.py                                                 66     66     22      0   0.00%   23-214
+main.py                                                              107    107     28      0   0.00%   12-299
+memory_system.py                                                      25     25      2      0   0.00%   14-111
+mip_client/__init__.py                                                 3      3      0      0   0.00%   10-13
+mip_client/client.py                                                 118    118     16      0   0.00%   10-319
+monitoring/__init__.py                                                 5      5      0      0   0.00%   20-28
+monitoring/prometheus_exporter.py                                     76     76     12      0   0.00%   17-368
+motor_integridade_processual/__init__.py                               4      4      0      0   0.00%   26-30
+motor_integridade_processual/api.py                                  287    287     38      0   0.00%   28-787
+motor_integridade_processual/arbiter/__init__.py                       3      3      0      0   0.00%   3-6
+motor_integridade_processual/arbiter/alternatives.py                  80     80     38      0   0.00%   8-211
+motor_integridade_processual/arbiter/decision.py                      24     24      8      0   0.00%   8-141
+motor_integridade_processual/config.py                                33     33      2      0   0.00%   10-107
+motor_integridade_processual/frameworks/__init__.py                    6      6      0      0   0.00%   13-23
+motor_integridade_processual/frameworks/base.py                       18     18      4      0   0.00%   10-115
+motor_integridade_processual/frameworks/kantian.py                    65     65     34      0   0.00%   15-272
+motor_integridade_processual/frameworks/principialism.py              86     86     40      0   0.00%   16-292
+motor_integridade_processual/frameworks/utilitarian.py                46     46     14      0   0.00%   15-187
+motor_integridade_processual/frameworks/virtue.py                     57     57     22      0   0.00%   17-216
+motor_integridade_processual/infrastructure/__init__.py                5      5      0      0   0.00%   3-8
+motor_integridade_processual/infrastructure/audit_trail.py            11     11      0      0   0.00%   3-26
+motor_integridade_processual/infrastructure/hitl_queue.py             12     12      2      0   0.00%   3-23
+motor_integridade_processual/infrastructure/knowledge_base.py         14     14      4      0   0.00%   3-26
+motor_integridade_processual/infrastructure/metrics.py                 9      9      0      0   0.00%   3-24
+motor_integridade_processual/models/__init__.py                        2      2      0      0   0.00%   12-14
+motor_integridade_processual/models/action_plan.py                   186    186     62      0   0.00%   18-422
+motor_integridade_processual/models/audit.py                           0      0      0      0 100.00%
+motor_integridade_processual/models/hitl.py                            0      0      0      0 100.00%
+motor_integridade_processual/models/knowledge.py                       0      0      0      0 100.00%
+motor_integridade_processual/models/verdict.py                       122    122     18      0   0.00%   16-292
+motor_integridade_processual/resolution/__init__.py                    3      3      0      0   0.00%   3-6
+motor_integridade_processual/resolution/conflict_resolver.py          80     80     34      0   0.00%   10-299
+motor_integridade_processual/resolution/rules.py                      44     44     12      0   0.00%   9-123
+neuromodulation/__init__.py                                            7      7      0      0   0.00%   15-29
+neuromodulation/acetylcholine_system.py                               49     49      2      0   0.00%   12-168
+neuromodulation/dopamine_system.py                                    60     60      4      0   0.00%   12-197
+neuromodulation/neuromodulation_controller.py                         73     73      0      0   0.00%   9-272
+neuromodulation/norepinephrine_system.py                              49     49      4      0   0.00%   12-158
+neuromodulation/serotonin_system.py                                   49     49      2      0   0.00%   12-164
+observability/__init__.py                                              3      3      0      0   0.00%   3-6
+observability/logger.py                                               37     37      4      0   0.00%   18-125
+observability/metrics.py                                              35     35     12      0   0.00%   17-138
+offensive_arsenal_tools.py                                            36     36     14      0   0.00%   14-153
+performance/__init__.py                                               13     13      0      0   0.00%   18-65
+performance/batch_predictor.py                                       245    245     64      0   0.00%   17-550
+performance/benchmark_suite.py                                       223    223     40      0   0.00%   17-608
+performance/distributed_trainer.py                                   171    171     56      0   0.00%   17-492
+performance/gpu_trainer.py                                           195    195     62      0   0.00%   17-484
+performance/inference_engine.py                                      240    240     66      0   0.00%   18-610
+performance/onnx_exporter.py                                         223    223     46      0   0.00%   17-547
+performance/profiler.py                                              199    199     44      0   0.00%   17-488
+performance/pruner.py                                                198    198     58      0   0.00%   17-558
+performance/quantizer.py                                             147    147     32      0   0.00%   15-430
+predictive_coding/__init__.py                                          7      7      0      0   0.00%   79-86
+predictive_coding/hpc_network.py                                     103    103     42      0   0.00%   16-268
+predictive_coding/layer1_sensory.py                                   95     95      8      0   0.00%   12-343
+predictive_coding/layer2_behavioral.py                               130    130     20      0   0.00%   12-356
+predictive_coding/layer3_operational.py                              143    143     20      0   0.00%   12-491
+predictive_coding/layer4_tactical.py                                  80     80      0      0   0.00%   12-310
+predictive_coding/layer5_strategic.py                                104    104      2      0   0.00%   12-419
+privacy/__init__.py                                                    7      7      0      0   0.00%   34-77
+privacy/base.py                                                      143    143     44      0   0.00%   18-445
+privacy/dp_aggregator.py                                             144    144     50      0   0.00%   15-496
+privacy/dp_mechanisms.py                                              92     92     26      0   0.00%   16-410
+privacy/example_usage.py                                             140    140     16      0   0.00%   20-308
+privacy/privacy_accountant.py                                        118    118     24      0   0.00%   22-493
+self_reflection.py                                                    18     18      4      0   0.00%   14-73
+skill_learning/__init__.py                                             3      3      0      0   0.00%   21-31
+skill_learning/skill_learning_controller.py                           94     94      4      0   0.00%   9-296
+tool_orchestrator.py                                                  43     43     14      0   0.00%   13-163
+training/__init__.py                                                   8      8      0      0   0.00%   17-47
+training/continuous_training.py                                      109    109     20      0   0.00%   16-311
+training/data_collection.py                                          232    232     78      0   0.00%   15-547
+training/data_preprocessor.py                                        239    239     74      0   0.00%   16-680
+training/data_validator.py                                           210    210     56      0   0.00%   17-580
+training/dataset_builder.py                                          179    179     30      0   0.00%   15-537
+training/evaluator.py                                                209    209     62      0   0.00%   17-508
+training/hyperparameter_tuner.py                                     148    148     22      0   0.00%   18-414
+training/layer_trainer.py                                            226    226     70      0   0.00%   18-546
+training/model_registry.py                                           170    170     66      0   0.00%   16-417
+training/train_layer1_vae.py                                         123    123     18      0   0.00%   20-399
+validate_regra_de_ouro.py                                            253    253     76      0   0.00%   16-476
+version.py                                                            11     11      0      0   0.00%   8-26
+xai/__init__.py                                                        9      9      0      0   0.00%   22-38
+xai/base.py                                                          115    115     22      0   0.00%   7-342
+xai/counterfactual.py                                                240    240     92      0   0.00%   14-785
+xai/engine.py                                                        167    167     50      0   0.00%   14-468
+xai/example_usage.py                                                 198    198     22      0   0.00%   7-410
+xai/feature_tracker.py                                               135    135     54      0   0.00%   13-372
+xai/lime_cybersec.py                                                 225    225     80      0   0.00%   14-684
+xai/shap_cybersec.py                                                 222    222     84      0   0.00%   15-652
+---------------------------------------------------------------------------------------------------------------
+TOTAL                                                              31381  31199   7974      0   0.55%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+
+[31m[1mFAIL Required test coverage of 70% not reached. Total coverage: 0.00%
+[0m[33m======================= [32m48 passed[0m, [33m[1m9 warnings[0m[33m in 14.08s[0m[33m ========================[0m
