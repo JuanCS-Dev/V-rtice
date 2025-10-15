@@ -104,25 +104,39 @@ class FibrinMeshResult:
 class FibrinMeshMetrics:
     """Prometheus metrics for fibrin mesh"""
 
+    # Class-level singleton metrics
+    _deployments_total = None
+    _active_meshes = None
+    _effectiveness = None
+    _deployment_duration = None
+
     def __init__(self):
-        self.deployments_total = Counter(
-            "fibrin_mesh_deployments_total",
-            "Total fibrin mesh deployments",
-            ["strength", "status"],
-        )
-        self.active_meshes = Gauge(
-            "fibrin_mesh_active", "Currently active fibrin meshes"
-        )
-        self.effectiveness = Histogram(
-            "fibrin_mesh_effectiveness",
-            "Mesh containment effectiveness",
-            buckets=[0.5, 0.7, 0.9, 0.95, 0.99, 1.0],
-        )
-        self.deployment_duration = Histogram(
-            "fibrin_mesh_deployment_seconds",
-            "Time to deploy fibrin mesh",
-            buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0],
-        )
+        # Initialize metrics only once at class level
+        if FibrinMeshMetrics._deployments_total is None:
+            FibrinMeshMetrics._deployments_total = Counter(
+                "fibrin_mesh_deployments_total",
+                "Total fibrin mesh deployments",
+                ["strength", "status"],
+            )
+            FibrinMeshMetrics._active_meshes = Gauge(
+                "fibrin_mesh_active", "Currently active fibrin meshes"
+            )
+            FibrinMeshMetrics._effectiveness = Histogram(
+                "fibrin_mesh_effectiveness",
+                "Mesh containment effectiveness",
+                buckets=[0.5, 0.7, 0.9, 0.95, 0.99, 1.0],
+            )
+            FibrinMeshMetrics._deployment_duration = Histogram(
+                "fibrin_mesh_deployment_seconds",
+                "Time to deploy fibrin mesh",
+                buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0],
+            )
+
+        # Always assign instance attributes from class-level
+        self.deployments_total = FibrinMeshMetrics._deployments_total
+        self.active_meshes = FibrinMeshMetrics._active_meshes
+        self.effectiveness = FibrinMeshMetrics._effectiveness
+        self.deployment_duration = FibrinMeshMetrics._deployment_duration
 
 
 class FibrinMeshContainment:

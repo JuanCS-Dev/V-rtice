@@ -109,27 +109,41 @@ class CascadeResult:
 class CascadeMetrics:
     """Prometheus metrics for cascade"""
 
+    # Class-level singleton metrics
+    _cascades_total = None
+    _active_cascades = None
+    _cascade_duration = None
+    _phase_duration = None
+
     def __init__(self):
-        self.cascades_total = Counter(
-            "coagulation_cascades_total",
-            "Total cascade initiations",
-            ["status"],
-        )
-        self.active_cascades = Gauge(
-            "coagulation_cascades_active",
-            "Currently active cascades",
-        )
-        self.cascade_duration = Histogram(
-            "coagulation_cascade_duration_seconds",
-            "Total cascade duration",
-            buckets=[10, 30, 60, 120, 300, 600, 1200],
-        )
-        self.phase_duration = Histogram(
-            "coagulation_phase_duration_seconds",
-            "Duration per phase",
-            ["phase"],
-            buckets=[0.1, 1, 5, 10, 30, 60, 300],
-        )
+        # Initialize metrics only once at class level
+        if CascadeMetrics._cascades_total is None:
+            CascadeMetrics._cascades_total = Counter(
+                "coagulation_cascades_total",
+                "Total cascade initiations",
+                ["status"],
+            )
+            CascadeMetrics._active_cascades = Gauge(
+                "coagulation_cascades_active",
+                "Currently active cascades",
+            )
+            CascadeMetrics._cascade_duration = Histogram(
+                "coagulation_cascade_duration_seconds",
+                "Total cascade duration",
+                buckets=[10, 30, 60, 120, 300, 600, 1200],
+            )
+            CascadeMetrics._phase_duration = Histogram(
+                "coagulation_phase_duration_seconds",
+                "Duration per phase",
+                ["phase"],
+                buckets=[0.1, 1, 5, 10, 30, 60, 300],
+            )
+
+        # Always assign instance attributes from class-level
+        self.cascades_total = CascadeMetrics._cascades_total
+        self.active_cascades = CascadeMetrics._active_cascades
+        self.cascade_duration = CascadeMetrics._cascade_duration
+        self.phase_duration = CascadeMetrics._phase_duration
 
 
 class CoagulationCascadeSystem:
