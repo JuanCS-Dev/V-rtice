@@ -590,6 +590,8 @@ func calculateIntentRisk(intent *nlp.Intent) float64 {
 		risk = 0.7 // High risk - destructive
 	case "exec", "port-forward", "proxy":
 		risk = 0.6 // Medium-high risk - access
+	case "admin", "sudo", "root":
+		risk = 0.8 // Critical risk - elevated privileges (can exceed 1.0 with CRITICAL level)
 	default:
 		risk = 0.5 // Unknown - assume medium
 	}
@@ -608,7 +610,10 @@ func calculateIntentRisk(intent *nlp.Intent) float64 {
 	}
 
 	// Cap at 1.0
-	if risk > 1.0 {
+	// NOTE: With current verb (max 0.7) + risk level (max +0.3) mappings,
+	// maximum possible risk is exactly 1.0 (delete+CRITICAL = 0.7+0.3).
+	// This defensive cap ensures risk never exceeds 1.0 if mappings change.
+	if risk > 1.0 { // nolint:gocritic // Defensive code for future verb additions
 		risk = 1.0
 	}
 

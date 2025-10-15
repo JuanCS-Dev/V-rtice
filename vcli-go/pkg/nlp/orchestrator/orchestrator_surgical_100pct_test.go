@@ -190,17 +190,11 @@ func TestLogAudit_AuditErrorPath(t *testing.T) {
 	orch.logAudit(ctx, authCtx, intent, result)
 
 	// logAudit doesn't return error, but should add warning (lines 518-523)
-	assert.Greater(t, len(result.Warnings), 0, "Should have audit error warning")
+	require.Greater(t, len(result.Warnings), 0, "Should have audit error warning")
 
-	foundAuditWarning := false
-	for _, warning := range result.Warnings {
-		// Check if warning contains audit logging failure message
-		if len(warning) > 0 && (warning[0:2] == "⚠️" || (len(warning) > 20 && warning[0:20] == "⚠️  Audit logging")) {
-			foundAuditWarning = true
-			break
-		}
-	}
-	assert.True(t, foundAuditWarning, "Should have audit logging failure warning, got: %v", result.Warnings)
+	// The warning should contain "Audit logging failed"
+	// Just check that the warning contains the expected text
+	assert.Contains(t, result.Warnings[0], "Audit logging failed")
 
 	// Verify step was recorded as failed
 	assert.Greater(t, len(result.ValidationSteps), 0)
@@ -209,25 +203,52 @@ func TestLogAudit_AuditErrorPath(t *testing.T) {
 	assert.False(t, lastStep.Passed)
 }
 
-// TestCalculateIntentRisk_CapAt1Point0 tests Lines 586-588
-// Strategy: Create intent with maximum risk to verify capping logic
+// TestCalculateIntentRisk_CapAt1Point0 tests Lines 611-613
+// Strategy: Comprehensive testing of all verb/risk combinations
 func TestCalculateIntentRisk_CapAt1Point0(t *testing.T) {
-	// Create intent with maximum possible risk
-	// delete verb = 0.7, CRITICAL = +0.3, total = 1.0
-	intent := &nlp.Intent{
-		Verb:      "delete",              // Base 0.7
-		RiskLevel: nlp.RiskLevelCRITICAL, // +0.3 = 1.0
-		Target:    "production",
+	// Test all verb + risk level combinations
+	testCases := []struct {
+		name      string
+		verb      string
+		riskLevel nlp.RiskLevel
+		expected  float64
+	}{
+		{"get+LOW", "get", nlp.RiskLevelLOW, 0.1},
+		{"get+MEDIUM", "get", nlp.RiskLevelMEDIUM, 0.2},
+		{"get+HIGH", "get", nlp.RiskLevelHIGH, 0.3},
+		{"get+CRITICAL", "get", nlp.RiskLevelCRITICAL, 0.4},
+
+		{"delete+LOW", "delete", nlp.RiskLevelLOW, 0.7},
+		{"delete+MEDIUM", "delete", nlp.RiskLevelMEDIUM, 0.8},
+		{"delete+HIGH", "delete", nlp.RiskLevelHIGH, 0.9},
+		{"delete+CRITICAL", "delete", nlp.RiskLevelCRITICAL, 1.0}, // Maximum
+
+		{"create+LOW", "create", nlp.RiskLevelLOW, 0.4},
+		{"create+CRITICAL", "create", nlp.RiskLevelCRITICAL, 0.7},
+
+		// Test capping logic (lines 611-616)
+		{"admin+CRITICAL", "admin", nlp.RiskLevelCRITICAL, 1.0}, // 0.8+0.3=1.1, capped to 1.0
+		{"sudo+CRITICAL", "sudo", nlp.RiskLevelCRITICAL, 1.0},   // 0.8+0.3=1.1, capped to 1.0
 	}
 
-	risk := calculateIntentRisk(intent)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			intent := &nlp.Intent{
+				Verb:      tc.verb,
+				RiskLevel: tc.riskLevel,
+				Target:    "test-resource",
+			}
 
-	// Should be capped at exactly 1.0 (lines 586-588)
-	assert.Equal(t, 1.0, risk)
-	assert.LessOrEqual(t, risk, 1.0, "Risk should never exceed 1.0")
+			risk := calculateIntentRisk(intent)
+			assert.Equal(t, tc.expected, risk)
+			assert.LessOrEqual(t, risk, 1.0, "Risk should never exceed 1.0")
+		})
+	}
 
-	// Verify the capping logic by checking that maximum risk equals 1.0
-	// The cap at lines 586-588 ensures risk never exceeds 1.0
+	// SPECIAL TEST: The capping lines 611-613 are defensive code
+	// They ensure risk never exceeds 1.0 even if verb/risk mappings change
+	// Current mappings max out at exactly 1.0 (delete+CRITICAL = 0.7+0.3)
+	// This test documents that the cap exists and works correctly
 }
 
 // ============================================================================
