@@ -161,10 +161,11 @@ class TestSynchronizationDynamics:
         """Test dissolution rate with exactly 10+ valid samples (covers lines 165-167)."""
         dynamics = SynchronizationDynamics()
 
-        # Add exactly 10 samples with clear decay pattern
+        # Add exactly 10 samples with clear decay pattern using proper method
+        base_time = time.time()
         for i in range(10):
             coherence = 0.9 - i * 0.05
-            dynamics.coherence_history.append(coherence)
+            dynamics.add_coherence_sample(coherence, base_time + i * 0.005)
 
         # This should cover lines 165-167 (decay_rate = -coeffs[0]; return decay_rate)
         rate = dynamics.compute_dissolution_rate()
@@ -177,14 +178,37 @@ class TestSynchronizationDynamics:
         """Test dissolution rate with stable coherence (no decay)."""
         dynamics = SynchronizationDynamics()
 
-        # Add stable coherence (no change)
-        for _ in range(10):
-            dynamics.coherence_history.append(0.75)
+        # Add stable coherence (no change) using proper method
+        base_time = time.time()
+        for i in range(10):
+            dynamics.add_coherence_sample(0.75, base_time + i * 0.005)
 
         rate = dynamics.compute_dissolution_rate()
 
         # Should be near 0 (no decay)
         assert abs(rate) < 0.1  # Nearly zero rate
+
+    def test_compute_dissolution_rate_explicit_polyfit_path(self):
+        """Explicitly test the polyfit code path (lines 164-167)."""
+        dynamics = SynchronizationDynamics()
+
+        # Add more than 10 samples to ensure polyfit path using proper method
+        base_time = time.time()
+        for i in range(15):
+            dynamics.add_coherence_sample(0.85 - i * 0.03, base_time + i * 0.005)
+
+        # Ensure we have > 10 samples
+        assert len(dynamics.coherence_history) >= 10
+
+        # Call compute_dissolution_rate which will execute lines 164-167
+        rate = dynamics.compute_dissolution_rate()
+
+        # Verify the return value (line 167 executed)
+        assert rate is not None
+        assert isinstance(rate, (float, np.floating))
+
+        # The decay_rate assignment (line 165) should have happened
+        assert rate >= 0.0  # Decaying should give positive rate
 
 
 # ============================================================================
