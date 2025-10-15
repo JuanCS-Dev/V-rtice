@@ -1509,7 +1509,7 @@ func TestEvaluateCondition_AllTypes(t *testing.T) {
 
 func TestEvaluatePolicy_ErrorInCondition(t *testing.T) {
 	checker := NewChecker(newMockRoleStore(), newMockPolicyStore())
-	
+
 	policy := security.Policy{
 		Name:   "test-error",
 		Effect: security.PolicyEffectDENY,
@@ -1521,21 +1521,177 @@ func TestEvaluatePolicy_ErrorInCondition(t *testing.T) {
 			},
 		},
 	}
-	
+
 	secCtx := &security.SecurityContext{
 		User: &security.User{ID: "user1"},
 		IP:   "192.168.1.100",
 	}
-	
+
 	cmd := createTestCommand([]string{"kubectl", "get", "pods"}, nil)
-	
+
 	effect, err := checker.evaluatePolicy(policy, secCtx, cmd)
-	
+
 	// Should return error from condition evaluation
 	if err == nil {
 		t.Error("Expected error from invalid CIDR")
 	}
 	if effect != "" {
 		t.Errorf("Expected empty effect on error, got: %s", effect)
+	}
+}
+
+// NEW TESTS FOR 100% COVERAGE
+
+// TestCheckCommand_RoleStoreError tests error handling when GetUserRoles fails (lines 105-107)
+func TestCheckCommand_RoleStoreError(t *testing.T) {
+	roleStore := &mockRoleStoreWithError{}
+	checker := NewChecker(roleStore, newMockPolicyStore())
+
+	user := createTestUser("user1", []string{"viewer"}, false)
+	secCtx := &security.SecurityContext{
+		User:      user,
+		IP:        "192.168.1.100",
+		RiskScore: 10,
+	}
+
+	cmd := createTestCommand([]string{"kubectl", "get", "pods"}, nil)
+
+	err := checker.CheckCommand(context.Background(), secCtx, cmd)
+
+	if err == nil {
+		t.Fatal("Expected error from roleStore.GetUserRoles")
+	}
+
+	secErr, ok := err.(*security.SecurityError)
+	if !ok {
+		t.Fatal("Expected SecurityError")
+	}
+	if secErr.Message != "Role store unavailable" {
+		t.Errorf("Expected 'Role store unavailable', got: %s", secErr.Message)
+	}
+}
+
+// TestCheckCommand_PolicyStoreError tests error handling when GetPolicies fails (lines 170-172)
+func TestCheckCommand_PolicyStoreError(t *testing.T) {
+	roleStore := newMockRoleStore()
+	roleStore.userRoles["user1"] = []security.Role{
+		{
+			Name:       "viewer",
+			RequireMFA: false,
+			Permissions: []security.Permission{
+				{
+					Resource:  "pods",
+					Verbs:     []string{"get"},
+					Namespace: "*",
+				},
+			},
+		},
+	}
+
+	policyStore := &mockPolicyStoreWithError{}
+	checker := NewChecker(roleStore, policyStore)
+
+	user := createTestUser("user1", []string{"viewer"}, false)
+	secCtx := &security.SecurityContext{
+		User:      user,
+		IP:        "192.168.1.100",
+		RiskScore: 10,
+	}
+
+	cmd := createTestCommand([]string{"kubectl", "get", "pods"}, nil)
+
+	err := checker.CheckCommand(context.Background(), secCtx, cmd)
+
+	if err == nil {
+		t.Fatal("Expected error from policyStore.GetPolicies")
+	}
+
+	secErr, ok := err.(*security.SecurityError)
+	if !ok {
+		t.Fatal("Expected SecurityError")
+	}
+	if secErr.Message != "Policy store unavailable" {
+		t.Errorf("Expected 'Policy store unavailable', got: %s", secErr.Message)
+	}
+}
+
+// TestCheckCommand_PolicyEvaluationError tests continue behavior when evaluatePolicy errors (lines 176-177)
+func TestCheckCommand_PolicyEvaluationError(t *testing.T) {
+	roleStore := newMockRoleStore()
+	roleStore.userRoles["user1"] = []security.Role{
+		{
+			Name:       "viewer",
+			RequireMFA: false,
+			Permissions: []security.Permission{
+				{
+					Resource:  "pods",
+					Verbs:     []string{"get"},
+					Namespace: "*",
+				},
+			},
+		},
+	}
+
+	policyStore := newMockPolicyStore()
+	policyStore.policies = []security.Policy{
+		{
+			Name:   "invalid-ip-policy",
+			Effect: security.PolicyEffectDENY,
+			Conditions: []security.Condition{
+				{
+					Type:     security.ConditionTypeIP,
+					Operator: security.OperatorIn,
+					Value:    "invalid-cidr", // Will cause error in evaluatePolicy
+				},
+			},
+		},
+	}
+
+	checker := NewChecker(roleStore, policyStore)
+
+	user := createTestUser("user1", []string{"viewer"}, false)
+	secCtx := &security.SecurityContext{
+		User:      user,
+		IP:        "192.168.1.100",
+		RiskScore: 10,
+	}
+
+	cmd := createTestCommand([]string{"kubectl", "get", "pods"}, nil)
+
+	// Should succeed - error in policy evaluation is ignored (continue)
+	err := checker.CheckCommand(context.Background(), secCtx, cmd)
+
+	if err != nil {
+		t.Errorf("Should succeed when policy evaluation errors (continue behavior), got error: %v", err)
+	}
+}
+
+// Mock stores with errors for error path testing
+
+type mockRoleStoreWithError struct{}
+
+func (m *mockRoleStoreWithError) GetRole(ctx context.Context, name string) (*security.Role, error) {
+	return nil, &security.SecurityError{
+		Layer:   "authz",
+		Type:    security.ErrorTypeAuthz,
+		Message: "Role store unavailable",
+	}
+}
+
+func (m *mockRoleStoreWithError) GetUserRoles(ctx context.Context, userID string) ([]security.Role, error) {
+	return nil, &security.SecurityError{
+		Layer:   "authz",
+		Type:    security.ErrorTypeAuthz,
+		Message: "Role store unavailable",
+	}
+}
+
+type mockPolicyStoreWithError struct{}
+
+func (m *mockPolicyStoreWithError) GetPolicies(ctx context.Context) ([]security.Policy, error) {
+	return nil, &security.SecurityError{
+		Layer:   "authz",
+		Type:    security.ErrorTypeAuthz,
+		Message: "Policy store unavailable",
 	}
 }

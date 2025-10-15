@@ -891,7 +891,7 @@ func TestDetectTamper_Disabled(t *testing.T) {
 func TestEventFilter_AllFields(t *testing.T) {
 	now := time.Now()
 	successTrue := true
-	
+
 	event := &AuditEvent{
 		UserID:    "testuser",
 		Action:    "update",
@@ -900,7 +900,7 @@ func TestEventFilter_AllFields(t *testing.T) {
 		RiskScore: 0.6,
 		Timestamp: now,
 	}
-	
+
 	// Test with all fields set
 	filter := &EventFilter{
 		UserID:    "testuser",
@@ -911,11 +911,32 @@ func TestEventFilter_AllFields(t *testing.T) {
 		EndTime:   now.Add(1 * time.Minute),
 		MinRisk:   0.5,
 	}
-	
+
 	assert.True(t, filter.Matches(event))
-	
+
 	// Change one field to not match
 	filter.Resource = "pod"
 	assert.False(t, filter.Matches(event))
+}
+
+// TestDetectTamper_PreviousHashMismatch tests detection of PreviousHash tampering
+func TestDetectTamper_PreviousHashMismatch(t *testing.T) {
+	logger := NewAuditLogger(nil)
+
+	// Log events
+	logger.LogAction("user1", "get", "pods", "", true)
+	logger.LogAction("user1", "delete", "pod", "mypod", true)
+	logger.LogAction("user2", "create", "deployment", "myapp", true)
+
+	// Verify not tampered initially
+	tampered := logger.detectTamper()
+	assert.False(t, tampered)
+
+	// Tamper with PreviousHash (break hash chain)
+	logger.events[1].PreviousHash = "invalid-hash"
+
+	// Should detect tamper via broken chain
+	tampered = logger.detectTamper()
+	assert.True(t, tampered)
 }
 

@@ -2,8 +2,6 @@ package testutil
 
 import (
 	"github.com/spf13/cobra"
-	k8scmd "github.com/verticedev/vcli-go/cmd/k8s"
-	orchestratecmd "github.com/verticedev/vcli-go/cmd/orchestrate"
 )
 
 // BuildRootCommand builds a root command for testing purposes
@@ -14,9 +12,9 @@ func BuildRootCommand() *cobra.Command {
 		Version: "2.0.0-test",
 	}
 
-	// Add all subcommands
-	rootCmd.AddCommand(k8scmd.NewK8sCommand())
-	rootCmd.AddCommand(orchestratecmd.NewOrchestrateCommand())
+	// Add mock commands for testing (avoiding import cycle with main package)
+	rootCmd.AddCommand(buildMockK8sCommand())
+	rootCmd.AddCommand(buildMockOrchestrateCommand())
 
 	// Add other commands (mock versions for testing)
 	rootCmd.AddCommand(&cobra.Command{Use: "data", Short: "Data operations"})
@@ -40,4 +38,29 @@ func BuildRootCommand() *cobra.Command {
 	rootCmd.AddCommand(&cobra.Command{Use: "offline", Short: "Offline mode"})
 
 	return rootCmd
+}
+
+// buildMockK8sCommand creates a mock k8s command for testing
+func buildMockK8sCommand() *cobra.Command {
+	k8sCmd := &cobra.Command{
+		Use:   "k8s",
+		Short: "Kubernetes cluster management",
+	}
+
+	// Add get subcommand
+	getCmd := &cobra.Command{
+		Use:   "get",
+		Short: "Get resources",
+	}
+	k8sCmd.AddCommand(getCmd)
+
+	return k8sCmd
+}
+
+// buildMockOrchestrateCommand creates a mock orchestrate command for testing
+func buildMockOrchestrateCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "orchestrate",
+		Short: "Orchestrate operations",
+	}
 }

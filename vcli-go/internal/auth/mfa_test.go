@@ -146,8 +146,9 @@ func TestTOTPProvider_RequiresMFA(t *testing.T) {
 			action:  "list_pods",
 			ctxValues: map[string]interface{}{
 				"mfa_verified_at": time.Now().Add(-20 * time.Minute),
+				"client_ip":       "1.2.3.4", // Untrusted IP to make test deterministic
 			},
-			want:    true, // Off-hours or other checks may still require MFA
+			want:    true, // Expired MFA + untrusted IP requires re-auth
 			wantErr: false,
 		},
 		{
