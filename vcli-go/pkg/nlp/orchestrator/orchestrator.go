@@ -102,6 +102,10 @@ func DefaultConfig() Config {
 }
 
 // NewOrchestrator creates a new Guardian orchestrator with real implementations
+//
+// UPGRADE: Fail-fast architecture - components validate their own configs.
+// If any component fails to initialize, orchestrator initialization fails.
+// This ensures all error paths are testable and auditable.
 func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 	// Apply defaults for zero values
 	if cfg.MaxRiskScore == 0 {
@@ -131,22 +135,16 @@ func NewOrchestrator(cfg Config) (*Orchestrator, error) {
 	}
 
 	// Layer 2: Authorization
-	if cfg.AuthzConfig == nil {
-		cfg.AuthzConfig = &authz.AuthorizerConfig{EnableRBAC: true, EnablePolicies: true, DenyByDefault: true}
-	}
-	authorizer, err := authz.NewAuthorizerWithConfig(cfg.AuthzConfig)
+	// UPGRADE: Use nil-safe constructor that applies defaults internally
+	// This makes error path testable while keeping API clean
+	authorizer, err := NewAuthorizerWithDefaults(cfg.AuthzConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create authorizer: %w", err)
 	}
 
 	// Layer 3: Sandboxing
-	if cfg.SandboxConfig == nil {
-		cfg.SandboxConfig = &sandbox.SandboxConfig{
-			ForbiddenNamespaces: []string{"kube-system"},
-			Timeout:             60 * time.Second,
-		}
-	}
-	sandboxManager, err := sandbox.NewSandbox(cfg.SandboxConfig)
+	// UPGRADE: Use nil-safe constructor that applies defaults internally
+	sandboxManager, err := NewSandboxWithDefaults(cfg.SandboxConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create sandbox: %w", err)
 	}
@@ -605,4 +603,55 @@ func (o *Orchestrator) GetAuthenticator() *auth.Authenticator {
 // GetSandbox returns the sandbox manager (for testing/advanced usage)
 func (o *Orchestrator) GetSandbox() *sandbox.Sandbox {
 	return o.sandboxManager
+}
+
+// --- UPGRADE: Component Factory Functions ---
+// These functions centralize component construction with proper error handling
+// and default application, making all error paths testable.
+
+// NewAuthorizerWithDefaults creates an authorizer with nil-safe defaults.
+//
+// UPGRADE: This function makes authorizer creation errors testable by
+// accepting potentially invalid configs and validating them explicitly.
+// Returns error if config is explicitly invalid (not just nil).
+func NewAuthorizerWithDefaults(cfg *authz.AuthorizerConfig) (*authz.Authorizer, error) {
+	// Apply defaults if nil
+	if cfg == nil {
+		cfg = &authz.AuthorizerConfig{
+			EnableRBAC:     true,
+			EnablePolicies: true,
+			DenyByDefault:  true,
+		}
+	}
+
+	// Validate config (UPGRADE: explicit validation makes errors testable)
+	if !cfg.EnableRBAC && !cfg.EnablePolicies {
+		return nil, fmt.Errorf("authorizer config invalid: must enable at least RBAC or Policies")
+	}
+
+	// Create authorizer
+	return authz.NewAuthorizerWithConfig(cfg)
+}
+
+// NewSandboxWithDefaults creates a sandbox with nil-safe defaults.
+//
+// UPGRADE: This function makes sandbox creation errors testable by
+// accepting potentially invalid configs and validating them explicitly.
+// Returns error if config is explicitly invalid (not just nil).
+func NewSandboxWithDefaults(cfg *sandbox.SandboxConfig) (*sandbox.Sandbox, error) {
+	// Apply defaults if nil
+	if cfg == nil {
+		cfg = &sandbox.SandboxConfig{
+			ForbiddenNamespaces: []string{"kube-system"},
+			Timeout:             60 * time.Second,
+		}
+	}
+
+	// Validate config (UPGRADE: explicit validation makes errors testable)
+	if cfg.Timeout < 0 {
+		return nil, fmt.Errorf("sandbox config invalid: timeout cannot be negative")
+	}
+
+	// Create sandbox
+	return sandbox.NewSandbox(cfg)
 }
