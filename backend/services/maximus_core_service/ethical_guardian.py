@@ -1212,7 +1212,7 @@ class EthicalGuardian:
 
         try:
             log_id = self.audit_logger.log(
-                action=GovernanceAction.DECISION_MADE,
+                action=GovernanceAction.ERB_DECISION_MADE,
                 actor=decision.actor,
                 description=f"Ethical decision for action '{decision.action}': {decision.decision_type.value}",
                 target_entity_type="action",
