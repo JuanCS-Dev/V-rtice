@@ -1672,13 +1672,8 @@ func TestNewOrchestrator_AuthenticatorCreationError(t *testing.T) {
 }
 
 // TestNewOrchestrator_AuthorizerCreationError tests error path when authorizer creation fails
+// UPGRADE: Now testable with explicit invalid config validation
 func TestNewOrchestrator_AuthorizerCreationError(t *testing.T) {
-	// Creating an authorizer with valid config should work, but we can test with edge case
-	// The authz.NewAuthorizerWithConfig can fail if config is malformed
-	// Since the current implementation doesn't easily fail, we document that this path
-	// would be tested if authz.NewAuthorizerWithConfig returned an error
-
-	// For now, create a test that shows the error would be caught
 	sessionMgr := mustCreateSessionManager(t)
 	cfg := Config{
 		AuthConfig: &auth.AuthConfig{
@@ -1686,29 +1681,24 @@ func TestNewOrchestrator_AuthorizerCreationError(t *testing.T) {
 			SessionManager: sessionMgr,
 		},
 		AuthzConfig: &authz.AuthorizerConfig{
-			EnableRBAC:     true,
-			EnablePolicies: true,
+			EnableRBAC:     false, // INVALID: Both disabled
+			EnablePolicies: false, // INVALID: Both disabled
 			DenyByDefault:  true,
 		},
 	}
 
 	orch, err := NewOrchestrator(cfg)
 
-	// Currently succeeds, but path exists for error handling
-	if err != nil {
-		assert.Contains(t, err.Error(), "failed to create authorizer")
-	} else {
-		assert.NotNil(t, orch)
-		orch.Close()
-	}
+	// Should fail with explicit validation error
+	assert.Error(t, err)
+	assert.Nil(t, orch)
+	assert.Contains(t, err.Error(), "failed to create authorizer")
+	assert.Contains(t, err.Error(), "must enable at least RBAC or Policies")
 }
 
 // TestNewOrchestrator_SandboxCreationError tests error path when sandbox creation fails
+// UPGRADE: Now testable with explicit invalid config validation
 func TestNewOrchestrator_SandboxCreationError(t *testing.T) {
-	// Sandbox creation with valid config should work
-	// The sandbox.NewSandbox can fail if config is malformed
-	// Document this error path exists
-
 	sessionMgr := mustCreateSessionManager(t)
 	cfg := Config{
 		AuthConfig: &auth.AuthConfig{
@@ -1717,18 +1707,122 @@ func TestNewOrchestrator_SandboxCreationError(t *testing.T) {
 		},
 		SandboxConfig: &sandbox.SandboxConfig{
 			ForbiddenNamespaces: []string{"kube-system"},
-			Timeout:             60 * time.Second,
+			Timeout:             -1 * time.Second, // INVALID: Negative timeout
 		},
 	}
 
 	orch, err := NewOrchestrator(cfg)
 
-	// Currently succeeds, but path exists for error handling
-	if err != nil {
-		assert.Contains(t, err.Error(), "failed to create sandbox")
-	} else {
-		assert.NotNil(t, orch)
-		orch.Close()
+	// Should fail with explicit validation error
+	assert.Error(t, err)
+	assert.Nil(t, orch)
+	assert.Contains(t, err.Error(), "failed to create sandbox")
+	assert.Contains(t, err.Error(), "timeout cannot be negative")
+}
+
+// TestNewAuthorizerWithDefaults tests the factory function
+// UPGRADE: Direct test of factory function for complete coverage
+func TestNewAuthorizerWithDefaults(t *testing.T) {
+	tests := []struct {
+		name      string
+		config    *authz.AuthorizerConfig
+		wantError bool
+		errorMsg  string
+	}{
+		{
+			name:      "nil config uses defaults",
+			config:    nil,
+			wantError: false,
+		},
+		{
+			name: "valid config succeeds",
+			config: &authz.AuthorizerConfig{
+				EnableRBAC:     true,
+				EnablePolicies: false,
+				DenyByDefault:  true,
+			},
+			wantError: false,
+		},
+		{
+			name: "both disabled fails",
+			config: &authz.AuthorizerConfig{
+				EnableRBAC:     false,
+				EnablePolicies: false,
+				DenyByDefault:  true,
+			},
+			wantError: true,
+			errorMsg:  "must enable at least RBAC or Policies",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			authorizer, err := NewAuthorizerWithDefaults(tt.config)
+
+			if tt.wantError {
+				assert.Error(t, err)
+				assert.Nil(t, authorizer)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, authorizer)
+			}
+		})
+	}
+}
+
+// TestNewSandboxWithDefaults tests the factory function
+// UPGRADE: Direct test of factory function for complete coverage
+func TestNewSandboxWithDefaults(t *testing.T) {
+	tests := []struct {
+		name      string
+		config    *sandbox.SandboxConfig
+		wantError bool
+		errorMsg  string
+	}{
+		{
+			name:      "nil config uses defaults",
+			config:    nil,
+			wantError: false,
+		},
+		{
+			name: "valid config succeeds",
+			config: &sandbox.SandboxConfig{
+				ForbiddenNamespaces: []string{"kube-system"},
+				Timeout:             30 * time.Second,
+			},
+			wantError: false,
+		},
+		{
+			name: "negative timeout fails",
+			config: &sandbox.SandboxConfig{
+				Timeout: -5 * time.Second,
+			},
+			wantError: true,
+			errorMsg:  "timeout cannot be negative",
+		},
+		{
+			name: "zero timeout succeeds (uses default)",
+			config: &sandbox.SandboxConfig{
+				Timeout: 0,
+			},
+			wantError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sb, err := NewSandboxWithDefaults(tt.config)
+
+			if tt.wantError {
+				assert.Error(t, err)
+				assert.Nil(t, sb)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, sb)
+			}
+		})
 	}
 }
 
