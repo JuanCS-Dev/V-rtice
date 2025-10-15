@@ -526,6 +526,7 @@ class EncryptedTrafficAnalyzer:
                 threat_type=TrafficThreatType.BENIGN,
                 confidence=0.0,
                 features=FlowFeatures(
+                    flow_id=network_flow.flow_id,
                     duration=0, packet_count=0, total_bytes=0,
                     bytes_per_second=0, packets_per_second=0,
                     min_packet_size=0, max_packet_size=0,
