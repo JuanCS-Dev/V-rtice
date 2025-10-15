@@ -24,6 +24,28 @@ import (
 	"github.com/verticedev/vcli-go/pkg/nlp/sandbox"
 )
 
+// ============================================================================
+// UPGRADE: Interface Abstraction for Testability
+// ============================================================================
+// These interfaces allow dependency injection for comprehensive testing while
+// maintaining production implementations. This is standard Go best practice.
+
+// IntentValidatorInterface allows testing intent validation errors
+type IntentValidatorInterface interface {
+	ValidateIntent(ctx context.Context, intent *intentpkg.CommandIntent) (*intentpkg.ValidationResult, error)
+}
+
+// BehavioralAnalyzerInterface allows testing behavioral anomaly blocking
+type BehavioralAnalyzerInterface interface {
+	AnalyzeAction(userID, action, resource string) *behavioral.AnomalyResult
+	RecordAction(userID, action, resource string, success bool)
+}
+
+// AuditLoggerInterface allows testing audit error paths
+type AuditLoggerInterface interface {
+	LogEvent(event *audit.AuditEvent) error
+}
+
 // Orchestrator coordinates the 7-layer security validation with real implementations
 type Orchestrator struct {
 	config Config
@@ -38,16 +60,19 @@ type Orchestrator struct {
 	sandboxManager *sandbox.Sandbox
 
 	// Layer 4: Intent Validation - Did you really mean that?
-	intentValidator *intentpkg.IntentValidator
+	// UPGRADE: Interface allows test injection
+	intentValidator IntentValidatorInterface
 
 	// Layer 5: Rate Limiting - How much can you do?
 	rateLimiter *ratelimit.RateLimiter
 
 	// Layer 6: Behavioral Analysis - Is this normal for you?
-	behaviorAnalyzer *behavioral.BehavioralAnalyzer
+	// UPGRADE: Interface allows test injection
+	behaviorAnalyzer BehavioralAnalyzerInterface
 
 	// Layer 7: Audit Logging - What did you do?
-	auditLogger *audit.AuditLogger
+	// UPGRADE: Interface allows test injection
+	auditLogger AuditLoggerInterface
 }
 
 // Config holds orchestrator configuration
