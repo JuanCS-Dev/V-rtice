@@ -1,0 +1,160 @@
+groups:
+  - name: vertice_service_health
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 2 minutes."
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Service {{ $labels.service }} has error rate above 5% (current: {{ $value }})"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "High latency on {{ $labels.service }}"
+          description: "95th percentile latency is {{ $value }}s on {{ $labels.service }}"
+
+  - name: vertice_resource_usage
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: resources
+        annotations:
+          summary: "High memory usage on {{ $labels.name }}"
+          description: "Container {{ $labels.name }} is using {{ $value | humanizePercentage }} of memory limit"
+
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: resources
+        annotations:
+          summary: "High CPU usage on {{ $labels.name }}"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value | humanizePercentage }}"
+
+  - name: vertice_maximus_core
+    interval: 30s
+    rules:
+      - alert: MaximusConsciousnessLow
+        expr: maximus_consciousness_level < 0.5
+        for: 2m
+        labels:
+          severity: critical
+          component: maximus
+        annotations:
+          summary: "MAXIMUS consciousness level critically low"
+          description: "Consciousness level is {{ $value }} (threshold: 0.5)"
+
+      - alert: EthicalGuardianViolation
+        expr: increase(ethical_violations_total[5m]) > 0
+        labels:
+          severity: critical
+          component: governance
+        annotations:
+          summary: "Ethical violation detected"
+          description: "{{ $value }} ethical violations in last 5 minutes"
+
+  - name: vertice_immune_system
+    interval: 30s
+    rules:
+      - alert: ImmuneResponseFailed
+        expr: rate(immune_response_failures_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: critical
+          component: immune
+        annotations:
+          summary: "Immune system response failures"
+          description: "Failure rate: {{ $value }} responses/sec"
+
+      - alert: ThreatDetectionBacklog
+        expr: threat_detection_queue_size > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: immune
+        annotations:
+          summary: "High threat detection backlog"
+          description: "Queue size: {{ $value }} items"
+
+  - name: vertice_wargaming
+    interval: 30s
+    rules:
+      - alert: WargamingFailureRatioHigh
+        expr: (wargaming_failures_total / wargaming_tests_total) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: wargaming
+        annotations:
+          summary: "High wargaming failure ratio"
+          description: "Failure ratio: {{ $value | humanizePercentage }}"
+
+  - name: vertice_database
+    interval: 30s
+    rules:
+      - alert: PostgresConnectionPoolExhausted
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "PostgreSQL connection pool near exhaustion"
+          description: "Connection usage: {{ $value | humanizePercentage }}"
+
+      - alert: PostgresReplicationLag
+        expr: pg_replication_lag > 10
+        for: 5m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL replication lag high"
+          description: "Replication lag: {{ $value }}s"
+
+  - name: vertice_redis
+    interval: 30s
+    rules:
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Memory usage: {{ $value | humanizePercentage }}"
+
+      - alert: RedisConnectionsHigh
+        expr: redis_connected_clients > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "High number of Redis connections"
+          description: "Connected clients: {{ $value }}"
