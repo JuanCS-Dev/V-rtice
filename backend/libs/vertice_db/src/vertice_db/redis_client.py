@@ -14,7 +14,7 @@ class RedisClient:
 
     def __init__(self, url: str) -> None:
         self.url = url
-        self._client: Redis = Redis.from_url(url, decode_responses=True)
+        self._client: Redis[str] = Redis.from_url(url, decode_responses=True)
 
     async def get(self, key: str) -> Any | None:
         """Get value from cache."""
@@ -35,7 +35,7 @@ class RedisClient:
 
     async def close(self) -> None:  # pragma: no cover
         """Close connection."""
-        await self._client.aclose()
+        await self._client.close()
 
 
 def create_redis_client(redis_url: str) -> RedisClient:

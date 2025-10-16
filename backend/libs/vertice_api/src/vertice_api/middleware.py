@@ -1,7 +1,8 @@
 """FastAPI middleware components."""
 
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 import structlog
 from fastapi import Request, Response
@@ -10,15 +11,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from vertice_core import VerticeException
 
 
-class RequestLoggingMiddleware(BaseHTTPMiddleware):  # type: ignore[misc]
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log all requests with timing and metadata."""
 
-    def __init__(self, app: Request, logger: structlog.stdlib.BoundLogger) -> None:
-        super().__init__(app)  # type: ignore[arg-type]
+    def __init__(self, app: Any, logger: structlog.stdlib.BoundLogger) -> None:
+        super().__init__(app)
         self.logger = logger
 
     async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Response]
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:  # pragma: no cover
         """Process request and log details."""
         start_time = time.time()
@@ -31,7 +32,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):  # type: ignore[misc]
         )
 
         try:
-            response = await call_next(request)  # type: ignore[misc]
+            response = await call_next(request)
             duration_ms = (time.time() - start_time) * 1000
 
             self.logger.info(
@@ -40,7 +41,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):  # type: ignore[misc]
                 duration_ms=round(duration_ms, 2),
             )
 
-            return response  # type: ignore[no-any-return]
+            return response
         except Exception as exc:
             duration_ms = (time.time() - start_time) * 1000
 
@@ -55,14 +56,15 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):  # type: ignore[misc]
             structlog.contextvars.clear_contextvars()
 
 
-class ErrorHandlingMiddleware(BaseHTTPMiddleware):  # type: ignore[misc]
+class ErrorHandlingMiddleware(BaseHTTPMiddleware):
     """Convert exceptions to proper JSON responses."""
+
     async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Response]
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         """Handle exceptions and convert to JSON."""
         try:
-            return await call_next(request)  # type: ignore[misc,no-any-return]
+            return await call_next(request)
         except VerticeException as exc:
             from fastapi.responses import JSONResponse
 

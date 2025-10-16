@@ -44,7 +44,7 @@ def create_app(
     )
 
     app.add_middleware(ErrorHandlingMiddleware)
-    app.add_middleware(RequestLoggingMiddleware, logger=logger)  # type: ignore[arg-type]
+    app.add_middleware(RequestLoggingMiddleware, logger=logger)
 
     health_router = create_health_router(
         settings.service_name,
