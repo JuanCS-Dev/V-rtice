@@ -1,5 +1,6 @@
 // /home/juan/vertice-dev/frontend/src/components/admin/SystemSelfCheck.jsx
 import logger from '@/utils/logger';
+import { apiClient } from '@/api/client';
 
 import React, { useState, useEffect } from 'react';
 
@@ -13,13 +14,10 @@ const SystemSelfCheck = () => {
   // Funções de verificação real baseadas nos módulos cyber
   const runNetworkScan = async () => {
     try {
-      // Simula chamada para backend que executa nmap local
-      const response = await fetch('http://localhost:8000/cyber/network-scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target: 'localhost', profile: 'self-check' })
+      return await apiClient.post('/cyber/network-scan', { 
+        target: 'localhost', 
+        profile: 'self-check' 
       });
-      return response.ok ? await response.json() : null;
     } catch (error) {
       logger.error('Network scan failed:', error);
       return null;
@@ -28,9 +26,7 @@ const SystemSelfCheck = () => {
 
   const runPortAnalysis = async () => {
     try {
-      // Verifica portas abertas usando integração com net_monitor
-      const response = await fetch('http://localhost:8000/cyber/port-analysis');
-      return response.ok ? await response.json() : null;
+      return await apiClient.get('/cyber/port-analysis');
     } catch (error) {
       logger.error('Port analysis failed:', error);
       return null;
@@ -39,9 +35,7 @@ const SystemSelfCheck = () => {
 
   const runFileIntegrityCheck = async () => {
     try {
-      // Integração com fs_monitor para verificar integridade
-      const response = await fetch('http://localhost:8000/cyber/file-integrity');
-      return response.ok ? await response.json() : null;
+      return await apiClient.get('/cyber/file-integrity');
     } catch (error) {
       logger.error('File integrity check failed:', error);
       return null;
@@ -50,9 +44,7 @@ const SystemSelfCheck = () => {
 
   const runProcessAnalysis = async () => {
     try {
-      // Análise de processos do sistema
-      const response = await fetch('http://localhost:8000/cyber/process-analysis');
-      return response.ok ? await response.json() : null;
+      return await apiClient.get('/cyber/process-analysis');
     } catch (error) {
       logger.error('Process analysis failed:', error);
       return null;
@@ -61,9 +53,7 @@ const SystemSelfCheck = () => {
 
   const runCertificateValidation = async () => {
     try {
-      // Verifica certificados SSL/TLS
-      const response = await fetch('http://localhost:8000/cyber/certificate-check');
-      return response.ok ? await response.json() : null;
+      return await apiClient.get('/cyber/certificate-check');
     } catch (error) {
       logger.error('Certificate validation failed:', error);
       return null;
@@ -73,8 +63,8 @@ const SystemSelfCheck = () => {
   const checkSecurityConfig = async () => {
     // Verifica configurações de segurança do sistema
     try {
-      const response = await fetch('http://localhost:8000/cyber/security-config');
-      return response.ok ? await response.json() : {
+      const response = await apiClient.get('/cyber/security-config');
+      return response || {
         firewall: 'unknown',
         ssh_config: 'unknown',
         user_permissions: 'unknown'
