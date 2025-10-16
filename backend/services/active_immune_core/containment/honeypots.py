@@ -915,5 +915,27 @@ Output:"""
             f"duration={duration}, commands={len(context.command_history)}, "
             f"TTPs={len(set(all_ttps))}"
         )
-        
+
         return summary
+
+
+# Wrapper class for backwards compatibility with tests
+class InteractiveShellHoneypot(LLMHoneypotBackend):
+    """Wrapper for LLMHoneypotBackend with test-compatible interface."""
+
+    def __init__(
+        self,
+        honeypot_id: str,
+        port: int,
+        llm_client: Optional[Any] = None,
+        **kwargs
+    ):
+        """Initialize with test-compatible parameters.
+
+        Args:
+            honeypot_id: Honeypot identifier (ignored, for test compatibility)
+            port: Port number (ignored, for test compatibility)
+            llm_client: LLM client
+            **kwargs: Additional arguments passed to parent
+        """
+        super().__init__(llm_client=llm_client, **kwargs)

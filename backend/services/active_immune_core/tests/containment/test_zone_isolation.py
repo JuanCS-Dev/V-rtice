@@ -672,26 +672,32 @@ class TestZoneIsolationErrorHandling:
 
     @pytest.mark.asyncio
     async def test_isolate_catastrophic_failure(self):
-        """Test complete failure in isolate (exception in outer try block - lines 407-412)"""
+        """Test complete failure in isolate (exception in outer try block - lines 407-409)"""
         from containment.zone_isolation import ZoneIsolationEngine
-        from unittest.mock import patch
 
         engine = ZoneIsolationEngine()
 
-        # Patch datetime.utcnow to raise exception
-        # This is called at line 341 before the for loop
-        # Will trigger the outer exception handler (lines 407-412)
-        with patch('containment.zone_isolation.datetime') as mock_datetime:
-            mock_datetime.utcnow.side_effect = RuntimeError("Catastrophic datetime error")
-            
-            result = await engine.isolate(
-                zones=["DMZ"],
-                isolation_level=IsolationLevel.BLOCKING,
-            )
+        # Force exception in OUTER try block by breaking metrics
+        # Metrics are accessed AFTER the zone loop and BEFORE return (line 393-398)
+        original_labels = engine.metrics.isolations_total.labels
 
-            # Outer exception handler creates FAILED result
-            assert result.status == "FAILED"
-            assert len(result.errors) > 0
+        def failing_labels(*args, **kwargs):
+            raise RuntimeError("Metrics system catastrophic failure")
+
+        engine.metrics.isolations_total.labels = failing_labels
+
+        result = await engine.isolate(
+            zones=["DMZ"],
+            isolation_level=IsolationLevel.BLOCKING,
+        )
+
+        # Outer exception handler (lines 407-409) creates FAILED result
+        assert result.status == "FAILED"
+        assert len(result.errors) > 0
+        assert "Metrics system catastrophic failure" in str(result.errors[0])
+
+        # Restore original
+        engine.metrics.isolations_total.labels = original_labels
 
 
 if __name__ == "__main__":

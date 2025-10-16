@@ -372,3 +372,60 @@ class TestLLMHoneypotIntegration:
         assert len(summary["ttps_identified"]) >= 2
         assert "T1087" in summary["ttps_identified"]  # Account Discovery
         assert "T1082" in summary["ttps_identified"]  # System Info Discovery
+
+
+class TestMissingCoverageLines:
+    """Tests for specific missing coverage lines."""
+
+    @pytest.mark.asyncio
+    async def test_llm_exception_fallback_lines_704_706(self):
+        """Test LLM exception handling and fallback (lines 704-706)."""
+        # Create LLM client that raises exception
+        class FailingLLMClient:
+            async def generate(self, prompt, **kwargs):
+                raise RuntimeError("LLM API failure")
+
+        backend = LLMHoneypotBackend(llm_client=FailingLLMClient())
+
+        context = HoneypotContext(
+            session_id="test-session",
+            attacker_ip="1.2.3.4",
+            honeypot_type=HoneypotType.SSH,
+        )
+
+        # Should catch exception and fall back to simple response (lines 704-706)
+        response = await backend.generate_response("whoami", context)
+
+        assert response is not None
+        assert isinstance(response, str)
+
+    @pytest.mark.asyncio
+    async def test_llm_no_generate_method_line_762(self):
+        """Test fallback when LLM client lacks generate method (line 762)."""
+        # Create LLM client without generate method
+        class NoGenerateClient:
+            def some_other_method(self):
+                pass
+
+        backend = LLMHoneypotBackend(llm_client=NoGenerateClient())
+
+        context = HoneypotContext(
+            session_id="test-session",
+            attacker_ip="1.2.3.4",
+            honeypot_type=HoneypotType.SSH,
+        )
+
+        # Should detect no generate method and use fallback (line 762)
+        response = await backend.generate_response("pwd", context)
+
+        assert response is not None
+        assert isinstance(response, str)
+
+    def test_fallback_cat_permission_denied_line_792(self):
+        """Test cat command fallback returns permission denied (line 792)."""
+        backend = LLMHoneypotBackend(llm_client=None)
+
+        # Test cat command with path pattern (line 792)
+        response = backend._generate_fallback_response("cat /etc/shadow", None)
+
+        assert response == "Permission denied"

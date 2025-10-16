@@ -415,6 +415,165 @@ class TestDeceptionEngine:
         assert any(c.honeypot_type == HoneypotType.HTTP for c in configs)
 
 
+class TestDeceptionEngineLLM:
+    """Test LLM-powered deception features"""
+
+    def test_llm_import_error_fallback(self):
+        """Test fallback when LLM client import fails (lines 35-37)"""
+        import sys
+        import importlib
+        from unittest.mock import patch
+        import builtins
+
+        # Save original import
+        original_import = builtins.__import__
+
+        def mock_import(name, *args, **kwargs):
+            # Block llm.llm_client import to trigger ImportError
+            if 'llm.llm_client' in name or name == 'llm.llm_client':
+                raise ImportError("Mocked LLM import error")
+            return original_import(name, *args, **kwargs)
+
+        try:
+            # Remove modules from cache
+            for mod in ['containment.honeypots', 'llm', 'llm.llm_client']:
+                if mod in sys.modules:
+                    del sys.modules[mod]
+
+            # Patch import to raise error
+            with patch('builtins.__import__', side_effect=mock_import):
+                # Import should trigger except block (lines 36-37)
+                import containment.honeypots
+
+                # Verify fallback values (lines 36-37 executed)
+                assert containment.honeypots.BaseLLMClient is None
+                assert containment.honeypots.LLMAPIError == Exception
+
+        finally:
+            # Clean up - force reimport with real LLM
+            for mod in ['containment.honeypots', 'llm', 'llm.llm_client']:
+                if mod in sys.modules:
+                    del sys.modules[mod]
+
+            # Reimport normally
+            import containment.honeypots
+
+    @pytest.mark.asyncio
+    async def test_deploy_adaptive_partial_success(self, deception_engine):
+        """Test partial deployment success (line 387)"""
+        orchestrator = deception_engine.orchestrator
+        
+        # Mock orchestrator to make one deployment fail
+        original_deploy = orchestrator.deploy_honeypot
+        call_count = [0]
+        
+        async def mock_deploy(config):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                # First deployment succeeds
+                return await original_deploy(config)
+            else:
+                # Second deployment fails
+                return None
+        
+        orchestrator.deploy_honeypot = mock_deploy
+        
+        # Deploy multiple honeypots
+        threat_intel = {
+            "targeted_services": ["ssh", "http"],
+            "attack_patterns": ["brute_force"],
+            "threat_level": "medium"
+        }
+        
+        result = await deception_engine.deploy_adaptive_honeypots(threat_intel)
+        
+        # Should have PARTIAL status (line 387)
+        assert result.status == "PARTIAL"
+        assert len(result.honeypots_deployed) > 0
+        assert len(result.honeypots_deployed) < 2
+
+    @pytest.mark.asyncio
+    async def test_llm_generation_exception_fallback(self):
+        """Test LLM exception handling and fallback (lines 704-706)"""
+        from containment.honeypots import InteractiveShellHoneypot, HoneypotContext
+        
+        # Create honeypot with LLM client that will fail
+        class FailingLLMClient:
+            async def generate(self, prompt, **kwargs):
+                raise Exception("LLM API Error")
+        
+        honeypot = InteractiveShellHoneypot(
+            honeypot_id="test-shell",
+            port=2222,
+            llm_client=FailingLLMClient()
+        )
+        
+        context = HoneypotContext(
+            source_ip="1.2.3.4",
+            session_id="test-session",
+            commands_history=[]
+        )
+        
+        # Should fall back to simple response (lines 704-706)
+        response = await honeypot.generate_response("ls /tmp", context)
+        assert response is not None
+        assert isinstance(response, str)
+
+    @pytest.mark.asyncio  
+    async def test_llm_client_no_generate_method_fallback(self):
+        """Test fallback when LLM client doesn't have generate method (line 762)"""
+        from containment.honeypots import InteractiveShellHoneypot, HoneypotContext
+        
+        # Create LLM client without generate method
+        class NoGenerateLLMClient:
+            pass
+        
+        honeypot = InteractiveShellHoneypot(
+            honeypot_id="test-shell",
+            port=2222,
+            llm_client=NoGenerateLLMClient()
+        )
+        
+        context = HoneypotContext(
+            source_ip="1.2.3.4",
+            session_id="test-session",
+            commands_history=[]
+        )
+        
+        # Should fall back to simple response (line 762)
+        response = await honeypot.generate_response("pwd", context)
+        assert response is not None
+        assert isinstance(response, str)
+
+    def test_fallback_response_cat_command(self):
+        """Test fallback response for cat command (line 792)"""
+        from containment.honeypots import InteractiveShellHoneypot
+        
+        honeypot = InteractiveShellHoneypot(
+            honeypot_id="test-shell",
+            port=2222,
+            llm_client=None
+        )
+        
+        # Test cat command (line 792)
+        response = honeypot._generate_fallback_response("cat /etc/passwd", None)
+        assert "Permission denied" in response
+
+    def test_fallback_response_cd_command(self):
+        """Test fallback response for cd command (line 794)"""
+        from containment.honeypots import InteractiveShellHoneypot
+        
+        honeypot = InteractiveShellHoneypot(
+            honeypot_id="test-shell",
+            port=2222,
+            llm_client=None
+        )
+        
+        # Test cd command (line 794) - returns empty string
+        response = honeypot._generate_fallback_response("cd /tmp", None)
+        assert response == ""
+
+
 class TestHoneypotMetrics:
     """Test Prometheus metrics"""
 
