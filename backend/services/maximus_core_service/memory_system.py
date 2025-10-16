@@ -31,18 +31,27 @@ class MemorySystem:
         self.vector_db_client = vector_db_client
         self.short_term_memory: list[dict[str, Any]] = []  # Stores recent interactions
 
-    async def store_interaction(self, prompt: str, response: dict[str, Any], confidence: float):
+    async def store_interaction(self, prompt: str, response: dict[str, Any] | str, confidence: float):
         """Stores a user interaction in both short-term and long-term memory.
 
         Args:
             prompt (str): The user's input prompt.
-            response (Dict[str, Any]): The AI's response.
+            response (Dict[str, Any] | str): The AI's response (can be dict or string).
             confidence (float): The confidence score of the AI's response.
         """
+        # Handle response as string or dict
+        response_text = ""
+        if isinstance(response, dict):
+            response_text = response.get('final_response', str(response))
+        elif isinstance(response, str):
+            response_text = response
+        else:
+            response_text = str(response)
+        
         interaction = {
             "timestamp": datetime.now().isoformat(),
             "prompt": prompt,
-            "response": response,
+            "response": response_text,
             "confidence": confidence,
         }
         self.short_term_memory.append(interaction)
@@ -51,7 +60,7 @@ class MemorySystem:
 
         # Store in long-term memory (vector DB)
         await self.vector_db_client.add_document(
-            content=f"User: {prompt}\nMaximus: {response.get('final_response', '')}",
+            content=f"User: {prompt}\nMaximus: {response_text}",
             metadata={
                 "type": "interaction",
                 "timestamp": interaction["timestamp"],

@@ -25,11 +25,11 @@ class ConfidenceScoring:
         """Initializes the ConfidenceScoring module."""
         pass
 
-    async def score(self, response: dict[str, Any], context: dict[str, Any]) -> float:
+    async def score(self, response: dict[str, Any] | str, context: dict[str, Any]) -> float:
         """Calculates a confidence score for the given response.
 
         Args:
-            response (Dict[str, Any]): The AI's generated response.
+            response (Dict[str, Any] | str): The AI's generated response (can be dict or string).
             context (Dict[str, Any]): The context in which the response was generated.
 
         Returns:
@@ -46,9 +46,19 @@ class ConfidenceScoring:
         # - Length and complexity of chain of thought
 
         base_score = 0.7
-        if "error" in response.get("output", "").lower():
+        
+        # Handle response as string or dict
+        response_text = ""
+        if isinstance(response, dict):
+            response_text = response.get("output", "")
+        elif isinstance(response, str):
+            response_text = response
+        else:
+            response_text = str(response)
+        
+        if "error" in response_text.lower():
             base_score -= 0.3
-        if context.get("tool_results") and any("error" in r for r in context["tool_results"]):
+        if context.get("tool_results") and any("error" in str(r) for r in context["tool_results"]):
             base_score -= 0.2
         if context.get("retrieved_docs"):
             base_score += 0.1
