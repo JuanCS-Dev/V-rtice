@@ -1,0 +1,75 @@
+[project]
+name = "vertice-core"
+version = "1.0.0"
+description = "Core utilities for Vértice services"
+requires-python = ">=3.11"
+authors = [
+    {name = "Vértice Team", email = "dev@vertice.ai"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = [
+    "structlog>=24.0.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.5.0",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-instrumentation-fastapi>=0.41b0",
+    "opentelemetry-instrumentation-httpx>=0.41b0",
+    "opentelemetry-instrumentation-redis>=0.41b0",
+    "opentelemetry-exporter-otlp>=1.20.0",
+    "prometheus-client>=0.19.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.13.0",
+    "mypy>=1.8.0",
+    "types-pyyaml",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = [
+    "--strict-markers",
+    "--cov=src/vertice_core",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-fail-under=95",
+    "-v",
+]
+
+[tool.coverage.run]
+source = ["src/vertice_core"]
+omit = ["tests/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "ANN", "S", "B", "C4", "RUF"]
+ignore = ["ANN101", "ANN102", "S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "ANN201", "ANN001"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "structlog.*"
+ignore_missing_imports = true
