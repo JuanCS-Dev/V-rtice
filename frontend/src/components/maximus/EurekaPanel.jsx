@@ -92,7 +92,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
   // DATA FETCHING
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8024/api/v1/eureka/stats');
+      const response = await fetch('/eureka/stats');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') setStats(data.data);
@@ -104,7 +104,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
 
   const fetchPendingApvs = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8024/api/v1/eureka/pending-apvs');
+      const response = await fetch('/eureka/pending-apvs');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') setPendingApvs(data.data.apvs || []);
@@ -116,7 +116,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
 
   const fetchHistory = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8024/api/v1/eureka/history?limit=50');
+      const response = await fetch('/eureka/history?limit=50');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') setRemediationHistory(data.data.history || []);
@@ -128,7 +128,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
 
   const fetchPRs = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8024/api/v1/eureka/pull-requests?limit=20');
+      const response = await fetch('/eureka/pull-requests?limit=20');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') setPullRequests(data.data.prs || []);
@@ -190,7 +190,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
     }));
 
     try {
-      const response = await fetch(`http://localhost:8024/api/v1/eureka/remediate/${apvId}`, {
+      const response = await fetch(`/eureka/remediate/${apvId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
         body: JSON.stringify({

@@ -29,6 +29,8 @@ CHEMICAL_SENSING_SERVICE_URL = os.getenv("CHEMICAL_SENSING_SERVICE_URL", "http:/
 SOMATOSENSORY_SERVICE_URL = os.getenv("SOMATOSENSORY_SERVICE_URL", "http://localhost:8102")
 VISUAL_CORTEX_SERVICE_URL = os.getenv("VISUAL_CORTEX_SERVICE_URL", "http://localhost:8103")
 AUDITORY_CORTEX_SERVICE_URL = os.getenv("AUDITORY_CORTEX_SERVICE_URL", "http://localhost:8104")
+EUREKA_SERVICE_URL = os.getenv("EUREKA_SERVICE_URL", "http://localhost:8024")
+ORACULO_SERVICE_URL = os.getenv("ORACULO_SERVICE_URL", "http://localhost:8026")
 
 CONSCIOUSNESS_SERVICE_BASE = os.getenv("CONSCIOUSNESS_SERVICE_URL", MAXIMUS_CORE_SERVICE_URL)
 
@@ -150,6 +152,36 @@ async def route_auditory_cortex_service(path: str, request: Request, api_key: st
         JSONResponse: The response from the Auditory Cortex Service.
     """
     return await _proxy_request(AUDITORY_CORTEX_SERVICE_URL, path, request)
+
+
+@app.api_route("/eureka/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_eureka_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the Eureka Service (Automated Remediation).
+
+    Args:
+        path (str): The path to the eureka service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the Eureka Service.
+    """
+    return await _proxy_request(EUREKA_SERVICE_URL, f"api/v1/eureka/{path}", request)
+
+
+@app.api_route("/oraculo/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_oraculo_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the Oraculo Service (Threat Intelligence).
+
+    Args:
+        path (str): The path to the oraculo service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the Oraculo Service.
+    """
+    return await _proxy_request(ORACULO_SERVICE_URL, f"api/v1/oraculo/{path}", request)
 
 
 @app.get("/stream/consciousness/sse")

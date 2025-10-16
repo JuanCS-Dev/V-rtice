@@ -104,7 +104,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
   // DATA FETCHING
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/stats');
+      const response = await fetch('/oraculo/stats');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') setStats(data.data);
@@ -116,7 +116,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
 
   const fetchFeedsHealth = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/feeds/health');
+      const response = await fetch('/oraculo/feeds/health');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') setFeedsHealth(data.data.feeds || feedsHealth);
@@ -128,7 +128,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
 
   const fetchAPVs = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/apvs?limit=50');
+      const response = await fetch('/oraculo/apvs?limit=50');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') setApvs(data.data.apvs || []);
@@ -161,7 +161,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
     }));
 
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/scan', {
+      const response = await fetch('/oraculo/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
         body: JSON.stringify(scanConfig)
@@ -187,7 +187,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
 
   const forwardToEureka = async (apvId) => {
     try {
-      const response = await fetch(`http://localhost:8026/api/v1/oraculo/apv/${apvId}/forward`, {
+      const response = await fetch(`/oraculo/apv/${apvId}/forward`, {
         method: 'POST', headers: { 'X-API-Key': API_KEY } });
       if (response.ok) {
         logger.success(`[Oráculo] APV ${apvId} forwarded to Eureka`);

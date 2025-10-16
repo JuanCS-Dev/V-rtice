@@ -59,7 +59,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
   const { data: mlStats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ['ml-stats', timeRange],
     queryFn: async () => {
-      const response = await fetch(`http://localhost:8026/wargaming/ml/stats?time_range=${timeRange}`);
+      const response = await fetch(`/oraculo/wargaming/ml/stats?time_range=${timeRange}`);
       if (!response.ok) throw new Error('Failed to fetch ML stats');
       return response.json();
     },
@@ -71,7 +71,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
   const { data: confidenceData, isLoading: confLoading } = useQuery({
     queryKey: ['ml-confidence', timeRange],
     queryFn: async () => {
-      const response = await fetch(`http://localhost:8026/wargaming/ml/confidence-distribution?time_range=${timeRange}`);
+      const response = await fetch(`/oraculo/wargaming/ml/confidence-distribution?time_range=${timeRange}`);
       if (!response.ok) throw new Error('Failed to fetch confidence distribution');
       return response.json();
     },
@@ -83,7 +83,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
   const { data: recentPredictions, isLoading: predLoading } = useQuery({
     queryKey: ['ml-predictions', timeRange],
     queryFn: async () => {
-      const response = await fetch(`http://localhost:8026/wargaming/ml/recent-predictions?limit=20&time_range=${timeRange}`);
+      const response = await fetch(`/oraculo/wargaming/ml/recent-predictions?limit=20&time_range=${timeRange}`);
       if (!response.ok) throw new Error('Failed to fetch recent predictions');
       return response.json();
     },
@@ -95,7 +95,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
   const { data: accuracyData, isLoading: accuracyLoading, error: accuracyError } = useQuery({
     queryKey: ['ml-accuracy', timeRange],
     queryFn: async () => {
-      const response = await fetch(`http://localhost:8026/wargaming/ml/accuracy?time_range=${timeRange}`);
+      const response = await fetch(`/oraculo/wargaming/ml/accuracy?time_range=${timeRange}`);
       if (!response.ok) {
         if (response.status === 503 || response.status === 500) {
           return null; // A/B testing store not available
