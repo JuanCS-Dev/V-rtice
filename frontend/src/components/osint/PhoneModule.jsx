@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiClient } from '@/api/client';
 import logger from '@/utils/logger';
 
 const PhoneModule = () => {
@@ -18,17 +19,9 @@ const PhoneModule = () => {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:8000/api/phone/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone: phone.trim() }),
-      });
+      const data = await apiClient.post('/api/phone/analyze', { phone: phone.trim() });
 
-      const data = await response.json();
-
-      if (response.ok && data.status === 'success') {
+      if (data.status === 'success') {
         setResult(data.data);
       } else {
         setError(data.detail || 'Erro ao analisar telefone');

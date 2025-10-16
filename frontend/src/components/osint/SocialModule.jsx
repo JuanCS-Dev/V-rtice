@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiClient } from '@/api/client';
 import logger from '@/utils/logger';
 
 const SocialModule = () => {
@@ -19,20 +20,12 @@ const SocialModule = () => {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:8000/api/social/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          platform: platform,
-          identifier: identifier.trim()
-        }),
+      const data = await apiClient.post('/api/social/profile', {
+        platform: platform,
+        identifier: identifier.trim()
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.status === 'success') {
+      if (data.status === 'success') {
         setResult(data.data);
       } else {
         setError(data.detail || 'Erro ao analisar perfil social');

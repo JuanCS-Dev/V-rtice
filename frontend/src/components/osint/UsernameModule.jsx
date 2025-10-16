@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiClient } from '@/api/client';
 import logger from '@/utils/logger';
 
 const UsernameModule = () => {
@@ -16,48 +17,36 @@ const UsernameModule = () => {
     setResults(null);
 
     try {
-      // Fazer chamada para o API Gateway
-      const response = await fetch('http://localhost:8000/api/username/search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          platforms: 'all',
-          deep_search: true,
-          include_archived: false
-        })
+      const data = await apiClient.post('/api/username/search', {
+        username: username,
+        platforms: 'all',
+        deep_search: true,
+        include_archived: false
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === 'success' && data.data) {
-          // Adaptar os dados reais do backend para o formato esperado
-          const profilesFound = data.data.profiles_found || [];
-          const adaptedProfiles = profilesFound.map(profile => ({
-            platform: profile.platform,
-            url: profile.url,
-            status: profile.exists ? 'found' : 'not_found',
-            last_activity: profile.timestamp ? new Date(profile.timestamp).toLocaleDateString() : null
-          }));
+      if (data.status === 'success' && data.data) {
+        // Adaptar os dados reais do backend para o formato esperado
+        const profilesFound = data.data.profiles_found || [];
+        const adaptedProfiles = profilesFound.map(profile => ({
+          platform: profile.platform,
+          url: profile.url,
+          status: profile.exists ? 'found' : 'not_found',
+          last_activity: profile.timestamp ? new Date(profile.timestamp).toLocaleDateString() : null
+        }));
 
-          const adaptedResults = {
-            username: username,
-            platforms_found: adaptedProfiles,
-            total_found: profilesFound.filter(p => p.exists).length,
-            confidence_score: data.data.ai_analysis?.confidence_score || 75,
-            ai_analysis: data.data.ai_analysis,
-            execution_time: data.data.execution_time,
-            total_platforms_checked: data.data.total_platforms_checked,
-            statistics: data.data.statistics
-          };
-          setResults(adaptedResults);
-        } else {
-          throw new Error('Dados inválidos recebidos');
-        }
+        const adaptedResults = {
+          username: username,
+          platforms_found: adaptedProfiles,
+          total_found: profilesFound.filter(p => p.exists).length,
+          confidence_score: data.data.ai_analysis?.confidence_score || 75,
+          ai_analysis: data.data.ai_analysis,
+          execution_time: data.data.execution_time,
+          total_platforms_checked: data.data.total_platforms_checked,
+          statistics: data.data.statistics
+        };
+        setResults(adaptedResults);
       } else {
-        throw new Error(`Erro HTTP: ${response.status}`);
+        throw new Error('Dados inválidos recebidos');
       }
     } catch (error) {
       logger.error('Erro na busca:', error);
