@@ -1,0 +1,118 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.set-matrix.outputs.services }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Generate build matrix
+        id: set-matrix
+        run: |
+          pip install pyyaml
+          python3 << 'EOF'
+          import yaml
+          import json
+          
+          with open('backend/ports.yaml') as f:
+              registry = yaml.safe_load(f)
+          
+          services = []
+          for category, svcs in registry.items():
+              if category != 'metadata' and isinstance(svcs, dict):
+                  for service_name, port in svcs.items():
+                      services.append({
+                          'name': service_name,
+                          'port': port,
+                          'category': category
+                      })
+          
+          # Limit to first 10 for PR builds
+          if '${{ github.event_name }}' == 'pull_request':
+              services = services[:10]
+          
+          print(f"services={json.dumps(services)}")
+          with open('$GITHUB_OUTPUT', 'a') as f:
+              f.write(f"services={json.dumps(services)}\n")
+          EOF
+
+  build-and-push:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJson(needs.build-matrix.outputs.services) }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+      
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/services/${{ matrix.service.name }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            SERVICE_NAME=${{ matrix.service.name }}
+            SERVICE_PORT=${{ matrix.service.port }}
+            SERVICE_CATEGORY=${{ matrix.service.category }}
+
+  build-summary:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Status: ${{ needs.build-and-push.result }}" >> $GITHUB_STEP_SUMMARY
