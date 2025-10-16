@@ -31,6 +31,8 @@ import { useAPVStream } from '../../hooks/useAPVStream';
 import './Panels.css';
 import './AdaptiveImmunity.css';
 
+const API_KEY = import.meta.env.VITE_API_KEY || '';
+
 export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
   // WEBSOCKET STREAM - Real-time APV detection
   const {
@@ -161,7 +163,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
     try {
       const response = await fetch('http://localhost:8026/api/v1/oraculo/scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
         body: JSON.stringify(scanConfig)
       });
 
@@ -186,8 +188,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
   const forwardToEureka = async (apvId) => {
     try {
       const response = await fetch(`http://localhost:8026/api/v1/oraculo/apv/${apvId}/forward`, {
-        method: 'POST'
-      });
+        method: 'POST', headers: { 'X-API-Key': API_KEY } });
       if (response.ok) {
         logger.success(`[Oráculo] APV ${apvId} forwarded to Eureka`);
         await fetchAPVs();

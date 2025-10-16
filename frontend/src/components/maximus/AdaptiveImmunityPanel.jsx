@@ -47,6 +47,8 @@ import {
 import logger from '@/utils/logger';
 import { HITLTab } from './hitl';
 
+const API_KEY = import.meta.env.VITE_API_KEY || '';
+
 export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
   const [timeRange, setTimeRange] = useState('24h'); // '1h', '24h', '7d', '30d'
   const [activeTab, setActiveTab] = useState('ml'); // 'ml', 'hitl', 'ab-testing'

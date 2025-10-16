@@ -23,6 +23,8 @@ import { useAPVStream } from '../../hooks/useAPVStream';
 import './Panels.css';
 import './AdaptiveImmunity.css';
 
+const API_KEY = import.meta.env.VITE_API_KEY || '';
+
 export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
   // WEBSOCKET STREAM - Real-time APV updates
   const {
@@ -190,7 +192,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
     try {
       const response = await fetch(`http://localhost:8024/api/v1/eureka/remediate/${apvId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
         body: JSON.stringify({
           mode: options.mode || 'auto',
           runWargaming: options.wargaming !== false,
