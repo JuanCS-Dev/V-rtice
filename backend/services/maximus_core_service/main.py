@@ -300,7 +300,9 @@ async def process_query_endpoint(request: QueryRequest) -> dict[str, Any]:
     if not maximus_ai:
         raise HTTPException(status_code=503, detail="Maximus AI not initialized.")
     try:
-        response = await maximus_ai.process_query(request.query, request.context)
+        # Ensure context is a dict, not None
+        context = request.context if request.context is not None else {}
+        response = await maximus_ai.process_query(request.query, context)
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")

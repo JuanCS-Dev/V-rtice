@@ -50,3 +50,5 @@ typing-inspection==0.4.2
     # via pydantic
 uvicorn==0.37.0
     # via vuln-scanner-service (pyproject.toml)
+sqlalchemy>=2.0.0
+pydantic-settings>=2.0.0
