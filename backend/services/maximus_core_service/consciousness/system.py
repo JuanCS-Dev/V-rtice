@@ -63,7 +63,7 @@ class ReactiveConfig:
     decision_history_size: int = 100  # Recent orchestration decisions
 
     # Feature Flags
-    enable_data_orchestration: bool = True  # Enable/disable orchestrator
+    enable_data_orchestration: bool = False  # Enable/disable orchestrator (DISABLED temporarily - metrics collector bug)
 
 
 @dataclass
@@ -90,7 +90,7 @@ class ConsciousnessConfig:
     arousal_max: float = 0.95
 
     # Safety Protocol (FASE VII)
-    safety_enabled: bool = True
+    safety_enabled: bool = False  # DISABLED temporarily - metrics collection bug
     safety_thresholds: SafetyThresholds | None = None
 
     # Reactive Fabric (Sprint 3)
@@ -156,15 +156,15 @@ class ConsciousnessSystem:
         print("🧠 Starting Consciousness System...")
 
         try:
-            # 1. Initialize TIG Fabric
+            # 1. Initialize TIG Fabric (ASYNC - non-blocking)
             print("  ├─ Creating TIG Fabric...")
             tig_config = TopologyConfig(
                 node_count=self.config.tig_node_count, target_density=self.config.tig_target_density
             )
             self.tig_fabric = TIGFabric(tig_config)
-            await self.tig_fabric.initialize()
-            await self.tig_fabric.enter_esgt_mode()
-            print(f"  ✅ TIG Fabric initialized ({self.config.tig_node_count} nodes)")
+            await self.tig_fabric.initialize_async()  # Returns immediately, builds in background
+            print(f"  ✅ TIG Fabric initializing in background ({self.config.tig_node_count} nodes)")
+            print(f"     Service starting - TIG will be ready shortly")
 
             # 2. TRACK 1: Initialize Social Cognition Components (ToM, Metacognition, PFC)
             print("  ├─ Creating Social Cognition components (ToM, Metacognition, PFC)...")

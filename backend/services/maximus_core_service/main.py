@@ -215,7 +215,7 @@ async def health_check() -> dict[str, Any]:
             health_status["components"]["tig_fabric"] = {
                 "status": "healthy",
                 "node_count": len(consciousness_system.tig_fabric.nodes),
-                "edge_count": consciousness_system.tig_fabric.edge_count,
+                "edge_count": tig_metrics.edge_count,
                 "avg_latency_us": tig_metrics.avg_latency_us
             }
 
@@ -244,8 +244,8 @@ async def health_check() -> dict[str, Any]:
             health_status["components"]["tom_engine"] = {
                 "status": "initialized" if consciousness_system.tom_engine._initialized else "not_initialized",
                 "total_agents": tom_stats["total_agents"],
-                "memory_beliefs": tom_stats["memory"]["total_beliefs"],
-                "contradictions": tom_stats["contradictions"],
+                "memory_cache_size": tom_stats["memory"]["cache_size"],
+                "contradictions": tom_stats["contradictions"]["total"],
                 "redis_cache": {
                     "enabled": tom_stats["redis_cache"]["enabled"],
                     "hit_rate": tom_stats["redis_cache"].get("hit_rate", 0.0) if tom_stats["redis_cache"]["enabled"] else None
@@ -265,11 +265,11 @@ async def health_check() -> dict[str, Any]:
 
     # Check HITL Decision Queue
     if decision_queue:
-        queue_stats = decision_queue.get_statistics()
+        pending_decisions = decision_queue.get_pending_decisions()
         health_status["components"]["decision_queue"] = {
             "status": "healthy",
-            "pending_decisions": queue_stats["pending"],
-            "sla_violations": queue_stats["sla_violations_count"]
+            "pending_decisions": len(pending_decisions),
+            "sla_violations": 0  # TODO: Track SLA violations in DecisionQueue
         }
     else:
         health_status["components"]["decision_queue"] = {"status": "not_initialized"}

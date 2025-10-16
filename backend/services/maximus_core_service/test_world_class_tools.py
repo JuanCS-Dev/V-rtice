@@ -13,7 +13,7 @@ orchestration mechanism.
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from tools_world_class import WorldClassTools
+from _demonstration.tools_world_class import WorldClassTools
 
 
 @pytest.fixture

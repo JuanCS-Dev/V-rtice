@@ -12,7 +12,7 @@ a robust and extensible architecture.
 
 from typing import TYPE_CHECKING, Any
 
-from all_services_tools import AllServicesTools
+from _demonstration.all_services_tools import AllServicesTools
 
 # Avoid circular import
 if TYPE_CHECKING:

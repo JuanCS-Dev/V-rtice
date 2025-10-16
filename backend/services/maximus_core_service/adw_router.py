@@ -17,17 +17,17 @@ Glory to YHWH
 
 import asyncio
 import logging
-import os
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 
 # Purple Team Service
-import sys
-sys.path.append('/home/juan/vertice-dev/backend/services')
-from purple_team.evolution_tracker import EvolutionTracker
+# TEMPORARY: Commented out until path resolution fixed in Docker
+# import sys
+# sys.path.append('/home/juan/vertice-dev/backend/services')
+# from purple_team.evolution_tracker import EvolutionTracker
 
 logger = logging.getLogger(__name__)
 
@@ -37,17 +37,18 @@ router = APIRouter(prefix="/api/adw", tags=["AI-Driven Workflows"])
 # SERVICE INITIALIZATION (Singleton Pattern)
 # ============================================================================
 
-_evolution_tracker: EvolutionTracker | None = None
-
-
-def get_evolution_tracker() -> EvolutionTracker:
-    """Dependency: Get evolution tracker instance (singleton)."""
-    global _evolution_tracker
-    if _evolution_tracker is None:
-        data_dir = os.getenv("PURPLE_TEAM_DATA_DIR", "/tmp/purple_team_data")
-        _evolution_tracker = EvolutionTracker(data_dir=data_dir)
-        logger.info(f"EvolutionTracker initialized with data_dir={data_dir}")
-    return _evolution_tracker
+# TEMPORARY: Commented out until purple_team path resolved
+# _evolution_tracker: EvolutionTracker | None = None
+#
+#
+# def get_evolution_tracker() -> EvolutionTracker:
+#     """Dependency: Get evolution tracker instance (singleton)."""
+#     global _evolution_tracker
+#     if _evolution_tracker is None:
+#         data_dir = os.getenv("PURPLE_TEAM_DATA_DIR", "/tmp/purple_team_data")
+#         _evolution_tracker = EvolutionTracker(data_dir=data_dir)
+#         logger.info(f"EvolutionTracker initialized with data_dir={data_dir}")
+#     return _evolution_tracker
 
 
 # NOTE: Offensive and Defensive service imports commented out
@@ -88,8 +89,8 @@ class CampaignRequest(BaseModel):
     """Request model for creating offensive campaign."""
 
     objective: str
-    scope: List[str]
-    constraints: Dict[str, Any] | None = None
+    scope: list[str]
+    constraints: dict[str, Any] | None = None
 
 
 class CampaignResponse(BaseModel):
@@ -106,7 +107,7 @@ class CampaignResponse(BaseModel):
 
 
 @router.get("/offensive/status")
-async def get_offensive_status() -> Dict[str, Any]:
+async def get_offensive_status() -> dict[str, Any]:
     """Get Red Team AI operational status.
 
     Returns current state of offensive orchestration system including:
@@ -235,7 +236,7 @@ async def create_campaign(
 
 
 @router.get("/offensive/campaigns")
-async def list_campaigns() -> Dict[str, Any]:
+async def list_campaigns() -> dict[str, Any]:
     """List all offensive campaigns (active and historical).
 
     Returns:
@@ -277,7 +278,7 @@ async def list_campaigns() -> Dict[str, Any]:
 
 
 @router.get("/defensive/status")
-async def get_defensive_status() -> Dict[str, Any]:
+async def get_defensive_status() -> dict[str, Any]:
     """Get Blue Team AI (Immune System) operational status.
 
     Returns comprehensive status of all 8 immune agents:
@@ -373,7 +374,7 @@ async def get_defensive_status() -> Dict[str, Any]:
 
 
 @router.get("/defensive/threats")
-async def get_threats() -> List[Dict[str, Any]]:
+async def get_threats() -> list[dict[str, Any]]:
     """Get currently detected threats.
 
     Returns list of active and recent threats detected by immune agents,
@@ -409,7 +410,7 @@ async def get_threats() -> List[Dict[str, Any]]:
 
 
 @router.get("/defensive/coagulation")
-async def get_coagulation_status() -> Dict[str, Any]:
+async def get_coagulation_status() -> dict[str, Any]:
     """Get coagulation cascade system status.
 
     Returns status of biological-inspired hemostasis system:
@@ -459,10 +460,8 @@ async def get_coagulation_status() -> Dict[str, Any]:
 
 
 @router.get("/purple/metrics")
-async def get_purple_metrics(
-    tracker: EvolutionTracker = Depends(get_evolution_tracker),
-) -> Dict[str, Any]:
-    """Get Purple Team co-evolution metrics - REAL DATA ✅
+async def get_purple_metrics() -> dict[str, Any]:
+    """Get Purple Team co-evolution metrics - TEMPORARY MOCK
 
     Returns metrics from Red vs Blue adversarial training cycles:
     - Red Team attack effectiveness
@@ -473,21 +472,22 @@ async def get_purple_metrics(
     Returns:
         Dict with purple team metrics
     """
-    try:
-        return await tracker.get_metrics()
-    except Exception as e:
-        logger.error(f"Error fetching purple metrics: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Evolution tracker error: {str(e)}"
-        )
+    # TEMPORARY: Return mock data until purple_team service integrated
+    logger.warning("Using mock data for purple metrics - service not yet integrated")
+    return {
+        "status": "idle",
+        "red_effectiveness": 0.0,
+        "blue_effectiveness": 0.0,
+        "cycles_completed": 0,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 
 @router.post("/purple/cycle")
 async def trigger_evolution_cycle(
-    background_tasks: BackgroundTasks,
-    tracker: EvolutionTracker = Depends(get_evolution_tracker),
-) -> Dict[str, Any]:
-    """Trigger new co-evolution cycle - REAL EXECUTION ✅
+    background_tasks: BackgroundTasks
+) -> dict[str, Any]:
+    """Trigger new co-evolution cycle - TEMPORARY MOCK
 
     Initiates adversarial training round where Red Team attacks
     and Blue Team defends, generating improvement signals for both.
@@ -495,30 +495,14 @@ async def trigger_evolution_cycle(
     Returns:
         Dict with cycle status and ID
     """
-    try:
-        # Create cycle
-        cycle = await tracker.trigger_cycle()
-
-        # Add background task for Red vs Blue simulation
-        # NOTE: Requires offensive/defensive services to be integrated
-        # background_tasks.add_task(
-        #     _run_evolution_cycle,
-        #     cycle["cycle_id"],
-        #     get_orchestrator(),
-        #     get_cascade(),
-        #     tracker
-        # )
-
-        logger.info(
-            f"Evolution cycle {cycle['cycle_id']} created (background execution pending service integration)"
-        )
-
-        return cycle
-    except Exception as e:
-        logger.error(f"Error triggering evolution cycle: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Cycle trigger failed: {str(e)}"
-        )
+    # TEMPORARY: Return mock data until purple_team service integrated
+    logger.warning("Using mock purple cycle trigger - service not yet integrated")
+    cycle_id = f"cycle_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    return {
+        "cycle_id": cycle_id,
+        "status": "pending",
+        "created_at": datetime.utcnow().isoformat()
+    }
 
 
 # async def _run_evolution_cycle(
@@ -569,16 +553,16 @@ async def trigger_evolution_cycle(
 
 # Import workflows
 from workflows.attack_surface_adw import (
-    AttackSurfaceWorkflow,
     AttackSurfaceTarget,
+    AttackSurfaceWorkflow,
 )
 from workflows.credential_intel_adw import (
     CredentialIntelWorkflow,
     CredentialTarget,
 )
 from workflows.target_profiling_adw import (
-    TargetProfilingWorkflow,
     ProfileTarget,
+    TargetProfilingWorkflow,
 )
 
 # Workflow instances (singletons)
@@ -653,7 +637,7 @@ async def execute_attack_surface_workflow(
     request: AttackSurfaceRequest,
     background_tasks: BackgroundTasks,
     workflow: AttackSurfaceWorkflow = Depends(get_attack_surface_workflow),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute Attack Surface Mapping workflow.
 
     Combines Network Recon + Vuln Intel + Service Detection for comprehensive
@@ -698,7 +682,7 @@ async def execute_credential_intel_workflow(
     request: CredentialIntelRequest,
     background_tasks: BackgroundTasks,
     workflow: CredentialIntelWorkflow = Depends(get_credential_intel_workflow),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute Credential Intelligence workflow.
 
     Combines Breach Data + Google Dorking + Dark Web + Username Hunter
@@ -754,7 +738,7 @@ async def execute_target_profiling_workflow(
     request: ProfileTargetRequest,
     background_tasks: BackgroundTasks,
     workflow: TargetProfilingWorkflow = Depends(get_target_profiling_workflow),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute Deep Target Profiling workflow.
 
     Combines Social Scraper + Email/Phone Analyzer + Image Analysis +
@@ -813,7 +797,7 @@ async def get_workflow_status(
     attack_surface: AttackSurfaceWorkflow = Depends(get_attack_surface_workflow),
     credential_intel: CredentialIntelWorkflow = Depends(get_credential_intel_workflow),
     target_profiling: TargetProfilingWorkflow = Depends(get_target_profiling_workflow),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get workflow execution status.
 
     Checks all workflow types for the given ID.
@@ -846,7 +830,7 @@ async def get_workflow_report(
     attack_surface: AttackSurfaceWorkflow = Depends(get_attack_surface_workflow),
     credential_intel: CredentialIntelWorkflow = Depends(get_credential_intel_workflow),
     target_profiling: TargetProfilingWorkflow = Depends(get_target_profiling_workflow),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get complete workflow report.
 
     Retrieves full report from any workflow type.
@@ -896,9 +880,7 @@ async def get_workflow_report(
 
 
 @router.get("/overview")
-async def get_adw_overview(
-    tracker: EvolutionTracker = Depends(get_evolution_tracker),
-) -> Dict[str, Any]:
+async def get_adw_overview() -> dict[str, Any]:
     """Get unified overview of all AI-Driven Workflows.
 
     Combines status from Offensive, Defensive, and Purple Team systems
@@ -910,7 +892,7 @@ async def get_adw_overview(
     try:
         # Fetch all statuses in parallel
         offensive, defensive, purple = await asyncio.gather(
-            get_offensive_status(), get_defensive_status(), get_purple_metrics(tracker)
+            get_offensive_status(), get_defensive_status(), get_purple_metrics()
         )
 
         # Determine overall status
@@ -945,7 +927,7 @@ async def get_adw_overview(
 
 
 @router.get("/health")
-async def adw_health_check() -> Dict[str, str]:
+async def adw_health_check() -> dict[str, str]:
     """ADW system health check endpoint.
 
     Returns:

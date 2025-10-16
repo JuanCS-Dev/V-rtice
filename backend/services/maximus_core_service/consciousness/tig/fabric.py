@@ -483,6 +483,7 @@ class TIGFabric:
         self.graph = nx.Graph()  # NetworkX graph for analysis
         self.metrics = FabricMetrics()
         self._initialized = False
+        self._initializing = False  # NEW: Track background init
 
         # FASE VII (Safety Hardening): Fault tolerance components
         self.node_health: dict[str, NodeHealth] = {}
@@ -493,6 +494,7 @@ class TIGFabric:
         # Health monitoring task
         self._health_monitor_task: asyncio.Task | None = None
         self._running = False
+        self._init_task: asyncio.Task | None = None  # NEW: Background init task
 
     async def initialize(self) -> None:
         """
@@ -553,6 +555,139 @@ class TIGFabric:
 
         self._initialized = True
         print("🛡️  Health monitoring active")
+
+    async def initialize_async(self) -> None:
+        """
+        Initialize TIG fabric asynchronously in background.
+
+        Service starts immediately and reports "initializing" status.
+        Topology construction happens in background without blocking startup.
+
+        Usage:
+            fabric = TIGFabric(config)
+            await fabric.initialize_async()  # Returns immediately
+            # Service is UP, TIG initializing in background
+
+            # Check status later:
+            if fabric.is_ready():
+                print("TIG ready!")
+
+        This is the PRODUCTION pattern - never block service startup.
+        """
+        if self._initialized:
+            raise RuntimeError("Fabric already initialized")
+
+        if self._initializing:
+            print("⚠️  TIG Fabric already initializing in background")
+            return
+
+        self._initializing = True
+        print(f"🧠 TIG Fabric: Starting background initialization ({self.config.node_count} nodes)...")
+        print(f"   Service will start immediately - topology builds in background")
+
+        # Launch initialization in background
+        self._init_task = asyncio.create_task(self._background_init())
+
+    async def _background_init(self) -> None:
+        """Internal: Run full initialization in background."""
+        try:
+            print(f"🧠 [Background] Initializing TIG Fabric with {self.config.node_count} nodes...")
+            print(f"   [Background] Target: Scale-free (γ={self.config.gamma}) + Small-world (C≥{self.config.clustering_target})")
+
+            # Run CPU-bound topology generation in thread pool to avoid blocking event loop
+            loop = asyncio.get_running_loop()
+
+            # Step 1: Generate scale-free topology (CPU-bound)
+            await loop.run_in_executor(None, self._generate_scale_free_base)
+
+            # Step 2: Apply small-world rewiring (CPU-bound)
+            if self.config.enable_small_world_rewiring:
+                await loop.run_in_executor(None, self._apply_small_world_rewiring)
+
+            # Step 3: Create TIGNode instances (fast, can run async)
+            self._instantiate_nodes()
+
+            # Step 4: Establish connections (fast, can run async)
+            self._establish_connections()
+
+            # Step 5: Compute metrics (CPU-bound)
+            await loop.run_in_executor(None, self._compute_metrics)
+
+            is_valid, violations = self.metrics.validate_iit_compliance()
+
+            if is_valid:
+                print("✅ [Background] TIG Fabric initialized successfully")
+                print(f"   ECI: {self.metrics.effective_connectivity_index:.3f}")
+                print(f"   Clustering: {self.metrics.avg_clustering_coefficient:.3f}")
+                print(f"   Path Length: {self.metrics.avg_path_length:.2f}")
+                print(f"   Algebraic Connectivity: {self.metrics.algebraic_connectivity:.3f}")
+            else:
+                print("⚠️  [Background] TIG Fabric initialized with IIT violations:")
+                for v in violations:
+                    print(f"   - {v}")
+
+            # Step 6: Initialize health monitoring
+            for node_id in self.nodes.keys():
+                self.node_health[node_id] = NodeHealth(node_id=node_id)
+                self.circuit_breakers[node_id] = CircuitBreaker()
+
+            # Step 7: Activate all nodes
+            for node in self.nodes.values():
+                node.node_state = NodeState.ACTIVE
+
+            # Step 8: Start health monitoring
+            self._running = True
+            self._health_monitor_task = asyncio.create_task(self._health_monitoring_loop())
+
+            self._initialized = True
+            self._initializing = False
+            print("🛡️  [Background] TIG health monitoring active - Fabric READY")
+
+        except Exception as e:
+            print(f"❌ [Background] TIG initialization failed: {e}")
+            self._initializing = False
+            raise
+
+    def is_ready(self) -> bool:
+        """Check if TIG fabric is fully initialized and ready.
+
+        Returns:
+            True if initialization complete, False if still initializing or failed
+        """
+        return self._initialized
+
+    def is_initializing(self) -> bool:
+        """Check if TIG fabric is currently initializing.
+
+        Returns:
+            True if initialization in progress, False otherwise
+        """
+        return self._initializing
+
+    def get_init_status(self) -> dict[str, Any]:
+        """Get detailed initialization status.
+
+        Returns:
+            Dict with keys:
+            - ready: bool - Fully initialized
+            - initializing: bool - Background init in progress
+            - node_count: int - Nodes created so far
+            - status: str - Human-readable status
+        """
+        if self._initialized:
+            status = "ready"
+        elif self._initializing:
+            status = "initializing"
+        else:
+            status = "not_started"
+
+        return {
+            "ready": self._initialized,
+            "initializing": self._initializing,
+            "node_count": len(self.nodes),
+            "target_node_count": self.config.node_count,
+            "status": status
+        }
 
     def _generate_scale_free_base(self) -> None:
         """Generate scale-free network using Barabási-Albert preferential attachment."""

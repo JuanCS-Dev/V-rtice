@@ -160,7 +160,7 @@ class MetricsCollector:
             tig_metrics = self.system.tig_fabric.get_metrics()
 
             metrics.tig_node_count = len(self.system.tig_fabric.nodes)
-            metrics.tig_edge_count = self.system.tig_fabric.edge_count
+            metrics.tig_edge_count = tig_metrics.edge_count
             metrics.tig_avg_latency_us = tig_metrics.avg_latency_us if hasattr(tig_metrics, 'avg_latency_us') else 0.0
 
             # Get current coherence if available
@@ -199,7 +199,7 @@ class MetricsCollector:
             if arousal_state:
                 metrics.arousal_level = arousal_state.arousal
                 metrics.arousal_classification = arousal_state.level.value if hasattr(arousal_state.level, 'value') else str(arousal_state.level)
-                metrics.arousal_stress = arousal_state.stress_contribution
+                metrics.arousal_stress = arousal_state.temporal_contribution
                 metrics.arousal_need = arousal_state.need_contribution
 
         except Exception as e:

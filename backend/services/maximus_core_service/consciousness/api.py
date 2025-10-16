@@ -250,7 +250,7 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
                 else str(arousal_state.level),
                 "baseline": arousal_state.baseline_arousal,
                 "need_contribution": arousal_state.need_contribution,
-                "stress_contribution": arousal_state.stress_contribution,
+                "temporal_contribution": arousal_state.temporal_contribution,
                 "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
