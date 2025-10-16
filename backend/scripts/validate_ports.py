@@ -24,7 +24,7 @@ from typing import Any
 
 try:
     import yaml
-except ImportError:
+except ImportError:  # pragma: no cover - defensive import check
     print("❌ PyYAML not installed. Run: pip install pyyaml")
     sys.exit(1)
 
@@ -46,7 +46,8 @@ def load_registry() -> dict[str, Any]:
     
     try:
         with open(registry_path) as f:
-            return yaml.safe_load(f)
+            data: dict[str, Any] = yaml.safe_load(f)
+            return data
     except yaml.YAMLError as e:
         print(f"❌ Invalid YAML: {e}")
         sys.exit(1)
@@ -165,7 +166,7 @@ def validate_completeness(registry: dict[str, Any]) -> list[str]:
     }
     
     # Get mapped services from YAML
-    mapped_services = set()
+    mapped_services: set[str] = set()
     for category, services in registry.items():
         if category == "metadata" or not isinstance(services, dict):
             continue
