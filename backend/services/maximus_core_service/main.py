@@ -315,4 +315,5 @@ if __name__ == "__main__":
     start_http_server(8001)
     print("📈 Prometheus metrics server started on port 8001")
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Core service runs on 8100, API Gateway proxies on 8000
+    uvicorn.run(app, host="0.0.0.0", port=8100)

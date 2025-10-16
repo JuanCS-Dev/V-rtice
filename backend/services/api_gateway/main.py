@@ -24,11 +24,11 @@ from starlette.websockets import WebSocketDisconnect
 app = FastAPI(title="Maximus API Gateway", version="1.0.0")
 
 # Configuration for backend services
-MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8000")
-CHEMICAL_SENSING_SERVICE_URL = os.getenv("CHEMICAL_SENSING_SERVICE_URL", "http://localhost:8001")
-SOMATOSENSORY_SERVICE_URL = os.getenv("SOMATOSENSORY_SERVICE_URL", "http://localhost:8002")
-VISUAL_CORTEX_SERVICE_URL = os.getenv("VISUAL_CORTEX_SERVICE_URL", "http://localhost:8003")
-AUDITORY_CORTEX_SERVICE_URL = os.getenv("AUDITORY_CORTEX_SERVICE_URL", "http://localhost:8004")
+MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8100")
+CHEMICAL_SENSING_SERVICE_URL = os.getenv("CHEMICAL_SENSING_SERVICE_URL", "http://localhost:8101")
+SOMATOSENSORY_SERVICE_URL = os.getenv("SOMATOSENSORY_SERVICE_URL", "http://localhost:8102")
+VISUAL_CORTEX_SERVICE_URL = os.getenv("VISUAL_CORTEX_SERVICE_URL", "http://localhost:8103")
+AUDITORY_CORTEX_SERVICE_URL = os.getenv("AUDITORY_CORTEX_SERVICE_URL", "http://localhost:8104")
 
 CONSCIOUSNESS_SERVICE_BASE = os.getenv("CONSCIOUSNESS_SERVICE_URL", MAXIMUS_CORE_SERVICE_URL)
 
