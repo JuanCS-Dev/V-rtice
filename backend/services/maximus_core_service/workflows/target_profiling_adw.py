@@ -132,7 +132,8 @@ class TargetProfilingWorkflow:
         Args:
             osint_service_url: OSINT Service endpoint
         """
-        self.osint_url = osint_service_url
+        import os
+        self.osint_url = osint_service_url if osint_service_url != "http://localhost:8036" else os.getenv("OSINT_SERVICE_URL", "http://localhost:8036")
 
         # Workflow state
         self.active_workflows: Dict[str, TargetProfileReport] = {}

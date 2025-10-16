@@ -261,7 +261,7 @@ services:
     build: ./backend/services/osint_service
     container_name: vertice-osint
     ports:
-      - "8100:8007"
+      - "8036:8007"
     environment:
       - REDIS_HOST=redis
       - MAXIMUS_HOST=maximus_predict
