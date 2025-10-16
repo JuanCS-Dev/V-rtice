@@ -1,0 +1,137 @@
+# Vértice MAXIMUS Service Port Registry
+# Single source of truth for all service ports
+# Version: 1.0.0
+
+metadata:
+  version: "1.0.0"
+  last_updated: "2025-10-16"
+  total_services: 83
+  port_ranges:
+    core: "8000-8099"
+    maximus: "8100-8199"
+    immune: "8200-8299"
+    intelligence: "8300-8399"
+    offensive: "8400-8499"
+    defensive: "8500-8599"
+    sensory: "8600-8699"
+    cognition: "8700-8799"
+    higher_order: "8800-8899"
+    support: "8900-8999"
+    wargaming: "9000-9099"
+    special: "9100-9199"
+
+# Gateway and Core Services (8000-8099)
+core:
+  api_gateway: 8000
+
+# MAXIMUS Family (8100-8199)
+maximus:
+  maximus_core_service: 8100
+  maximus_oraculo: 8101
+  maximus_oraculo_v2: 8102
+  maximus_eureka: 8103
+  maximus_integration_service: 8104
+  maximus_orchestrator_service: 8105
+  maximus_predict: 8106
+
+# Immune System Services (8200-8299)
+immune:
+  active_immune_core: 8200
+  adaptive_immune_system: 8201
+  adaptive_immunity_db: 8202
+  adaptive_immunity_service: 8203
+  ai_immune_system: 8204
+  immunis_api_service: 8205
+  immunis_bcell_service: 8206
+  immunis_cytotoxic_t_service: 8207
+  immunis_dendritic_service: 8208
+  immunis_helper_t_service: 8209
+  immunis_macrophage_service: 8210
+  immunis_neutrophil_service: 8211
+  immunis_nk_cell_service: 8212
+  immunis_treg_service: 8213
+
+# Intelligence & OSINT Services (8300-8399)
+intelligence:
+  osint_service: 8300
+  threat_intel_service: 8301
+  google_osint_service: 8302
+  network_recon_service: 8303
+  domain_service: 8304
+  ip_intelligence_service: 8305
+  vuln_intel_service: 8306
+  cyber_service: 8307
+  network_monitor_service: 8308
+  ssl_monitor_service: 8309
+  nmap_service: 8310
+
+# Offensive Security Services (8400-8499)
+offensive:
+  offensive_orchestrator_service: 8400
+  offensive_gateway: 8401
+  offensive_tools_service: 8402
+  web_attack_service: 8403
+  malware_analysis_service: 8404
+  c2_orchestration_service: 8405
+  social_eng_service: 8406
+  vuln_scanner_service: 8407
+
+# Defensive Security Services (8500-8599)
+defensive:
+  reactive_fabric_core: 8500
+  reactive_fabric_analysis: 8501
+  reflex_triage_engine: 8502
+  homeostatic_regulation: 8503
+  bas_service: 8504
+  rte_service: 8505
+  hsas_service: 8506
+
+# Sensory Processing Services (8600-8699)
+sensory:
+  auditory_cortex_service: 8600
+  visual_cortex_service: 8601
+  somatosensory_service: 8602
+  chemical_sensing_service: 8603
+  vestibular_service: 8604
+  tegumentar_service: 8605
+
+# Cognitive Services (8700-8799)
+cognition:
+  prefrontal_cortex_service: 8700
+  digital_thalamus_service: 8701
+  memory_consolidation_service: 8702
+  neuromodulation_service: 8703
+
+# Higher-Order Cognitive Loop (8800-8899)
+higher_order:
+  hcl_analyzer_service: 8800
+  hcl_planner_service: 8801
+  hcl_executor_service: 8802
+  hcl_kb_service: 8803
+  hcl_monitor_service: 8804
+  strategic_planning_service: 8805
+  autonomous_investigation_service: 8806
+  narrative_analysis_service: 8807
+  narrative_manipulation_filter: 8808
+
+# Support & Infrastructure Services (8900-8999)
+support:
+  auth_service: 8900
+  atlas_service: 8901
+  agent_communication: 8902
+  sinesp_service: 8903
+  hitl_patch_service: 8904
+  cloud_coordinator_service: 8905
+  edge_agent_service: 8906
+  hpc_service: 8907
+  ethical_audit_service: 8908
+  adr_core_service: 8909
+
+# Wargaming & Testing Services (9000-9099)
+wargaming:
+  wargaming_crisol: 9000
+  mock_vulnerable_apps: 9001
+  tataca_ingestion: 9002
+  seriema_graph: 9003
+  purple_team: 9004
+  predictive_threat_hunting_service: 9005

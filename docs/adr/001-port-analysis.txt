@@ -1,0 +1,118 @@
+=== ADR-001: Port Analysis Results ===
+Date: 2025-10-16
+Analyzer: Track 2 Infrastructure Team
+
+SUMMARY:
+- Total services: 83
+- Undefined ports: 18 services
+- Defined ports: 65 services
+- CRITICAL: Port 8000 conflict (38 services)
+
+CURRENT PORT USAGE (sorted):
+active_immune_core: UNDEFINED
+adaptive_immune_system: 8000
+adaptive_immunity_db: 8000
+adaptive_immunity_service: UNDEFINED
+adr_core_service: 8005
+agent_communication: 8000
+ai_immune_system: 8000
+api_gateway: 8000
+atlas_service: 8007
+auditory_cortex_service: 8000
+auth_service: 8008
+autonomous_investigation_service: UNDEFINED
+bas_service: UNDEFINED
+c2_orchestration_service: UNDEFINED
+chemical_sensing_service: 8000
+cloud_coordinator_service: 8000
+cyber_service: 8011
+digital_thalamus_service: 8000
+domain_service: 8013
+edge_agent_service: 8000
+ethical_audit_service: 8000
+google_osint_service: 8014
+hcl_analyzer_service: 8015
+hcl_executor_service: 8016
+hcl_kb_service: 8017
+hcl_monitor_service: 8018
+hcl_planner_service: 8019
+hitl_patch_service: 8000
+homeostatic_regulation: 8000
+hpc_service: 8006
+hsas_service: 8000
+immunis_api_service: UNDEFINED
+immunis_bcell_service: 8000
+immunis_cytotoxic_t_service: 8000
+immunis_dendritic_service: 8000
+immunis_helper_t_service: 8000
+immunis_macrophage_service: 8000
+immunis_neutrophil_service: 8000
+immunis_nk_cell_service: 8000
+immunis_treg_service: UNDEFINED
+ip_intelligence_service: 8022
+malware_analysis_service: 8023
+maximus_core_service: 8100
+maximus_eureka: UNDEFINED
+maximus_integration_service: 8025
+maximus_oraculo: UNDEFINED
+maximus_oraculo_v2: 8000
+maximus_orchestrator_service: 8027
+maximus_predict: 8000
+memory_consolidation_service: UNDEFINED
+mock_vulnerable_apps: 8000
+narrative_analysis_service: UNDEFINED
+narrative_manipulation_filter: UNDEFINED
+network_monitor_service: 8031
+network_recon_service: 8000
+neuromodulation_service: 8000
+nmap_service: 8034
+offensive_gateway: UNDEFINED
+offensive_orchestrator_service: UNDEFINED
+offensive_tools_service: UNDEFINED
+osint_service: 8000
+predictive_threat_hunting_service: UNDEFINED
+prefrontal_cortex_service: 8000
+purple_team: 8000
+reactive_fabric_analysis: 8601
+reactive_fabric_core: 8600
+reflex_triage_engine: 8000
+rte_service: 8038
+seriema_graph: 8000
+sinesp_service: 8039
+social_eng_service: 8040
+somatosensory_service: 8000
+ssl_monitor_service: 8041
+strategic_planning_service: 8000
+tataca_ingestion: 8000
+tegumentar_service: UNDEFINED
+threat_intel_service: 8043
+vestibular_service: 8000
+visual_cortex_service: 8000
+vuln_intel_service: 8000
+vuln_scanner_service: 8046
+wargaming_crisol: UNDEFINED
+web_attack_service: 8000
+
+CONFLICTS DETECTED:
+- Port 8000: 38 services (CRITICAL - needs immediate resolution)
+
+RECOMMENDED SOLUTION:
+Create ports.yaml registry with proper range allocation:
+- Core services: 8000-8099
+- MAXIMUS family: 8100-8199
+- Immune system: 8200-8299
+- Intelligence: 8300-8399
+- Offensive: 8400-8499
+- Defensive: 8500-8599
+- Sensory: 8600-8699
+- Cognition: 8700-8799
+- Higher-order: 8800-8899
+- Support: 8900-8999
+- Wargaming: 9000-9099
+- Special: 9100-9199
+
+NEXT STEPS:
+1. Create backend/ports.yaml with complete mapping
+2. Implement validate_ports.py script
+3. Add CI validation
+4. Track 3 will migrate services to use new ports

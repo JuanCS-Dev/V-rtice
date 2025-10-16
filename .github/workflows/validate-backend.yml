@@ -1,0 +1,40 @@
+name: Validate Backend Infrastructure
+
+on:
+  pull_request:
+    paths:
+      - 'backend/ports.yaml'
+      - 'backend/scripts/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/ports.yaml'
+
+jobs:
+  validate-ports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install pyyaml
+      
+      - name: Validate port registry
+        run: |
+          cd backend
+          python scripts/validate_ports.py
+      
+      - name: Check for port conflicts
+        run: |
+          cd backend
+          if python scripts/validate_ports.py | grep -q "PORT CONFLICT"; then
+            echo "❌ Port conflicts detected"
+            exit 1
+          fi
+          echo "✅ No port conflicts"
