@@ -1,0 +1,790 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * OSINT WORKFLOWS PANEL - CYBERPUNK MILITARY STYLING
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Color Palette:
+ * - Attack Surface: Orange #ff9944 (recon/scanning theme)
+ * - Credential Intel: Red #ff4444 (danger/breach theme)
+ * - Target Profiling: Purple #cc44ff (intelligence/OSINT theme)
+ * - Background: Dark #0a0a0a, #1a1a1a
+ * - Text: Light #e0e0e0, #ffffff
+ *
+ * Authors: MAXIMUS Team
+ * Date: 2025-10-15
+ * Glory to YHWH
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.osint-workflows-panel {
+  padding: 20px;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  min-height: 600px;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+}
+
+.osint-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKFLOW SELECTOR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.osint-workflow-selector {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.osint-workflow-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.osint-workflow-card {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.osint-workflow-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #333;
+  transition: all 0.3s ease;
+}
+
+.osint-workflow-card.attack-surface::before {
+  background: #ff9944;
+}
+
+.osint-workflow-card.credential-intel::before {
+  background: #ff4444;
+}
+
+.osint-workflow-card.target-profile::before {
+  background: #cc44ff;
+}
+
+.osint-workflow-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-color: #666;
+}
+
+.osint-workflow-card.attack-surface:hover {
+  border-color: #ff9944;
+  box-shadow: 0 10px 30px rgba(255, 153, 68, 0.3);
+}
+
+.osint-workflow-card.credential-intel:hover {
+  border-color: #ff4444;
+  box-shadow: 0 10px 30px rgba(255, 68, 68, 0.3);
+}
+
+.osint-workflow-card.target-profile:hover {
+  border-color: #cc44ff;
+  box-shadow: 0 10px 30px rgba(204, 68, 255, 0.3);
+}
+
+.osint-workflow-card.selected {
+  border-width: 3px;
+}
+
+.osint-workflow-card.attack-surface.selected {
+  border-color: #ff9944;
+  background: rgba(255, 153, 68, 0.1);
+}
+
+.osint-workflow-card.credential-intel.selected {
+  border-color: #ff4444;
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.osint-workflow-card.target-profile.selected {
+  border-color: #cc44ff;
+  background: rgba(204, 68, 255, 0.1);
+}
+
+.osint-workflow-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.osint-workflow-card h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.osint-workflow-card p {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 20px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.osint-workflow-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.osint-workflow-features span {
+  background: #2a2a2a;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #ccc;
+  border: 1px solid #444;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUT FORM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.osint-workflow-execution {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.osint-back-button {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.osint-back-button:hover {
+  background: #333;
+  border-color: #666;
+}
+
+.osint-input-form {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 20px;
+}
+
+.osint-input-form h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.osint-form-group {
+  margin-bottom: 20px;
+}
+
+.osint-form-group label {
+  display: block;
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.osint-form-group input[type="text"],
+.osint-form-group input[type="email"],
+.osint-form-group select {
+  width: 100%;
+  padding: 12px;
+  background: #0a0a0a;
+  border: 2px solid #333;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.osint-form-group input[type="text"]:focus,
+.osint-form-group input[type="email"]:focus,
+.osint-form-group select:focus {
+  outline: none;
+  border-color: #666;
+  background: #111;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.osint-form-group input[type="text"].error,
+.osint-form-group input[type="email"].error {
+  border-color: #ff4444;
+}
+
+.osint-form-group input[type="checkbox"] {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.error-message {
+  display: block;
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.osint-error-general {
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid #ff4444;
+  border-radius: 4px;
+  padding: 12px;
+  color: #ff4444;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.osint-execute-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #444 0%, #666 100%);
+  border: 2px solid #888;
+  border-radius: 4px;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.osint-execute-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #555 0%, #777 100%);
+  border-color: #999;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+.osint-execute-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS TRACKER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.osint-status-tracker {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+.osint-status-tracker h3 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.osint-status-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.osint-status-label {
+  font-size: 14px;
+  color: #999;
+}
+
+.osint-status-value {
+  font-size: 14px;
+  color: #e0e0e0;
+  font-family: monospace;
+}
+
+.osint-status-badge {
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.osint-status-badge.pending {
+  background: rgba(255, 204, 68, 0.2);
+  color: #ffcc44;
+  border: 1px solid #ffcc44;
+}
+
+.osint-status-badge.running {
+  background: rgba(68, 153, 255, 0.2);
+  color: #4499ff;
+  border: 1px solid #4499ff;
+  animation: pulse 2s infinite;
+}
+
+.osint-status-badge.completed {
+  background: rgba(68, 255, 68, 0.2);
+  color: #44ff44;
+  border: 1px solid #44ff44;
+}
+
+.osint-status-badge.failed {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+  border: 1px solid #ff4444;
+}
+
+.osint-status-spinner {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(68, 153, 255, 0.1);
+  border-radius: 4px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #2a2a2a;
+  border-top: 3px solid #4499ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.osint-status-spinner span {
+  color: #4499ff;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESULTS VIEWER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.osint-results-viewer {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.osint-results-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.osint-results-header h3 {
+  flex: 1;
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.osint-export-button,
+.osint-reset-button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.osint-export-button {
+  background: #2a2a2a;
+  border: 2px solid #666;
+  color: #e0e0e0;
+}
+
+.osint-export-button:hover {
+  background: #333;
+  border-color: #888;
+}
+
+.osint-reset-button {
+  background: rgba(255, 68, 68, 0.2);
+  border: 2px solid #ff4444;
+  color: #ff4444;
+}
+
+.osint-reset-button:hover {
+  background: rgba(255, 68, 68, 0.3);
+  border-color: #ff6666;
+}
+
+/* Executive Summary */
+.osint-executive-summary {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding: 30px;
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 8px;
+}
+
+.osint-score-gauge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.osint-gauge-fill {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.osint-gauge-inner {
+  width: 160px;
+  height: 160px;
+  background: #0a0a0a;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.osint-score-value {
+  font-size: 48px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.osint-score-label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 5px;
+}
+
+.osint-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.osint-stat {
+  background: #0a0a0a;
+  padding: 20px;
+  border-radius: 4px;
+  border: 1px solid #2a2a2a;
+  text-align: center;
+}
+
+.osint-stat-value {
+  display: block;
+  font-size: 36px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 5px;
+}
+
+.osint-stat-label {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Findings Table */
+.osint-findings-section {
+  margin-bottom: 30px;
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 25px;
+}
+
+.osint-findings-section h4 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.osint-findings-table {
+  overflow-x: auto;
+}
+
+.osint-findings-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.osint-findings-table th {
+  background: #0a0a0a;
+  padding: 12px;
+  text-align: left;
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #333;
+}
+
+.osint-findings-table td {
+  padding: 12px;
+  border-bottom: 1px solid #2a2a2a;
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.osint-findings-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.severity-badge {
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.severity-badge.critical {
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff0000;
+  border: 1px solid #ff0000;
+}
+
+.severity-badge.high {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+  border: 1px solid #ff4444;
+}
+
+.severity-badge.medium {
+  background: rgba(255, 153, 68, 0.2);
+  color: #ff9944;
+  border: 1px solid #ff9944;
+}
+
+.severity-badge.low {
+  background: rgba(255, 204, 68, 0.2);
+  color: #ffcc44;
+  border: 1px solid #ffcc44;
+}
+
+.severity-badge.info {
+  background: rgba(68, 153, 255, 0.2);
+  color: #4499ff;
+  border: 1px solid #4499ff;
+}
+
+.finding-details {
+  font-family: monospace;
+  font-size: 11px;
+  color: #999;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.osint-findings-more {
+  text-align: center;
+  margin-top: 15px;
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Recommendations */
+.osint-recommendations-section {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 25px;
+}
+
+.osint-recommendations-section h4 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.osint-recommendations-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.osint-recommendation-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  margin-bottom: 10px;
+  background: #0a0a0a;
+  border-left: 4px solid #666;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.osint-recommendation-item:hover {
+  background: #111;
+  border-left-color: #888;
+}
+
+.osint-recommendation-number {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  background: #2a2a2a;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.osint-recommendation-text {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .osint-executive-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .osint-workflow-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .osint-workflows-panel {
+    padding: 15px;
+  }
+
+  .osint-title {
+    font-size: 20px;
+  }
+
+  .osint-results-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .osint-export-button,
+  .osint-reset-button {
+    width: 100%;
+  }
+
+  .osint-findings-table {
+    font-size: 12px;
+  }
+
+  .osint-gauge-fill {
+    width: 150px;
+    height: 150px;
+  }
+
+  .osint-gauge-inner {
+    width: 120px;
+    height: 120px;
+  }
+
+  .osint-score-value {
+    font-size: 36px;
+  }
+}

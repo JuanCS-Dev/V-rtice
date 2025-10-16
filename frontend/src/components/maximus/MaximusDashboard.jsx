@@ -23,6 +23,7 @@ import { WorkflowsPanel } from './WorkflowsPanel';
 import MaximusTerminal from './MaximusTerminal';
 import { ConsciousnessPanel } from './ConsciousnessPanel';
 import { AdaptiveImmunityPanel } from './AdaptiveImmunityPanel';
+import { ADWPanel } from './ADWPanel';
 import { BackgroundEffect } from './BackgroundEffects';
 import SkipLink from '../shared/SkipLink';
 import { DashboardFooter } from '../shared/DashboardFooter';
@@ -52,6 +53,7 @@ export const MaximusDashboard = ({ setCurrentView }) => {
     { id: 'terminal', name: t('dashboard.maximus.panels.terminal'), icon: '⚡', description: t('dashboard.maximus.panelDescriptions.terminal') },
     { id: 'consciousness', name: 'Consciousness', icon: '🧠', description: 'Real-time consciousness monitoring (TIG, ESGT, MCEA)' },
     { id: 'adaptive-immunity', name: 'Adaptive Immunity', icon: '🧬', description: 'ML-powered patch validation monitoring (Oráculo→Eureka→Crisol)' },
+    { id: 'adw', name: 'AI-Driven Workflows', icon: '⚔️', description: 'Unified Red/Blue/Purple Team operations (Offensive + Defensive + Co-evolution)' },
     { id: 'insights', name: t('dashboard.maximus.panels.insights'), icon: '💡', description: t('dashboard.maximus.panelDescriptions.insights') },
     { id: 'ai3', name: t('dashboard.maximus.panels.ai3'), icon: '🧬', description: t('dashboard.maximus.panelDescriptions.ai3') },
     { id: 'oraculo', name: t('dashboard.maximus.panels.oracle'), icon: '🔮', description: t('dashboard.maximus.panelDescriptions.oracle') },
@@ -88,6 +90,8 @@ export const MaximusDashboard = ({ setCurrentView }) => {
         return <ConsciousnessPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'adaptive-immunity':
         return <AdaptiveImmunityPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
+      case 'adw':
+        return <ADWPanel />;
       case 'ai3':
         return <MaximusAI3Panel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'oraculo':
