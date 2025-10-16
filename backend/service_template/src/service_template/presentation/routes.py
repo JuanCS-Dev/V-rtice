@@ -7,7 +7,6 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..application.dtos import CreateEntityDTO, EntityDTO, PaginatedEntitiesDTO, UpdateEntityDTO
 from ..application.use_cases import (

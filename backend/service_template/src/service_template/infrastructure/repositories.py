@@ -27,7 +27,7 @@ class SQLAlchemyExampleRepository(ExampleRepository):
             name=model.name,
             description=model.description,
             status=model.status,
-            metadata=model.metadata,
+            extra_data=model.extra_data,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -39,7 +39,7 @@ class SQLAlchemyExampleRepository(ExampleRepository):
             name=entity.name,
             description=entity.description,
             status=entity.status,
-            metadata=entity.metadata,
+            extra_data=entity.extra_data,
             created_at=entity.created_at,
             updated_at=entity.updated_at,
         )
@@ -94,7 +94,7 @@ class SQLAlchemyExampleRepository(ExampleRepository):
         model.name = entity.name
         model.description = entity.description
         model.status = entity.status
-        model.metadata = entity.metadata
+        model.extra_data = entity.extra_data
         model.updated_at = entity.updated_at
 
         await self.session.flush()

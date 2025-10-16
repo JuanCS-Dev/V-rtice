@@ -33,7 +33,7 @@ class EntityDTO(BaseModel):
     name: str
     description: Optional[str]
     status: str
-    metadata: dict[str, str]
+    extra_data: dict[str, str]
     created_at: datetime
     updated_at: datetime
 

@@ -26,7 +26,7 @@ class ExampleModel(Base):
     name = Column(String(255), nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
     status = Column(String(50), nullable=False, default="active", index=True)
-    metadata = Column(JSON, nullable=False, default=dict)
+    extra_data = Column(JSON, nullable=False, default=dict)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
