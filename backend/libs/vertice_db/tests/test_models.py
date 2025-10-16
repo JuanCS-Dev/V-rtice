@@ -1,0 +1,42 @@
+"""Tests for vertice_db.models module."""
+
+from datetime import datetime
+
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from vertice_db import Base, TimestampMixin
+
+
+class UserModel(Base, TimestampMixin):
+    """Test model."""
+
+    __tablename__ = "user_model"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+
+
+def test_base_model_exists():
+    """Test Base model exists."""
+    assert Base is not None
+
+
+def test_timestamp_mixin_has_fields():
+    """Test TimestampMixin has created_at and updated_at."""
+    model = UserModel(id=1, name="test")
+    assert hasattr(model, "created_at")
+    assert hasattr(model, "updated_at")
+
+
+def test_to_dict_converts_model():
+    """Test to_dict method."""
+    model = UserModel(id=1, name="test")
+    model.created_at = datetime(2024, 1, 1, 12, 0, 0)
+    model.updated_at = datetime(2024, 1, 1, 12, 0, 0)
+
+    result = model.to_dict()
+    assert result["id"] == 1
+    assert result["name"] == "test"
+    assert isinstance(result["created_at"], str)
+    assert isinstance(result["updated_at"], str)
