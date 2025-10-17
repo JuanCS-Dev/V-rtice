@@ -238,6 +238,7 @@ strict_equality = true
 show_error_codes = true
 show_column_numbers = true
 pretty = true
+mypy_path = "backend"
 
 # Exclude paths
 exclude = [
@@ -249,6 +250,8 @@ exclude = [
     'dist/',
     'LEGADO/',
     'node_modules/',
+    'service_template/',
+    '.*/tests/.*',  # Excluir todos os diretórios de testes
 ]
 
 # Per-module options
@@ -263,6 +266,9 @@ module = [
     "shodan.*",
     "neo4j.*",
     "kafka.*",
+    "asyncpg.*",
+    "networkx.*",
+    "torch.*",
 ]
 ignore_missing_imports = true
 

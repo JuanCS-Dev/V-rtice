@@ -48,7 +48,7 @@ def test_verdict_confidence_conversion():
         title="Test",
         agents_involved=["a1"],
         evidence_chain=["m1"],
-        confidence=Decimal("0.75"),  # Decimal input
+        confidence=0.7532,  # Float input - tests line 50
         recommended_action="MONITOR",
         color="#10B981",
         created_at=datetime.utcnow(),
