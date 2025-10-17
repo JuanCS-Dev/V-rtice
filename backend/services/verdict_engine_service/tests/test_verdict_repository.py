@@ -77,11 +77,11 @@ async def test_get_active_verdicts_query_construction(mocker, sample_verdict):
     # Mock connection and pool properly
     mock_conn = mocker.AsyncMock()
     mock_conn.fetch = mocker.AsyncMock(return_value=[])
-    
+
     mock_acquire = mocker.MagicMock()
     mock_acquire.__aenter__ = mocker.AsyncMock(return_value=mock_conn)
     mock_acquire.__aexit__ = mocker.AsyncMock(return_value=None)
-    
+
     mock_pool = mocker.AsyncMock()
     mock_pool.acquire = mocker.MagicMock(return_value=mock_acquire)
 

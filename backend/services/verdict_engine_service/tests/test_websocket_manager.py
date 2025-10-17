@@ -1,9 +1,7 @@
 """Tests for WebSocket manager."""
 
-import asyncio
 
 import pytest
-from fastapi import WebSocket
 
 from models import WebSocketMessage
 from websocket_manager import ConnectionManager
