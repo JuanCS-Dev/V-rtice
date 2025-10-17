@@ -15,8 +15,8 @@ import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import get_cache, get_repository
-from api import router as api_router
+from verdict_engine_service.api import get_cache, get_repository
+from verdict_engine_service.api import router as api_router
 from verdict_engine_service.cache import VerdictCache
 from verdict_engine_service.config import settings
 from verdict_engine_service.kafka_consumer import start_consumer_task

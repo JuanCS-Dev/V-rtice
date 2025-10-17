@@ -6,30 +6,30 @@ Tests ALL 18 sanitization functions with edge cases.
 Critical security module - NO compromises.
 """
 
-import pytest
-from pathlib import Path
 
+import pytest
+
+from shared.exceptions import ValidationError
 from shared.sanitizers import (
-    sanitize_html,
-    strip_html_tags,
-    sanitize_xml,
-    sanitize_sql_identifier,
-    detect_sql_injection,
-    sanitize_shell_argument,
     detect_command_injection,
-    sanitize_path,
-    sanitize_ldap_dn,
-    sanitize_ldap_filter,
-    sanitize_nosql_operator,
-    sanitize_http_header,
-    normalize_whitespace,
+    detect_sql_injection,
     normalize_unicode,
+    normalize_whitespace,
     remove_control_characters,
     sanitize_alphanumeric,
     sanitize_email,
+    sanitize_html,
+    sanitize_http_header,
+    sanitize_ldap_dn,
+    sanitize_ldap_filter,
+    sanitize_nosql_operator,
+    sanitize_path,
+    sanitize_shell_argument,
+    sanitize_sql_identifier,
+    sanitize_xml,
+    strip_html_tags,
     truncate_string,
 )
-from shared.exceptions import ValidationError
 
 
 class TestHTMLSanitization:
@@ -121,6 +121,17 @@ class TestSQLSanitization:
         """Test sanitize_sql_identifier raises on exceeding custom max_length."""
         with pytest.raises(ValidationError):
             sanitize_sql_identifier("abcde", max_length=3)
+
+    def test_sanitize_sql_identifier_reserved_keywords(self) -> None:
+        """Test sanitize_sql_identifier rejects SQL reserved keywords."""
+        reserved = ["SELECT", "INSERT", "DELETE", "UPDATE", "DROP", "CREATE", "ALTER", "UNION", "WHERE", "FROM"]
+        for keyword in reserved:
+            with pytest.raises(ValidationError, match="reserved keyword"):
+                sanitize_sql_identifier(keyword)
+            # Test lowercase too
+            with pytest.raises(ValidationError, match="reserved keyword"):
+                sanitize_sql_identifier(keyword.lower())
+
     def test_detect_sql_injection_safe(self) -> None:
         """Test detect_sql_injection with safe input."""
         assert detect_sql_injection("SELECT * FROM users") is False or True  # Depends on keywords
@@ -137,6 +148,10 @@ class TestSQLSanitization:
     def test_detect_sql_injection_drop(self) -> None:
         """Test detect_sql_injection detects DROP."""
         assert detect_sql_injection("DROP TABLE") is True
+
+    def test_detect_sql_injection_empty_string(self) -> None:
+        """Test detect_sql_injection with empty string."""
+        assert detect_sql_injection("") is False
 
 
 class TestShellSanitization:
@@ -157,6 +172,10 @@ class TestShellSanitization:
         result = sanitize_shell_argument("file;rm -rf")
         assert result  # Should escape or quote
 
+    def test_sanitize_shell_argument_empty_string(self) -> None:
+        """Test sanitize_shell_argument with empty string."""
+        assert sanitize_shell_argument("") == ""
+
     def test_detect_command_injection_safe(self) -> None:
         """Test detect_command_injection with safe input."""
         assert detect_command_injection("file.txt") is False
@@ -172,6 +191,10 @@ class TestShellSanitization:
     def test_detect_command_injection_backtick(self) -> None:
         """Test detect_command_injection detects backticks."""
         assert detect_command_injection("`whoami`") is True
+
+    def test_detect_command_injection_empty_string(self) -> None:
+        """Test detect_command_injection with empty string."""
+        assert detect_command_injection("") is False
 
 
 class TestPathSanitization:
@@ -207,6 +230,18 @@ class TestPathSanitization:
         with pytest.raises(ValidationError):
             sanitize_path("/etc/passwd", base_dir="/tmp")
 
+    def test_sanitize_path_traversal_absolute_path_with_dotdot(self) -> None:
+        """Test sanitize_path with absolute path containing .. that escapes implied base."""
+        # This will trigger line 359-360 (implied_base extraction) and 369-373 (exception)
+        with pytest.raises(ValidationError, match="Path traversal"):
+            sanitize_path("/var/www/../../etc/passwd")
+
+    def test_sanitize_path_traversal_absolute_path_contained(self) -> None:
+        """Test sanitize_path with absolute path containing .. but stays in implied base."""
+        # Path: /var/www/uploads/../static -> resolves to /var/www/static (safe)
+        result = sanitize_path("/var/www/uploads/../static")
+        assert result  # Should pass as it stays within /var boundary
+
 
 class TestLDAPSanitization:
     """Test LDAP injection prevention."""
@@ -221,6 +256,10 @@ class TestLDAPSanitization:
         result = sanitize_ldap_dn("CN=User (Special)")
         assert result  # Should escape parentheses
 
+    def test_sanitize_ldap_dn_empty_string(self) -> None:
+        """Test sanitize_ldap_dn with empty string."""
+        assert sanitize_ldap_dn("") == ""
+
     def test_sanitize_ldap_filter_valid(self) -> None:
         """Test sanitize_ldap_filter with valid filter value."""
         result = sanitize_ldap_filter("john")
@@ -230,6 +269,10 @@ class TestLDAPSanitization:
         """Test sanitize_ldap_filter escapes wildcards."""
         result = sanitize_ldap_filter("user*")
         assert result  # Should escape *
+
+    def test_sanitize_ldap_filter_empty_string(self) -> None:
+        """Test sanitize_ldap_filter with empty string."""
+        assert sanitize_ldap_filter("") == ""
 
 
 class TestNoSQLSanitization:
@@ -245,6 +288,13 @@ class TestNoSQLSanitization:
         with pytest.raises(ValidationError):
             sanitize_nosql_operator("$gt")
 
+    def test_sanitize_nosql_operator_non_string_type(self) -> None:
+        """Test sanitize_nosql_operator raises on non-string input."""
+        with pytest.raises(ValidationError, match="must be a string"):
+            sanitize_nosql_operator(123)  # type: ignore
+        with pytest.raises(ValidationError, match="must be a string"):
+            sanitize_nosql_operator({"key": "value"})  # type: ignore
+
 
 class TestHTTPSanitization:
     """Test HTTP header sanitization."""
@@ -259,6 +309,15 @@ class TestHTTPSanitization:
         with pytest.raises(ValidationError):
             sanitize_http_header("value\r\nInjected: header")
 
+    def test_sanitize_http_header_empty_string(self) -> None:
+        """Test sanitize_http_header with empty string."""
+        assert sanitize_http_header("") == ""
+
+    def test_sanitize_http_header_null_byte(self) -> None:
+        """Test sanitize_http_header raises on null byte."""
+        with pytest.raises(ValidationError, match="Null byte"):
+            sanitize_http_header("value\x00injection")
+
 
 class TestTextNormalization:
     """Test text normalization functions."""
@@ -271,6 +330,10 @@ class TestTextNormalization:
         """Test normalize_whitespace replaces tabs."""
         assert normalize_whitespace("hello\tworld") == "hello world"
 
+    def test_normalize_whitespace_empty_string(self) -> None:
+        """Test normalize_whitespace with empty string."""
+        assert normalize_whitespace("") == ""
+
     def test_normalize_unicode_nfkc(self) -> None:
         """Test normalize_unicode with NFKC."""
         result = normalize_unicode("café")  # é = e + combining accent
@@ -281,6 +344,10 @@ class TestTextNormalization:
         result = normalize_unicode("café", form="NFD")
         assert result
 
+    def test_normalize_unicode_empty_string(self) -> None:
+        """Test normalize_unicode with empty string."""
+        assert normalize_unicode("") == ""
+
     def test_remove_control_characters_basic(self) -> None:
         """Test remove_control_characters removes controls."""
         result = remove_control_characters("hello\x00world")
@@ -289,6 +356,10 @@ class TestTextNormalization:
     def test_remove_control_characters_preserves_text(self) -> None:
         """Test remove_control_characters preserves valid text."""
         assert remove_control_characters("hello") == "hello"
+
+    def test_remove_control_characters_empty_string(self) -> None:
+        """Test remove_control_characters with empty string."""
+        assert remove_control_characters("") == ""
 
 
 class TestAlphanumericSanitization:
@@ -310,6 +381,32 @@ class TestAlphanumericSanitization:
         result = sanitize_alphanumeric("user@example.com", additional_chars=".@")
         assert "@" in result
         assert "." in result
+
+    def test_sanitize_alphanumeric_empty_string_no_min(self) -> None:
+        """Test sanitize_alphanumeric with empty string (min_length=0)."""
+        assert sanitize_alphanumeric("", min_length=0) == ""
+
+    def test_sanitize_alphanumeric_empty_string_with_min_raises(self) -> None:
+        """Test sanitize_alphanumeric with empty string raises when min_length > 0."""
+        with pytest.raises(ValidationError, match="too short"):
+            sanitize_alphanumeric("", min_length=5)
+
+    def test_sanitize_alphanumeric_min_length_after_sanitization(self) -> None:
+        """Test sanitize_alphanumeric raises if result < min_length."""
+        with pytest.raises(ValidationError, match="too short"):
+            sanitize_alphanumeric("@@@", min_length=3)  # After sanitization: ""
+
+    def test_sanitize_alphanumeric_with_dashes(self) -> None:
+        """Test sanitize_alphanumeric with allow_dashes=True."""
+        result = sanitize_alphanumeric("user-name-123", allow_dashes=True)
+        assert "-" in result
+        assert result == "user-name-123"
+
+    def test_sanitize_alphanumeric_with_spaces(self) -> None:
+        """Test sanitize_alphanumeric with allow_spaces=True."""
+        result = sanitize_alphanumeric("hello world 123", allow_spaces=True)
+        assert " " in result
+        assert result == "hello world 123"
 
 
 
@@ -336,6 +433,15 @@ class TestEmailSanitization:
         result = sanitize_email("anything", validate=False)
         assert result == "anything"
 
+    def test_sanitize_email_empty_string_no_validation(self) -> None:
+        """Test sanitize_email with empty string (validation=False)."""
+        assert sanitize_email("", validate=False) == ""
+
+    def test_sanitize_email_empty_string_with_validation_raises(self) -> None:
+        """Test sanitize_email with empty string raises when validate=True."""
+        with pytest.raises(ValidationError, match="cannot be empty"):
+            sanitize_email("", validate=True)
+
 
 class TestTruncateString:
     """Test string truncation."""
@@ -361,3 +467,6 @@ class TestTruncateString:
         result = truncate_string("hello world", max_length=8, suffix=">>")
         assert ">>" in result or len(result) <= 8
 
+    def test_truncate_string_empty_string(self) -> None:
+        """Test truncate_string with empty string."""
+        assert truncate_string("", max_length=10) == ""

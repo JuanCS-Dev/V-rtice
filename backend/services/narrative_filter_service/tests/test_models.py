@@ -3,7 +3,7 @@
 from datetime import datetime
 
 import pytest
-from narrative_filter_service.models import (
+from models import (
     Alliance,
     IntentClassification,
     PatternType,

@@ -3,7 +3,7 @@
 from uuid import uuid4
 
 import pytest
-from verdict_engine_service.cache import VerdictCache
+from cache import VerdictCache
 
 
 @pytest.mark.asyncio

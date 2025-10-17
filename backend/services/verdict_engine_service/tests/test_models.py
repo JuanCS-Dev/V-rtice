@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError
-from verdict_engine_service.models import (
+from models import (
     HealthResponse,
     Verdict,
     VerdictFilter,

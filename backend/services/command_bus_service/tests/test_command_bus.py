@@ -1,8 +1,8 @@
 """Tests for command bus service."""
 
 import pytest
-from command_bus_service.main import app
-from command_bus_service.models import (
+from main import app
+from models import (
     C2LCommand,
     C2LCommandType,
     CommandStatus,

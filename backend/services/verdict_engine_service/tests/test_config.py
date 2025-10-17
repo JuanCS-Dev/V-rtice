@@ -2,7 +2,7 @@
 
 import pytest
 from pydantic import ValidationError
-from verdict_engine_service.config import Settings
+from config import Settings
 
 
 def test_settings_defaults():

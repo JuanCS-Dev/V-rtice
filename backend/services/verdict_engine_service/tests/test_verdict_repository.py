@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
-from verdict_engine_service.models import VerdictFilter
-from verdict_engine_service.verdict_repository import VerdictRepository
+from models import VerdictFilter
+from verdict_repository import VerdictRepository
 
 
 @pytest.mark.asyncio
