@@ -21,13 +21,14 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const DefensiveDashboard = lazy(() => import('./components/dashboards/DefensiveDashboard/DefensiveDashboard'));
 const OffensiveDashboard = lazy(() => import('./components/dashboards/OffensiveDashboard/OffensiveDashboard'));
 const PurpleTeamDashboard = lazy(() => import('./components/dashboards/PurpleTeamDashboard/PurpleTeamDashboard'));
+const CockpitSoberano = lazy(() => import('./components/dashboards/CockpitSoberano/CockpitSoberano'));
 const OSINTDashboard = lazy(() => import('./components/OSINTDashboard'));
 const MaximusDashboard = lazy(() => import('./components/maximus/MaximusDashboard'));
 const ReactiveFabricDashboard = lazy(() => import('./components/reactive-fabric/ReactiveFabricDashboard'));
 const HITLDecisionConsole = lazy(() => import('./components/reactive-fabric/HITLDecisionConsole'));
 
 function App() {
-  // 'main', 'admin', 'defensive', 'offensive', 'purple', 'osint', 'maximus', 'reactive-fabric', 'hitl-console'
+  // 'main', 'admin', 'defensive', 'offensive', 'purple', 'cockpit', 'osint', 'maximus', 'reactive-fabric', 'hitl-console'
   const [currentView, setCurrentView] = useState('main');
 
   // Enable keyboard navigation
@@ -52,6 +53,11 @@ function App() {
     purple: (
       <ErrorBoundary context="purple-team-dashboard" title="Purple Team Dashboard Error">
         <PurpleTeamDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    cockpit: (
+      <ErrorBoundary context="cockpit-soberano" title="Cockpit Soberano Error">
+        <CockpitSoberano setCurrentView={setCurrentView} />
       </ErrorBoundary>
     ),
     osint: (

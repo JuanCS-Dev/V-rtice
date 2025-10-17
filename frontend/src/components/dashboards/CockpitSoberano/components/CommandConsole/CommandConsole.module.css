@@ -1,0 +1,420 @@
+/**
+ * CommandConsole Styles
+ */
+
+.commandConsole {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-primary, rgba(255, 255, 255, 0.1));
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  height: 100%;
+}
+
+.consoleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.consoleHeader h3 {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: 'Courier New', monospace;
+}
+
+.headerIcon {
+  font-size: var(--text-2xl);
+}
+
+.lastCommandStatus {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: 'Courier New', monospace;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.errorBanner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-base);
+  padding: var(--space-md);
+  color: var(--color-danger);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.sectionLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-family: 'Courier New', monospace;
+}
+
+.commandSelector,
+.agentSelector,
+.parameterSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.commandGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.commandButton {
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+
+.commandButton:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-2px);
+}
+
+.commandButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.severity-low {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.severity-low:hover:not(:disabled),
+.severity-low.selected {
+  border-color: #3b82f6;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.severity-medium {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.severity-medium:hover:not(:disabled),
+.severity-medium.selected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.severity-critical {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.severity-critical:hover:not(:disabled),
+.severity-critical.selected {
+  border-color: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.commandIcon {
+  font-size: var(--text-4xl);
+}
+
+.commandLabel {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+}
+
+.commandDesc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.parameterSection {
+  background: rgba(0, 0, 0, 0.4);
+  padding: var(--space-md);
+  border-radius: var(--radius-base);
+}
+
+.parameterInput {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-base);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  font-family: 'Courier New', monospace;
+  transition: all var(--transition-base);
+}
+
+.parameterInput:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+.agentList {
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-base);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.agentList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agentList::-webkit-scrollbar-thumb {
+  background: var(--color-accent-primary);
+  border-radius: 3px;
+}
+
+.agentItem {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-base);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.agentItem:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: var(--color-accent-primary);
+}
+
+.agentItem.selected {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-accent-primary);
+}
+
+.agentCheckbox {
+  accent-color: var(--color-accent-primary);
+}
+
+.agentInfo {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agentName {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
+}
+
+.agentStatus {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.emptyState {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-family: 'Courier New', monospace;
+}
+
+.consoleFooter {
+  margin-top: auto;
+  padding-top: var(--space-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.executeButton {
+  width: 100%;
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
+  color: white;
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.executeButton:hover:not(:disabled) {
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+  transform: translateY(-2px);
+}
+
+.executeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(107, 114, 128, 0.3);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.confirmDialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  backdrop-filter: blur(4px);
+}
+
+.dialogContent {
+  background: linear-gradient(135deg, rgba(15, 15, 25, 0.95) 0%, rgba(25, 25, 40, 0.95) 100%);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  max-width: 500px;
+  box-shadow: 0 0 50px rgba(239, 68, 68, 0.5);
+}
+
+.dialogHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.dialogHeader h3 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-danger);
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.warningIcon {
+  font-size: var(--text-4xl);
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+}
+
+.dialogText {
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-xl);
+  font-family: 'Courier New', monospace;
+}
+
+.dialogText strong {
+  color: var(--color-danger);
+  font-weight: var(--font-bold);
+}
+
+.dialogActions {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-base);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.cancelButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-primary);
+}
+
+.cancelButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.confirmButton {
+  background: var(--color-danger);
+  border: none;
+  color: white;
+}
+
+.confirmButton:hover {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .commandGrid {
+    grid-template-columns: 1fr;
+  }
+}

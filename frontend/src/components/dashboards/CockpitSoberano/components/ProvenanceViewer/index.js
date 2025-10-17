@@ -1,0 +1,1 @@
+export { ProvenanceModal } from './ProvenanceModal';

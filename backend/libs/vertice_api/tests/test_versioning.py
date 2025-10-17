@@ -570,3 +570,25 @@ class TestVersionRange:
         # Should pass through without version checks
         result = await handler(req=mock_request)
         assert result["status"] == "ok"
+
+    @pytest.mark.asyncio()
+    async def test_finds_request_in_kwargs(self):
+        """Test version_range finds Request in kwargs (branch 341->349)."""
+        from starlette.datastructures import State
+        from vertice_api.versioning import version_range
+
+        @version_range("v1", "v3")
+        async def handler_kwargs_request(user_id: int, *, request: Request):
+            # Request in kwargs only
+            return {"version": request.state.api_version, "user_id": user_id}
+
+        # Create proper mock with real State object
+        mock_request = MagicMock()
+        mock_request.state = State()
+        mock_request.state.api_version = "v2"
+        mock_request.method = "GET"  # hasattr checks
+
+        # Pass request as kwarg - triggers line 341 False, skips loop 342-347, goes to 349
+        result = await handler_kwargs_request(123, request=mock_request)
+        assert result["version"] == "v2"
+        assert result["user_id"] == 123

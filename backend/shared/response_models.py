@@ -21,7 +21,7 @@ Response Format Standards:
 
 Usage:
     >>> from shared.response_models import SuccessResponse, ErrorResponse
-    >>> 
+    >>>
     >>> @app.get("/users/{id}")
     >>> async def get_user(id: int) -> SuccessResponse:
     >>>     user = await fetch_user(id)
@@ -32,7 +32,7 @@ License: Proprietary
 """
 
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Optional, TypeVar, Literal
+from typing import Any, Generic, Literal, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -85,7 +85,7 @@ class SuccessResponse(BaseResponse, Generic[T]):
     message: Optional[str] = Field(
         default=None, description="Human-readable success message"
     )
-    meta: Optional[Dict[str, Any]] = Field(
+    meta: Optional[dict[str, Any]] = Field(
         default=None, description="Additional metadata"
     )
 
@@ -104,9 +104,9 @@ class ListResponse(BaseResponse, Generic[T]):
     """
 
     success: Literal[True] = Field(default=True, description="Always True for success responses")
-    data: List[T] = Field(..., description="List of items")
+    data: list[T] = Field(..., description="List of items")
     message: Optional[str] = Field(default=None)
-    meta: Optional[Dict[str, Any]] = Field(default=None)
+    meta: Optional[dict[str, Any]] = Field(default=None)
     pagination: Optional["PaginationMeta"] = Field(
         default=None, description="Pagination metadata"
     )
@@ -187,7 +187,7 @@ class DeletedResponse(BaseResponse):
 
     success: Literal[True] = Field(default=True, description="Always True for success responses")
     message: str = Field(default="Resource deleted successfully")
-    meta: Optional[Dict[str, Any]] = Field(default=None)
+    meta: Optional[dict[str, Any]] = Field(default=None)
 
 
 # ============================================================================
@@ -206,7 +206,7 @@ class ErrorDetail(BaseModel):
     field: Optional[str] = Field(
         default=None, description="Field name for validation errors"
     )
-    details: Optional[Dict[str, Any]] = Field(
+    details: Optional[dict[str, Any]] = Field(
         default=None, description="Additional error context"
     )
 
@@ -224,7 +224,7 @@ class ErrorResponse(BaseResponse):
 
     success: Literal[False] = Field(default=False, description="Always False for error responses")
     error: ErrorDetail = Field(..., description="Primary error information")
-    errors: Optional[List[ErrorDetail]] = Field(
+    errors: Optional[list[ErrorDetail]] = Field(
         default=None, description="Additional errors (validation, etc.)"
     )
 
@@ -235,7 +235,7 @@ class ValidationErrorResponse(ErrorResponse):
     Includes detailed field-level validation errors.
     """
 
-    def __init__(self, errors: List[Dict[str, Any]], **kwargs):
+    def __init__(self, errors: list[dict[str, Any]], **kwargs):
         """Create validation error response from error list.
 
         Args:
@@ -272,7 +272,7 @@ class HealthStatus(BaseModel):
     """Service health status."""
 
     status: str = Field(..., description="Health status (healthy/degraded/unhealthy)")
-    checks: Dict[str, bool] = Field(
+    checks: dict[str, bool] = Field(
         default_factory=dict, description="Individual health checks"
     )
     version: Optional[str] = Field(default=None, description="Service version")
@@ -292,8 +292,8 @@ class HealthResponse(BaseResponse):
 
 
 def success_response(
-    data: Any, message: Optional[str] = None, meta: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    data: Any, message: Optional[str] = None, meta: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """Helper function to create success response dict.
 
     Args:
@@ -308,13 +308,13 @@ def success_response(
 
 
 def list_response(
-    data: List[Any],
+    data: list[Any],
     page: Optional[int] = None,
     page_size: Optional[int] = None,
     total_items: Optional[int] = None,
     message: Optional[str] = None,
-    meta: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    meta: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """Helper function to create paginated list response.
 
     Args:
@@ -342,8 +342,8 @@ def error_response(
     message: str,
     status_code: int = 500,
     field: Optional[str] = None,
-    details: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    details: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     """Helper function to create error response dict.
 
     Args:

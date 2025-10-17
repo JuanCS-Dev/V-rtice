@@ -352,47 +352,5 @@
     "selector": "Selecionar Idioma",
     "current": "Idioma Atual",
     "change": "Alterar Idioma"
-  },
-  "cockpit": {
-    "title": "COCKPIT SOBERANO",
-    "subtitle": "Centro de Comando & Inteligência da Célula Híbrida",
-    "metrics": {
-      "agents": "Agentes Ativos",
-      "verdicts": "Veredictos",
-      "alliances": "Alianças",
-      "deception": "Engano",
-      "latency": "Latência"
-    },
-    "verdicts": {
-      "title": "Veredictos",
-      "connected": "CONECTADO",
-      "disconnected": "DESCONECTADO",
-      "empty": "Nenhum veredicto no momento",
-      "emptyHint": "Aguardando análise de telemetria..."
-    },
-    "verdict": {
-      "agents": "Agentes",
-      "target": "Alvo",
-      "confidence": "Confiança",
-      "action": "Ação Recomendada",
-      "viewEvidence": "Ver Evidências"
-    },
-    "commands": {
-      "title": "Console de Comando",
-      "selectCommand": "Selecionar Comando",
-      "selectAgents": "Selecionar Agentes",
-      "noAgents": "Nenhum agente disponível",
-      "execute": "Executar Comando",
-      "confirmTerminate": "Confirmar Terminação",
-      "confirmAction": "Confirmar Terminação"
-    },
-    "graph": {
-      "title": "Rede de Alianças"
-    },
-    "provenance": {
-      "title": "Cadeia de Evidências",
-      "evidence": "Evidências",
-      "noEvidence": "Nenhuma evidência disponível"
-    }
   }
 }

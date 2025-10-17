@@ -1,0 +1,144 @@
+/**
+ * CockpitSoberano Styles
+ * Aligned with Vértice Design System v2.0
+ */
+
+.cockpitContainer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+  color: var(--color-text-primary, #ffffff);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Scanline CRT Effect */
+.scanlineOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 0, 0, 0.05) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.3;
+  animation: scanline 10s linear infinite;
+}
+
+@keyframes scanline {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+.mainContent {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+.leftPanel {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  overflow: hidden;
+}
+
+.graphSection {
+  flex: 1;
+  min-height: 300px;
+  overflow: hidden;
+}
+
+.commandSection {
+  height: 400px;
+  overflow: hidden;
+}
+
+/* Responsive Design */
+@media (max-width: 1280px) {
+  .mainContent {
+    grid-template-columns: 1fr 350px;
+  }
+
+  .commandSection {
+    height: 350px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .rightPanel {
+    flex-direction: row;
+    height: auto;
+  }
+
+  .graphSection,
+  .commandSection {
+    flex: 1;
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  .rightPanel {
+    flex-direction: column;
+  }
+
+  .graphSection,
+  .commandSection {
+    height: 300px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .scanlineOverlay {
+    animation: none;
+    opacity: 0.1;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .cockpitContainer {
+    background: #000000;
+  }
+
+  .scanlineOverlay {
+    display: none;
+  }
+}

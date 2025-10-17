@@ -18,12 +18,12 @@ Usage:
     ```python
     from shared.base_config import BaseServiceConfig
     from pydantic import Field
-    
+
     class MyServiceConfig(BaseServiceConfig):
         # Service-specific settings
         api_key: str = Field(..., description="External API key")
         max_workers: int = Field(default=4, ge=1, le=32)
-        
+
     config = MyServiceConfig()
     ```
 
@@ -40,14 +40,12 @@ Author: Vértice Platform Team
 License: Proprietary
 """
 
-import os
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 # ============================================================================
 # ENVIRONMENT ENUM
@@ -339,7 +337,7 @@ class BaseServiceConfig(BaseSettings):
         auth = f":{self.redis_password}@" if self.redis_password else ""
         return f"redis://{auth}{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
-    def model_dump_safe(self) -> Dict[str, Any]:
+    def model_dump_safe(self) -> dict[str, Any]:
         """
         Dump config as dict with secrets masked.
 
@@ -415,13 +413,20 @@ def generate_env_example(config_class: type[BaseServiceConfig]) -> str:
         description = field_info.description or "No description"
         lines.append(f"# {description}")
 
-        # Field constraints
-        if hasattr(field_info, "ge") and field_info.ge is not None:
-            lines.append(f"#   Min value: {field_info.ge}")
-        if hasattr(field_info, "le") and field_info.le is not None:
-            lines.append(f"#   Max value: {field_info.le}")
-        if hasattr(field_info, "pattern") and field_info.pattern:
-            lines.append(f"#   Pattern: {field_info.pattern}")
+        # Field constraints (Pydantic V2 uses metadata)
+        if hasattr(field_info, "metadata") and field_info.metadata:
+            for constraint in field_info.metadata:
+                constraint_type = type(constraint).__name__
+                # Numeric constraints
+                if constraint_type == "Ge" and hasattr(constraint, "ge"):
+                    lines.append(f"#   Min value: {constraint.ge}")
+                elif constraint_type == "Le" and hasattr(constraint, "le"):
+                    lines.append(f"#   Max value: {constraint.le}")
+                elif constraint_type == "MultipleOf" and hasattr(constraint, "multiple_of"):
+                    lines.append(f"#   Multiple of: {constraint.multiple_of}")
+                # String constraints (pattern)
+                if hasattr(constraint, "pattern") and constraint.pattern:
+                    lines.append(f"#   Pattern: {constraint.pattern}")
 
         # Environment variable name
         env_name = field_name.upper()

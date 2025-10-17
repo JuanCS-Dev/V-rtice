@@ -111,6 +111,9 @@ class RateLimiter:
         window_start = now - self.config.window_seconds
 
         # Use Redis sorted set for sliding window
+        if not self._redis_client:
+            return await self._check_memory(identifier, cost)
+
         pipe = self._redis_client.pipeline()
 
         # Remove old entries

@@ -352,47 +352,5 @@
     "selector": "Select Language",
     "current": "Current Language",
     "change": "Change Language"
-  },
-  "cockpit": {
-    "title": "SOVEREIGN COCKPIT",
-    "subtitle": "Hybrid Cell Command & Intelligence Center",
-    "metrics": {
-      "agents": "Active Agents",
-      "verdicts": "Verdicts",
-      "alliances": "Alliances",
-      "deception": "Deception",
-      "latency": "Latency"
-    },
-    "verdicts": {
-      "title": "Verdicts",
-      "connected": "CONNECTED",
-      "disconnected": "DISCONNECTED",
-      "empty": "No verdicts at this time",
-      "emptyHint": "Awaiting telemetry analysis..."
-    },
-    "verdict": {
-      "agents": "Agents",
-      "target": "Target",
-      "confidence": "Confidence",
-      "action": "Recommended Action",
-      "viewEvidence": "View Evidence"
-    },
-    "commands": {
-      "title": "Command Console",
-      "selectCommand": "Select Command",
-      "selectAgents": "Select Agents",
-      "noAgents": "No agents available",
-      "execute": "Execute Command",
-      "confirmTerminate": "Confirm Termination",
-      "confirmAction": "Confirm Termination"
-    },
-    "graph": {
-      "title": "Alliance Network"
-    },
-    "provenance": {
-      "title": "Evidence Chain",
-      "evidence": "Evidence",
-      "noEvidence": "No evidence available"
-    }
   }
 }
