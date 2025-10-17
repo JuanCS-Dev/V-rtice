@@ -4,5 +4,4 @@ Pytest configuration for async tests
 
 import pytest
 
-# Configure pytest-asyncio
-pytest_plugins = ('pytest_asyncio',)
+# Removed pytest_plugins declaration - using pyproject.toml or root conftest instead

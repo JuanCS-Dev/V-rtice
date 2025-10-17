@@ -23,7 +23,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
 from qdrant_client.http.exceptions import UnexpectedResponse
 
-from config import VectorDBConfig, get_config
+from ..config import VectorDBConfig, get_config
 
 
 logger = logging.getLogger(__name__)

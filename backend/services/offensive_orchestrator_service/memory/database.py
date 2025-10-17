@@ -18,8 +18,8 @@ from sqlalchemy import create_engine, select, and_, or_
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 
-from config import DatabaseConfig, get_config
-from models import Base, CampaignDB, HOTLDecisionDB, AttackMemoryDB, CampaignStatus
+from ..config import DatabaseConfig, get_config
+from ..models import Base, CampaignDB, HOTLDecisionDB, AttackMemoryDB, CampaignStatus
 
 
 logger = logging.getLogger(__name__)
