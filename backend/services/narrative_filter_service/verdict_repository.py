@@ -4,7 +4,7 @@ from uuid import UUID
 
 from asyncpg import Pool  # type: ignore[import-untyped]
 
-from narrative_filter_service.models import Severity, Verdict, VerdictCategory, VerdictStatus
+from models import Severity, Verdict, VerdictCategory, VerdictStatus
 
 
 class VerdictRepository:
@@ -53,7 +53,7 @@ class VerdictRepository:
                 verdict.status.value,
                 verdict.color,
             )
-            return UUID(str(row["id"]))  # type: ignore[return-value]
+            return UUID(str(row["id"]))
 
     async def get_active_verdicts(
         self, severity: Severity | None = None, category: VerdictCategory | None = None, limit: int = 100
@@ -137,7 +137,7 @@ class VerdictRepository:
 
         async with self.pool.acquire() as conn:
             result = await conn.execute(query, status.value, command_id, verdict_id)
-            return bool(result != "UPDATE 0")  # type: ignore[return-value]
+            return bool(result != "UPDATE 0")
 
     async def batch_create(self, verdicts: list[Verdict]) -> int:
         """Batch create verdicts.

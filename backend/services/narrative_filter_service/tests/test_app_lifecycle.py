@@ -7,7 +7,7 @@ import pytest
 @pytest.mark.asyncio
 async def test_app_lifespan_execution():
     """Test app lifespan startup and shutdown - covers lines 19-21."""
-    from narrative_filter_service.main import app, lifespan
+    from main import app, lifespan
 
     # Execute lifespan context manager
     async with lifespan(app):
@@ -21,20 +21,20 @@ async def test_app_lifespan_execution():
 
 def test_app_configuration():
     """Test app is properly configured."""
-    from narrative_filter_service.main import app
+    from main import app
 
     assert app.title == "narrative-filter-service"
     assert app.version == "1.0.0"
 
     # Verify routes are registered
-    routes = {route.path for route in app.routes}
+    routes = {getattr(route, "path", None) for route in app.routes}
     assert "/health/" in routes
     assert "/metrics" in routes
 
 
 def test_app_has_lifespan():
     """Test app has lifespan configured."""
-    from narrative_filter_service.main import app
+    from main import app
 
     assert hasattr(app, 'router')
     # App was created with lifespan parameter

@@ -10,15 +10,15 @@ from datetime import datetime
 from typing import Any
 
 try:
-    import torch  # type: ignore[import-not-found, import-untyped]
-    from sentence_transformers import SentenceTransformer  # type: ignore[import-not-found, import-untyped]
+    import torch  # type: ignore[import-not-found]
+    from sentence_transformers import SentenceTransformer  # type: ignore[import-not-found]
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
 
 
-from narrative_filter_service.config import settings
-from narrative_filter_service.models import IntentClassification, SemanticRepresentation
+from config import settings
+from models import IntentClassification, SemanticRepresentation
 
 
 class SemanticProcessor:
@@ -49,7 +49,7 @@ class SemanticProcessor:
             return [0.1] * 384
 
         embedding = self.model.encode(text, convert_to_tensor=True, device=self.device)
-        return list(embedding.cpu().tolist())  # type: ignore[return-value]
+        return list(embedding.cpu().tolist())
 
     def classify_intent(self, text: str) -> tuple[IntentClassification, float]:
         """Classify intent of message using heuristic rules.

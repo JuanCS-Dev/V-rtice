@@ -5,8 +5,8 @@ from uuid import uuid4
 
 import pytest
 
-from narrative_filter_service.models import IntentClassification
-from narrative_filter_service.repository import SemanticRepository, create_pool
+from models import IntentClassification
+from repository import SemanticRepository, create_pool
 
 
 @pytest.fixture

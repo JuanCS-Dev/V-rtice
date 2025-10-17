@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from narrative_filter_service.main import app
+from main import app
 
 client = TestClient(app)
 

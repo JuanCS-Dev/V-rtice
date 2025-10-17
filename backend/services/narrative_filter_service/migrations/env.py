@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from config import settings
+from config import settings  # type: ignore[import-not-found]
 
 # this is the Alembic Config object
 config = context.config

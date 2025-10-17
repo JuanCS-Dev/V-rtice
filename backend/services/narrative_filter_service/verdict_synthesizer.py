@@ -9,8 +9,8 @@ Responsável por:
 
 from datetime import datetime
 
-from narrative_filter_service.config import settings
-from narrative_filter_service.models import Severity, StrategicPattern, Verdict, VerdictCategory, VerdictStatus
+from config import settings
+from models import Severity, StrategicPattern, Verdict, VerdictCategory, VerdictStatus
 
 
 class VerdictSynthesizer:

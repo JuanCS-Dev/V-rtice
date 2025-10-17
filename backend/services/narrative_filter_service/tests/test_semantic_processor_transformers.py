@@ -4,7 +4,7 @@
 
 def test_transformers_import_available():
     """Test transformers import availability detection."""
-    from narrative_filter_service.semantic_processor import TRANSFORMERS_AVAILABLE
+    from semantic_processor import TRANSFORMERS_AVAILABLE
 
     # TRANSFORMERS_AVAILABLE is set based on import success
     assert isinstance(TRANSFORMERS_AVAILABLE, bool)
@@ -32,7 +32,7 @@ def test_processor_with_transformers_mock():
         # Force reimport to trigger torch import success path
         import importlib
 
-        import semantic_processor
+        import semantic_processor  # type: ignore[import-not-found]
         importlib.reload(semantic_processor)
 
         processor = semantic_processor.SemanticProcessor()
@@ -44,7 +44,7 @@ def test_processor_with_transformers_mock():
 
 def test_generate_embedding_with_torch_path():
     """Test embedding generation using torch path."""
-    from narrative_filter_service.semantic_processor import TRANSFORMERS_AVAILABLE, SemanticProcessor
+    from semantic_processor import TRANSFORMERS_AVAILABLE, SemanticProcessor
 
     processor = SemanticProcessor()
 

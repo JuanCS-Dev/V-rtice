@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 import networkx as nx  # type: ignore[import-untyped]
 from scipy.stats import entropy  # type: ignore[import-untyped]
 
-from narrative_filter_service.config import settings
-from narrative_filter_service.models import Alliance, PatternType, SemanticRepresentation, StrategicPattern
+from config import settings
+from models import Alliance, PatternType, SemanticRepresentation, StrategicPattern
 
 
 class StrategicPatternDetector:
@@ -109,7 +109,7 @@ class StrategicPatternDetector:
         # Normalize to 0-1 range (lower KL = higher MI)
         normalized_mi = 1.0 / (1.0 + kl_div)
 
-        return float(min(normalized_mi, 1.0))  # type: ignore[return-value]
+        return float(min(normalized_mi, 1.0))
 
     def detect_deception(self, agent_id: str, interactions: list[SemanticRepresentation]) -> float:
         """Calculate deception score for an agent.

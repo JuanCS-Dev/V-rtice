@@ -3,10 +3,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from asyncpg import Pool  # type: ignore[import-untyped]
+import asyncpg  # type: ignore[import-untyped]
+from asyncpg import Pool
 
-from narrative_filter_service.config import settings
-from narrative_filter_service.models import IntentClassification, SemanticRepresentation
+from config import settings
+from models import IntentClassification, SemanticRepresentation
 
 
 class SemanticRepository:
@@ -52,7 +53,7 @@ class SemanticRepository:
                 representation.raw_content,
                 representation.provenance_chain,
             )
-            return UUID(str(row["id"]))  # type: ignore[return-value]
+            return UUID(str(row["id"]))
 
     async def get_by_message_id(self, message_id: str) -> SemanticRepresentation | None:
         """Get semantic representation by message_id.

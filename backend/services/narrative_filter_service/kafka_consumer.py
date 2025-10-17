@@ -6,10 +6,10 @@ from typing import Any
 import structlog
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer  # type: ignore[import-untyped]
 
-from narrative_filter_service.config import settings
-from narrative_filter_service.models import SemanticRepresentation
-from narrative_filter_service.repository import SemanticRepository
-from narrative_filter_service.semantic_processor import SemanticProcessor
+from config import settings
+from models import SemanticRepresentation
+from repository import SemanticRepository
+from semantic_processor import SemanticProcessor
 
 logger = structlog.get_logger()
 
@@ -86,6 +86,9 @@ class TelemetryConsumer:
         if not all([message_id, source_agent_id, content]):
             logger.warning("incomplete_message", message=message)
             return
+
+        # Type narrowing: after check, these are guaranteed str
+        assert isinstance(message_id, str) and isinstance(source_agent_id, str) and isinstance(content, str)
 
         # Process semantically
         representation = await self.processor.process_message(
