@@ -21,7 +21,7 @@ class VerdictCache:
 
     def __init__(self) -> None:
         """Initialize cache client."""
-        self.client: redis.Redis | None = None
+        self.client: redis.Redis[str] | None = None
 
     async def connect(self) -> None:
         """Connect to Redis."""

@@ -5,7 +5,9 @@ PostgreSQL repository, and Redis cache. 100% production-ready.
 """
 
 import asyncio
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 from uuid import uuid4
 
 import structlog
@@ -34,7 +36,7 @@ logger = structlog.get_logger()
 
 
 # Global state (managed by lifespan)
-app_state = {
+app_state: dict[str, Any] = {
     "repository": None,
     "cache": None,
     "ws_manager": None,
@@ -43,7 +45,7 @@ app_state = {
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # pragma: no cover
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:  # pragma: no cover
     """Application lifespan manager."""
     # Startup
     logger.info("verdict_engine_starting", version=settings.version)
@@ -71,7 +73,7 @@ async def lifespan(app: FastAPI):  # pragma: no cover
     logger.info("kafka_consumer_started")
 
     # Ping task for WebSocket health
-    async def ping_task():
+    async def ping_task() -> None:
         while True:
             await asyncio.sleep(settings.websocket_ping_interval)
             await ws_manager.ping_all()
@@ -118,12 +120,12 @@ app.add_middleware(
 
 
 # Dependency injection overrides
-def _get_repository():
-    return app_state["repository"]  # pragma: no cover
+def _get_repository() -> VerdictRepository | None:
+    return app_state.get("repository")  # pragma: no cover
 
 
-def _get_cache():
-    return app_state["cache"]  # pragma: no cover
+def _get_cache() -> VerdictCache | None:
+    return app_state.get("cache")  # pragma: no cover
 
 
 app.dependency_overrides[get_repository] = _get_repository
@@ -136,17 +138,17 @@ app.include_router(api_router)
 
 # WebSocket endpoint
 @app.websocket("/ws/verdicts")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket) -> None:
     """WebSocket endpoint for real-time verdict streaming."""
     client_id = str(uuid4())  # pragma: no cover
-    ws_manager = app_state["ws_manager"]  # pragma: no cover
+    ws_manager: ConnectionManager = app_state.get("ws_manager")  # type: ignore[assignment]  # pragma: no cover
   # pragma: no cover
     await websocket_handler(websocket, client_id, ws_manager)  # pragma: no cover
 
 
 # Root endpoint
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     """Root endpoint."""
     return {
         "service": "verdict_engine",

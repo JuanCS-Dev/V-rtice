@@ -4,12 +4,21 @@ Provides HTTP access to verdicts, stats, and health.
 Integrates with cache and repository.
 """
 
+from typing import Any, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from cache import VerdictCache
-from models import HealthResponse, Verdict, VerdictFilter, VerdictStats
+from models import (
+    CategoryType,
+    HealthResponse,
+    SeverityLevel,
+    StatusType,
+    Verdict,
+    VerdictFilter,
+    VerdictStats,
+)
 from verdict_repository import VerdictRepository
 
 router = APIRouter(prefix="/api/v1", tags=["verdicts"])
@@ -40,9 +49,9 @@ async def get_active_verdicts(
 ) -> list[Verdict]:
     """Get active verdicts with optional filters."""
     filters = VerdictFilter(
-        status=status,
-        severity=severity,
-        category=category,
+        status=cast(StatusType | None, status),
+        severity=cast(SeverityLevel | None, severity),
+        category=cast(CategoryType | None, category),
         agent_id=agent_id,
         limit=limit,
         offset=offset,
@@ -102,7 +111,7 @@ async def update_verdict_status(
     mitigation_id: UUID | None = None,
     cache: VerdictCache = Depends(get_cache),
     repository: VerdictRepository = Depends(get_repository),
-) -> dict:
+) -> dict[str, Any]:
     """Update verdict status (for C2L integration)."""
     success = await repository.update_verdict_status(verdict_id, new_status, mitigation_id)
 
@@ -122,11 +131,11 @@ async def health_check(
     cache: VerdictCache = Depends(get_cache),
 ) -> HealthResponse:
     """Health check endpoint."""
-    dependencies = {
+    dependencies: dict[str, bool] = {
         "postgres": repository.pool is not None,
         "redis": cache.client is not None,
     }
 
-    status = "healthy" if all(dependencies.values()) else "degraded"
+    status: str = "healthy" if all(dependencies.values()) else "degraded"
 
-    return HealthResponse(status=status, dependencies=dependencies)
+    return HealthResponse(status=cast(Any, status), dependencies=dependencies)

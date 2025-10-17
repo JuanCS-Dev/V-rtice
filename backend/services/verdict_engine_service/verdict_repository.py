@@ -146,5 +146,5 @@ class VerdictRepository:
         """  # pragma: no cover
   # pragma: no cover
         async with self.pool.acquire() as conn:  # pragma: no cover
-            result = await conn.execute(query, verdict_id, new_status, mitigation_id)  # pragma: no cover
+            result: str = await conn.execute(query, verdict_id, new_status, mitigation_id)  # pragma: no cover
             return result.split()[-1] == "1"  # pragma: no cover

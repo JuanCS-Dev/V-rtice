@@ -116,3 +116,16 @@ def test_encode_special_types(sample_verdict):
     assert isinstance(encoded["confidence"], str)
     assert isinstance(encoded["timestamp"], str)
     assert isinstance(encoded["nested"]["uuid"], str)
+
+
+def test_serialize_non_model_object():
+    """Test serialization of non-Verdict/non-VerdictStats object."""
+    cache = VerdictCache()
+
+    # Test with dict (line 45 fallback)
+    data = {"key": "value", "number": 42}
+    serialized = cache._serialize(data)
+
+    assert isinstance(serialized, str)
+    assert "key" in serialized
+    assert "value" in serialized

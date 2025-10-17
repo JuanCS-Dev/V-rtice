@@ -6,14 +6,15 @@ and API responses. All models are 100% type-safe and validated.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
 # Enums as Literals for type safety
 SeverityLevel = Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
-VerdictStatus = Literal["ACTIVE", "MITIGATED", "DISMISSED", "ESCALATED"]
+StatusType = Literal["ACTIVE", "MITIGATED", "DISMISSED", "ESCALATED"]
+VerdictStatus = StatusType  # Alias for backward compatibility
 CategoryType = Literal[
     "ALLIANCE",
     "DECEPTION",
@@ -97,7 +98,7 @@ class WebSocketMessage(BaseModel):
     """WebSocket message format for real-time streaming."""
 
     type: Literal["verdict", "stats", "ping", "error"]
-    data: Verdict | VerdictStats | dict | None = None
+    data: Verdict | VerdictStats | dict[str, Any] | None = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 

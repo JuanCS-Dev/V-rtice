@@ -7,6 +7,7 @@ broadcasts to WebSocket clients, updates cache.
 import asyncio
 import json
 from decimal import Decimal
+from typing import Any
 from uuid import UUID
 
 import structlog
@@ -95,7 +96,7 @@ class VerdictConsumer:
                     message_value=message.value,
                 )
 
-    def _parse_verdict(self, data: dict) -> Verdict:
+    def _parse_verdict(self, data: dict[str, Any]) -> Verdict:
         """Parse verdict from Kafka message."""
         # Handle UUID conversion
         if isinstance(data.get("id"), str):
