@@ -4,8 +4,8 @@ from uuid import uuid4
 
 import pytest
 
-from models import Alliance, PatternType, StrategicPattern
-from strategic_repository import AllianceRepository, StrategicPatternRepository
+from narrative_filter_service.models import Alliance, PatternType, StrategicPattern
+from narrative_filter_service.strategic_repository import AllianceRepository, StrategicPatternRepository
 
 
 @pytest.fixture

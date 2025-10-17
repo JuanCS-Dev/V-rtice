@@ -5,8 +5,8 @@ from uuid import uuid4
 
 import pytest
 
-from models import Severity, Verdict, VerdictCategory, VerdictStatus
-from verdict_repository import VerdictRepository
+from narrative_filter_service.models import Severity, Verdict, VerdictCategory, VerdictStatus
+from narrative_filter_service.verdict_repository import VerdictRepository
 
 
 @pytest.fixture

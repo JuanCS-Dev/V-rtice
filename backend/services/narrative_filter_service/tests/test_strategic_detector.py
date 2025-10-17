@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from models import IntentClassification, PatternType, SemanticRepresentation
-from strategic_detector import StrategicPatternDetector
+from narrative_filter_service.models import IntentClassification, PatternType, SemanticRepresentation
+from narrative_filter_service.strategic_detector import StrategicPatternDetector
 
 
 @pytest.fixture

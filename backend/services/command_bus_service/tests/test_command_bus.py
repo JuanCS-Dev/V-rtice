@@ -3,8 +3,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
-from models import C2LCommand, C2LCommandType, CommandStatus, KillSwitchLayer, KillSwitchResult
+from command_bus_service.main import app
+from command_bus_service.models import C2LCommand, C2LCommandType, CommandStatus, KillSwitchLayer, KillSwitchResult
 
 client = TestClient(app)
 

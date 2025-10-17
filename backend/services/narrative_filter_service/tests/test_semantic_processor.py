@@ -4,8 +4,8 @@ from datetime import datetime
 
 import pytest
 
-from models import IntentClassification
-from semantic_processor import SemanticProcessor
+from narrative_filter_service.models import IntentClassification
+from narrative_filter_service.semantic_processor import SemanticProcessor
 
 
 @pytest.fixture
