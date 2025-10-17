@@ -11,6 +11,7 @@ from typing import Any
 
 import pytest
 from pydantic import ValidationError
+
 from shared.response_models import (
     ERROR_EXAMPLE,
     LIST_EXAMPLE,

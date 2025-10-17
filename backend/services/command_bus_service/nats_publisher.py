@@ -1,14 +1,11 @@
 """NATS JetStream publisher for C2L commands."""
 
-import json
-from typing import Optional
 
 import structlog
+from backend.services.command_bus_service.config import settings
+from backend.services.command_bus_service.models import C2LCommand, CommandReceipt
 from nats.aio.client import Client as NATSClient
 from nats.js import JetStreamContext
-
-from config import settings
-from models import C2LCommand, CommandReceipt, CommandStatus
 
 logger = structlog.get_logger()
 
@@ -18,8 +15,8 @@ class NATSPublisher:
 
     def __init__(self) -> None:
         """Initialize publisher."""
-        self.nc: Optional[NATSClient] = None
-        self.js: Optional[JetStreamContext] = None
+        self.nc: NATSClient | None = None
+        self.js: JetStreamContext | None = None
 
     async def connect(self) -> None:
         """Connect to NATS JetStream."""

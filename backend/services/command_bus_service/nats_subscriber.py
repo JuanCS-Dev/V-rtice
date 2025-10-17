@@ -1,16 +1,14 @@
 """NATS JetStream subscriber for C2L commands."""
 
 import json
-from typing import Optional
 
 import structlog
+from backend.services.command_bus_service.c2l_executor import C2LCommandExecutor
+from backend.services.command_bus_service.config import settings
+from backend.services.command_bus_service.models import C2LCommand
 from nats.aio.client import Client as NATSClient
 from nats.js import JetStreamContext
-from nats.js.api import ConsumerConfig
-
-from c2l_executor import C2LCommandExecutor
-from config import settings
-from models import C2LCommand
+from nats.js.api import AckPolicy, ConsumerConfig
 
 logger = structlog.get_logger()
 
@@ -20,8 +18,8 @@ class NATSSubscriber:
 
     def __init__(self, executor: C2LCommandExecutor) -> None:
         """Initialize subscriber."""
-        self.nc: Optional[NATSClient] = None
-        self.js: Optional[JetStreamContext] = None
+        self.nc: NATSClient | None = None
+        self.js: JetStreamContext | None = None
         self.executor = executor
 
     async def connect(self) -> None:
@@ -39,7 +37,7 @@ class NATSSubscriber:
         # Durable consumer
         consumer_config = ConsumerConfig(
             durable_name="c2l-executor",
-            ack_policy="explicit",
+            ack_policy=AckPolicy.EXPLICIT,
             max_deliver=3,
             ack_wait=30,  # 30 seconds to ack
         )

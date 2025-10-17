@@ -9,13 +9,14 @@ Production-grade only.
 from pathlib import Path
 
 import pytest
+from pydantic import Field, ValidationError
+
 from shared.base_config import (
     BaseServiceConfig,
     Environment,
     generate_env_example,
     load_config,
 )
-from pydantic import Field, ValidationError
 
 
 class TestEnvironmentEnum:

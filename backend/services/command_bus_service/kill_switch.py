@@ -5,8 +5,6 @@ from typing import Any
 
 import structlog
 
-from models import KillSwitchLayer
-
 logger = structlog.get_logger()
 
 

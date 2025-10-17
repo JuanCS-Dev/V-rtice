@@ -1,0 +1,157 @@
+"""Tests for NATS subscriber."""
+
+import json
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+from backend.services.command_bus_service.c2l_executor import C2LCommandExecutor
+from backend.services.command_bus_service.models import C2LCommand, C2LCommandType, CommandReceipt
+from backend.services.command_bus_service.nats_subscriber import NATSSubscriber
+
+
+@pytest.mark.asyncio
+async def test_subscriber_initialization():
+    """Test subscriber initialization."""
+    executor = Mock(spec=C2LCommandExecutor)
+    subscriber = NATSSubscriber(executor)
+
+    assert subscriber.nc is None
+    assert subscriber.js is None
+    assert subscriber.executor is executor
+
+
+@pytest.mark.asyncio
+async def test_subscribe_without_connection():
+    """Test subscribing without NATS connection raises error."""
+    executor = Mock(spec=C2LCommandExecutor)
+    subscriber = NATSSubscriber(executor)
+
+    with pytest.raises(RuntimeError, match="NATS not connected"):
+        await subscriber.subscribe()
+
+
+@pytest.mark.asyncio
+async def test_connect():
+    """Test NATS connection with mocked client."""
+    executor = Mock(spec=C2LCommandExecutor)
+
+    # Mock NATS client
+    mock_nc = AsyncMock()
+    mock_js = Mock()
+    mock_nc.jetstream = Mock(return_value=mock_js)
+    mock_nc.connect = AsyncMock()
+
+    with patch("backend.services.command_bus_service.nats_subscriber.NATSClient", return_value=mock_nc):
+        subscriber = NATSSubscriber(executor)
+        await subscriber.connect()
+
+        assert subscriber.nc is mock_nc
+        assert subscriber.js is mock_js
+        mock_nc.connect.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_disconnect():
+    """Test NATS disconnection."""
+    executor = Mock(spec=C2LCommandExecutor)
+    subscriber = NATSSubscriber(executor)
+
+    # Mock NATS client
+    mock_nc = AsyncMock()
+    subscriber.nc = mock_nc
+
+    await subscriber.disconnect()
+    mock_nc.close.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_disconnect_when_not_connected():
+    """Test disconnect when nc is None."""
+    executor = Mock(spec=C2LCommandExecutor)
+    subscriber = NATSSubscriber(executor)
+
+    # Should not raise error
+    await subscriber.disconnect()
+    assert subscriber.nc is None
+
+
+@pytest.mark.asyncio
+async def test_subscribe_message_processing():
+    """Test message processing in subscribe loop."""
+    executor = AsyncMock(spec=C2LCommandExecutor)
+    subscriber = NATSSubscriber(executor)
+
+    # Mock JS
+    mock_js = AsyncMock()
+    subscriber.js = mock_js
+
+    # Mock message
+    command = C2LCommand(
+        operator_id="test-op",
+        command_type=C2LCommandType.MUTE,
+        target_agents=["agent-1"],
+    )
+
+    receipt = CommandReceipt(
+        command_id=command.id,
+        status="COMPLETED",
+        message="Success",
+    )
+
+    mock_msg = AsyncMock()
+    mock_msg.data = command.model_dump_json().encode()
+    mock_msg.ack = AsyncMock()
+
+    # Mock subscription with single message then stop
+    mock_subscription = AsyncMock()
+    mock_subscription.messages = [mock_msg]
+
+    mock_js.subscribe = AsyncMock(return_value=mock_subscription)
+    executor.execute = AsyncMock(return_value=receipt)
+    executor.publisher = AsyncMock()
+    executor.publisher.publish_confirmation = AsyncMock()
+
+    # Run subscribe with single message
+    try:
+        await subscriber.subscribe()
+    except (StopAsyncIteration, AttributeError):
+        pass  # Expected when messages list ends
+
+    # Verify
+    mock_js.subscribe.assert_called_once()
+    executor.execute.assert_called_once()
+    executor.publisher.publish_confirmation.assert_called_once()
+    mock_msg.ack.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_subscribe_message_processing_error():
+    """Test error handling in message processing."""
+    executor = AsyncMock(spec=C2LCommandExecutor)
+    subscriber = NATSSubscriber(executor)
+
+    # Mock JS
+    mock_js = AsyncMock()
+    subscriber.js = mock_js
+
+    # Mock invalid message
+    mock_msg = AsyncMock()
+    mock_msg.data = b"invalid json"
+    mock_msg.nak = AsyncMock()
+
+    # Mock subscription
+    mock_subscription = AsyncMock()
+    mock_subscription.messages = [mock_msg]
+
+    mock_js.subscribe = AsyncMock(return_value=mock_subscription)
+
+    # Run subscribe
+    try:
+        await subscriber.subscribe()
+    except (StopAsyncIteration, AttributeError):
+        pass
+
+    # Verify error handling
+    mock_js.subscribe.assert_called_once()
+    mock_msg.nak.assert_called_once()
+

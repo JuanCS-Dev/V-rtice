@@ -36,11 +36,11 @@ Author: Vértice Platform Team
 License: Proprietary
 """
 
-from datetime import datetime
 import logging
 import traceback
-from typing import Any, Dict, Union
 import uuid
+from datetime import datetime
+from typing import Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -62,9 +62,9 @@ def build_error_response(
     error_code: str,
     message: str,
     status_code: int,
-    details: Dict[str, Any] = None,
+    details: dict[str, Any] = None,
     request_id: str = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build standardized error response dictionary.
 
     Args:

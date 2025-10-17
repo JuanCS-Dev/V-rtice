@@ -28,7 +28,7 @@ Author: Vértice Platform Team
 License: Proprietary
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .constants import ServicePorts
 
@@ -53,7 +53,7 @@ LICENSE_INFO = {
 # ============================================================================
 
 
-def get_servers(service_port: int) -> List[Dict[str, str]]:
+def get_servers(service_port: int) -> list[dict[str, str]]:
     """Get server configurations for different environments.
 
     Args:
@@ -166,11 +166,11 @@ def create_openapi_config(
     service_description: str,
     version: str = "1.0.0",
     service_port: Optional[int] = None,
-    tags: Optional[List[Dict[str, str]]] = None,
+    tags: Optional[list[dict[str, str]]] = None,
     include_security: bool = True,
-    additional_metadata: Optional[Dict[str, Any]] = None,
+    additional_metadata: Optional[dict[str, Any]] = None,
     app: Optional[Any] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create standardized OpenAPI configuration for a FastAPI service.
 
     Args:
@@ -259,7 +259,7 @@ def create_openapi_config(
 # ============================================================================
 
 
-def get_maximus_core_config() -> Dict[str, Any]:
+def get_maximus_core_config() -> dict[str, Any]:
     """Get OpenAPI config for Maximus Core Service."""
     return create_openapi_config(
         service_name="Maximus Core Service",
@@ -286,7 +286,7 @@ def get_maximus_core_config() -> Dict[str, Any]:
     )
 
 
-def get_ip_intelligence_config() -> Dict[str, Any]:
+def get_ip_intelligence_config() -> dict[str, Any]:
     """Get OpenAPI config for IP Intelligence Service."""
     return create_openapi_config(
         service_name="IP Intelligence Service",
@@ -310,7 +310,7 @@ def get_ip_intelligence_config() -> Dict[str, Any]:
     )
 
 
-def get_malware_analysis_config() -> Dict[str, Any]:
+def get_malware_analysis_config() -> dict[str, Any]:
     """Get OpenAPI config for Malware Analysis Service."""
     return create_openapi_config(
         service_name="Malware Analysis Service",

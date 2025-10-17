@@ -7,7 +7,7 @@ Covers all code paths including error conditions, caching, and fallbacks.
 
 import os
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -26,7 +26,7 @@ class TestVaultConfig:
 
     def test_default_config(self):
         """Test default configuration values."""
-        assert VaultConfig.ADDR == os.getenv("VAULT_ADDR", "http://localhost:8200")
+        assert os.getenv("VAULT_ADDR", "http://localhost:8200") == VaultConfig.ADDR
         assert VaultConfig.MOUNT_POINT == "vertice"
         assert VaultConfig.CACHE_TTL == 300
         assert VaultConfig.FAIL_OPEN is True
@@ -39,6 +39,7 @@ class TestVaultConfig:
 
         # Force re-import to pick up new env vars
         import importlib
+
         import shared.vault_client
         importlib.reload(shared.vault_client)
 
@@ -136,7 +137,7 @@ class TestVaultClientCaching:
     def test_cache_store_and_retrieve(self, mock_hvac):
         """Test storing and retrieving from cache."""
         client = VaultClient(token="test-token")
-        
+
         test_data = {"key": "value"}
         client._store_in_cache("test/path", test_data)
 
@@ -148,7 +149,7 @@ class TestVaultClientCaching:
     def test_cache_expiry(self, mock_hvac):
         """Test cache expiration."""
         client = VaultClient(token="test-token")
-        
+
         test_data = {"key": "value"}
         client._store_in_cache("test/path", test_data)
 
@@ -163,7 +164,7 @@ class TestVaultClientCaching:
     def test_cache_miss(self, mock_hvac):
         """Test cache miss."""
         client = VaultClient(token="test-token")
-        
+
         cached = client._get_from_cache("nonexistent/path")
         assert cached is None
 
@@ -217,7 +218,7 @@ class TestVaultClientGetSecret:
         mock_hvac.Client.return_value = mock_hvac_client
 
         client = VaultClient(token="test-token")
-        
+
         # Pre-populate cache
         test_data = {'api_key': 'cached-key'}
         client._store_in_cache("test/path", test_data)
@@ -240,7 +241,7 @@ class TestVaultClientGetSecret:
         }
 
         client = VaultClient(token="test-token")
-        
+
         # Pre-populate cache with different value
         client._store_in_cache("test/path", {'api_key': 'cached-key'})
 
@@ -256,9 +257,8 @@ class TestVaultClientGetSecret:
         """Test secret not found with env fallback."""
         mock_hvac_client = MagicMock()
         mock_hvac.Client.return_value = mock_hvac_client
-        
+
         # Simulate InvalidPath - but mock_hvac.exceptions needs to exist
-        from unittest.mock import Mock
         invalid_path_exc = type('InvalidPath', (Exception,), {})
         mock_hvac_client.secrets.kv.v2.read_secret_version.side_effect = invalid_path_exc("Not found")
 
@@ -275,7 +275,7 @@ class TestVaultClientGetSecret:
         """Test VaultError exception with fallback."""
         mock_hvac_client = MagicMock()
         mock_hvac.Client.return_value = mock_hvac_client
-        
+
         vault_error = type('VaultError', (Exception,), {})
         mock_hvac_client.secrets.kv.v2.read_secret_version.side_effect = vault_error("Vault error")
 
@@ -417,7 +417,7 @@ class TestVaultClientSetSecret:
         mock_hvac.Client.return_value = mock_hvac_client
 
         client = VaultClient(token="test-token")
-        
+
         # Pre-populate cache
         client._store_in_cache("test/path", {"old": "value"})
         assert "test/path" in client._cache
@@ -472,7 +472,7 @@ class TestVaultClientDeleteSecret:
         mock_hvac.Client.return_value = mock_hvac_client
 
         client = VaultClient(token="test-token")
-        
+
         # Pre-populate cache
         client._store_in_cache("test/path", {"key": "value"})
         assert "test/path" in client._cache

@@ -8,11 +8,12 @@ Provides metrics, status, and diagnostics for MAXIMUS distributed architecture.
 import asyncio
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Optional
+
+from pydantic import BaseModel, Field
 
 import docker
 from docker.errors import APIError, NotFound
-from pydantic import BaseModel, Field
 
 
 class ContainerStatus(str, Enum):
@@ -56,10 +57,10 @@ class ContainerInfo(BaseModel):
     health: HealthStatus
     uptime_seconds: Optional[int] = Field(None, ge=0)
     restart_count: int = Field(default=0, ge=0)
-    ports: Dict[str, List[str]] = Field(default_factory=dict)
-    labels: Dict[str, str] = Field(default_factory=dict)
+    ports: dict[str, list[str]] = Field(default_factory=dict)
+    labels: dict[str, str] = Field(default_factory=dict)
     metrics: Optional[ContainerMetrics] = None
-    last_log_lines: List[str] = Field(default_factory=list)
+    last_log_lines: list[str] = Field(default_factory=list)
 
 
 class ClusterHealth(BaseModel):
@@ -72,79 +73,79 @@ class ClusterHealth(BaseModel):
     stopped_containers: int = Field(..., ge=0)
     total_cpu_percent: float = Field(..., ge=0.0)
     total_memory_mb: float = Field(..., ge=0.0)
-    containers: List[ContainerInfo]
+    containers: list[ContainerInfo]
 
 
 class ContainerHealthMonitor:
     """
     Docker container health monitoring service.
-    
+
     Collects real-time metrics, status, and logs from all containers.
     Designed for MAXIMUS distributed consciousness infrastructure.
     """
-    
+
     def __init__(self, docker_url: str = "unix://var/run/docker.sock"):
         """
         Initialize health monitor.
-        
+
         Args:
             docker_url: Docker daemon socket URL
         """
         self.client = docker.DockerClient(base_url=docker_url)
-    
+
     async def get_container_info(
-        self, 
+        self,
         container_id: str,
         include_metrics: bool = True,
         log_lines: int = 10
     ) -> ContainerInfo:
         """
         Get detailed information about a single container.
-        
+
         Args:
             container_id: Container ID or name
             include_metrics: Include resource metrics
             log_lines: Number of recent log lines to include
-            
+
         Returns:
             Complete container information
-            
+
         Raises:
             NotFound: If container doesn't exist
         """
         try:
             container = self.client.containers.get(container_id)
-            
+
             # Basic info
             attrs = container.attrs
             state = attrs.get("State", {})
             config = attrs.get("Config", {})
-            
+
             # Status
             status = self._parse_status(state.get("Status", "unknown"))
-            
+
             # Health
             health_data = state.get("Health", {})
             health = self._parse_health(health_data.get("Status"))
-            
+
             # Uptime
             started_at = state.get("StartedAt")
             uptime = self._calculate_uptime(started_at) if started_at else None
-            
+
             # Restart count
             restart_count = state.get("RestartCount", 0)
-            
+
             # Ports
             ports = self._parse_ports(attrs.get("NetworkSettings", {}).get("Ports", {}))
-            
+
             # Labels
             labels = config.get("Labels", {})
-            
+
             # Metrics
             metrics = None
             if include_metrics and status == ContainerStatus.RUNNING:
                 metrics = await self._get_container_metrics(container)
-            
+
             # Recent logs
             logs = []
             if log_lines > 0:
@@ -153,7 +154,7 @@ class ContainerHealthMonitor:
                     logs = log_output.decode("utf-8", errors="ignore").strip().split("\n")
                 except Exception:
                     pass
-            
+
             return ContainerInfo(
                 id=container.short_id,
                 name=container.name,
@@ -167,29 +168,29 @@ class ContainerHealthMonitor:
                 metrics=metrics,
                 last_log_lines=logs
             )
-            
+
         except NotFound:
             raise
         except APIError as e:
             raise RuntimeError(f"Docker API error: {e}") from e
-    
+
     async def get_cluster_health(
-        self, 
+        self,
         include_metrics: bool = True,
         log_lines: int = 5
     ) -> ClusterHealth:
         """
         Get health summary of entire container cluster.
-        
+
         Args:
             include_metrics: Include resource metrics for each container
             log_lines: Number of log lines per container
-            
+
         Returns:
             Cluster-wide health summary
         """
         containers = self.client.containers.list(all=True)
-        
+
         # Collect info for all containers
         container_infos = []
         for container in containers:
@@ -203,26 +204,26 @@ class ContainerHealthMonitor:
             except Exception as e:
                 # Log but don't fail entire query
                 print(f"Warning: Failed to get info for {container.name}: {e}")
-        
+
         # Calculate cluster metrics
         total = len(container_infos)
         running = sum(1 for c in container_infos if c.status == ContainerStatus.RUNNING)
         healthy = sum(1 for c in container_infos if c.health == HealthStatus.HEALTHY)
         unhealthy = sum(1 for c in container_infos if c.health == HealthStatus.UNHEALTHY)
         stopped = sum(1 for c in container_infos if c.status == ContainerStatus.EXITED)
-        
+
         total_cpu = sum(
-            c.metrics.cpu_percent 
-            for c in container_infos 
+            c.metrics.cpu_percent
+            for c in container_infos
             if c.metrics and c.metrics.cpu_percent
         )
-        
+
         total_memory = sum(
-            c.metrics.memory_usage_mb 
-            for c in container_infos 
+            c.metrics.memory_usage_mb
+            for c in container_infos
             if c.metrics and c.metrics.memory_usage_mb
         )
-        
+
         return ClusterHealth(
             total_containers=total,
             running_containers=running,
@@ -233,33 +234,33 @@ class ContainerHealthMonitor:
             total_memory_mb=total_memory,
             containers=container_infos
         )
-    
+
     async def _get_container_metrics(self, container) -> ContainerMetrics:
         """Extract resource metrics from container stats"""
         try:
             stats = container.stats(stream=False)
-            
+
             # CPU
             cpu_delta = stats["cpu_stats"]["cpu_usage"]["total_usage"] - \
                        stats["precpu_stats"]["cpu_usage"]["total_usage"]
             system_delta = stats["cpu_stats"]["system_cpu_usage"] - \
                           stats["precpu_stats"]["system_cpu_usage"]
             cpu_count = stats["cpu_stats"].get("online_cpus", 1)
-            
+
             cpu_percent = 0.0
             if system_delta > 0:
                 cpu_percent = (cpu_delta / system_delta) * cpu_count * 100.0
-            
+
             # Memory
             memory_usage = stats["memory_stats"].get("usage", 0) / (1024 * 1024)
             memory_limit = stats["memory_stats"].get("limit", 0) / (1024 * 1024)
             memory_percent = (memory_usage / memory_limit * 100) if memory_limit > 0 else 0
-            
+
             # Network
             networks = stats.get("networks", {})
             network_rx = sum(net.get("rx_bytes", 0) for net in networks.values()) / (1024 * 1024)
             network_tx = sum(net.get("tx_bytes", 0) for net in networks.values()) / (1024 * 1024)
-            
+
             # Block I/O
             block_io = stats.get("blkio_stats", {}).get("io_service_bytes_recursive", [])
             block_read = sum(
@@ -268,7 +269,7 @@ class ContainerHealthMonitor:
             block_write = sum(
                 item["value"] for item in block_io if item["op"] == "write"
             ) / (1024 * 1024) if block_io else 0
-            
+
             return ContainerMetrics(
                 cpu_percent=round(cpu_percent, 2),
                 memory_usage_mb=round(memory_usage, 2),
@@ -279,11 +280,11 @@ class ContainerHealthMonitor:
                 block_read_mb=round(block_read, 2),
                 block_write_mb=round(block_write, 2)
             )
-            
+
         except Exception as e:
             print(f"Warning: Failed to get metrics: {e}")
             return ContainerMetrics()
-    
+
     def _parse_status(self, status_str: str) -> ContainerStatus:
         """Parse Docker status string to enum"""
         status_map = {
@@ -296,30 +297,30 @@ class ContainerHealthMonitor:
             "created": ContainerStatus.CREATED,
         }
         return status_map.get(status_str.lower(), ContainerStatus.UNKNOWN)
-    
+
     def _parse_health(self, health_str: Optional[str]) -> HealthStatus:
         """Parse Docker health status"""
         if not health_str:
             return HealthStatus.NONE
-        
+
         health_map = {
             "healthy": HealthStatus.HEALTHY,
             "unhealthy": HealthStatus.UNHEALTHY,
             "starting": HealthStatus.STARTING,
         }
         return health_map.get(health_str.lower(), HealthStatus.NONE)
-    
-    def _parse_ports(self, ports_dict: Dict) -> Dict[str, List[str]]:
+
+    def _parse_ports(self, ports_dict: dict) -> dict[str, list[str]]:
         """Parse Docker ports mapping"""
         result = {}
         for container_port, host_bindings in ports_dict.items():
             if host_bindings:
                 result[container_port] = [
-                    f"{b['HostIp']}:{b['HostPort']}" 
+                    f"{b['HostIp']}:{b['HostPort']}"
                     for b in host_bindings
                 ]
         return result
-    
+
     def _calculate_uptime(self, started_at: str) -> Optional[int]:
         """Calculate container uptime in seconds"""
         try:
@@ -329,7 +330,7 @@ class ContainerHealthMonitor:
             return int(uptime)
         except Exception:
             return None
-    
+
     def close(self):
         """Close Docker client connection"""
         self.client.close()
@@ -340,13 +341,13 @@ if __name__ == "__main__":
     async def main():
         print("🏥 MAXIMUS Container Health Dashboard")
         print("=" * 60)
-        
+
         monitor = ContainerHealthMonitor()
-        
+
         try:
             health = await monitor.get_cluster_health(include_metrics=True, log_lines=3)
-            
-            print(f"\n📊 Cluster Status:")
+
+            print("\n📊 Cluster Status:")
             print(f"   Total containers: {health.total_containers}")
             print(f"   Running: {health.running_containers}")
             print(f"   Healthy: {health.healthy_containers}")
@@ -354,8 +355,8 @@ if __name__ == "__main__":
             print(f"   Stopped: {health.stopped_containers}")
             print(f"   CPU: {health.total_cpu_percent:.1f}%")
             print(f"   Memory: {health.total_memory_mb:.1f} MB")
-            
-            print(f"\n📦 Containers:")
+
+            print("\n📦 Containers:")
             for container in health.containers:
                 status_emoji = "✅" if container.status == ContainerStatus.RUNNING else "❌"
                 health_emoji = {
@@ -364,25 +365,25 @@ if __name__ == "__main__":
                     HealthStatus.STARTING: "💛",
                     HealthStatus.NONE: "⚪"
                 }[container.health]
-                
+
                 print(f"\n   {status_emoji} {health_emoji} {container.name}")
                 print(f"      Image: {container.image}")
                 print(f"      Status: {container.status.value}")
                 print(f"      Uptime: {container.uptime_seconds}s" if container.uptime_seconds else "      Not running")
-                
+
                 if container.metrics:
                     print(f"      CPU: {container.metrics.cpu_percent}%")
                     print(f"      Memory: {container.metrics.memory_usage_mb:.1f}MB / {container.metrics.memory_limit_mb:.1f}MB ({container.metrics.memory_percent:.1f}%)")
-                
+
                 if container.ports:
                     print(f"      Ports: {container.ports}")
-                
+
                 if container.last_log_lines:
-                    print(f"      Recent logs:")
+                    print("      Recent logs:")
                     for log in container.last_log_lines[:2]:
                         print(f"        • {log[:80]}")
-            
+
         finally:
             monitor.close()
-    
+
     asyncio.run(main())

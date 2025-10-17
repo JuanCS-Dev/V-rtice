@@ -2,9 +2,8 @@
 
 from datetime import datetime
 
+from backend.services.command_bus_service.models import HealthResponse
 from fastapi import APIRouter, status
-
-from models import HealthResponse
 
 router = APIRouter()
 

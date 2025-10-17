@@ -39,7 +39,7 @@ Author: Vértice Platform Team
 License: Proprietary
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # ============================================================================
 # BASE EXCEPTION
@@ -64,7 +64,7 @@ class VerticeException(Exception):
         message: str,
         error_code: str = "VERTICE_ERROR",
         status_code: int = 500,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         """Initialize the VerticeException.
 
@@ -81,7 +81,7 @@ class VerticeException(Exception):
         super().__init__(self.message)
 
     @property
-    def context(self) -> Dict[str, Any]:
+    def context(self) -> dict[str, Any]:
         """Return full error context for logging and debugging.
 
         Returns:
@@ -120,7 +120,7 @@ class VerticeException(Exception):
 class ValidationError(VerticeException):
     """Raised when input validation fails."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="VALIDATION_ERROR",
@@ -132,7 +132,7 @@ class ValidationError(VerticeException):
 class SchemaValidationError(ValidationError):
     """Raised when Pydantic schema validation fails."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(message=message, details=details)
         self.error_code = "SCHEMA_VALIDATION_ERROR"
 
@@ -140,7 +140,7 @@ class SchemaValidationError(ValidationError):
 class InvalidInputError(ValidationError):
     """Raised when input parameters are invalid or malformed."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(message=message, details=details)
         self.error_code = "INVALID_INPUT"
 
@@ -148,7 +148,7 @@ class InvalidInputError(ValidationError):
 class MissingFieldError(ValidationError):
     """Raised when required fields are missing from request."""
 
-    def __init__(self, field_name: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, field_name: str, details: Optional[dict[str, Any]] = None):
         message = f"Required field '{field_name}' is missing"
         super().__init__(message=message, details=details)
         self.error_code = "MISSING_FIELD"
@@ -163,7 +163,7 @@ class SecurityException(VerticeException):
     """Base exception for security-related errors."""
 
     def __init__(
-        self, message: str, error_code: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, error_code: str, details: Optional[dict[str, Any]] = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=403, details=details
@@ -176,7 +176,7 @@ class UnauthorizedError(SecurityException):
     def __init__(
         self,
         message: str = "Authentication required",
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         super().__init__(
             message=message,
@@ -192,7 +192,7 @@ class ForbiddenError(SecurityException):
     def __init__(
         self,
         message: str = "Insufficient permissions",
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         super().__init__(
             message=message,
@@ -207,7 +207,7 @@ class InvalidTokenError(UnauthorizedError):
     def __init__(
         self,
         message: str = "Invalid or expired token",
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         super().__init__(message=message, details=details)
         self.error_code = "INVALID_TOKEN"
@@ -219,7 +219,7 @@ class RateLimitExceeded(SecurityException):
     def __init__(
         self,
         message: str = "Rate limit exceeded",
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         super().__init__(
             message=message,
@@ -232,7 +232,7 @@ class RateLimitExceeded(SecurityException):
 class SecurityViolationError(SecurityException):
     """Raised when a security policy is violated."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="SECURITY_VIOLATION",
@@ -249,7 +249,7 @@ class ServiceException(VerticeException):
     """Base exception for service-level errors."""
 
     def __init__(
-        self, message: str, error_code: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, error_code: str, details: Optional[dict[str, Any]] = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=503, details=details
@@ -259,7 +259,7 @@ class ServiceException(VerticeException):
 class ServiceUnavailableError(ServiceException):
     """Raised when a service is temporarily unavailable."""
 
-    def __init__(self, service_name: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, service_name: str, details: Optional[dict[str, Any]] = None):
         message = f"Service '{service_name}' is currently unavailable"
         super().__init__(
             message=message,
@@ -275,7 +275,7 @@ class ServiceTimeoutError(ServiceException):
         self,
         service_name: str,
         timeout_seconds: int,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         message = f"Service '{service_name}' timed out after {timeout_seconds}s"
         super().__init__(
@@ -289,7 +289,7 @@ class ServiceTimeoutError(ServiceException):
 class ServiceConfigurationError(ServiceException):
     """Raised when service configuration is invalid or missing."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="SERVICE_CONFIGURATION_ERROR",
@@ -307,7 +307,7 @@ class DatabaseException(VerticeException):
     """Base exception for database-related errors."""
 
     def __init__(
-        self, message: str, error_code: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, error_code: str, details: Optional[dict[str, Any]] = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=500, details=details
@@ -320,7 +320,7 @@ class DatabaseConnectionError(DatabaseException):
     def __init__(
         self,
         message: str = "Database connection failed",
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         super().__init__(
             message=message,
@@ -332,7 +332,7 @@ class DatabaseConnectionError(DatabaseException):
 class DatabaseQueryError(DatabaseException):
     """Raised when a database query fails."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="DATABASE_QUERY_ERROR",
@@ -343,7 +343,7 @@ class DatabaseQueryError(DatabaseException):
 class DuplicateRecordError(DatabaseException):
     """Raised when attempting to create a duplicate record."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="DUPLICATE_RECORD",
@@ -359,7 +359,7 @@ class RecordNotFoundError(DatabaseException):
         self,
         resource_type: str,
         resource_id: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         message = f"{resource_type} with ID '{resource_id}' not found"
         super().__init__(
@@ -379,7 +379,7 @@ class ExternalAPIException(VerticeException):
     """Base exception for external API integration errors."""
 
     def __init__(
-        self, message: str, error_code: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, error_code: str, details: Optional[dict[str, Any]] = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=502, details=details
@@ -390,7 +390,7 @@ class ExternalAPIError(ExternalAPIException):
     """Raised when external API request fails."""
 
     def __init__(
-        self, api_name: str, status_code: int, details: Optional[Dict[str, Any]] = None
+        self, api_name: str, status_code: int, details: Optional[dict[str, Any]] = None
     ):
         message = f"External API '{api_name}' returned error (status {status_code})"
         super().__init__(
@@ -403,7 +403,7 @@ class ExternalAPIError(ExternalAPIException):
 class ExternalAPITimeoutError(ExternalAPIException):
     """Raised when external API request times out."""
 
-    def __init__(self, api_name: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, api_name: str, details: Optional[dict[str, Any]] = None):
         message = f"External API '{api_name}' request timed out"
         super().__init__(
             message=message,
@@ -416,7 +416,7 @@ class ExternalAPITimeoutError(ExternalAPIException):
 class APIQuotaExceededError(ExternalAPIException):
     """Raised when external API quota is exceeded."""
 
-    def __init__(self, api_name: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, api_name: str, details: Optional[dict[str, Any]] = None):
         message = f"API quota exceeded for '{api_name}'"
         super().__init__(
             message=message,
@@ -435,7 +435,7 @@ class BusinessLogicException(VerticeException):
     """Base exception for business rule violations."""
 
     def __init__(
-        self, message: str, error_code: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, error_code: str, details: Optional[dict[str, Any]] = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=422, details=details
@@ -445,7 +445,7 @@ class BusinessLogicException(VerticeException):
 class InvalidOperationError(BusinessLogicException):
     """Raised when an operation violates business rules."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="INVALID_OPERATION",
@@ -460,7 +460,7 @@ class StateTransitionError(BusinessLogicException):
         self,
         current_state: str,
         attempted_state: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         message = f"Cannot transition from '{current_state}' to '{attempted_state}'"
         super().__init__(
@@ -473,7 +473,7 @@ class StateTransitionError(BusinessLogicException):
 class WorkflowException(BusinessLogicException):
     """Raised when a workflow execution fails."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="WORKFLOW_ERROR",
@@ -494,7 +494,7 @@ class ResourceException(VerticeException):
         message: str,
         error_code: str,
         status_code: int,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         super().__init__(
             message=message,
@@ -511,7 +511,7 @@ class ResourceNotFoundError(ResourceException):
         self,
         resource_type: str,
         identifier: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         message = f"{resource_type} '{identifier}' not found"
         super().__init__(
@@ -525,7 +525,7 @@ class ResourceNotFoundError(ResourceException):
 class ResourceConflictError(ResourceException):
     """Raised when a resource operation conflicts with existing state."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="RESOURCE_CONFLICT",
@@ -537,7 +537,7 @@ class ResourceConflictError(ResourceException):
 class ResourceExhaustedError(ResourceException):
     """Raised when system resources are exhausted."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="RESOURCE_EXHAUSTED",
@@ -550,7 +550,7 @@ class QuotaExceededError(ResourceException):
     """Raised when user quota is exceeded."""
 
     def __init__(
-        self, quota_type: str, limit: int, details: Optional[Dict[str, Any]] = None
+        self, quota_type: str, limit: int, details: Optional[dict[str, Any]] = None
     ):
         message = f"Quota exceeded for '{quota_type}' (limit: {limit})"
         super().__init__(
@@ -570,7 +570,7 @@ class AnalysisException(VerticeException):
     """Base exception for AI/ML analysis errors."""
 
     def __init__(
-        self, message: str, error_code: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, error_code: str, details: Optional[dict[str, Any]] = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=500, details=details
@@ -584,7 +584,7 @@ class AnalysisTimeoutError(AnalysisException):
         self,
         analysis_type: str,
         timeout_seconds: int,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         message = f"Analysis '{analysis_type}' timed out after {timeout_seconds}s"
         super().__init__(
@@ -598,7 +598,7 @@ class AnalysisTimeoutError(AnalysisException):
 class ModelNotFoundError(AnalysisException):
     """Raised when a requested ML model is not found."""
 
-    def __init__(self, model_name: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, model_name: str, details: Optional[dict[str, Any]] = None):
         message = f"AI model '{model_name}' not found or not loaded"
         super().__init__(
             message=message,
@@ -611,7 +611,7 @@ class ModelNotFoundError(AnalysisException):
 class InsufficientDataError(AnalysisException):
     """Raised when insufficient data is available for analysis."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None):
         super().__init__(
             message=message,
             error_code="INSUFFICIENT_DATA",
@@ -629,7 +629,7 @@ class ThreatException(VerticeException):
     """Base exception for threat detection and analysis errors."""
 
     def __init__(
-        self, message: str, error_code: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, error_code: str, details: Optional[dict[str, Any]] = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=500, details=details
@@ -643,7 +643,7 @@ class MalwareDetectedError(ThreatException):
         self,
         malware_type: str,
         file_hash: str,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ):
         message = f"Malware detected: {malware_type} (hash: {file_hash})"
         super().__init__(
@@ -657,7 +657,7 @@ class MalwareDetectedError(ThreatException):
 class ScanFailedError(ThreatException):
     """Raised when a security scan fails."""
 
-    def __init__(self, scan_type: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, scan_type: str, details: Optional[dict[str, Any]] = None):
         message = f"Scan failed: {scan_type}"
         super().__init__(
             message=message,
