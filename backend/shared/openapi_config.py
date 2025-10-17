@@ -169,6 +169,7 @@ def create_openapi_config(
     tags: Optional[List[Dict[str, str]]] = None,
     include_security: bool = True,
     additional_metadata: Optional[Dict[str, Any]] = None,
+    app: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """Create standardized OpenAPI configuration for a FastAPI service.
 
@@ -180,6 +181,7 @@ def create_openapi_config(
         tags: Custom tags for endpoint categorization (default: COMMON_TAGS)
         include_security: Include security schemes (default: True)
         additional_metadata: Additional OpenAPI metadata
+        app: FastAPI application instance (optional, for openapi_schema closure)
 
     Returns:
         Dictionary with OpenAPI configuration for FastAPI
@@ -192,6 +194,9 @@ def create_openapi_config(
         >>>     service_port=8002,
         >>> )
         >>> app = FastAPI(**config)
+        >>> # Or with app reference for custom_openapi:
+        >>> app = FastAPI()
+        >>> app.openapi = create_openapi_config(..., app=app)["openapi_schema"]
     """
     config = {
         "title": service_name,
@@ -214,11 +219,14 @@ def create_openapi_config(
         if hasattr(custom_openapi, "openapi_schema"):
             return custom_openapi.openapi_schema
 
+        # Get routes from app if available (either from parameter or via context)
+        routes = app.routes if app is not None else []
+
         openapi_schema = get_openapi(
             title=service_name,
             version=version,
             description=service_description,
-            routes=app.routes,
+            routes=routes,
             tags=tags or COMMON_TAGS,
             servers=get_servers(service_port) if service_port else None,
         )
