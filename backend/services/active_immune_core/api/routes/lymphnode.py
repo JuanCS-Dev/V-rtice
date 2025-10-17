@@ -12,13 +12,13 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Path, status
 
-from api.core_integration import CoordinationService
-from api.core_integration.coordination_service import (
+from active_immune_core.api.core_integration import CoordinationService
+from active_immune_core.api.core_integration.coordination_service import (
     AgentNotFoundForCloneError,
     CoordinationServiceError,
     LymphnodeNotAvailableError,
 )
-from api.models.coordination import (
+from active_immune_core.api.models.coordination import (
     CloneRequest,
     CloneResponse,
     HomeostaticStateResponse,

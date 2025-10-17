@@ -4,7 +4,7 @@ import pytest
 from vertice_core import BaseServiceSettings
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_settings() -> BaseServiceSettings:
     """Create test settings."""
     return BaseServiceSettings(

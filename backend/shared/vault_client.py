@@ -19,7 +19,7 @@ Features:
 - Type-safe secret retrieval
 
 Usage:
-    from backend.shared.vault_client import VaultClient
+    from shared.vault_client import VaultClient
     
     vault = VaultClient()
     

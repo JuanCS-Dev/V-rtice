@@ -909,20 +909,41 @@ class TestVaultClient100PercentCoverage:
     def test_get_secret_generic_exception_logging(self, mock_hvac_module, vault_config_mock):
         """Test lines 253-254: generic exception logging in get_secret."""
         from backend.shared.vault_client import VaultClient
+        import logging
         
-        mock_client = Mock()
-        mock_client.is_authenticated.return_value = True
-        # Trigger generic exception (not VaultError or InvalidPath)
-        mock_client.secrets.kv.v2.read_secret_version.side_effect = RuntimeError("Unexpected error")
-        mock_hvac_module.Client.return_value = mock_client
+        # Create custom exception classes that are NOT VaultError or InvalidPath
+        class CustomVaultError(Exception):
+            """Custom exception for mocking VaultError."""
+            pass
         
-        vault = VaultClient()
+        class CustomInvalidPath(Exception):
+            """Custom exception for mocking InvalidPath."""
+            pass
         
-        with patch("backend.shared.vault_client.logging.error") as mock_error:
-            result = vault.get_secret("test/path")
-            # Should log generic error
-            assert any("Unexpected error getting secret" in str(call) for call in mock_error.call_args_list)
-            assert result is None
+        # Mock hvac.exceptions to use our custom classes
+        mock_hvac_module.exceptions = Mock()
+        mock_hvac_module.exceptions.VaultError = CustomVaultError
+        mock_hvac_module.exceptions.InvalidPath = CustomInvalidPath
+        
+        # Patch the imported exceptions in vault_client module
+        with patch("backend.shared.vault_client.VaultError", CustomVaultError), \
+             patch("backend.shared.vault_client.InvalidPath", CustomInvalidPath):
+            
+            mock_client = Mock()
+            mock_client.is_authenticated.return_value = True
+            # Trigger generic exception (KeyError is NOT VaultError or InvalidPath)
+            mock_client.secrets.kv.v2.read_secret_version.side_effect = KeyError("Unexpected key error")
+            mock_hvac_module.Client.return_value = mock_client
+            
+            vault = VaultClient()
+            
+            with patch.object(logging, "error") as mock_error:
+                result = vault.get_secret("test/path")
+                # Should log generic error with "Unexpected error getting secret"
+                mock_error.assert_called()
+                error_message = str(mock_error.call_args_list[0])
+                assert "Unexpected error getting secret" in error_message
+                assert result is None
 
     @patch("backend.shared.vault_client.HVAC_AVAILABLE", True)
     @patch("backend.shared.vault_client.hvac")
@@ -980,3 +1001,108 @@ class TestVaultClient100PercentCoverage:
         # When HVAC_AVAILABLE is False, these should be Exception
         assert InvalidPath == Exception
         assert VaultError == Exception
+
+    @patch("backend.shared.vault_client.HVAC_AVAILABLE", True)
+    @patch("backend.shared.vault_client.hvac")
+    def test_token_renewal_failure_logging(self, mock_hvac_module, vault_config_mock):
+        """Test lines 176-177: Token renewal failure logging."""
+        from backend.shared.vault_client import VaultClient
+        import logging
+        
+        mock_client = Mock()
+        mock_client.is_authenticated.return_value = True
+        mock_hvac_module.Client.return_value = mock_client
+        
+        vault = VaultClient()
+        
+        # Set token expiry to trigger renewal
+        vault.token_expiry = datetime.now() + timedelta(minutes=2)
+        
+        # Mock _login_approle to raise exception
+        with patch.object(vault, '_login_approle', side_effect=Exception("Login failed")):
+            with patch.object(logging, "error") as mock_error:
+                vault._renew_token_if_needed()
+                # Should log error about token renewal failure
+                mock_error.assert_called()
+                error_message = str(mock_error.call_args_list[0])
+                assert "Token renewal failed" in error_message
+
+    @patch("backend.shared.vault_client.HVAC_AVAILABLE", True)
+    @patch("backend.shared.vault_client.hvac")
+    def test_delete_secret_cache_miss_branch(self, mock_hvac_module, vault_config_mock):
+        """Test line 319 branch: path NOT in cache (cache miss)."""
+        from backend.shared.vault_client import VaultClient
+        
+        mock_client = Mock()
+        mock_client.is_authenticated.return_value = True
+        mock_client.secrets.kv.v2.delete_latest_version_of_secret.return_value = True
+        mock_hvac_module.Client.return_value = mock_client
+        
+        vault = VaultClient()
+        
+        # Ensure cache is empty (path not in cache)
+        assert "test/path" not in vault._cache
+        
+        # Delete should work even without cache entry
+        result = vault.delete_secret("test/path")
+        
+        assert result is True
+        # Cache should still be empty (line 319 condition false)
+        assert "test/path" not in vault._cache
+
+    @patch("backend.shared.vault_client.HVAC_AVAILABLE", True)
+    @patch("backend.shared.vault_client.hvac")
+    def test_get_secret_fallback_env_none_branch(self, mock_hvac_module, vault_config_mock):
+        """Test line 259 branch: fallback_env is None."""
+        from backend.shared.vault_client import VaultClient
+        import logging
+        
+        mock_client = Mock()
+        mock_client.is_authenticated.return_value = True
+        # Make vault.get_secret fail to reach fallback logic
+        from backend.shared.vault_client import InvalidPath
+        mock_client.secrets.kv.v2.read_secret_version.side_effect = InvalidPath("Not found")
+        mock_hvac_module.Client.return_value = mock_client
+        
+        vault = VaultClient()
+        
+        with patch.object(logging, "warning") as mock_warning:
+            # Call with fallback_env=None (default)
+            result = vault.get_secret("test/path", fallback_env=None)
+            
+            # Should skip env fallback (line 257) and go to line 264
+            assert result is None
+            # Should log "Secret not found"
+            warning_calls = [str(call) for call in mock_warning.call_args_list]
+            assert any("Secret not found" in call for call in warning_calls)
+
+    @patch("backend.shared.vault_client.HVAC_AVAILABLE", True)
+    @patch("backend.shared.vault_client.hvac")
+    def test_get_secret_fallback_env_empty_value_branch(self, mock_hvac_module, vault_config_mock):
+        """Test line 259->264: fallback_env provided but env var is empty/not set."""
+        from backend.shared.vault_client import VaultClient
+        import logging
+        
+        mock_client = Mock()
+        mock_client.is_authenticated.return_value = True
+        # Make vault.get_secret fail to reach fallback logic
+        from backend.shared.vault_client import InvalidPath
+        mock_client.secrets.kv.v2.read_secret_version.side_effect = InvalidPath("Not found")
+        mock_hvac_module.Client.return_value = mock_client
+        
+        vault = VaultClient()
+        
+        # Ensure env var does NOT exist
+        with patch.dict(os.environ, {}, clear=False):
+            if "NONEXISTENT_VAR" in os.environ:
+                del os.environ["NONEXISTENT_VAR"]
+            
+            with patch.object(logging, "warning") as mock_warning:
+                # fallback_env is provided but env var doesn't exist
+                # Should go from 259->264 (env_value is None)
+                result = vault.get_secret("test/path", fallback_env="NONEXISTENT_VAR")
+                
+                assert result is None
+                # Should log "Secret not found" (line 264)
+                warning_calls = [str(call) for call in mock_warning.call_args_list]
+                assert any("Secret not found" in call for call in warning_calls)

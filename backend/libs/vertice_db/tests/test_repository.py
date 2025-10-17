@@ -3,7 +3,6 @@
 import pytest
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
-
 from vertice_db import Base, BaseRepository
 
 
@@ -17,7 +16,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(100))
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_create(db_session):
     """Test create operation."""
     repo = BaseRepository(User, db_session)
@@ -28,7 +27,7 @@ async def test_repository_create(db_session):
     assert user.email == "john@test.com"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_get(db_session):
     """Test get operation."""
     repo = BaseRepository(User, db_session)
@@ -39,7 +38,7 @@ async def test_repository_get(db_session):
     assert fetched.name == "Jane"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_get_nonexistent(db_session):
     """Test get returns None for nonexistent ID."""
     repo = BaseRepository(User, db_session)
@@ -47,7 +46,7 @@ async def test_repository_get_nonexistent(db_session):
     assert result is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_list(db_session):
     """Test list operation."""
     repo = BaseRepository(User, db_session)
@@ -58,7 +57,7 @@ async def test_repository_list(db_session):
     assert len(users) == 2
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_update(db_session):
     """Test update operation."""
     repo = BaseRepository(User, db_session)
@@ -70,7 +69,7 @@ async def test_repository_update(db_session):
     assert updated.email == "old@test.com"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_update_nonexistent(db_session):
     """Test update returns None for nonexistent ID."""
     repo = BaseRepository(User, db_session)
@@ -78,7 +77,7 @@ async def test_repository_update_nonexistent(db_session):
     assert result is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_delete(db_session):
     """Test delete operation."""
     repo = BaseRepository(User, db_session)
@@ -91,7 +90,7 @@ async def test_repository_delete(db_session):
     assert fetched is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_repository_delete_nonexistent(db_session):
     """Test delete returns False for nonexistent ID."""
     repo = BaseRepository(User, db_session)

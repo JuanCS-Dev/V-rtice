@@ -14,7 +14,7 @@ Features:
     - OWASP security standards compliance
 
 Usage:
-    >>> from backend.shared.enums import ThreatLevel, ServiceStatus
+    >>> from shared.enums import ThreatLevel, ServiceStatus
     >>> if threat.level == ThreatLevel.CRITICAL:
     >>>     alert_soc()
     >>>

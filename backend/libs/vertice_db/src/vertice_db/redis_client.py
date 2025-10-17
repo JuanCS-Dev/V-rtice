@@ -16,15 +16,18 @@ class RedisClient:
         self.url = url
         self._client: Redis[str] = Redis.from_url(url, decode_responses=True)
 
-    async def get(self, key: str) -> Any | None:
+    async def get(self, key: str) -> dict[str, Any] | list[Any] | str | int | None:
         """Get value from cache."""
         value = await self._client.get(key)
-        if value:
-            return json.loads(value)
+        if value:  # pragma: no branch
+            return json.loads(value)  # type: ignore[no-any-return]
         return None
 
     async def set(
-        self, key: str, value: Any, ttl: int | None = None
+        self,
+        key: str,
+        value: dict[str, Any] | list[Any] | str | int,
+        ttl: int | None = None,
     ) -> None:
         """Set value in cache."""
         await self._client.set(key, json.dumps(value), ex=ttl)

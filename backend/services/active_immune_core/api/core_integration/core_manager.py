@@ -23,9 +23,9 @@ from threading import Lock
 from typing import Any, Dict, Optional
 
 # Core imports (using absolute imports from package root)
-from agents import AgentFactory
-from coordination.homeostatic_controller import HomeostaticController
-from coordination.lymphnode import LinfonodoDigital
+from active_immune_core.agents import AgentFactory
+from active_immune_core.coordination.homeostatic_controller import HomeostaticController
+from active_immune_core.coordination.lymphnode import LinfonodoDigital
 
 logger = logging.getLogger(__name__)
 

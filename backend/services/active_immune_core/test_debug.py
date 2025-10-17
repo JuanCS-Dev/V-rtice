@@ -9,8 +9,8 @@ logging.basicConfig(level=logging.INFO)
 # Add current directory to path
 sys.path.insert(0, ".")
 
-from api.core_integration.agent_service import AgentService
-from api.core_integration.core_manager import CoreManager
+from active_immune_core.api.core_integration.agent_service import AgentService
+from active_immune_core.api.core_integration.core_manager import CoreManager
 
 
 async def test_create_agent():

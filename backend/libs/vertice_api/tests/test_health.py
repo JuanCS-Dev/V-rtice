@@ -2,7 +2,6 @@
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from vertice_api.health import create_health_router
 
 

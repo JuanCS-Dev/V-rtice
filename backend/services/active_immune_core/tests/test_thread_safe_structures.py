@@ -10,7 +10,7 @@ import asyncio
 
 import pytest
 
-from coordination.thread_safe_structures import (
+from active_immune_core.coordination.thread_safe_structures import (
     AtomicCounter,
     ThreadSafeBuffer,
     ThreadSafeCounter,

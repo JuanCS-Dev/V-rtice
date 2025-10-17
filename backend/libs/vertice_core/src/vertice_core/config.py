@@ -20,7 +20,7 @@ class BaseServiceSettings(BaseSettings):
     service_version: str = "1.0.0"
     environment: Literal["development", "staging", "production"] = "development"
 
-    host: str = "0.0.0.0"
+    host: str = "0.0.0.0"  # noqa: S104 - Intentional for container deployment
     port: int
     workers: int = 1
 

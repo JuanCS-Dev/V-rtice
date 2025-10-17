@@ -11,8 +11,8 @@ import time
 
 import pytest
 
-from coordination.exceptions import LymphnodeRateLimitError, LymphnodeResourceExhaustedError
-from coordination.rate_limiter import ClonalExpansionRateLimiter, RateLimiter
+from active_immune_core.coordination.exceptions import LymphnodeRateLimitError, LymphnodeResourceExhaustedError
+from active_immune_core.coordination.rate_limiter import ClonalExpansionRateLimiter, RateLimiter
 
 # ==================== RATE LIMITER TESTS ====================
 

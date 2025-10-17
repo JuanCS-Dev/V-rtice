@@ -24,7 +24,7 @@ Exception Categories:
     - Resource: Resource not found, conflicts, and limits
 
 Usage:
-    >>> from backend.shared.exceptions import ValidationError, UnauthorizedError
+    >>> from shared.exceptions import ValidationError, UnauthorizedError
     >>> raise ValidationError(
     >>>     message="Invalid IP address format",
     >>>     details={"ip": "256.0.0.1", "expected_format": "IPv4"}

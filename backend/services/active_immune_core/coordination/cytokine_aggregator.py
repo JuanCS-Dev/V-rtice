@@ -39,7 +39,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import ValidationError
 
-from coordination.validators import validate_cytokine
+from active_immune_core.coordination.validators import validate_cytokine
 
 logger = logging.getLogger(__name__)
 

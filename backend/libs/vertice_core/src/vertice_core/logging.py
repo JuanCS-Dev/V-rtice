@@ -21,10 +21,9 @@ def get_logger(
     """Get a configured structured logger for a service."""
     level_upper = level.upper()
     if level_upper not in _LOG_LEVELS:
-        raise ValueError(
-            f"Invalid log level: {level}. "
-            f"Must be one of: {', '.join(_LOG_LEVELS.keys())}"
-        )
+        valid_levels = ", ".join(_LOG_LEVELS.keys())
+        error_msg = f"Invalid log level: {level}. Must be one of: {valid_levels}"
+        raise ValueError(error_msg)
 
     logging.basicConfig(
         format="%(message)s",

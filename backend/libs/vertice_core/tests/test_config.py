@@ -1,7 +1,6 @@
 """Tests for vertice_core.config module."""
 
 import pytest
-
 from vertice_core.config import BaseServiceSettings
 
 
@@ -27,7 +26,7 @@ class TestBaseServiceSettings:
 
         assert settings.service_version == "1.0.0"
         assert settings.environment == "development"
-        assert settings.host == "0.0.0.0"
+        assert settings.host == "0.0.0.0"  # noqa: S104
         assert settings.workers == 1
         assert settings.log_level == "INFO"
         assert settings.otel_enabled is True

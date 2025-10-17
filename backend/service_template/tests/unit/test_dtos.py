@@ -3,12 +3,10 @@ Tests for Application Layer - DTOs
 
 100% coverage required.
 """
-import pytest
 from datetime import datetime
-from uuid import UUID, uuid4
 
+import pytest
 from pydantic import ValidationError
-
 from service_template.application.dtos import (
     CreateEntityDTO,
     EntityDTO,
@@ -103,9 +101,9 @@ class TestEntityDTO:
             status="active",
             extra_data={"key": "value"}
         )
-        
+
         dto = EntityDTO.model_validate(entity)
-        
+
         assert dto.id == entity.id
         assert dto.name == "test"
         assert dto.description == "desc"
@@ -117,9 +115,9 @@ class TestEntityDTO:
     def test_from_entity_no_description(self) -> None:
         """Test creating DTO from entity without description."""
         entity = ExampleEntity(name="test")
-        
+
         dto = EntityDTO.model_validate(entity)
-        
+
         assert dto.name == "test"
         assert dto.description is None
 
@@ -134,14 +132,14 @@ class TestPaginatedEntitiesDTO:
             ExampleEntity(name="test2"),
         ]
         entity_dtos = [EntityDTO.model_validate(e) for e in entities]
-        
+
         dto = PaginatedEntitiesDTO(
             items=entity_dtos,
             total=50,
             limit=10,
             offset=20
         )
-        
+
         assert len(dto.items) == 2
         assert dto.total == 50
         assert dto.limit == 10
@@ -155,6 +153,6 @@ class TestPaginatedEntitiesDTO:
             limit=100,
             offset=0
         )
-        
+
         assert dto.items == []
         assert dto.total == 0

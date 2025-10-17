@@ -4,12 +4,11 @@ Application Layer - Use Cases
 Business use cases orchestrating domain logic.
 Framework-independent application logic.
 """
-from typing import Optional
 from uuid import UUID
 
 from ..domain.entities import ExampleEntity
 from ..domain.events import EntityCreated, EntityDeleted, EntityUpdated
-from ..domain.exceptions import EntityAlreadyExistsError, EntityNotFoundError
+from ..domain.exceptions import EntityAlreadyExistsError
 from ..domain.repositories import ExampleRepository
 
 
@@ -19,7 +18,7 @@ class CreateEntityUseCase:
     def __init__(self, repository: ExampleRepository) -> None:
         self.repository = repository
 
-    async def execute(self, name: str, description: Optional[str] = None) -> ExampleEntity:
+    async def execute(self, name: str, description: str | None = None) -> ExampleEntity:
         """Execute use case."""
         # Check if entity already exists
         existing = await self.repository.get_by_name(name)
@@ -33,7 +32,7 @@ class CreateEntityUseCase:
         created_entity = await self.repository.create(entity)
 
         # Emit domain event (in real system, use event bus)
-        event = EntityCreated(entity_id=created_entity.id, entity_data={"name": name})
+        EntityCreated(entity_id=created_entity.id, entity_data={"name": name})
 
         return created_entity
 
@@ -45,11 +44,12 @@ class GetEntityUseCase:
         self.repository = repository
 
     async def execute(self, entity_id: UUID) -> ExampleEntity:
-        """Execute use case."""
-        entity = await self.repository.get_by_id(entity_id)
-        if not entity:
-            raise EntityNotFoundError(str(entity_id), "ExampleEntity")
-        return entity
+        """Execute use case.
+
+        Raises:
+            EntityNotFoundError: If entity not found.
+        """
+        return await self.repository.get_by_id(entity_id)
 
 
 class UpdateEntityUseCase:
@@ -61,14 +61,17 @@ class UpdateEntityUseCase:
     async def execute(
         self,
         entity_id: UUID,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
+        name: str | None = None,
+        description: str | None = None,
     ) -> ExampleEntity:
-        """Execute use case."""
+        """Execute use case.
+
+        Raises:
+            EntityNotFoundError: If entity not found.
+            EntityAlreadyExistsError: If new name already exists.
+        """
         # Get existing entity
         entity = await self.repository.get_by_id(entity_id)
-        if not entity:
-            raise EntityNotFoundError(str(entity_id), "ExampleEntity")
 
         # Track changes
         changes: dict[str, str] = {}
@@ -91,7 +94,7 @@ class UpdateEntityUseCase:
 
         # Emit event if there were changes
         if changes:
-            event = EntityUpdated(entity_id=entity_id, changes=changes)
+            EntityUpdated(entity_id=entity_id, changes=changes)
 
         return updated_entity
 
@@ -102,21 +105,20 @@ class DeleteEntityUseCase:
     def __init__(self, repository: ExampleRepository) -> None:
         self.repository = repository
 
-    async def execute(self, entity_id: UUID) -> bool:
-        """Execute use case."""
-        # Verify entity exists
-        entity = await self.repository.get_by_id(entity_id)
-        if not entity:
-            raise EntityNotFoundError(str(entity_id), "ExampleEntity")
+    async def execute(self, entity_id: UUID) -> None:
+        """Execute use case.
+
+        Raises:
+            EntityNotFoundError: If entity not found.
+        """
+        # This will raise EntityNotFoundError if not found
+        await self.repository.get_by_id(entity_id)
 
         # Delete
-        deleted = await self.repository.delete(entity_id)
+        await self.repository.delete(entity_id)
 
         # Emit event
-        if deleted:
-            event = EntityDeleted(entity_id=entity_id)
-
-        return deleted
+        EntityDeleted(entity_id=entity_id)
 
 
 class ListEntitiesUseCase:

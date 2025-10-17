@@ -1,0 +1,45 @@
+# Ruff config for CRITICAL lint issues only (100% mission)
+# Excludes style/docstring/annotation warnings
+
+[lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes
+    "B",     # flake8-bugbear (serious bugs)
+    "SIM",   # simplify (code smells)
+    "RET",   # return statements
+    "TRY3",  # tryceratops critical (exception handling)
+]
+
+ignore = [
+    # Non-critical style issues
+    "E501",   # line too long
+    "E203",   # whitespace before ':'
+    
+    # Documentation (not critical for functionality)
+    "D",      # pydocstyle (all)
+    
+    # Type annotations (mypy handles this)
+    "ANN",    # flake8-annotations (all)
+    
+    # Naming conventions (style, not bugs)
+    "N",      # pep8-naming (all)
+    
+    # Security false positives
+    "S104",   # bind to 0.0.0.0 (intentional in config)
+    "S101",   # assert (required for pytest)
+    
+    # Overly strict test patterns
+    "PT",     # pytest-style (non-critical)
+    "PLR2004", # magic values (common in tests)
+    "ARG001",  # unused args (fixtures)
+    
+    # Import sorting (handled by other tools)
+    "I",      # isort
+    "INP",    # implicit namespace packages
+    
+    # Exception handling style
+    "EM",     # error messages (style)
+    "TRY003", # long messages (style)
+    "TRY301", # raise abstraction (style)
+]

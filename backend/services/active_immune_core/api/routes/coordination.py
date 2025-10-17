@@ -13,7 +13,7 @@ from typing import Dict, Optional
 
 from fastapi import APIRouter, HTTPException, Path, Query, status
 
-from api.models.coordination import (
+from active_immune_core.api.models.coordination import (
     ConsensusProposal,
     ConsensusResponse,
     CoordinationStatus,
@@ -22,7 +22,7 @@ from api.models.coordination import (
     TaskListResponse,
     TaskResponse,
 )
-from api.websocket import broadcaster
+from active_immune_core.api.websocket import broadcaster
 
 router = APIRouter()
 

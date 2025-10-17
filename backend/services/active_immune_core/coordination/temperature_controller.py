@@ -35,7 +35,7 @@ import logging
 from enum import Enum
 from typing import Any, Dict
 
-from coordination.thread_safe_structures import ThreadSafeTemperature
+from active_immune_core.coordination.thread_safe_structures import ThreadSafeTemperature
 
 logger = logging.getLogger(__name__)
 

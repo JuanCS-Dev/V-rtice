@@ -2,24 +2,28 @@
 
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING
 
 import structlog
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-
 from vertice_core import VerticeException
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log all requests with timing and metadata."""
 
-    def __init__(self, app: Any, logger: structlog.stdlib.BoundLogger) -> None:
+    def __init__(
+        self, app: "FastAPI", logger: structlog.stdlib.BoundLogger
+    ) -> None:
         super().__init__(app)
         self.logger = logger
 
     async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:  # pragma: no cover
         """Process request and log details."""
         start_time = time.time()
@@ -60,7 +64,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
     """Convert exceptions to proper JSON responses."""
 
     async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
         """Handle exceptions and convert to JSON."""
         try:

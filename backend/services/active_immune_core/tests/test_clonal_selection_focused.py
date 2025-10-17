@@ -9,8 +9,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
-from agents.models import AgentType
-from coordination.clonal_selection import ClonalSelectionEngine, FitnessMetrics
+from active_immune_core.agents.models import AgentType
+from active_immune_core.coordination.clonal_selection import ClonalSelectionEngine, FitnessMetrics
 
 # ==================== FIXTURES ====================
 

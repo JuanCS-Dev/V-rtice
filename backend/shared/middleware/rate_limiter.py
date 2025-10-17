@@ -18,7 +18,7 @@ Features:
 - Graceful degradation if Redis unavailable
 
 Usage:
-    from backend.shared.middleware.rate_limiter import RateLimiter
+    from shared.middleware.rate_limiter import RateLimiter
     
     app = FastAPI()
     app.add_middleware(RateLimiter, redis_url="redis://localhost:6379")
@@ -203,7 +203,7 @@ class TokenBucket:
                 raise HTTPException(
                     status_code=503,
                     detail="Rate limiting service unavailable"
-                )
+                ) from e
 
 
 # ============================================================================

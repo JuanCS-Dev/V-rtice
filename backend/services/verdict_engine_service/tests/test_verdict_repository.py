@@ -1,5 +1,6 @@
 """Tests for VerdictRepository."""
 
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
@@ -9,16 +10,25 @@ from verdict_repository import VerdictRepository
 
 
 @pytest.mark.asyncio
-async def test_repository_connect_disconnect():
+async def test_repository_connect_disconnect(mocker):
     """Test repository connection lifecycle."""
+    # Mock asyncpg.create_pool
+    mock_pool = AsyncMock()
+    mock_create_pool = mocker.patch(
+        "verdict_repository.asyncpg.create_pool",
+        new=AsyncMock(return_value=mock_pool)
+    )
+
     repo = VerdictRepository()
 
     assert repo.pool is None
 
     await repo.connect()
     assert repo.pool is not None
+    mock_create_pool.assert_called_once()
 
     await repo.disconnect()
+    mock_pool.close.assert_called_once()
     assert repo.pool is None
 
 
@@ -62,23 +72,26 @@ async def test_update_verdict_status_no_pool():
 
 
 @pytest.mark.asyncio
-async def test_get_active_verdicts_query_construction(mock_repository, sample_verdict):
+async def test_get_active_verdicts_query_construction(mocker, sample_verdict):
     """Test SQL query construction with filters."""
-    repo = mock_repository
-    repo.pool = True  # Simulate connected
+    # Mock connection and pool properly
+    mock_conn = mocker.AsyncMock()
+    mock_conn.fetch = mocker.AsyncMock(return_value=[])
+    
+    mock_acquire = mocker.MagicMock()
+    mock_acquire.__aenter__ = mocker.AsyncMock(return_value=mock_conn)
+    mock_acquire.__aexit__ = mocker.AsyncMock(return_value=None)
+    
+    mock_pool = mocker.AsyncMock()
+    mock_pool.acquire = mocker.MagicMock(return_value=mock_acquire)
 
-    # Mock pool.acquire()
-    mock_conn = mock_repository
-    mock_conn.fetch.return_value = []
+    repo = VerdictRepository()
+    repo.pool = mock_pool
 
     # Test status filter
     filters = VerdictFilter(status="ACTIVE")
-    # Query should include: WHERE 1=1 AND status = $1
-    # This test validates query construction logic indirectly
-
-    # Test severity filter
-    filters = VerdictFilter(severity="CRITICAL")
-    # Query should include: AND severity = $1
+    await repo.get_active_verdicts(filters)
+    mock_conn.fetch.assert_awaited()
 
     # Test multiple filters
     filters = VerdictFilter(
@@ -89,7 +102,6 @@ async def test_get_active_verdicts_query_construction(mock_repository, sample_ve
         limit=10,
         offset=5,
     )
-    # Query should include all filters + LIMIT + OFFSET
 
     # Validation: filters object is correctly constructed
     assert filters.status == "ACTIVE"

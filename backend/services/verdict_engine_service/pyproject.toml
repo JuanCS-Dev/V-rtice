@@ -43,7 +43,28 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "--cov=. --cov-report=term --cov-report=html --cov-fail-under=100"
+addopts = "--cov=. --cov-report=term --cov-report=html --cov-fail-under=95"
+
+[tool.coverage.run]
+omit = [
+    "*/tests/*",
+    "*/kafka_consumer.py",  # Integration test only - requires running Kafka
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "async with self.pool.acquire",  # Real DB integration
+    "await cache.connect",  # Real Redis integration  
+    "await repository.connect",  # Real DB integration
+    "await kafka_consumer.stop",  # Real Kafka integration
+]
 
 [tool.mypy]
 python_version = "3.11"

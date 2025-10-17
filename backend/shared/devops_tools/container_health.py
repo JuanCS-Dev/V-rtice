@@ -171,7 +171,7 @@ class ContainerHealthMonitor:
         except NotFound:
             raise
         except APIError as e:
-            raise RuntimeError(f"Docker API error: {e}")
+            raise RuntimeError(f"Docker API error: {e}") from e
     
     async def get_cluster_health(
         self, 

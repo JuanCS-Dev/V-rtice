@@ -4,7 +4,6 @@ Tests for Domain Layer - Value Objects
 100% coverage required.
 """
 import pytest
-
 from service_template.domain.value_objects import Email, Status
 
 
@@ -44,7 +43,7 @@ class TestEmail:
     def test_email_immutable(self) -> None:
         """Test email is immutable (frozen dataclass)."""
         email = Email("test@example.com")
-        
+
         with pytest.raises(AttributeError):
             email.value = "new@example.com"  # type: ignore
 
@@ -87,6 +86,6 @@ class TestStatus:
     def test_status_immutable(self) -> None:
         """Test status is immutable (frozen dataclass)."""
         status = Status("active")
-        
+
         with pytest.raises(AttributeError):
             status.value = "inactive"  # type: ignore

@@ -3,14 +3,15 @@ Presentation Layer - FastAPI Application
 
 Main FastAPI application with middleware and configuration.
 """
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
 from ..infrastructure.config import get_settings
+from ..infrastructure.database import Database
 from .routes import router
 
 
@@ -24,10 +25,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     print(f"📊 Environment: {settings.environment}")
     print(f"🔌 Port: {settings.port}")
 
+    # Initialize database
+    db = Database(settings.database_url)
+    await db.create_tables()
+    app.state.db = db
+
     yield
 
     # Shutdown
     print(f"👋 Shutting down {settings.service_name}")
+    await db.close()
 
 
 def create_app() -> FastAPI:

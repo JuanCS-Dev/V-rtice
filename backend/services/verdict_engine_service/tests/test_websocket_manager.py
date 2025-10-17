@@ -1,5 +1,7 @@
 """Tests for WebSocket manager."""
 
+import asyncio
+
 import pytest
 from fastapi import WebSocket
 
@@ -20,7 +22,8 @@ async def test_connection_manager_init():
 async def test_connect_websocket(mocker):
     """Test WebSocket connection."""
     manager = ConnectionManager()
-    websocket = mocker.AsyncMock(spec=WebSocket)
+    websocket = mocker.AsyncMock()
+    websocket.send_json = mocker.AsyncMock()
     client_id = "test-client-1"
 
     await manager.connect(websocket, client_id)
@@ -34,7 +37,8 @@ async def test_connect_websocket(mocker):
 async def test_disconnect_websocket(mocker):
     """Test WebSocket disconnection."""
     manager = ConnectionManager()
-    websocket = mocker.AsyncMock(spec=WebSocket)
+    websocket = mocker.AsyncMock()
+    websocket.send_json = mocker.AsyncMock()
     client_id = "test-client-1"
 
     await manager.connect(websocket, client_id)
@@ -49,7 +53,7 @@ async def test_disconnect_websocket(mocker):
 async def test_send_personal(mocker, sample_verdict):
     """Test sending message to specific client."""
     manager = ConnectionManager()
-    websocket = mocker.AsyncMock(spec=WebSocket)
+    websocket = mocker.AsyncMock()  # Remove spec=WebSocket que causa bool() == False
     client_id = "test-client-1"
 
     await manager.connect(websocket, client_id)
@@ -57,14 +61,14 @@ async def test_send_personal(mocker, sample_verdict):
     message = WebSocketMessage(type="verdict", data=sample_verdict)
     await manager.send_personal(message, client_id)
 
-    websocket.send_json.assert_called_once()
+    websocket.send_json.assert_called_once_with(message.model_dump(mode="json"))
 
 
 @pytest.mark.asyncio
 async def test_send_personal_failure(mocker):
     """Test send_personal with WebSocket error."""
     manager = ConnectionManager()
-    websocket = mocker.AsyncMock(spec=WebSocket)
+    websocket = mocker.AsyncMock()  # Remove spec=WebSocket
     websocket.send_json.side_effect = Exception("Connection lost")
     client_id = "test-client-1"
 
@@ -81,8 +85,8 @@ async def test_send_personal_failure(mocker):
 async def test_broadcast_verdict(mocker, sample_verdict):
     """Test broadcasting verdict to all clients."""
     manager = ConnectionManager()
-    ws1 = mocker.AsyncMock(spec=WebSocket)
-    ws2 = mocker.AsyncMock(spec=WebSocket)
+    ws1 = mocker.AsyncMock()
+    ws2 = mocker.AsyncMock()
 
     await manager.connect(ws1, "client-1")
     await manager.connect(ws2, "client-2")
@@ -97,7 +101,8 @@ async def test_broadcast_verdict(mocker, sample_verdict):
 async def test_broadcast_stats(mocker, sample_stats):
     """Test broadcasting stats to all clients."""
     manager = ConnectionManager()
-    websocket = mocker.AsyncMock(spec=WebSocket)
+    websocket = mocker.AsyncMock()
+    websocket.send_json = mocker.AsyncMock()
 
     await manager.connect(websocket, "client-1")
 
@@ -110,8 +115,8 @@ async def test_broadcast_stats(mocker, sample_stats):
 async def test_broadcast_with_failures(mocker, sample_verdict):
     """Test broadcast handling client failures."""
     manager = ConnectionManager()
-    ws1 = mocker.AsyncMock(spec=WebSocket)
-    ws2 = mocker.AsyncMock(spec=WebSocket)
+    ws1 = mocker.AsyncMock()
+    ws2 = mocker.AsyncMock()
     ws2.send_json.side_effect = Exception("Failed")
 
     await manager.connect(ws1, "client-1")
@@ -129,8 +134,8 @@ async def test_broadcast_with_failures(mocker, sample_verdict):
 async def test_ping_all(mocker):
     """Test ping all connections."""
     manager = ConnectionManager()
-    ws1 = mocker.AsyncMock(spec=WebSocket)
-    ws2 = mocker.AsyncMock(spec=WebSocket)
+    ws1 = mocker.AsyncMock()
+    ws2 = mocker.AsyncMock()
 
     await manager.connect(ws1, "client-1")
     await manager.connect(ws2, "client-2")

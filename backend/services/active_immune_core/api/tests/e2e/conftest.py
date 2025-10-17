@@ -14,8 +14,8 @@ from typing import AsyncGenerator
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-from api.core_integration import CoreManager
-from api.main import create_app
+from active_immune_core.api.core_integration import CoreManager
+from active_immune_core.api.main import create_app
 
 
 @pytest_asyncio.fixture(scope="session")

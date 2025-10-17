@@ -5,7 +5,7 @@ from typing import Any, Generic, TypeVar
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .models import Base
+from .base import Base
 
 T = TypeVar("T", bound=Base)
 
@@ -20,14 +20,14 @@ class BaseRepository(Generic[T]):
     async def get(self, id: int) -> T | None:
         """Get by ID."""
         result = await self.session.execute(
-            select(self.model).where(self.model.id == id)  # type: ignore[attr-defined]
+            select(self.model).where(self.model.id == id),  # type: ignore[attr-defined]
         )
         return result.scalar_one_or_none()
 
     async def list(self, limit: int = 100, offset: int = 0) -> list[T]:
         """List with pagination."""
         result = await self.session.execute(
-            select(self.model).limit(limit).offset(offset)
+            select(self.model).limit(limit).offset(offset),
         )
         return list(result.scalars().all())
 

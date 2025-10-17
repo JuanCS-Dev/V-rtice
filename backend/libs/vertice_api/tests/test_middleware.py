@@ -2,9 +2,8 @@
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from vertice_core import NotFoundError
-
 from vertice_api.middleware import ErrorHandlingMiddleware
+from vertice_core import NotFoundError
 
 
 class TestErrorHandlingMiddleware:

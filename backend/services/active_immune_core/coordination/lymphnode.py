@@ -35,10 +35,10 @@ import redis.asyncio as aioredis
 from aiokafka import AIOKafkaConsumer
 
 from agents import AgentFactory, AgentType
-from agents.models import AgenteState
-from coordination.agent_orchestrator import AgentOrchestrator
-from coordination.cytokine_aggregator import CytokineAggregator
-from coordination.exceptions import (
+from active_immune_core.agents.models import AgenteState
+from active_immune_core.coordination.agent_orchestrator import AgentOrchestrator
+from active_immune_core.coordination.cytokine_aggregator import CytokineAggregator
+from active_immune_core.coordination.exceptions import (
     AgentOrchestrationError,
     CytokineProcessingError,
     HormonePublishError,
@@ -47,11 +47,11 @@ from coordination.exceptions import (
     LymphnodeResourceExhaustedError,
     PatternDetectionError,
 )
-from coordination.lymphnode_metrics import LymphnodeMetrics
-from coordination.pattern_detector import PatternDetector
-from coordination.rate_limiter import ClonalExpansionRateLimiter
-from coordination.temperature_controller import HomeostaticState, TemperatureController
-from coordination.thread_safe_structures import (
+from active_immune_core.coordination.lymphnode_metrics import LymphnodeMetrics
+from active_immune_core.coordination.pattern_detector import PatternDetector
+from active_immune_core.coordination.rate_limiter import ClonalExpansionRateLimiter
+from active_immune_core.coordination.temperature_controller import HomeostaticState, TemperatureController
+from active_immune_core.coordination.thread_safe_structures import (
     ThreadSafeBuffer,
     ThreadSafeCounter,
 )

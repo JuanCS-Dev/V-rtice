@@ -1,6 +1,7 @@
 """Tests for vertice_core.exceptions module."""
 
 
+from vertice_core import VerticeException  # Use alias from __init__
 from vertice_core.exceptions import (
     ConflictError,
     ForbiddenError,
@@ -8,7 +9,6 @@ from vertice_core.exceptions import (
     ServiceUnavailableError,
     UnauthorizedError,
     ValidationError,
-    VerticeException,
 )
 
 
@@ -41,7 +41,8 @@ class TestVerticeException:
 
         result = exc.to_dict()
 
-        assert result["error"] == "VerticeException"
+        # VerticeException is an alias for VerticeError
+        assert result["error"] in ("VerticeException", "VerticeError")
         assert result["message"] == "Test"
         assert result["status_code"] == 400
         assert result["details"] == {"x": 1}

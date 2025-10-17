@@ -12,7 +12,7 @@ class TestSettings:
     def test_defaults(self) -> None:
         """Test default settings."""
         settings = Settings()
-        
+
         assert settings.service_name == "service-template"
         assert settings.service_version == "1.0.0"
         assert settings.port == 8000

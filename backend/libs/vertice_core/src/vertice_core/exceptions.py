@@ -3,7 +3,7 @@
 from typing import Any
 
 
-class VerticeException(Exception):
+class VerticeError(Exception):
     """Base exception for all Vértice services."""
 
     def __init__(
@@ -27,10 +27,10 @@ class VerticeException(Exception):
         }
 
 
-class NotFoundError(VerticeException):
+class NotFoundError(VerticeError):
     """Resource not found (HTTP 404)."""
 
-    def __init__(self, resource: str, identifier: Any) -> None:
+    def __init__(self, resource: str, identifier: str | int) -> None:
         super().__init__(
             message=f"{resource} not found: {identifier}",
             status_code=404,
@@ -38,7 +38,7 @@ class NotFoundError(VerticeException):
         )
 
 
-class ValidationError(VerticeException):
+class ValidationError(VerticeError):
     """Request validation failed (HTTP 422)."""
 
     def __init__(self, message: str, field: str | None = None) -> None:
@@ -49,21 +49,21 @@ class ValidationError(VerticeException):
         )
 
 
-class UnauthorizedError(VerticeException):
+class UnauthorizedError(VerticeError):
     """Authentication failed (HTTP 401)."""
 
     def __init__(self, message: str = "Authentication required") -> None:
         super().__init__(message=message, status_code=401)
 
 
-class ForbiddenError(VerticeException):
+class ForbiddenError(VerticeError):
     """Authorization failed (HTTP 403)."""
 
     def __init__(self, message: str = "Permission denied") -> None:
         super().__init__(message=message, status_code=403)
 
 
-class ConflictError(VerticeException):
+class ConflictError(VerticeError):
     """Resource conflict (HTTP 409)."""
 
     def __init__(self, message: str, resource: str) -> None:
@@ -74,7 +74,7 @@ class ConflictError(VerticeException):
         )
 
 
-class ServiceUnavailableError(VerticeException):
+class ServiceUnavailableError(VerticeError):
     """Service temporarily unavailable (HTTP 503)."""
 
     def __init__(self, service_name: str, reason: str = "") -> None:

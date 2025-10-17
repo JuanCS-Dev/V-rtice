@@ -12,9 +12,9 @@ from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Path, Query, status
 
-from api.core_integration import AgentService
-from api.core_integration.agent_service import AgentNotFoundError, AgentServiceError
-from api.models.agents import (
+from active_immune_core.api.core_integration import AgentService
+from active_immune_core.api.core_integration.agent_service import AgentNotFoundError, AgentServiceError
+from active_immune_core.api.models.agents import (
     AgentAction,
     AgentActionResponse,
     AgentCreate,
@@ -23,7 +23,7 @@ from api.models.agents import (
     AgentStatsResponse,
     AgentUpdate,
 )
-from api.websocket import broadcaster
+from active_immune_core.api.websocket import broadcaster
 
 router = APIRouter()
 

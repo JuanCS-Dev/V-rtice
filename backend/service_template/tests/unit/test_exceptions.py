@@ -3,7 +3,6 @@ Tests for Domain Layer - Exceptions
 
 100% coverage required.
 """
-import pytest
 
 from service_template.domain.exceptions import (
     DomainException,
@@ -34,7 +33,7 @@ class TestEntityNotFoundError:
     def test_creation_minimal(self) -> None:
         """Test error with minimal parameters."""
         exc = EntityNotFoundError("123")
-        
+
         assert exc.entity_id == "123"
         assert exc.entity_type == "Entity"
         assert "Entity not found: 123" in str(exc)
@@ -42,7 +41,7 @@ class TestEntityNotFoundError:
     def test_creation_with_type(self) -> None:
         """Test error with custom entity type."""
         exc = EntityNotFoundError("456", "User")
-        
+
         assert exc.entity_id == "456"
         assert exc.entity_type == "User"
         assert "User not found: 456" in str(exc)
@@ -59,7 +58,7 @@ class TestEntityAlreadyExistsError:
     def test_creation_minimal(self) -> None:
         """Test error with minimal parameters."""
         exc = EntityAlreadyExistsError("test@example.com")
-        
+
         assert exc.identifier == "test@example.com"
         assert exc.entity_type == "Entity"
         assert "Entity already exists: test@example.com" in str(exc)
@@ -67,7 +66,7 @@ class TestEntityAlreadyExistsError:
     def test_creation_with_type(self) -> None:
         """Test error with custom entity type."""
         exc = EntityAlreadyExistsError("admin", "User")
-        
+
         assert exc.identifier == "admin"
         assert exc.entity_type == "User"
         assert "User already exists: admin" in str(exc)
@@ -84,7 +83,7 @@ class TestInvalidEntityStateError:
     def test_creation(self) -> None:
         """Test error creation."""
         exc = InvalidEntityStateError("123", "delete", "archived")
-        
+
         assert exc.entity_id == "123"
         assert exc.operation == "delete"
         assert exc.current_state == "archived"
@@ -94,7 +93,7 @@ class TestInvalidEntityStateError:
     def test_different_operation(self) -> None:
         """Test with different operation."""
         exc = InvalidEntityStateError("456", "activate", "deleted")
-        
+
         assert "Cannot activate entity 456" in str(exc)
         assert "current state is deleted" in str(exc)
 
@@ -110,7 +109,7 @@ class TestValidationError:
     def test_creation(self) -> None:
         """Test error creation."""
         exc = ValidationError("email", "Invalid format")
-        
+
         assert exc.field == "email"
         assert exc.message == "Invalid format"
         assert "Validation error on email" in str(exc)
@@ -119,7 +118,7 @@ class TestValidationError:
     def test_different_field(self) -> None:
         """Test with different field."""
         exc = ValidationError("username", "Too short")
-        
+
         assert exc.field == "username"
         assert exc.message == "Too short"
         assert "username" in str(exc)

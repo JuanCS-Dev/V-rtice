@@ -137,7 +137,7 @@ class CoordinationService:
             original_agent = factory._agents[agent_id]
 
             # Get agent type from state
-            from agents.models import AgentType
+            from active_immune_core.agents.models import AgentType
 
             # Map state.tipo (string) to AgentType enum
             tipo_str = original_agent.state.tipo.lower()

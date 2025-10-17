@@ -212,6 +212,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   ip_intelligence_service:
     build: ./backend/services/ip_intelligence_service
@@ -226,6 +232,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   network_monitor_service:
     build: ./backend/services/network_monitor_service
@@ -256,6 +268,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   osint-service:
     build: ./backend/services/osint_service
@@ -278,6 +296,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   maximus_predict:
     build: ./backend/services/maximus_predict
@@ -294,6 +318,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   # ============================
   # ATLAS SERVICE (NOVO)
@@ -352,6 +382,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   # ============================
   # SOCIAL ENGINEERING SERVICE
@@ -418,6 +454,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8013/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   malware_analysis_service:
     build: ./backend/services/malware_analysis_service
@@ -433,6 +475,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8014/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   ssl_monitor_service:
     build: ./backend/services/ssl_monitor_service
@@ -445,6 +493,12 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8015/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   # ============================
   # ADR CORE SERVICE

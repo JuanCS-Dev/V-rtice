@@ -12,7 +12,7 @@ import asyncio
 import time
 from typing import Dict, Optional
 
-from coordination.exceptions import LymphnodeRateLimitError
+from active_immune_core.coordination.exceptions import LymphnodeRateLimitError
 
 
 class RateLimiter:

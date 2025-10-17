@@ -1,26 +1,19 @@
 #!/bin/bash
 # MAXIMUS Backend Startup Script
-# Starts API Gateway + MAXIMUS Core Service
+# Starts Docker Compose services for new architecture (3 libs + services)
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="/home/juan/vertice-dev"
-
-GATEWAY_DIR="$PROJECT_ROOT/backend/services/api_gateway"
-MAXIMUS_DIR="$PROJECT_ROOT/backend/services/maximus_core_service"
-
-GATEWAY_PORT="${GATEWAY_PORT:-8000}"
-MAXIMUS_PORT="${MAXIMUS_PORT:-8100}"
-
-GATEWAY_PID_FILE="/tmp/maximus_gateway.pid"
-MAXIMUS_PID_FILE="/tmp/maximus_core.pid"
+DOCKER_COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml"
 
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 log_info() {
@@ -39,195 +32,231 @@ log_warning() {
     echo -e "${YELLOW}[!]${NC} $1"
 }
 
-check_port() {
-    local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
-        return 0
+log_section() {
+    echo -e "${CYAN}╔════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC} $1"
+    echo -e "${CYAN}╚════════════════════════════════════════════╝${NC}"
+}
+
+check_docker() {
+    if ! command -v docker &> /dev/null; then
+        log_error "Docker não encontrado. Instale o Docker primeiro."
+        exit 1
+    fi
+    
+    if ! docker compose version &> /dev/null; then
+        log_error "Docker Compose não encontrado. Instale o Docker Compose primeiro."
+        exit 1
+    fi
+}
+
+get_service_status() {
+    local service=$1
+    if docker compose -f "$DOCKER_COMPOSE_FILE" ps --status running | grep -q "$service"; then
+        echo "running"
     else
-        return 1
+        echo "stopped"
     fi
 }
 
-stop_service() {
-    local pid_file=$1
-    local service_name=$2
-    
-    if [ -f "$pid_file" ]; then
-        local pid=$(cat "$pid_file")
-        if kill -0 $pid 2>/dev/null; then
-            log_info "Stopping $service_name (PID: $pid)..."
-            kill $pid 2>/dev/null || true
-            sleep 2
-            if kill -0 $pid 2>/dev/null; then
-                kill -9 $pid 2>/dev/null || true
-            fi
-            log_success "$service_name stopped"
-        fi
-        rm -f "$pid_file"
-    fi
+count_running_services() {
+    docker compose -f "$DOCKER_COMPOSE_FILE" ps --status running --format json 2>/dev/null | wc -l
 }
 
-start_maximus_core() {
-    log_info "Starting MAXIMUS Core Service on port $MAXIMUS_PORT..."
+start_services() {
+    log_section "🚀 Iniciando MAXIMUS Backend"
+    echo -e "${CYAN}👸 Penélope: 'Maximus, acorde! Mas lembre-se: EU mando aqui!'${NC}"
     
-    cd "$MAXIMUS_DIR"
+    cd "$PROJECT_ROOT"
     
-    if [ ! -d ".venv" ]; then
-        log_error "Virtual environment not found in $MAXIMUS_DIR"
-        return 1
-    fi
+    # Start core infrastructure first
+    log_info "Penélope: Ativando fundações (Redis, Postgres, Qdrant)..."
+    docker compose -f "$DOCKER_COMPOSE_FILE" up -d redis postgres qdrant 2>&1 | grep -v "warn" || true
     
-    PYTHONPATH=. .venv/bin/uvicorn main:app \
-        --host 0.0.0.0 \
-        --port $MAXIMUS_PORT \
-        --log-level info \
-        > /tmp/maximus_core.log 2>&1 &
+    sleep 3
     
-    local pid=$!
-    echo $pid > "$MAXIMUS_PID_FILE"
+    # Start main services
+    log_info "Penélope: Trazendo Maximus online..."
+    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
+        api_gateway \
+        maximus_core_service \
+        maximus_integration_service \
+        maximus_orchestrator_service 2>&1 | grep -v "warn" || true
     
-    # Wait for service to start
-    local max_attempts=30
-    local attempt=0
-    while [ $attempt -lt $max_attempts ]; do
-        if check_port $MAXIMUS_PORT; then
-            log_success "MAXIMUS Core Service started (PID: $pid)"
-            log_info "  → http://localhost:$MAXIMUS_PORT"
-            log_info "  → Health: http://localhost:$MAXIMUS_PORT/health"
-            log_info "  → Logs: /tmp/maximus_core.log"
-            return 0
-        fi
-        sleep 1
-        attempt=$((attempt + 1))
-    done
+    sleep 2
     
-    log_error "MAXIMUS Core Service failed to start"
-    tail -20 /tmp/maximus_core.log
-    return 1
+    log_success "✨ Maximus está VIVO... mas totalmente sob CONTROLE de Penélope! 👑"
 }
 
-start_api_gateway() {
-    log_info "Starting API Gateway on port $GATEWAY_PORT..."
+stop_services() {
+    log_section "🛑 Parando MAXIMUS Backend"
+    echo -e "${CYAN}👸 Penélope: 'Maximus, hora de dormir. SEM reclamar!'${NC}"
     
-    cd "$GATEWAY_DIR"
+    cd "$PROJECT_ROOT"
+    docker compose -f "$DOCKER_COMPOSE_FILE" stop
     
-    if [ ! -d ".venv" ]; then
-        log_error "Virtual environment not found in $GATEWAY_DIR"
-        return 1
-    fi
-    
-    export MAXIMUS_CORE_SERVICE_URL="http://localhost:$MAXIMUS_PORT"
-    
-    PYTHONPATH=. .venv/bin/uvicorn main:app \
-        --host 0.0.0.0 \
-        --port $GATEWAY_PORT \
-        --log-level info \
-        > /tmp/maximus_gateway.log 2>&1 &
-    
-    local pid=$!
-    echo $pid > "$GATEWAY_PID_FILE"
-    
-    # Wait for service to start
-    local max_attempts=15
-    local attempt=0
-    while [ $attempt -lt $max_attempts ]; do
-        if check_port $GATEWAY_PORT; then
-            log_success "API Gateway started (PID: $pid)"
-            log_info "  → http://localhost:$GATEWAY_PORT"
-            log_info "  → Logs: /tmp/maximus_gateway.log"
-            return 0
-        fi
-        sleep 1
-        attempt=$((attempt + 1))
-    done
-    
-    log_error "API Gateway failed to start"
-    tail -20 /tmp/maximus_gateway.log
-    return 1
+    log_success "✅ Maximus desativado. Penélope mantém vigilância! 👸"
 }
 
 show_status() {
+    log_section "📊 Status dos Serviços MAXIMUS"
+    echo -e "${CYAN}👸 Penélope: 'Deixa eu ver como Maximus está se comportando...'${NC}"
     echo ""
-    echo "═══════════════════════════════════════════════════════"
-    echo " MAXIMUS Backend Status"
-    echo "═══════════════════════════════════════════════════════"
     
-    if check_port $MAXIMUS_PORT; then
-        log_success "MAXIMUS Core Service: RUNNING (port $MAXIMUS_PORT)"
+    cd "$PROJECT_ROOT"
+    
+    # Core Infrastructure
+    echo ""
+    echo -e "${CYAN}═══ Core Infrastructure ═══${NC}"
+    
+    local infra=("redis" "postgres" "qdrant")
+    for service in "${infra[@]}"; do
+        local status=$(get_service_status "$service")
+        if [ "$status" = "running" ]; then
+            log_success "$service: RUNNING"
+        else
+            log_error "$service: STOPPED"
+        fi
+    done
+    
+    # MAXIMUS AI Core
+    echo ""
+    echo -e "${CYAN}═══ MAXIMUS AI Core ═══${NC}"
+    
+    local core_services=(
+        "api_gateway:8000"
+        "maximus_core_service:8150"
+        "maximus_predict:8126"
+        "maximus_orchestrator_service:8125"
+    )
+    
+    for service_port in "${core_services[@]}"; do
+        IFS=':' read -r service port <<< "$service_port"
+        local status=$(get_service_status "$service")
+        if [ "$status" = "running" ]; then
+            log_success "$service: RUNNING → http://localhost:$port"
+        else
+            log_error "$service: STOPPED"
+        fi
+    done
+    
+    # Support Services
+    echo ""
+    echo -e "${CYAN}═══ Support Services ═══${NC}"
+    
+    local support=(
+        "osint-service:8036"
+        "vuln_scanner_service:8111"
+        "threat_intel_service:8113"
+        "malware_analysis_service:8114"
+        "ssl_monitor_service:8115"
+        "nmap_service:8106"
+        "domain_service:8104"
+        "ip_intelligence_service:8105"
+    )
+    
+    for service_port in "${support[@]}"; do
+        IFS=':' read -r service port <<< "$service_port"
+        local status=$(get_service_status "$service")
+        if [ "$status" = "running" ]; then
+            log_success "$service: RUNNING"
+        else
+            log_error "$service: STOPPED"
+        fi
+    done
+    
+    # Health Check Summary
+    echo ""
+    echo -e "${CYAN}═══ Health Status ═══${NC}"
+    
+    local healthy=$(docker compose ps --format "{{.Health}}" 2>/dev/null | grep "healthy" | wc -l)
+    local unhealthy=$(docker compose ps --format "{{.Health}}" 2>/dev/null | grep "unhealthy" | wc -l)
+    local starting=$(docker compose ps --format "{{.Health}}" 2>/dev/null | grep "starting" | wc -l)
+    
+    echo -e "${GREEN}✓ Healthy:${NC} $healthy"
+    if [[ "$unhealthy" -gt 0 ]]; then
+        echo -e "${RED}✗ Unhealthy:${NC} $unhealthy"
     else
-        log_error "MAXIMUS Core Service: NOT RUNNING"
+        echo -e "${GREEN}✓ Unhealthy:${NC} 0"
+    fi
+    if [[ "$starting" -gt 0 ]]; then
+        echo -e "${YELLOW}⟳ Starting:${NC} $starting"
     fi
     
-    if check_port $GATEWAY_PORT; then
-        log_success "API Gateway: RUNNING (port $GATEWAY_PORT)"
+    # Summary
+    echo ""
+    local total=$(count_running_services)
+    echo -e "${CYAN}═══════════════════════════════════════════${NC}"
+    echo -e "${GREEN}Total de serviços ativos:${NC} $total"
+    echo -e "${CYAN}═══════════════════════════════════════════${NC}"
+    if [[ "$total" -gt 10 ]]; then
+        echo -e "${CYAN}👸 Penélope: 'Muito bem Maximus, continue assim!'${NC}"
+    elif [[ "$total" -gt 5 ]]; then
+        echo -e "${YELLOW}👸 Penélope: 'Maximus, você pode fazer melhor...'${NC}"
     else
-        log_error "API Gateway: NOT RUNNING"
+        echo -e "${RED}👸 Penélope: 'MAXIMUS! Acorde agora ou vai ficar de castigo!'${NC}"
     fi
-    
-    echo "═══════════════════════════════════════════════════════"
     echo ""
 }
 
-stop_all() {
-    log_info "Stopping MAXIMUS Backend..."
-    stop_service "$MAXIMUS_PID_FILE" "MAXIMUS Core Service"
-    stop_service "$GATEWAY_PID_FILE" "API Gateway"
-    log_success "All services stopped"
+show_logs() {
+    local service="${1:-api_gateway}"
+    
+    log_info "Mostrando logs de: $service"
+    echo ""
+    
+    cd "$PROJECT_ROOT"
+    docker compose -f "$DOCKER_COMPOSE_FILE" logs -f "$service"
 }
 
 case "${1:-start}" in
     start)
-        log_info "🚀 Starting MAXIMUS Backend..."
-        
-        # Check if already running
-        if check_port $MAXIMUS_PORT || check_port $GATEWAY_PORT; then
-            log_warning "Services already running. Use 'maximus stop' first."
-            show_status
-            exit 1
-        fi
-        
-        # Start services
-        start_maximus_core || exit 1
+        check_docker
+        start_services
         sleep 3
-        start_api_gateway || exit 1
-        
         show_status
-        log_success "🎉 MAXIMUS Backend ready!"
         ;;
         
     stop)
-        stop_all
+        check_docker
+        stop_services
         ;;
         
     restart)
-        stop_all
+        check_docker
+        stop_services
         sleep 2
-        $0 start
+        start_services
+        sleep 3
+        show_status
         ;;
         
     status)
+        check_docker
         show_status
         ;;
         
     logs)
-        case "${2:-all}" in
-            core|maximus)
-                tail -f /tmp/maximus_core.log
-                ;;
-            gateway|api)
-                tail -f /tmp/maximus_gateway.log
-                ;;
-            all|*)
-                log_info "Core logs: /tmp/maximus_core.log"
-                log_info "Gateway logs: /tmp/maximus_gateway.log"
-                echo ""
-                tail -f /tmp/maximus_core.log /tmp/maximus_gateway.log
-                ;;
-        esac
+        check_docker
+        show_logs "${2:-api_gateway}"
         ;;
         
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs [core|gateway|all]}"
+        echo "MAXIMUS Backend Manager"
+        echo ""
+        echo "Uso: maximus {start|stop|restart|status|logs [service]}"
+        echo ""
+        echo "Comandos:"
+        echo "  start    - Inicia todos os serviços"
+        echo "  stop     - Para todos os serviços"
+        echo "  restart  - Reinicia todos os serviços"
+        echo "  status   - Mostra status dos serviços"
+        echo "  logs     - Mostra logs (opcional: especificar serviço)"
+        echo ""
+        echo "Exemplos:"
+        echo "  maximus start"
+        echo "  maximus status"
+        echo "  maximus logs maximus_core_service"
         exit 1
         ;;
 esac

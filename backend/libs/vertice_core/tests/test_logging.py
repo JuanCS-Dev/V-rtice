@@ -4,7 +4,6 @@ import json
 
 import pytest
 import structlog
-
 from vertice_core.logging import get_logger
 
 
@@ -25,8 +24,18 @@ class TestGetLogger:
 
     def test_rejects_invalid_log_level(self) -> None:
         """Test that invalid log level raises ValueError."""
-        with pytest.raises(ValueError, match="Invalid log level"):
+        with pytest.raises(ValueError, match="Invalid log level.*Must be one of"):
             get_logger("test_service", level="INVALID")
+
+    def test_invalid_level_error_message_format(self) -> None:
+        """Test that error message contains expected format."""
+        try:
+            get_logger("test_service", level="BADLEVEL")
+        except ValueError as e:
+            assert "Invalid log level: BADLEVEL" in str(e)
+            assert "Must be one of:" in str(e)
+            assert "DEBUG" in str(e)
+            assert "INFO" in str(e)
 
     def test_case_insensitive_log_level(self) -> None:
         """Test that log level is case-insensitive."""

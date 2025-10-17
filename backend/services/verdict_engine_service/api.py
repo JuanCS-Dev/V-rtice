@@ -52,6 +52,26 @@ async def get_active_verdicts(
     return verdicts
 
 
+@router.get("/verdicts/stats", response_model=VerdictStats)
+async def get_verdict_stats(
+    cache: VerdictCache = Depends(get_cache),
+    repository: VerdictRepository = Depends(get_repository),
+) -> VerdictStats:
+    """Get aggregated verdict statistics (cache-first)."""
+    # Try cache first
+    cached = await cache.get_stats()
+    if cached:
+        return cached
+
+    # Fallback to database
+    stats = await repository.get_stats()
+
+    # Cache for future requests
+    await cache.cache_stats(stats)
+
+    return stats
+
+
 @router.get("/verdicts/{verdict_id}", response_model=Verdict)
 async def get_verdict(
     verdict_id: UUID,
@@ -73,26 +93,6 @@ async def get_verdict(
     await cache.cache_verdict(verdict)
 
     return verdict
-
-
-@router.get("/verdicts/stats", response_model=VerdictStats)
-async def get_verdict_stats(
-    cache: VerdictCache = Depends(get_cache),
-    repository: VerdictRepository = Depends(get_repository),
-) -> VerdictStats:
-    """Get aggregated verdict statistics (cache-first)."""
-    # Try cache first
-    cached = await cache.get_stats()
-    if cached:
-        return cached
-
-    # Fallback to database
-    stats = await repository.get_stats()
-
-    # Cache for future requests
-    await cache.cache_stats(stats)
-
-    return stats
 
 
 @router.put("/verdicts/{verdict_id}/status")

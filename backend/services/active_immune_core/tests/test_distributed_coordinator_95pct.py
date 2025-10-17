@@ -27,7 +27,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from agents.distributed_coordinator import (
+from active_immune_core.agents.distributed_coordinator import (
     AgentNode,
     AgentRole,
     DistributedCoordinator,

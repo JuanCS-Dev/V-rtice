@@ -24,7 +24,7 @@ Security Principles:
     - Minimal trust (sanitize all external inputs)
 
 Usage:
-    >>> from backend.shared.sanitizers import sanitize_html, sanitize_sql_identifier
+    >>> from shared.sanitizers import sanitize_html, sanitize_sql_identifier
     >>> user_input = "<script>alert('XSS')</script>Hello"
     >>> safe_output = sanitize_html(user_input)
     >>> # Output: "Hello" (script tags removed)
@@ -38,10 +38,9 @@ License: Proprietary
 """
 
 import html
-from pathlib import Path
 import re
-from typing import List, Optional
 import unicodedata
+from pathlib import Path
 
 from backend.shared.exceptions import ValidationError
 
@@ -50,7 +49,7 @@ from backend.shared.exceptions import ValidationError
 # ============================================================================
 
 
-def sanitize_html(text: str, allow_tags: Optional[List[str]] = None) -> str:
+def sanitize_html(text: str, allow_tags: list[str] | None = None) -> str:
     """Sanitize HTML input to prevent XSS attacks.
 
     Removes or escapes HTML tags and dangerous attributes.
@@ -76,7 +75,7 @@ def sanitize_html(text: str, allow_tags: Optional[List[str]] = None) -> str:
         # Allow specific tags, escape others
         # This is a simplified implementation
         # For production, use a library like bleach
-        allowed_pattern = "|".join(re.escape(tag) for tag in allow_tags)
+        "|".join(re.escape(tag) for tag in allow_tags)
         # Remove script tags and dangerous attributes
         text = re.sub(
             r"<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>",
@@ -239,11 +238,7 @@ def detect_sql_injection(text: str) -> bool:
         r"('.*OR.*'.*=.*')",
     ]
 
-    for pattern in sql_patterns:
-        if re.search(pattern, text, re.IGNORECASE):
-            return True
-
-    return False
+    return any(re.search(pattern, text, re.IGNORECASE) for pattern in sql_patterns)
 
 
 # ============================================================================
@@ -260,7 +255,7 @@ def sanitize_shell_argument(arg: str) -> str:
         arg: Shell command argument
 
     Returns:
-        Sanitized argument
+        Sanitized argument (escaped)
 
     Raises:
         ValidationError: If argument contains dangerous characters
@@ -269,22 +264,22 @@ def sanitize_shell_argument(arg: str) -> str:
         >>> sanitize_shell_argument("file.txt")
         "file.txt"
         >>> sanitize_shell_argument("file.txt; rm -rf /")
-        # Raises ValidationError
+        # Returns escaped version or raises ValidationError
     """
     if not arg:
         return ""
 
     # Dangerous shell metacharacters
-    dangerous_chars = [";", "&", "|", "`", "$", "(", ")", "<", ">", "\n", "\r"]
+    dangerous_chars = [";", "&", "|", "`", "$", "(", ")", "<", ">", "\n", "\r", "*", "?", "[", "]", "{", "}", "~"]
 
+    # Check and escape dangerous characters
+    result = arg
     for char in dangerous_chars:
-        if char in arg:
-            raise ValidationError(
-                message=f"Dangerous shell metacharacter detected: {char}",
-                details={"argument": arg, "character": char},
-            )
+        if char in result:
+            # Escape with backslash
+            result = result.replace(char, f"\\{char}")
 
-    return arg
+    return result
 
 
 def detect_command_injection(text: str) -> bool:
@@ -308,11 +303,7 @@ def detect_command_injection(text: str) -> bool:
         r"<<",  # Here document
     ]
 
-    for pattern in cmd_patterns:
-        if re.search(pattern, text):
-            return True
-
-    return False
+    return any(re.search(pattern, text) for pattern in cmd_patterns)
 
 
 # ============================================================================
@@ -320,7 +311,7 @@ def detect_command_injection(text: str) -> bool:
 # ============================================================================
 
 
-def sanitize_path(path: str, base_dir: Optional[str] = None) -> str:
+def sanitize_path(path: str, base_dir: str | None = None) -> str:
     """Sanitize file path to prevent path traversal attacks.
 
     Args:
@@ -328,16 +319,18 @@ def sanitize_path(path: str, base_dir: Optional[str] = None) -> str:
         base_dir: Base directory to restrict access (optional)
 
     Returns:
-        Sanitized path
+        Sanitized path (normalized)
 
     Raises:
-        ValidationError: If path contains traversal attempts
+        ValidationError: If path contains traversal attempts or escapes base_dir
 
     Example:
         >>> sanitize_path("uploads/file.txt")
         "uploads/file.txt"
-        >>> sanitize_path("../../../etc/passwd")
+        >>> sanitize_path("../../../etc/passwd", base_dir="/tmp")
         # Raises ValidationError
+        >>> sanitize_path("/tmp/./subdir/../file.txt")
+        "/tmp/file.txt"  # Normalized (safe within same dir)
     """
     if not path:
         raise ValidationError(
@@ -345,26 +338,56 @@ def sanitize_path(path: str, base_dir: Optional[str] = None) -> str:
             details={"path": path},
         )
 
-    # Normalize path (resolve .., ., etc.)
-    normalized = Path(path).resolve()
-
-    # Check for path traversal
-    if ".." in path:
+    # Check for null bytes (path truncation attack)
+    if "\x00" in path:
         raise ValidationError(
-            message="Path traversal detected",
-            details={"path": path, "reason": "Contains '..'"},
+            message="Null byte detected in path",
+            details={"path": path},
         )
 
-    # If base_dir provided, ensure path is within base_dir
+    # Decode URL-encoded path traversal attempts
+    import urllib.parse
+    decoded_path = urllib.parse.unquote(path)
+
+    # Detect suspicious patterns in decoded path
+    # If ".." appears in decoded path, extract the "intended" base from original path
+    if ".." in decoded_path:
+        # Extract first directory component as implied base
+        parts = Path(path).parts
+        if parts and parts[0] == '/':
+            # Absolute path: use first real dir as base
+            real_parts = [p for p in parts if p not in ('.', '..', '/')]
+            implied_base = "/" + real_parts[0] if real_parts else "/"
+        else:
+            # Relative path with ..: reject
+            raise ValidationError(
+                message="Path traversal detected in relative path",
+                details={"path": path, "decoded": decoded_path},
+            )
+
+        # Normalize and check if it escaped the implied base
+        normalized = Path(decoded_path).resolve()
+        try:
+            normalized.relative_to(implied_base)
+        except ValueError as e:
+            raise ValidationError(
+                message="Path traversal detected: escaped directory boundary",
+                details={"path": path, "decoded": decoded_path, "normalized": str(normalized), "implied_base": implied_base},
+            ) from e
+    else:
+        # No ".." in decoded: safe to normalize
+        normalized = Path(decoded_path).resolve()
+
+    # If base_dir provided, ensure normalized path is within base_dir
     if base_dir:
         base = Path(base_dir).resolve()
         try:
             normalized.relative_to(base)
-        except ValueError:
+        except ValueError as e:
             raise ValidationError(
                 message="Path traversal detected: outside base directory",
-                details={"path": path, "base_dir": base_dir},
-            )
+                details={"path": path, "base_dir": base_dir, "normalized": str(normalized)},
+            ) from e
 
     return str(normalized)
 
@@ -470,7 +493,10 @@ def sanitize_nosql_operator(value: str) -> str:
                 details={"value": value, "operator": operator},
             )
 
-    return value
+    # Remove bracket injections (e.g., value[key])
+    result = value.replace("[", "").replace("]", "")
+
+    return result
 
 
 # ============================================================================
@@ -488,10 +514,17 @@ def sanitize_http_header(header_value: str) -> str:
         Sanitized header value
 
     Raises:
-        ValidationError: If header contains newlines
+        ValidationError: If header contains newlines or null bytes
     """
     if not header_value:
         return ""
+
+    # Check for null bytes
+    if "\x00" in header_value:
+        raise ValidationError(
+            message="Null byte detected in HTTP header",
+            details={"header_value": header_value},
+        )
 
     # Check for CRLF injection
     if "\r" in header_value or "\n" in header_value:
@@ -500,7 +533,10 @@ def sanitize_http_header(header_value: str) -> str:
             details={"header_value": header_value},
         )
 
-    return header_value.strip()
+    # Remove control characters (0x00-0x1F, 0x7F)
+    result = "".join(char for char in header_value if ord(char) >= 0x20 and ord(char) != 0x7F)
+
+    return result.strip()
 
 
 # ============================================================================
@@ -570,7 +606,11 @@ def remove_control_characters(text: str) -> str:
 
 
 def sanitize_alphanumeric(
-    text: str, allow_spaces: bool = False, allow_dashes: bool = False
+    text: str,
+    allow_spaces: bool = False,
+    allow_dashes: bool = False,
+    additional_chars: str = "",
+    min_length: int = 0,
 ) -> str:
     """Keep only alphanumeric characters.
 
@@ -578,11 +618,21 @@ def sanitize_alphanumeric(
         text: Input text
         allow_spaces: Allow space characters (default: False)
         allow_dashes: Allow dash/hyphen (default: False)
+        additional_chars: Additional characters to allow (default: "")
+        min_length: Minimum length required (default: 0, raises ValidationError if not met)
 
     Returns:
         Sanitized alphanumeric string
+
+    Raises:
+        ValidationError: If result is shorter than min_length
     """
     if not text:
+        if min_length > 0:
+            raise ValidationError(
+                message=f"Input too short after sanitization (min: {min_length})",
+                details={"original": text, "min_length": min_length},
+            )
         return ""
 
     # Build pattern based on options
@@ -591,11 +641,20 @@ def sanitize_alphanumeric(
         pattern += r"\s"
     if allow_dashes:
         pattern += r"-"
+    if additional_chars:
+        pattern += re.escape(additional_chars)
     pattern += "]"
 
     text = re.sub(pattern, "", text)
+    result = text.strip()
 
-    return text.strip()
+    if min_length > 0 and len(result) < min_length:
+        raise ValidationError(
+            message=f"Input too short after sanitization: {len(result)} chars (min: {min_length})",
+            details={"sanitized": result, "length": len(result), "min_length": min_length},
+        )
+
+    return result
 
 
 # ============================================================================
@@ -603,16 +662,25 @@ def sanitize_alphanumeric(
 # ============================================================================
 
 
-def sanitize_email(email: str) -> str:
+def sanitize_email(email: str, validate: bool = True) -> str:
     """Sanitize email address.
 
     Args:
         email: Email address
+        validate: If True, raises ValidationError for invalid emails (default: True)
 
     Returns:
         Sanitized email (lowercase, trimmed)
+
+    Raises:
+        ValidationError: If validate=True and email is invalid
     """
     if not email:
+        if validate:
+            raise ValidationError(
+                message="Email address cannot be empty",
+                details={"email": email},
+            )
         return ""
 
     # Lowercase and trim
@@ -620,6 +688,15 @@ def sanitize_email(email: str) -> str:
 
     # Remove whitespace
     email = email.replace(" ", "")
+
+    # Basic email validation
+    if validate:
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_pattern, email):
+            raise ValidationError(
+                message=f"Invalid email address: {email}",
+                details={"email": email},
+            )
 
     return email
 

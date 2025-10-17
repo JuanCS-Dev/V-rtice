@@ -5,8 +5,8 @@
 
 metadata:
   version: "1.0.0"
-  last_updated: "2025-10-16"
-  total_services: 83
+  last_updated: "2025-10-17"
+  total_services: 86
   port_ranges:
     core: "8000-8099"
     maximus: "8100-8199"
@@ -20,6 +20,7 @@ metadata:
     support: "8900-8999"
     wargaming: "9000-9099"
     special: "9100-9199"
+    hub_ai: "9200-9299"
 
 # Gateway and Core Services (8000-8099)
 core:
@@ -136,3 +137,9 @@ wargaming:
   seriema_graph: 9003
   purple_team: 9004
   predictive_threat_hunting_service: 9005
+
+# HUB-AI - Cockpit Soberano (9200-9299)
+hub_ai:
+  narrative_filter_service: 9200
+  verdict_engine_service: 9201
+  command_bus_service: 9202

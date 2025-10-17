@@ -36,7 +36,7 @@ from typing import Any, Dict, List, Optional
 
 import asyncpg
 
-from agents.models import AgentType
+from active_immune_core.agents.models import AgentType
 
 logger = logging.getLogger(__name__)
 

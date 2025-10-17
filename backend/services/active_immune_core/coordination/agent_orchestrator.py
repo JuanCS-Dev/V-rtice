@@ -38,15 +38,15 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
-from agents.agent_factory import AgentFactory
-from agents.models import AgenteState, AgentType
-from coordination.exceptions import (
+from active_immune_core.agents.agent_factory import AgentFactory
+from active_immune_core.agents.models import AgenteState, AgentType
+from active_immune_core.coordination.exceptions import (
     AgentOrchestrationError,
     LymphnodeRateLimitError,
     LymphnodeResourceExhaustedError,
 )
-from coordination.rate_limiter import ClonalExpansionRateLimiter
-from coordination.thread_safe_structures import AtomicCounter
+from active_immune_core.coordination.rate_limiter import ClonalExpansionRateLimiter
+from active_immune_core.coordination.thread_safe_structures import AtomicCounter
 
 logger = logging.getLogger(__name__)
 

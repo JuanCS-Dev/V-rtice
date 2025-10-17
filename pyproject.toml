@@ -146,6 +146,7 @@ testpaths = ["tests", "backend/tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+asyncio_mode = "auto"
 
 # Output options
 addopts = [
@@ -291,7 +292,7 @@ skips = [
 line-length = 88
 target-version = "py310"
 
-# Enable pycodestyle (E), Pyflakes (F), isort (I), pydocstyle (D)
+[tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
     "F",   # Pyflakes
@@ -305,14 +306,16 @@ select = [
 ]
 
 ignore = [
-    "E501",  # Line too long (handled by Black)
-    "E203",  # Whitespace before ':' (Black compatibility)
-    "W503",  # Line break before binary operator (Black compatibility)
-    "D100",  # Missing docstring in public module (phased approach)
-    "D101",  # Missing docstring in public class
-    "D102",  # Missing docstring in public method
-    "D103",  # Missing docstring in public function
-    "D104",  # Missing docstring in public package
+    "E501",    # Line too long (handled by Black)
+    "E203",    # Whitespace before ':' (Black compatibility)
+    "D100",    # Missing docstring in public module (phased approach)
+    "D101",    # Missing docstring in public class
+    "D102",    # Missing docstring in public method
+    "D103",    # Missing docstring in public function
+    "D104",    # Missing docstring in public package
+    "S104",    # Binding to all interfaces (0.0.0.0 is standard for containers)
+    "N818",    # Exception naming (VerticeException is our base)
+    "ANN401",  # Any type allowed for flexible APIs
 ]
 
 exclude = [
@@ -329,7 +332,7 @@ exclude = [
     "migrations",
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 "tests/*" = ["S101"]      # Allow assert in tests
 

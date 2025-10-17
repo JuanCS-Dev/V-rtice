@@ -13,7 +13,7 @@ from typing import Optional, Set
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
-from api.core_integration import EventBridge
+from active_immune_core.api.core_integration import EventBridge
 
 logger = logging.getLogger(__name__)
 

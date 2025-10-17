@@ -5,7 +5,6 @@ Abstract interfaces for data access.
 Implementations in infrastructure layer.
 """
 from abc import ABC, abstractmethod
-from typing import Optional
 from uuid import UUID
 
 from .entities import ExampleEntity
@@ -20,12 +19,16 @@ class ExampleRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, entity_id: UUID) -> Optional[ExampleEntity]:
-        """Get entity by ID."""
+    async def get_by_id(self, entity_id: UUID) -> ExampleEntity:
+        """Get entity by ID.
+
+        Raises:
+            EntityNotFoundError: If entity not found.
+        """
         pass
 
     @abstractmethod
-    async def get_by_name(self, name: str) -> Optional[ExampleEntity]:
+    async def get_by_name(self, name: str) -> ExampleEntity | None:
         """Get entity by name."""
         pass
 
@@ -42,8 +45,12 @@ class ExampleRepository(ABC):
         pass
 
     @abstractmethod
-    async def delete(self, entity_id: UUID) -> bool:
-        """Delete entity by ID. Returns True if deleted."""
+    async def delete(self, entity_id: UUID) -> None:
+        """Delete entity by ID.
+
+        Raises:
+            EntityNotFoundError: If entity not found.
+        """
         pass
 
     @abstractmethod

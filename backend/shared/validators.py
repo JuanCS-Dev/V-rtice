@@ -25,7 +25,7 @@ Security:
     - Maximum length enforcement
 
 Usage:
-    >>> from backend.shared.validators import validate_ipv4, validate_domain
+    >>> from shared.validators import validate_ipv4, validate_domain
     >>> validate_ipv4("192.168.1.1")  # Returns True
     >>> validate_ipv4("256.0.0.1")    # Raises ValidationError
     >>>
@@ -42,14 +42,11 @@ License: Proprietary
 """
 
 import ipaddress
-from pathlib import Path
 import re
-from typing import Any, List, Optional, Union
+from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
-from pydantic import field_validator
-
-from backend.shared.constants import RegexPatterns, SystemLimits
 from backend.shared.exceptions import ValidationError
 
 # ============================================================================
@@ -76,7 +73,7 @@ def validate_ipv4(ip: str) -> str:
         raise ValidationError(
             message=f"Invalid IPv4 address: {ip}",
             details={"ip": ip, "error": str(e)},
-        )
+        ) from e
 
 
 def validate_ipv6(ip: str) -> str:
@@ -98,10 +95,10 @@ def validate_ipv6(ip: str) -> str:
         raise ValidationError(
             message=f"Invalid IPv6 address: {ip}",
             details={"ip": ip, "error": str(e)},
-        )
+        ) from e
 
 
-def validate_ip_address(ip: str, version: Optional[int] = None) -> str:
+def validate_ip_address(ip: str, version: int | None = None) -> str:
     """Validate IP address (IPv4 or IPv6).
 
     Args:
@@ -127,10 +124,10 @@ def validate_ip_address(ip: str, version: Optional[int] = None) -> str:
             raise ValidationError(
                 message=f"Invalid IP address: {ip}",
                 details={"ip": ip, "error": str(e)},
-            )
+            ) from e
 
 
-def validate_cidr(cidr: str, version: Optional[int] = None) -> str:
+def validate_cidr(cidr: str, version: int | None = None) -> str:
     """Validate CIDR notation (e.g., 192.168.1.0/24).
 
     Args:
@@ -155,7 +152,7 @@ def validate_cidr(cidr: str, version: Optional[int] = None) -> str:
         raise ValidationError(
             message=f"Invalid CIDR notation: {cidr}",
             details={"cidr": cidr, "error": str(e)},
-        )
+        ) from e
 
 
 def is_private_ip(ip: str) -> bool:
@@ -229,7 +226,7 @@ def validate_domain(domain: str) -> str:
     return domain
 
 
-def validate_url(url: str, allowed_schemes: Optional[List[str]] = None) -> str:
+def validate_url(url: str, allowed_schemes: list[str] | None = None) -> str:
     """Validate URL format.
 
     Args:
@@ -272,7 +269,7 @@ def validate_url(url: str, allowed_schemes: Optional[List[str]] = None) -> str:
         raise ValidationError(
             message=f"Invalid URL: {url}",
             details={"url": url, "error": str(e)},
-        )
+        ) from e
 
 
 # ============================================================================
@@ -372,7 +369,7 @@ def validate_sha512(hash_value: str) -> str:
     return hash_value
 
 
-def validate_hash(hash_value: str, hash_type: Optional[str] = None) -> str:
+def validate_hash(hash_value: str, hash_type: str | None = None) -> str:
     """Validate hash format (auto-detect or specify type).
 
     Args:
@@ -506,7 +503,7 @@ def validate_username(username: str, min_length: int = 3, max_length: int = 32) 
 # ============================================================================
 
 
-def validate_port(port: Union[int, str]) -> int:
+def validate_port(port: int | str) -> int:
     """Validate port number (1-65535).
 
     Args:
@@ -520,11 +517,11 @@ def validate_port(port: Union[int, str]) -> int:
     """
     try:
         port_num = int(port)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError) as e:
         raise ValidationError(
             message=f"Invalid port number: {port}",
             details={"port": port, "type": type(port).__name__},
-        )
+        ) from e
 
     if not (1 <= port_num <= 65535):
         raise ValidationError(
@@ -543,7 +540,7 @@ def validate_port(port: Union[int, str]) -> int:
 def validate_file_path(
     file_path: str,
     allow_absolute: bool = True,
-    allowed_extensions: Optional[List[str]] = None,
+    allowed_extensions: list[str] | None = None,
 ) -> str:
     """Validate file path format.
 
@@ -591,7 +588,7 @@ def validate_file_path(
 
 
 def validate_filename(
-    filename: str, max_length: int = 255, allowed_chars_pattern: Optional[str] = None
+    filename: str, max_length: int = 255, allowed_chars_pattern: str | None = None
 ) -> str:
     """Validate filename format.
 
@@ -692,7 +689,7 @@ def validate_ioc(ioc: str, ioc_type: str) -> str:
 
 
 def validate_string_length(
-    value: str, min_length: Optional[int] = None, max_length: Optional[int] = None
+    value: str, min_length: int | None = None, max_length: int | None = None
 ) -> str:
     """Validate string length.
 
@@ -725,8 +722,8 @@ def validate_string_length(
 
 
 def validate_list_length(
-    items: List[Any], min_items: Optional[int] = None, max_items: Optional[int] = None
-) -> List[Any]:
+    items: list[Any], min_items: int | None = None, max_items: int | None = None
+) -> list[Any]:
     """Validate list length.
 
     Args:

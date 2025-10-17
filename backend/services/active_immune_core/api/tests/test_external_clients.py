@@ -12,14 +12,14 @@ Version: 1.0.0
 import pytest
 import pytest_asyncio
 
-from api.clients import (
+from active_immune_core.api.clients import (
     AdaptiveImmunityClient,
     GovernanceClient,
     IPIntelClient,
     MemoryClient,
     TregClient,
 )
-from api.clients.governance_client import RiskLevel
+from active_immune_core.api.clients.governance_client import RiskLevel
 
 # ==================== FIXTURES ====================
 

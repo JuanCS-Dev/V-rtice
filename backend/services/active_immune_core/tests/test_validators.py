@@ -9,7 +9,7 @@ Date: 2025-10-07
 import pytest
 from pydantic import ValidationError
 
-from coordination.validators import (
+from active_immune_core.coordination.validators import (
     AgentRegistration,
     ApoptosisSignal,
     ClonalExpansionRequest,

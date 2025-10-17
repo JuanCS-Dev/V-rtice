@@ -6,7 +6,6 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-
 from vertice_core import get_logger
 
 logger = get_logger(__name__)
@@ -28,7 +27,7 @@ class DatabaseConnection:
 
         self.engine: AsyncEngine = create_async_engine(url, **engine_kwargs)
         self._session_factory: sessionmaker[AsyncSession] = sessionmaker(  # type: ignore[type-var,call-overload]
-            self.engine, class_=AsyncSession, expire_on_commit=False
+            self.engine, class_=AsyncSession, expire_on_commit=False,
         )
 
     @asynccontextmanager

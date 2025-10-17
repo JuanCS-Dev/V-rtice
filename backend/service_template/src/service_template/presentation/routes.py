@@ -3,6 +3,7 @@ Presentation Layer - FastAPI Routes
 
 HTTP endpoints for the service.
 """
+from collections.abc import AsyncGenerator
 from typing import Annotated
 from uuid import UUID
 
@@ -17,8 +18,7 @@ from ..application.use_cases import (
     UpdateEntityUseCase,
 )
 from ..domain.exceptions import EntityAlreadyExistsError, EntityNotFoundError
-from ..infrastructure.database import Database
-from ..infrastructure.repositories import SQLAlchemyExampleRepository
+from ..infrastructure.database import Database, SQLAlchemyExampleRepository
 from .dependencies import get_database
 
 router = APIRouter(prefix="/api/v1/entities", tags=["entities"])
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/entities", tags=["entities"])
 
 async def get_repository(
     db: Annotated[Database, Depends(get_database)]
-) -> SQLAlchemyExampleRepository:
+) -> AsyncGenerator[SQLAlchemyExampleRepository, None]:
     """Get repository dependency."""
     async with db.session() as session:
         yield SQLAlchemyExampleRepository(session)
@@ -48,7 +48,7 @@ async def create_entity(
         entity = await use_case.execute(name=dto.name, description=dto.description)
         return EntityDTO.model_validate(entity)
     except EntityAlreadyExistsError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.get(
@@ -66,7 +66,7 @@ async def get_entity(
         entity = await use_case.execute(entity_id)
         return EntityDTO.model_validate(entity)
     except EntityNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.get(
@@ -112,9 +112,9 @@ async def update_entity(
         )
         return EntityDTO.model_validate(entity)
     except EntityNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except EntityAlreadyExistsError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
 
 @router.delete(
@@ -131,4 +131,4 @@ async def delete_entity(
         use_case = DeleteEntityUseCase(repo)
         await use_case.execute(entity_id)
     except EntityNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e

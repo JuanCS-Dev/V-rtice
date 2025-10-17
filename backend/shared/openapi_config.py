@@ -16,7 +16,7 @@ Features:
 
 Usage:
     >>> from fastapi import FastAPI
-    >>> from backend.shared.openapi_config import create_openapi_config
+    >>> from shared.openapi_config import create_openapi_config
     >>>
     >>> app = FastAPI(**create_openapi_config(
     >>>     service_name="Maximus Core Service",

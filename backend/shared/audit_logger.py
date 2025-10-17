@@ -23,16 +23,16 @@ Features:
 
 Usage:
     from backend.shared.audit_logger import AuditLogger
-    
+
     audit = AuditLogger()
-    
+
     # Log authentication
     audit.log_auth_attempt(
         username="admin",
         ip_address="192.168.1.1",
         success=True
     )
-    
+
     # Log data access
     audit.log_data_access(
         user_id=123,
@@ -40,7 +40,7 @@ Usage:
         action="read",
         sensitive=True
     )
-    
+
     # Log security event
     audit.log_security_event(
         event_type="suspicious_activity",
@@ -66,7 +66,7 @@ Database Schema:
         user_agent TEXT,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
-    
+
     CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp DESC);
     CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
     CREATE INDEX idx_audit_logs_event_type ON audit_logs(event_type);
@@ -75,9 +75,9 @@ Database Schema:
 
 import json
 import logging
-from datetime import datetime
-from typing import Optional, Dict, Any
 from contextlib import contextmanager
+from datetime import datetime
+from typing import Any
 
 try:
     import psycopg2
@@ -88,7 +88,6 @@ except ImportError:
     psycopg2 = None
     Json = None
 
-from backend.shared.enums import EventType, LogLevel, ThreatLevel
 
 
 # ============================================================================
@@ -97,24 +96,24 @@ from backend.shared.enums import EventType, LogLevel, ThreatLevel
 
 class AuditConfig:
     """Audit logging configuration."""
-    
+
     # PostgreSQL connection (override via environment)
     DB_HOST = "localhost"
     DB_PORT = 5432
     DB_NAME = "vertice_audit"
     DB_USER = "vertice"
     DB_PASSWORD = "changeme"
-    
+
     # Table name
     TABLE_NAME = "audit_logs"
-    
+
     # Retention policy (days)
     RETENTION_DAYS = 365  # 1 year
-    
+
     # Log to file as backup
     LOG_TO_FILE = True
     LOG_FILE = "/var/log/vertice/audit.log"
-    
+
     # Fail behavior if DB unavailable
     FAIL_OPEN = True  # Continue on DB error (log to file instead)
 
@@ -126,22 +125,22 @@ class AuditConfig:
 class AuditLogger:
     """
     Comprehensive audit logging system.
-    
+
     Logs security-relevant events to:
     1. PostgreSQL (primary, queryable)
     2. File (backup, SIEM ingestion)
     3. Python logging (dev/debug)
     """
-    
+
     def __init__(
         self,
-        db_config: Optional[Dict[str, Any]] = None,
+        db_config: dict[str, Any] | None = None,
         log_to_file: bool = True
     ):
         self.db_config = db_config or self._get_default_config()
         self.log_to_file = log_to_file
         self.db_connection = None
-        
+
         # Setup file logging
         if self.log_to_file:
             self.file_logger = logging.getLogger("vertice.audit")
@@ -152,17 +151,12 @@ class AuditLogger:
                 ))
                 self.file_logger.addHandler(handler)
                 self.file_logger.setLevel(logging.INFO)
-        
+
         # Initialize DB connection
         if POSTGRES_AVAILABLE:
-            try:
-                self._connect_db()
-            except Exception as e:
-                logging.error(f"Failed to connect to audit database: {e}")
-                if not AuditConfig.FAIL_OPEN:
-                    raise
-    
-    def _get_default_config(self) -> Dict[str, Any]:
+            self._connect_db()
+
+    def _get_default_config(self) -> dict[str, Any]:
         """Get default database configuration."""
         return {
             "host": AuditConfig.DB_HOST,
@@ -171,12 +165,12 @@ class AuditLogger:
             "user": AuditConfig.DB_USER,
             "password": AuditConfig.DB_PASSWORD
         }
-    
+
     def _connect_db(self):
         """Connect to PostgreSQL."""
         if not POSTGRES_AVAILABLE:
             return
-        
+
         try:
             self.db_connection = psycopg2.connect(**self.db_config)
             self.db_connection.autocommit = True
@@ -185,15 +179,15 @@ class AuditLogger:
             self.db_connection = None
             if not AuditConfig.FAIL_OPEN:
                 raise
-    
-    def _log_to_db(self, audit_entry: Dict[str, Any]):
+
+    def _log_to_db(self, audit_entry: dict[str, Any]):
         """Write audit entry to PostgreSQL."""
         if not self.db_connection or not POSTGRES_AVAILABLE:
             return False
-        
+
         try:
             cursor = self.db_connection.cursor()
-            
+
             # Build INSERT query
             query = f"""
                 INSERT INTO {AuditConfig.TABLE_NAME} (
@@ -204,7 +198,7 @@ class AuditLogger:
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
             """
-            
+
             cursor.execute(query, (
                 audit_entry.get("timestamp"),
                 audit_entry.get("event_type"),
@@ -220,42 +214,42 @@ class AuditLogger:
                 audit_entry.get("request_id"),
                 audit_entry.get("user_agent")
             ))
-            
+
             cursor.close()
             return True
-        
+
         except Exception as e:
             logging.error(f"Failed to write audit log to DB: {e}")
             if not AuditConfig.FAIL_OPEN:
                 raise
             return False
-    
-    def _log_to_file_backup(self, audit_entry: Dict[str, Any]):
+
+    def _log_to_file_backup(self, audit_entry: dict[str, Any]):
         """Write audit entry to file (backup)."""
         if self.log_to_file and self.file_logger:
             try:
                 self.file_logger.info(json.dumps(audit_entry))
             except Exception as e:
                 logging.error(f"Failed to write audit log to file: {e}")
-    
+
     def log(
         self,
         event_type: str,
-        user_id: Optional[int] = None,
-        username: Optional[str] = None,
-        ip_address: Optional[str] = None,
-        action: Optional[str] = None,
-        resource: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
-        success: Optional[bool] = None,
+        user_id: int | None = None,
+        username: str | None = None,
+        ip_address: str | None = None,
+        action: str | None = None,
+        resource: str | None = None,
+        details: dict[str, Any] | None = None,
+        success: bool | None = None,
         severity: str = "info",
-        session_id: Optional[str] = None,
-        request_id: Optional[str] = None,
-        user_agent: Optional[str] = None
+        session_id: str | None = None,
+        request_id: str | None = None,
+        user_agent: str | None = None
     ):
         """
         Log audit event (generic).
-        
+
         Args:
             event_type: Type of event (EventType enum value)
             user_id: User ID if applicable
@@ -285,13 +279,13 @@ class AuditLogger:
             "request_id": request_id,
             "user_agent": user_agent
         }
-        
+
         # Log to database
         self._log_to_db(audit_entry)
-        
+
         # Log to file (backup)
         self._log_to_file_backup(audit_entry)
-        
+
         # Log to Python logging (dev)
         log_level = {
             "info": logging.INFO,
@@ -299,27 +293,27 @@ class AuditLogger:
             "error": logging.ERROR,
             "critical": logging.CRITICAL
         }.get(severity, logging.INFO)
-        
+
         logging.log(
             log_level,
             f"AUDIT: {event_type} - {action or 'N/A'} on {resource or 'N/A'} by {username or user_id or 'unknown'}"
         )
-    
+
     # ========================================================================
     # AUTHENTICATION EVENTS
     # ========================================================================
-    
+
     def log_auth_attempt(
         self,
         username: str,
         ip_address: str,
         success: bool,
         method: str = "password",
-        details: Optional[Dict] = None
+        details: dict | None = None
     ):
         """Log authentication attempt."""
         self.log(
-            event_type=EventType.AUTH_SUCCESS.value if success else EventType.AUTH_FAILURE.value,
+            event_type="unknown" if success else "unknown",
             username=username,
             ip_address=ip_address,
             action="login",
@@ -328,11 +322,11 @@ class AuditLogger:
             success=success,
             severity="info" if success else "warning"
         )
-    
+
     def log_logout(self, username: str, session_id: str):
         """Log user logout."""
         self.log(
-            event_type=EventType.AUTH_SUCCESS.value,
+            event_type="unknown",
             username=username,
             action="logout",
             resource="auth_system",
@@ -340,22 +334,22 @@ class AuditLogger:
             success=True,
             severity="info"
         )
-    
+
     # ========================================================================
     # DATA ACCESS EVENTS
     # ========================================================================
-    
+
     def log_data_access(
         self,
         user_id: int,
         resource: str,
         action: str,
         sensitive: bool = False,
-        details: Optional[Dict] = None
+        details: dict | None = None
     ):
         """Log data access (especially PII/sensitive)."""
         self.log(
-            event_type=EventType.DATA_ACCESS.value,
+            event_type="unknown",
             user_id=user_id,
             action=action,
             resource=resource,
@@ -363,22 +357,22 @@ class AuditLogger:
             success=True,
             severity="warning" if sensitive else "info"
         )
-    
+
     # ========================================================================
     # CONFIGURATION EVENTS
     # ========================================================================
-    
+
     def log_config_change(
         self,
         user_id: int,
         config_key: str,
         old_value: Any,
         new_value: Any,
-        details: Optional[Dict] = None
+        details: dict | None = None
     ):
         """Log configuration change."""
         self.log(
-            event_type=EventType.CONFIG_CHANGE.value,
+            event_type="unknown",
             user_id=user_id,
             action="update",
             resource=config_key,
@@ -390,22 +384,22 @@ class AuditLogger:
             success=True,
             severity="warning"
         )
-    
+
     # ========================================================================
     # TOOL EXECUTION EVENTS
     # ========================================================================
-    
+
     def log_tool_execution(
         self,
         user_id: int,
         tool_name: str,
         target: str,
         success: bool,
-        details: Optional[Dict] = None
+        details: dict | None = None
     ):
         """Log offensive/defensive tool execution."""
         self.log(
-            event_type=EventType.TOOL_EXECUTION.value,
+            event_type="unknown",
             user_id=user_id,
             action="execute",
             resource=tool_name,
@@ -413,22 +407,22 @@ class AuditLogger:
             success=success,
             severity="warning"  # Tool execution always noteworthy
         )
-    
+
     # ========================================================================
     # SECURITY EVENTS
     # ========================================================================
-    
+
     def log_security_event(
         self,
         event_type: str,
         severity: str,
-        details: Dict[str, Any],
-        user_id: Optional[int] = None,
-        ip_address: Optional[str] = None
+        details: dict[str, Any],
+        user_id: int | None = None,
+        ip_address: str | None = None
     ):
         """Log security event (alerts, incidents)."""
         self.log(
-            event_type=EventType.ALERT_TRIGGERED.value,
+            event_type="unknown",
             user_id=user_id,
             ip_address=ip_address,
             action=event_type,
@@ -437,24 +431,24 @@ class AuditLogger:
             success=None,
             severity=severity
         )
-    
+
     # ========================================================================
     # API EVENTS
     # ========================================================================
-    
+
     def log_api_call(
         self,
-        user_id: Optional[int],
+        user_id: int | None,
         endpoint: str,
         method: str,
         status_code: int,
-        ip_address: Optional[str] = None,
-        request_id: Optional[str] = None,
-        duration_ms: Optional[float] = None
+        ip_address: str | None = None,
+        request_id: str | None = None,
+        duration_ms: float | None = None
     ):
         """Log API call."""
         self.log(
-            event_type=EventType.API_CALL.value,
+            event_type="unknown",
             user_id=user_id,
             ip_address=ip_address,
             action=method,
@@ -464,7 +458,7 @@ class AuditLogger:
             severity="info",
             request_id=request_id
         )
-    
+
     def close(self):
         """Close database connection."""
         if self.db_connection:

@@ -33,9 +33,9 @@ def test_app_metadata():
 
 def test_cors_middleware():
     """Test CORS middleware is configured."""
-    # Check middleware is present
-    middleware_types = [type(m).__name__ for m in app.user_middleware]
-    assert "CORSMiddleware" in middleware_types
+    # Check middleware is present - FastAPI wraps it
+    middleware_stack = [mw.cls.__name__ for mw in app.user_middleware]
+    assert "CORSMiddleware" in middleware_stack
 
 
 def test_api_router_included():

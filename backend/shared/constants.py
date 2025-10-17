@@ -5,7 +5,7 @@ This module contains all system-wide constants used across the 67+ microservices
 Centralizing constants prevents magic strings/numbers and ensures consistency.
 
 Usage:
-    from backend.shared.constants import ServicePorts, APIEndpoints
+    from shared.constants import ServicePorts, APIEndpoints
 
     app = FastAPI()
     uvicorn.run(app, host="0.0.0.0", port=ServicePorts.MAXIMUS_CORE)

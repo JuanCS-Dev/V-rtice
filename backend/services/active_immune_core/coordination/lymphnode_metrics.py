@@ -35,7 +35,7 @@ Date: 2025-10-07
 import logging
 from typing import Any, Dict
 
-from coordination.thread_safe_structures import AtomicCounter
+from active_immune_core.coordination.thread_safe_structures import AtomicCounter
 
 logger = logging.getLogger(__name__)
 

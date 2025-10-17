@@ -1,9 +1,8 @@
 """Tests for vertice_api.factory module."""
 
 from fastapi.testclient import TestClient
-from vertice_core import BaseServiceSettings
-
 from vertice_api.factory import create_app
+from vertice_core import BaseServiceSettings
 
 
 class TestCreateApp:

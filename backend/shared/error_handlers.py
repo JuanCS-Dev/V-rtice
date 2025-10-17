@@ -27,7 +27,7 @@ Error Response Format:
 
 Usage:
     >>> from fastapi import FastAPI
-    >>> from backend.shared.error_handlers import register_error_handlers
+    >>> from shared.error_handlers import register_error_handlers
     >>>
     >>> app = FastAPI()
     >>> register_error_handlers(app)

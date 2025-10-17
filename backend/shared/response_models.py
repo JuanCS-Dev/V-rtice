@@ -20,7 +20,7 @@ Response Format Standards:
     List: {"success": true, "data": [...], "meta": {...}, "pagination": {...}}
 
 Usage:
-    >>> from backend.shared.response_models import SuccessResponse, ErrorResponse
+    >>> from shared.response_models import SuccessResponse, ErrorResponse
     >>> 
     >>> @app.get("/users/{id}")
     >>> async def get_user(id: int) -> SuccessResponse:
@@ -32,7 +32,7 @@ License: Proprietary
 """
 
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Literal
 
 from pydantic import BaseModel, Field
 
@@ -80,7 +80,7 @@ class SuccessResponse(BaseResponse, Generic[T]):
         meta: Optional metadata (processing time, version, etc.)
     """
 
-    success: bool = Field(default=True, const=True)
+    success: Literal[True] = Field(default=True, description="Always True for success responses")
     data: T = Field(..., description="Response payload")
     message: Optional[str] = Field(
         default=None, description="Human-readable success message"
@@ -103,7 +103,7 @@ class ListResponse(BaseResponse, Generic[T]):
         pagination: Pagination information (if applicable)
     """
 
-    success: bool = Field(default=True, const=True)
+    success: Literal[True] = Field(default=True, description="Always True for success responses")
     data: List[T] = Field(..., description="List of items")
     message: Optional[str] = Field(default=None)
     meta: Optional[Dict[str, Any]] = Field(default=None)
@@ -185,7 +185,7 @@ class DeletedResponse(BaseResponse):
     Typically returns no data, just success confirmation.
     """
 
-    success: bool = Field(default=True, const=True)
+    success: Literal[True] = Field(default=True, description="Always True for success responses")
     message: str = Field(default="Resource deleted successfully")
     meta: Optional[Dict[str, Any]] = Field(default=None)
 
@@ -222,7 +222,7 @@ class ErrorResponse(BaseResponse):
         errors: Optional list of multiple errors (e.g., validation)
     """
 
-    success: bool = Field(default=False, const=False)
+    success: Literal[False] = Field(default=False, description="Always False for error responses")
     error: ErrorDetail = Field(..., description="Primary error information")
     errors: Optional[List[ErrorDetail]] = Field(
         default=None, description="Additional errors (validation, etc.)"

@@ -16,7 +16,7 @@ Features:
 
 Usage:
     ```python
-    from backend.shared.base_config import BaseServiceConfig
+    from shared.base_config import BaseServiceConfig
     from pydantic import Field
     
     class MyServiceConfig(BaseServiceConfig):
