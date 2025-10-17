@@ -24,12 +24,12 @@ Access:
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from backend.shared.constants import ServicePorts
@@ -50,7 +50,7 @@ class ServiceInfo(BaseModel):
     docs_endpoint: str
     openapi_endpoint: str
     status: str = "unknown"
-    last_checked: Optional[datetime] = None
+    last_checked: datetime | None = None
 
 
 class ServiceHealth(BaseModel):
@@ -60,7 +60,7 @@ class ServiceHealth(BaseModel):
     status: str
     response_time_ms: float
     last_checked: datetime
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class AggregatedDocs(BaseModel):
@@ -69,7 +69,7 @@ class AggregatedDocs(BaseModel):
     total_services: int
     healthy_services: int
     total_endpoints: int
-    services: List[Dict[str, Any]]
+    services: list[dict[str, Any]]
     generated_at: datetime
 
 
@@ -77,7 +77,7 @@ class AggregatedDocs(BaseModel):
 # SERVICE REGISTRY
 # ============================================================================
 
-SERVICE_REGISTRY: List[ServiceInfo] = []
+SERVICE_REGISTRY: list[ServiceInfo] = []
 
 
 def register_services():
@@ -258,7 +258,7 @@ async def root():
     <body>
         <h1>🌐 Vértice Platform - API Documentation Portal</h1>
         <p>Unified documentation for all {len(SERVICE_REGISTRY)} microservices</p>
-        
+
         <div class="stats">
             <div class="stat">
                 <div class="stat-value">{len(SERVICE_REGISTRY)}</div>
@@ -273,12 +273,12 @@ async def root():
                 <div class="stat-label">Total Endpoints</div>
             </div>
         </div>
-        
+
         <h2>📚 Service Catalog</h2>
         <div class="service-grid" id="services">
             Loading services...
         </div>
-        
+
         <h2>🔗 Quick Links</h2>
         <ul>
             <li><a href="/docs">Interactive API Documentation (Swagger UI)</a></li>
@@ -286,7 +286,7 @@ async def root():
             <li><a href="/health/all">Health Status (JSON)</a></li>
             <li><a href="/docs/aggregated">Aggregated OpenAPI Spec</a></li>
         </ul>
-        
+
         <script>
             // Load services dynamically
             fetch('/services')
@@ -305,12 +305,12 @@ async def root():
                         </div>
                     `).join('');
                 }});
-            
+
             // Load health stats
             fetch('/health/all')
                 .then(r => r.json())
                 .then(data => {{
-                    document.getElementById('healthy-count').textContent = 
+                    document.getElementById('healthy-count').textContent =
                         data.filter(s => s.status === 'healthy').length;
                 }});
         </script>
@@ -320,13 +320,13 @@ async def root():
     return HTMLResponse(content=html_content)
 
 
-@app.get("/services", response_model=List[ServiceInfo], tags=["services"])
+@app.get("/services", response_model=list[ServiceInfo], tags=["services"])
 async def list_services():
     """List all registered services."""
     return SERVICE_REGISTRY
 
 
-@app.get("/health/all", response_model=List[ServiceHealth], tags=["health"])
+@app.get("/health/all", response_model=list[ServiceHealth], tags=["health"])
 async def check_all_health():
     """Check health status of all services."""
     results = []

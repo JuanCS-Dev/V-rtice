@@ -383,6 +383,8 @@ async def test_execute_network_layer_failure():
 @pytest.mark.asyncio
 async def test_cascade_terminate_with_failures():
     """Test cascade termination when sub-agent fails (branch 213->203)."""
+    from datetime import datetime
+
     publisher = Mock(spec=NATSPublisher)
     kill_switch = KillSwitch()
     audit_repo = AuditRepository()
@@ -409,9 +411,6 @@ async def test_cascade_terminate_with_failures():
         # Third call = child-2 (FAIL)
         # Fourth call = child-3 (success)
         if call_count["count"] == 3 and command.target_agents[0] == "child-2":
-            from datetime import datetime
-
-            from backend.services.command_bus_service.models import CommandReceipt
             return CommandReceipt(
                 command_id=command.id,
                 status="FAILED",

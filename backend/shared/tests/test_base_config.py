@@ -351,10 +351,29 @@ class TestBaseServiceConfigMethods:
 
     def test_model_dump_safe_none_values(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test model_dump_safe handles None values."""
+        # Clear .env loading to ensure clean state
         monkeypatch.setenv("SERVICE_NAME", "test-service")
         monkeypatch.setenv("SERVICE_PORT", "8000")
+        # Explicitly unset secrets
+        monkeypatch.delenv("POSTGRES_PASSWORD", raising=False)
+        monkeypatch.delenv("JWT_SECRET", raising=False)
+        monkeypatch.delenv("API_KEY", raising=False)
 
-        config = BaseServiceConfig()
+        # Create config with explicit env_file=None to avoid .env pollution
+        from pydantic_settings import SettingsConfigDict
+        
+        class TestConfig(BaseServiceConfig):
+            model_config = SettingsConfigDict(
+                env_file=None,
+                env_file_encoding="utf-8",
+                env_nested_delimiter="__",
+                case_sensitive=False,
+                extra="ignore",
+                validate_default=True,
+                validate_assignment=True,
+            )
+        
+        config = TestConfig()
         safe_dump = config.model_dump_safe()
 
         assert safe_dump["postgres_password"] is None
@@ -396,6 +415,9 @@ class TestBaseServiceConfigMethods:
         """Test validate_required_vars with multiple missing vars."""
         monkeypatch.setenv("SERVICE_NAME", "test-service")
         monkeypatch.setenv("SERVICE_PORT", "8000")
+        # Ensure required vars are NOT set
+        monkeypatch.delenv("API_KEY", raising=False)
+        monkeypatch.delenv("JWT_SECRET", raising=False)
 
         config = BaseServiceConfig()
 

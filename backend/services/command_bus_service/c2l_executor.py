@@ -152,7 +152,7 @@ class C2LCommandExecutor:
                 await self.kill_switch.graceful_shutdown(target_agent_id)
             elif layer == KillSwitchLayer.CONTAINER:
                 await self.kill_switch.force_kill(target_agent_id)
-            elif layer == KillSwitchLayer.NETWORK:
+            else:  # layer == KillSwitchLayer.NETWORK
                 await self.kill_switch.network_quarantine(target_agent_id)
 
             executed_layers.append(layer.value)
