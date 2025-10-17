@@ -5,15 +5,15 @@ from datetime import datetime
 from uuid import UUID
 
 import structlog
-from backend.services.command_bus_service.audit_repository import AuditLog, AuditRepository
-from backend.services.command_bus_service.kill_switch import KillSwitch
-from backend.services.command_bus_service.models import (
+from audit_repository import AuditLog, AuditRepository
+from kill_switch import KillSwitch
+from models import (
     C2LCommand,
     C2LCommandType,
     CommandReceipt,
     KillSwitchLayer,
 )
-from backend.services.command_bus_service.nats_publisher import NATSPublisher
+from nats_publisher import NATSPublisher
 
 logger = structlog.get_logger()
 

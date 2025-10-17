@@ -4,8 +4,8 @@ import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from backend.services.command_bus_service.main import app, lifespan
-from backend.services.command_bus_service.models import (
+from main import app, lifespan
+from models import (
     C2LCommand,
     C2LCommandType,
     CommandStatus,
@@ -25,8 +25,8 @@ def mock_nats_components():
     mock_subscriber.subscribe = AsyncMock(side_effect=asyncio.CancelledError())
 
     with (
-        patch("backend.services.command_bus_service.main.NATSPublisher", return_value=mock_publisher),
-        patch("backend.services.command_bus_service.main.NATSSubscriber", return_value=mock_subscriber),
+        patch("main.NATSPublisher", return_value=mock_publisher),
+        patch("main.NATSSubscriber", return_value=mock_subscriber),
     ):
         yield mock_publisher, mock_subscriber
 
@@ -107,11 +107,11 @@ async def test_lifespan_startup_shutdown():
     mock_kill_switch = Mock()
 
     with (
-        patch("backend.services.command_bus_service.main.NATSPublisher", return_value=mock_publisher),
-        patch("backend.services.command_bus_service.main.NATSSubscriber", return_value=mock_subscriber),
-        patch("backend.services.command_bus_service.main.C2LCommandExecutor", return_value=mock_executor),
-        patch("backend.services.command_bus_service.main.AuditRepository", return_value=mock_audit_repo),
-        patch("backend.services.command_bus_service.main.KillSwitch", return_value=mock_kill_switch),
+        patch("main.NATSPublisher", return_value=mock_publisher),
+        patch("main.NATSSubscriber", return_value=mock_subscriber),
+        patch("main.C2LCommandExecutor", return_value=mock_executor),
+        patch("main.AuditRepository", return_value=mock_audit_repo),
+        patch("main.KillSwitch", return_value=mock_kill_switch),
     ):
         # Create mock FastAPI instance
         mock_app = Mock()
@@ -143,11 +143,11 @@ async def test_lifespan_subscriber_task_cancellation():
     mock_subscriber.subscribe = long_subscribe
 
     with (
-        patch("backend.services.command_bus_service.main.NATSPublisher", return_value=mock_publisher),
-        patch("backend.services.command_bus_service.main.NATSSubscriber", return_value=mock_subscriber),
-        patch("backend.services.command_bus_service.main.C2LCommandExecutor"),
-        patch("backend.services.command_bus_service.main.AuditRepository"),
-        patch("backend.services.command_bus_service.main.KillSwitch"),
+        patch("main.NATSPublisher", return_value=mock_publisher),
+        patch("main.NATSSubscriber", return_value=mock_subscriber),
+        patch("main.C2LCommandExecutor"),
+        patch("main.AuditRepository"),
+        patch("main.KillSwitch"),
     ):
         mock_app = Mock()
 

@@ -1,7 +1,7 @@
 """Tests for Kill Switch."""
 
 import pytest
-from backend.services.command_bus_service.kill_switch import KillSwitch
+from kill_switch import KillSwitch
 
 
 @pytest.mark.asyncio

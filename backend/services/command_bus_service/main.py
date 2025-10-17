@@ -6,13 +6,13 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 import structlog
-from backend.services.command_bus_service import health_api
-from backend.services.command_bus_service.audit_repository import AuditRepository
-from backend.services.command_bus_service.c2l_executor import C2LCommandExecutor
-from backend.services.command_bus_service.config import settings
-from backend.services.command_bus_service.kill_switch import KillSwitch
-from backend.services.command_bus_service.nats_publisher import NATSPublisher
-from backend.services.command_bus_service.nats_subscriber import NATSSubscriber
+import health_api
+from audit_repository import AuditRepository
+from c2l_executor import C2LCommandExecutor
+from config import settings
+from kill_switch import KillSwitch
+from nats_publisher import NATSPublisher
+from nats_subscriber import NATSSubscriber
 from fastapi import FastAPI
 from prometheus_client import make_asgi_app
 

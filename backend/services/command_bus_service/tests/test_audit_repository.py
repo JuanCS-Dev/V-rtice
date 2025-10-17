@@ -3,7 +3,7 @@
 from uuid import uuid4
 
 import pytest
-from backend.services.command_bus_service.audit_repository import AuditLog, AuditRepository
+from audit_repository import AuditLog, AuditRepository
 
 
 @pytest.mark.asyncio

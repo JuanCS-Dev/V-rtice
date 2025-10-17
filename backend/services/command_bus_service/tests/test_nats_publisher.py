@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
 import pytest
-from backend.services.command_bus_service.models import C2LCommand, C2LCommandType, CommandReceipt
-from backend.services.command_bus_service.nats_publisher import NATSPublisher
+from models import C2LCommand, C2LCommandType, CommandReceipt
+from nats_publisher import NATSPublisher
 
 
 @pytest.mark.asyncio
@@ -149,7 +149,7 @@ async def test_connect():
     mock_nc.jetstream = Mock(return_value=mock_js)
     mock_nc.connect = AsyncMock()
 
-    with patch("backend.services.command_bus_service.nats_publisher.NATSClient", return_value=mock_nc):
+    with patch("nats_publisher.NATSClient", return_value=mock_nc):
         publisher = NATSPublisher()
         await publisher.connect()
 

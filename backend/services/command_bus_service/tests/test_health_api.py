@@ -1,7 +1,7 @@
 """Tests for health API."""
 
 import pytest
-from backend.services.command_bus_service.health_api import router
+from health_api import router
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

@@ -3,9 +3,9 @@
 import json
 
 import structlog
-from backend.services.command_bus_service.c2l_executor import C2LCommandExecutor
-from backend.services.command_bus_service.config import settings
-from backend.services.command_bus_service.models import C2LCommand
+from c2l_executor import C2LCommandExecutor
+from config import settings
+from models import C2LCommand
 from nats.aio.client import Client as NATSClient
 from nats.js import JetStreamContext
 from nats.js.api import AckPolicy, ConsumerConfig

@@ -1,6 +1,6 @@
 """Tests for config."""
 
-from backend.services.command_bus_service.config import settings
+from config import settings
 
 
 def test_config_settings() -> None:
