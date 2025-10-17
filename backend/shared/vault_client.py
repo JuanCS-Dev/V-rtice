@@ -144,6 +144,10 @@ class VaultClient:
 
     def _login_approle(self):
         """Authenticate using AppRole."""
+        if self.client is None:
+            logging.error("Cannot login: Vault client not initialized")
+            return
+
         try:
             response = self.client.auth.approle.login(
                 role_id=self.role_id,
@@ -242,8 +246,10 @@ class VaultClient:
 
                 # Return specific key or full dict
                 if key:
-                    return secret_data.get(key)
-                return secret_data
+                    result: str | dict[str, Any] | None = secret_data.get(key)
+                    return result
+                result_dict: dict[str, Any] = secret_data
+                return result_dict
 
             except (VaultError, InvalidPath) as e:
                 logging.warning(f"Failed to get secret from Vault ({path}): {e}")
@@ -334,7 +340,8 @@ class VaultClient:
                 path=path,
                 mount_point=VaultConfig.MOUNT_POINT
             )
-            return response['data']['keys']
+            keys: list[Any] = response['data']['keys']
+            return keys
 
         except Exception as e:
             logging.error(f"Failed to list secrets ({path}): {e}")
@@ -371,11 +378,13 @@ def get_api_key(service: str, fallback_env: str | None = None) -> str | None:
         API key string or None
     """
     client = get_vault_client()
-    return client.get_secret(
+    result = client.get_secret(
         f"api-keys/{service}",
         "api_key",
         fallback_env=fallback_env
     )
+    # get_secret with key param returns str | dict | None, but with key="api_key" returns str | None
+    return result if isinstance(result, str) or result is None else None
 
 
 def get_database_config(db: str = "postgres") -> dict[str, Any] | None:
@@ -389,17 +398,20 @@ def get_database_config(db: str = "postgres") -> dict[str, Any] | None:
         Database config dict or None
     """
     client = get_vault_client()
-    return client.get_secret(f"database/{db}")
+    result = client.get_secret(f"database/{db}")
+    # get_secret without key param returns dict | None
+    return result if isinstance(result, dict) or result is None else None
 
 
 def get_jwt_secret() -> str | None:
     """Get JWT secret key."""
     client = get_vault_client()
-    return client.get_secret(
+    result = client.get_secret(
         "app/jwt",
         "secret_key",
         fallback_env="JWT_SECRET_KEY"
     )
+    return result if isinstance(result, str) or result is None else None
 
 
 # ============================================================================

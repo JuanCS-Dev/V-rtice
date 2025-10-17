@@ -1006,6 +1006,27 @@ class TestVaultClient100PercentCoverage:
 
     @patch("backend.shared.vault_client.HVAC_AVAILABLE", True)
     @patch("backend.shared.vault_client.hvac")
+    def test_login_approle_with_none_client(self, mock_hvac_module, vault_config_mock):
+        """Test lines 148-149: _login_approle early return when client is None."""
+        from backend.shared.vault_client import VaultClient
+        
+        mock_client = Mock()
+        mock_hvac_module.Client.return_value = mock_client
+        
+        # Create vault client normally
+        vault = VaultClient(role_id="test-role", secret_id="test-secret")
+        
+        # Force client to None to trigger defensive branch
+        vault.client = None
+        
+        # Should log error and return early (not crash)
+        with patch("backend.shared.vault_client.logging") as mock_log:
+            vault._login_approle()
+            mock_log.error.assert_called_once()
+            assert "Cannot login" in str(mock_log.error.call_args)
+
+    @patch("backend.shared.vault_client.HVAC_AVAILABLE", True)
+    @patch("backend.shared.vault_client.hvac")
     def test_token_renewal_failure_logging(self, mock_hvac_module, vault_config_mock):
         """Test lines 176-177: Token renewal failure logging."""
         from backend.shared.vault_client import VaultClient
