@@ -1,6 +1,6 @@
 """Tests for NATS subscriber."""
 
-import json
+import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -102,20 +102,28 @@ async def test_subscribe_message_processing():
     mock_msg.data = command.model_dump_json().encode()
     mock_msg.ack = AsyncMock()
 
-    # Mock subscription with single message then stop
+    # Create async iterator mock
+    async def async_message_generator():  # noqa: ANN202
+        yield mock_msg
+
+    # Mock subscription with async iterator
     mock_subscription = AsyncMock()
-    mock_subscription.messages = [mock_msg]
+    mock_subscription.messages = async_message_generator()
 
     mock_js.subscribe = AsyncMock(return_value=mock_subscription)
     executor.execute = AsyncMock(return_value=receipt)
     executor.publisher = AsyncMock()
     executor.publisher.publish_confirmation = AsyncMock()
 
-    # Run subscribe with single message
+    # Run subscribe in background, cancel after processing
+    task = asyncio.create_task(subscriber.subscribe())
+    await asyncio.sleep(0.05)  # Let it process message
+    task.cancel()
+
     try:
-        await subscriber.subscribe()
-    except (StopAsyncIteration, AttributeError):
-        pass  # Expected when messages list ends
+        await task
+    except asyncio.CancelledError:
+        pass
 
     # Verify
     mock_js.subscribe.assert_called_once()
@@ -139,16 +147,24 @@ async def test_subscribe_message_processing_error():
     mock_msg.data = b"invalid json"
     mock_msg.nak = AsyncMock()
 
+    # Create async iterator mock
+    async def async_message_generator():  # noqa: ANN202
+        yield mock_msg
+
     # Mock subscription
     mock_subscription = AsyncMock()
-    mock_subscription.messages = [mock_msg]
+    mock_subscription.messages = async_message_generator()
 
     mock_js.subscribe = AsyncMock(return_value=mock_subscription)
 
-    # Run subscribe
+    # Run subscribe in background, cancel after processing
+    task = asyncio.create_task(subscriber.subscribe())
+    await asyncio.sleep(0.05)  # Let it process message
+    task.cancel()
+
     try:
-        await subscriber.subscribe()
-    except (StopAsyncIteration, AttributeError):
+        await task
+    except asyncio.CancelledError:
         pass
 
     # Verify error handling

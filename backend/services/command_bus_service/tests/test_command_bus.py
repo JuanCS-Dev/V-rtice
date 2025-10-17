@@ -14,25 +14,33 @@ from backend.services.command_bus_service.models import (
 )
 from fastapi.testclient import TestClient
 
-client = TestClient(app)
+client = TestClient(app, raise_server_exceptions=False)
 
 
 @pytest.fixture
-def test_client():
-    """Create test client with lifespan context."""
-    with TestClient(app) as client:
-        yield client
+def mock_nats_components():
+    """Mock NATS components for TestClient."""
+    mock_publisher = AsyncMock()
+    mock_subscriber = AsyncMock()
+    mock_subscriber.subscribe = AsyncMock(side_effect=asyncio.CancelledError())
+
+    with (
+        patch("backend.services.command_bus_service.main.NATSPublisher", return_value=mock_publisher),
+        patch("backend.services.command_bus_service.main.NATSSubscriber", return_value=mock_subscriber),
+    ):
+        yield mock_publisher, mock_subscriber
 
 
-def test_health_check(test_client: TestClient) -> None:
+def test_health_check(mock_nats_components) -> None:
     """Test health check endpoint."""
-    response = test_client.get("/health/")
-    assert response.status_code == 200
+    with TestClient(app) as client:
+        response = client.get("/health/")
+        assert response.status_code == 200
 
-    data = response.json()
-    assert data["status"] == "ok"
-    assert data["service"] == "command-bus-service"
-    assert data["version"] == "1.0.0"
+        data = response.json()
+        assert data["status"] == "ok"
+        assert data["service"] == "command-bus-service"
+        assert data["version"] == "1.0.0"
 
 
 def test_c2l_command_creation() -> None:

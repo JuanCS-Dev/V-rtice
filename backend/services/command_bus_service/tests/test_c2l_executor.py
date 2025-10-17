@@ -7,7 +7,7 @@ import pytest
 from backend.services.command_bus_service.audit_repository import AuditLog, AuditRepository
 from backend.services.command_bus_service.c2l_executor import C2LCommandExecutor
 from backend.services.command_bus_service.kill_switch import KillSwitch
-from backend.services.command_bus_service.models import C2LCommand, C2LCommandType
+from backend.services.command_bus_service.models import C2LCommand, C2LCommandType, CommandReceipt
 from backend.services.command_bus_service.nats_publisher import NATSPublisher
 
 
@@ -316,3 +316,121 @@ async def test_audit_get_all():
 
     all_logs = await audit_repo.get_all()
     assert len(all_logs) == 3
+
+
+@pytest.mark.asyncio
+async def test_execute_container_layer_failure():
+    """Test CONTAINER layer failure (branch 155->158)."""
+    publisher = Mock(spec=NATSPublisher)
+    kill_switch = Mock(spec=KillSwitch)
+    kill_switch.graceful_shutdown = AsyncMock()
+    kill_switch.force_kill = AsyncMock(side_effect=Exception("Container kill failed"))
+    kill_switch.network_quarantine = AsyncMock()
+    audit_repo = AuditRepository()
+
+    executor = C2LCommandExecutor(publisher, kill_switch, audit_repo)
+
+    command = C2LCommand(
+        id=uuid4(),
+        operator_id="test-operator",
+        command_type=C2LCommandType.TERMINATE,
+        target_agents=["agent-container-fail"],
+    )
+
+    result = await executor.execute(command)
+
+    assert result.status == "COMPLETED"
+    # All 3 layers attempted
+    assert audit_repo.count() == 3
+    logs = await audit_repo.get_by_command(command.id)
+    # Layer 2 (CONTAINER) should be failure
+    container_log = [log for log in logs if log.layer == "CONTAINER"][0]
+    assert container_log.success is False
+    assert "Container kill failed" in container_log.details["error"]
+
+
+@pytest.mark.asyncio
+async def test_execute_network_layer_failure():
+    """Test NETWORK layer failure (complete branch 155->158)."""
+    publisher = Mock(spec=NATSPublisher)
+    kill_switch = Mock(spec=KillSwitch)
+    kill_switch.graceful_shutdown = AsyncMock()
+    kill_switch.force_kill = AsyncMock()
+    kill_switch.network_quarantine = AsyncMock(side_effect=Exception("Network quarantine failed"))
+    audit_repo = AuditRepository()
+
+    executor = C2LCommandExecutor(publisher, kill_switch, audit_repo)
+
+    command = C2LCommand(
+        id=uuid4(),
+        operator_id="test-operator",
+        command_type=C2LCommandType.TERMINATE,
+        target_agents=["agent-network-fail"],
+    )
+
+    result = await executor.execute(command)
+
+    assert result.status == "COMPLETED"
+    # All 3 layers attempted
+    assert audit_repo.count() == 3
+    logs = await audit_repo.get_by_command(command.id)
+    # Layer 3 (NETWORK) should be failure
+    network_log = [log for log in logs if log.layer == "NETWORK"][0]
+    assert network_log.success is False
+    assert "Network quarantine failed" in network_log.details["error"]
+
+
+@pytest.mark.asyncio
+async def test_cascade_terminate_with_failures():
+    """Test cascade termination when sub-agent fails (branch 213->203)."""
+    publisher = Mock(spec=NATSPublisher)
+    kill_switch = KillSwitch()
+    audit_repo = AuditRepository()
+
+    executor = C2LCommandExecutor(publisher, kill_switch, audit_repo)
+
+    # Mock _get_sub_agents to return 3 sub-agents
+    async def mock_get_sub_agents(agent_id: str) -> list[str]:
+        if agent_id == "parent-agent":
+            return ["child-1", "child-2", "child-3"]
+        return []
+
+    executor._get_sub_agents = mock_get_sub_agents
+
+    # Mock execute to fail for child-2
+    original_execute = executor.execute
+
+    call_count = {"count": 0}
+
+    async def mock_execute(command: C2LCommand) -> CommandReceipt:
+        call_count["count"] += 1
+        # First call = parent (success)
+        # Second call = child-1 (success)
+        # Third call = child-2 (FAIL)
+        # Fourth call = child-3 (success)
+        if call_count["count"] == 3 and command.target_agents[0] == "child-2":
+            from datetime import datetime
+
+            from backend.services.command_bus_service.models import CommandReceipt
+            return CommandReceipt(
+                command_id=command.id,
+                status="FAILED",
+                message="Simulated failure",
+                timestamp=datetime.utcnow(),
+            )
+        return await original_execute(command)
+
+    executor.execute = mock_execute
+
+    command = C2LCommand(
+        id=uuid4(),
+        operator_id="test-operator",
+        command_type=C2LCommandType.TERMINATE,
+        target_agents=["parent-agent"],
+    )
+
+    result = await executor.execute(command)
+
+    assert result.status == "COMPLETED"
+    # Only 2 out of 3 cascade terminated (child-2 failed)
+    assert "Cascade: 2" in result.message
