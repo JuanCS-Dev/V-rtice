@@ -239,6 +239,16 @@
         "Coverage Metrics"
       ]
     },
+    "cockpit": {
+      "name": "SOVEREIGN COCKPIT",
+      "description": "Command & Control Intelligence Center",
+      "features": [
+        "Real-time Verdicts",
+        "Alliance Graph",
+        "C2L Commands",
+        "Kill Switch"
+      ]
+    },
     "osint": {
       "name": "OSINT",
       "description": "Open Source Intelligence",

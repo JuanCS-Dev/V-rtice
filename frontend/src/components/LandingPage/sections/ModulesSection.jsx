@@ -79,6 +79,17 @@ export const ModulesSection = ({ setCurrentView }) => {
       features: t('modules.purple.features', { returnObjects: true })
     },
     {
+      id: 'cockpit',
+      name: t('modules.cockpit.name', 'Cockpit Soberano'),
+      description: t('modules.cockpit.description', 'Centro de Comando & Controle de Inteligência'),
+      icon: '🎯',
+      color: 'red',
+      features: t('modules.cockpit.features', {
+        returnObjects: true,
+        defaultValue: ['Real-time Verdicts', 'Alliance Graph', 'C2L Commands', 'Kill Switch']
+      })
+    },
+    {
       id: 'osint',
       name: t('modules.osint.name'),
       description: t('modules.osint.description'),

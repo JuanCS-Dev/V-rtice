@@ -239,6 +239,16 @@
         "Métricas de Cobertura"
       ]
     },
+    "cockpit": {
+      "name": "COCKPIT SOBERANO",
+      "description": "Centro de Comando & Controle de Inteligência",
+      "features": [
+        "Real-time Verdicts",
+        "Alliance Graph",
+        "C2L Commands",
+        "Kill Switch"
+      ]
+    },
     "osint": {
       "name": "OSINT",
       "description": "Inteligência de Fontes Abertas",
