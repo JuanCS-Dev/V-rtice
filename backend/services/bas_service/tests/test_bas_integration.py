@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 os.environ["MAXIMUS_ENV"] = "test"
 os.environ["BAS_SAFE_MODE"] = "true"
 
-from services.bas_service.api import app
+from backend.services.bas_service.api import app
 
 
 @pytest.fixture

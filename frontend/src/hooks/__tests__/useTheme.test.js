@@ -13,98 +13,138 @@ describe('useTheme Hook', () => {
   beforeEach(() => {
     global.localStorage.clear();
     vi.clearAllMocks();
-    // Reset document classes
-    document.documentElement.className = '';
+    // Reset document attributes
+    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.removeAttribute('data-mode');
   });
 
-  it('should initialize with default dark theme', () => {
+  it('should initialize with default theme', () => {
     const { result } = renderHook(() => useTheme());
 
-    expect(result.current.theme).toBe('dark');
+    expect(result.current.theme).toBe('default');
+    expect(result.current.availableThemes).toHaveLength(7);
   });
 
   it('should initialize with theme from localStorage', () => {
-    localStorage.setItem('theme', JSON.stringify('light'));
+    localStorage.setItem('vertice-theme', 'cyber-blue');
 
     const { result } = renderHook(() => useTheme());
 
-    expect(result.current.theme).toBe('light');
+    expect(result.current.theme).toBe('cyber-blue');
   });
 
-  it('should toggle theme', () => {
+  it('should cycle through themes', () => {
     const { result } = renderHook(() => useTheme());
 
-    expect(result.current.theme).toBe('dark');
+    expect(result.current.theme).toBe('default');
 
     act(() => {
-      result.current.toggleTheme();
+      result.current.cycleTheme();
     });
 
-    expect(result.current.theme).toBe('light');
+    expect(result.current.theme).toBe('cyber-blue');
 
     act(() => {
-      result.current.toggleTheme();
+      result.current.cycleTheme();
     });
 
-    expect(result.current.theme).toBe('dark');
+    expect(result.current.theme).toBe('purple-haze');
   });
 
   it('should set specific theme', () => {
     const { result } = renderHook(() => useTheme());
 
     act(() => {
-      result.current.setTheme('light');
+      result.current.setTheme('windows11');
     });
 
-    expect(result.current.theme).toBe('light');
+    expect(result.current.theme).toBe('windows11');
 
     act(() => {
-      result.current.setTheme('dark');
+      result.current.setTheme('red-alert');
     });
 
-    expect(result.current.theme).toBe('dark');
+    expect(result.current.theme).toBe('red-alert');
   });
 
   it('should persist theme to localStorage', () => {
     const { result } = renderHook(() => useTheme());
 
     act(() => {
-      result.current.setTheme('light');
+      result.current.setTheme('amber-alert');
     });
 
-    expect(localStorage.getItem('theme')).toBe(JSON.stringify('light'));
+    expect(localStorage.getItem('vertice-theme')).toBe('amber-alert');
   });
 
-  it('should apply theme class to document', () => {
+  it('should apply theme attribute to document', () => {
     const { result } = renderHook(() => useTheme());
 
     act(() => {
-      result.current.setTheme('light');
+      result.current.setTheme('stealth-mode');
     });
 
-    expect(document.documentElement.classList.contains('light')).toBe(true);
-    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(document.documentElement.getAttribute('data-theme')).toBe('stealth-mode');
 
     act(() => {
-      result.current.setTheme('dark');
+      result.current.setTheme('purple-haze');
     });
 
-    expect(document.documentElement.classList.contains('dark')).toBe(true);
-    expect(document.documentElement.classList.contains('light')).toBe(false);
+    expect(document.documentElement.getAttribute('data-theme')).toBe('purple-haze');
   });
 
-  it('should detect system preference if not set', () => {
-    // Mock matchMedia
-    global.matchMedia = vi.fn().mockImplementation((query) => ({
-      matches: query === '(prefers-color-scheme: light)',
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }));
-
+  it('should return current theme info', () => {
     const { result } = renderHook(() => useTheme());
 
-    // Should use system preference (light in this mock)
-    expect(result.current.theme).toBe('light');
+    act(() => {
+      result.current.setTheme('cyber-blue');
+    });
+
+    expect(result.current.currentThemeInfo.id).toBe('cyber-blue');
+    expect(result.current.currentThemeInfo.name).toBe('Cyber Blue');
+    expect(result.current.currentThemeInfo.preview).toBeDefined();
+  });
+
+  it('should not set invalid theme', () => {
+    const { result } = renderHook(() => useTheme());
+
+    const initialTheme = result.current.theme;
+
+    act(() => {
+      result.current.setTheme('invalid-theme');
+    });
+
+    // Theme should not change
+    expect(result.current.theme).toBe(initialTheme);
+  });
+
+  it('should handle mode for windows11 theme', () => {
+    const { result } = renderHook(() => useTheme());
+
+    act(() => {
+      result.current.setTheme('windows11');
+      result.current.setMode('dark');
+    });
+
+    expect(result.current.mode).toBe('dark');
+    expect(document.documentElement.getAttribute('data-mode')).toBe('dark');
+  });
+
+  it('should toggle mode', () => {
+    const { result } = renderHook(() => useTheme());
+
+    expect(result.current.mode).toBe('light');
+
+    act(() => {
+      result.current.toggleMode();
+    });
+
+    expect(result.current.mode).toBe('dark');
+
+    act(() => {
+      result.current.toggleMode();
+    });
+
+    expect(result.current.mode).toBe('light');
   });
 });

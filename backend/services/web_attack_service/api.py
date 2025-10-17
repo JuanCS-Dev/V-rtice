@@ -22,11 +22,11 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from services.web_attack_service.ai_copilot import AICoPilot
-from services.web_attack_service.burp_wrapper import BurpSuiteWrapper
-from services.web_attack_service.config import get_settings
-from services.web_attack_service.models import *
-from services.web_attack_service.zap_wrapper import ZAPWrapper
+from backend.services.web_attack_service.ai_copilot import AICoPilot
+from backend.services.web_attack_service.burp_wrapper import BurpSuiteWrapper
+from backend.services.web_attack_service.config import get_settings
+from backend.services.web_attack_service.models import *
+from backend.services.web_attack_service.zap_wrapper import ZAPWrapper
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

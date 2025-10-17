@@ -18,7 +18,7 @@ from typing import Dict, List, Optional
 
 from zapv2 import ZAPv2
 
-from services.web_attack_service.models import ScanType, Severity, ZAPAlert, ZAPScanRequest, ZAPScanResult
+from backend.services.web_attack_service.models import ScanType, Severity, ZAPAlert, ZAPScanRequest, ZAPScanResult
 
 logger = logging.getLogger(__name__)
 

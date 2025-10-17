@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from services.ethical_audit_service.models import (
+from backend.services.ethical_audit_service.models import (
     ComplianceResult,
     DecisionType,
     FinalDecision,

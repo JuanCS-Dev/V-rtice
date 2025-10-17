@@ -4,8 +4,8 @@ import json
 
 import structlog
 from c2l_executor import C2LCommandExecutor
-from services.command_bus_service.config import settings
-from services.command_bus_service.models import C2LCommand
+from backend.services.command_bus_service.config import settings
+from backend.services.command_bus_service.models import C2LCommand
 from nats.aio.client import Client as NATSClient
 from nats.js import JetStreamContext
 from nats.js.api import AckPolicy, ConsumerConfig

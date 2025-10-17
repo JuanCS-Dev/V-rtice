@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * THREAT PREDICTION WIDGET - FASE 8 Enhanced Cognition
  * ═══════════════════════════════════════════════════════════════════════════
@@ -12,6 +11,7 @@ import logger from '@/utils/logger';
 
 import React, { useState } from 'react';
 import { predictThreats } from '../../../api/maximusAI';
+import logger from '@/utils/logger';
 import './ThreatPredictionWidget.css';
 
 export const ThreatPredictionWidget = () => {
@@ -87,37 +87,49 @@ export const ThreatPredictionWidget = () => {
           <div className="result-section">
             <h4>Predicted Threats</h4>
             <div className="threat-list">
-              {predictions.predicted_attacks?.map((attack, idx) => (
-                <div key={idx} className="threat-item">
-                  <span className="threat-type">{attack.type || 'Unknown'}</span>
-                  <span className="confidence">
-                    {Math.round((attack.confidence || 0) * 100)}%
-                  </span>
-                </div>
-              )) || <p className="no-data">No threats predicted</p>}
+              {predictions.predicted_attacks?.length > 0 ? (
+                predictions.predicted_attacks.map((attack, idx) => (
+                  <div key={idx} className="threat-item">
+                    <span className="threat-type">{attack.type || 'Unknown'}</span>
+                    <span className="confidence">
+                      {Math.round((attack.confidence || 0) * 100)}%
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="no-data">No threats predicted</p>
+              )}
             </div>
           </div>
 
           <div className="result-section">
             <h4>Vulnerability Forecast</h4>
             <div className="vuln-list">
-              {predictions.vuln_forecast?.map((vuln, idx) => (
-                <div key={idx} className="vuln-item">
-                  <span className="vuln-id">{vuln.cve || 'N/A'}</span>
-                  <span className="exploit-prob">
-                    {Math.round((vuln.exploit_probability || 0) * 100)}%
-                  </span>
-                </div>
-              )) || <p className="no-data">No vulnerabilities forecasted</p>}
+              {predictions.vuln_forecast?.length > 0 ? (
+                predictions.vuln_forecast.map((vuln, idx) => (
+                  <div key={idx} className="vuln-item">
+                    <span className="vuln-id">{vuln.cve || 'N/A'}</span>
+                    <span className="exploit-prob">
+                      {Math.round((vuln.exploit_probability || 0) * 100)}%
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="no-data">No vulnerabilities forecasted</p>
+              )}
             </div>
           </div>
 
           <div className="result-section">
             <h4>Hunting Recommendations</h4>
             <ul className="recommendations">
-              {predictions.hunting_recommendations?.map((rec, idx) => (
-                <li key={idx}>{rec}</li>
-              )) || <li className="no-data">No recommendations</li>}
+              {predictions.hunting_recommendations?.length > 0 ? (
+                predictions.hunting_recommendations.map((rec, idx) => (
+                  <li key={idx}>{rec}</li>
+                ))
+              ) : (
+                <li className="no-data">No recommendations</li>
+              )}
             </ul>
           </div>
         </div>

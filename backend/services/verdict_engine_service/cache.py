@@ -12,8 +12,8 @@ from uuid import UUID
 
 import redis.asyncio as redis
 
-from services.verdict_engine_service.config import settings
-from services.verdict_engine_service.models import Verdict, VerdictStats
+from backend.services.verdict_engine_service.config import settings
+from backend.services.verdict_engine_service.models import Verdict, VerdictStats
 
 
 class VerdictCache:

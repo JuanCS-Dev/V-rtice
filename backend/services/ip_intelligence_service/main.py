@@ -19,9 +19,9 @@ from typing import Dict
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from services.ip_intelligence_service.config import get_settings
-from services.ip_intelligence_service.database import get_ip_data, update_ip_data
-from services.ip_intelligence_service.models import IPInfo, IPQuery
+from backend.services.ip_intelligence_service.config import get_settings
+from backend.services.ip_intelligence_service.database import get_ip_data, update_ip_data
+from backend.services.ip_intelligence_service.models import IPInfo, IPQuery
 
 app = FastAPI(title="Maximus IP Intelligence Service", version="1.0.0")
 

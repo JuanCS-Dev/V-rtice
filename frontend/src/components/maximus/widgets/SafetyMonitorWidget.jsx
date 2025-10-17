@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * SAFETY MONITOR WIDGET - Consciousness Safety Protocol Dashboard
  * ═══════════════════════════════════════════════════════════════════════════
@@ -17,6 +16,7 @@ import logger from '@/utils/logger';
  * Version: 1.0.0 - FASE VII Week 9-10
  */
 
+import logger from '@/utils/logger';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 import {

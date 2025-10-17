@@ -1,11 +1,13 @@
 /**
-import logger from '@/utils/logger';
  * Vitest Setup File
  *
  * Global test configuration and mocks
  */
 
-import { expect, afterEach, vi } from 'vitest';
+// Ensure NODE_ENV is set to test
+process.env.NODE_ENV = 'test';
+
+import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -80,6 +82,19 @@ global.WebSocket = class WebSocket {
 
 // Mock fetch globally
 global.fetch = vi.fn();
+
+// Mock logger globally
+vi.mock('@/utils/logger', () => ({
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    group: vi.fn(),
+    table: vi.fn(),
+    setLevel: vi.fn()
+  }
+}));
 
 // Console spy setup (to catch errors in tests)
 const originalError = console.error;

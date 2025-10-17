@@ -43,10 +43,10 @@ from messaging.consumer import (
     HITLNotificationConsumer,
     HITLDecisionConsumer,
 )
-from services.adaptive_immune_system.models.apv import APVDispatchMessage
-from services.adaptive_immune_system.models.remedy import RemedyStatusMessage
-from services.adaptive_immune_system.models.wargame import WargameReportMessage
-from services.adaptive_immune_system.models.hitl import HITLNotificationMessage, HITLDecisionMessage
+from backend.services.adaptive_immune_system.models.apv import APVDispatchMessage
+from backend.services.adaptive_immune_system.models.remedy import RemedyStatusMessage
+from backend.services.adaptive_immune_system.models.wargame import WargameReportMessage
+from backend.services.adaptive_immune_system.models.hitl import HITLNotificationMessage, HITLDecisionMessage
 
 
 class MessageTracker:

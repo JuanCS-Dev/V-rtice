@@ -27,7 +27,7 @@ service_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(service_root))
 
 from kafka_integration.apv_publisher import APVPublisher
-from services.maximus_oraculo.models.apv import APV, AffectedPackage
+from backend.services.maximus_oraculo.models.apv import APV, AffectedPackage
 
 
 class TestAPVPublisher:

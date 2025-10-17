@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * MEMORY CONSOLIDATION WIDGET - Hippocampal Replay Engine
  * ═══════════════════════════════════════════════════════════════════════════
@@ -11,6 +10,7 @@ import logger from '@/utils/logger';
  * - Consolidation Statistics
  */
 
+import logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import './MemoryConsolidationWidget.css';
 

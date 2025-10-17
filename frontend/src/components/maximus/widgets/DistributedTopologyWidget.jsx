@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * DISTRIBUTED TOPOLOGY WIDGET - FASE 10 Distributed Organism
  * ═══════════════════════════════════════════════════════════════════════════
@@ -11,6 +10,7 @@ import logger from '@/utils/logger';
  * - Load Distribution
  */
 
+import logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import { getGlobalMetrics, getTopology } from '../../../api/maximusAI';
 import './DistributedTopologyWidget.css';
@@ -132,32 +132,36 @@ export const DistributedTopologyWidget = () => {
               </div>
 
               <div className="agents-grid">
-                {topology.agents?.map((agent, idx) => (
-                  <div key={idx} className="agent-card">
-                    <div className="agent-header">
-                      <span className="agent-id">{agent.id || `agent-${idx}`}</span>
-                      <span
-                        className={`health-indicator ${getHealthClass(agent.health)}`}
-                      />
+                {topology.agents?.length > 0 ? (
+                  topology.agents.map((agent, idx) => (
+                    <div key={idx} className="agent-card">
+                      <div className="agent-header">
+                        <span className="agent-id">{agent.id || `agent-${idx}`}</span>
+                        <span
+                          className={`health-indicator ${getHealthClass(agent.health)}`}
+                        />
+                      </div>
+                      <div className="agent-info">
+                        <div className="info-row">
+                          <span className="info-label">Location:</span>
+                          <span className="info-value">{agent.location || 'Unknown'}</span>
+                        </div>
+                        <div className="info-row">
+                          <span className="info-label">Buffer:</span>
+                          <span className="info-value">
+                            {agent.buffer_utilization || 0}%
+                          </span>
+                        </div>
+                        <div className="info-row">
+                          <span className="info-label">Events/s:</span>
+                          <span className="info-value">{agent.events_per_second || 0}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="agent-info">
-                      <div className="info-row">
-                        <span className="info-label">Location:</span>
-                        <span className="info-value">{agent.location || 'Unknown'}</span>
-                      </div>
-                      <div className="info-row">
-                        <span className="info-label">Buffer:</span>
-                        <span className="info-value">
-                          {agent.buffer_utilization || 0}%
-                        </span>
-                      </div>
-                      <div className="info-row">
-                        <span className="info-label">Events/s:</span>
-                        <span className="info-value">{agent.events_per_second || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                )) || <p className="no-agents">No agents available</p>}
+                  ))
+                ) : (
+                  <p className="no-agents">No agents available</p>
+                )}
               </div>
             </>
           )}

@@ -7,11 +7,11 @@ from uuid import uuid4
 import pytest
 import pytest_asyncio
 
-from services.verdict_engine_service.cache import VerdictCache
-from services.verdict_engine_service.config import Settings
-from services.verdict_engine_service.models import Verdict, VerdictStats
-from services.verdict_engine_service.verdict_repository import VerdictRepository
-from services.verdict_engine_service.websocket_manager import ConnectionManager
+from backend.services.verdict_engine_service.cache import VerdictCache
+from backend.services.verdict_engine_service.config import Settings
+from backend.services.verdict_engine_service.models import Verdict, VerdictStats
+from backend.services.verdict_engine_service.verdict_repository import VerdictRepository
+from backend.services.verdict_engine_service.websocket_manager import ConnectionManager
 
 
 @pytest.fixture

@@ -19,7 +19,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from services.hcl_kb_service.models import HCLDataEntry, HCLDataType
+from backend.services.hcl_kb_service.models import HCLDataEntry, HCLDataType
 
 app = FastAPI(title="Maximus HCL Knowledge Base Service", version="1.0.0")
 

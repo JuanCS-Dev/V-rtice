@@ -19,8 +19,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from services.social_eng_service.database import Base, get_db
-from services.social_eng_service.main import app
+from backend.services.social_eng_service.database import Base, get_db
+from backend.services.social_eng_service.main import app
 
 # Use an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"

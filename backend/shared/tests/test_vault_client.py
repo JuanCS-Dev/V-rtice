@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from shared.vault_client import (
+from backend.shared.vault_client import (
     VaultClient,
     VaultConfig,
     get_api_key,
@@ -40,24 +40,24 @@ class TestVaultConfig:
         # Force re-import to pick up new env vars
         import importlib
 
-        import shared.vault_client
-        importlib.reload(shared.vault_client)
+        import backend.shared.vault_client
+        importlib.reload(backend.shared.vault_client)
 
-        assert shared.vault_client.VaultConfig.ADDR == "https://vault.example.com"
+        assert backend.shared.vault_client.VaultConfig.ADDR == "https://vault.example.com"
 
 
 class TestVaultClientInitialization:
     """Test VaultClient initialization."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', False)
     def test_init_without_hvac(self):
         """Test initialization when hvac library not available."""
         client = VaultClient(addr="http://custom:8200")
         assert client.client is None
         assert client.addr == "http://custom:8200"
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_init_with_token(self, mock_hvac):
         """Test initialization with direct token."""
         mock_hvac_client = MagicMock()
@@ -69,8 +69,8 @@ class TestVaultClientInitialization:
         # Token set successfully
         assert client.client is not None
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_init_with_approle(self, mock_hvac):
         """Test initialization with AppRole credentials."""
         mock_hvac_client = MagicMock()
@@ -94,8 +94,8 @@ class TestVaultClientInitialization:
         assert client.secret_id == "test-secret"
         mock_hvac_client.auth.approle.login.assert_called_once()
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_init_without_credentials(self, mock_hvac):
         """Test initialization without any credentials (explicit params)."""
         mock_hvac_client = MagicMock()
@@ -106,8 +106,8 @@ class TestVaultClientInitialization:
 
         assert client.client is not None
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_init_approle_failure_fail_open(self, mock_hvac):
         """Test AppRole login failure with fail_open=True."""
         mock_hvac_client = MagicMock()
@@ -118,9 +118,9 @@ class TestVaultClientInitialization:
         client = VaultClient(role_id="test-role", secret_id="test-secret")
         assert client is not None
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
-    @patch('shared.vault_client.VaultConfig.FAIL_OPEN', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.VaultConfig.FAIL_OPEN', False)
     def test_init_failure_no_fail_open(self, mock_hvac):
         """Test initialization failure with fail_open=False."""
         mock_hvac.Client.side_effect = Exception("Connection failed")
@@ -132,8 +132,8 @@ class TestVaultClientInitialization:
 class TestVaultClientCaching:
     """Test secret caching functionality."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_cache_store_and_retrieve(self, mock_hvac):
         """Test storing and retrieving from cache."""
         client = VaultClient(token="test-token")
@@ -144,8 +144,8 @@ class TestVaultClientCaching:
         cached = client._get_from_cache("test/path")
         assert cached == test_data
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_cache_expiry(self, mock_hvac):
         """Test cache expiration."""
         client = VaultClient(token="test-token")
@@ -159,8 +159,8 @@ class TestVaultClientCaching:
         cached = client._get_from_cache("test/path")
         assert cached is None
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_cache_miss(self, mock_hvac):
         """Test cache miss."""
         client = VaultClient(token="test-token")
@@ -172,8 +172,8 @@ class TestVaultClientCaching:
 class TestVaultClientGetSecret:
     """Test secret retrieval functionality."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_success(self, mock_hvac):
         """Test successful secret retrieval."""
         mock_hvac_client = MagicMock()
@@ -193,8 +193,8 @@ class TestVaultClientGetSecret:
 
         assert result == 'secret-key-123'
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_full_dict(self, mock_hvac):
         """Test retrieving full secret dictionary."""
         mock_hvac_client = MagicMock()
@@ -210,8 +210,8 @@ class TestVaultClientGetSecret:
 
         assert result == secret_data
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_from_cache(self, mock_hvac):
         """Test retrieving secret from cache."""
         mock_hvac_client = MagicMock()
@@ -229,8 +229,8 @@ class TestVaultClientGetSecret:
         assert result == 'cached-key'
         mock_hvac_client.secrets.kv.v2.read_secret_version.assert_not_called()
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_bypass_cache(self, mock_hvac):
         """Test bypassing cache."""
         mock_hvac_client = MagicMock()
@@ -250,9 +250,9 @@ class TestVaultClientGetSecret:
 
         assert result == 'fresh-key'
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
-    @patch('shared.vault_client.InvalidPath', Exception)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.InvalidPath', Exception)
     def test_get_secret_not_found_with_fallback(self, mock_hvac, monkeypatch):
         """Test secret not found with env fallback."""
         mock_hvac_client = MagicMock()
@@ -269,8 +269,8 @@ class TestVaultClientGetSecret:
 
         assert result == "env-fallback-value"
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_vault_error_fallback(self, mock_hvac, monkeypatch):
         """Test VaultError exception with fallback."""
         mock_hvac_client = MagicMock()
@@ -286,8 +286,8 @@ class TestVaultClientGetSecret:
 
         assert result == "vault-error-fallback"
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_unexpected_error(self, mock_hvac):
         """Test unexpected error during secret retrieval."""
         mock_hvac_client = MagicMock()
@@ -299,8 +299,8 @@ class TestVaultClientGetSecret:
 
         assert result is None
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_not_found_no_fallback(self, mock_hvac):
         """Test secret not found without fallback."""
         mock_hvac_client = MagicMock()
@@ -312,7 +312,7 @@ class TestVaultClientGetSecret:
 
         assert result is None
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', False)
     def test_get_secret_no_hvac_with_fallback(self, monkeypatch):
         """Test secret retrieval without hvac, using env fallback."""
         monkeypatch.setenv("FALLBACK_KEY", "env-value")
@@ -322,7 +322,7 @@ class TestVaultClientGetSecret:
 
         assert result == "env-value"
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', False)
     def test_get_secret_no_hvac_no_fallback(self):
         """Test secret retrieval without hvac and no fallback."""
         client = VaultClient()
@@ -334,8 +334,8 @@ class TestVaultClientGetSecret:
 class TestVaultClientTokenRenewal:
     """Test token renewal functionality."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_renew_token_if_needed_not_needed(self, mock_hvac):
         """Test token renewal when not needed."""
         mock_hvac_client = MagicMock()
@@ -347,8 +347,8 @@ class TestVaultClientTokenRenewal:
         # Should not renew
         client._renew_token_if_needed()
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_renew_token_if_needed_required(self, mock_hvac):
         """Test token renewal when required."""
         mock_hvac_client = MagicMock()
@@ -367,8 +367,8 @@ class TestVaultClientTokenRenewal:
 
         client._renew_token_if_needed()
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_renew_token_failure(self, mock_hvac):
         """Test token renewal failure handling."""
         mock_hvac_client = MagicMock()
@@ -382,8 +382,8 @@ class TestVaultClientTokenRenewal:
         # Should not raise
         client._renew_token_if_needed()
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_renew_token_no_client(self, mock_hvac):
         """Test renewal with no client."""
         client = VaultClient()
@@ -396,8 +396,8 @@ class TestVaultClientTokenRenewal:
 class TestVaultClientSetSecret:
     """Test secret storage functionality."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_set_secret_success(self, mock_hvac):
         """Test successful secret storage."""
         mock_hvac_client = MagicMock()
@@ -409,8 +409,8 @@ class TestVaultClientSetSecret:
         assert result is True
         mock_hvac_client.secrets.kv.v2.create_or_update_secret.assert_called_once()
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_set_secret_invalidates_cache(self, mock_hvac):
         """Test that set_secret invalidates cache."""
         mock_hvac_client = MagicMock()
@@ -426,8 +426,8 @@ class TestVaultClientSetSecret:
 
         assert "test/path" not in client._cache
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_set_secret_failure(self, mock_hvac):
         """Test secret storage failure."""
         mock_hvac_client = MagicMock()
@@ -439,7 +439,7 @@ class TestVaultClientSetSecret:
 
         assert result is False
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', False)
     def test_set_secret_no_client(self):
         """Test set_secret without client."""
         client = VaultClient()
@@ -451,8 +451,8 @@ class TestVaultClientSetSecret:
 class TestVaultClientDeleteSecret:
     """Test secret deletion functionality."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_delete_secret_success(self, mock_hvac):
         """Test successful secret deletion."""
         mock_hvac_client = MagicMock()
@@ -464,8 +464,8 @@ class TestVaultClientDeleteSecret:
         assert result is True
         mock_hvac_client.secrets.kv.v2.delete_latest_version_of_secret.assert_called_once()
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_delete_secret_invalidates_cache(self, mock_hvac):
         """Test that delete_secret invalidates cache."""
         mock_hvac_client = MagicMock()
@@ -481,8 +481,8 @@ class TestVaultClientDeleteSecret:
 
         assert "test/path" not in client._cache
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_delete_secret_failure(self, mock_hvac):
         """Test secret deletion failure."""
         mock_hvac_client = MagicMock()
@@ -494,7 +494,7 @@ class TestVaultClientDeleteSecret:
 
         assert result is False
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', False)
     def test_delete_secret_no_client(self):
         """Test delete_secret without client."""
         client = VaultClient()
@@ -506,8 +506,8 @@ class TestVaultClientDeleteSecret:
 class TestVaultClientListSecrets:
     """Test secret listing functionality."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_list_secrets_success(self, mock_hvac):
         """Test successful secret listing."""
         mock_hvac_client = MagicMock()
@@ -522,8 +522,8 @@ class TestVaultClientListSecrets:
 
         assert result == ['secret1', 'secret2', 'secret3']
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_list_secrets_failure(self, mock_hvac):
         """Test secret listing failure."""
         mock_hvac_client = MagicMock()
@@ -535,7 +535,7 @@ class TestVaultClientListSecrets:
 
         assert result == []
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', False)
     def test_list_secrets_no_client(self):
         """Test list_secrets without client."""
         client = VaultClient()
@@ -549,8 +549,8 @@ class TestGlobalVaultClient:
 
     def test_get_vault_client_singleton(self):
         """Test global client is singleton."""
-        import shared.vault_client
-        shared.vault_client._global_vault_client = None
+        import backend.shared.vault_client
+        backend.shared.vault_client._global_vault_client = None
 
         client1 = get_vault_client()
         client2 = get_vault_client()
@@ -561,7 +561,7 @@ class TestGlobalVaultClient:
 class TestConvenienceFunctions:
     """Test convenience wrapper functions."""
 
-    @patch('shared.vault_client.get_vault_client')
+    @patch('backend.shared.vault_client.get_vault_client')
     def test_get_api_key(self, mock_get_client):
         """Test get_api_key convenience function."""
         mock_client = MagicMock()
@@ -577,7 +577,7 @@ class TestConvenienceFunctions:
             fallback_env="VT_API_KEY"
         )
 
-    @patch('shared.vault_client.get_vault_client')
+    @patch('backend.shared.vault_client.get_vault_client')
     def test_get_database_config(self, mock_get_client):
         """Test get_database_config convenience function."""
         mock_client = MagicMock()
@@ -589,7 +589,7 @@ class TestConvenienceFunctions:
         assert result == {"host": "localhost", "port": "5432"}
         mock_client.get_secret.assert_called_once_with("database/postgres")
 
-    @patch('shared.vault_client.get_vault_client')
+    @patch('backend.shared.vault_client.get_vault_client')
     def test_get_jwt_secret(self, mock_get_client):
         """Test get_jwt_secret convenience function."""
         mock_client = MagicMock()
@@ -614,7 +614,7 @@ class TestConvenienceFunctions:
 class TestCoverageCompleteness:
     """Tests targeting uncovered lines for 100% coverage."""
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', False)
     def test_import_error_branch_no_hvac(self):
         """Test ImportError branch when hvac not available (lines 56-60)."""
         # When HVAC_AVAILABLE is False, exception classes default to Exception
@@ -622,11 +622,11 @@ class TestCoverageCompleteness:
         assert client.client is None
         # This covers the except ImportError block
 
-    @patch('shared.vault_client.VaultConfig.ROLE_ID', None)
-    @patch('shared.vault_client.VaultConfig.SECRET_ID', None)
-    @patch('shared.vault_client.VaultConfig.TOKEN', None)
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.VaultConfig.ROLE_ID', None)
+    @patch('backend.shared.vault_client.VaultConfig.SECRET_ID', None)
+    @patch('backend.shared.vault_client.VaultConfig.TOKEN', None)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_init_with_token_sets_expiry(self, mock_hvac):
         """Test token initialization sets expiry (lines 135-136)."""
         mock_hvac_client = MagicMock()
@@ -644,8 +644,8 @@ class TestCoverageCompleteness:
         assert client.token_expiry is not None
         assert before <= client.token_expiry <= after
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_init_no_credentials_warning(self, mock_hvac, caplog):
         """Test warning when no credentials provided (line 138)."""
         import logging
@@ -665,9 +665,9 @@ class TestCoverageCompleteness:
         )
         assert warning_found or client.client is not None  # Either warns or succeeds
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
-    @patch('shared.vault_client.VaultConfig.FAIL_OPEN', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.VaultConfig.FAIL_OPEN', False)
     def test_init_failure_raises_when_not_fail_open(self, mock_hvac):
         """Test init raises exception when FAIL_OPEN=False (line 142->exit)."""
         mock_hvac.Client.side_effect = Exception("Connection error")
@@ -676,8 +676,8 @@ class TestCoverageCompleteness:
             VaultClient(addr="http://test:8200", token="test-token")
         # This covers line 142->exit (raise branch)
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_login_approle_no_client_early_return(self, mock_hvac):
         """Test _login_approle returns early when no client (lines 148-149)."""
         client = VaultClient(addr="http://test:8200")
@@ -690,9 +690,9 @@ class TestCoverageCompleteness:
         # Should return early without attempting login
         # This covers lines 148-149
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
-    @patch('shared.vault_client.VaultConfig.FAIL_OPEN', False)
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.VaultConfig.FAIL_OPEN', False)
     def test_login_approle_failure_raises(self, mock_hvac):
         """Test AppRole login raises when FAIL_OPEN=False (line 167)."""
         mock_hvac_client = MagicMock()
@@ -707,8 +707,8 @@ class TestCoverageCompleteness:
             )
         # This covers line 167 (raise in _login_approle)
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_renew_token_exception_handling(self, mock_hvac, caplog):
         """Test token renewal exception handling (lines 179-180)."""
         mock_hvac_client = MagicMock()
@@ -741,8 +741,8 @@ class TestCoverageCompleteness:
         assert any("authentication failed" in record.message.lower() for record in caplog.records)
         # This covers lines 179-180
 
-    @patch('shared.vault_client.HVAC_AVAILABLE', True)
-    @patch('shared.vault_client.hvac')
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
     def test_get_secret_returns_full_dict_without_key(self, mock_hvac):
         """Test get_secret returns full dict when key not specified (line 228)."""
         mock_hvac_client = MagicMock()
@@ -770,3 +770,78 @@ class TestCoverageCompleteness:
         # Should return None because env var is empty
         assert result is None
         # This covers branch 263->268 (env_value is falsy)
+
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
+    def test_get_secret_from_cache_with_key(self, mock_hvac):
+        """Test cache return with specific key (line 228)."""
+        mock_hvac_client = MagicMock()
+        mock_hvac.Client.return_value = mock_hvac_client
+        
+        # Mock successful login
+        mock_hvac_client.auth.approle.login.return_value = {
+            'auth': {'client_token': 'test-token', 'lease_duration': 3600}
+        }
+        
+        client = VaultClient(
+            addr="http://test:8200",
+            role_id="test-role",
+            secret_id="test-secret"
+        )
+        
+        # Pre-populate cache
+        cache_data = {"username": "admin", "password": "secret123"}
+        client._store_in_cache("database/config", cache_data)
+        
+        # Get specific key from cache
+        result = client.get_secret("database/config", key="username")
+        assert result == "admin"
+        # This covers line 228 return cached.get(key)
+
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
+    def test_init_no_credentials_else_branch(self, mock_hvac, caplog):
+        """Test initialization else branch with no credentials (line 138)."""
+        import logging
+        caplog.set_level(logging.WARNING)
+        
+        mock_hvac_client = MagicMock()
+        mock_hvac.Client.return_value = mock_hvac_client
+        
+        # Initialize with empty strings (truthy check fails)
+        client = VaultClient(addr="http://test:8200", token="", role_id="", secret_id="")
+        
+        # Should execute else branch line 138
+        assert any("No Vault credentials" in rec.message for rec in caplog.records)
+
+    @patch('backend.shared.vault_client.HVAC_AVAILABLE', True)
+    @patch('backend.shared.vault_client.hvac')
+    def test_renew_token_exception_catch(self, mock_hvac, caplog):
+        """Test token renewal exception handling (lines 179-180)."""
+        import logging
+        caplog.set_level(logging.INFO)
+        
+        mock_hvac_client = MagicMock()
+        mock_hvac.Client.return_value = mock_hvac_client
+        
+        # First call succeeds for init
+        mock_hvac_client.auth.approle.login.side_effect = [
+            {'auth': {'client_token': 'initial-token', 'lease_duration': 1}},
+            Exception("Renewal failed")
+        ]
+        
+        client = VaultClient(
+            addr="http://test:8200",
+            role_id="test-role",
+            secret_id="test-secret"
+        )
+        
+        # Force token expiry
+        client.token_expiry = datetime.now() - timedelta(seconds=10)
+        
+        # Try to renew
+        client._renew_token_if_needed()
+        
+        # Should catch exception and log error
+        assert any("Token renewal failed" in rec.message or "failed" in rec.message.lower() 
+                   for rec in caplog.records if rec.levelname == "ERROR")

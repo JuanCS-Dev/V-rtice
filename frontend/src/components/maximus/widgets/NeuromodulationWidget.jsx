@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * NEUROMODULATION WIDGET - Digital Neurotransmitters
  * ═══════════════════════════════════════════════════════════════════════════
@@ -11,6 +10,7 @@ import logger from '@/utils/logger';
  * - NORADRENALINA: Urgency → Temperature Control
  */
 
+import logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import './NeuromodulationWidget.css';
 

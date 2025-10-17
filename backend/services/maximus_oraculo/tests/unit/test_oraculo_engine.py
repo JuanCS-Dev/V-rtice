@@ -20,7 +20,7 @@ service_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(service_root))
 
 from oraculo_engine import OraculoEngine
-from services.maximus_oraculo.models.apv import APV
+from backend.services.maximus_oraculo.models.apv import APV
 
 
 class TestOraculoEngine:

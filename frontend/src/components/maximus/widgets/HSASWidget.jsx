@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * HSAS WIDGET - Hybrid Skill Acquisition System
  * ═══════════════════════════════════════════════════════════════════════════
@@ -11,6 +10,7 @@ import logger from '@/utils/logger';
  * - IMITATION LEARNING: Aprendizado por demonstração
  */
 
+import logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import './HSASWidget.css';
 

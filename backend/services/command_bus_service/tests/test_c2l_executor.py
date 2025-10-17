@@ -7,7 +7,7 @@ import pytest
 from audit_repository import AuditLog, AuditRepository
 from c2l_executor import C2LCommandExecutor
 from kill_switch import KillSwitch
-from services.command_bus_service.models import C2LCommand, C2LCommandType, CommandReceipt
+from backend.services.command_bus_service.models import C2LCommand, C2LCommandType, CommandReceipt
 from nats_publisher import NATSPublisher
 
 

@@ -33,9 +33,9 @@ import pytest
 from messaging.client import RabbitMQClient, get_rabbitmq_client
 from messaging.publisher import APVPublisher, WargameReportPublisher
 from messaging.consumer import HITLNotificationConsumer
-from services.adaptive_immune_system.models.apv import APVDispatchMessage
-from services.adaptive_immune_system.models.wargame import WargameReportMessage
-from services.adaptive_immune_system.models.hitl import HITLNotificationMessage
+from backend.services.adaptive_immune_system.models.apv import APVDispatchMessage
+from backend.services.adaptive_immune_system.models.wargame import WargameReportMessage
+from backend.services.adaptive_immune_system.models.hitl import HITLNotificationMessage
 
 
 class ChaosScenario:

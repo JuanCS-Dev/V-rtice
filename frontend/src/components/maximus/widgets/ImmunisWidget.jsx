@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * IMMUNIS WIDGET - Digital Immune System
  * ═══════════════════════════════════════════════════════════════════════════
@@ -12,6 +11,7 @@ import logger from '@/utils/logger';
  * - MEMÓRIA IMUNOLÓGICA: Células de memória para respostas rápidas
  */
 
+import logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import './ImmunisWidget.css';
 

@@ -13,10 +13,10 @@ from uuid import UUID
 import structlog
 from aiokafka import AIOKafkaConsumer
 
-from services.verdict_engine_service.cache import VerdictCache
-from services.verdict_engine_service.config import settings
-from services.verdict_engine_service.models import Verdict
-from services.verdict_engine_service.websocket_manager import ConnectionManager
+from backend.services.verdict_engine_service.cache import VerdictCache
+from backend.services.verdict_engine_service.config import settings
+from backend.services.verdict_engine_service.models import Verdict
+from backend.services.verdict_engine_service.websocket_manager import ConnectionManager
 
 logger = structlog.get_logger()
 

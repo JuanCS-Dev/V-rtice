@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * STRATEGIC PLANNING WIDGET - Digital Prefrontal Cortex
  * ═══════════════════════════════════════════════════════════════════════════
@@ -12,6 +11,7 @@ import logger from '@/utils/logger';
  * - PLANOS ESTRATÉGICOS: Long-term planning
  */
 
+import logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import './StrategicPlanningWidget.css';
 

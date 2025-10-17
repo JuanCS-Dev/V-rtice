@@ -5,8 +5,8 @@ from typing import Any, Generator, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from services.command_bus_service.main import app, lifespan
-from services.command_bus_service.models import (
+from backend.services.command_bus_service.main import app, lifespan
+from backend.services.command_bus_service.models import (
     C2LCommand,
     C2LCommandType,
     CommandStatus,

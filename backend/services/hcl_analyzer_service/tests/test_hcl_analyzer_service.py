@@ -21,8 +21,8 @@ import pytest_asyncio
 from httpx import AsyncClient
 
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/hcl_analyzer_service")
-from services.hcl_analyzer_service.main import app, historical_metrics
-from services.hcl_analyzer_service.models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
+from backend.services.hcl_analyzer_service.main import app, historical_metrics
+from backend.services.hcl_analyzer_service.models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
 
 # ==================== FIXTURES ====================
 

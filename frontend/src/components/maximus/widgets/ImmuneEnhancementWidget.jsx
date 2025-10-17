@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * ═══════════════════════════════════════════════════════════════════════════
  * IMMUNE ENHANCEMENT WIDGET - FASE 9 Immune Enhancement
  * ═══════════════════════════════════════════════════════════════════════════
@@ -11,6 +10,7 @@ import logger from '@/utils/logger';
  * - Antibody Repertoire
  */
 
+import logger from '@/utils/logger';
 import React, { useState } from 'react';
 import {
   suppressFalsePositives,
@@ -231,17 +231,21 @@ export const ImmuneEnhancementWidget = () => {
 
           {ltmResults && (
             <div className="ltm-memories">
-              {ltmResults.memories?.map((memory, idx) => (
-                <div key={idx} className="memory-item">
-                  <div className="memory-header">
-                    <span className="memory-type">{memory.pattern_type || 'Unknown'}</span>
-                    <span className="importance">
-                      {((memory.importance || 0) * 100).toFixed(0)}% importance
-                    </span>
+              {ltmResults.memories?.length > 0 ? (
+                ltmResults.memories.map((memory, idx) => (
+                  <div key={idx} className="memory-item">
+                    <div className="memory-header">
+                      <span className="memory-type">{memory.pattern_type || 'Unknown'}</span>
+                      <span className="importance">
+                        {((memory.importance || 0) * 100).toFixed(0)}% importance
+                      </span>
+                    </div>
+                    <p className="memory-content">{memory.description || 'No description'}</p>
                   </div>
-                  <p className="memory-content">{memory.description || 'No description'}</p>
-                </div>
-              )) || <p className="no-memories">No memories found</p>}
+                ))
+              ) : (
+                <p className="no-memories">No memories found</p>
+              )}
             </div>
           )}
         </div>

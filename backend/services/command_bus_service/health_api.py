@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from services.command_bus_service.models import HealthResponse
+from backend.services.command_bus_service.models import HealthResponse
 from fastapi import APIRouter, status
 
 router = APIRouter()

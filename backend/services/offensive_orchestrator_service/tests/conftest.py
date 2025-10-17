@@ -19,7 +19,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
-from services.offensive_orchestrator_service.models import (
+from backend.services.offensive_orchestrator_service.models import (
     Base,
     CampaignObjective,
     CampaignPlan,
@@ -28,7 +28,7 @@ from services.offensive_orchestrator_service.models import (
     CampaignStatus,
     HOTLRequest,
 )
-from services.offensive_orchestrator_service.config import (
+from backend.services.offensive_orchestrator_service.config import (
     ServiceConfig,
     DatabaseConfig,
     VectorDBConfig,

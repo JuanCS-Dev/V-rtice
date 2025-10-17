@@ -23,15 +23,15 @@ from connectors.threat_intel_connector import ThreatIntelConnector
 from engines.detection_engine import DetectionEngine
 from engines.ml_engine import MLEngine
 from engines.response_engine import ResponseEngine
-from services.adr_core_service.models.enums import ResponseActionType
-from services.adr_core_service.models.schemas import (
+from backend.services.adr_core_service.models.enums import ResponseActionType
+from backend.services.adr_core_service.models.schemas import (
     DetectionResult,
     IpIntelligenceData,
     ResponseAction,
     ThreatIntelData,
 )
 from playbooks.loader import PlaybookLoader
-from services.adr_core_service.utils.logger import setup_logger
+from backend.services.adr_core_service.utils.logger import setup_logger
 
 # Setup logger
 logger = setup_logger(__name__)

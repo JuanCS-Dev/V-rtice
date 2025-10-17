@@ -32,7 +32,7 @@ from fastapi.responses import Response, JSONResponse
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from services.hitl_patch_service.models import (
+from backend.services.hitl_patch_service.models import (
     HITLDecisionRecord,
     PatchDecision,
     PatchPriority,

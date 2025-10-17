@@ -20,7 +20,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from services.hcl_analyzer_service.models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
+from backend.services.hcl_analyzer_service.models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
 
 app = FastAPI(title="Maximus HCL Analyzer Service", version="1.0.0")
 

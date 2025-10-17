@@ -17,6 +17,6 @@ Features:
 __version__ = "1.0.0"
 __author__ = "Maximus AI Platform"
 
-from services.web_attack_service.api import app
+from backend.services.web_attack_service.api import app
 
 __all__ = ["app"]

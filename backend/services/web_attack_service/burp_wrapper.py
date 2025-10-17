@@ -11,7 +11,7 @@ from typing import Dict, List, Optional
 
 import httpx
 
-from services.web_attack_service.models import (
+from backend.services.web_attack_service.models import (
     BurpScanRequest,
     BurpScanResult,
     BurpVulnerability,

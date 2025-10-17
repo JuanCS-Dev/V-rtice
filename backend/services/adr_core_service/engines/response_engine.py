@@ -15,9 +15,9 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from services.adr_core_service.models.enums import ResponseActionType
-from services.adr_core_service.models.schemas import ResponseAction
-from services.adr_core_service.utils.logger import setup_logger
+from backend.services.adr_core_service.models.enums import ResponseActionType
+from backend.services.adr_core_service.models.schemas import ResponseAction
+from backend.services.adr_core_service.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
