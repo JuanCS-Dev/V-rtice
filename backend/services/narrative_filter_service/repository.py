@@ -3,11 +3,11 @@
 from datetime import datetime
 from uuid import UUID
 
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg
 from asyncpg import Pool
 
-from config import settings
-from models import IntentClassification, SemanticRepresentation
+from narrative_filter_service.config import settings
+from narrative_filter_service.models import IntentClassification, SemanticRepresentation
 
 
 class SemanticRepository:

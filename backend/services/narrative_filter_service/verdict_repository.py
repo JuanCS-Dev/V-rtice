@@ -2,9 +2,9 @@
 
 from uuid import UUID
 
-from asyncpg import Pool  # type: ignore[import-untyped]
+from asyncpg import Pool
 
-from models import Severity, Verdict, VerdictCategory, VerdictStatus
+from narrative_filter_service.models import Severity, Verdict, VerdictCategory, VerdictStatus
 
 
 class VerdictRepository:

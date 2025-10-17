@@ -4,9 +4,8 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
-
-from models import VerdictFilter
-from verdict_repository import VerdictRepository
+from verdict_engine_service.models import VerdictFilter
+from verdict_engine_service.verdict_repository import VerdictRepository
 
 
 @pytest.mark.asyncio
@@ -14,7 +13,7 @@ async def test_repository_connect_disconnect(mocker):
     """Test repository connection lifecycle."""
     # Mock asyncpg.create_pool
     mock_pool = AsyncMock()
-    mock_create_pool = mocker.patch(
+    mocker.patch(
         "verdict_repository.asyncpg.create_pool",
         new=AsyncMock(return_value=mock_pool)
     )

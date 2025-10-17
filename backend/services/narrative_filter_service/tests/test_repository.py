@@ -4,9 +4,8 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
-
-from models import IntentClassification, SemanticRepresentation
-from repository import SemanticRepository
+from narrative_filter_service.models import IntentClassification, SemanticRepresentation
+from narrative_filter_service.repository import SemanticRepository
 
 
 @pytest.fixture

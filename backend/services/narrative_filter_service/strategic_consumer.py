@@ -4,12 +4,12 @@ import json
 from typing import Any
 
 import structlog
-from aiokafka import AIOKafkaConsumer, AIOKafkaProducer  # type: ignore[import-untyped]
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
-from config import settings
-from repository import SemanticRepository
-from strategic_detector import StrategicPatternDetector
-from strategic_repository import AllianceRepository, StrategicPatternRepository
+from narrative_filter_service.config import settings
+from narrative_filter_service.repository import SemanticRepository
+from narrative_filter_service.strategic_detector import StrategicPatternDetector
+from narrative_filter_service.strategic_repository import AllianceRepository, StrategicPatternRepository
 
 logger = structlog.get_logger()
 

@@ -10,11 +10,11 @@ Responsável por:
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-import networkx as nx  # type: ignore[import-untyped]
-from scipy.stats import entropy  # type: ignore[import-untyped]
+import networkx as nx
+from scipy.stats import entropy
 
-from config import settings
-from models import Alliance, PatternType, SemanticRepresentation, StrategicPattern
+from narrative_filter_service.config import settings
+from narrative_filter_service.models import Alliance, PatternType, SemanticRepresentation, StrategicPattern
 
 
 class StrategicPatternDetector:
@@ -268,7 +268,7 @@ class StrategicPatternDetector:
             return []
 
         # Use greedy modularity maximization
-        from networkx.algorithms import community  # type: ignore[import-untyped]
+        from networkx.algorithms import community
 
         communities = community.greedy_modularity_communities(self.alliance_graph, weight="weight")
 

@@ -2,9 +2,8 @@
 
 
 import pytest
-
-from models import PatternType, Severity, StrategicPattern, VerdictCategory, VerdictStatus
-from verdict_synthesizer import VerdictSynthesizer
+from narrative_filter_service.models import PatternType, Severity, StrategicPattern, VerdictCategory, VerdictStatus
+from narrative_filter_service.verdict_synthesizer import VerdictSynthesizer
 
 
 @pytest.fixture

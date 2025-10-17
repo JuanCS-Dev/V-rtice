@@ -1,8 +1,7 @@
 """Tests for main FastAPI app."""
 
 from fastapi.testclient import TestClient
-
-from main import app
+from narrative_filter_service.main import app
 
 client = TestClient(app)
 

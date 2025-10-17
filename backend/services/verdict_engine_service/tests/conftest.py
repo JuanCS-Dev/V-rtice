@@ -6,7 +6,6 @@ from uuid import uuid4
 
 import pytest
 import pytest_asyncio
-
 from verdict_engine_service.cache import VerdictCache
 from verdict_engine_service.config import Settings
 from verdict_engine_service.models import Verdict, VerdictStats

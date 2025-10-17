@@ -2,9 +2,9 @@
 
 from uuid import UUID
 
-from asyncpg import Pool  # type: ignore[import-untyped]
+from asyncpg import Pool
 
-from models import Alliance, PatternType, StrategicPattern
+from narrative_filter_service.models import Alliance, PatternType, StrategicPattern
 
 
 class StrategicPatternRepository:

@@ -8,10 +8,10 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg
 
-from config import settings
-from models import Verdict, VerdictFilter, VerdictStats
+from verdict_engine_service.config import settings
+from verdict_engine_service.models import Verdict, VerdictFilter, VerdictStats
 
 
 class VerdictRepository:

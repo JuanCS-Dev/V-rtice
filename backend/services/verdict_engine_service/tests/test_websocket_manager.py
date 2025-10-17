@@ -2,9 +2,8 @@
 
 
 import pytest
-
-from models import WebSocketMessage
-from websocket_manager import ConnectionManager
+from verdict_engine_service.models import WebSocketMessage
+from verdict_engine_service.websocket_manager import ConnectionManager
 
 
 @pytest.mark.asyncio

@@ -10,15 +10,15 @@ from datetime import datetime
 from typing import Any
 
 try:
-    import torch  # type: ignore[import-not-found]
-    from sentence_transformers import SentenceTransformer  # type: ignore[import-not-found]
+    import torch
+    from sentence_transformers import SentenceTransformer
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
 
 
-from config import settings
-from models import IntentClassification, SemanticRepresentation
+from narrative_filter_service.config import settings
+from narrative_filter_service.models import IntentClassification, SemanticRepresentation
 
 
 class SemanticProcessor:

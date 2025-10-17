@@ -2,8 +2,7 @@
 
 import pytest
 from fastapi.testclient import TestClient
-
-from main import app
+from verdict_engine_service.main import app
 
 
 @pytest.fixture
