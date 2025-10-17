@@ -4,6 +4,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
+
 from kafka_consumer import VerdictConsumer
 
 

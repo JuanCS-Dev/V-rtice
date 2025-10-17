@@ -3,6 +3,7 @@
 from datetime import datetime
 
 import pytest
+
 from models import IntentClassification
 from semantic_processor import SemanticProcessor
 

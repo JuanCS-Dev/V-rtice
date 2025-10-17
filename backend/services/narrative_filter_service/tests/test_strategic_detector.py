@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 
 import pytest
+
 from models import IntentClassification, PatternType, SemanticRepresentation
 from strategic_detector import StrategicPatternDetector
 

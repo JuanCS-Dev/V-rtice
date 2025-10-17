@@ -4,7 +4,7 @@ from uuid import UUID
 
 from asyncpg import Pool
 
-from narrative_filter_service.models import Alliance, PatternType, StrategicPattern
+from models import Alliance, PatternType, StrategicPattern
 
 
 class StrategicPatternRepository:

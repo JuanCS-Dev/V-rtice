@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, status
 
-from narrative_filter_service.models import HealthResponse
+from models import HealthResponse
 
 router = APIRouter()
 

@@ -6,10 +6,10 @@ from typing import Any
 import structlog
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
-from narrative_filter_service.config import settings
-from narrative_filter_service.models import SemanticRepresentation
-from narrative_filter_service.repository import SemanticRepository
-from narrative_filter_service.semantic_processor import SemanticProcessor
+from config import settings
+from models import SemanticRepresentation
+from repository import SemanticRepository
+from semantic_processor import SemanticProcessor
 
 logger = structlog.get_logger()
 

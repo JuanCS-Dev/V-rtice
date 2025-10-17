@@ -3,6 +3,7 @@
 from uuid import uuid4
 
 import pytest
+
 from models import Alliance, PatternType, StrategicPattern
 from strategic_repository import AllianceRepository, StrategicPatternRepository
 

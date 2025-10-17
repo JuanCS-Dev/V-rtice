@@ -2,6 +2,7 @@
 
 
 import pytest
+
 from models import PatternType, Severity, StrategicPattern, VerdictCategory, VerdictStatus
 from verdict_synthesizer import VerdictSynthesizer
 

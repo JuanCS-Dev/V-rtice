@@ -1,6 +1,8 @@
 """Tests for command bus service."""
 
 import pytest
+from fastapi.testclient import TestClient
+
 from main import app
 from models import (
     C2LCommand,
@@ -9,7 +11,6 @@ from models import (
     KillSwitchLayer,
     KillSwitchResult,
 )
-from fastapi.testclient import TestClient
 
 client = TestClient(app)
 

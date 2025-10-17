@@ -4,7 +4,7 @@ from uuid import UUID
 
 from asyncpg import Pool
 
-from narrative_filter_service.models import Severity, Verdict, VerdictCategory, VerdictStatus
+from models import Severity, Verdict, VerdictCategory, VerdictStatus
 
 
 class VerdictRepository:

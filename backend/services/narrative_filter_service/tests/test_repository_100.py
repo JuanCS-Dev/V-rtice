@@ -4,6 +4,7 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
+
 from models import IntentClassification
 from repository import SemanticRepository, create_pool
 

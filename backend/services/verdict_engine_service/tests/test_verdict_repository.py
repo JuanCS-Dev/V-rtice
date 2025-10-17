@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
+
 from models import VerdictFilter
 from verdict_repository import VerdictRepository
 

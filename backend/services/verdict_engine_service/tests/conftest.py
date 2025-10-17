@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pytest
 import pytest_asyncio
+
 from cache import VerdictCache
 from config import Settings
 from models import Verdict, VerdictStats

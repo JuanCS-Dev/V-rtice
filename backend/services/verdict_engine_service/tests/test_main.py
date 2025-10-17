@@ -2,6 +2,7 @@
 
 import pytest
 from fastapi.testclient import TestClient
+
 from main import app
 
 
@@ -70,7 +71,7 @@ async def test_lifespan_startup_shutdown(mocker):
 def test_dependency_overrides():
     """Test dependency injection overrides are set."""
     # Validate app_state structure
-    from verdict_engine_service.main import app_state
+    from main import app_state
 
     assert "repository" in app_state
     assert "cache" in app_state

@@ -4,6 +4,7 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
+
 from models import Severity, Verdict, VerdictCategory, VerdictStatus
 from verdict_repository import VerdictRepository
 
